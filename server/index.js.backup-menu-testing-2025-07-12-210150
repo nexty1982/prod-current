@@ -1,0 +1,310 @@
+// 📁 backend/server/index.js
+require('dotenv').config();
+
+const express = require('express');
+const morgan = require('morgan');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+
+const sessionMW = require('./config/session');
+const db = require('./config/db');
+const { requestLogger, errorLogger } = require('./middleware/logger');
+// Import client context middleware for multi-tenant support
+const { clientContext, clientContextCleanup } = require('./middleware/clientContext');
+
+// ─── API ROUTES ─────────────────────────────────────────────────────
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+const debugRoutes = require('./routes/debug');
+const menuManagementRoutes = require('./routes/menuManagement');
+const menuPermissionsRoutes = require('./routes/menuPermissions');
+const notesRoutes = require('./routes/notes');
+const baptismRouter = require('./routes/baptism');
+const marriageRouter = require('./routes/marriage');
+const funeralRouter = require('./routes/funeral');
+const uniqueValuesRouter = require('./routes/unique-values');
+const dropdownOptionsRouter = require('./routes/dropdownOptions');
+const baptismCertificatesRouter = require('./routes/baptismCertificates');
+const marriageCertificatesRouter = require('./routes/marriageCertificates');
+const ocrRouter = require('./routes/ocr');
+const calendarRouter = require('./routes/calendar');
+const dashboardRouter = require('./routes/dashboard');
+const invoicesRouter = require('./routes/invoices');
+const invoicesMultilingualRouter = require('./routes/invoicesMultilingual');
+const enhancedInvoicesRouter = require('./routes/enhancedInvoices');
+const billingRouter = require('./routes/billing');
+const churchesRouter = require('./routes/churches');
+const provisionRouter = require('./routes/provision');
+const certificatesRouter = require('./routes/certificates');
+const ocrSessionsRouter = require('./routes/ocrSessions');
+const ocrVisionRouter = require('./routes/ocrVision');
+const ecommerceRouter = require('./routes/ecommerce');
+const backupRouter = require('./routes/backup');
+const { router: notificationRouter } = require('./routes/notifications');
+const kanbanRouter = require('./routes/kanban');
+const { router: logsRouter } = require('./routes/logs');
+const uploadTokenRouter = require('./routes/uploadToken');
+const templatesRouter = require('./routes/templates');
+// Import client API router for multi-tenant client endpoints
+const clientApiRouter = require('./routes/clientApi');
+// Import main clients management router
+const clientsRouter = require('./routes/clients');
+// Import admin system management router
+const adminSystemRouter = require('./routes/adminSystem');
+// Import church admin management router for multi-database support
+const churchAdminRouter = require('./routes/admin/church');
+// Import churches management router for church provisioning
+const churchesManagementRouter = require('./routes/admin/churches');
+// Import church OCR management router for multi-tenant OCR pipeline
+const churchOcrRouter = require('./routes/church/ocr');
+// Import public OCR routes (no authentication required)
+const publicOcrRouter = require('./routes/public/ocr');
+const funeralCertificatesRouter = require('./routes/funeralCertificates');
+// Import pages and uploads management routes
+const pagesRouter = require('./routes/pages');
+const uploadsRouter = require('./routes/uploads');
+const orthodoxCalendarRouter = require('./routes/orthodoxCalendar');
+
+const app = express();
+app.set('trust proxy', 1);
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://localhost:3000',
+  'https://orthodoxmetrics.com',
+  'http://localhost:3001',
+  'https://localhost:3001',
+  'http://localhost:5173',
+  'https://localhost:5173',
+  'http://localhost:5174',
+  'https://localhost:5174',
+  'http://127.0.0.1:3000',
+  'https://127.0.0.1:3000',
+  'http://127.0.0.1:3001',
+  'https://127.0.0.1:3001',
+  'http://127.0.0.1:5173',
+  'https://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'https://127.0.0.1:5174',
+  'http://192.168.1.239',
+  'https://192.168.1.239',
+  'http://192.168.1.239:3000',
+  'https://192.168.1.239:3000',
+  'http://192.168.1.239:3001',
+  'https://192.168.1.239:3001',
+  'http://192.168.1.239:5173',
+  'https://192.168.1.239:5173',
+  'http://192.168.1.239:5174',
+  'https://192.168.1.239:5174',
+  'http://192.168.1.221',
+  'https://192.168.1.221',
+  'http://192.168.1.221:3000',
+  'https://192.168.1.221:3000',
+  'http://192.168.1.221:3001',
+  'https://192.168.1.221:3001',
+  'http://192.168.1.221:5173',
+  'https://192.168.1.221:5173',
+  'http://192.168.1.221:5174',
+  'https://192.168.1.221:5174',
+  'https://orthodmetrics.com',
+  'https://orthodoxmetrics.com',
+  'http://orthodoxmetrics.com',
+  'https://orthodoxmetrics.com:8080',
+  'http://orthodoxmetrics.com:8080',
+  'https://www.orthodoxmetrics.com',
+  'http://www.orthodoxmetrics.com'
+];
+
+// ─── CORS SETUP ─────────────────────────────────────────────────────
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error('CORS policy does not allow access from origin: ' + origin));
+  },
+  credentials: true
+}));
+
+const PORT = process.env.PORT || 3001;
+const HOST = process.env.HOST || '0.0.0.0';
+
+// ─── MIDDLEWARE ─────────────────────────────────────────────────────
+app.use(morgan('dev'));
+app.use(express.json());
+app.use(sessionMW);
+
+// ─── ROUTES ─────────────────────────────────────────────────────────
+// PRIORITY: Churches API - moved to top to avoid middleware conflicts
+app.use('/api/churches', churchesRouter);
+
+// API prefixed routes (for direct API access)
+app.use('/api/auth', authRoutes);
+app.use('/api/public/ocr', publicOcrRouter); // Public OCR service (no auth required)
+app.use('/api/admin', adminRoutes);
+app.use('/api/admin/system', adminSystemRouter); // System admin routes
+app.use('/api/admin/church', churchAdminRouter); // Church admin routes
+app.use('/api/admin/churches', churchesManagementRouter); // Church provisioning and management
+app.use('/api/backup', backupRouter);
+app.use('/api/templates', templatesRouter);
+app.use('/api', notificationRouter);
+app.use('/api/liturgical-calendar', orthodoxCalendarRouter); // Orthodox liturgical calendar
+app.use('/api', debugRoutes);
+
+// Record management routes
+app.use('/api/baptism-records', baptismRouter);
+app.use('/api/marriage-records', marriageRouter);
+app.use('/api/funeral-records', funeralRouter);
+app.use('/api/unique-values', uniqueValuesRouter);
+
+// Certificate routes
+app.use('/api/baptismCertificates', baptismCertificatesRouter);
+app.use('/api/certificate/baptism', baptismCertificatesRouter);
+app.use('/api/marriageCertificates', marriageCertificatesRouter);
+app.use('/api/certificate/marriage', marriageCertificatesRouter);
+app.use('/api/funeralCertificates', funeralCertificatesRouter);
+app.use('/api/certificate/funeral', funeralCertificatesRouter);
+
+// OCR and Vision routes
+app.use('/api', ocrVisionRouter); // New Google Vision OCR routes
+app.use('/api', uploadTokenRouter); // Upload token management routes
+app.use('/api', ocrRouter);
+app.use('/api/ocr', ocrSessionsRouter);
+
+// Business routes
+app.use('/api/calendar', calendarRouter);
+app.use('/api/dashboard', dashboardRouter);
+app.use('/api/invoices', invoicesRouter);
+app.use('/api/invoices-enhanced', enhancedInvoicesRouter);
+app.use('/api/invoices-ml', invoicesMultilingualRouter);
+app.use('/api/enhanced-invoices', enhancedInvoicesRouter);
+app.use('/api/billing', billingRouter);
+app.use('/api/clients', clientsRouter); // Client management API
+app.use('/api/provision', provisionRouter);
+app.use('/api/certificates', certificatesRouter);
+app.use('/api/eCommerce', ecommerceRouter);
+app.use('/api/logs', logsRouter);
+
+// CMS Routes
+app.use('/api/pages', pagesRouter);
+app.use('/api/uploads', uploadsRouter);
+
+// Menu and admin routes
+app.use('/api/menu-management', menuManagementRoutes);
+app.use('/api/menu-permissions', menuPermissionsRoutes);
+app.use('/api/notes', notesRoutes);
+app.use('/api/kanban', kanbanRouter);
+
+// Multi-tenant client routes
+app.use('/client/:clientSlug/api', clientContext, clientApiRouter, clientContextCleanup);
+
+// ⬇️ Mount dropdownOptions routes here to prevent override
+app.use('/api', dropdownOptionsRouter);
+
+// Additional utility routes expected by frontend
+app.get('/api/dropdown-options', (req, res) => {
+  // Return dropdown options for forms
+  res.json({
+    countries: ['United States', 'Canada', 'Greece', 'Romania', 'Russia'],
+    states: ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA'],
+    languages: ['en', 'gr', 'ru', 'ro'],
+    roles: ['admin', 'priest', 'supervisor', 'volunteer', 'viewer', 'church'],
+    recordTypes: ['baptism', 'marriage', 'funeral']
+  });
+});
+
+app.get('/api/config', (req, res) => {
+  // Return app configuration
+  res.json({
+    appName: 'OrthodoxMetrics',
+    version: '1.0.0',
+    supportedLanguages: ['en', 'gr', 'ru', 'ro'],
+    features: {
+      ocr: true,
+      certificates: true,
+      invoices: true,
+      calendar: true
+    }
+  });
+});
+
+app.get('/api/search', (req, res) => {
+  // Basic search functionality placeholder
+  const { q, type } = req.query;
+  res.json({
+    query: q,
+    type: type || 'all',
+    results: [],
+    message: 'Search functionality not yet implemented'
+  });
+});
+
+// ─── HEALTHCHECK ────────────────────────────────────────────────────
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbStatus = await db.testConnection();
+    res.json({
+      status: dbStatus.success ? 'ok' : 'error',
+      user: req.session.user || null,
+      database: dbStatus
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+// ─── 404 HANDLER ────────────────────────────────────────────────────
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
+// ─── STATIC FRONTEND ────────────────────────────────────────────────
+app.use('/uploads', express.static(path.resolve(__dirname, '../public/uploads')));
+app.use('/assets', express.static(path.resolve(__dirname, '../src/assets')));
+
+// Serve static files from the React app build directory
+app.use(express.static(path.resolve(__dirname, '../front-end/dist')));
+
+// Catch-all handler: send back React's index.html file for any non-API routes
+app.get('*', (req, res) => {
+  // Don't serve index.html for API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  
+  const indexPath = path.resolve(__dirname, '../front-end/dist/index.html');
+  res.sendFile(indexPath);
+});
+
+// ─── EMAIL QUEUE PROCESSING ──────────────────────────────────────────
+const { notificationService } = require('./routes/notifications');
+const cron = require('node-cron');
+
+// Process email queue every 5 minutes
+cron.schedule('*/5 * * * *', async () => {
+  try {
+    const processedCount = await notificationService.processEmailQueue();
+    if (processedCount > 0) {
+      console.log(`Processed ${processedCount} emails from notification queue`);
+    }
+  } catch (error) {
+    console.error('Error processing email queue:', error);
+  }
+});
+
+console.log('Email queue processor started (runs every 5 minutes)');
+
+// ─── START OCR PROCESSING SERVICE ─────────────────────────────────
+const ocrProcessingService = require('./services/ocrProcessingService');
+ocrProcessingService.start();
+
+// ─── START SERVER ───────────────────────────────────────────────────
+app.listen(PORT, HOST, () => {
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  console.log(`🚀 Server running in ${nodeEnv.toUpperCase()} mode at http://${HOST}:${PORT}`);
+  if (nodeEnv === 'development') {
+    console.log('📋 Development mode: Enhanced logging and verbose output enabled');
+  } else if (nodeEnv === 'production') {
+    console.log('🔧 Production mode: Optimized for performance and reduced logging');
+  }
+});

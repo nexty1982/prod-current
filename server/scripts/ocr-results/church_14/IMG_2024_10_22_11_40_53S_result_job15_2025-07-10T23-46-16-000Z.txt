@@ -1,0 +1,172 @@
+============================================================
+OCR RESULT
+============================================================
+Original File: IMG_2024_10_22_11_40_53S.jpg
+Processed File: ocr_1752191176803-139255787_34764654c31eeeec.jpg
+Language: en
+Record Type: funeral
+Confidence Score: 100.0%
+Processing Date: Thu Jul 10 2025 19:46:28 GMT-0400 (Eastern Daylight Time)
+Job ID: 15
+File Generated: 2025-07-11T00:08:30.841Z
+============================================================
+
+EXTRACTED TEXT:
+----------------------------------------
+МЕТРИЧЕСКОЙ книги на
+98
+H.
+года, часть третЇМ, И ОСМЕРШИХА.
+FHITS
+Принуж
+Мсяця й день.
+Кетопроисхожденіє, има, отчество й фамилім о мершагw.
+Αυτά
+обмершагш.
+6 чего отмеря.
+Кто исповедываля і проваля.
+P
+Кто совершаля погревеніе, и гдѣ погребены.
+Женска,
+επέρτη.
+погребенім.
+Мужеска.
+Женска.
+AGE
+MBER
+DATE OF
+DEATH
+FEMALE
+BURT
+I
+A
+L
+FULL NAME OF DECEDENT
+12/15
+25/02 5/05
+2120
+Helen Russo (NP)
+Rose Lorenick
+9/01
+9103
+Peter Lovenich
+MALE
+FEMALE
+75
+80
+82
+CAUSE OF DEATH
+Liven
+metastasis
+NAME OF PRIEST WHO
+ADMINISTERED SACRAMENTS
+NAME OF PRIEST WHO OFFICIATED AT
+BURIAL AND PLACE OF INTERNMENT
+Fr. James Parsells
+SS.
+Plot 144
+Peter + Paul, Manville #1
+Fr. Jares Parsells Plot 55
+ss, Peta Paul, manville
+#12
+Fr. Joes Parells
+Ss. Peta Pul, mamble
+Plot 55
+#1
+76
+89
+Ya
+Year 99
+Cardiopulmonay
+avrest
+adved
+83
+89
+80
+Parkinson's
+diserce
+emphysenu
+2spiration
+Prtunonin
+Myocardial
+infraction
+ditated cardiomyopathy
+complicated by
+Dyper theriz
+Cardiorespiratory
+arrest
+av
+Fr. Janes Parells
+Plotssy
+Ss. Peter Pal, cerety #2
+Fi. Joes Panels
+Ss. Peter Paul, revety
+F. Jaes Parsells
+Ss.
+Peters
+Plot 73
+# 3
+Plot 826
+На
+Plot 126
++ Paul centy
+Fr. Jones Paneles
+SE. Peter Paul Canty
+#3
+F.. Janes Parcels Plot 857
+ss. Pelad Paul cesty #1
+F..
+Joes Parnell
+Plot 904
+55. petat fiul county. #1
+Fr. Joe Panel
+Ss. Peter Aul centy
+Fr. Jas Pavell
+Ss. Peter Paul crusty
+Fr. Jon Parell
+Ss. Petal Paul Cenety
+Plot 825
+713
+Plot 54 #3
+Plot
+1/19
+1/!༢ ། !/༢༢
+Charles Basil Fetchko
+80
+N
+2/15
+2/18
+Zollie Gertrude Pituch (NP)
+3
+4/22
+4126
+Anne Тосек
+5/11 5/15
+Peter Grenthe
+(NP)
+77
+ST
+6/22
+6/25
+Helen Patson
+7/01
+7/07
+John Kulina
+7
+6/26 7/30
+Alex Putyuski
+(NP)
+3.
+7/28 7/31
+Nicholas Brunosky
+(NP)
+75
+75
+410\
+11/05
+Fredrick Gorbaturs
+----------------------------------------
+
+============================================================
+End of OCR Result
+============================================================

@@ -1,0 +1,158 @@
+============================================================
+MULTI-LANGUAGE OCR RESULT
+============================================================
+Original File: IMG_2024_10_22_11_29_46S.jpg
+Processed File: ocr_1752528685172-358091607_2c5edb90d0ad0a29.jpg
+Expected Language: en
+Detected Language: en
+Record Type: baptism
+OCR Confidence: 100.0%
+Processing Date: 2025-07-14T21:31:38.755Z
+Job ID: 29
+============================================================
+
+ORIGINAL TEXT (en):
+----------------------------------------
+MARRIAGES
+HISTY|PISCKSÅ HUNTI A
+AkeronponexoжAule, na, anai Hana Ora Mkeropokami, na, maina ora
+Mkcanzkponenorkanie akcenɣa, CKOAKKO
+ROAкORK.
+11 A.
+ART% OT% poд8 кOTO(KMZ
+Curry
+11
+kponenorkanie merkerk,
+CKOAKKO AKTZ oтz pед и
+"1
+MATEOH.
+KOTopaz Rрaкoмz.
+MATION.
+NUMBER
+DATE
+PULL NAME OF GROOM, RESIDENCE,
+AGE, RELIGION, 1st or 2nd MARRIAGE
+FIRST NAMES PULL NAME OF BRIDE, RESIDENCE.
+OF GROOM'S AGE, RELIGION, 1st or 2nd MARRIAGE OF BRIDE'S
+PARENTS
+YEAR
+H
+92/93/97/99
+MIL ACTI ETSFIM, (KPHESSSISTAHMINSA.
+Kro CoRegulaAz
+TAHCTRO.
+KTO RNAH почTAI.
+FIRST NAMES
+PRIEST'S NAME
+WITNESSES NAMES
+2000
+OT% Kakoгo чHCAA H 34 KAкHMZ
+№ License.
+DATE AND NUMBER OF LICENSE
+# MC 67-92
+1942
+Frank Mille: Th
+Reviden
+27
+A. Catholic
+PARENTS
+Frank
+Filippo
+Larissa Kylick
+D. Abedox
+Mancille
+Opeke
+27 8251
+F
+Babarz
+Pacell
+July
+25
+Victor Lindholm Jr.
+Belle Mead
+41 victor
+Presbyterian Lamar
+Kristine Aydzaj 37
+Hillsborough Outheday
+John
+Olga
+F. Jones
+Parsells
+and marriage
+1993
+June 22 Eric Eugene Kupersmith
+Cherry Hill
+1
+1997
+1st
+1 June 6 Patrick J. Caroll
+1999
+Somerville
+Johanne Rydzzj
+Terry Ash
+#93-98
+Hillsborough
+29
+27
+Carl
+Judith Cherry Hill
+Nicholas
+Nicole Helene De Lanto
+Orthodox Jacquelle
+F. Jae s
+Eric Lupen
+Parsells
+Kristen De Laizto
+97-136
+Cherry Hill
+Ist
+30
+Mary B Kelly Y/zchowch
+Yackovich
+F. Jansz
+Panels
+Somerville
+Deacon Paul Sokol
+Dariz Parsells
+Civil Marrige Blessed
+Babylon, NY
+District 5150
+Local Register 9703172
+1
+2000
+Feb. 20 Robert Charles Erkman 50 Janes
+7th
+Flemington 3rd Diy
+Barbara Lohsen 410 Floyd.
+E. J
+mrugmt
+Panel
+1st
+Adventist Melyn Bridgewater Orthday
+Oct 08/Todd Alan Peterson 29 Donald
+1st
+Carole
+2000
+Butler
+Jill Ann Filippini 35 /Atopere
+Manville
+Orthodox
+2nd
+F.
+Join
+Jas Panch
+Deacon Paul Sokol
+Kathryn motoulloff
+Mark Applegit
+Teresz Filippini
+# 7-00
+Bridge-uta
+#mc
+48-2000
+----------------------------------------
+
+NO TRANSLATION AVAILABLE
+
+============================================================
+End of Multi-Language OCR Result
+============================================================

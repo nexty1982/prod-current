@@ -1,0 +1,377 @@
+/**
+ * Lenten Season Theme
+ * Solemn purple and muted tones for the Great Lent period
+ */
+
+.theme-lent-season {
+  /* Primary Color Palette - Deep Liturgical Purple */
+  --color-primary: #663399;
+  --color-primary-light: #7B4397;
+  --color-primary-dark: #4A1A5C;
+  --color-primary-rgb: 102, 51, 153;
+  
+  /* Secondary Colors - Subdued Earth Tones */
+  --color-secondary: #4A4A4A;
+  --color-secondary-light: #6E6E6E;
+  --color-secondary-dark: #2C2C2C;
+  --color-secondary-rgb: 74, 74, 74;
+  
+  /* Accent Colors - Muted Burgundy */
+  --color-accent: #8B4444;
+  --color-accent-light: #A85858;
+  --color-accent-dark: #6B2C2C;
+  --color-accent-rgb: 139, 68, 68;
+  
+  /* Background Colors - Subtle and Muted */
+  --color-background: #F7F6F8;
+  --color-surface: #FEFEFE;
+  --color-paper: #F2F1F4;
+  --color-sidebar: #F5F4F7;
+  
+  /* Text Colors - Deeper for Solemnity */
+  --color-text-primary: #2D1B3D;
+  --color-text-secondary: #4A4A4A;
+  --color-text-hint: #7A7A7A;
+  --color-text-disabled: #BABABA;
+  
+  /* Border and Divider Colors */
+  --color-border: #DDD9E2;
+  --color-divider: #E8E5EB;
+  
+  /* Status Colors - Muted for Lenten Solemnity */
+  --color-success: #5A7A5A;
+  --color-warning: #B8860B;
+  --color-error: #B85450;
+  --color-info: #5A6B8D;
+  
+  /* Shadow and Elevation - Subtle */
+  --shadow-1: 0 1px 3px rgba(102, 51, 153, 0.08);
+  --shadow-2: 0 2px 6px rgba(102, 51, 153, 0.12);
+  --shadow-3: 0 4px 12px rgba(102, 51, 153, 0.15);
+  
+  /* Border Radius */
+  --border-radius-sm: 3px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 9px;
+  
+  /* Lenten Specific Elements */
+  --color-lenten-purple: #663399;
+  --color-lenten-cross: #8B4444;
+  --color-fasting-reminder: #4A1A5C;
+  --color-penitential: #6B2C2C;
+}
+
+/* Typography - More Solemn Appearance */
+.theme-lent-season .MuiTypography-h1,
+.theme-lent-season .MuiTypography-h2,
+.theme-lent-season .MuiTypography-h3 {
+  color: var(--color-primary-dark);
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.theme-lent-season .MuiTypography-h4,
+.theme-lent-season .MuiTypography-h5,
+.theme-lent-season .MuiTypography-h6 {
+  color: var(--color-secondary-dark);
+  font-weight: 400;
+}
+
+.theme-lent-season .MuiTypography-body1,
+.theme-lent-season .MuiTypography-body2 {
+  line-height: 1.7;
+  color: var(--color-text-primary);
+}
+
+/* Button Styling - Understated */
+.theme-lent-season .MuiButton-containedPrimary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: white;
+  box-shadow: var(--shadow-1);
+  transition: all 0.2s ease;
+}
+
+.theme-lent-season .MuiButton-containedPrimary:hover {
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  box-shadow: var(--shadow-2);
+}
+
+.theme-lent-season .MuiButton-outlinedPrimary {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  border-width: 1.5px;
+}
+
+.theme-lent-season .MuiButton-textPrimary {
+  color: var(--color-primary);
+}
+
+/* Paper and Card Styling - Clean and Simple */
+.theme-lent-season .MuiPaper-root {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-1);
+}
+
+.theme-lent-season .MuiPaper-elevation1 {
+  box-shadow: var(--shadow-1);
+}
+
+.theme-lent-season .MuiPaper-elevation2 {
+  box-shadow: var(--shadow-2);
+}
+
+.theme-lent-season .MuiPaper-elevation3 {
+  box-shadow: var(--shadow-3);
+}
+
+/* AppBar and Navigation - Subdued */
+.theme-lent-season .MuiAppBar-root {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary-dark));
+  color: white;
+  box-shadow: var(--shadow-2);
+}
+
+.theme-lent-season .MuiToolbar-root {
+  border-bottom: 1px solid var(--color-accent);
+}
+
+/* Drawer and Sidebar */
+.theme-lent-season .MuiDrawer-paper {
+  background-color: var(--color-sidebar);
+  border-right: 1px solid var(--color-primary);
+}
+
+.theme-lent-season .MuiListItem-root:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.08);
+}
+
+.theme-lent-season .MuiListItemIcon-root {
+  color: var(--color-primary);
+}
+
+.theme-lent-season .MuiListItemText-primary {
+  font-weight: 400;
+}
+
+/* Table Styling - Minimalist */
+.theme-lent-season .MuiTableHead-root {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+}
+
+.theme-lent-season .MuiTableHead-root .MuiTableCell-root {
+  color: white;
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-accent);
+}
+
+.theme-lent-season .MuiTableRow-root:nth-of-type(even) {
+  background-color: rgba(var(--color-primary-rgb), 0.03);
+}
+
+.theme-lent-season .MuiTableRow-root:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.06);
+}
+
+.theme-lent-season .MuiTableCell-root {
+  border-bottom: 1px solid var(--color-divider);
+}
+
+/* Form Controls - Simple and Clean */
+.theme-lent-season .MuiTextField-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-primary);
+  border-width: 1.5px;
+}
+
+.theme-lent-season .MuiFormLabel-root.Mui-focused {
+  color: var(--color-primary);
+}
+
+.theme-lent-season .MuiSelect-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-primary);
+}
+
+.theme-lent-season .MuiInputBase-root {
+  color: var(--color-text-primary);
+}
+
+/* Chip Styling - Muted */
+.theme-lent-season .MuiChip-colorPrimary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.theme-lent-season .MuiChip-outlined {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Alert Styling for Lent */
+.theme-lent-season .MuiAlert-standardInfo {
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+  color: var(--color-primary-dark);
+  border: 1px solid var(--color-primary);
+}
+
+/* AG Grid Lenten Theme */
+.theme-lent-season .ag-theme-lent-season {
+  --ag-background-color: var(--color-surface);
+  --ag-foreground-color: var(--color-text-primary);
+  --ag-border-color: var(--color-border);
+  --ag-secondary-border-color: var(--color-divider);
+  
+  /* Header colors */
+  --ag-header-background-color: var(--color-primary);
+  --ag-header-foreground-color: white;
+  --ag-header-cell-hover-background-color: var(--color-primary-light);
+  --ag-header-cell-moving-background-color: var(--color-primary-dark);
+  
+  /* Row colors */
+  --ag-row-hover-color: rgba(var(--color-primary-rgb), 0.06);
+  --ag-row-border-color: var(--color-divider);
+  --ag-odd-row-background-color: var(--color-surface);
+  --ag-even-row-background-color: rgba(var(--color-primary-rgb), 0.02);
+  
+  /* Selection colors */
+  --ag-selected-row-background-color: rgba(var(--color-primary-rgb), 0.12);
+  --ag-range-selection-background-color: rgba(var(--color-primary-rgb), 0.15);
+  --ag-range-selection-border-color: var(--color-primary);
+  
+  /* Control colors */
+  --ag-control-panel-background-color: var(--color-surface);
+  --ag-side-bar-panel-background-color: var(--color-paper);
+  
+  /* Icons */
+  --ag-icon-color: var(--color-primary);
+  
+  /* Focus and active states */
+  --ag-cell-focus-border-color: var(--color-primary);
+}
+
+/* Lenten specific AG Grid styling */
+.theme-lent-season .ag-theme-lent-season .ag-row {
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.theme-lent-season .ag-theme-lent-season .ag-header-cell {
+  font-weight: 500;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.theme-lent-season .ag-theme-lent-season .ag-cell {
+  border-right: 1px solid var(--color-divider);
+  color: var(--color-text-primary);
+}
+
+/* Lenten pagination styling */
+.theme-lent-season .ag-theme-lent-season .ag-paging-panel {
+  background-color: var(--color-paper);
+  border-top: 1px solid var(--color-primary);
+}
+
+.theme-lent-season .ag-theme-lent-season .ag-paging-button {
+  color: var(--color-primary);
+}
+
+.theme-lent-season .ag-theme-lent-season .ag-paging-button:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.08);
+}
+
+/* Lenten filter styling */
+.theme-lent-season .ag-theme-lent-season .ag-filter-toolpanel-header {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 500;
+}
+
+.theme-lent-season .ag-theme-lent-season .ag-menu {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  box-shadow: var(--shadow-2);
+}
+
+/* Lenten Specific Elements */
+.theme-lent-season .lenten-cross {
+  color: var(--color-lenten-cross);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+.theme-lent-season .fasting-reminder {
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+  border-left: 4px solid var(--color-fasting-reminder);
+  padding: 8px 12px;
+  margin: 8px 0;
+  border-radius: var(--border-radius-sm);
+}
+
+.theme-lent-season .penitential-text {
+  color: var(--color-penitential);
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* Lenten Prayer Time Indicators */
+.theme-lent-season .prayer-hour {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: white;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Lenten Calendar Styling */
+.theme-lent-season .lenten-day {
+  border: 1px solid var(--color-primary);
+  background-color: rgba(var(--color-primary-rgb), 0.05);
+}
+
+.theme-lent-season .lenten-day.fasting-day {
+  background-color: rgba(var(--color-accent-rgb), 0.1);
+  border-color: var(--color-accent);
+}
+
+/* Special Lenten Animations */
+.theme-lent-season .fade-in-solemn {
+  animation: fadeInSolemn 1s ease-in-out;
+}
+
+@keyframes fadeInSolemn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.theme-lent-season .subtle-glow {
+  box-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.theme-lent-season .subtle-glow:hover {
+  box-shadow: 0 0 15px rgba(var(--color-primary-rgb), 0.4);
+}
+
+/* Reading and Scripture Text Enhancement */
+.theme-lent-season .scripture-text {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.8;
+  color: var(--color-text-primary);
+  padding: 16px;
+  background-color: rgba(var(--color-primary-rgb), 0.02);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--border-radius-sm);
+  margin: 12px 0;
+}
+
+.theme-lent-season .verse-reference {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  text-align: right;
+  margin-top: 8px;
+}

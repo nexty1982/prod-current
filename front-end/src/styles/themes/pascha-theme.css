@@ -1,0 +1,440 @@
+/**
+ * Paschal (Easter) Season Theme
+ * Bright whites, golds, and joyful colors for the Resurrection season
+ */
+
+.theme-pascha-theme {
+  /* Primary Color Palette - Brilliant Gold and White */
+  --color-primary: #FFD700;
+  --color-primary-light: #FFEF94;
+  --color-primary-dark: #DAA520;
+  --color-primary-rgb: 255, 215, 0;
+  
+  /* Secondary Colors - Pure White and Light Blues */
+  --color-secondary: #F0F8FF;
+  --color-secondary-light: #FFFFFF;
+  --color-secondary-dark: #E6F3FF;
+  --color-secondary-rgb: 240, 248, 255;
+  
+  /* Accent Colors - Joyful Red */
+  --color-accent: #DC143C;
+  --color-accent-light: #FF6B6B;
+  --color-accent-dark: #B91C3C;
+  --color-accent-rgb: 220, 20, 60;
+  
+  /* Background Colors - Bright and Pure */
+  --color-background: #FEFEFE;
+  --color-surface: #FFFFFF;
+  --color-paper: #FAFBFC;
+  --color-sidebar: #F8F9FE;
+  
+  /* Text Colors - Clear and Readable */
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #4A4A4A;
+  --color-text-hint: #6E6E6E;
+  --color-text-disabled: #A0A0A0;
+  
+  /* Border and Divider Colors */
+  --color-border: #E0E7FF;
+  --color-divider: #F0F4FF;
+  
+  /* Status Colors - Bright and Joyful */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+  
+  /* Shadow and Elevation - Light and Airy */
+  --shadow-1: 0 1px 3px rgba(255, 215, 0, 0.1);
+  --shadow-2: 0 4px 6px rgba(255, 215, 0, 0.15);
+  --shadow-3: 0 10px 15px rgba(255, 215, 0, 0.2);
+  
+  /* Border Radius */
+  --border-radius-sm: 6px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 18px;
+  
+  /* Paschal Specific Elements */
+  --color-paschal-gold: #FFD700;
+  --color-paschal-white: #FFFFFF;
+  --color-paschal-red: #DC143C;
+  --color-resurrection-light: #FFF8DC;
+  --color-alleluia: #FFE55C;
+  --color-joy: #FF69B4;
+}
+
+/* Typography - Joyful and Bright */
+.theme-pascha-theme .MuiTypography-h1,
+.theme-pascha-theme .MuiTypography-h2,
+.theme-pascha-theme .MuiTypography-h3 {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.theme-pascha-theme .MuiTypography-h4,
+.theme-pascha-theme .MuiTypography-h5,
+.theme-pascha-theme .MuiTypography-h6 {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.theme-pascha-theme .MuiTypography-body1,
+.theme-pascha-theme .MuiTypography-body2 {
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
+/* Button Styling - Bright and Celebratory */
+.theme-pascha-theme .MuiButton-containedPrimary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-2);
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.theme-pascha-theme .MuiButton-containedPrimary:hover {
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  box-shadow: var(--shadow-3);
+  transform: translateY(-2px);
+}
+
+.theme-pascha-theme .MuiButton-containedSecondary {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  color: white;
+  box-shadow: var(--shadow-2);
+}
+
+.theme-pascha-theme .MuiButton-outlinedPrimary {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  border-width: 2px;
+  font-weight: 600;
+}
+
+/* Paper and Card Styling - Bright and Clean */
+.theme-pascha-theme .MuiPaper-root {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-1);
+  border-radius: var(--border-radius-md);
+}
+
+.theme-pascha-theme .MuiPaper-elevation1 {
+  box-shadow: var(--shadow-1);
+}
+
+.theme-pascha-theme .MuiPaper-elevation2 {
+  box-shadow: var(--shadow-2);
+}
+
+.theme-pascha-theme .MuiPaper-elevation3 {
+  box-shadow: var(--shadow-3);
+}
+
+/* AppBar and Navigation - Golden and Bright */
+.theme-pascha-theme .MuiAppBar-root {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-3);
+}
+
+.theme-pascha-theme .MuiToolbar-root {
+  border-bottom: 3px solid var(--color-paschal-white);
+}
+
+/* Drawer and Sidebar */
+.theme-pascha-theme .MuiDrawer-paper {
+  background: linear-gradient(180deg, var(--color-sidebar), var(--color-surface));
+  border-right: 3px solid var(--color-primary);
+}
+
+.theme-pascha-theme .MuiListItem-root:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.15);
+  border-radius: var(--border-radius-sm);
+}
+
+.theme-pascha-theme .MuiListItemIcon-root {
+  color: var(--color-primary-dark);
+}
+
+.theme-pascha-theme .MuiListItemText-primary {
+  font-weight: 500;
+}
+
+/* Table Styling - Bright and Clear */
+.theme-pascha-theme .MuiTableHead-root {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+}
+
+.theme-pascha-theme .MuiTableHead-root .MuiTableCell-root {
+  color: var(--color-text-primary);
+  font-weight: 700;
+  border-bottom: 3px solid var(--color-accent);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.theme-pascha-theme .MuiTableRow-root:nth-of-type(even) {
+  background: linear-gradient(90deg, rgba(var(--color-primary-rgb), 0.05), rgba(var(--color-primary-rgb), 0.08));
+}
+
+.theme-pascha-theme .MuiTableRow-root:hover {
+  background: linear-gradient(90deg, rgba(var(--color-primary-rgb), 0.15), rgba(var(--color-accent-rgb), 0.1));
+  transform: scale(1.01);
+  transition: all 0.2s ease;
+}
+
+/* Form Controls - Elegant and Clear */
+.theme-pascha-theme .MuiTextField-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-primary);
+  border-width: 3px;
+  box-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.3);
+}
+
+.theme-pascha-theme .MuiFormLabel-root.Mui-focused {
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+.theme-pascha-theme .MuiSelect-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-primary);
+  border-width: 2px;
+}
+
+/* Chip Styling - Bright and Joyful */
+.theme-pascha-theme .MuiChip-colorPrimary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: var(--color-text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-1);
+}
+
+.theme-pascha-theme .MuiChip-outlined {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  border-width: 2px;
+  font-weight: 500;
+}
+
+/* Alert Styling for Paschal Season */
+.theme-pascha-theme .MuiAlert-standardSuccess {
+  background-color: var(--color-resurrection-light);
+  color: var(--color-primary-dark);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-md);
+}
+
+.theme-pascha-theme .MuiAlert-standardInfo {
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.1), rgba(var(--color-accent-rgb), 0.05));
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-primary);
+}
+
+/* AG Grid Paschal Theme */
+.theme-pascha-theme .ag-theme-pascha-theme {
+  --ag-background-color: var(--color-surface);
+  --ag-foreground-color: var(--color-text-primary);
+  --ag-border-color: var(--color-border);
+  --ag-secondary-border-color: var(--color-divider);
+  
+  /* Header colors */
+  --ag-header-background-color: var(--color-primary);
+  --ag-header-foreground-color: var(--color-text-primary);
+  --ag-header-cell-hover-background-color: var(--color-primary-light);
+  --ag-header-cell-moving-background-color: var(--color-primary-dark);
+  
+  /* Row colors */
+  --ag-row-hover-color: rgba(var(--color-primary-rgb), 0.12);
+  --ag-row-border-color: var(--color-divider);
+  --ag-odd-row-background-color: var(--color-surface);
+  --ag-even-row-background-color: rgba(var(--color-primary-rgb), 0.04);
+  
+  /* Selection colors */
+  --ag-selected-row-background-color: rgba(var(--color-primary-rgb), 0.2);
+  --ag-range-selection-background-color: rgba(var(--color-primary-rgb), 0.25);
+  --ag-range-selection-border-color: var(--color-primary);
+  
+  /* Control colors */
+  --ag-control-panel-background-color: var(--color-surface);
+  --ag-side-bar-panel-background-color: var(--color-paper);
+  
+  /* Icons */
+  --ag-icon-color: var(--color-primary-dark);
+  
+  /* Focus and active states */
+  --ag-cell-focus-border-color: var(--color-primary);
+}
+
+/* Paschal specific AG Grid styling */
+.theme-pascha-theme .ag-theme-pascha-theme .ag-row {
+  border-bottom: 1px solid var(--color-divider);
+  transition: all 0.2s ease;
+}
+
+.theme-pascha-theme .ag-theme-pascha-theme .ag-header-cell {
+  font-weight: 700;
+  border-right: 1px solid var(--color-accent);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.theme-pascha-theme .ag-theme-pascha-theme .ag-cell {
+  border-right: 1px solid var(--color-divider);
+}
+
+/* Paschal pagination styling */
+.theme-pascha-theme .ag-theme-pascha-theme .ag-paging-panel {
+  background: linear-gradient(90deg, var(--color-paper), var(--color-surface));
+  border-top: 3px solid var(--color-primary);
+}
+
+.theme-pascha-theme .ag-theme-pascha-theme .ag-paging-button {
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+.theme-pascha-theme .ag-theme-pascha-theme .ag-paging-button:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.15);
+  border-radius: var(--border-radius-sm);
+}
+
+/* Paschal filter styling */
+.theme-pascha-theme .ag-theme-pascha-theme .ag-filter-toolpanel-header {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.theme-pascha-theme .ag-theme-pascha-theme .ag-menu {
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-primary);
+  box-shadow: var(--shadow-3);
+  border-radius: var(--border-radius-md);
+}
+
+/* Paschal Specific Elements */
+.theme-pascha-theme .paschal-cross {
+  color: var(--color-paschal-red);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  text-shadow: 0 0 10px var(--color-paschal-gold);
+}
+
+.theme-pascha-theme .alleluia-text {
+  background: linear-gradient(135deg, var(--color-alleluia), var(--color-primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  font-size: 1.2em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-pascha-theme .resurrection-banner {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent), var(--color-paschal-white));
+  color: var(--color-text-primary);
+  padding: 16px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-3);
+  text-align: center;
+  font-weight: 700;
+  margin: 16px 0;
+}
+
+.theme-pascha-theme .joy-indicator {
+  background: linear-gradient(135deg, var(--color-joy), var(--color-accent-light));
+  color: white;
+  padding: 6px 12px;
+  border-radius: var(--border-radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-2);
+}
+
+/* Paschal Calendar Styling */
+.theme-pascha-theme .paschal-day {
+  border: 2px solid var(--color-primary);
+  background: linear-gradient(135deg, var(--color-resurrection-light), var(--color-surface));
+  border-radius: var(--border-radius-sm);
+}
+
+.theme-pascha-theme .paschal-day.feast-day {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+/* Special Paschal Animations */
+.theme-pascha-theme .fade-in-joyful {
+  animation: fadeInJoyful 0.8s ease-out;
+}
+
+@keyframes fadeInJoyful {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.theme-pascha-theme .golden-glow {
+  box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.6);
+  transition: box-shadow 0.3s ease;
+}
+
+.theme-pascha-theme .golden-glow:hover {
+  box-shadow: 0 0 30px rgba(var(--color-primary-rgb), 0.8);
+}
+
+.theme-pascha-theme .celebration-pulse {
+  animation: celebrationPulse 2s ease-in-out infinite;
+}
+
+@keyframes celebrationPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.8);
+  }
+}
+
+/* Scripture and Liturgical Text Enhancement */
+.theme-pascha-theme .paschal-scripture {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.8;
+  color: var(--color-text-primary);
+  padding: 20px;
+  background: linear-gradient(135deg, var(--color-resurrection-light), var(--color-surface));
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-lg);
+  margin: 16px 0;
+  box-shadow: var(--shadow-2);
+}
+
+.theme-pascha-theme .paschal-verse-reference {
+  font-size: 0.875rem;
+  color: var(--color-primary-dark);
+  font-style: italic;
+  text-align: right;
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.theme-pascha-theme .christ-is-risen {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin: 20px 0;
+  animation: celebrationPulse 3s ease-in-out infinite;
+}

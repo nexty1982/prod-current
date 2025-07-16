@@ -1,0 +1,167 @@
+============================================================
+MULTI-LANGUAGE OCR RESULT
+============================================================
+Original File: IMG_2025_03_05_10_46_54S.jpg
+Processed File: ocr_1752533359422-354700876_7bbf277f600ad9e0.jpg
+Expected Language: en
+Detected Language: en
+Record Type: baptism
+OCR Confidence: 100.0%
+Processing Date: 2025-07-14T22:49:30.150Z
+Job ID: 33
+============================================================
+
+ORIGINAL TEXT (en):
+----------------------------------------
+PART 1 BAPTISMS
+PART 1-BAPTISMS
+PARISH RECORD
+NO 22929
+PARISH RECORD
+NAME OF CHILD
+margaret
+NAME OF PARENTS
+AND.
+ter Hull
+Shyperte
+Manga
+ADDRESS
+(FATHER'S NAME)
+t Palfy
+(MOTHER'S NAME)
+Brooks
+Blvd.
+(NUMBER AND STREET, CITY, STATE)
+mille, n.g
+DATE OF BIRTH
+October 2, 1952
+DATE OF BAPTISM AND
+CONFIRMATION
+AT.
+ss.
+PLACE OF BIRTH
+GOD PARENTS
+NOV. LE
+Oct
+Peter
+(CHURCH)
+1952
+-Paul
+Somerville -.,
+(CITY)
+mes
+Havel
+Havel
+RECTOR
+SACRAMENTS PERFORMED BY
+Rev. Nicholas J. Kiryluk
+Oct. 19-1952
+PART 1-BAPTISMS
+NAME OF CHILD
+NAME OF PARENTS
+AND.
+ADDRESS
+NO 22924
+Sonia
+John Jo
+(FATHER'S NAME)
+na Sa
+Sarcozy
+(MOTHER'S NA.
+Tancalyps
+Au
+(NUMBER AND STREET. CITY. STATE)
+my, J
+DATE OF BIRTH
+June
+DATE OF BAPTISM AND
+CONFIRMATION
+AT
+PLACE OF BIRTH
+GOD PARENTS
+12, 1952
+w
+August 17, 1952
+Peter
+ne August "é
+(CHURCH)
+New Brunswick - N.
+(CITY)
+Frederick Go
+Thacker
+SACRAMENTS PERFORMED BY
+Nicholas T.
+(STATE)
+eday
+T. Kiryluk
+RECTOR
+PART 1 BAPTISMS
+PARISH RECORD NO 22928
+NAME OF CHILD
+NAME OF PARENTS
+#
+AND.
+ADDRESS
+Philip Gregor
+(FATHER'S NAME)
+(MOTHER'S NAME)
+155 Neilson
+(NUMBER AND STREET, CITY, STATE)
+New Brunswic
+'July 3, 1952'
+DATE OF BIRTH.
+DATE OF BAPTISM AND
+CONFIRMATION
+AT
+(CHURCH)
+PLACE OF BIRTH.
+New
+(CITY)
+mj
+19-1952
+ENT.
+(STATE)
+GOD PARENTS Alexander Rudzica
+Eugenia Jana
+SACRAMENTS PERFORMED BY
+Les. Nicholas J. Kiryluk
+RECTOR
+PARISH RECORD
+NAME OF CHILD
+ID 22925
+Christine
+NAME OF PARENTS M
+Polescluck
+AND.
+(FATHER'S NAME)
+✓ MOTHER'S NAME)
+Marion Porter
+ADDRESS
+Porter
+Sher
+Poles chuck)
+(NUMBER AND STREET, CITY, STATE)
+Baltimore, Marylan
+DATE OF BIRTH
+November 6, 1951
+DATE OF BAPTISM AND
+CONFIRMATION.
+July 12, 1952
+AT SS. Peter
+PLACE OF BIRTH.
+(CHURCH)
+17 al
+Philadelphia Ta.
+GOD PARENTS George Huzenic
+Fannie Ruger
+SACRAMENTS PERFORMED BY
+Rev Nicholas P. Kerk
+RECTOR
+Archin
+----------------------------------------
+
+NO TRANSLATION AVAILABLE
+
+============================================================
+End of Multi-Language OCR Result
+============================================================

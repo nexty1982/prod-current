@@ -1,0 +1,47 @@
+[
+  {
+    "groom_name": "Alexandros Georgios Kanellopoulos",
+    "bride_name": "Maria Christina Stavrou",
+    "date_performed": "2024-06-15",
+    "priest_name": "Father Dimitrios Papadopoulos",
+    "witnesses": "Konstantinos Kanellopoulos and Irene Stavrou",
+    "marriage_license": "IL-2024-06-001234",
+    "notes": "Traditional Greek Orthodox ceremony with dance of Isaiah and crowning"
+  },
+  {
+    "groom_name": "Vladimir Sergei Volkov",
+    "bride_name": "Ekaterina Alexandrovna Petrova",
+    "date_performed": "2024-07-20",
+    "priest_name": "Father Nicholas Romanov",
+    "witnesses": "Igor Volkov and Svetlana Kuznetsova",
+    "marriage_license": "MI-2024-07-005678",
+    "notes": "Russian Orthodox wedding with traditional blessing of rings and crowns"
+  },
+  {
+    "groom_name": "Stefan Milos Jovanovic",
+    "bride_name": "Milica Ana Nikolic",
+    "date_performed": "2024-08-10",
+    "priest_name": "Father Mihailo Petrovic",
+    "witnesses": "Marko Jovanovic and Jovanka Stojanovic",
+    "marriage_license": "PA-2024-08-009012",
+    "notes": "Serbian Orthodox celebration with traditional kolo dancing"
+  },
+  {
+    "groom_name": "Gabriel Michael Thompson",
+    "bride_name": "Sofia Elena Marinescu",
+    "date_performed": "2024-09-05",
+    "priest_name": "Father Andrew Constantine",
+    "witnesses": "Robert Thompson and Elena Popescu",
+    "marriage_license": "OH-2024-09-003456",
+    "notes": "Mixed heritage wedding combining American and Romanian traditions"
+  },
+  {
+    "groom_name": "Dimitri Paul Kostas",
+    "bride_name": "Helena Rose Angelou",
+    "date_performed": "2024-09-22",
+    "priest_name": "Father Christopher Papadakis",
+    "witnesses": "Paul Kostas and Rose Dimitriou",
+    "marriage_license": "MA-2024-09-007890",
+    "notes": "Autumn wedding with beautiful church decorations and Byzantine chanting"
+  }
+]

@@ -1,0 +1,312 @@
+{
+  "timestamp": "2025-07-13T00:37:23.829Z",
+  "baseUrl": "http://localhost:3001",
+  "results": [
+    {
+      "path": "/",
+      "description": "Home page",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:14.972Z",
+      "success": true
+    },
+    {
+      "path": "/dashboard",
+      "description": "Dashboard",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:15.277Z",
+      "success": true
+    },
+    {
+      "path": "/admin",
+      "description": "Admin home",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:15.581Z",
+      "success": true
+    },
+    {
+      "path": "/admin/dashboard",
+      "description": "Admin dashboard",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:15.885Z",
+      "success": true
+    },
+    {
+      "path": "/admin/users",
+      "description": "User management",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "4645",
+      "timestamp": "2025-07-13T00:37:16.197Z",
+      "success": true
+    },
+    {
+      "path": "/admin/churches",
+      "description": "Church management",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "338",
+      "timestamp": "2025-07-13T00:37:16.530Z",
+      "success": true
+    },
+    {
+      "path": "/admin/template-manager",
+      "description": "Template manager",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:16.833Z",
+      "success": true
+    },
+    {
+      "path": "/admin/record-template-manager",
+      "description": "Record template manager",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:17.136Z",
+      "success": true
+    },
+    {
+      "path": "/admin/church-admin-panel",
+      "description": "Church admin panel",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:17.440Z",
+      "success": true
+    },
+    {
+      "path": "/admin/ocr",
+      "description": "OCR system",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:17.744Z",
+      "success": true
+    },
+    {
+      "path": "/admin/logs",
+      "description": "System logs",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:18.046Z",
+      "success": true
+    },
+    {
+      "path": "/admin/settings",
+      "description": "System settings",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:18.349Z",
+      "success": true
+    },
+    {
+      "path": "/records",
+      "description": "Records home",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:18.652Z",
+      "success": true
+    },
+    {
+      "path": "/records/baptism",
+      "description": "Baptism records",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:18.954Z",
+      "success": true
+    },
+    {
+      "path": "/records/marriage",
+      "description": "Marriage records",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:19.257Z",
+      "success": true
+    },
+    {
+      "path": "/records/funeral",
+      "description": "Funeral records",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "text/html; charset=UTF-8",
+      "contentLength": "653",
+      "timestamp": "2025-07-13T00:37:19.559Z",
+      "success": true
+    },
+    {
+      "path": "/baptism-records",
+      "description": "Legacy baptism records",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "62",
+      "timestamp": "2025-07-13T00:37:19.863Z",
+      "success": true
+    },
+    {
+      "path": "/marriage-records",
+      "description": "Legacy marriage records",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "62",
+      "timestamp": "2025-07-13T00:37:20.167Z",
+      "success": true
+    },
+    {
+      "path": "/funeral-records",
+      "description": "Legacy funeral records",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "62",
+      "timestamp": "2025-07-13T00:37:20.470Z",
+      "success": true
+    },
+    {
+      "path": "/api/auth/status",
+      "description": "Auth status API",
+      "status": 404,
+      "statusText": "Not Found",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "21",
+      "timestamp": "2025-07-13T00:37:20.772Z",
+      "success": false,
+      "issue": "not_found"
+    },
+    {
+      "path": "/api/templates",
+      "description": "Templates API",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "5437",
+      "timestamp": "2025-07-13T00:37:21.075Z",
+      "success": true
+    },
+    {
+      "path": "/api/templates/global/available",
+      "description": "Global templates API",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "2905",
+      "timestamp": "2025-07-13T00:37:21.379Z",
+      "success": true
+    },
+    {
+      "path": "/api/churches",
+      "description": "Churches API",
+      "status": 500,
+      "statusText": "Internal Server Error",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "36",
+      "timestamp": "2025-07-13T00:37:21.683Z",
+      "success": false,
+      "issue": "server_error"
+    },
+    {
+      "path": "/api/admin/churches",
+      "description": "Admin churches API",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "338",
+      "timestamp": "2025-07-13T00:37:22.013Z",
+      "success": true
+    },
+    {
+      "path": "/api/users",
+      "description": "Users API",
+      "status": 404,
+      "statusText": "Not Found",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "21",
+      "timestamp": "2025-07-13T00:37:22.315Z",
+      "success": false,
+      "issue": "not_found"
+    },
+    {
+      "path": "/api/baptism-records",
+      "description": "Baptism records API",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "62",
+      "timestamp": "2025-07-13T00:37:22.618Z",
+      "success": true
+    },
+    {
+      "path": "/api/marriage-records",
+      "description": "Marriage records API",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "62",
+      "timestamp": "2025-07-13T00:37:22.921Z",
+      "success": true
+    },
+    {
+      "path": "/api/funeral-records",
+      "description": "Funeral records API",
+      "status": 200,
+      "statusText": "OK",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "62",
+      "timestamp": "2025-07-13T00:37:23.225Z",
+      "success": true
+    },
+    {
+      "path": "/api/admin/logs",
+      "description": "Admin logs API",
+      "status": 404,
+      "statusText": "Not Found",
+      "contentType": "application/json; charset=utf-8",
+      "contentLength": "21",
+      "timestamp": "2025-07-13T00:37:23.527Z",
+      "success": false,
+      "issue": "not_found"
+    }
+  ],
+  "summary": {
+    "total": 29,
+    "successful": 25,
+    "failed": 4,
+    "issues": {
+      "authentication": 0,
+      "permission": 0,
+      "not_found": 3,
+      "server_error": 1,
+      "network_error": 0
+    }
+  }
+}

@@ -1,0 +1,65 @@
+============================================================
+MULTI-LANGUAGE OCR RESULT
+============================================================
+Original File: Screenshot_20250404_102238_OneDrive.jpg
+Processed File: ocr_1752468130133-306759187_79a941522a9b12d7.jpg
+Expected Language: en
+Detected Language: en
+Record Type: baptism
+OCR Confidence: 100.0%
+Processing Date: 2025-07-14T04:42:37.978Z
+Job ID: 19
+============================================================
+
+ORIGINAL TEXT (en):
+----------------------------------------
+10:22
+Burien
+Name
+Oct Ergi Dolombosh
+4-175-18
+4 monthe
+Det
+fron
+V.J. Veliki Raiz
+15-28 16-29 Paul Klage
+Cause
+1916
+577%
+born in
+temperature
+23 days
+Manville
+Nov
+now
+Mathew
+9
+12
+born in
+37ops
+Muchebich heart
+Meturrca
+Berck Krainska
+vil-Tradatz
+nov. nov Peter Klaga
+13
+forn
+in Manville
+12
+1 month &
+iday
+Feb
+Feb Grege
+attack
+temperatur
+1917
+Gregory litrov killed by
+OAOM Bar || toein
+K
+----------------------------------------
+
+NO TRANSLATION AVAILABLE
+
+============================================================
+End of Multi-Language OCR Result
+============================================================

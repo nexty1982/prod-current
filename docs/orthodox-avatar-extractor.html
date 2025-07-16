@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orthodox Avatar Extractor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        
+        .upload-area.dragover {
+            border-color: #007bff;
+            background-color: #f0f8ff;
+        }
+        
+        input[type="file"] {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .preview-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .original-image {
+            max-width: 100%;
+            max-height: 400px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .grid-overlay {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+        
+        .grid-cell {
+            position: absolute;
+            border: 2px solid #ff0000;
+            background-color: rgba(255, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .grid-cell:hover {
+            background-color: rgba(255, 0, 0, 0.3);
+            border-color: #ff6666;
+        }
+        
+        .grid-cell.selected {
+            border-color: #00ff00;
+            background-color: rgba(0, 255, 0, 0.2);
+        }
+        
+        .extraction-area {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .avatar-preview {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        
+        .avatar-preview img {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .avatar-preview input {
+            display: block;
+            margin: 5px auto;
+            width: 120px;
+            padding: 5px;
+            font-size: 12px;
+        }
+        
+        .download-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .download-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .instructions {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .instructions ol {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏛️ Orthodox Avatar Extractor</h1>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Upload one of your Orthodox avatar grid images (3x3 grid)</li>
+                <li>Click on each avatar in the grid to select it</li>
+                <li>The tool will automatically extract each avatar</li>
+                <li>Rename each extracted avatar and download</li>
+                <li>Place the downloaded files in your <code>/front-end/public/assets/avatars/</code> directory</li>
+            </ol>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <h3>Drop your Orthodox avatar grid image here or click to browse</h3>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+
+        <div class="preview-container" id="previewContainer"></div>
+        
+        <div class="extraction-area" id="extractionArea">
+            <h3>Extracted Avatars:</h3>
+            <div id="avatarGrid"></div>
+            <button onclick="downloadAll()" class="download-btn" style="font-size: 16px; padding: 12px 24px;">
+                📥 Download All Avatars
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentImage = null;
+        let extractedAvatars = [];
+        
+        // Suggested names for Orthodox avatars
+        const avatarNames = [
+            'orthodox-monk-1.png', 'orthodox-elder-1.png', 'orthodox-priest-1.png',
+            'orthodox-nun-1.png', 'orthodox-woman-1.png', 'orthodox-man-1.png',
+            'orthodox-priest-2.png', 'orthodox-elder-2.png', 'orthodox-priest-3.png'
+        ];
+
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const extractionArea = document.getElementById('extractionArea');
+
+        // Handle drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleImage(files[0]);
+            }
+        });
+
+        uploadArea.addEventListener('click', () => {
+            imageInput.click();
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleImage(e.target.files[0]);
+            }
+        });
+
+        function handleImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImage = new Image();
+                currentImage.onload = () => {
+                    displayImageWithGrid();
+                };
+                currentImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function displayImageWithGrid() {
+            previewContainer.innerHTML = '';
+            
+            const gridOverlay = document.createElement('div');
+            gridOverlay.className = 'grid-overlay';
+            
+            const img = document.createElement('img');
+            img.src = currentImage.src;
+            img.className = 'original-image';
+            img.onload = () => {
+                createGridCells(gridOverlay, img);
+            };
+            
+            gridOverlay.appendChild(img);
+            previewContainer.appendChild(gridOverlay);
+        }
+
+        function createGridCells(container, img) {
+            const rect = img.getBoundingClientRect();
+            const cellWidth = img.offsetWidth / 3;
+            const cellHeight = img.offsetHeight / 3;
+            
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.style.left = (col * cellWidth) + 'px';
+                    cell.style.top = (row * cellHeight) + 'px';
+                    cell.style.width = cellWidth + 'px';
+                    cell.style.height = cellHeight + 'px';
+                    
+                    const index = row * 3 + col;
+                    cell.onclick = () => extractAvatar(row, col, index);
+                    
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        function extractAvatar(row, col, index) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const cellWidth = currentImage.width / 3;
+            const cellHeight = currentImage.height / 3;
+            
+            canvas.width = cellWidth;
+            canvas.height = cellHeight;
+            
+            ctx.drawImage(
+                currentImage,
+                col * cellWidth, row * cellHeight, cellWidth, cellHeight,
+                0, 0, cellWidth, cellHeight
+            );
+            
+            const dataURL = canvas.toDataURL('image/png');
+            
+            // Create preview
+            const avatarPreview = document.createElement('div');
+            avatarPreview.className = 'avatar-preview';
+            
+            const img = document.createElement('img');
+            img.src = dataURL;
+            
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = avatarNames[index] || `orthodox-avatar-${index + 1}.png`;
+            nameInput.placeholder = 'Avatar filename';
+            
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'download-btn';
+            downloadBtn.textContent = 'Download';
+            downloadBtn.onclick = () => downloadAvatar(dataURL, nameInput.value);
+            
+            avatarPreview.appendChild(img);
+            avatarPreview.appendChild(nameInput);
+            avatarPreview.appendChild(downloadBtn);
+            
+            document.getElementById('avatarGrid').appendChild(avatarPreview);
+            
+            extractedAvatars.push({ dataURL, name: nameInput.value, element: avatarPreview });
+            
+            extractionArea.style.display = 'block';
+            
+            // Mark cell as selected
+            const cells = document.querySelectorAll('.grid-cell');
+            cells[index].classList.add('selected');
+        }
+
+        function downloadAvatar(dataURL, filename) {
+            const link = document.createElement('a');
+            link.download = filename || 'orthodox-avatar.png';
+            link.href = dataURL;
+            link.click();
+        }
+
+        function downloadAll() {
+            extractedAvatars.forEach((avatar, index) => {
+                const nameInput = avatar.element.querySelector('input');
+                const filename = nameInput.value || `orthodox-avatar-${index + 1}.png`;
+                setTimeout(() => {
+                    downloadAvatar(avatar.dataURL, filename);
+                }, index * 500); // Stagger downloads
+            });
+        }
+    </script>
+</body>
+</html>

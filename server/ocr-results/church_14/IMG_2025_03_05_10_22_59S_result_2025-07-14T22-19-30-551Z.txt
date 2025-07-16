@@ -1,0 +1,165 @@
+============================================================
+MULTI-LANGUAGE OCR RESULT
+============================================================
+Original File: IMG_2025_03_05_10_22_59S.jpg
+Processed File: ocr_1752531554609-445307231_885e99773d93794f.jpg
+Expected Language: en
+Detected Language: en
+Record Type: baptism
+OCR Confidence: 100.0%
+Processing Date: 2025-07-14T22:19:30.551Z
+Job ID: 31
+============================================================
+
+ORIGINAL TEXT (en):
+----------------------------------------
+PART 1 BAPTISMS
+PART 1-BAPTISMS
+PARISH RECORD
+NAME OF CHILD
+NC 31224
+et
+Rasatth reple
+PARENTS
+NAME OF PARENTS
+AND.
+Spar
+Olga
+ADDRESS
+(FATHER'S NAME)
+Naruta
+(MOTHER'S NAME)
+183 Leghorn
+(NUMBER AND STREET, CITY, STATE)
+Bradley Estate
+PARISH RECORD
+NO 31219
+n.g
+DATE OF BIRTH
+DATE OF BIRTH.
+Nov.
+12
+1949
+DATE OF BAPTISM AND December 11, 1949
+CONFIRMATION
+AT
+St. Peter & Paul (Manville
+PLACE OF BIRTH
+GOD PARENTS.
+(CHURCH)
+Somerville
+(CITY)
+iter Colans
+an
+SACRAMENTS PERFORMED BY
+Nicholas
+T. Kuryly
+luk
+2
+RECTOR
+NAME OF CHILD
+NAME OF PARENTS
+AND.
+Joseph Holovach
+(FATHER'S NAME)
+Mary Kaymicks
+ADDRESS
+(MOTHER'S NAME)
+Washington
+(NUMBER AND STREET, CITY, STATE)
+Mawville
+1 Agua 18, 1949
+DATE OF BAPTISM AND
+CONFIRMATION
+AT
+Sept. 18, 1949
+Paul
+St. Peter
+PLACE OF BIRTH
+GOD PARENTS
+(CHURCH)
+(CITY)
+.
+(STATE)
+ne maryn
+Pale
+Stof Stephanie M
+SACRAMENTS PERFORMED BY
+T.
+Rev. n.J. Kuryluk
+RECTOR
+PART 1 BAPTISMS
+PARISH RECORD
+NO 31225
+PART 1 BAPTISMS
+PARISH RECORD
+No 31220
+NAME OF CHILD
+NAME OF PARENTS.
+NAME OF CHILD
+NAME OF PARENTS
+AND.
+Hope
+P. Mayberry
+(FATHER'S NAME)
+Ann marche
+(MOTHER'S NAME)
+AND.
+ADDRESS
+5.
+DATE OF BIRTH.
+Vladim
+Will
+(FATHER'S NAME)
+Tobi
+(MOTHER'S NAME)
+3rd St., Manville N.J.
+(NUMBER AND STREET, CITY, STATE)
+November 21, 1949
+ADDRESS
+RED
+(NUMBER AND STREET, CITY, STATE)
+New Brunswick, N.J
+DATE OF BIRTH.
+August 23,
+DATE OF BAPTISM AND
+CONFIRMATION
+AT.
+9949
+Nov. 27, 1949
+7
+(CHURCH)
+its
+DATE OF BAPTISM AND
+CONFIRMATION
+AT.
+:. Pe
+PLACE OF BIRTH
+GOD PARENTS.
+mary
+(CHURCH)
+Faul
+Somerville, N..
+(CITY)
+Pero
+SACRAMENTS PERFORMED BY
+Kew.
+homyake,
+Nicholas J. Turyluk
+RECTOR
+PLACE OF BIRTH
+GOD PARENTS.
+(CITY)
+(STATE)
+Michae
+SACRAMENTS PERFORMED BY
+Richolas
+F. Ker
+RECTOR
+----------------------------------------
+
+NO TRANSLATION AVAILABLE
+
+============================================================
+End of Multi-Language OCR Result
+============================================================

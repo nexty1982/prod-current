@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orthodox Calendar - Church Records Management</title>
+    <link rel="stylesheet" href="/template2/queue_1.0.0/HTML/dist/assets/css/vendor.css">
+    <link rel="stylesheet" href="/template2/queue_1.0.0/HTML/dist/assets/css/app.css">
+    <style>
+        .orthodox-calendar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fefbf3 0%, #f7f3e9 50%, #f4e5d3 100%);
+        }
+        .calendar-header {
+            background: linear-gradient(135deg, #d4a574 0%, #c19653 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(196, 150, 83, 0.3);
+        }
+        .liturgical-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #6b5b95;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .saint-card {
+            background: white;
+            border: 2px solid #d4a574;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(212, 165, 116, 0.2);
+            transition: transform 0.2s ease;
+        }
+        .saint-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(212, 165, 116, 0.3);
+        }
+        .reading-card {
+            background: #fefbf3;
+            border: 2px solid #d4a574;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .btn-orthodox {
+            background: linear-gradient(135deg, #d4a574 0%, #c19653 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-orthodox:hover {
+            background: linear-gradient(135deg, #c19653 0%, #a8833c 100%);
+            transform: translateY(-1px);
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #d4a574;
+            border: 2px solid #d4a574;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .calendar-day {
+            background: white;
+            min-height: 100px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .calendar-day:hover {
+            background: #fefbf3;
+        }
+        .calendar-day.today {
+            background: #f7f3e9;
+            font-weight: bold;
+        }
+        .calendar-day.selected {
+            background: #e8dcc0;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #d4a574;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="orthodox-calendar">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="calendar-header text-center">
+            <h1><i class="fas fa-cross me-3"></i>Orthodox Liturgical Calendar</h1>
+            <p class="mb-0">Daily Saints, Readings, and Liturgical Information</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button id="todayBtn" class="btn btn-orthodox me-2">
+                                    <i class="fas fa-calendar-day me-2"></i>Today
+                                </button>
+                                <button id="monthBtn" class="btn btn-orthodox">
+                                    <i class="fas fa-calendar me-2"></i>Month View
+                                </button>
+                            </div>
+                            <div id="currentDate" class="h5 mb-0 text-muted"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="text-center py-5" style="display: none;">
+            <div class="loading-spinner mx-auto mb-3"></div>
+            <p class="text-muted">Loading liturgical data...</p>
+        </div>
+
+        <!-- Today View -->
+        <div id="todayView" class="row">
+            <div class="col-lg-6">
+                <!-- Saints Section -->
+                <div class="card mb-4">
+                    <div class="card-header" style="background: linear-gradient(135deg, #d4a574 0%, #c19653 100%); color: white;">
+                        <h4 class="mb-0"><i class="fas fa-star me-2"></i>Saints of the Day</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="saintsContainer">
+                            <p class="text-muted">Loading saints...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <!-- Readings Section -->
+                <div class="card mb-4">
+                    <div class="card-header" style="background: linear-gradient(135deg, #d4a574 0%, #c19653 100%); color: white;">
+                        <h4 class="mb-0"><i class="fas fa-book-open me-2"></i>Scripture Readings</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="readingsContainer">
+                            <p class="text-muted">Loading readings...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <!-- Liturgical Info -->
+                <div class="card">
+                    <div class="card-header" style="background: linear-gradient(135deg, #d4a574 0%, #c19653 100%); color: white;">
+                        <h4 class="mb-0"><i class="fas fa-church me-2"></i>Liturgical Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="liturgicalInfo">
+                            <p class="text-muted">Loading liturgical information...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Month View -->
+        <div id="monthView" style="display: none;">
+            <div class="card">
+                <div class="card-header" style="background: linear-gradient(135deg, #d4a574 0%, #c19653 100%); color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button id="prevMonth" class="btn btn-light">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h4 id="monthTitle" class="mb-0"></h4>
+                        <button id="nextMonth" class="btn btn-light">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/template2/queue_1.0.0/HTML/dist/assets/js/vendor.js"></script>
+    <script src="/template2/queue_1.0.0/HTML/dist/assets/js/app.js"></script>
+    <script>
+        class OrthodoxCalendar {
+            constructor() {
+                this.currentDate = new Date();
+                this.selectedDate = new Date();
+                this.view = 'today';
+                this.todayData = null;
+                this.monthData = null;
+                
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.loadTodayData();
+                this.updateCurrentDate();
+            }
+
+            bindEvents() {
+                document.getElementById('todayBtn').addEventListener('click', () => this.switchView('today'));
+                document.getElementById('monthBtn').addEventListener('click', () => this.switchView('month'));
+                document.getElementById('prevMonth').addEventListener('click', () => this.navigateMonth(-1));
+                document.getElementById('nextMonth').addEventListener('click', () => this.navigateMonth(1));
+            }
+
+            switchView(view) {
+                this.view = view;
+                
+                // Update button states
+                document.getElementById('todayBtn').classList.toggle('active', view === 'today');
+                document.getElementById('monthBtn').classList.toggle('active', view === 'month');
+                
+                // Show/hide views
+                document.getElementById('todayView').style.display = view === 'today' ? 'block' : 'none';
+                document.getElementById('monthView').style.display = view === 'month' ? 'block' : 'none';
+                
+                if (view === 'month') {
+                    this.loadMonthData();
+                }
+            }
+
+            async loadTodayData() {
+                this.showLoading(true);
+                try {
+                    const response = await fetch('/api/liturgical-calendar/today');
+                    this.todayData = await response.json();
+                    this.renderTodayView();
+                } catch (error) {
+                    console.error('Error loading today\'s data:', error);
+                    this.showError('Failed to load liturgical data');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            async loadDateData(date) {
+                this.showLoading(true);
+                try {
+                    const dateStr = date.toISOString().split('T')[0];
+                    const response = await fetch(`/api/liturgical-calendar/date/${dateStr}`);
+                    this.todayData = await response.json();
+                    this.selectedDate = date;
+                    this.renderTodayView();
+                    this.switchView('today');
+                } catch (error) {
+                    console.error('Error loading date data:', error);
+                    this.showError('Failed to load liturgical data');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            async loadMonthData() {
+                this.showLoading(true);
+                try {
+                    const year = this.currentDate.getFullYear();
+                    const month = this.currentDate.getMonth() + 1;
+                    const response = await fetch(`/api/liturgical-calendar/month/${year}/${month}`);
+                    this.monthData = await response.json();
+                    this.renderMonthView();
+                } catch (error) {
+                    console.error('Error loading month data:', error);
+                    this.showError('Failed to load month data');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            renderTodayView() {
+                if (!this.todayData) return;
+
+                // Update current date display
+                this.updateCurrentDate();
+
+                // Render saints
+                this.renderSaints();
+
+                // Render readings
+                this.renderReadings();
+
+                // Render liturgical info
+                this.renderLiturgicalInfo();
+            }
+
+            renderSaints() {
+                const container = document.getElementById('saintsContainer');
+                
+                if (!this.todayData.saints || this.todayData.saints.length === 0) {
+                    container.innerHTML = '<p class="text-muted">No saints recorded for this day</p>';
+                    return;
+                }
+
+                container.innerHTML = this.todayData.saints.map(saint => `
+                    <div class="saint-card">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-star text-warning me-3 mt-1"></i>
+                            <div class="flex-grow-1">
+                                <h5 class="text-primary">${saint.name}</h5>
+                                ${saint.title ? `<p class="text-muted fst-italic mb-2">${saint.title}</p>` : ''}
+                                ${saint.description ? `<p class="mb-2">${saint.description}</p>` : ''}
+                                ${saint.commemoration ? `<small class="text-muted">Commemoration: ${saint.commemoration}</small>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderReadings() {
+                const container = document.getElementById('readingsContainer');
+                
+                if (!this.todayData.readings || this.todayData.readings.length === 0) {
+                    container.innerHTML = '<p class="text-muted">No scripture readings for this day</p>';
+                    return;
+                }
+
+                container.innerHTML = this.todayData.readings.map(reading => `
+                    <div class="reading-card">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-book-open text-primary me-3 mt-1"></i>
+                            <div class="flex-grow-1">
+                                <h5 class="text-primary">${reading.title}</h5>
+                                <p class="fw-bold text-secondary">${reading.citation}</p>
+                                ${reading.type ? `<span class="badge bg-secondary mb-2">${reading.type}</span>` : ''}
+                                ${reading.text ? `<p class="fst-italic">"${reading.text}"</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderLiturgicalInfo() {
+                const container = document.getElementById('liturgicalInfo');
+                
+                let html = '<div class="row">';
+                
+                if (this.todayData.liturgicalSeason) {
+                    html += `
+                        <div class="col-md-4 mb-3">
+                            <strong>Liturgical Season:</strong><br>
+                            <span class="text-primary">${this.todayData.liturgicalSeason}</span>
+                        </div>
+                    `;
+                }
+                
+                if (this.todayData.liturgicalColor) {
+                    html += `
+                        <div class="col-md-4 mb-3">
+                            <strong>Liturgical Color:</strong><br>
+                            <span class="liturgical-color" style="background-color: ${this.getLiturgicalColorStyle(this.todayData.liturgicalColor)}"></span>
+                            <span class="text-capitalize">${this.todayData.liturgicalColor}</span>
+                        </div>
+                    `;
+                }
+                
+                if (this.todayData.fastingStatus) {
+                    html += `
+                        <div class="col-md-4 mb-3">
+                            <strong>Fasting:</strong><br>
+                            <span class="text-info">${this.todayData.fastingStatus}</span>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                container.innerHTML = html;
+            }
+
+            renderMonthView() {
+                const monthTitle = document.getElementById('monthTitle');
+                const calendarGrid = document.getElementById('calendarGrid');
+                
+                monthTitle.textContent = this.currentDate.toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+
+                // Generate calendar days
+                const days = this.getDaysInMonth(this.currentDate);
+                const today = new Date();
+                
+                let html = '';
+                
+                // Day headers
+                ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                    html += `<div class="calendar-day" style="background: #d4a574; color: white; text-align: center; font-weight: bold;">${day}</div>`;
+                });
+                
+                // Calendar days
+                days.forEach(day => {
+                    if (!day) {
+                        html += '<div class="calendar-day"></div>';
+                        return;
+                    }
+                    
+                    const isToday = day.toDateString() === today.toDateString();
+                    const isSelected = day.toDateString() === this.selectedDate.toDateString();
+                    const classes = ['calendar-day'];
+                    if (isToday) classes.push('today');
+                    if (isSelected) classes.push('selected');
+                    
+                    html += `
+                        <div class="${classes.join(' ')}" onclick="calendar.loadDateData(new Date(${day.getTime()}))">
+                            <span>${day.getDate()}</span>
+                            ${this.monthData && this.monthData[day.getDate()] ? 
+                                '<i class="fas fa-star text-warning" style="font-size: 10px;"></i>' : ''}
+                        </div>
+                    `;
+                });
+                
+                calendarGrid.innerHTML = html;
+            }
+
+            getDaysInMonth(date) {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const firstDayOfWeek = firstDay.getDay();
+                const daysInMonth = lastDay.getDate();
+
+                const days = [];
+                
+                // Add empty cells for days before the first day
+                for (let i = 0; i < firstDayOfWeek; i++) {
+                    days.push(null);
+                }
+                
+                // Add all days of the month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    days.push(new Date(year, month, day));
+                }
+                
+                return days;
+            }
+
+            navigateMonth(direction) {
+                this.currentDate = new Date(
+                    this.currentDate.getFullYear(),
+                    this.currentDate.getMonth() + direction,
+                    1
+                );
+                this.loadMonthData();
+            }
+
+            updateCurrentDate() {
+                const dateStr = this.selectedDate.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                document.getElementById('currentDate').textContent = dateStr;
+            }
+
+            getLiturgicalColorStyle(color) {
+                const colors = {
+                    white: '#ffffff',
+                    red: '#dc3545',
+                    purple: '#6f42c1',
+                    green: '#28a745',
+                    gold: '#ffc107',
+                    blue: '#007bff',
+                    black: '#343a40'
+                };
+                return colors[color] || colors.green;
+            }
+
+            showLoading(show) {
+                document.getElementById('loading').style.display = show ? 'block' : 'none';
+            }
+
+            showError(message) {
+                // You can implement a more sophisticated error display here
+                console.error(message);
+                alert(message);
+            }
+        }
+
+        // Initialize the calendar when the page loads
+        let calendar;
+        document.addEventListener('DOMContentLoaded', () => {
+            calendar = new OrthodoxCalendar();
+        });
+    </script>
+</body>
+</html>

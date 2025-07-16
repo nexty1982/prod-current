@@ -1,0 +1,126 @@
+============================================================
+MULTI-LANGUAGE OCR RESULT
+============================================================
+Original File: IMG_2025_03_15_14_04_55S.jpg
+Processed File: ocr_1752465968890-399538982_9a5837ef5ff34af7.jpg
+Expected Language: en
+Detected Language: en
+Record Type: baptism
+OCR Confidence: 100.0%
+Processing Date: 2025-07-14T04:10:08.417Z
+Job ID: 17
+============================================================
+
+ORIGINAL TEXT (en):
+----------------------------------------
+PART III-DEATHS
+PART III-DEATHS
+✓
+PARISH RECORD
+No 61053
+Jow Brihorchut
+March 18-21.1942
+FULL NAME OF DECEASED
+DATE OF DEATH
+AGE OF DECEASED
+55
+Somerville M..
+PLACE OF DEATH ✓
+CAUSE OF DEATH.
+WAS CONFESSED AND
+SACRAMENT ADMINISTERED
+PLACE OF BURIAL
+IN CITY OF
+(DATE AND BY WHOM)
+BURIAL RITES PERFORMED BY
+Rec. M.
+(NAME OF PRIEST)
+AT
+(ADDRESS)
+St. Paul C. M
+(CHURCH)
+PARISH RECORD
+FULL NAME OF DECEASED
+No 61051
+* DECEASED Mary Skvarla
+DATE OF DEATH Nov. 19, 1941
+46/2 yers.
+AGE OF DECEASED
+PLACE OF DEATH.
+CAUSE OF DEATH
+Manville ..
+camer
+WAS CONFESSED AND
+SACRAMENT ADMINISTERE
+IN CITY
+R
+(DATE AND BY WHOM)
+PLACE OF BURIAL: St. Peter & Paul
+cem. Manville M..
+BURIAL RITES PERFORMED BY.
+.
+(NAME OF PRIEST)
+90 Washington Ave
+(ADDRESS)
+PART III-DEATHS
+PARISH RECORD
+No 61054
+(CHURCH)
+PART III-DEATHS
+PARISH RECORD
+(CITY)
+N® 61052
+FULL NAME OF DECE
+DATE OF DEATH
+DECEASED Louis Pa
+Febr. 23 1942
+AGE OF DECEASED
+52
+St Peter & Paul Cemet
+PLACE OF DEATH &
+CAUSE OF DEATH
+Hemorrhage
+WAS CONFESSED AND
+SACRAMENT ADMINISTERED
+PLACE OF BURIAL
+IN CITY OF
+(DATE AND BY WHOM)
+Manville ny
+BURIAL RITES PERFORMED BY
+Ren. M.
+(ADDRESS)
+(NAME OF PRIEST)
+AT St. Peter & Paul Manville
+(CHURCH)
+(CITY)
+FULL NAME OF DECEASED Anastasia Rilik
+.Dec. 5, 19412
+DATE OF DEATH
+AGE OF DECEASED
+PLACE OF DEATH
+CAUSE OF DEATH
+49
+Trenton, N.J.
+4 peretonit
+WAS CONFESSED AND
+SACRAMENT ADMINISTERED
+v.m.
+(DATE AND BY WHOM)
+PLACE OF BURIAL St. Vladimir ci-
+IN CITY
+metery Trentoning
+DD Per M.
+BURIAL RITES PERFORMED BY
+(ADDRESS)
+(NAME OF PRIEST)
+90 Washington Marily
+"St Peters Paul Mantien
+(CHURCH)
+(CITY)
+----------------------------------------
+
+NO TRANSLATION AVAILABLE
+
+============================================================
+End of Multi-Language OCR Result
+============================================================

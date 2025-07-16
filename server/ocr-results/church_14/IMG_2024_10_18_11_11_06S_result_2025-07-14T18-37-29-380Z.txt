@@ -1,0 +1,111 @@
+============================================================
+MULTI-LANGUAGE OCR RESULT
+============================================================
+Original File: IMG_2024_10_18_11_11_06S.jpg
+Processed File: ocr_1752518222787-64257993_d9c320233ee1b15d.jpg
+Expected Language: en
+Detected Language: en
+Record Type: baptism
+OCR Confidence: 100.0%
+Processing Date: 2025-07-14T18:37:29.380Z
+Job ID: 24
+============================================================
+
+ORIGINAL TEXT (en):
+----------------------------------------
+Gurrs poдHB:
+M
+A
+L
+E
+WHXCA.
+NUMBER
+MkCauz
+H AFHL
+DATES
+BAPTISM
+BIRTH
+FEMALE
+HISTPHYSCHON KANTH MA
+Zbanis, uma, wryectio n. kamkala poдuteneŇ,
+B'kponenozдAHIA.
+M KAKOFO
+NAME OF CHILD
+CITY OF BIRTH
+FATHER'S FULL NAME. MOTHER'S MAIDEN NAME
+YEAR
+KOBIRHLEPHOBE-TAVEREISES
+1942, 4ACTL NOPERA, W PONEWAXCA.
+BRAHI, HMA, OTYICTKO. H $amiiA
+BOCNDÍGMINHKOEZ.
+FULL NAMES OF SPONSORS
+KTO COREPшAAZ TAHHCTRO
+KOILUSHIA...
+PRIEST'S NAME
+(NEW BRUNSWICK, NJ.)
+52 N Q4JUN BRLAUG 13 MICHAEL CHRISTOPHER RICHARD JOHN OSTAPOVICH SUSAN ANDREY CHIK.
+OSTAPOVICH
+ORTHODOX
+ORTHODOX
+ROBERT OSTAPOVICH
+NANCY OSTAPOVICH
+REV EUGENE D, TARRIS
+issued
+Cipt #
+73-8
+26 AUG 13
+53
+x
+(NEW BRUNSWICK, NJ.)
+54
+X
+PROT
+55
+X
+24 JUN 13A 13 KRISTEN) MARIE
+OSTAPOVICH
+5AUG 7370773 (KIMBERLY) ANN HARVEY GEORGE FIELDING CAROLLAND MOCK
+FIELDING
+(PT. PLEASANT, NN.)
+BOSEP 14 OCT 173 SUZANA
+RICHARD JOHN OSTAPOVICH SUSAN ANDREYCHIK
+THOMAS ANDREYCHIK
+JUDITH ANDREY CIFIK
+REV EUGENE D. TARRIS
+ORTHODOX
+ORTHODOX
+cest t
+73-9
+issed
+DE Aus 73
+STEPHE MOCK
+ORTHODOX
+NANCY MACKEY
+Rev. Eveeva D. TARRIS
+Issued
+Cart II
+73-20
+7007 23
+BORIS LABOSKI
+LABOski
+VASA Zupa Noski
+JOVAN ZUPAN OS
+oski
+LOJZA ZUPANOSki
+REV. EUGENE D. TARRIS
+(SOMERVILLE, N.J.)
+cast #
+73-4
+Sound
+5 00 73
+1973
+I RECEPTION INTO
+10 BAPTISMS
+INTO ORTHODOXY
+----------------------------------------
+
+NO TRANSLATION AVAILABLE
+
+============================================================
+End of Multi-Language OCR Result
+============================================================

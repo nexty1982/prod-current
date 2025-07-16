@@ -1,0 +1,461 @@
+/* Orthodox Christian Typography & Styling */
+
+/* Google Fonts Import for Orthodox Records */
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Forum&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Greek:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Cyrillic:wght@400;500;600;700&display=swap');
+
+/* Orthodox Color Palette & Global Font Stack */
+:root {
+  /* Traditional Orthodox Colors */
+  --orthodox-maroon: #8a0303;
+  --orthodox-gold: #C8A951;
+  --orthodox-deep-green: #1d442d;
+  --orthodox-cream: #faf7f0;
+  --orthodox-deep-blue: #1a365d;
+  
+  /* Light theme backgrounds */
+  --orthodox-bg-light: #fefcf7;
+  --orthodox-card-light: #ffffff;
+  --orthodox-border-light: #e2d5b7;
+  
+  /* Dark theme backgrounds */
+  --orthodox-bg-dark: #1a1611;
+  --orthodox-card-dark: #2d2520;
+  --orthodox-border-dark: #4a3f2f;
+  
+  /* Global Orthodox Font Stack Variables */
+  --font-orthodox-serif: 'EB Garamond', 'Times New Roman', serif;
+  --font-orthodox-header: 'Forum', 'Times New Roman', serif;
+  --font-orthodox-decorative: 'Cinzel Decorative', 'Times New Roman', serif;
+  --font-orthodox-slavic: 'Old Standard TT', 'Times New Roman', serif;
+  --font-orthodox-greek: 'Noto Serif Greek', 'Noto Serif', serif;
+  --font-orthodox-cyrillic: 'Noto Serif Cyrillic', 'Noto Serif', serif;
+  
+  /* Global font stack for easy application */
+  --font-primary: var(--font-orthodox-serif);
+  --font-headings: var(--font-orthodox-header);
+  --font-decorative: var(--font-orthodox-decorative);
+  --font-body: var(--font-orthodox-serif);
+  --font-special: var(--font-orthodox-slavic);
+}
+
+/* Global Orthodox Body Font Application */
+.orthodox-app {
+  font-family: var(--font-primary);
+  line-height: 1.6;
+  color: #374151;
+}
+
+.orthodox-app h1,
+.orthodox-app h2,
+.orthodox-app h3,
+.orthodox-app h4,
+.orthodox-app h5,
+.orthodox-app h6 {
+  font-family: var(--font-headings);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+/* Orthodox Record Header Styles */
+.record-header {
+  font-family: var(--font-orthodox-header);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--orthodox-maroon);
+  margin-bottom: 1rem;
+}
+
+.record-header.large {
+  font-size: 1.875rem; /* 30px */
+  line-height: 2.25rem;
+}
+
+.record-header.medium {
+  font-size: 1.5rem; /* 24px */
+  line-height: 2rem;
+}
+
+.record-header.small {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.75rem;
+}
+
+/* Certificate Title Styles */
+.certificate-title {
+  font-family: var(--font-orthodox-decorative);
+  color: var(--orthodox-gold);
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  margin-bottom: 1.5rem;
+}
+
+.certificate-title.large {
+  font-size: 2.5rem; /* 40px */
+  line-height: 1.2;
+}
+
+.certificate-title.medium {
+  font-size: 2rem; /* 32px */
+  line-height: 1.3;
+}
+
+.certificate-title.small {
+  font-size: 1.5rem; /* 24px */
+  line-height: 1.4;
+}
+
+/* OCR Preview Text */
+.ocr-preview-text {
+  font-family: var(--font-orthodox-serif);
+  line-height: 1.6;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.ocr-preview-text.large {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.7;
+}
+
+/* Record Body Text */
+.record-body {
+  font-family: var(--font-orthodox-slavic);
+  line-height: 1.5;
+  font-size: 0.95rem;
+  color: #4a5568;
+}
+
+/* Language-Specific Styles */
+.record-lang-gr {
+  font-family: var(--font-orthodox-greek);
+  font-feature-settings: "kern" 1, "liga" 1;
+  /* Support for polytonic Greek */
+  font-variant-ligatures: common-ligatures;
+}
+
+.record-lang-ru,
+.record-lang-bg,
+.record-lang-sr {
+  font-family: var(--font-orthodox-cyrillic);
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.record-lang-ro,
+.record-lang-en {
+  font-family: var(--font-orthodox-serif);
+}
+
+/* Orthodox Table Styling */
+.orthodox-table-container {
+  background: var(--orthodox-bg-light);
+  border-radius: 8px;
+  border: 2px solid var(--orthodox-border-light);
+  box-shadow: 0 4px 12px rgba(138, 3, 3, 0.1);
+}
+
+.orthodox-table-header {
+  background: linear-gradient(135deg, var(--orthodox-maroon), #a11e1e);
+  color: var(--orthodox-cream);
+  font-family: var(--font-orthodox-header);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: capitalize;
+}
+
+.orthodox-card {
+  background: var(--orthodox-card-light);
+  border: 1px solid var(--orthodox-border-light);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(138, 3, 3, 0.08);
+  transition: all 0.3s ease;
+}
+
+.orthodox-card:hover {
+  box-shadow: 0 4px 16px rgba(138, 3, 3, 0.15);
+  border-color: var(--orthodox-gold);
+}
+
+/* Orthodox Buttons */
+.orthodox-btn-primary {
+  background: linear-gradient(135deg, var(--orthodox-maroon), #a11e1e);
+  color: var(--orthodox-cream);
+  border: 1px solid var(--orthodox-maroon);
+  font-family: var(--font-orthodox-header);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.orthodox-btn-primary:hover {
+  background: linear-gradient(135deg, #a11e1e, var(--orthodox-maroon));
+  box-shadow: 0 4px 12px rgba(138, 3, 3, 0.3);
+  transform: translateY(-1px);
+}
+
+.orthodox-btn-secondary {
+  background: transparent;
+  color: var(--orthodox-maroon);
+  border: 2px solid var(--orthodox-maroon);
+  font-family: var(--font-orthodox-header);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.orthodox-btn-secondary:hover {
+  background: var(--orthodox-maroon);
+  color: var(--orthodox-cream);
+}
+
+.orthodox-btn-gold {
+  background: linear-gradient(135deg, var(--orthodox-gold), #d4b961);
+  color: var(--orthodox-maroon);
+  border: 1px solid var(--orthodox-gold);
+  font-family: var(--font-orthodox-decorative);
+  font-weight: 400;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.orthodox-btn-gold:hover {
+  background: linear-gradient(135deg, #d4b961, var(--orthodox-gold));
+  box-shadow: 0 4px 12px rgba(200, 169, 81, 0.4);
+}
+
+/* Orthodox Form Elements */
+.orthodox-input {
+  font-family: var(--font-orthodox-serif);
+  border: 2px solid var(--orthodox-border-light);
+  border-radius: 4px;
+  padding: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.orthodox-input:focus {
+  border-color: var(--orthodox-gold);
+  box-shadow: 0 0 0 3px rgba(200, 169, 81, 0.1);
+  outline: none;
+}
+
+.orthodox-select {
+  font-family: var(--font-orthodox-serif);
+  border: 2px solid var(--orthodox-border-light);
+  border-radius: 4px;
+  background: var(--orthodox-card-light);
+}
+
+/* Orthodox Badges/Chips */
+.orthodox-badge {
+  background: var(--orthodox-deep-green);
+  color: var(--orthodox-cream);
+  font-family: var(--font-orthodox-header);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.orthodox-badge.confidence-high {
+  background: var(--orthodox-deep-green);
+}
+
+.orthodox-badge.confidence-medium {
+  background: var(--orthodox-gold);
+  color: var(--orthodox-maroon);
+}
+
+.orthodox-badge.confidence-low {
+  background: var(--orthodox-maroon);
+}
+
+.orthodox-badge.required {
+  background: var(--orthodox-maroon);
+  animation: pulse 2s infinite;
+}
+
+/* Orthodox Modal/Dialog */
+.orthodox-modal {
+  background: var(--orthodox-card-light);
+  border: 3px solid var(--orthodox-gold);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(138, 3, 3, 0.2);
+}
+
+.orthodox-modal-header {
+  background: linear-gradient(135deg, var(--orthodox-maroon), #a11e1e);
+  color: var(--orthodox-cream);
+  font-family: var(--font-orthodox-header);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: capitalize;
+  padding: 1.5rem;
+  border-radius: 9px 9px 0 0;
+  margin: -3px -3px 0 -3px;
+}
+
+/* Dark Theme Support */
+[data-theme="dark"],
+.orthodox-app[data-theme="dark"] {
+  --orthodox-bg-light: var(--orthodox-bg-dark);
+  --orthodox-card-light: var(--orthodox-card-dark);
+  --orthodox-border-light: var(--orthodox-border-dark);
+}
+
+[data-theme="dark"] .ocr-preview-text,
+.orthodox-app[data-theme="dark"] .ocr-preview-text {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .record-body,
+.orthodox-app[data-theme="dark"] .record-body {
+  color: #cbd5e0;
+}
+
+[data-theme="dark"] .orthodox-input,
+.orthodox-app[data-theme="dark"] .orthodox-input {
+  background: var(--orthodox-card-dark);
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .orthodox-select,
+.orthodox-app[data-theme="dark"] .orthodox-select {
+  background: var(--orthodox-card-dark);
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .orthodox-app h1,
+[data-theme="dark"] .orthodox-app h2,
+[data-theme="dark"] .orthodox-app h3,
+[data-theme="dark"] .orthodox-app h4,
+[data-theme="dark"] .orthodox-app h5,
+[data-theme="dark"] .orthodox-app h6 {
+  color: var(--orthodox-cream);
+}
+
+[data-theme="dark"] .orthodox-app {
+  color: #cbd5e0;
+}
+
+/* Animation for sacred elements */
+@keyframes orthodox-glow {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(200, 169, 81, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(200, 169, 81, 0.6);
+  }
+}
+
+.orthodox-sacred {
+  animation: orthodox-glow 3s ease-in-out infinite;
+}
+
+/* Utility Classes for Easy Font Application */
+.font-orthodox-primary { font-family: var(--font-primary) !important; }
+.font-orthodox-headings { font-family: var(--font-headings) !important; }
+.font-orthodox-decorative { font-family: var(--font-decorative) !important; }
+.font-orthodox-body { font-family: var(--font-body) !important; }
+.font-orthodox-special { font-family: var(--font-special) !important; }
+.font-orthodox-greek { font-family: var(--font-orthodox-greek) !important; }
+.font-orthodox-cyrillic { font-family: var(--font-orthodox-cyrillic) !important; }
+.font-orthodox-slavic { font-family: var(--font-orthodox-slavic) !important; }
+
+/* Color utility classes */
+.text-orthodox-maroon { color: var(--orthodox-maroon) !important; }
+.text-orthodox-gold { color: var(--orthodox-gold) !important; }
+.text-orthodox-green { color: var(--orthodox-deep-green) !important; }
+.text-orthodox-cream { color: var(--orthodox-cream) !important; }
+.text-orthodox-blue { color: var(--orthodox-deep-blue) !important; }
+
+.bg-orthodox-maroon { background-color: var(--orthodox-maroon) !important; }
+.bg-orthodox-gold { background-color: var(--orthodox-gold) !important; }
+.bg-orthodox-green { background-color: var(--orthodox-deep-green) !important; }
+.bg-orthodox-cream { background-color: var(--orthodox-cream) !important; }
+.bg-orthodox-blue { background-color: var(--orthodox-deep-blue) !important; }
+
+/* Border utility classes */
+.border-orthodox-maroon { border-color: var(--orthodox-maroon) !important; }
+.border-orthodox-gold { border-color: var(--orthodox-gold) !important; }
+.border-orthodox-green { border-color: var(--orthodox-deep-green) !important; }
+
+/* Orthodox spacing and sizing utilities */
+.orthodox-letter-spacing { letter-spacing: 0.05em; }
+.orthodox-letter-spacing-wide { letter-spacing: 0.1em; }
+.orthodox-letter-spacing-wider { letter-spacing: 0.15em; }
+
+.orthodox-line-height { line-height: 1.6; }
+.orthodox-line-height-relaxed { line-height: 1.7; }
+.orthodox-line-height-loose { line-height: 1.8; }
+
+/* Responsive font sizing */
+@media (max-width: 768px) {
+  .certificate-title.large {
+    font-size: 2rem;
+  }
+  
+  .record-header.large {
+    font-size: 1.5rem;
+  }
+  
+  .ocr-preview-text.large {
+    font-size: 1rem;
+  }
+}
+
+/* AG Grid Orthodox Theme Overrides */
+.ag-theme-orthodox .ag-header {
+  background: var(--orthodox-maroon);
+  color: var(--orthodox-cream);
+  font-family: var(--font-orthodox-header);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.ag-theme-orthodox .ag-header-cell-text {
+  font-family: var(--font-orthodox-header);
+}
+
+.ag-theme-orthodox .ag-cell {
+  font-family: var(--font-orthodox-serif);
+  border-right: 1px solid var(--orthodox-border-light);
+}
+
+.ag-theme-orthodox .ag-row-even {
+  background: var(--orthodox-bg-light);
+}
+
+.ag-theme-orthodox .ag-row-odd {
+  background: var(--orthodox-card-light);
+}
+
+.ag-theme-orthodox .ag-row:hover {
+  background: rgba(200, 169, 81, 0.1);
+}
+
+/* Orthodox confidence score styling in AG Grid */
+.ag-theme-orthodox .confidence-high {
+  background: rgba(29, 68, 45, 0.1);
+  color: var(--orthodox-deep-green);
+  font-weight: 600;
+}
+
+.ag-theme-orthodox .confidence-medium {
+  background: rgba(200, 169, 81, 0.1);
+  color: #b8860b;
+  font-weight: 600;
+}
+
+.ag-theme-orthodox .confidence-low {
+  background: rgba(138, 3, 3, 0.1);
+  color: var(--orthodox-maroon);
+  font-weight: 600;
+}

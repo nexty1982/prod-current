@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Standard US Orthodox Parish Registry",
+    "success": false,
+    "confidence": 0,
+    "fieldsExtracted": 0,
+    "fields": {}
+  },
+  {
+    "name": "Mixed Language Registry (Greek-English)",
+    "success": false,
+    "confidence": 0,
+    "fieldsExtracted": 0,
+    "fields": {}
+  },
+  {
+    "name": "Space-Separated Registry (No Pipes)",
+    "success": false,
+    "confidence": 0,
+    "fieldsExtracted": 0,
+    "fields": {}
+  },
+  {
+    "name": "Reception into Orthodox Church",
+    "success": false,
+    "confidence": 0,
+    "fieldsExtracted": 0,
+    "fields": {}
+  },
+  {
+    "name": "Traditional Serbian Registry Format",
+    "success": false,
+    "confidence": 0,
+    "fieldsExtracted": 0,
+    "fields": {}
+  }
+]

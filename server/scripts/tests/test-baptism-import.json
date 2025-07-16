@@ -1,0 +1,26 @@
+[
+  {
+    "person_name": "Dimitrios Kostas",
+    "date_performed": "2024-09-09",
+    "priest_name": "Fr. Nicholas",
+    "notes": "Sample baptism record 1 for testing import functionality",
+    "parents": "Parent1 and Parent2 Kostas",
+    "godparents": "Godparent1 and Godparent2 Petrov"
+  },
+  {
+    "person_name": "Maria Petrov",
+    "date_performed": "2024-03-14",
+    "priest_name": "Fr. Michael",
+    "notes": "Sample baptism record 2 for testing import functionality",
+    "parents": "Parent1 and Parent2 Petrov",
+    "godparents": "Godparent1 and Godparent2 Nikolaou"
+  },
+  {
+    "person_name": "George Nikolaou",
+    "date_performed": "2024-02-02",
+    "priest_name": "Fr. George",
+    "notes": "Sample baptism record 3 for testing import functionality",
+    "parents": "Parent1 and Parent2 Nikolaou",
+    "godparents": "Godparent1 and Godparent2 Stavros"
+  }
+]

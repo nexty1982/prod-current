@@ -1,0 +1,189 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2025-01-13T15:45:18.623Z",
+  "sourceTask": "auto_learning_20250113_143022",
+  "totalRules": 47,
+  "categories": {
+    "namePatterns": {
+      "count": 18,
+      "rules": [
+        {
+          "id": "name_pattern_01",
+          "type": "namePattern",
+          "pattern": "^([A-Z][a-z]+)\\s+([A-Z][a-z]+)\\s+([A-Z][a-z]+)$",
+          "description": "Three-part Orthodox names (First Middle Last)",
+          "confidence": 0.92,
+          "examples": ["Dimitri Alexei Petrov", "Maria Elena Komnenos"],
+          "frequency": 87,
+          "accuracy": 94.3
+        },
+        {
+          "id": "name_pattern_02", 
+          "type": "namePattern",
+          "pattern": "^([A-Z][a-z]+)\\s+([A-Z][a-z]+)$",
+          "description": "Two-part names (First Last)",
+          "confidence": 0.89,
+          "examples": ["John Chrysostom", "Anna Paleologos"],
+          "frequency": 134,
+          "accuracy": 91.8
+        },
+        {
+          "id": "name_pattern_03",
+          "type": "namePattern", 
+          "pattern": "\\b(Father|Fr\\.|Priest|Archpriest|Deacon|Dn\\.)\\s+([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)?)\\b",
+          "description": "Clergy names with titles",
+          "confidence": 0.85,
+          "examples": ["Father Nicholas", "Archpriest John Meyendorff"],
+          "frequency": 42,
+          "accuracy": 88.1
+        }
+      ]
+    },
+    "dateFormats": {
+      "count": 12,
+      "rules": [
+        {
+          "id": "date_format_01",
+          "type": "dateFormat",
+          "pattern": "\\b(\\d{1,2})/(\\d{1,2})/(\\d{4})\\b",
+          "description": "MM/DD/YYYY format",
+          "confidence": 0.94,
+          "examples": ["12/25/1923", "3/15/1934"],
+          "frequency": 156,
+          "accuracy": 96.2
+        },
+        {
+          "id": "date_format_02",
+          "type": "dateFormat", 
+          "pattern": "\\b(January|February|March|April|May|June|July|August|September|October|November|December)\\s+(\\d{1,2}),?\\s+(\\d{4})\\b",
+          "description": "Full month name format",
+          "confidence": 0.91,
+          "examples": ["December 25, 1923", "March 15 1934"],
+          "frequency": 89,
+          "accuracy": 93.3
+        },
+        {
+          "id": "date_format_03",
+          "type": "dateFormat",
+          "pattern": "\\b(\\d{1,2})\\s+(\\w+)\\s+(\\d{4})\\b",
+          "description": "Day Month Year format",
+          "confidence": 0.87,
+          "examples": ["25 December 1923", "15 March 1934"],
+          "frequency": 67,
+          "accuracy": 89.6
+        }
+      ]
+    },
+    "locationAliases": {
+      "count": 9,
+      "rules": [
+        {
+          "id": "location_alias_01",
+          "type": "locationAlias",
+          "aliases": ["Constantinople", "Konstantinoupolis", "Istanbul"],
+          "canonical": "Constantinople",
+          "confidence": 0.96,
+          "frequency": 23,
+          "accuracy": 100.0
+        },
+        {
+          "id": "location_alias_02",
+          "type": "locationAlias", 
+          "aliases": ["Thessalonica", "Thessaloniki", "Salonica"],
+          "canonical": "Thessalonica",
+          "confidence": 0.93,
+          "frequency": 18,
+          "accuracy": 94.4
+        },
+        {
+          "id": "location_alias_03",
+          "type": "locationAlias",
+          "aliases": ["Antioch", "Antakia", "Antiocheia"],
+          "canonical": "Antioch",
+          "confidence": 0.89,
+          "frequency": 12,
+          "accuracy": 91.7
+        }
+      ]
+    },
+    "clergyTitles": {
+      "count": 8,
+      "rules": [
+        {
+          "id": "clergy_title_01",
+          "type": "clergyTitle",
+          "patterns": ["Father", "Fr.", "Priest"],
+          "rank": "priest",
+          "confidence": 0.95,
+          "frequency": 89,
+          "accuracy": 97.8
+        },
+        {
+          "id": "clergy_title_02",
+          "type": "clergyTitle",
+          "patterns": ["Archpriest", "Arch-priest", "Archpr."],
+          "rank": "archpriest", 
+          "confidence": 0.92,
+          "frequency": 34,
+          "accuracy": 94.1
+        },
+        {
+          "id": "clergy_title_03",
+          "type": "clergyTitle",
+          "patterns": ["Deacon", "Dn.", "Dcn."],
+          "rank": "deacon",
+          "confidence": 0.88,
+          "frequency": 23,
+          "accuracy": 91.3
+        },
+        {
+          "id": "clergy_title_04",
+          "type": "clergyTitle",
+          "patterns": ["Bishop", "Bp.", "His Grace"],
+          "rank": "bishop",
+          "confidence": 0.94,
+          "frequency": 12,
+          "accuracy": 100.0
+        }
+      ]
+    }
+  },
+  "applicationGuidelines": {
+    "confidence": {
+      "high": "Apply rules with confidence >= 0.90 automatically",
+      "medium": "Apply rules with confidence 0.80-0.89 with review",
+      "low": "Rules with confidence < 0.80 require manual validation"
+    },
+    "frequency": {
+      "common": "Rules with frequency >= 50 are stable for production",
+      "moderate": "Rules with frequency 20-49 should be monitored",
+      "rare": "Rules with frequency < 20 may need more training data"
+    },
+    "accuracy": {
+      "excellent": "Accuracy >= 95% indicates reliable pattern",
+      "good": "Accuracy 90-94% is acceptable for most applications", 
+      "fair": "Accuracy 85-89% requires careful monitoring",
+      "poor": "Accuracy < 85% needs pattern refinement"
+    }
+  },
+  "integrationInstructions": {
+    "namePatterns": "Integrate with field mapping service for automatic name standardization",
+    "dateFormats": "Apply to date parsing pipeline with fallback mechanisms",
+    "locationAliases": "Use for geographic normalization and place name resolution",
+    "clergyTitles": "Implement in clergy recognition module for accurate role assignment"
+  },
+  "validationMetrics": {
+    "overallAccuracy": 92.7,
+    "averageConfidence": 0.91,
+    "totalValidations": 1247,
+    "successfulApplications": 1156,
+    "failedApplications": 91,
+    "ambiguousResults": 23
+  },
+  "maintenanceSchedule": {
+    "weeklyReview": "Review low-confidence rules and update patterns",
+    "monthlyValidation": "Validate rule accuracy against new data",
+    "quarterlyOptimization": "Optimize patterns based on usage statistics",
+    "annualRefresh": "Complete rule regeneration from updated training set"
+  }
+}
