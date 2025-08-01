@@ -1,0 +1,120 @@
+{
+  "id": "38eda846537e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/config/db-scripts.js",
+  "relativePath": "server/config/db-scripts.js",
+  "name": "db-scripts.js",
+  "extension": ".js",
+  "size": 6483,
+  "modified": "2025-07-22T15:38:25.801Z",
+  "created": "2025-07-22T15:06:28.711Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 183,
+      "characters": 6447,
+      "words": 658
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 10
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 7,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 15,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 15,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 16,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 16,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 17,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 17,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 18,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 18,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 178,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// server/config/db-scripts.js\r\n// Database configuration specifically for debug scripts and utilities\r\nconst mysql = require('mysql2/promise');\r\nconst path = require('path');\r\n\r\n// Load environment variables\r\nconst envFile = process.env.[REDACTED] === 'production'\r\n  ? '../.env.production'\r\n  : '../.env.development';\r\nrequire('dotenv').config({ path: path.resolve(__dirname, envFile) });\r\n\r\n// Script-specific database configuration\r\n// Uses a dedicated script user or fallback to main app credentials\r\nconst scriptDbConfig = {\r\n  host: process.env.[REDACTED] || process.env.[REDACTED] || 'localhost',\r\n  user: process.env.[REDACTED] || process.env.[REDACTED] || 'orthoapps',\r\n  password: process.env.[REDACTED] || process.env.[REDACTED] || 'Summerof1982@!',\r\n  database: process.env.[REDACTED] || process.env.[REDACTED] || 'orthodoxmetrics_db',\r\n  connectTimeout: 30000,\r\n  acquireTimeout: 30000,\r\n  waitForConnections: true,\r\n  connectionLimit: 5, // Fewer connections for scripts\r\n  queueLimit: 0,\r\n  charset: 'utf8mb4',\r\n  // Additional options for script reliability\r\n  autoReconnect: true,\r\n  reconnectDelay: 2000,\r\n  // Disable SSL for local development scripts\r\n  ssl: false\r\n};\r\n\r\nconsole.log('📊 Script Database Config:');\r\nconsole.log(`   Host: ${scriptDbConfig.host}`);\r\nconsole.log(`   User: ${scriptDbConfig.user}`);\r\nconsole.log(`   Database: ${scriptDbConfig.database}`);\r\nconsole.log(`   Connection: ${scriptDbConfig.connectionLimit} max connections`);\r\n\r\nconst scriptPool = mysql.createPool(scriptDbConfig);\r\n\r\n// Simple query logging for scripts (less verbose)\r\nfunction logScriptQuery(sql, params) {\r\n  const timestamp = new Date().toISOString().split('T')[1].split('.')[0];\r\n  if (params && params.length) {\r\n    console.log(`[${timestamp}] 🔍 ${sql.substring(0, 60)}${sql.length > 60 ? '...' : ''}`);\r\n    if (params.length <= 5) {\r\n      console.log(`[${timestamp}] 📋 Params: [${params.join(', ')}]`);\r\n    } else {\r\n      console.log(`[${timestamp}] 📋 Params: [${params.slice(0, 3).join(', ')}, ... +${params.length - 3} more]`);\r\n    }\r\n  } else {\r\n    console.log(`[${timestamp}] 🔍 ${sql}`);\r\n  }\r\n}\r\n\r\n// Override query methods with script-friendly logging\r\nconst origQuery = scriptPool.query.bind(scriptPool);\r\nscriptPool.query = async function(sql, params) {\r\n  logScriptQuery(sql, params);\r\n  try {\r\n    return await origQuery(sql, params);\r\n  } catch (error) {\r\n    console.error(`❌ Query failed: ${error.message}`);\r\n    throw error;\r\n  }\r\n};\r\n\r\nconst origExecute = scriptPool.execute.bind(scriptPool);\r\nscriptPool.execute = async function(sql, params) {\r\n  logScriptQuery(sql, params);\r\n  try {\r\n    return await origExecute(sql, params);\r\n  } catch (error) {\r\n    console.error(`❌ Execute failed: ${error.message}`);\r\n    throw error;\r\n  }\r\n};\r\n\r\n// Script-specific helper functions\r\nconst scriptHelpers = {\r\n  // Test connection with detailed error info\r\n  testConnection: async () => {\r\n    try {\r\n      console.log('🔍 Testing database connection...');\r\n      const [rows] = await scriptPool.query('SELECT 1 as test, NOW() as current_time, USER() as current_user, DATABASE() as current_db');\r\n      const result = rows[0];\r\n      console.log('✅ Database connection successful!');\r\n      console.log(`   Current Time: ${result.current_time}`);\r\n      console.log(`   Current User: ${result.current_user}`);\r\n      console.log(`   Current DB: ${result.current_db}`);\r\n      return { success: true, message: 'Database connection successful', details: result };\r\n    } catch (error) {\r\n      console.error('❌ Database connection failed!');\r\n      console.error(`   Error: ${error.message}`);\r\n      console.error(`   Code: ${error.code}`);\r\n      console.error(`   SQL State: ${error.sqlState}`);\r\n      return { success: false, message: `Database connection failed: ${error.message}`, error };\r\n    }\r\n  },\r\n\r\n  // Get basic database info\r\n  getDatabaseInfo: async () => {\r\n    try {\r\n      const [tables] = await scriptPool.query(\"SHOW TABLES\");\r\n      const [userInfo] = await scriptPool.query(\"SELECT USER() as user, DATABASE() as database, @@version as version\");\r\n      \r\n      return {\r\n        success: true,\r\n        info: {\r\n          user: userInfo[0].user,\r\n          database: userInfo[0].database,\r\n          version: userInfo[0].version,\r\n          tables: tables.map(row => Object.values(row)[0]),\r\n          tableCount: tables.length\r\n        }\r\n      };\r\n    } catch (error) {\r\n      return { success: false, error: error.message };\r\n    }\r\n  },\r\n\r\n  // Safe query execution with error handling\r\n  safeQuery: async (sql, params = []) => {\r\n    try {\r\n      const [rows] = await scriptPool.execute(sql, params);\r\n      return { success: true, data: rows };\r\n    } catch (error) {\r\n      console.error(`❌ Safe query failed: ${error.message}`);\r\n      return { success: false, error: error.message, sqlState: error.sqlState };\r\n    }\r\n  },\r\n\r\n  // Check if a table exists\r\n  tableExists: async (tableName) => {\r\n    try {\r\n      const [rows] = await scriptPool.execute(\r\n        \"SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?\",\r\n        [tableName]\r\n      );\r\n      return rows[0].count > 0;\r\n    } catch (error) {\r\n      console.error(`❌ Error checking table ${tableName}: ${error.message}`);\r\n      return false;\r\n    }\r\n  },\r\n\r\n  // Close the connection pool (important for scripts)\r\n  close: async () => {\r\n    try {\r\n      console.log('🔌 Closing script database connections...');\r\n      await scriptPool.end();\r\n      console.log('✅ Database connections closed');\r\n    } catch (error) {\r\n      console.error('❌ Error closing database connections:', error.message);\r\n    }\r\n  }\r\n};\r\n\r\n// Export the script pool and helpers\r\nmodule.exports = {\r\n  promisePool: scriptPool,\r\n  ...scriptHelpers\r\n};\r\n\r\n// Handle script termination gracefully\r\nprocess.on('SIGINT', async () => {\r\n  console.log('\\n🛑 Script interrupted, closing database connections...');\r\n  await scriptHelpers.close();\r\n  process.exit(0);\r\n});\r\n\r\nprocess.on('SIGTERM', async () => {\r\n  console.log('\\n🛑 Script terminated, closing database connections...');\r\n  await scriptHelpers.close();\r\n  process.exit(0);\r\n});\r\n\r\n// Test connection on import (optional, can be disabled)\r\nif (process.env.[REDACTED] !== 'false') {\r\n  scriptHelpers.testConnection().catch(err => {\r\n    console.error('❌ Initial database test failed:', err.message);\r\n  });\r\n} \r\n"
+    },
+    "complexity": {
+      "totalLines": 183,
+      "codeLines": 147,
+      "commentLines": 18,
+      "commentRatio": 0.10909090909090909,
+      "averageLineLength": 37.83030303030303
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.538Z"
+  },
+  "contentHash": "a2b323a79b9cc023f0fc3442e470bbed5915ee9e8bade209a58d9c2a4ae883c1",
+  "discoveredAt": "2025-07-28T07:19:59.538Z"
+}

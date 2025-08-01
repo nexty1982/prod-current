@@ -20,49 +20,172 @@ async function fetchOCASaints(date) {
   try {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
+    const dateKey = `${month}-${day}`;
     
-    const response = await axios.get(`https://www.oca.org/saints/lives/${date.getFullYear()}/${month}/${day}`, {
-      timeout: 5000,
-      headers: {
-        'User-Agent': 'Orthodox Church Management System'
-      }
-    });
-
-    // This is a simplified version - in production you'd parse the HTML response
-    // For now, return some sample saints
-    return [
+    // Sample saints data for different dates
+    const saintsData = {
+      '07-01': [{ name: "St. Cosmas and Damian", description: "Unmercenary healers", type: "martyr" }],
+      '07-02': [{ name: "St. Juvenal of Jerusalem", description: "Patriarch of Jerusalem", type: "bishop" }],
+      '07-03': [{ name: "St. Hyacinth of Caesarea", description: "Martyr", type: "martyr" }],
+      '07-04': [{ name: "St. Andrew of Crete", description: "Archbishop and hymnographer", type: "bishop" }],
+      '07-05': [{ name: "St. Athanasius of Athos", description: "Founder of monasticism on Mount Athos", type: "monk" }],
+      '07-06': [{ name: "St. Sisoes the Great", description: "Desert father", type: "monk" }],
+      '07-07': [{ name: "St. Thomas of Mount Maleon", description: "Hermit", type: "monk" }],
+      '07-08': [{ name: "St. Procopius the Great Martyr", description: "Martyr under Diocletian", type: "martyr" }],
+      '07-09': [{ name: "St. Pancratius of Taormina", description: "Bishop and martyr", type: "bishop" }],
+      '07-10': [{ name: "St. Anthony of the Kiev Caves", description: "Father of Russian monasticism", type: "monk" }],
+      '07-11': [{ name: "St. Euphemia the Great Martyr", description: "Great martyr of Chalcedon", type: "martyr" }],
+      '07-12': [{ name: "Sts. Peter and Paul", description: "Chief apostles", type: "apostle" }],
+      '07-13': [{ name: "St. Gabriel the Archangel", description: "Synaxis of the Archangel Gabriel", type: "angel" }],
+      '07-14': [{ name: "St. Aquila the Apostle", description: "One of the Seventy", type: "apostle" }],
+      '07-15': [{ name: "St. Vladimir Equal-to-the-Apostles", description: "Baptizer of Russia", type: "king" }],
+      '07-16': [{ name: "St. Athenogenes", description: "Bishop and martyr", type: "bishop" }],
+      '07-17': [{ name: "St. Marina the Great Martyr", description: "Virgin martyr", type: "martyr" }],
+      '07-18': [{ name: "St. Pambo of Nitria", description: "Desert father", type: "monk" }],
+      '07-19': [{ name: "St. Macrina the Younger", description: "Sister of St. Basil", type: "nun" }],
+      '07-20': [{ name: "Prophet Elijah", description: "The Tishbite", type: "prophet" }],
+      '07-21': [{ name: "St. Symeon the Fool-for-Christ", description: "Fool for Christ", type: "fool" }],
+      '07-22': [{ name: "St. Mary Magdalene", description: "Myrrhbearer", type: "myrrhbearer" }],
+      '07-23': [{ name: "St. Phocas the Gardener", description: "Martyr and gardener", type: "martyr" }],
+      '07-24': [{ name: "St. Christina the Great Martyr", description: "Virgin martyr", type: "martyr" }],
+      '07-25': [{ name: "St. Anna", description: "Mother of the Theotokos", type: "righteous" }],
+      '07-26': [{ name: "St. Paraskeva of Rome", description: "Martyr", type: "martyr" }],
+      '07-27': [{ name: "St. Panteleimon the Great Martyr", description: "Unmercenary healer", type: "martyr" }],
+      '07-28': [{ name: "Sts. Prochorus, Nicanor, Timon and Parmenas", description: "Of the Seventy", type: "apostle" }],
+      '07-29': [{ name: "St. Callinicus of Cilicia", description: "Martyr", type: "martyr" }],
+      '07-30': [{ name: "St. Silas the Apostle", description: "Of the Seventy", type: "apostle" }],
+      '07-31': [{ name: "St. Eudocimus the Righteous", description: "Of Cappadocia", type: "righteous" }]
+    };
+    
+    // Return saints for the specific date, or a default saint if not found
+    const daysSaints = saintsData[dateKey] || [
       {
-        name: "St. Euphemia the Great Martyr",
-        description: "Holy martyr who suffered for the faith",
-        type: "martyr",
-        source: "oca"
+        name: "Various Saints",
+        description: "Commemorated on this day",
+        type: "various"
       }
     ];
+    
+    return daysSaints.map(saint => ({
+      ...saint,
+      source: "local_data"
+    }));
+    
   } catch (error) {
-    console.error('Error fetching OCA saints:', error);
-    return [];
+    console.error('Error fetching saints data:', error);
+    return [{
+      name: "Various Saints",
+      description: "Commemorated on this day",
+      type: "various",
+      source: "fallback"
+    }];
   }
 }
 
 // Get liturgical readings for the date
 function getLiturgicalReadings(date) {
-  // Simplified readings - in production you'd have a proper lectionary
-  const readings = {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const dateKey = `${month}-${day}`;
+  
+  // Sample readings for different dates in July
+  const readingsData = {
+    '07-20': { epistle: "1 Kings 19:9-16", gospel: "Luke 4:22-30" }, // Prophet Elijah
+    '07-22': { epistle: "1 Corinthians 9:2-12", gospel: "Luke 8:1-3" }, // Mary Magdalene
+    '07-24': { epistle: "2 Corinthians 6:1-10", gospel: "Matthew 13:44-54" }, // St. Christina
+    '07-27': { epistle: "James 5:10-20", gospel: "Luke 6:17-23" }, // St. Panteleimon
+    '07-25': { epistle: "Galatians 4:22-31", gospel: "Luke 8:16-21" }, // St. Anna
+    '07-15': { epistle: "1 Corinthians 4:9-16", gospel: "Matthew 9:9-13" }, // St. Vladimir
+    '07-17': { epistle: "2 Corinthians 6:1-10", gospel: "Mark 5:24-34" }, // St. Marina
+  };
+  
+  // Default readings for ordinary days
+  const defaultReadings = {
     epistle: "2 Corinthians 11:21-33",
     gospel: "Matthew 16:13-19"
   };
   
-  return readings;
+  return readingsData[dateKey] || defaultReadings;
 }
 
 // Get liturgical season and tone
 function getLiturgicalInfo(date) {
-  // Simplified liturgical calculation
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const dateKey = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  
+  // Special days with specific colors
+  const specialDays = {
+    '07-20': { season: "Feast of Prophet Elijah", tone: "Tone 6", liturgicalColor: "gold" },
+    '07-22': { season: "Mary Magdalene", tone: "Tone 6", liturgicalColor: "red" },
+    '07-24': { season: "St. Christina", tone: "Tone 6", liturgicalColor: "red" },
+    '07-25': { season: "St. Anna", tone: "Tone 6", liturgicalColor: "blue" },
+    '07-27': { season: "St. Panteleimon", tone: "Tone 6", liturgicalColor: "red" },
+    '07-15': { season: "St. Vladimir", tone: "Tone 6", liturgicalColor: "gold" },
+    '07-17': { season: "St. Marina", tone: "Tone 6", liturgicalColor: "red" }
+  };
+  
+  // Calculate tone based on date (simplified calculation for July 2025)
+  const weekOfYear = Math.floor((day + 181) / 7); // Approximate week since start of year
+  const tone = ((weekOfYear - 1) % 8) + 1;
+  
+  // Check for special days first
+  if (specialDays[dateKey]) {
+    return specialDays[dateKey];
+  }
+  
+  // Default for ordinary time
   return {
     season: "Ordinary Time",
-    tone: "Tone 2",
+    tone: `Tone ${tone}`,
     liturgicalColor: "green"
   };
+}
+
+// Helper functions for local data
+async function getLocalCommemorations(date) {
+  try {
+    const [rows] = await promisePool.query(`
+      SELECT * FROM local_commemorations 
+      WHERE (DATE(date) = ? OR recurring = TRUE) AND active = TRUE
+      ORDER BY liturgical_rank DESC, name
+    `, [date.toISOString().split('T')[0]]);
+    
+    return rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      type: row.commemoration_type,
+      description: row.description || '',
+      rank: row.liturgical_rank,
+      color: row.liturgical_color
+    }));
+  } catch (error) {
+    console.error('Error fetching local commemorations:', error);
+    return [];
+  }
+}
+
+async function getParishEvents(date) {
+  try {
+    const [rows] = await promisePool.query(`
+      SELECT * FROM parish_events 
+      WHERE (DATE(event_date) = ? OR recurring = TRUE) AND active = TRUE
+      ORDER BY start_time
+    `, [date.toISOString().split('T')[0]]);
+    
+    return rows.map(row => ({
+      id: row.id,
+      title: row.title,
+      description: row.description || '',
+      startTime: row.start_time,
+      endTime: row.end_time,
+      location: row.location,
+      type: row.event_type
+    }));
+  } catch (error) {
+    console.error('Error fetching parish events:', error);
+    return [];
+  }
 }
 
 /**
@@ -162,7 +285,9 @@ router.get('/month/:year/:month', async (req, res) => {
   }
 });
 
-module.exports = router;
+// Helper functions for database operations
+const { promisePool } = require('../config/db');
+
 async function getUserPreferences(userId) {
   try {
     const [rows] = await promisePool.query(`
@@ -891,6 +1016,156 @@ router.get('/events', async (req, res) => {
   } catch (error) {
     console.error('Error fetching parish events:', error);
     res.status(500).json({ error: 'Failed to fetch parish events' });
+  }
+});
+
+// ===== FRONTEND COMPATIBILITY ROUTES =====
+// These routes match what the frontend liturgicalService expects
+
+// Get liturgical calendar data for a specific year and language
+router.get('/:language/:year', async (req, res) => {
+  try {
+    const { language, year } = req.params;
+    const { type = 'revised_julian' } = req.query;
+    
+    // Generate liturgical days for the entire year
+    const yearData = [];
+    const currentYear = parseInt(year);
+    
+    for (let month = 0; month < 12; month++) {
+      const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, month, day);
+        const liturgicalInfo = getLiturgicalInfo(date);
+        const saints = await fetchOCASaints(date);
+        const readings = getLiturgicalReadings(date);
+        
+        yearData.push({
+          date: date.toISOString().split('T')[0],
+          gregorianDate: date.toISOString().split('T')[0],
+          liturgicalDate: date.toISOString().split('T')[0], // Simplified
+          weekday: date.getDay(),
+          feasts: [], // Simplified - no complex feast calculation
+          saints: saints,
+          readings: readings,
+          fastingLevel: 0, // Simplified
+          liturgicalColor: liturgicalInfo.liturgicalColor,
+          season: liturgicalInfo.season,
+          tone: liturgicalInfo.tone,
+          isHoliday: false,
+          isSunday: date.getDay() === 0,
+          paschalDistance: 0, // Simplified
+          language: language,
+          calendarType: type
+        });
+      }
+    }
+    
+    res.json(yearData);
+  } catch (error) {
+    console.error('Error fetching liturgical calendar by year:', error);
+    res.status(500).json({ error: 'Failed to fetch liturgical calendar data' });
+  }
+});
+
+// Get saints by date
+router.get('/saints', async (req, res) => {
+  try {
+    const { date, lang = 'en' } = req.query;
+    const requestedDate = new Date(date);
+    const saints = await fetchOCASaints(requestedDate);
+    res.json(saints);
+  } catch (error) {
+    console.error('Error fetching saints by date:', error);
+    res.status(500).json({ error: 'Failed to fetch saints' });
+  }
+});
+
+// Get feasts by date
+router.get('/feasts', async (req, res) => {
+  try {
+    const { date, lang = 'en' } = req.query;
+    // Simplified feast data
+    res.json([]);
+  } catch (error) {
+    console.error('Error fetching feasts by date:', error);
+    res.status(500).json({ error: 'Failed to fetch feasts' });
+  }
+});
+
+// Get fasting status for a date
+router.get('/fasting', async (req, res) => {
+  try {
+    const { date } = req.query;
+    // Simplified fasting data
+    res.json([]);
+  } catch (error) {
+    console.error('Error fetching fasting status:', error);
+    res.status(500).json({ error: 'Failed to fetch fasting status' });
+  }
+});
+
+// Get liturgical season
+router.get('/season', async (req, res) => {
+  try {
+    const { lang = 'en' } = req.query;
+    const today = new Date();
+    const liturgicalInfo = getLiturgicalInfo(today);
+    res.json(liturgicalInfo);
+  } catch (error) {
+    console.error('Error fetching liturgical season:', error);
+    res.status(500).json({ error: 'Failed to fetch liturgical season' });
+  }
+});
+
+// Get liturgical readings for a date
+router.get('/readings', async (req, res) => {
+  try {
+    const { date, lang = 'en' } = req.query;
+    const requestedDate = new Date(date);
+    const readings = getLiturgicalReadings(requestedDate);
+    res.json([readings]);
+  } catch (error) {
+    console.error('Error fetching liturgical readings:', error);
+    res.status(500).json({ error: 'Failed to fetch readings' });
+  }
+});
+
+// Get church events for a date range
+router.get('/events/:churchId', async (req, res) => {
+  try {
+    const { churchId } = req.params;
+    const { start_date, end_date } = req.query;
+    // Simplified church events - would connect to church database in production
+    res.json([]);
+  } catch (error) {
+    console.error('Error fetching church events:', error);
+    res.status(500).json({ error: 'Failed to fetch church events' });
+  }
+});
+
+// Search saints by name
+router.get('/saints/search', async (req, res) => {
+  try {
+    const { q, lang = 'en', limit = 10 } = req.query;
+    // Simplified search - would implement full-text search in production
+    res.json([]);
+  } catch (error) {
+    console.error('Error searching saints:', error);
+    res.status(500).json({ error: 'Failed to search saints' });
+  }
+});
+
+// Search feasts by name
+router.get('/feasts/search', async (req, res) => {
+  try {
+    const { q, lang = 'en', limit = 10 } = req.query;
+    // Simplified search - would implement full-text search in production
+    res.json([]);
+  } catch (error) {
+    console.error('Error searching feasts:', error);
+    res.status(500).json({ error: 'Failed to search feasts' });
   }
 });
 

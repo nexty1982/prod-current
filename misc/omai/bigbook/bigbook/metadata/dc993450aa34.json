@@ -1,0 +1,43 @@
+{
+  "id": "dc993450aa34",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/SYSTEM_ARCHITECTURE.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/SYSTEM_ARCHITECTURE.md",
+  "name": "SYSTEM_ARCHITECTURE.md",
+  "extension": ".md",
+  "size": 11948,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:07.244Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 307,
+      "characters": 10658,
+      "words": 1212
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 307,
+      "codeLines": 206,
+      "commentLines": 50,
+      "commentRatio": 0.1953125,
+      "averageLineLength": 40.23828125
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.227Z"
+  },
+  "contentHash": "b27db671b995d0001fe58a0f8cd40f472fcbdec461d58bf585b0222c97b4afac",
+  "discoveredAt": "2025-07-28T07:19:58.227Z"
+}

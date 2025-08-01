@@ -1,0 +1,43 @@
+{
+  "id": "748420085d77",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/tsconfig.node.json",
+  "relativePath": "front-end/tsconfig.node.json",
+  "name": "tsconfig.node.json",
+  "extension": ".json",
+  "size": 223,
+  "modified": "2025-04-30T05:42:45.000Z",
+  "created": "2025-07-05T02:28:22.412Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 11,
+      "characters": 223,
+      "words": 17
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 11,
+      "codeLines": 10,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 21.3
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.962Z"
+  },
+  "contentHash": "6ec602b8aa146888c76f0b41ca3515f91f95919f6e6417a4670decaba8fcb982",
+  "discoveredAt": "2025-07-28T07:19:58.962Z"
+}

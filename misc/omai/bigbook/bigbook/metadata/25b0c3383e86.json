@@ -1,0 +1,54 @@
+{
+  "id": "25b0c3383e86",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-useauth-conflict.js",
+  "relativePath": "server/debug/fix-useauth-conflict.js",
+  "name": "fix-useauth-conflict.js",
+  "extension": ".js",
+  "size": 2325,
+  "modified": "2025-07-22T03:58:17.786Z",
+  "created": "2025-07-22T03:58:17.786Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 56,
+      "characters": 2303,
+      "words": 232
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 56,
+      "codeLines": 40,
+      "commentLines": 5,
+      "commentRatio": 0.1111111111111111,
+      "averageLineLength": 49.577777777777776
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.176Z"
+  },
+  "contentHash": "0d9acd5e19abcd9747ed9884115dc36f76ee383565b95410717f46998940dbbe",
+  "discoveredAt": "2025-07-28T07:20:00.176Z"
+}

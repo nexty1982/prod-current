@@ -1,0 +1,43 @@
+{
+  "id": "bbcc6053f068",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-users-schema.sh",
+  "relativePath": "server/debug/check-users-schema.sh",
+  "name": "check-users-schema.sh",
+  "extension": ".sh",
+  "size": 634,
+  "modified": "2025-07-22T12:58:06.031Z",
+  "created": "2025-07-22T12:58:04.330Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 19,
+      "characters": 632,
+      "words": 96
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 19,
+      "codeLines": 14,
+      "commentLines": 1,
+      "commentRatio": 0.06666666666666667,
+      "averageLineLength": 40.93333333333333
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.087Z"
+  },
+  "contentHash": "7258637029ae1b0d5bd48b2da83115b37cf8a1c644a42a8cba312c57d02ba3e6",
+  "discoveredAt": "2025-07-28T07:20:00.087Z"
+}

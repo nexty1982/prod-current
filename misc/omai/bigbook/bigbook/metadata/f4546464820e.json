@@ -1,0 +1,43 @@
+{
+  "id": "f4546464820e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/orthodoxmetrics-js-arsenal.md",
+  "relativePath": "orthodoxmetrics-js-arsenal.md",
+  "name": "orthodoxmetrics-js-arsenal.md",
+  "extension": ".md",
+  "size": 35313,
+  "modified": "2025-07-22T19:16:54.312Z",
+  "created": "2025-07-24T22:00:58.439Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 945,
+      "characters": 35301,
+      "words": 4031
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 945,
+      "codeLines": 541,
+      "commentLines": 188,
+      "commentRatio": 0.2578875171467764,
+      "averageLineLength": 46.832647462277095
+    },
+    "lastAnalyzed": "2025-07-26T04:17:10.274Z"
+  },
+  "contentHash": "6ff35d4bb8321e55d8abf9d80f4cbef480d84bfb321b0bf28ce867bd0a07f72f",
+  "discoveredAt": "2025-07-26T04:17:10.274Z"
+}

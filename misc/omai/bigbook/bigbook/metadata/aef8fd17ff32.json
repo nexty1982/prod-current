@@ -1,0 +1,43 @@
+{
+  "id": "aef8fd17ff32",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/pages/omb/sample-icons.ts",
+  "relativePath": "front-end/src/pages/omb/sample-icons.ts",
+  "name": "sample-icons.ts",
+  "extension": ".ts",
+  "size": 3701,
+  "modified": "2025-07-25T00:13:02.861Z",
+  "created": "2025-07-25T00:12:57.898Z",
+  "classification": {
+    "type": "Other",
+    "category": "Uncategorized",
+    "confidence": 0
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 165,
+      "characters": 3701,
+      "words": 362
+    },
+    "classification": {
+      "type": "Other",
+      "category": "Uncategorized",
+      "confidence": 0
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 165,
+      "codeLines": 164,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 21.5609756097561
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.878Z"
+  },
+  "contentHash": "f2c7c1534ec7b479c3cc5a6febfce486b8314ccc9a6df27c28b8ed08b7521991",
+  "discoveredAt": "2025-07-28T07:19:58.878Z"
+}

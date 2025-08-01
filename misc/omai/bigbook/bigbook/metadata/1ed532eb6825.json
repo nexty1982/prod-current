@@ -1,0 +1,56 @@
+{
+  "id": "1ed532eb6825",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/99fa08f8a982.json",
+  "relativePath": "bigbook/metadata/99fa08f8a982.json",
+  "name": "99fa08f8a982.json",
+  "extension": ".json",
+  "size": 6737,
+  "modified": "2025-07-26T04:17:10.958Z",
+  "created": "2025-07-26T04:17:10.958Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 56,
+      "characters": 6695,
+      "words": 541
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 43
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 43,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"99fa08f8a982\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/legacy/phase0-fix-entities-column.js\",\n  \"relativePath\": \"server/legacy/phase0-fix-entities-column.js\",\n  \"name\": \"phase0-fix-entities-column.js\",\n  \"extension\": \".js\",\n  \"size\": 4940,\n  \"modified\": \"2025-07-24T14:51:40.484Z\",\n  \"created\": \"2025-07-24T14:51:40.484Z\",\n  \"classification\": {\n    \"type\": \"Troubleshooting Utilities\",\n    \"category\": \"Diagnostic Tools\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 127,\n      \"characters\": 4898,\n      \"words\": 439\n    },\n    \"classification\": {\n      \"type\": \"Troubleshooting Utilities\",\n      \"category\": \"Diagnostic Tools\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"mysql2/promise\",\n        \"line\": 8\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 13,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"/**\\r\\n * Phase 0: Fix Missing Extracted Entities Column in OCR Jobs Table\\r\\n * \\r\\n * The OCR processing service is trying to access extracted_entities column\\r\\n * that doesn't exist. This script adds the missing column.\\r\\n */\\r\\n\\r\\nconst mysql = require('mysql2/promise');\\r\\n\\r\\nconst DB_CONFIG = {\\r\\n    host: 'localhost',\\r\\n    user: 'orthodoxapps',\\r\\n    password: '[REDACTED]',\\r\\n    database: 'saints_peter_and_paul_orthodox_church_db'\\r\\n};\\r\\n\\r\\nasync function fixExtractedEntitiesColumn() {\\r\\n    console.log('🔧 Phase 0: Fixing missing extracted_entities column in OCR jobs table...');\\r\\n    \\r\\n    let connection;\\r\\n    try {\\r\\n        connection = await mysql.createConnection(DB_CONFIG);\\r\\n        console.log('✅ Connected to OCR database');\\r\\n\\r\\n        // Check current table structure\\r\\n        console.log('\\\\n📋 Checking current ocr_jobs table structure...');\\r\\n        const [columns] = await connection.execute(`\\r\\n            SHOW COLUMNS FROM ocr_jobs\\r\\n        `);\\r\\n        \\r\\n        const existingColumns = columns.map(col => col.Field);\\r\\n        console.log('📋 Current column count:', existingColumns.length);\\r\\n\\r\\n        // Add missing extracted_entities column\\r\\n        const columnsToAdd = [\\r\\n            {\\r\\n                name: 'extracted_entities',\\r\\n                definition: 'JSON NULL COMMENT \\\"Extracted entities from AI processing\\\"'\\r\\n            },\\r\\n            {\\r\\n                name: 'entity_confidence',\\r\\n                definition: 'DECIMAL(3,2) NULL COMMENT \\\"Entity extraction confidence score 0.00-1.00\\\"'\\r\\n            },\\r\\n            {\\r\\n                name: 'needs_review',\\r\\n                definition: 'BOOLEAN DEFAULT TRUE COMMENT \\\"Whether the OCR result needs manual review\\\"'\\r\\n            },\\r\\n            {\\r\\n                name: 'detected_language',\\r\\n                definition: 'VARCHAR(10) NULL COMMENT \\\"Detected language code\\\"'\\r\\n            }\\r\\n        ];\\r\\n\\r\\n        for (const column of columnsToAdd) {\\r\\n            if (!existingColumns.includes(column.name)) {\\r\\n                console.log(`\\\\n➕ Adding missing column: ${column.name}`);\\r\\n                await connection.execute(`\\r\\n                    ALTER TABLE ocr_jobs \\r\\n                    ADD COLUMN ${column.name} ${column.definition}\\r\\n                `);\\r\\n                console.log(`✅ Added column: ${column.name}`);\\r\\n            } else {\\r\\n                console.log(`✅ Column already exists: ${column.name}`);\\r\\n            }\\r\\n        }\\r\\n\\r\\n        // Verify the fix by checking the table structure again\\r\\n        console.log('\\\\n📋 Verifying updated table structure...');\\r\\n        const [updatedColumns] = await connection.execute(`\\r\\n            SHOW COLUMNS FROM ocr_jobs\\r\\n        `);\\r\\n        \\r\\n        const finalColumns = updatedColumns.map(col => col.Field);\\r\\n        console.log('📋 Final column count:', finalColumns.length);\\r\\n        console.log('📋 New columns added:', finalColumns.filter(col => !existingColumns.includes(col)));\\r\\n\\r\\n        // Check if all required columns are now present\\r\\n        const requiredColumns = ['extracted_entities', 'entity_confidence', 'needs_review', 'detected_language'];\\r\\n        const missingColumns = requiredColumns.filter(col => !finalColumns.includes(col));\\r\\n\\r\\n        if (missingColumns.length === 0) {\\r\\n            console.log('\\\\n🎉 SUCCESS: All required columns are now present!');\\r\\n            requiredColumns.forEach(col => {\\r\\n                console.log(`✅ ${col}: FOUND`);\\r\\n            });\\r\\n        } else {\\r\\n            console.log('\\\\n❌ ERROR: Some columns are still missing:', missingColumns);\\r\\n        }\\r\\n\\r\\n        // Test the OCR job query that was failing\\r\\n        console.log('\\\\n🧪 Testing the extracted_entities query...');\\r\\n        try {\\r\\n            const [testResult] = await connection.execute(`\\r\\n                SELECT COUNT(*) as count \\r\\n                FROM ocr_jobs \\r\\n                WHERE status = 'complete' \\r\\n                AND extracted_entities IS NOT NULL\\r\\n                AND JSON_LENGTH(extracted_entities) > 0\\r\\n            `);\\r\\n            console.log(`✅ Query test passed! Found ${testResult[0].count} jobs with extracted entities`);\\r\\n        } catch (error) {\\r\\n            console.log(`❌ Query test failed: ${error.message}`);\\r\\n        }\\r\\n\\r\\n    } catch (error) {\\r\\n        console.error('❌ Error fixing extracted_entities column:', error.message);\\r\\n        throw error;\\r\\n    } finally {\\r\\n        if (connection) {\\r\\n            await connection.end();\\r\\n            console.log('🔌 Database connection closed');\\r\\n        }\\r\\n    }\\r\\n}\\r\\n\\r\\n// Run the fix\\r\\nfixExtractedEntitiesColumn()\\r\\n    .then(() => {\\r\\n        console.log('\\\\n🎯 Phase 0 Extracted Entities Fix Complete!');\\r\\n        console.log('📝 Next: Re-run OCR status check to verify everything works');\\r\\n        process.exit(0);\\r\\n    })\\r\\n    .catch((error) => {\\r\\n        console.error('\\\\n💥 Phase 0 Extracted Entities Fix Failed:', error.message);\\r\\n        process.exit(1);\\r\\n    });\\r\\n\"\n    },\n    \"complexity\": {\n      \"totalLines\": 127,\n      \"codeLines\": 99,\n      \"commentLines\": 12,\n      \"commentRatio\": 0.10810810810810811,\n      \"averageLineLength\": 42.67567567567568\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:10.959Z\"\n  },\n  \"contentHash\": \"1d2626d6275079a422f669bb9f1b7880492bb4305f2ade4643f8ada8fc57ba55\",\n  \"discoveredAt\": \"2025-07-26T04:17:10.959Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 56,
+      "codeLines": 56,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 118.57142857142857
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.251Z"
+  },
+  "contentHash": "8f2161c7c3e4894176f6fdf33fe38a6be0586e09b540549b4699e52bad4ee019",
+  "discoveredAt": "2025-07-28T07:19:57.251Z"
+}

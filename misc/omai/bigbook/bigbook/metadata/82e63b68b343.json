@@ -1,0 +1,43 @@
+{
+  "id": "82e63b68b343",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-notifications-system-v2.sql",
+  "relativePath": "server/debug/fix-notifications-system-v2.sql",
+  "name": "fix-notifications-system-v2.sql",
+  "extension": ".sql",
+  "size": 4645,
+  "modified": "2025-07-26T20:59:27.296Z",
+  "created": "2025-07-26T20:59:26.067Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 118,
+      "characters": 4645,
+      "words": 534
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 118,
+      "codeLines": 107,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 42.21495327102804
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.146Z"
+  },
+  "contentHash": "2b87451176f1e2daa766a3ee1a72c2f8b711280f1fd71b01b1d45e4c225f6a37",
+  "discoveredAt": "2025-07-28T07:20:00.146Z"
+}

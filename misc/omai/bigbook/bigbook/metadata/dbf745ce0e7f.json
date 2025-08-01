@@ -1,0 +1,43 @@
+{
+  "id": "dbf745ce0e7f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/diagnose-api-v2.sh",
+  "relativePath": "server/scripts/diagnose-api-v2.sh",
+  "name": "diagnose-api-v2.sh",
+  "extension": ".sh",
+  "size": 6580,
+  "modified": "2025-07-22T07:54:33.270Z",
+  "created": "2025-07-22T07:54:31.597Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 217,
+      "characters": 6514,
+      "words": 842
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 217,
+      "codeLines": 159,
+      "commentLines": 22,
+      "commentRatio": 0.12154696132596685,
+      "averageLineLength": 34.530386740331494
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.028Z"
+  },
+  "contentHash": "08b08240fbf3127afbdbf9b2eef7202709ae9d7b86e2e010dbc31cc68914683f",
+  "discoveredAt": "2025-07-28T07:20:01.028Z"
+}

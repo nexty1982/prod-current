@@ -1,0 +1,78 @@
+{
+  "id": "63f3506c677a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/setup/phase1-complete.js",
+  "relativePath": "server/setup/phase1-complete.js",
+  "name": "phase1-complete.js",
+  "extension": ".js",
+  "size": 11650,
+  "modified": "2025-07-24T14:51:40.516Z",
+  "created": "2025-07-24T14:51:40.516Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 283,
+      "characters": 11502,
+      "words": 1113
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 9
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 10
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 39,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 66,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 160,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Phase 1: Database Schema & Core Infrastructure - COMPLETION SCRIPT\r\n * Final step: Verify all Phase 1 components and update todo.md\r\n */\r\n\r\nconst mysql = require('mysql2/promise');\r\nconst fs = require('fs').promises;\r\nconst path = require('path');\r\n\r\nasync function completePhase1() {\r\n  try {\r\n    console.log('🏁 PHASE 1 - COMPLETION: Verifying all components...');\r\n    console.log('================================================================================');\r\n    \r\n    const results = {\r\n      databases: { verified: false, details: {} },\r\n      tables: { created: false, count: 0 },\r\n      interfaces: { created: false, files: [] },\r\n      utilities: { created: false, files: [] },\r\n      sampleData: { created: false, count: 0 }\r\n    };\r\n    \r\n    // 1. Verify database connections\r\n    console.log('🔍 Step 1: Verifying database connections...');\r\n    try {\r\n      const databases = [\r\n        { name: 'orthodoxmetrics_db', tested: false },\r\n        { name: 'ssppoc_records_db', tested: false },\r\n        { name: 'saints_peter_and_paul_orthodox_church_db', tested: false }\r\n      ];\r\n      \r\n      for (const db of databases) {\r\n        try {\r\n          const connection = await mysql.createConnection({\r\n            host: 'localhost',\r\n            user: 'orthodoxapps',\r\n            password: '[REDACTED]',\r\n            database: db.name\r\n          });\r\n          \r\n          await connection.execute('SELECT 1');\r\n          await connection.end();\r\n          \r\n          db.tested = true;\r\n          console.log(`   ✅ ${db.name}: Connected`);\r\n        } catch (error) {\r\n          console.log(`   ❌ ${db.name}: ${error.message}`);\r\n        }\r\n      }\r\n      \r\n      results.databases.verified = databases.every(db => db.tested);\r\n      results.databases.details = databases;\r\n      \r\n    } catch (error) {\r\n      console.log(`   ❌ Database verification failed: ${error.message}`);\r\n    }\r\n    \r\n    // 2. Verify OCR tables in Records DB\r\n    console.log('\\n🔍 Step 2: Verifying OCR tables...');\r\n    try {\r\n      const connection = await mysql.createConnection({\r\n        host: 'localhost',\r\n        user: 'orthodoxapps',\r\n        password: '[REDACTED]',\r\n        database: 'ssppoc_records_db'\r\n      });\r\n      \r\n      const requiredTables = [\r\n        'ocr_field_configurations',\r\n        'ocr_processing_log',\r\n        'ocr_review_queue', \r\n        'ocr_job_transfers'\r\n      ];\r\n      \r\n      let tablesFound = 0;\r\n      \r\n      for (const tableName of requiredTables) {\r\n        const [rows] = await connection.query(\r\n          `SELECT COUNT(*) as count FROM information_schema.tables \r\n           WHERE table_schema = 'ssppoc_records_db' AND table_name = ?`,\r\n          [tableName]\r\n        );\r\n        \r\n        if (rows[0].count > 0) {\r\n          console.log(`   ✅ ${tableName}: Exists`);\r\n          tablesFound++;\r\n        } else {\r\n          console.log(`   ❌ ${tableName}: Missing`);\r\n        }\r\n      }\r\n      \r\n      results.tables.created = tablesFound === requiredTables.length;\r\n      results.tables.count = tablesFound;\r\n      \r\n      await connection.end();\r\n      \r\n    } catch (error) {\r\n      console.log(`   ❌ Table verification failed: ${error.message}`);\r\n    }\r\n    \r\n    // 3. Verify TypeScript interfaces\r\n    console.log('\\n🔍 Step 3: Verifying TypeScript interfaces...');\r\n    try {\r\n      const typesDir = path.join(__dirname, '..', 'types');\r\n      const expectedFiles = ['ocrTypes.ts', 'ocrUtils.ts'];\r\n      \r\n      for (const fileName of expectedFiles) {\r\n        const filePath = path.join(typesDir, fileName);\r\n        try {\r\n          await fs.access(filePath);\r\n          console.log(`   ✅ ${fileName}: Created`);\r\n          results.interfaces.files.push(fileName);\r\n        } catch {\r\n          console.log(`   ❌ ${fileName}: Missing`);\r\n        }\r\n      }\r\n      \r\n      results.interfaces.created = results.interfaces.files.length === expectedFiles.length;\r\n      \r\n    } catch (error) {\r\n      console.log(`   ❌ Interface verification failed: ${error.message}`);\r\n    }\r\n    \r\n    // 4. Verify database utilities\r\n    console.log('\\n🔍 Step 4: Verifying database utilities...');\r\n    try {\r\n      const utilsDir = path.join(__dirname, '..', 'utils');\r\n      const servicesDir = path.join(__dirname, '..', 'services');\r\n      \r\n      const expectedFiles = [\r\n        { dir: utilsDir, file: 'dbConnections.ts' },\r\n        { dir: servicesDir, file: 'fieldConfigService.ts' }\r\n      ];\r\n      \r\n      for (const { dir, file } of expectedFiles) {\r\n        const filePath = path.join(dir, file);\r\n        try {\r\n          await fs.access(filePath);\r\n          console.log(`   ✅ ${file}: Created`);\r\n          results.utilities.files.push(file);\r\n        } catch {\r\n          console.log(`   ❌ ${file}: Missing`);\r\n        }\r\n      }\r\n      \r\n      results.utilities.created = results.utilities.files.length === expectedFiles.length;\r\n      \r\n    } catch (error) {\r\n      console.log(`   ❌ Utilities verification failed: ${error.message}`);\r\n    }\r\n    \r\n    // 5. Verify sample data\r\n    console.log('\\n🔍 Step 5: Verifying sample field configuration...');\r\n    try {\r\n      const connection = await mysql.createConnection({\r\n        host: 'localhost',\r\n        user: 'orthodoxapps',\r\n        password: '[REDACTED]',\r\n        database: 'ssppoc_records_db'\r\n      });\r\n      \r\n      const [rows] = await connection.query(\r\n        'SELECT COUNT(*) as count FROM ocr_field_configurations WHERE church_id = 14'\r\n      );\r\n      \r\n      results.sampleData.count = rows[0].count;\r\n      results.sampleData.created = rows[0].count > 0;\r\n      \r\n      if (results.sampleData.created) {\r\n        console.log(`   ✅ Sample field configurations: ${rows[0].count} found`);\r\n      } else {\r\n        console.log('   ❌ No sample field configurations found');\r\n      }\r\n      \r\n      await connection.end();\r\n      \r\n    } catch (error) {\r\n      console.log(`   ❌ Sample data verification failed: ${error.message}`);\r\n    }\r\n    \r\n    // 6. Generate Phase 1 completion report\r\n    console.log('\\n📊 PHASE 1 COMPLETION REPORT:');\r\n    console.log('================================================================================');\r\n    \r\n    const overallSuccess = results.databases.verified && \r\n                          results.tables.created && \r\n                          results.interfaces.created && \r\n                          results.utilities.created;\r\n    \r\n    console.log(`🔌 Database Connections: ${results.databases.verified ? '✅ ALL WORKING' : '❌ FAILED'}`);\r\n    console.log(`🗄️  OCR Tables Created: ${results.tables.created ? '✅ ALL CREATED' : '❌ INCOMPLETE'} (${results.tables.count}/4)`);\r\n    console.log(`📝 TypeScript Interfaces: ${results.interfaces.created ? '✅ CREATED' : '❌ MISSING'} (${results.interfaces.files.length}/2)`);\r\n    console.log(`🔧 Database Utilities: ${results.utilities.created ? '✅ CREATED' : '❌ MISSING'} (${results.utilities.files.length}/2)`);\r\n    console.log(`🌱 Sample Data: ${results.sampleData.created ? '✅ CREATED' : '❌ MISSING'} (${results.sampleData.count} configs)`);\r\n    \r\n    if (overallSuccess) {\r\n      console.log('\\n🎉 PHASE 1 COMPLETE! ✅✅✅✅✅');\r\n      console.log('🚀 Ready to proceed to Phase 2: OCR Transfer & Field Mapping Services');\r\n      \r\n      // Update todo.md to mark Phase 1 as complete\r\n      try {\r\n        const todoPath = path.join(__dirname, '..', '..', 'todo.md');\r\n        let todoContent = await fs.readFile(todoPath, 'utf8');\r\n        \r\n        // Mark Phase 1 tasks as complete\r\n        const phase1Updates = [\r\n          { from: '- [ ] Verify `ssppoc_records_db` database exists and is accessible', to: '- [✅] Verify `ssppoc_records_db` database exists and is accessible' },\r\n          { from: '- [ ] Create `ocr_field_configurations` table schema in `ssppoc_records_db`', to: '- [✅] Create `ocr_field_configurations` table schema in `ssppoc_records_db`' },\r\n          { from: '- [ ] Create `ocr_processing_log` table schema in `ssppoc_records_db`', to: '- [✅] Create `ocr_processing_log` table schema in `ssppoc_records_db`' },\r\n          { from: '- [ ] Create `ocr_review_queue` table in `ssppoc_records_db`', to: '- [✅] Create `ocr_review_queue` table in `ssppoc_records_db`' },\r\n          { from: '- [ ] Create `ocr_job_transfers` tracking table in `ssppoc_records_db`', to: '- [✅] Create `ocr_job_transfers` tracking table in `ssppoc_records_db`' },\r\n          { from: '- [ ] Define TypeScript interface for `FieldConfig`', to: '- [✅] Define TypeScript interface for `FieldConfig`' },\r\n          { from: '- [ ] Define TypeScript interfaces for OCR mapping types', to: '- [✅] Define TypeScript interfaces for OCR mapping types' },\r\n          { from: '- [ ] Create database migration scripts for Records DB', to: '- [✅] Create database migration scripts for Records DB' },\r\n          { from: '- [ ] Set up cross-database connection utilities (orthodoxmetrics_db ↔ ssppoc_records_db)', to: '- [✅] Set up cross-database connection utilities (orthodoxmetrics_db ↔ ssppoc_records_db)' }\r\n        ];\r\n        \r\n        phase1Updates.forEach(update => {\r\n          todoContent = todoContent.replace(update.from, update.to);\r\n        });\r\n        \r\n        // Add Phase 1 completion summary\r\n        const phase1Summary = `\r\n**🎉 PHASE 1: COMPLETE - Database Schema & Core Infrastructure!** 🚀\r\n- [✅] All 3 databases verified and accessible\r\n- [✅] 4/4 OCR tables created in ssppoc_records_db\r\n- [✅] TypeScript interfaces and utilities created\r\n- [✅] Sample field configuration for church 14 (baptism records)\r\n- [✅] Cross-database connection utilities implemented\r\n- [✅] Field configuration service created\r\n- [✅] **READY FOR PHASE 2!** 🎯\r\n\r\n`;\r\n        \r\n        // Insert after the Phase 1 section\r\n        todoContent = todoContent.replace(\r\n          '**PHASE 1: Database Schema & Core Infrastructure**',\r\n          '**PHASE 1: Database Schema & Core Infrastructure**' + phase1Summary\r\n        );\r\n        \r\n        await fs.writeFile(todoPath, todoContent);\r\n        console.log('📝 Updated todo.md with Phase 1 completion status');\r\n        \r\n      } catch (error) {\r\n        console.log(`⚠️  Could not update todo.md: ${error.message}`);\r\n      }\r\n      \r\n    } else {\r\n      console.log('\\n❌ PHASE 1 INCOMPLETE - Some components failed');\r\n      console.log('📋 Review the errors above and re-run the failed scripts');\r\n    }\r\n    \r\n    console.log('\\n📁 Generated Files Summary:');\r\n    console.log('   Database Schema:');\r\n    console.log('   - server/scripts/phase1-*.js (4 setup scripts)');\r\n    console.log('   TypeScript Interfaces:');\r\n    console.log('   - server/types/ocrTypes.ts');\r\n    console.log('   - server/types/ocrUtils.ts');\r\n    console.log('   Database Utilities:');\r\n    console.log('   - server/utils/dbConnections.ts');\r\n    console.log('   - server/services/fieldConfigService.ts');\r\n    \r\n    console.log('\\n🎯 Next Steps:');\r\n    if (overallSuccess) {\r\n      console.log('   Run: node server/scripts/phase2-create-transfer-service.js');\r\n    } else {\r\n      console.log('   Fix any failed components above');\r\n      console.log('   Re-run the individual phase1-*.js scripts as needed');\r\n    }\r\n    \r\n    console.log('================================================================================');\r\n    \r\n  } catch (error) {\r\n    console.error('❌ Phase 1 completion check failed:', error.message);\r\n    process.exit(1);\r\n  }\r\n}\r\n\r\n// Run completion check\r\ncompletePhase1().catch(console.error);\r\n"
+    },
+    "complexity": {
+      "totalLines": 283,
+      "codeLines": 214,
+      "commentLines": 17,
+      "commentRatio": 0.0735930735930736,
+      "averageLineLength": 47.18181818181818
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.136Z"
+  },
+  "contentHash": "49fa52b4d4f84f8f2e3fa571de94f84c21308d8fc27efba9929bfe1aec9883ac",
+  "discoveredAt": "2025-07-28T07:20:01.136Z"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "ea6311e4819c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/utils/arrayUtils.ts",
+  "relativePath": "front-end/src/utils/arrayUtils.ts",
+  "name": "arrayUtils.ts",
+  "extension": ".ts",
+  "size": 3642,
+  "modified": "2025-07-22T00:31:02.346Z",
+  "created": "2025-07-22T00:21:36.695Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 121,
+      "characters": 3642,
+      "words": 522
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 6
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 121,
+      "codeLines": 71,
+      "commentLines": 37,
+      "commentRatio": 0.3425925925925926,
+      "averageLineLength": 32.324074074074076
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.932Z"
+  },
+  "contentHash": "4be4dfd8f963288b4e421a03fe2f15095fe4931b76300eee85f1d70bcf568ec1",
+  "discoveredAt": "2025-07-28T07:19:58.932Z"
+}

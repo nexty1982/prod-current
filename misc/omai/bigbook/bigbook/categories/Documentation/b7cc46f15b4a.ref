@@ -1,0 +1,6 @@
+{
+  "id": "b7cc46f15b4a",
+  "name": "check-backend-logs.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/check-backend-logs.sh",
+  "type": "Documentation"
+}

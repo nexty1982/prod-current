@@ -1,0 +1,43 @@
+{
+  "id": "f3481c668c34",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/fix-church-id-inconsistencies.js",
+  "relativePath": "server/scripts/fix-church-id-inconsistencies.js",
+  "name": "fix-church-id-inconsistencies.js",
+  "extension": ".js",
+  "size": 2184,
+  "modified": "2025-07-21T17:55:03.249Z",
+  "created": "2025-07-21T17:53:05.320Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 60,
+      "characters": 2184,
+      "words": 228
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 60,
+      "codeLines": 49,
+      "commentLines": 6,
+      "commentRatio": 0.10909090909090909,
+      "averageLineLength": 38.54545454545455
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.039Z"
+  },
+  "contentHash": "7cff7e1c287e7b5086b6891a0200cb4a7e1a8f8b2824f2c3af4e412a64fdf844",
+  "discoveredAt": "2025-07-28T07:20:01.039Z"
+}

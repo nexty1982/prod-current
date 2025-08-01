@@ -1,0 +1,6 @@
+{
+  "id": "f3be7721b8fa",
+  "name": "church-setup-wizard-schema.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migrations/church-setup-wizard-schema.sql",
+  "type": "Database Scripts"
+}

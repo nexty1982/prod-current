@@ -7,7 +7,7 @@ const { promisePool } = require('../config/db');
 const router = express.Router();
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '../../public/uploads');
+const uploadsDir = path.join(__dirname, '../../misc/public/uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }

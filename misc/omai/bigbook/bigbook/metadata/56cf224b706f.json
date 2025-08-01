@@ -1,0 +1,43 @@
+{
+  "id": "56cf224b706f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/agents/omai-mediator.ts",
+  "relativePath": "services/om-ai/agents/omai-mediator.ts",
+  "name": "omai-mediator.ts",
+  "extension": ".ts",
+  "size": 17323,
+  "modified": "2025-07-25T02:41:31.745Z",
+  "created": "2025-07-25T02:41:30.316Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 543,
+      "characters": 17323,
+      "words": 1457
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 543,
+      "codeLines": 419,
+      "commentLines": 45,
+      "commentRatio": 0.09698275862068965,
+      "averageLineLength": 35.87931034482759
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.381Z"
+  },
+  "contentHash": "52d7c2080923c9e09399dd54d308d316ddfc124de319ed02c00433c4fc289c9c",
+  "discoveredAt": "2025-07-28T07:20:01.381Z"
+}

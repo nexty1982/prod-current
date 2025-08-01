@@ -1,0 +1,43 @@
+{
+  "id": "ec3ff66e48c6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/index.js",
+  "relativePath": "services/om-ai/index.js",
+  "name": "index.js",
+  "extension": ".js",
+  "size": 13336,
+  "modified": "2025-07-27T04:12:49.203Z",
+  "created": "2025-07-25T19:45:51.061Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 398,
+      "characters": 13304,
+      "words": 1434
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 398,
+      "codeLines": 276,
+      "commentLines": 42,
+      "commentRatio": 0.1320754716981132,
+      "averageLineLength": 39.965408805031444
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.462Z"
+  },
+  "contentHash": "9ec168096d57c2e07c6e9b79f058690c6fa0c732fe8766eeb03aaa80b15d4041",
+  "discoveredAt": "2025-07-28T07:20:01.462Z"
+}

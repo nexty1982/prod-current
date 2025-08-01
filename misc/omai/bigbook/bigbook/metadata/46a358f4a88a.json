@@ -1,0 +1,43 @@
+{
+  "id": "46a358f4a88a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/agents/types.ts",
+  "relativePath": "services/om-ai/agents/types.ts",
+  "name": "types.ts",
+  "extension": ".ts",
+  "size": 4222,
+  "modified": "2025-07-25T00:55:49.199Z",
+  "created": "2025-07-25T00:35:06.131Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 187,
+      "characters": 4222,
+      "words": 414
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 187,
+      "codeLines": 166,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 24.186746987951807
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.384Z"
+  },
+  "contentHash": "9dab934f3a6aef9010730b8c2e4e84edffd6d5fa9b9bf2fa54345db7e8665e3e",
+  "discoveredAt": "2025-07-28T07:20:01.384Z"
+}

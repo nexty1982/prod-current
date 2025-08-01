@@ -1,0 +1,6 @@
+{
+  "id": "e9dc4928f2d4",
+  "name": "install-nfs-client.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/install-nfs-client.sh",
+  "type": "Setup Scripts"
+}

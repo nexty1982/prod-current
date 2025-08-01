@@ -1,0 +1,59 @@
+{
+  "id": "9c6c3e87b4d5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/nlp/nlp-engine.ts",
+  "relativePath": "services/om-ai/nlp/nlp-engine.ts",
+  "name": "nlp-engine.ts",
+  "extension": ".ts",
+  "size": 14663,
+  "modified": "2025-07-25T01:59:08.640Z",
+  "created": "2025-07-25T01:59:07.344Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 520,
+      "characters": 14663,
+      "words": 1395
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 520,
+      "codeLines": 445,
+      "commentLines": 7,
+      "commentRatio": 0.015486725663716814,
+      "averageLineLength": 30.721238938053098
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.554Z"
+  },
+  "contentHash": "c4893dd6b6f71be5a5845510a57979d630edee0181526aa5c8580beb4df0396d",
+  "discoveredAt": "2025-07-28T07:20:01.554Z"
+}

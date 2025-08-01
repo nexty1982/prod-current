@@ -1,0 +1,49 @@
+{
+  "id": "1a919a84c0bf",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/OMAI_PHASE5_LIVE_CODE_GENERATION.md",
+  "relativePath": "docs/7-26-25/OMAI_PHASE5_LIVE_CODE_GENERATION.md",
+  "name": "OMAI_PHASE5_LIVE_CODE_GENERATION.md",
+  "extension": ".md",
+  "size": 12173,
+  "modified": "2025-07-25T00:31:31.606Z",
+  "created": "2025-07-25T00:31:30.339Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 438,
+      "characters": 12037,
+      "words": 1475
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 8
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 83
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 438,
+      "codeLines": 268,
+      "commentLines": 77,
+      "commentRatio": 0.22318840579710145,
+      "averageLineLength": 33.34782608695652
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.749Z"
+  },
+  "contentHash": "a643ebb05e3b887176299a72b8ff8cdca9a86fbc7691aca91869e6c1f4dbba88",
+  "discoveredAt": "2025-07-28T07:19:57.749Z"
+}

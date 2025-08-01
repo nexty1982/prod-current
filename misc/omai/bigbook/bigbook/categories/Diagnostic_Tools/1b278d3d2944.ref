@@ -1,0 +1,6 @@
+{
+  "id": "1b278d3d2944",
+  "name": "diagnose-jit-terminal-root-cause.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/diagnose-jit-terminal-root-cause.sh",
+  "type": "Troubleshooting Utilities"
+}

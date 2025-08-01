@@ -1,0 +1,43 @@
+{
+  "id": "8e64c5cf5267",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/controllers/autoLearningController.js",
+  "relativePath": "server/controllers/autoLearningController.js",
+  "name": "autoLearningController.js",
+  "extension": ".js",
+  "size": 11474,
+  "modified": "2025-07-15T06:06:31.030Z",
+  "created": "2025-07-15T05:57:48.464Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 439,
+      "characters": 11474,
+      "words": 1021
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 439,
+      "codeLines": 328,
+      "commentLines": 46,
+      "commentRatio": 0.12299465240641712,
+      "averageLineLength": 29.288770053475936
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.546Z"
+  },
+  "contentHash": "6127c77d568b06ec239ff9e9232214529e57c3aaa1f7e5fcd78f2e558fe4e0a8",
+  "discoveredAt": "2025-07-28T07:19:59.546Z"
+}

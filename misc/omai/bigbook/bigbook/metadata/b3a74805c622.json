@@ -1,0 +1,43 @@
+{
+  "id": "b3a74805c622",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/views/apps/calendar/EventData.ts",
+  "relativePath": "front-end/src/views/apps/calendar/EventData.ts",
+  "name": "EventData.ts",
+  "extension": ".ts",
+  "size": 1391,
+  "modified": "2025-04-30T05:42:45.000Z",
+  "created": "2025-07-05T02:28:50.064Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 65,
+      "characters": 1391,
+      "words": 209
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 65,
+      "codeLines": 61,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 21.704918032786885
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.954Z"
+  },
+  "contentHash": "056aedb287d999ffaf9ba63faf7ffa647380d58ba216055d90bf5dbf7e29bcb2",
+  "discoveredAt": "2025-07-28T07:19:58.954Z"
+}

@@ -1,6 +1,7 @@
 // server/utils/emailService.js
 const nodemailer = require('nodemailer');
 const path = require('path');
+const { getActiveEmailConfig } = require('../routes/settings');
 
 // Email templates
 const getOCRReceiptTemplate = (sessionInfo, results) => {
@@ -81,33 +82,76 @@ const getOCRReceiptTemplate = (sessionInfo, results) => {
   `;
 };
 
-// Create transporter
-const createTransporter = () => {
-  const config = {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.SMTP_PORT || 587,
-    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_USER || process.env.EMAIL_USER,
-      pass: process.env.SMTP_PASS || process.env.EMAIL_PASS,
-    },
-  };
+// Create transporter with dynamic configuration
+const createTransporter = async () => {
+  try {
+    // Try to get configuration from database first
+    const dbConfig = await getActiveEmailConfig();
+    
+    if (dbConfig) {
+      console.log(`📧 Using database email config: ${dbConfig.provider} (${dbConfig.smtp_host}:${dbConfig.smtp_port})`);
+      
+      const config = {
+        host: dbConfig.smtp_host,
+        port: dbConfig.smtp_port,
+        secure: dbConfig.smtp_secure,
+        auth: {
+          user: dbConfig.smtp_user,
+          pass: dbConfig.smtp_pass,
+        },
+      };
 
-  return nodemailer.createTransporter(config);
+      return nodemailer.createTransporter(config);
+    } else {
+      // Fallback to environment variables
+      console.log('📧 Using environment variable email config (fallback)');
+      
+      const config = {
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: process.env.SMTP_PORT || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER || process.env.EMAIL_USER,
+          pass: process.env.SMTP_PASS || process.env.EMAIL_PASS,
+        },
+      };
+
+      return nodemailer.createTransporter(config);
+    }
+  } catch (error) {
+    console.error('Failed to get email config from database, using environment variables:', error);
+    
+    const config = {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: process.env.SMTP_PORT || 587,
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER || process.env.EMAIL_USER,
+        pass: process.env.SMTP_PASS || process.env.EMAIL_PASS,
+      },
+    };
+
+    return nodemailer.createTransporter(config);
+  }
 };
 
 // Send OCR receipt email
 const sendOCRReceipt = async (sessionInfo, results, attachments = []) => {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     const { userEmail, sessionId, recordType } = sessionInfo;
 
     if (!userEmail) {
       throw new Error('No email address provided for receipt');
     }
 
+    // Get sender info from database config or fallback to environment
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'Orthodox Church Records';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
     const mailOptions = {
-      from: `"Orthodox Church Records" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`,
+      from: `"${senderName}" <${senderEmail}>`,
       to: userEmail,
       subject: `OCR Processing Complete - ${recordType.charAt(0).toUpperCase() + recordType.slice(1)} Record (${sessionId.substring(0, 8)})`,
       html: getOCRReceiptTemplate(sessionInfo, results),
@@ -137,7 +181,7 @@ const sendOCRReceipt = async (sessionInfo, results, attachments = []) => {
 // Send session verification email
 const sendSessionVerification = async (sessionInfo) => {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     const { userEmail, sessionId, pin, expiresAt, recordType } = sessionInfo;
 
     if (!userEmail) {
@@ -199,8 +243,13 @@ const sendSessionVerification = async (sessionInfo) => {
 </html>
     `;
 
+    // Get sender info from database config or fallback to environment
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'Orthodox Church Records';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
     const mailOptions = {
-      from: `"Orthodox Church Records" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`,
+      from: `"${senderName}" <${senderEmail}>`,
       to: userEmail,
       subject: `OCR Session Created - PIN: ${pin}`,
       html: verificationTemplate
@@ -325,9 +374,238 @@ const testEmailConfig = async () => {
   }
 };
 
+// OMAI Task Assignment Email Templates
+const getTaskAssignmentTemplate = (taskURL, email) => {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { background: #8c249d; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .button { 
+            display: inline-block; 
+            background: #8c249d; 
+            color: white; 
+            padding: 15px 30px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer { background: #f1f1f1; padding: 10px; text-align: center; font-size: 12px; }
+        .highlight { background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📝 Task Assignment Invitation</h1>
+        <p>Orthodox Metrics AI System</p>
+    </div>
+    
+    <div class="content">
+        <h2>Hello!</h2>
+        <p>You've been invited to assign tasks to Nick through the OMAI Task Assignment System.</p>
+        
+        <div class="highlight">
+            <h3>🎯 How it works:</h3>
+            <ul>
+                <li><strong>Click the link below</strong> to access your secure task form</li>
+                <li><strong>Add multiple tasks</strong> with titles, descriptions, and priorities</li>
+                <li><strong>Submit instantly</strong> - tasks are sent directly to Nick at next1452@gmail.com</li>
+                <li><strong>No account required</strong> - just use this secure link</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="${taskURL}" class="button">
+                📋 Assign Tasks to Nick
+            </a>
+        </div>
+        
+        <p><strong>Direct Link:</strong> <a href="${taskURL}">${taskURL}</a></p>
+        
+        <div class="highlight">
+            <h3>📋 Task Priorities Available:</h3>
+            <ul>
+                <li><strong>🔥 High Priority</strong> - Urgent tasks requiring immediate attention</li>
+                <li><strong>⚠️ Medium Priority</strong> - Standard tasks for regular workflow</li>
+                <li><strong>🧊 Low Priority</strong> - Nice-to-have tasks for when time permits</li>
+            </ul>
+        </div>
+        
+        <p><em>⏰ Note: This link expires in 30 days for security reasons.</em></p>
+        
+        <h3>Questions?</h3>
+        <p>If you have any questions about the task assignment system, please contact Nick directly at next1452@gmail.com.</p>
+    </div>
+    
+    <div class="footer">
+        <p>© 2025 Orthodox Metrics AI System</p>
+        <p>This is an automated message from OMAI.</p>
+        <p>Recipient: ${email}</p>
+    </div>
+</body>
+</html>
+  `;
+};
+
+const getTaskSubmissionTemplate = (fromEmail, tasks, submissionId) => {
+  const OMAIRequest = require('./OMAIRequest');
+  const tasksHTML = OMAIRequest.formatTasksForEmail(tasks);
+  
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { background: #8c249d; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .task-list { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .footer { background: #f1f1f1; padding: 10px; text-align: center; font-size: 12px; }
+        .metadata { background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .priority-high { border-left: 4px solid #ff4444; }
+        .priority-medium { border-left: 4px solid #ff9944; }
+        .priority-low { border-left: 4px solid #44ff44; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📬 New Task Assignment</h1>
+        <p>OMAI Task Assignment System</p>
+    </div>
+    
+    <div class="content">
+        <h2>Hi Nick!</h2>
+        <p>You have received ${tasks.length} new task${tasks.length > 1 ? 's' : ''} through the OMAI Task Assignment System.</p>
+        
+        <div class="metadata">
+            <h3>📋 Submission Details</h3>
+            <p><strong>From:</strong> ${fromEmail}</p>
+            <p><strong>Submission ID:</strong> #${submissionId}</p>
+            <p><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
+            <p><strong>Total Tasks:</strong> ${tasks.length}</p>
+        </div>
+
+        <div class="task-list">
+            <h3>🎯 Tasks Assigned:</h3>
+            ${tasksHTML}
+        </div>
+        
+        <h3>📊 Quick Summary:</h3>
+        <ul>
+            <li><strong>🔥 High Priority:</strong> ${tasks.filter(t => ['🔥', 'high'].includes(t.priority)).length} tasks</li>
+            <li><strong>⚠️ Medium Priority:</strong> ${tasks.filter(t => ['⚠️', 'medium'].includes(t.priority)).length} tasks</li>
+            <li><strong>🧊 Low Priority:</strong> ${tasks.filter(t => ['🧊', 'low'].includes(t.priority)).length} tasks</li>
+        </ul>
+        
+        <h3>Next Steps:</h3>
+        <ul>
+            <li>Review the task priorities and descriptions</li>
+            <li>Contact ${fromEmail} if you need clarification on any tasks</li>
+            <li>Add tasks to your preferred project management system</li>
+        </ul>
+        
+        <p><em>💡 Tip: You can reply directly to ${fromEmail} from this email to discuss the tasks.</em></p>
+    </div>
+    
+    <div class="footer">
+        <p>© 2025 Orthodox Metrics AI System</p>
+        <p>This task assignment was processed automatically by OMAI.</p>
+        <p>Submission ID: #${submissionId} | Generated: ${new Date().toISOString()}</p>
+    </div>
+</body>
+</html>
+  `;
+};
+
+// Send task assignment email
+const sendTaskAssignmentEmail = async (email, taskURL, token) => {
+  try {
+    const transporter = await createTransporter();
+    const htmlContent = getTaskAssignmentTemplate(taskURL, email);
+
+    // Get sender info from database config or fallback
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'OMAI Task System';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: email,
+      subject: '📝 Task Assignment Invitation - Orthodox Metrics AI',
+      html: htmlContent,
+      headers: {
+        'X-OMAI-Type': 'task-assignment',
+        'X-OMAI-Token': token.substring(0, 8) + '...',
+        'X-Priority': '1'
+      }
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Task assignment email sent to ${email}:`, info.messageId);
+    
+    return {
+      success: true,
+      messageId: info.messageId,
+      email: email
+    };
+  } catch (error) {
+    console.error(`❌ Failed to send task assignment email to ${email}:`, error);
+    throw error;
+  }
+};
+
+// Send task submission email to Nick
+const sendTaskSubmissionEmail = async (fromEmail, tasks, submissionId) => {
+  try {
+    const transporter = await createTransporter();
+    const htmlContent = getTaskSubmissionTemplate(fromEmail, tasks, submissionId);
+
+    // Get sender info from database config or fallback
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'OMAI Task System';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: 'next1452@gmail.com',
+      replyTo: fromEmail,
+      subject: `📬 New Task Assignment from ${fromEmail} (${tasks.length} tasks)`,
+      html: htmlContent,
+      headers: {
+        'X-OMAI-Type': 'task-submission',
+        'X-OMAI-Submission': submissionId,
+        'X-OMAI-From': fromEmail,
+        'X-OMAI-Task-Count': tasks.length,
+        'X-Priority': '1'
+      }
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Task submission email sent to Nick from ${fromEmail}:`, info.messageId);
+    
+    return {
+      success: true,
+      messageId: info.messageId,
+      from: fromEmail,
+      taskCount: tasks.length
+    };
+  } catch (error) {
+    console.error(`❌ Failed to send task submission email from ${fromEmail}:`, error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendOCRReceipt,
   sendSessionVerification,
   sendErrorNotification,
-  testEmailConfig
+  testEmailConfig,
+  sendTaskAssignmentEmail,
+  sendTaskSubmissionEmail
 };

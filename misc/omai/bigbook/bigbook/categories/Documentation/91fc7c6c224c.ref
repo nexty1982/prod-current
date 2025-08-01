@@ -1,0 +1,6 @@
+{
+  "id": "91fc7c6c224c",
+  "name": "switch-to-production.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/switch-to-production.sh",
+  "type": "Documentation"
+}

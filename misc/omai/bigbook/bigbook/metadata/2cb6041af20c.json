@@ -1,0 +1,72 @@
+{
+  "id": "2cb6041af20c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/admin/systemInfo.js",
+  "relativePath": "server/routes/admin/systemInfo.js",
+  "name": "systemInfo.js",
+  "extension": ".js",
+  "size": 4300,
+  "modified": "2025-07-13T20:40:35.634Z",
+  "created": "2025-07-13T20:37:22.841Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 122,
+      "characters": 4294,
+      "words": 369
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "os",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 87,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 116,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// server/routes/admin/systemInfo.js\r\nconst express = require('express');\r\nconst os = require('os');\r\nconst path = require('path');\r\nconst { promisePool } = require('../../config/db');\r\n\r\nconst router = express.Router();\r\n\r\n// Middleware to check if user is admin or super_admin\r\nconst checkRole = (allowedRoles) => {\r\n    return async (req, res, next) => {\r\n        try {\r\n            // Check if user is authenticated\r\n            if (!req.session?.user) {\r\n                return res.status(401).json({\r\n                    success: false,\r\n                    message: 'Authentication required'\r\n                });\r\n            }\r\n\r\n            const userRole = req.session.user.role;\r\n            \r\n            // Check if user has required role\r\n            if (!allowedRoles.includes(userRole)) {\r\n                return res.status(403).json({\r\n                    success: false,\r\n                    message: 'Insufficient privileges'\r\n                });\r\n            }\r\n\r\n            next();\r\n        } catch (error) {\r\n            console.error('Error in checkRole middleware:', error);\r\n            res.status(500).json({\r\n                success: false,\r\n                message: 'Internal server error'\r\n            });\r\n        }\r\n    };\r\n};\r\n\r\n// GET /api/admin/system-info - Get system information\r\nrouter.get('/system-info', checkRole(['super_admin', 'admin']), async (req, res) => {\r\n    try {\r\n        console.log('📊 Fetching system information...');\r\n\r\n        // Get package.json version\r\n        let version = 'Unknown';\r\n        try {\r\n            const packageJson = require('../../package.json');\r\n            version = packageJson.version || 'Unknown';\r\n        } catch (error) {\r\n            console.warn('Could not read package.json version:', error.message);\r\n        }\r\n\r\n        // Get church count from database\r\n        let churchCount = 0;\r\n        try {\r\n            const [result] = await promisePool.query('SELECT COUNT(*) as count FROM churches');\r\n            churchCount = result[0]?.count || 0;\r\n        } catch (error) {\r\n            console.warn('Could not fetch church count:', error.message);\r\n        }\r\n\r\n        // Format memory usage in MB\r\n        const memoryUsage = process.memoryUsage();\r\n        const memoryInMB = Math.round(memoryUsage.rss / 1024 / 1024);\r\n\r\n        // Format uptime in hours and minutes\r\n        const uptimeSeconds = process.uptime();\r\n        const hours = Math.floor(uptimeSeconds / 3600);\r\n        const minutes = Math.floor((uptimeSeconds % 3600) / 60);\r\n        const formattedUptime = `${hours}h ${minutes}m`;\r\n\r\n        // Get system information\r\n        const systemInfo = {\r\n            // System Information\r\n            nodeVersion: process.version,\r\n            uptime: formattedUptime,\r\n            uptimeSeconds: Math.round(uptimeSeconds),\r\n            hostname: os.hostname(),\r\n            memory: memoryInMB,\r\n            platform: os.platform(),\r\n            arch: os.arch(),\r\n            \r\n            // Application Settings\r\n            env: process.env.[REDACTED] || 'development',\r\n            version: version,\r\n            dateFormat: 'MM/DD/YYYY',\r\n            language: 'en',\r\n            churchCount: churchCount,\r\n            \r\n            // Additional system details\r\n            totalMemory: Math.round(os.totalmem() / 1024 / 1024),\r\n            freeMemory: Math.round(os.freemem() / 1024 / 1024),\r\n            cpuCount: os.cpus().length,\r\n            loadAverage: os.loadavg()[0].toFixed(2)\r\n        };\r\n\r\n        console.log('✅ System information retrieved successfully');\r\n        console.log('   Node.js version:', systemInfo.nodeVersion);\r\n        console.log('   Uptime:', systemInfo.uptime);\r\n        console.log('   Memory usage:', systemInfo.memory, 'MB');\r\n        console.log('   Church count:', systemInfo.churchCount);\r\n\r\n        res.json({\r\n            success: true,\r\n            data: systemInfo\r\n        });\r\n\r\n    } catch (error) {\r\n        console.error('❌ Error fetching system information:', error);\r\n        res.status(500).json({\r\n            success: false,\r\n            message: 'Failed to retrieve system information',\r\n            error: process.env.[REDACTED] === 'development' ? error.message : undefined\r\n        });\r\n    }\r\n});\r\n\r\nmodule.exports = router;\r\n"
+    },
+    "complexity": {
+      "totalLines": 122,
+      "codeLines": 91,
+      "commentLines": 13,
+      "commentRatio": 0.125,
+      "averageLineLength": 39.61538461538461
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.375Z"
+  },
+  "contentHash": "395636a372ca182fa17dd724218cedbba6a7b7d09d9a152393575c2a2c065a6b",
+  "discoveredAt": "2025-07-28T07:20:00.375Z"
+}

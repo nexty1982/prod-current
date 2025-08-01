@@ -1,0 +1,43 @@
+{
+  "id": "d81926f13a68",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/debug-church-records-issue.sql",
+  "relativePath": "debug-church-records-issue.sql",
+  "name": "debug-church-records-issue.sql",
+  "extension": ".sql",
+  "size": 1620,
+  "modified": "2025-07-22T22:27:34.946Z",
+  "created": "2025-07-22T22:27:32.967Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 46,
+      "characters": 1620,
+      "words": 205
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 46,
+      "codeLines": 40,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 39.225
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.258Z"
+  },
+  "contentHash": "46a0ac9673651294890f33c9d9a32a856f798ffd41a84fdf67413e7dc1049db0",
+  "discoveredAt": "2025-07-26T04:17:09.258Z"
+}

@@ -21,7 +21,7 @@ import {
     Church as ChurchIcon,
     ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { useCreateClient } from '../../../hooks/useClientManagement';
 import { useQueryClient } from '@tanstack/react-query';
 import type { CreateClientRequest } from '../../../types/client-management.types';

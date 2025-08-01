@@ -1,0 +1,78 @@
+{
+  "id": "3cb9f5c7b8fa",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/setup/createClientDatabase.js",
+  "relativePath": "server/setup/createClientDatabase.js",
+  "name": "createClientDatabase.js",
+  "extension": ".js",
+  "size": 2974,
+  "modified": "2025-07-09T12:16:57.391Z",
+  "created": "2025-07-09T12:15:00.976Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 88,
+      "characters": 2972,
+      "words": 232
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 12,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 47,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 48,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "const mysql = require('mysql2/promise');\r\nconst fs = require('fs').promises;\r\nconst path = require('path');\r\n\r\nasync function createClientDatabase(clientSlug, clientName, contactEmail) {\r\n    const databaseName = `orthodox_${clientSlug}`;\r\n    \r\n    // Connect as root to create database\r\n    const rootConnection = await mysql.createConnection({\r\n        host: 'localhost',\r\n        user: 'root',\r\n        password: process.env.[REDACTED]\r\n    });\r\n    \r\n    try {\r\n        console.log(`Creating database: ${databaseName}`);\r\n        \r\n        // Create database\r\n        await rootConnection.execute(`CREATE DATABASE IF NOT EXISTS ${databaseName}`);\r\n        \r\n        // Read template schema\r\n        const schemaPath = path.join(__dirname, 'clientDatabaseTemplate.sql');\r\n        const schemaSql = await fs.readFile(schemaPath, 'utf8');\r\n        \r\n        // Replace placeholders\r\n        const clientSql = schemaSql\r\n            .replace(/{DATABASE_NAME}/g, databaseName)\r\n            .replace(/{CLIENT_NAME}/g, clientName)\r\n            .replace(/{CONTACT_EMAIL}/g, contactEmail);\r\n        \r\n        // Execute schema\r\n        const statements = clientSql.split(';').filter(stmt => stmt.trim());\r\n        \r\n        await rootConnection.execute(`USE ${databaseName}`);\r\n        \r\n        for (const statement of statements) {\r\n            if (statement.trim()) {\r\n                await rootConnection.execute(statement);\r\n            }\r\n        }\r\n        \r\n        console.log(`✅ Database ${databaseName} created successfully`);\r\n        \r\n        // Update client status\r\n        const mainConnection = await mysql.createConnection({\r\n            host: 'localhost',\r\n            user: process.env.[REDACTED],\r\n            password: process.env.[REDACTED],\r\n            database: 'orthodox'\r\n        });\r\n        \r\n        await mainConnection.execute(\r\n            'UPDATE clients SET status = \"active\" WHERE slug = ?',\r\n            [clientSlug]\r\n        );\r\n        \r\n        await mainConnection.end();\r\n        \r\n    } catch (error) {\r\n        console.error('Error creating client database:', error);\r\n        throw error;\r\n    } finally {\r\n        await rootConnection.end();\r\n    }\r\n}\r\n\r\n// Usage: node createClientDatabase.js ssppoc \"Saints Peter & Paul Orthodox Church\" \"admin@ssppoc.org\"\r\nif (require.main === module) {\r\n    const [,, clientSlug, clientName, contactEmail] = process.argv;\r\n    \r\n    if (!clientSlug || !clientName || !contactEmail) {\r\n        console.log('Usage: node createClientDatabase.js <slug> <name> <email>');\r\n        process.exit(1);\r\n    }\r\n    \r\n    createClientDatabase(clientSlug, clientName, contactEmail)\r\n        .then(() => {\r\n            console.log('Client database creation completed');\r\n            process.exit(0);\r\n        })\r\n        .catch(error => {\r\n            console.error('Failed to create client database:', error);\r\n            process.exit(1);\r\n        });\r\n}\r\n\r\nmodule.exports = createClientDatabase;\r\n"
+    },
+    "complexity": {
+      "totalLines": 88,
+      "codeLines": 62,
+      "commentLines": 7,
+      "commentRatio": 0.10144927536231885,
+      "averageLineLength": 40.04347826086956
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.133Z"
+  },
+  "contentHash": "6a50c6949ee7e466f4459e891938f55dcc2ae97f494afba21e577f9a5653ffa4",
+  "discoveredAt": "2025-07-28T07:20:01.133Z"
+}

@@ -1,0 +1,3586 @@
+=== Frontend Dependency Graph ===
+Generated: Wed Jul 30 01:00:02 AM EDT 2025
+
+--- COMPONENT DEPENDENCIES ---
+Component: About.tsx
+  Imports:
+
+Component: AccessControlDashboard.tsx
+  Imports:
+    './tabs/UserManagement';
+    './tabs/RoleManagement';
+    './tabs/SessionManagement';
+    './tabs/MenuManagement';
+
+Component: AccountSetting.tsx
+  Imports:
+
+Component: AccountTab.tsx
+  Imports:
+
+Component: ActionCode.tsx
+  Imports:
+
+Component: ActivityLogs.tsx
+  Imports:
+
+Component: AddChurchPage.tsx
+  Imports:
+
+Component: AddNewClient.tsx
+  Imports:
+
+Component: AddNewTaskModal.tsx
+  Imports:
+
+Component: AddNotes.tsx
+  Imports:
+
+Component: Address.tsx
+  Imports:
+
+Component: AddToCart.tsx
+  Imports:
+
+Component: AdminDashboardLayout.tsx
+  Imports:
+    './SuperAdminDashboard';
+
+Component: AdminErrorBoundary.tsx
+  Imports:
+
+Component: AdminLogs.tsx
+  Imports:
+
+Component: AdminPageFallback.tsx
+  Imports:
+
+Component: AdminSettings.tsx
+  Imports:
+    './components/ComponentManager';
+
+Component: AdminTile.tsx
+  Imports:
+
+Component: AdminWelcomeCard.tsx
+  Imports:
+
+Component: AdvancedCard.tsx
+  Imports:
+
+Component: AdvancedGridDialog.tsx
+  Imports:
+
+Component: AdvancedRecordsDemo.tsx
+  Imports:
+
+Component: AGGridViewOnly.tsx
+  Imports:
+
+Component: AIAdminPanel.tsx
+  Imports:
+    './AIContentGenerator';
+    './AIAnalyticsDashboard';
+    './AIOCRProcessor';
+    './AITranslationAssistant';
+    './AIDeploymentAutomation';
+    './AILogAnalysis';
+    './AutoLearningOCR';
+
+Component: AIAnalyticsDashboard.tsx
+  Imports:
+
+Component: AIContentGenerator.tsx
+  Imports:
+
+Component: AIDeploymentAutomation.tsx
+  Imports:
+
+Component: ai-lab.tsx
+  Imports:
+
+Component: AILogAnalysis.tsx
+  Imports:
+
+Component: AIOCRProcessor.tsx
+  Imports:
+
+Component: AITranslationAssistant.tsx
+  Imports:
+
+Component: AlertCart.tsx
+  Imports:
+
+Component: AlertCode.tsx
+  Imports:
+
+Component: AlertDialog.tsx
+  Imports:
+
+Component: AnalyticsDashboard.tsx
+  Imports:
+
+Component: AnimatedBanner.tsx
+  Imports:
+
+Component: Animation.tsx
+  Imports:
+
+Component: ApiMethodFocusItemCode.tsx
+  Imports:
+
+Component: ApiMethodFocusItem.tsx
+  Imports:
+
+Component: ApiMethodSetItemExpansionCode.tsx
+  Imports:
+
+Component: ApiMethodSetItemExpansion.tsx
+  Imports:
+
+Component: api-routes-viewer.tsx
+  Imports:
+
+Component: AppCard.tsx
+  Imports:
+
+Component: AppLinks.tsx
+  Imports:
+    './data';
+    './data';
+
+Component: App.tsx
+  Imports:
+    './theme/Theme';
+    './layouts/full/shared/customizer/RTL';
+    './routes/Router';
+    './context/CustomizerContext';
+    './context/ChurchRecordsContext';
+    './context/AuthContext';
+    './contexts/MenuVisibilityContext';
+    './contexts/NotificationContext';
+    './context/WebSocketContext';
+    './components/ErrorBoundary';
+    './components/ErrorBoundary/FilterErrorBoundary';
+    './utils/axiosInterceptor';
+    './context/ThemeContext';
+
+Component: ArcDesignChart.tsx
+  Imports:
+
+Component: ArcDesignCode.tsx
+  Imports:
+
+Component: AreaChartCode.tsx
+  Imports:
+
+Component: AreaChartConnectNullsChart.tsx
+  Imports:
+
+Component: AreaChartConnectNullsCode.tsx
+  Imports:
+
+Component: AreaChartFillByValueChart.tsx
+  Imports:
+
+Component: AreaChartFillByValueCode.tsx
+  Imports:
+
+Component: AreaChart.tsx
+  Imports:
+
+Component: AreaSparkLineChart.tsx
+  Imports:
+
+Component: AreaSparkLineCode.tsx
+  Imports:
+
+Component: ArrowTooltipCode.tsx
+  Imports:
+
+Component: AssignTaskPage.tsx
+  Imports:
+
+Component: AuditLogFeed.tsx
+  Imports:
+
+Component: AuthContext.tsx
+  Imports:
+
+Component: AuthenticationComponent.tsx
+  Imports:
+
+Component: AuthForgotPassword.tsx
+  Imports:
+
+Component: AuthLogin.tsx
+  Imports:
+    './AuthSocialButtons';
+
+Component: AuthRedirect.tsx
+  Imports:
+
+Component: AuthRegister.tsx
+  Imports:
+    './AuthSocialButtons';
+
+Component: AuthSocialButtons.tsx
+  Imports:
+
+Component: AuthTwoSteps.tsx
+  Imports:
+
+Component: AutoFixDemo.tsx
+  Imports:
+
+Component: AutoLearningOCR.tsx
+  Imports:
+
+Component: autonomy-dashboard.tsx
+  Imports:
+
+Component: BackendDetails.tsx
+  Imports:
+
+Component: BackupSettings.tsx
+  Imports:
+
+Component: Banner1.tsx
+  Imports:
+    './code/TransectionCode';
+
+Component: Banner2.tsx
+  Imports:
+    './code/NotificationCode';
+
+Component: Banner3.tsx
+  Imports:
+    './code/FriendCardCode';
+
+Component: Banner4.tsx
+  Imports:
+    './code/ErrorBannerCode';
+
+Component: Banner5.tsx
+  Imports:
+    './code/EmptyCartCode';
+
+Component: BannerContent.tsx
+  Imports:
+
+Component: Banner.tsx
+  Imports:
+
+Component: Banner.tsx
+  Imports:
+
+Component: Banner.tsx
+  Imports:
+
+Component: Banner.tsx
+  Imports:
+
+Component: BaptismRecordsComponent.tsx
+  Imports:
+
+Component: BaptismRecordsPage.tsx
+  Imports:
+
+Component: BaptismRecordViewerMagnifier.tsx
+  Imports:
+
+Component: BarChartStackedBySignChart.tsx
+  Imports:
+
+Component: BarChartStackedBySignCode.tsx
+  Imports:
+
+Component: BarcodeScannerModal.tsx
+  Imports:
+
+Component: BaseCard.tsx
+  Imports:
+
+Component: BasicCode.tsx
+  Imports:
+
+Component: BasicCustomIconsCode.tsx
+  Imports:
+
+Component: BasicCustomIcons.tsx
+  Imports:
+
+Component: BasicDateTimeCode.tsx
+  Imports:
+
+Component: BasicDateTime.tsx
+  Imports:
+    './code/BasicDateTimeCode'
+
+Component: BasicGaugesChart.tsx
+  Imports:
+
+Component: BasicGaugesCode.tsx
+  Imports:
+
+Component: BasicHeaderFormCode.tsx
+  Imports:
+
+Component: BasicIconsCode.tsx
+  Imports:
+
+Component: BasicIconsCode.tsx
+  Imports:
+
+Component: BasicIcons.tsx
+  Imports:
+
+Component: BasicIcons.tsx
+  Imports:
+
+Component: BasicLayoutCode.tsx
+  Imports:
+
+Component: BasicLayoutCode.tsx
+  Imports:
+
+Component: BasicLayout.tsx
+  Imports:
+
+Component: BasicLayout.tsx
+  Imports:
+
+Component: BasicPieChart.tsx
+  Imports:
+
+Component: BasicPieCode.tsx
+  Imports:
+
+Component: BasicScatterChart.tsx
+  Imports:
+
+Component: BasicScatterCode.tsx
+  Imports:
+
+Component: BasicSimpleTreeViewCode.tsx
+  Imports:
+
+Component: BasicSimpleTreeView.tsx
+  Imports:
+
+Component: BasicSparkLineCode.tsx
+  Imports:
+
+Component: BasicSparkLineCustomizationChart.tsx
+  Imports:
+
+Component: BasicSparkLineCustomizationCode.tsx
+  Imports:
+
+Component: BasicSparkLine.tsx
+  Imports:
+
+Component: BasicTableCode.tsx
+  Imports:
+
+Component: BasicTable.tsx
+  Imports:
+
+Component: BasicTransferListCode.tsx
+  Imports:
+
+Component: BasicTransferList.tsx
+  Imports:
+
+Component: BiaxialBarChart.tsx
+  Imports:
+
+Component: BiaxialBarCode.tsx
+  Imports:
+
+Component: BiaxialLineChart.tsx
+  Imports:
+
+Component: BiaxialLineCode.tsx
+  Imports:
+
+Component: BigBookConsolePage.tsx
+  Imports:
+    './UploadedFileList';
+    './FileViewer';
+    './BigBookSettings';
+
+Component: BigBookCustomComponentViewer.tsx
+  Imports:
+
+Component: BigBookDynamicRoute.tsx
+  Imports:
+
+Component: BigBookKanbanSync.tsx
+  Imports:
+
+Component: BigBookSettings.tsx
+  Imports:
+
+Component: BigCalendar.tsx
+  Imports:
+    './EventData';
+
+Component: BillsTab.tsx
+  Imports:
+
+Component: BlankCard.tsx
+  Imports:
+
+Component: BlankLayout.tsx
+  Imports:
+
+Component: BlogAdmin.tsx
+  Imports:
+
+Component: BlogCard.tsx
+  Imports:
+
+Component: BlogComment.tsx
+  Imports:
+
+Component: BlogCreate.tsx
+  Imports:
+
+Component: BlogDetail.tsx
+  Imports:
+    './BlogComment';
+
+Component: BlogEdit.tsx
+  Imports:
+
+Component: BlogFeaturedCard.tsx
+  Imports:
+
+Component: BlogFeed.tsx
+  Imports:
+
+Component: BlogListing.tsx
+  Imports:
+    './BlogCard';
+    './BlogFeaturedCard';
+
+Component: BlogList.tsx
+  Imports:
+
+Component: BlogPost.tsx
+  Imports:
+
+Component: BlogPost.tsx
+  Imports:
+
+Component: Blog.tsx
+  Imports:
+
+Component: Blog.tsx
+  Imports:
+
+Component: BlogView.tsx
+  Imports:
+
+Component: Breadcrumb.tsx
+  Imports:
+
+Component: BuildConsole.tsx
+  Imports:
+
+Component: C2a2.tsx
+  Imports:
+    './GuaranteeCard';
+
+Component: C2a.tsx
+  Imports:
+
+Component: CandlestickChartCode.tsx
+  Imports:
+
+Component: CandlestickChart.tsx
+  Imports:
+
+Component: CartItem.tsx
+  Imports:
+    No local imports
+
+Component: Cart.tsx
+  Imports:
+    './CartItem';
+
+Component: CategoryTaskList.tsx
+  Imports:
+    './TaskData';
+    './TaskModal/EditCategoryModal';
+    './TaskModal/AddNewTaskModal';
+
+Component: CertificatePreviewer.tsx
+  Imports:
+    './constants';
+
+Component: ChatApp.tsx
+  Imports:
+
+Component: ChatContent.tsx
+  Imports:
+    './ChatInsideSidebar';
+
+Component: ChatInsideSidebar.tsx
+  Imports:
+
+Component: ChatListing.tsx
+  Imports:
+
+Component: ChatMsgSent.tsx
+  Imports:
+
+Component: ChatSettings.tsx
+  Imports:
+
+Component: ChatSidebar.tsx
+  Imports:
+    './ChatListing';
+
+Component: ChatSidebar.tsx
+  Imports:
+    './ChatListing';
+
+Component: Chat.tsx
+  Imports:
+
+Component: ChatWindow.tsx
+  Imports:
+    './MessageInput';
+
+Component: CheckboxCode.tsx
+  Imports:
+
+Component: CheckboxesAutocomplete.tsx
+  Imports:
+    './data';
+
+Component: CheckboxesCode.tsx
+  Imports:
+
+Component: CheckboxSelectionCode.tsx
+  Imports:
+
+Component: CheckboxSelection.tsx
+  Imports:
+
+Component: ChildCard.tsx
+  Imports:
+
+Component: ChurchAdminList.tsx
+  Imports:
+
+Component: ChurchAdminPanelTest.tsx
+  Imports:
+
+Component: ChurchAdminPanel.tsx
+  Imports:
+
+Component: ChurchAdminPanelWorking.tsx
+  Imports:
+
+Component: churchData.tsx
+  Imports:
+
+Component: ChurchForm.tsx
+  Imports:
+    './UserManagementDialog';
+
+Component: ChurchList.tsx
+  Imports:
+
+Component: ChurchRecordsContext.tsx
+  Imports:
+    './AuthContext';
+
+Component: ChurchRecordsPage.tsx
+  Imports:
+    './SSPPOCRecordsPage';
+
+Component: ChurchRecordsProvider.tsx
+  Imports:
+
+Component: ChurchRecordTableList.tsx
+  Imports:
+
+Component: ChurchServerManager.tsx
+  Imports:
+
+Component: ChurchSetup.tsx
+  Imports:
+
+Component: ChurchSetupWizard.tsx
+  Imports:
+
+Component: ChurchSetupWizard.tsx
+  Imports:
+
+Component: ChurchSetupWizard.tsx
+  Imports:
+
+Component: ClickPopoverCode.tsx
+  Imports:
+
+Component: ClickPopover.tsx
+  Imports:
+
+Component: ClientManagementDashboard.tsx
+  Imports:
+
+Component: CodeDialog.tsx
+  Imports:
+
+Component: CodePreviewModal.tsx
+  Imports:
+    './types';
+
+Component: CollapsibleForm.tsx
+  Imports:
+
+Component: CollapsibleForm.tsx
+  Imports:
+
+Component: CollapsibleTable.tsx
+  Imports:
+
+Component: ColorButtonGroupCode.tsx
+  Imports:
+
+Component: ColorButtonGroup.tsx
+  Imports:
+
+Component: ColorButtons.tsx
+  Imports:
+
+Component: ColorLabelRadioCode.tsx
+  Imports:
+
+Component: ColorLabel.tsx
+  Imports:
+
+Component: ColorPaletteSelector.tsx
+  Imports:
+
+Component: ColorPickerPopover.tsx
+  Imports:
+
+Component: ColorsCheckboxCode.tsx
+  Imports:
+
+Component: ColorsCode.tsx
+  Imports:
+
+Component: ColorsRadioCode.tsx
+  Imports:
+
+Component: ColorsSwitchCode.tsx
+  Imports:
+
+Component: Colors.tsx
+  Imports:
+
+Component: Colors.tsx
+  Imports:
+
+Component: Colors.tsx
+  Imports:
+
+Component: ColumnChartCode.tsx
+  Imports:
+
+Component: ColumnChart.tsx
+  Imports:
+
+Component: Columndragdrop.tsx
+  Imports:
+
+Component: ComboBoxAutocomplete.tsx
+  Imports:
+
+Component: ComboBoxCode.tsx
+  Imports:
+
+Component: ComingSoon.tsx
+  Imports:
+
+Component: ComplexCardCode.tsx
+  Imports:
+
+Component: ComplexCard.tsx
+  Imports:
+    './code/ComplexCardCode';
+
+Component: ComponentAgentPanel.tsx
+  Imports:
+    './types';
+
+Component: ComponentDiscoveryPanel.tsx
+  Imports:
+
+Component: ComponentInspector.tsx
+  Imports:
+    './GitOpsPanel';
+    './VisualRegressionDashboard';
+    './ManualFixEditor';
+
+Component: ComponentManager.tsx
+  Imports:
+
+Component: ComponentPalette.tsx
+  Imports:
+    './sample-icons';
+    './types';
+
+Component: ComponentPreview.tsx
+  Imports:
+    './sample-icons';
+    './types';
+
+Component: ComponentRegistry.tsx
+  Imports:
+
+Component: Components.tsx
+  Imports:
+
+Component: ConfidenceBadge.tsx
+  Imports:
+
+Component: ContactAdd.tsx
+  Imports:
+
+Component: ContactDetails.tsx
+  Imports:
+
+Component: ContactFilter.tsx
+  Imports:
+    './ContactAdd';
+
+Component: ContactListItem.tsx
+  Imports:
+
+Component: ContactList.tsx
+  Imports:
+    './ContactListItem';
+
+Component: ContactsData.tsx
+  Imports:
+
+Component: ContactSearch.tsx
+  Imports:
+
+Component: Contacts.tsx
+  Imports:
+
+Component: Contact.tsx
+  Imports:
+
+Component: Contact.tsx
+  Imports:
+
+Component: ContentArea.tsx
+  Imports:
+
+Component: ContentArea.tsx
+  Imports:
+
+Component: ContentRenderer.tsx
+  Imports:
+    './DynamicComponentRenderer';
+
+Component: ContentSettings.tsx
+  Imports:
+    './ImageGridExtractor';
+
+Component: control-dashboard.tsx
+  Imports:
+
+Component: ControlledCode.tsx
+  Imports:
+
+Component: ControlledExpansionTreeCode.tsx
+  Imports:
+
+Component: ControlledExpansionTree.tsx
+  Imports:
+
+Component: ControlledSelectionCode.tsx
+  Imports:
+
+Component: ControlledSelectiontree.tsx
+  Imports:
+
+Component: ControlledStateAutocomplete.tsx
+  Imports:
+
+Component: ControlledStateCode.tsx
+  Imports:
+
+Component: ControlsListCode.tsx
+  Imports:
+
+Component: ControlsList.tsx
+  Imports:
+
+Component: countrydata.tsx
+  Imports:
+
+Component: CountrySelectAutocomplete.tsx
+  Imports:
+    './countrydata'
+
+Component: CountrySelectCode.tsx
+  Imports:
+
+Component: Create.tsx
+  Imports:
+
+Component: CurrentValue.tsx
+  Imports:
+
+Component: CustomCheckbox.tsx
+  Imports:
+
+Component: CustomDisabledButton.tsx
+  Imports:
+
+Component: CustomEleCheckboxCode.tsx
+  Imports:
+
+Component: CustomersReviews.tsx
+  Imports:
+
+Component: Customers.tsx
+  Imports:
+
+Component: CustomExRadioCode.tsx
+  Imports:
+
+Component: CustomFormLabel.tsx
+  Imports:
+
+Component: CustomIconCode.tsx
+  Imports:
+
+Component: CustomizerContext.tsx
+  Imports:
+    './config'
+
+Component: Customizer.tsx
+  Imports:
+
+Component: CustomOutlinedButton.tsx
+  Imports:
+
+Component: CustomOutlinedIcon.tsx
+  Imports:
+
+Component: CustomOutlinedInput.tsx
+  Imports:
+
+Component: CustomRadio.tsx
+  Imports:
+
+Component: CustomRangeSlider.tsx
+  Imports:
+
+Component: CustomSelect.tsx
+  Imports:
+
+Component: CustomSliderCode.tsx
+  Imports:
+
+Component: CustomSlider.tsx
+  Imports:
+
+Component: CustomSocialButton.tsx
+  Imports:
+
+Component: CustomSwitchCode.tsx
+  Imports:
+
+Component: CustomSwitch.tsx
+  Imports:
+
+Component: CustomTextField.tsx
+  Imports:
+
+Component: CustomTreeItemCode.tsx
+  Imports:
+
+Component: CustomTreeItemView.tsx
+  Imports:
+
+Component: Custom.tsx
+  Imports:
+
+Component: Custom.tsx
+  Imports:
+
+Component: Custom.tsx
+  Imports:
+
+Component: DarkThemeColors.tsx
+  Imports:
+
+Component: DashboardCard.tsx
+  Imports:
+
+Component: DashboardWidgetCard.tsx
+  Imports:
+
+Component: DashedLineChart.tsx
+  Imports:
+
+Component: DashedLineCode.tsx
+  Imports:
+
+Component: DatabaseStatus.tsx
+  Imports:
+
+Component: DefaultButtonGroupCode.tsx
+  Imports:
+
+Component: DefaultButtonGroup.tsx
+  Imports:
+
+Component: DefaultButtons.tsx
+  Imports:
+
+Component: DefaultCheckboxCode.tsx
+  Imports:
+
+Component: DefaultCode.tsx
+  Imports:
+
+Component: DefaultcolorsCheckboxCode.tsx
+  Imports:
+
+Component: DefaultColors.tsx
+  Imports:
+
+Component: DefaultColors.tsx
+  Imports:
+
+Component: DefaultFormCode.tsx
+  Imports:
+
+Component: DefaultLabelSwitchCode.tsx
+  Imports:
+
+Component: DefaultLabel.tsx
+  Imports:
+
+Component: DefaultRadioCode.tsx
+  Imports:
+
+Component: DefaultsliderCode.tsx
+  Imports:
+
+Component: DefaultSwitchCode.tsx
+  Imports:
+
+Component: Default.tsx
+  Imports:
+
+Component: Default.tsx
+  Imports:
+
+Component: Default.tsx
+  Imports:
+
+Component: DeleteConfirmationModal.tsx
+  Imports:
+    './constants';
+
+Component: DemosDD.tsx
+  Imports:
+
+Component: DemoSlider.tsx
+  Imports:
+    './DemoTitle';
+
+Component: DemoTitle.tsx
+  Imports:
+
+Component: DescriptionCode.tsx
+  Imports:
+
+Component: Detail.tsx
+  Imports:
+
+Component: DifferentDateTime.tsx
+  Imports:
+    './code/DifferentDesignCode'
+
+Component: DifferentDesignCode.tsx
+  Imports:
+
+Component: DisabledCode.tsx
+  Imports:
+
+Component: DisabledSliderCode.tsx
+  Imports:
+
+Component: DisclaimerModal.tsx
+  Imports:
+
+Component: DiscreteSliderCode.tsx
+  Imports:
+
+Component: DiscreteSlider.tsx
+  Imports:
+
+Component: DoughnutChartsCode.tsx
+  Imports:
+
+Component: DoughnutChart.tsx
+  Imports:
+
+Component: DownloadCard.tsx
+  Imports:
+
+Component: DozensCarousel.tsx
+  Imports:
+
+Component: DynamicComponentRenderer.tsx
+  Imports:
+
+Component: DynamicMenuContext.tsx
+  Imports:
+
+Component: Earned.tsx
+  Imports:
+
+Component: EcommerceAddProduct.tsx
+  Imports:
+
+Component: EcommerceCardCode.tsx
+  Imports:
+
+Component: EcommerceCard.tsx
+  Imports:
+    './code/EcommerceCardCode';
+
+Component: EcommerceCheckout.tsx
+  Imports:
+
+Component: EcommerceDetail.tsx
+  Imports:
+
+Component: EcommerceEditProduct.tsx
+  Imports:
+
+Component: Ecommerce.tsx
+  Imports:
+
+Component: Ecommerce.tsx
+  Imports:
+
+Component: EcomProductList.tsx
+  Imports:
+
+Component: EditableRecordPage.tsx
+  Imports:
+
+Component: EditableRecordRow.tsx
+  Imports:
+    './MappingState';
+
+Component: EditCategoryModal.tsx
+  Imports:
+
+Component: EditChurchModal.tsx
+  Imports:
+
+Component: editor.tsx
+  Imports:
+    './OMBEditor';
+
+Component: EditTaskModal.tsx
+  Imports:
+
+Component: Edit.tsx
+  Imports:
+
+Component: EmailActions.tsx
+  Imports:
+
+Component: EmailCompose.tsx
+  Imports:
+
+Component: EmailContent.tsx
+  Imports:
+
+Component: EmailData.tsx
+  Imports:
+
+Component: EmailFilter.tsx
+  Imports:
+    './EmailCompose';
+
+Component: EmailListItem.tsx
+  Imports:
+
+Component: EmailList.tsx
+  Imports:
+    './EmailListItem';
+
+Component: EmailSearch.tsx
+  Imports:
+
+Component: EmailSettingsForm.tsx
+  Imports:
+
+Component: Email.tsx
+  Imports:
+
+Component: EmployeeSalary.tsx
+  Imports:
+
+Component: EmptyCartCode.tsx
+  Imports:
+
+Component: EncryptedStoragePanel.tsx
+  Imports:
+
+Component: EnhancedModernDashboard.tsx
+  Imports:
+
+Component: EnhancedPageEditorTest.tsx
+  Imports:
+    './EnhancedPageEditor';
+
+Component: EnhancedPageEditor.tsx
+  Imports:
+    './DynamicComponentRenderer';
+    './ContentRenderer';
+
+Component: EnhancedTransferListCode.tsx
+  Imports:
+
+Component: EnhancedTransferList.tsx
+  Imports:
+
+Component: EnhanceTable.tsx
+  Imports:
+
+Component: EntityExtractionViewer.tsx
+  Imports:
+
+Component: ErrorBannerCode.tsx
+  Imports:
+
+Component: ErrorBoundary.tsx
+  Imports:
+
+Component: ErrorDetailsCard.tsx
+  Imports:
+
+Component: ErrorNotificationToast.tsx
+  Imports:
+
+Component: Error.tsx
+  Imports:
+
+Component: Expence.tsx
+  Imports:
+
+Component: ExportActions.tsx
+  Imports:
+
+Component: ExtractionAnalytics.tsx
+  Imports:
+
+Component: FABCode.tsx
+  Imports:
+
+Component: FabColorButtons.tsx
+  Imports:
+
+Component: FABColorCode.tsx
+  Imports:
+
+Component: FabDefaultButton.tsx
+  Imports:
+
+Component: FabSizeButtons.tsx
+  Imports:
+
+Component: FABSizeCode.tsx
+  Imports:
+
+Component: Faq.tsx
+  Imports:
+
+Component: FbBasicHeaderForm.tsx
+  Imports:
+
+Component: FbDefaultForm.tsx
+  Imports:
+
+Component: FbDisabledForm.tsx
+  Imports:
+
+Component: FbInputVariants.tsx
+  Imports:
+
+Component: FbLeftIconForm.tsx
+  Imports:
+
+Component: FbOrdinaryForm.tsx
+  Imports:
+
+Component: FbReadonlyForm.tsx
+  Imports:
+
+Component: FbRightIconForm.tsx
+  Imports:
+
+Component: FeaturesTitle.tsx
+  Imports:
+
+Component: Features.tsx
+  Imports:
+    './FeatureTitle';
+
+Component: Features.tsx
+  Imports:
+    './FeatureTitle';
+
+Component: FeatureTitle.tsx
+  Imports:
+
+Component: FieldMappingEditor.tsx
+  Imports:
+
+Component: FieldRenderer.tsx
+  Imports:
+
+Component: FieldTemplateSelector.tsx
+  Imports:
+
+Component: FileViewer.tsx
+  Imports:
+
+Component: FilledCode.tsx
+  Imports:
+
+Component: FilledCode.tsx
+  Imports:
+
+Component: FilterErrorBoundary.tsx
+  Imports:
+
+Component: FinalStep.tsx
+  Imports:
+
+Component: FirstStep.tsx
+  Imports:
+
+Component: FixedHeaderTable.tsx
+  Imports:
+
+Component: FolderListCode.tsx
+  Imports:
+
+Component: FolderList.tsx
+  Imports:
+
+Component: FollowerCardCode.tsx
+  Imports:
+
+Component: FollowerCard.tsx
+  Imports:
+
+Component: FollowerCard.tsx
+  Imports:
+
+Component: Followers.tsx
+  Imports:
+
+Component: Followers.tsx
+  Imports:
+
+Component: Footer.tsx
+  Imports:
+
+Component: ForgotPassword2.tsx
+  Imports:
+
+Component: ForgotPassword.tsx
+  Imports:
+
+Component: FormCode.tsx
+  Imports:
+
+Component: FormCustomCode.tsx
+  Imports:
+
+Component: FormCustom.tsx
+  Imports:
+
+Component: FormDialog.tsx
+  Imports:
+
+Component: FormHorizontal.tsx
+  Imports:
+
+Component: FormLabelAlignment.tsx
+  Imports:
+
+Component: FormLayouts.tsx
+  Imports:
+
+Component: FormSeparatorCode.tsx
+  Imports:
+
+Component: FormSeparator.tsx
+  Imports:
+
+Component: FormSeparator.tsx
+  Imports:
+
+Component: FormTabs.tsx
+  Imports:
+
+Component: FormTabs.tsx
+  Imports:
+
+Component: FormValidation.tsx
+  Imports:
+
+Component: FormVertical.tsx
+  Imports:
+
+Component: FormWizardCode.tsx
+  Imports:
+
+Component: FormWizardSteps.tsx
+  Imports:
+    './code/FormWizardCode'
+
+Component: FormWizard.tsx
+  Imports:
+
+Component: FrameworksTitle.tsx
+  Imports:
+
+Component: Frameworks.tsx
+  Imports:
+    './FrameworksTitle';
+
+Component: FreeSoloAutocomplete.tsx
+  Imports:
+    './data';
+
+Component: FreeSoloCode.tsx
+  Imports:
+
+Component: FriendCardCode.tsx
+  Imports:
+
+Component: FriendCardCode.tsx
+  Imports:
+
+Component: FriendCard.tsx
+  Imports:
+    './code/FriendCardCode';
+
+Component: FriendsCard.tsx
+  Imports:
+
+Component: FriendsList.tsx
+  Imports:
+
+Component: FriendsList.tsx
+  Imports:
+
+Component: Friends.tsx
+  Imports:
+
+Component: FullLayout.tsx
+  Imports:
+    './vertical/header/Header';
+    './vertical/sidebar/Sidebar';
+    './shared/customizer/Customizer';
+
+Component: FullScreenCode.tsx
+  Imports:
+
+Component: FullscreenDialog.tsx
+  Imports:
+
+Component: FVCheckbox.tsx
+  Imports:
+
+Component: FVLogin.tsx
+  Imports:
+
+Component: FVOnLeave.tsx
+  Imports:
+
+Component: FVRadio.tsx
+  Imports:
+
+Component: FVRegister.tsx
+  Imports:
+
+Component: FVSelect.tsx
+  Imports:
+
+Component: GalleryCard.tsx
+  Imports:
+
+Component: Gallery.tsx
+  Imports:
+
+Component: GaugePointerChart.tsx
+  Imports:
+
+Component: GaugePointerCode.tsx
+  Imports:
+
+Component: GeneralCard.tsx
+  Imports:
+
+Component: GeneralCard.tsx
+  Imports:
+
+Component: GiftCardCode.tsx
+  Imports:
+
+Component: GiftCard.tsx
+  Imports:
+    './code/GiftCardCode';
+
+Component: GitOpsDemo.tsx
+  Imports:
+
+Component: GitOpsPanel.tsx
+  Imports:
+
+Component: GlobalOMAI.tsx
+  Imports:
+    './ErrorDetailsCard';
+
+Component: GlobalTemplateEditor.tsx
+  Imports:
+
+Component: GradientChartCode.tsx
+  Imports:
+
+Component: GredientChart.tsx
+  Imports:
+
+Component: GroupedCode.tsx
+  Imports:
+
+Component: GroupedSizeCode.tsx
+  Imports:
+
+Component: Growth.tsx
+  Imports:
+
+Component: GuaranteeCard.tsx
+  Imports:
+
+Component: HeaderAlert.tsx
+  Imports:
+
+Component: Header.tsx
+  Imports:
+
+Component: Header.tsx
+  Imports:
+
+Component: Header.tsx
+  Imports:
+
+Component: Heading1Code.tsx
+  Imports:
+
+Component: Heading2Code.tsx
+  Imports:
+
+Component: Heading3Code.tsx
+  Imports:
+
+Component: Heading4Code.tsx
+  Imports:
+
+Component: Heading5Code.tsx
+  Imports:
+
+Component: Heading6Code.tsx
+  Imports:
+
+Component: HeadlineSourcePicker.tsx
+  Imports:
+
+Component: Homepage.tsx
+  Imports:
+
+Component: HorizontalStepper.tsx
+  Imports:
+
+Component: HoverPopoverCode.tsx
+  Imports:
+
+Component: HoverPopover.tsx
+  Imports:
+
+Component: HpHeader.tsx
+  Imports:
+    './Navigations';
+    './MobileSidebar';
+
+Component: I18nContext.tsx
+  Imports:
+
+Component: IconAvatarsCode.tsx
+  Imports:
+
+Component: IconBottomCode.tsx
+  Imports:
+
+Component: IconCode.tsx
+  Imports:
+
+Component: IconColorButtons.tsx
+  Imports:
+
+Component: IconColorCode.tsx
+  Imports:
+
+Component: IconLeftCode.tsx
+  Imports:
+
+Component: IconLoadingButtons.tsx
+  Imports:
+
+Component: IconRightCode.tsx
+  Imports:
+
+Component: IconSizeButtons.tsx
+  Imports:
+
+Component: IconSizesCode.tsx
+  Imports:
+
+Component: IconWithLabelCode.tsx
+  Imports:
+
+Component: ImageAvatarsCode.tsx
+  Imports:
+
+Component: ImageGridExtractor.tsx
+  Imports:
+
+Component: ImportModal.tsx
+  Imports:
+    './constants';
+
+Component: ImportRecordsButton.tsx
+  Imports:
+
+Component: ImportRecordsExample.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: index.tsx
+  Imports:
+
+Component: InlineItemCard.tsx
+  Imports:
+
+Component: InputVariantsCode.tsx
+  Imports:
+
+Component: IntroCard.tsx
+  Imports:
+
+Component: invoceLists.tsx
+  Imports:
+
+Component: InvoicePDFPreview.tsx
+  Imports:
+
+Component: InvoiceViewByNumber.tsx
+  Imports:
+
+Component: JITTerminalAccess.tsx
+  Imports:
+
+Component: JITTerminalConsole.tsx
+  Imports:
+
+Component: JITTerminal.tsx
+  Imports:
+
+Component: KanbanBoard.tsx
+  Imports:
+    './KanbanColumn';
+
+Component: KanbanColumn.tsx
+  Imports:
+    './KanbanTaskCard';
+
+Component: KanbanData.tsx
+  Imports:
+
+Component: KanbanHeader.tsx
+  Imports:
+
+Component: KanbanTaskCard.tsx
+  Imports:
+    './KanbanTaskModal';
+
+Component: KanbanTaskModal.broken.tsx
+  Imports:
+
+Component: KanbanTaskModal.clean.tsx
+  Imports:
+
+Component: KanbanTaskModal.tsx
+  Imports:
+    './MarkdownUpload';
+
+Component: Kanban.tsx
+  Imports:
+
+Component: Key.tsx
+  Imports:
+
+Component: Landingpage.tsx
+  Imports:
+
+Component: Language.tsx
+  Imports:
+
+Component: LeaderShipCarousel.tsx
+  Imports:
+
+Component: LeftIconFormCode.tsx
+  Imports:
+
+Component: LetterAvatarsCode.tsx
+  Imports:
+
+Component: LightThemeColors.tsx
+  Imports:
+
+Component: LineChartCode.tsx
+  Imports:
+
+Component: LineChart.tsx
+  Imports:
+
+Component: LineChartWithReferenceLinesChart.tsx
+  Imports:
+
+Component: LineChartWithReferenceLinesCode.tsx
+  Imports:
+
+Component: LinewithforecastChart.tsx
+  Imports:
+
+Component: LinewithforecastCode.tsx
+  Imports:
+
+Component: List.tsx
+  Imports:
+
+Component: LiturgicalCalendar.tsx
+  Imports:
+
+Component: LiturgicalFlowBackgroundTailwind.tsx
+  Imports:
+
+Component: LiturgicalFlowBackground.tsx
+  Imports:
+
+Component: Loadable.tsx
+  Imports:
+
+Component: LoadingBar.tsx
+  Imports:
+
+Component: LoadingButtonsCode.tsx
+  Imports:
+
+Component: Login2.tsx
+  Imports:
+
+Component: Login.tsx
+  Imports:
+
+Component: Logo.tsx
+  Imports:
+
+Component: Logs.tsx
+  Imports:
+
+Component: Maintenance.tsx
+  Imports:
+
+Component: main.tsx
+  Imports:
+    './context/CustomizerContext';
+    './App';
+    './views/spinner/Spinner';
+    './utils/globalErrorHandler';
+
+Component: ManualFixEditor.tsx
+  Imports:
+
+Component: ManualUploader.tsx
+  Imports:
+    './types';
+
+Component: MarkdownUpload.tsx
+  Imports:
+
+Component: MaxWidthCode.tsx
+  Imports:
+
+Component: MaxWidthDialog.tsx
+  Imports:
+
+Component: Media.tsx
+  Imports:
+
+Component: Media.tsx
+  Imports:
+
+Component: MenuManagement.tsx
+  Imports:
+
+Component: MenuManagement.tsx
+  Imports:
+
+Component: MenuPermissions.tsx
+  Imports:
+
+Component: MenuSettings.tsx
+  Imports:
+
+Component: MenuVisibilityContext.tsx
+  Imports:
+
+Component: MessageInput.tsx
+  Imports:
+
+Component: Message.tsx
+  Imports:
+    './data';
+
+Component: MetadataForm.tsx
+  Imports:
+    './types';
+
+Component: MiniControlPanel.tsx
+  Imports:
+
+Component: MixedBarChart.tsx
+  Imports:
+
+Component: MixedBarCode.tsx
+  Imports:
+
+Component: MobileRightSidebar.tsx
+  Imports:
+    './AppLinks';
+    './QuickLinks';
+
+Component: MobileSidebar.tsx
+  Imports:
+    './Navigations';
+
+Component: MobileSidebar.tsx
+  Imports:
+    './Navigations';
+
+Component: ModernInvoiceDetail.simple.tsx
+  Imports:
+
+Component: ModernInvoiceDetail.tsx
+  Imports:
+
+Component: ModernInvoiceEdit.simple.tsx
+  Imports:
+
+Component: ModernInvoiceEdit.tsx
+  Imports:
+
+Component: ModernInvoiceList.tsx
+  Imports:
+
+Component: Modern.tsx
+  Imports:
+
+Component: MonthlyEarnings.tsx
+  Imports:
+
+Component: MonthlyEarnings.tsx
+  Imports:
+
+Component: MostVisited.tsx
+  Imports:
+
+Component: MuiAccordion.tsx
+  Imports:
+
+Component: MuiAlert.tsx
+  Imports:
+
+Component: MuiAutoComplete.tsx
+  Imports:
+
+Component: MuiAvatar.tsx
+  Imports:
+
+Component: MuiButton.tsx
+  Imports:
+
+Component: MuiCheckbox.tsx
+  Imports:
+
+Component: MuiChip.tsx
+  Imports:
+
+Component: MuiDateTimePicker.tsx
+  Imports:
+    './code/TimepickerCode'
+
+Component: MuiDateTime.tsx
+  Imports:
+
+Component: MuiDialog.tsx
+  Imports:
+
+Component: MuiList.tsx
+  Imports:
+
+Component: MuiPopover.tsx
+  Imports:
+
+Component: MuiRadio.tsx
+  Imports:
+
+Component: MuiRating.tsx
+  Imports:
+
+Component: MuiSlider.tsx
+  Imports:
+
+Component: MuiSwitch.tsx
+  Imports:
+
+Component: MuiTabs.tsx
+  Imports:
+
+Component: MuiTooltip.tsx
+  Imports:
+
+Component: MuiTransferList.tsx
+  Imports:
+
+Component: MuiTypography.tsx
+  Imports:
+
+Component: MultilingualShowcase.tsx
+  Imports:
+
+Component: MultipleValuesAutocomplete.tsx
+  Imports:
+    './data';
+
+Component: MultipleValuesCode.tsx
+  Imports:
+
+Component: MultiSelectTreeViewCode.tsx
+  Imports:
+
+Component: MultiSelectTreeView.tsx
+  Imports:
+
+Component: MusicCardCode.tsx
+  Imports:
+
+Component: MusicCard.tsx
+  Imports:
+    './code/MusicCardCode';
+
+Component: NavCollapse.tsx
+  Imports:
+
+Component: NavGroup.tsx
+  Imports:
+
+Component: Navigations.tsx
+  Imports:
+
+Component: Navigations.tsx
+  Imports:
+
+Component: Navigation.tsx
+  Imports:
+    './NavListing/NavListing';
+
+Component: Navigation.tsx
+  Imports:
+    './NavListing/NavListing';
+
+Component: NavItem.tsx
+  Imports:
+
+Component: NavListing.tsx
+  Imports:
+
+Component: NestedListCode.tsx
+  Imports:
+
+Component: NestedList.tsx
+  Imports:
+
+Component: NFSBackupConfig.tsx
+  Imports:
+    './SDLCBackupPanel';
+
+Component: nlp-dashboard.tsx
+  Imports:
+
+Component: NoteContent.tsx
+  Imports:
+    './AddNotes';
+
+Component: NoteList.tsx
+  Imports:
+
+Component: NoteSidebar.tsx
+  Imports:
+    './NoteList';
+
+Component: Notes.tsx
+  Imports:
+
+Component: NotificationBell.tsx
+  Imports:
+
+Component: NotificationCenter.tsx
+  Imports:
+
+Component: NotificationCode.tsx
+  Imports:
+
+Component: NotificationContext.tsx
+  Imports:
+
+Component: NotificationList.tsx
+  Imports:
+
+Component: NotificationManagement.tsx
+  Imports:
+
+Component: NotificationPreferences.tsx
+  Imports:
+
+Component: NotificationTab.tsx
+  Imports:
+
+Component: Notification.tsx
+  Imports:
+
+Component: OcrCorrectionTool.tsx
+  Imports:
+
+Component: OCRDataPanel.tsx
+  Imports:
+
+Component: OCRDragComponents.tsx
+  Imports:
+
+Component: OCRFieldMapping.tsx
+  Imports:
+    './OCRFieldMappingWindow';
+
+Component: OCRFieldMappingWindow.tsx
+  Imports:
+
+Component: OcrInterface.tsx
+  Imports:
+    './OcrWizardEnhanced';
+    './OcrPreviewModal';
+    './OcrRecordMapper';
+    './OcrMultiRecordMapper';
+    './GlobalTemplateEditor';
+
+Component: OcrMultiRecordMapper.tsx
+  Imports:
+    './EditableRecordRow';
+    './OcrTextBlockList';
+    './MappingState';
+    './utils/ocrRowSplitter';
+
+Component: OcrPreviewModal.tsx
+  Imports:
+
+Component: OCRPreviewTableEnhanced.tsx
+  Imports:
+
+Component: OCRPreviewTable.tsx
+  Imports:
+
+Component: OCRQueueStats.tsx
+  Imports:
+
+Component: OcrRecordMapper.tsx
+  Imports:
+    './OcrCorrectionTool';
+    './FieldTemplateSelector';
+    './SmartSuggestionEngine';
+
+Component: OCRRecordsDemo.tsx
+  Imports:
+    './OCRPreviewTableEnhanced';
+
+Component: OcrScanPreviewDemo.tsx
+  Imports:
+
+Component: OcrScanPreview.tsx
+  Imports:
+
+Component: OcrTestPanel.tsx
+  Imports:
+
+Component: OcrTextBlockList.tsx
+  Imports:
+    './utils/ocrRowSplitter';
+
+Component: OCRUploader.tsx
+  Imports:
+    './BarcodeScannerModal';
+    './DisclaimerModal';
+    './UploadStatus';
+
+Component: OCRUpload.tsx
+  Imports:
+
+Component: OcrWizardEnhanced.tsx
+  Imports:
+
+Component: OcrWizardUpload.tsx
+  Imports:
+
+Component: OCXDataPanel_new.tsx
+  Imports:
+
+Component: OCXDataPanel.tsx
+  Imports:
+
+Component: OMAIDiscoveryPanelMobile.tsx
+  Imports:
+
+Component: OMAIDiscoveryPanel.tsx
+  Imports:
+
+Component: OMAITaskAssignmentWidget.tsx
+  Imports:
+    './EmailSettingsForm';
+
+Component: OMBEditor.tsx
+  Imports:
+    './ComponentPalette';
+    './ComponentPreview';
+    './MetadataForm';
+    './PluginResultsPanel';
+    './ComponentAgentPanel';
+    './CodePreviewModal';
+    './types';
+
+Component: OMBigBook.tsx
+  Imports:
+    './BigBookConsolePage';
+    './BigBookSettings';
+    './EncryptedStoragePanel';
+    './QuestionnairePreview';
+    './OMAIDiscoveryPanel';
+    './TSXComponentInstallWizard';
+    './BigBookCustomComponentViewer';
+
+Component: OMCalendar.tsx
+  Imports:
+
+Component: OMLearnDashboard.tsx
+  Imports:
+
+Component: OMLearn.tsx
+  Imports:
+    './OMLearnDashboard';
+    './QuestionnaireRunner';
+    './SurveyResultsContext';
+
+Component: OMSiteSurvey.tsx
+  Imports:
+
+Component: OnLeaveCode.tsx
+  Imports:
+
+Component: OnSeriesItemClickChart.tsx
+  Imports:
+
+Component: OnSeriesItemClickCode.tsx
+  Imports:
+
+Component: OrthodoxAvatarSelector.tsx
+  Imports:
+
+Component: OrthodoxAvatars_new.tsx
+  Imports:
+
+Component: OrthodoxAvatars.tsx
+  Imports:
+
+Component: OrthodoxBanner.tsx
+  Imports:
+
+Component: OrthodoxChurchIcon.tsx
+  Imports:
+
+Component: OrthodoxHeadlines.tsx
+  Imports:
+
+Component: OrthodoxLogin.tsx
+  Imports:
+
+Component: OrthodoxMetricsAdmin.tsx
+  Imports:
+
+Component: OrthodoxMetricsDemo.tsx
+  Imports:
+
+Component: OrthodoxMetrics.tsx
+  Imports:
+
+Component: OrthodoxThemeDemo.tsx
+  Imports:
+
+Component: OrthodoxThemeToggle.tsx
+  Imports:
+
+Component: OutlinedCode.tsx
+  Imports:
+
+Component: OutlinedCode.tsx
+  Imports:
+
+Component: OutlinedCode.tsx
+  Imports:
+
+Component: OutlinedColorButtons.tsx
+  Imports:
+
+Component: OutlinedIconButtons.tsx
+  Imports:
+
+Component: OutlinedIconCode.tsx
+  Imports:
+
+Component: OutlinedSizeButton.tsx
+  Imports:
+
+Component: OutlineSizeCode.tsx
+  Imports:
+
+Component: PageContainer.tsx
+  Imports:
+
+Component: PageEditorTest.tsx
+  Imports:
+    './PageEditor';
+
+Component: PageEditor.tsx
+  Imports:
+
+Component: PageEditor.tsx
+  Imports:
+
+Component: PageEditorWrapper.tsx
+  Imports:
+    './PageEditor';
+
+Component: PageImpressions.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: page.tsx
+  Imports:
+
+Component: PaginationTable.tsx
+  Imports:
+
+Component: ParentCard.tsx
+  Imports:
+
+Component: ParishMap.tsx
+  Imports:
+
+Component: ParishMap.tsx
+  Imports:
+
+Component: PaymentGateways.tsx
+  Imports:
+
+Component: PaymentMethods.tsx
+  Imports:
+
+Component: PercentAreaChart.tsx
+  Imports:
+
+Component: PercentAreaCode.tsx
+  Imports:
+
+Component: PermissionDebugger.tsx
+  Imports:
+
+Component: PhotosCard.tsx
+  Imports:
+
+Component: PieChartsCode.tsx
+  Imports:
+
+Component: PieChartWithCenterLabelChart.tsx
+  Imports:
+
+Component: PieChartWithCenterLabelCode.tsx
+  Imports:
+
+Component: PieChartWithCustomizedLabelCode.tsx
+  Imports:
+
+Component: PieChartWithCustomizedLabel.tsx
+  Imports:
+
+Component: PieChartWithPaddingAngleChart.tsx
+  Imports:
+
+Component: PieChartWithPaddingAngleCode.tsx
+  Imports:
+
+Component: PluginResultsPanel.tsx
+  Imports:
+
+Component: Portfolio.tsx
+  Imports:
+
+Component: PositionCheckboxCode.tsx
+  Imports:
+
+Component: PositionRadioCode.tsx
+  Imports:
+
+Component: PositionsTooltipCode.tsx
+  Imports:
+
+Component: PositionSwitchCode.tsx
+  Imports:
+
+Component: Position.tsx
+  Imports:
+
+Component: Position.tsx
+  Imports:
+
+Component: Position.tsx
+  Imports:
+
+Component: PositiveAndNegativeBarChart.tsx
+  Imports:
+
+Component: PositiveAndNegativeBarCode.tsx
+  Imports:
+
+Component: PostComments.tsx
+  Imports:
+
+Component: PostItem.tsx
+  Imports:
+    './PostComments';
+
+Component: PostTextBox.tsx
+  Imports:
+
+Component: Post.tsx
+  Imports:
+    './PostItem';
+    './PostTextBox';
+
+Component: predictive-dashboard.tsx
+  Imports:
+
+Component: PricingCard.tsx
+  Imports:
+
+Component: Pricing.tsx
+  Imports:
+
+Component: Pricing.tsx
+  Imports:
+
+Component: Pricing.tsx
+  Imports:
+
+Component: Pricing.tsx
+  Imports:
+
+Component: ProcessingQueue.tsx
+  Imports:
+    './types';
+    './ConfidenceBadge';
+
+Component: ProductAvgSales.tsx
+  Imports:
+
+Component: ProductCarousel.tsx
+  Imports:
+    './SliderData';
+
+Component: ProductCheckout.tsx
+  Imports:
+    './HorizontalStepper';
+    './FirstStep';
+    './SecondStep';
+    './ThirdStep';
+    './FinalStep';
+
+Component: ProductDesc.tsx
+  Imports:
+
+Component: ProductDetails.tsx
+  Imports:
+
+Component: ProductDetails.tsx
+  Imports:
+
+Component: ProductDetail.tsx
+  Imports:
+
+Component: ProductFilter.tsx
+  Imports:
+
+Component: ProductList.tsx
+  Imports:
+    './ProductSearch';
+
+Component: ProductPerformances.tsx
+  Imports:
+
+Component: ProductRelated.tsx
+  Imports:
+
+Component: ProductSearch.tsx
+  Imports:
+
+Component: ProductSidebar.tsx
+  Imports:
+    './ProductFilter';
+
+Component: ProductTableList.tsx
+  Imports:
+
+Component: ProductTemplate.tsx
+  Imports:
+
+Component: ProductTemplate.tsx
+  Imports:
+
+Component: ProfileBanner.tsx
+  Imports:
+    './ProfileTab';
+    './OrthodoxAvatarSelector';
+
+Component: ProfileCardCode.tsx
+  Imports:
+
+Component: ProfileCard.tsx
+  Imports:
+    './code/ProfileCardCode';
+
+Component: ProfileTab.tsx
+  Imports:
+
+Component: Profile.tsx
+  Imports:
+
+Component: Profile.tsx
+  Imports:
+
+Component: project-generator.tsx
+  Imports:
+
+Component: Projects.tsx
+  Imports:
+
+Component: ProtectedRoute.tsx
+  Imports:
+
+Component: PublicOCRUploader.tsx
+  Imports:
+
+Component: PublicOCRUpload.tsx
+  Imports:
+
+Component: QuestionnairePreview.tsx
+  Imports:
+
+Component: QuestionnaireRunner.tsx
+  Imports:
+    './SurveyResultsContext';
+
+Component: Questions.tsx
+  Imports:
+
+Component: QuickLinks.tsx
+  Imports:
+    './data';
+
+Component: RadarChartsCode.tsx
+  Imports:
+
+Component: RadialbarChartsCode.tsx
+  Imports:
+
+Component: RadialbarChart.tsx
+  Imports:
+
+Component: RadioCode.tsx
+  Imports:
+
+Component: RangeDefault.tsx
+  Imports:
+    './code/RangesliderCode'
+
+Component: RangesliderCode.tsx
+  Imports:
+
+Component: RangeSlider.tsx
+  Imports:
+
+Component: RecentTransactions.tsx
+  Imports:
+
+Component: RecordCard.tsx
+  Imports:
+
+Component: RecordFilters.tsx
+  Imports:
+    './constants';
+
+Component: RecordFilter.tsx
+  Imports:
+
+Component: RecordFormModal.tsx
+  Imports:
+    './constants';
+
+Component: RecordGeneratorPage.tsx
+  Imports:
+
+Component: RecordGenerator.tsx
+  Imports:
+
+Component: RecordHeader.tsx
+  Imports:
+    './constants';
+
+Component: RecordHistoryModal.tsx
+  Imports:
+
+Component: RecordList.tsx
+  Imports:
+    './RecordCard';
+    './RecordSearch';
+
+Component: RecordManager.tsx
+  Imports:
+    './RecordHeader';
+    './RecordSearch';
+    './RecordFilters';
+    './RecordTable';
+    './RecordFormModal';
+    './RecordHistoryModal';
+    './CertificatePreviewer';
+    './ImportModal';
+    './DeleteConfirmationModal';
+    './RecordPagination';
+    './useRecordManager';
+    './constants';
+
+Component: RecordPagination.tsx
+  Imports:
+
+Component: RecordPreviewPane.tsx
+  Imports:
+
+Component: RecordsContext.tsx
+  Imports:
+    './AuthContext';
+
+Component: RecordSearch.tsx
+  Imports:
+    './constants';
+
+Component: RecordSearch.tsx
+  Imports:
+    './constants';
+
+Component: RecordSidebar.tsx
+  Imports:
+    './RecordFilter';
+
+Component: RecordTable.tsx
+  Imports:
+    './constants';
+
+Component: RecordTemplateManager.tsx
+  Imports:
+
+Component: RecordWorkflowExample.tsx
+  Imports:
+
+Component: Register2.tsx
+  Imports:
+
+Component: Register.tsx
+  Imports:
+
+Component: ResetPasswordModal.tsx
+  Imports:
+
+Component: ResponsiveDialog.tsx
+  Imports:
+
+Component: ResponsiveFullscreenCode.tsx
+  Imports:
+
+Component: RetryButton.tsx
+  Imports:
+
+Component: RevenueUpdates.tsx
+  Imports:
+
+Component: RevenueUpdates.tsx
+  Imports:
+
+Component: ReviewCarousel.tsx
+  Imports:
+
+Component: RoleManagement.tsx
+  Imports:
+
+Component: RoleManagement.tsx
+  Imports:
+
+Component: RollbaseCASL.tsx
+  Imports:
+
+Component: Router.tsx
+  Imports:
+
+Component: Rowdragdrop.tsx
+  Imports:
+
+Component: RTL.tsx
+  Imports:
+
+Component: SacramentsStats.tsx
+  Imports:
+
+Component: SalesOverview.tsx
+  Imports:
+
+Component: Sales.tsx
+  Imports:
+
+Component: SalesTwo.tsx
+  Imports:
+
+Component: ScatterClickNoSnapChart.tsx
+  Imports:
+
+Component: ScatterClickNoSnapCode.tsx
+  Imports:
+
+Component: ScatterDatasetChart.tsx
+  Imports:
+
+Component: ScatterDatasetCode.tsx
+  Imports:
+
+Component: ScreenshotCapture.tsx
+  Imports:
+
+Component: ScriptRunner.tsx
+  Imports:
+
+Component: ScrollableCode.tsx
+  Imports:
+
+Component: Scrollbar.tsx
+  Imports:
+
+Component: ScrollContentDialog.tsx
+  Imports:
+
+Component: ScrollingContentCode.tsx
+  Imports:
+
+Component: ScrollToTop.tsx
+  Imports:
+
+Component: SDLCBackupPanel.tsx
+  Imports:
+
+Component: SearchTable.tsx
+  Imports:
+
+Component: Search.tsx
+  Imports:
+
+Component: SecondStep.tsx
+  Imports:
+
+Component: SecurityTab.tsx
+  Imports:
+
+Component: SelectCode.tsx
+  Imports:
+
+Component: SelectedListCode.tsx
+  Imports:
+
+Component: SelectedList.tsx
+  Imports:
+
+Component: SellingProducts.tsx
+  Imports:
+
+Component: ServiceManagement.tsx
+  Imports:
+    './services/BackendDetails';
+
+Component: SessionManagement.tsx
+  Imports:
+
+Component: SessionManagement.tsx
+  Imports:
+
+Component: SettingsCode.tsx
+  Imports:
+
+Component: Settings.tsx
+  Imports:
+
+Component: Settings.tsx
+  Imports:
+
+Component: Shadows.tsx
+  Imports:
+
+Component: SidebarItems.tsx
+  Imports:
+    './NavItem';
+    './NavCollapse';
+    './NavGroup/NavGroup';
+
+Component: Sidebar.tsx
+  Imports:
+    './SidebarItems';
+    './SidebarProfile/Profile';
+
+Component: SimpleAreaChart.tsx
+  Imports:
+
+Component: SimpleAreaCode.tsx
+  Imports:
+
+Component: SimpleBarChart.tsx
+  Imports:
+
+Component: SimpleBarCode.tsx
+  Imports:
+
+Component: SimpleCode.tsx
+  Imports:
+
+Component: SimpleDialog.tsx
+  Imports:
+
+Component: SimpleLineChart.tsx
+  Imports:
+
+Component: SimpleLineCode.tsx
+  Imports:
+
+Component: SimpleListCode.tsx
+  Imports:
+
+Component: SimpleList.tsx
+  Imports:
+
+Component: SimpleOCRPanel.tsx
+  Imports:
+
+Component: SimpleOCRUploader.tsx
+  Imports:
+
+Component: SimplePageEditorTest.tsx
+  Imports:
+    './SimplePageEditor';
+
+Component: SimplePageEditor.tsx
+  Imports:
+    './DynamicComponentRenderer';
+    './ContentRenderer';
+
+Component: SimpleTooltipCode.tsx
+  Imports:
+
+Component: SiteClone.tsx
+  Imports:
+
+Component: SiteEditorDemo.tsx
+  Imports:
+
+Component: SiteEditorErrorBoundary.tsx
+  Imports:
+
+Component: SiteEditorFallback.tsx
+  Imports:
+
+Component: SiteEditorOverlay.tsx
+  Imports:
+    './ComponentInspector';
+    './VRTSettingsPanel';
+
+Component: SiteEditorTest.tsx
+  Imports:
+
+Component: SiteEditor.tsx
+  Imports:
+    './SiteEditorOverlay';
+    './SiteEditorErrorBoundary';
+
+Component: SiteStructureVisualizer.tsx
+  Imports:
+
+Component: SizeButtonGroupCode.tsx
+  Imports:
+
+Component: SizeButtonGroup.tsx
+  Imports:
+
+Component: SizeButton.tsx
+  Imports:
+
+Component: SizesAutocomplete.tsx
+  Imports:
+
+Component: SizesCheckboxCode.tsx
+  Imports:
+
+Component: SizesCode.tsx
+  Imports:
+
+Component: SizesCode.tsx
+  Imports:
+
+Component: SizesCode.tsx
+  Imports:
+
+Component: SizesCode.tsx
+  Imports:
+
+Component: SizesRadioCode.tsx
+  Imports:
+
+Component: SizesSwitchCode.tsx
+  Imports:
+
+Component: Sizes.tsx
+  Imports:
+
+Component: Sizes.tsx
+  Imports:
+
+Component: Sizes.tsx
+  Imports:
+
+Component: slider.tsx
+  Imports:
+
+Component: SmartRedirect.tsx
+  Imports:
+
+Component: SocialChat.tsx
+  Imports:
+
+Component: SocialPermissionsToggle.tsx
+  Imports:
+
+Component: SocialToolbar.tsx
+  Imports:
+
+Component: Social.tsx
+  Imports:
+
+Component: Spinner.tsx
+  Imports:
+
+Component: SSPPOCRecordsPage.tsx
+  Imports:
+
+Component: StackedAreaChart.tsx
+  Imports:
+
+Component: StackedAreaCode.tsx
+  Imports:
+
+Component: StackedBarChart.tsx
+  Imports:
+
+Component: StackedBarCode.tsx
+  Imports:
+
+Component: Status.tsx
+  Imports:
+
+Component: Status.tsx
+  Imports:
+
+Component: Step1RecordDetails.tsx
+  Imports:
+
+Component: Step2FileUploader.tsx
+  Imports:
+
+Component: Step3FileReview.tsx
+  Imports:
+
+Component: Step4Confirmation.tsx
+  Imports:
+
+Component: StillQuestions.tsx
+  Imports:
+
+Component: StraightAnglePieChart.tsx
+  Imports:
+
+Component: StraightAnglePieCode.tsx
+  Imports:
+
+Component: Subtitle1Code.tsx
+  Imports:
+
+Component: Subtitle2Code.tsx
+  Imports:
+
+Component: SuperAdminDashboard.tsx
+  Imports:
+    './AdminTile';
+
+Component: SurveyResultsContext.tsx
+  Imports:
+
+Component: SwitchListCode.tsx
+  Imports:
+
+Component: SwitchList.tsx
+  Imports:
+
+Component: switch.tsx
+  Imports:
+
+Component: SystemNotifications.tsx
+  Imports:
+
+Component: SystemWatchdog.tsx
+  Imports:
+
+Component: TabEmbedding.tsx
+  Imports:
+
+Component: Table1.tsx
+  Imports:
+
+Component: Table2.tsx
+  Imports:
+
+Component: Table3.tsx
+  Imports:
+
+Component: Table4.tsx
+  Imports:
+
+Component: Table5.tsx
+  Imports:
+    './tableData';
+
+Component: TableControlPanel.tsx
+  Imports:
+
+Component: TableThemeDemo.tsx
+  Imports:
+    './TableThemeSelector';
+
+Component: TableThemeEditor.tsx
+  Imports:
+
+Component: TableThemeSelector.tsx
+  Imports:
+
+Component: TabPayments.tsx
+  Imports:
+
+Component: TabTeamScheduling.tsx
+  Imports:
+
+Component: TabWorkflows.tsx
+  Imports:
+
+Component: TaskData.tsx
+  Imports:
+    './TaskModal/EditTaskModal';
+
+Component: TaskManager.tsx
+  Imports:
+    './KanbanHeader';
+    './CategoryTaskList';
+
+Component: teaching-dashboard.tsx
+  Imports:
+
+Component: TemperatureRangeCode.tsx
+  Imports:
+
+Component: TemplateCreationDialog.tsx
+  Imports:
+
+Component: TemplateManager.tsx
+  Imports:
+
+Component: TemplatePreviewDialog.tsx
+  Imports:
+
+Component: TemplateSetupCompletion.tsx
+  Imports:
+
+Component: test-grid.tsx
+  Imports:
+
+Component: TestimonialTitle.tsx
+  Imports:
+
+Component: Testimonial.tsx
+  Imports:
+    './TestimonialTitle';
+
+Component: TestLiturgicalCalendar.tsx
+  Imports:
+
+Component: Test.tsx
+  Imports:
+
+Component: TextButtonGroupCode.tsx
+  Imports:
+
+Component: TextButtonGroup.tsx
+  Imports:
+
+Component: TextCode.tsx
+  Imports:
+
+Component: TextCode.tsx
+  Imports:
+
+Component: TextColorButtons.tsx
+  Imports:
+
+Component: TextColorCode.tsx
+  Imports:
+
+Component: TextDefaultButtons.tsx
+  Imports:
+
+Component: TextErrorCode.tsx
+  Imports:
+
+Component: TextIconButtons.tsx
+  Imports:
+
+Component: TextIconColor.tsx
+  Imports:
+
+Component: TextInfoCode.tsx
+  Imports:
+
+Component: TextPrimaryCode.tsx
+  Imports:
+
+Component: TextSecondaryCode.tsx
+  Imports:
+
+Component: TextSizeButton.tsx
+  Imports:
+
+Component: TextSizesCode.tsx
+  Imports:
+
+Component: TextSuccessCode.tsx
+  Imports:
+
+Component: TextWarningCode.tsx
+  Imports:
+
+Component: ThemeColors.tsx
+  Imports:
+
+Component: ThemeContext.tsx
+  Imports:
+
+Component: ThemeCustomizer.tsx
+  Imports:
+
+Component: ThemedLayout.tsx
+  Imports:
+
+Component: ThemedTable.tsx
+  Imports:
+
+Component: Theme.tsx
+  Imports:
+    './Components';
+    './Typography';
+    './Shadows';
+    './DarkThemeColors';
+    './LightThemeColors';
+    './DefaultColors';
+
+Component: ThirdStep.tsx
+  Imports:
+
+Component: ThreeColumn.tsx
+  Imports:
+
+Component: Thumbnail.tsx
+  Imports:
+
+Component: Thumbnail.tsx
+  Imports:
+
+Component: TicketFilter.tsx
+  Imports:
+
+Component: TicketListing.tsx
+  Imports:
+
+Component: Tickets.tsx
+  Imports:
+
+Component: TimepickerCode.tsx
+  Imports:
+
+Component: TinyAreaChart.tsx
+  Imports:
+
+Component: TinyAreaCode.tsx
+  Imports:
+
+Component: TinyBarChart.tsx
+  Imports:
+
+Component: TinyBarCode.tsx
+  Imports:
+
+Component: TinyLineChart.tsx
+  Imports:
+
+Component: TinyLineCode.tsx
+  Imports:
+
+Component: TiptapEditor.tsx
+  Imports:
+    './TiptapEdit';
+
+Component: TiptapEdit.tsx
+  Imports:
+
+Component: TodaysSummary.tsx
+  Imports:
+
+Component: TopCards.tsx
+  Imports:
+
+Component: TopChurches.tsx
+  Imports:
+
+Component: TopPerformers.tsx
+  Imports:
+    './TopPerformerData';
+
+Component: TrackitemclicksTreeCode.tsx
+  Imports:
+
+Component: TrackitemclicksTree.tsx
+  Imports:
+
+Component: TransectionCode.tsx
+  Imports:
+
+Component: TransitionCode.tsx
+  Imports:
+
+Component: TransitionCode.tsx
+  Imports:
+
+Component: TransitionDialog.tsx
+  Imports:
+
+Component: TransitionsCode.tsx
+  Imports:
+
+Component: TSXComponentInstallWizard.tsx
+  Imports:
+
+Component: TwoLevelPieChart.tsx
+  Imports:
+
+Component: TwoLevelPieCode.tsx
+  Imports:
+
+Component: TwoSimplePieChart.tsx
+  Imports:
+
+Component: TwoSimplePieCode.tsx
+  Imports:
+
+Component: TwoSteps2.tsx
+  Imports:
+
+Component: TwoSteps.tsx
+  Imports:
+
+Component: Typography.tsx
+  Imports:
+
+Component: Unauthorized.tsx
+  Imports:
+
+Component: UnifiedRecordsPage.tsx
+  Imports:
+    './SSPPOCRecordsPage';
+
+Component: UpcomingActivityCode.tsx
+  Imports:
+
+Component: UpcomingActivity.tsx
+  Imports:
+    './code/UpcomingActivityCode';
+
+Component: UploadedFileList.tsx
+  Imports:
+
+Component: UploadStatus.tsx
+  Imports:
+
+Component: UploadTokenManager.tsx
+  Imports:
+
+Component: useGlobalErrorStore.tsx
+  Imports:
+
+Component: UserFormModal.tsx
+  Imports:
+
+Component: UserFormModal.tsx
+  Imports:
+
+Component: UserManagement_backup.tsx
+  Imports:
+
+Component: UserManagement-Broken.tsx
+  Imports:
+
+Component: UserManagement_corrupted.tsx
+  Imports:
+
+Component: UserManagementDialog.tsx
+  Imports:
+
+Component: UserManagement_Enhanced.tsx
+  Imports:
+
+Component: UserManagement-Fixed.tsx
+  Imports:
+
+Component: UserManagement_Fixed.tsx
+  Imports:
+
+Component: UserManagement.tsx
+  Imports:
+
+Component: UserManagement.tsx
+  Imports:
+
+Component: UserProfile.tsx
+  Imports:
+
+Component: VariableWidthCode.tsx
+  Imports:
+
+Component: VariantCode.tsx
+  Imports:
+
+Component: VariationCard.tsx
+  Imports:
+
+Component: VariationCard.tsx
+  Imports:
+
+Component: VerticalButtonGroupCode.tsx
+  Imports:
+
+Component: VerticalButtonGroup.tsx
+  Imports:
+
+Component: VerticalCode.tsx
+  Imports:
+
+Component: Views.tsx
+  Imports:
+
+Component: View.tsx
+  Imports:
+
+Component: VisualRegressionDashboard.tsx
+  Imports:
+
+Component: VisualTestDemo.tsx
+  Imports:
+
+Component: VolumesliderCode.tsx
+  Imports:
+
+Component: VolumeSlider.tsx
+  Imports:
+
+Component: VoronoiInteractionChart.tsx
+  Imports:
+
+Component: VoronoiInteractionCode.tsx
+  Imports:
+
+Component: VRTSettingsPanel.tsx
+  Imports:
+
+Component: WebSocketContext.tsx
+  Imports:
+    './AuthContext';
+
+Component: WeeklyStats.tsx
+  Imports:
+
+Component: WelcomeCard.tsx
+  Imports:
+
+Component: Welcome.tsx
+  Imports:
+
+Component: WhatsNewEditor_Simple.tsx
+  Imports:
+
+Component: WhatsNewEditor.tsx
+  Imports:
+
+Component: WhyChooseUsEnhanced.tsx
+  Imports:
+
+Component: WidgetBanners.tsx
+  Imports:
+
+Component: WidgetCards.tsx
+  Imports:
+
+Component: WidgetCharts.tsx
+  Imports:
+
+Component: WithBadgeCode.tsx
+  Imports:
+
+Component: WizardUpload.tsx
+  Imports:
+    './wizard/Step1RecordDetails';
+    './wizard/Step2FileUploader';
+    './wizard/Step3FileReview';
+    './wizard/Step4Confirmation';
+
+Component: YearlyBreakup.tsx
+  Imports:
+
+Component: YearlySales.tsx
+  Imports:
+
+--- EXTERNAL DEPENDENCIES ---
+Production Dependencies:
+  "dependencies": {
+    "@casl/ability": "^6.7.3",
+    "@casl/react": "^5.0.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@editorjs/code": "^2.9.3",
+    "@editorjs/delimiter": "^1.4.2",
+    "@editorjs/editorjs": "^2.30.8",
+    "@editorjs/header": "^2.8.8",
+    "@editorjs/image": "^2.10.3",
+    "@editorjs/list": "^2.0.8",
+    "@editorjs/paragraph": "^2.11.7",
+    "@editorjs/quote": "^2.7.6",
+    "@editorjs/table": "^2.4.5",
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@headlessui/react": "^2.2.6",
+    "@hello-pangea/dnd": "^18.0.1",
+    "@heroicons/react": "^2.2.0",
+
+Development Dependencies:
+  "devDependencies": {
+    "@tanstack/react-query-devtools": "^5.81.5",
+    "@types/chance": "^1.1.6",
+    "@types/fslightbox-react": "^1.7.8",
+    "@types/node": "22.10.1",
+    "@types/react": "^19.0.1",
+    "@types/react-big-calendar": "^1.15.0",
+    "@types/react-dom": "^19.0.1",
+    "@types/react-helmet": "^6.1.11",
+    "@types/react-slick": "^0.23.13",

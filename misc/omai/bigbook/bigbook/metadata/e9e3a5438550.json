@@ -1,0 +1,68 @@
+{
+  "id": "e9e3a5438550",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/services/databaseService.js",
+  "relativePath": "server/services/databaseService.js",
+  "name": "databaseService.js",
+  "extension": ".js",
+  "size": 6992,
+  "modified": "2025-07-22T09:38:32.510Z",
+  "created": "2025-07-19T14:38:59.133Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 236,
+      "characters": 6984,
+      "words": 728
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 10
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 101,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 102,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 103,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "/**\r\n * Database Service Layer - Proper Architecture Separation\r\n * \r\n * This service implements the correct database separation:\r\n * - orthodoxmetrics_db: All platform data (users, churches, OCR, settings)\r\n * - Church-specific DBs: Only record data (baptism, marriage, funeral)\r\n */\r\n\r\nconst { promisePool } = require('../config/db'); // orthodoxmetrics_db connection\r\nconst mysql = require('mysql2/promise');\r\n\r\n// Cache for church database connections\r\nconst churchDbConnections = new Map();\r\n\r\n/**\r\n * Get the main platform database connection (orthodoxmetrics_db)\r\n * Use this for ALL non-record operations\r\n */\r\nfunction getPlatformDb() {\r\n    return promisePool;\r\n}\r\n\r\n/**\r\n * Get database connection (alias for getPlatformDb for backward compatibility)\r\n * @returns {Object} - Platform database connection\r\n */\r\nfunction getDatabase() {\r\n    return promisePool;\r\n}\r\n\r\n/**\r\n * Get the church's record database name for a given user\r\n * @param {number} userId - User ID to look up\r\n * @returns {Promise<string>} - Database name (e.g., 'ssppoc_records_db')\r\n */\r\nasync function getChurchRecordDatabase(userId) {\r\n    try {\r\n        const [result] = await promisePool.query(`\r\n            SELECT c.database_name \r\n            FROM users u \r\n            JOIN churches c ON u.church_id = c.id \r\n            WHERE u.id = ?\r\n        `, [userId]);\r\n        \r\n        if (result.length === 0) {\r\n            throw new Error(`No church database found for user ID: ${userId}`);\r\n        }\r\n        \r\n        return result[0].database_name;\r\n    } catch (error) {\r\n        console.error('❌ Error getting church record database:', error);\r\n        throw error;\r\n    }\r\n}\r\n\r\n/**\r\n * Get the church's record database name by church ID\r\n * @param {number} churchId - Church ID to look up\r\n * @returns {Promise<string>} - Database name (e.g., 'ssppoc_records_db')\r\n */\r\nasync function getChurchRecordDatabaseByChurchId(churchId) {\r\n    try {\r\n        const [result] = await promisePool.query(`\r\n            SELECT database_name \r\n            FROM churches \r\n            WHERE id = ?\r\n        `, [churchId]);\r\n        \r\n        if (result.length === 0) {\r\n            throw new Error(`No church found with ID: ${churchId}`);\r\n        }\r\n        \r\n        if (!result[0].database_name) {\r\n            throw new Error(`No database configured for church ID: ${churchId}`);\r\n        }\r\n        \r\n        return result[0].database_name;\r\n    } catch (error) {\r\n        console.error('❌ Error getting church record database by church ID:', error);\r\n        throw error;\r\n    }\r\n}\r\n\r\n/**\r\n * Get a connection to a church's record database\r\n * Use this ONLY for record operations (baptism, marriage, funeral)\r\n * @param {number} churchId - Church ID\r\n * @returns {Promise<mysql.Connection>} - Database connection to church records DB\r\n */\r\nasync function getChurchRecordConnection(churchId) {\r\n    try {\r\n        const databaseName = await getChurchRecordDatabaseByChurchId(churchId);\r\n        \r\n        // Check if we already have a connection cached\r\n        if (churchDbConnections.has(databaseName)) {\r\n            return churchDbConnections.get(databaseName);\r\n        }\r\n        \r\n        // Create new connection to the church's record database\r\n        const connection = mysql.createPool({\r\n            host: process.env.[REDACTED],\r\n            user: process.env.[REDACTED],\r\n            password: process.env.[REDACTED],\r\n            database: databaseName,\r\n            waitForConnections: true,\r\n            connectionLimit: 10,\r\n            queueLimit: 0\r\n        });\r\n        \r\n        // Cache the connection\r\n        churchDbConnections.set(databaseName, connection);\r\n        \r\n        console.log(`✅ Connected to church record database: ${databaseName}`);\r\n        return connection;\r\n        \r\n    } catch (error) {\r\n        console.error('❌ Error connecting to church record database:', error);\r\n        throw error;\r\n    }\r\n}\r\n\r\n/**\r\n * Get OCR database connection\r\n * OCR data is stored in orthodoxmetrics_ocr_db (separate from platform DB)\r\n */\r\nfunction getOcrDb() {\r\n    const { getOcrDbPool } = require('./dbConnections');\r\n    return getOcrDbPool();\r\n}\r\n\r\n/**\r\n * Execute a query on the church's record database\r\n * @param {number} churchId - Church ID\r\n * @param {string} query - SQL query\r\n * @param {Array} params - Query parameters\r\n * @returns {Promise<Array>} - Query results\r\n */\r\nasync function queryChurchRecords(churchId, query, params = []) {\r\n    const connection = await getChurchRecordConnection(churchId);\r\n    return connection.execute(query, params);\r\n}\r\n\r\n/**\r\n * Execute a query on the platform database (orthodoxmetrics_db)\r\n * Use this for users, churches, settings, etc.\r\n * @param {string} query - SQL query\r\n * @param {Array} params - Query parameters\r\n * @returns {Promise<Array>} - Query results\r\n */\r\nasync function queryPlatform(query, params = []) {\r\n    return promisePool.execute(query, params);\r\n}\r\n\r\n/**\r\n * Get church metadata (from orthodoxmetrics_db)\r\n * @param {number} churchId - Church ID\r\n * @returns {Promise<Object>} - Church metadata\r\n */\r\nasync function getChurchMetadata(churchId) {\r\n    const [result] = await queryPlatform(`\r\n        SELECT \r\n            id,\r\n            name,\r\n            email,\r\n            phone,\r\n            address,\r\n            city,\r\n            state_province,\r\n            postal_code,\r\n            country,\r\n            preferred_language,\r\n            timezone,\r\n            currency,\r\n            tax_id,\r\n            website,\r\n            description_multilang,\r\n            settings,\r\n            is_active,\r\n            database_name,\r\n            setup_complete,\r\n            created_at,\r\n            updated_at\r\n        FROM churches \r\n        WHERE id = ?\r\n    `, [churchId]);\r\n    \r\n    if (result.length === 0) {\r\n        throw new Error(`Church not found with ID: ${churchId}`);\r\n    }\r\n    \r\n    return result[0];\r\n}\r\n\r\n/**\r\n * Check if a path should use church record database\r\n * @param {string} path - Request path\r\n * @returns {boolean} - True if should use church records DB\r\n */\r\nfunction isRecordPath(path) {\r\n    const recordPaths = [\r\n        '/saints-peter-and-paul-Records',\r\n        '/church/:id/records',\r\n        '/api/records',\r\n        '/api/baptism',\r\n        '/api/marriage', \r\n        '/api/funeral'\r\n    ];\r\n    \r\n    return recordPaths.some(recordPath => \r\n        path.includes('records') || \r\n        path.includes('baptism') || \r\n        path.includes('marriage') || \r\n        path.includes('funeral')\r\n    );\r\n}\r\n\r\nmodule.exports = {\r\n    // Main database functions\r\n    getPlatformDb,\r\n    getDatabase, // Added for backward compatibility\r\n    getOcrDb,\r\n    \r\n    // Church record database functions\r\n    getChurchRecordDatabase,\r\n    getChurchRecordDatabaseByChurchId,\r\n    getChurchRecordConnection,\r\n    queryChurchRecords,\r\n    \r\n    // Platform database functions\r\n    queryPlatform,\r\n    getChurchMetadata,\r\n    \r\n    // Utility functions\r\n    isRecordPath\r\n};\r\n"
+    },
+    "complexity": {
+      "totalLines": 236,
+      "codeLines": 139,
+      "commentLines": 67,
+      "commentRatio": 0.32524271844660196,
+      "averageLineLength": 32.116504854368934
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.106Z"
+  },
+  "contentHash": "e6754aa60002cde3a1255e0091806e2f6e1e6e9e09fb0b0c90b06e9c565e6fdb",
+  "discoveredAt": "2025-07-28T07:20:01.106Z"
+}

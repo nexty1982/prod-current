@@ -1,0 +1,91 @@
+{
+  "id": "c86f69b91488",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/debug-auth.js",
+  "relativePath": "server/utils/debug-auth.js",
+  "name": "debug-auth.js",
+  "extension": ".js",
+  "size": 3799,
+  "modified": "2025-07-05T07:00:44.000Z",
+  "created": "2025-07-09T00:48:38.526Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 118,
+      "characters": 3775,
+      "words": 344
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "bcrypt",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 6
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 42,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 64,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 10,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 11,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 12,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "/**\r\n * Debug authentication - check user and create proper test user\r\n */\r\n\r\nconst bcrypt = require('bcrypt');\r\nconst mysql = require('mysql2/promise');\r\n\r\n// Database configuration\r\nconst dbConfig = {\r\n  host: process.env.[REDACTED] || 'localhost',\r\n  user: process.env.[REDACTED] || 'orthodoxmetrics_user',\r\n  password: process.env.[REDACTED] || 'securepassword123',\r\n  database: process.env.[REDACTED] || 'orthodoxmetrics_db',\r\n  connectTimeout: 60000,\r\n};\r\n\r\nasync function debugAuth() {\r\n  let connection;\r\n  \r\n  try {\r\n    console.log('🔗 Connecting to database...');\r\n    connection = await mysql.createConnection(dbConfig);\r\n    \r\n    // Check current user\r\n    console.log('\\n📋 Checking existing users...');\r\n    const [users] = await connection.execute('SELECT id, email, password_hash, first_name, last_name, role, is_active FROM users WHERE email = ?', ['admin@orthodoxmetrics.com']);\r\n    \r\n    if (users.length > 0) {\r\n      const user = users[0];\r\n      console.log('✅ Found user:', {\r\n        id: user.id,\r\n        email: user.email,\r\n        first_name: user.first_name,\r\n        last_name: user.last_name,\r\n        role: user.role,\r\n        is_active: user.is_active,\r\n        password_hash_length: user.password_hash ? user.password_hash.length : 'NULL'\r\n      });\r\n      \r\n      // Test password\r\n      console.log('\\n🔐 Testing password...');\r\n      const testPassword = '[REDACTED]';\r\n      const isMatch = await bcrypt.compare(testPassword, user.password_hash);\r\n      console.log(`Password \"${testPassword}\" matches:`, isMatch);\r\n      \r\n      if (!isMatch) {\r\n        console.log('\\n🔧 Creating new password hash...');\r\n        const newHash = await bcrypt.hash(testPassword, 10);\r\n        console.log('New hash:', newHash);\r\n        \r\n        // Update with new hash\r\n        await connection.execute('UPDATE users SET password_hash = ? WHERE id = ?', [newHash, user.id]);\r\n        console.log('✅ Password updated');\r\n        \r\n        // Test again\r\n        const isMatchAfter = await bcrypt.compare(testPassword, newHash);\r\n        console.log(`Password \"${testPassword}\" matches after update:`, isMatchAfter);\r\n      }\r\n    } else {\r\n      console.log('❌ User not found, creating new user...');\r\n      \r\n      const testUser = {\r\n        email: 'admin@orthodoxmetrics.com',\r\n        password: '[REDACTED]',\r\n        first_name: 'Test',\r\n        last_name: 'Admin',\r\n        role: 'admin'\r\n      };\r\n      \r\n      const password_hash = await bcrypt.hash(testUser.password, 10);\r\n      \r\n      const [result] = await connection.execute(\r\n        `INSERT INTO users (email, password_hash, first_name, last_name, role, preferred_language, is_active, email_verified, created_at, updated_at) \r\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,\r\n        [\r\n          testUser.email,\r\n          password_hash,\r\n          testUser.first_name,\r\n          testUser.last_name,\r\n          testUser.role,\r\n          'en',\r\n          true,\r\n          true\r\n        ]\r\n      );\r\n      \r\n      console.log('✅ User created with ID:', result.insertId);\r\n    }\r\n    \r\n    // Check database structure\r\n    console.log('\\n📊 Checking users table structure...');\r\n    const [columns] = await connection.execute('DESCRIBE users');\r\n    console.log('Table columns:', columns.map(col => `${col.Field} (${col.Type})`));\r\n    \r\n  } catch (error) {\r\n    console.error('❌ Error:', error);\r\n  } finally {\r\n    if (connection) {\r\n      await connection.end();\r\n    }\r\n  }\r\n}\r\n\r\n// Run the script\r\nif (require.main === module) {\r\n  debugAuth()\r\n    .then(() => {\r\n      console.log('\\n🎉 Debug complete!');\r\n      process.exit(0);\r\n    })\r\n    .catch((error) => {\r\n      console.error('💥 Script failed:', error);\r\n      process.exit(1);\r\n    });\r\n}\r\n\r\nmodule.exports = debugAuth;\r\n"
+    },
+    "complexity": {
+      "totalLines": 118,
+      "codeLines": 89,
+      "commentLines": 10,
+      "commentRatio": 0.10101010101010101,
+      "averageLineLength": 36.06060606060606
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.244Z"
+  },
+  "contentHash": "304e920cfbab6f43640e3bd9391e29da081c9886d4f30ddbdd17f2037eafae25",
+  "discoveredAt": "2025-07-28T07:20:01.244Z"
+}

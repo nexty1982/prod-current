@@ -147,7 +147,7 @@ export const SuperAdminDashboard: React.FC = () => {
       label: 'OCR Management',
       description: 'Document processing & uploads',
       to: '/apps/ocr',
-      roleRestriction: ['super_admin', 'admin', 'priest', 'deacon'],
+      roleRestriction: ['super_admin', 'admin', 'manager'],
       category: 'tools'
     },
     {
@@ -167,7 +167,7 @@ export const SuperAdminDashboard: React.FC = () => {
       label: 'Record Management',
       description: 'Baptism, marriage & funeral records',
       to: '/demos/editable-record/baptism/new',
-      roleRestriction: ['super_admin', 'admin', 'priest', 'deacon'],
+      roleRestriction: ['super_admin', 'admin', 'manager'],
       badge: 'Latest',
       badgeColor: 'success',
       category: 'content'
@@ -177,7 +177,7 @@ export const SuperAdminDashboard: React.FC = () => {
       label: 'Church Management',
       description: 'Parish administration & settings',
       to: '/apps/churches',
-      roleRestriction: ['super_admin', 'admin', 'priest'],
+      roleRestriction: ['super_admin', 'admin', 'manager'],
       category: 'content'
     },
     {
@@ -185,7 +185,7 @@ export const SuperAdminDashboard: React.FC = () => {
       label: 'CMS Content',
       description: 'Website content management',
       to: '/apps/cms',
-      roleRestriction: ['super_admin', 'admin', 'priest', 'deacon'],
+      roleRestriction: ['super_admin', 'admin', 'manager'],
       category: 'content'
     },
 

@@ -1,0 +1,59 @@
+{
+  "id": "b9f1b50f39af",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-registry-fix.sh",
+  "relativePath": "scripts/test-registry-fix.sh",
+  "name": "test-registry-fix.sh",
+  "extension": ".sh",
+  "size": 4797,
+  "modified": "2025-07-27T18:41:14.552Z",
+  "created": "2025-07-27T18:18:24.426Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 129,
+      "characters": 4759,
+      "words": 590
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 43
+      },
+      {
+        "type": "npm_package",
+        "name": "@mui/material",
+        "line": 44
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 98
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 129,
+      "codeLines": 102,
+      "commentLines": 12,
+      "commentRatio": 0.10526315789473684,
+      "averageLineLength": 40.62280701754386
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.522Z"
+  },
+  "contentHash": "68f853f121eb19b8fc3742099bce6c4c34a8d546ddf6f127ddc1760e663a6393",
+  "discoveredAt": "2025-07-28T07:19:59.522Z"
+}

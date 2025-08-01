@@ -1,0 +1,43 @@
+{
+  "id": "3040475d9a6b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/ai/learning/regressionFeedback.ts",
+  "relativePath": "front-end/src/ai/learning/regressionFeedback.ts",
+  "name": "regressionFeedback.ts",
+  "extension": ".ts",
+  "size": 21449,
+  "modified": "2025-07-25T04:54:03.342Z",
+  "created": "2025-07-25T04:53:58.077Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 671,
+      "characters": 21449,
+      "words": 1812
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 671,
+      "codeLines": 553,
+      "commentLines": 40,
+      "commentRatio": 0.06745362563237774,
+      "averageLineLength": 34.83136593591905
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.656Z"
+  },
+  "contentHash": "df25c318f0121f4d46ea4a00f74b4b36325da59e57b9f5969b7bd58d632a5c88",
+  "discoveredAt": "2025-07-28T07:19:58.656Z"
+}

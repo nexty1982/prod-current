@@ -1,0 +1,43 @@
+{
+  "id": "45fc29bb359f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-outer-nginx.sh",
+  "relativePath": "server/debug/check-outer-nginx.sh",
+  "name": "check-outer-nginx.sh",
+  "extension": ".sh",
+  "size": 5894,
+  "modified": "2025-07-23T13:08:20.566Z",
+  "created": "2025-07-23T13:08:19.127Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 173,
+      "characters": 5838,
+      "words": 626
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 173,
+      "codeLines": 129,
+      "commentLines": 15,
+      "commentRatio": 0.10416666666666667,
+      "averageLineLength": 38.708333333333336
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.080Z"
+  },
+  "contentHash": "60daf494f963d11c4a67fc6320c36bdc107d913d31b95f0a162d98ed965829d5",
+  "discoveredAt": "2025-07-28T07:20:00.080Z"
+}

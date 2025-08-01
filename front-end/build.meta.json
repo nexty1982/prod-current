@@ -1,0 +1,14 @@
+{
+  "lastBuild": "2025-07-30T06:24:38.032Z",
+  "config": {
+    "mode": "incremental",
+    "memory": 4096,
+    "installPackage": "",
+    "legacyPeerDeps": true,
+    "skipInstall": true,
+    "dryRun": false
+  },
+  "success": true,
+  "duration": 5288,
+  "version": "1.0.0"
+}

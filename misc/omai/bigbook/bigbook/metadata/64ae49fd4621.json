@@ -1,0 +1,43 @@
+{
+  "id": "64ae49fd4621",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/add-markdown-field.sql",
+  "relativePath": "server/database/add-markdown-field.sql",
+  "name": "add-markdown-field.sql",
+  "extension": ".sql",
+  "size": 0,
+  "modified": "2025-07-17T22:24:19.661Z",
+  "created": "2025-07-17T22:24:19.661Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1,
+      "characters": 0,
+      "words": 0
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 1,
+      "codeLines": 0,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 0
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.572Z"
+  },
+  "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "discoveredAt": "2025-07-28T07:19:59.572Z"
+}

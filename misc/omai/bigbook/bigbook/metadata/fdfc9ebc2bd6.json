@@ -1,0 +1,43 @@
+{
+  "id": "fdfc9ebc2bd6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-actual-login.js",
+  "relativePath": "server/debug/test-actual-login.js",
+  "name": "test-actual-login.js",
+  "extension": ".js",
+  "size": 6856,
+  "modified": "2025-07-22T03:58:17.802Z",
+  "created": "2025-07-22T03:58:17.802Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 145,
+      "characters": 6810,
+      "words": 613
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 145,
+      "codeLines": 122,
+      "commentLines": 5,
+      "commentRatio": 0.03937007874015748,
+      "averageLineLength": 50.960629921259844
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.219Z"
+  },
+  "contentHash": "8d8b81c88dd7cb336a9fb9480b3d3eae6d611800501ab2398bad2ab99fe75044",
+  "discoveredAt": "2025-07-28T07:20:00.219Z"
+}

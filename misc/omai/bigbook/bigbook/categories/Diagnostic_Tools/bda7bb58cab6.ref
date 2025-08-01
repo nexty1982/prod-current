@@ -1,0 +1,6 @@
+{
+  "id": "bda7bb58cab6",
+  "name": "fix-session-auth-complete.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-session-auth-complete.sh",
+  "type": "Troubleshooting Utilities"
+}

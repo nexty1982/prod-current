@@ -1,0 +1,121 @@
+{
+  "id": "91fd1434ac80",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/controllers/records.js",
+  "relativePath": "server/controllers/records.js",
+  "name": "records.js",
+  "extension": ".js",
+  "size": 15607,
+  "modified": "2025-07-13T02:52:06.016Z",
+  "created": "2025-07-13T02:48:15.065Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 573,
+      "characters": 15607,
+      "words": 1678
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 7
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 12,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 15,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 122,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 175,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 243,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 341,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 407,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 450,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 556,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "/**\r\n * Orthodox Metrics - Records Controller\r\n * Business logic for church records CRUD operations\r\n */\r\n\r\nconst mysql = require('mysql2/promise');\r\nconst { v4: uuidv4 } = require('uuid');\r\n\r\n// Database connection helper\r\nconst getDbConnection = async () => {\r\n  return mysql.createConnection({\r\n    host: process.env.[REDACTED] || 'localhost',\r\n    user: process.env.[REDACTED] || 'root',\r\n    password: process.env.[REDACTED] || '',\r\n    database: process.env.[REDACTED] || 'orthodoxmetrics_db'\r\n  });\r\n};\r\n\r\n// Helper function to get table name based on record type\r\nconst getTableName = (recordType) => {\r\n  const tableMap = {\r\n    'baptism': 'baptism_records',\r\n    'marriage': 'marriage_records', \r\n    'funeral': 'funeral_records'\r\n  };\r\n  return tableMap[recordType];\r\n};\r\n\r\n// Helper function to log audit trail\r\nconst logAuditTrail = async (connection, action, recordType, recordId, userId, changes = null) => {\r\n  const auditSql = `\r\n    INSERT INTO record_audit_log (\r\n      id, record_type, record_id, user_id, action, changes, \r\n      created_at, ip_address\r\n    ) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)\r\n  `;\r\n  \r\n  const auditId = uuidv4();\r\n  const changesJson = changes ? JSON.stringify(changes) : null;\r\n  \r\n  await connection.execute(auditSql, [\r\n    auditId, recordType, recordId, userId, action, changesJson, null\r\n  ]);\r\n};\r\n\r\n/**\r\n * List all records of a specific type\r\n */\r\nconst listRecords = async (req, res) => {\r\n  let connection;\r\n  \r\n  try {\r\n    connection = await getDbConnection();\r\n    const { recordType } = req;\r\n    const tableName = getTableName(recordType);\r\n    \r\n    // Query parameters for pagination and filtering\r\n    const page = parseInt(req.query.page) || 1;\r\n    const limit = parseInt(req.query.limit) || 50;\r\n    const offset = (page - 1) * limit;\r\n    const search = req.query.search || '';\r\n    const status = req.query.status || '';\r\n    \r\n    // Build WHERE clause\r\n    let whereClause = 'WHERE 1=1';\r\n    const queryParams = [];\r\n    \r\n    if (search) {\r\n      whereClause += ' AND (JSON_EXTRACT(fields, \"$.*.value\") LIKE ? OR id LIKE ?)';\r\n      queryParams.push(`%${search}%`, `%${search}%`);\r\n    }\r\n    \r\n    if (status) {\r\n      whereClause += ' AND status = ?';\r\n      queryParams.push(status);\r\n    }\r\n    \r\n    // Get total count\r\n    const countSql = `SELECT COUNT(*) as total FROM ${tableName} ${whereClause}`;\r\n    const [countRows] = await connection.execute(countSql, queryParams);\r\n    const total = countRows[0].total;\r\n    \r\n    // Get records with pagination\r\n    const sql = `\r\n      SELECT id, record_type, fields, metadata, color_overrides, tags, \r\n             created_at, updated_at, status\r\n      FROM ${tableName} \r\n      ${whereClause}\r\n      ORDER BY updated_at DESC \r\n      LIMIT ? OFFSET ?\r\n    `;\r\n    \r\n    const [rows] = await connection.execute(sql, [...queryParams, limit, offset]);\r\n    \r\n    // Parse JSON fields\r\n    const records = rows.map(row => ({\r\n      ...row,\r\n      fields: JSON.parse(row.fields || '[]'),\r\n      metadata: JSON.parse(row.metadata || '{}'),\r\n      colorOverrides: JSON.parse(row.color_overrides || '{}'),\r\n      tags: JSON.parse(row.tags || '[]')\r\n    }));\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: {\r\n        records,\r\n        pagination: {\r\n          page,\r\n          limit,\r\n          total,\r\n          totalPages: Math.ceil(total / limit)\r\n        }\r\n      }\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Error listing records:', error);\r\n    res.status(500).json({\r\n      error: 'Database error',\r\n      message: 'Failed to retrieve records',\r\n      details: process.env.[REDACTED] === 'development' ? error.message : undefined\r\n    });\r\n  } finally {\r\n    if (connection) await connection.end();\r\n  }\r\n};\r\n\r\n/**\r\n * Get a single record by ID\r\n */\r\nconst getRecordById = async (req, res) => {\r\n  let connection;\r\n  \r\n  try {\r\n    connection = await getDbConnection();\r\n    const { recordType } = req;\r\n    const { id } = req.params;\r\n    const tableName = getTableName(recordType);\r\n    \r\n    const sql = `\r\n      SELECT id, record_type, fields, metadata, color_overrides, tags,\r\n             created_at, updated_at, status\r\n      FROM ${tableName} \r\n      WHERE id = ?\r\n    `;\r\n    \r\n    const [rows] = await connection.execute(sql, [id]);\r\n    \r\n    if (rows.length === 0) {\r\n      return res.status(404).json({\r\n        error: 'Record not found',\r\n        message: `No ${recordType} record found with ID: ${id}`\r\n      });\r\n    }\r\n    \r\n    const record = {\r\n      ...rows[0],\r\n      fields: JSON.parse(rows[0].fields || '[]'),\r\n      metadata: JSON.parse(rows[0].metadata || '{}'),\r\n      colorOverrides: JSON.parse(rows[0].color_overrides || '{}'),\r\n      tags: JSON.parse(rows[0].tags || '[]')\r\n    };\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: record\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Error fetching record:', error);\r\n    res.status(500).json({\r\n      error: 'Database error',\r\n      message: 'Failed to retrieve record',\r\n      details: process.env.[REDACTED] === 'development' ? error.message : undefined\r\n    });\r\n  } finally {\r\n    if (connection) await connection.end();\r\n  }\r\n};\r\n\r\n/**\r\n * Create a new record\r\n */\r\nconst createRecord = async (req, res) => {\r\n  let connection;\r\n  \r\n  try {\r\n    connection = await getDbConnection();\r\n    const { recordType } = req;\r\n    const { fields, metadata, colorOverrides, tags } = req.body;\r\n    const tableName = getTableName(recordType);\r\n    \r\n    const recordId = uuidv4();\r\n    const userId = req.user.id;\r\n    \r\n    const sql = `\r\n      INSERT INTO ${tableName} (\r\n        id, record_type, fields, metadata, color_overrides, tags,\r\n        created_at, updated_at, created_by, updated_by, status\r\n      ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(), ?, ?, 'active')\r\n    `;\r\n    \r\n    const values = [\r\n      recordId,\r\n      recordType,\r\n      JSON.stringify(fields || []),\r\n      JSON.stringify({\r\n        churchId: req.user.church_id || 1,\r\n        createdBy: userId,\r\n        createdAt: new Date().toISOString(),\r\n        version: 1,\r\n        ...metadata\r\n      }),\r\n      JSON.stringify(colorOverrides || {}),\r\n      JSON.stringify(tags || []),\r\n      userId,\r\n      userId\r\n    ];\r\n    \r\n    await connection.execute(sql, values);\r\n    \r\n    // Log audit trail\r\n    await logAuditTrail(connection, 'CREATE', recordType, recordId, userId, {\r\n      fields: fields,\r\n      metadata: metadata\r\n    });\r\n    \r\n    res.status(201).json({\r\n      success: true,\r\n      data: {\r\n        id: recordId,\r\n        recordType,\r\n        message: `${recordType} record created successfully`\r\n      }\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Error creating record:', error);\r\n    res.status(500).json({\r\n      error: 'Database error',\r\n      message: 'Failed to create record',\r\n      details: process.env.[REDACTED] === 'development' ? error.message : undefined\r\n    });\r\n  } finally {\r\n    if (connection) await connection.end();\r\n  }\r\n};\r\n\r\n/**\r\n * Update an existing record\r\n */\r\nconst updateRecord = async (req, res) => {\r\n  let connection;\r\n  \r\n  try {\r\n    connection = await getDbConnection();\r\n    const { recordType } = req;\r\n    const { id } = req.params;\r\n    const { fields, metadata, colorOverrides, tags } = req.body;\r\n    const tableName = getTableName(recordType);\r\n    const userId = req.user.id;\r\n    \r\n    // First, get the existing record for audit trail\r\n    const [existingRows] = await connection.execute(\r\n      `SELECT fields, metadata, color_overrides, tags FROM ${tableName} WHERE id = ?`,\r\n      [id]\r\n    );\r\n    \r\n    if (existingRows.length === 0) {\r\n      return res.status(404).json({\r\n        error: 'Record not found',\r\n        message: `No ${recordType} record found with ID: ${id}`\r\n      });\r\n    }\r\n    \r\n    const existingRecord = existingRows[0];\r\n    \r\n    const sql = `\r\n      UPDATE ${tableName} \r\n      SET fields = ?, metadata = ?, color_overrides = ?, tags = ?,\r\n          updated_at = NOW(), updated_by = ?\r\n      WHERE id = ?\r\n    `;\r\n    \r\n    const updatedMetadata = {\r\n      ...JSON.parse(existingRecord.metadata || '{}'),\r\n      ...metadata,\r\n      updatedBy: userId,\r\n      updatedAt: new Date().toISOString(),\r\n      version: (JSON.parse(existingRecord.metadata || '{}').version || 1) + 1\r\n    };\r\n    \r\n    const values = [\r\n      JSON.stringify(fields || []),\r\n      JSON.stringify(updatedMetadata),\r\n      JSON.stringify(colorOverrides || {}),\r\n      JSON.stringify(tags || []),\r\n      userId,\r\n      id\r\n    ];\r\n    \r\n    const [result] = await connection.execute(sql, values);\r\n    \r\n    if (result.affectedRows === 0) {\r\n      return res.status(404).json({\r\n        error: 'Record not found',\r\n        message: `No ${recordType} record found with ID: ${id}`\r\n      });\r\n    }\r\n    \r\n    // Log audit trail with changes\r\n    const changes = {\r\n      before: {\r\n        fields: JSON.parse(existingRecord.fields || '[]'),\r\n        metadata: JSON.parse(existingRecord.metadata || '{}')\r\n      },\r\n      after: {\r\n        fields: fields,\r\n        metadata: updatedMetadata\r\n      }\r\n    };\r\n    \r\n    await logAuditTrail(connection, 'UPDATE', recordType, id, userId, changes);\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: {\r\n        id,\r\n        recordType,\r\n        message: `${recordType} record updated successfully`,\r\n        version: updatedMetadata.version\r\n      }\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Error updating record:', error);\r\n    res.status(500).json({\r\n      error: 'Database error', \r\n      message: 'Failed to update record',\r\n      details: process.env.[REDACTED] === 'development' ? error.message : undefined\r\n    });\r\n  } finally {\r\n    if (connection) await connection.end();\r\n  }\r\n};\r\n\r\n/**\r\n * Delete a record\r\n */\r\nconst deleteRecord = async (req, res) => {\r\n  let connection;\r\n  \r\n  try {\r\n    connection = await getDbConnection();\r\n    const { recordType } = req;\r\n    const { id } = req.params;\r\n    const tableName = getTableName(recordType);\r\n    const userId = req.user.id;\r\n    \r\n    // Get record before deletion for audit trail\r\n    const [existingRows] = await connection.execute(\r\n      `SELECT * FROM ${tableName} WHERE id = ?`,\r\n      [id]\r\n    );\r\n    \r\n    if (existingRows.length === 0) {\r\n      return res.status(404).json({\r\n        error: 'Record not found',\r\n        message: `No ${recordType} record found with ID: ${id}`\r\n      });\r\n    }\r\n    \r\n    const existingRecord = existingRows[0];\r\n    \r\n    // Soft delete by updating status\r\n    const sql = `\r\n      UPDATE ${tableName} \r\n      SET status = 'deleted', updated_at = NOW(), updated_by = ?\r\n      WHERE id = ?\r\n    `;\r\n    \r\n    await connection.execute(sql, [userId, id]);\r\n    \r\n    // Log audit trail\r\n    await logAuditTrail(connection, 'DELETE', recordType, id, userId, {\r\n      deletedRecord: {\r\n        fields: JSON.parse(existingRecord.fields || '[]'),\r\n        metadata: JSON.parse(existingRecord.metadata || '{}')\r\n      }\r\n    });\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: {\r\n        id,\r\n        recordType,\r\n        message: `${recordType} record deleted successfully`\r\n      }\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Error deleting record:', error);\r\n    res.status(500).json({\r\n      error: 'Database error',\r\n      message: 'Failed to delete record', \r\n      details: process.env.[REDACTED] === 'development' ? error.message : undefined\r\n    });\r\n  } finally {\r\n    if (connection) await connection.end();\r\n  }\r\n};\r\n\r\n/**\r\n * Get record audit history\r\n */\r\nconst getRecordHistory = async (req, res) => {\r\n  let connection;\r\n  \r\n  try {\r\n    connection = await getDbConnection();\r\n    const { recordType } = req;\r\n    const { id } = req.params;\r\n    \r\n    const sql = `\r\n      SELECT ral.*, u.username, u.role\r\n      FROM record_audit_log ral\r\n      LEFT JOIN users u ON ral.user_id = u.id\r\n      WHERE ral.record_type = ? AND ral.record_id = ?\r\n      ORDER BY ral.created_at DESC\r\n    `;\r\n    \r\n    const [rows] = await connection.execute(sql, [recordType, id]);\r\n    \r\n    const history = rows.map(row => ({\r\n      ...row,\r\n      changes: row.changes ? JSON.parse(row.changes) : null\r\n    }));\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: history\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Error fetching record history:', error);\r\n    res.status(500).json({\r\n      error: 'Database error',\r\n      message: 'Failed to retrieve record history',\r\n      details: process.env.[REDACTED] === 'development' ? error.message : undefined\r\n    });\r\n  } finally {\r\n    if (connection) await connection.end();\r\n  }\r\n};\r\n\r\n/**\r\n * Validate record data\r\n */\r\nconst validateRecord = async (req, res) => {\r\n  try {\r\n    const { recordType } = req;\r\n    const { fields } = req.body;\r\n    \r\n    // Basic validation rules based on record type\r\n    const validationRules = {\r\n      baptism: ['person_name', 'baptism_date', 'church'],\r\n      marriage: ['spouse1_name', 'spouse2_name', 'marriage_date', 'church'],\r\n      funeral: ['person_name', 'death_date', 'funeral_date', 'church']\r\n    };\r\n    \r\n    const requiredFields = validationRules[recordType] || [];\r\n    const errors = [];\r\n    \r\n    // Check required fields\r\n    requiredFields.forEach(fieldKey => {\r\n      const field = fields.find(f => f.key === fieldKey);\r\n      if (!field || !field.value) {\r\n        errors.push({\r\n          field: fieldKey,\r\n          message: `${fieldKey.replace('_', ' ')} is required`\r\n        });\r\n      }\r\n    });\r\n    \r\n    // Validate dates\r\n    fields.forEach(field => {\r\n      if (field.type === 'date' && field.value) {\r\n        const date = new Date(field.value);\r\n        if (isNaN(date.getTime())) {\r\n          errors.push({\r\n            field: field.key,\r\n            message: `${field.label} must be a valid date`\r\n          });\r\n        }\r\n      }\r\n    });\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: {\r\n        isValid: errors.length === 0,\r\n        errors\r\n      }\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Error validating record:', error);\r\n    res.status(500).json({\r\n      error: 'Validation error',\r\n      message: 'Failed to validate record'\r\n    });\r\n  }\r\n};\r\n\r\n/**\r\n * Get records statistics\r\n */\r\nconst getRecordStats = async (req, res) => {\r\n  let connection;\r\n  \r\n  try {\r\n    connection = await getDbConnection();\r\n    \r\n    const stats = {};\r\n    const recordTypes = ['baptism', 'marriage', 'funeral'];\r\n    \r\n    for (const recordType of recordTypes) {\r\n      const tableName = getTableName(recordType);\r\n      \r\n      const [totalRows] = await connection.execute(\r\n        `SELECT COUNT(*) as total FROM ${tableName} WHERE status = 'active'`\r\n      );\r\n      \r\n      const [recentRows] = await connection.execute(\r\n        `SELECT COUNT(*) as recent FROM ${tableName} \r\n         WHERE status = 'active' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`\r\n      );\r\n      \r\n      stats[recordType] = {\r\n        total: totalRows[0].total,\r\n        recent: recentRows[0].recent\r\n      };\r\n    }\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: stats\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Error fetching record stats:', error);\r\n    res.status(500).json({\r\n      error: 'Database error',\r\n      message: 'Failed to retrieve statistics',\r\n      details: process.env.[REDACTED] === 'development' ? error.message : undefined\r\n    });\r\n  } finally {\r\n    if (connection) await connection.end();\r\n  }\r\n};\r\n\r\nmodule.exports = {\r\n  listRecords,\r\n  getRecordById,\r\n  createRecord,\r\n  updateRecord,\r\n  deleteRecord,\r\n  getRecordHistory,\r\n  validateRecord,\r\n  getRecordStats\r\n};\r\n"
+    },
+    "complexity": {
+      "totalLines": 573,
+      "codeLines": 444,
+      "commentLines": 45,
+      "commentRatio": 0.09202453987730061,
+      "averageLineLength": 30.028629856850717
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.562Z"
+  },
+  "contentHash": "2265912b2570e3811f89ce2df23b4ad36c2904aa2a9817010d2795afff4b0e4e",
+  "discoveredAt": "2025-07-28T07:19:59.562Z"
+}

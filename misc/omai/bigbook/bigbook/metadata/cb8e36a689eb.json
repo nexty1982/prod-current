@@ -1,0 +1,43 @@
+{
+  "id": "cb8e36a689eb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/layouts/full/shared/customizer/typings.d.ts",
+  "relativePath": "front-end/src/layouts/full/shared/customizer/typings.d.ts",
+  "name": "typings.d.ts",
+  "extension": ".ts",
+  "size": 97,
+  "modified": "2025-04-30T05:42:45.000Z",
+  "created": "2025-07-05T02:28:48.224Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 5,
+      "characters": 97,
+      "words": 11
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 5,
+      "codeLines": 4,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 23.25
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.862Z"
+  },
+  "contentHash": "17335a8dcf53534ed9e064c3ee5bc680b136e9e4534261b064e1faf420d1b6fd",
+  "discoveredAt": "2025-07-28T07:19:58.862Z"
+}

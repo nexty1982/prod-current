@@ -1,0 +1,54 @@
+{
+  "id": "f64dfb46b0c1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/sync/sync-manager.js",
+  "relativePath": "server/scrapers/sync/sync-manager.js",
+  "name": "sync-manager.js",
+  "extension": ".js",
+  "size": 15171,
+  "modified": "2025-07-14T06:43:23.926Z",
+  "created": "2025-07-14T06:42:22.162Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 427,
+      "characters": 15143,
+      "words": 1176
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "node-cron",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 5
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 427,
+      "codeLines": 334,
+      "commentLines": 25,
+      "commentRatio": 0.06963788300835655,
+      "averageLineLength": 39.949860724233986
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.627Z"
+  },
+  "contentHash": "889c23249396f4aeb1b3abd7d1f20899f61a6c64d88fff67b33ecf7988d64cfe",
+  "discoveredAt": "2025-07-28T07:20:00.627Z"
+}

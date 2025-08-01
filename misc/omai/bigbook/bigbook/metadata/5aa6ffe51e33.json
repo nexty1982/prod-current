@@ -1,0 +1,56 @@
+{
+  "id": "5aa6ffe51e33",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/7-8-25/SESSION_AUTH_TROUBLESHOOTING_LOG.md",
+  "relativePath": "docs/archive/temp_extract/7-8-25/SESSION_AUTH_TROUBLESHOOTING_LOG.md",
+  "name": "SESSION_AUTH_TROUBLESHOOTING_LOG.md",
+  "extension": ".md",
+  "size": 6609,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:08.096Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 205,
+      "characters": 6585,
+      "words": 829
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 40,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 44,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "# Session/Authentication Troubleshooting Log - July 8, 2025\r\n\r\n## PROBLEM STATEMENT\r\nRecurring session/authentication issues in Orthodox Metrics app:\r\n- \"Auth middleware - User: undefined\" errors\r\n- \"No valid session found\" errors  \r\n- Session cookies not persisting between requests\r\n- New debug routes returning 404 errors\r\n\r\n## CURRENT STATUS: NOT RESOLVED\r\n**Critical Issues Still Present:**\r\n1. ❌ Users not properly authenticated (session.user = undefined)\r\n2. ❌ New routes (/auth/check, debug routes) returning 404\r\n3. ❌ Sessions generating new IDs on each request instead of persisting\r\n4. ❌ /notifications/counts returning 401 due to failed auth\r\n\r\n## TROUBLESHOOTING STEPS TAKEN\r\n\r\n### Step 1: Analyzed Documentation and Configuration\r\n**Files Reviewed:**\r\n- `/docs/README.md`\r\n- `/docs/AUTHENTICATION_DEBUGGING_GUIDE.md`\r\n- `/docs/SESSION_ARCHITECTURE.md`\r\n- `/docs/NGINX_CONFIGURATION_GUIDE.md`\r\n\r\n**Findings:**\r\n- Session config looked correct in theory\r\n- Auth middleware structure appeared sound\r\n\r\n### Step 2: Inspected Backend Session Configuration\r\n**File:** `z:\\server\\config\\session.js`\r\n**Original Issues Found:**\r\n- `sameSite: 'strict'` was blocking cross-domain cookies\r\n- `domain` restriction was interfering with proxy setup\r\n\r\n**Changes Made:**\r\n```javascript\r\n// Changed from:\r\nsameSite: 'strict',\r\ndomain: process.env.[REDACTED],\r\n\r\n// To:\r\nsameSite: 'lax',\r\n// domain: process.env.[REDACTED], // Commented out\r\n```\r\n\r\n**Result:** Cookies now set properly, but users still not authenticated\r\n\r\n### Step 3: Updated Frontend API Configuration  \r\n**File:** `z:\\front-end\\.env.development`\r\n**Change Made:**\r\n```\r\n# Changed from:\r\nREACT_APP_API_BASE_URL=http://localhost:3001\r\n\r\n# To:\r\nREACT_APP_API_BASE_URL=https://orthodoxmetrics.com\r\n```\r\n\r\n**Result:** Frontend now makes requests to correct domain\r\n\r\n### Step 4: Added Debug Routes\r\n**File:** `z:\\server\\routes\\debug.js`\r\n**Routes Added:**\r\n- `/debug/session` - Session status debugging\r\n- `/debug/cookies` - Cookie parsing debugging  \r\n- `/debug/test-cookie` - Manual cookie setting test\r\n- `/debug/check-cookie` - Cookie persistence test\r\n- `/debug/session-continuity` - Session continuity testing\r\n- `/debug/session-full-debug` - Comprehensive session debugging\r\n\r\n**Result:** ❌ All debug routes return 404 - routes not loading properly\r\n\r\n### Step 5: Added Auth Check Route\r\n**File:** `z:\\server\\routes\\auth.js`\r\n**Route Added:**\r\n```javascript\r\nrouter.get('/check', (req, res) => {\r\n  // Auth status checking logic\r\n});\r\n```\r\n\r\n**Result:** ❌ Route returns 404 - not loading properly\r\n\r\n### Step 6: Verified Route Registration\r\n**File:** `z:\\server\\index.js`\r\n**Confirmed Routes Registered:**\r\n```javascript\r\napp.use('/api', debugRoutes);\r\napp.use('/debug', debugRoutes);\r\napp.use('/api/auth', authRoutes);  \r\napp.use('/auth', authRoutes);\r\n```\r\n\r\n**Result:** Routes appear correctly registered but still return 404\r\n\r\n### Step 7: Tested with curl Commands\r\n**Commands Tested:**\r\n```bash\r\n# Test session endpoint\r\ncurl -c cookies.txt -b cookies.txt https://orthodoxmetrics.com/debug/session\r\n\r\n# Test notification counts  \r\ncurl -c cookies.txt -b cookies.txt https://orthodoxmetrics.com/notifications/counts\r\n\r\n# Test auth check\r\ncurl https://orthodoxmetrics.com/auth/check\r\n```\r\n\r\n**Results:**\r\n- ✅ Session cookies being set correctly\r\n- ❌ New routes still return 404  \r\n- ❌ Users still showing as undefined in auth middleware\r\n\r\n## CURRENT LOG ANALYSIS\r\n\r\nFrom latest server logs:\r\n```\r\n🔐 Auth middleware - Session ID: JNGKIw0ZhpNM5Q2EFCqhN26nBrAa_nhF\r\n🔐 Auth middleware - User: undefined\r\n❌ No valid session found\r\nGET /auth/check 404 0.563 ms - 149\r\n```\r\n\r\n**Key Issues Identified:**\r\n1. **Session IDs are changing on each request** - indicates session not persisting\r\n2. **User is always undefined** - users are not logging in successfully \r\n3. **New routes return 404** - server not loading updated route files\r\n\r\n## ROOT CAUSE ANALYSIS\r\n\r\n### Issue 1: Route Loading Problem\r\n**Symptoms:** New routes return 404\r\n**Possible Causes:**\r\n- Syntax error in route files preventing loading\r\n- Module caching issues \r\n- Server not restarted properly after changes\r\n- Route file not saved correctly\r\n\r\n### Issue 2: User Authentication Failure  \r\n**Symptoms:** session.user always undefined\r\n**Possible Causes:**\r\n- Users not actually logging in through frontend\r\n- Login endpoint not working correctly\r\n- Session regeneration clearing user data\r\n- Frontend not sending login requests properly\r\n\r\n### Issue 3: Session Persistence Failure\r\n**Symptoms:** New session ID on each request  \r\n**Possible Causes:**\r\n- Cookie configuration still incorrect\r\n- Session store not saving properly\r\n- Client not sending cookies back\r\n- Proxy configuration stripping cookies\r\n\r\n## NEXT STEPS REQUIRED\r\n\r\n### Immediate Actions:\r\n1. **Verify server startup** - Check for syntax errors preventing route loading\r\n2. **Test basic routes** - Confirm existing routes still work \r\n3. **Test login flow** - Verify users can actually log in through frontend\r\n4. **Check session store** - Verify sessions are being saved to database/memory\r\n5. **Restart server cleanly** - Ensure all changes are loaded\r\n\r\n### Diagnostic Commands Needed:\r\n```bash\r\n# 1. Check server startup for errors\r\ncd z:\\server && node index.js\r\n\r\n# 2. Test basic existing route\r\ncurl https://orthodoxmetrics.com/logs/frontend\r\n\r\n# 3. Test login endpoint\r\ncurl -X POST -H \"Content-Type: application/json\" \\\r\n  -d '{\"email\":\"test@example.com\",\"password\":\"testpass\"}' \\\r\n  https://orthodoxmetrics.com/auth/login\r\n\r\n# 4. Check route registration\r\ncurl https://orthodoxmetrics.com/api/test-basic\r\n```\r\n\r\n## FILES MODIFIED\r\n\r\n### Configuration Files:\r\n- `z:\\server\\config\\session.js` - Cookie sameSite and domain settings\r\n- `z:\\front-end\\.env.development` - API base URL\r\n\r\n### Route Files:\r\n- `z:\\server\\routes\\debug.js` - Added comprehensive debug endpoints\r\n- `z:\\server\\routes\\auth.js` - Added /check endpoint  \r\n- `z:\\server\\index.js` - Added test routes and route registration\r\n\r\n### Documentation:\r\n- Various docs in `/docs/` directory reviewed and referenced\r\n\r\n## CONCLUSION\r\n\r\n**The authentication issue is NOT resolved.** Multiple attempts have been made to fix cookie and session configuration, but the core problems remain:\r\n\r\n1. Users are not successfully authenticating (session.user = undefined)\r\n2. New diagnostic routes are not loading (404 errors)  \r\n3. Sessions are not persisting between requests\r\n\r\nThe next phase requires systematic verification of server startup, route loading, and the actual login flow from frontend to backend.\r\n"
+    },
+    "complexity": {
+      "totalLines": 205,
+      "codeLines": 95,
+      "commentLines": 66,
+      "commentRatio": 0.40993788819875776,
+      "averageLineLength": 39.36645962732919
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.302Z"
+  },
+  "contentHash": "455700698586668f961c0cc28786ca5da9daef2e9ebc0b1819ec9047ec4c8125",
+  "discoveredAt": "2025-07-28T07:19:58.302Z"
+}

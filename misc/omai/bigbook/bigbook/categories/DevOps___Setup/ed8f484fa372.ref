@@ -1,0 +1,6 @@
+{
+  "id": "ed8f484fa372",
+  "name": "auto-install-missing-deps.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/auto-install-missing-deps.sh",
+  "type": "Setup Scripts"
+}

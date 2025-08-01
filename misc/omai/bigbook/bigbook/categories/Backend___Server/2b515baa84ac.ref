@@ -1,0 +1,6 @@
+{
+  "id": "2b515baa84ac",
+  "name": "start-production.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/start-production.sh",
+  "type": "Server Scripts"
+}

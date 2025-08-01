@@ -1,0 +1,43 @@
+{
+  "id": "5bd8b8047ab7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/DATABASE_SCHEMA.md",
+  "relativePath": "docs/archive/07-09-25/DATABASE_SCHEMA.md",
+  "name": "DATABASE_SCHEMA.md",
+  "extension": ".md",
+  "size": 20186,
+  "modified": "2025-07-09T04:32:16.331Z",
+  "created": "2025-07-09T04:32:16.331Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 689,
+      "characters": 20116,
+      "words": 2117
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 689,
+      "codeLines": 516,
+      "commentLines": 58,
+      "commentRatio": 0.10104529616724739,
+      "averageLineLength": 33.52090592334495
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.868Z"
+  },
+  "contentHash": "780b41ef5b3fc5b282380a6e673b3962e396e4d3b62f939ec96b639ec18f35b5",
+  "discoveredAt": "2025-07-28T07:19:57.868Z"
+}

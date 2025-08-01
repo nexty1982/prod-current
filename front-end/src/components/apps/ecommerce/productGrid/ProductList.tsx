@@ -16,7 +16,7 @@ import {
   Theme,
   Skeleton,
 } from '@mui/material';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 
 import { ProductContext } from "src/context/EcommerceContext";
 import ProductSearch from './ProductSearch';

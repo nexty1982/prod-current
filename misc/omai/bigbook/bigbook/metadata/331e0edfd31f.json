@@ -1,0 +1,43 @@
+{
+  "id": "331e0edfd31f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/calendar-schema.sql",
+  "relativePath": "server/calendar-schema.sql",
+  "name": "calendar-schema.sql",
+  "extension": ".sql",
+  "size": 22498,
+  "modified": "2025-07-23T21:15:46.778Z",
+  "created": "2025-07-23T20:56:06.357Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 533,
+      "characters": 22498,
+      "words": 2098
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 533,
+      "codeLines": 458,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 47.620087336244545
+    },
+    "lastAnalyzed": "2025-07-26T04:17:10.346Z"
+  },
+  "contentHash": "ea7626364de9f4498358d387de44bcb2ae701231c3795b032def6013dbba1f48",
+  "discoveredAt": "2025-07-26T04:17:10.346Z"
+}

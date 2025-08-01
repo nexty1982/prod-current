@@ -1,0 +1,54 @@
+{
+  "id": "9f423825f0f4",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/embeddings/context-loader.ts",
+  "relativePath": "services/om-ai/embeddings/context-loader.ts",
+  "name": "context-loader.ts",
+  "extension": ".ts",
+  "size": 8251,
+  "modified": "2025-07-25T00:06:42.353Z",
+  "created": "2025-07-24T23:55:11.560Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 252,
+      "characters": 8251,
+      "words": 784
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 252,
+      "codeLines": 194,
+      "commentLines": 12,
+      "commentRatio": 0.05825242718446602,
+      "averageLineLength": 38.0873786407767
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.452Z"
+  },
+  "contentHash": "89cbc6b61bc2b44dfa64d1e69bf0573920cc5df23881000e2a9aedc477e31a25",
+  "discoveredAt": "2025-07-28T07:20:01.452Z"
+}

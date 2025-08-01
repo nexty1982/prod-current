@@ -1,0 +1,43 @@
+{
+  "id": "508bdc9c8abd",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/MISSION_ACCOMPLISHED.md",
+  "relativePath": "docs/archive/MISSION_ACCOMPLISHED.md",
+  "name": "MISSION_ACCOMPLISHED.md",
+  "extension": ".md",
+  "size": 7734,
+  "modified": "2025-07-14T17:42:01.769Z",
+  "created": "2025-07-14T07:13:13.694Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 192,
+      "characters": 7422,
+      "words": 926
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 192,
+      "codeLines": 118,
+      "commentLines": 37,
+      "commentRatio": 0.23870967741935484,
+      "averageLineLength": 46.41935483870968
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.118Z"
+  },
+  "contentHash": "db62c4dae4e2522a8b2f09f5396eb37d0028e4ccec0ae2c604d1e6b80666b4a5",
+  "discoveredAt": "2025-07-28T07:19:58.118Z"
+}

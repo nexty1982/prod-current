@@ -1,7 +1,10 @@
 // server/middleware/userAuthorization.js - User Management Authorization
+// 🔄 Refactored to use unified role system (see utils/roles.js)
+
+const { canManageUser: checkCanManageUser, getUserLevel } = require('../utils/roles');
 
 // Root super admin email - can be overridden via environment variable
-const ROOT_SUPERADMIN_EMAIL = process.env.ROOT_SUPERADMIN_EMAIL || 'superadmin@orthodoxmetrics.com';
+const ROOT_SUPERADMIN_EMAIL = process.env.ROOT_SUPERADMIN_EMAIL || 'superadmin@orthodmetrics.com';
 
 /**
  * Check if current user is the root super admin
@@ -48,34 +51,16 @@ function canManageUser(currentUser, targetUser) {
         return false;
     }
 
-    // Users can manage themselves (limited operations like password change)
-    if (isManagingSelf) {
-        console.log('✅ User can manage themselves');
-        return true;
+    // Use unified role system for general user management
+    const canManage = checkCanManageUser(currentUser, targetUser);
+    
+    if (canManage) {
+        console.log('✅ User management authorized by unified role system');
+    } else {
+        console.warn('❌ User management denied by unified role system');
     }
-
-    // super_admins cannot manage other super_admins (except root manages all)
-    if (currentUser.role === 'super_admin' && targetUser.role === 'super_admin') {
-        console.warn('❌ super_admin cannot manage other super_admins');
-        return false;
-    }
-
-    // super_admins can manage admins and below
-    if (currentUser.role === 'super_admin' && targetUser.role !== 'super_admin') {
-        console.log('✅ super_admin can manage non-super_admin users');
-        return true;
-    }
-
-    // Admins can manage users below their level
-    if (currentUser.role === 'admin' && !['admin', 'super_admin'].includes(targetUser.role)) {
-        console.log('✅ admin can manage users below admin level');
-        return true;
-    }
-
-    console.warn('❌ User management operation denied', {
-        reason: 'Insufficient privileges for this operation'
-    });
-    return false;
+    
+    return canManage;
 }
 
 /**
@@ -120,22 +105,8 @@ function canPerformDestructiveOperation(currentUser, targetUser) {
         return false;
     }
 
-    // super_admins cannot perform destructive operations on other super_admins
-    if (currentUser.role === 'super_admin' && targetUser.role === 'super_admin') {
-        return false;
-    }
-
-    // super_admins can perform destructive operations on non-super_admins
-    if (currentUser.role === 'super_admin' && targetUser.role !== 'super_admin') {
-        return true;
-    }
-
-    // Admins can perform destructive operations on users below their level
-    if (currentUser.role === 'admin' && !['admin', 'super_admin'].includes(targetUser.role)) {
-        return true;
-    }
-
-    return false;
+    // 🔄 Use unified role system for destructive operations
+    return checkCanManageUser(currentUser, targetUser);
 }
 
 /**
@@ -168,13 +139,12 @@ function canChangeRole(currentUser, targetUser, newRole) {
         return false;
     }
 
-    // super_admins cannot change other super_admin roles
-    if (currentUser.role === 'super_admin' && targetUser.role === 'super_admin') {
-        return false;
-    }
+    // 🔄 Use unified role system for role change validation
+    const currentUserLevel = getUserLevel(currentUser);
+    const newRoleLevel = getUserLevel({ role: newRole });
 
-    // Use general management rules for other role changes
-    return canManageUser(currentUser, targetUser);
+    // User must be able to manage the target user and have sufficient privileges for the new role
+    return checkCanManageUser(currentUser, targetUser) && currentUserLevel >= newRoleLevel;
 }
 
 /**
@@ -228,7 +198,7 @@ function logUnauthorizedAttempt(currentUser, targetUser, operation) {
     console.warn('🚨 UNAUTHORIZED USER MANAGEMENT ATTEMPT:', JSON.stringify(logData, null, 2));
     
     // In production, you might want to send this to a security monitoring system
-    devLogger.warn('Unauthorized user management attempt', logData);
+    // devLogger.warn('Unauthorized user management attempt', logData);
 }
 
 module.exports = {

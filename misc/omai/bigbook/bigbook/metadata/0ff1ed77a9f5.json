@@ -1,0 +1,43 @@
+{
+  "id": "0ff1ed77a9f5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-parish-map-api.sh",
+  "relativePath": "scripts/test-parish-map-api.sh",
+  "name": "test-parish-map-api.sh",
+  "extension": ".sh",
+  "size": 1545,
+  "modified": "2025-07-27T05:13:08.974Z",
+  "created": "2025-07-27T05:11:19.821Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 49,
+      "characters": 1541,
+      "words": 185
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 49,
+      "codeLines": 34,
+      "commentLines": 6,
+      "commentRatio": 0.15,
+      "averageLineLength": 37.325
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.520Z"
+  },
+  "contentHash": "61ce579ed5db74a99540336ab2d7859710e3d5cc03cdb4046debb2c83c1a3678",
+  "discoveredAt": "2025-07-28T07:19:59.520Z"
+}

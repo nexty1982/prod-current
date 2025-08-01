@@ -1,0 +1,43 @@
+{
+  "id": "0fa3a670715a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/PHASE12_STATUS.md",
+  "relativePath": "services/om-ai/PHASE12_STATUS.md",
+  "name": "PHASE12_STATUS.md",
+  "extension": ".md",
+  "size": 5890,
+  "modified": "2025-07-25T02:49:02.768Z",
+  "created": "2025-07-25T02:49:01.786Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 165,
+      "characters": 5850,
+      "words": 735
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 165,
+      "codeLines": 96,
+      "commentLines": 34,
+      "commentRatio": 0.26153846153846155,
+      "averageLineLength": 43.46923076923077
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.361Z"
+  },
+  "contentHash": "22261f4c8abc7a84efc93d2901964b30fbbc8f59de2062be213406e34621c448",
+  "discoveredAt": "2025-07-28T07:20:01.361Z"
+}

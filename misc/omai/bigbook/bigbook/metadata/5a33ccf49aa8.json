@@ -1,0 +1,43 @@
+{
+  "id": "5a33ccf49aa8",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/OMAI_SERVICE_SETUP_GUIDE.md",
+  "relativePath": "OMAI_SERVICE_SETUP_GUIDE.md",
+  "name": "OMAI_SERVICE_SETUP_GUIDE.md",
+  "extension": ".md",
+  "size": 7875,
+  "modified": "2025-07-25T23:25:49.743Z",
+  "created": "2025-07-25T23:25:29.733Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 264,
+      "characters": 7847,
+      "words": 975
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 264,
+      "codeLines": 140,
+      "commentLines": 65,
+      "commentRatio": 0.3170731707317073,
+      "averageLineLength": 36.707317073170735
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.214Z"
+  },
+  "contentHash": "ae3c3e7fdb027b3b384519e0fca49507d0e33dbf39b88345decaa32730b7b115",
+  "discoveredAt": "2025-07-26T04:17:09.214Z"
+}

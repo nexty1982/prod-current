@@ -1,0 +1,43 @@
+{
+  "id": "61d4f21ee72d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/temp/translation-feature-summary.js",
+  "relativePath": "server/temp/translation-feature-summary.js",
+  "name": "translation-feature-summary.js",
+  "extension": ".js",
+  "size": 4091,
+  "modified": "2025-07-11T10:49:29.386Z",
+  "created": "2025-07-11T00:18:34.663Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 87,
+      "characters": 3983,
+      "words": 364
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 87,
+      "codeLines": 72,
+      "commentLines": 3,
+      "commentRatio": 0.04,
+      "averageLineLength": 51.81333333333333
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.169Z"
+  },
+  "contentHash": "0005966bba7c2204c092db8160bd7501300ffbef65086e36b2ca76114c81ec77",
+  "discoveredAt": "2025-07-28T07:20:01.169Z"
+}

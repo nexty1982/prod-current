@@ -23,11 +23,9 @@ router.get('/summary/:churchId', async (req, res) => {
       [churchId]
     );
     
-    // Get OCR pipeline stats (mock data for now)
-    const pendingOCRFiles = 5;
+    // Get additional stats
     const recordsNeedingReview = 3;
     const uploadErrors = 1;
-    const failedOCRs = 0;
     
     // Get monthly activity for the last 6 months
     const monthlyActivity = [];
@@ -72,10 +70,8 @@ router.get('/summary/:churchId', async (req, res) => {
       totalBaptisms: baptisms[0]?.count || 0,
       totalMarriages: marriages[0]?.count || 0,
       totalFunerals: funerals[0]?.count || 0,
-      pendingOCRFiles,
       recordsNeedingReview,
       uploadErrors,
-      failedOCRs,
       monthlyActivity,
       lastUpdated: new Date().toISOString()
     };
@@ -84,66 +80,6 @@ router.get('/summary/:churchId', async (req, res) => {
   } catch (error) {
     console.error('Dashboard summary error:', error);
     res.status(500).json({ error: 'Failed to fetch dashboard summary' });
-  }
-});
-
-// Get OCR pipeline status
-router.get('/ocr-pipeline/:churchId', async (req, res) => {
-  try {
-    const { churchId } = req.params;
-    
-    // Mock OCR pipeline data
-    const pipeline = [
-      {
-        id: 'uploaded',
-        stage: 'uploaded',
-        stageName: 'Files Uploaded',
-        count: 12,
-        status: 'completed',
-        actionUrl: '/pages/ocr',
-        lastUpdated: new Date().toISOString()
-      },
-      {
-        id: 'preprocessed',
-        stage: 'preprocessed',
-        stageName: 'Preprocessed',
-        count: 8,
-        status: 'processing',
-        actionUrl: '/pages/ocr',
-        lastUpdated: new Date().toISOString()
-      },
-      {
-        id: 'processed',
-        stage: 'processed',
-        stageName: 'OCR Processed',
-        count: 5,
-        status: 'completed',
-        actionUrl: '/pages/ocr',
-        lastUpdated: new Date().toISOString()
-      },
-      {
-        id: 'verified',
-        stage: 'verified',
-        stageName: 'Verified',
-        count: 3,
-        status: 'pending',
-        actionUrl: '/pages/ocr',
-        lastUpdated: new Date().toISOString()
-      },
-      {
-        id: 'stored',
-        stage: 'stored',
-        stageName: 'Stored',
-        count: 2,
-        status: 'completed',
-        lastUpdated: new Date().toISOString()
-      }
-    ];
-    
-    res.json(pipeline);
-  } catch (error) {
-    console.error('OCR pipeline error:', error);
-    res.status(500).json({ error: 'Failed to fetch OCR pipeline status' });
   }
 });
 
@@ -175,9 +111,9 @@ router.get('/activity-log/:churchId', async (req, res) => {
         userId: 'user2',
         userName: 'Mary Johnson',
         userRole: 'volunteer',
-        action: 'UPLOAD_OCR',
+        action: 'FILE_UPLOAD',
         recordType: 'upload',
-        description: 'Uploaded OCR file: baptism_records_1920.pdf',
+        description: 'Uploaded file: baptism_records_1920.pdf',
         ipAddress: '192.168.1.101',
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         changes: { filename: 'baptism_records_1920.pdf', size: '2.5MB' }
@@ -237,9 +173,9 @@ router.get('/activity/:churchId', async (req, res) => {
         userId: 'user2',
         userName: 'Mary Johnson',
         userRole: 'volunteer',
-        action: 'UPLOAD_OCR',
+        action: 'FILE_UPLOAD',
         recordType: 'upload',
-        description: 'Uploaded OCR file: baptism_records_1920.pdf',
+        description: 'Uploaded file: baptism_records_1920.pdf',
         ipAddress: '192.168.1.101',
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         changes: { filename: 'baptism_records_1920.pdf', size: '2.5MB' }
@@ -281,23 +217,23 @@ router.get('/notifications/:churchId', async (req, res) => {
       {
         id: '1',
         type: 'error',
-        title: 'OCR Processing Failed',
+        title: 'File Processing Failed',
         message: 'Failed to process baptism_records_1920.pdf due to poor image quality',
         timestamp: new Date().toISOString(),
         isRead: false,
         priority: 'high',
-        actionUrl: '/pages/ocr',
+        actionUrl: '/pages/records',
         metadata: { filename: 'baptism_records_1920.pdf' }
       },
       {
         id: '2',
         type: 'warning',
         title: 'Records Need Review',
-        message: '3 OCR-processed records require manual verification',
+        message: '3 processed records require manual verification',
         timestamp: new Date(Date.now() - 1800000).toISOString(),
         isRead: false,
         priority: 'medium',
-        actionUrl: '/pages/ocr',
+        actionUrl: '/pages/records',
         metadata: { count: 3 }
       },
       {
@@ -353,7 +289,7 @@ router.get('/church/:churchId', async (req, res) => {
       website: 'https://ssppoc.org',
       address: '123 Church Street, Manville, NJ 08835',
       description: 'Orthodox Christian church serving the community since 1952',
-      features: ['OCR Processing', 'Digital Records', 'Certificate Generation', 'Liturgical Calendar']
+      features: ['Digital Records', 'Certificate Generation', 'Liturgical Calendar', 'File Management']
     };
     
     res.json(church);
@@ -401,18 +337,6 @@ router.get('/metrics/:churchId', async (req, res) => {
         { month: 'May', baptisms: 25, marriages: 18, funerals: 10, total: 53 },
         { month: 'Jun', baptisms: 30, marriages: 20, funerals: 14, total: 64 }
       ],
-      ocrPerformance: {
-        totalProcessed: 245,
-        successRate: 92.5,
-        averageProcessingTime: 2.3,
-        errorRate: 7.5,
-        weeklyStats: [
-          { week: 'Week 1', processed: 52, success: 48, errors: 4 },
-          { week: 'Week 2', processed: 67, success: 62, errors: 5 },
-          { week: 'Week 3', processed: 44, success: 41, errors: 3 },
-          { week: 'Week 4', processed: 82, success: 76, errors: 6 }
-        ]
-      },
       userActivity: {
         activeUsers: 12,
         totalSessions: 156,

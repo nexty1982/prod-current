@@ -1,0 +1,43 @@
+{
+  "id": "daf7577099a1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/CHURCH_MANAGEMENT_URGENT_STATUS.md",
+  "relativePath": "docs/archive/07-09-25/CHURCH_MANAGEMENT_URGENT_STATUS.md",
+  "name": "CHURCH_MANAGEMENT_URGENT_STATUS.md",
+  "extension": ".md",
+  "size": 3763,
+  "modified": "2025-07-09T04:32:16.331Z",
+  "created": "2025-07-09T04:32:16.331Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 104,
+      "characters": 3747,
+      "words": 531
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 104,
+      "codeLines": 54,
+      "commentLines": 23,
+      "commentRatio": 0.2987012987012987,
+      "averageLineLength": 46.98701298701299
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.859Z"
+  },
+  "contentHash": "7d8b263b9c002d7986f5f0c21f47841c6ce94c1d4cd5c06f409736bb80e117b1",
+  "discoveredAt": "2025-07-28T07:19:57.859Z"
+}

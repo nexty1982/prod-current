@@ -1,0 +1,43 @@
+{
+  "id": "00fc5eb3c57f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-frontend-session.js",
+  "relativePath": "server/debug/check-frontend-session.js",
+  "name": "check-frontend-session.js",
+  "extension": ".js",
+  "size": 2980,
+  "modified": "2025-07-22T03:58:17.742Z",
+  "created": "2025-07-22T03:58:17.742Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 65,
+      "characters": 2968,
+      "words": 282
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 65,
+      "codeLines": 58,
+      "commentLines": 1,
+      "commentRatio": 0.01694915254237288,
+      "averageLineLength": 48.847457627118644
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.074Z"
+  },
+  "contentHash": "03c08874b4c83f2221d8a8e069d4933de00b9544486e5bec95aeb55769e2aaa7",
+  "discoveredAt": "2025-07-28T07:20:00.074Z"
+}

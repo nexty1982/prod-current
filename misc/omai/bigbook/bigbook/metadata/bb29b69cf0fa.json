@@ -1,0 +1,74 @@
+{
+  "id": "bb29b69cf0fa",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/initialize-tasks-system.sh",
+  "relativePath": "scripts/initialize-tasks-system.sh",
+  "name": "initialize-tasks-system.sh",
+  "extension": ".sh",
+  "size": 21349,
+  "modified": "2025-07-28T03:16:37.445Z",
+  "created": "2025-07-28T03:16:32.884Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 658,
+      "characters": 21069,
+      "words": 2692
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 528
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 529
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 165
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 177
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 420
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 458
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 658,
+      "codeLines": 426,
+      "commentLines": 117,
+      "commentRatio": 0.2154696132596685,
+      "averageLineLength": 37.348066298342545
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.121Z"
+  },
+  "contentHash": "58314b2f0961159648292ed86d7271061ff031b4fda152bf81ae82eff8765008",
+  "discoveredAt": "2025-07-28T07:19:59.121Z"
+}

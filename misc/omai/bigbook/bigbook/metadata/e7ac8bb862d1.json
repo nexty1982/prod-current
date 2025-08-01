@@ -1,0 +1,74 @@
+{
+  "id": "e7ac8bb862d1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-initial-blank-page.sh",
+  "relativePath": "server/debug/fix-initial-blank-page.sh",
+  "name": "fix-initial-blank-page.sh",
+  "extension": ".sh",
+  "size": 12596,
+  "modified": "2025-07-23T14:30:09.259Z",
+  "created": "2025-07-23T14:30:07.536Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 465,
+      "characters": 12536,
+      "words": 1379
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 32
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 378
+      },
+      {
+        "type": "npm_package",
+        "name": "react-router-dom",
+        "line": 379
+      },
+      {
+        "type": "npm_package",
+        "name": "@mui/material",
+        "line": 381
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 420
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 424
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 465,
+      "codeLines": 368,
+      "commentLines": 14,
+      "commentRatio": 0.03664921465968586,
+      "averageLineLength": 31.586387434554975
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.137Z"
+  },
+  "contentHash": "a37eface7888531fb5bb14a76a4072ca2c0d53b8d1656559328a0d8f946f65dd",
+  "discoveredAt": "2025-07-28T07:20:00.137Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "85b6c5bccd76",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/temp/analyze-baptism-registry-pages.js",
+  "relativePath": "server/temp/analyze-baptism-registry-pages.js",
+  "name": "analyze-baptism-registry-pages.js",
+  "extension": ".js",
+  "size": 5412,
+  "modified": "2025-07-11T10:49:29.341Z",
+  "created": "2025-07-11T03:09:33.930Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 158,
+      "characters": 5340,
+      "words": 473
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 158,
+      "codeLines": 131,
+      "commentLines": 9,
+      "commentRatio": 0.06428571428571428,
+      "averageLineLength": 36.785714285714285
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.145Z"
+  },
+  "contentHash": "b300a04792130ab7b16eb78d2105b3e3842787654abfb7875135f07203bb2399",
+  "discoveredAt": "2025-07-28T07:20:01.145Z"
+}

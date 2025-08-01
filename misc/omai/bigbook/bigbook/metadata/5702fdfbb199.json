@@ -1,0 +1,104 @@
+{
+  "id": "5702fdfbb199",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/install-pdf-table-deps.sh",
+  "relativePath": "scripts/7-26-25/install-pdf-table-deps.sh",
+  "name": "install-pdf-table-deps.sh",
+  "extension": ".sh",
+  "size": 2308,
+  "modified": "2025-07-26T22:22:59.277Z",
+  "created": "2025-07-26T22:22:55.762Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 62,
+      "characters": 2244,
+      "words": 278
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 7
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 10
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 11
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 12
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 15
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 16
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 17
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 18
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 21
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 24
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 27
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 31
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 62,
+      "codeLines": 51,
+      "commentLines": 1,
+      "commentRatio": 0.019230769230769232,
+      "averageLineLength": 41.98076923076923
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.000Z"
+  },
+  "contentHash": "e0da9a84fd7a407dd3cc4ce4597e2a5cd0d04a6572d58079c47da204c2242a0c",
+  "discoveredAt": "2025-07-28T07:19:59.000Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "88a06ed43272",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/Multi-Tenant-Provisioning.md",
+  "relativePath": "docs/Multi-Tenant-Provisioning.md",
+  "name": "Multi-Tenant-Provisioning.md",
+  "extension": ".md",
+  "size": 5255,
+  "modified": "2025-07-21T10:08:28.466Z",
+  "created": "2025-07-21T10:08:28.306Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 217,
+      "characters": 5225,
+      "words": 604
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 217,
+      "codeLines": 123,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 39.959349593495936
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.799Z"
+  },
+  "contentHash": "6590f7a88a3711a9ce1eaa860bcf11021045cee30d78ed6e6a73925be622e726",
+  "discoveredAt": "2025-07-28T07:19:57.799Z"
+}

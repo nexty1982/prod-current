@@ -1,0 +1,43 @@
+{
+  "id": "cd29eab1cc1c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/nginx-configuration.md",
+  "relativePath": "docs/archive/07-09-25/nginx-configuration.md",
+  "name": "nginx-configuration.md",
+  "extension": ".md",
+  "size": 8276,
+  "modified": "2025-07-09T09:56:53.107Z",
+  "created": "2025-07-09T09:56:53.107Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 282,
+      "characters": 8276,
+      "words": 688
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 282,
+      "codeLines": 180,
+      "commentLines": 55,
+      "commentRatio": 0.23404255319148937,
+      "averageLineLength": 34.02127659574468
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.037Z"
+  },
+  "contentHash": "27398dfc4253fdbc66cfd9d40e0c3db1644130f7b02e47579b4703f27bf6e759",
+  "discoveredAt": "2025-07-28T07:19:58.037Z"
+}

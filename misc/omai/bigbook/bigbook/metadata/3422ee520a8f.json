@@ -1,0 +1,43 @@
+{
+  "id": "3422ee520a8f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-social-menu-for-frjames.js",
+  "relativePath": "server/debug/test-social-menu-for-frjames.js",
+  "name": "test-social-menu-for-frjames.js",
+  "extension": ".js",
+  "size": 7701,
+  "modified": "2025-07-22T15:55:28.087Z",
+  "created": "2025-07-22T15:55:25.273Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 164,
+      "characters": 7617,
+      "words": 701
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 164,
+      "codeLines": 128,
+      "commentLines": 11,
+      "commentRatio": 0.07913669064748201,
+      "averageLineLength": 52.15107913669065
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.254Z"
+  },
+  "contentHash": "b2294c2c179378584fd0d2c2b4b76a86ff6408ad64c5fe46bf3ffcff9897b91c",
+  "discoveredAt": "2025-07-28T07:20:00.254Z"
+}

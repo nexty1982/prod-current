@@ -1,0 +1,61 @@
+{
+  "id": "50d4dbe4a307",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/ccaa3144078e.json",
+  "relativePath": "bigbook/metadata/ccaa3144078e.json",
+  "name": "ccaa3144078e.json",
+  "extension": ".json",
+  "size": 3621,
+  "modified": "2025-07-26T04:17:11.762Z",
+  "created": "2025-07-26T04:17:11.762Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 61,
+      "characters": 3611,
+      "words": 296
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 48
+      },
+      {
+        "type": "npm_package",
+        "name": "bcrypt",
+        "line": 48
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 48,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"ccaa3144078e\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/check-test-user.js\",\n  \"relativePath\": \"server/utils/check-test-user.js\",\n  \"name\": \"check-test-user.js\",\n  \"extension\": \".js\",\n  \"size\": 1947,\n  \"modified\": \"2025-07-05T07:26:26.000Z\",\n  \"created\": \"2025-07-09T00:48:38.526Z\",\n  \"classification\": {\n    \"type\": \"Testing Scripts\",\n    \"category\": \"DevOps > Test\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 60,\n      \"characters\": 1937,\n      \"words\": 188\n    },\n    \"classification\": {\n      \"type\": \"Testing Scripts\",\n      \"category\": \"DevOps > Test\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"mysql2/promise\",\n        \"line\": 2\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"bcrypt\",\n        \"line\": 3\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 9,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"// Check if test user exists and create if needed\\r\\nconst mysql = require('mysql2/promise');\\r\\nconst bcrypt = require('bcrypt');\\r\\n\\r\\n// Database configuration\\r\\nconst dbConfig = {\\r\\n  host: 'localhost',\\r\\n  user: 'root',\\r\\n  password: '[REDACTED]', // Update this with your actual password\\r\\n  database: 'orthodoxmetrics_db',\\r\\n  waitForConnections: true,\\r\\n  connectionLimit: 10,\\r\\n  queueLimit: 0\\r\\n};\\r\\n\\r\\nconst promisePool = mysql.createPool(dbConfig);\\r\\n\\r\\nasync function checkAndCreateTestUser() {\\r\\n  console.log('🔍 Checking if test user exists...');\\r\\n  \\r\\n  try {\\r\\n    // Check if user exists\\r\\n    const [rows] = await promisePool.query(\\r\\n      'SELECT id, email, first_name, last_name, role, is_active FROM users WHERE email = ?',\\r\\n      ['admin@orthodoxmetrics.com']\\r\\n    );\\r\\n    \\r\\n    if (rows.length === 0) {\\r\\n      console.log('❌ Test user does not exist. Creating...');\\r\\n      \\r\\n      // Create test user\\r\\n      const hashedPassword = await bcrypt.hash('admin123', 10);\\r\\n      \\r\\n      await promisePool.query(\\r\\n        'INSERT INTO users (email, password_hash, first_name, last_name, role, is_active, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?)',\\r\\n        ['admin@orthodoxmetrics.com', hashedPassword, 'Admin', 'User', 'super_admin', 1, 1]\\r\\n      );\\r\\n      \\r\\n      console.log('✅ Test user created successfully!');\\r\\n      console.log('   Email: admin@orthodoxmetrics.com');\\r\\n      console.log('   Password: admin123');\\r\\n      console.log('   Role: super_admin');\\r\\n    } else {\\r\\n      console.log('✅ Test user exists:');\\r\\n      console.log('   ID:', rows[0].id);\\r\\n      console.log('   Email:', rows[0].email);\\r\\n      console.log('   Name:', rows[0].first_name, rows[0].last_name);\\r\\n      console.log('   Role:', rows[0].role);\\r\\n      console.log('   Active:', rows[0].is_active);\\r\\n    }\\r\\n    \\r\\n    process.exit(0);\\r\\n  } catch (error) {\\r\\n    console.error('❌ Error:', error);\\r\\n    process.exit(1);\\r\\n  }\\r\\n}\\r\\n\\r\\ncheckAndCreateTestUser();\\r\\n\"\n    },\n    \"complexity\": {\n      \"totalLines\": 60,\n      \"codeLines\": 45,\n      \"commentLines\": 4,\n      \"commentRatio\": 0.08163265306122448,\n      \"averageLineLength\": 37.55102040816327\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:11.765Z\"\n  },\n  \"contentHash\": \"df6108b585c82c72d7aa10bc8519151ca19fc29d7adaa0d20a2bcb6d928ec6d5\",\n  \"discoveredAt\": \"2025-07-26T04:17:11.765Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 61,
+      "codeLines": 61,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 58.21311475409836
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.465Z"
+  },
+  "contentHash": "26cc50b5c826dd299ceada95d71bbaeeacdacaf6e408e0370812ea6b978c1489",
+  "discoveredAt": "2025-07-28T07:19:57.465Z"
+}

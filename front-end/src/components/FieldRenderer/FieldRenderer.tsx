@@ -23,7 +23,7 @@ import {
   Palette as PaletteIcon,
   CalendarToday as CalendarIcon,
   Email as EmailIcon,
-  Phone as PhoneIcon,
+  Smartphone as PhoneIcon,
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';

@@ -1,0 +1,43 @@
+{
+  "id": "3722c05ffa38",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/task_012_omai_icon_generation.md",
+  "relativePath": "docs/7-26-25/task_012_omai_icon_generation.md",
+  "name": "task_012_omai_icon_generation.md",
+  "extension": ".md",
+  "size": 2645,
+  "modified": "2025-07-26T05:22:17.000Z",
+  "created": "2025-07-27T02:13:08.221Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 96,
+      "characters": 2599,
+      "words": 375
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 96,
+      "codeLines": 65,
+      "commentLines": 12,
+      "commentRatio": 0.15584415584415584,
+      "averageLineLength": 32.51948051948052
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.769Z"
+  },
+  "contentHash": "47a92ef31d2f9e5e9bf8a9d3fe4865c9484ebb244c03f59414734212cf74d4da",
+  "discoveredAt": "2025-07-28T07:19:57.769Z"
+}

@@ -11,7 +11,7 @@ class KanbanTask {
         host: process.env.DB_HOST || 'localhost',
         user: process.env.DB_USER || 'root',
         password: process.env.DB_PASSWORD || '',
-        database: process.env.DB_NAME || 'orthodoxmetrics'
+        database: process.env.DB_NAME || 'orthodmetrics_dev'
       });
     }
     return this.connection;

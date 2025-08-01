@@ -1,0 +1,54 @@
+{
+  "id": "a0a4981f8003",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/orchestrator.ts",
+  "relativePath": "services/om-ai/orchestrator.ts",
+  "name": "orchestrator.ts",
+  "extension": ".ts",
+  "size": 10973,
+  "modified": "2025-07-25T02:41:56.937Z",
+  "created": "2025-07-25T00:56:12.129Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 330,
+      "characters": 10943,
+      "words": 975
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 330,
+      "codeLines": 252,
+      "commentLines": 26,
+      "commentRatio": 0.09352517985611511,
+      "averageLineLength": 37.65467625899281
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.558Z"
+  },
+  "contentHash": "3391d0cad01f58d35fae7a4f5b67caf6b47ade316ddb405626c7cd13c25e0d45",
+  "discoveredAt": "2025-07-28T07:20:01.558Z"
+}

@@ -1,0 +1,119 @@
+{
+  "id": "cb80e78902c0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/layouts/full/vertical/header/data.ts",
+  "relativePath": "front-end/src/layouts/full/vertical/header/data.ts",
+  "name": "data.ts",
+  "extension": ".ts",
+  "size": 5066,
+  "modified": "2025-07-21T04:50:34.148Z",
+  "created": "2025-07-05T02:28:48.460Z",
+  "classification": {
+    "type": "Other",
+    "category": "Uncategorized",
+    "confidence": 0
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 224,
+      "characters": 5066,
+      "words": 540
+    },
+    "classification": {
+      "type": "Other",
+      "category": "Uncategorized",
+      "confidence": 0
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-1.jpg",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-2.jpg",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-3.jpg",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-4.jpg",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-account.svg",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-inbox.svg",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-tasks.svg",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-dd-chat.svg",
+        "line": 10
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-dd-cart.svg",
+        "line": 11
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-dd-invoice.svg",
+        "line": 12
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-dd-date.svg",
+        "line": 13
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-dd-mobile.svg",
+        "line": 14
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-dd-lifebuoy.svg",
+        "line": 15
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-dd-message-box.svg",
+        "line": 16
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/svgs/icon-dd-application.svg",
+        "line": 17
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 224,
+      "codeLines": 199,
+      "commentLines": 10,
+      "commentRatio": 0.04784688995215311,
+      "averageLineLength": 23.105263157894736
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.863Z"
+  },
+  "contentHash": "1e5b3cfd8d8d996d243482079aa4999150ce31ff335af0caec298b3c479483ce",
+  "discoveredAt": "2025-07-28T07:19:58.863Z"
+}

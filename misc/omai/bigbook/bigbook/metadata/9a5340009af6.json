@@ -1,0 +1,77 @@
+{
+  "id": "9a5340009af6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/backend/routes/site-editor.js",
+  "relativePath": "backend/routes/site-editor.js",
+  "name": "site-editor.js",
+  "extension": ".js",
+  "size": 12414,
+  "modified": "2025-07-25T06:16:14.278Z",
+  "created": "2025-07-25T06:15:59.075Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 414,
+      "characters": 12414,
+      "words": 1291
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 90,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 411,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// Site Editor API Routes\r\n// Express routes for Phase 17 Site Editor functionality including component editing, backup, and GitOps\r\n\r\nconst express = require('express');\r\nconst router = express.Router();\r\nconst fs = require('fs').promises;\r\nconst path = require('path');\r\nconst crypto = require('crypto');\r\nconst { authenticateToken, requireSuperAdmin } = require('../middleware/auth');\r\nconst SiteEditorManager = require('../services/siteEditorManager');\r\nconst GitOpsService = require('../services/gitOpsService');\r\n\r\n// Initialize Site Editor Manager\r\nconst siteEditor = new SiteEditorManager();\r\nconst gitOps = new GitOpsService();\r\n\r\n/**\r\n * GET /api/editor/components-map\r\n * Get mapping of component names to file paths\r\n */\r\nrouter.get('/components-map', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const componentsMap = await siteEditor.getComponentsMap();\r\n    res.json(componentsMap);\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to get components map:', error);\r\n    res.status(500).json({ message: 'Failed to retrieve components mapping' });\r\n  }\r\n});\r\n\r\n/**\r\n * GET /api/editor/component-source\r\n * Get source code for a specific component\r\n */\r\nrouter.get('/component-source', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const { path: componentPath } = req.query;\r\n    \r\n    if (!componentPath) {\r\n      return res.status(400).json({ message: 'Component path is required' });\r\n    }\r\n\r\n    // Validate path to prevent directory traversal\r\n    const validation = siteEditor.validatePath(componentPath);\r\n    if (!validation.valid) {\r\n      return res.status(400).json({ message: validation.error });\r\n    }\r\n\r\n    const source = await siteEditor.getComponentSource(componentPath);\r\n    \r\n    // Set appropriate content type\r\n    res.setHeader('Content-Type', 'text/plain');\r\n    res.send(source);\r\n\r\n    // Log access\r\n    await siteEditor.logAction(req.user, 'COMPONENT_SOURCE_ACCESSED', {\r\n      path: componentPath,\r\n      size: source.length\r\n    });\r\n\r\n  } catch (error) {\r\n    if (error.code === 'ENOENT') {\r\n      res.status(404).json({ message: 'Component file not found' });\r\n    } else {\r\n      console.error('[Site Editor] Failed to get component source:', error);\r\n      res.status(500).json({ message: 'Failed to retrieve component source' });\r\n    }\r\n  }\r\n});\r\n\r\n/**\r\n * POST /api/editor/save-component\r\n * Save component source code with backup\r\n */\r\nrouter.post('/save-component', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const { path: componentPath, contents } = req.body;\r\n    \r\n    if (!componentPath || contents === undefined) {\r\n      return res.status(400).json({ message: 'Path and contents are required' });\r\n    }\r\n\r\n    // Validate path\r\n    const validation = siteEditor.validatePath(componentPath);\r\n    if (!validation.valid) {\r\n      return res.status(400).json({ message: validation.error });\r\n    }\r\n\r\n    // Check if enabled in production\r\n    if (isProduction() && !process.env.[REDACTED]) {\r\n      return res.status(403).json({ \r\n        message: 'Site Editor is disabled in production environment' \r\n      });\r\n    }\r\n\r\n    // Save component with backup\r\n    const result = await siteEditor.saveComponent({\r\n      path: componentPath,\r\n      contents,\r\n      user: req.user,\r\n      gitOpsEnabled: req.body.gitOpsEnabled || false\r\n    });\r\n\r\n    // If GitOps is enabled, create commit and PR\r\n    if (req.body.gitOpsEnabled && result.success) {\r\n      try {\r\n        const gitResult = await gitOps.createFixCommit({\r\n          componentPath,\r\n          backupToken: result.backupToken,\r\n          user: req.user,\r\n          message: `fix(${path.basename(componentPath, '.tsx')}): Manual fix via Site Editor by ${req.user.name}`\r\n        });\r\n\r\n        result.gitOps = gitResult;\r\n      } catch (gitError) {\r\n        console.error('[Site Editor] GitOps failed:', gitError);\r\n        result.gitOps = { success: false, error: gitError.message };\r\n      }\r\n    }\r\n\r\n    res.json(result);\r\n\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to save component:', error);\r\n    \r\n    // Log the failure\r\n    await siteEditor.logAction(req.user, 'COMPONENT_SAVE_FAILED', {\r\n      path: req.body.path,\r\n      error: error.message\r\n    }, false, error.message);\r\n\r\n    res.status(500).json({ \r\n      message: 'Failed to save component',\r\n      error: error.message \r\n    });\r\n  }\r\n});\r\n\r\n/**\r\n * POST /api/editor/rollback-component\r\n * Rollback component to a previous version\r\n */\r\nrouter.post('/rollback-component', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const { backupToken } = req.body;\r\n    \r\n    if (!backupToken) {\r\n      return res.status(400).json({ message: 'Backup token is required' });\r\n    }\r\n\r\n    const result = await siteEditor.rollbackComponent({\r\n      backupToken,\r\n      user: req.user\r\n    });\r\n\r\n    res.json(result);\r\n\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to rollback component:', error);\r\n    \r\n    await siteEditor.logAction(req.user, 'COMPONENT_ROLLBACK_FAILED', {\r\n      backupToken: req.body.backupToken,\r\n      error: error.message\r\n    }, false, error.message);\r\n\r\n    res.status(500).json({ \r\n      message: 'Failed to rollback component',\r\n      error: error.message \r\n    });\r\n  }\r\n});\r\n\r\n/**\r\n * GET /api/editor/backups\r\n * Get backup files for a component\r\n */\r\nrouter.get('/backups', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const { component } = req.query;\r\n    \r\n    if (!component) {\r\n      return res.status(400).json({ message: 'Component name is required' });\r\n    }\r\n\r\n    const backups = await siteEditor.getBackups(component);\r\n    res.json(backups);\r\n\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to get backups:', error);\r\n    res.status(500).json({ message: 'Failed to retrieve backup files' });\r\n  }\r\n});\r\n\r\n/**\r\n * GET /api/editor/backup-content/:token\r\n * Get content of a specific backup\r\n */\r\nrouter.get('/backup-content/:token', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const { token } = req.params;\r\n    \r\n    const content = await siteEditor.getBackupContent(token);\r\n    \r\n    res.setHeader('Content-Type', 'text/plain');\r\n    res.send(content);\r\n\r\n  } catch (error) {\r\n    if (error.code === 'ENOENT') {\r\n      res.status(404).json({ message: 'Backup file not found' });\r\n    } else {\r\n      console.error('[Site Editor] Failed to get backup content:', error);\r\n      res.status(500).json({ message: 'Failed to retrieve backup content' });\r\n    }\r\n  }\r\n});\r\n\r\n/**\r\n * POST /api/editor/validate-syntax\r\n * Validate TypeScript/JavaScript syntax\r\n */\r\nrouter.post('/validate-syntax', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const { contents, path: filePath } = req.body;\r\n    \r\n    if (!contents) {\r\n      return res.status(400).json({ message: 'Contents are required' });\r\n    }\r\n\r\n    const validation = await siteEditor.validateSyntax(contents, filePath);\r\n    res.json(validation);\r\n\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to validate syntax:', error);\r\n    res.status(500).json({ message: 'Failed to validate syntax' });\r\n  }\r\n});\r\n\r\n/**\r\n * GET /api/editor/audit-logs\r\n * Get Site Editor audit logs\r\n */\r\nrouter.get('/audit-logs', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const { startDate, endDate, userId, action, component } = req.query;\r\n    \r\n    const filters = {};\r\n    if (startDate) filters.startDate = new Date(startDate);\r\n    if (endDate) filters.endDate = new Date(endDate);\r\n    if (userId) filters.userId = userId;\r\n    if (action) filters.action = action;\r\n    if (component) filters.component = component;\r\n\r\n    const auditLogs = await siteEditor.getAuditLogs(filters);\r\n    res.json(auditLogs);\r\n\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to get audit logs:', error);\r\n    res.status(500).json({ message: 'Failed to retrieve audit logs' });\r\n  }\r\n});\r\n\r\n/**\r\n * GET /api/editor/config\r\n * Get Site Editor configuration\r\n */\r\nrouter.get('/config', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const config = await siteEditor.getConfig();\r\n    res.json(config);\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to get config:', error);\r\n    res.status(500).json({ message: 'Failed to retrieve configuration' });\r\n  }\r\n});\r\n\r\n/**\r\n * PUT /api/editor/config\r\n * Update Site Editor configuration\r\n */\r\nrouter.put('/config', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const config = req.body;\r\n    \r\n    // Validate configuration\r\n    const validation = validateSiteEditorConfig(config);\r\n    if (!validation.valid) {\r\n      return res.status(400).json({ \r\n        message: 'Invalid configuration',\r\n        errors: validation.errors \r\n      });\r\n    }\r\n\r\n    await siteEditor.updateConfig(config, req.user);\r\n    \r\n    console.log(`[Site Editor] Configuration updated by ${req.user.name} (${req.user.id})`);\r\n    \r\n    res.json({ message: 'Configuration updated successfully' });\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to update config:', error);\r\n    res.status(500).json({ message: 'Failed to update configuration' });\r\n  }\r\n});\r\n\r\n/**\r\n * POST /api/editor/create-pr\r\n * Create GitHub/GitLab pull request for changes\r\n */\r\nrouter.post('/create-pr', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const { backupToken, title, description, branch } = req.body;\r\n    \r\n    if (!backupToken) {\r\n      return res.status(400).json({ message: 'Backup token is required' });\r\n    }\r\n\r\n    const result = await gitOps.createPullRequest({\r\n      backupToken,\r\n      title: title || `Site Editor fix by ${req.user.name}`,\r\n      description: description || 'Manual component fix via Site Editor',\r\n      branch: branch || `site-editor-fix-${Date.now()}`,\r\n      user: req.user\r\n    });\r\n\r\n    res.json(result);\r\n\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to create PR:', error);\r\n    res.status(500).json({ \r\n      message: 'Failed to create pull request',\r\n      error: error.message \r\n    });\r\n  }\r\n});\r\n\r\n/**\r\n * GET /api/editor/git-status\r\n * Get Git repository status\r\n */\r\nrouter.get('/git-status', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const status = await gitOps.getRepoStatus();\r\n    res.json(status);\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to get git status:', error);\r\n    res.status(500).json({ message: 'Failed to retrieve git status' });\r\n  }\r\n});\r\n\r\n/**\r\n * POST /api/editor/trigger-reload\r\n * Trigger frontend reload after save\r\n */\r\nrouter.post('/trigger-reload', authenticateToken, requireSuperAdmin, async (req, res) => {\r\n  try {\r\n    const { component, reloadType } = req.body;\r\n    \r\n    // This would integrate with your hot reload system\r\n    // For now, we'll just log the reload trigger\r\n    await siteEditor.logAction(req.user, 'RELOAD_TRIGGERED', {\r\n      component,\r\n      reloadType: reloadType || 'full'\r\n    });\r\n\r\n    res.json({ \r\n      message: 'Reload triggered',\r\n      reloadType: reloadType || 'full'\r\n    });\r\n\r\n  } catch (error) {\r\n    console.error('[Site Editor] Failed to trigger reload:', error);\r\n    res.status(500).json({ message: 'Failed to trigger reload' });\r\n  }\r\n});\r\n\r\n// Helper functions\r\n\r\nfunction validateSiteEditorConfig(config) {\r\n  const errors = [];\r\n  \r\n  if (typeof config.enabled !== 'boolean') {\r\n    errors.push('enabled must be a boolean');\r\n  }\r\n  \r\n  if (typeof config.allowInProduction !== 'boolean') {\r\n    errors.push('allowInProduction must be a boolean');\r\n  }\r\n  \r\n  if (typeof config.lockdownMode !== 'boolean') {\r\n    errors.push('lockdownMode must be a boolean');\r\n  }\r\n  \r\n  if (typeof config.autoBackup !== 'boolean') {\r\n    errors.push('autoBackup must be a boolean');\r\n  }\r\n  \r\n  if (!Number.isInteger(config.maxBackups) || config.maxBackups < 1) {\r\n    errors.push('maxBackups must be a positive integer');\r\n  }\r\n  \r\n  if (typeof config.backupDir !== 'string' || !config.backupDir.trim()) {\r\n    errors.push('backupDir must be a non-empty string');\r\n  }\r\n\r\n  return {\r\n    valid: errors.length === 0,\r\n    errors\r\n  };\r\n}\r\n\r\nfunction isProduction() {\r\n  return process.env.[REDACTED] === 'production';\r\n}\r\n\r\nmodule.exports = router; "
+    },
+    "complexity": {
+      "totalLines": 414,
+      "codeLines": 276,
+      "commentLines": 67,
+      "commentRatio": 0.19533527696793002,
+      "averageLineLength": 34.559766763848394
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.500Z"
+  },
+  "contentHash": "3108feef9ea7ecdf644bb03a326d2f6926834d726782485f6b73919952c9e16e",
+  "discoveredAt": "2025-07-28T07:19:56.500Z"
+}

@@ -85,12 +85,13 @@ class AIService {
     private baseURL: string;
 
     constructor() {
-        this.baseURL = process.env.REACT_APP_AI_API_URL || 'http://localhost:8001';
+        // Connect to OrthodoxMetrics backend instead of external AI service
+        this.baseURL = process.env.REACT_APP_API_URL || '';
     }
 
     // Content Generation
     async generateContent(request: AIContentRequest): Promise<AIContentResponse> {
-        const response = await fetch(`${this.baseURL}/api/content/generate`, {
+        const response = await fetch(`${this.baseURL}/api/ai/content/generate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -107,7 +108,7 @@ class AIService {
 
     // Translation
     async translateText(request: AITranslationRequest): Promise<AITranslationResponse> {
-        const response = await fetch(`${this.baseURL}/api/translation/translate`, {
+        const response = await fetch(`${this.baseURL}/api/ai/translate/start`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -134,7 +135,7 @@ class AIService {
             }
         });
 
-        const response = await fetch(`${this.baseURL}/api/ocr/process`, {
+        const response = await fetch(`${this.baseURL}/api/ai/ocr/process`, {
             method: 'POST',
             body: formData,
         });
@@ -148,12 +149,16 @@ class AIService {
 
     // Analytics & Insights
     async generateAnalytics(request: AIAnalyticsRequest): Promise<AIAnalyticsResponse> {
-        const response = await fetch(`${this.baseURL}/api/analytics/insights`, {
+        const response = await fetch(`${this.baseURL}/api/ai/logs/analyze`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(request),
+            body: JSON.stringify({
+                log_data: request.data_source,
+                analysis_type: request.analysis_type,
+                time_range: request.time_range
+            }),
         });
 
         if (!response.ok) {
@@ -216,13 +221,133 @@ class AIService {
 
     // Health check
     async healthCheck(): Promise<{ status: string; version: string; services: Record<string, boolean> }> {
-        const response = await fetch(`${this.baseURL}/health`);
+        const response = await fetch(`${this.baseURL}/api/ai/status`);
 
         if (!response.ok) {
             throw new Error('AI Service unavailable');
         }
 
         return response.json();
+    }
+
+    // Get AI metrics
+    async getMetrics(): Promise<{
+        dailyRequests: number;
+        contentGenerated: number;
+        documentsProcessed: number;
+        translations: number;
+        avgResponseTime: number;
+        successRate: number;
+    }> {
+        const response = await fetch(`${this.baseURL}/api/ai/metrics`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch AI metrics');
+        }
+
+        const data = await response.json();
+        return data.metrics;
+    }
+
+    // AI Deployment
+    async runDeployment(request: {
+        church_name: string;
+        church_slug: string;
+        domain?: string;
+        ssl_enabled?: boolean;
+        backup_enabled?: boolean;
+        monitoring_enabled?: boolean;
+    }): Promise<{
+        deployment_id: string;
+        status: string;
+        estimated_time: string;
+        logs: string[];
+    }> {
+        const response = await fetch(`${this.baseURL}/api/ai/deploy/run`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(request),
+        });
+
+        if (!response.ok) {
+            throw new Error('AI Deployment failed');
+        }
+
+        return response.json();
+    }
+
+    // OCR Learning Status
+    async getOCRLearningStatus(): Promise<{
+        status: string;
+        progress: number;
+        success_rate: number;
+        last_run: string;
+        next_run: string;
+    }> {
+        const response = await fetch(`${this.baseURL}/api/ai/ocr-learning/status`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch OCR learning status');
+        }
+
+        const data = await response.json();
+        return data;
+    }
+
+    // Start OCR Learning
+    async startOCRLearning(): Promise<{
+        task_id: string;
+        status: string;
+        estimated_duration: string;
+    }> {
+        const response = await fetch(`${this.baseURL}/api/ai/ocr-learning/start`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to start OCR learning');
+        }
+
+        return response.json();
+    }
+
+    // Reset OCR Learning
+    async resetOCRLearning(): Promise<{ message: string }> {
+        const response = await fetch(`${this.baseURL}/api/ai/ocr-learning/reset`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to reset OCR learning');
+        }
+
+        return response.json();
+    }
+
+    // Get OCR Learning Rules
+    async getOCRLearningRules(): Promise<Array<{
+        id: string;
+        name: string;
+        description: string;
+        confidence: number;
+        enabled: boolean;
+    }>> {
+        const response = await fetch(`${this.baseURL}/api/ai/ocr-learning/rules`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch OCR learning rules');
+        }
+
+        const data = await response.json();
+        return data.rules;
     }
 }
 

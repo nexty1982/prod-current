@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 // Form state reducer
@@ -44,7 +44,7 @@ const initialFormState = {
   },
   optional: {
     logo: null,
-    description: '',
+    description_multilang: '',
     established_year: ''
   },
   templateSettings: {
@@ -52,7 +52,8 @@ const initialFormState = {
     auto_setup_standard: true,
     generate_components: false,
     record_types: ['baptism', 'marriage', 'funeral'],
-    template_style: 'orthodox_traditional'
+    template_style: 'orthodox_traditional',
+    template_church_id: null // New field for template selection
   },
   databaseConfig: {
     test_connection: false,
@@ -75,8 +76,41 @@ const ChurchWizard = ({ onClose, onSuccess }) => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [setupProgress, setSetupProgress] = useState(null);
+  
+  // New state for template churches
+  const [templateChurches, setTemplateChurches] = useState([]);
+  const [loadingTemplateChurches, setLoadingTemplateChurches] = useState(false);
 
   const totalSteps = 6; // Expanded from 4 to 6 steps
+
+  // Load English churches for template selection
+  useEffect(() => {
+    const fetchEnglishChurches = async () => {
+      try {
+        setLoadingTemplateChurches(true);
+        const response = await fetch('/api/admin/churches?preferred_language=en', {
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch template churches');
+        }
+
+        const data = await response.json();
+        setTemplateChurches(data.churches || []);
+      } catch (err) {
+        console.error('Error fetching template churches:', err);
+        setErrors(prev => ({
+          ...prev,
+          templateChurches: 'Failed to load template churches'
+        }));
+      } finally {
+        setLoadingTemplateChurches(false);
+      }
+    };
+
+    fetchEnglishChurches();
+  }, []);
 
   // Language options
   const languageOptions = [
@@ -259,70 +293,89 @@ const ChurchWizard = ({ onClose, onSuccess }) => {
   // Submit form
   const handleSubmit = async () => {
     if (!validateStep(6)) return;
-
     setIsSubmitting(true);
-    
     try {
-      // Create FormData for file upload
-      const submitData = new FormData();
-      
-      // Add all form fields
-      submitData.append('name', formData.churchInfo.name);
-      submitData.append('address', formData.churchInfo.address);
-      submitData.append('city', formData.churchInfo.city);
-      submitData.append('region', formData.churchInfo.region);
-      submitData.append('country', formData.churchInfo.country);
-      submitData.append('phone', formData.churchInfo.phone);
-      submitData.append('website', formData.churchInfo.website);
-      
-      submitData.append('preferred_language', formData.language.preferred_language);
-      submitData.append('timezone', formData.language.timezone);
-      submitData.append('calendar_type', formData.language.calendar_type);
-      
-      submitData.append('admin_full_name', formData.adminAccount.full_name);
-      submitData.append('admin_email', formData.adminAccount.email);
-      submitData.append('admin_password', formData.adminAccount.password);
-      submitData.append('admin_title', formData.adminAccount.title);
-      
-      submitData.append('description', formData.optional.description);
-      submitData.append('established_year', formData.optional.established_year);
-      
-      // Template settings
-      submitData.append('setup_templates', formData.templateSettings.setup_templates);
-      submitData.append('auto_setup_standard', formData.templateSettings.auto_setup_standard);
-      submitData.append('generate_components', formData.templateSettings.generate_components);
-      submitData.append('record_types', JSON.stringify(formData.templateSettings.record_types));
-      submitData.append('template_style', formData.templateSettings.template_style);
-      
-      // Test church settings
-      submitData.append('is_test_church', formData.testChurch.is_test_church);
-      submitData.append('auto_populate_data', formData.testChurch.auto_populate_data);
-      submitData.append('include_sample_records', formData.testChurch.include_sample_records);
-      submitData.append('sample_record_count', formData.testChurch.sample_record_count);
-      
+      let response;
       if (formData.optional.logo) {
+        // Use FormData if uploading a file
+        const submitData = new FormData();
+        submitData.append('name', formData.churchInfo.name);
+        submitData.append('address', formData.churchInfo.address);
+        submitData.append('city', formData.churchInfo.city);
+        submitData.append('region', formData.churchInfo.region);
+        submitData.append('country', formData.churchInfo.country);
+        submitData.append('phone', formData.churchInfo.phone);
+        submitData.append('website', formData.churchInfo.website);
+        submitData.append('preferred_language', formData.language.preferred_language);
+        submitData.append('timezone', formData.language.timezone);
+        submitData.append('calendar_type', formData.language.calendar_type);
+        submitData.append('admin_full_name', formData.adminAccount.full_name);
+        submitData.append('admin_email', formData.adminAccount.email);
+        submitData.append('admin_password', formData.adminAccount.password);
+        submitData.append('admin_title', formData.adminAccount.title);
+        submitData.append('description_multilang', formData.optional.description_multilang);
+        submitData.append('established_year', formData.optional.established_year);
+        submitData.append('setup_templates', formData.templateSettings.setup_templates);
+        submitData.append('auto_setup_standard', formData.templateSettings.auto_setup_standard);
+        submitData.append('generate_components', formData.templateSettings.generate_components);
+        submitData.append('record_types', JSON.stringify(formData.templateSettings.record_types));
+        submitData.append('template_style', formData.templateSettings.template_style);
+        submitData.append('template_church_id', formData.templateSettings.template_church_id);
+        submitData.append('is_test_church', formData.testChurch.is_test_church);
+        submitData.append('auto_populate_data', formData.testChurch.auto_populate_data);
+        submitData.append('include_sample_records', formData.testChurch.include_sample_records);
+        submitData.append('sample_record_count', formData.testChurch.sample_record_count);
         submitData.append('logo', formData.optional.logo);
+        response = await fetch('/api/admin/churches', {
+          method: 'POST',
+          body: submitData
+        });
+      } else {
+        // Use JSON if no file
+        const payload = {
+          name: formData.churchInfo.name,
+          address: formData.churchInfo.address,
+          city: formData.churchInfo.city,
+          region: formData.churchInfo.region,
+          country: formData.churchInfo.country,
+          phone: formData.churchInfo.phone,
+          website: formData.churchInfo.website,
+          preferred_language: formData.language.preferred_language,
+          timezone: formData.language.timezone,
+          calendar_type: formData.language.calendar_type,
+          admin_full_name: formData.adminAccount.full_name,
+          admin_email: formData.adminAccount.email,
+          admin_password: formData.adminAccount.password,
+          admin_title: formData.adminAccount.title,
+          description_multilang: formData.optional.description_multilang,
+          established_year: formData.optional.established_year,
+          setup_templates: formData.templateSettings.setup_templates,
+          auto_setup_standard: formData.templateSettings.auto_setup_standard,
+          generate_components: formData.templateSettings.generate_components,
+          record_types: formData.templateSettings.record_types,
+          template_style: formData.templateSettings.template_style,
+          template_church_id: formData.templateSettings.template_church_id,
+          is_test_church: formData.testChurch.is_test_church,
+          auto_populate_data: formData.testChurch.auto_populate_data,
+          include_sample_records: formData.testChurch.include_sample_records,
+          sample_record_count: formData.testChurch.sample_record_count
+        };
+        response = await fetch('/api/admin/churches', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
       }
-
-      const response = await fetch('/api/churches', {
-        method: 'POST',
-        body: submitData
-      });
-
       if (!response.ok) {
         throw new Error('Failed to create church');
       }
-
       const result = await response.json();
-      
       setSubmitSuccess(true);
       setTimeout(() => {
         if (onSuccess) onSuccess(result);
         resetWizard();
       }, 2000);
-
     } catch (error) {
-      console.error('Error creating church:', error);
       setErrors({ submit: 'Failed to create church. Please try again.' });
     } finally {
       setIsSubmitting(false);
@@ -902,6 +955,46 @@ const ChurchWizard = ({ onClose, onSuccess }) => {
                   {/* Template Configuration */}
                   {formData.templateSettings.setup_templates && (
                     <div className="space-y-6 p-6 bg-gray-50 rounded-lg">
+                      
+                      {/* Template Church Selection */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Use Template From Existing Church
+                        </label>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Select an English-language church to use as a template. The new church will inherit its structure, pages, themes, permissions, and settings.
+                        </p>
+                        {loadingTemplateChurches ? (
+                          <div className="flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            <span className="text-sm text-gray-600">Loading template churches...</span>
+                          </div>
+                        ) : (
+                          <select
+                            value={formData.templateSettings.template_church_id || ''}
+                            onChange={(e) => updateField('templateSettings', 'template_church_id', e.target.value || null)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">No template - Start from scratch</option>
+                            {templateChurches.map(church => (
+                              <option key={church.id} value={church.id}>
+                                {church.name} ({church.city ? `${church.city}, ` : ''}{church.country || 'Unknown location'})
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        {errors.templateChurches && (
+                          <p className="text-red-500 text-sm mt-1">{errors.templateChurches}</p>
+                        )}
+                        {formData.templateSettings.template_church_id && (
+                          <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                            <p className="text-sm text-blue-800">
+                              <strong>📋 Template Selected:</strong> The new church will be created using the same structure and settings as the selected template church. This ensures consistent operation and seamless integration.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
                       {/* Record Types */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -1034,8 +1127,8 @@ const ChurchWizard = ({ onClose, onSuccess }) => {
                       Description
                     </label>
                     <textarea
-                      value={formData.optional.description}
-                      onChange={(e) => updateField('optional', 'description', e.target.value)}
+                      value={formData.optional.description_multilang}
+                      onChange={(e) => updateField('optional', 'description_multilang', e.target.value)}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Brief description of the church..."
@@ -1111,7 +1204,7 @@ const ChurchWizard = ({ onClose, onSuccess }) => {
                       <dl className="space-y-1">
                         {formData.optional.logo && <div><dt className="inline font-medium">Logo:</dt> <dd className="inline">✓ Uploaded</dd></div>}
                         {formData.optional.established_year && <div><dt className="inline font-medium">Established:</dt> <dd className="inline">{formData.optional.established_year}</dd></div>}
-                        {formData.optional.description && <div><dt className="inline font-medium">Description:</dt> <dd className="inline">{formData.optional.description.substring(0, 50)}...</dd></div>}
+                        {formData.optional.description_multilang && <div><dt className="inline font-medium">Description:</dt> <dd className="inline">{formData.optional.description_multilang.substring(0, 50)}...</dd></div>}
                       </dl>
                     </div>
                   </div>

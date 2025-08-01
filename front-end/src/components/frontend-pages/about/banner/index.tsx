@@ -1,5 +1,5 @@
 import { Box, Stack, Typography, Container, Grid, Button } from '@mui/material';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 
 const Banner = () => {
   return (

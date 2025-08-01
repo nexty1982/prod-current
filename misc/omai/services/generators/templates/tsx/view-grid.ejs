@@ -1,0 +1,191 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Paper, Typography, Button, Chip, IconButton, Tooltip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TablePagination, TextField, InputAdornment, Alert
+} from '@mui/material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Search as SearchIcon } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+
+interface <%= componentName %>Record {
+  id: number;
+  <% fields.forEach(field => { %>
+  <%= field.name %>: <%= getTypeScriptType(field.type) %>;
+  <% }); %>
+}
+
+export default function View<%= componentName %>() {
+  const navigate = useNavigate();
+  const [records, setRecords] = useState<<%= componentName %>Record[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    loadRecords();
+  }, []);
+
+  const loadRecords = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('<%= component.route %>');
+      if (response.ok) {
+        const result = await response.json();
+        setRecords(result.data || []);
+      } else {
+        setError('Failed to load records');
+      }
+    } catch (error) {
+      setError('Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this record?')) return;
+
+    try {
+      const response = await fetch(`<%= component.route %>/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        loadRecords(); // Reload the list
+      } else {
+        setError('Failed to delete record');
+      }
+    } catch (error) {
+      setError('Network error');
+    }
+  };
+
+  const filteredRecords = records.filter(record =>
+    Object.values(record).some(value =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const paginatedRecords = filteredRecords.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" p={4}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box p={3}>
+      <Paper elevation={2} sx={{ p: 3 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h5">
+            <%= component.name %> Records
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/<%= component.id %>/create')}
+          >
+            Add New
+          </Button>
+        </Box>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search records..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ mb: 2 }}
+        />
+
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <% fields.forEach(field => { %>
+                <TableCell><%= field.label %></TableCell>
+                <% }); %>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedRecords.map((record) => (
+                <TableRow key={record.id}>
+                  <% fields.forEach(field => { %>
+                  <TableCell>
+                    <% if (field.type === 'date') { %>
+                    {record.<%= field.name %> ? format(new Date(record.<%= field.name %>), 'MMM dd, yyyy') : '-'}
+                    <% } else if (field.type === 'select') { %>
+                    <Chip 
+                      label={record.<%= field.name %>} 
+                      size="small" 
+                      color="primary" 
+                      variant="outlined" 
+                    />
+                    <% } else { %>
+                    {record.<%= field.name %> || '-'}
+                    <% } %>
+                  </TableCell>
+                  <% }); %>
+                  <TableCell>
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        onClick={() => navigate(`/<%= component.id %>/edit/${record.id}`)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(record.id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <TablePagination
+          component="div"
+          count={filteredRecords.length}
+          page={page}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+        />
+      </Paper>
+    </Box>
+  );
+} 

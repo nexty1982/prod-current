@@ -1,3 +1,40 @@
+# Node
+node_modules/
+.env
+npm-debug.log*
+package-lock.json
+
+# Logs
+*.log
+logs/
+debug/
+
+# Build
+dist/
+build/
+
+# Frontend Artifacts
+.vite/
+coverage/
+*.tsbuildinfo
+
+# VSCode
+.vscode/
+
+# OS/Editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Uploads / User content
+misc/uploads/
+misc/public/
+
+# Generated
+VERSION
+
+
 # Binaries and executables
 *.exe
 *.dll

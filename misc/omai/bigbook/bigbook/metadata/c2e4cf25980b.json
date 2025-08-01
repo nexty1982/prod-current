@@ -1,0 +1,43 @@
+{
+  "id": "c2e4cf25980b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/start-phase12.sh",
+  "relativePath": "services/om-ai/start-phase12.sh",
+  "name": "start-phase12.sh",
+  "extension": ".sh",
+  "size": 2734,
+  "modified": "2025-07-25T02:43:08.749Z",
+  "created": "2025-07-25T02:43:06.449Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 109,
+      "characters": 2696,
+      "words": 384
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 109,
+      "codeLines": 85,
+      "commentLines": 7,
+      "commentRatio": 0.07608695652173914,
+      "averageLineLength": 28.130434782608695
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.568Z"
+  },
+  "contentHash": "7464c79538b33f34277f5b453ad93a4bb8e91634a5c6957b5728dd1b69acf5d4",
+  "discoveredAt": "2025-07-28T07:20:01.568Z"
+}

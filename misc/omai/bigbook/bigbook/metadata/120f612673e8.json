@@ -1,0 +1,50 @@
+{
+  "id": "120f612673e8",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/components/ErrorBoundary/index.ts",
+  "relativePath": "front-end/src/components/ErrorBoundary/index.ts",
+  "name": "index.ts",
+  "extension": ".ts",
+  "size": 1732,
+  "modified": "2025-07-13T01:37:40.050Z",
+  "created": "2025-07-13T01:33:17.251Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 46,
+      "characters": 1732,
+      "words": 144
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 18,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// ErrorBoundary index.ts - Export error boundary components\r\nexport { default as ErrorBoundary } from './ErrorBoundary';\r\nexport { default as AdminErrorBoundary } from './AdminErrorBoundary';\r\n\r\n// Additional error boundary utilities\r\nexport interface ErrorBoundaryProps {\r\n    children: React.ReactNode;\r\n    fallbackComponent?: React.ReactNode;\r\n    onError?: (error: Error, errorInfo: React.ErrorInfo) => void;\r\n}\r\n\r\n// Hook for manual error reporting\r\nexport const useErrorHandler = () => {\r\n    const reportError = (error: Error, context?: string) => {\r\n        console.error(`Manual error report ${context ? `(${context})` : ''}:`, error);\r\n        \r\n        // In production, send to error tracking service\r\n        if (process.env.[REDACTED] === 'production') {\r\n            fetch('/api/logs/client-errors', {\r\n                method: 'POST',\r\n                headers: {\r\n                    'Content-Type': 'application/json',\r\n                },\r\n                body: JSON.stringify({\r\n                    error: {\r\n                        message: error.message,\r\n                        stack: error.stack,\r\n                        name: error.name\r\n                    },\r\n                    context,\r\n                    metadata: {\r\n                        timestamp: new Date().toISOString(),\r\n                        userAgent: navigator.userAgent,\r\n                        url: window.location.href,\r\n                        userId: localStorage.getItem('userId') || 'anonymous'\r\n                    }\r\n                })\r\n            }).catch(logError => {\r\n                console.error('Failed to log manual error to server:', logError);\r\n            });\r\n        }\r\n    };\r\n\r\n    return { reportError };\r\n};\r\n"
+    },
+    "complexity": {
+      "totalLines": 46,
+      "codeLines": 37,
+      "commentLines": 4,
+      "commentRatio": 0.0975609756097561,
+      "averageLineLength": 40.853658536585364
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.697Z"
+  },
+  "contentHash": "5791fc6a38ea6ed42df90ce4a488add2c945629f644e721e50334cfdd44280d8",
+  "discoveredAt": "2025-07-28T07:19:58.697Z"
+}

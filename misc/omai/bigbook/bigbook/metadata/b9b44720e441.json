@@ -1,0 +1,43 @@
+{
+  "id": "b9b44720e441",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/quick-fix-user-management.sh",
+  "relativePath": "server/scripts/quick-fix-user-management.sh",
+  "name": "quick-fix-user-management.sh",
+  "extension": ".sh",
+  "size": 1687,
+  "modified": "2025-07-22T09:31:53.071Z",
+  "created": "2025-07-22T09:31:51.043Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 59,
+      "characters": 1671,
+      "words": 226
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 59,
+      "codeLines": 45,
+      "commentLines": 5,
+      "commentRatio": 0.1,
+      "averageLineLength": 32.26
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.058Z"
+  },
+  "contentHash": "cc54ee723881dae869734fd913f11712e85d0b50116b5d510f1d0b539b8a9567",
+  "discoveredAt": "2025-07-28T07:20:01.058Z"
+}

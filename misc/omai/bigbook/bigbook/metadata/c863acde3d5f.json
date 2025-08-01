@@ -1,0 +1,43 @@
+{
+  "id": "c863acde3d5f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/OM-BigBook/pages/components/README.md",
+  "relativePath": "docs/OM-BigBook/pages/components/README.md",
+  "name": "README.md",
+  "extension": ".md",
+  "size": 2811,
+  "modified": "2025-07-25T00:25:53.940Z",
+  "created": "2025-07-25T00:25:53.310Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 106,
+      "characters": 2761,
+      "words": 337
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 106,
+      "codeLines": 49,
+      "commentLines": 25,
+      "commentRatio": 0.33783783783783783,
+      "averageLineLength": 35.45945945945946
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.800Z"
+  },
+  "contentHash": "da24beb25854338a2a7ef45068634346d71cfc7d30beabacdb4a9033985c017f",
+  "discoveredAt": "2025-07-28T07:19:57.800Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "7f802801b4dd",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-24-25/README-CHURCH-LINKAGE-FIX.md",
+  "relativePath": "docs/7-24-25/README-CHURCH-LINKAGE-FIX.md",
+  "name": "README-CHURCH-LINKAGE-FIX.md",
+  "extension": ".md",
+  "size": 4745,
+  "modified": "2025-07-22T21:12:24.060Z",
+  "created": "2025-07-22T21:12:22.369Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 138,
+      "characters": 4629,
+      "words": 640
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 138,
+      "codeLines": 80,
+      "commentLines": 20,
+      "commentRatio": 0.2,
+      "averageLineLength": 44.54
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.707Z"
+  },
+  "contentHash": "25b07c389ae7a5e344c0339b0f9a761c1be9d3e48607f0ff694545d5b522e573",
+  "discoveredAt": "2025-07-28T07:19:57.707Z"
+}

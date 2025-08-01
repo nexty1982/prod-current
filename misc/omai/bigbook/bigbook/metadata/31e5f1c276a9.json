@@ -1,0 +1,49 @@
+{
+  "id": "31e5f1c276a9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/api/utils/axiosInstance.ts",
+  "relativePath": "front-end/src/api/utils/axiosInstance.ts",
+  "name": "axiosInstance.ts",
+  "extension": ".ts",
+  "size": 5030,
+  "modified": "2025-07-24T22:24:22.581Z",
+  "created": "2025-07-23T15:08:46.477Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 157,
+      "characters": 5016,
+      "words": 470
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 6
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 157,
+      "codeLines": 116,
+      "commentLines": 16,
+      "commentRatio": 0.12121212121212122,
+      "averageLineLength": 36.35606060606061
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.689Z"
+  },
+  "contentHash": "3c9410db7617e23a83fa53321c8d9dfc7ecc02e84adba71fed7d5d28046ac150",
+  "discoveredAt": "2025-07-28T07:19:58.689Z"
+}

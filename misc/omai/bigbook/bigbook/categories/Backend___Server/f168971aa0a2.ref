@@ -1,0 +1,6 @@
+{
+  "id": "f168971aa0a2",
+  "name": "restart-server.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/restart-server.sh",
+  "type": "Server Scripts"
+}

@@ -1,28 +1,38 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { lazy } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import ComingSoon from '../components/shared/ComingSoon';
 import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
+import SmartRedirect from '../components/routing/SmartRedirect';
+import HeadlineSourcePicker from '../components/headlines/HeadlineSourcePicker';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
 
 /* ****Pages***** */
-// Temporary simple component for testing
-const ModernDash = () => <div style={{ padding: '20px' }}><h1>Modern Dashboard - Test Component</h1><p>If you can see this, the routing is working!</p></div>;
+const ModernDash = Loadable(lazy(() => import('../views/dashboard/EnhancedModernDashboard')));
 const EcommerceDash = Loadable(lazy(() => import('../views/dashboard/Ecommerce')));
+const OrthodMetricsDash = Loadable(lazy(() => import('../views/dashboard/OrthodoxMetrics')));
 
 /* ****Apps***** */
 // const Blog = Loadable(lazy(() => import('../views/apps/blog/Blog')));
 // const BlogDetail = Loadable(lazy(() => import('../views/apps/blog/BlogPost')));
 const Contacts = Loadable(lazy(() => import('../views/apps/contacts/Contacts')));
-const Chats = Loadable(lazy(() => import('../views/apps/chat/Chat')));
+const ChatApp = Loadable(lazy(() => import('../views/apps/chat/ChatApp')));
 const Notes = Loadable(lazy(() => import('../views/apps/notes/Notes')));
 const Tickets = Loadable(lazy(() => import('../views/apps/tickets/Tickets')));
+
+/* ****Developer Tools***** */
+const SiteStructureVisualizer = Loadable(lazy(() => import('../tools/SiteStructureVisualizer')));
+const Kanban = Loadable(lazy(() => import('../views/apps/kanban/Kanban')));
+const InvoiceList = Loadable(lazy(() => import('../views/apps/invoice/List')));
+const InvoiceCreate = Loadable(lazy(() => import('../views/apps/invoice/Create')));
+const InvoiceDetail = Loadable(lazy(() => import('../views/apps/invoice/Detail')));
+const InvoiceEdit = Loadable(lazy(() => import('../views/apps/invoice/Edit')));
 const Ecommerce = Loadable(lazy(() => import('../views/apps/eCommerce/Ecommerce')));
 const EcommerceDetail = Loadable(lazy(() => import('../views/apps/eCommerce/EcommerceDetail')));
 const EcommerceAddProduct = Loadable(
@@ -37,9 +47,6 @@ const EcomProductCheckout = Loadable(
 );
 const Calendar = Loadable(lazy(() => import('../views/apps/calendar/BigCalendar')));
 const LiturgicalCalendar = Loadable(lazy(() => import('../views/apps/calendar/LiturgicalCalendar')));
-const OCRUpload = Loadable(lazy(() => import('../views/apps/ocr/OCRUpload')));
-const PublicOCRUpload = Loadable(lazy(() => import('../views/apps/ocr/PublicOCRUpload')));
-const OCRFieldMapping = Loadable(lazy(() => import('../views/apps/ocr/OCRFieldMapping')));
 const SiteClone = Loadable(lazy(() => import('../views/apps/site-clone/SiteClone')));
 const Logs = Loadable(lazy(() => import('../views/apps/logs/Logs')));
 const UserProfile = Loadable(lazy(() => import('../views/apps/user-profile/UserProfile')));
@@ -47,15 +54,26 @@ const Followers = Loadable(lazy(() => import('../views/apps/user-profile/Followe
 const Friends = Loadable(lazy(() => import('../views/apps/user-profile/Friends')));
 const Gallery = Loadable(lazy(() => import('../views/apps/user-profile/Gallery')));
 const Email = Loadable(lazy(() => import('../views/apps/email/Email')));
-const InvoiceList = Loadable(lazy(() => import('../views/apps/invoice/List')));
-const InvoiceCreate = Loadable(lazy(() => import('../views/apps/invoice/Create')));
-const InvoiceDetail = Loadable(lazy(() => import('../views/apps/invoice/Detail')));
-const InvoiceEdit = Loadable(lazy(() => import('../views/apps/invoice/Edit')));
-const Kanban = Loadable(lazy(() => import('../views/apps/kanban/Kanban')));
+
+/* ****Social Features***** */
+const SocialBlogList = Loadable(lazy(() => import('../views/social/blog/BlogList')));
+const SocialBlogCreate = Loadable(lazy(() => import('../views/social/blog/BlogCreate')));
+const SocialBlogEdit = Loadable(lazy(() => import('../views/social/blog/BlogEdit')));
+const SocialBlogView = Loadable(lazy(() => import('../views/social/blog/BlogView')));
+const SocialFriends = Loadable(lazy(() => import('../views/social/friends/FriendsList')));
+const SocialChat = Loadable(lazy(() => import('../views/social/chat/SocialChat')));
+const SocialNotifications = Loadable(lazy(() => import('../views/social/notifications/NotificationCenter')));
+
+// Orthodox Headlines
+const OrthodoxHeadlines = Loadable(lazy(() => import('../pages/OrthodoxHeadlines')));
+
+// OMAI Task Assignment
+const AssignTaskPage = Loadable(lazy(() => import('../pages/AssignTaskPage')));
 
 // Church Management
 const ChurchList = Loadable(lazy(() => import('../views/apps/church-management/ChurchList')));
 const ChurchForm = Loadable(lazy(() => import('../views/apps/church-management/ChurchForm')));
+const ChurchSetupWizard = Loadable(lazy(() => import('../views/apps/church-management/ChurchSetupWizard')));
 
 // Client Management (Multi-tenant SaaS)
 const ClientManagementDashboard = Loadable(lazy(() => import('../views/apps/client-management/ClientManagementDashboard')));
@@ -65,6 +83,7 @@ const TemplateManager = Loadable(lazy(() => import('../views/apps/client-managem
 
 // Settings
 const MenuSettings = Loadable(lazy(() => import('../views/settings/MenuSettings')));
+const JITTerminalAccess = Loadable(lazy(() => import('../views/settings/JITTerminalAccess')));
 
 // Notifications
 const NotificationList = Loadable(lazy(() => import('../components/notifications/NotificationList')));
@@ -74,13 +93,51 @@ const NotificationPreferences = Loadable(lazy(() => import('../components/notifi
 const UserManagement = Loadable(lazy(() => import('../views/admin/UserManagement')));
 const RoleManagement = Loadable(lazy(() => import('../views/admin/RoleManagement')));
 const AdminSettings = Loadable(lazy(() => import('../views/admin/AdminSettings')));
-const AdminLogs = Loadable(lazy(() => import('../views/admin/AdminLogs')));
+const OMSiteSurvey = Loadable(lazy(() => import('../views/admin/tools/OMSiteSurvey')));
+const PageEditor = Loadable(lazy(() => import('../views/admin/tools/PageEditor')));
+const BlogFeed = Loadable(lazy(() => import('../views/blog/BlogFeed')));
+const BlogAdmin = Loadable(lazy(() => import('../views/admin/BlogAdmin')));
+const SessionManagement = Loadable(lazy(() => import('../views/admin/SessionManagement')));
+const AdminLogs = Loadable(lazy(() => import('../views/admin/SessionManagement')));
+const ActivityLogs = Loadable(lazy(() => import('../views/admin/ActivityLogs')));
 const MenuPermissions = Loadable(lazy(() => import('../views/admin/MenuPermissions')));
-const OrthodoxMetricsAdmin = Loadable(lazy(() => import('../views/admin/OrthodoxMetricsAdmin')));
+const MenuManagement = Loadable(lazy(() => import('../views/admin/MenuManagement')));
+const OrthodMetricsAdmin = Loadable(lazy(() => import('../views/admin/OrthodoxMetricsAdmin')));
 const AIAdminPanel = Loadable(lazy(() => import('../components/ai/AIAdminPanel')));
+const OMAIUltimateLogger = Loadable(lazy(() => import('../components/OMAI/Logger/Demo')));
 const ScriptRunner = Loadable(lazy(() => import('../components/admin/ScriptRunner')));
 const SuperAdminDashboard = Loadable(lazy(() => import('../components/admin/SuperAdminDashboard')));
+const SiteEditorDemo = Loadable(lazy(() => import('../views/demo/SiteEditorDemo')));
+const AutoFixDemo = Loadable(lazy(() => import('../views/demo/AutoFixDemo')));
+const GitOpsDemo = Loadable(lazy(() => import('../views/demo/GitOpsDemo')));
+
+// Site Editor and JIT Terminal Components
+const SiteEditor = Loadable(lazy(() => import('../components/SiteEditor')));
+const JITTerminal = Loadable(lazy(() => import('../components/terminal/JITTerminal')));
+const JITTerminalConsole = Loadable(lazy(() => import('../views/admin/JITTerminalConsole')));
+
+// AI Lab
+const OMAILab = Loadable(lazy(() => import('../pages/sandbox/ai-lab')));
+const ProjectGenerator = Loadable(lazy(() => import('../pages/sandbox/project-generator')));
+const OMBEditor = Loadable(lazy(() => import('../pages/omb/editor')));
 const AdminDashboardLayout = Loadable(lazy(() => import('../components/admin/AdminDashboardLayout')));
+const AdminPageFallback = Loadable(lazy(() => import('../components/admin/AdminPageFallback')));
+
+// Big Book System
+const OMBigBook = Loadable(lazy(() => import('../components/admin/OMBigBook')));
+const BigBookDynamicRoute = Loadable(lazy(() => import('../components/admin/BigBookDynamicRoute')));
+
+// OMAI Mobile
+const OMAIDiscoveryPanelMobile = Loadable(lazy(() => import('../components/admin/OMAIDiscoveryPanelMobile')));
+
+// Component Registry for Dynamic Addons
+import { DynamicAddonRoute } from '../components/registry/ComponentRegistry';
+
+// OMLearn Module
+const OMLearn = Loadable(lazy(() => import('../modules/OMLearn/OMLearn')));
+
+// Build System
+const BuildConsole = Loadable(lazy(() => import('../components/admin/BuildConsole')));
 
 // Demos
 const OrthodoxThemeDemo = Loadable(lazy(() => import('../components/demos/OrthodoxThemeDemo')));
@@ -88,13 +145,20 @@ const AdvancedRecordsDemo = Loadable(lazy(() => import('../views/AdvancedRecords
 const EditableRecordPage = Loadable(lazy(() => import('../views/EditableRecordPage')));
 const TableThemeEditor = Loadable(lazy(() => import('../demos/TableThemeEditor')));
 const RecordGeneratorPage = Loadable(lazy(() => import('../pages/RecordGeneratorPage')));
+const VisualTestDemo = Loadable(lazy(() => import('../views/demo/VisualTestDemo')));
 
 // Records Pages
-const BaptismRecordsPage = Loadable(lazy(() => import('../views/records/BaptismRecordsPage')));
+const SSPPOCRecordsPage = Loadable(lazy(() => import('../views/records/SSPPOCRecordsPage')));
 const UnifiedRecordsPage = Loadable(lazy(() => import('../views/records/UnifiedRecordsPage')));
 const ChurchAdminList = Loadable(lazy(() => import('../views/admin/ChurchAdminList')));
 const ChurchAdminPanel = Loadable(lazy(() => import('../views/admin/ChurchAdminPanelWorking')));
-const OCXDataPanel = Loadable(lazy(() => import('../views/admin/OCRDataPanel')));
+const ChurchRecordsPage = Loadable(lazy(() => import('../views/records/ChurchRecordsPage')));
+
+// New Records Management (Shop Layout)
+const RecordsManagement = Loadable(lazy(() => import('../pages/apps/records/index')));
+
+// Church Records UI (based on eco-product-list)
+const ChurchRecordsList = Loadable(lazy(() => import('../pages/apps/records-ui/index')));
 
 // ui components
 const MuiAlert = Loadable(lazy(() => import('../views/ui-components/MuiAlert')));
@@ -214,6 +278,7 @@ const Landingpage = Loadable(lazy(() => import('../views/pages/landingpage/Landi
 
 // front end pages
 const Homepage = Loadable(lazy(() => import('../views/pages/frontend-pages/Homepage')));
+const OrthodMetricsDemo = Loadable(lazy(() => import('../views/pages/frontend-pages/OrthodoxMetricsDemo')));
 const About = Loadable(lazy(() => import('../views/pages/frontend-pages/About')));
 const Contact = Loadable(lazy(() => import('../views/pages/frontend-pages/Contact')));
 const Portfolio = Loadable(lazy(() => import('../views/pages/frontend-pages/Portfolio')));
@@ -222,7 +287,6 @@ const BlogPage = Loadable(lazy(() => import('../views/pages/frontend-pages/Blog'
 const BlogPost = Loadable(lazy(() => import('../views/pages/frontend-pages/BlogPost')));
 
 // CMS Pages
-const PageEditor = Loadable(lazy(() => import('../views/apps/cms/PageEditor')));
 const PageEditorTest = Loadable(lazy(() => import('../views/apps/cms/PageEditorTest')));
 const EnhancedPageEditor = Loadable(lazy(() => import('../views/apps/cms/EnhancedPageEditor')));
 const EnhancedPageEditorTest = Loadable(lazy(() => import('../views/apps/cms/EnhancedPageEditorTest')));
@@ -234,7 +298,7 @@ const Router = [
     path: '/',
     element: <FullLayout />,
     children: [
-      { path: '/', element: <Navigate to="/admin" /> },
+      { path: '/', element: <SmartRedirect /> },
       {
         path: '/dashboards/modern',
         exact: true,
@@ -254,6 +318,15 @@ const Router = [
         )
       },
       {
+        path: '/dashboards/orthodmetrics',
+        exact: true,
+        element: (
+          <ProtectedRoute requiredPermission="admin_dashboard">
+            <OrthodMetricsDash />
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/apps/contacts',
         element: (
           <ProtectedRoute>
@@ -267,10 +340,89 @@ const Router = [
         path: '/apps/chats',
         element: (
           <ProtectedRoute>
-            <Chats />
+            <ChatApp />
           </ProtectedRoute>
         )
       },
+
+      // Developer Tools
+      {
+        path: '/tools/site-structure',
+        element: (
+          <ProtectedRoute requiredPermission="admin">
+            <SiteStructureVisualizer />
+          </ProtectedRoute>
+        )
+      },
+
+      // Social Experience Routes
+      {
+        path: '/social/blog',
+        element: (
+          <ProtectedRoute>
+            <SocialBlogList />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/social/blog/create',
+        element: (
+          <ProtectedRoute>
+            <SocialBlogCreate />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/social/blog/edit/:id',
+        element: (
+          <ProtectedRoute>
+            <SocialBlogEdit />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/social/blog/post/:id',
+        element: (
+          <ProtectedRoute>
+            <SocialBlogView />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/social/friends',
+        element: (
+          <ProtectedRoute>
+            <SocialFriends />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/social/chat',
+        element: (
+          <ProtectedRoute>
+            <SocialChat />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/social/notifications',
+        element: (
+          <ProtectedRoute>
+            <SocialNotifications />
+          </ProtectedRoute>
+        )
+      },
+
+      // Orthodox Headlines - Authenticated news aggregator
+      {
+        path: '/orthodox-headlines',
+        element: (
+          <ProtectedRoute>
+            <OrthodoxHeadlines />
+          </ProtectedRoute>
+        )
+      },
+
       {
         path: '/apps/email',
         element: (
@@ -433,6 +585,14 @@ const Router = [
           </ProtectedRoute>
         )
       },
+      {
+        path: '/apps/church-management/wizard',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <ChurchSetupWizard />
+          </ProtectedRoute>
+        )
+      },
 
       // Client Management Routes
       {
@@ -496,6 +656,16 @@ const Router = [
         )
       },
       {
+        path: '/settings/jit-terminal',
+        element: (
+          <ProtectedRoute>
+            <AdminErrorBoundary>
+              <JITTerminalAccess />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/admin/users',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin']}>
@@ -511,6 +681,16 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
               <MenuPermissions />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/menu-management',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <MenuManagement />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -532,10 +712,56 @@ const Router = [
         )
       },
       {
+        path: '/admin/tools/survey',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OMSiteSurvey />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/tools/page-editor',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'church_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <PageEditor />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/blog-admin',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'church_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <BlogAdmin />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/admin/logs',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminLogs />
+            <ActivityLogs />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/sessions',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <SessionManagement />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/activity-logs',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <ActivityLogs />
           </ProtectedRoute>
         )
       },
@@ -558,12 +784,50 @@ const Router = [
         )
       },
       {
-        path: '/admin',
+        path: '/admin/omai-logger',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin']}>
             <AdminErrorBoundary>
-              <AdminDashboardLayout />
+              <OMAIUltimateLogger />
             </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/site-editor',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <SiteEditor />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/jit-terminal',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <JITTerminalConsole />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/headlines-config',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <HeadlineSourcePicker />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminPageFallback />
           </ProtectedRoute>
         )
       },
@@ -580,9 +844,79 @@ const Router = [
       {
         path: '/admin/orthodox-metrics',
         element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <OrthodMetricsDash />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/bigbook',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <OMBigBook />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/omai/mobile',
+        element: (
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
-              <OrthodoxMetricsAdmin />
+              <OMAIDiscoveryPanelMobile />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/bigbook/omlearn/*',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <OMLearn />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/build',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'dev_admin']}>
+            <AdminErrorBoundary>
+              <BuildConsole />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/sandbox/ai-lab',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <OMAILab />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/sandbox/project-generator',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ProjectGenerator />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/omb/editor',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OMBEditor />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -594,7 +928,7 @@ const Router = [
       {
         path: '/demos/advanced-records',
         element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'priest']}>
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager']}>
             <AdvancedRecordsDemo />
           </ProtectedRoute>
         )
@@ -602,7 +936,7 @@ const Router = [
       {
         path: '/demos/editable-record',
         element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'priest', 'deacon']}>
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
             <EditableRecordPage />
           </ProtectedRoute>
         )
@@ -610,7 +944,7 @@ const Router = [
       {
         path: '/demos/editable-record/:recordType',
         element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'priest', 'deacon']}>
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
             <EditableRecordPage />
           </ProtectedRoute>
         )
@@ -618,7 +952,7 @@ const Router = [
       {
         path: '/demos/editable-record/:recordType/:recordId',
         element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'priest', 'deacon']}>
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
             <EditableRecordPage />
           </ProtectedRoute>
         )
@@ -626,7 +960,7 @@ const Router = [
       {
         path: '/demos/table-tester',
         element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'priest', 'deacon']}>
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
             <TableThemeEditor />
           </ProtectedRoute>
         )
@@ -634,24 +968,122 @@ const Router = [
       {
         path: '/demos/record-generator',
         element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'priest', 'deacon']}>
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
             <RecordGeneratorPage />
           </ProtectedRoute>
         )
       },
+                   {
+               path: '/demos/site-editor',
+               element: (
+                 <ProtectedRoute requiredRole={['super_admin']}>
+                   <SiteEditorDemo />
+                 </ProtectedRoute>
+               )
+             },
+                         {
+              path: '/demos/auto-fix',
+              element: (
+                <ProtectedRoute requiredRole={['super_admin']}>
+                  <AutoFixDemo />
+                </ProtectedRoute>
+              )
+            },
+            {
+              path: '/demos/gitops',
+              element: (
+                <ProtectedRoute requiredRole={['super_admin']}>
+                  <GitOpsDemo />
+                </ProtectedRoute>
+              )
+            },
+            {
+              path: '/demos/vrt',
+              element: (
+                <ProtectedRoute requiredRole={['super_admin']}>
+                  <VisualTestDemo />
+                </ProtectedRoute>
+              )
+            },
       {
         path: '/records/baptism',
         element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'priest', 'deacon']}>
-            <BaptismRecordsPage />
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
+            <SSPPOCRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/saints-peter-and-paul-Records',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
+            <ChurchRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/:churchId(\\d+)-records',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
+            <ChurchRecordsPage />
           </ProtectedRoute>
         )
       },
       {
         path: '/:churchName-Records',
         element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'priest', 'deacon']}>
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
             <UnifiedRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/records',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
+            <ChurchRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      // New Records Management with Shop Layout
+      {
+        path: '/apps/records',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
+            <RecordsManagement />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/records/baptism',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
+            <SSPPOCRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/records/marriage',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
+            <SSPPOCRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/records/funeral',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
+            <SSPPOCRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      // Church Records UI - Professional Record Browser
+      {
+        path: '/apps/records-ui',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'manager', 'user']}>
+            <ChurchRecordsList />
           </ProtectedRoute>
         )
       },
@@ -676,14 +1108,6 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin']}>
             <ChurchAdminPanel />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/admin/church/:id/ocr',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <OCXDataPanel />
           </ProtectedRoute>
         )
       },
@@ -716,22 +1140,6 @@ const Router = [
         element: <LiturgicalCalendar />
       },
       {
-        path: '/apps/ocr-upload',
-        element: <PublicOCRUpload />
-      },
-      {
-        path: '/apps/ocr-field-mapping',
-        element: <OCRFieldMapping />
-      },
-      {
-        path: '/apps/ocr-admin', 
-        element: (
-          <ProtectedRoute requiredPermission="access_ocr">
-            <OCRUpload />
-          </ProtectedRoute>
-        )
-      },
-      {
         path: '/apps/site-clone',
         element: (
           <ProtectedRoute requiredPermission="access_admin">
@@ -747,6 +1155,52 @@ const Router = [
           </ProtectedRoute>
         )
       },
+      
+      // =====================================================
+      // DYNAMIC ADDON ROUTES
+      // =====================================================
+      
+      // Parish Map Addon
+      {
+        path: '/addons/parish-map',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <DynamicAddonRoute route="/addons/parish-map" />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      
+      // Generic addon route pattern for future addons
+      // Note: More specific routes should be added above this catch-all
+      {
+        path: '/addons/*',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <DynamicAddonRoute route={window.location.pathname} />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+
+      // =====================================================
+      // BIG BOOK CUSTOM COMPONENT ROUTES
+      // =====================================================
+      
+      // Big Book custom component routes
+      {
+        path: '/bigbook/:componentId',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'editor']}>
+            <AdminErrorBoundary>
+              <BigBookDynamicRoute />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      
       { path: '/ui-components/alert', element: <MuiAlert /> },
       { path: '/ui-components/accordion', element: <MuiAccordion /> },
       { path: '/ui-components/avatar', element: <MuiAvatar /> },
@@ -867,10 +1321,14 @@ const Router = [
       { path: '/pages/pricing', element: <ComingSoon pageName="The pricing page" /> },
       { path: '/pages/faq', element: <ComingSoon pageName="The FAQ page" /> },
       { path: '/frontend-pages/homepage', element: <Homepage /> },
+      { path: '/demo', element: <OrthodMetricsDemo /> },
+      { path: '/assign-task', element: <AssignTaskPage /> },
       { path: '/frontend-pages/about', element: <ComingSoon pageName="The about page" /> },
       { path: '/frontend-pages/contact', element: <ComingSoon pageName="The contact page" /> },
       { path: '/frontend-pages/portfolio', element: <ComingSoon pageName="The portfolio page" /> },
       { path: '/frontend-pages/pricing', element: <ComingSoon pageName="The pricing page" /> },
+      { path: '/blog', element: <BlogFeed /> },
+      { path: '/blog/:slug', element: <BlogPost /> },
       { path: '/frontend-pages/blog', element: <ComingSoon pageName="The blog page" /> },
       { path: '/frontend-pages/blog/detail/:id', element: <BlogPost /> },
       { path: '*', element: <Navigate to="/auth/404" /> },

@@ -1,0 +1,64 @@
+{
+  "id": "f2387829b013",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/debug-html-structure.js",
+  "relativePath": "server/scrapers/debug-html-structure.js",
+  "name": "debug-html-structure.js",
+  "extension": ".js",
+  "size": 11388,
+  "modified": "2025-07-23T11:50:36.260Z",
+  "created": "2025-07-23T11:50:34.041Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 282,
+      "characters": 11316,
+      "words": 794
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "cheerio",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 9
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 282,
+      "codeLines": 231,
+      "commentLines": 12,
+      "commentRatio": 0.04938271604938271,
+      "averageLineLength": 44.77366255144033
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.585Z"
+  },
+  "contentHash": "c692385f29a7ce24fb21af31a4c7988ab7bafe10717311c2ccd16152a055cb0a",
+  "discoveredAt": "2025-07-28T07:20:00.585Z"
+}

@@ -16,13 +16,13 @@ async function updatePassword() {
 
     const connection = await mysql.createConnection({
       host: 'localhost',
-      user: 'orthodoxapp',
+      user: 'orthodapps',
       password: 'Summerof1982@!',
-      database: 'orthodoxmetrics_db'
+      database: 'orthodmetrics_dev'
     });
 
     const [result] = await connection.execute(
-      'UPDATE users SET password = ? WHERE email = ?',
+      'UPDATE users SET password_hash = ? WHERE email = ?',
       [hash, email]
     );
 

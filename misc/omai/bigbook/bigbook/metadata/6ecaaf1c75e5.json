@@ -1,0 +1,43 @@
+{
+  "id": "6ecaaf1c75e5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/update-notifications-with-actions.sql",
+  "relativePath": "server/debug/update-notifications-with-actions.sql",
+  "name": "update-notifications-with-actions.sql",
+  "extension": ".sql",
+  "size": 1527,
+  "modified": "2025-07-26T21:08:52.523Z",
+  "created": "2025-07-26T21:08:51.499Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 45,
+      "characters": 1527,
+      "words": 162
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 45,
+      "codeLines": 42,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 35.23809523809524
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.256Z"
+  },
+  "contentHash": "821630cf9cb43622bc199358b300351693547ff43d7233fb8b9c234287182c46",
+  "discoveredAt": "2025-07-28T07:20:00.256Z"
+}

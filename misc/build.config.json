@@ -1,0 +1,8 @@
+{
+  "mode": "incremental",
+  "memory": 4096,
+  "installPackage": "",
+  "legacyPeerDeps": true,
+  "skipInstall": true,
+  "dryRun": false
+}

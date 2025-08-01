@@ -1,0 +1,54 @@
+{
+  "id": "8261bb560b66",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/debug-encrypted-storage.sh",
+  "relativePath": "debug-encrypted-storage.sh",
+  "name": "debug-encrypted-storage.sh",
+  "extension": ".sh",
+  "size": 3413,
+  "modified": "2025-07-26T04:16:02.759Z",
+  "created": "2025-07-26T04:15:16.514Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 115,
+      "characters": 3379,
+      "words": 390
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 84
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 85
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 115,
+      "codeLines": 89,
+      "commentLines": 2,
+      "commentRatio": 0.02197802197802198,
+      "averageLineLength": 35.7032967032967
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.259Z"
+  },
+  "contentHash": "e0e6229df08faf834d5f8f89ff56e132ae530ca2616a323a57e4737e6c5fef09",
+  "discoveredAt": "2025-07-26T04:17:09.259Z"
+}

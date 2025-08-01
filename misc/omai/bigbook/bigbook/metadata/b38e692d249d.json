@@ -1,0 +1,54 @@
+{
+  "id": "b38e692d249d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/rebuild-frontend.sh",
+  "relativePath": "server/debug/rebuild-frontend.sh",
+  "name": "rebuild-frontend.sh",
+  "extension": ".sh",
+  "size": 611,
+  "modified": "2025-07-22T12:45:24.378Z",
+  "created": "2025-07-22T12:45:22.698Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 23,
+      "characters": 595,
+      "words": 86
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 8
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 15
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 23,
+      "codeLines": 14,
+      "commentLines": 2,
+      "commentRatio": 0.125,
+      "averageLineLength": 35.8125
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.191Z"
+  },
+  "contentHash": "46701b218994a77e13611d4b245fbf34d6a1f901e4612689bd5f015058753faf",
+  "discoveredAt": "2025-07-28T07:20:00.191Z"
+}

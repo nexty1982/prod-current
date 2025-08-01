@@ -1,0 +1,6 @@
+{
+  "id": "babde4e280fe",
+  "name": "fix-production-jit-and-omai.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-production-jit-and-omai.sh",
+  "type": "Troubleshooting Utilities"
+}

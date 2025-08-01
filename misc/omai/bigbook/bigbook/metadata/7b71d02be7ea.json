@@ -1,0 +1,43 @@
+{
+  "id": "7b71d02be7ea",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/cleanup-expired-sessions.js",
+  "relativePath": "server/debug/cleanup-expired-sessions.js",
+  "name": "cleanup-expired-sessions.js",
+  "extension": ".js",
+  "size": 3756,
+  "modified": "2025-07-22T03:58:17.754Z",
+  "created": "2025-07-22T03:58:17.754Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 89,
+      "characters": 3746,
+      "words": 311
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 89,
+      "codeLines": 71,
+      "commentLines": 5,
+      "commentRatio": 0.06578947368421052,
+      "averageLineLength": 46.69736842105263
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.087Z"
+  },
+  "contentHash": "fc0d76ba18ce970daaa1a520b796b499e2b5f6af7c4485b3990b6fa6e1268ce3",
+  "discoveredAt": "2025-07-28T07:20:00.088Z"
+}

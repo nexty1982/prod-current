@@ -1,0 +1,104 @@
+{
+  "id": "a25793820a1f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/production-session-test.js",
+  "relativePath": "server/debug/production-session-test.js",
+  "name": "production-session-test.js",
+  "extension": ".js",
+  "size": 3717,
+  "modified": "2025-07-24T14:50:26.356Z",
+  "created": "2025-07-24T14:50:26.356Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 101,
+      "characters": 3671,
+      "words": 337
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 45
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:secret|token)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 15,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 16,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 50,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 51,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 52,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 53,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Production Session Diagnosis Script\r\n * Run this to check if your production session configuration is correct\r\n */\r\n\r\nconsole.log('🔍 Orthodox Metrics Production Session Diagnosis');\r\nconsole.log('================================================');\r\n\r\n// Check environment\r\nconsole.log('\\n📋 Environment Configuration:');\r\nconsole.log('NODE_ENV:', process.env.[REDACTED] || 'undefined');\r\nconsole.log('SESSION_SECRET:'[REDACTED]'SET' : 'NOT SET');\r\nconsole.log('DB_HOST:', process.env.[REDACTED] || 'default');\r\nconsole.log('DB_NAME:', process.env.[REDACTED] || 'default');\r\n\r\n// Test session configuration\r\nconsole.log('\\n🔧 Session Configuration Test:');\r\ntry {\r\n  const session = require('../config/session');\r\n  console.log('✅ Session configuration loaded successfully');\r\n  \r\n  // Check cookie settings\r\n  const mockApp = {\r\n    use: (middleware) => {\r\n      // Extract session options\r\n      if (middleware && middleware.name === 'session') {\r\n        console.log('📝 Session Cookie Settings:');\r\n        console.log('  secure:', middleware.options?.cookie?.secure);\r\n        console.log('  httpOnly:', middleware.options?.cookie?.httpOnly);\r\n        console.log('  sameSite:', middleware.options?.cookie?.sameSite);\r\n        console.log('  domain:', middleware.options?.cookie?.domain);\r\n        console.log('  maxAge:', middleware.options?.cookie?.maxAge);\r\n      }\r\n    }\r\n  };\r\n  \r\n} catch (error) {\r\n  console.log('❌ Session configuration error:', error.message);\r\n}\r\n\r\n// Database connection test\r\nconsole.log('\\n🗄️  Database Connection Test:');\r\nconst mysql = require('mysql2/promise');\r\n\r\nasync function testDatabase() {\r\n  try {\r\n    const connection = await mysql.createConnection({\r\n      host: process.env.[REDACTED] || 'localhost',\r\n      user: process.env.[REDACTED] || 'orthodoxapps', \r\n      password: process.env.[REDACTED] || 'Summerof1982@!',\r\n      database: process.env.[REDACTED] || 'orthodoxmetrics_db'\r\n    });\r\n    \r\n    console.log('✅ Database connection successful');\r\n    \r\n    // Check if sessions table exists\r\n    const [tables] = await connection.execute(\"SHOW TABLES LIKE 'sessions'\");\r\n    if (tables.length > 0) {\r\n      console.log('✅ Sessions table exists');\r\n      \r\n      // Check sessions table structure\r\n      const [structure] = await connection.execute(\"DESCRIBE sessions\");\r\n      console.log('📋 Sessions table structure:');\r\n      structure.forEach(col => {\r\n        console.log(`  ${col.Field}: ${col.Type}`);\r\n      });\r\n      \r\n      // Count current sessions\r\n      const [count] = await connection.execute(\"SELECT COUNT(*) as count FROM sessions\");\r\n      console.log(`📊 Current active sessions: ${count[0].count}`);\r\n      \r\n    } else {\r\n      console.log('⚠️  Sessions table does not exist - this could be the issue!');\r\n    }\r\n    \r\n    await connection.end();\r\n    \r\n  } catch (error) {\r\n    console.log('❌ Database connection failed:', error.message);\r\n  }\r\n}\r\n\r\ntestDatabase();\r\n\r\n// Recommendations\r\nconsole.log('\\n💡 Production Checklist:');\r\nconsole.log('1. ✓ Set NODE_ENV=production');\r\nconsole.log('2. ✓ Set strong SESSION_SECRET'); \r\nconsole.log('3. ✓ Ensure HTTPS is enabled');\r\nconsole.log('4. ✓ Verify sessions table exists');\r\nconsole.log('5. ✓ Check CORS allows orthodoxmetrics.com');\r\nconsole.log('6. ✓ Restart server after changes');\r\n\r\nconsole.log('\\n🚀 To fix session issues:');\r\nconsole.log('   1. Run: export NODE_ENV=production');\r\nconsole.log('   2. Set SESSION_SECRET environment variable');\r\nconsole.log('   3. Restart your server');\r\nconsole.log('   4. Clear browser cookies for orthodoxmetrics.com');\r\nconsole.log('   5. Try logging in again'); "
+    },
+    "complexity": {
+      "totalLines": 101,
+      "codeLines": 69,
+      "commentLines": 14,
+      "commentRatio": 0.1686746987951807,
+      "averageLineLength": 42.34939759036145
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.188Z"
+  },
+  "contentHash": "c3a6916df8208f32591ca206520655ca91d4e92e77d070d518a3a48e731e594e",
+  "discoveredAt": "2025-07-28T07:20:00.188Z"
+}

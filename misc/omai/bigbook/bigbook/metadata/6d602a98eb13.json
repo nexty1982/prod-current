@@ -1,0 +1,49 @@
+{
+  "id": "6d602a98eb13",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-server-for-bigbook.sh",
+  "relativePath": "scripts/restart-server-for-bigbook.sh",
+  "name": "restart-server-for-bigbook.sh",
+  "extension": ".sh",
+  "size": 3769,
+  "modified": "2025-07-27T19:54:57.072Z",
+  "created": "2025-07-27T19:54:08.237Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 120,
+      "characters": 3739,
+      "words": 514
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 97
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 120,
+      "codeLines": 88,
+      "commentLines": 11,
+      "commentRatio": 0.1111111111111111,
+      "averageLineLength": 36.08080808080808
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.475Z"
+  },
+  "contentHash": "fb1f922bf8790357ed77d0617d4a49078df812009a85292656239c6337b43f02",
+  "discoveredAt": "2025-07-28T07:19:59.475Z"
+}

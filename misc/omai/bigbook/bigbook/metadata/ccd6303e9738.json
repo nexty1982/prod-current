@@ -1,0 +1,56 @@
+{
+  "id": "ccd6303e9738",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/55df67b70181.json",
+  "relativePath": "bigbook/metadata/55df67b70181.json",
+  "name": "55df67b70181.json",
+  "extension": ".json",
+  "size": 4037,
+  "modified": "2025-07-26T04:17:10.938Z",
+  "created": "2025-07-26T04:17:10.938Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 92,
+      "characters": 4027,
+      "words": 282
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 79
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:secret|token)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 79,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"55df67b70181\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug-session-config.js\",\n  \"relativePath\": \"server/debug-session-config.js\",\n  \"name\": \"debug-session-config.js\",\n  \"extension\": \".js\",\n  \"size\": 1558,\n  \"modified\": \"2025-07-22T08:51:31.186Z\",\n  \"created\": \"2025-07-22T08:51:29.625Z\",\n  \"classification\": {\n    \"type\": \"Troubleshooting Utilities\",\n    \"category\": \"Diagnostic Tools\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 41,\n      \"characters\": 1548,\n      \"words\": 145\n    },\n    \"classification\": {\n      \"type\": \"Troubleshooting Utilities\",\n      \"category\": \"Diagnostic Tools\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"dotenv\",\n        \"line\": 7\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:secret|token)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 15,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 9,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 10,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 10,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 13,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 14,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 15,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"#!/usr/bin/env node\\r\\n\\r\\nconsole.log('🔍 DEBUG: Session Configuration Values');\\r\\nconsole.log('=====================================');\\r\\n\\r\\n// Load environment variables\\r\\nrequire('dotenv').config();\\r\\n\\r\\nconst isProduction = process.env.[REDACTED] === 'production';\\r\\nconst isHTTPS = process.env.[REDACTED] === 'true' || process.env.[REDACTED] === 'production';\\r\\n\\r\\nconsole.log('Environment Variables:');\\r\\nconsole.log('  NODE_ENV:', process.env.[REDACTED]);\\r\\nconsole.log('  HTTPS:', process.env.[REDACTED]);\\r\\nconsole.log('  SESSION_SECRET:'[REDACTED]'SET' : 'NOT SET');\\r\\n\\r\\nconsole.log('\\\\nCalculated Values:');\\r\\nconsole.log('  isProduction:', isProduction);\\r\\nconsole.log('  isHTTPS:', isHTTPS);\\r\\n\\r\\nconsole.log('\\\\nCookie Configuration:');\\r\\nconsole.log('  secure:', isHTTPS);\\r\\nconsole.log('  httpOnly: true');\\r\\nconsole.log('  domain:', isProduction ? '.orthodoxmetrics.com' : undefined);\\r\\n\\r\\nconsole.log('\\\\n🎯 Expected vs Current:');\\r\\nconsole.log('  We WANT secure: true for HTTPS');\\r\\nconsole.log('  We HAVE secure:', isHTTPS);\\r\\n\\r\\nif (!isHTTPS) {\\r\\n    console.log('\\\\n❌ PROBLEM FOUND:');\\r\\n    console.log('  isHTTPS is false, so secure cookies are disabled!');\\r\\n    console.log('  This is why browser cookies show Secure: false');\\r\\n    \\r\\n    console.log('\\\\n🔧 SOLUTION:');\\r\\n    console.log('  The environment variables are not being set properly');\\r\\n    console.log('  PM2 might not be picking up HTTPS=true');\\r\\n} else {\\r\\n    console.log('\\\\n✅ Configuration looks correct');\\r\\n    console.log('  The issue might be browser cache or session persistence');\\r\\n} \"\n    },\n    \"complexity\": {\n      \"totalLines\": 41,\n      \"codeLines\": 30,\n      \"commentLines\": 2,\n      \"commentRatio\": 0.0625,\n      \"averageLineLength\": 46.71875\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:10.942Z\"\n  },\n  \"contentHash\": \"ec1e2b6d4bcee3840f6b43f53033b45acf07efb665c22eda10688825327a9b46\",\n  \"discoveredAt\": \"2025-07-26T04:17:10.942Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 92,
+      "codeLines": 92,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 42.78260869565217
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.968Z"
+  },
+  "contentHash": "4389696d93c3348940436249d6f1debe7bf50032e1adda97c7b4b182b32bc61f",
+  "discoveredAt": "2025-07-28T07:19:56.968Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "1b9ef672a453",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/config/ai-patterns.json",
+  "relativePath": "bigbook/config/ai-patterns.json",
+  "name": "ai-patterns.json",
+  "extension": ".json",
+  "size": 41,
+  "modified": "2025-07-24T23:18:18.341Z",
+  "created": "2025-07-24T23:18:18.341Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 5,
+      "characters": 41,
+      "words": 6
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 5,
+      "codeLines": 4,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 9.25
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.570Z"
+  },
+  "contentHash": "519ecfa020a0036fc24630dff2779da58c65b0b932e1611743b1ec5ce50148f8",
+  "discoveredAt": "2025-07-28T07:19:56.570Z"
+}

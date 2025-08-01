@@ -1,0 +1,73 @@
+{
+  "id": "c70fd1c32f4d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/config/db-root.js",
+  "relativePath": "server/config/db-root.js",
+  "name": "db-root.js",
+  "extension": ".js",
+  "size": 380,
+  "modified": "2025-07-09T12:52:36.391Z",
+  "created": "2025-07-09T12:45:49.449Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 15,
+      "characters": 380,
+      "words": 33
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 6,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 7,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 8,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// config/db-root.js\r\nconst mysql = require('mysql2/promise');\r\nrequire('dotenv').config();\r\n\r\nconst rootPool = mysql.createPool({\r\n  host: process.env.[REDACTED] || 'localhost',\r\n  user: process.env.[REDACTED] || 'superadmin',\r\n  password: process.env.[REDACTED],\r\n  waitForConnections: true,\r\n  connectionLimit: 5,\r\n  queueLimit: 0,\r\n});\r\n\r\nmodule.exports = { rootPool };\r\n"
+    },
+    "complexity": {
+      "totalLines": 15,
+      "codeLines": 11,
+      "commentLines": 1,
+      "commentRatio": 0.08333333333333333,
+      "averageLineLength": 30.333333333333332
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.536Z"
+  },
+  "contentHash": "fbea8f5cb6bcfc27376c7dde38b18f5a405d867b817f731d706c42bcce8bbca5",
+  "discoveredAt": "2025-07-28T07:19:59.536Z"
+}

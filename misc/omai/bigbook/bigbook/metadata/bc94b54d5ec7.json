@@ -1,0 +1,56 @@
+{
+  "id": "bc94b54d5ec7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/ca2731cc3d7c.json",
+  "relativePath": "bigbook/metadata/ca2731cc3d7c.json",
+  "name": "ca2731cc3d7c.json",
+  "extension": ".json",
+  "size": 4996,
+  "modified": "2025-07-26T04:17:10.954Z",
+  "created": "2025-07-26T04:17:10.954Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 56,
+      "characters": 4952,
+      "words": 384
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 43
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 43,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"ca2731cc3d7c\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/legacy/phase0-database-test.js\",\n  \"relativePath\": \"server/legacy/phase0-database-test.js\",\n  \"name\": \"phase0-database-test.js\",\n  \"extension\": \".js\",\n  \"size\": 3300,\n  \"modified\": \"2025-07-24T14:51:40.480Z\",\n  \"created\": \"2025-07-24T14:51:40.480Z\",\n  \"classification\": {\n    \"type\": \"Testing Scripts\",\n    \"category\": \"DevOps > Test\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 103,\n      \"characters\": 3256,\n      \"words\": 279\n    },\n    \"classification\": {\n      \"type\": \"Testing Scripts\",\n      \"category\": \"DevOps > Test\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"mysql2/promise\",\n        \"line\": 10\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 25,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"#!/usr/bin/env node\\r\\n\\r\\n/**\\r\\n * Updated Database Connection Test for Phase 0\\r\\n * Tests the correct database names used in OrthodoxMetrics\\r\\n * \\r\\n * Run with: node phase0-database-test.js\\r\\n */\\r\\n\\r\\nconst mysql = require('mysql2/promise');\\r\\n\\r\\nasync function testCorrectDatabases() {\\r\\n    console.log('🔍 Testing Correct OrthodoxMetrics Database Connections');\\r\\n    console.log('═'.repeat(60));\\r\\n    \\r\\n    const databases = [\\r\\n        'saints_peter_and_paul_orthodox_church_db',\\r\\n        'ssppoc_records_db',\\r\\n        'orthodoxmetrics_db'\\r\\n    ];\\r\\n\\r\\n    const auth = {\\r\\n        host: 'localhost',\\r\\n        user: 'orthodoxapps',\\r\\n        password: '[REDACTED]',\\r\\n        port: 3306\\r\\n    };\\r\\n\\r\\n    console.log(`🔐 Testing with user: ${auth.user}\\\\n`);\\r\\n\\r\\n    let allSuccess = true;\\r\\n\\r\\n    for (const dbName of databases) {\\r\\n        console.log(`📋 Testing database: ${dbName}`);\\r\\n        console.log('─'.repeat(40));\\r\\n        \\r\\n        try {\\r\\n            // Test connection to specific database\\r\\n            const connection = await mysql.createConnection({\\r\\n                ...auth,\\r\\n                database: dbName\\r\\n            });\\r\\n\\r\\n            console.log('✅ Connection successful!');\\r\\n            \\r\\n            // Test basic query\\r\\n            const [result] = await connection.query('SELECT 1 as test');\\r\\n            console.log('✅ Query test passed');\\r\\n            \\r\\n            // Check table count\\r\\n            const [tables] = await connection.query('SHOW TABLES');\\r\\n            console.log(`✅ Found ${tables.length} tables`);\\r\\n            \\r\\n            // For OCR database, check specific tables\\r\\n            if (dbName === 'saints_peter_and_paul_orthodox_church_db') {\\r\\n                const [ocrTables] = await connection.query(\\\"SHOW TABLES LIKE '%ocr%'\\\");\\r\\n                console.log(`✅ OCR tables: ${ocrTables.length} found`);\\r\\n                \\r\\n                ocrTables.forEach(table => {\\r\\n                    const tableName = Object.values(table)[0];\\r\\n                    console.log(`   • ${tableName}`);\\r\\n                });\\r\\n            }\\r\\n            \\r\\n            await connection.end();\\r\\n            console.log('✅ Connection closed properly\\\\n');\\r\\n            \\r\\n        } catch (error) {\\r\\n            console.log(`❌ Connection failed: ${error.message}\\\\n`);\\r\\n            allSuccess = false;\\r\\n        }\\r\\n    }\\r\\n\\r\\n    console.log('═'.repeat(60));\\r\\n    if (allSuccess) {\\r\\n        console.log('🎉 ALL DATABASE CONNECTIONS SUCCESSFUL!');\\r\\n        console.log('✅ Phase 0 database testing PASSED');\\r\\n        console.log('\\\\n📋 Ready for next Phase 0 tests:');\\r\\n        console.log('   • Google Vision API testing');\\r\\n        console.log('   • OCR upload functionality');\\r\\n        console.log('   • OCR processing pipeline');\\r\\n    } else {\\r\\n        console.log('❌ Some database connections failed');\\r\\n        console.log('🔧 Fix database issues before proceeding');\\r\\n    }\\r\\n    \\r\\n    return allSuccess;\\r\\n}\\r\\n\\r\\n// Run the test\\r\\nif (require.main === module) {\\r\\n    testCorrectDatabases()\\r\\n        .then(success => {\\r\\n            process.exit(success ? 0 : 1);\\r\\n        })\\r\\n        .catch(error => {\\r\\n            console.error('💥 Test crashed:', error);\\r\\n            process.exit(1);\\r\\n        });\\r\\n}\\r\\n\\r\\nmodule.exports = { testCorrectDatabases };\\r\\n\"\n    },\n    \"complexity\": {\n      \"totalLines\": 103,\n      \"codeLines\": 70,\n      \"commentLines\": 12,\n      \"commentRatio\": 0.14634146341463414,\n      \"averageLineLength\": 37.09756097560975\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:10.957Z\"\n  },\n  \"contentHash\": \"96ec965a74d02ffe77068fe29e2bcf7f49dc84cd03e11aebb779b205a1bf5eae\",\n  \"discoveredAt\": \"2025-07-26T04:17:10.957Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 56,
+      "codeLines": 56,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 87.44642857142857
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.452Z"
+  },
+  "contentHash": "dbe0fdb31a5112fe4fd0299d9a99232ae80888d422ad13a44fa7367513ae18f6",
+  "discoveredAt": "2025-07-28T07:19:57.452Z"
+}

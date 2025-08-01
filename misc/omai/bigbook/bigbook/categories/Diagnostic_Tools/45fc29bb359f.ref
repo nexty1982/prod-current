@@ -1,0 +1,6 @@
+{
+  "id": "45fc29bb359f",
+  "name": "check-outer-nginx.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-outer-nginx.sh",
+  "type": "Troubleshooting Utilities"
+}

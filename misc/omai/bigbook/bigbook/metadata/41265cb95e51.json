@@ -1,0 +1,43 @@
+{
+  "id": "41265cb95e51",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/QUICK_START.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/QUICK_START.md",
+  "name": "QUICK_START.md",
+  "extension": ".md",
+  "size": 715,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:06.660Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 32,
+      "characters": 715,
+      "words": 84
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 32,
+      "codeLines": 19,
+      "commentLines": 6,
+      "commentRatio": 0.24,
+      "averageLineLength": 27.12
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.206Z"
+  },
+  "contentHash": "142c25571bac244e74f5c9c8e99f7d312c5d99ee375e6633454ddfbe0ae8e3c4",
+  "discoveredAt": "2025-07-28T07:19:58.206Z"
+}

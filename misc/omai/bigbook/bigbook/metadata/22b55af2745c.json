@@ -1,0 +1,43 @@
+{
+  "id": "22b55af2745c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/credentials/google-vision-credentials.json",
+  "relativePath": "server/credentials/google-vision-credentials.json",
+  "name": "google-vision-credentials.json",
+  "extension": ".json",
+  "size": 2392,
+  "modified": "2025-07-10T22:08:15.093Z",
+  "created": "2025-07-10T22:08:15.093Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 14,
+      "characters": 2392,
+      "words": 28
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 14,
+      "codeLines": 13,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 183
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.564Z"
+  },
+  "contentHash": "e02403cbe0e98099a8e72586c0e627c2b23d7f91e21139bbca99c1102d134549",
+  "discoveredAt": "2025-07-28T07:19:59.564Z"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "0b48dc108d91",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/learningSources.js",
+  "relativePath": "services/om-ai/learningSources.js",
+  "name": "learningSources.js",
+  "extension": ".js",
+  "size": 5706,
+  "modified": "2025-07-27T03:11:41.386Z",
+  "created": "2025-07-27T03:11:40.431Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 229,
+      "characters": 5706,
+      "words": 536
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 7
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 229,
+      "codeLines": 176,
+      "commentLines": 34,
+      "commentRatio": 0.1619047619047619,
+      "averageLineLength": 25.938095238095237
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.544Z"
+  },
+  "contentHash": "04f894e896486132daedb7de0691c8ff17bb6ca1ccd6b085b89eb52a6f193395",
+  "discoveredAt": "2025-07-28T07:20:01.544Z"
+}

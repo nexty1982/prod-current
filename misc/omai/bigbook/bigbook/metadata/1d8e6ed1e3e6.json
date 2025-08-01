@@ -1,0 +1,43 @@
+{
+  "id": "1d8e6ed1e3e6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/fix-churches-schema.sql",
+  "relativePath": "server/database/fix-churches-schema.sql",
+  "name": "fix-churches-schema.sql",
+  "extension": ".sql",
+  "size": 11244,
+  "modified": "2025-07-21T20:01:31.603Z",
+  "created": "2025-07-21T19:58:57.574Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 152,
+      "characters": 8808,
+      "words": 1045
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 152,
+      "codeLines": 127,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 67.90551181102362
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.993Z"
+  },
+  "contentHash": "89cbc1fb4d08ae2c845d474c6f76d059a70e6e2248d77a7d17dd560be6d56f2d",
+  "discoveredAt": "2025-07-28T07:19:59.993Z"
+}

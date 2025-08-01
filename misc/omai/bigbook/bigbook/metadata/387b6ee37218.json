@@ -1,0 +1,43 @@
+{
+  "id": "387b6ee37218",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-jit-and-restart.sh",
+  "relativePath": "scripts/fix-jit-and-restart.sh",
+  "name": "fix-jit-and-restart.sh",
+  "extension": ".sh",
+  "size": 3137,
+  "modified": "2025-07-25T20:13:57.733Z",
+  "created": "2025-07-25T20:13:54.088Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 92,
+      "characters": 3085,
+      "words": 403
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 92,
+      "codeLines": 62,
+      "commentLines": 12,
+      "commentRatio": 0.16216216216216217,
+      "averageLineLength": 40.45945945945946
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.105Z"
+  },
+  "contentHash": "84d3723b46189fd544088a30a8ccde0e8848c881b994160268f911dd848d26af",
+  "discoveredAt": "2025-07-28T07:19:59.105Z"
+}

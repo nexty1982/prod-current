@@ -1,0 +1,54 @@
+{
+  "id": "743019c43d1e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/legacy/phase1-create-typescript-interfaces.js",
+  "relativePath": "server/legacy/phase1-create-typescript-interfaces.js",
+  "name": "phase1-create-typescript-interfaces.js",
+  "extension": ".js",
+  "size": 17669,
+  "modified": "2025-07-14T21:24:32.848Z",
+  "created": "2025-07-14T21:21:47.247Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 596,
+      "characters": 17649,
+      "words": 1661
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 9
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 596,
+      "codeLines": 485,
+      "commentLines": 53,
+      "commentRatio": 0.09851301115241635,
+      "averageLineLength": 31.45167286245353
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.279Z"
+  },
+  "contentHash": "4931c85e6f40fcdc8bc12a2a8f14b6baddfe6d3854d0ed84614b8ed29af84696",
+  "discoveredAt": "2025-07-28T07:20:00.279Z"
+}

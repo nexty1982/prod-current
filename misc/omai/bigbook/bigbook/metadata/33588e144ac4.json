@@ -1,0 +1,59 @@
+{
+  "id": "33588e144ac4",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/autonomy/goal-manager.ts",
+  "relativePath": "services/om-ai/autonomy/goal-manager.ts",
+  "name": "goal-manager.ts",
+  "extension": ".ts",
+  "size": 15305,
+  "modified": "2025-07-25T01:36:48.151Z",
+  "created": "2025-07-25T01:30:47.627Z",
+  "classification": {
+    "type": "Other",
+    "category": "Uncategorized",
+    "confidence": 0
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 466,
+      "characters": 15305,
+      "words": 1426
+    },
+    "classification": {
+      "type": "Other",
+      "category": "Uncategorized",
+      "confidence": 0
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 466,
+      "codeLines": 403,
+      "commentLines": 5,
+      "commentRatio": 0.012254901960784314,
+      "averageLineLength": 36.161764705882355
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.410Z"
+  },
+  "contentHash": "d595d6bf669789e2cc56485381e4a20f16b8a0f9ab2f69cbebf5d41c01dd7306",
+  "discoveredAt": "2025-07-28T07:20:01.410Z"
+}

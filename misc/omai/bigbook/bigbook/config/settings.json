@@ -1,0 +1,9 @@
+{
+  "databaseUser": "root",
+  "databasePassword": "Summerof1982@!",
+  "useSudo": true,
+  "sudoPassword": "",
+  "defaultDatabase": "omai_db",
+  "scriptTimeout": 30000,
+  "maxFileSize": 10485760
+}

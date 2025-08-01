@@ -1,0 +1,74 @@
+{
+  "id": "a5725bf24b1b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/b18375102ab9.json",
+  "relativePath": "bigbook/metadata/b18375102ab9.json",
+  "name": "b18375102ab9.json",
+  "extension": ".json",
+  "size": 7036,
+  "modified": "2025-07-26T04:17:11.734Z",
+  "created": "2025-07-26T04:17:11.734Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 87,
+      "characters": 6978,
+      "words": 616
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "@google-cloud/vision",
+        "line": 74
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 74
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 74
+      },
+      {
+        "type": "npm_package",
+        "name": "sharp",
+        "line": 74
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 74
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 74
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 87,
+      "codeLines": 87,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 79.2183908045977
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.368Z"
+  },
+  "contentHash": "a21bca5a97574f99443796769081ad002325039530fa5b73723ec109f9afb20f",
+  "discoveredAt": "2025-07-28T07:19:57.368Z"
+}

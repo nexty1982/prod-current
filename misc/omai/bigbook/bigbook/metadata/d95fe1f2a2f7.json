@@ -1,0 +1,43 @@
+{
+  "id": "d95fe1f2a2f7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-jit-terminal.sh",
+  "relativePath": "scripts/test-jit-terminal.sh",
+  "name": "test-jit-terminal.sh",
+  "extension": ".sh",
+  "size": 3749,
+  "modified": "2025-07-25T20:06:32.254Z",
+  "created": "2025-07-25T20:06:28.797Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 110,
+      "characters": 3679,
+      "words": 470
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 110,
+      "codeLines": 85,
+      "commentLines": 10,
+      "commentRatio": 0.10526315789473684,
+      "averageLineLength": 37.536842105263155
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.513Z"
+  },
+  "contentHash": "b4bf60e616fdb2a8f7a62b85279122cb407fcc2a82d40390b4e598bb4e825cb2",
+  "discoveredAt": "2025-07-28T07:19:59.513Z"
+}

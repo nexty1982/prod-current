@@ -1,0 +1,6 @@
+{
+  "id": "405f05dd779c",
+  "name": "autonomous-deploy-node.js",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/tasks/autonomous-deploy-node.js",
+  "type": "Build Scripts"
+}

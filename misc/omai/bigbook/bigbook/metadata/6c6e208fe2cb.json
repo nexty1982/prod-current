@@ -1,0 +1,43 @@
+{
+  "id": "6c6e208fe2cb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/USER_MANAGEMENT_TOGGLE_FIX.md",
+  "relativePath": "docs/archive/07-09-25/USER_MANAGEMENT_TOGGLE_FIX.md",
+  "name": "USER_MANAGEMENT_TOGGLE_FIX.md",
+  "extension": ".md",
+  "size": 31791,
+  "modified": "2025-07-09T04:32:16.331Z",
+  "created": "2025-07-09T04:32:16.331Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 928,
+      "characters": 31783,
+      "words": 2768
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 928,
+      "codeLines": 727,
+      "commentLines": 66,
+      "commentRatio": 0.0832282471626734,
+      "averageLineLength": 38.634300126103405
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.021Z"
+  },
+  "contentHash": "6417b833e177efb8eafffefab270e6b3a1bceae5782c9f639b0714413bbf0d48",
+  "discoveredAt": "2025-07-28T07:19:58.022Z"
+}

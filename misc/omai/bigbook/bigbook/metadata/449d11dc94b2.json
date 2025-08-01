@@ -1,0 +1,43 @@
+{
+  "id": "449d11dc94b2",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/churchValidation.js",
+  "relativePath": "server/utils/churchValidation.js",
+  "name": "churchValidation.js",
+  "extension": ".js",
+  "size": 6963,
+  "modified": "2025-07-15T07:07:33.693Z",
+  "created": "2025-07-13T22:27:31.118Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 216,
+      "characters": 6963,
+      "words": 746
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 216,
+      "codeLines": 144,
+      "commentLines": 42,
+      "commentRatio": 0.22580645161290322,
+      "averageLineLength": 36.09139784946237
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.230Z"
+  },
+  "contentHash": "dfb8021c6daf3208bb6a78c812b4745beb461da6e2bfb417661314f32fd2996b",
+  "discoveredAt": "2025-07-28T07:20:01.230Z"
+}

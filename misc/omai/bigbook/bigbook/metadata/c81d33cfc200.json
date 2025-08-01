@@ -1,0 +1,54 @@
+{
+  "id": "c81d33cfc200",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/componentDiscovery.js",
+  "relativePath": "server/utils/componentDiscovery.js",
+  "name": "componentDiscovery.js",
+  "extension": ".js",
+  "size": 18934,
+  "modified": "2025-07-26T05:09:38.225Z",
+  "created": "2025-07-26T05:09:36.663Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 596,
+      "characters": 18934,
+      "words": 1589
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 596,
+      "codeLines": 392,
+      "commentLines": 112,
+      "commentRatio": 0.2222222222222222,
+      "averageLineLength": 35.54563492063492
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.232Z"
+  },
+  "contentHash": "6d5ea0431373db597bed8c4334cb2204260c3128182c72a2313aec468804cc06",
+  "discoveredAt": "2025-07-28T07:20:01.232Z"
+}

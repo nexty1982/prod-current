@@ -4,6 +4,7 @@ import { PostType, profiledataType } from '../../types/apps/userProfile';
 import React from "react";
 import useSWR from 'swr';
 import { getFetcher, postFetcher } from 'src/api/globalFetcher';
+import { ensureArray } from '../../utils/arrayUtils';
 
 // Define context type
 export type UserDataContextType = {
@@ -101,12 +102,12 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // Function to filter followers based on search input
     const filterFollowers = () => {
-        if (followers) {
-            return followers.filter((t) =>
-                t.name.toLowerCase().includes(search.toLowerCase())
-            );
-        }
-        return followers;
+        const safeFollowers = ensureArray(followers, []);
+        if (safeFollowers.length === 0) return [];
+        
+        return safeFollowers.filter((t) =>
+            t.name.toLowerCase().includes(search.toLowerCase())
+        );
     };
 
     // Add comment to a post

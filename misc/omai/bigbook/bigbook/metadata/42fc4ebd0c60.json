@@ -1,0 +1,54 @@
+{
+  "id": "42fc4ebd0c60",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-global-images.js",
+  "relativePath": "server/debug/check-global-images.js",
+  "name": "check-global-images.js",
+  "extension": ".js",
+  "size": 6941,
+  "modified": "2025-07-22T15:00:42.677Z",
+  "created": "2025-07-22T15:00:39.953Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 141,
+      "characters": 6901,
+      "words": 536
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 141,
+      "codeLines": 110,
+      "commentLines": 8,
+      "commentRatio": 0.06779661016949153,
+      "averageLineLength": 55.54237288135593
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.076Z"
+  },
+  "contentHash": "28a805ac24f0a307b017991f53d2145e1da6891af63e85d05bb3d14b4c6ca696",
+  "discoveredAt": "2025-07-28T07:20:00.076Z"
+}

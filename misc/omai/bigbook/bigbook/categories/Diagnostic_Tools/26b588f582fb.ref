@@ -1,0 +1,6 @@
+{
+  "id": "26b588f582fb",
+  "name": "apply-domain-fix.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/apply-domain-fix.sh",
+  "type": "Troubleshooting Utilities"
+}

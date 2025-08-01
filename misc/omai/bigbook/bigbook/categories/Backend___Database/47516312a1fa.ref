@@ -1,0 +1,6 @@
+{
+  "id": "47516312a1fa",
+  "name": "add-church-info-fields.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migrations/add-church-info-fields.sql",
+  "type": "Database Scripts"
+}

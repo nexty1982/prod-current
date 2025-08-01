@@ -1,0 +1,43 @@
+{
+  "id": "5595bd5e5276",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/NOTIFICATION_SYSTEM_COMPLETE.md",
+  "relativePath": "docs/archive/07-09-25/NOTIFICATION_SYSTEM_COMPLETE.md",
+  "name": "NOTIFICATION_SYSTEM_COMPLETE.md",
+  "extension": ".md",
+  "size": 7830,
+  "modified": "2025-07-09T04:32:16.323Z",
+  "created": "2025-07-09T04:32:16.315Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 196,
+      "characters": 7708,
+      "words": 850
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 196,
+      "codeLines": 137,
+      "commentLines": 29,
+      "commentRatio": 0.1746987951807229,
+      "averageLineLength": 45.08433734939759
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.902Z"
+  },
+  "contentHash": "d4920920329d120361392d191439017b6f9fc0b60a4701bb5130fa293249a838",
+  "discoveredAt": "2025-07-28T07:19:57.902Z"
+}

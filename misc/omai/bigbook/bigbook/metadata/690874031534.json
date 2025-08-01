@@ -1,0 +1,66 @@
+{
+  "id": "690874031534",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/a2d30e6bb272.json",
+  "relativePath": "bigbook/metadata/a2d30e6bb272.json",
+  "name": "a2d30e6bb272.json",
+  "extension": ".json",
+  "size": 4804,
+  "modified": "2025-07-26T04:17:10.346Z",
+  "created": "2025-07-26T04:17:10.346Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 108,
+      "characters": 4790,
+      "words": 370
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express-session",
+        "line": 95
+      },
+      {
+        "type": "npm_package",
+        "name": "express-mysql-session",
+        "line": 95
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 95
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:secret|token)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 95,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"a2d30e6bb272\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/config/backup-7-22-25-session.js\",\n  \"relativePath\": \"server/config/backup-7-22-25-session.js\",\n  \"name\": \"backup-7-22-25-session.js\",\n  \"extension\": \".js\",\n  \"size\": 1956,\n  \"modified\": \"2025-07-24T14:50:26.304Z\",\n  \"created\": \"2025-07-24T14:50:26.304Z\",\n  \"classification\": {\n    \"type\": \"Server Scripts\",\n    \"category\": \"Backend > Server\",\n    \"confidence\": 4\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 64,\n      \"characters\": 1942,\n      \"words\": 202\n    },\n    \"classification\": {\n      \"type\": \"Server Scripts\",\n      \"category\": \"Backend > Server\",\n      \"confidence\": 4\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"express-session\",\n        \"line\": 2\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"express-mysql-session\",\n        \"line\": 3\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"dotenv\",\n        \"line\": 6\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:secret|token)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 45,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 10,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 11,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 12,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 13,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 14,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 41,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 44,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"// server/config/session.js - FRONTEND-COMPATIBLE SESSION CONFIG\\nconst session = require('express-session');\\nconst MySQLStore = require('express-mysql-session')(session);\\n\\n// Load environment variables\\nrequire('dotenv').config();\\n\\n// Database connection options for session store\\nconst sessionStoreOptions = {\\n  host: process.env.[REDACTED] || 'localhost',\\n  port: process.env.[REDACTED] || 3306,\\n  user: process.env.[REDACTED] || 'orthodoxapps',\\n  password: process.env.[REDACTED] || 'Summerof1982@!',\\n  database: process.env.[REDACTED] || 'orthodoxmetrics_db',\\n  charset: 'utf8mb4',\\n  expiration: 86400000, // 24 hours\\n  checkExpirationInterval: 900000, // Check every 15 minutes\\n  createDatabaseTable: true,\\n  endConnectionOnClose: true,\\n  clearExpired: true,\\n  schema: {\\n    tableName: 'sessions',\\n    columnNames: {\\n      session_id: 'session_id',\\n      expires: 'expires',\\n      data: 'data'\\n    }\\n  }\\n};\\n\\nconst store = new MySQLStore(sessionStoreOptions);\\n\\nstore.on('error', (error) => {\\n  console.error('❌ Session store error:', error);\\n});\\n\\nstore.on('connect', () => {\\n  console.log('✅ Session store connected successfully');\\n});\\n\\nconst sessionSecret = process.env.[REDACTED] || 'orthodox-metrics-production-secret-2025';\\n\\nconsole.log('🍪 Session configuration:');\\nconsole.log('   Environment:', process.env.[REDACTED] || 'development');\\nconsole.log('   Session secret:'[REDACTED]'SET' : 'NOT SET');\\n\\nmodule.exports = session({\\n  name: 'connect.sid',\\n  secret: sessionSecret,\\n  store: store,\\n  resave: false,\\n  saveUninitialized: false,\\n  rolling: true,\\n  proxy: true,\\n  cookie: {\\n    secure: false, // 🔧 FIXED: Allow non-HTTPS for development/testing\\n    httpOnly: false, // 🔧 FIXED: Allow JavaScript access for frontend\\n    maxAge: 86400000, // 24 hours\\n    sameSite: 'lax', // 🔧 FIXED: Allow cross-origin requests\\n    path: '/', // 🔧 FIXED: Available for all paths\\n    // No domain restriction for better compatibility\\n  }\\n});\\n\"\n    },\n    \"complexity\": {\n      \"totalLines\": 64,\n      \"codeLines\": 51,\n      \"commentLines\": 4,\n      \"commentRatio\": 0.07272727272727272,\n      \"averageLineLength\": 34.163636363636364\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:10.347Z\"\n  },\n  \"contentHash\": \"e5fdc167a44b0f8ccdc11f435964a4cbdc06c58f3675c5811bb993b185ba9dfc\",\n  \"discoveredAt\": \"2025-07-26T04:17:10.347Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 108,
+      "codeLines": 108,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 43.361111111111114
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.289Z"
+  },
+  "contentHash": "3d842aadfdb02fee2d2e9d42e3a4d214e85fbba015ca1c3e60b95358038ef1b9",
+  "discoveredAt": "2025-07-28T07:19:57.289Z"
+}

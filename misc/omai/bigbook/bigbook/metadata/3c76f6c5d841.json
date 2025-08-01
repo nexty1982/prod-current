@@ -1,0 +1,43 @@
+{
+  "id": "3c76f6c5d841",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/USER_MANAGEMENT_ARCHITECTURE.md",
+  "relativePath": "docs/USER_MANAGEMENT_ARCHITECTURE.md",
+  "name": "USER_MANAGEMENT_ARCHITECTURE.md",
+  "extension": ".md",
+  "size": 9502,
+  "modified": "2025-07-21T21:55:15.982Z",
+  "created": "2025-07-21T21:55:13.839Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 326,
+      "characters": 9392,
+      "words": 1099
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 326,
+      "codeLines": 206,
+      "commentLines": 46,
+      "commentRatio": 0.18253968253968253,
+      "averageLineLength": 35.551587301587304
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.835Z"
+  },
+  "contentHash": "d85958179eb61d259548ecff88a646e909735c740c4b1e1726fc0f4a516e973b",
+  "discoveredAt": "2025-07-28T07:19:57.835Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "27e8f76b4b1f",
+  "name": "fix-backend-now.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-backend-now.sh",
+  "type": "Troubleshooting Utilities"
+}

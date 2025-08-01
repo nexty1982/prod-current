@@ -1,0 +1,6 @@
+{
+  "id": "bbcc6053f068",
+  "name": "check-users-schema.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-users-schema.sh",
+  "type": "Database Scripts"
+}

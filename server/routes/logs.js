@@ -3,8 +3,53 @@ const router = express.Router();
 const winston = require('winston');
 const fs = require('fs');
 const path = require('path');
+const { dbLogger, info, warn, error, debug } = require('../utils/dbLogger');
 
-// Initialize winston logger with multiple transports
+// Database-backed Winston transport
+class DatabaseTransport extends winston.Transport {
+  constructor(opts = {}) {
+    super(opts);
+    this.source = opts.source || 'winston';
+    this.service = opts.service || 'logging';
+  }
+
+  log(info, callback) {
+    setImmediate(() => {
+      this.emit('logged', info);
+    });
+
+    // Map Winston levels to our database logger levels
+    const levelMap = {
+      error: 'ERROR',
+      warn: 'WARN', 
+      info: 'INFO',
+      debug: 'DEBUG',
+      verbose: 'DEBUG',
+      silly: 'DEBUG'
+    };
+
+    const dbLevel = levelMap[info.level] || 'INFO';
+    
+    // Extract metadata
+    const { message, level, timestamp, ...meta } = info;
+    
+    // Log to database
+    dbLogger.log(
+      dbLevel,
+      this.source,
+      message,
+      meta,
+      meta.user_email || null,
+      this.service
+    ).catch(err => {
+      console.error('Database logging failed:', err);
+    });
+
+    callback();
+  }
+}
+
+// Initialize winston logger with database transport
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
@@ -13,15 +58,14 @@ const logger = winston.createLogger({
         winston.format.json()
     ),
     transports: [
-        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'logs/combined.log' }),
+        new DatabaseTransport({ source: 'main-logger', service: 'logging' }),
         new winston.transports.Console({
             format: winston.format.simple()
         })
     ]
 });
 
-// Component-specific loggers
+// Component-specific loggers using database transport
 const componentLoggers = {
     'Authentication': winston.createLogger({
         level: 'info',
@@ -30,7 +74,7 @@ const componentLoggers = {
             winston.format.json()
         ),
         transports: [
-            new winston.transports.File({ filename: 'logs/auth.log' }),
+            new DatabaseTransport({ source: 'Authentication', service: 'auth' }),
             new winston.transports.Console()
         ]
     }),
@@ -41,7 +85,7 @@ const componentLoggers = {
             winston.format.json()
         ),
         transports: [
-            new winston.transports.File({ filename: 'logs/database.log' }),
+            new DatabaseTransport({ source: 'Database', service: 'database' }),
             new winston.transports.Console()
         ]
     }),
@@ -52,7 +96,7 @@ const componentLoggers = {
             winston.format.json()
         ),
         transports: [
-            new winston.transports.File({ filename: 'logs/api.log' }),
+            new DatabaseTransport({ source: 'API Server', service: 'api' }),
             new winston.transports.Console()
         ]
     }),
@@ -63,7 +107,7 @@ const componentLoggers = {
             winston.format.json()
         ),
         transports: [
-            new winston.transports.File({ filename: 'logs/email.log' }),
+            new DatabaseTransport({ source: 'Email Service', service: 'email' }),
             new winston.transports.Console()
         ]
     }),
@@ -74,18 +118,7 @@ const componentLoggers = {
             winston.format.json()
         ),
         transports: [
-            new winston.transports.File({ filename: 'logs/upload.log' }),
-            new winston.transports.Console()
-        ]
-    }),
-    'OCR Service': winston.createLogger({
-        level: 'info',
-        format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.json()
-        ),
-        transports: [
-            new winston.transports.File({ filename: 'logs/ocr.log' }),
+            new DatabaseTransport({ source: 'File Upload', service: 'upload' }),
             new winston.transports.Console()
         ]
     })
@@ -101,16 +134,18 @@ const componentLogLevels = {
     'Database': { level: 'info', enabled: true },
     'API Server': { level: 'info', enabled: true },
     'Email Service': { level: 'info', enabled: true },
-    'File Upload': { level: 'info', enabled: true },
-    'OCR Service': { level: 'info', enabled: true }
+    'File Upload': { level: 'info', enabled: true }
 };
 
-// Helper function to add log to recent logs
-function addToRecentLogs(logEntry) {
+// Helper function to add log to recent logs (now from database)
+async function addToRecentLogs(logEntry) {
     recentLogs.push(logEntry);
     if (recentLogs.length > MAX_RECENT_LOGS) {
         recentLogs.shift();
     }
+    
+    // Also log to database
+    await info('LogsAPI', 'Log entry added', logEntry, null, 'logs-api');
 }
 
 // Helper function to create log entry
@@ -152,7 +187,203 @@ function logMessage(level, component, message, details = null, req = null) {
     logger.log(level, message, { ...logEntry });
 }
 
-// GET /api/logs - Get recent logs
+// GET /api/logs/database - Get logs from database with advanced filtering
+router.get('/database', async (req, res) => {
+    try {
+        const {
+            level,
+            source,
+            service,
+            user_email,
+            start_date,
+            end_date,
+            limit = 100,
+            offset = 0,
+            search
+        } = req.query;
+
+        const filters = {
+            level,
+            source,
+            service,
+            user_email,
+            startDate: start_date ? new Date(start_date) : null,
+            endDate: end_date ? new Date(end_date) : null,
+            limit: Math.min(parseInt(limit), 1000), // Cap at 1000
+            offset: parseInt(offset)
+        };
+
+        let logs = await dbLogger.getLogs(filters);
+
+        // Apply search filter if provided
+        if (search) {
+            const searchLower = search.toLowerCase();
+            logs = logs.filter(log => 
+                log.message.toLowerCase().includes(searchLower) ||
+                log.source.toLowerCase().includes(searchLower) ||
+                (log.service && log.service.toLowerCase().includes(searchLower))
+            );
+        }
+
+        res.json({
+            logs,
+            pagination: {
+                total: logs.length,
+                limit: filters.limit,
+                offset: filters.offset
+            },
+            filters: {
+                level,
+                source,
+                service,
+                user_email,
+                start_date,
+                end_date,
+                search
+            }
+        });
+
+    } catch (logError) {
+        console.error('Failed to fetch database logs:', logError);
+        res.status(500).json({ 
+            error: 'Failed to fetch database logs',
+            message: logError.message
+        });
+    }
+});
+
+// GET /api/logs/database/stats - Get log statistics
+router.get('/database/stats', async (req, res) => {
+    try {
+        const { promisePool } = require('../config/db');
+        
+        // Get basic statistics
+        const [levelStats] = await promisePool.execute(`
+            SELECT level, COUNT(*) as count 
+            FROM system_logs 
+            WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            GROUP BY level
+        `);
+
+        const [serviceStats] = await promisePool.execute(`
+            SELECT service, COUNT(*) as count 
+            FROM system_logs 
+            WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            AND service IS NOT NULL
+            GROUP BY service
+            ORDER BY count DESC
+            LIMIT 10
+        `);
+
+        const [totalLogs] = await promisePool.execute(`
+            SELECT COUNT(*) as total FROM system_logs
+        `);
+
+        const [recentErrors] = await promisePool.execute(`
+            SELECT COUNT(*) as count
+            FROM system_logs 
+            WHERE level = 'ERROR' 
+            AND timestamp >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+        `);
+
+        const [errorTrends] = await promisePool.execute(`
+            SELECT 
+                DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00') as hour,
+                COUNT(*) as error_count
+            FROM system_logs 
+            WHERE level = 'ERROR' 
+            AND timestamp >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            GROUP BY DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00')
+            ORDER BY hour DESC
+        `);
+
+        res.json({
+            summary: {
+                totalLogs: totalLogs[0].total,
+                recentErrors: recentErrors[0].count,
+                timeRange: '24 hours'
+            },
+            levelDistribution: levelStats,
+            topServices: serviceStats,
+            errorTrends: errorTrends
+        });
+
+    } catch (statsError) {
+        console.error('Failed to fetch log statistics:', statsError);
+        res.status(500).json({ 
+            error: 'Failed to fetch log statistics',
+            message: statsError.message
+        });
+    }
+});
+
+// POST /api/logs/database/cleanup - Clean up old logs (superadmin only)
+router.post('/database/cleanup', async (req, res) => {
+    try {
+        // Role gating - only superadmin can cleanup logs
+        if (!req.user || req.user.role !== 'super_admin') {
+            return res.status(403).json({ 
+                error: 'Insufficient permissions',
+                message: 'Only super administrators can clean up logs'
+            });
+        }
+
+        const { days_to_keep = 30, cutoff_date } = req.body;
+        
+        let deletedCount;
+        let cutoffDate;
+
+        if (cutoff_date) {
+            // Use specific cutoff date
+            cutoffDate = new Date(cutoff_date);
+            if (isNaN(cutoffDate.getTime())) {
+                return res.status(400).json({
+                    error: 'Invalid cutoff_date format',
+                    message: 'Please provide a valid ISO date string'
+                });
+            }
+        } else {
+            // Use days to keep
+            cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - days_to_keep);
+        }
+
+        // Execute cleanup
+        const { promisePool } = require('../config/db');
+        const [result] = await promisePool.execute(
+            'DELETE FROM system_logs WHERE timestamp < ?',
+            [cutoffDate]
+        );
+        
+        deletedCount = result.affectedRows;
+
+        // Create audit record of cleanup
+        await info('LogsAPI', 'Log cleanup executed', {
+            deletedCount,
+            cutoffDate: cutoffDate.toISOString(),
+            daysKept: days_to_keep,
+            executedBy: req.user.email,
+            requestId: req.requestId
+        }, req.user, 'logs-api');
+
+        res.json({
+            success: true,
+            message: 'Log cleanup completed successfully',
+            deletedCount,
+            cutoffDate: cutoffDate.toISOString(),
+            daysKept: days_to_keep
+        });
+
+    } catch (cleanupError) {
+        console.error('Failed to cleanup logs:', cleanupError);
+        res.status(500).json({ 
+            error: 'Failed to cleanup logs',
+            message: cleanupError.message
+        });
+    }
+});
+
+// GET /api/logs - Get recent logs (legacy in-memory)
 router.get('/', (req, res) => {
     try {
         const {
@@ -407,7 +638,7 @@ router.post('/test', (req, res) => {
             'API request processed',
             'Email notification sent',
             'File upload completed',
-            'OCR processing finished',
+            'File processing finished',
             'Cache updated',
             'Session created',
             'Data validation passed',

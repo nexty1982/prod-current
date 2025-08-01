@@ -1,0 +1,59 @@
+{
+  "id": "db19e11f07a6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/autonomy.js",
+  "relativePath": "server/routes/autonomy.js",
+  "name": "autonomy.js",
+  "extension": ".js",
+  "size": 17099,
+  "modified": "2025-07-25T01:36:48.285Z",
+  "created": "2025-07-25T01:35:32.499Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 451,
+      "characters": 17099,
+      "words": 1558
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 451,
+      "codeLines": 376,
+      "commentLines": 27,
+      "commentRatio": 0.06699751861042183,
+      "averageLineLength": 41.044665012406945
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.394Z"
+  },
+  "contentHash": "33fca2c5c49692b03e5847a561b670419edff5bce0b74adaa763e5d7b4a3c36f",
+  "discoveredAt": "2025-07-28T07:20:00.394Z"
+}

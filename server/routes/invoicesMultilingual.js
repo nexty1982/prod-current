@@ -31,7 +31,7 @@ const invoiceTranslations = {
       marriage_processing: 'Marriage Record Processing',
       funeral_processing: 'Funeral Record Processing',
       certificate_generation: 'Certificate Generation',
-      ocr_processing: 'OCR Document Processing',
+
       monthly_subscription: 'Monthly Subscription',
       annual_subscription: 'Annual Subscription'
     }
@@ -60,7 +60,7 @@ const invoiceTranslations = {
       marriage_processing: 'Επεξεργασία Μητρώου Γάμου',
       funeral_processing: 'Επεξεργασία Μητρώου Κηδείας',
       certificate_generation: 'Δημιουργία Πιστοποιητικού',
-      ocr_processing: 'Επεξεργασία OCR Εγγράφων',
+
       monthly_subscription: 'Μηνιαία Συνδρομή',
       annual_subscription: 'Ετήσια Συνδρομή'
     }
@@ -89,7 +89,7 @@ const invoiceTranslations = {
       marriage_processing: 'Обработка записей о браке',
       funeral_processing: 'Обработка записей о похоронах',
       certificate_generation: 'Генерация сертификатов',
-      ocr_processing: 'OCR обработка документов',
+
       monthly_subscription: 'Месячная подписка',
       annual_subscription: 'Годовая подписка'
     }
@@ -118,7 +118,7 @@ const invoiceTranslations = {
       marriage_processing: 'Procesarea înregistrărilor de căsătorie',
       funeral_processing: 'Procesarea înregistrărilor de înmormântare',
       certificate_generation: 'Generarea certificatelor',
-      ocr_processing: 'Procesarea OCR a documentelor',
+
       monthly_subscription: 'Abonament lunar',
       annual_subscription: 'Abonament anual'
     }

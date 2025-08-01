@@ -1,15 +1,18 @@
 import { FC, useContext } from 'react';
 import { styled, Container, Box, useTheme } from '@mui/material';
-import { Outlet } from 'react-router';
+import { Outlet } from 'react-router-dom';
 import Header from './vertical/header/Header';
 import Sidebar from './vertical/sidebar/Sidebar';
 import Customizer from './shared/customizer/Customizer';
 import Navigation from '../full/horizontal/navbar/Navigation';
 import HorizontalHeader from '../full/horizontal/header/Header';
 import ScrollToTop from '../../components/shared/ScrollToTop';
-import LoadingBar from '../../LoadingBar';
+// import LoadingBar from '../../LoadingBar';
 import { CustomizerContext } from 'src/context/CustomizerContext';
 import config from 'src/context/config';
+// import SiteEditorOverlay from '../../components/SiteEditorOverlay';
+// import GlobalOMAI from '../../components/global/GlobalOMAI';
+// import ErrorNotificationToast from '../../components/global/ErrorNotificationToast';
 
 const MainWrapper = styled('div')(() => ({
   display: 'flex',
@@ -34,7 +37,7 @@ const FullLayout: FC = () => {
 
   return (
     <>
-      <LoadingBar />
+      {/* <LoadingBar /> */}
       <MainWrapper className={activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}>
 
         {/* ------------------------------------------- */}
@@ -70,7 +73,9 @@ const FullLayout: FC = () => {
 
             <Box sx={{ minHeight: 'calc(100vh - 170px)' }}>
               <ScrollToTop>
-                <Outlet />
+                {/* <SiteEditorOverlay> */}
+                  <Outlet />
+                {/* </SiteEditorOverlay> */}
               </ScrollToTop>
             </Box>
 
@@ -81,8 +86,13 @@ const FullLayout: FC = () => {
           <Customizer />
         </PageWrapper>
       </MainWrapper>
+      
+      {/* ------------------------------------------- */}
+      {/* Global OMAI Assistant - DISABLED */}
+      {/* ------------------------------------------- */}
+      {/* <GlobalOMAI /> */}
+      {/* <ErrorNotificationToast /> */}
     </>
-
   );
 };
 

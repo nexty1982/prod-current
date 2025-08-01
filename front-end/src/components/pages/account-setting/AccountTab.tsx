@@ -84,8 +84,17 @@ const AccountTab = () => {
     timezone: user?.timezone || 'UTC'
   });
 
+  // Password change state
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   // Update form when user data changes
   React.useEffect(() => {
@@ -102,6 +111,13 @@ const AccountTab = () => {
 
   const handleInputChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
+
+  const handlePasswordChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordData(prev => ({
       ...prev,
       [field]: event.target.value
     }));
@@ -135,6 +151,54 @@ const AccountTab = () => {
       setMessage({ type: 'error', text: 'An error occurred while updating your profile.' });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePasswordSave = async () => {
+    setIsPasswordLoading(true);
+    setPasswordMessage(null);
+
+    // Validate passwords match
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'New password and confirmation do not match.' });
+      setIsPasswordLoading(false);
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordMessage({ type: 'error', text: 'New password must be at least 6 characters long.' });
+      setIsPasswordLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(passwordData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setPasswordMessage({ type: 'success', text: 'Password updated successfully!' });
+        // Clear password fields
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      } else {
+        setPasswordMessage({ type: 'error', text: data.message || 'Failed to update password. Please try again.' });
+      }
+    } catch (error) {
+      console.error('Password update error:', error);
+      setPasswordMessage({ type: 'error', text: 'An error occurred while updating your password.' });
+    } finally {
+      setIsPasswordLoading(false);
     }
   };
 
@@ -190,6 +254,13 @@ const AccountTab = () => {
               Change Password
             </Typography>
             <Typography color="textSecondary" mb={3}>To change your password please confirm here</Typography>
+            
+            {passwordMessage && (
+              <Alert severity={passwordMessage.type} sx={{ mb: 2 }}>
+                {passwordMessage.text}
+              </Alert>
+            )}
+            
             <form>
               <CustomFormLabel
                 sx={{
@@ -201,7 +272,8 @@ const AccountTab = () => {
               </CustomFormLabel>
               <CustomTextField
                 id="text-cpwd"
-                value=""
+                value={passwordData.currentPassword}
+                onChange={handlePasswordChange('currentPassword')}
                 variant="outlined"
                 fullWidth
                 type="password"
@@ -211,7 +283,8 @@ const AccountTab = () => {
               <CustomFormLabel htmlFor="text-npwd">New Password</CustomFormLabel>
               <CustomTextField
                 id="text-npwd"
-                value=""
+                value={passwordData.newPassword}
+                onChange={handlePasswordChange('newPassword')}
                 variant="outlined"
                 fullWidth
                 type="password"
@@ -221,12 +294,40 @@ const AccountTab = () => {
               <CustomFormLabel htmlFor="text-conpwd">Confirm Password</CustomFormLabel>
               <CustomTextField
                 id="text-conpwd"
-                value=""
+                value={passwordData.confirmPassword}
+                onChange={handlePasswordChange('confirmPassword')}
                 variant="outlined"
                 fullWidth
                 type="password"
                 placeholder="Confirm new password"
               />
+              
+              <Stack direction="row" spacing={2} sx={{ justifyContent: 'end' }} mt={3}>
+                <Button
+                  size="large"
+                  variant="contained"
+                  color="primary"
+                  onClick={handlePasswordSave}
+                  disabled={isPasswordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                >
+                  {isPasswordLoading ? <CircularProgress size={20} /> : 'Change Password'}
+                </Button>
+                <Button
+                  size="large"
+                  variant="text"
+                  color="error"
+                  onClick={() => {
+                    setPasswordData({
+                      currentPassword: '',
+                      newPassword: '',
+                      confirmPassword: ''
+                    });
+                    setPasswordMessage(null);
+                  }}
+                >
+                  Clear
+                </Button>
+              </Stack>
             </form>
           </CardContent>
         </BlankCard>

@@ -1,0 +1,43 @@
+{
+  "id": "ac3a1a6d17ef",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/CHURCH_SETUP_WIZARD_ENHANCEMENTS.md",
+  "relativePath": "docs/archive/temp_extract/CHURCH_SETUP_WIZARD_ENHANCEMENTS.md",
+  "name": "CHURCH_SETUP_WIZARD_ENHANCEMENTS.md",
+  "extension": ".md",
+  "size": 9601,
+  "modified": "2025-07-14T00:22:08.000Z",
+  "created": "2025-07-14T05:44:09.420Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 258,
+      "characters": 9459,
+      "words": 1287
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 258,
+      "codeLines": 155,
+      "commentLines": 50,
+      "commentRatio": 0.24390243902439024,
+      "averageLineLength": 44.63414634146341
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.306Z"
+  },
+  "contentHash": "e524e08d4811e0dec7bc939cb650d1ad33ee0d09f77c39760c4ece1d7618c98d",
+  "discoveredAt": "2025-07-28T07:19:58.306Z"
+}

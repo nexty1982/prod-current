@@ -1,0 +1,54 @@
+{
+  "id": "8fac7273f69b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/hooks/useClientManagement.ts",
+  "relativePath": "front-end/src/hooks/useClientManagement.ts",
+  "name": "useClientManagement.ts",
+  "extension": ".ts",
+  "size": 9525,
+  "modified": "2025-07-08T01:16:14.298Z",
+  "created": "2025-07-08T01:06:31.479Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 255,
+      "characters": 8517,
+      "words": 821
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "@tanstack/react-query",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 255,
+      "codeLines": 187,
+      "commentLines": 32,
+      "commentRatio": 0.1461187214611872,
+      "averageLineLength": 37.57077625570776
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.844Z"
+  },
+  "contentHash": "15325469dc3643c2ea8e8b267c8e590af8a05678179f8a94792e00d2bcff9ace",
+  "discoveredAt": "2025-07-28T07:19:58.844Z"
+}

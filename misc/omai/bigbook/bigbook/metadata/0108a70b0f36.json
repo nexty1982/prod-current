@@ -1,0 +1,64 @@
+{
+  "id": "0108a70b0f36",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/encryptedStorage.js",
+  "relativePath": "server/utils/encryptedStorage.js",
+  "name": "encryptedStorage.js",
+  "extension": ".js",
+  "size": 11973,
+  "modified": "2025-07-26T04:23:32.504Z",
+  "created": "2025-07-26T02:53:00.605Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 392,
+      "characters": 11973,
+      "words": 1128
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "child_process",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 392,
+      "codeLines": 269,
+      "commentLines": 65,
+      "commentRatio": 0.19461077844311378,
+      "averageLineLength": 33.862275449101794
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.250Z"
+  },
+  "contentHash": "784fe07ac6712ea41763196d8d076d40196f0df35ddf4ee17b0632b5f1250314",
+  "discoveredAt": "2025-07-28T07:20:01.250Z"
+}

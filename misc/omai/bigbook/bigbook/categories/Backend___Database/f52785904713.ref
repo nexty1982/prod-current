@@ -1,0 +1,6 @@
+{
+  "id": "f52785904713",
+  "name": "verify-fix.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/verify-fix.sql",
+  "type": "Database Scripts"
+}

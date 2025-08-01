@@ -1,0 +1,6 @@
+{
+  "id": "b1e2b81e029d",
+  "name": "tenant-status.json",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/control/tenant-status.json",
+  "type": "Configuration"
+}

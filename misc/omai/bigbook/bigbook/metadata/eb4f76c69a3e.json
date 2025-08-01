@@ -1,0 +1,81 @@
+{
+  "id": "eb4f76c69a3e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/5722095911a0.json",
+  "relativePath": "bigbook/metadata/5722095911a0.json",
+  "name": "5722095911a0.json",
+  "extension": ".json",
+  "size": 10243,
+  "modified": "2025-07-26T04:17:10.914Z",
+  "created": "2025-07-26T04:17:10.914Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 177,
+      "characters": 10207,
+      "words": 788
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 164
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 164
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 164
+      },
+      {
+        "type": "npm_package",
+        "name": "express-session",
+        "line": 164
+      },
+      {
+        "type": "npm_package",
+        "name": "express-mysql-session",
+        "line": 164
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 164
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:secret|token)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 164,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"5722095911a0\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/session-cookie-test.js\",\n  \"relativePath\": \"server/debug/session-cookie-test.js\",\n  \"name\": \"session-cookie-test.js\",\n  \"extension\": \".js\",\n  \"size\": 5434,\n  \"modified\": \"2025-07-24T14:50:26.364Z\",\n  \"created\": \"2025-07-24T14:50:26.364Z\",\n  \"classification\": {\n    \"type\": \"Server Scripts\",\n    \"category\": \"Backend > Server\",\n    \"confidence\": 4\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 163,\n      \"characters\": 5398,\n      \"words\": 492\n    },\n    \"classification\": {\n      \"type\": \"Server Scripts\",\n      \"category\": \"Backend > Server\",\n      \"confidence\": 4\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"express\",\n        \"line\": 2\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"path\",\n        \"line\": 3\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"dotenv\",\n        \"line\": 9\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"express-session\",\n        \"line\": 11\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"express-mysql-session\",\n        \"line\": 12\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"mysql2/promise\",\n        \"line\": 92\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:secret|token)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 19,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 6,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 18,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 19,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 20,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 21,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 24,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 38,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 39,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 40,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 41,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 42,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 94,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 95,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 96,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 97,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 98,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"// server/debug/session-cookie-test.js\\r\\nconst express = require('express');\\r\\nconst path = require('path');\\r\\n\\r\\n// Load environment\\r\\nconst envFile = process.env.[REDACTED] === 'production' \\r\\n  ? '../.env.production' \\r\\n  : '../.env.development';\\r\\nrequire('dotenv').config({ path: path.resolve(__dirname, envFile) });\\r\\n\\r\\nconst session = require('express-session');\\r\\nconst MySQLStore = require('express-mysql-session')(session);\\r\\n\\r\\nconsole.log('🔍 Orthodox Metrics Session Cookie Diagnostic');\\r\\nconsole.log('==============================================');\\r\\n\\r\\nconsole.log('\\\\n📋 Environment:');\\r\\nconsole.log('NODE_ENV:', process.env.[REDACTED]);\\r\\nconsole.log('SESSION_SECRET:'[REDACTED]'SET' : 'NOT SET');\\r\\nconsole.log('DB_HOST:', process.env.[REDACTED]);\\r\\nconsole.log('DB_NAME:', process.env.[REDACTED]);\\r\\n\\r\\nconsole.log('\\\\n🍪 Cookie Configuration Test:');\\r\\nconst isProduction = process.env.[REDACTED] === 'production';\\r\\nconsole.log('Production mode:', isProduction);\\r\\nconsole.log('Secure cookies:', isProduction);\\r\\nconsole.log('SameSite:', 'lax');\\r\\nconsole.log('Domain:', isProduction ? '.orthodoxmetrics.com' : 'undefined');\\r\\nconsole.log('HttpOnly:', true);\\r\\nconsole.log('MaxAge:', '24 hours');\\r\\n\\r\\n// Test database connection for sessions\\r\\nasync function testSessionStore() {\\r\\n  try {\\r\\n    console.log('\\\\n🗄️  Session Store Test:');\\r\\n    \\r\\n    const dbOptions = {\\r\\n      host: process.env.[REDACTED] || '0.0.0.0',\\r\\n      port: process.env.[REDACTED] || 3306,\\r\\n      user: process.env.[REDACTED] || 'orthodoxapps',\\r\\n      password: process.env.[REDACTED] || 'Summerof1982@!',\\r\\n      database: process.env.[REDACTED] || 'orthodoxmetrics_db',\\r\\n    };\\r\\n\\r\\n    const store = new MySQLStore(dbOptions);\\r\\n    \\r\\n    console.log('✅ Session store created successfully');\\r\\n    \\r\\n    // Test store operations\\r\\n    const testSessionId = 'test-session-' + Date.now();\\r\\n    const testData = { user: { id: 1, email: 'test@example.com' } };\\r\\n    \\r\\n    await new Promise((resolve, reject) => {\\r\\n      store.set(testSessionId, testData, (err) => {\\r\\n        if (err) reject(err);\\r\\n        else resolve();\\r\\n      });\\r\\n    });\\r\\n    \\r\\n    console.log('✅ Session write test passed');\\r\\n    \\r\\n    const retrievedData = await new Promise((resolve, reject) => {\\r\\n      store.get(testSessionId, (err, data) => {\\r\\n        if (err) reject(err);\\r\\n        else resolve(data);\\r\\n      });\\r\\n    });\\r\\n    \\r\\n    console.log('✅ Session read test passed');\\r\\n    console.log('   Retrieved data:', retrievedData);\\r\\n    \\r\\n    // Clean up test session\\r\\n    await new Promise((resolve, reject) => {\\r\\n      store.destroy(testSessionId, (err) => {\\r\\n        if (err) reject(err);\\r\\n        else resolve();\\r\\n      });\\r\\n    });\\r\\n    \\r\\n    console.log('✅ Session cleanup test passed');\\r\\n    \\r\\n  } catch (error) {\\r\\n    console.error('❌ Session store test failed:', error.message);\\r\\n  }\\r\\n}\\r\\n\\r\\n// Test actual session table\\r\\nasync function testSessionTable() {\\r\\n  try {\\r\\n    console.log('\\\\n📊 Session Table Test:');\\r\\n    \\r\\n    const mysql = require('mysql2/promise');\\r\\n    const connection = await mysql.createConnection({\\r\\n      host: process.env.[REDACTED] || '0.0.0.0',\\r\\n      port: process.env.[REDACTED] || 3306,\\r\\n      user: process.env.[REDACTED] || 'orthodoxapps',\\r\\n      password: process.env.[REDACTED] || 'Summerof1982@!',\\r\\n      database: process.env.[REDACTED] || 'orthodoxmetrics_db',\\r\\n    });\\r\\n\\r\\n    // Check if sessions table exists\\r\\n    const [tables] = await connection.execute(\\r\\n      \\\"SHOW TABLES LIKE 'sessions'\\\"\\r\\n    );\\r\\n    \\r\\n    if (tables.length === 0) {\\r\\n      console.log('❌ Sessions table does not exist');\\r\\n      return;\\r\\n    }\\r\\n    \\r\\n    console.log('✅ Sessions table exists');\\r\\n    \\r\\n    // Check table structure\\r\\n    const [structure] = await connection.execute('DESCRIBE sessions');\\r\\n    console.log('📋 Sessions table structure:');\\r\\n    structure.forEach(col => {\\r\\n      console.log(`   ${col.Field}: ${col.Type}`);\\r\\n    });\\r\\n    \\r\\n    // Check active sessions\\r\\n    const [sessions] = await connection.execute(\\r\\n      'SELECT COUNT(*) as total, COUNT(CASE WHEN FROM_UNIXTIME(expires) > NOW() THEN 1 END) as active FROM sessions'\\r\\n    );\\r\\n    \\r\\n    console.log(`📈 Sessions: ${sessions[0].total} total, ${sessions[0].active} active`);\\r\\n    \\r\\n    // Check recent sessions\\r\\n    const [recentSessions] = await connection.execute(`\\r\\n      SELECT session_id, FROM_UNIXTIME(expires) as expires_readable, \\r\\n             CHAR_LENGTH(data) as data_size\\r\\n      FROM sessions \\r\\n      ORDER BY expires DESC \\r\\n      LIMIT 5\\r\\n    `);\\r\\n    \\r\\n    console.log('🕒 Recent sessions:');\\r\\n    recentSessions.forEach(session => {\\r\\n      console.log(`   ${session.session_id}: expires ${session.expires_readable}, size ${session.data_size} bytes`);\\r\\n    });\\r\\n    \\r\\n    await connection.end();\\r\\n    \\r\\n  } catch (error) {\\r\\n    console.error('❌ Session table test failed:', error.message);\\r\\n  }\\r\\n}\\r\\n\\r\\n// Run all tests\\r\\nasync function runDiagnostics() {\\r\\n  await testSessionStore();\\r\\n  await testSessionTable();\\r\\n  \\r\\n  console.log('\\\\n🚀 Recommendations:');\\r\\n  console.log('1. Ensure NODE_ENV=production is set before starting server');\\r\\n  console.log('2. Clear browser cookies for orthodoxmetrics.com');\\r\\n  console.log('3. Use HTTPS in production (required for secure cookies)');\\r\\n  console.log('4. Check browser Network tab for cookie headers');\\r\\n  console.log('5. Verify session.config is using correct settings');\\r\\n  \\r\\n  process.exit(0);\\r\\n}\\r\\n\\r\\nrunDiagnostics(); \"\n    },\n    \"complexity\": {\n      \"totalLines\": 163,\n      \"codeLines\": 119,\n      \"commentLines\": 11,\n      \"commentRatio\": 0.08461538461538462,\n      \"averageLineLength\": 39.37692307692308\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:10.915Z\"\n  },\n  \"contentHash\": \"a576711892ddd067d426acd16e6f26f002ea2444d5396866f424266f36a209c0\",\n  \"discoveredAt\": \"2025-07-26T04:17:10.916Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 177,
+      "codeLines": 177,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 56.67231638418079
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.975Z"
+  },
+  "contentHash": "862e2e4151523b5b0f683e48a7c33c311909fb420c2f0e774c4916338295218f",
+  "discoveredAt": "2025-07-28T07:19:56.975Z"
+}

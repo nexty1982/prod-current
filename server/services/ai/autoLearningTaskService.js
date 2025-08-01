@@ -301,7 +301,7 @@ class AutoLearningTaskService {
 
     try {
       // Switch to OCR database
-      await switchToDatabase('saints_peter_and_paul_orthodox_church_db');
+      await switchToDatabase(process.env.OCR_DATABASE || 'orthodoxmetrics_ocr_db');
 
       // Create OCR job for Google Vision processing
       const [jobResult] = await db.query(`

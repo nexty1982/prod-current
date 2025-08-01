@@ -1,0 +1,43 @@
+{
+  "id": "5a44145d59ac",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/control/gap-report.json",
+  "relativePath": "services/om-ai/control/gap-report.json",
+  "name": "gap-report.json",
+  "extension": ".json",
+  "size": 1629,
+  "modified": "2025-07-25T00:55:16.519Z",
+  "created": "2025-07-25T00:55:12.957Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 64,
+      "characters": 1629,
+      "words": 111
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 64,
+      "codeLines": 64,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 24.46875
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.415Z"
+  },
+  "contentHash": "cf13d73d76bf3beec42e447f5adc323668c3d7a4c01ab2927d9724fc737c1d5d",
+  "discoveredAt": "2025-07-28T07:20:01.415Z"
+}

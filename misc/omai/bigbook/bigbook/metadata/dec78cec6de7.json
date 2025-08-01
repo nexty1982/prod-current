@@ -1,0 +1,64 @@
+{
+  "id": "dec78cec6de7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/cron/fetch-headlines.js",
+  "relativePath": "server/cron/fetch-headlines.js",
+  "name": "fetch-headlines.js",
+  "extension": ".js",
+  "size": 15976,
+  "modified": "2025-07-22T16:26:07.228Z",
+  "created": "2025-07-22T16:26:03.966Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 515,
+      "characters": 15882,
+      "words": 1400
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 19
+      },
+      {
+        "type": "npm_package",
+        "name": "cheerio",
+        "line": 20
+      },
+      {
+        "type": "npm_package",
+        "name": "xml2js",
+        "line": 21
+      },
+      {
+        "type": "npm_package",
+        "name": "node-cron",
+        "line": 23
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 515,
+      "codeLines": 396,
+      "commentLines": 61,
+      "commentRatio": 0.13347921225382933,
+      "averageLineLength": 33.36105032822757
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.566Z"
+  },
+  "contentHash": "0a071f26a644ed1a0931580524396b76fce8e8165521b81180f889126cc740c2",
+  "discoveredAt": "2025-07-28T07:19:59.566Z"
+}

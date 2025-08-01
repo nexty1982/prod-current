@@ -1,0 +1,43 @@
+{
+  "id": "2eccccebfcf0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/tasks/Task-132-Blog-System-Complete.md",
+  "relativePath": "docs/tasks/Task-132-Blog-System-Complete.md",
+  "name": "Task-132-Blog-System-Complete.md",
+  "extension": ".md",
+  "size": 6908,
+  "modified": "2025-07-28T05:37:48.718Z",
+  "created": "2025-07-28T05:37:47.243Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 212,
+      "characters": 6768,
+      "words": 873
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 212,
+      "codeLines": 135,
+      "commentLines": 32,
+      "commentRatio": 0.19161676646706588,
+      "averageLineLength": 38.9940119760479
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.315Z"
+  },
+  "contentHash": "a1a7cf8a66646a7950dfe05314f8b4b92b69c66f8406b672e035a892e3430bc2",
+  "discoveredAt": "2025-07-28T07:19:58.315Z"
+}

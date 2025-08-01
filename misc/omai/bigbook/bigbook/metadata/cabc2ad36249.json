@@ -1,0 +1,49 @@
+{
+  "id": "cabc2ad36249",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-backup-separation.sh",
+  "relativePath": "scripts/test-backup-separation.sh",
+  "name": "test-backup-separation.sh",
+  "extension": ".sh",
+  "size": 2833,
+  "modified": "2025-07-27T16:31:33.357Z",
+  "created": "2025-07-27T16:31:32.593Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 82,
+      "characters": 2757,
+      "words": 422
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 75
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 82,
+      "codeLines": 64,
+      "commentLines": 4,
+      "commentRatio": 0.058823529411764705,
+      "averageLineLength": 39.35294117647059
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.506Z"
+  },
+  "contentHash": "f070986c959859f5d95de80afd83477177594555b6a5a8abc9b4e676fb94421e",
+  "discoveredAt": "2025-07-28T07:19:59.506Z"
+}

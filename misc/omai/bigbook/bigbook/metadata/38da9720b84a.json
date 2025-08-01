@@ -1,0 +1,43 @@
+{
+  "id": "38da9720b84a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/test-builtin-ecryptfs.sh",
+  "relativePath": "scripts/7-26-25/test-builtin-ecryptfs.sh",
+  "name": "test-builtin-ecryptfs.sh",
+  "extension": ".sh",
+  "size": 5749,
+  "modified": "2025-07-26T04:38:12.788Z",
+  "created": "2025-07-26T04:37:35.851Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 159,
+      "characters": 5713,
+      "words": 662
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 159,
+      "codeLines": 122,
+      "commentLines": 8,
+      "commentRatio": 0.06153846153846154,
+      "averageLineLength": 42.176923076923075
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.056Z"
+  },
+  "contentHash": "3919c55a779b8f42ec2be19be26447504b69978f726d3f30d7c2170544399cfd",
+  "discoveredAt": "2025-07-28T07:19:59.056Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "bca890bb934f",
+  "name": "fix-omai-import.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-omai-import.sh",
+  "type": "Troubleshooting Utilities"
+}

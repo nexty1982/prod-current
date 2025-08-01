@@ -1,0 +1,43 @@
+{
+  "id": "1412b5bc8b66",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/sdlc-backup-manager.sh",
+  "relativePath": "server/scripts/sdlc-backup-manager.sh",
+  "name": "sdlc-backup-manager.sh",
+  "extension": ".sh",
+  "size": 13394,
+  "modified": "2025-07-24T22:34:35.244Z",
+  "created": "2025-07-24T22:34:30.414Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 438,
+      "characters": 13394,
+      "words": 1382
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 438,
+      "codeLines": 319,
+      "commentLines": 53,
+      "commentRatio": 0.1424731182795699,
+      "averageLineLength": 34.185483870967744
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.066Z"
+  },
+  "contentHash": "5c754cb7da92a380aa80c8940d4d5970d6061f4f363c9366f614da490c1d7e4e",
+  "discoveredAt": "2025-07-28T07:20:01.066Z"
+}

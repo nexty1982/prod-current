@@ -1,0 +1,79 @@
+{
+  "id": "2522eeaecaa7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/a532d71fd450.json",
+  "relativePath": "bigbook/metadata/a532d71fd450.json",
+  "name": "a532d71fd450.json",
+  "extension": ".json",
+  "size": 30846,
+  "modified": "2025-07-26T04:17:09.518Z",
+  "created": "2025-07-26T04:17:09.518Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 152,
+      "characters": 30828,
+      "words": 2653
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express-session",
+        "line": 139
+      },
+      {
+        "type": "npm_package",
+        "name": "express-mysql-session",
+        "line": 139
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 139
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 139
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 139
+      },
+      {
+        "type": "npm_package",
+        "name": "express-mysql-session",
+        "line": 139
+      },
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 139
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 152,
+      "codeLines": 152,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 201.82236842105263
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.308Z"
+  },
+  "contentHash": "2ee819e767d30aefd2daf9b015cfa6bdbf258d9aac17609d7fbb64492e4d6aaa",
+  "discoveredAt": "2025-07-28T07:19:57.308Z"
+}

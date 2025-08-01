@@ -1,0 +1,43 @@
+{
+  "id": "7c6a3aa5e635",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-profile-persistence.js",
+  "relativePath": "server/debug/test-profile-persistence.js",
+  "name": "test-profile-persistence.js",
+  "extension": ".js",
+  "size": 6007,
+  "modified": "2025-07-22T14:55:40.943Z",
+  "created": "2025-07-22T14:55:38.448Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 122,
+      "characters": 5969,
+      "words": 489
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 122,
+      "codeLines": 100,
+      "commentLines": 7,
+      "commentRatio": 0.06542056074766354,
+      "averageLineLength": 53.39252336448598
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.247Z"
+  },
+  "contentHash": "3f7d93cff7d5b3a05cdb15fe94f93d139d8bff55130b9a82458569172860ed4e",
+  "discoveredAt": "2025-07-28T07:20:00.247Z"
+}

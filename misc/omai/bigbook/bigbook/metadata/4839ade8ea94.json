@@ -1,0 +1,43 @@
+{
+  "id": "4839ade8ea94",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/data/test-working-churches/churches.json",
+  "relativePath": "server/data/test-working-churches/churches.json",
+  "name": "churches.json",
+  "extension": ".json",
+  "size": 2,
+  "modified": "2025-07-23T11:49:04.789Z",
+  "created": "2025-07-23T11:49:04.789Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1,
+      "characters": 2,
+      "words": 1
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 1,
+      "codeLines": 1,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 2
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.569Z"
+  },
+  "contentHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "discoveredAt": "2025-07-28T07:19:59.569Z"
+}

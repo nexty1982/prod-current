@@ -1,0 +1,43 @@
+{
+  "id": "70a16a151586",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-session-issue.js",
+  "relativePath": "server/debug/check-session-issue.js",
+  "name": "check-session-issue.js",
+  "extension": ".js",
+  "size": 4701,
+  "modified": "2025-07-22T03:58:17.754Z",
+  "created": "2025-07-22T03:58:17.754Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 105,
+      "characters": 4683,
+      "words": 492
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 105,
+      "codeLines": 92,
+      "commentLines": 2,
+      "commentRatio": 0.02127659574468085,
+      "averageLineLength": 48.212765957446805
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.083Z"
+  },
+  "contentHash": "bc46e984cf2e9a0564b3822ed540c3196500886aa53f5baf90b1a2746fac0066",
+  "discoveredAt": "2025-07-28T07:20:00.083Z"
+}

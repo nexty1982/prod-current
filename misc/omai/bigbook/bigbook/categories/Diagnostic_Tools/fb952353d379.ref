@@ -1,0 +1,6 @@
+{
+  "id": "fb952353d379",
+  "name": "fix-nfs-client-issue.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-nfs-client-issue.sh",
+  "type": "Troubleshooting Utilities"
+}

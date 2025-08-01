@@ -1,0 +1,69 @@
+{
+  "id": "5ad24489d828",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/omb/generateFromComponent.ts",
+  "relativePath": "services/omb/generateFromComponent.ts",
+  "name": "generateFromComponent.ts",
+  "extension": ".ts",
+  "size": 5629,
+  "modified": "2025-07-25T00:28:22.863Z",
+  "created": "2025-07-25T00:28:22.207Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 197,
+      "characters": 5629,
+      "words": 569
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "ejs",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "child_process",
+        "line": 126
+      },
+      {
+        "type": "npm_package",
+        "name": "util",
+        "line": 127
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 197,
+      "codeLines": 154,
+      "commentLines": 12,
+      "commentRatio": 0.07228915662650602,
+      "averageLineLength": 32.48192771084337
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.579Z"
+  },
+  "contentHash": "794d2b5d14eae92f540e01d6b4febc4adf8a7524492084ea90b30d99fbb894ea",
+  "discoveredAt": "2025-07-28T07:20:01.579Z"
+}

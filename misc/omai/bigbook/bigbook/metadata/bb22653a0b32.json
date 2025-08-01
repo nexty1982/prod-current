@@ -1,0 +1,59 @@
+{
+  "id": "bb22653a0b32",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/agents/doc-bot.ts",
+  "relativePath": "services/om-ai/agents/doc-bot.ts",
+  "name": "doc-bot.ts",
+  "extension": ".ts",
+  "size": 5177,
+  "modified": "2025-07-25T00:56:36.786Z",
+  "created": "2025-07-25T00:56:36.133Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 173,
+      "characters": 5169,
+      "words": 502
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "@/components/${component}",
+        "line": 141
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 173,
+      "codeLines": 135,
+      "commentLines": 9,
+      "commentRatio": 0.0625,
+      "averageLineLength": 34.22222222222222
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.365Z"
+  },
+  "contentHash": "c57d02e83720688cb61f1582fa3bb6478d5e85480219c996db936a9cf34677d7",
+  "discoveredAt": "2025-07-28T07:20:01.365Z"
+}

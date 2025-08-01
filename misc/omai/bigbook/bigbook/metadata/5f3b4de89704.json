@@ -1,0 +1,43 @@
+{
+  "id": "5f3b4de89704",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-backend-with-stubs.sh",
+  "relativePath": "scripts/restart-backend-with-stubs.sh",
+  "name": "restart-backend-with-stubs.sh",
+  "extension": ".sh",
+  "size": 2411,
+  "modified": "2025-07-25T19:46:28.866Z",
+  "created": "2025-07-25T19:46:24.858Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 83,
+      "characters": 2375,
+      "words": 311
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 83,
+      "codeLines": 48,
+      "commentLines": 16,
+      "commentRatio": 0.25,
+      "averageLineLength": 35.765625
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.474Z"
+  },
+  "contentHash": "5ce61741d19324089aa668f7049d24cae2aa81b8867c1d830d5f1216b660548e",
+  "discoveredAt": "2025-07-28T07:19:59.474Z"
+}

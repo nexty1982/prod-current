@@ -1,0 +1,64 @@
+{
+  "id": "29dc10ad61f8",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/fix-frontend-deps.sh",
+  "relativePath": "fix-frontend-deps.sh",
+  "name": "fix-frontend-deps.sh",
+  "extension": ".sh",
+  "size": 1345,
+  "modified": "2025-07-23T21:34:28.166Z",
+  "created": "2025-07-23T21:34:24.237Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 63,
+      "characters": 1343,
+      "words": 168
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 42
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 43
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 43
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 47
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 63,
+      "codeLines": 42,
+      "commentLines": 7,
+      "commentRatio": 0.14285714285714285,
+      "averageLineLength": 26.142857142857142
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.801Z"
+  },
+  "contentHash": "4864316bba6579643ee36536b154c3e66263038999ed61663114ec33cb31441c",
+  "discoveredAt": "2025-07-26T04:17:09.801Z"
+}

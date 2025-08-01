@@ -1,0 +1,43 @@
+{
+  "id": "10f0e7d7666a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-frjames-social-access.js",
+  "relativePath": "server/debug/fix-frjames-social-access.js",
+  "name": "fix-frjames-social-access.js",
+  "extension": ".js",
+  "size": 3186,
+  "modified": "2025-07-26T20:38:54.967Z",
+  "created": "2025-07-26T20:28:01.057Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 83,
+      "characters": 3166,
+      "words": 300
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 83,
+      "codeLines": 60,
+      "commentLines": 8,
+      "commentRatio": 0.11764705882352941,
+      "averageLineLength": 43.720588235294116
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.135Z"
+  },
+  "contentHash": "852d645fe802060ced0e6244115614b3d2481bc7c29dc71987bea58892b205cd",
+  "discoveredAt": "2025-07-28T07:20:00.135Z"
+}

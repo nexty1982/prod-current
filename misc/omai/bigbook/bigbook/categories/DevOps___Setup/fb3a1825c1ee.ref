@@ -1,0 +1,6 @@
+{
+  "id": "fb3a1825c1ee",
+  "name": "setup-crontab.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/cron/setup-crontab.sh",
+  "type": "Setup Scripts"
+}

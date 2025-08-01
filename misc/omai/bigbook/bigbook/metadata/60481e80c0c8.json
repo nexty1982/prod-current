@@ -1,0 +1,43 @@
+{
+  "id": "60481e80c0c8",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-with-fixed-jit.sh",
+  "relativePath": "scripts/restart-with-fixed-jit.sh",
+  "name": "restart-with-fixed-jit.sh",
+  "extension": ".sh",
+  "size": 2447,
+  "modified": "2025-07-25T20:18:22.294Z",
+  "created": "2025-07-25T20:18:18.802Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 74,
+      "characters": 2399,
+      "words": 327
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 74,
+      "codeLines": 48,
+      "commentLines": 11,
+      "commentRatio": 0.1864406779661017,
+      "averageLineLength": 39.42372881355932
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.476Z"
+  },
+  "contentHash": "8854bb60632ef9b3f4c1f8e6d466f6b245f859f403f1c9d903ca7a7924e429ce",
+  "discoveredAt": "2025-07-28T07:19:59.476Z"
+}

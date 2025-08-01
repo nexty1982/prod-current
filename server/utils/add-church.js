@@ -3,7 +3,7 @@
 // Add Real Church to Database Script
 // Run with: node add-church.js
 
-const { promisePool } = require('../config/db');
+const { promisePool } = require('../config/db'            // NOTE: Users are stored in orthodmetrics_dev, not in individual church databases;
 const readline = require('readline');
 
 const rl = readline.createInterface({
@@ -141,18 +141,8 @@ async function addChurch() {
                 )
             `);
             
-            // Users table
-            await churchDb.query(`
-                CREATE TABLE IF NOT EXISTS users (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    name VARCHAR(255) NOT NULL,
-                    email VARCHAR(255) UNIQUE NOT NULL,
-                    password VARCHAR(255) NOT NULL,
-                    role ENUM('admin', 'super_admin', 'user') DEFAULT 'user',
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                )
-            `);
+            // NOTE: Users are stored in orthodmetrics_dev, not in individual church databases
+            // Church databases are for records only. User management is handled centrally.
             
             // Activity log table
             await churchDb.query(`

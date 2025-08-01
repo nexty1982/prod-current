@@ -1,0 +1,74 @@
+{
+  "id": "28b2a5fd7c2d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/7-11-25/RECORD_TEMPLATE_MANAGER_STATUS.md",
+  "relativePath": "docs/archive/temp_extract/7-11-25/RECORD_TEMPLATE_MANAGER_STATUS.md",
+  "name": "RECORD_TEMPLATE_MANAGER_STATUS.md",
+  "extension": ".md",
+  "size": 10262,
+  "modified": "2025-07-12T03:59:18.000Z",
+  "created": "2025-07-14T05:44:08.896Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 353,
+      "characters": 10204,
+      "words": 1246
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 8
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 39
+      },
+      {
+        "type": "npm_package",
+        "name": "ag-grid-react",
+        "line": 40
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 114
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 115
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 123
+      },
+      {
+        "type": "npm_package",
+        "name": "ag-grid-react",
+        "line": 124
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 353,
+      "codeLines": 209,
+      "commentLines": 73,
+      "commentRatio": 0.25886524822695034,
+      "averageLineLength": 34.6241134751773
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.272Z"
+  },
+  "contentHash": "a11bce1b9ce543b4806fd339f3a66d276a601b87edbf4b5b726ead8f98e4cd07",
+  "discoveredAt": "2025-07-28T07:19:58.272Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "7b3ba3a473d4",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/create_omsetup_user.sql",
+  "relativePath": "create_omsetup_user.sql",
+  "name": "create_omsetup_user.sql",
+  "extension": ".sql",
+  "size": 344,
+  "modified": "2025-07-23T21:22:17.335Z",
+  "created": "2025-07-23T21:22:16.992Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 9,
+      "characters": 344,
+      "words": 41
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 9,
+      "codeLines": 6,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 56
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.251Z"
+  },
+  "contentHash": "736870dd58257c049361b092cfc7d8aa559740661b2f12201d0cb21db7bc8509",
+  "discoveredAt": "2025-07-26T04:17:09.251Z"
+}

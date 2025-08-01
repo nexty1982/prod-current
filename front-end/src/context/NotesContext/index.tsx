@@ -1,25 +1,14 @@
 
-import { createContext, useState, useEffect } from 'react';
-import React from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { NotesType } from '../../types/apps/note';
 import { useAuth } from '../AuthContext';
+import { ensureArray } from '../../utils/arrayUtils';
 
-// Enhanced NotesType to match backend structure
-export interface NotesType {
-    id: number;
-    title: string;
-    content: string;
+interface NotesFilters {
     category: string;
-    tags: string[];
-    color: string;
-    is_pinned: boolean;
-    is_archived: boolean;
-    is_shared: boolean;
-    created_at: string;
-    updated_at: string;
-    created_by_name: string;
-    is_owner: boolean;
-    deleted?: boolean; // For backward compatibility
-    datef?: any; // For backward compatibility
+    search: string;
+    archived: boolean;
+    pinned: boolean;
 }
 
 // Define context type
@@ -29,12 +18,7 @@ interface NotesContextType {
     loading: boolean;
     error: string | null;
     selectedNoteId: number | null;
-    filters: {
-        category: string;
-        search: string;
-        archived: boolean;
-        pinned: boolean;
-    };
+    filters: NotesFilters;
     selectNote: (id: number) => void;
     addNote: (newNote: Partial<NotesType>) => Promise<void>;
     updateNote: (id: number, updates: Partial<NotesType>) => Promise<void>;

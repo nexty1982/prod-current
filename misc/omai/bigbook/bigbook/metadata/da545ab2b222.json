@@ -1,0 +1,56 @@
+{
+  "id": "da545ab2b222",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/test-login.js",
+  "relativePath": "server/utils/test-login.js",
+  "name": "test-login.js",
+  "extension": ".js",
+  "size": 937,
+  "modified": "2025-07-05T07:18:49.000Z",
+  "created": "2025-07-09T00:48:38.534Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 41,
+      "characters": 927,
+      "words": 89
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "node-fetch",
+        "line": 7
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 21,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Test the login functionality after fixing the auth routes\r\n */\r\n\r\nconst fetch = require('node-fetch');\r\n\r\nasync function testLogin() {\r\n  try {\r\n    console.log('🧪 Testing login functionality...');\r\n    \r\n    // Test login\r\n    const loginResponse = await fetch('http://localhost:3001/api/auth/login', {\r\n      method: 'POST',\r\n      headers: {\r\n        'Content-Type': 'application/json'\r\n      },\r\n      body: JSON.stringify({\r\n        username: 'admin@orthodoxmetrics.com',\r\n        password: '[REDACTED]'\r\n      })\r\n    });\r\n    \r\n    const loginData = await loginResponse.json();\r\n    \r\n    if (loginResponse.ok) {\r\n      console.log('✅ Login successful!');\r\n      console.log('👤 User:', loginData.user);\r\n    } else {\r\n      console.log('❌ Login failed:', loginData);\r\n    }\r\n    \r\n  } catch (error) {\r\n    console.error('💥 Test failed:', error);\r\n  }\r\n}\r\n\r\n// Run the test\r\ntestLogin();\r\n"
+    },
+    "complexity": {
+      "totalLines": 41,
+      "codeLines": 26,
+      "commentLines": 6,
+      "commentRatio": 0.1875,
+      "averageLineLength": 26.96875
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.286Z"
+  },
+  "contentHash": "775f21c55b307c1f6fa895204f9545abfcd3225e59c67d87ceca0bd179bce771",
+  "discoveredAt": "2025-07-28T07:20:01.286Z"
+}

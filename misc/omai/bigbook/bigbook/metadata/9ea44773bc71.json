@@ -1,0 +1,43 @@
+{
+  "id": "9ea44773bc71",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/ADMIN_MONOLITH_BREAKDOWN_SUMMARY.md",
+  "relativePath": "docs/ADMIN_MONOLITH_BREAKDOWN_SUMMARY.md",
+  "name": "ADMIN_MONOLITH_BREAKDOWN_SUMMARY.md",
+  "extension": ".md",
+  "size": 6349,
+  "modified": "2025-07-22T09:13:22.587Z",
+  "created": "2025-07-22T09:13:20.824Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 136,
+      "characters": 6255,
+      "words": 779
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 136,
+      "codeLines": 80,
+      "commentLines": 27,
+      "commentRatio": 0.2523364485981308,
+      "averageLineLength": 56.925233644859816
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.782Z"
+  },
+  "contentHash": "0d2c28f45d6a35d8b14e01a519b75d0a66ccb3d6f5ccf17735819525650a4b81",
+  "discoveredAt": "2025-07-28T07:19:57.782Z"
+}

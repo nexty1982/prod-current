@@ -1,0 +1,43 @@
+{
+  "id": "7218baf2f753",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/jurisdictions/rocor-scraper.js",
+  "relativePath": "server/scrapers/jurisdictions/rocor-scraper.js",
+  "name": "rocor-scraper.js",
+  "extension": ".js",
+  "size": 3953,
+  "modified": "2025-07-14T06:06:57.015Z",
+  "created": "2025-07-14T05:59:57.548Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 113,
+      "characters": 3951,
+      "words": 253
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 113,
+      "codeLines": 86,
+      "commentLines": 2,
+      "commentRatio": 0.022727272727272728,
+      "averageLineLength": 41.30681818181818
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.603Z"
+  },
+  "contentHash": "8ba150beec5135640154723858dbac9fa9b2e1c878eed24ec3801c9ffb6e06a5",
+  "discoveredAt": "2025-07-28T07:20:00.603Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "3fa4866aa5c5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-all-frjames-issues.sh",
+  "relativePath": "server/debug/fix-all-frjames-issues.sh",
+  "name": "fix-all-frjames-issues.sh",
+  "extension": ".sh",
+  "size": 886,
+  "modified": "2025-07-26T20:55:05.627Z",
+  "created": "2025-07-26T20:28:49.109Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 28,
+      "characters": 868,
+      "words": 129
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 28,
+      "codeLines": 22,
+      "commentLines": 1,
+      "commentRatio": 0.043478260869565216,
+      "averageLineLength": 36.56521739130435
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.111Z"
+  },
+  "contentHash": "30a035a77dbb3218fb7a74f9ed1cca1c644444d750d46bbbb70a30acebd89733",
+  "discoveredAt": "2025-07-28T07:20:00.111Z"
+}

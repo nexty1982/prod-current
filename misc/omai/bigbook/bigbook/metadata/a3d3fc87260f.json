@@ -1,0 +1,74 @@
+{
+  "id": "a3d3fc87260f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/controllers/churchOcrController.js",
+  "relativePath": "server/controllers/churchOcrController.js",
+  "name": "churchOcrController.js",
+  "extension": ".js",
+  "size": 38890,
+  "modified": "2025-07-19T14:03:12.993Z",
+  "created": "2025-07-10T21:47:48.444Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1239,
+      "characters": 38855,
+      "words": 3901
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "multer",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 9
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 838
+      },
+      {
+        "type": "npm_package",
+        "name": "@google-cloud/vision",
+        "line": 1112
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 1239,
+      "codeLines": 950,
+      "commentLines": 114,
+      "commentRatio": 0.10714285714285714,
+      "averageLineLength": 35.00845864661654
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.557Z"
+  },
+  "contentHash": "00cee96ae5f0a91651fad29ee23a28bf86971792c465d76a7592c5eeb76ccb05",
+  "discoveredAt": "2025-07-28T07:19:59.557Z"
+}

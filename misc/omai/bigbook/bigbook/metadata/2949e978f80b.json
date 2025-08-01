@@ -1,0 +1,56 @@
+{
+  "id": "2949e978f80b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/a126fed86e1e.json",
+  "relativePath": "bigbook/metadata/a126fed86e1e.json",
+  "name": "a126fed86e1e.json",
+  "extension": ".json",
+  "size": 5777,
+  "modified": "2025-07-26T04:17:11.646Z",
+  "created": "2025-07-26T04:17:11.646Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 56,
+      "characters": 5745,
+      "words": 485
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "bcrypt",
+        "line": 43
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 43,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"a126fed86e1e\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/simple-test-user.js\",\n  \"relativePath\": \"server/scripts/simple-test-user.js\",\n  \"name\": \"simple-test-user.js\",\n  \"extension\": \".js\",\n  \"size\": 4067,\n  \"modified\": \"2025-07-20T18:24:41.890Z\",\n  \"created\": \"2025-07-20T18:22:51.329Z\",\n  \"classification\": {\n    \"type\": \"Testing Scripts\",\n    \"category\": \"DevOps > Test\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 116,\n      \"characters\": 4035,\n      \"words\": 369\n    },\n    \"classification\": {\n      \"type\": \"Testing Scripts\",\n      \"category\": \"DevOps > Test\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"bcrypt\",\n        \"line\": 7\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 28,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"#!/usr/bin/env node\\r\\n\\r\\n/**\\r\\n * Super simple test user creation script\\r\\n */\\r\\n\\r\\nconst bcrypt = require('bcrypt');\\r\\nconst DatabaseService = require('../services/databaseService');\\r\\n\\r\\nasync function createSimpleTestUser() {\\r\\n  try {\\r\\n    console.log('🚀 CREATING SIMPLE TEST USER');\\r\\n    console.log('=' .repeat(40));\\r\\n    \\r\\n    // Test database connection first\\r\\n    console.log('\\\\n🔗 Testing database connection...');\\r\\n    const testConnection = await DatabaseService.queryPlatform('SELECT 1 as test');\\r\\n    console.log('✅ Database connection successful');\\r\\n    \\r\\n    // Check users table\\r\\n    console.log('\\\\n👥 Checking users table...');\\r\\n    const userCount = await DatabaseService.queryPlatform('SELECT COUNT(*) as total FROM users');\\r\\n    console.log(`Current users: ${userCount[0]?.total || 0}`);\\r\\n    \\r\\n    // Create test user\\r\\n    const testUser = {\\r\\n      email: 'admin@orthodoxmetrics.com',\\r\\n      password: '[REDACTED]',\\r\\n      first_name: 'Admin',\\r\\n      last_name: 'User',\\r\\n      role: 'super_admin'\\r\\n    };\\r\\n    \\r\\n    // Check if exists\\r\\n    const existing = await DatabaseService.queryPlatform(\\r\\n      'SELECT id, email, role FROM users WHERE email = ?', \\r\\n      [testUser.email]\\r\\n    );\\r\\n    \\r\\n    if (existing.length > 0) {\\r\\n      console.log('✅ Test user already exists:');\\r\\n      console.log(`   ID: ${existing[0].id}`);\\r\\n      console.log(`   Email: ${existing[0].email}`);\\r\\n      console.log(`   Role: ${existing[0].role}`);\\r\\n    } else {\\r\\n      console.log('\\\\n🔐 Creating new test user...');\\r\\n      const passwordHash = await bcrypt.hash(testUser.password, 10);\\r\\n      \\r\\n      const result = await DatabaseService.queryPlatform(\\r\\n        `INSERT INTO users \\r\\n         (email, password_hash, first_name, last_name, role, preferred_language, is_active, email_verified, created_at, updated_at) \\r\\n         VALUES (?, ?, ?, ?, ?, 'en', 1, 1, NOW(), NOW())`,\\r\\n        [testUser.email, passwordHash, testUser.first_name, testUser.last_name, testUser.role]\\r\\n      );\\r\\n      \\r\\n      console.log('✅ User created successfully!');\\r\\n      console.log(`   ID: ${result.insertId}`);\\r\\n      console.log(`   Email: ${testUser.email}`);\\r\\n      console.log(`   Password: ${testUser.password}`);\\r\\n      console.log(`   Role: ${testUser.role}`);\\r\\n    }\\r\\n    \\r\\n    // Now manually create a login activity \\r\\n    console.log('\\\\n📊 Creating test login activity...');\\r\\n    \\r\\n    // Get the user ID\\r\\n    const user = await DatabaseService.queryPlatform('SELECT id FROM users WHERE email = ?', [testUser.email]);\\r\\n    const userId = user[0].id;\\r\\n    \\r\\n    console.log(`Using user ID: ${userId}`);\\r\\n    \\r\\n    // Simple activity insert\\r\\n    await DatabaseService.queryPlatform(\\r\\n      `INSERT INTO activity_log (user_id, action, ip_address, user_agent, created_at) \\r\\n       VALUES (?, 'login', '127.0.0.1', 'Test Browser Setup Script', NOW())`,\\r\\n      [userId]\\r\\n    );\\r\\n    \\r\\n    console.log('✅ Test login activity created!');\\r\\n    \\r\\n    // Verify it worked\\r\\n    console.log('\\\\n🔍 Verifying session data...');\\r\\n    const sessionTest = await DatabaseService.queryPlatform(`\\r\\n      SELECT u.email, u.first_name, u.last_name, al.ip_address, al.created_at\\r\\n      FROM activity_log al\\r\\n      JOIN users u ON al.user_id = u.id\\r\\n      WHERE al.action = 'login'\\r\\n      ORDER BY al.created_at DESC\\r\\n      LIMIT 1\\r\\n    `);\\r\\n    \\r\\n    if (sessionTest.length > 0) {\\r\\n      const session = sessionTest[0];\\r\\n      console.log('✅ Session data verified:');\\r\\n      console.log(`   User: ${session.first_name} ${session.last_name} (${session.email})`);\\r\\n      console.log(`   IP: ${session.ip_address}`);\\r\\n      console.log(`   Time: ${session.created_at}`);\\r\\n    }\\r\\n    \\r\\n    console.log('\\\\n🎉 SETUP COMPLETE!');\\r\\n    console.log('💡 Try logging in and check /admin/logs');\\r\\n    \\r\\n  } catch (error) {\\r\\n    console.error('❌ Error:', error);\\r\\n    console.error('Stack:', error.stack);\\r\\n  }\\r\\n}\\r\\n\\r\\ncreateSimpleTestUser().then(() => {\\r\\n  console.log('\\\\n🏁 Done');\\r\\n  process.exit(0);\\r\\n}).catch(error => {\\r\\n  console.error('💥 Failed:', error);\\r\\n  process.exit(1);\\r\\n});\\r\\n\"\n    },\n    \"complexity\": {\n      \"totalLines\": 116,\n      \"codeLines\": 83,\n      \"commentLines\": 12,\n      \"commentRatio\": 0.12631578947368421,\n      \"averageLineLength\": 40.33684210526316\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:11.649Z\"\n  },\n  \"contentHash\": \"0f59e268b8212beb97e6e57ec11e9d436121de30deaaae777eb58a07083f05bd\",\n  \"discoveredAt\": \"2025-07-26T04:17:11.650Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 56,
+      "codeLines": 56,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 101.60714285714286
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.284Z"
+  },
+  "contentHash": "6e9dd087f6613c2b5640a5055b674110d3a48dfacddf5d3ef2030d6f586816e3",
+  "discoveredAt": "2025-07-28T07:19:57.284Z"
+}

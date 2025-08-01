@@ -1,0 +1,43 @@
+{
+  "id": "9df527afd82d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/agents/index.ts",
+  "relativePath": "services/om-ai/agents/index.ts",
+  "name": "index.ts",
+  "extension": ".ts",
+  "size": 289,
+  "modified": "2025-07-25T00:36:15.430Z",
+  "created": "2025-07-25T00:36:14.835Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 13,
+      "characters": 289,
+      "words": 29
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 13,
+      "codeLines": 11,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 25
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.365Z"
+  },
+  "contentHash": "4045229b1d9ccf45e4103bc6b04f7e463be6bb6b62b2898be37036d14621c71b",
+  "discoveredAt": "2025-07-28T07:20:01.365Z"
+}

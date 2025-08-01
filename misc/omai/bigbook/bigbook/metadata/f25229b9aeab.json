@@ -1,0 +1,78 @@
+{
+  "id": "f25229b9aeab",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/screenshot-utility.js",
+  "relativePath": "scripts/screenshot-utility.js",
+  "name": "screenshot-utility.js",
+  "extension": ".js",
+  "size": 10440,
+  "modified": "2025-07-28T05:52:42.286Z",
+  "created": "2025-07-28T05:52:40.953Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 329,
+      "characters": 10390,
+      "words": 909
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "puppeteer",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 9
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 10
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 17,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 18,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * OrthodoxMetrics Universal Screenshot Utility\r\n * AI Agent-friendly screenshot automation with fallbacks\r\n */\r\n\r\nconst puppeteer = require('puppeteer');\r\nconst fs = require('fs').promises;\r\nconst path = require('path');\r\n\r\nclass ScreenshotUtility {\r\n  constructor(options = {}) {\r\n    this.baseUrl = options.baseUrl || process.env.[REDACTED] || 'http://localhost:3000';\r\n    this.outputDir = options.outputDir || path.join(__dirname, '../screenshots');\r\n    this.credentials = {\r\n      username: options.username || process.env.[REDACTED] || 'admin',\r\n      password: options.password || process.env.[REDACTED] || 'admin123'\r\n    };\r\n    this.browser = null;\r\n    this.page = null;\r\n  }\r\n\r\n  async initialize() {\r\n    console.log('🚀 Initializing Screenshot Utility...');\r\n    \r\n    // Ensure output directory exists\r\n    await fs.mkdir(this.outputDir, { recursive: true });\r\n    \r\n    // Launch browser with optimal settings\r\n    this.browser = await puppeteer.launch({\r\n      headless: 'new',\r\n      args: [\r\n        '--no-sandbox',\r\n        '--disable-setuid-sandbox',\r\n        '--disable-dev-shm-usage',\r\n        '--disable-gpu',\r\n        '--disable-web-security',\r\n        '--allow-running-insecure-content'\r\n      ]\r\n    });\r\n    \r\n    this.page = await this.browser.newPage();\r\n    \r\n    // Set optimal viewport\r\n    await this.page.setViewport({\r\n      width: 1920,\r\n      height: 1080,\r\n      deviceScaleFactor: 1\r\n    });\r\n    \r\n    // Set longer timeouts for complex pages\r\n    this.page.setDefaultTimeout(30000);\r\n    this.page.setDefaultNavigationTimeout(30000);\r\n    \r\n    console.log('✅ Screenshot utility ready');\r\n  }\r\n\r\n  async login() {\r\n    console.log('🔐 Attempting authentication...');\r\n    \r\n    try {\r\n      await this.page.goto(`${this.baseUrl}/auth/login`, { \r\n        waitUntil: 'networkidle2' \r\n      });\r\n      \r\n      // Wait for login form elements\r\n      await this.page.waitForSelector('input[name=\"username\"], input[type=\"email\"], #username, #email');\r\n      \r\n      // Try different common selectors\r\n      const usernameSelector = await this.page.$('input[name=\"username\"]') ? 'input[name=\"username\"]' :\r\n                              await this.page.$('input[type=\"email\"]') ? 'input[type=\"email\"]' :\r\n                              await this.page.$('#username') ? '#username' : '#email';\r\n      \r\n      const passwordSelector = await this.page.$('input[name=\"password\"]') ? 'input[name=\"password\"]' :\r\n                              await this.page.$('input[type=\"password\"]') ? 'input[type=\"password\"]' : '#password';\r\n      \r\n      // Fill credentials\r\n      await this.page.type(usernameSelector, this.credentials.username);\r\n      await this.page.type(passwordSelector, this.credentials.password);\r\n      \r\n      // Submit form - try different button selectors\r\n      const submitSelector = await this.page.$('button[type=\"submit\"]') ? 'button[type=\"submit\"]' :\r\n                            await this.page.$('.login-button') ? '.login-button' :\r\n                            await this.page.$('.signin-button') ? '.signin-button' : 'button';\r\n      \r\n      await this.page.click(submitSelector);\r\n      \r\n      // Wait for navigation or success indicator\r\n      await this.page.waitForNavigation({ waitUntil: 'networkidle2' });\r\n      \r\n      console.log('✅ Authentication successful');\r\n      return true;\r\n      \r\n    } catch (error) {\r\n      console.log('⚠️ Authentication skipped:', error.message);\r\n      return false;\r\n    }\r\n  }\r\n\r\n  async addUrlOverlay(customText = null) {\r\n    const currentUrl = this.page.url();\r\n    const displayText = customText || currentUrl;\r\n    \r\n    await this.page.evaluate((text) => {\r\n      // Remove any existing overlay\r\n      const existing = document.getElementById('screenshot-overlay');\r\n      if (existing) existing.remove();\r\n      \r\n      // Create new overlay\r\n      const overlay = document.createElement('div');\r\n      overlay.id = 'screenshot-overlay';\r\n      overlay.style.cssText = `\r\n        position: fixed;\r\n        top: 10px;\r\n        right: 10px;\r\n        background: rgba(0, 0, 0, 0.8);\r\n        color: white;\r\n        padding: 8px 12px;\r\n        border-radius: 4px;\r\n        font-family: monospace;\r\n        font-size: 12px;\r\n        z-index: 999999;\r\n        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);\r\n        border: 1px solid rgba(255, 255, 255, 0.2);\r\n      `;\r\n      overlay.textContent = text;\r\n      document.body.appendChild(overlay);\r\n    }, displayText);\r\n    \r\n    // Wait for overlay to render\r\n    await this.page.waitForTimeout(500);\r\n  }\r\n\r\n  async captureScreenshot(taskId, screenshotIndex, route, description = '') {\r\n    const filename = `task${taskId}-${screenshotIndex.toString().padStart(2, '0')}.png`;\r\n    const filepath = path.join(this.outputDir, filename);\r\n    \r\n    console.log(`📸 Capturing: ${filename} - ${description}`);\r\n    console.log(`🌐 Route: ${route}`);\r\n    \r\n    try {\r\n      // Navigate to target route\r\n      const fullUrl = `${this.baseUrl}${route}`;\r\n      await this.page.goto(fullUrl, { \r\n        waitUntil: 'networkidle2',\r\n        timeout: 30000 \r\n      });\r\n      \r\n      // Wait for page stabilization\r\n      await this.page.waitForTimeout(3000);\r\n      \r\n      // Wait for common framework elements\r\n      try {\r\n        await this.page.waitForSelector('.MuiBox-root, .app-content, #root > div', { timeout: 5000 });\r\n      } catch (e) {\r\n        console.log('⚠️ Framework elements not found, proceeding anyway...');\r\n      }\r\n      \r\n      // Add URL overlay\r\n      await this.addUrlOverlay();\r\n      \r\n      // Take screenshot\r\n      await this.page.screenshot({\r\n        path: filepath,\r\n        fullPage: true,\r\n        type: 'png'\r\n      });\r\n      \r\n      console.log(`✅ Screenshot saved: ${filepath}`);\r\n      \r\n      return {\r\n        success: true,\r\n        filename,\r\n        filepath,\r\n        route,\r\n        description,\r\n        url: fullUrl\r\n      };\r\n      \r\n    } catch (error) {\r\n      console.error(`❌ Failed to capture ${filename}:`, error.message);\r\n      \r\n      return {\r\n        success: false,\r\n        filename,\r\n        route,\r\n        error: error.message\r\n      };\r\n    }\r\n  }\r\n\r\n  async captureTaskScreenshots(taskId, screenshots) {\r\n    console.log(`📋 Capturing ${screenshots.length} screenshots for Task ${taskId}...`);\r\n    \r\n    const results = [];\r\n    \r\n    for (let i = 0; i < screenshots.length; i++) {\r\n      const screenshot = screenshots[i];\r\n      const result = await this.captureScreenshot(\r\n        taskId,\r\n        i + 1,\r\n        screenshot.route,\r\n        screenshot.description\r\n      );\r\n      \r\n      results.push(result);\r\n      \r\n      // Brief pause between screenshots\r\n      await this.page.waitForTimeout(1000);\r\n    }\r\n    \r\n    return results;\r\n  }\r\n\r\n  async generateReport(taskId, results) {\r\n    const reportPath = path.join(this.outputDir, `Task-${taskId}-Screenshot-Report.md`);\r\n    \r\n    let report = `# Task ${taskId} - Screenshot Report\\n\\n`;\r\n    report += `**Generated**: ${new Date().toISOString()}\\n`;\r\n    report += `**Base URL**: ${this.baseUrl}\\n\\n`;\r\n    \r\n    report += `## Screenshots Captured\\n\\n`;\r\n    \r\n    results.forEach((result, index) => {\r\n      if (result.success) {\r\n        report += `### ✅ ${result.filename}\\n`;\r\n        report += `- **Route**: ${result.route}\\n`;\r\n        report += `- **Description**: ${result.description}\\n`;\r\n        report += `- **URL**: ${result.url}\\n`;\r\n        report += `- **Status**: Successfully captured\\n\\n`;\r\n      } else {\r\n        report += `### ❌ ${result.filename}\\n`;\r\n        report += `- **Route**: ${result.route}\\n`;\r\n        report += `- **Error**: ${result.error}\\n`;\r\n        report += `- **Status**: Failed to capture\\n\\n`;\r\n      }\r\n    });\r\n    \r\n    const successful = results.filter(r => r.success).length;\r\n    const failed = results.filter(r => !r.success).length;\r\n    \r\n    report += `## Summary\\n\\n`;\r\n    report += `- **Total**: ${results.length}\\n`;\r\n    report += `- **Successful**: ${successful}\\n`;\r\n    report += `- **Failed**: ${failed}\\n\\n`;\r\n    \r\n    if (successful === results.length) {\r\n      report += `🎉 **All screenshots captured successfully!**\\n`;\r\n    } else {\r\n      report += `⚠️ **${failed} screenshot(s) failed to capture.**\\n`;\r\n    }\r\n    \r\n    await fs.writeFile(reportPath, report);\r\n    console.log(`📄 Report generated: ${reportPath}`);\r\n    \r\n    return { reportPath, successful, failed, total: results.length };\r\n  }\r\n\r\n  async cleanup() {\r\n    if (this.browser) {\r\n      await this.browser.close();\r\n      console.log('🧹 Browser closed');\r\n    }\r\n  }\r\n\r\n  async run(taskId, screenshots) {\r\n    try {\r\n      await this.initialize();\r\n      await this.login();\r\n      \r\n      const results = await this.captureTaskScreenshots(taskId, screenshots);\r\n      const summary = await this.generateReport(taskId, results);\r\n      \r\n      console.log(`\\n🎉 Task ${taskId} screenshot capture complete!`);\r\n      console.log(`✅ Successful: ${summary.successful}/${summary.total}`);\r\n      console.log(`📁 Screenshots saved to: ${this.outputDir}`);\r\n      \r\n      if (summary.successful === summary.total) {\r\n        console.log('🚀 All screenshots ready - task can be marked complete!');\r\n      }\r\n      \r\n      return { results, summary };\r\n      \r\n    } catch (error) {\r\n      console.error('❌ Screenshot capture failed:', error);\r\n      throw error;\r\n    } finally {\r\n      await this.cleanup();\r\n    }\r\n  }\r\n}\r\n\r\n// Export for use in other scripts\r\nmodule.exports = ScreenshotUtility;\r\n\r\n// CLI execution when run directly\r\nif (require.main === module) {\r\n  // Example usage for Task 132\r\n  const task132Screenshots = [\r\n    {\r\n      route: '/admin/tools/page-editor',\r\n      description: 'PageEditor with Content Type Toggle'\r\n    },\r\n    {\r\n      route: '/admin/tools/page-editor?contentType=blog',\r\n      description: 'Blog Creation Interface'\r\n    },\r\n    {\r\n      route: '/admin/blog-admin',\r\n      description: 'Blog Admin Dashboard'\r\n    },\r\n    {\r\n      route: '/blog',\r\n      description: 'Public Blog Feed'\r\n    }\r\n  ];\r\n  \r\n  const utility = new ScreenshotUtility();\r\n  \r\n  utility.run(132, task132Screenshots)\r\n    .then(({ summary }) => {\r\n      process.exit(summary.successful === summary.total ? 0 : 1);\r\n    })\r\n    .catch(error => {\r\n      console.error('Fatal error:', error);\r\n      process.exit(1);\r\n    });\r\n} "
+    },
+    "complexity": {
+      "totalLines": 329,
+      "codeLines": 241,
+      "commentLines": 26,
+      "commentRatio": 0.09737827715355805,
+      "averageLineLength": 36.546816479400746
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.480Z"
+  },
+  "contentHash": "df6b632f8f5bbd768243e71afbd84bfaebeaf951316c35fae8974f4f56c47541",
+  "discoveredAt": "2025-07-28T07:19:59.480Z"
+}

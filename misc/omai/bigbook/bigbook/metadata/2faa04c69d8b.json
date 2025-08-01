@@ -1,0 +1,94 @@
+{
+  "id": "2faa04c69d8b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/5f9ba06514e4.json",
+  "relativePath": "bigbook/metadata/5f9ba06514e4.json",
+  "name": "5f9ba06514e4.json",
+  "extension": ".json",
+  "size": 34821,
+  "modified": "2025-07-26T04:17:09.702Z",
+  "created": "2025-07-26T04:17:09.702Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 195,
+      "characters": 34821,
+      "words": 2808
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "compression",
+        "line": 182
+      },
+      {
+        "type": "npm_package",
+        "name": "helmet",
+        "line": 182
+      },
+      {
+        "type": "npm_package",
+        "name": "cors",
+        "line": 182
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 182
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 182
+      },
+      {
+        "type": "npm_package",
+        "name": "redis",
+        "line": 182
+      },
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 182
+      },
+      {
+        "type": "npm_package",
+        "name": "os",
+        "line": 182
+      },
+      {
+        "type": "npm_package",
+        "name": "perf_hooks",
+        "line": 182
+      },
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 182
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 195,
+      "codeLines": 195,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 177.57435897435897
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.018Z"
+  },
+  "contentHash": "dbadd559f359185584c60c6767aea39d33922bc85e0b64d9a4227a4bdf96015e",
+  "discoveredAt": "2025-07-28T07:19:57.018Z"
+}

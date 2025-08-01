@@ -217,4 +217,117 @@ router.get('/session-full-debug', (req, res) => {
     });
 });
 
+// 🔧 SESSION DEBUG ENDPOINT - Shows session transmission details
+router.get('/session-status', async (req, res) => {
+    console.log('🔍 SESSION STATUS DEBUG ENDPOINT CALLED');
+    console.log('======================================');
+    
+    try {
+        const { promisePool } = require('../config/db');
+        
+        // Get session information
+        const sessionInfo = {
+            // Request info
+            sessionID: req.sessionID,
+            hasSession: !!req.session,
+            hasUser: !!req.session?.user,
+            userEmail: req.session?.user?.email || null,
+            
+            // Cookie info
+            rawCookies: req.headers.cookie || null,
+            hasCookieHeader: !!req.headers.cookie,
+            
+            // Cookie parsing
+            cookiesReceived: [],
+            
+            // Server info
+            timestamp: new Date().toISOString(),
+            userAgent: req.headers['user-agent']
+        };
+        
+        // Parse cookies
+        if (req.headers.cookie) {
+            const cookies = req.headers.cookie.split(';');
+            cookies.forEach(cookie => {
+                const [name, value] = cookie.trim().split('=');
+                sessionInfo.cookiesReceived.push({ 
+                    name, 
+                    value: value ? value.substring(0, 20) + '...' : 'empty',
+                    isSessionCookie: name === 'orthodox.sid'
+                });
+            });
+        }
+        
+        // Check database for sessions
+        const [sessionCount] = await promisePool.query('SELECT COUNT(*) as count FROM sessions');
+        const [recentSessions] = await promisePool.query(`
+            SELECT session_id, expires, 
+                   CASE WHEN data LIKE '%"email"%' THEN 'HAS_USER' ELSE 'NO_USER' END as has_user,
+                   LENGTH(data) as data_size
+            FROM sessions 
+            ORDER BY expires DESC 
+            LIMIT 5
+        `);
+        
+        sessionInfo.database = {
+            totalSessions: sessionCount[0].count,
+            recentSessions: recentSessions.map(s => ({
+                id: s.session_id.substring(0, 20) + '...',
+                hasUser: s.has_user,
+                expires: s.expires,
+                isExpired: new Date(s.expires) < new Date(),
+                dataSize: s.data_size
+            }))
+        };
+        
+        // Diagnosis
+        const diagnosis = [];
+        
+        if (!req.headers.cookie) {
+            diagnosis.push('❌ NO COOKIES: Browser is not sending any cookies');
+        } else if (!sessionInfo.cookiesReceived.find(c => c.isSessionCookie)) {
+            diagnosis.push('❌ NO SESSION COOKIE: Browser sent cookies but no orthodox.sid');
+        } else {
+            diagnosis.push('✅ SESSION COOKIE: Browser is sending orthodox.sid cookie');
+        }
+        
+        if (!req.session?.user) {
+            diagnosis.push('❌ NO USER: Session exists but no user data');
+        } else {
+            diagnosis.push('✅ USER AUTHENTICATED: Session has user data');
+        }
+        
+        if (sessionCount[0].count === 0) {
+            diagnosis.push('❌ NO SESSIONS: No sessions in database');
+        } else if (sessionCount[0].count > 10) {
+            diagnosis.push('⚠️  MANY SESSIONS: Too many sessions in database');
+        } else {
+            diagnosis.push(`✅ SESSIONS: ${sessionCount[0].count} sessions in database`);
+        }
+        
+        sessionInfo.diagnosis = diagnosis;
+        
+        console.log('🔍 Session Debug Results:');
+        console.log(`   Session ID: ${sessionInfo.sessionID}`);
+        console.log(`   Has User: ${sessionInfo.hasUser}`);
+        console.log(`   User Email: ${sessionInfo.userEmail}`);
+        console.log(`   Cookies Received: ${sessionInfo.cookiesReceived.length}`);
+        console.log(`   Session Cookie Present: ${sessionInfo.cookiesReceived.find(c => c.isSessionCookie) ? 'YES' : 'NO'}`);
+        
+        res.json({
+            success: true,
+            message: 'Session debug information',
+            data: sessionInfo
+        });
+        
+    } catch (error) {
+        console.error('❌ Session debug error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Session debug failed',
+            message: error.message
+        });
+    }
+});
+
 module.exports = router;

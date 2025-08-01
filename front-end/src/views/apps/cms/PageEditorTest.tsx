@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import PageEditor from './PageEditor';
 import PageContainer from 'src/components/container/PageContainer';
 

@@ -8,9 +8,9 @@ const mysql = require('mysql2/promise');
 // Database configuration
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'orthodoxmetrics_user',
-  password: process.env.DB_PASSWORD || 'securepassword123',
-  database: process.env.DB_NAME || 'orthodoxmetrics_db',
+  user: process.env.DB_USER || 'orthodapps',
+  password: process.env.DB_PASSWORD || 'Summerof1982@!',
+  database: process.env.DB_NAME || 'orthodmetrics_dev',
   connectTimeout: 60000,
   acquireTimeout: 60000,
   timeout: 60000,
@@ -25,11 +25,11 @@ async function createTestUser() {
     
     // Test user data
     const testUser = {
-      email: 'admin@orthodoxmetrics.com',
-      password: 'admin123',
-      first_name: 'Test',
+      email: 'superadmin@orthodoxmetrics.com',
+      password: 'Summerof82@!',
+      first_name: 'Super',
       last_name: 'Admin',
-      role: 'admin',
+      role: 'super_admin',
       preferred_language: 'en',
       is_active: true,
       email_verified: true

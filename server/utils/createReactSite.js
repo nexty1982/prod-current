@@ -9,7 +9,7 @@ const execAsync = promisify(exec);
 const logger = require('./logger');
 
 const TEMPLATE_DIR = path.join(__dirname, '../../templates');
-const CHURCHES_DIR = path.join(__dirname, '../../public/churches');
+const CHURCHES_DIR = path.join(__dirname, '../../misc/public/churches');
 const BASE_URL = process.env.BASE_URL || 'https://orthodoxmetrics.com';
 
 // Language-specific template configurations

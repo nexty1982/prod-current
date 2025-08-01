@@ -1,0 +1,6 @@
+{
+  "id": "b95b6829ecd1",
+  "name": "create_user_blogs_table.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/create_user_blogs_table.sql",
+  "type": "Database Scripts"
+}

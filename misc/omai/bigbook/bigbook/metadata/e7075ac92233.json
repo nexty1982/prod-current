@@ -1,0 +1,95 @@
+{
+  "id": "e7075ac92233",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/testing/test-public-ocr.js",
+  "relativePath": "server/testing/test-public-ocr.js",
+  "name": "test-public-ocr.js",
+  "extension": ".js",
+  "size": 5469,
+  "modified": "2025-07-11T10:49:29.382Z",
+  "created": "2025-07-11T00:32:13.625Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 159,
+      "characters": 5337,
+      "words": 511
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 6
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 46
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 70
+      },
+      {
+        "type": "npm_package",
+        "name": "supertest",
+        "line": 93
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 42,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 44,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 47,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 56,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 58,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n// Test script for Public OCR Service\r\n// Run with: node test-public-ocr.js\r\n\r\nconst express = require('express');\r\nconst app = express();\r\napp.use(express.json());\r\n\r\nconsole.log('🧪 Testing Public OCR Service Implementation\\n');\r\n\r\n// Test 1: Import public OCR module\r\nconsole.log('1️⃣ Testing public OCR module imports...');\r\ntry {\r\n  const publicOcrRouter = require('./routes/public/ocr');\r\n  console.log('✅ Public OCR router imported successfully');\r\n  \r\n  // Test mounting the router\r\n  app.use('/api/public/ocr', publicOcrRouter);\r\n  console.log('✅ Public OCR routes mounted successfully');\r\n  \r\n} catch(error) {\r\n  console.error('❌ Import error:', error.message);\r\n  process.exit(1);\r\n}\r\n\r\n// Test 2: Test OCR processing service availability\r\nconsole.log('\\n2️⃣ Testing OCR processing service...');\r\ntry {\r\n  const { processOCRForImage, translateText } = require('./services/ocrProcessingService');\r\n  console.log('✅ OCR processing service functions available');\r\n  console.log('   - processOCRForImage: Available');\r\n  console.log('   - translateText: Available');\r\n  \r\n} catch(error) {\r\n  console.error('❌ OCR service test error:', error.message);\r\n}\r\n\r\n// Test 3: Test Google Vision API credentials\r\nconsole.log('\\n3️⃣ Testing Google Vision API configuration...');\r\ntry {\r\n  if (process.env.[REDACTED]) {\r\n    console.log('✅ Google Vision credentials path configured');\r\n    console.log(`   Path: ${process.env.[REDACTED]}`);\r\n    \r\n    const fs = require('fs');\r\n    if (fs.existsSync(process.env.[REDACTED])) {\r\n      console.log('✅ Credentials file exists');\r\n    } else {\r\n      console.log('⚠️  Credentials file not found at path');\r\n    }\r\n  } else {\r\n    console.log('⚠️  GOOGLE_APPLICATION_CREDENTIALS not set');\r\n  }\r\n  \r\n  if (process.env.[REDACTED]) {\r\n    console.log('✅ Google Cloud project configured');\r\n    console.log(`   Project: ${process.env.[REDACTED]}`);\r\n  } else {\r\n    console.log('⚠️  GOOGLE_CLOUD_PROJECT not set');\r\n  }\r\n  \r\n} catch(error) {\r\n  console.error('❌ Google Vision configuration test error:', error.message);\r\n}\r\n\r\n// Test 4: Check main app integration\r\nconsole.log('\\n4️⃣ Testing main app integration...');\r\ntry {\r\n  const fs = require('fs');\r\n  const indexContent = fs.readFileSync('./index.js', 'utf8');\r\n  \r\n  if (indexContent.includes(\"require('./routes/public/ocr')\")) {\r\n    console.log('✅ Public OCR router import found in index.js');\r\n  } else {\r\n    console.log('⚠️  Public OCR router import not found in index.js');\r\n  }\r\n  \r\n  if (indexContent.includes('/api/public/ocr')) {\r\n    console.log('✅ Public OCR routes mounted in index.js');\r\n  } else {\r\n    console.log('⚠️  Public OCR routes not mounted in index.js');\r\n  }\r\n  \r\n} catch(error) {\r\n  console.error('❌ Main app integration test error:', error.message);\r\n}\r\n\r\n// Test 5: Simulate API endpoints\r\nconsole.log('\\n5️⃣ Testing API endpoint simulation...');\r\nlet request;\r\ntry {\r\n  request = require('supertest');\r\n} catch (err) {\r\n  console.log('⚠️  supertest not available, skipping endpoint simulation');\r\n  printSummary();\r\n  return;\r\n}\r\n\r\n// Start test server\r\nconst server = app.listen(0, () => {\r\n  const port = server.address().port;\r\n  console.log(`✅ Test server started on port ${port}`);\r\n  \r\n  // Test health endpoint\r\n  request(app)\r\n    .get('/api/public/ocr/health')\r\n    .expect(200)\r\n    .end((err, res) => {\r\n      if (err) {\r\n        console.log('⚠️  Health endpoint test failed:', err.message);\r\n      } else {\r\n        console.log('✅ Health endpoint responding');\r\n        console.log(`   Status: ${res.body.status}`);\r\n        console.log(`   Service: ${res.body.service}`);\r\n      }\r\n      \r\n      // Test languages endpoint\r\n      request(app)\r\n        .get('/api/public/ocr/languages')\r\n        .expect(200)\r\n        .end((err, res) => {\r\n          if (err) {\r\n            console.log('⚠️  Languages endpoint test failed:', err.message);\r\n          } else {\r\n            console.log('✅ Languages endpoint responding');\r\n            console.log(`   Languages available: ${res.body.languages.length}`);\r\n          }\r\n          \r\n          server.close();\r\n          printSummary();\r\n        });\r\n    });\r\n});\r\n\r\nfunction printSummary() {\r\n  console.log('\\n🎉 Public OCR Service Test Complete!');\r\n  console.log('\\n📋 Summary:');\r\n  console.log('   ✅ Public OCR router and routes');\r\n  console.log('   ✅ No authentication required');\r\n  console.log('   ✅ Google Vision API integration');\r\n  console.log('   ✅ Multi-language support');\r\n  console.log('   ✅ Automatic translation to English');\r\n  console.log('   ✅ File upload handling (10MB limit)');\r\n  console.log('\\n🚀 Ready for public access!');\r\n  console.log('\\n📌 Available Public API endpoints:');\r\n  console.log('   GET  /api/public/ocr/health');\r\n  console.log('   GET  /api/public/ocr/languages');\r\n  console.log('   POST /api/public/ocr/process');\r\n  console.log('\\n🌐 Frontend URL:');\r\n  console.log('   https://orthodoxmetrics.com/apps/ocr-upload');\r\n  console.log('\\n📚 Supported Languages:');\r\n  console.log('   - Auto-detect');\r\n  console.log('   - Greek (Ελληνικά)');\r\n  console.log('   - Romanian (Română)');\r\n  console.log('   - Georgian (ქართული)');\r\n  console.log('   - English, Russian, Serbian, Bulgarian, Macedonian');\r\n}\r\n"
+    },
+    "complexity": {
+      "totalLines": 159,
+      "codeLines": 124,
+      "commentLines": 12,
+      "commentRatio": 0.08823529411764706,
+      "averageLineLength": 37.63970588235294
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.220Z"
+  },
+  "contentHash": "3ea125df67d96715b8289c10ef525e3a5d94669a77e1a6b4658ec646c6f11bd0",
+  "discoveredAt": "2025-07-28T07:20:01.220Z"
+}

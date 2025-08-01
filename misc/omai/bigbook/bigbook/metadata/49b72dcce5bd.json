@@ -1,0 +1,43 @@
+{
+  "id": "49b72dcce5bd",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/SERVER_MIGRATION_GUIDE.md",
+  "relativePath": "docs/archive/07-09-25/SERVER_MIGRATION_GUIDE.md",
+  "name": "SERVER_MIGRATION_GUIDE.md",
+  "extension": ".md",
+  "size": 8982,
+  "modified": "2025-07-09T04:32:16.315Z",
+  "created": "2025-07-09T04:32:16.311Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 10
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 367,
+      "characters": 8982,
+      "words": 1134
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 10
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 367,
+      "codeLines": 182,
+      "commentLines": 88,
+      "commentRatio": 0.32592592592592595,
+      "averageLineLength": 31.555555555555557
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.960Z"
+  },
+  "contentHash": "ff305b32d4c21b0402d9d6cce86a00ebf6e45d59c89378eca2a2d75305c3cee8",
+  "discoveredAt": "2025-07-28T07:19:57.960Z"
+}

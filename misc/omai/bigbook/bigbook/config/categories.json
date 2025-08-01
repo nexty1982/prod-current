@@ -1,0 +1,77 @@
+{
+  "version": "1.0",
+  "categories": [
+    {
+      "id": 1,
+      "name": "Scripts",
+      "description": "Automation and utility scripts",
+      "color": "#28a745",
+      "icon": "code",
+      "sort_order": 1,
+      "parent_id": null
+    },
+    {
+      "id": 2,
+      "name": "Documentation",
+      "description": "System documentation and guides",
+      "color": "#17a2b8",
+      "icon": "book",
+      "sort_order": 2,
+      "parent_id": null
+    },
+    {
+      "id": 3,
+      "name": "Database",
+      "description": "SQL scripts and database management",
+      "color": "#ffc107",
+      "icon": "database",
+      "sort_order": 3,
+      "parent_id": null
+    },
+    {
+      "id": 4,
+      "name": "Configuration",
+      "description": "System configuration files",
+      "color": "#6f42c1",
+      "icon": "cog",
+      "sort_order": 4,
+      "parent_id": null
+    },
+    {
+      "id": 5,
+      "name": "Testing",
+      "description": "Test scripts and validation tools",
+      "color": "#fd7e14",
+      "icon": "check-circle",
+      "sort_order": 5,
+      "parent_id": null
+    },
+    {
+      "id": 6,
+      "name": "Deployment",
+      "description": "Deployment and setup scripts",
+      "color": "#e83e8c",
+      "icon": "rocket",
+      "sort_order": 6,
+      "parent_id": null
+    },
+    {
+      "id": 7,
+      "name": "Maintenance",
+      "description": "System maintenance and cleanup",
+      "color": "#6c757d",
+      "icon": "tools",
+      "sort_order": 7,
+      "parent_id": null
+    },
+    {
+      "id": 8,
+      "name": "AI/ML",
+      "description": "AI and machine learning components",
+      "color": "#20c997",
+      "icon": "brain",
+      "sort_order": 8,
+      "parent_id": null
+    }
+  ]
+}

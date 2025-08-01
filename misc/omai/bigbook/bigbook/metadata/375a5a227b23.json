@@ -1,0 +1,69 @@
+{
+  "id": "375a5a227b23",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/backup-engine.js",
+  "relativePath": "server/scripts/backup-engine.js",
+  "name": "backup-engine.js",
+  "extension": ".js",
+  "size": 14033,
+  "modified": "2025-07-24T03:05:12.210Z",
+  "created": "2025-07-24T03:02:02.900Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 372,
+      "characters": 14033,
+      "words": 1131
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "child_process",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "util",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 7
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 372,
+      "codeLines": 275,
+      "commentLines": 31,
+      "commentRatio": 0.10130718954248366,
+      "averageLineLength": 43.1764705882353
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.645Z"
+  },
+  "contentHash": "85ae539b1e0230da2cd392a01c1fa8352545c80805e66d1b3348ea925b68acbb",
+  "discoveredAt": "2025-07-28T07:20:00.645Z"
+}

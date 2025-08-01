@@ -1,0 +1,69 @@
+{
+  "id": "64af8b5b2041",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/7-12-25/COPILOT_HANDOFF_2025-07-12.md",
+  "relativePath": "docs/archive/7-12-25/COPILOT_HANDOFF_2025-07-12.md",
+  "name": "COPILOT_HANDOFF_2025-07-12.md",
+  "extension": ".md",
+  "size": 10992,
+  "modified": "2025-07-12T04:01:39.546Z",
+  "created": "2025-07-12T04:00:10.006Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 379,
+      "characters": 10792,
+      "words": 1362
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 8
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 95
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 163
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 164
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 171
+      },
+      {
+        "type": "npm_package",
+        "name": "ag-grid-react",
+        "line": 172
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 379,
+      "codeLines": 232,
+      "commentLines": 56,
+      "commentRatio": 0.19444444444444445,
+      "averageLineLength": 35.72222222222222
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.077Z"
+  },
+  "contentHash": "fc8b253b5178f74b6cad66ecd7cd487966a613d50fdc8480987038b07d6bcd5e",
+  "discoveredAt": "2025-07-28T07:19:58.077Z"
+}

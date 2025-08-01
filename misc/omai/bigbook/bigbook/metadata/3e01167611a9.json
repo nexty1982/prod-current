@@ -1,0 +1,59 @@
+{
+  "id": "3e01167611a9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/analytics/trend-analyzer.ts",
+  "relativePath": "services/om-ai/analytics/trend-analyzer.ts",
+  "name": "trend-analyzer.ts",
+  "extension": ".ts",
+  "size": 16188,
+  "modified": "2025-07-25T01:48:56.284Z",
+  "created": "2025-07-25T01:41:34.335Z",
+  "classification": {
+    "type": "Other",
+    "category": "Uncategorized",
+    "confidence": 0
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 463,
+      "characters": 16187,
+      "words": 1802
+    },
+    "classification": {
+      "type": "Other",
+      "category": "Uncategorized",
+      "confidence": 0
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 463,
+      "codeLines": 358,
+      "commentLines": 18,
+      "commentRatio": 0.047872340425531915,
+      "averageLineLength": 41.026595744680854
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.407Z"
+  },
+  "contentHash": "75af21b06867e897c370847dfb5226564165af4e5c4fb7c1497bcf7f6605b021",
+  "discoveredAt": "2025-07-28T07:20:01.407Z"
+}

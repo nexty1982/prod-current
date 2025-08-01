@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Button, Checkbox, FormControlLabel, styled } from '@mui/material';
 import { useAuth } from '../../../context/AuthContext';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 // Styled components to match the original design
 const LoginContainer = styled(Box)(() => ({
@@ -33,30 +33,57 @@ const LeftSection = styled(Box)({
 
 const OrthodoxCross = styled(Box)({
     width: '120px',
-    height: '120px',
+    height: '140px',
     marginBottom: '2rem',
     position: 'relative',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
 
+    // Main vertical beam
     '&::before': {
         content: '""',
         position: 'absolute',
         width: '8px',
-        height: '100px',
+        height: '120px',
         background: '#D4AF37',
         borderRadius: '4px',
+        zIndex: 1,
     },
 
+    // Main horizontal crossbar
     '&::after': {
         content: '""',
         position: 'absolute',
-        top: '20px',
-        width: '60px',
+        top: '50px',
+        width: '70px',
+        height: '7px',
+        background: '#D4AF37',
+        borderRadius: '3px',
+        zIndex: 2,
+    },
+
+    // Upper titulus bar (INRI bar)
+    '& .upper-bar': {
+        position: 'absolute',
+        top: '25px',
+        width: '45px',
+        height: '5px',
+        background: '#D4AF37',
+        borderRadius: '2px',
+        zIndex: 2,
+    },
+
+    // Lower slanted footrest bar
+    '& .lower-bar': {
+        position: 'absolute',
+        top: '95px',
+        width: '50px',
         height: '6px',
         background: '#D4AF37',
         borderRadius: '3px',
+        transform: 'rotate(-15deg)',
+        zIndex: 2,
     },
 });
 
@@ -308,6 +335,11 @@ const OrthodoxLogin: React.FC = () => {
 
         try {
             await login(email, password);
+            
+            console.log('🔑 Login successful! Navigating to "/" for SmartRedirect...');
+            console.log('🔑 User email:', email);
+            
+            // Let SmartRedirect handle all users consistently based on role and church assignment
             navigate('/');
         } catch (err: any) {
             setError(err.message || 'Login failed');
@@ -337,7 +369,10 @@ const OrthodoxLogin: React.FC = () => {
 
             <MainContainer>
                 <LeftSection>
-                    <OrthodoxCross />
+                    <OrthodoxCross>
+                        <Box className="upper-bar" />
+                        <Box className="lower-bar" />
+                    </OrthodoxCross>
 
                     <BrandTitle>Orthodox Metrics</BrandTitle>
                     <BrandSubtitle>Recording the Saints Among Us</BrandSubtitle>
@@ -363,6 +398,7 @@ const OrthodoxLogin: React.FC = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 variant="outlined"
+                                inputProps={{ autoComplete: "username" }}
                             />
 
                             <StyledTextField
@@ -374,6 +410,7 @@ const OrthodoxLogin: React.FC = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 variant="outlined"
+                                inputProps={{ autoComplete: "current-password" }}
                             />
 
                             {error && (
@@ -381,6 +418,8 @@ const OrthodoxLogin: React.FC = () => {
                                     {error}
                                 </Typography>
                             )}
+
+
 
                             <FormOptions>
                                 <FormControlLabel

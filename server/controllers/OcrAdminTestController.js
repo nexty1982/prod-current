@@ -15,13 +15,13 @@ class OcrAdminTestController {
         host: 'localhost',
         user: 'orthodoxapps',
         password: 'Summerof1982@!',
-        database: 'orthodoxmetrics_db'
+        database: 'orthodmetrics_dev'
       },
       ocr: {
         host: 'localhost',
         user: 'orthodoxapps',
         password: 'Summerof1982@!',
-        database: 'saints_peter_and_paul_orthodox_church_db'
+        database: process.env.OCR_DATABASE || 'orthodoxmetrics_ocr_db'
       },
       records: {
         host: 'localhost',
@@ -38,7 +38,7 @@ class OcrAdminTestController {
       // Check if user exists in session or JWT
       const userEmail = req.user?.email || req.body?.userEmail || req.headers['x-user-email'];
       
-      if (userEmail !== 'superadmin@orthodoxmetrics.com') {
+      if (userEmail !== 'superadmin@orthodmetrics.com') {
         return res.status(403).json({
           success: false,
           message: 'Access denied. SuperAdmin privileges required.'
@@ -61,7 +61,7 @@ class OcrAdminTestController {
     const results = {};
 
     try {
-      // Test orthodoxmetrics_db
+      // Test orthodmetrics_dev
       try {
         const orthodoxConnection = await mysql.createConnection(this.dbConfigs.orthodoxmetrics);
         const [rows] = await orthodoxConnection.execute('SELECT COUNT(*) as count FROM churches');
@@ -142,9 +142,9 @@ class OcrAdminTestController {
       const [columns] = await connection.execute(`
         SELECT COLUMN_NAME 
         FROM INFORMATION_SCHEMA.COLUMNS 
-        WHERE TABLE_SCHEMA = 'saints_peter_and_paul_orthodox_church_db' 
+        WHERE TABLE_SCHEMA = ? 
         AND TABLE_NAME = 'ocr_jobs'
-      `);
+      `, [process.env.OCR_DATABASE || 'orthodoxmetrics_ocr_db']);
 
       const requiredColumns = [
         'id', 'church_id', 'file_path', 'original_filename', 'status', 'ocr_result',

@@ -1,0 +1,84 @@
+{
+  "id": "01c89b5ce66d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/cab24a9836fc.json",
+  "relativePath": "bigbook/metadata/cab24a9836fc.json",
+  "name": "cab24a9836fc.json",
+  "extension": ".json",
+  "size": 21579,
+  "modified": "2025-07-26T04:17:11.154Z",
+  "created": "2025-07-26T04:17:11.154Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 115,
+      "characters": 21579,
+      "words": 1702
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 102
+      },
+      {
+        "type": "npm_package",
+        "name": "multer",
+        "line": 102
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 102
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 102
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 102
+      },
+      {
+        "type": "npm_package",
+        "name": "sharp",
+        "line": 102
+      },
+      {
+        "type": "npm_package",
+        "name": "jsonwebtoken",
+        "line": 102
+      },
+      {
+        "type": "npm_package",
+        "name": "@google-cloud/vision",
+        "line": 102
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 115,
+      "codeLines": 115,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 186.65217391304347
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.456Z"
+  },
+  "contentHash": "88f9718d597ae9dd1c3c8f034cdd7957c0f011420b462ac632898b9a4f2e76b7",
+  "discoveredAt": "2025-07-28T07:19:57.456Z"
+}

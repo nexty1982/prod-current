@@ -1,0 +1,6 @@
+{
+  "id": "05604ac3a406",
+  "name": "rebuild-ai-backend-connection.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/rebuild-ai-backend-connection.sh",
+  "type": "Build Scripts"
+}

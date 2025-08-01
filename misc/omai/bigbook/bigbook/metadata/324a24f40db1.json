@@ -1,0 +1,43 @@
+{
+  "id": "324a24f40db1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-omai-frontend.sh",
+  "relativePath": "scripts/test-omai-frontend.sh",
+  "name": "test-omai-frontend.sh",
+  "extension": ".sh",
+  "size": 3694,
+  "modified": "2025-07-25T20:40:39.044Z",
+  "created": "2025-07-25T20:40:33.868Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 96,
+      "characters": 3646,
+      "words": 449
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 96,
+      "codeLines": 67,
+      "commentLines": 11,
+      "commentRatio": 0.14102564102564102,
+      "averageLineLength": 45.52564102564103
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.518Z"
+  },
+  "contentHash": "83ef9c985348068fd02775efa6bcc9f7880a01061a7f563c97df463c6ae260c9",
+  "discoveredAt": "2025-07-28T07:19:59.518Z"
+}

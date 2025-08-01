@@ -1,0 +1,56 @@
+{
+  "id": "dfcfda1cee8f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/d63e645b43b7.json",
+  "relativePath": "bigbook/metadata/d63e645b43b7.json",
+  "name": "d63e645b43b7.json",
+  "extension": ".json",
+  "size": 4574,
+  "modified": "2025-07-26T04:17:10.858Z",
+  "created": "2025-07-26T04:17:10.858Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 56,
+      "characters": 4544,
+      "words": 366
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 43
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 43,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"d63e645b43b7\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/cookie-test.js\",\n  \"relativePath\": \"server/debug/cookie-test.js\",\n  \"name\": \"cookie-test.js\",\n  \"extension\": \".js\",\n  \"size\": 2930,\n  \"modified\": \"2025-07-22T03:58:17.758Z\",\n  \"created\": \"2025-07-22T03:58:17.754Z\",\n  \"classification\": {\n    \"type\": \"Troubleshooting Utilities\",\n    \"category\": \"Diagnostic Tools\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 82,\n      \"characters\": 2900,\n      \"words\": 260\n    },\n    \"classification\": {\n      \"type\": \"Troubleshooting Utilities\",\n      \"category\": \"Diagnostic Tools\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"axios\",\n        \"line\": 2\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 15,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"// server/debug/cookie-test.js\\r\\nconst axios = require('axios');\\r\\n\\r\\nasync function testCookieFlow() {\\r\\n  console.log('🍪 Testing Cookie Flow');\\r\\n  console.log('======================');\\r\\n\\r\\n  const baseURL = 'https://orthodoxmetrics.com';\\r\\n  \\r\\n  try {\\r\\n    // Step 1: Login and capture cookies\\r\\n    console.log('\\\\n1. 🔐 Testing login...');\\r\\n    const loginResponse = await axios.post(`${baseURL}/api/auth/login`, {\\r\\n      username: 'superadmin@orthodoxmetrics.com',\\r\\n      password: '[REDACTED]' // Replace with actual password\\r\\n    }, {\\r\\n      withCredentials: true,\\r\\n      timeout: 10000\\r\\n    });\\r\\n\\r\\n    console.log('✅ Login response status:', loginResponse.status);\\r\\n    console.log('✅ Login response data:', loginResponse.data);\\r\\n    \\r\\n    // Check if cookies were set\\r\\n    const setCookieHeaders = loginResponse.headers['set-cookie'];\\r\\n    if (setCookieHeaders) {\\r\\n      console.log('✅ Cookies set by server:');\\r\\n      setCookieHeaders.forEach(cookie => {\\r\\n        console.log('   ', cookie);\\r\\n      });\\r\\n    } else {\\r\\n      console.log('❌ No cookies set by server');\\r\\n    }\\r\\n\\r\\n    // Step 2: Make an authenticated request\\r\\n    console.log('\\\\n2. 🔐 Testing authenticated request...');\\r\\n    \\r\\n    // Create a new axios instance with the cookies\\r\\n    const authenticatedAxios = axios.create({\\r\\n      baseURL,\\r\\n      withCredentials: true,\\r\\n      timeout: 10000\\r\\n    });\\r\\n\\r\\n    const authCheckResponse = await authenticatedAxios.get('/api/auth/check');\\r\\n    \\r\\n    console.log('✅ Auth check response status:', authCheckResponse.status);\\r\\n    console.log('✅ Auth check response data:', authCheckResponse.data);\\r\\n\\r\\n    // Step 3: Test User Management endpoint\\r\\n    console.log('\\\\n3. 👥 Testing User Management endpoint...');\\r\\n    \\r\\n    const usersResponse = await authenticatedAxios.get('/api/admin/users');\\r\\n    \\r\\n    console.log('✅ Users response status:', usersResponse.status);\\r\\n    console.log('✅ Users response data (first 100 chars):', \\r\\n      JSON.stringify(usersResponse.data).substring(0, 100) + '...');\\r\\n\\r\\n    console.log('\\\\n🎉 All tests passed! Cookie flow is working correctly.');\\r\\n\\r\\n  } catch (error) {\\r\\n    console.error('\\\\n❌ Cookie test failed:');\\r\\n    \\r\\n    if (error.response) {\\r\\n      console.error('Response status:', error.response.status);\\r\\n      console.error('Response data:', error.response.data);\\r\\n      console.error('Response headers:', error.response.headers);\\r\\n    } else if (error.request) {\\r\\n      console.error('No response received:', error.message);\\r\\n    } else {\\r\\n      console.error('Request setup error:', error.message);\\r\\n    }\\r\\n\\r\\n    console.log('\\\\n🔍 Debugging suggestions:');\\r\\n    console.log('1. Check if server is running and accessible');\\r\\n    console.log('2. Verify login credentials are correct');\\r\\n    console.log('3. Check server logs for authentication errors');\\r\\n    console.log('4. Verify CORS and session configuration');\\r\\n  }\\r\\n}\\r\\n\\r\\ntestCookieFlow(); \"\n    },\n    \"complexity\": {\n      \"totalLines\": 82,\n      \"codeLines\": 59,\n      \"commentLines\": 6,\n      \"commentRatio\": 0.09230769230769231,\n      \"averageLineLength\": 42.707692307692305\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:10.859Z\"\n  },\n  \"contentHash\": \"cc6a97635601ad85e6dae4efe6e69a95d9c4c4742688d88a85fd91a1a516e415\",\n  \"discoveredAt\": \"2025-07-26T04:17:10.859Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 56,
+      "codeLines": 56,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 80.16071428571429
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.498Z"
+  },
+  "contentHash": "3eaa15b1ce4e3bea258faeaa3a2144d3da643f238d9f8e7683b65d65c087e480",
+  "discoveredAt": "2025-07-28T07:19:57.498Z"
+}

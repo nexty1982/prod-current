@@ -1,0 +1,54 @@
+{
+  "id": "40585f8fcb38",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/dialogue/context-sync.ts",
+  "relativePath": "services/om-ai/dialogue/context-sync.ts",
+  "name": "context-sync.ts",
+  "extension": ".ts",
+  "size": 11119,
+  "modified": "2025-07-25T02:40:05.009Z",
+  "created": "2025-07-25T02:40:03.908Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 348,
+      "characters": 11119,
+      "words": 1085
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 348,
+      "codeLines": 254,
+      "commentLines": 38,
+      "commentRatio": 0.13013698630136986,
+      "averageLineLength": 36.5
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.429Z"
+  },
+  "contentHash": "dca52760d1f8bb9505d1c330ce05d01818949e417b070bc3afcfa7f8a2cf6e81",
+  "discoveredAt": "2025-07-28T07:20:01.429Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "0e431e5caef4",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-24-25/ACCOUNT_SETTINGS_IMPLEMENTATION_GUIDE.md",
+  "relativePath": "docs/7-24-25/ACCOUNT_SETTINGS_IMPLEMENTATION_GUIDE.md",
+  "name": "ACCOUNT_SETTINGS_IMPLEMENTATION_GUIDE.md",
+  "extension": ".md",
+  "size": 5611,
+  "modified": "2025-07-22T23:28:08.823Z",
+  "created": "2025-07-22T23:28:06.634Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 156,
+      "characters": 5507,
+      "words": 678
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 156,
+      "codeLines": 97,
+      "commentLines": 29,
+      "commentRatio": 0.23015873015873015,
+      "averageLineLength": 42.23809523809524
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.675Z"
+  },
+  "contentHash": "a83e653d6c23a4541886708e12ff70d992c4fe28b0b386a47704152b9a99aac0",
+  "discoveredAt": "2025-07-28T07:19:57.675Z"
+}

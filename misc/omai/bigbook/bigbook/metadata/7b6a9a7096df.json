@@ -1,0 +1,43 @@
+{
+  "id": "7b6a9a7096df",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/middleware/sessionValidation.js",
+  "relativePath": "server/middleware/sessionValidation.js",
+  "name": "sessionValidation.js",
+  "extension": ".js",
+  "size": 2834,
+  "modified": "2025-07-04T23:08:01.000Z",
+  "created": "2025-07-09T00:48:35.202Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 110,
+      "characters": 2834,
+      "words": 321
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 110,
+      "codeLines": 79,
+      "commentLines": 17,
+      "commentRatio": 0.17708333333333334,
+      "averageLineLength": 28.208333333333332
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.316Z"
+  },
+  "contentHash": "03f61e0aa0cc6229f68f335b27ff738f76de60724027dedceda4103d170c9f36",
+  "discoveredAt": "2025-07-28T07:20:00.316Z"
+}

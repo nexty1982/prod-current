@@ -1,0 +1,6 @@
+{
+  "id": "31039cf5e4b9",
+  "name": "fix-icon-errors-and-deploy.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-icon-errors-and-deploy.sh",
+  "type": "Build Scripts"
+}

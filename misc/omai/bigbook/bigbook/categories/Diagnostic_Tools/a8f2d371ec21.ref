@@ -1,0 +1,6 @@
+{
+  "id": "a8f2d371ec21",
+  "name": "fix-mui-database-icon.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/tasks/scripts/fix-mui-database-icon.sh",
+  "type": "Troubleshooting Utilities"
+}

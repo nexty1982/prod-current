@@ -1,0 +1,89 @@
+{
+  "id": "4c631917b83c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/debug-scrapers.js",
+  "relativePath": "server/scrapers/debug-scrapers.js",
+  "name": "debug-scrapers.js",
+  "extension": ".js",
+  "size": 11224,
+  "modified": "2025-07-24T14:51:40.412Z",
+  "created": "2025-07-24T14:51:40.412Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 304,
+      "characters": 11158,
+      "words": 860
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 9
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 16,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 17,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 18,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 19,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n// 📁 server/scrapers/debug-scrapers.js\r\n// Comprehensive diagnostic tool for scraper issues\r\n\r\nconst mysql = require('mysql2/promise');\r\nconst axios = require('axios');\r\nconst fs = require('fs').promises;\r\nconst path = require('path');\r\n\r\nclass ScraperDiagnostics {\r\n    constructor() {\r\n        this.issues = [];\r\n        this.fixes = [];\r\n        this.dbConfig = {\r\n            host: process.env.[REDACTED] || 'localhost',\r\n            user: process.env.[REDACTED] || 'orthodoxapps',\r\n            password: process.env.[REDACTED] || 'Summerof1982@!',\r\n            database: process.env.[REDACTED] || 'orthodoxmetrics'\r\n        };\r\n    }\r\n\r\n    async runDiagnostics() {\r\n        console.log('🔍 Running Scraper Diagnostics...\\n');\r\n\r\n        await this.checkEnvironmentVariables();\r\n        await this.checkDatabaseConnection();\r\n        await this.checkDatabaseSchema();\r\n        await this.checkDependencies();\r\n        await this.checkNetworkConnectivity();\r\n        await this.checkFilePermissions();\r\n\r\n        this.generateReport();\r\n    }\r\n\r\n    async checkEnvironmentVariables() {\r\n        console.log('📋 Checking Environment Variables...');\r\n        \r\n        const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];\r\n        const missingVars = [];\r\n\r\n        for (const varName of requiredEnvVars) {\r\n            if (!process.env[varName]) {\r\n                missingVars.push(varName);\r\n            } else {\r\n                console.log(`   ✓ ${varName}: ${varName === 'DB_PASSWORD' ? '[HIDDEN]' : process.env[varName]}`);\r\n            }\r\n        }\r\n\r\n        if (missingVars.length > 0) {\r\n            this.issues.push({\r\n                category: 'Environment',\r\n                issue: `Missing environment variables: ${missingVars.join(', ')}`,\r\n                severity: 'HIGH',\r\n                fix: 'Create .env file with database credentials'\r\n            });\r\n            console.log(`   ❌ Missing: ${missingVars.join(', ')}`);\r\n        } else {\r\n            console.log('   ✅ All environment variables present');\r\n        }\r\n        console.log('');\r\n    }\r\n\r\n    async checkDatabaseConnection() {\r\n        console.log('🗄️  Checking Database Connection...');\r\n        \r\n        try {\r\n            console.log(`   Attempting connection to ${this.dbConfig.host}:3306 as ${this.dbConfig.user}`);\r\n            \r\n            const connection = await mysql.createConnection(this.dbConfig);\r\n            await connection.ping();\r\n            console.log('   ✅ Database connection successful');\r\n            await connection.end();\r\n            \r\n        } catch (error) {\r\n            this.issues.push({\r\n                category: 'Database',\r\n                issue: `Connection failed: ${error.message}`,\r\n                severity: 'CRITICAL',\r\n                fix: this.getDatabaseConnectionFix(error)\r\n            });\r\n            console.log(`   ❌ Connection failed: ${error.message}`);\r\n        }\r\n        console.log('');\r\n    }\r\n\r\n    async checkDatabaseSchema() {\r\n        console.log('🏗️  Checking Database Schema...');\r\n        \r\n        try {\r\n            const connection = await mysql.createConnection(this.dbConfig);\r\n            \r\n            // Check for required tables\r\n            const requiredTables = [\r\n                'orthodox_churches',\r\n                'scraping_sessions', \r\n                'scraping_errors',\r\n                'url_validations'\r\n            ];\r\n\r\n            for (const tableName of requiredTables) {\r\n                try {\r\n                    const [rows] = await connection.execute(\r\n                        'SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = ? AND table_name = ?',\r\n                        [this.dbConfig.database, tableName]\r\n                    );\r\n                    \r\n                    if (rows[0].count > 0) {\r\n                        console.log(`   ✓ Table ${tableName} exists`);\r\n                    } else {\r\n                        this.issues.push({\r\n                            category: 'Database Schema',\r\n                            issue: `Missing table: ${tableName}`,\r\n                            severity: 'HIGH',\r\n                            fix: 'Run database setup script to create missing tables'\r\n                        });\r\n                        console.log(`   ❌ Missing table: ${tableName}`);\r\n                    }\r\n                } catch (tableError) {\r\n                    console.log(`   ❌ Error checking table ${tableName}: ${tableError.message}`);\r\n                }\r\n            }\r\n            \r\n            await connection.end();\r\n            \r\n        } catch (error) {\r\n            console.log(`   ⚠️  Could not check schema (connection issue): ${error.message}`);\r\n        }\r\n        console.log('');\r\n    }\r\n\r\n    async checkDependencies() {\r\n        console.log('📦 Checking Dependencies...');\r\n        \r\n        const requiredPackages = [\r\n            'axios',\r\n            'cheerio', \r\n            'puppeteer',\r\n            'mysql2',\r\n            'winston',\r\n            'json2csv'\r\n        ];\r\n\r\n        for (const pkg of requiredPackages) {\r\n            try {\r\n                require.resolve(pkg);\r\n                console.log(`   ✓ ${pkg} is installed`);\r\n            } catch (error) {\r\n                this.issues.push({\r\n                    category: 'Dependencies',\r\n                    issue: `Missing package: ${pkg}`,\r\n                    severity: 'HIGH',\r\n                    fix: `Install with: npm install ${pkg}`\r\n                });\r\n                console.log(`   ❌ Missing package: ${pkg}`);\r\n            }\r\n        }\r\n        console.log('');\r\n    }\r\n\r\n    async checkNetworkConnectivity() {\r\n        console.log('🌐 Checking Network Connectivity...');\r\n        \r\n        const testUrls = [\r\n            'https://www.oca.org',\r\n            'https://www.goarch.org',\r\n            'https://www.antiochian.org'\r\n        ];\r\n\r\n        for (const url of testUrls) {\r\n            try {\r\n                const response = await axios.get(url, { timeout: 10000 });\r\n                console.log(`   ✓ ${url} - Status: ${response.status}`);\r\n            } catch (error) {\r\n                this.issues.push({\r\n                    category: 'Network',\r\n                    issue: `Cannot reach ${url}: ${error.message}`,\r\n                    severity: 'MEDIUM',\r\n                    fix: 'Check internet connectivity and firewall settings'\r\n                });\r\n                console.log(`   ❌ ${url} - Error: ${error.message}`);\r\n            }\r\n        }\r\n        console.log('');\r\n    }\r\n\r\n    async checkFilePermissions() {\r\n        console.log('📁 Checking File Permissions...');\r\n        \r\n        const testDirs = [\r\n            path.join(__dirname, '../data/churches'),\r\n            path.join(__dirname, '../logs'),\r\n            path.join(__dirname, '../uploads')\r\n        ];\r\n\r\n        for (const dir of testDirs) {\r\n            try {\r\n                await fs.mkdir(dir, { recursive: true });\r\n                await fs.writeFile(path.join(dir, 'test.tmp'), 'test');\r\n                await fs.unlink(path.join(dir, 'test.tmp'));\r\n                console.log(`   ✓ ${dir} - Read/Write OK`);\r\n            } catch (error) {\r\n                this.issues.push({\r\n                    category: 'File Permissions',\r\n                    issue: `Cannot write to ${dir}: ${error.message}`,\r\n                    severity: 'MEDIUM',\r\n                    fix: 'Check directory permissions and create missing directories'\r\n                });\r\n                console.log(`   ❌ ${dir} - Error: ${error.message}`);\r\n            }\r\n        }\r\n        console.log('');\r\n    }\r\n\r\n    getDatabaseConnectionFix(error) {\r\n        if (error.message.includes('Access denied')) {\r\n            return 'Fix database credentials in .env file or grant proper permissions to user';\r\n        } else if (error.message.includes('ECONNREFUSED')) {\r\n            return 'Start MySQL server or check if it\\'s running on the correct port';\r\n        } else if (error.message.includes('ENOTFOUND')) {\r\n            return 'Check database host address and network connectivity';\r\n        } else {\r\n            return 'Check database configuration and server status';\r\n        }\r\n    }\r\n\r\n    generateReport() {\r\n        console.log('📊 DIAGNOSTIC REPORT');\r\n        console.log('='.repeat(50));\r\n        \r\n        if (this.issues.length === 0) {\r\n            console.log('✅ No issues found! Your scraper system should be working properly.');\r\n            console.log('\\nTo test the scrapers, run:');\r\n            console.log('   cd server/scrapers');\r\n            console.log('   node test-scraper.js --quick');\r\n            return;\r\n        }\r\n\r\n        // Group issues by severity\r\n        const critical = this.issues.filter(i => i.severity === 'CRITICAL');\r\n        const high = this.issues.filter(i => i.severity === 'HIGH');\r\n        const medium = this.issues.filter(i => i.severity === 'MEDIUM');\r\n\r\n        if (critical.length > 0) {\r\n            console.log('\\n🚨 CRITICAL ISSUES (Must fix first):');\r\n            critical.forEach((issue, i) => {\r\n                console.log(`${i + 1}. ${issue.issue}`);\r\n                console.log(`   Fix: ${issue.fix}\\n`);\r\n            });\r\n        }\r\n\r\n        if (high.length > 0) {\r\n            console.log('\\n⚠️  HIGH PRIORITY ISSUES:');\r\n            high.forEach((issue, i) => {\r\n                console.log(`${i + 1}. ${issue.issue}`);\r\n                console.log(`   Fix: ${issue.fix}\\n`);\r\n            });\r\n        }\r\n\r\n        if (medium.length > 0) {\r\n            console.log('\\n📋 MEDIUM PRIORITY ISSUES:');\r\n            medium.forEach((issue, i) => {\r\n                console.log(`${i + 1}. ${issue.issue}`);\r\n                console.log(`   Fix: ${issue.fix}\\n`);\r\n            });\r\n        }\r\n\r\n        this.generateFixScript();\r\n    }\r\n\r\n    generateFixScript() {\r\n        console.log('🔧 AUTOMATED FIX SCRIPT');\r\n        console.log('='.repeat(50));\r\n        \r\n        const hasDbIssues = this.issues.some(i => i.category === 'Database' || i.category === 'Database Schema');\r\n        const hasDependencyIssues = this.issues.some(i => i.category === 'Dependencies');\r\n        \r\n        console.log('Run these commands to fix common issues:\\n');\r\n        \r\n        if (hasDependencyIssues) {\r\n            console.log('# Install missing dependencies:');\r\n            console.log('npm install axios cheerio puppeteer mysql2 winston json2csv\\n');\r\n        }\r\n        \r\n        if (hasDbIssues) {\r\n            console.log('# Fix database issues:');\r\n            console.log('# 1. Update .env file with correct credentials');\r\n            console.log('# 2. Run database setup:');\r\n            console.log('node setup-database.js\\n');\r\n        }\r\n        \r\n        console.log('# Test the fixes:');\r\n        console.log('node debug-scrapers.js');\r\n        console.log('node test-scraper.js --quick');\r\n    }\r\n}\r\n\r\n// Run diagnostics if called directly\r\nif (require.main === module) {\r\n    const diagnostics = new ScraperDiagnostics();\r\n    diagnostics.runDiagnostics().catch(console.error);\r\n}\r\n\r\nmodule.exports = ScraperDiagnostics; "
+    },
+    "complexity": {
+      "totalLines": 304,
+      "codeLines": 252,
+      "commentLines": 6,
+      "commentRatio": 0.023255813953488372,
+      "averageLineLength": 41.213178294573645
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.587Z"
+  },
+  "contentHash": "9ab1b033f1b82d6b04dc332fa2fd728e1550a032822c6e91f3abd1bef121b10f",
+  "discoveredAt": "2025-07-28T07:20:00.587Z"
+}

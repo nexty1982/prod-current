@@ -1,0 +1,43 @@
+{
+  "id": "25a28c16ab8d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/backup.sh",
+  "relativePath": "server/scripts/backup.sh",
+  "name": "backup.sh",
+  "extension": ".sh",
+  "size": 5750,
+  "modified": "2025-07-24T03:05:12.210Z",
+  "created": "2025-07-24T03:02:26.816Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 217,
+      "characters": 5750,
+      "words": 656
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 217,
+      "codeLines": 163,
+      "commentLines": 24,
+      "commentRatio": 0.12834224598930483,
+      "averageLineLength": 29.272727272727273
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.646Z"
+  },
+  "contentHash": "70e8234d761f76987248088e304f2a90ba5a70ac1a8f1067975ad83829c9fc71",
+  "discoveredAt": "2025-07-28T07:20:00.646Z"
+}

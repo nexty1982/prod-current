@@ -1,0 +1,56 @@
+{
+  "id": "caf00f9141ad",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/config.ts",
+  "relativePath": "services/om-ai/config.ts",
+  "name": "config.ts",
+  "extension": ".ts",
+  "size": 1000,
+  "modified": "2025-07-24T23:54:36.860Z",
+  "created": "2025-07-24T23:54:31.488Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 36,
+      "characters": 1000,
+      "words": 86
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 17,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 18,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "export const OMAIConfig = {\r\n  // Model Configuration\r\n  model: \"/models/codellama.gguf\",\r\n  backend: \"ollama\", // or local inference engine\r\n  useGPU: true,\r\n  \r\n  // Memory and Storage Paths\r\n  memoryPath: \"./services/om-ai/memory/om-memory.json\",\r\n  embeddingDBPath: \"./services/om-ai/embeddings/index.db\",\r\n  embeddingsPath: \"./services/om-ai/embeddings/embeddings.json\",\r\n  \r\n  // Plugin Configuration\r\n  pluginsPath: \"./services/om-ai/plugins\",\r\n  packsPath: \"./services/om-ai/packs\",\r\n  \r\n  // Development Flags\r\n  debug: process.env.[REDACTED] === 'development',\r\n  logLevel: process.env.[REDACTED] || 'info',\r\n  \r\n  // Vector Search Configuration\r\n  maxContextLength: 4096,\r\n  similarityThreshold: 0.7,\r\n  maxResults: 5,\r\n  \r\n  // Security Settings\r\n  allowExternalCalls: false,\r\n  maxPromptLength: 8192,\r\n  maxResponseLength: 4096,\r\n  \r\n  // Performance Settings\r\n  batchSize: 10,\r\n  cacheEnabled: true,\r\n  cacheTTL: 3600, // 1 hour\r\n};\r\n\r\nexport type OMAIConfigType = typeof OMAIConfig; "
+    },
+    "complexity": {
+      "totalLines": 36,
+      "codeLines": 22,
+      "commentLines": 7,
+      "commentRatio": 0.2413793103448276,
+      "averageLineLength": 32.62068965517241
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.414Z"
+  },
+  "contentHash": "09af230bbbf0b0fd584f2ef0d31965fcac45f9fc10a7101bd98ae01e85a24822",
+  "discoveredAt": "2025-07-28T07:20:01.414Z"
+}

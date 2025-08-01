@@ -1,0 +1,43 @@
+{
+  "id": "a4472ce133b1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/billing_history_schema.sql",
+  "relativePath": "server/database/billing_history_schema.sql",
+  "name": "billing_history_schema.sql",
+  "extension": ".sql",
+  "size": 1954,
+  "modified": "2025-07-04T23:08:01.000Z",
+  "created": "2025-07-09T00:48:35.106Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 32,
+      "characters": 1954,
+      "words": 208
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 32,
+      "codeLines": 29,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 66.24137931034483
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.586Z"
+  },
+  "contentHash": "da5e7d64678d2ce9768e8f5e9db21cb7a50ba2eaa60ba872bc0d7dbb730f33a6",
+  "discoveredAt": "2025-07-28T07:19:59.586Z"
+}

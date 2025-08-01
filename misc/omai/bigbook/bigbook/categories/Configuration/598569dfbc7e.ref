@@ -1,0 +1,6 @@
+{
+  "id": "598569dfbc7e",
+  "name": "add-omai-settings-to-admin.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/add-omai-settings-to-admin.sh",
+  "type": "Configuration"
+}

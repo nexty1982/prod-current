@@ -1,0 +1,43 @@
+{
+  "id": "9524b227e415",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/test-lockout-functionality.js",
+  "relativePath": "server/scripts/test-lockout-functionality.js",
+  "name": "test-lockout-functionality.js",
+  "extension": ".js",
+  "size": 2845,
+  "modified": "2025-07-20T19:06:55.143Z",
+  "created": "2025-07-20T19:06:44.470Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 75,
+      "characters": 2805,
+      "words": 301
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 75,
+      "codeLines": 51,
+      "commentLines": 6,
+      "commentRatio": 0.10526315789473684,
+      "averageLineLength": 46.56140350877193
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.087Z"
+  },
+  "contentHash": "ce64f45543019580312c61e9baad75ac8ca63c78a61467d1cea9bbd644e5bb58",
+  "discoveredAt": "2025-07-28T07:20:01.087Z"
+}

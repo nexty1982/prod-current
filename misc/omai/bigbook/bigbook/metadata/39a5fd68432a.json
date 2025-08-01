@@ -1,0 +1,43 @@
+{
+  "id": "39a5fd68432a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/types/liturgical.types.ts",
+  "relativePath": "front-end/src/types/liturgical.types.ts",
+  "name": "liturgical.types.ts",
+  "extension": ".ts",
+  "size": 2378,
+  "modified": "2025-07-05T04:33:04.271Z",
+  "created": "2025-07-05T03:40:47.639Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 94,
+      "characters": 2378,
+      "words": 292
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 94,
+      "codeLines": 83,
+      "commentLines": 2,
+      "commentRatio": 0.023529411764705882,
+      "averageLineLength": 26.788235294117648
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.930Z"
+  },
+  "contentHash": "4a26fca47a8462893d5df34d74dd855b2fa76c4863fc79a5fdd104483fba7e37",
+  "discoveredAt": "2025-07-28T07:19:58.930Z"
+}

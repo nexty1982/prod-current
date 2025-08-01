@@ -3,7 +3,7 @@
  * Provides UI for selecting and managing application themes
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -19,6 +19,8 @@ import {
   Paper,
   useMediaQuery,
   useTheme as useMuiTheme,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
   Palette as PaletteIcon,
@@ -27,6 +29,7 @@ import {
   DarkMode as DarkModeIcon,
   Church as ChurchIcon,
   Settings as SettingsIcon,
+  SaveOutlined as SaveIcon,
 } from '@mui/icons-material';
 
 import { useTheme, ThemeConfig, ThemeName, THEME_CONFIGS } from '../../context/ThemeContext';

@@ -1,0 +1,43 @@
+{
+  "id": "acbbbcc4c8bb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/setup-ocr-tables.js",
+  "relativePath": "server/utils/setup-ocr-tables.js",
+  "name": "setup-ocr-tables.js",
+  "extension": ".js",
+  "size": 8805,
+  "modified": "2025-07-11T10:49:29.401Z",
+  "created": "2025-07-10T22:16:56.995Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 183,
+      "characters": 8743,
+      "words": 649
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 183,
+      "codeLines": 142,
+      "commentLines": 14,
+      "commentRatio": 0.08974358974358974,
+      "averageLineLength": 53.71153846153846
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.283Z"
+  },
+  "contentHash": "ede50bef9491e87cf541d13a1295e018f8d5cb5d84ca62d8ca8b8f87c382987f",
+  "discoveredAt": "2025-07-28T07:20:01.283Z"
+}

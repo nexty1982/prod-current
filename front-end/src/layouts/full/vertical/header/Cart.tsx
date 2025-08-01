@@ -4,7 +4,7 @@ import React, { useState, useContext } from 'react';
 import { sum } from 'lodash';
 import { IconShoppingCart, IconX } from '@tabler/icons-react';
 import { Box, Typography, Badge, Drawer, IconButton, Button, Stack } from '@mui/material';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import CartItems from './CartItem';
 import { ProductContext } from 'src/context/EcommerceContext';
 

@@ -1,0 +1,6 @@
+{
+  "id": "e49323223073",
+  "name": "setup-pm2-backend.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/setup-pm2-backend.sh",
+  "type": "Setup Scripts"
+}

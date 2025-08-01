@@ -1,0 +1,43 @@
+{
+  "id": "6faebcedb92c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/scripts/useTableStyleStore.ts",
+  "relativePath": "front-end/scripts/useTableStyleStore.ts",
+  "name": "useTableStyleStore.ts",
+  "extension": ".ts",
+  "size": 4694,
+  "modified": "2025-07-13T05:24:59.973Z",
+  "created": "2025-07-13T05:24:20.279Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 141,
+      "characters": 4694,
+      "words": 441
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 141,
+      "codeLines": 125,
+      "commentLines": 8,
+      "commentRatio": 0.06015037593984962,
+      "averageLineLength": 34.097744360902254
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.641Z"
+  },
+  "contentHash": "9cfbf252059bb48425208a674bb0e80c69dde0e758f46cd203cb2de0972e63e0",
+  "discoveredAt": "2025-07-28T07:19:58.641Z"
+}

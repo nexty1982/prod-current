@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
     });
 
 // ─── FIELDS METADATA ─────────────────────────────────────────────────────────
-router.get('/', async (req, res) => {
+router.get('/fields-metadata', async (req, res) => {
       try {
             const tables = ['baptism_records', 'marriage_records', 'funeral_records'];
             const out = {};
@@ -54,7 +54,7 @@ router.get('/', async (req, res) => {
 });
 
 // ─── PERMISSION CONFIG ──────────────────────────────────────────────────────
-router.get('/', (req, res) => {
+router.get('/config', (req, res) => {
   try {
     let config = { mandatory: {}, dropdowns: {} };
     if (fs.existsSync(CONFIG_FILE)) {
@@ -68,7 +68,7 @@ router.get('/', (req, res) => {
 });
 
 // ─── TOGGLE MANDATORY FIELD ─────────────────────────────────────────────────
-router.post('/', (req, res) => {
+router.post('/toggle-mandatory', (req, res) => {
   const { table, column, mandatory: isMandatory } = req.body;
   try {
     let config = fs.existsSync(CONFIG_FILE)
@@ -89,7 +89,7 @@ router.post('/', (req, res) => {
 });
 
 // ─── UPDATE USER PERMISSION ─────────────────────────────────────────────────
-router.post('/', (req, res) => {
+router.post('/update-permission', (req, res) => {
   const { username, permission, value } = req.body;
   const allowed = ['can_edit_baptism','can_edit_marriage','can_edit_funeral'];
   if (!allowed.includes(permission)) {
@@ -110,7 +110,7 @@ router.post('/', (req, res) => {
 });
 
 // ─── UNIQUE VALUES ──────────────────────────────────────────────────────────
-router.get('/', async (req, res) => {
+router.get('/unique-values', async (req, res) => {
   const { table, column } = req.query;
   try {
       const [rows] = await promisePool.query(

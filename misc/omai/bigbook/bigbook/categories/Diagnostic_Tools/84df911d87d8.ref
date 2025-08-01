@@ -1,0 +1,6 @@
+{
+  "id": "84df911d87d8",
+  "name": "fix-server-crash.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-server-crash.sh",
+  "type": "Troubleshooting Utilities"
+}

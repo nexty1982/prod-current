@@ -1,0 +1,43 @@
+{
+  "id": "99a06a125891",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/deployment/RunScript.ps1",
+  "relativePath": "server/deployment/RunScript.ps1",
+  "name": "RunScript.ps1",
+  "extension": ".ps1",
+  "size": 10014,
+  "modified": "2025-07-13T19:54:05.111Z",
+  "created": "2025-07-13T19:49:24.633Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 266,
+      "characters": 9980,
+      "words": 871
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 266,
+      "codeLines": 217,
+      "commentLines": 10,
+      "commentRatio": 0.04405286343612335,
+      "averageLineLength": 41.76651982378855
+    },
+    "lastAnalyzed": "2025-07-26T04:17:10.943Z"
+  },
+  "contentHash": "a1f15a00446bc46d77c052ff2a11f7b364fd03e01a9f0b2d1bd802d0fc687103",
+  "discoveredAt": "2025-07-26T04:17:10.943Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "c7d54dd89e1a",
+  "name": "debug-database-issue.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/debug-database-issue.sh",
+  "type": "Database Scripts"
+}

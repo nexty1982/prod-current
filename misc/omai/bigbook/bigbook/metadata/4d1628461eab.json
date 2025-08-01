@@ -1,0 +1,43 @@
+{
+  "id": "4d1628461eab",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/check-cursor-ai-schema.sh",
+  "relativePath": "check-cursor-ai-schema.sh",
+  "name": "check-cursor-ai-schema.sh",
+  "extension": ".sh",
+  "size": 2429,
+  "modified": "2025-07-23T23:09:35.600Z",
+  "created": "2025-07-23T23:09:34.914Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 63,
+      "characters": 2427,
+      "words": 301
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 63,
+      "codeLines": 45,
+      "commentLines": 6,
+      "commentRatio": 0.11764705882352941,
+      "averageLineLength": 46.05882352941177
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.247Z"
+  },
+  "contentHash": "9d4afc961cb72394a151a1baf47f67bc6ad58dbfa82c04d8f553cf41f51a42f0",
+  "discoveredAt": "2025-07-26T04:17:09.247Z"
+}

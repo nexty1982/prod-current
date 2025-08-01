@@ -1,0 +1,54 @@
+{
+  "id": "13ee66583e65",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-phantom-user-frontend.sh",
+  "relativePath": "server/debug/fix-phantom-user-frontend.sh",
+  "name": "fix-phantom-user-frontend.sh",
+  "extension": ".sh",
+  "size": 2710,
+  "modified": "2025-07-24T14:50:26.344Z",
+  "created": "2025-07-24T14:50:26.344Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 96,
+      "characters": 2656,
+      "words": 376
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 28
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 32
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 96,
+      "codeLines": 72,
+      "commentLines": 7,
+      "commentRatio": 0.08860759493670886,
+      "averageLineLength": 32.41772151898734
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.156Z"
+  },
+  "contentHash": "c147e0136c284b4a35e136f6e43ff16526fd79f87c798bd73484a51e918abfc8",
+  "discoveredAt": "2025-07-28T07:20:00.156Z"
+}

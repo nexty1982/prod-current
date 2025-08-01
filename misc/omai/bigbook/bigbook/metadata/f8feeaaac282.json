@@ -1,0 +1,49 @@
+{
+  "id": "f8feeaaac282",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/stop-dev.sh",
+  "relativePath": "server/debug/stop-dev.sh",
+  "name": "stop-dev.sh",
+  "extension": ".sh",
+  "size": 2537,
+  "modified": "2025-07-21T21:39:02.607Z",
+  "created": "2025-07-21T21:39:00.617Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 91,
+      "characters": 2507,
+      "words": 348
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 71
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 91,
+      "codeLines": 63,
+      "commentLines": 13,
+      "commentRatio": 0.17105263157894737,
+      "averageLineLength": 31.43421052631579
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.216Z"
+  },
+  "contentHash": "0c5bf9b3ac843f2218ebd3452b7ccc073e0e13ad137269d0d94caf83cd92e32b",
+  "discoveredAt": "2025-07-28T07:20:00.216Z"
+}

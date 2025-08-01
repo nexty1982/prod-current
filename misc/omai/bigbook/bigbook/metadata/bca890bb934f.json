@@ -1,0 +1,43 @@
+{
+  "id": "bca890bb934f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-omai-import.sh",
+  "relativePath": "scripts/fix-omai-import.sh",
+  "name": "fix-omai-import.sh",
+  "extension": ".sh",
+  "size": 3298,
+  "modified": "2025-07-25T20:43:52.657Z",
+  "created": "2025-07-25T20:43:48.001Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 97,
+      "characters": 3244,
+      "words": 426
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 97,
+      "codeLines": 68,
+      "commentLines": 12,
+      "commentRatio": 0.15,
+      "averageLineLength": 39.35
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.113Z"
+  },
+  "contentHash": "de3a08d574030ae7e113138836a4f7b8f545fd2f03762e3c91e4e943ff107391",
+  "discoveredAt": "2025-07-28T07:19:59.113Z"
+}

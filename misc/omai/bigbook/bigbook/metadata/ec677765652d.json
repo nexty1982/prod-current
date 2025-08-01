@@ -1,0 +1,43 @@
+{
+  "id": "ec677765652d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-notifications-system.js",
+  "relativePath": "server/debug/fix-notifications-system.js",
+  "name": "fix-notifications-system.js",
+  "extension": ".js",
+  "size": 8986,
+  "modified": "2025-07-26T20:54:51.395Z",
+  "created": "2025-07-26T20:54:50.143Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 191,
+      "characters": 8956,
+      "words": 682
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 191,
+      "codeLines": 156,
+      "commentLines": 13,
+      "commentRatio": 0.07692307692307693,
+      "averageLineLength": 50.67455621301775
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.148Z"
+  },
+  "contentHash": "b1512849ae7014518e4b26dde6c0a4891ae2f3aafe9b5c418cf0250e7486f588",
+  "discoveredAt": "2025-07-28T07:20:00.148Z"
+}

@@ -24,11 +24,11 @@
     "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
-    "suppressImplicitAnyIndexErrors": true
+    "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "src"
+    "src",
+    "../../records"
   ],
   "references": [
     {

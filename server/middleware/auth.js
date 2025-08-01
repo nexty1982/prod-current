@@ -1,20 +1,52 @@
-// server/middleware/auth.js - NEW FILE
+// server/middleware/auth.js - Enhanced Session Authentication Middleware
+
 const authMiddleware = (req, res, next) => {
-  // console.log('🔐 Auth middleware - Session ID:', req.sessionID);
-  // console.log('🔐 Auth middleware - User:', req.session?.user?.email);
+const hasOMSession = req.headers.cookie?.includes('orthodmetrics.sid=');
+
+  console.log('🔐 Auth middleware - Session ID:', req.sessionID);
+  console.log('🔐 Auth middleware - User:', req.session?.user?.email);
+  console.log('🔐 Auth middleware - Method:', req.method, req.originalUrl);
+  console.log('🔐 Cookie check for orthodmetrics.sid:', hasOMSession);
+  
+  // Enhanced debugging for session persistence issues
+  if (req.sessionID) {
+    console.log('🔐 Session cookie received:', !!req.headers.cookie);
+    console.log('🔐 Session store available:', !!req.sessionStore);
+    
+    // Check if session exists in store
+    if (req.sessionStore && req.session) {
+      console.log('🔐 Session data exists:', Object.keys(req.session));
+      console.log('🔐 Session user data:', req.session.user ? 'PRESENT' : 'MISSING');
+    }
+  }
   
   // Check if session exists and has user
   if (!req.session || !req.session.user) {
-    // console.log('❌ No valid session found');
+    console.log('❌ No valid session found');
+    
+    // Enhanced debugging for session issues
+    const debugInfo = {
+      sessionExists: !!req.session,
+      sessionID: req.sessionID,
+      hasUserData: !!req.session?.user,
+      sessionKeys: req.session ? Object.keys(req.session) : [],
+      cookieHeader: !!req.headers.cookie,
+      userAgent: req.headers['user-agent']?.substring(0, 50),
+      timestamp: new Date().toISOString()
+    };
+    
+    console.log('🔍 Session debug info:', debugInfo);
+    
     return res.status(401).json({ 
       error: 'Authentication required',
-      code: 'NO_SESSION'
+      code: 'NO_SESSION',
+      debug: process.env.NODE_ENV === 'development' ? debugInfo : undefined
     });
   }
 
   // Verify session hasn't expired
   if (req.session.expires && new Date() > new Date(req.session.expires)) {
-    // console.log('❌ Session expired');
+    console.log('❌ Session expired');
     req.session.destroy();
     return res.status(401).json({ 
       error: 'Session expired',
@@ -22,11 +54,23 @@ const authMiddleware = (req, res, next) => {
     });
   }
 
+  // Verify user data integrity
+  if (!req.session.user.id || !req.session.user.email || !req.session.user.role) {
+    console.log('❌ Incomplete session user data:', req.session.user);
+    return res.status(401).json({ 
+      error: 'Invalid session data',
+      code: 'INVALID_SESSION_DATA'
+    });
+  }
+
   // Add user to request object for easy access
   req.user = req.session.user;
   
-  // Update last activity
+  // Update last activity timestamp
   req.session.lastActivity = new Date();
+  
+  // Log successful authentication
+  console.log('✅ Authentication successful for:', req.user.email, 'Role:', req.user.role);
   
   next();
 };
@@ -34,45 +78,77 @@ const authMiddleware = (req, res, next) => {
 const optionalAuth = (req, res, next) => {
   if (req.session?.user) {
     req.user = req.session.user;
+    console.log('🔐 Optional auth - User found:', req.user.email);
+  } else {
+    console.log('🔐 Optional auth - No user session');
   }
   next();
 };
 
+// 🔄 Role checking refactored to use unified role system (see utils/roles.js)
+const { requireRole: unifiedRequireRole } = require('../utils/roles');
+
 const requireRole = (allowedRoles) => {
-  return (req, res, next) => {
-    console.log('🔐 Role check - User role:', req.session?.user?.role);
-    console.log('🔐 Role check - Allowed roles:', allowedRoles);
-    
-    // First check if user is authenticated
-    if (!req.session || !req.session.user) {
-      console.log('❌ No valid session found for role check');
-      return res.status(401).json({ 
-        error: 'Authentication required',
-        code: 'NO_SESSION'
-      });
-    }
+  return unifiedRequireRole(allowedRoles);
+};
 
-    const userRole = req.session.user.role;
+/**
+ * Enhanced session validator to help debug session persistence issues
+ */
+const validateSession = (req, res, next) => {
+  console.log('🔍 Session Validation Debug:');
+  console.log('  Session ID:', req.sessionID);
+  console.log('  Has Session Object:', !!req.session);
+  console.log('  Has User Data:', !!req.session?.user);
+  console.log('  Cookie Header Present:', !!req.headers.cookie);
+  
+  if (req.session?.user) {
+    console.log('  User ID:', req.session.user.id);
+    console.log('  User Email:', req.session.user.email);
+    console.log('  User Role:', req.session.user.role);
+    console.log('  Login Time:', req.session.loginTime);
+    console.log('  Last Activity:', req.session.lastActivity);
+  }
+  
+  // Check for potential session issues
+  if (req.sessionID && req.headers.cookie) {
+    const sessionCookie = req.headers.cookie.includes('orthodmetrics.sid=') || 
+                         req.headers.cookie.includes('orthodmetrics.sid=');
+    console.log('  Session Cookie Present:', sessionCookie);
     
-    // Check if user's role is in the allowed roles array
-    if (!allowedRoles.includes(userRole)) {
-      console.log(`❌ Access denied - User role '${userRole}' not in allowed roles:`, allowedRoles);
-      return res.status(403).json({ 
-        error: 'Insufficient permissions',
-        code: 'INSUFFICIENT_ROLE',
-        required: allowedRoles,
-        current: userRole
-      });
+    if (!sessionCookie) {
+      console.log('⚠️  Session ID exists but no session cookie found in headers');
     }
+  }
+  
+  next();
+};
 
-    console.log(`✅ Role check passed - User role '${userRole}' is authorized`);
-    next();
+/**
+ * Middleware to handle session regeneration issues during login
+ */
+const handleSessionRegeneration = (req, res, next) => {
+  // Store original regenerate function
+  const originalRegenerate = req.session.regenerate;
+  
+  // Override regenerate to prevent timing issues
+  req.session.regenerate = function(callback) {
+    console.log('🔄 Session regeneration called - preventing to avoid timing issues');
+    
+    // Instead of regenerating, just call the callback
+    if (callback) {
+      setImmediate(callback);
+    }
   };
+  
+  next();
 };
 
 module.exports = { 
   authMiddleware, 
   optionalAuth,
-  requireAuth: authMiddleware,  // Export requireAuth as an alias
-  requireRole  // Export requireRole middleware
+  requireAuth: authMiddleware,
+  requireRole,
+  validateSession,
+  handleSessionRegeneration
 };

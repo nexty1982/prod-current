@@ -1,0 +1,43 @@
+{
+  "id": "d802d52dabc7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/session-persistence-debug.js",
+  "relativePath": "server/debug/session-persistence-debug.js",
+  "name": "session-persistence-debug.js",
+  "extension": ".js",
+  "size": 6941,
+  "modified": "2025-07-22T03:58:17.798Z",
+  "created": "2025-07-22T03:58:17.798Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 134,
+      "characters": 6891,
+      "words": 587
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 134,
+      "codeLines": 113,
+      "commentLines": 2,
+      "commentRatio": 0.017391304347826087,
+      "averageLineLength": 57.34782608695652
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.206Z"
+  },
+  "contentHash": "a38fcd345225e4e1cb8a4e253e251b1d824e66caf26e4cc40b9768892ae96acb",
+  "discoveredAt": "2025-07-28T07:20:00.206Z"
+}

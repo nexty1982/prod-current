@@ -1,0 +1,43 @@
+{
+  "id": "72cd66592edc",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-menu-api-for-frjames.js",
+  "relativePath": "server/debug/test-menu-api-for-frjames.js",
+  "name": "test-menu-api-for-frjames.js",
+  "extension": ".js",
+  "size": 7795,
+  "modified": "2025-07-22T15:56:35.361Z",
+  "created": "2025-07-22T15:56:32.433Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 179,
+      "characters": 7697,
+      "words": 649
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 179,
+      "codeLines": 138,
+      "commentLines": 13,
+      "commentRatio": 0.08609271523178808,
+      "averageLineLength": 48.258278145695364
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.231Z"
+  },
+  "contentHash": "e3b3ebb594fe4a67a7a95829bbc3b838a11302928f7802ec80487ebc746b52fc",
+  "discoveredAt": "2025-07-28T07:20:00.231Z"
+}

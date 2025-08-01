@@ -1,0 +1,43 @@
+{
+  "id": "e62cabe5ae69",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/utils/duplicate-detector.js",
+  "relativePath": "server/scrapers/utils/duplicate-detector.js",
+  "name": "duplicate-detector.js",
+  "extension": ".js",
+  "size": 14923,
+  "modified": "2025-07-14T06:06:57.186Z",
+  "created": "2025-07-14T06:03:08.217Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 415,
+      "characters": 14921,
+      "words": 1232
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 415,
+      "codeLines": 296,
+      "commentLines": 32,
+      "commentRatio": 0.0975609756097561,
+      "averageLineLength": 42.1859756097561
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.634Z"
+  },
+  "contentHash": "9ff21b8dbc58fd3f6c1d9947cf8af2dd4b841c4189d3651773a683782d45acd8",
+  "discoveredAt": "2025-07-28T07:20:00.634Z"
+}

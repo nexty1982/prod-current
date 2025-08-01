@@ -1,0 +1,49 @@
+{
+  "id": "c9f3cc3a7618",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/services/recordService.ts",
+  "relativePath": "front-end/src/services/recordService.ts",
+  "name": "recordService.ts",
+  "extension": ".ts",
+  "size": 9426,
+  "modified": "2025-07-13T02:52:06.113Z",
+  "created": "2025-07-13T02:49:45.568Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 335,
+      "characters": 9426,
+      "words": 875
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 6
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 335,
+      "codeLines": 231,
+      "commentLines": 37,
+      "commentRatio": 0.13805970149253732,
+      "averageLineLength": 32.57462686567164
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.898Z"
+  },
+  "contentHash": "f45f755df42673b2e240bbfbf13fb6c96598e8cfbc5b663a943c6f2aa1632ea9",
+  "discoveredAt": "2025-07-28T07:19:58.898Z"
+}

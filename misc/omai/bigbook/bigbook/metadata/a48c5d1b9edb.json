@@ -1,0 +1,49 @@
+{
+  "id": "a48c5d1b9edb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/check-activity-log-table.js",
+  "relativePath": "server/scripts/check-activity-log-table.js",
+  "name": "check-activity-log-table.js",
+  "extension": ".js",
+  "size": 2709,
+  "modified": "2025-07-20T18:32:42.434Z",
+  "created": "2025-07-20T18:32:34.822Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 68,
+      "characters": 2687,
+      "words": 234
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 68,
+      "codeLines": 51,
+      "commentLines": 7,
+      "commentRatio": 0.1206896551724138,
+      "averageLineLength": 44.741379310344826
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.002Z"
+  },
+  "contentHash": "5f404502e3c888a1e31974d257200c9d03505b80093257e2c22b9bea859fb02c",
+  "discoveredAt": "2025-07-28T07:20:01.002Z"
+}

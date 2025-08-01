@@ -1,26 +1,27 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { ThemeSettings } from './theme/Theme';
 import RTL from './layouts/full/shared/customizer/RTL';
-import { RouterProvider } from 'react-router';
+import { RouterProvider } from 'react-router-dom';
 import router from './routes/Router';
-import { CustomizerContext } from 'src/context/CustomizerContext';
-import { ChurchRecordsProvider } from './context/ChurchRecordsProvider';
+import { CustomizerContext } from './context/CustomizerContext';
+import { ChurchRecordsProvider } from './context/ChurchRecordsContext';
 import { AuthProvider } from './context/AuthContext';
 import { MenuVisibilityProvider } from './contexts/MenuVisibilityContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { WebSocketProvider } from './context/WebSocketContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { ErrorBoundary } from './components/ErrorBoundary';
-
-// Import Orthodox styling
+import FilterErrorBoundary from './components/ErrorBoundary/FilterErrorBoundary';
+import { setupAxiosInterceptors } from './utils/axiosInterceptor';
 import './styles/orthodox-fonts.css';
 
 // Import Orthodox Theme System
-import { ThemeProvider as OrthodoxThemeProvider } from './context/ThemeContext';
-import './styles/themes/orthodox-traditional.css';
-import './styles/themes/lent-season.css';
-import './styles/themes/pascha-theme.css';
+//import { ThemeProvider as OrthodoxThemeProvider } from './context/ThemeContext';
+//import './styles/themes/orthodox-traditional.css';
+//import './styles/themes/lent-season.css';
+//import './styles/themes/pascha-theme.css';
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -39,11 +40,17 @@ function App() {
   const theme = ThemeSettings();
   const { activeDir, activeMode } = useContext(CustomizerContext);
 
+  // Set up global axios interceptors for 401 error handling
+  useEffect(() => {
+    console.log('🚀 Setting up global axios interceptors...');
+    setupAxiosInterceptors();
+  }, []);
+
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <OrthodoxThemeProvider>
+        <WebSocketProvider>
           <ChurchRecordsProvider>
             <MenuVisibilityProvider>
               <NotificationProvider>
@@ -56,7 +63,9 @@ function App() {
                       style={{ minHeight: '100vh' }}
                     >
                       <ErrorBoundary>
-                        <RouterProvider router={router} />
+                        <FilterErrorBoundary>
+                          <RouterProvider router={router} />
+                        </FilterErrorBoundary>
                       </ErrorBoundary>
                     </div>
                     <ReactQueryDevtools initialIsOpen={false} />
@@ -65,7 +74,7 @@ function App() {
               </NotificationProvider>
             </MenuVisibilityProvider>
           </ChurchRecordsProvider>
-        </OrthodoxThemeProvider>
+        </WebSocketProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

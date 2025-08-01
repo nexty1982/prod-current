@@ -1,0 +1,43 @@
+{
+  "id": "ec1a130ded8e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/check-menu-items.js",
+  "relativePath": "server/scripts/check-menu-items.js",
+  "name": "check-menu-items.js",
+  "extension": ".js",
+  "size": 1472,
+  "modified": "2025-07-27T02:29:55.448Z",
+  "created": "2025-07-27T02:29:54.691Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 43,
+      "characters": 1462,
+      "words": 124
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 43,
+      "codeLines": 30,
+      "commentLines": 3,
+      "commentRatio": 0.09090909090909091,
+      "averageLineLength": 41.03030303030303
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.014Z"
+  },
+  "contentHash": "117aab7cf68464fad0a26f0e44fb0ab81d1bc26576117bd4e19112ab89c3b729",
+  "discoveredAt": "2025-07-28T07:20:01.014Z"
+}

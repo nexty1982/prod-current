@@ -1,62 +1,69 @@
 // logger.js
-const winston = require("winston");
-const expressWinston = require("express-winston");
-const path = require("path");
-const fs = require("fs");
+const fs = require('fs').promises;
+const path = require('path');
+const { formatTimestamp, formatTimestampUser } = require('./formatTimestamp');
 
-// 1) Ensure ./logs directory exists
-const logDir = path.join(__dirname, "logs");
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir);
+class Logger {
+  constructor() {
+    this.logDir = '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/logs';
+    this.ensureLogDir();
+  }
+
+  async ensureLogDir() {
+    try {
+      await fs.mkdir(this.logDir, { recursive: true });
+    } catch (error) {
+      // Log directory creation failed, but we can still log to console
+      console.error('Failed to create log directory:', error);
+    }
+  }
+
+  async writeToFile(level, message, details = null) {
+    const rawTimestamp = new Date().toISOString();
+    const formattedTimestamp = formatTimestamp(rawTimestamp);
+    const logEntry = {
+      timestamp: rawTimestamp, // Keep ISO for file storage
+      timestampFormatted: formattedTimestamp, // Add formatted version
+      level,
+      message,
+      details
+    };
+
+    const logFile = path.join(this.logDir, 'encrypted-storage.log');
+    const logLine = JSON.stringify(logEntry) + '\n';
+
+    try {
+      await fs.appendFile(logFile, logLine);
+    } catch (error) {
+      // Fallback to console if file write fails
+      console.error('Failed to write to log file:', error);
+    }
+
+    // Also log to console for development - use formatted timestamp
+    const consoleMessage = `[${formattedTimestamp}] ${level.toUpperCase()}: ${message}`;
+    if (details) {
+      console.log(consoleMessage, details);
+    } else {
+      console.log(consoleMessage);
+    }
+  }
+
+  info(message, details = null) {
+    this.writeToFile('info', message, details);
+  }
+
+  warn(message, details = null) {
+    this.writeToFile('warn', message, details);
+  }
+
+  error(message, details = null) {
+    this.writeToFile('error', message, details);
+  }
+
+  debug(message, details = null) {
+    this.writeToFile('debug', message, details);
+  }
 }
 
-// 2) Create the Winston logger instance
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    winston.format.json()
-  ),
-  transports: [
-    // All logs → combined.log
-    new winston.transports.File({
-      filename: path.join(logDir, "combined.log"),
-    }),
-    // Only error-level logs → error.log
-    new winston.transports.File({
-      filename: path.join(logDir, "error.log"),
-      level: "error",
-    }),
-  ],
-});
-
-// 3) Export a request-logging middleware
-const requestLogger = expressWinston.logger({
-  winstonInstance: logger,
-  level: "info",
-  meta: true,
-  msg:
-    "{{req.method}} {{req.url}} HTTP/{{req.httpVersion}} " +
-    "{{res.statusCode}} {{res.responseTime}}ms",
-  expressFormat: false,
-  colorize: false,
-  ignoreRoute: () => false,
-});
-
-// 4) Export an error-logging middleware
-const errorLogger = expressWinston.errorLogger({
-  winstonInstance: logger,
-  level: "error",
-  format: winston.format.combine(
-    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    winston.format.json()
-  ),
-});
-
-// 5) Export the logger itself if you want to `logger.info(…)` manually elsewhere
-module.exports = {
-  logger,
-  requestLogger,
-  errorLogger,
-};
+module.exports = new Logger();
 

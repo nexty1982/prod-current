@@ -1,0 +1,49 @@
+{
+  "id": "aa21364d83b0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/ecommerce.js",
+  "relativePath": "server/routes/ecommerce.js",
+  "name": "ecommerce.js",
+  "extension": ".js",
+  "size": 6534,
+  "modified": "2025-07-05T22:35:33.000Z",
+  "created": "2025-07-09T00:48:38.478Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 211,
+      "characters": 6534,
+      "words": 595
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 211,
+      "codeLines": 184,
+      "commentLines": 8,
+      "commentRatio": 0.041666666666666664,
+      "averageLineLength": 32.84375
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.470Z"
+  },
+  "contentHash": "a6913a0d31d6194f1942182e7bec300a70815ad25a95ff031f4bed8144b1c715",
+  "discoveredAt": "2025-07-28T07:20:00.470Z"
+}

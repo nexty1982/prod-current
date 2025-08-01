@@ -9,7 +9,7 @@ const router = express.Router();
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, '../../public/uploads');
+    const uploadDir = path.join(__dirname, '../../misc/public/uploads');
 
     // Create the directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
@@ -133,7 +133,7 @@ router.delete('/images/:id', async (req, res) => {
     );
 
     // Delete the file from the filesystem
-    const filePath = path.join(__dirname, '../../public', imageData[0].url);
+    const filePath = path.join(__dirname, '../../misc/public', imageData[0].url);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }

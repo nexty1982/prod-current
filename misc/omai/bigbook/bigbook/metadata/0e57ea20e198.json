@@ -1,0 +1,49 @@
+{
+  "id": "0e57ea20e198",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/autoLearningRoutes.js",
+  "relativePath": "server/routes/autoLearningRoutes.js",
+  "name": "autoLearningRoutes.js",
+  "extension": ".js",
+  "size": 5134,
+  "modified": "2025-07-15T06:02:51.456Z",
+  "created": "2025-07-15T05:58:11.268Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 158,
+      "characters": 5134,
+      "words": 499
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 158,
+      "codeLines": 69,
+      "commentLines": 72,
+      "commentRatio": 0.5106382978723404,
+      "averageLineLength": 35.184397163120565
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.392Z"
+  },
+  "contentHash": "9d5201b57a6bb7440756684db9dddddf93157116b33047456820d1d04c795138",
+  "discoveredAt": "2025-07-28T07:20:00.392Z"
+}

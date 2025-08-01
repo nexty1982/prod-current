@@ -1,0 +1,54 @@
+{
+  "id": "54d9558deb3b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/setup-church-records-ui.sh",
+  "relativePath": "scripts/7-26-25/setup-church-records-ui.sh",
+  "name": "setup-church-records-ui.sh",
+  "extension": ".sh",
+  "size": 11178,
+  "modified": "2025-07-26T09:41:14.202Z",
+  "created": "2025-07-26T09:40:07.015Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 301,
+      "characters": 10780,
+      "words": 1520
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 271
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 294
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 301,
+      "codeLines": 265,
+      "commentLines": 5,
+      "commentRatio": 0.018518518518518517,
+      "averageLineLength": 38.75555555555555
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.028Z"
+  },
+  "contentHash": "13025061f19a5aa2c4ecdbc9b8dec4965d9aad7aff8006db7782e0e98c6d17e2",
+  "discoveredAt": "2025-07-28T07:19:59.028Z"
+}

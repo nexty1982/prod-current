@@ -1,0 +1,43 @@
+{
+  "id": "b7cc46f15b4a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/check-backend-logs.sh",
+  "relativePath": "scripts/check-backend-logs.sh",
+  "name": "check-backend-logs.sh",
+  "extension": ".sh",
+  "size": 1644,
+  "modified": "2025-07-25T19:44:47.267Z",
+  "created": "2025-07-25T19:44:31.229Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 54,
+      "characters": 1628,
+      "words": 223
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 54,
+      "codeLines": 34,
+      "commentLines": 7,
+      "commentRatio": 0.17073170731707318,
+      "averageLineLength": 38.41463414634146
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.080Z"
+  },
+  "contentHash": "f3887e166593a44072c19fc7b65e547de4d177f9fdcadc85afa2127e4cfc47f9",
+  "discoveredAt": "2025-07-28T07:19:59.080Z"
+}

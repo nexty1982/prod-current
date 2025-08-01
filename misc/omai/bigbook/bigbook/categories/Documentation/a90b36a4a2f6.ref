@@ -1,0 +1,6 @@
+{
+  "id": "a90b36a4a2f6",
+  "name": "check-backend-status.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/check-backend-status.sh",
+  "type": "Documentation"
+}

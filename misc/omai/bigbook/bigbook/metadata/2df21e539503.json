@@ -1,0 +1,43 @@
+{
+  "id": "2df21e539503",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/mysql/check-database-name.sql",
+  "relativePath": "scripts/mysql/check-database-name.sql",
+  "name": "check-database-name.sql",
+  "extension": ".sql",
+  "size": 139,
+  "modified": "2025-07-22T21:55:56.949Z",
+  "created": "2025-07-22T21:55:55.155Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 2,
+      "characters": 139,
+      "words": 21
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 2,
+      "codeLines": 2,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 69
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.132Z"
+  },
+  "contentHash": "f55248e232e623e38abcd26c950f57e9525cc71bbad8a762a07afa5d8fee82dd",
+  "discoveredAt": "2025-07-28T07:19:59.132Z"
+}

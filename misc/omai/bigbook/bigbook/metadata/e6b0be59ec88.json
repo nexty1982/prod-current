@@ -1,0 +1,43 @@
+{
+  "id": "e6b0be59ec88",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/delete-duplicate-churches.js",
+  "relativePath": "server/scripts/delete-duplicate-churches.js",
+  "name": "delete-duplicate-churches.js",
+  "extension": ".js",
+  "size": 1340,
+  "modified": "2025-07-21T18:09:37.354Z",
+  "created": "2025-07-21T18:09:35.809Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 42,
+      "characters": 1340,
+      "words": 151
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 42,
+      "codeLines": 37,
+      "commentLines": 3,
+      "commentRatio": 0.075,
+      "averageLineLength": 32.425
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.023Z"
+  },
+  "contentHash": "7b95b52deef4402f49ee4a23713e264acb6247ea2ad6349963cf342d033d3523",
+  "discoveredAt": "2025-07-28T07:20:01.023Z"
+}

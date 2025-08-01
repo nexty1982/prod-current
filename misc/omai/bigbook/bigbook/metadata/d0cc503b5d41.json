@@ -1,0 +1,59 @@
+{
+  "id": "d0cc503b5d41",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/rebuild-enhanced-bigbook.sh",
+  "relativePath": "scripts/7-26-25/rebuild-enhanced-bigbook.sh",
+  "name": "rebuild-enhanced-bigbook.sh",
+  "extension": ".sh",
+  "size": 1805,
+  "modified": "2025-07-26T01:45:08.077Z",
+  "created": "2025-07-26T01:45:05.178Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 55,
+      "characters": 1751,
+      "words": 249
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 28
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 32
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 38
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 55,
+      "codeLines": 36,
+      "commentLines": 8,
+      "commentRatio": 0.18181818181818182,
+      "averageLineLength": 38.56818181818182
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.010Z"
+  },
+  "contentHash": "6d40f31aa15995df1ba1720b8ba1c2b2c08114bee2b07f70ef691728ed276b47",
+  "discoveredAt": "2025-07-28T07:19:59.010Z"
+}

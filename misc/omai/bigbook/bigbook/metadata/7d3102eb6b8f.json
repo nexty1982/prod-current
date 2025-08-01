@@ -1,0 +1,69 @@
+{
+  "id": "7d3102eb6b8f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/omb.js",
+  "relativePath": "server/routes/omb.js",
+  "name": "omb.js",
+  "extension": ".js",
+  "size": 9355,
+  "modified": "2025-07-25T00:28:43.480Z",
+  "created": "2025-07-25T00:14:44.802Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 333,
+      "characters": 9355,
+      "words": 950
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 294
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 295
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 333,
+      "codeLines": 256,
+      "commentLines": 26,
+      "commentRatio": 0.09219858156028368,
+      "averageLineLength": 31.31205673758865
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.534Z"
+  },
+  "contentHash": "a14762b8d469aa69813c4fab80dc72a6f73d022491232a01f6c98fe32faa0e13",
+  "discoveredAt": "2025-07-28T07:20:00.534Z"
+}

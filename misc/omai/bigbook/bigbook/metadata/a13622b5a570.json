@@ -1,0 +1,43 @@
+{
+  "id": "a13622b5a570",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/test-original-backup-system.sh",
+  "relativePath": "server/test-original-backup-system.sh",
+  "name": "test-original-backup-system.sh",
+  "extension": ".sh",
+  "size": 2259,
+  "modified": "2025-07-24T00:27:34.011Z",
+  "created": "2025-07-24T00:27:13.868Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 66,
+      "characters": 2213,
+      "words": 275
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 66,
+      "codeLines": 49,
+      "commentLines": 7,
+      "commentRatio": 0.125,
+      "averageLineLength": 38.357142857142854
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.174Z"
+  },
+  "contentHash": "ff7697f31ade70da90384777bfd60e4571e16b727513cb9934a6c43ae5a01f68",
+  "discoveredAt": "2025-07-28T07:20:01.174Z"
+}

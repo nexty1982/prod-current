@@ -1,0 +1,6 @@
+{
+  "id": "ecac008284af",
+  "name": "fix-jit-terminal-menu-duplication.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-jit-terminal-menu-duplication.sh",
+  "type": "Troubleshooting Utilities"
+}

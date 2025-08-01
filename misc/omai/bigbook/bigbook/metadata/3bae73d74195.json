@@ -1,0 +1,43 @@
+{
+  "id": "3bae73d74195",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/generateMarkdownDoc.ts",
+  "relativePath": "services/om-ai/generateMarkdownDoc.ts",
+  "name": "generateMarkdownDoc.ts",
+  "extension": ".ts",
+  "size": 3703,
+  "modified": "2025-07-25T00:23:54.269Z",
+  "created": "2025-07-25T00:23:51.278Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 116,
+      "characters": 3693,
+      "words": 366
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 116,
+      "codeLines": 90,
+      "commentLines": 7,
+      "commentRatio": 0.07216494845360824,
+      "averageLineLength": 36.50515463917526
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.456Z"
+  },
+  "contentHash": "9a60ea3f55691179010ec11eabd0d33726e1daeef7900aec5632c0d2c19785a3",
+  "discoveredAt": "2025-07-28T07:20:01.456Z"
+}

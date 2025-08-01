@@ -26,7 +26,7 @@ import {
     IconChevronDown,
     IconMenu,
     IconLock,
-    IconSave,
+    IconDeviceFloppy,
     IconRefresh
 } from '@tabler/icons-react';
 
@@ -272,7 +272,7 @@ const MenuManagement: React.FC = () => {
                     </Button>
                     <Button
                         variant="contained"
-                        startIcon={<IconSave />}
+                        startIcon={<IconDeviceFloppy />}
                         onClick={saveChanges}
                         disabled={saving || pendingChanges.length === 0}
                     >

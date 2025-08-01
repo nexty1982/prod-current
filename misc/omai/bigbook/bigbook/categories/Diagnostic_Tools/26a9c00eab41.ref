@@ -1,0 +1,6 @@
+{
+  "id": "26a9c00eab41",
+  "name": "fix-wrong-page-redirect.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-wrong-page-redirect.sh",
+  "type": "Troubleshooting Utilities"
+}

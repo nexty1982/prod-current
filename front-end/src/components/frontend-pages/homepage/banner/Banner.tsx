@@ -77,7 +77,154 @@ const Banner = () => {
   };
 
   return (
-    (<Box bgcolor="primary.light" pt={7}>
+    <Box bgcolor="primary.light" pt={7}>
+      {/* Orthodox Banner */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+          py: 4,
+          mb: 4,
+          borderRadius: '0 0 20px 20px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Container maxWidth="md">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: { xs: 2, sm: 4, md: 6 },
+              flexDirection: { xs: 'column', sm: 'row' },
+              textAlign: 'center',
+              p: 4,
+              bgcolor: 'white',
+              borderRadius: 2,
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            {/* Left Text */}
+            <Typography
+              variant="h4"
+              sx={{
+                fontFamily: '"Noto Serif", "Times New Roman", serif',
+                fontWeight: 600,
+                color: '#6B46C1',
+                fontSize: { xs: '1.5rem', sm: '2rem' },
+                lineHeight: 1.3,
+                textAlign: { xs: 'center', sm: 'right' },
+                order: { xs: 1, sm: 0 },
+              }}
+            >
+              Orthodox<br />Metrics
+            </Typography>
+
+            {/* Orthodox Cross */}
+            <Box
+              sx={{
+                position: 'relative',
+                width: 80,
+                height: 120,
+                filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.5))',
+                order: { xs: 0, sm: 1 },
+              }}
+            >
+              {/* Vertical beam */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: 0,
+                  transform: 'translateX(-50%)',
+                  width: 12,
+                  height: 120,
+                  bgcolor: '#FFD700',
+                }}
+              />
+              {/* Top bar */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: 20,
+                  transform: 'translateX(-50%)',
+                  width: 30,
+                  height: 8,
+                  bgcolor: '#FFD700',
+                }}
+              />
+              {/* Main bar */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: 45,
+                  transform: 'translateX(-50%)',
+                  width: 70,
+                  height: 10,
+                  bgcolor: '#FFD700',
+                }}
+              />
+              {/* Bottom bar (angled) */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: 80,
+                  transform: 'translateX(-50%) rotate(-20deg)',
+                  width: 50,
+                  height: 8,
+                  bgcolor: '#FFD700',
+                }}
+              />
+            </Box>
+
+            {/* Right Text - Multilingual */}
+            <Box
+              sx={{
+                minWidth: 250,
+                textAlign: { xs: 'center', sm: 'left' },
+                position: 'relative',
+                height: 60,
+                order: { xs: 2, sm: 2 },
+              }}
+            >
+              <Typography
+                variant="h4"
+                sx={{
+                  fontFamily: '"Noto Serif", "Times New Roman", serif',
+                  fontWeight: 600,
+                  color: '#6B46C1',
+                  fontSize: { xs: '1.5rem', sm: '2rem' },
+                  lineHeight: 1.3,
+                  whiteSpace: 'pre-line',
+                }}
+              >
+                Metrici{'\n'}Ortodoxe
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Tagline */}
+          <Box sx={{ textAlign: 'center', mt: 3 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontFamily: '"Noto Serif", "Times New Roman", serif',
+                fontStyle: 'italic',
+                color: '#6B46C1',
+                fontSize: { xs: '1rem', sm: '1.25rem' },
+              }}
+            >
+              Înregistrăm sfinții din mijlocul nostru!
+            </Typography>
+          </Box>
+        </Container>
+      </Box>
+
       <Container
         sx={{
           maxWidth: '1400px !important',
@@ -284,7 +431,7 @@ const Banner = () => {
           />
         ) : null}
       </Container>
-    </Box>)
+    </Box>
   );
 };
 

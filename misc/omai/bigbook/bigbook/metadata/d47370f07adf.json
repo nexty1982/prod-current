@@ -1,0 +1,96 @@
+{
+  "id": "d47370f07adf",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/change-role-to-admin.js",
+  "relativePath": "server/debug/change-role-to-admin.js",
+  "name": "change-role-to-admin.js",
+  "extension": ".js",
+  "size": 2764,
+  "modified": "2025-07-24T14:50:26.364Z",
+  "created": "2025-07-24T14:50:26.364Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 82,
+      "characters": 2746,
+      "words": 251
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 5,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 11,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 12,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 15,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "const mysql = require('mysql2/promise');\r\nconst path = require('path');\r\n\r\n// Load environment variables\r\nconst envFile = process.env.[REDACTED] === 'production' \r\n  ? '../.env.production' \r\n  : '../.env.development';\r\nrequire('dotenv').config({ path: path.resolve(__dirname, envFile) });\r\n\r\nconst dbConfig = {\r\n  host: process.env.[REDACTED] || '0.0.0.0',\r\n  port: process.env.[REDACTED] || 3306,\r\n  user: process.env.[REDACTED] || 'orthodoxapps',\r\n  password: process.env.[REDACTED] || 'Summerof1982@!',\r\n  database: process.env.[REDACTED] || 'orthodoxmetrics_db',\r\n  charset: 'utf8mb4'\r\n};\r\n\r\nasync function changeRoleToAdmin() {\r\n  let connection;\r\n  \r\n  try {\r\n    console.log('🔧 Changing superadmin@orthodoxmetrics.com role to admin...');\r\n    \r\n    connection = await mysql.createConnection(dbConfig);\r\n    \r\n    // Check current role\r\n    console.log('\\n📊 BEFORE CHANGE:');\r\n    const [beforeResult] = await connection.execute(\r\n      'SELECT id, email, role, is_active FROM users WHERE email = ?',\r\n      ['superadmin@orthodoxmetrics.com']\r\n    );\r\n    \r\n    if (beforeResult.length === 0) {\r\n      console.log('❌ User not found!');\r\n      return;\r\n    }\r\n    \r\n    console.log('Current role:', beforeResult[0].role);\r\n    \r\n    // Update role to admin\r\n    const [updateResult] = await connection.execute(\r\n      'UPDATE users SET role = ? WHERE email = ?',\r\n      ['admin', 'superadmin@orthodoxmetrics.com']\r\n    );\r\n    \r\n    console.log('✅ Role updated successfully');\r\n    \r\n    // Verify the change\r\n    console.log('\\n📊 AFTER CHANGE:');\r\n    const [afterResult] = await connection.execute(\r\n      'SELECT id, email, role, is_active FROM users WHERE email = ?',\r\n      ['superadmin@orthodoxmetrics.com']\r\n    );\r\n    \r\n    console.log('New role:', afterResult[0].role);\r\n    \r\n    console.log('\\n🎯 EXPECTED BEHAVIOR:');\r\n    console.log('hasRole([\\'admin\\', \\'super_admin\\']) should return:', ['admin', 'super_admin'].includes(afterResult[0].role));\r\n    console.log('Content & Services tabs should be: VISIBLE');\r\n    \r\n    console.log('\\n🔄 NEXT STEPS:');\r\n    console.log('1. Clear browser localStorage:');\r\n    console.log('   localStorage.clear(); sessionStorage.clear();');\r\n    console.log('2. Logout and login again');\r\n    console.log('3. Go to Settings page');\r\n    console.log('4. Content & Services tabs should now be visible!');\r\n    \r\n    console.log('\\n💡 TO CHANGE BACK TO SUPER_ADMIN LATER:');\r\n    console.log('UPDATE users SET role = \"super_admin\" WHERE email = \"superadmin@orthodoxmetrics.com\";');\r\n    \r\n  } catch (error) {\r\n    console.error('❌ Error:', error.message);\r\n  } finally {\r\n    if (connection) {\r\n      await connection.end();\r\n    }\r\n  }\r\n}\r\n\r\n// Run the change\r\nchangeRoleToAdmin().catch(console.error); "
+    },
+    "complexity": {
+      "totalLines": 82,
+      "codeLines": 60,
+      "commentLines": 5,
+      "commentRatio": 0.07692307692307693,
+      "averageLineLength": 39.96923076923077
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.058Z"
+  },
+  "contentHash": "3712b609f6d20aa53bded6b34a9bac8b8f22c62105153a84103a6764705bd7fb",
+  "discoveredAt": "2025-07-28T07:20:00.058Z"
+}

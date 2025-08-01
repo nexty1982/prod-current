@@ -9,7 +9,7 @@ const fs = require('fs').promises;
 // Configure multer for markdown file uploads
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../uploads/kanban/markdown');
+    const uploadDir = path.join(__dirname, '../../misc/uploads/kanban/markdown');
     try {
       await fs.mkdir(uploadDir, { recursive: true });
       cb(null, uploadDir);

@@ -1,0 +1,6 @@
+{
+  "id": "4d49efdc337e",
+  "name": "church-database-template.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/templates/church-database-template.sql",
+  "type": "Database Scripts"
+}

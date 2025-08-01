@@ -1,0 +1,43 @@
+{
+  "id": "71a53055b596",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/disable-root-socket-access.sh",
+  "relativePath": "disable-root-socket-access.sh",
+  "name": "disable-root-socket-access.sh",
+  "extension": ".sh",
+  "size": 4946,
+  "modified": "2025-07-24T23:00:16.472Z",
+  "created": "2025-07-24T23:00:15.768Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 169,
+      "characters": 4930,
+      "words": 644
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 169,
+      "codeLines": 118,
+      "commentLines": 16,
+      "commentRatio": 0.11940298507462686,
+      "averageLineLength": 35.53731343283582
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.263Z"
+  },
+  "contentHash": "b30d3bedc95994ae7dc5a6d121dcd0f32f81f41f86ceb9869fa25a446b9b7f80",
+  "discoveredAt": "2025-07-26T04:17:09.263Z"
+}

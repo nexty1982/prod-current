@@ -10,7 +10,7 @@ const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'orthodoxmetrics_user',
   password: process.env.DB_PASSWORD || 'securepassword123',
-  database: process.env.DB_NAME || 'orthodoxmetrics_db',
+  database: process.env.DB_NAME || 'orthodmetrics_dev',
   connectTimeout: 60000,
 };
 
@@ -23,7 +23,7 @@ async function debugAuth() {
     
     // Check current user
     console.log('\n📋 Checking existing users...');
-    const [users] = await connection.execute('SELECT id, email, password_hash, first_name, last_name, role, is_active FROM users WHERE email = ?', ['admin@orthodoxmetrics.com']);
+    const [users] = await connection.execute('SELECT id, email, password_hash, first_name, last_name, role, is_active FROM users WHERE email = ?', ['admin@orthodmetrics.com']);
     
     if (users.length > 0) {
       const user = users[0];
@@ -60,7 +60,7 @@ async function debugAuth() {
       console.log('❌ User not found, creating new user...');
       
       const testUser = {
-        email: 'admin@orthodoxmetrics.com',
+        email: 'admin@orthodmetrics.com',
         password: 'admin123',
         first_name: 'Test',
         last_name: 'Admin',

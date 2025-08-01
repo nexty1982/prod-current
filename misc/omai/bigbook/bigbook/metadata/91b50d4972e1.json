@@ -1,0 +1,64 @@
+{
+  "id": "91b50d4972e1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/7d4ef5d553db.json",
+  "relativePath": "bigbook/metadata/7d4ef5d553db.json",
+  "name": "7d4ef5d553db.json",
+  "extension": ".json",
+  "size": 36426,
+  "modified": "2025-07-26T04:17:11.666Z",
+  "created": "2025-07-26T04:17:11.666Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 71,
+      "characters": 36378,
+      "words": 3085
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 58
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 58
+      },
+      {
+        "type": "npm_package",
+        "name": "@google-cloud/vision",
+        "line": 58
+      },
+      {
+        "type": "npm_package",
+        "name": "tesseract.js",
+        "line": 58
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 71,
+      "codeLines": 71,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 511.38028169014086
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.140Z"
+  },
+  "contentHash": "9280135e5f978c5730ae5e20beb5f34825ea577a8729569a58150fe7bdef1c3b",
+  "discoveredAt": "2025-07-28T07:19:57.140Z"
+}

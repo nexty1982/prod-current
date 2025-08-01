@@ -1,0 +1,43 @@
+{
+  "id": "a8f2d371ec21",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/tasks/scripts/fix-mui-database-icon.sh",
+  "relativePath": "tasks/scripts/fix-mui-database-icon.sh",
+  "name": "fix-mui-database-icon.sh",
+  "extension": ".sh",
+  "size": 468,
+  "modified": "2025-07-28T06:55:35.349Z",
+  "created": "2025-07-28T06:54:19.432Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 15,
+      "characters": 456,
+      "words": 65
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 15,
+      "codeLines": 9,
+      "commentLines": 3,
+      "commentRatio": 0.25,
+      "averageLineLength": 36.833333333333336
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.595Z"
+  },
+  "contentHash": "2c99fc30b7936fda38e94c2e5ba44a3e4efbcfe6f9e3a94804a9cd5fd43f0e10",
+  "discoveredAt": "2025-07-28T07:20:01.595Z"
+}

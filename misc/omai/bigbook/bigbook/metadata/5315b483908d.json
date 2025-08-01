@@ -1,0 +1,263 @@
+{
+  "id": "5315b483908d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/SECURITY_GUIDE.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/SECURITY_GUIDE.md",
+  "name": "SECURITY_GUIDE.md",
+  "extension": ".md",
+  "size": 24643,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:06.904Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 10
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 993,
+      "characters": 24613,
+      "words": 2618
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 10
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "bcryptjs",
+        "line": 74
+      },
+      {
+        "type": "npm_package",
+        "name": "speakeasy",
+        "line": 106
+      },
+      {
+        "type": "npm_package",
+        "name": "qrcode",
+        "line": 107
+      },
+      {
+        "type": "npm_package",
+        "name": "express-session",
+        "line": 239
+      },
+      {
+        "type": "npm_package",
+        "name": "express-mysql-session",
+        "line": 240
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 241
+      },
+      {
+        "type": "npm_package",
+        "name": "express-validator",
+        "line": 331
+      },
+      {
+        "type": "npm_package",
+        "name": "validator",
+        "line": 332
+      },
+      {
+        "type": "npm_package",
+        "name": "isomorphic-dompurify",
+        "line": 409
+      },
+      {
+        "type": "npm_package",
+        "name": "validator",
+        "line": 410
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 515
+      },
+      {
+        "type": "npm_package",
+        "name": "multer",
+        "line": 561
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 562
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 563
+      },
+      {
+        "type": "npm_package",
+        "name": "util",
+        "line": 564
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 565
+      },
+      {
+        "type": "npm_package",
+        "name": "express-rate-limit",
+        "line": 656
+      },
+      {
+        "type": "npm_package",
+        "name": "rate-limit-redis",
+        "line": 657
+      },
+      {
+        "type": "npm_package",
+        "name": "ioredis",
+        "line": 658
+      },
+      {
+        "type": "npm_package",
+        "name": "cors",
+        "line": 722
+      },
+      {
+        "type": "npm_package",
+        "name": "helmet",
+        "line": 759
+      },
+      {
+        "type": "npm_package",
+        "name": "winston",
+        "line": 799
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:secret|token)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 833,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 244,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 245,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 246,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 247,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 259,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 269,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 518,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 519,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 520,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 521,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 522,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 525,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 526,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 527,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 528,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 661,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 662,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "# Security Implementation Guide\r\n\r\n## 🔒 Orthodox Metrics Security Framework\r\n\r\nThis document provides comprehensive security implementation guidelines for the Orthodox Metrics church management system.\r\n\r\n## 🛡️ Security Overview\r\n\r\n### Security Principles\r\n1. **Defense in Depth**: Multiple security layers\r\n2. **Least Privilege**: Minimal required permissions\r\n3. **Secure by Default**: Secure configurations out of the box\r\n4. **Regular Updates**: Keep dependencies current\r\n5. **Monitoring**: Continuous security monitoring\r\n\r\n### Security Domains\r\n- **Authentication & Authorization**\r\n- **Data Protection**\r\n- **Input Validation**\r\n- **Network Security**\r\n- **Session Management**\r\n- **File Upload Security**\r\n- **Database Security**\r\n- **API Security**\r\n\r\n## 🔐 Authentication & Authorization\r\n\r\n### Password Security\r\n\r\n#### Password Requirements\r\n```javascript\r\n// utils/validation.js\r\nconst validatePassword = (password) => {\r\n  // Minimum 8 characters, 1 uppercase, 1 lowercase, 1 number\r\n  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$/;\r\n  return passwordRegex.test(password);\r\n};\r\n\r\nconst passwordStrength = (password) => {\r\n  let score = 0;\r\n  let feedback = [];\r\n  \r\n  // Length check\r\n  if (password.length >= 8) score += 1;\r\n  else feedback.push('Use at least 8 characters');\r\n  \r\n  // Uppercase check\r\n  if (/[A-Z]/.test(password)) score += 1;\r\n  else feedback.push('Include uppercase letters');\r\n  \r\n  // Lowercase check\r\n  if (/[a-z]/.test(password)) score += 1;\r\n  else feedback.push('Include lowercase letters');\r\n  \r\n  // Number check\r\n  if (/\\d/.test(password)) score += 1;\r\n  else feedback.push('Include numbers');\r\n  \r\n  // Special character check\r\n  if (/[!@#$%^&*(),.?\":{}|<>]/.test(password)) score += 1;\r\n  else feedback.push('Include special characters');\r\n  \r\n  return {\r\n    score: score,\r\n    strength: score < 3 ? 'weak' : score < 4 ? 'medium' : 'strong',\r\n    feedback: feedback\r\n  };\r\n};\r\n```\r\n\r\n#### Password Hashing\r\n```javascript\r\n// utils/hash.js\r\nconst bcrypt = require('bcryptjs');\r\n\r\nconst hashPassword = async (password) => {\r\n  const saltRounds = 12; // Increased from 10 for better security\r\n  return await bcrypt.hash(password, saltRounds);\r\n};\r\n\r\nconst verifyPassword = async (password, hash) => {\r\n  return await bcrypt.compare(password, hash);\r\n};\r\n\r\n// Password history to prevent reuse\r\nconst checkPasswordHistory = async (userId, newPassword) => {\r\n  const [history] = await db.execute(\r\n    'SELECT password_hash FROM password_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 5',\r\n    [userId]\r\n  );\r\n  \r\n  for (const record of history) {\r\n    if (await bcrypt.compare(newPassword, record.password_hash)) {\r\n      return false; // Password already used\r\n    }\r\n  }\r\n  return true; // Password not in history\r\n};\r\n```\r\n\r\n### Multi-Factor Authentication (MFA)\r\n\r\n#### TOTP Implementation\r\n```javascript\r\n// utils/mfa.js\r\nconst speakeasy = require('speakeasy');\r\nconst QRCode = require('qrcode');\r\n\r\nconst generateMFASecret = (userEmail) => {\r\n  return speakeasy.generateSecret({\r\n    name: `Orthodox Metrics (${userEmail})`,\r\n    issuer: 'Orthodox Metrics',\r\n    length: 32\r\n  });\r\n};\r\n\r\nconst generateQRCode = async (secret) => {\r\n  return await QRCode.toDataURL(secret.otpauth_url);\r\n};\r\n\r\nconst verifyMFAToken = (token, secret) => {\r\n  return speakeasy.totp.verify({\r\n    secret: secret,\r\n    encoding: 'base32',\r\n    token: token,\r\n    window: 2 // Allow 2 time steps before/after\r\n  });\r\n};\r\n```\r\n\r\n### Role-Based Access Control (RBAC)\r\n\r\n#### Role Definition\r\n```javascript\r\n// utils/roles.js\r\nconst ROLES = {\r\n  SUPER_ADMIN: 'super_admin',\r\n  ADMIN: 'admin',\r\n  MODERATOR: 'moderator',\r\n  USER: 'user',\r\n  GUEST: 'guest'\r\n};\r\n\r\nconst PERMISSIONS = {\r\n  // User management\r\n  CREATE_USER: 'create_user',\r\n  READ_USER: 'read_user',\r\n  UPDATE_USER: 'update_user',\r\n  DELETE_USER: 'delete_user',\r\n  \r\n  // Church management\r\n  CREATE_CHURCH: 'create_church',\r\n  READ_CHURCH: 'read_church',\r\n  UPDATE_CHURCH: 'update_church',\r\n  DELETE_CHURCH: 'delete_church',\r\n  \r\n  // System management\r\n  VIEW_LOGS: 'view_logs',\r\n  MANAGE_SYSTEM: 'manage_system',\r\n  \r\n  // OCR processing\r\n  PROCESS_OCR: 'process_ocr',\r\n  VIEW_OCR_RESULTS: 'view_ocr_results'\r\n};\r\n\r\nconst ROLE_PERMISSIONS = {\r\n  [ROLES.SUPER_ADMIN]: Object.values(PERMISSIONS),\r\n  [ROLES.ADMIN]: [\r\n    PERMISSIONS.CREATE_USER,\r\n    PERMISSIONS.READ_USER,\r\n    PERMISSIONS.UPDATE_USER,\r\n    PERMISSIONS.DELETE_USER,\r\n    PERMISSIONS.CREATE_CHURCH,\r\n    PERMISSIONS.READ_CHURCH,\r\n    PERMISSIONS.UPDATE_CHURCH,\r\n    PERMISSIONS.DELETE_CHURCH,\r\n    PERMISSIONS.VIEW_LOGS,\r\n    PERMISSIONS.PROCESS_OCR,\r\n    PERMISSIONS.VIEW_OCR_RESULTS\r\n  ],\r\n  [ROLES.MODERATOR]: [\r\n    PERMISSIONS.READ_USER,\r\n    PERMISSIONS.UPDATE_USER,\r\n    PERMISSIONS.READ_CHURCH,\r\n    PERMISSIONS.UPDATE_CHURCH,\r\n    PERMISSIONS.PROCESS_OCR,\r\n    PERMISSIONS.VIEW_OCR_RESULTS\r\n  ],\r\n  [ROLES.USER]: [\r\n    PERMISSIONS.READ_CHURCH,\r\n    PERMISSIONS.PROCESS_OCR,\r\n    PERMISSIONS.VIEW_OCR_RESULTS\r\n  ],\r\n  [ROLES.GUEST]: [\r\n    PERMISSIONS.READ_CHURCH\r\n  ]\r\n};\r\n\r\nconst hasPermission = (userRole, permission) => {\r\n  return ROLE_PERMISSIONS[userRole]?.includes(permission) || false;\r\n};\r\n```\r\n\r\n#### Permission Middleware\r\n```javascript\r\n// middleware/permissions.js\r\nconst { hasPermission } = require('../utils/roles');\r\n\r\nconst requirePermission = (permission) => {\r\n  return (req, res, next) => {\r\n    const userRole = req.session?.user?.role;\r\n    \r\n    if (!userRole) {\r\n      return res.status(401).json({\r\n        success: false,\r\n        error: 'Authentication required'\r\n      });\r\n    }\r\n    \r\n    if (!hasPermission(userRole, permission)) {\r\n      return res.status(403).json({\r\n        success: false,\r\n        error: 'Insufficient permissions'\r\n      });\r\n    }\r\n    \r\n    next();\r\n  };\r\n};\r\n```\r\n\r\n## 🔒 Session Security\r\n\r\n### Secure Session Configuration\r\n\r\n#### Enhanced Session Security\r\n```javascript\r\n// config/session.js\r\nconst session = require('express-session');\r\nconst MySQLStore = require('express-mysql-session')(session);\r\nconst crypto = require('crypto');\r\n\r\nconst sessionStore = new MySQLStore({\r\n  host: process.env.[REDACTED],\r\n  user: process.env.[REDACTED],\r\n  password: process.env.[REDACTED],\r\n  database: process.env.[REDACTED],\r\n  createDatabaseTable: true,\r\n  schema: {\r\n    tableName: 'sessions',\r\n    columnNames: {\r\n      session_id: 'session_id',\r\n      expires: 'expires',\r\n      data: 'data'\r\n    }\r\n  }\r\n});\r\n\r\nconst sessionSecret = process.env.[REDACTED] || crypto.randomBytes(64).toString('hex');\r\n\r\nconst sessionConfig = {\r\n  key: 'orthodox.sid',\r\n  secret: sessionSecret,\r\n  store: sessionStore,\r\n  resave: false,\r\n  saveUninitialized: false,\r\n  rolling: true,\r\n  cookie: {\r\n    secure: process.env.[REDACTED] === 'production', // HTTPS only in production\r\n    httpOnly: true, // Prevent XSS\r\n    maxAge: 30 * 60 * 1000, // 30 minutes\r\n    sameSite: 'strict' // CSRF protection\r\n  },\r\n  genid: () => {\r\n    return crypto.randomBytes(32).toString('hex');\r\n  }\r\n};\r\n\r\nmodule.exports = session(sessionConfig);\r\n```\r\n\r\n#### Session Monitoring\r\n```javascript\r\n// middleware/sessionMonitor.js\r\nconst logger = require('../utils/logger');\r\n\r\nconst sessionMonitor = (req, res, next) => {\r\n  // Log session activity\r\n  if (req.session?.user) {\r\n    logger.info('Session activity:', {\r\n      userId: req.session.user.id,\r\n      sessionId: req.sessionID,\r\n      ip: req.ip,\r\n      userAgent: req.get('User-Agent'),\r\n      url: req.url,\r\n      method: req.method\r\n    });\r\n  }\r\n  \r\n  // Check for session hijacking\r\n  if (req.session?.user) {\r\n    const currentIP = req.ip;\r\n    const currentUA = req.get('User-Agent');\r\n    \r\n    if (req.session.lastIP && req.session.lastIP !== currentIP) {\r\n      logger.warn('Potential session hijacking detected:', {\r\n        userId: req.session.user.id,\r\n        sessionId: req.sessionID,\r\n        oldIP: req.session.lastIP,\r\n        newIP: currentIP\r\n      });\r\n    }\r\n    \r\n    req.session.lastIP = currentIP;\r\n    req.session.lastUserAgent = currentUA;\r\n  }\r\n  \r\n  next();\r\n};\r\n\r\nmodule.exports = sessionMonitor;\r\n```\r\n\r\n## 🛡️ Input Validation & Sanitization\r\n\r\n### Comprehensive Input Validation\r\n\r\n#### Validation Middleware\r\n```javascript\r\n// middleware/validation.js\r\nconst { body, param, query, validationResult } = require('express-validator');\r\nconst validator = require('validator');\r\n\r\nconst handleValidationErrors = (req, res, next) => {\r\n  const errors = validationResult(req);\r\n  if (!errors.isEmpty()) {\r\n    return res.status(400).json({\r\n      success: false,\r\n      error: 'Validation failed',\r\n      details: errors.array()\r\n    });\r\n  }\r\n  next();\r\n};\r\n\r\n// User validation rules\r\nconst userValidationRules = () => {\r\n  return [\r\n    body('email')\r\n      .isEmail()\r\n      .normalizeEmail()\r\n      .withMessage('Invalid email format'),\r\n    body('name')\r\n      .trim()\r\n      .isLength({ min: 2, max: 50 })\r\n      .matches(/^[a-zA-Z\\s]+$/)\r\n      .withMessage('Name must contain only letters and spaces'),\r\n    body('password')\r\n      .isLength({ min: 8 })\r\n      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)/)\r\n      .withMessage('Password must contain at least 8 characters, 1 uppercase, 1 lowercase, and 1 number'),\r\n    body('role')\r\n      .optional()\r\n      .isIn(['admin', 'user', 'moderator'])\r\n      .withMessage('Invalid role')\r\n  ];\r\n};\r\n\r\n// Church validation rules\r\nconst churchValidationRules = () => {\r\n  return [\r\n    body('name')\r\n      .trim()\r\n      .isLength({ min: 2, max: 100 })\r\n      .withMessage('Church name must be between 2 and 100 characters'),\r\n    body('address')\r\n      .optional()\r\n      .trim()\r\n      .isLength({ max: 255 })\r\n      .withMessage('Address too long'),\r\n    body('phone')\r\n      .optional()\r\n      .matches(/^\\+?[\\d\\s\\-\\(\\)]+$/)\r\n      .withMessage('Invalid phone number format'),\r\n    body('email')\r\n      .optional()\r\n      .isEmail()\r\n      .normalizeEmail()\r\n      .withMessage('Invalid email format'),\r\n    body('priest_name')\r\n      .optional()\r\n      .trim()\r\n      .isLength({ max: 100 })\r\n      .matches(/^[a-zA-Z\\s]+$/)\r\n      .withMessage('Priest name must contain only letters and spaces')\r\n  ];\r\n};\r\n\r\nmodule.exports = {\r\n  handleValidationErrors,\r\n  userValidationRules,\r\n  churchValidationRules\r\n};\r\n```\r\n\r\n#### XSS Prevention\r\n```javascript\r\n// utils/sanitization.js\r\nconst DOMPurify = require('isomorphic-dompurify');\r\nconst validator = require('validator');\r\n\r\nconst sanitizeHTML = (html) => {\r\n  return DOMPurify.sanitize(html, {\r\n    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br'],\r\n    ALLOWED_ATTR: []\r\n  });\r\n};\r\n\r\nconst sanitizeInput = (input) => {\r\n  if (typeof input === 'string') {\r\n    // Escape HTML entities\r\n    return validator.escape(input.trim());\r\n  }\r\n  return input;\r\n};\r\n\r\nconst sanitizeObject = (obj) => {\r\n  const sanitized = {};\r\n  for (const [key, value] of Object.entries(obj)) {\r\n    if (typeof value === 'string') {\r\n      sanitized[key] = sanitizeInput(value);\r\n    } else if (typeof value === 'object' && value !== null) {\r\n      sanitized[key] = sanitizeObject(value);\r\n    } else {\r\n      sanitized[key] = value;\r\n    }\r\n  }\r\n  return sanitized;\r\n};\r\n\r\nmodule.exports = {\r\n  sanitizeHTML,\r\n  sanitizeInput,\r\n  sanitizeObject\r\n};\r\n```\r\n\r\n## 🔒 Database Security\r\n\r\n### SQL Injection Prevention\r\n\r\n#### Parameterized Queries\r\n```javascript\r\n// database/queries.js\r\nconst db = require('./connection');\r\n\r\n// Safe query execution\r\nconst executeQuery = async (query, params = []) => {\r\n  try {\r\n    const [results] = await db.execute(query, params);\r\n    return results;\r\n  } catch (error) {\r\n    logger.error('Database query error:', { query, params, error });\r\n    throw error;\r\n  }\r\n};\r\n\r\n// Example safe queries\r\nconst getUserByEmail = async (email) => {\r\n  return executeQuery(\r\n    'SELECT id, email, name, role, is_active FROM users WHERE email = ? AND is_active = 1',\r\n    [email]\r\n  );\r\n};\r\n\r\nconst updateUserPassword = async (userId, hashedPassword) => {\r\n  return executeQuery(\r\n    'UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',\r\n    [hashedPassword, userId]\r\n  );\r\n};\r\n\r\n// Prevent SQL injection in dynamic queries\r\nconst buildWhereClause = (filters) => {\r\n  const conditions = [];\r\n  const params = [];\r\n  \r\n  if (filters.email) {\r\n    conditions.push('email LIKE ?');\r\n    params.push(`%${filters.email}%`);\r\n  }\r\n  \r\n  if (filters.role) {\r\n    conditions.push('role = ?');\r\n    params.push(filters.role);\r\n  }\r\n  \r\n  if (filters.isActive !== undefined) {\r\n    conditions.push('is_active = ?');\r\n    params.push(filters.isActive ? 1 : 0);\r\n  }\r\n  \r\n  return {\r\n    whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',\r\n    params\r\n  };\r\n};\r\n```\r\n\r\n### Database Connection Security\r\n\r\n#### Secure Connection Configuration\r\n```javascript\r\n// config/database.js\r\nconst mysql = require('mysql2/promise');\r\n\r\nconst dbConfig = {\r\n  host: process.env.[REDACTED],\r\n  user: process.env.[REDACTED],\r\n  password: process.env.[REDACTED],\r\n  database: process.env.[REDACTED],\r\n  port: process.env.[REDACTED] || 3306,\r\n  \r\n  // Security configurations\r\n  ssl: process.env.[REDACTED] === 'production' ? {\r\n    ca: process.env.[REDACTED],\r\n    cert: process.env.[REDACTED],\r\n    key: process.env.[REDACTED],\r\n    rejectUnauthorized: true\r\n  } : false,\r\n  \r\n  // Connection pool settings\r\n  connectionLimit: 10,\r\n  acquireTimeout: 60000,\r\n  timeout: 60000,\r\n  \r\n  // Security flags\r\n  flags: [\r\n    'FOUND_ROWS',\r\n    'IGNORE_SPACE',\r\n    'LONG_PASSWORD',\r\n    'LONG_FLAG',\r\n    'TRANSACTIONS',\r\n    'RESERVED',\r\n    'SECURE_CONNECTION'\r\n  ]\r\n};\r\n\r\nconst pool = mysql.createPool(dbConfig);\r\n\r\nmodule.exports = pool;\r\n```\r\n\r\n## 🔐 File Upload Security\r\n\r\n### Secure File Upload Implementation\r\n\r\n#### File Upload Middleware\r\n```javascript\r\n// middleware/fileUpload.js\r\nconst multer = require('multer');\r\nconst path = require('path');\r\nconst crypto = require('crypto');\r\nconst { promisify } = require('util');\r\nconst fs = require('fs');\r\n\r\nconst MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB\r\nconst ALLOWED_MIME_TYPES = [\r\n  'application/pdf',\r\n  'application/msword',\r\n  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',\r\n  'text/plain',\r\n  'image/jpeg',\r\n  'image/png',\r\n  'image/gif'\r\n];\r\n\r\nconst ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.txt', '.jpg', '.jpeg', '.png', '.gif'];\r\n\r\nconst storage = multer.diskStorage({\r\n  destination: (req, file, cb) => {\r\n    const uploadDir = path.join(__dirname, '../uploads');\r\n    if (!fs.existsSync(uploadDir)) {\r\n      fs.mkdirSync(uploadDir, { recursive: true });\r\n    }\r\n    cb(null, uploadDir);\r\n  },\r\n  filename: (req, file, cb) => {\r\n    // Generate secure filename\r\n    const uniqueSuffix = crypto.randomBytes(16).toString('hex');\r\n    const extension = path.extname(file.originalname);\r\n    cb(null, `${uniqueSuffix}${extension}`);\r\n  }\r\n});\r\n\r\nconst fileFilter = (req, file, cb) => {\r\n  // Check MIME type\r\n  if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {\r\n    return cb(new Error('Invalid file type'), false);\r\n  }\r\n  \r\n  // Check file extension\r\n  const extension = path.extname(file.originalname).toLowerCase();\r\n  if (!ALLOWED_EXTENSIONS.includes(extension)) {\r\n    return cb(new Error('Invalid file extension'), false);\r\n  }\r\n  \r\n  cb(null, true);\r\n};\r\n\r\nconst upload = multer({\r\n  storage,\r\n  fileFilter,\r\n  limits: {\r\n    fileSize: MAX_FILE_SIZE,\r\n    files: 5 // Maximum 5 files per request\r\n  }\r\n});\r\n\r\n// Virus scanning middleware\r\nconst virusScanning = async (req, res, next) => {\r\n  if (!req.file) return next();\r\n  \r\n  try {\r\n    // Implement virus scanning here\r\n    // For example, using ClamAV or similar\r\n    const isClean = await scanFile(req.file.path);\r\n    if (!isClean) {\r\n      // Delete infected file\r\n      await fs.promises.unlink(req.file.path);\r\n      return res.status(400).json({\r\n        success: false,\r\n        error: 'File contains malicious content'\r\n      });\r\n    }\r\n    next();\r\n  } catch (error) {\r\n    logger.error('Virus scanning error:', error);\r\n    next(error);\r\n  }\r\n};\r\n\r\nmodule.exports = {\r\n  upload,\r\n  virusScanning\r\n};\r\n```\r\n\r\n## 🔒 API Security\r\n\r\n### Rate Limiting\r\n\r\n#### Request Rate Limiting\r\n```javascript\r\n// middleware/rateLimiter.js\r\nconst rateLimit = require('express-rate-limit');\r\nconst RedisStore = require('rate-limit-redis');\r\nconst Redis = require('ioredis');\r\n\r\nconst redis = new Redis({\r\n  host: process.env.[REDACTED] || 'localhost',\r\n  port: process.env.[REDACTED] || 6379\r\n});\r\n\r\n// General API rate limiting\r\nconst apiLimiter = rateLimit({\r\n  store: new RedisStore({\r\n    client: redis,\r\n    prefix: 'api:'\r\n  }),\r\n  windowMs: 15 * 60 * 1000, // 15 minutes\r\n  max: 100, // 100 requests per window\r\n  message: {\r\n    success: false,\r\n    error: 'Too many requests, please try again later'\r\n  },\r\n  standardHeaders: true,\r\n  legacyHeaders: false\r\n});\r\n\r\n// Strict rate limiting for authentication\r\nconst authLimiter = rateLimit({\r\n  store: new RedisStore({\r\n    client: redis,\r\n    prefix: 'auth:'\r\n  }),\r\n  windowMs: 15 * 60 * 1000, // 15 minutes\r\n  max: 5, // 5 login attempts per window\r\n  message: {\r\n    success: false,\r\n    error: 'Too many login attempts, please try again later'\r\n  },\r\n  skipSuccessfulRequests: true\r\n});\r\n\r\n// File upload rate limiting\r\nconst uploadLimiter = rateLimit({\r\n  store: new RedisStore({\r\n    client: redis,\r\n    prefix: 'upload:'\r\n  }),\r\n  windowMs: 60 * 60 * 1000, // 1 hour\r\n  max: 10, // 10 uploads per hour\r\n  message: {\r\n    success: false,\r\n    error: 'Upload limit exceeded, please try again later'\r\n  }\r\n});\r\n\r\nmodule.exports = {\r\n  apiLimiter,\r\n  authLimiter,\r\n  uploadLimiter\r\n};\r\n```\r\n\r\n### CORS Security\r\n\r\n#### Secure CORS Configuration\r\n```javascript\r\n// config/cors.js\r\nconst cors = require('cors');\r\n\r\nconst corsOptions = {\r\n  origin: (origin, callback) => {\r\n    // Allow requests from specified origins\r\n    const allowedOrigins = [\r\n      'http://localhost:3001',\r\n      'https://orthodox-metrics.com',\r\n      'https://www.orthodox-metrics.com'\r\n    ];\r\n    \r\n    // Allow requests with no origin (mobile apps, etc.)\r\n    if (!origin) return callback(null, true);\r\n    \r\n    if (allowedOrigins.includes(origin)) {\r\n      callback(null, true);\r\n    } else {\r\n      callback(new Error('Not allowed by CORS'));\r\n    }\r\n  },\r\n  credentials: true,\r\n  optionsSuccessStatus: 200,\r\n  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],\r\n  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],\r\n  exposedHeaders: ['X-Total-Count']\r\n};\r\n\r\nmodule.exports = cors(corsOptions);\r\n```\r\n\r\n## 🛡️ Security Headers\r\n\r\n### HTTP Security Headers\r\n\r\n#### Security Headers Middleware\r\n```javascript\r\n// middleware/securityHeaders.js\r\nconst helmet = require('helmet');\r\n\r\nconst securityHeaders = helmet({\r\n  contentSecurityPolicy: {\r\n    directives: {\r\n      defaultSrc: [\"'self'\"],\r\n      styleSrc: [\"'self'\", \"'unsafe-inline'\"],\r\n      scriptSrc: [\"'self'\"],\r\n      imgSrc: [\"'self'\", \"data:\", \"https:\"],\r\n      fontSrc: [\"'self'\"],\r\n      connectSrc: [\"'self'\"],\r\n      mediaSrc: [\"'self'\"],\r\n      objectSrc: [\"'none'\"],\r\n      frameAncestors: [\"'none'\"],\r\n      baseUri: [\"'self'\"],\r\n      formAction: [\"'self'\"]\r\n    }\r\n  },\r\n  crossOriginEmbedderPolicy: false,\r\n  hsts: {\r\n    maxAge: 31536000,\r\n    includeSubDomains: true,\r\n    preload: true\r\n  },\r\n  noSniff: true,\r\n  frameguard: { action: 'deny' },\r\n  xssFilter: true,\r\n  referrerPolicy: { policy: 'same-origin' }\r\n});\r\n\r\nmodule.exports = securityHeaders;\r\n```\r\n\r\n## 🔍 Security Monitoring\r\n\r\n### Security Event Logging\r\n\r\n#### Security Logger\r\n```javascript\r\n// utils/securityLogger.js\r\nconst winston = require('winston');\r\n\r\nconst securityLogger = winston.createLogger({\r\n  level: 'info',\r\n  format: winston.format.combine(\r\n    winston.format.timestamp(),\r\n    winston.format.json()\r\n  ),\r\n  transports: [\r\n    new winston.transports.File({\r\n      filename: 'logs/security.log',\r\n      level: 'warn'\r\n    }),\r\n    new winston.transports.Console({\r\n      format: winston.format.simple()\r\n    })\r\n  ]\r\n});\r\n\r\nconst logSecurityEvent = (event, details) => {\r\n  securityLogger.warn('Security Event', {\r\n    event,\r\n    timestamp: new Date().toISOString(),\r\n    ...details\r\n  });\r\n};\r\n\r\n// Common security events\r\nconst SECURITY_EVENTS = {\r\n  FAILED_LOGIN: 'failed_login',\r\n  SUCCESSFUL_LOGIN: 'successful_login',\r\n  LOGOUT: 'logout',\r\n  PASSWORD_CHANGE: 'password_change',\r\n  ACCOUNT_LOCKED: 'account_locked',\r\n  INVALID_TOKEN: '[REDACTED]',\r\n  PERMISSION_DENIED: 'permission_denied',\r\n  SUSPICIOUS_ACTIVITY: 'suspicious_activity'\r\n};\r\n\r\nmodule.exports = {\r\n  securityLogger,\r\n  logSecurityEvent,\r\n  SECURITY_EVENTS\r\n};\r\n```\r\n\r\n### Intrusion Detection\r\n\r\n#### Suspicious Activity Detection\r\n```javascript\r\n// middleware/intrusionDetection.js\r\nconst { logSecurityEvent, SECURITY_EVENTS } = require('../utils/securityLogger');\r\n\r\nconst suspiciousActivityDetector = (req, res, next) => {\r\n  const ip = req.ip;\r\n  const userAgent = req.get('User-Agent');\r\n  \r\n  // Check for suspicious patterns\r\n  const suspiciousPatterns = [\r\n    /script/i,\r\n    /union.*select/i,\r\n    /drop.*table/i,\r\n    /<script/i,\r\n    /javascript:/i,\r\n    /vbscript:/i,\r\n    /onload=/i,\r\n    /onerror=/i\r\n  ];\r\n  \r\n  const checkString = `${req.url} ${JSON.stringify(req.body)} ${JSON.stringify(req.query)}`;\r\n  \r\n  for (const pattern of suspiciousPatterns) {\r\n    if (pattern.test(checkString)) {\r\n      logSecurityEvent(SECURITY_EVENTS.SUSPICIOUS_ACTIVITY, {\r\n        ip,\r\n        userAgent,\r\n        url: req.url,\r\n        method: req.method,\r\n        pattern: pattern.toString(),\r\n        data: checkString\r\n      });\r\n      \r\n      return res.status(400).json({\r\n        success: false,\r\n        error: 'Request blocked due to suspicious content'\r\n      });\r\n    }\r\n  }\r\n  \r\n  next();\r\n};\r\n\r\nmodule.exports = suspiciousActivityDetector;\r\n```\r\n\r\n## 🔐 Security Checklist\r\n\r\n### Production Security Checklist\r\n\r\n#### Server Security\r\n- [ ] Use HTTPS everywhere\r\n- [ ] Implement proper SSL/TLS configuration\r\n- [ ] Configure secure headers (HSTS, CSP, etc.)\r\n- [ ] Disable unnecessary services\r\n- [ ] Keep system and dependencies updated\r\n- [ ] Configure firewall rules\r\n- [ ] Implement fail2ban or similar\r\n- [ ] Regular security audits\r\n\r\n#### Application Security\r\n- [ ] Implement rate limiting\r\n- [ ] Use parameterized queries\r\n- [ ] Validate and sanitize all inputs\r\n- [ ] Implement proper authentication\r\n- [ ] Use secure session management\r\n- [ ] Implement CSRF protection\r\n- [ ] Configure secure CORS\r\n- [ ] Implement file upload security\r\n\r\n#### Database Security\r\n- [ ] Use strong database passwords\r\n- [ ] Implement database access controls\r\n- [ ] Enable database logging\r\n- [ ] Regular database backups\r\n- [ ] Encrypt sensitive data\r\n- [ ] Use database connection pooling\r\n- [ ] Implement database monitoring\r\n\r\n#### Monitoring & Logging\r\n- [ ] Implement comprehensive logging\r\n- [ ] Monitor security events\r\n- [ ] Set up intrusion detection\r\n- [ ] Regular log analysis\r\n- [ ] Implement alerting\r\n- [ ] Monitor system resources\r\n- [ ] Track failed login attempts\r\n\r\n### Security Testing\r\n\r\n#### Penetration Testing\r\n```bash\r\n# Example security testing commands\r\n# (Use in development environment only)\r\n\r\n# Test for SQL injection\r\nsqlmap -u \"http://localhost:3000/api/users\" --cookie=\"session=...\" --batch\r\n\r\n# Test for XSS\r\nxsshunter test --url \"http://localhost:3000\"\r\n\r\n# Test for CSRF\r\ncsrf-test --url \"http://localhost:3000\" --cookie=\"session=...\"\r\n\r\n# Port scanning\r\nnmap -sS -O localhost\r\n\r\n# SSL testing\r\nsslscan --ssl2 --ssl3 localhost:443\r\n```\r\n\r\n## 🔒 Emergency Response\r\n\r\n### Security Incident Response Plan\r\n\r\n#### Incident Response Steps\r\n1. **Identification**: Detect and confirm security incident\r\n2. **Containment**: Isolate affected systems\r\n3. **Eradication**: Remove the threat\r\n4. **Recovery**: Restore systems to normal operation\r\n5. **Lessons Learned**: Document and improve security\r\n\r\n#### Emergency Contacts\r\n- **System Administrator**: [Contact Information]\r\n- **Security Team**: [Contact Information]\r\n- **Management**: [Contact Information]\r\n- **Legal**: [Contact Information]\r\n\r\n#### Incident Response Scripts\r\n```bash\r\n# Emergency system lockdown\r\n#!/bin/bash\r\n# stop-all-services.sh\r\n\r\necho \"EMERGENCY: Stopping all services...\"\r\nsystemctl stop nginx\r\nsystemctl stop orthodox-metrics\r\nsystemctl stop mysql\r\niptables -A INPUT -j DROP\r\necho \"All services stopped and network access blocked\"\r\n```\r\n\r\n---\r\n\r\n*This security implementation guide should be reviewed and updated regularly to address new threats and maintain the highest security standards for the Orthodox Metrics system.*\r\n"
+    },
+    "complexity": {
+      "totalLines": 993,
+      "codeLines": 720,
+      "commentLines": 120,
+      "commentRatio": 0.14285714285714285,
+      "averageLineLength": 27.836904761904762
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.214Z"
+  },
+  "contentHash": "8a25441d8cc0ed1c50ed6f36c5a288b6ef66e05ea960e07fe76a79a986481242",
+  "discoveredAt": "2025-07-28T07:19:58.214Z"
+}

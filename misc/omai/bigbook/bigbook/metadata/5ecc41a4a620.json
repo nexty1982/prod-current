@@ -1,0 +1,43 @@
+{
+  "id": "5ecc41a4a620",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/package-lock.json",
+  "relativePath": "package-lock.json",
+  "name": "package-lock.json",
+  "extension": ".json",
+  "size": 66676,
+  "modified": "2025-07-28T06:24:03.326Z",
+  "created": "2025-07-25T19:38:17.898Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1890,
+      "characters": 66676,
+      "words": 3451
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 1890,
+      "codeLines": 1889,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 34.29698253043939
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.969Z"
+  },
+  "contentHash": "3d5d76eea662e09a34e3e8f9895f1f949f6a86d72671b613a8b261a032ee03c9",
+  "discoveredAt": "2025-07-28T07:19:58.969Z"
+}

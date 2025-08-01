@@ -1,0 +1,43 @@
+{
+  "id": "4578c8c91498",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/docs/PHASE_13_SITE_EDITOR_IMPLEMENTATION.md",
+  "relativePath": "front-end/docs/PHASE_13_SITE_EDITOR_IMPLEMENTATION.md",
+  "name": "PHASE_13_SITE_EDITOR_IMPLEMENTATION.md",
+  "extension": ".md",
+  "size": 9402,
+  "modified": "2025-07-25T04:15:33.466Z",
+  "created": "2025-07-25T04:15:23.806Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 224,
+      "characters": 9240,
+      "words": 1157
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 224,
+      "codeLines": 138,
+      "commentLines": 42,
+      "commentRatio": 0.23333333333333334,
+      "averageLineLength": 49.85
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.322Z"
+  },
+  "contentHash": "c796376a5f209e7f8c385eacfddef542d309e7d0bf34ff9235cd4f7ff917f541",
+  "discoveredAt": "2025-07-28T07:19:58.322Z"
+}

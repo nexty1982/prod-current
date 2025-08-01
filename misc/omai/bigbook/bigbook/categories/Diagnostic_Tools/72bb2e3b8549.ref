@@ -1,0 +1,6 @@
+{
+  "id": "72bb2e3b8549",
+  "name": "fix-scraper-urls.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/fix-scraper-urls.sh",
+  "type": "Troubleshooting Utilities"
+}

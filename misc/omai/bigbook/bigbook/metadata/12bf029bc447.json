@@ -1,0 +1,49 @@
+{
+  "id": "12bf029bc447",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/questionnaireParser.js",
+  "relativePath": "server/utils/questionnaireParser.js",
+  "name": "questionnaireParser.js",
+  "extension": ".js",
+  "size": 6505,
+  "modified": "2025-07-26T03:16:09.647Z",
+  "created": "2025-07-26T03:16:08.010Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 210,
+      "characters": 6505,
+      "words": 612
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 210,
+      "codeLines": 134,
+      "commentLines": 44,
+      "commentRatio": 0.24719101123595505,
+      "averageLineLength": 34.50561797752809
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.277Z"
+  },
+  "contentHash": "3dbb723bc2d41365447afe8b22f703217205c863647d508ed809200a4f7ee8fb",
+  "discoveredAt": "2025-07-28T07:20:01.277Z"
+}

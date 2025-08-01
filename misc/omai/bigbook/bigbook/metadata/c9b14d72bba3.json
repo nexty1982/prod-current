@@ -1,0 +1,84 @@
+{
+  "id": "c9b14d72bba3",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/c3f35846e29a.json",
+  "relativePath": "bigbook/metadata/c3f35846e29a.json",
+  "name": "c3f35846e29a.json",
+  "extension": ".json",
+  "size": 8567,
+  "modified": "2025-07-26T04:17:11.734Z",
+  "created": "2025-07-26T04:17:11.734Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 103,
+      "characters": 8499,
+      "words": 765
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "@google-cloud/vision",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "canvas",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "multer",
+        "line": 90
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 103,
+      "codeLines": 103,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 81.52427184466019
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.436Z"
+  },
+  "contentHash": "b509f3a6bce3fec8a7f843c33063d9885b626a712df977814cbdda128b60767c",
+  "discoveredAt": "2025-07-28T07:19:57.436Z"
+}

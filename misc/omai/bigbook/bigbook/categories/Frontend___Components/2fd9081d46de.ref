@@ -1,0 +1,6 @@
+{
+  "id": "2fd9081d46de",
+  "name": "test-component-name-validation.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-component-name-validation.sh",
+  "type": "Frontend Scripts"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "dcff6b3eaa62",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/layouts/full/horizontal/navbar/Menudata.ts",
+  "relativePath": "front-end/src/layouts/full/horizontal/navbar/Menudata.ts",
+  "name": "Menudata.ts",
+  "extension": ".ts",
+  "size": 21503,
+  "modified": "2025-07-05T22:45:29.063Z",
+  "created": "2025-07-05T02:28:47.960Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 876,
+      "characters": 21503,
+      "words": 1489
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "lodash",
+        "line": 18
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 876,
+      "codeLines": 873,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 23.626575028636886
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.861Z"
+  },
+  "contentHash": "80dac01bcbcdb7ba36310a9f9c844c6f3e17557a68c8fe17f596bcb4333a9cb0",
+  "discoveredAt": "2025-07-28T07:19:58.861Z"
+}

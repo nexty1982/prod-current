@@ -1,0 +1,43 @@
+{
+  "id": "f4b47afc83a3",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/setup/phase2-complete.js",
+  "relativePath": "server/setup/phase2-complete.js",
+  "name": "phase2-complete.js",
+  "extension": ".js",
+  "size": 455,
+  "modified": "2025-07-14T21:28:15.239Z",
+  "created": "2025-07-14T21:28:15.239Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 14,
+      "characters": 445,
+      "words": 51
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 14,
+      "codeLines": 4,
+      "commentLines": 7,
+      "commentRatio": 0.6363636363636364,
+      "averageLineLength": 39.27272727272727
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.138Z"
+  },
+  "contentHash": "9495e6f62348918fcff115ea35a7c6a517d25aed24ff43a122a640fa2a9ee293",
+  "discoveredAt": "2025-07-28T07:20:01.138Z"
+}

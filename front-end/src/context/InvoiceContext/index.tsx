@@ -1,6 +1,5 @@
 import React, { createContext, useEffect, useState, useContext } from 'react';
 import { InvoiceList } from '../../types/apps/invoice';
-import { orthodoxMetricsAPI } from 'src/api/orthodox-metrics.api';
 import type {
   InvoiceFilters,
   CreateInvoiceData,
@@ -64,7 +63,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setLoading(true);
       setError(null);
 
-      const response: PaginatedResponse<Invoice> = await orthodoxMetricsAPI.invoices.getAll({
+      const response: PaginatedResponse<Invoice> = await metricsAPI.invoices.getAll({
         ...filters,
         page: currentPage,
       });
@@ -87,7 +86,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Get invoice by ID
   const getInvoiceById = async (id: number): Promise<Invoice | null> => {
     try {
-      const invoice = await orthodoxMetricsAPI.invoices.getById(id);
+      const invoice = await metricsAPI.invoices.getById(id);
       return invoice;
     } catch (err) {
       console.error('Error fetching invoice:', err);
@@ -98,7 +97,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Get invoice by invoice number (v1 API)
   const getInvoiceByNumber = async (invoiceNumber: string): Promise<Invoice | null> => {
     try {
-      const invoice = await orthodoxMetricsAPI.invoices.getByInvoiceNumber(invoiceNumber);
+      const invoice = await metricsAPI.invoices.getByInvoiceNumber(invoiceNumber);
       return invoice;
     } catch (err) {
       console.error('Error fetching invoice by number:', err);
@@ -109,7 +108,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Create new invoice
   const createInvoice = async (invoiceData: CreateInvoiceData): Promise<Invoice | null> => {
     try {
-      const newInvoice = await orthodoxMetricsAPI.invoices.create(invoiceData);
+      const newInvoice = await metricsAPI.invoices.create(invoiceData);
       await fetchInvoices(); // Refresh the list
       return newInvoice;
     } catch (err) {
@@ -121,7 +120,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Update existing invoice
   const updateInvoice = async (id: number, updates: Partial<Invoice>): Promise<Invoice | null> => {
     try {
-      const updatedInvoice = await orthodoxMetricsAPI.invoices.update(id, updates);
+      const updatedInvoice = await metricsAPI.invoices.update(id, updates);
       await fetchInvoices(); // Refresh the list
       return updatedInvoice;
     } catch (err) {
@@ -133,7 +132,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Delete invoice
   const deleteInvoice = async (id: number): Promise<boolean> => {
     try {
-      await orthodoxMetricsAPI.invoices.delete(id);
+      await metricsAPI.invoices.delete(id);
       await fetchInvoices(); // Refresh the list
       return true;
     } catch (err) {
@@ -145,7 +144,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Mark invoice as paid
   const markInvoiceAsPaid = async (id: number, paidDate?: string): Promise<Invoice | null> => {
     try {
-      const updatedInvoice = await orthodoxMetricsAPI.invoices.markPaid(id, paidDate);
+      const updatedInvoice = await metricsAPI.invoices.markPaid(id, paidDate);
       await fetchInvoices(); // Refresh the list
       return updatedInvoice;
     } catch (err) {
@@ -157,7 +156,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Generate PDF
   const generateInvoicePDF = async (id: number): Promise<Blob | null> => {
     try {
-      const pdfBlob = await orthodoxMetricsAPI.invoices.generatePDF(id);
+      const pdfBlob = await metricsAPI.invoices.generatePDF(id);
       return pdfBlob;
     } catch (err) {
       console.error('Error generating PDF:', err);
@@ -190,7 +189,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Send invoice via email
   const sendInvoiceEmail = async (id: number, email: string): Promise<boolean> => {
     try {
-      await orthodoxMetricsAPI.invoices.sendEmail(id, email);
+      await metricsAPI.invoices.sendEmail(id, email);
       return true;
     } catch (err) {
       console.error('Error sending invoice email:', err);
@@ -201,7 +200,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Export invoices
   const exportInvoices = async (format: 'csv' | 'xlsx' | 'pdf'): Promise<Blob | null> => {
     try {
-      const exportBlob = await orthodoxMetricsAPI.invoices.export(filters, format);
+      const exportBlob = await metricsAPI.invoices.export(filters, format);
       return exportBlob;
     } catch (err) {
       console.error('Error exporting invoices:', err);

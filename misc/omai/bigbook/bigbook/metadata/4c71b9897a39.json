@@ -1,0 +1,49 @@
+{
+  "id": "4c71b9897a39",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/social/chat.js",
+  "relativePath": "server/routes/social/chat.js",
+  "name": "chat.js",
+  "extension": ".js",
+  "size": 25123,
+  "modified": "2025-07-21T21:46:59.453Z",
+  "created": "2025-07-21T21:46:56.970Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 698,
+      "characters": 25123,
+      "words": 2153
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 698,
+      "codeLines": 553,
+      "commentLines": 51,
+      "commentRatio": 0.08443708609271523,
+      "averageLineLength": 40.258278145695364
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.558Z"
+  },
+  "contentHash": "b6a131d9d5abd9f7ea79de518993eb929494ec2a96119f780a2ce80d3d0d46ad",
+  "discoveredAt": "2025-07-28T07:20:00.558Z"
+}

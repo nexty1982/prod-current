@@ -1,0 +1,84 @@
+{
+  "id": "aeeb0cf9bf2c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/api/ticket/TicketData.ts",
+  "relativePath": "front-end/src/api/ticket/TicketData.ts",
+  "name": "TicketData.ts",
+  "extension": ".ts",
+  "size": 5071,
+  "modified": "2025-04-30T05:42:44.000Z",
+  "created": "2025-07-05T02:28:23.428Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 143,
+      "characters": 5071,
+      "words": 595
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-1.jpg",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-2.jpg",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-3.jpg",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-4.jpg",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-5.jpg",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "chance",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "src/types/apps/ticket",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "msw",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 143,
+      "codeLines": 136,
+      "commentLines": 2,
+      "commentRatio": 0.014492753623188406,
+      "averageLineLength": 35.68840579710145
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.685Z"
+  },
+  "contentHash": "522bf2a0f68e6bc59343d71a095e43fa082bac74afdccb7920a711b01dd0fcec",
+  "discoveredAt": "2025-07-28T07:19:58.685Z"
+}

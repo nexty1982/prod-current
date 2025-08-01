@@ -1,0 +1,54 @@
+{
+  "id": "9b982debe293",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-church-edit-form.sh",
+  "relativePath": "server/debug/fix-church-edit-form.sh",
+  "name": "fix-church-edit-form.sh",
+  "extension": ".sh",
+  "size": 2121,
+  "modified": "2025-07-22T13:06:14.155Z",
+  "created": "2025-07-22T13:06:12.266Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 64,
+      "characters": 2075,
+      "words": 332
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 17
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 24
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 64,
+      "codeLines": 56,
+      "commentLines": 2,
+      "commentRatio": 0.034482758620689655,
+      "averageLineLength": 34.689655172413794
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.120Z"
+  },
+  "contentHash": "8ade3bab21fbb0910ae07fd1feaec50849e3775be5e1a67be45f1ca87974a6b5",
+  "discoveredAt": "2025-07-28T07:20:00.120Z"
+}

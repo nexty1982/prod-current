@@ -1,0 +1,6 @@
+{
+  "id": "5cb13fc1a9d0",
+  "name": "rebuild-omlearn.ps1",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/rebuild-omlearn.ps1",
+  "type": "Build Scripts"
+}

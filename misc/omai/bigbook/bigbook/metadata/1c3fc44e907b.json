@@ -1,0 +1,43 @@
+{
+  "id": "1c3fc44e907b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/records/constants.js",
+  "relativePath": "front-end/src/records/constants.js",
+  "name": "constants.js",
+  "extension": ".js",
+  "size": 14037,
+  "modified": "2025-07-18T00:01:34.986Z",
+  "created": "2025-07-13T04:51:07.668Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 322,
+      "characters": 14037,
+      "words": 1718
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 322,
+      "codeLines": 301,
+      "commentLines": 11,
+      "commentRatio": 0.035256410256410256,
+      "averageLineLength": 43.96153846153846
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.882Z"
+  },
+  "contentHash": "d3d6724ee6f3ea16069e57a604d00d91f52529d9e551b0ef6cd49594998c4f7d",
+  "discoveredAt": "2025-07-28T07:19:58.882Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "f3be7721b8fa",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migrations/church-setup-wizard-schema.sql",
+  "relativePath": "server/migrations/church-setup-wizard-schema.sql",
+  "name": "church-setup-wizard-schema.sql",
+  "extension": ".sql",
+  "size": 9683,
+  "modified": "2025-07-13T23:51:54.313Z",
+  "created": "2025-07-13T23:33:18.409Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 196,
+      "characters": 8291,
+      "words": 847
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 196,
+      "codeLines": 167,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 48.16766467065868
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.324Z"
+  },
+  "contentHash": "9922bcb1066969f3146f7040082ed347a3d3d856e21f2adb864d56eb844abfce",
+  "discoveredAt": "2025-07-28T07:20:00.324Z"
+}

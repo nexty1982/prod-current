@@ -1,0 +1,6 @@
+{
+  "id": "5700b921afe0",
+  "name": "backup.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/backup.sh",
+  "type": "Setup Scripts"
+}

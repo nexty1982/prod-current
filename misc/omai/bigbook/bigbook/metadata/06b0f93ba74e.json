@@ -1,0 +1,43 @@
+{
+  "id": "06b0f93ba74e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/verify-production-mode.sh",
+  "relativePath": "scripts/verify-production-mode.sh",
+  "name": "verify-production-mode.sh",
+  "extension": ".sh",
+  "size": 3349,
+  "modified": "2025-07-25T20:54:04.484Z",
+  "created": "2025-07-25T20:53:59.481Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 87,
+      "characters": 3313,
+      "words": 415
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 87,
+      "codeLines": 58,
+      "commentLines": 12,
+      "commentRatio": 0.17142857142857143,
+      "averageLineLength": 46.1
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.535Z"
+  },
+  "contentHash": "3332dd6659332e16591bf233441cd03114dbc90f9777a93a196fddb970416efd",
+  "discoveredAt": "2025-07-28T07:19:59.535Z"
+}

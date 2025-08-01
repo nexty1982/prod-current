@@ -1,5 +1,5 @@
 /**
- * Orthodox Metrics - Audit Logger Middleware
+ * Orthod    database: process.env.DB_NAME || 'orthodmetrics_dev'x Metrics - Audit Logger Middleware
  * Middleware for logging user actions and record changes
  */
 
@@ -12,7 +12,7 @@ const getDbConnection = async () => {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'orthodoxmetrics_db'
+    database: process.env.DB_NAME || 'orthodmetrics_dev'
   });
 };
 

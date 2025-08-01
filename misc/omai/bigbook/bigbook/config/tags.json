@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "tags": [
+    {
+      "id": 1,
+      "name": "critical",
+      "description": "Critical system components",
+      "color": "#dc3545",
+      "usage_count": 0
+    },
+    {
+      "id": 2,
+      "name": "deprecated",
+      "description": "Deprecated or legacy code",
+      "color": "#6c757d",
+      "usage_count": 0
+    },
+    {
+      "id": 3,
+      "name": "experimental",
+      "description": "Experimental features",
+      "color": "#fd7e14",
+      "usage_count": 0
+    },
+    {
+      "id": 4,
+      "name": "production",
+      "description": "Production-ready code",
+      "color": "#28a745",
+      "usage_count": 0
+    },
+    {
+      "id": 5,
+      "name": "security",
+      "description": "Security-related components",
+      "color": "#dc3545",
+      "usage_count": 0
+    }
+  ]
+}

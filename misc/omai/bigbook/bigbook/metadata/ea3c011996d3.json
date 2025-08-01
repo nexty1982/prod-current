@@ -1,0 +1,59 @@
+{
+  "id": "ea3c011996d3",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/setup-omai-path-discovery.sh",
+  "relativePath": "setup-omai-path-discovery.sh",
+  "name": "setup-omai-path-discovery.sh",
+  "extension": ".sh",
+  "size": 8651,
+  "modified": "2025-07-26T03:54:04.796Z",
+  "created": "2025-07-26T03:53:30.948Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 282,
+      "characters": 8591,
+      "words": 977
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 44
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 206
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 214
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 282,
+      "codeLines": 238,
+      "commentLines": 11,
+      "commentRatio": 0.04417670682730924,
+      "averageLineLength": 33.373493975903614
+    },
+    "lastAnalyzed": "2025-07-26T04:17:11.892Z"
+  },
+  "contentHash": "205a0bd092182087b9450ec7a174e1efcdb4d17bf51653c041c6d559be063181",
+  "discoveredAt": "2025-07-26T04:17:11.892Z"
+}

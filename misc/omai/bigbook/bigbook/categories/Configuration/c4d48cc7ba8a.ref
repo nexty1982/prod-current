@@ -1,0 +1,6 @@
+{
+  "id": "c4d48cc7ba8a",
+  "name": "embeddings.json",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/embeddings/embeddings.json",
+  "type": "Configuration"
+}

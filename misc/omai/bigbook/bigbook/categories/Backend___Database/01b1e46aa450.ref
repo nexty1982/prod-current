@@ -1,0 +1,6 @@
+{
+  "id": "01b1e46aa450",
+  "name": "fix-notifications-schema.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/mysql/fix-notifications-schema.sql",
+  "type": "Database Scripts"
+}

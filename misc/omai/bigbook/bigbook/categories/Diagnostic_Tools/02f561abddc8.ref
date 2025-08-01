@@ -1,0 +1,6 @@
+{
+  "id": "02f561abddc8",
+  "name": "fix-calendar-schema.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/fix-calendar-schema.sh",
+  "type": "Troubleshooting Utilities"
+}

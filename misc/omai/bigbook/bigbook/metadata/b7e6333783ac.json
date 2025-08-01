@@ -1,0 +1,43 @@
+{
+  "id": "b7e6333783ac",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/ai/visualTesting/playwrightTests.ts",
+  "relativePath": "front-end/src/ai/visualTesting/playwrightTests.ts",
+  "name": "playwrightTests.ts",
+  "extension": ".ts",
+  "size": 22763,
+  "modified": "2025-07-25T04:53:03.835Z",
+  "created": "2025-07-25T04:53:02.053Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 716,
+      "characters": 22763,
+      "words": 2020
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 716,
+      "codeLines": 579,
+      "commentLines": 45,
+      "commentRatio": 0.07211538461538461,
+      "averageLineLength": 34.96153846153846
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.663Z"
+  },
+  "contentHash": "bfeb674e77ba79550ede343913b136cff18fda906335ea43e1d64403a3887d67",
+  "discoveredAt": "2025-07-28T07:19:58.663Z"
+}

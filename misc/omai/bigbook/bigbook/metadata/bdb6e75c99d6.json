@@ -1,0 +1,79 @@
+{
+  "id": "bdb6e75c99d6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/825fce31e194.json",
+  "relativePath": "bigbook/metadata/825fce31e194.json",
+  "name": "825fce31e194.json",
+  "extension": ".json",
+  "size": 17067,
+  "modified": "2025-07-26T04:17:09.466Z",
+  "created": "2025-07-26T04:17:09.466Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 110,
+      "characters": 17031,
+      "words": 1440
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 97
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 97
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 97
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 97
+      },
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 97
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 97
+      },
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 97
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 110,
+      "codeLines": 110,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 153.83636363636364
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.162Z"
+  },
+  "contentHash": "4fe842c00be3244e8ef246806ba6fc723e0ddcf29dddcbed439d17a446ba443d",
+  "discoveredAt": "2025-07-28T07:19:57.162Z"
+}

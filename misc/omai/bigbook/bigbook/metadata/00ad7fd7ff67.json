@@ -1,0 +1,43 @@
+{
+  "id": "00ad7fd7ff67",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/kanban_schema.sql",
+  "relativePath": "server/database/kanban_schema.sql",
+  "name": "kanban_schema.sql",
+  "extension": ".sql",
+  "size": 7399,
+  "modified": "2025-07-06T04:45:13.000Z",
+  "created": "2025-07-09T00:48:35.106Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 191,
+      "characters": 7399,
+      "words": 812
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 191,
+      "codeLines": 177,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 40.655367231638415
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.012Z"
+  },
+  "contentHash": "2bdc99fdeede2a4c49d1fab4d4fde2fbbdf0eb8c000df3917661d176034a993f",
+  "discoveredAt": "2025-07-28T07:20:00.012Z"
+}

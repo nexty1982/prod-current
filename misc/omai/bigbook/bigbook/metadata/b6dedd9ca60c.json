@@ -1,0 +1,94 @@
+{
+  "id": "b6dedd9ca60c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/final-xlsx-fix.sh",
+  "relativePath": "scripts/7-26-25/final-xlsx-fix.sh",
+  "name": "final-xlsx-fix.sh",
+  "extension": ".sh",
+  "size": 3562,
+  "modified": "2025-07-26T22:14:23.115Z",
+  "created": "2025-07-26T22:14:22.318Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 90,
+      "characters": 3438,
+      "words": 452
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "xlsx",
+        "line": 82
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 7
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 10
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 11
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 12
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 15
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 19
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 22
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 26
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 84
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 90,
+      "codeLines": 80,
+      "commentLines": 1,
+      "commentRatio": 0.012345679012345678,
+      "averageLineLength": 41.34567901234568
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.986Z"
+  },
+  "contentHash": "ddfea933d2d8624aafb3309ddc434457ed248cb156f8bcfa3bd7d53d578cc87f",
+  "discoveredAt": "2025-07-28T07:19:58.986Z"
+}

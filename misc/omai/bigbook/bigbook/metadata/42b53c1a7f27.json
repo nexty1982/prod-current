@@ -1,0 +1,66 @@
+{
+  "id": "42b53c1a7f27",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/build.js",
+  "relativePath": "scripts/build.js",
+  "name": "build.js",
+  "extension": ".js",
+  "size": 8636,
+  "modified": "2025-07-26T05:46:52.950Z",
+  "created": "2025-07-26T02:00:21.929Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 295,
+      "characters": 8620,
+      "words": 801
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "child_process",
+        "line": 5
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 166,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\nconst fs = require('fs');\r\nconst path = require('path');\r\nconst { execSync } = require('child_process');\r\n\r\n// ANSI color codes for console output\r\nconst colors = {\r\n  reset: '\\x1b[0m',\r\n  bright: '\\x1b[1m',\r\n  red: '\\x1b[31m',\r\n  green: '\\x1b[32m',\r\n  yellow: '\\x1b[33m',\r\n  blue: '\\x1b[34m',\r\n  magenta: '\\x1b[35m',\r\n  cyan: '\\x1b[36m'\r\n};\r\n\r\nfunction log(message, color = 'reset') {\r\n  const timestamp = new Date().toISOString();\r\n  const source = process.argv.includes('--ui') ? '[WEB-UI]' : '[CLI]';\r\n  console.log(`${colors[color]}[${timestamp}] ${source} ${message}${colors.reset}`);\r\n}\r\n\r\nfunction readConfig() {\r\n  try {\r\n    const configPath = path.join(process.cwd(), 'build.config.json');\r\n    const configContent = fs.readFileSync(configPath, 'utf8');\r\n    return JSON.parse(configContent);\r\n  } catch (error) {\r\n    log('Error reading build.config.json', 'red');\r\n    log('Using default configuration', 'yellow');\r\n    return {\r\n      mode: 'incremental',\r\n      memory: 4096,\r\n      installPackage: '',\r\n      legacyPeerDeps: true,\r\n      skipInstall: false,\r\n      dryRun: false\r\n    };\r\n  }\r\n}\r\n\r\nfunction executeCommand(command, description) {\r\n  try {\r\n    log(`Executing: ${description}`, 'cyan');\r\n    if (process.argv.includes('--ui')) {\r\n      log(`Command: ${command}`, 'blue');\r\n    }\r\n    \r\n    const result = execSync(command, { \r\n      encoding: 'utf8',\r\n      stdio: process.argv.includes('--ui') ? 'pipe' : 'inherit'\r\n    });\r\n    \r\n    if (process.argv.includes('--ui')) {\r\n      log(`✓ ${description} completed successfully`, 'green');\r\n      return result;\r\n    }\r\n    return result;\r\n  } catch (error) {\r\n    log(`✗ ${description} failed`, 'red');\r\n    if (process.argv.includes('--ui')) {\r\n      log(`Error: ${error.message}`, 'red');\r\n      return error.message;\r\n    }\r\n    process.exit(1);\r\n  }\r\n}\r\n\r\nfunction writeBuildLog(config, success, output = '', error = '') {\r\n  try {\r\n    const logEntry = {\r\n      timestamp: new Date().toISOString(),\r\n      config,\r\n      success,\r\n      output: output.substring(0, 10000), // Limit output size\r\n      error: error.substring(0, 5000) // Limit error size\r\n    };\r\n    \r\n    const logPath = path.join(process.cwd(), 'build.log');\r\n    const existingLogs = fs.existsSync(logPath) \r\n      ? JSON.parse(fs.readFileSync(logPath, 'utf8')) \r\n      : [];\r\n    \r\n    existingLogs.push(logEntry);\r\n    \r\n    // Keep only last 50 builds\r\n    if (existingLogs.length > 50) {\r\n      existingLogs.splice(0, existingLogs.length - 50);\r\n    }\r\n    \r\n    fs.writeFileSync(logPath, JSON.stringify(existingLogs, null, 2));\r\n  } catch (error) {\r\n    log('Warning: Could not write to build.log', 'yellow');\r\n  }\r\n}\r\n\r\nfunction writeBuildMeta(config, success, duration) {\r\n  try {\r\n    const meta = {\r\n      lastBuild: new Date().toISOString(),\r\n      config,\r\n      success,\r\n      duration,\r\n      version: require('../package.json').version || 'unknown'\r\n    };\r\n    \r\n    const metaPath = path.join(process.cwd(), 'build.meta.json');\r\n    fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));\r\n  } catch (error) {\r\n    log('Warning: Could not write to build.meta.json', 'yellow');\r\n  }\r\n}\r\n\r\nfunction main() {\r\n  const startTime = Date.now();\r\n  let buildOutput = '';\r\n  let buildError = '';\r\n  const isUIMode = process.argv.includes('--ui');\r\n  \r\n  // Capture all output for UI mode\r\n  if (isUIMode) {\r\n    const originalLog = console.log;\r\n    const originalError = console.error;\r\n    \r\n    console.log = (...args) => {\r\n      buildOutput += args.join(' ') + '\\n';\r\n      originalLog(...args);\r\n    };\r\n    \r\n    console.error = (...args) => {\r\n      buildError += args.join(' ') + '\\n';\r\n      originalError(...args);\r\n    };\r\n  }\r\n  \r\n  try {\r\n    log('🚀 Starting OrthodoxMetrics Build System', 'bright');\r\n    \r\n    // Read configuration\r\n    const config = readConfig();\r\n    log(`Configuration loaded: mode=${config.mode}, memory=${config.memory}MB`, 'blue');\r\n    \r\n    if (config.dryRun) {\r\n      log('🔍 DRY RUN MODE - No actual execution', 'yellow');\r\n      log(`Would execute: ${config.mode} build with ${config.memory}MB memory`, 'cyan');\r\n      if (config.installPackage) {\r\n        log(`Would install package: ${config.installPackage}`, 'cyan');\r\n      }\r\n      \r\n      if (isUIMode) {\r\n        console.log(JSON.stringify({\r\n          success: true,\r\n          output: buildOutput,\r\n          error: '',\r\n          duration: Date.now() - startTime,\r\n          config: config,\r\n          dryRun: true\r\n        }));\r\n      }\r\n      return;\r\n    }\r\n    \r\n    // Set NODE_OPTIONS for memory\r\n    process.env.[REDACTED] = `--max-old-space-size=${config.memory}`;\r\n    log(`Set NODE_OPTIONS=--max-old-space-size=${config.memory}`, 'blue');\r\n    \r\n    // Navigate to front-end directory\r\n    const frontEndPath = path.join(process.cwd(), 'front-end');\r\n    if (!fs.existsSync(frontEndPath)) {\r\n      throw new Error('front-end directory not found');\r\n    }\r\n    \r\n    process.chdir(frontEndPath);\r\n    log('Changed to front-end directory', 'blue');\r\n    \r\n    // Install package if specified\r\n    if (config.installPackage && !config.skipInstall) {\r\n      const installCommand = config.legacyPeerDeps \r\n        ? `npm install ${config.installPackage} --legacy-peer-deps`\r\n        : `npm install ${config.installPackage}`;\r\n      \r\n      const result = executeCommand(installCommand, `Installing package: ${config.installPackage}`);\r\n      if (process.argv.includes('--ui')) {\r\n        buildOutput += `Package installation: ${result}\\n`;\r\n      }\r\n    }\r\n    \r\n    // Run build based on mode\r\n    if (config.mode === 'full') {\r\n      log('🧹 Running full build (clean install + build)', 'cyan');\r\n      \r\n      if (!config.skipInstall) {\r\n        const cleanCommand = 'rm -rf dist node_modules package-lock.json';\r\n        const result = executeCommand(cleanCommand, 'Cleaning previous build artifacts');\r\n        if (process.argv.includes('--ui')) {\r\n          buildOutput += `Clean: ${result}\\n`;\r\n        }\r\n        \r\n        const installCommand = config.legacyPeerDeps \r\n          ? 'npm install --legacy-peer-deps'\r\n          : 'npm install';\r\n        \r\n        const result2 = executeCommand(installCommand, 'Installing dependencies');\r\n        if (process.argv.includes('--ui')) {\r\n          buildOutput += `Install: ${result2}\\n`;\r\n        }\r\n      }\r\n      \r\n      const buildResult = executeCommand('npm run build', 'Building application');\r\n      if (process.argv.includes('--ui')) {\r\n        buildOutput += `Build: ${buildResult}\\n`;\r\n      }\r\n    } else {\r\n      // Incremental build\r\n      log('⚡ Running incremental build', 'cyan');\r\n      const buildResult = executeCommand('npm run build', 'Building application');\r\n      if (process.argv.includes('--ui')) {\r\n        buildOutput += `Build: ${buildResult}\\n`;\r\n      }\r\n    }\r\n    \r\n    const duration = Date.now() - startTime;\r\n    log(`✅ Build completed successfully in ${duration}ms`, 'green');\r\n    \r\n    // Write logs and metadata\r\n    writeBuildLog(config, true, buildOutput);\r\n    writeBuildMeta(config, true, duration);\r\n    \r\n    if (process.argv.includes('--ui')) {\r\n      console.log(JSON.stringify({\r\n        success: true,\r\n        output: buildOutput,\r\n        duration,\r\n        config\r\n      }));\r\n    }\r\n    \r\n  } catch (error) {\r\n    const duration = Date.now() - startTime;\r\n    log(`❌ Build failed after ${duration}ms`, 'red');\r\n    log(`Error: ${error.message}`, 'red');\r\n    \r\n    buildError = error.message;\r\n    \r\n    // Write logs and metadata\r\n    const config = readConfig();\r\n    writeBuildLog(config, false, buildOutput, buildError);\r\n    writeBuildMeta(config, false, duration);\r\n    \r\n    if (process.argv.includes('--ui')) {\r\n      console.log(JSON.stringify({\r\n        success: false,\r\n        error: buildError,\r\n        duration,\r\n        config\r\n      }));\r\n    }\r\n    \r\n    process.exit(1);\r\n  }\r\n}\r\n\r\n// Handle command line arguments\r\nif (process.argv.includes('--help') || process.argv.includes('-h')) {\r\n  console.log(`\r\nOrthodoxMetrics Build System\r\n\r\nUsage: node scripts/build.js [options]\r\n\r\nOptions:\r\n  --ui          Run in UI mode (returns JSON output)\r\n  --help, -h    Show this help message\r\n\r\nConfiguration:\r\n  Reads from build.config.json in the project root.\r\n  \r\n  Fields:\r\n  - mode: \"full\" | \"incremental\"\r\n  - memory: number (MB)\r\n  - installPackage: string (optional npm package)\r\n  - legacyPeerDeps: boolean\r\n  - skipInstall: boolean\r\n  - dryRun: boolean\r\n\r\nExamples:\r\n  node scripts/build.js\r\n  node scripts/build.js --ui\r\n  node scripts/build.js --help\r\n`);\r\n  process.exit(0);\r\n}\r\n\r\nmain(); "
+    },
+    "complexity": {
+      "totalLines": 295,
+      "codeLines": 235,
+      "commentLines": 13,
+      "commentRatio": 0.05241935483870968,
+      "averageLineLength": 32.810483870967744
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.072Z"
+  },
+  "contentHash": "5fa097647fe72c00520ede2f00466b3bc30c7b0bced57ef297a3149b558e65c1",
+  "discoveredAt": "2025-07-28T07:19:59.073Z"
+}

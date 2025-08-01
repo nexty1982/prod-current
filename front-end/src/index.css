@@ -67,3 +67,55 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Orthodox Metrics - Liturgical Flow Animation */
+@keyframes colorflow {
+  0% {
+    background-position: 0% 50%;
+  }
+  14.3% {
+    background-position: 25% 50%;
+  }
+  28.6% {
+    background-position: 50% 50%;
+  }
+  42.9% {
+    background-position: 75% 50%;
+  }
+  57.2% {
+    background-position: 100% 50%;
+  }
+  71.5% {
+    background-position: 75% 50%;
+  }
+  85.8% {
+    background-position: 50% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Utility classes for liturgical styling */
+.liturgical-flow {
+  animation: colorflow 20s ease-in-out infinite;
+  background-size: 400% 400%;
+}
+
+.orthodox-cross-glow {
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
+}
+
+.liturgical-gradient {
+  background: linear-gradient(
+    135deg,
+    #6B21A8 0%,     /* Purple - Lent */
+    #FFD700 14.3%,  /* Gold - Resurrection */
+    #DC2626 28.6%,  /* Red - Martyrs */
+    #059669 42.9%,  /* Green - Ordinary Time */
+    #2563EB 57.2%,  /* Blue - Theotokos */
+    #F9FAFB 71.5%,  /* White - Feasts */
+    #1F2937 85.8%,  /* Black - Good Friday */
+    #6B21A8 100%    /* Purple - Complete cycle */
+  );
+}

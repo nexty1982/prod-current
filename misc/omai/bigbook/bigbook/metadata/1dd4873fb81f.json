@@ -1,0 +1,43 @@
+{
+  "id": "1dd4873fb81f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/start-omai-system.sh",
+  "relativePath": "scripts/start-omai-system.sh",
+  "name": "start-omai-system.sh",
+  "extension": ".sh",
+  "size": 3221,
+  "modified": "2025-07-25T19:23:04.425Z",
+  "created": "2025-07-25T19:16:23.925Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 110,
+      "characters": 3177,
+      "words": 430
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 110,
+      "codeLines": 68,
+      "commentLines": 20,
+      "commentRatio": 0.22727272727272727,
+      "averageLineLength": 34.86363636363637
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.503Z"
+  },
+  "contentHash": "47cc14212cd64ea5283ee0b481e173e7ae37cc324b52413ad36801f1c252a7b8",
+  "discoveredAt": "2025-07-28T07:19:59.503Z"
+}

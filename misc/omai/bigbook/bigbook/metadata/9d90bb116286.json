@@ -1,0 +1,43 @@
+{
+  "id": "9d90bb116286",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/restart-and-test-routes.sh",
+  "relativePath": "server/scripts/restart-and-test-routes.sh",
+  "name": "restart-and-test-routes.sh",
+  "extension": ".sh",
+  "size": 745,
+  "modified": "2025-07-22T09:16:43.714Z",
+  "created": "2025-07-22T09:16:42.082Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 29,
+      "characters": 739,
+      "words": 107
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 29,
+      "codeLines": 19,
+      "commentLines": 4,
+      "commentRatio": 0.17391304347826086,
+      "averageLineLength": 30.91304347826087
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.062Z"
+  },
+  "contentHash": "130b917268cfc17d6a53246261cd2dd9cd09518714c24e9dc13da6e18d701cca",
+  "discoveredAt": "2025-07-28T07:20:01.062Z"
+}

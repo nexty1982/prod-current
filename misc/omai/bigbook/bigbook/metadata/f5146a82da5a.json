@@ -1,0 +1,54 @@
+{
+  "id": "f5146a82da5a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/rebuild-omlearn.sh",
+  "relativePath": "rebuild-omlearn.sh",
+  "name": "rebuild-omlearn.sh",
+  "extension": ".sh",
+  "size": 2253,
+  "modified": "2025-07-26T01:04:18.895Z",
+  "created": "2025-07-26T01:03:43.340Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 81,
+      "characters": 2219,
+      "words": 303
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 34
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 46
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 81,
+      "codeLines": 59,
+      "commentLines": 9,
+      "commentRatio": 0.1323529411764706,
+      "averageLineLength": 31.455882352941178
+    },
+    "lastAnalyzed": "2025-07-26T04:17:10.285Z"
+  },
+  "contentHash": "1d70f30c938f5f3119e02549fbd0e0e422edd11b650cdb062a7fdab28723c29a",
+  "discoveredAt": "2025-07-26T04:17:10.286Z"
+}

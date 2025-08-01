@@ -1,0 +1,54 @@
+{
+  "id": "a00659c1436e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/orthodoxCalendar.js",
+  "relativePath": "server/routes/orthodoxCalendar.js",
+  "name": "orthodoxCalendar.js",
+  "extension": ".js",
+  "size": 42438,
+  "modified": "2025-07-24T20:58:49.088Z",
+  "created": "2025-07-11T10:19:26.742Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1173,
+      "characters": 42438,
+      "words": 4893
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 1173,
+      "codeLines": 959,
+      "commentLines": 81,
+      "commentRatio": 0.07788461538461539,
+      "averageLineLength": 39.34423076923077
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.537Z"
+  },
+  "contentHash": "aa984ada4a463d6bde46cbabdb97029b62e17e55eb17e2834c3e0db1fa8a6e1d",
+  "discoveredAt": "2025-07-28T07:20:00.537Z"
+}

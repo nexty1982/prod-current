@@ -1,0 +1,59 @@
+{
+  "id": "e01e0ce9cbeb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/fix-omlearn-icon-bug.sh",
+  "relativePath": "fix-omlearn-icon-bug.sh",
+  "name": "fix-omlearn-icon-bug.sh",
+  "extension": ".sh",
+  "size": 1382,
+  "modified": "2025-07-26T03:40:47.477Z",
+  "created": "2025-07-26T03:40:09.979Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 47,
+      "characters": 1376,
+      "words": 191
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 22
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 25
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 30
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 47,
+      "codeLines": 38,
+      "commentLines": 1,
+      "commentRatio": 0.02564102564102564,
+      "averageLineLength": 34.1025641025641
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.805Z"
+  },
+  "contentHash": "dc713bd569f415c26a710c081fbdaf96a3297d5ba8463114c8097f27fad3a847",
+  "discoveredAt": "2025-07-26T04:17:09.805Z"
+}

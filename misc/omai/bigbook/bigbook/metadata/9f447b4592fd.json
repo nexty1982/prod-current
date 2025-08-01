@@ -1,0 +1,94 @@
+{
+  "id": "9f447b4592fd",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-blank-page-and-phantom.sh",
+  "relativePath": "server/debug/fix-blank-page-and-phantom.sh",
+  "name": "fix-blank-page-and-phantom.sh",
+  "extension": ".sh",
+  "size": 14833,
+  "modified": "2025-07-24T14:50:26.344Z",
+  "created": "2025-07-24T14:50:26.344Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 541,
+      "characters": 14777,
+      "words": 1578
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "@mui/material",
+        "line": 29
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-1.jpg",
+        "line": 31
+      },
+      {
+        "type": "npm_package",
+        "name": "@tabler/icons-react",
+        "line": 32
+      },
+      {
+        "type": "npm_package",
+        "name": "react-router",
+        "line": 34
+      },
+      {
+        "type": "npm_package",
+        "name": "src/context/CustomizerContext",
+        "line": 35
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 36
+      },
+      {
+        "type": "npm_package",
+        "name": "src/context/AuthContext",
+        "line": 37
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 144
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 493
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 497
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 541,
+      "codeLines": 428,
+      "commentLines": 19,
+      "commentRatio": 0.042505592841163314,
+      "averageLineLength": 31.818791946308725
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.113Z"
+  },
+  "contentHash": "ada9bc5c98f4732ec0e40c2c3f203ebbbbfef1db478e7998e98b862ff619fc1c",
+  "discoveredAt": "2025-07-28T07:20:00.113Z"
+}

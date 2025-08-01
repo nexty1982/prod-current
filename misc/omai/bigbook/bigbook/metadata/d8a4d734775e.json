@@ -1,0 +1,54 @@
+{
+  "id": "d8a4d734775e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/fix-omb-component-discovery.sh",
+  "relativePath": "scripts/7-26-25/fix-omb-component-discovery.sh",
+  "name": "fix-omb-component-discovery.sh",
+  "extension": ".sh",
+  "size": 4786,
+  "modified": "2025-07-26T08:17:48.316Z",
+  "created": "2025-07-26T08:05:17.300Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 126,
+      "characters": 4730,
+      "words": 584
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 89
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 113
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 126,
+      "codeLines": 100,
+      "commentLines": 8,
+      "commentRatio": 0.07407407407407407,
+      "averageLineLength": 42.49074074074074
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.996Z"
+  },
+  "contentHash": "181c67e4cfe4d6491fa0f89802b72d06eb255d975baad9bd5e3d2f0821d4d44e",
+  "discoveredAt": "2025-07-28T07:19:58.996Z"
+}

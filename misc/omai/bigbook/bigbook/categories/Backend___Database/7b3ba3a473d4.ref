@@ -1,0 +1,6 @@
+{
+  "id": "7b3ba3a473d4",
+  "name": "create_omsetup_user.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/create_omsetup_user.sql",
+  "type": "Database Scripts"
+}

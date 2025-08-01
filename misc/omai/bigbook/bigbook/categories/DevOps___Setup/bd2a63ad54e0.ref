@@ -1,0 +1,6 @@
+{
+  "id": "bd2a63ad54e0",
+  "name": "install-backup-system.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/install-backup-system.sh",
+  "type": "Setup Scripts"
+}

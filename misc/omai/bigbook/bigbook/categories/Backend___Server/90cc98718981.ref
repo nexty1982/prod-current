@@ -1,0 +1,6 @@
+{
+  "id": "90cc98718981",
+  "name": "restart-with-jit-routes.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-with-jit-routes.sh",
+  "type": "Server Scripts"
+}

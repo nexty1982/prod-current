@@ -1,0 +1,43 @@
+{
+  "id": "aef1cc425aad",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/BIG_BOOK_COMPONENTS_INDEX.md",
+  "relativePath": "bigbook/BIG_BOOK_COMPONENTS_INDEX.md",
+  "name": "BIG_BOOK_COMPONENTS_INDEX.md",
+  "extension": ".md",
+  "size": 241,
+  "modified": "2025-07-27T05:44:27.702Z",
+  "created": "2025-07-27T05:29:33.615Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 9,
+      "characters": 237,
+      "words": 32
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 9,
+      "codeLines": 2,
+      "commentLines": 2,
+      "commentRatio": 0.5,
+      "averageLineLength": 57.25
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.508Z"
+  },
+  "contentHash": "075bb3566aa368dbb661a5009d39db36e580b11f5a7272419939e52b6ed3bb72",
+  "discoveredAt": "2025-07-28T07:19:56.508Z"
+}

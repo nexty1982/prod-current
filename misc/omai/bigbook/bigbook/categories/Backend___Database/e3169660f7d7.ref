@@ -1,0 +1,6 @@
+{
+  "id": "e3169660f7d7",
+  "name": "fix-database-tables.js",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/fix-database-tables.js",
+  "type": "Database Scripts"
+}

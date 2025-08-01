@@ -1,32 +1,23 @@
-// server/config/session.js - UPDATED VERSION
+// server/config/session.js - FIXED VERSION FOR HTTPS PRODUCTION
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 
-const path = require('path');
-const envFile = process.env.NODE_ENV === 'production'
-  ? '../.env.production'
-  : '../.env.development';
-require('dotenv').config({ path: path.resolve(__dirname, envFile) });
+// Load environment variables
+require('dotenv').config();
 
-// Enhanced DB connection options
-const dbOptions = {
-  host: process.env.DB_HOST || '0.0.0.0',
+// Database connection options for session store
+const sessionStoreOptions = {
+  host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || 'orthodoxapp',
+  user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || 'Summerof1982@!',
-  database: process.env.DB_NAME || 'orthodoxmetrics_db',
-  connectTimeout: 30000, // Increased to 30 seconds
-  acquireTimeout: 30000,
-  waitForConnections: true,
-  connectionLimit: 20, // Increased pool size
-  queueLimit: 0,
-  reconnect: true,
-  // Session store specific options
-  expiration: 24 * 60 * 60 * 1000, // 1 day in milliseconds
-  checkExpirationInterval: 15 * 60 * 1000, // Check every 15 minutes
+  database: process.env.DB_NAME || 'orthodmetrics_dev',
+  charset: 'utf8mb4',
+  expiration: 86400000, // 24 hours
+  checkExpirationInterval: 900000, // Check every 15 minutes
   createDatabaseTable: true,
   endConnectionOnClose: true,
-  charset: 'utf8mb4',
+  clearExpired: true,
   schema: {
     tableName: 'sessions',
     columnNames: {
@@ -37,33 +28,158 @@ const dbOptions = {
   }
 };
 
-const store = new MySQLStore(dbOptions);
+// Create MySQL connection for session management
+const mysql = require('mysql2/promise');
+const sessionConnection = mysql.createPool({
+  host: sessionStoreOptions.host,
+  port: sessionStoreOptions.port,
+  user: sessionStoreOptions.user,
+  password: sessionStoreOptions.password,
+  database: sessionStoreOptions.database,
+  charset: sessionStoreOptions.charset,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-// Handle store errors gracefully
+const store = new MySQLStore(sessionStoreOptions);
+
+// Enhanced error handling for session store
 store.on('error', (error) => {
   console.error('❌ Session store error:', error);
+  console.error('❌ This may cause phantom user issues!');
 });
 
 store.on('connect', () => {
   console.log('✅ Session store connected successfully');
 });
 
-module.exports = session({
-  key: process.env.SESSION_KEY || 'orthodox.sid',
-  secret: process.env.SESSION_SECRET || 'fallback-secret-key-for-development',
-  store,
+store.on('disconnect', () => {
+  console.log('⚠️ Session store disconnected');
+});
+
+// Enhanced environment detection for HTTPS
+const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'development';
+// 🔧 FORCE HTTPS for orthodmetrics.com - always use secure cookies
+const isHTTPS = true; // Force secure cookies for production HTTPS site
+const sessionSecret = process.env.SESSION_SECRET || 'orthodox-metrics-production-secret-2025';
+
+console.log('🍪 Session configuration:');
+console.log('   Environment:', process.env.NODE_ENV || 'development');
+console.log('   HTTPS mode:', isHTTPS, '(FORCED TRUE for production)');
+console.log('   Secure cookies:', isHTTPS);
+console.log('   Session secret:', sessionSecret ? 'SET' : 'NOT SET');
+console.log('   Cookie name: orthodmetrics.sid');
+console.log('   Cookie domain: .orthodmetrics.com');
+
+const sessionConfig = {
+  name: 'orthodmetrics.sid',
+  secret: sessionSecret,
+  store: store,
   resave: false,
   saveUninitialized: false,
   rolling: true,
+  proxy: true, // Trust proxy headers (important for nginx setup)
   cookie: {
-    secure: false,
-    //secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    httpOnly: true, // SECURITY FIX: Prevent XSS attacks
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-    sameSite: 'lax'
-    //sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // Consistent setting
-    //domain: process.env.NODE_ENV === 'production' ? '.orthodoxmetrics.com' : undefined
+    secure: true, // 🔧 FIXED: Enable secure cookies for HTTPS
+    httpOnly: true,
+    maxAge: 86400000, // 24 hours
+    sameSite: 'lax', // Allow same-site requests
+    domain: '.orthodmetrics.com' // 🔧 FIXED: Correct domain for orthodmetrics.com
+  }
+};
+
+// Create session middleware with enhanced debugging
+const sessionMiddleware = session(sessionConfig);
+
+// Wrap session middleware to add debugging for phantom user issues
+const debugSessionMiddleware = (req, res, next) => {
+  const originalSessionId = req.sessionID;
+  
+  // Log session state before middleware
+  console.log(`🍪 SESSION DEBUG - ${req.method} ${req.path}`);
+  console.log(`   Session ID before: ${originalSessionId || 'NONE'}`);
+  console.log(`   Cookie header: ${req.headers.cookie ? 'PRESENT' : 'MISSING'}`);
+  
+  sessionMiddleware(req, res, (err) => {
+    if (err) {
+      console.error('❌ Session middleware error:', err);
+      return next(err);
+    }
+    
+    const newSessionId = req.sessionID;
+    console.log(`   Session ID after: ${newSessionId || 'NONE'}`);
+    console.log(`   Session user: ${req.session?.user?.email || 'NONE'}`);
+    console.log(`   Session keys: ${req.session ? Object.keys(req.session).join(', ') : 'NONE'}`);
+    
+    // Check for phantom user issue
+    if (newSessionId && !req.session?.user) {
+      console.log('⚠️  PHANTOM USER DETECTED: Session ID exists but no user data');
+      console.log('⚠️  This indicates session store or cookie transmission issues');
+    }
+    
+    // Check for session ID changes (indicates session not persisting)
+    if (originalSessionId && newSessionId && originalSessionId !== newSessionId) {
+      console.log('⚠️  SESSION ID CHANGED: Session not persisting properly');
+      console.log(`   Original: ${originalSessionId}`);
+      console.log(`   New: ${newSessionId}`);
+    }
+    
+    next();
+  });
+};
+
+// Session management utilities
+const SessionManager = {
+  async getUserSessionCount(userId) {
+    const [rows] = await sessionConnection.execute(
+      'SELECT COUNT(*) as count FROM sessions WHERE user_id = ? AND expires > NOW()',
+      [userId]
+    );
+    return rows[0].count;
   },
-  // Add session name for better identification
-  name: 'orthodox.sid'
-});
+
+  async getOldestUserSession(userId) {
+    const [rows] = await sessionConnection.execute(
+      'SELECT session_id FROM sessions WHERE user_id = ? AND expires > NOW() ORDER BY expires ASC LIMIT 1',
+      [userId]
+    );
+    return rows[0] || null;
+  },
+
+  async deleteSession(sessionId) {
+    await sessionConnection.execute('DELETE FROM sessions WHERE session_id = ?', [sessionId]);
+  },
+
+  async updateSessionUserId(sessionId, userId) {
+    await sessionConnection.execute(
+      'UPDATE sessions SET user_id = ? WHERE session_id = ?',
+      [userId, sessionId]
+    );
+  },
+
+  async enforceSessionLimits(userId, userRole, currentSessionId) {
+    // Determine session limits based on role
+    const sessionLimit = userRole === 'super_admin' ? 5 : 3;
+    
+    console.log(`🛡️ Checking session limits for user ${userId} (${userRole}): max ${sessionLimit} sessions`);
+    
+    const currentCount = await this.getUserSessionCount(userId);
+    console.log(`📊 Current sessions: ${currentCount}/${sessionLimit}`);
+    
+    if (currentCount >= sessionLimit) {
+      const oldestSession = await this.getOldestUserSession(userId);
+      if (oldestSession && oldestSession.session_id !== currentSessionId) {
+        console.log(`🚨 Session limit exceeded! Auto-kicking oldest session: ${oldestSession.session_id}`);
+        await this.deleteSession(oldestSession.session_id);
+        console.log(`✅ Oldest session removed. New count: ${await this.getUserSessionCount(userId)}`);
+      }
+    }
+  }
+};
+
+module.exports = {
+  sessionMiddleware: debugSessionMiddleware,
+  sessionConnection,
+  SessionManager
+};

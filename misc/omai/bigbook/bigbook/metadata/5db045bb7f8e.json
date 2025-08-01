@@ -1,0 +1,50 @@
+{
+  "id": "5db045bb7f8e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/fix-https-sessions.sh",
+  "relativePath": "server/scripts/fix-https-sessions.sh",
+  "name": "fix-https-sessions.sh",
+  "extension": ".sh",
+  "size": 3273,
+  "modified": "2025-07-24T14:50:26.376Z",
+  "created": "2025-07-24T14:50:26.376Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 109,
+      "characters": 3259,
+      "words": 405
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:secret|token)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 46,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/bin/bash\n\n# ==============================================================================\n# Fix HTTPS Session Authentication Script\n# ==============================================================================\n# This script fixes the session configuration for HTTPS and restarts the server\n# \n# Usage: ./fix-https-sessions.sh\n# ==============================================================================\n\nset -e\n\n# Colors for output\nRED='\\033[0;31m'\nGREEN='\\033[0;32m'\nYELLOW='\\033[1;33m'\nBLUE='\\033[0;34m'\nPURPLE='\\033[0;35m'\nNC='\\033[0m' # No Color\n\nlog() {\n    echo -e \"${2:-$NC}$(date '+%Y-%m-%d %H:%M:%S') - $1${NC}\"\n}\n\ninfo() {\n    log \"ℹ️ $1\" \"$BLUE\"\n}\n\nsuccess() {\n    log \"✅ $1\" \"$GREEN\"\n}\n\nwarning() {\n    log \"⚠️ $1\" \"$YELLOW\"\n}\n\necho \"========================================\"\necho \"🔧 Fixing HTTPS Session Authentication\"\necho \"========================================\"\n\ninfo \"Step 1: Setting environment variables for HTTPS session handling\"\n\n# Set production environment variables\nexport NODE_ENV=production\nexport HTTPS=true\nexport SESSION_SECRET=\"[REDACTED]\"\nexport TRUST_PROXY=true\n\nsuccess \"Environment variables set:\"\necho \"   NODE_ENV: $NODE_ENV\"\necho \"   HTTPS: $HTTPS\" \necho \"   SESSION_SECRET: SET\"\necho \"   TRUST_PROXY: $TRUST_PROXY\"\n\ninfo \"Step 2: Validating session configuration\"\n\n# Check if the session config file was updated\nif grep -q \"secure: isHTTPS\" config/session.js; then\n    success \"Session config has been updated for HTTPS\"\nelse\n    warning \"Session config may not be updated - check config/session.js\"\nfi\n\ninfo \"Step 3: Clearing old sessions to force new secure cookies\"\n\n# Clear old sessions from database to force new secure cookies\nmysql -u orthodoxapps -p\"Summerof1982@!\" orthodoxmetrics_db -e \"\nDELETE FROM sessions WHERE expires < UNIX_TIMESTAMP();\nUPDATE sessions SET data = JSON_SET(data, '$.cookie.secure', true) WHERE JSON_EXTRACT(data, '$.cookie.secure') = false;\n\" 2>/dev/null || warning \"Could not clear old sessions (this is ok)\"\n\ninfo \"Step 4: Restarting server with new configuration\"\n\n# Restart PM2 with environment variables\npm2 restart orthodox-backend --update-env\n\nsuccess \"Server restarted with HTTPS session configuration\"\n\ninfo \"Step 5: Testing session configuration\"\n\n# Wait a moment for server to start\nsleep 3\n\n# Test the configuration\nif curl -s https://orthodoxmetrics.com/api/auth/check > /dev/null; then\n    success \"Server is responding to HTTPS requests\"\nelse\n    warning \"Server may not be responding properly\"\nfi\n\necho \"\"\necho \"🎯 HTTPS Session Fix Complete!\"\necho \"================================\"\necho \"\"\necho \"Next steps:\"\necho \"1. Clear your browser cookies completely (very important!)\"\necho \"2. Login again - cookies should now be secure and persist\"\necho \"3. Check browser dev tools:\"\necho \"   - F12 > Application > Cookies\"\necho \"   - Look for 'orthodox.sid' cookie\"\necho \"   - Should show: Secure=true, Domain=.orthodoxmetrics.com\"\necho \"\"\necho \"If sessions still don't persist:\"\necho \"1. Check PM2 logs: pm2 logs orthodox-backend\"\necho \"2. Monitor auth logs: tail -f logs/auth.log\"\necho \"3. Test session endpoint: curl https://orthodoxmetrics.com/debug/session\"\necho \"\"\n\nsuccess \"Session authentication should now work with HTTPS!\" "
+    },
+    "complexity": {
+      "totalLines": 109,
+      "codeLines": 71,
+      "commentLines": 15,
+      "commentRatio": 0.1744186046511628,
+      "averageLineLength": 36.63953488372093
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.043Z"
+  },
+  "contentHash": "e9b9625c9427a2d770c82e60fb9ac50f14b5d5f3783a732c16f5dc74376fa2d0",
+  "discoveredAt": "2025-07-28T07:20:01.043Z"
+}

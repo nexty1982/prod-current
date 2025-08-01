@@ -1,0 +1,74 @@
+{
+  "id": "add4da7adc36",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/7813c6d92732.json",
+  "relativePath": "bigbook/metadata/7813c6d92732.json",
+  "name": "7813c6d92732.json",
+  "extension": ".json",
+  "size": 34612,
+  "modified": "2025-07-26T04:17:11.090Z",
+  "created": "2025-07-26T04:17:11.090Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 93,
+      "characters": 32836,
+      "words": 2649
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "bcrypt",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "multer",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 80
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 93,
+      "codeLines": 93,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 352.0860215053763
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.117Z"
+  },
+  "contentHash": "2721461d173ba85a605b7f4de04e5d9aaac3c7c25ee9435bd8d35669b714307b",
+  "discoveredAt": "2025-07-28T07:19:57.117Z"
+}

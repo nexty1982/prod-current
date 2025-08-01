@@ -1,0 +1,43 @@
+{
+  "id": "ee0c41215a23",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/churches_migration_fix.sql",
+  "relativePath": "server/database/churches_migration_fix.sql",
+  "name": "churches_migration_fix.sql",
+  "extension": ".sql",
+  "size": 2151,
+  "modified": "2025-07-05T23:16:48.000Z",
+  "created": "2025-07-09T00:48:35.106Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 42,
+      "characters": 2151,
+      "words": 244
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 42,
+      "codeLines": 36,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 58.47222222222222
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.594Z"
+  },
+  "contentHash": "cb359cec4439398f1c79b32f4397c39c522fc8ad084185ac57aafe267e713282",
+  "discoveredAt": "2025-07-28T07:19:59.594Z"
+}

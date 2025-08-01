@@ -1,0 +1,79 @@
+{
+  "id": "d485e1ff2ac9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/setup-headlines.sh",
+  "relativePath": "server/scripts/setup-headlines.sh",
+  "name": "setup-headlines.sh",
+  "extension": ".sh",
+  "size": 4521,
+  "modified": "2025-07-22T23:51:59.063Z",
+  "created": "2025-07-22T23:39:34.017Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 155,
+      "characters": 4465,
+      "words": 593
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "rss-parser",
+        "line": 44
+      },
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 51
+      },
+      {
+        "type": "npm_package",
+        "name": "cheerio",
+        "line": 58
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 40
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 47
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 54
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 61
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 155,
+      "codeLines": 115,
+      "commentLines": 18,
+      "commentRatio": 0.13533834586466165,
+      "averageLineLength": 32.41353383458647
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.072Z"
+  },
+  "contentHash": "e58410a1dcc687b8dbf3497586aeea7161a3507e5a8897d534a764d19141e3f4",
+  "discoveredAt": "2025-07-28T07:20:01.072Z"
+}

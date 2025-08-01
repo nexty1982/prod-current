@@ -1,0 +1,43 @@
+{
+  "id": "1d2b76a1b8f0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/services/authService.ts",
+  "relativePath": "front-end/src/services/authService.ts",
+  "name": "authService.ts",
+  "extension": ".ts",
+  "size": 5566,
+  "modified": "2025-07-23T15:14:45.353Z",
+  "created": "2025-07-05T04:35:31.683Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 198,
+      "characters": 5566,
+      "words": 641
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 198,
+      "codeLines": 128,
+      "commentLines": 50,
+      "commentRatio": 0.2808988764044944,
+      "averageLineLength": 30.02247191011236
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.891Z"
+  },
+  "contentHash": "8a0adf53d5597d6ecd14b9b6083dd450d88b1dd3575b1796d51ec1bd9ac7f625",
+  "discoveredAt": "2025-07-28T07:19:58.891Z"
+}

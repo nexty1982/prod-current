@@ -1,0 +1,43 @@
+{
+  "id": "e4c5aa38cc47",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/legacy/phase2-test-integration.js",
+  "relativePath": "server/legacy/phase2-test-integration.js",
+  "name": "phase2-test-integration.js",
+  "extension": ".js",
+  "size": 431,
+  "modified": "2025-07-14T21:28:14.207Z",
+  "created": "2025-07-14T21:28:14.207Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 14,
+      "characters": 417,
+      "words": 53
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 14,
+      "codeLines": 4,
+      "commentLines": 7,
+      "commentRatio": 0.6363636363636364,
+      "averageLineLength": 36.72727272727273
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.285Z"
+  },
+  "contentHash": "3511050e1f67e17103f0f809de8783cd00bbaee537ac615b6eba5241e2f44b75",
+  "discoveredAt": "2025-07-28T07:20:00.285Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "1b5cd2ecac79",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/_workspace_dist_parish-map/package.json",
+  "relativePath": "_workspace_dist_parish-map/package.json",
+  "name": "package.json",
+  "extension": ".json",
+  "size": 1343,
+  "modified": "2025-07-27T06:54:42.305Z",
+  "created": "2025-07-27T06:54:42.238Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 52,
+      "characters": 1343,
+      "words": 112
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 52,
+      "codeLines": 52,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 24.846153846153847
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.422Z"
+  },
+  "contentHash": "7242012fa64c3c7752e7633f57f757cc4bb1cd274d9a9f97336f7ef29421b4ca",
+  "discoveredAt": "2025-07-28T07:19:56.422Z"
+}

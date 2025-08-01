@@ -1,0 +1,94 @@
+{
+  "id": "373c26983381",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/final-dependency-fix.sh",
+  "relativePath": "scripts/7-26-25/final-dependency-fix.sh",
+  "name": "final-dependency-fix.sh",
+  "extension": ".sh",
+  "size": 2778,
+  "modified": "2025-07-26T22:09:01.077Z",
+  "created": "2025-07-26T22:08:56.123Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 71,
+      "characters": 2660,
+      "words": 339
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 7
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 10
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 11
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 14
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 18
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 21
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 24
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 28
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 67
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 68
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 71,
+      "codeLines": 60,
+      "commentLines": 1,
+      "commentRatio": 0.01639344262295082,
+      "averageLineLength": 42.459016393442624
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.985Z"
+  },
+  "contentHash": "57813270f4175d887261a6e4465d5324e004c2dbb3a4ca80398a7a5730e4c52d",
+  "discoveredAt": "2025-07-28T07:19:58.985Z"
+}

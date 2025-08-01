@@ -1,0 +1,6 @@
+{
+  "id": "3b2a905963e0",
+  "name": "check-server-connectivity.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-server-connectivity.sh",
+  "type": "Troubleshooting Utilities"
+}

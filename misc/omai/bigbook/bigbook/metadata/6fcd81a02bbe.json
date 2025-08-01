@@ -1,0 +1,43 @@
+{
+  "id": "6fcd81a02bbe",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/docs/orthodox_ssppoc2_only.sql",
+  "relativePath": "front-end/docs/orthodox_ssppoc2_only.sql",
+  "name": "orthodox_ssppoc2_only.sql",
+  "extension": ".sql",
+  "size": 6527,
+  "modified": "2025-07-21T03:27:10.709Z",
+  "created": "2025-07-21T03:27:10.677Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 217,
+      "characters": 6527,
+      "words": 596
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 217,
+      "codeLines": 149,
+      "commentLines": 43,
+      "commentRatio": 0.22395833333333334,
+      "averageLineLength": 32.869791666666664
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.588Z"
+  },
+  "contentHash": "a65d1538e889345af8e60054819089f2a7c9e3a191e4e6c5de961a015b8f419d",
+  "discoveredAt": "2025-07-28T07:19:58.588Z"
+}

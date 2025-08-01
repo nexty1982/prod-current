@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Grid,
@@ -29,6 +29,11 @@ import {
   MenuItem,
   Alert,
   Skeleton,
+  Container,
+  FormControlLabel,
+  Checkbox,
+  Stack,
+  Divider,
 } from '@mui/material';
 import {
   IconSearch,
@@ -39,14 +44,18 @@ import {
   IconMapPin,
   IconMail,
   IconCalendar,
+  IconFilter,
+  IconBuilding,
 } from '@tabler/icons-react';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
+import BlankCard from 'src/components/shared/BlankCard';
 import { useAuth } from 'src/context/AuthContext';
-import { orthodoxMetricsAPI } from 'src/api/orthodox-metrics.api';
+import { adminAPI } from 'src/api/admin.api';
 import { logger } from 'src/utils/logger';
 import type { Church } from 'src/types/orthodox-metrics.types';
 import OrthodoxChurchIcon from 'src/components/shared/OrthodoxChurchIcon';
+import OrthodoxBanner from 'src/components/shared/OrthodoxBanner';
 
 interface ChurchListProps { }
 
@@ -61,6 +70,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [shouldDeleteDatabase, setShouldDeleteDatabase] = useState(false);
 
   const BCrumb = [
     { to: '/', title: 'Home' },
@@ -78,7 +88,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
           userAction: 'church_list_load_start'
         });
         
-        const response = await orthodoxMetricsAPI.churches.getAll();
+        const response = await adminAPI.churches.getAll();
         setChurches(response.churches || []);
         
         // Log successful load
@@ -121,6 +131,70 @@ const ChurchList: React.FC<ChurchListProps> = () => {
     }
   }, [hasRole]);
 
+  // Refresh data when user returns to the page (e.g., from edit form)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && hasRole(['admin', 'super_admin'])) {
+        // Page became visible, refresh the data
+        logger.info('Church Management', 'Page became visible, refreshing churches list', {
+          userAction: 'church_list_refresh_on_focus'
+        });
+        
+        // Refetch churches without showing loading state
+        adminAPI.churches.getAll()
+          .then(response => {
+            setChurches(response.churches || []);
+            logger.info('Church Management', 'Churches list refreshed successfully', {
+              count: response.churches?.length || 0,
+              userAction: 'church_list_refresh_success'
+            });
+          })
+          .catch(err => {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to refresh churches';
+            logger.error('Church Management', 'Failed to refresh churches list', {
+              error: errorMessage,
+              userAction: 'church_list_refresh'
+            });
+          });
+      }
+    };
+
+    const handleFocus = () => {
+      if (hasRole(['admin', 'super_admin'])) {
+        // Window regained focus, refresh the data
+        logger.info('Church Management', 'Window regained focus, refreshing churches list', {
+          userAction: 'church_list_refresh_on_window_focus'
+        });
+        
+        // Refetch churches without showing loading state
+        adminAPI.churches.getAll()
+          .then(response => {
+            setChurches(response.churches || []);
+            logger.info('Church Management', 'Churches list refreshed successfully', {
+              count: response.churches?.length || 0,
+              userAction: 'church_list_refresh_success'
+            });
+          })
+          .catch(err => {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to refresh churches';
+            logger.error('Church Management', 'Failed to refresh churches list', {
+              error: errorMessage,
+              userAction: 'church_list_refresh'
+            });
+          });
+      }
+    };
+
+    // Listen for page visibility changes and window focus
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [hasRole]);
+
   // Handle search query changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -160,29 +234,36 @@ const ChurchList: React.FC<ChurchListProps> = () => {
 
   const handleDeleteChurch = async (church: Church) => {
     try {
-      // Log the delete attempt
       logger.info('Church Management', 'Church deletion initiated', {
         churchId: church.id,
         churchName: church.name,
+        deleteDatabase: shouldDeleteDatabase,
         userAction: 'church_delete_attempt'
       });
       
-      await orthodoxMetricsAPI.churches.delete(church.id);
+      // Remove all users from the church before deletion
+      await adminAPI.churches.removeAllUsers(church.id);
+      
+      // Delete the church with database option
+      await adminAPI.churches.delete(church.id, shouldDeleteDatabase);
+      
       setChurches(prev => prev.filter(c => c.id !== church.id));
       setDeleteDialogOpen(false);
       setSelectedChurch(null);
+      setShouldDeleteDatabase(false); // Reset the checkbox
       
-      // Log successful deletion
       logger.info('Church Management', 'Church deleted successfully', {
         churchId: church.id,
         churchName: church.name,
+        deletedDatabase: shouldDeleteDatabase,
         userAction: 'church_delete'
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete church';
       setError(errorMessage);
-      
-      // Log the delete error
+      if (errorMessage.includes('assigned users')) {
+        setError('Cannot delete church with assigned users. Please remove all users from this church first.');
+      }
       logger.error('Church Management', 'Failed to delete church', {
         error: errorMessage,
         churchId: church.id,
@@ -246,11 +327,11 @@ const ChurchList: React.FC<ChurchListProps> = () => {
     return isActive ? 'Active' : 'Inactive';
   };
 
-  if (!hasRole(['admin', 'super_admin', 'supervisor'])) {
+  if (!hasRole(['admin', 'super_admin', 'manager'])) {
     // Log the access denied error
     logger.warn('Church Management', 'Access denied. Administrator privileges required to view church management.', {
       userAction: 'church_management_access_denied',
-      requiredRoles: ['admin', 'super_admin', 'supervisor'],
+      requiredRoles: ['admin', 'super_admin', 'manager'],
       path: '/apps/church-management'
     });
     
@@ -264,530 +345,246 @@ const ChurchList: React.FC<ChurchListProps> = () => {
   }
 
   return (
-    <PageContainer title="Church Management" description="Manage Orthodox churches in the system">
+    <PageContainer title="Church Management" description="Manage churches in the Orthodox Metrics system">
       <Breadcrumb title="Church Management" items={BCrumb} />
+      
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
 
       <Grid container spacing={3}>
-        {/* Header Section with gradient background */}
-        <Grid size={{ xs: 12 }}>
-          <Box 
-            sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              borderRadius: 3,
-              p: 4,
-              mb: 3,
-              color: 'white',
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="7" cy="7" r="1"/%3E%3Ccircle cx="27" cy="7" r="1"/%3E%3Ccircle cx="47" cy="7" r="1"/%3E%3Ccircle cx="7" cy="27" r="1"/%3E%3Ccircle cx="27" cy="27" r="1"/%3E%3Ccircle cx="47" cy="27" r="1"/%3E%3Ccircle cx="7" cy="47" r="1"/%3E%3Ccircle cx="27" cy="47" r="1"/%3E%3Ccircle cx="47" cy="47" r="1"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-              },
-            }}
-          >
-            <Box display="flex" justifyContent="space-between" alignItems="center" position="relative" zIndex={1}>
-              <Box>
-                <Typography variant="h3" fontWeight="bold" gutterBottom>
-                  Church Management
-                </Typography>
-                <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                  Manage and oversee Orthodox church communities
-                </Typography>
-                <Box display="flex" alignItems="center" mt={2}>
-                  <Box sx={{ 
-                    backgroundColor: 'rgba(255,255,255,0.2)', 
-                    borderRadius: 2, 
-                    px: 2, 
-                    py: 0.5,
-                    mr: 2 
-                  }}>
-                    <Typography variant="body2" fontWeight="bold">
-                      {churches.length} Total Churches
-                    </Typography>
-                  </Box>
-                  <Box sx={{ 
-                    backgroundColor: 'rgba(255,255,255,0.2)', 
-                    borderRadius: 2, 
-                    px: 2, 
-                    py: 0.5 
-                  }}>
-                    <Typography variant="body2" fontWeight="bold">
-                      {churches.filter(c => c.is_active).length} Active
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-              <Button
-                variant="contained"
-                startIcon={<IconPlus />}
-                href="/apps/church-management/create"
-                onClick={handleAddNewChurch}
-                sx={{
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: 2,
-                  px: 3,
-                  py: 1.5,
-                  fontWeight: 'bold',
-                  textTransform: 'none',
-                  fontSize: '1rem',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.3)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                Add New Church
-              </Button>
-            </Box>
-          </Box>
-        </Grid>
+        {/* Search & Filter Controls Card */}
+        <Grid item xs={12}>
+          <BlankCard>
+            <CardContent>
+              <Typography variant="h5" mb={1}>
+                <IconBuilding size={24} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+                Church Management
+              </Typography>
+              <Typography color="textSecondary" mb={3}>
+                Search, filter, and manage Orthodox churches
+              </Typography>
 
-        {/* Search and Filter Section with modern glass morphism design */}
-        <Grid size={{ xs: 12 }}>
-          <Paper 
-            sx={{ 
-              p: 3, 
-              mb: 3,
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: 3,
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <Grid container spacing={3} alignItems="center">
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  placeholder="Search churches..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-                      },
-                      '&.Mui-focused': {
-                        backgroundColor: 'white',
-                        boxShadow: '0 4px 20px rgba(102, 126, 234, 0.25)',
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <IconSearch size={20} color="#667eea" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 3 }}>
-                <FormControl fullWidth>
-                  <InputLabel>Status Filter</InputLabel>
-                  <Select
-                    value={filterStatus}
-                    onChange={(e) => handleFilterChange(e.target.value as any)}
-                    label="Status Filter"
-                    sx={{
-                      borderRadius: 2,
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                      },
-                      '&.Mui-focused': {
-                        backgroundColor: 'white',
-                      },
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Search churches by name, location, or email..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconSearch size={20} />
+                        </InputAdornment>
+                      ),
                     }}
-                  >
-                    <MenuItem value="all">All Churches</MenuItem>
-                    <MenuItem value="active">Active Only</MenuItem>
-                    <MenuItem value="inactive">Inactive Only</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid size={{ xs: 12, md: 3 }}>
-                <Box sx={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  borderRadius: 2,
-                  p: 2,
-                  textAlign: 'center',
-                }}>
-                  <Typography variant="h6" fontWeight="bold">
-                    {filteredChurches.length}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Churches Found
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Status Filter</InputLabel>
+                    <Select
+                      value={filterStatus}
+                      label="Status Filter"
+                      onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive')}
+                      startAdornment={<IconFilter size={16} style={{ marginLeft: 8 }} />}
+                    >
+                      <MenuItem value="all">All Churches</MenuItem>
+                      <MenuItem value="active">Active Only</MenuItem>
+                      <MenuItem value="inactive">Inactive Only</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-        {/* Error Display with modern styling */}
-        {error && (
-          <Grid size={{ xs: 12 }}>
-            <Alert 
-              severity="error" 
-              sx={{ 
-                mb: 2,
-                borderRadius: 3,
-                border: '1px solid rgba(211, 47, 47, 0.2)',
-                backgroundColor: 'rgba(255, 235, 238, 0.8)',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 4px 20px rgba(211, 47, 47, 0.1)',
-              }}
-            >
-              {error}
-            </Alert>
-          </Grid>
-        )}
+                <Grid item xs={12} md={3}>
+                  <Stack direction="row" spacing={2} justifyContent="flex-end">
+                    {hasRole(['super_admin']) && (
+                      <Button
+                        variant="outlined"
+                        startIcon={<IconPlus />}
+                        onClick={() => navigate('/apps/church-management/wizard')}
+                      >
+                        Setup Wizard
+                      </Button>
+                    )}
+                    <Button
+                      variant="contained"
+                      startIcon={<IconPlus />}
+                      onClick={() => navigate('/apps/church-management/create')}
+                    >
+                      Add Church
+                    </Button>
+                  </Stack>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </BlankCard>
+        </Grid>
 
         {/* Churches Grid */}
-        <Grid size={{ xs: 12 }}>
-          {loading ? (
-            <Grid container spacing={3}>
-              {[...Array(6)].map((_, index) => (
-                <Grid size={{ xs: 12, md: 6, lg: 4 }} key={index}>
-                  <Card sx={{ 
-                    borderRadius: 4,
-                    background: 'linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%)',
-                    border: '1px solid rgba(102, 126, 234, 0.1)',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-                  }}>
-                    <CardContent sx={{ p: 3 }}>
-                      <Box display="flex" alignItems="center" mb={3}>
-                        <Skeleton 
-                          variant="rounded" 
-                          width={60} 
-                          height={60} 
-                          sx={{ borderRadius: 3 }}
-                        />
-                        <Box ml={2} flex={1}>
-                          <Skeleton variant="text" width="70%" height={28} sx={{ mb: 1 }} />
-                          <Skeleton variant="text" width="40%" height={24} />
-                        </Box>
-                      </Box>
-                      <Skeleton variant="text" width="100%" height={20} sx={{ mb: 2 }} />
-                      <Skeleton variant="text" width="85%" height={20} sx={{ mb: 2 }} />
-                      <Skeleton variant="text" width="75%" height={20} sx={{ mb: 2 }} />
-                      <Skeleton variant="rectangular" width="100%" height={40} sx={{ borderRadius: 2 }} />
-                    </CardContent>
-                    <CardActions sx={{ px: 3, pb: 3 }}>
-                      <Skeleton variant="circular" width={40} height={40} />
-                      <Skeleton variant="circular" width={40} height={40} />
-                      <Skeleton variant="circular" width={40} height={40} />
-                    </CardActions>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          ) : (
-            <Grid container spacing={3}>
-              {filteredChurches.map((church) => (
-                <Grid size={{ xs: 12, md: 6, lg: 4 }} key={church.id}>
-                  <Card
-                    sx={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      borderRadius: 4,
-                      background: 'linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%)',
-                      border: '1px solid rgba(102, 126, 234, 0.1)',
-                      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: 4,
-                        background: church.is_active 
-                          ? 'linear-gradient(90deg, #4ade80 0%, #22c55e 100%)'
-                          : 'linear-gradient(90deg, #f87171 0%, #ef4444 100%)',
-                        transition: 'all 0.3s ease',
-                      },
-                      '&:hover': {
-                        transform: 'translateY(-8px) scale(1.02)',
-                        boxShadow: '0 20px 40px rgba(102, 126, 234, 0.15)',
-                        '&::before': {
-                          height: 6,
-                        },
-                      },
-                    }}
-                  >
-                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                      {/* Church Header */}
-                      <Box display="flex" alignItems="center" mb={3}>
-                        <Box
-                          sx={{
-                            width: 60,
-                            height: 60,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: 3,
-                            background: church.is_active
-                              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                              : 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
-                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
-                            position: 'relative',
-                            '&::after': {
-                              content: '""',
-                              position: 'absolute',
-                              inset: 1,
-                              borderRadius: 'inherit',
-                              background: 'rgba(255, 255, 255, 0.1)',
-                            },
-                          }}
-                        >
-                          <OrthodoxChurchIcon
-                            isActive={church.is_active}
-                            uniqueId={church.id}
-                            sx={{ width: 32, height: 32, color: 'white', zIndex: 1 }}
-                          />
-                        </Box>
-                        <Box ml={2} flex={1}>
-                          <Typography 
-                            variant="h6" 
-                            component="h2" 
-                            noWrap
-                            sx={{
-                              fontWeight: 700,
-                              background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-                              backgroundClip: 'text',
-                              WebkitBackgroundClip: 'text',
-                              WebkitTextFillColor: 'transparent',
-                              mb: 1,
-                            }}
-                          >
-                            {church.name}
-                          </Typography>
-                          <Chip
-                            label={getChurchStatusText(church.is_active)}
-                            color={getChurchStatusColor(church.is_active)}
-                            size="small"
-                            sx={{
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                              borderRadius: 2,
-                              textTransform: 'uppercase',
-                              letterSpacing: 0.5,
-                            }}
-                          />
-                        </Box>
-                      </Box>
-
-                      {/* Church Details */}
-                      <Box space={2}>
-                        <Box display="flex" alignItems="center" mb={2} sx={{ 
-                          p: 1.5, 
-                          backgroundColor: 'rgba(102, 126, 234, 0.05)', 
-                          borderRadius: 2,
-                          border: '1px solid rgba(102, 126, 234, 0.1)',
-                        }}>
-                          <IconMapPin size={18} color="#667eea" />
-                          <Typography variant="body2" color="text.secondary" ml={1.5} noWrap>
-                            {church.address || 'Address not specified'}
-                          </Typography>
-                        </Box>
-
-                        <Box display="flex" alignItems="center" mb={2} sx={{ 
-                          p: 1.5, 
-                          backgroundColor: 'rgba(102, 126, 234, 0.05)', 
-                          borderRadius: 2,
-                          border: '1px solid rgba(102, 126, 234, 0.1)',
-                        }}>
-                          <IconMail size={18} color="#667eea" />
-                          <Typography variant="body2" color="text.secondary" ml={1.5} noWrap>
-                            {church.email || 'Email not specified'}
-                          </Typography>
-                        </Box>
-
-                        <Box display="flex" alignItems="center" mb={2} sx={{ 
-                          p: 1.5, 
-                          backgroundColor: 'rgba(102, 126, 234, 0.05)', 
-                          borderRadius: 2,
-                          border: '1px solid rgba(102, 126, 234, 0.1)',
-                        }}>
-                          <IconCalendar size={18} color="#667eea" />
-                          <Typography variant="body2" color="text.secondary" ml={1.5}>
-                            Created: {new Date(church.created_at).toLocaleDateString()}
-                          </Typography>
-                        </Box>
-
-                        <Box sx={{
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          color: 'white',
-                          borderRadius: 2,
-                          p: 1.5,
-                          textAlign: 'center',
-                        }}>
-                          <Typography variant="body2" fontWeight="bold">
-                            Language: {church.preferred_language?.toUpperCase() || 'EN'}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </CardContent>
-
-                    {/* Enhanced Action Buttons */}
-                    <CardActions sx={{ 
-                      justifyContent: 'center', 
-                      px: 3, 
-                      pb: 3,
-                      gap: 1,
-                    }}>
-                      <IconButton
-                        size="medium"
-                        onClick={() => handleViewChurch(church)}
-                        sx={{
-                          backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                          color: '#667eea',
-                          borderRadius: 2,
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            backgroundColor: '#667eea',
-                            color: 'white',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-                          },
-                        }}
-                      >
-                        <IconEye size={20} />
-                      </IconButton>
-                      <IconButton
-                        size="medium"
-                        onClick={() => handleEditChurch(church)}
-                        sx={{
-                          backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                          color: '#22c55e',
-                          borderRadius: 2,
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            backgroundColor: '#22c55e',
-                            color: 'white',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 4px 15px rgba(34, 197, 94, 0.4)',
-                          },
-                        }}
-                      >
-                        <IconEdit size={20} />
-                      </IconButton>
-                      <IconButton
-                        size="medium"
-                        onClick={() => handleDeleteDialogOpen(church)}
-                        sx={{
-                          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                          color: '#ef4444',
-                          borderRadius: 2,
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            backgroundColor: '#ef4444',
-                            color: 'white',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)',
-                          },
-                        }}
-                      >
-                        <IconTrash size={20} />
-                      </IconButton>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Grid>
-
-        {/* Enhanced Empty State */}
-        {!loading && filteredChurches.length === 0 && (
-          <Grid size={{ xs: 12 }}>
-            <Paper sx={{ 
-              p: 6, 
-              textAlign: 'center',
-              borderRadius: 4,
-              background: 'linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%)',
-              border: '1px solid rgba(102, 126, 234, 0.1)',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-            }}>
-              <Box sx={{
-                width: 120,
-                height: 120,
-                mx: 'auto',
-                mb: 3,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 8px 30px rgba(102, 126, 234, 0.3)',
-              }}>
-                <OrthodoxChurchIcon 
-                  sx={{ width: 60, height: 60, color: 'white' }}
-                  isActive={true}
-                  uniqueId={0}
-                />
-              </Box>
-              <Typography variant="h5" fontWeight="bold" gutterBottom sx={{
-                background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}>
-                {searchQuery ? 'No churches match your search' : 'No churches found'}
+        <Grid item xs={12}>
+          <BlankCard>
+            <CardContent>
+              <Typography variant="h5" mb={1}>
+                Churches ({filteredChurches.length})
               </Typography>
-              <Typography variant="body1" color="text.secondary" mb={4} sx={{ maxWidth: 400, mx: 'auto' }}>
-                {searchQuery 
-                  ? 'Try adjusting your search criteria or filters to find what you\'re looking for.'
-                  : 'Get started by adding your first Orthodox church to the system.'
+              <Typography color="textSecondary" mb={3}>
+                {filteredChurches.length === 0 
+                  ? 'No churches found matching your criteria'
+                  : `Showing ${filteredChurches.length} church${filteredChurches.length !== 1 ? 'es' : ''}`
                 }
               </Typography>
-              <Button
-                variant="contained"
-                startIcon={<IconPlus />}
-                href="/apps/church-management/create"
-                sx={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  borderRadius: 3,
-                  px: 4,
-                  py: 1.5,
-                  fontWeight: 'bold',
-                  textTransform: 'none',
-                  fontSize: '1rem',
-                  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 20px rgba(102, 126, 234, 0.5)',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                {searchQuery ? 'Add New Church' : 'Add First Church'}
-              </Button>
-            </Paper>
-          </Grid>
-        )}
+
+              {loading ? (
+                <Grid container spacing={3}>
+                  {[1, 2, 3, 4, 5, 6].map((item) => (
+                    <Grid item xs={12} sm={6} lg={4} key={item}>
+                      <Card>
+                        <CardContent>
+                          <Stack spacing={2}>
+                            <Skeleton variant="circular" width={40} height={40} />
+                            <Skeleton variant="text" width="80%" height={28} />
+                            <Skeleton variant="text" width="60%" height={20} />
+                            <Skeleton variant="text" width="40%" height={20} />
+                          </Stack>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : filteredChurches.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 6 }}>
+                  <IconBuilding size={64} style={{ opacity: 0.3, marginBottom: 16 }} />
+                  <Typography variant="h6" color="textSecondary" gutterBottom>
+                    {searchQuery || filterStatus !== 'all' 
+                      ? 'No churches match your search criteria'
+                      : 'No churches have been added yet'
+                    }
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+                    {searchQuery || filterStatus !== 'all'
+                      ? 'Try adjusting your search or filter settings'
+                      : 'Get started by adding your first church to the system'
+                    }
+                  </Typography>
+                  {!searchQuery && filterStatus === 'all' && (
+                    <Button
+                      variant="contained"
+                      startIcon={<IconPlus />}
+                      onClick={() => navigate('/apps/church-management/create')}
+                    >
+                      Add First Church
+                    </Button>
+                  )}
+                </Box>
+              ) : (
+                <Grid container spacing={3}>
+                  {filteredChurches.map((church) => (
+                    <Grid item xs={12} sm={6} lg={4} key={church.id}>
+                      <Card 
+                        sx={{ 
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                          '&:hover': {
+                            transform: 'translateY(-2px)',
+                            boxShadow: 4,
+                          }
+                        }}
+                      >
+                        <CardContent sx={{ flexGrow: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
+                            <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
+                              <OrthodoxChurchIcon />
+                            </Avatar>
+                            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                              <Typography variant="h6" noWrap title={church.name}>
+                                {church.name}
+                              </Typography>
+                              <Chip
+                                label={church.is_active ? 'Active' : 'Inactive'}
+                                color={church.is_active ? 'success' : 'default'}
+                                size="small"
+                                sx={{ mt: 0.5 }}
+                              />
+                            </Box>
+                          </Box>
+
+                          <Stack spacing={1}>
+                            {church.address && (
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <IconMapPin size={16} style={{ marginRight: 8, opacity: 0.7 }} />
+                                <Typography variant="body2" color="textSecondary" noWrap>
+                                  {church.address}
+                                </Typography>
+                              </Box>
+                            )}
+                            
+                            {church.email && (
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <IconMail size={16} style={{ marginRight: 8, opacity: 0.7 }} />
+                                <Typography variant="body2" color="textSecondary" noWrap>
+                                  {church.email}
+                                </Typography>
+                              </Box>
+                            )}
+                            
+                            {church.created_at && (
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <IconCalendar size={16} style={{ marginRight: 8, opacity: 0.7 }} />
+                                <Typography variant="body2" color="textSecondary">
+                                  Added {new Date(church.created_at).toLocaleDateString()}
+                                </Typography>
+                              </Box>
+                            )}
+                          </Stack>
+                        </CardContent>
+                        
+                        <Divider />
+                        
+                        <CardActions sx={{ justifyContent: 'space-between', px: 2, py: 1.5 }}>
+                          <Button
+                            size="small"
+                            startIcon={<IconEye />}
+                            onClick={() => handleViewChurch(church)}
+                          >
+                            View
+                          </Button>
+                          
+                          <Stack direction="row" spacing={1}>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleEditChurch(church)}
+                              sx={{ color: 'primary.main' }}
+                            >
+                              <IconEdit size={18} />
+                            </IconButton>
+                            
+                            {hasRole(['super_admin']) && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteChurch(church)}
+                                sx={{ color: 'error.main' }}
+                              >
+                                <IconTrash size={18} />
+                              </IconButton>
+                            )}
+                          </Stack>
+                        </CardActions>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </CardContent>
+          </BlankCard>
+        </Grid>
       </Grid>
 
       {/* Enhanced Delete Confirmation Dialog */}
@@ -818,8 +615,41 @@ const ChurchList: React.FC<ChurchListProps> = () => {
             Are you sure you want to delete <strong>"{selectedChurch?.name}"</strong>? 
           </Typography>
           <Typography variant="body2" color="text.secondary" mt={1}>
-            This action cannot be undone and will permanently remove all church data.
+            This action cannot be undone and will permanently remove the church from the system.
           </Typography>
+          
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={shouldDeleteDatabase}
+                onChange={(e) => setShouldDeleteDatabase(e.target.checked)}
+                sx={{
+                  color: '#ef4444',
+                  '&.Mui-checked': {
+                    color: '#ef4444',
+                  },
+                }}
+              />
+            }
+            label="Also remove the database and all church records"
+            sx={{ mt: 2, mb: 1 }}
+          />
+          
+          {shouldDeleteDatabase && (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              <Typography variant="body2">
+                <strong>⚠️ Warning:</strong> This will permanently delete the church's database including all records, users, and data. This action is irreversible!
+              </Typography>
+            </Alert>
+          )}
+          
+          {!shouldDeleteDatabase && (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              <Typography variant="body2">
+                <strong>ℹ️ Note:</strong> The church record will be removed from the system, but the database and all church records will be preserved.
+              </Typography>
+            </Alert>
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 3, gap: 1 }}>
           <Button 
@@ -884,7 +714,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
         <DialogContent sx={{ p: 4 }}>
           {selectedChurch && (
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item xs={12} md={6}>
                 <Box sx={{
                   p: 2,
                   backgroundColor: 'rgba(102, 126, 234, 0.05)',
@@ -897,7 +727,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
                   <Typography variant="body1" gutterBottom>{selectedChurch.name}</Typography>
                 </Box>
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item xs={12} md={6}>
                 <Box sx={{
                   p: 2,
                   backgroundColor: 'rgba(102, 126, 234, 0.05)',
@@ -915,7 +745,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
                   />
                 </Box>
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item xs={12} md={6}>
                 <Box sx={{
                   p: 2,
                   backgroundColor: 'rgba(102, 126, 234, 0.05)',
@@ -928,7 +758,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
                   <Typography variant="body1" gutterBottom>{selectedChurch.address || 'Not specified'}</Typography>
                 </Box>
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item xs={12} md={6}>
                 <Box sx={{
                   p: 2,
                   backgroundColor: 'rgba(102, 126, 234, 0.05)',
@@ -941,7 +771,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
                   <Typography variant="body1" gutterBottom>{selectedChurch.email || 'Not specified'}</Typography>
                 </Box>
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item xs={12} md={6}>
                 <Box sx={{
                   p: 2,
                   backgroundColor: 'rgba(102, 126, 234, 0.05)',
@@ -954,7 +784,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
                   <Typography variant="body1" gutterBottom>{selectedChurch.preferred_language?.toUpperCase() || 'EN'}</Typography>
                 </Box>
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item xs={12} md={6}>
                 <Box sx={{
                   p: 2,
                   backgroundColor: 'rgba(102, 126, 234, 0.05)',
@@ -1004,8 +834,8 @@ const ChurchList: React.FC<ChurchListProps> = () => {
             Edit Church
           </Button>
         </DialogActions>
-      </Dialog>
-    </PageContainer>
+              </Dialog>
+      </PageContainer>
   );
 };
 

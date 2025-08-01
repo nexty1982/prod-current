@@ -1,0 +1,54 @@
+{
+  "id": "78d2b414a2b3",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/tasks/scripts/fix-router-duplicate-pageeditor.sh",
+  "relativePath": "tasks/scripts/fix-router-duplicate-pageeditor.sh",
+  "name": "fix-router-duplicate-pageeditor.sh",
+  "extension": ".sh",
+  "size": 557,
+  "modified": "2025-07-28T06:52:11.081Z",
+  "created": "2025-07-28T06:51:33.168Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 15,
+      "characters": 545,
+      "words": 74
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 13
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 13
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 15,
+      "codeLines": 9,
+      "commentLines": 3,
+      "commentRatio": 0.25,
+      "averageLineLength": 44.25
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.595Z"
+  },
+  "contentHash": "af0e505661d7821bf021fdf90533beb9fbc0044c2c407387cb5fd72502cea645",
+  "discoveredAt": "2025-07-28T07:20:01.595Z"
+}

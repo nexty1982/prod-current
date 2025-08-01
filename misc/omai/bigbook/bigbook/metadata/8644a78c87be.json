@@ -1,0 +1,49 @@
+{
+  "id": "8644a78c87be",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/check-frontend-auth.sh",
+  "relativePath": "scripts/check-frontend-auth.sh",
+  "name": "check-frontend-auth.sh",
+  "extension": ".sh",
+  "size": 3488,
+  "modified": "2025-07-27T20:22:19.417Z",
+  "created": "2025-07-27T20:22:18.667Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 106,
+      "characters": 3388,
+      "words": 567
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 85
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 106,
+      "codeLines": 95,
+      "commentLines": 2,
+      "commentRatio": 0.020618556701030927,
+      "averageLineLength": 33.845360824742265
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.082Z"
+  },
+  "contentHash": "a6dcea51488841b0a9545a08141b99a2282e34618b3fc9ce796ad753decfd3ef",
+  "discoveredAt": "2025-07-28T07:19:59.082Z"
+}

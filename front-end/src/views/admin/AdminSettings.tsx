@@ -27,10 +27,22 @@ import {
     IconUsers,
     IconVersions,
     IconWorld,
-    IconCalendar
+    IconCalendar,
+    IconPhoto,
+    IconActivity,
+    IconBook,
+    IconMail,
+    IconCopy
 } from '@tabler/icons-react';
 import { useAuth } from '../../context/AuthContext';
 import BackupSettings from '../settings/BackupSettings';
+import ContentSettings from '../settings/ContentSettings';
+import ServiceManagement from '../settings/ServiceManagement';
+import NotificationManagement from '../../components/admin/NotificationManagement';
+import OMBigBook from '../../components/admin/OMBigBook';
+import ComponentManager from './components/ComponentManager';
+import OMAITaskAssignmentWidget from '../../components/admin/OMAITaskAssignmentWidget';
+import OmaiSpinSettings from './OmaiSpinSettings';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { 
@@ -70,11 +82,13 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const AdminSettings: React.FC = () => {
-    const { isSuperAdmin } = useAuth();
+    const { isSuperAdmin, hasRole, user } = useAuth();
     const [tabValue, setTabValue] = useState(0);
     const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+
 
     // Fetch system information when General tab is active
     useEffect(() => {
@@ -118,8 +132,43 @@ const AdminSettings: React.FC = () => {
                 </Box>
 
                 <Card>
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                        <Tabs value={tabValue} onChange={handleTabChange} aria-label="admin settings tabs">
+                    <Box sx={{ 
+                        borderBottom: 1, 
+                        borderColor: 'divider',
+                        // Mobile-friendly scrollable tabs container
+                        '& .MuiTabs-root': {
+                            minHeight: 'auto',
+                        },
+                        '& .MuiTabs-flexContainer': {
+                            gap: { xs: 0, sm: 1 }
+                        },
+                        '& .MuiTab-root': {
+                            minWidth: { xs: 'auto', sm: 160 },
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            padding: { xs: '8px 12px', sm: '12px 16px' },
+                            whiteSpace: 'nowrap',
+                            '& .MuiTab-iconWrapper': {
+                                fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                                marginBottom: { xs: '2px', sm: '4px' }
+                            }
+                        }
+                    }}>
+                        <Tabs 
+                            value={tabValue} 
+                            onChange={handleTabChange} 
+                            aria-label="admin settings tabs"
+                            variant="scrollable"
+                            scrollButtons="auto"
+                            allowScrollButtonsMobile
+                            sx={{
+                                '& .MuiTabs-scrollButtons': {
+                                    '&.Mui-disabled': { opacity: 0.3 }
+                                },
+                                '& .MuiTabs-indicator': {
+                                    height: 3
+                                }
+                            }}
+                        >
                             <Tab
                                 icon={<IconServer />}
                                 label="General"
@@ -143,6 +192,42 @@ const AdminSettings: React.FC = () => {
                                 label="Notifications"
                                 id="admin-settings-tab-3"
                                 aria-controls="admin-settings-tabpanel-3"
+                            />
+                            <Tab
+                                icon={<IconPhoto />}
+                                label="Content"
+                                id="admin-settings-tab-4"
+                                aria-controls="admin-settings-tabpanel-4"
+                            />
+                            <Tab
+                                icon={<IconActivity />}
+                                label="Services"
+                                id="admin-settings-tab-5"
+                                aria-controls="admin-settings-tabpanel-5"
+                            />
+                            <Tab
+                                icon={<IconBook />}
+                                label="OM Big Book"
+                                id="admin-settings-tab-6"
+                                aria-controls="admin-settings-tabpanel-6"
+                            />
+                            <Tab
+                                icon={<IconCpu />}
+                                label="Components"
+                                id="admin-settings-tab-7"
+                                aria-controls="admin-settings-tabpanel-7"
+                            />
+                            <Tab
+                                icon={<IconMail />}
+                                label="OMAI Tasks"
+                                id="admin-settings-tab-8"
+                                aria-controls="admin-settings-tabpanel-8"
+                            />
+                            <Tab
+                                icon={<IconCopy />}
+                                label="OMAI Spin"
+                                id="admin-settings-tab-9"
+                                aria-controls="admin-settings-tabpanel-9"
                             />
                         </Tabs>
                     </Box>
@@ -378,7 +463,7 @@ const AdminSettings: React.FC = () => {
                         <BackupSettings />
                     </TabPanel>
 
-                    <TabPanel value={tabValue} index={isSuperAdmin() ? 2 : 1}>
+                    <TabPanel value={tabValue} index={2}>
                         <Typography variant="h6" gutterBottom>
                             Security Settings
                         </Typography>
@@ -409,45 +494,32 @@ const AdminSettings: React.FC = () => {
                         </Stack>
                     </TabPanel>
 
-                    <TabPanel value={tabValue} index={isSuperAdmin() ? 3 : 2}>
-                        <Typography variant="h6" gutterBottom>
-                            Notification Settings
-                        </Typography>
-                        <Alert severity="success" sx={{ mb: 3 }}>
-                            Notification system is now active. Manage notification types, templates, and user preferences.
-                        </Alert>
-                        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
-                            <Card variant="outlined" sx={{ flex: 1 }}>
-                                <CardContent>
-                                    <Typography variant="h6" gutterBottom>
-                                        Email Notifications
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Configure email notification settings and templates.
-                                    </Typography>
-                                    <Box sx={{ mt: 2 }}>
-                                        <Button variant="outlined" size="small">
-                                            Manage Templates
-                                        </Button>
-                                    </Box>
-                                </CardContent>
-                            </Card>
-                            <Card variant="outlined" sx={{ flex: 1 }}>
-                                <CardContent>
-                                    <Typography variant="h6" gutterBottom>
-                                        System Alerts
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Configure system alerts and monitoring notifications.
-                                    </Typography>
-                                    <Box sx={{ mt: 2 }}>
-                                        <Button variant="outlined" size="small">
-                                            View Queue
-                                        </Button>
-                                    </Box>
-                                </CardContent>
-                            </Card>
-                        </Stack>
+                    <TabPanel value={tabValue} index={3}>
+                        <NotificationManagement />
+                    </TabPanel>
+
+                    <TabPanel value={tabValue} index={4}>
+                        <ContentSettings />
+                    </TabPanel>
+
+                    <TabPanel value={tabValue} index={5}>
+                        <ServiceManagement />
+                    </TabPanel>
+
+                    <TabPanel value={tabValue} index={6}>
+                        <OMBigBook />
+                    </TabPanel>
+
+                    <TabPanel value={tabValue} index={7}>
+                        <ComponentManager />
+                    </TabPanel>
+
+                    <TabPanel value={tabValue} index={8}>
+                        <OMAITaskAssignmentWidget />
+                    </TabPanel>
+
+                    <TabPanel value={tabValue} index={9}>
+                        <OmaiSpinSettings />
                     </TabPanel>
                 </Card>
             </Box>

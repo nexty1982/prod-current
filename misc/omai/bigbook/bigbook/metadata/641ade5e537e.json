@@ -1,0 +1,43 @@
+{
+  "id": "641ade5e537e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/API_ENDPOINTS_REFERENCE.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/API_ENDPOINTS_REFERENCE.md",
+  "name": "API_ENDPOINTS_REFERENCE.md",
+  "extension": ".md",
+  "size": 12925,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:04.608Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 746,
+      "characters": 12925,
+      "words": 1426
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 746,
+      "codeLines": 450,
+      "commentLines": 139,
+      "commentRatio": 0.23599320882852293,
+      "averageLineLength": 20.41426146010187
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.135Z"
+  },
+  "contentHash": "d6e4debc0aa13899df8618dc691b3771ad195a2e226535b493d2940d85fce38b",
+  "discoveredAt": "2025-07-28T07:19:58.135Z"
+}

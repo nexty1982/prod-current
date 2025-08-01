@@ -1,0 +1,62 @@
+{
+  "id": "3e8c54c30080",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/7-11-25/DIAGNOSTIC_TOOLKIT_DOCUMENTATION.md",
+  "relativePath": "docs/archive/7-11-25/DIAGNOSTIC_TOOLKIT_DOCUMENTATION.md",
+  "name": "DIAGNOSTIC_TOOLKIT_DOCUMENTATION.md",
+  "extension": ".md",
+  "size": 9747,
+  "modified": "2025-07-12T03:59:18.769Z",
+  "created": "2025-07-12T03:56:10.174Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 382,
+      "characters": 9655,
+      "words": 1152
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 205,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 206,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 207,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "# Diagnostic Toolkit Documentation\r\n\r\n## Overview\r\n\r\nThis document describes the comprehensive diagnostic toolkit developed for Orthodox Metrics to identify and resolve link, permission, and API issues. The toolkit consists of 7 specialized Node.js scripts designed for different testing scenarios.\r\n\r\n## Architecture\r\n\r\n```\r\nserver/scripts/\r\n├── quick-permission-test.js          # Fast health check\r\n├── check-links-permissions.js        # Comprehensive auth testing\r\n├── browser-session-test.js           # Real session testing\r\n├── diagnose-churches-api.js          # Specific endpoint investigation\r\n├── test-api-routes.js                # Systematic API testing\r\n├── debug-churches-api.js             # Deep database debugging\r\n└── fix-database-tables.js            # Infrastructure repair\r\n```\r\n\r\n## Script Specifications\r\n\r\n### 1. Quick Permission Test (`quick-permission-test.js`)\r\n\r\n**Purpose**: Rapid health assessment without authentication requirements\r\n\r\n**Features**:\r\n- Tests 11 core routes (8 frontend, 3 API)\r\n- No session management required\r\n- Categorizes errors by type (auth, not found, server error)\r\n- Provides success rate percentage\r\n- Generates actionable recommendations\r\n\r\n**Output Format**:\r\n```\r\n🚀 Quick Permission Test for Orthodox Metrics\r\n==================================================\r\n✅ 200 - Route Name (Success)\r\n❌ 404 - Route Name (Expected 200) - Route not found\r\n📊 SUMMARY: 8/11 successful (72.7%)\r\n```\r\n\r\n**Use Cases**:\r\n- Development environment testing\r\n- CI/CD pipeline health checks\r\n- Quick issue identification\r\n- Pre-deployment verification\r\n\r\n### 2. Full Link Checker (`check-links-permissions.js`)\r\n\r\n**Purpose**: Comprehensive authentication-aware testing\r\n\r\n**Features**:\r\n- Automatic superadmin login\r\n- HTML page crawling for additional links\r\n- Session cookie management\r\n- Detailed JSON report generation\r\n- Frontend and API endpoint testing\r\n\r\n**Authentication Flow**:\r\n1. POST to `/api/auth/login` with credentials\r\n2. Extract session cookies\r\n3. Use cookies for subsequent requests\r\n4. Crawl HTML responses for additional links\r\n\r\n**Output**:\r\n- Console progress reporting\r\n- JSON file: `logs/link-check-{timestamp}.json`\r\n- Categorized error analysis\r\n\r\n### 3. Browser Session Test (`browser-session-test.js`)\r\n\r\n**Purpose**: Testing with real user browser sessions\r\n\r\n**Features**:\r\n- Uses actual browser cookies\r\n- Command-line cookie input\r\n- Most accurate permission testing\r\n- Bypasses potential login issues\r\n\r\n**Usage Pattern**:\r\n```bash\r\nnpm run check:session -- --cookie \"connect.sid=s%3AyourValue\"\r\n```\r\n\r\n**Cookie Extraction**:\r\n- Chrome/Edge: Developer Tools > Application > Cookies\r\n- Firefox: Developer Tools > Storage > Cookies\r\n\r\n### 4. Churches API Diagnostic (`diagnose-churches-api.js`)\r\n\r\n**Purpose**: Targeted investigation of Churches API 500 errors\r\n\r\n**Features**:\r\n- Database connectivity testing\r\n- Table structure verification\r\n- Query simulation\r\n- Error isolation and analysis\r\n\r\n**Diagnostic Steps**:\r\n1. Test database connection\r\n2. Verify table existence\r\n3. Simulate API queries\r\n4. Analyze error patterns\r\n\r\n### 5. Comprehensive API Route Tester (`test-api-routes.js`)\r\n\r\n**Purpose**: Systematic testing of all major API endpoints\r\n\r\n**Features**:\r\n- Tests 15+ API routes\r\n- Authentication simulation\r\n- Error categorization\r\n- Specific recommendations per error type\r\n\r\n**API Categories Tested**:\r\n- Authentication endpoints\r\n- User management\r\n- Church management\r\n- Template management\r\n- Administrative functions\r\n\r\n### 6. Churches API Debug (`debug-churches-api.js`)\r\n\r\n**Purpose**: Deep debugging with direct database queries\r\n\r\n**Features**:\r\n- Direct SQL query execution\r\n- Function-level testing\r\n- Raw data examination\r\n- Execution path simulation\r\n\r\n**Debug Levels**:\r\n1. Database connection\r\n2. Table queries\r\n3. Data processing\r\n4. Response formatting\r\n\r\n### 7. Database Table Fixer (`fix-database-tables.js`)\r\n\r\n**Purpose**: Automated database migration and repair\r\n\r\n**Features**:\r\n- Table existence checking\r\n- Missing table creation\r\n- Default data population\r\n- Migration logging\r\n\r\n**Migration Capabilities**:\r\n- `menu_role_permissions` table creation\r\n- Default permission insertion\r\n- Foreign key establishment\r\n- Data integrity verification\r\n\r\n## npm Scripts Integration\r\n\r\nEnhanced `package.json` with diagnostic commands:\r\n\r\n```json\r\n{\r\n  \"scripts\": {\r\n    \"check:quick\": \"node scripts/quick-permission-test.js\",\r\n    \"check:full\": \"node scripts/check-links-permissions.js\", \r\n    \"check:session\": \"node scripts/browser-session-test.js\",\r\n    \"diagnose:churches\": \"node scripts/diagnose-churches-api.js\",\r\n    \"test:api\": \"node scripts/test-api-routes.js\",\r\n    \"debug:churches\": \"node scripts/debug-churches-api.js\",\r\n    \"fix:database\": \"node scripts/fix-database-tables.js\"\r\n  }\r\n}\r\n```\r\n\r\n## Error Classification System\r\n\r\n### HTTP Status Code Categories\r\n\r\n#### 200 (Success)\r\n- ✅ Green checkmark\r\n- Route functioning correctly\r\n- No action required\r\n\r\n#### 401 (Authentication Required)\r\n- 🔒 Lock icon\r\n- Session cookies needed\r\n- Use browser session test\r\n\r\n#### 403 (Permission Denied)\r\n- 🚫 Prohibition sign\r\n- Role/permission issue\r\n- Check user role in database\r\n\r\n#### 404 (Not Found)\r\n- 💥 Explosion icon\r\n- Route not implemented\r\n- Verify endpoint existence\r\n\r\n#### 500 (Server Error)\r\n- 🔥 Fire icon\r\n- Backend issue\r\n- Check application logs and database\r\n\r\n## Environment Configuration\r\n\r\n### Default Values\r\n```javascript\r\nconst BASE_URL = process.env.[REDACTED] || 'http://localhost:3001';\r\nconst ADMIN_EMAIL = process.env.[REDACTED] || 'superadmin@orthodoxmetrics.com';\r\nconst ADMIN_PASSWORD = process.env.[REDACTED] || 'admin123';\r\n```\r\n\r\n### Custom Configuration\r\n```bash\r\n# Different environment\r\nBASE_URL=https://staging.orthodoxmetrics.com npm run check:quick\r\n\r\n# Custom credentials\r\nADMIN_EMAIL=admin@church.com ADMIN_PASSWORD=secret npm run check:full\r\n```\r\n\r\n## Output File Management\r\n\r\n### Log Directory Structure\r\n```\r\nserver/logs/\r\n├── link-check-2025-07-11-14-30-00.json\r\n├── session-test-2025-07-11-14-35-00.json\r\n└── diagnostic-report-2025-07-11-14-40-00.json\r\n```\r\n\r\n### JSON Report Schema\r\n```json\r\n{\r\n  \"timestamp\": \"2025-07-11T14:30:00.000Z\",\r\n  \"testType\": \"quick-permission\",\r\n  \"summary\": {\r\n    \"total\": 11,\r\n    \"successful\": 8,\r\n    \"failed\": 3,\r\n    \"successRate\": \"72.7%\"\r\n  },\r\n  \"results\": [\r\n    {\r\n      \"route\": \"/dashboard\",\r\n      \"status\": 200,\r\n      \"success\": true,\r\n      \"responseTime\": 150\r\n    }\r\n  ],\r\n  \"recommendations\": [\r\n    \"Check application logs for 500 errors\",\r\n    \"Verify database connectivity\"\r\n  ]\r\n}\r\n```\r\n\r\n## Performance Considerations\r\n\r\n### Script Execution Times\r\n- Quick test: ~5-10 seconds\r\n- Full test: ~30-60 seconds\r\n- Session test: ~10-20 seconds\r\n- Database debug: ~5-15 seconds\r\n\r\n### Resource Usage\r\n- Minimal CPU impact\r\n- Low memory footprint\r\n- Network dependent on endpoint count\r\n- Database connection pooling utilized\r\n\r\n## Security Features\r\n\r\n### Credential Protection\r\n- Environment variable support\r\n- No hardcoded passwords\r\n- Session cookie expiration respect\r\n- Secure output logging\r\n\r\n### Access Control\r\n- Superadmin role verification\r\n- Permission hierarchy testing\r\n- Role-based route access validation\r\n- Authentication flow verification\r\n\r\n## Troubleshooting Common Issues\r\n\r\n### Connection Refused\r\n```\r\nError: connect ECONNREFUSED ::1:3001\r\n```\r\n**Solution**: Verify server is running on correct port\r\n\r\n### Module Not Found\r\n```\r\nError: Cannot find module 'axios'\r\n```\r\n**Solution**: Run `npm install axios` in server directory\r\n\r\n### Login Failed\r\n```\r\n❌ Login failed: Invalid credentials\r\n```\r\n**Solution**: Verify ADMIN_EMAIL and ADMIN_PASSWORD are correct\r\n\r\n### Database Connection Failed\r\n```\r\nError: ER_ACCESS_DENIED_ERROR\r\n```\r\n**Solution**: Check database credentials and connection string\r\n\r\n## Integration with CI/CD\r\n\r\n### GitHub Actions Example\r\n```yaml\r\n- name: Run Permission Tests\r\n  run: |\r\n    cd server\r\n    npm run check:quick\r\n    if [ $? -ne 0 ]; then\r\n      echo \"Permission tests failed\"\r\n      exit 1\r\n    fi\r\n```\r\n\r\n### Pre-deployment Checks\r\n```bash\r\n#!/bin/bash\r\ncd server\r\nnpm run check:quick\r\nnpm run fix:database\r\nnpm run test:api\r\n```\r\n\r\n## Maintenance and Updates\r\n\r\n### Adding New Routes\r\n```javascript\r\nconst newRoutes = [\r\n  '/your/new/route',\r\n  '/api/your/new/endpoint'\r\n];\r\n```\r\n\r\n### Extending Error Categories\r\n```javascript\r\nconst errorCategories = {\r\n  401: { icon: '🔒', message: 'Authentication required' },\r\n  403: { icon: '🚫', message: 'Permission denied' },\r\n  404: { icon: '💥', message: 'Route not found' },\r\n  500: { icon: '🔥', message: 'Server error' },\r\n  502: { icon: '🌐', message: 'Bad gateway' }  // New category\r\n};\r\n```\r\n\r\n### Database Migration Extensions\r\n```javascript\r\nconst additionalTables = [\r\n  'user_sessions',\r\n  'audit_logs', \r\n  'templates'\r\n];\r\n```\r\n\r\n## Future Enhancements\r\n\r\n### Planned Features\r\n1. **Automated Scheduling**: Cron job integration for regular health checks\r\n2. **Slack/Email Notifications**: Alert system for critical failures\r\n3. **Performance Monitoring**: Response time tracking and alerting\r\n4. **Historical Analysis**: Trend analysis of success rates over time\r\n5. **Load Testing**: Concurrent request testing capabilities\r\n\r\n### API Expansion\r\n1. **GraphQL Testing**: Support for GraphQL endpoints\r\n2. **WebSocket Testing**: Real-time connection testing\r\n3. **File Upload Testing**: Multipart form data testing\r\n4. **Rate Limit Testing**: API throttling verification\r\n\r\n---\r\n\r\n**Toolkit Status**: ✅ COMPLETE AND OPERATIONAL  \r\n**Last Updated**: July 11, 2025  \r\n**Maintenance**: Ongoing as application evolves\r\n"
+    },
+    "complexity": {
+      "totalLines": 382,
+      "codeLines": 225,
+      "commentLines": 80,
+      "commentRatio": 0.26229508196721313,
+      "averageLineLength": 30.15737704918033
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.047Z"
+  },
+  "contentHash": "f2ca233d183878daaf76efb9a18a33075bf46ec7d755eab2ed02e7016cbce0fd",
+  "discoveredAt": "2025-07-28T07:19:58.047Z"
+}

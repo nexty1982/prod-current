@@ -1,0 +1,43 @@
+{
+  "id": "b1e2b81e029d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/control/tenant-status.json",
+  "relativePath": "services/om-ai/control/tenant-status.json",
+  "name": "tenant-status.json",
+  "extension": ".json",
+  "size": 2103,
+  "modified": "2025-07-25T00:54:53.136Z",
+  "created": "2025-07-25T00:54:52.557Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 39,
+      "characters": 2103,
+      "words": 191
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 39,
+      "codeLines": 39,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 52.94871794871795
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.425Z"
+  },
+  "contentHash": "339ad55d9544c66ea528a32d76725d03d175451ec2098d754d94e5830495f212",
+  "discoveredAt": "2025-07-28T07:20:01.425Z"
+}

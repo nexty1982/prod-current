@@ -1,0 +1,43 @@
+{
+  "id": "9d90429050ce",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/services/fieldConfigService.ts",
+  "relativePath": "server/services/fieldConfigService.ts",
+  "name": "fieldConfigService.ts",
+  "extension": ".ts",
+  "size": 3538,
+  "modified": "2025-07-14T21:26:00.475Z",
+  "created": "2025-07-14T21:26:00.475Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 128,
+      "characters": 3538,
+      "words": 369
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 128,
+      "codeLines": 90,
+      "commentLines": 23,
+      "commentRatio": 0.20353982300884957,
+      "averageLineLength": 29.938053097345133
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.107Z"
+  },
+  "contentHash": "04df502b88506ccec2911ea68fb03896461b5ac9fa47de166450924b36df3296",
+  "discoveredAt": "2025-07-28T07:20:01.107Z"
+}

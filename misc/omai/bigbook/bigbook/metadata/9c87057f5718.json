@@ -1,0 +1,43 @@
+{
+  "id": "9c87057f5718",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-24-25/CHURCH_RECORDS_ISSUE_DIAGNOSIS.md",
+  "relativePath": "docs/7-24-25/CHURCH_RECORDS_ISSUE_DIAGNOSIS.md",
+  "name": "CHURCH_RECORDS_ISSUE_DIAGNOSIS.md",
+  "extension": ".md",
+  "size": 4226,
+  "modified": "2025-07-22T22:30:32.995Z",
+  "created": "2025-07-22T22:30:31.059Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 108,
+      "characters": 4184,
+      "words": 511
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 108,
+      "codeLines": 68,
+      "commentLines": 18,
+      "commentRatio": 0.20930232558139536,
+      "averageLineLength": 47.01162790697674
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.679Z"
+  },
+  "contentHash": "c9cf3c27927fcd1ff8f17ee7fbb6a361351898e8869e29a039aaef7b904ddf56",
+  "discoveredAt": "2025-07-28T07:19:57.679Z"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "bb1cd8d5bd73",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/layouts/full/vertical/sidebar/SSPPOCMenuItems.ts",
+  "relativePath": "front-end/src/layouts/full/vertical/sidebar/SSPPOCMenuItems.ts",
+  "name": "SSPPOCMenuItems.ts",
+  "extension": ".ts",
+  "size": 1230,
+  "modified": "2025-07-19T12:46:02.751Z",
+  "created": "2025-07-18T21:45:18.517Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 59,
+      "characters": 1228,
+      "words": 122
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "lodash",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 59,
+      "codeLines": 53,
+      "commentLines": 1,
+      "commentRatio": 0.018518518518518517,
+      "averageLineLength": 21.59259259259259
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.867Z"
+  },
+  "contentHash": "a79fdd867593dafa0033596f5f68008ea81529b32624fe00494c7c32e79c6a81",
+  "discoveredAt": "2025-07-28T07:19:58.867Z"
+}

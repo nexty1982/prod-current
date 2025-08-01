@@ -1,0 +1,43 @@
+{
+  "id": "aed11f8ca697",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/migrations/2024_add_church_advanced_config.sql",
+  "relativePath": "server/database/migrations/2024_add_church_advanced_config.sql",
+  "name": "2024_add_church_advanced_config.sql",
+  "extension": ".sql",
+  "size": 1170,
+  "modified": "2025-07-17T18:10:21.863Z",
+  "created": "2025-07-17T18:10:20.201Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 28,
+      "characters": 1170,
+      "words": 134
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 28,
+      "codeLines": 27,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 42.2962962962963
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.023Z"
+  },
+  "contentHash": "2788f1cabc01c2d04a2b1248efc5a51de9f8875a985f5467616d9d9c6822c6de",
+  "discoveredAt": "2025-07-28T07:20:00.023Z"
+}

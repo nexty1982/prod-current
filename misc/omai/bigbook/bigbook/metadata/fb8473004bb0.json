@@ -1,0 +1,84 @@
+{
+  "id": "fb8473004bb0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/2dd22a1c975d.json",
+  "relativePath": "bigbook/metadata/2dd22a1c975d.json",
+  "name": "2dd22a1c975d.json",
+  "extension": ".json",
+  "size": 25269,
+  "modified": "2025-07-26T04:17:10.950Z",
+  "created": "2025-07-26T04:17:10.950Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 103,
+      "characters": 25221,
+      "words": 1768
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "morgan",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "cors",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "http",
+        "line": 90
+      },
+      {
+        "type": "npm_package",
+        "name": "node-cron",
+        "line": 90
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 103,
+      "codeLines": 103,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 243.873786407767
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.805Z"
+  },
+  "contentHash": "328f41d4345b529a4e00191c93c347087f82fa9fc49e3864071a1fcbfbb57d47",
+  "discoveredAt": "2025-07-28T07:19:56.805Z"
+}

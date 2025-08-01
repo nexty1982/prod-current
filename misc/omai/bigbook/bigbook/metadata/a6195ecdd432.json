@@ -1,0 +1,64 @@
+{
+  "id": "a6195ecdd432",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/baptismCertificates.js",
+  "relativePath": "server/routes/baptismCertificates.js",
+  "name": "baptismCertificates.js",
+  "extension": ".js",
+  "size": 8717,
+  "modified": "2025-07-04T23:08:08.000Z",
+  "created": "2025-07-09T00:48:38.478Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 258,
+      "characters": 8717,
+      "words": 888
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "canvas",
+        "line": 5
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 258,
+      "codeLines": 187,
+      "commentLines": 26,
+      "commentRatio": 0.12206572769953052,
+      "averageLineLength": 39.455399061032864
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.399Z"
+  },
+  "contentHash": "a910e3fe6a654fdb8fa4a450a5e3bd532d9d6527a4e1dcaae0082ec99fbeb9fd",
+  "discoveredAt": "2025-07-28T07:20:00.399Z"
+}

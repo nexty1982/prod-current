@@ -8,37 +8,42 @@ import type {
     ChurchInfo,
     ChurchInfoUpdateRequest
 } from '../types/client-management.types';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+import { apiClient } from './utils/axiosInstance';
 
 class ClientManagementApi {
-    private baseURL: string;
-
-    constructor(baseURL: string = API_BASE_URL) {
-        this.baseURL = baseURL;
-    }
-
+    // Wrapper method to maintain API compatibility while using shared axios instance
     private async request<T>(
         endpoint: string,
-        options: RequestInit = {}
+        options: { method?: string; body?: string } = {}
     ): Promise<ClientApiResponse<T>> {
-        const url = `${this.baseURL}/api${endpoint}`;
-
         try {
-            const response = await fetch(url, {
-                ...options,
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...options.headers,
-                },
-            });
+            let result;
+            const data = options.body ? JSON.parse(options.body) : undefined;
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            switch (options.method) {
+                case 'POST':
+                    result = await apiClient.post(endpoint, data);
+                    break;
+                case 'PUT':
+                    result = await apiClient.put(endpoint, data);
+                    break;
+                case 'PATCH':
+                    result = await apiClient.patch(endpoint, data);
+                    break;
+                case 'DELETE':
+                    result = await apiClient.delete(endpoint);
+                    break;
+                default:
+                    result = await apiClient.get(endpoint);
+                    break;
             }
 
-            return await response.json();
+            // Wrap result to match expected ClientApiResponse format
+            return {
+                success: true,
+                data: result,
+                message: 'Operation completed successfully'
+            };
         } catch (error) {
             console.error(`API request failed: ${endpoint}`, error);
             throw error;

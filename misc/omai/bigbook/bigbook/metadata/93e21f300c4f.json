@@ -1,0 +1,49 @@
+{
+  "id": "93e21f300c4f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/test-cursor-ai.sh",
+  "relativePath": "scripts/7-26-25/test-cursor-ai.sh",
+  "name": "test-cursor-ai.sh",
+  "extension": ".sh",
+  "size": 2197,
+  "modified": "2025-07-23T22:49:04.997Z",
+  "created": "2025-07-23T22:48:39.477Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 76,
+      "characters": 2195,
+      "words": 271
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 36
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 76,
+      "codeLines": 58,
+      "commentLines": 7,
+      "commentRatio": 0.1076923076923077,
+      "averageLineLength": 32.61538461538461
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.058Z"
+  },
+  "contentHash": "0b0d07085f887d5628fd36d8858971db2da3496a001c822337d9276bc767c2dc",
+  "discoveredAt": "2025-07-28T07:19:59.058Z"
+}

@@ -1,0 +1,54 @@
+{
+  "id": "598569dfbc7e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/add-omai-settings-to-admin.sh",
+  "relativePath": "scripts/add-omai-settings-to-admin.sh",
+  "name": "add-omai-settings-to-admin.sh",
+  "extension": ".sh",
+  "size": 4085,
+  "modified": "2025-07-25T21:39:18.464Z",
+  "created": "2025-07-25T21:38:58.293Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 118,
+      "characters": 4027,
+      "words": 551
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 37
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 42
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 118,
+      "codeLines": 84,
+      "commentLines": 14,
+      "commentRatio": 0.14285714285714285,
+      "averageLineLength": 39.89795918367347
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.066Z"
+  },
+  "contentHash": "307224f7e23677f15e2b5c68bcbacd056a8c0f55b4a1c9e8611954096f195a86",
+  "discoveredAt": "2025-07-28T07:19:59.066Z"
+}

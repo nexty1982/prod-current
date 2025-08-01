@@ -1,0 +1,64 @@
+{
+  "id": "bb0dcbcfbcc5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/3c940122d411.json",
+  "relativePath": "bigbook/metadata/3c940122d411.json",
+  "name": "3c940122d411.json",
+  "extension": ".json",
+  "size": 14038,
+  "modified": "2025-07-26T04:17:11.686Z",
+  "created": "2025-07-26T04:17:11.686Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 77,
+      "characters": 14038,
+      "words": 1242
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "node-pty",
+        "line": 64
+      },
+      {
+        "type": "npm_package",
+        "name": "os",
+        "line": 64
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 64
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 64
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 77,
+      "codeLines": 77,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 181.32467532467533
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.873Z"
+  },
+  "contentHash": "63a8db350fce42907730d93a7bfaef2b9ade61da6101285ad2a89fdc5f8e23a1",
+  "discoveredAt": "2025-07-28T07:19:56.873Z"
+}

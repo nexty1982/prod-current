@@ -1,0 +1,43 @@
+{
+  "id": "6708308b1739",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/demo-omai-commands.sh",
+  "relativePath": "scripts/7-26-25/demo-omai-commands.sh",
+  "name": "demo-omai-commands.sh",
+  "extension": ".sh",
+  "size": 4653,
+  "modified": "2025-07-26T05:04:34.103Z",
+  "created": "2025-07-26T05:04:32.708Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 162,
+      "characters": 4545,
+      "words": 701
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 162,
+      "codeLines": 132,
+      "commentLines": 2,
+      "commentRatio": 0.014925373134328358,
+      "averageLineLength": 32.71641791044776
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.983Z"
+  },
+  "contentHash": "fae682a41814af81514281bd5af43b0fcc4a024ee8e607eef24aad905311300f",
+  "discoveredAt": "2025-07-28T07:19:58.983Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "3d031ed6b892",
+  "name": "check-server-status.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/check-server-status.sh",
+  "type": "Server Scripts"
+}

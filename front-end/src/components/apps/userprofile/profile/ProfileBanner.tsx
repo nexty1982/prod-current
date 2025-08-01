@@ -35,6 +35,8 @@ import {
 import ProfileTab from './ProfileTab';
 import BlankCard from '../../../shared/BlankCard';
 import OrthodoxAvatarSelector from './OrthodoxAvatarSelector';
+import { useAuth } from 'src/context/AuthContext';
+import { useProfileSync } from '../../../../hooks/useProfileSync';
 
 // Default images
 import profilecover from 'src/assets/images/backgrounds/profilebg.jpg';
@@ -60,87 +62,90 @@ console.log('ProfileBanner - orthodoxAvatars imported:', {
 });
 
 const ProfileBanner = () => {
+  const { user } = useAuth();
+  const {
+    profileImage: avatarImage,
+    profileData,
+    updateProfileImage,
+    updateProfile,
+    refreshProfile,
+    isLoading: profileLoading
+  } = useProfileSync(userimg);
+
   const [coverPhoto, setCoverPhoto] = useState(profilecover);
-  const [avatarImage, setAvatarImage] = useState(userimg);
   const [selectedAvatarId, setSelectedAvatarId] = useState<number | null>(null);
   const [coverUploadOpen, setCoverUploadOpen] = useState(false);
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  
-  // User profile data state - Load from localStorage or use defaults
-  const getInitialProfile = () => {
-    try {
-      const savedProfile = localStorage.getItem('userProfile');
-      if (savedProfile) {
-        return JSON.parse(savedProfile);
-      }
-    } catch (error) {
-      console.error('Failed to load initial profile:', error);
-    }
-    
-    // Default values only if no saved profile exists
-    return {
-      full_name: 'Your Name',
-      introduction: 'Orthodox Christian dedicated to preserving church traditions and serving the community.',
-      institute_name: 'St. Nicholas Orthodox Seminary',
-      website_url: 'https://orthodoxfaith.com',
-      location: 'New York, NY'
-    };
-  };
-  
-  const [userProfile, setUserProfile] = useState(getInitialProfile());
-  
+  const [globalImages, setGlobalImages] = useState<any[]>([]);
+  const [showGlobalImages, setShowGlobalImages] = useState(false);
+  const [profileImages, setProfileImages] = useState<string[]>([]);
+
   // Edit mode state
   const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState({ ...userProfile });
-  
-  const coverInputRef = useRef<HTMLInputElement>(null);
+  const [editedProfile, setEditedProfile] = useState<any>({});
+
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
-  // Load user profile data from local storage
+  // Sync with profile data from the hook
   useEffect(() => {
-    const loadUserProfile = async () => {
+    if (profileData) {
+      setEditedProfile({ ...profileData });
+
+      // Set cover photo from database if available
+      if (profileData.cover_image_url) {
+        setCoverPhoto(profileData.cover_image_url);
+        console.log('📸 Cover photo loaded from profile data:', profileData.cover_image_url);
+      }
+    }
+
+    // Load global images
+    fetchGlobalImages();
+  }, [profileData]);
+
+  // Fetch all available profile images from the backend
+  useEffect(() => {
+    const fetchProfileImages = async () => {
       try {
-        // Get profile from local storage
-        const savedProfile = localStorage.getItem('userProfile');
-        if (savedProfile) {
-          const profileData = JSON.parse(savedProfile);
-          // Only update if the current profile is different (prevents reset to defaults)
-          setUserProfile(profileData);
-          setEditedProfile({ ...profileData });
-        }
-        
-        // Get selected avatar ID from local storage
-        const savedAvatarId = localStorage.getItem('selectedAvatarId');
-        if (savedAvatarId) {
-          setSelectedAvatarId(parseInt(savedAvatarId));
+        const response = await fetch('/api/global-images/public');
+        const data = await response.json();
+        if (data && data.images) {
+          setProfileImages(data.images.map((img: any) => img.url || img.path || img));
         }
       } catch (error) {
-        console.error('Failed to load user profile:', error);
+        console.error('Failed to fetch profile images:', error);
       }
     };
-    
-    loadUserProfile();
+    fetchProfileImages();
   }, []);
 
-  // Save profile changes to local storage
+  // Fetch all global images (both profile and banner)
+  const fetchGlobalImages = async () => {
+    try {
+      console.log('📸 Fetching public global images...');
+      const response = await fetch('/api/admin/global-images/public');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📸 Public global images response:', data);
+        setGlobalImages(data.images || []);
+        console.log('📸 Set global images:', data.images?.length || 0, 'images');
+      } else {
+        console.error('📸 Failed to fetch global images, status:', response.status);
+      }
+    } catch (error) {
+      console.error('Failed to fetch global images:', error);
+    }
+  };
+
+  // Save profile changes to database using the sync hook
   const handleSaveProfile = async () => {
     try {
-      // Save profile data to local storage
-      localStorage.setItem('userProfile', JSON.stringify(editedProfile));
-      
-      // Save avatar selection
-      if (selectedAvatarId) {
-        localStorage.setItem('selectedAvatarId', selectedAvatarId.toString());
-      } else {
-        localStorage.removeItem('selectedAvatarId');
-      }
-      
-      setUserProfile({ ...editedProfile });
+      await updateProfile(editedProfile);
       setIsEditing(false);
       setSnackbarMessage('Profile updated successfully!');
       setSnackbarOpen(true);
+      console.log('📸 Profile saved using sync hook');
     } catch (error) {
       console.error('Failed to save profile:', error);
       setSnackbarMessage('Failed to update profile. Please try again.');
@@ -150,13 +155,13 @@ const ProfileBanner = () => {
 
   // Cancel edit mode
   const handleCancelEdit = () => {
-    setEditedProfile({ ...userProfile });
+    setEditedProfile({ ...user });
     setIsEditing(false);
   };
 
   // Handle input changes
   const handleInputChange = (field: string, value: string) => {
-    setEditedProfile(prev => ({
+    setEditedProfile((prev: any) => ({
       ...prev,
       [field]: value
     }));
@@ -174,31 +179,48 @@ const ProfileBanner = () => {
     position: 'relative'
   }));
 
-  const handleCoverPhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setCoverPhoto(e.target?.result as string);
-        setSnackbarMessage('Cover photo updated successfully!');
-        setSnackbarOpen(true);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
-  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setAvatarImage(e.target?.result as string);
-        setSelectedAvatarId(null); // Reset Orthodox avatar selection
-        setAvatarUploadOpen(false);
-        setSnackbarMessage('Profile picture updated successfully!');
+      try {
+        // Create a unique filename
+        const timestamp = Date.now();
+        const fileName = `profile_${timestamp}_${file.name}`;
+
+        // Create FormData to send the file
+        const formData = new FormData();
+        formData.append('profile', file);
+        formData.append('fileName', fileName);
+
+        // Send to server to save in shared directory
+        const response = await fetch('/api/upload/profile', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          const imageUrl = `/images/profile/${fileName}`;
+
+          // Use the sync hook to update profile image
+          await updateProfileImage(imageUrl);
+
+          setSelectedAvatarId(null); // Reset Orthodox avatar selection
+          setAvatarUploadOpen(false);
+
+          setSnackbarMessage('Profile picture updated and saved!');
+          setSnackbarOpen(true);
+          console.log('📸 Profile image saved using sync hook:', imageUrl);
+        } else {
+          throw new Error('Failed to upload profile image');
+        }
+      } catch (error) {
+        console.error('Error uploading profile:', error);
+        setSnackbarMessage('Failed to upload profile picture. Please try again.');
         setSnackbarOpen(true);
-      };
-      reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -212,7 +234,7 @@ const ProfileBanner = () => {
   // Function to render the current avatar (either uploaded image or Orthodox SVG)
   const renderCurrentAvatar = (size: number = 100, sx: any = {}, onClick?: () => void) => {
     if (selectedAvatarId) {
-      const selectedAvatar = orthodoxAvatars.find(avatar => avatar.id === selectedAvatarId);
+      const selectedAvatar = orthodoxAvatars.find(avatar => String(avatar.id) === String(selectedAvatarId));
       if (selectedAvatar) {
         const AvatarComponent = selectedAvatar.component;
         return (
@@ -235,8 +257,9 @@ const ProfileBanner = () => {
         );
       }
     }
-    
+
     // Fallback to uploaded image
+    console.log('Rendering avatar with image:', avatarImage);
     return (
       <Avatar
         src={avatarImage}
@@ -256,19 +279,19 @@ const ProfileBanner = () => {
     <>
       <BlankCard>
         <Box sx={{ position: 'relative' }}>
-          <CardMedia 
-            component="img" 
-            image={coverPhoto} 
-            alt="Cover Photo" 
-            sx={{ 
-              width: "100%", 
-              height: "300px", 
+          <CardMedia
+            component="img"
+            image={coverPhoto}
+            alt="Cover Photo"
+            sx={{
+              width: "100%",
+              height: "300px",
               objectFit: "cover",
               cursor: 'pointer'
             }}
             onClick={() => setCoverUploadOpen(true)}
           />
-          
+
           {/* Cover Photo Edit Button */}
           <Tooltip title="Change Cover Photo">
             <IconButton
@@ -340,56 +363,15 @@ const ProfileBanner = () => {
 
               {!isEditing ? (
                 <Stack spacing={2}>
-                  {userProfile.introduction && (
-                    <Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        Introduction
-                      </Typography>
-                      <Typography variant="body1">
-                        {userProfile.introduction}
-                      </Typography>
-                    </Box>
-                  )}
-                  
-                  {userProfile.institute_name && (
-                    <Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        Institute/Organization
-                      </Typography>
-                      <Typography variant="body1">
-                        {userProfile.institute_name}
-                      </Typography>
-                    </Box>
-                  )}
-                  
-                  {userProfile.website_url && (
-                    <Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        Website
-                      </Typography>
-                      <Typography 
-                        variant="body1" 
-                        component="a" 
-                        href={userProfile.website_url.startsWith('http') ? userProfile.website_url : `https://${userProfile.website_url}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
-                      >
-                        {userProfile.website_url}
-                      </Typography>
-                    </Box>
-                  )}
-                  
-                  {userProfile.location && (
-                    <Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        Location
-                      </Typography>
-                      <Typography variant="body1">
-                        {userProfile.location}
-                      </Typography>
-                    </Box>
-                  )}
+                  {/* No extra fields available on User object. Only name, email, role, etc. */}
+                  <Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Email
+                    </Typography>
+                    <Typography variant="body1">
+                      {user?.email}
+                    </Typography>
+                  </Box>
                 </Stack>
               ) : (
                 <Stack spacing={2}>
@@ -402,7 +384,7 @@ const ProfileBanner = () => {
                     onChange={(e) => handleInputChange('introduction', e.target.value)}
                     placeholder="Tell us about yourself..."
                   />
-                  
+
                   <TextField
                     label="Institute/Organization"
                     fullWidth
@@ -410,7 +392,7 @@ const ProfileBanner = () => {
                     onChange={(e) => handleInputChange('institute_name', e.target.value)}
                     placeholder="Your church, seminary, or organization"
                   />
-                  
+
                   <TextField
                     label="Website URL"
                     fullWidth
@@ -418,7 +400,7 @@ const ProfileBanner = () => {
                     onChange={(e) => handleInputChange('website_url', e.target.value)}
                     placeholder="https://your-website.com"
                   />
-                  
+
                   <TextField
                     label="Location"
                     fullWidth
@@ -430,7 +412,7 @@ const ProfileBanner = () => {
               )}
             </Paper>
           </Grid>
-          
+
           {/* about profile */}
           <Grid
             sx={{
@@ -488,12 +470,9 @@ const ProfileBanner = () => {
                 <Box mt={1}>
                   {!isEditing ? (
                     <>
-                      <Typography fontWeight={600} variant="h5">
-                        {userProfile.full_name}
-                      </Typography>
-                      <Typography color="textSecondary" variant="h6" fontWeight={400}>
-                        Orthodox Faithful
-                      </Typography>
+                      <Typography fontWeight={600} variant="h5">{user?.first_name} {user?.last_name}</Typography>
+                      <Typography color="textSecondary" variant="h6" fontWeight={400}>{user?.role || 'Orthodox Faithful'}</Typography>
+                      <Typography variant="body1">{user?.email}</Typography>
                     </>
                   ) : (
                     <Box sx={{ mt: 2 }}>
@@ -526,31 +505,20 @@ const ProfileBanner = () => {
               xs: 12
             }}>
             <Stack direction={'row'} gap={2} alignItems="center" justifyContent="center" my={2}>
-              {userProfile.website_url && (
-                <Button 
-                  color="primary" 
-                  variant="outlined"
-                  href={userProfile.website_url.startsWith('http') ? userProfile.website_url : `https://${userProfile.website_url}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Visit Website
-                </Button>
-              )}
               <Button color="primary" variant="contained">
                 Contact
               </Button>
             </Stack>
           </Grid>
         </Grid>
-        
+
         {/**TabbingPart**/}
         <ProfileTab />
       </BlankCard>
 
       {/* Cover Photo Upload Dialog */}
-      <Dialog 
-        open={coverUploadOpen} 
+      <Dialog
+        open={coverUploadOpen}
         onClose={() => setCoverUploadOpen(false)}
         maxWidth="sm"
         fullWidth
@@ -564,51 +532,121 @@ const ProfileBanner = () => {
         <DialogContent>
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Box sx={{ mb: 3 }}>
-              <img 
-                src={coverPhoto} 
-                alt="Current Cover" 
-                style={{ 
-                  width: '100%', 
-                  maxHeight: '200px', 
+              <img
+                src={coverPhoto}
+                alt="Current Cover"
+                style={{
+                  width: '100%',
+                  maxHeight: '200px',
                   objectFit: 'cover',
                   borderRadius: '8px'
                 }}
               />
             </Box>
-            
-            <input
-              ref={coverInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleCoverPhotoUpload}
-            />
-            
-            <Button
-              variant="contained"
-              startIcon={<IconUpload />}
-              onClick={() => coverInputRef.current?.click()}
-              size="large"
-              fullWidth
-            >
-              Upload New Cover Photo
-            </Button>
-            
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              Recommended size: 1200x300 pixels. JPG, PNG, or GIF files only.
+
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Select a banner image from the available options below
             </Typography>
+
+            {/* Banner Images */}
+            {globalImages.length > 0 ? (
+              <Box sx={{ mt: 4 }}>
+                <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
+                  Global Banner Images
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mb: 3 }}>
+                  Choose from admin-uploaded global banner images
+                </Typography>
+
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                  gap: 2
+                }}>
+                  {globalImages.filter(img => img.type === 'banner').map((image) => (
+                    <Box
+                      key={image.id}
+                      sx={{
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        p: 1,
+                        borderRadius: 1,
+                        border: '2px solid',
+                        borderColor: coverPhoto === image.url ? 'primary.main' : 'transparent',
+                        '&:hover': {
+                          borderColor: 'primary.main',
+                          backgroundColor: 'action.hover'
+                        }
+                      }}
+                      onClick={async () => {
+                        try {
+                          // Save to database immediately
+                          const updateResponse = await fetch('/api/user/profile/images', {
+                            method: 'PUT',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            credentials: 'include',
+                            body: JSON.stringify({ cover_image_url: image.url })
+                          });
+
+                          if (updateResponse.ok) {
+                            setCoverPhoto(image.url);
+                            localStorage.setItem('userBannerImage', image.url);
+                            setSnackbarMessage('Banner image updated and saved!');
+                            setSnackbarOpen(true);
+                            console.log('📸 Banner image saved to database:', image.url);
+                          } else {
+                            throw new Error('Failed to save banner to database');
+                          }
+                        } catch (error) {
+                          console.error('Failed to save banner:', error);
+                          setSnackbarMessage('Failed to save banner image');
+                          setSnackbarOpen(true);
+                        }
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: '100%',
+                          height: 80,
+                          borderRadius: 1,
+                          backgroundImage: `url(${image.url})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          mb: 1
+                        }}
+                      />
+                      <Typography variant="caption" display="block" noWrap>
+                        {image.name}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            ) : (
+              <Box sx={{ mt: 4, textAlign: 'center' }}>
+                <Typography variant="h6" gutterBottom color="text.secondary">
+                  No Banner Images Available
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Contact your administrator to upload banner images.
+                </Typography>
+              </Box>
+            )}
           </Box>
         </DialogContent>
       </Dialog>
 
       {/* Avatar Upload Dialog */}
-      <Dialog 
-        open={avatarUploadOpen} 
+      <Dialog
+        open={avatarUploadOpen}
         onClose={() => setAvatarUploadOpen(false)}
         maxWidth="md"
         fullWidth
         PaperProps={{
-          sx: { 
+          sx: {
             maxHeight: '90vh',
             overflow: 'hidden'
           }
@@ -647,10 +685,10 @@ const ProfileBanner = () => {
                 borderColor: 'primary.main'
               })}
               <Typography variant="h5" fontWeight={600} sx={{ mt: 2 }}>
-                {userProfile.full_name}
+                {user?.first_name} {user?.last_name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Orthodox Faithful
+                {user?.role || 'Orthodox Faithful'}
               </Typography>
             </Box>
 
@@ -658,7 +696,7 @@ const ProfileBanner = () => {
             <Card sx={{ mb: 4 }}>
               <CardContent sx={{ textAlign: 'center' }}>
                 <Typography variant="h6" gutterBottom>Upload Custom Image</Typography>
-                
+
                 <input
                   ref={avatarInputRef}
                   type="file"
@@ -666,7 +704,7 @@ const ProfileBanner = () => {
                   style={{ display: 'none' }}
                   onChange={handleAvatarUpload}
                 />
-                
+
                 <Button
                   variant="contained"
                   startIcon={<IconUpload />}
@@ -676,88 +714,125 @@ const ProfileBanner = () => {
                 >
                   Upload Your Photo
                 </Button>
-                
+
                 <Typography variant="body2" color="text.secondary">
                   Recommended: Square image, at least 200x200 pixels
                 </Typography>
               </CardContent>
             </Card>
 
-            {/* Orthodox Character Avatars */}
-            <Card>
+            {/* Uploaded Profile Images Section */}
+            <Card sx={{ mb: 4 }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
-                  Choose Orthodox Character Avatar
+                  Choose from Uploaded Profile Images
                 </Typography>
-                
-                {/* Debug: Show avatar count */}
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mb: 2 }}>
-                  {orthodoxAvatars.length} Orthodox avatars available
-                </Typography>
-                
-                {/* Test: Direct avatar rendering */}
-                <Box sx={{ textAlign: 'center', mb: 2, p: 2, border: '1px dashed #ccc' }}>
-                  <Typography variant="caption" color="text.secondary" gutterBottom>
-                    Test Avatar (Direct Render):
-                  </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, gap: 2 }}>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <YoungPriest1 size={60} />
-                      <Typography variant="caption" display="block">SVG Test</Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
+                  {profileImages.map((img: string) => (
+                    <Box
+                      key={img}
+                      sx={{
+                        border: avatarImage === img ? '3px solid #1976d2' : '2px solid #eee',
+                        borderRadius: '50%',
+                        p: 1,
+                        cursor: 'pointer',
+                        width: 80,
+                        height: 80,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#fff',
+                      }}
+                      onClick={async () => {
+                        try {
+                          // Use the sync hook to update profile image
+                          await updateProfileImage(img);
+                          setSelectedAvatarId(null);
+                          setSnackbarMessage('Profile image updated and saved!');
+                          setSnackbarOpen(true);
+                          console.log('📸 Profile image saved using sync hook:', img);
+                        } catch (error) {
+                          console.error('Failed to save profile image:', error);
+                          setSnackbarMessage('Failed to save profile image');
+                          setSnackbarOpen(true);
+                        }
+                      }}
+                    >
+                      <Avatar src={img} sx={{ width: 60, height: 60 }} />
                     </Box>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <TestAvatar size={60} />
-                      <Typography variant="caption" display="block">Simple SVG</Typography>
-                    </Box>
-                    <Box sx={{ textAlign: 'center', width: 60, height: 60, backgroundColor: 'primary.main', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                      <Typography variant="caption">Fallback</Typography>
-                    </Box>
-                  </Box>
-                </Box>
-                
-                {/* Clergy Section */}
-                <Box sx={{ mb: 4 }}>
-                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
-                    Orthodox Clergy ({orthodoxAvatars.filter(avatar => avatar.type === 'clergy').length} available)
-                  </Typography>
-                  <Box sx={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', 
-                    gap: 2 
-                  }}>
-                    {orthodoxAvatars.filter(avatar => avatar.type === 'clergy').map((avatar) => (
-                      <OrthodoxAvatarSelector
-                        key={avatar.id}
-                        avatar={avatar}
-                        isSelected={selectedAvatarId === avatar.id}
-                        onClick={() => handlePresetAvatarSelect(avatar)}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-
-                {/* Laity Section */}
-                <Box>
-                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, color: 'secondary.main' }}>
-                    Orthodox Faithful ({orthodoxAvatars.filter(avatar => avatar.type === 'laity').length} available)
-                  </Typography>
-                  <Box sx={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', 
-                    gap: 2 
-                  }}>
-                    {orthodoxAvatars.filter(avatar => avatar.type === 'laity').map((avatar) => (
-                      <OrthodoxAvatarSelector
-                        key={avatar.id}
-                        avatar={avatar}
-                        isSelected={selectedAvatarId === avatar.id}
-                        onClick={() => handlePresetAvatarSelect(avatar)}
-                      />
-                    ))}
-                  </Box>
+                  ))}
                 </Box>
               </CardContent>
             </Card>
+
+            {/* Global Images Section */}
+            {globalImages.length > 0 && (
+              <Card sx={{ mt: 4 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
+                    Global Profile Images
+                  </Typography>
+
+                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mb: 3 }}>
+                    Choose from admin-uploaded global profile images
+                  </Typography>
+
+                  <Box sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
+                    gap: 2
+                  }}>
+                    {globalImages.filter(img => img.type === 'profile').map((image) => (
+                      <Box
+                        key={image.id}
+                        sx={{
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          p: 1,
+                          borderRadius: 1,
+                          border: '2px solid',
+                          borderColor: avatarImage === image.url ? 'primary.main' : 'transparent',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                            backgroundColor: 'action.hover'
+                          }
+                        }}
+                        onClick={async () => {
+                          try {
+                            // Use the sync hook to update profile image
+                            await updateProfileImage(image.url);
+                            setSelectedAvatarId(null);
+                            setSnackbarMessage('Profile image updated and saved!');
+                            setSnackbarOpen(true);
+                            console.log('📸 Global profile image saved using sync hook:', image.url);
+                          } catch (error) {
+                            console.error('Failed to save profile image:', error);
+                            setSnackbarMessage('Failed to save profile image');
+                            setSnackbarOpen(true);
+                          }
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 60,
+                            height: 60,
+                            borderRadius: '50%',
+                            backgroundImage: `url(${image.url})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            mx: 'auto',
+                            mb: 1
+                          }}
+                        />
+                        <Typography variant="caption" display="block" noWrap>
+                          {image.name}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
+            )}
           </Box>
         </DialogContent>
       </Dialog>
@@ -769,9 +844,9 @@ const ProfileBanner = () => {
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={() => setSnackbarOpen(false)} 
-          severity="success" 
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
           sx={{ width: '100%' }}
         >
           {snackbarMessage}

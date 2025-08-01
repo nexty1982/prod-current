@@ -1,0 +1,49 @@
+{
+  "id": "a9e6be584d65",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/emergency-revert-registry-panel.sh",
+  "relativePath": "scripts/emergency-revert-registry-panel.sh",
+  "name": "emergency-revert-registry-panel.sh",
+  "extension": ".sh",
+  "size": 2364,
+  "modified": "2025-07-27T18:55:49.706Z",
+  "created": "2025-07-27T18:55:43.964Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 62,
+      "characters": 2338,
+      "words": 259
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 48
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 62,
+      "codeLines": 44,
+      "commentLines": 7,
+      "commentRatio": 0.13725490196078433,
+      "averageLineLength": 44.64705882352941
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.096Z"
+  },
+  "contentHash": "56e2b21d3f3d2e722cd44d255e2fbe2c6e802b2090ca3580e1e4967678bf57ef",
+  "discoveredAt": "2025-07-28T07:19:59.096Z"
+}

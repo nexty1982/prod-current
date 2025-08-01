@@ -58,7 +58,7 @@ import {
 import { useInvoiceContext } from 'src/context/InvoiceContext';
 import { InvoiceStatus } from 'src/types/apps/invoice';
 import { Invoice } from 'src/types/orthodox-metrics.types';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import logger from 'src/utils/logger';
 

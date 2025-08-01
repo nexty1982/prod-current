@@ -1,0 +1,43 @@
+{
+  "id": "da3c8c66480e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/OMAI_PHASE7_PROJECT_GENERATION.md",
+  "relativePath": "OMAI_PHASE7_PROJECT_GENERATION.md",
+  "name": "OMAI_PHASE7_PROJECT_GENERATION.md",
+  "extension": ".md",
+  "size": 14922,
+  "modified": "2025-07-25T00:46:53.612Z",
+  "created": "2025-07-25T00:46:52.281Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 410,
+      "characters": 14786,
+      "words": 1826
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 410,
+      "codeLines": 241,
+      "commentLines": 74,
+      "commentRatio": 0.23492063492063492,
+      "averageLineLength": 45.31428571428572
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.212Z"
+  },
+  "contentHash": "039006542c01f64036f3b4a409fd0631830bf73101a9dd02378939187175aad3",
+  "discoveredAt": "2025-07-26T04:17:09.212Z"
+}

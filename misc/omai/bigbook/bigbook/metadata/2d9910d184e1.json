@@ -1,0 +1,43 @@
+{
+  "id": "2d9910d184e1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/ai/git/prGenerator.ts",
+  "relativePath": "front-end/src/ai/git/prGenerator.ts",
+  "name": "prGenerator.ts",
+  "extension": ".ts",
+  "size": 13366,
+  "modified": "2025-07-25T04:40:09.932Z",
+  "created": "2025-07-25T04:40:05.918Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 413,
+      "characters": 13360,
+      "words": 1283
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 413,
+      "codeLines": 320,
+      "commentLines": 30,
+      "commentRatio": 0.08571428571428572,
+      "averageLineLength": 36.11142857142857
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.654Z"
+  },
+  "contentHash": "cc4a36aff222310d665c321c3691353c39cc62cd2e931614d0f379dca5f82130",
+  "discoveredAt": "2025-07-28T07:19:58.654Z"
+}

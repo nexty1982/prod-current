@@ -3,6 +3,7 @@
 
 const express = require('express');
 const mysql = require('mysql2/promise');
+const { promisePool } = require('../config/db'); // For platform database access
 
 const router = express.Router();
 
@@ -36,7 +37,11 @@ router.use(async (req, res, next) => {
 // Get church information
 router.get('/church-info', async (req, res) => {
     try {
-        const [rows] = await req.clientDb.execute('SELECT * FROM church_info LIMIT 1');
+        // Get church metadata from platform database (orthodmetrics_dev)
+        // Use church_id from session or default to church ID 14 (Saints Peter and Paul)
+        const churchId = req.session?.user?.church_id || 14;
+        
+        const [rows] = await promisePool.query('SELECT * FROM churches WHERE id = ?', [churchId]);
         const churchInfo = rows[0] || {};
 
         // Add client branding from main database
@@ -56,13 +61,14 @@ router.get('/church-info', async (req, res) => {
 router.put('/church-info', async (req, res) => {
     try {
         const { name, address, phone, email, website, primary_color, secondary_color } = req.body;
+        const churchId = req.session?.user?.church_id || 14;
 
-        await req.clientDb.execute(`
-            UPDATE church_info SET 
+        await promisePool.query(`
+            UPDATE churches SET 
                 name = ?, address = ?, phone = ?, email = ?, website = ?,
-                primary_color = ?, secondary_color = ?, updated_at = NOW()
-            WHERE id = 1
-        `, [name, address, phone, email, website, primary_color, secondary_color]);
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `, [name, address, phone, email, website, churchId]);
 
         res.json({ success: true, message: 'Church information updated' });
     } catch (error) {

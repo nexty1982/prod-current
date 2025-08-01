@@ -1,0 +1,74 @@
+{
+  "id": "6de071858fed",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/services/templateService.js",
+  "relativePath": "server/services/templateService.js",
+  "name": "templateService.js",
+  "extension": ".js",
+  "size": 33422,
+  "modified": "2025-07-15T01:05:44.231Z",
+  "created": "2025-07-12T01:49:23.407Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 924,
+      "characters": 33418,
+      "words": 3343
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 31
+      },
+      {
+        "type": "npm_package",
+        "name": "ag-grid-react",
+        "line": 32
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 234
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 241
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 924,
+      "codeLines": 650,
+      "commentLines": 153,
+      "commentRatio": 0.19053549190535493,
+      "averageLineLength": 39.839352428393525
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.126Z"
+  },
+  "contentHash": "c0b44faf93fdd56b1d7b814db7f2da333a3582d870511164b561f645987054e4",
+  "discoveredAt": "2025-07-28T07:20:01.126Z"
+}

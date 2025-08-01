@@ -1,0 +1,43 @@
+{
+  "id": "62dde2d4d950",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/omaiMaintenanceInterface.js",
+  "relativePath": "server/utils/omaiMaintenanceInterface.js",
+  "name": "omaiMaintenanceInterface.js",
+  "extension": ".js",
+  "size": 11436,
+  "modified": "2025-07-26T05:33:57.320Z",
+  "created": "2025-07-26T05:33:09.708Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 369,
+      "characters": 11436,
+      "words": 1025
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 369,
+      "codeLines": 283,
+      "commentLines": 42,
+      "commentRatio": 0.12923076923076923,
+      "averageLineLength": 33.88923076923077
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.274Z"
+  },
+  "contentHash": "f9f70cce3e6978c87706381abc153bc677a48c6d70a310716c7105d1a3a9905c",
+  "discoveredAt": "2025-07-28T07:20:01.274Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "8212917caf2d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/install-parish-map-component.sh",
+  "relativePath": "scripts/install-parish-map-component.sh",
+  "name": "install-parish-map-component.sh",
+  "extension": ".sh",
+  "size": 5783,
+  "modified": "2025-07-28T00:04:22.567Z",
+  "created": "2025-07-28T00:04:17.891Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 147,
+      "characters": 5635,
+      "words": 835
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 147,
+      "codeLines": 129,
+      "commentLines": 6,
+      "commentRatio": 0.044444444444444446,
+      "averageLineLength": 40.65925925925926
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.127Z"
+  },
+  "contentHash": "1b467ab3fc8178d72ae9e60644d848f3d58f389334adfa0edb1642904588f6ff",
+  "discoveredAt": "2025-07-28T07:19:59.127Z"
+}

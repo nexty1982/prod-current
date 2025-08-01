@@ -1,0 +1,43 @@
+{
+  "id": "3796b6cdf967",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/testing/test-db-utilities.ts",
+  "relativePath": "server/testing/test-db-utilities.ts",
+  "name": "test-db-utilities.ts",
+  "extension": ".ts",
+  "size": 2293,
+  "modified": "2025-07-14T21:26:00.479Z",
+  "created": "2025-07-14T21:26:00.479Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 71,
+      "characters": 2253,
+      "words": 219
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 71,
+      "codeLines": 51,
+      "commentLines": 8,
+      "commentRatio": 0.13559322033898305,
+      "averageLineLength": 36.559322033898304
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.198Z"
+  },
+  "contentHash": "5d72d5f0da57002f095885681fc56a1d70fcfc39094b3dc9ab47931412aa4508",
+  "discoveredAt": "2025-07-28T07:20:01.198Z"
+}

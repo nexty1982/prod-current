@@ -81,8 +81,12 @@ export interface ChurchInfo {
     priest_name: string;
     priest_email?: string;
     priest_phone?: string;
-    liturgical_language: string;
+    preferred_language: string;
     timezone: string;
+    description_multilang?: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
     branding?: ClientBranding;
 }
 

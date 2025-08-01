@@ -1,0 +1,6 @@
+{
+  "id": "9bfe243e8393",
+  "name": "omai-system-status.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/omai-system-status.sh",
+  "type": "Frontend Scripts"
+}

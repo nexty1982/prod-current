@@ -1,0 +1,56 @@
+{
+  "id": "e0044af8b8cf",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migration/update-enhanced-ocr-schema.js",
+  "relativePath": "server/migration/update-enhanced-ocr-schema.js",
+  "name": "update-enhanced-ocr-schema.js",
+  "extension": ".js",
+  "size": 6505,
+  "modified": "2025-07-24T14:51:40.492Z",
+  "created": "2025-07-24T14:51:40.492Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 180,
+      "characters": 6463,
+      "words": 556
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 6
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 19,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Enhanced OCR Database Schema Update\r\n * Adds columns to support the new OCR wizard functionality\r\n */\r\n\r\nconst mysql = require('mysql2/promise');\r\n\r\nasync function updateOcrSchema() {\r\n  try {\r\n    console.log('🔄 Updating OCR database schema for enhanced features...');\r\n    console.log('================================================================================');\r\n    \r\n    // Connect to OCR database\r\n    const connection = await mysql.createConnection({\r\n      host: 'localhost',\r\n      user: 'orthodoxapps',\r\n      password: '[REDACTED]',\r\n      database: 'saints_peter_and_paul_orthodox_church_db'\r\n    });\r\n\r\n    console.log('✅ Connected to OCR database');\r\n\r\n    // Check existing columns\r\n    const [columns] = await connection.execute(`\r\n      SELECT COLUMN_NAME \r\n      FROM INFORMATION_SCHEMA.COLUMNS \r\n      WHERE TABLE_SCHEMA = 'saints_peter_and_paul_orthodox_church_db' \r\n      AND TABLE_NAME = 'ocr_jobs'\r\n    `);\r\n\r\n    const existingColumns = columns.map(col => col.COLUMN_NAME);\r\n    console.log(`📊 Found ${existingColumns.length} existing columns in ocr_jobs table`);\r\n\r\n    // Define new columns needed for enhanced OCR\r\n    const newColumns = [\r\n      {\r\n        name: 'preprocessing_options',\r\n        definition: 'preprocessing_options JSON DEFAULT NULL',\r\n        description: 'JSON object storing preprocessing settings used'\r\n      },\r\n      {\r\n        name: 'raw_response_json',\r\n        definition: 'raw_response_json JSON DEFAULT NULL',\r\n        description: 'Complete raw response from OCR service'\r\n      },\r\n      {\r\n        name: 'confidence_score',\r\n        definition: 'confidence_score FLOAT DEFAULT NULL',\r\n        description: 'Overall confidence score (0.0 to 1.0)'\r\n      },\r\n      {\r\n        name: 'attempts',\r\n        definition: 'attempts INT DEFAULT 0',\r\n        description: 'Number of processing attempts'\r\n      },\r\n      {\r\n        name: 'error_message',\r\n        definition: 'error_message TEXT DEFAULT NULL',\r\n        description: 'Error message if processing failed'\r\n      },\r\n      {\r\n        name: 'processed_image_path',\r\n        definition: 'processed_image_path TEXT DEFAULT NULL',\r\n        description: 'Path to preprocessed image file'\r\n      },\r\n      {\r\n        name: 'approved',\r\n        definition: 'approved BOOLEAN DEFAULT FALSE',\r\n        description: 'Whether results have been approved for insertion'\r\n      },\r\n      {\r\n        name: 'segments_json',\r\n        definition: 'segments_json JSON DEFAULT NULL',\r\n        description: 'Structured OCR segments with bounding boxes'\r\n      }\r\n    ];\r\n\r\n    // Add missing columns\r\n    let addedColumns = 0;\r\n    for (const column of newColumns) {\r\n      if (!existingColumns.includes(column.name)) {\r\n        console.log(`➕ Adding column: ${column.name}`);\r\n        \r\n        try {\r\n          await connection.execute(`ALTER TABLE ocr_jobs ADD COLUMN ${column.definition}`);\r\n          console.log(`   ✅ Added ${column.name}: ${column.description}`);\r\n          addedColumns++;\r\n        } catch (error) {\r\n          console.error(`   ❌ Failed to add ${column.name}:`, error.message);\r\n        }\r\n      } else {\r\n        console.log(`   ⏭️  Column ${column.name} already exists`);\r\n      }\r\n    }\r\n\r\n    // Create indexes for better performance\r\n    console.log('\\n📈 Creating performance indexes...');\r\n    \r\n    const indexes = [\r\n      {\r\n        name: 'idx_ocr_jobs_status_confidence',\r\n        definition: 'CREATE INDEX idx_ocr_jobs_status_confidence ON ocr_jobs (status, confidence_score)',\r\n        description: 'Index for filtering by status and confidence'\r\n      },\r\n      {\r\n        name: 'idx_ocr_jobs_approved',\r\n        definition: 'CREATE INDEX idx_ocr_jobs_approved ON ocr_jobs (approved, created_at)',\r\n        description: 'Index for approved records'\r\n      },\r\n      {\r\n        name: 'idx_ocr_jobs_attempts',\r\n        definition: 'CREATE INDEX idx_ocr_jobs_attempts ON ocr_jobs (attempts, status)',\r\n        description: 'Index for retry logic'\r\n      }\r\n    ];\r\n\r\n    for (const index of indexes) {\r\n      try {\r\n        await connection.execute(index.definition);\r\n        console.log(`   ✅ Created index: ${index.name}`);\r\n      } catch (error) {\r\n        if (error.code === 'ER_DUP_KEYNAME') {\r\n          console.log(`   ⏭️  Index ${index.name} already exists`);\r\n        } else {\r\n          console.error(`   ❌ Failed to create index ${index.name}:`, error.message);\r\n        }\r\n      }\r\n    }\r\n\r\n    // Verify final schema\r\n    console.log('\\n🔍 Verifying final schema...');\r\n    \r\n    const [finalColumns] = await connection.execute(`\r\n      SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT\r\n      FROM INFORMATION_SCHEMA.COLUMNS \r\n      WHERE TABLE_SCHEMA = 'saints_peter_and_paul_orthodox_church_db' \r\n      AND TABLE_NAME = 'ocr_jobs'\r\n      ORDER BY ORDINAL_POSITION\r\n    `);\r\n\r\n    console.log(`📊 Final schema: ${finalColumns.length} total columns`);\r\n    \r\n    // Show enhanced columns\r\n    const enhancedColumns = finalColumns.filter(col => \r\n      ['preprocessing_options', 'raw_response_json', 'confidence_score', 'attempts', \r\n       'error_message', 'processed_image_path', 'approved', 'segments_json'].includes(col.COLUMN_NAME)\r\n    );\r\n    \r\n    console.log(`🎯 Enhanced OCR columns: ${enhancedColumns.length}/8 present`);\r\n    enhancedColumns.forEach(col => {\r\n      console.log(`   ✅ ${col.COLUMN_NAME} (${col.DATA_TYPE})`);\r\n    });\r\n\r\n    await connection.end();\r\n    \r\n    console.log('\\n================================================================================');\r\n    console.log('🎉 Enhanced OCR Schema Update Complete!');\r\n    console.log(`📊 Summary:`);\r\n    console.log(`   - Added ${addedColumns} new columns`);\r\n    console.log(`   - Total columns: ${finalColumns.length}`);\r\n    console.log(`   - Enhanced features: Ready for wizard workflow`);\r\n    console.log('\\n🚀 Ready for enhanced OCR processing with:');\r\n    console.log('   - Preprocessing options storage');\r\n    console.log('   - Confidence scoring');\r\n    console.log('   - Retry mechanisms');\r\n    console.log('   - Approval workflow');\r\n    console.log('   - Structured segment data');\r\n    console.log('================================================================================');\r\n    \r\n  } catch (error) {\r\n    console.error('❌ Schema update failed:', error.message);\r\n    process.exit(1);\r\n  }\r\n}\r\n\r\n// Run schema update\r\nupdateOcrSchema().catch(console.error);\r\n"
+    },
+    "complexity": {
+      "totalLines": 180,
+      "codeLines": 144,
+      "commentLines": 13,
+      "commentRatio": 0.08280254777070063,
+      "averageLineLength": 39.65605095541401
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.321Z"
+  },
+  "contentHash": "89ab5593968f0cf624aebbc794b86a87dd664f1207f358743e3ab934a6642f49",
+  "discoveredAt": "2025-07-28T07:20:00.321Z"
+}

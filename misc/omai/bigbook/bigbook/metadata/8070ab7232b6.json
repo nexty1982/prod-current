@@ -1,0 +1,43 @@
+{
+  "id": "8070ab7232b6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/BIGBOOK_COMPREHENSIVE_FILE_SUPPORT.md",
+  "relativePath": "docs/7-26-25/BIGBOOK_COMPREHENSIVE_FILE_SUPPORT.md",
+  "name": "BIGBOOK_COMPREHENSIVE_FILE_SUPPORT.md",
+  "extension": ".md",
+  "size": 7858,
+  "modified": "2025-07-24T23:54:04.098Z",
+  "created": "2025-07-24T23:53:49.940Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 257,
+      "characters": 7752,
+      "words": 1089
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 257,
+      "codeLines": 154,
+      "commentLines": 51,
+      "commentRatio": 0.24878048780487805,
+      "averageLineLength": 36.31219512195122
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.717Z"
+  },
+  "contentHash": "2f9487a78ccb1d49cfbbc364240b0851efa75768ac0a654ea5403dce3855bcfd",
+  "discoveredAt": "2025-07-28T07:19:57.717Z"
+}

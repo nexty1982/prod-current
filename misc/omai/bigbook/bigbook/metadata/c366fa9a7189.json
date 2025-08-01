@@ -1,0 +1,50 @@
+{
+  "id": "c366fa9a7189",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/SESSION_ARCHITECTURE.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/SESSION_ARCHITECTURE.md",
+  "name": "SESSION_ARCHITECTURE.md",
+  "extension": ".md",
+  "size": 5709,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:07.096Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 208,
+      "characters": 5709,
+      "words": 690
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 79,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "# Session & Authentication Architecture\r\n\r\n## Overview\r\n\r\nThe Orthodox Metrics application uses a session-based authentication system with the following components:\r\n\r\n## Architecture Components\r\n\r\n### 1. Session Storage\r\n- **Type**: MySQL-based session store\r\n- **Table**: `sessions` in `orthodoxmetrics_db`\r\n- **Library**: `express-mysql-session`\r\n- **Persistence**: Database-backed for reliability\r\n\r\n### 2. Session Middleware\r\n- **Library**: `express-session`\r\n- **Configuration**: `z:\\server\\config\\session.js`\r\n- **Cookie Name**: `orthodoxmetrics.sid`\r\n- **Max Age**: 24 hours\r\n\r\n### 3. Authentication Middleware\r\n- **Location**: `z:\\server\\middleware\\auth.js`\r\n- **Function**: `requireAuth()`\r\n- **Purpose**: Validates session and user existence\r\n\r\n### 4. Authorization Middleware\r\n- **Location**: `z:\\server\\routes\\admin.js`\r\n- **Functions**: \r\n  - `requireAdmin()` - Admin or Super Admin\r\n  - `requireSuperAdmin()` - Super Admin only\r\n  - `requireRolePermission()` - Role-based creation permissions\r\n\r\n## Session Flow\r\n\r\n### 1. Login Process\r\n```javascript\r\n// POST /auth/login\r\n1. User submits credentials\r\n2. Backend validates against database\r\n3. Creates session: req.session.user = userData\r\n4. Returns success response\r\n5. Session cookie sent to browser\r\n```\r\n\r\n### 2. Subsequent Requests\r\n```javascript\r\n// Any authenticated endpoint\r\n1. Browser sends session cookie\r\n2. Express-session loads session from MySQL\r\n3. Auth middleware checks req.session.user\r\n4. If valid, request proceeds\r\n5. If invalid, returns 401\r\n```\r\n\r\n### 3. Logout Process\r\n```javascript\r\n// POST /auth/logout\r\n1. Destroy session: req.session.destroy()\r\n2. Clear session from database\r\n3. Clear cookie from browser\r\n```\r\n\r\n## Session Configuration\r\n\r\n### Database Schema\r\n```sql\r\nCREATE TABLE sessions (\r\n  session_id VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,\r\n  expires INT(11) UNSIGNED NOT NULL,\r\n  data MEDIUMTEXT COLLATE utf8mb4_unicode_ci,\r\n  PRIMARY KEY (session_id)\r\n);\r\n```\r\n\r\n### Session Options\r\n```javascript\r\n{\r\n  key: 'orthodoxmetrics.sid',           // Cookie name\r\n  secret: process.env.[REDACTED],   // Encryption key\r\n  store: MySQLStore,                    // Database storage\r\n  resave: false,                        // Don't save unchanged sessions\r\n  saveUninitialized: false,             // Don't save empty sessions\r\n  rolling: true,                        // Reset expiration on activity\r\n  proxy: true,                          // Trust reverse proxy\r\n  cookie: {\r\n    secure: false,                      // HTTP allowed (nginx handles SSL)\r\n    httpOnly: true,                     // Prevent XSS\r\n    maxAge: 24 * 60 * 60 * 1000,       // 24 hours\r\n    sameSite: 'lax',                    // CSRF protection\r\n    domain: undefined,                  // Let browser handle\r\n    path: '/'                           // Available site-wide\r\n  }\r\n}\r\n```\r\n\r\n## Route Structure\r\n\r\n### API Routes (with /api prefix)\r\n```\r\n/api/auth/*          - Authentication endpoints\r\n/api/admin/*         - User/admin management\r\n/api/churches/*      - Church management\r\n/api/logs/*          - System logs\r\n/api/notifications/* - Notifications\r\n/api/notes/*         - Notes system\r\n```\r\n\r\n### Direct Routes (without /api prefix)\r\n```\r\n/auth/*              - Direct auth access\r\n/admin/*             - Direct admin access\r\n/churches/*          - Direct church access\r\n/logs/*              - Direct logs access\r\n/notifications/*     - Direct notifications access\r\n/notes/*             - Direct notes access\r\n```\r\n\r\n## Nginx Proxy Configuration\r\n\r\n### Cookie Forwarding\r\n```nginx\r\nproxy_set_header Cookie $http_cookie;\r\nproxy_pass_header Set-Cookie;\r\nproxy_cookie_path / /;\r\n```\r\n\r\n### CORS Headers\r\n```nginx\r\nadd_header 'Access-Control-Allow-Credentials' 'true' always;\r\nadd_header 'Access-Control-Allow-Origin' '$http_origin' always;\r\n```\r\n\r\n## Security Considerations\r\n\r\n### Session Security\r\n- **HTTPOnly**: Prevents JavaScript access to session cookie\r\n- **SameSite**: Protects against CSRF attacks\r\n- **Secure**: Would be true in production with HTTPS\r\n- **Rolling**: Extends session on activity\r\n\r\n### Role-Based Access\r\n- **super_admin**: Full system access\r\n- **admin**: User and church management (limited)\r\n- **user**: Basic access to own data\r\n\r\n### Database Security\r\n- Session data encrypted with secret\r\n- Automatic session cleanup on expiration\r\n- SQL injection protection via parameterized queries\r\n\r\n## Monitoring & Debugging\r\n\r\n### Session Health Check\r\n```javascript\r\n// GET /debug/session\r\n{\r\n  sessionId: \"...\",\r\n  user: {...},\r\n  isAuthenticated: true,\r\n  sessionAge: \"2 hours\",\r\n  expiresIn: \"22 hours\"\r\n}\r\n```\r\n\r\n### Key Metrics to Monitor\r\n- Session creation rate\r\n- Session duration\r\n- Authentication failures\r\n- Database connection health\r\n- Cookie delivery success\r\n\r\n## Common Issues\r\n\r\n### Session Not Persisting\r\n- Check MySQL connection\r\n- Verify session table exists\r\n- Check session secret consistency\r\n- Monitor session store errors\r\n\r\n### Cookie Not Sent\r\n- Verify nginx proxy configuration\r\n- Check CORS settings\r\n- Ensure frontend sends credentials\r\n- Validate cookie domain/path\r\n\r\n### Authentication Failures\r\n- Check user exists in database\r\n- Verify password hashing\r\n- Monitor session middleware errors\r\n- Check authorization logic\r\n\r\n## Performance Considerations\r\n\r\n### Session Cleanup\r\n- Automatic cleanup of expired sessions\r\n- Monitor session table size\r\n- Consider session pruning strategy\r\n\r\n### Database Load\r\n- Connection pooling for session store\r\n- Monitor MySQL performance\r\n- Consider Redis for high-traffic scenarios\r\n\r\n### Memory Usage\r\n- Session data kept minimal\r\n- Avoid storing large objects in session\r\n- Regular garbage collection monitoring\r\n"
+    },
+    "complexity": {
+      "totalLines": 208,
+      "codeLines": 133,
+      "commentLines": 39,
+      "commentRatio": 0.22674418604651161,
+      "averageLineLength": 31.78488372093023
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.221Z"
+  },
+  "contentHash": "37d41a4764ccfa6b3fecedc7c13a1d72e042b5ca0bd26edb8026a70ced9cab59",
+  "discoveredAt": "2025-07-28T07:19:58.221Z"
+}

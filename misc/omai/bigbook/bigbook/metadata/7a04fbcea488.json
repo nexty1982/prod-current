@@ -1,0 +1,49 @@
+{
+  "id": "7a04fbcea488",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/debug-server-issues.sh",
+  "relativePath": "scripts/debug-server-issues.sh",
+  "name": "debug-server-issues.sh",
+  "extension": ".sh",
+  "size": 4202,
+  "modified": "2025-07-25T20:10:47.214Z",
+  "created": "2025-07-25T20:10:44.103Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 131,
+      "characters": 4132,
+      "words": 544
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 102
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 131,
+      "codeLines": 94,
+      "commentLines": 15,
+      "commentRatio": 0.13761467889908258,
+      "averageLineLength": 36.71559633027523
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.087Z"
+  },
+  "contentHash": "ba345c5d1658c1884f10c95d4de4f8f12c149d8d94ed6d42bb03753e6a573592",
+  "discoveredAt": "2025-07-28T07:19:59.087Z"
+}

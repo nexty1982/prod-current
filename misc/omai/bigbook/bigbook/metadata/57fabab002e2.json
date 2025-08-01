@@ -1,0 +1,54 @@
+{
+  "id": "57fabab002e2",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/complete-security-scan.js",
+  "relativePath": "server/debug/complete-security-scan.js",
+  "name": "complete-security-scan.js",
+  "extension": ".js",
+  "size": 6648,
+  "modified": "2025-07-22T03:58:17.754Z",
+  "created": "2025-07-22T03:58:17.754Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 160,
+      "characters": 6600,
+      "words": 488
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 160,
+      "codeLines": 130,
+      "commentLines": 9,
+      "commentRatio": 0.06474820143884892,
+      "averageLineLength": 44.60431654676259
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.090Z"
+  },
+  "contentHash": "6f22c22d6e52c2261e74f95bbda4c7294917f86fe78d713a87c0937d246f8e0c",
+  "discoveredAt": "2025-07-28T07:20:00.090Z"
+}

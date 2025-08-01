@@ -1,0 +1,54 @@
+{
+  "id": "9fae5fdbe426",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/services/omaiBackgroundService.js",
+  "relativePath": "server/services/omaiBackgroundService.js",
+  "name": "omaiBackgroundService.js",
+  "extension": ".js",
+  "size": 12799,
+  "modified": "2025-07-27T05:21:36.684Z",
+  "created": "2025-07-25T19:12:04.781Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 457,
+      "characters": 12785,
+      "words": 1250
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 457,
+      "codeLines": 299,
+      "commentLines": 92,
+      "commentRatio": 0.23529411764705882,
+      "averageLineLength": 30.79539641943734
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.115Z"
+  },
+  "contentHash": "7c9b0f69558ae6926ddcf9caccdfdf3d9e9b8d10fbff49328e22e7dd623e0107",
+  "discoveredAt": "2025-07-28T07:20:01.115Z"
+}

@@ -312,7 +312,6 @@ export const AGGridViewOnly: React.FC<AGGridViewOnlyProps> = ({
             floatingFilter: enableFilters,
           }}
           rowSelection="multiple"
-          suppressRowClickSelection={false}
           onCellClicked={handleCellClicked}
           onSelectionChanged={handleSelectionChanged}
           animateRows={true}

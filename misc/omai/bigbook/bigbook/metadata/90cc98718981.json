@@ -1,0 +1,43 @@
+{
+  "id": "90cc98718981",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-with-jit-routes.sh",
+  "relativePath": "scripts/restart-with-jit-routes.sh",
+  "name": "restart-with-jit-routes.sh",
+  "extension": ".sh",
+  "size": 4154,
+  "modified": "2025-07-25T20:05:31.618Z",
+  "created": "2025-07-25T20:05:19.545Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 136,
+      "characters": 4090,
+      "words": 527
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 136,
+      "codeLines": 90,
+      "commentLines": 18,
+      "commentRatio": 0.16666666666666666,
+      "averageLineLength": 36.620370370370374
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.477Z"
+  },
+  "contentHash": "08fa73d7ea5ef0b497217c5b8737fd0a8373df5a3d0ab8b9b87677ff7e192b2e",
+  "discoveredAt": "2025-07-28T07:19:59.477Z"
+}

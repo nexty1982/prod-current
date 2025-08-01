@@ -1,0 +1,43 @@
+{
+  "id": "d4192eb28a8d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-permission-logic.js",
+  "relativePath": "server/debug/test-permission-logic.js",
+  "name": "test-permission-logic.js",
+  "extension": ".js",
+  "size": 2823,
+  "modified": "2025-07-22T03:58:17.802Z",
+  "created": "2025-07-22T03:58:17.802Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 62,
+      "characters": 2799,
+      "words": 246
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 62,
+      "codeLines": 48,
+      "commentLines": 5,
+      "commentRatio": 0.09433962264150944,
+      "averageLineLength": 51.41509433962264
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.246Z"
+  },
+  "contentHash": "e1dc08c8f9a4a8efe87444095132ab8d193692316068b1d69497b1b80bf4644f",
+  "discoveredAt": "2025-07-28T07:20:00.246Z"
+}

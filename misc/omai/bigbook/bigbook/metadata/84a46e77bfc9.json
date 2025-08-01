@@ -1,0 +1,59 @@
+{
+  "id": "84a46e77bfc9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/analytics/correlation-analyzer.ts",
+  "relativePath": "services/om-ai/analytics/correlation-analyzer.ts",
+  "name": "correlation-analyzer.ts",
+  "extension": ".ts",
+  "size": 19443,
+  "modified": "2025-07-25T01:48:56.301Z",
+  "created": "2025-07-25T01:43:15.819Z",
+  "classification": {
+    "type": "Other",
+    "category": "Uncategorized",
+    "confidence": 0
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 544,
+      "characters": 19443,
+      "words": 1933
+    },
+    "classification": {
+      "type": "Other",
+      "category": "Uncategorized",
+      "confidence": 0
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 544,
+      "codeLines": 447,
+      "commentLines": 12,
+      "commentRatio": 0.026143790849673203,
+      "averageLineLength": 40.847494553376904
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.388Z"
+  },
+  "contentHash": "72dbd44e55742e97c19f6dbec4bdfc3c1b8ab7d38e3c60d560c29503974e6bf5",
+  "discoveredAt": "2025-07-28T07:20:01.388Z"
+}

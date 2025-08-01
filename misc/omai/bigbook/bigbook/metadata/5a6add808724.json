@@ -1,0 +1,94 @@
+{
+  "id": "5a6add808724",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/nlp.js",
+  "relativePath": "server/routes/nlp.js",
+  "name": "nlp.js",
+  "extension": ".js",
+  "size": 15609,
+  "modified": "2025-07-25T02:03:45.433Z",
+  "created": "2025-07-25T02:03:44.097Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 488,
+      "characters": 15609,
+      "words": 1610
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 53
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 130
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 189
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 249
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 302
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 355
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 431
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 488,
+      "codeLines": 405,
+      "commentLines": 17,
+      "commentRatio": 0.04028436018957346,
+      "averageLineLength": 35.32701421800948
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.516Z"
+  },
+  "contentHash": "5d861b92ed36b363d2caeda9d0bdccaabc8880bf5c4e85701062f4b1d81bccda",
+  "discoveredAt": "2025-07-28T07:20:00.516Z"
+}

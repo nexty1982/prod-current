@@ -1,0 +1,124 @@
+{
+  "id": "e0e5863150b5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/fix-frontend-session-cookies.sh",
+  "relativePath": "server/scripts/fix-frontend-session-cookies.sh",
+  "name": "fix-frontend-session-cookies.sh",
+  "extension": ".sh",
+  "size": 6718,
+  "modified": "2025-07-24T14:50:26.364Z",
+  "created": "2025-07-24T14:50:26.364Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 211,
+      "characters": 6654,
+      "words": 751
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express-session",
+        "line": 27
+      },
+      {
+        "type": "npm_package",
+        "name": "express-mysql-session",
+        "line": 28
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 31
+      },
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 98
+      },
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 121
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 137,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:secret|token)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 70,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 35,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 36,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 37,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 38,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 39,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 66,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 69,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/bin/bash\n\necho \"🔧 Fixing Frontend Session Cookie Issue\"\necho \"=======================================\"\n\ncd /var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server\n\necho \"🔍 IDENTIFIED PROBLEM:\"\necho \"Frontend API calls return: {\\\"error\\\":\\\"Authentication required\\\",\\\"code\\\":\\\"NO_SESSION\\\"}\"\necho \"This means frontend isn't sending session cookies properly.\"\necho \"\"\n\necho \"🛠️ DEBUGGING SESSION COOKIE CONFIGURATION...\"\n\n# Check current session configuration\necho \"1. Current session configuration:\"\ngrep -A 10 \"cookie:\" config/session.js\n\necho \"\"\necho \"2. Let's fix the session cookie settings for frontend compatibility...\"\n\n# Create a more frontend-compatible session config\ncp config/session.js config/session.js.backup-cookie-fix\n\ncat > config/session.js << 'EOF'\n// server/config/session.js - FRONTEND-COMPATIBLE SESSION CONFIG\nconst session = require('express-session');\nconst MySQLStore = require('express-mysql-session')(session);\n\n// Load environment variables\nrequire('dotenv').config();\n\n// Database connection options for session store\nconst sessionStoreOptions = {\n  host: process.env.[REDACTED] || 'localhost',\n  port: process.env.[REDACTED] || 3306,\n  user: process.env.[REDACTED] || 'orthodoxapps',\n  password: process.env.[REDACTED] || 'Summerof1982@!',\n  database: process.env.[REDACTED] || 'orthodoxmetrics_db',\n  charset: 'utf8mb4',\n  expiration: 86400000, // 24 hours\n  checkExpirationInterval: 900000, // Check every 15 minutes\n  createDatabaseTable: true,\n  endConnectionOnClose: true,\n  clearExpired: true,\n  schema: {\n    tableName: 'sessions',\n    columnNames: {\n      session_id: 'session_id',\n      expires: 'expires',\n      data: 'data'\n    }\n  }\n};\n\nconst store = new MySQLStore(sessionStoreOptions);\n\nstore.on('error', (error) => {\n  console.error('❌ Session store error:', error);\n});\n\nstore.on('connect', () => {\n  console.log('✅ Session store connected successfully');\n});\n\nconst sessionSecret = process.env.[REDACTED] || 'orthodox-metrics-production-secret-2025';\n\nconsole.log('🍪 Session configuration:');\nconsole.log('   Environment:', process.env.[REDACTED] || 'development');\nconsole.log('   Session secret:'[REDACTED]'SET' : 'NOT SET');\n\nmodule.exports = session({\n  name: 'connect.sid',\n  secret: sessionSecret,\n  store: store,\n  resave: false,\n  saveUninitialized: false,\n  rolling: true,\n  proxy: true,\n  cookie: {\n    secure: false, // 🔧 FIXED: Allow non-HTTPS for development/testing\n    httpOnly: false, // 🔧 FIXED: Allow JavaScript access for frontend\n    maxAge: 86400000, // 24 hours\n    sameSite: 'lax', // 🔧 FIXED: Allow cross-origin requests\n    path: '/', // 🔧 FIXED: Available for all paths\n    // No domain restriction for better compatibility\n  }\n});\nEOF\n\necho \"✅ Updated session configuration for frontend compatibility\"\n\necho \"\"\necho \"3. Testing frontend API call simulation...\"\n\n# Create a test to simulate frontend API call with proper session\ncat > test_frontend_api.js << 'EOF'\nconst express = require('express');\nconst sessionMiddleware = require('./config/session');\nconst authRoutes = require('./routes/auth');\nconst adminUsersRoutes = require('./routes/admin/users');\nconst { requireRole } = require('./middleware/auth');\n\nconst app = express();\napp.use(express.json());\napp.set('trust proxy', 1);\napp.use(sessionMiddleware);\n\n// Add routes\napp.use('/api/auth', authRoutes);\napp.use('/api/admin/users', requireRole(['super_admin', 'admin']), adminUsersRoutes);\n\nconst server = app.listen(3001, () => {\n  console.log('🧪 Test server running on port 3001');\n  \n  // Test login and then user fetch\n  setTimeout(testFlow, 1000);\n});\n\nasync function testFlow() {\n  const axios = require('axios');\n  \n  try {\n    console.log('');\n    console.log('🧪 Testing complete authentication flow...');\n    \n    // Create axios instance with cookie jar\n    const instance = axios.create({\n      baseURL: 'http://localhost:3001',\n      withCredentials: true\n    });\n    \n    // Step 1: Login\n    console.log('1. Testing login...');\n    const loginResponse = await instance.post('/api/auth/login', {\n      email: 'superadmin@orthodoxmetrics.com',\n      password: '[REDACTED]' // You'll need to update this\n    });\n    \n    console.log('   Login status:', loginResponse.status);\n    console.log('   Session ID:', loginResponse.data.sessionId);\n    \n    // Step 2: Test user fetch with session\n    console.log('2. Testing user fetch with session...');\n    const usersResponse = await instance.get('/api/admin/users');\n    \n    console.log('   Users API status:', usersResponse.status);\n    console.log('   Users count:', usersResponse.data.users?.length || 0);\n    \n    if (usersResponse.data.users && usersResponse.data.users.length > 0) {\n      console.log('   ✅ SUCCESS: Users retrieved successfully!');\n      console.log('   Sample user:', usersResponse.data.users[0].email);\n    } else {\n      console.log('   ❌ PROBLEM: No users in response');\n    }\n    \n  } catch (error) {\n    console.error('❌ Test flow error:', error.response?.status, error.response?.data || error.message);\n  }\n  \n  server.close();\n  process.exit(0);\n}\nEOF\n\necho \"4. Restarting main server with new session config...\"\npm2 restart orthodox-backend\n\nsleep 3\n\necho \"\"\necho \"5. Testing session endpoint after restart...\"\nauth_check=$(curl -s -w \"%{http_code}\" https://orthodoxmetrics.com/api/auth/check -o /dev/null)\necho \"Auth check status: $auth_check\"\n\necho \"\"\necho \"📋 FRONTEND SESSION FIXES APPLIED:\"\necho \"==================================\"\necho \"✅ Set secure: false (allow non-HTTPS)\"\necho \"✅ Set httpOnly: false (allow JS access)\"  \necho \"✅ Set sameSite: 'lax' (allow cross-origin)\"\necho \"✅ Set path: '/' (available everywhere)\"\necho \"✅ Removed domain restrictions\"\necho \"\"\n\necho \"🎯 CRITICAL NEXT STEPS:\"\necho \"=======================\"\necho \"1. 🧹 CLEAR ALL BROWSER COOKIES for orthodoxmetrics.com\"\necho \"2. 🚪 LOG OUT completely from admin panel\"\necho \"3. 🔄 CLOSE browser entirely and reopen\"\necho \"4. 🔑 LOG IN again to admin panel\"\necho \"5. 📊 Test User Management page\"\necho \"\"\n\necho \"🔍 TO DEBUG FURTHER:\"\necho \"===================\"\necho \"1. Open browser Developer Tools (F12)\"\necho \"2. Go to Application tab > Cookies\"\necho \"3. Check if 'connect.sid' cookie exists for orthodoxmetrics.com\"\necho \"4. Go to Network tab and refresh User Management page\"\necho \"5. Look for /api/admin/users request and check if it includes cookies\"\necho \"\"\n\necho \"💡 If User Management still shows 'Failed to fetch users':\"\necho \"   The Network tab will show exactly what's happening!\"\n\n# Cleanup\nrm -f test_frontend_api.js\n\necho \"\"\necho \"🎯 The session cookie configuration has been fixed for frontend compatibility!\" "
+    },
+    "complexity": {
+      "totalLines": 211,
+      "codeLines": 155,
+      "commentLines": 14,
+      "commentRatio": 0.08284023668639054,
+      "averageLineLength": 37.928994082840234
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.042Z"
+  },
+  "contentHash": "d430104d10de02139bd1664e0cc8989210df93e3d6a90fb7f37839a953597c87",
+  "discoveredAt": "2025-07-28T07:20:01.042Z"
+}

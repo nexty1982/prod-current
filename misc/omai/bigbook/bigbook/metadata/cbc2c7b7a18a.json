@@ -1,0 +1,119 @@
+{
+  "id": "cbc2c7b7a18a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/api/eCommerce/ProductsData.ts",
+  "relativePath": "front-end/src/api/eCommerce/ProductsData.ts",
+  "name": "ProductsData.ts",
+  "extension": ".ts",
+  "size": 9702,
+  "modified": "2025-04-30T05:42:44.000Z",
+  "created": "2025-07-05T02:28:23.000Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 341,
+      "characters": 9702,
+      "words": 1123
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "date-fns",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "chance",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s1.jpg",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s2.jpg",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s3.jpg",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s4.jpg",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s5.jpg",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s6.jpg",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s7.jpg",
+        "line": 9
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s8.jpg",
+        "line": 10
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s9.jpg",
+        "line": 11
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s10.jpg",
+        "line": 12
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s11.jpg",
+        "line": 13
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s12.jpg",
+        "line": 14
+      },
+      {
+        "type": "npm_package",
+        "name": "msw",
+        "line": 15
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 341,
+      "codeLines": 323,
+      "commentLines": 7,
+      "commentRatio": 0.021212121212121213,
+      "averageLineLength": 28.33939393939394
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.679Z"
+  },
+  "contentHash": "b25cef1d2853b9f10200af2ba6b2b803a31afe245178a048c6b255eab1ca8b73",
+  "discoveredAt": "2025-07-28T07:19:58.679Z"
+}

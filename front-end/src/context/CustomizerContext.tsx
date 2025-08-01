@@ -34,20 +34,101 @@ export const CustomizerContext = createContext<CustomizerContextState | any>(und
 interface CustomizerContextProps {
     children: ReactNode;
 }
+
+// Helper functions for localStorage
+const getStoredValue = (key: string, defaultValue: any): any => {
+    if (typeof window === 'undefined') return defaultValue;
+    try {
+        const stored = localStorage.getItem(`orthodoxmetrics-${key}`);
+        return stored !== null ? JSON.parse(stored) : defaultValue;
+    } catch (error) {
+        console.warn(`Failed to parse stored value for ${key}:`, error);
+        return defaultValue;
+    }
+};
+
+const setStoredValue = (key: string, value: any): void => {
+    if (typeof window === 'undefined') return;
+    try {
+        localStorage.setItem(`orthodoxmetrics-${key}`, JSON.stringify(value));
+    } catch (error) {
+        console.warn(`Failed to store value for ${key}:`, error);
+    }
+};
+
 // Create the provider component
 export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ children }) => {
 
-    const [activeDir, setActiveDir] = useState<string>(config.activeDir);
-    const [activeMode, setActiveMode] = useState<string>(config.activeMode);
-    const [activeTheme, setActiveTheme] = useState<string>(config.activeTheme);
-    const [activeLayout, setActiveLayout] = useState<string>(config.activeLayout);
-    const [isCardShadow, setIsCardShadow] = useState<boolean>(config.isCardShadow);
-    const [isLayout, setIsLayout] = useState<string>(config.isLayout);
-    const [isBorderRadius, setIsBorderRadius] = useState<number>(config.isBorderRadius);
-    const [isCollapse, setIsCollapse] = useState<string>(config.isCollapse);
+    // Initialize state with localStorage values or config defaults
+    const [activeDir, setActiveDirState] = useState<string>(() => 
+        getStoredValue('activeDir', config.activeDir)
+    );
+    const [activeMode, setActiveModeState] = useState<string>(() => 
+        getStoredValue('activeMode', config.activeMode)
+    );
+    const [activeTheme, setActiveThemeState] = useState<string>(() => 
+        getStoredValue('activeTheme', config.activeTheme)
+    );
+    const [activeLayout, setActiveLayoutState] = useState<string>(() => 
+        getStoredValue('activeLayout', config.activeLayout)
+    );
+    const [isCardShadow, setIsCardShadowState] = useState<boolean>(() => 
+        getStoredValue('isCardShadow', config.isCardShadow)
+    );
+    const [isLayout, setIsLayoutState] = useState<string>(() => 
+        getStoredValue('isLayout', config.isLayout)
+    );
+    const [isBorderRadius, setIsBorderRadiusState] = useState<number>(() => 
+        getStoredValue('isBorderRadius', config.isBorderRadius)
+    );
+    const [isCollapse, setIsCollapseState] = useState<string>(() => 
+        getStoredValue('isCollapse', config.isCollapse)
+    );
     const [isLanguage, setIsLanguage] = useState<string>(config.isLanguage);
     const [isSidebarHover, setIsSidebarHover] = useState<boolean>(false);
     const [isMobileSidebar, setIsMobileSidebar] = useState<boolean>(false);
+
+    // Enhanced setter functions that also save to localStorage
+    const setActiveDir = (dir: string) => {
+        setActiveDirState(dir);
+        setStoredValue('activeDir', dir);
+    };
+
+    const setActiveMode = (mode: string) => {
+        setActiveModeState(mode);
+        setStoredValue('activeMode', mode);
+    };
+
+    const setActiveTheme = (theme: string) => {
+        setActiveThemeState(theme);
+        setStoredValue('activeTheme', theme);
+    };
+
+    const setActiveLayout = (layout: string) => {
+        setActiveLayoutState(layout);
+        setStoredValue('activeLayout', layout);
+    };
+
+    const setIsCardShadow = (shadow: boolean) => {
+        setIsCardShadowState(shadow);
+        setStoredValue('isCardShadow', shadow);
+    };
+
+    const setIsLayout = (layout: string) => {
+        setIsLayoutState(layout);
+        setStoredValue('isLayout', layout);
+    };
+
+    const setIsBorderRadius = (radius: number) => {
+        setIsBorderRadiusState(radius);
+        setStoredValue('isBorderRadius', radius);
+    };
+
+    const setIsCollapse = (collapse: string) => {
+        setIsCollapseState(collapse);
+        setStoredValue('isCollapse', collapse);
+    };
+
     // Set attributes immediately
     useEffect(() => {
         document.documentElement.setAttribute("class", activeMode);

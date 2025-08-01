@@ -1,0 +1,71 @@
+{
+  "id": "1b82b884da94",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/preprocessOcr.js",
+  "relativePath": "server/routes/preprocessOcr.js",
+  "name": "preprocessOcr.js",
+  "extension": ".js",
+  "size": 8042,
+  "modified": "2025-07-14T22:32:13.214Z",
+  "created": "2025-07-14T22:27:45.971Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 275,
+      "characters": 7989,
+      "words": 707
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "multer",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 9
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 18,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "/**\r\n * OCR Preprocessing API Endpoint\r\n * Handles image preprocessing requests with advanced computer vision techniques\r\n */\r\n\r\nconst express = require('express');\r\nconst multer = require('multer');\r\nconst path = require('path');\r\nconst fs = require('fs').promises;\r\nconst ImagePreprocessor = require('../utils/imagePreprocessor');\r\n\r\nconst router = express.Router();\r\nconst preprocessor = new ImagePreprocessor();\r\n\r\n// Configure multer for file uploads\r\nconst storage = multer.diskStorage({\r\n  destination: (req, file, cb) => {\r\n    cb(null, process.env.[REDACTED] || './uploads/raw');\r\n  },\r\n  filename: (req, file, cb) => {\r\n    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);\r\n    cb(null, 'raw-' + uniqueSuffix + path.extname(file.originalname));\r\n  }\r\n});\r\n\r\nconst upload = multer({\r\n  storage,\r\n  limits: {\r\n    fileSize: 50 * 1024 * 1024 // 50MB\r\n  },\r\n  fileFilter: (req, file, cb) => {\r\n    const allowedTypes = [\r\n      'image/jpeg',\r\n      'image/png',\r\n      'image/tiff',\r\n      'image/bmp',\r\n      'image/webp'\r\n    ];\r\n\r\n    if (allowedTypes.includes(file.mimetype)) {\r\n      cb(null, true);\r\n    } else {\r\n      cb(new Error(`Unsupported file type: ${file.mimetype}`), false);\r\n    }\r\n  }\r\n});\r\n\r\n/**\r\n * POST /api/ocr/preprocess\r\n * Preprocess image for optimal OCR results\r\n */\r\nrouter.post('/preprocess', upload.single('image'), async (req, res) => {\r\n  const startTime = Date.now();\r\n  \r\n  try {\r\n    console.log('🔄 OCR Preprocessing Request Started');\r\n    console.log('=====================================');\r\n    \r\n    if (!req.file) {\r\n      return res.status(400).json({\r\n        status: 'error',\r\n        error: 'No image file provided'\r\n      });\r\n    }\r\n\r\n    const {\r\n      language = 'en',\r\n      enhance = 'true',\r\n      outputDir = './uploads/processed'\r\n    } = req.body;\r\n\r\n    const inputPath = req.file.path;\r\n    const enhanceBool = enhance === 'true' || enhance === true;\r\n    \r\n    console.log(`📁 Input file: ${inputPath}`);\r\n    console.log(`🌐 Language: ${language}`);\r\n    console.log(`✨ Enhancement: ${enhanceBool ? 'enabled' : 'disabled'}`);\r\n    \r\n    // Get file stats\r\n    const fileStats = await fs.stat(inputPath);\r\n    console.log(`📊 File size: ${(fileStats.size / 1024 / 1024).toFixed(2)} MB`);\r\n\r\n    // Process the image\r\n    const result = await preprocessor.processImage(inputPath, {\r\n      language,\r\n      enhance: enhanceBool,\r\n      outputDir\r\n    });\r\n\r\n    const processingTime = Date.now() - startTime;\r\n    \r\n    if (result.status === 'success') {\r\n      // Get processed file stats\r\n      const processedStats = await fs.stat(result.processedImage);\r\n      const sizeReduction = ((fileStats.size - processedStats.size) / fileStats.size * 100).toFixed(1);\r\n      \r\n      console.log('=====================================');\r\n      console.log('✅ OCR Preprocessing Complete!');\r\n      console.log(`⏱️  Processing time: ${processingTime}ms`);\r\n      console.log(`📏 Original: ${result.originalDimensions[0]}x${result.originalDimensions[1]}`);\r\n      console.log(`✂️  Cropped: ${result.croppedDimensions[0]}x${result.croppedDimensions[1]}`);\r\n      console.log(`📐 Final: ${result.finalDimensions[0]}x${result.finalDimensions[1]}`);\r\n      console.log(`🔄 Rotation: ${result.rotationAngle.toFixed(2)}°`);\r\n      console.log(`💾 Size reduction: ${sizeReduction}%`);\r\n      console.log(`🎯 Ready for OCR processing!`);\r\n      console.log('=====================================');\r\n\r\n      // Clean up original file\r\n      try {\r\n        await fs.unlink(inputPath);\r\n      } catch (error) {\r\n        console.warn('⚠️  Could not clean up original file:', error.message);\r\n      }\r\n\r\n      res.json({\r\n        status: 'success',\r\n        processedImage: result.processedImage,\r\n        rotationAngle: result.rotationAngle,\r\n        originalDimensions: result.originalDimensions,\r\n        croppedDimensions: result.croppedDimensions,\r\n        finalDimensions: result.finalDimensions,\r\n        processingTime,\r\n        sizeReduction: `${sizeReduction}%`,\r\n        processingSteps: result.processingSteps,\r\n        language,\r\n        enhanced: enhanceBool,\r\n        metadata: {\r\n          originalSize: fileStats.size,\r\n          processedSize: processedStats.size,\r\n          compressionRatio: (processedStats.size / fileStats.size).toFixed(3)\r\n        }\r\n      });\r\n\r\n    } else {\r\n      console.error('❌ Preprocessing failed:', result.error);\r\n      \r\n      // Clean up original file on error\r\n      try {\r\n        await fs.unlink(inputPath);\r\n      } catch (error) {\r\n        console.warn('⚠️  Could not clean up original file:', error.message);\r\n      }\r\n\r\n      res.status(500).json({\r\n        status: 'error',\r\n        error: result.error,\r\n        processingTime\r\n      });\r\n    }\r\n\r\n  } catch (error) {\r\n    console.error('❌ Preprocessing endpoint error:', error);\r\n    \r\n    // Clean up uploaded file on error\r\n    if (req.file) {\r\n      try {\r\n        await fs.unlink(req.file.path);\r\n      } catch (unlinkError) {\r\n        console.warn('⚠️  Could not clean up file:', unlinkError.message);\r\n      }\r\n    }\r\n\r\n    res.status(500).json({\r\n      status: 'error',\r\n      error: error.message || 'Preprocessing failed',\r\n      processingTime: Date.now() - startTime\r\n    });\r\n  }\r\n});\r\n\r\n/**\r\n * POST /api/ocr/preprocess-path\r\n * Preprocess image from existing file path\r\n */\r\nrouter.post('/preprocess-path', async (req, res) => {\r\n  const startTime = Date.now();\r\n  \r\n  try {\r\n    const {\r\n      imagePath,\r\n      language = 'en',\r\n      enhance = true,\r\n      outputDir = './uploads/processed'\r\n    } = req.body;\r\n\r\n    if (!imagePath) {\r\n      return res.status(400).json({\r\n        status: 'error',\r\n        error: 'No image path provided'\r\n      });\r\n    }\r\n\r\n    console.log(`🔄 Processing existing image: ${imagePath}`);\r\n\r\n    // Check if file exists\r\n    try {\r\n      await fs.access(imagePath);\r\n    } catch {\r\n      return res.status(404).json({\r\n        status: 'error',\r\n        error: 'Image file not found'\r\n      });\r\n    }\r\n\r\n    // Process the image\r\n    const result = await preprocessor.processImage(imagePath, {\r\n      language,\r\n      enhance,\r\n      outputDir\r\n    });\r\n\r\n    const processingTime = Date.now() - startTime;\r\n\r\n    if (result.status === 'success') {\r\n      console.log(`✅ Path-based preprocessing complete in ${processingTime}ms`);\r\n      \r\n      res.json({\r\n        status: 'success',\r\n        processedImage: result.processedImage,\r\n        rotationAngle: result.rotationAngle,\r\n        originalDimensions: result.originalDimensions,\r\n        croppedDimensions: result.croppedDimensions,\r\n        finalDimensions: result.finalDimensions,\r\n        processingTime,\r\n        processingSteps: result.processingSteps,\r\n        language,\r\n        enhanced: enhance\r\n      });\r\n\r\n    } else {\r\n      res.status(500).json({\r\n        status: 'error',\r\n        error: result.error,\r\n        processingTime\r\n      });\r\n    }\r\n\r\n  } catch (error) {\r\n    console.error('❌ Path preprocessing error:', error);\r\n    \r\n    res.status(500).json({\r\n      status: 'error',\r\n      error: error.message || 'Preprocessing failed',\r\n      processingTime: Date.now() - startTime\r\n    });\r\n  }\r\n});\r\n\r\n/**\r\n * GET /api/ocr/preprocess/health\r\n * Health check for preprocessing service\r\n */\r\nrouter.get('/health', (req, res) => {\r\n  res.json({\r\n    status: 'healthy',\r\n    service: 'OCR Image Preprocessing',\r\n    features: [\r\n      'Document detection and boundary analysis',\r\n      'Automatic rotation and perspective correction',\r\n      'Intelligent cropping with padding',\r\n      'Standard resolution normalization',\r\n      'CLAHE contrast enhancement',\r\n      'Adaptive thresholding',\r\n      'Morphological text cleanup',\r\n      'Multi-language support'\r\n    ],\r\n    supportedLanguages: ['en', 'el', 'ru', 'ro'],\r\n    supportedFormats: ['JPEG', 'PNG', 'TIFF', 'BMP', 'WebP'],\r\n    maxFileSize: '50MB',\r\n    standardOutputSize: '1024x1440'\r\n  });\r\n});\r\n\r\nmodule.exports = router;\r\n"
+    },
+    "complexity": {
+      "totalLines": 275,
+      "codeLines": 211,
+      "commentLines": 25,
+      "commentRatio": 0.1059322033898305,
+      "averageLineLength": 32.33474576271186
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.542Z"
+  },
+  "contentHash": "1b372e34e5c84a30fa65b8bbc455ec59c80d481ba9f2e9d9cae0efc249bebc7f",
+  "discoveredAt": "2025-07-28T07:20:00.542Z"
+}

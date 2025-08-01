@@ -1,0 +1,43 @@
+{
+  "id": "d7b7b3313c44",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/debug-login-redirect.js",
+  "relativePath": "server/debug/debug-login-redirect.js",
+  "name": "debug-login-redirect.js",
+  "extension": ".js",
+  "size": 7408,
+  "modified": "2025-07-22T15:20:39.979Z",
+  "created": "2025-07-22T15:20:35.909Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 159,
+      "characters": 7326,
+      "words": 646
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 159,
+      "codeLines": 122,
+      "commentLines": 13,
+      "commentRatio": 0.0962962962962963,
+      "averageLineLength": 51.407407407407405
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.098Z"
+  },
+  "contentHash": "f8626f55c19ec9c85ffde27d05ce02711aa4c61604f8a552fc51303baf6c4b6d",
+  "discoveredAt": "2025-07-28T07:20:00.098Z"
+}

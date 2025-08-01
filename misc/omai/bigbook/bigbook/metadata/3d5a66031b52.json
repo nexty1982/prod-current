@@ -1,0 +1,54 @@
+{
+  "id": "3d5a66031b52",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/rebuild-build-system.sh",
+  "relativePath": "scripts/7-26-25/rebuild-build-system.sh",
+  "name": "rebuild-build-system.sh",
+  "extension": ".sh",
+  "size": 1818,
+  "modified": "2025-07-26T02:04:27.305Z",
+  "created": "2025-07-26T02:03:38.341Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 69,
+      "characters": 1796,
+      "words": 228
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 44
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 48
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 69,
+      "codeLines": 45,
+      "commentLines": 10,
+      "commentRatio": 0.18181818181818182,
+      "averageLineLength": 31.418181818181818
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.008Z"
+  },
+  "contentHash": "3b15b56025fcab678e6e79d7c1335977f10d1a71a866e0e1fb1a6d82bbbe3bb7",
+  "discoveredAt": "2025-07-28T07:19:59.008Z"
+}

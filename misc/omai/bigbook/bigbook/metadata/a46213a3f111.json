@@ -1,0 +1,84 @@
+{
+  "id": "a46213a3f111",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/restore-all-dependencies.sh",
+  "relativePath": "scripts/7-26-25/restore-all-dependencies.sh",
+  "name": "restore-all-dependencies.sh",
+  "extension": ".sh",
+  "size": 1234,
+  "modified": "2025-07-26T22:02:58.665Z",
+  "created": "2025-07-26T22:02:53.563Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 33,
+      "characters": 1210,
+      "words": 140
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 7
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 10
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 13
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 14
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 17
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 20
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 20
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 24
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 33,
+      "codeLines": 23,
+      "commentLines": 1,
+      "commentRatio": 0.041666666666666664,
+      "averageLineLength": 49.083333333333336
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.016Z"
+  },
+  "contentHash": "5b657cf8b209a27719964d9f25f33327d4e729eead01ec84f5e91eb0a858d574",
+  "discoveredAt": "2025-07-28T07:19:59.016Z"
+}

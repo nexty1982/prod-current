@@ -1,0 +1,43 @@
+{
+  "id": "e38d7e4701de",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/types/client-management.types.ts",
+  "relativePath": "front-end/src/types/client-management.types.ts",
+  "name": "client-management.types.ts",
+  "extension": ".ts",
+  "size": 2531,
+  "modified": "2025-07-21T17:45:45.895Z",
+  "created": "2025-07-08T01:05:37.143Z",
+  "classification": {
+    "type": "Other",
+    "category": "Uncategorized",
+    "confidence": 0
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 107,
+      "characters": 2531,
+      "words": 227
+    },
+    "classification": {
+      "type": "Other",
+      "category": "Uncategorized",
+      "confidence": 0
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 107,
+      "codeLines": 96,
+      "commentLines": 2,
+      "commentRatio": 0.02040816326530612,
+      "averageLineLength": 24.663265306122447
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.929Z"
+  },
+  "contentHash": "42ba49a8bf2ef6ab718bd3d52a123bdb5cecd666f6cb6e99f719daaccc847760",
+  "discoveredAt": "2025-07-28T07:19:58.929Z"
+}

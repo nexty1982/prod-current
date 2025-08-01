@@ -1,0 +1,43 @@
+{
+  "id": "dc00cea83a9a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/start-jit-terminal.sh",
+  "relativePath": "scripts/start-jit-terminal.sh",
+  "name": "start-jit-terminal.sh",
+  "extension": ".sh",
+  "size": 2987,
+  "modified": "2025-07-25T20:06:01.587Z",
+  "created": "2025-07-25T20:05:58.425Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 86,
+      "characters": 2951,
+      "words": 391
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 86,
+      "codeLines": 57,
+      "commentLines": 11,
+      "commentRatio": 0.16176470588235295,
+      "averageLineLength": 42.14705882352941
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.483Z"
+  },
+  "contentHash": "9bf5b9e44aa9ca26a0e1105ee2abd7178c299c7ee49dd56062e8c82f4240d2f8",
+  "discoveredAt": "2025-07-28T07:19:59.483Z"
+}

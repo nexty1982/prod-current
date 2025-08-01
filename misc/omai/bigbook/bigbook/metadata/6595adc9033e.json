@@ -1,0 +1,54 @@
+{
+  "id": "6595adc9033e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/hooks/useFilteredMenuItems.ts",
+  "relativePath": "front-end/src/hooks/useFilteredMenuItems.ts",
+  "name": "useFilteredMenuItems.ts",
+  "extension": ".ts",
+  "size": 23831,
+  "modified": "2025-07-27T05:33:15.457Z",
+  "created": "2025-07-05T22:20:20.033Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 546,
+      "characters": 23799,
+      "words": 1920
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "lodash",
+        "line": 9
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 546,
+      "codeLines": 406,
+      "commentLines": 61,
+      "commentRatio": 0.13062098501070663,
+      "averageLineLength": 48.37687366167024
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.849Z"
+  },
+  "contentHash": "45520da4e727b506c49ffebb6a77703a2ccbf0030c3538a2af0bfce48b567372",
+  "discoveredAt": "2025-07-28T07:19:58.849Z"
+}

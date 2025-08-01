@@ -1,0 +1,49 @@
+{
+  "id": "c28b1d4aa197",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/ff8a77acee03.json",
+  "relativePath": "bigbook/metadata/ff8a77acee03.json",
+  "name": "ff8a77acee03.json",
+  "extension": ".json",
+  "size": 21980,
+  "modified": "2025-07-26T04:17:11.774Z",
+  "created": "2025-07-26T04:17:11.774Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 116,
+      "characters": 21150,
+      "words": 1506
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "nodemailer",
+        "line": 103
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 116,
+      "codeLines": 116,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 181.33620689655172
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.663Z"
+  },
+  "contentHash": "5d9e412edde3eb51868b3b44c88693278bab4b38085c455af20ed14895792447",
+  "discoveredAt": "2025-07-28T07:19:57.663Z"
+}

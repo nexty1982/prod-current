@@ -2,10 +2,47 @@
 const express = require('express');
 const { getChurchDbConnection } = require('../utils/dbSwitcher');
 const { cleanRecords, cleanRecord, transformBaptismRecords, transformBaptismRecord } = require('../utils/dateFormatter');
+const { promisePool } = require('../config/db');
 const router = express.Router();
 
-// Church database configuration
-const CHURCH_DB_NAME = 'ssppoc_records_db';
+/**
+ * Get church database name by church_id
+ * @param {number} churchId 
+ * @returns {Promise<string>} database name
+ */
+async function getChurchDatabaseName(churchId) {
+    try {
+        if (!churchId || churchId === '0') {
+            // Default to SSPPOC database for backward compatibility
+            console.log('🏛️ Using default database for church_id:', churchId);
+            return 'ssppoc_records_db';
+        }
+        
+        console.log('🔍 Looking up database name for church_id:', churchId);
+        
+        const [churches] = await promisePool.query(
+            'SELECT database_name FROM orthodmetrics_dev.churches WHERE id = ? AND is_active = 1',
+            [churchId]
+        );
+        
+        if (churches.length === 0) {
+            console.warn(`⚠️ No active church found with ID: ${churchId}, using default database`);
+            return 'ssppoc_records_db'; // Fallback instead of throwing error
+        }
+        
+        if (!churches[0].database_name) {
+            console.warn(`⚠️ No database_name configured for church ID: ${churchId}, using default database`);
+            return 'ssppoc_records_db'; // Fallback instead of throwing error
+        }
+        
+        console.log(`✅ Found database: ${churches[0].database_name} for church_id: ${churchId}`);
+        return churches[0].database_name;
+    } catch (error) {
+        console.error('❌ Error in getChurchDatabaseName:', error);
+        console.log('🔄 Falling back to default database');
+        return 'ssppoc_records_db'; // Always fallback to prevent 500 errors
+    }
+}
 
 // Test endpoint to verify API is working
 router.get('/test', (req, res) => {
@@ -25,37 +62,58 @@ router.get('/', async (req, res) => {
             page = 1, 
             limit = 10, 
             search = '', 
+            church_id = null,
             sortField = 'id', 
             sortDirection = 'desc' 
         } = req.query;
 
+        console.log('📋 Query parameters:', { page, limit, search, church_id, sortField, sortDirection });
+
+        // Dynamically resolve church database name
+        const databaseName = await getChurchDatabaseName(church_id);
+        console.log(`🏛️ Using database: ${databaseName} for church_id: ${church_id}`);
+
         // Get church database connection
-        const churchDbPool = await getChurchDbConnection(CHURCH_DB_NAME);
+        const churchDbPool = await getChurchDbConnection(databaseName);
 
         let query = 'SELECT * FROM baptism_records';
         let countQuery = 'SELECT COUNT(*) as total FROM baptism_records';
         const queryParams = [];
         const countParams = [];
+        let whereConditions = [];
+
+        // Add church filtering
+        if (church_id && church_id !== '0') {
+            whereConditions.push('church_id = ?');
+            queryParams.push(church_id);
+            countParams.push(church_id);
+            console.log(`🏛️ Filtering by church_id: ${church_id}`);
+        }
 
         // Add search functionality
         if (search && search.trim()) {
-            const searchConditions = `
-                WHERE first_name LIKE ? 
+            const searchCondition = `(first_name LIKE ? 
                 OR last_name LIKE ? 
                 OR clergy LIKE ? 
                 OR sponsors LIKE ? 
                 OR parents LIKE ? 
-                OR birthplace LIKE ?
-            `;
+                OR birthplace LIKE ?)`;
             const searchParam = `%${search.trim()}%`;
             
-            query += searchConditions;
-            countQuery += searchConditions;
+            whereConditions.push(searchCondition);
             
             // Add search parameters for main query
             queryParams.push(searchParam, searchParam, searchParam, searchParam, searchParam, searchParam);
             // Add search parameters for count query
             countParams.push(searchParam, searchParam, searchParam, searchParam, searchParam, searchParam);
+            console.log(`🔍 Searching for: "${search.trim()}"`);
+        }
+        
+        // Apply WHERE conditions if any exist
+        if (whereConditions.length > 0) {
+            const whereClause = ` WHERE ${whereConditions.join(' AND ')}`;
+            query += whereClause;
+            countQuery += whereClause;
         }
 
         // Add sorting
@@ -340,13 +398,16 @@ router.delete('/:id', async (req, res) => {
 
 // GET /api/unique-values?table=…&column=…
 router.get('/unique-values', async (req, res) => {
-    const { table, column } = req.query;
+    const { table, column, church_id } = req.query;
     if (!table || !column) {
         return res.status(400).json({ error: 'table and column query params required' });
     }
     try {
+        // Dynamically resolve church database name
+        const databaseName = await getChurchDatabaseName(church_id);
+        
         // Get church database connection
-        const churchDbPool = await getChurchDbConnection(CHURCH_DB_NAME);
+        const churchDbPool = await getChurchDbConnection(databaseName);
         
         // **Warning**: ensure table/column come from a whitelist in production!
         const sql = `SELECT DISTINCT TRIM(\`${column}\`) AS value FROM \`${table}\` WHERE \`${column}\` IS NOT NULL AND TRIM(\`${column}\`) != ''`;
@@ -381,18 +442,32 @@ router.get('/unique-values', async (req, res) => {
 
 router.get('/dropdown-options/:column', async (req, res) => {
     const { column } = req.params;
-    const { table } = req.query;
-    if (!table) {
-        return res.status(400).json({ error: 'table query param required' });
-    }
+    const { table, church_id } = req.query;
+    
+    // Default to baptism_records if no table specified
+    const tableName = table || 'baptism_records';
+    
     try {
-        // Get church database connection
-        const churchDbPool = await getChurchDbConnection(CHURCH_DB_NAME);
+        // Dynamically resolve church database name
+        const databaseName = await getChurchDatabaseName(church_id);
         
-        // beware SQL-injection in prod—validate table/column against a whitelist!
-        const sql = `SELECT DISTINCT \`${column}\` AS value FROM \`${table}\``;
+        // Get church database connection
+        const churchDbPool = await getChurchDbConnection(databaseName);
+        
+        // Validate column against whitelist for security
+        const allowedColumns = ['clergy', 'priest', 'sponsors', 'parents', 'birthplace', 'place_of_birth'];
+        if (!allowedColumns.includes(column)) {
+            return res.status(400).json({ error: 'Invalid column specified' });
+        }
+        
+        // Build query with proper filtering
+        const sql = `SELECT DISTINCT \`${column}\` AS value FROM \`${tableName}\` WHERE \`${column}\` IS NOT NULL AND TRIM(\`${column}\`) != '' ORDER BY \`${column}\` ASC`;
         const [rows] = await churchDbPool.query(sql);
-        res.json({ values: rows.map(r => r.value) });
+        
+        // Filter out empty values and deduplicate
+        const values = [...new Set(rows.map(r => r.value).filter(v => v && v.trim()))];
+        
+        res.json({ values });
     } catch (err) {
         console.error('fetch dropdown-options error:', err);
         res.status(500).json({ error: 'Could not fetch dropdown options' });

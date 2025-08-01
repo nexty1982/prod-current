@@ -1,0 +1,62 @@
+{
+  "id": "0e8d21aa57cb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/6975303f98b8.json",
+  "relativePath": "bigbook/metadata/6975303f98b8.json",
+  "name": "6975303f98b8.json",
+  "extension": ".json",
+  "size": 5126,
+  "modified": "2025-07-26T04:17:10.910Z",
+  "created": "2025-07-26T04:17:10.910Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 68,
+      "characters": 5102,
+      "words": 426
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "bcrypt",
+        "line": 55
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 55,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 55,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"6975303f98b8\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/reset-superadmin-password.js\",\n  \"relativePath\": \"server/debug/reset-superadmin-password.js\",\n  \"name\": \"reset-superadmin-password.js\",\n  \"extension\": \".js\",\n  \"size\": 3092,\n  \"modified\": \"2025-07-22T03:58:17.798Z\",\n  \"created\": \"2025-07-22T03:58:17.798Z\",\n  \"classification\": {\n    \"type\": \"Troubleshooting Utilities\",\n    \"category\": \"Diagnostic Tools\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 81,\n      \"characters\": 3068,\n      \"words\": 297\n    },\n    \"classification\": {\n      \"type\": \"Troubleshooting Utilities\",\n      \"category\": \"Diagnostic Tools\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"bcrypt\",\n        \"line\": 2\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 10,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 65,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 74,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"const { promisePool } = require('../config/db');\\r\\nconst bcrypt = require('bcrypt');\\r\\n\\r\\nasync function resetSuperAdminPassword() {\\r\\n  try {\\r\\n    console.log('🔐 Resetting superadmin password...');\\r\\n    \\r\\n    // Create a fresh password hash for \\\"admin123\\\"\\r\\n    console.log('1. Generating new password hash...');\\r\\n    const password = '[REDACTED]';\\r\\n    const saltRounds = 12;\\r\\n    const newPasswordHash = await bcrypt.hash(password, saltRounds);\\r\\n    \\r\\n    console.log('✅ New hash generated');\\r\\n    \\r\\n    // Update the user with the new hash\\r\\n    console.log('2. Updating database...');\\r\\n    const [result] = await promisePool.query(\\r\\n      'UPDATE users SET password_hash = ?, updated_at = NOW() WHERE email = ?',\\r\\n      [newPasswordHash, 'superadmin@orthodoxmetrics.com']\\r\\n    );\\r\\n    \\r\\n    if (result.affectedRows === 0) {\\r\\n      console.log('❌ No user found with email superadmin@orthodoxmetrics.com');\\r\\n      process.exit(1);\\r\\n    }\\r\\n    \\r\\n    console.log('✅ Password hash updated successfully');\\r\\n    \\r\\n    // Verify the new hash works\\r\\n    console.log('3. Testing the new password...');\\r\\n    const [users] = await promisePool.query(\\r\\n      'SELECT password_hash FROM users WHERE email = ?',\\r\\n      ['superadmin@orthodoxmetrics.com']\\r\\n    );\\r\\n    \\r\\n    const isValid = await bcrypt.compare(password, users[0].password_hash);\\r\\n    console.log('✅ Password verification test:', isValid ? 'PASSED' : 'FAILED');\\r\\n    \\r\\n    if (!isValid) {\\r\\n      console.log('❌ Something went wrong with the password reset');\\r\\n      process.exit(1);\\r\\n    }\\r\\n    \\r\\n    // Show final status\\r\\n    console.log('\\\\n🎉 SUCCESS! Password reset complete.');\\r\\n    console.log('');\\r\\n    console.log('📋 Login credentials:');\\r\\n    console.log('   Email: superadmin@orthodoxmetrics.com');\\r\\n    console.log('   Password: admin123');\\r\\n    console.log('');\\r\\n    console.log('🔗 Next steps:');\\r\\n    console.log('1. Go to your login page');\\r\\n    console.log('2. Use the credentials above');\\r\\n    console.log('3. Should work immediately');\\r\\n    console.log('4. After login, Content & Services tabs should be visible');\\r\\n    \\r\\n    console.log('\\\\n💡 If login still fails:');\\r\\n    console.log('- Check browser console for JavaScript errors');\\r\\n    console.log('- Make sure your application server is running');\\r\\n    console.log('- Try a different browser or incognito mode');\\r\\n    \\r\\n    process.exit(0);\\r\\n  } catch (error) {\\r\\n    console.error('❌ Error resetting password:'[REDACTED]'\\\\n🚨 Manual SQL command to try:');\\r\\n    \\r\\n    // Generate a simpler hash manually\\r\\n    try {\\r\\n      const simpleHash = await bcrypt.hash('admin123', 10);\\r\\n      console.log(`UPDATE users SET password_hash = '${simpleHash}' WHERE email = 'superadmin@orthodoxmetrics.com';`);\\r\\n    } catch (hashError) {\\r\\n      console.log('UPDATE users SET password_hash = \\\"$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi\\\" WHERE email = \\\"superadmin@orthodoxmetrics.com\\\";');\\r\\n      console.log('(This hash is for password: \\\"[REDACTED]\\\")');\\r\\n    }\\r\\n    \\r\\n    process.exit(1);\\r\\n  }\\r\\n}\\r\\n\\r\\nresetSuperAdminPassword(); \"\n    },\n    \"complexity\": {\n      \"totalLines\": 81,\n      \"codeLines\": 61,\n      \"commentLines\": 5,\n      \"commentRatio\": 0.07575757575757576,\n      \"averageLineLength\": 44.25757575757576\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:10.911Z\"\n  },\n  \"contentHash\": \"f91709e8de896b6258feb0258f522b937d1b2817e1c65e660c1a1f0516e4049a\",\n  \"discoveredAt\": \"2025-07-26T04:17:10.911Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 68,
+      "codeLines": 68,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 74.04411764705883
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.057Z"
+  },
+  "contentHash": "c69e47825180371493f0c136afd12ddaa01ded2409a201d703de3429efcbe85a",
+  "discoveredAt": "2025-07-28T07:19:57.058Z"
+}

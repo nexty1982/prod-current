@@ -1,0 +1,59 @@
+{
+  "id": "5f903ab9e79f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/headlines-management.js",
+  "relativePath": "server/scripts/headlines-management.js",
+  "name": "headlines-management.js",
+  "extension": ".js",
+  "size": 13868,
+  "modified": "2025-07-22T16:28:20.392Z",
+  "created": "2025-07-22T16:28:17.106Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 416,
+      "characters": 13808,
+      "words": 1091
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 214
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 233
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 234
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 416,
+      "codeLines": 300,
+      "commentLines": 49,
+      "commentRatio": 0.14040114613180515,
+      "averageLineLength": 37.232091690544415
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.048Z"
+  },
+  "contentHash": "80e7eec15413c2c5789b4030d9fd085c639bf85ef7037157ab2bdba9710080d4",
+  "discoveredAt": "2025-07-28T07:20:01.049Z"
+}

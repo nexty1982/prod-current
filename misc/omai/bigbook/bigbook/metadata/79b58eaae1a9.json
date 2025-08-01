@@ -1,0 +1,68 @@
+{
+  "id": "79b58eaae1a9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/controllers/analyticsController.js",
+  "relativePath": "server/controllers/analyticsController.js",
+  "name": "analyticsController.js",
+  "extension": ".js",
+  "size": 11197,
+  "modified": "2025-07-22T16:05:59.231Z",
+  "created": "2025-07-21T04:56:57.655Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 273,
+      "characters": 11197,
+      "words": 1203
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 5
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 29,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 30,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 31,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// server/controllers/analyticsController.js\r\n\r\nconst { promisePool } = require('../config/db');\r\nconst { getChurchDbConnection } = require('../utils/dbSwitcher');\r\nconst mysql = require('mysql2/promise');\r\n\r\n// Helper to get church_id from church context (set by security middleware)\r\nfunction getChurchId(req) {\r\n  // Priority: church context from security middleware > session > query\r\n  return req.churchContext?.requestedChurchId || \r\n         req.session?.user?.church_id || \r\n         req.query.church_id;\r\n}\r\n\r\n// Helper: get church database name from platform DB\r\nasync function getChurchDatabaseName(churchId) {\r\n  const [rows] = await promisePool.query(\r\n    'SELECT database_name FROM church_info WHERE id = ?',\r\n    [churchId]\r\n  );\r\n  if (!rows.length || !rows[0].database_name) throw new Error('Invalid or missing church_id/database_name');\r\n  return rows[0].database_name;\r\n}\r\n\r\n// Helper: get connection to church-specific DB\r\nasync function getChurchDb(churchId) {\r\n  const dbName = await getChurchDatabaseName(churchId);\r\n  return mysql.createPool({\r\n    host: process.env.[REDACTED],\r\n    user: process.env.[REDACTED],\r\n    password: process.env.[REDACTED],\r\n    database: dbName,\r\n    waitForConnections: true,\r\n    connectionLimit: 10,\r\n    queueLimit: 0\r\n  });\r\n}\r\n\r\n// Feast days definition\r\nconst feastDays = [\r\n  { name: 'Nativity', month: 12, day: 25 },\r\n  { name: 'Theophany', month: 1, day: 6 },\r\n  { name: 'Annunciation', month: 3, day: 25 },\r\n  { name: 'Transfiguration', month: 8, day: 6 },\r\n  { name: 'Dormition', month: 8, day: 15 },\r\n  { name: 'Elevation of the Cross', month: 9, day: 14 },\r\n  {\r\n    name: 'Pascha',\r\n    dates: [\r\n      '1900-04-15', '1901-05-05', '1902-04-27', '1903-04-19', '1904-05-08', '1905-04-23',\r\n      '1906-04-15', '1907-05-05', '1908-04-26', '1909-04-11', '1910-05-01', '1911-04-16',\r\n      '1912-05-05', '1913-04-27', '1914-04-12', '1915-05-02', '1916-04-23', '1917-04-08',\r\n      '1918-04-28', '1919-04-20', '1920-04-04', '1921-04-24', '1922-04-16', '1923-04-08',\r\n      '1924-04-27', '1925-04-12', '1926-04-04', '1927-04-24', '1928-04-15', '1929-05-05',\r\n      '1930-04-20', '1931-04-12', '1932-05-01', '1933-04-16', '1934-04-08', '1935-04-28',\r\n      '1936-04-12', '1937-05-02', '1938-04-17', '1939-04-09', '1940-04-28', '1941-04-13',\r\n      '1942-04-05', '1943-04-25', '1944-04-16', '1945-04-29', '1946-04-21', '1947-04-06',\r\n      '1948-04-25', '1949-04-17', '1950-04-09', '1951-04-29', '1952-04-20', '1953-04-05',\r\n      '1954-04-25', '1955-04-10', '1956-04-29', '1957-04-21', '1958-04-06', '1959-04-26',\r\n      '1960-04-17', '1961-04-02', '1962-04-22', '1963-04-14', '1964-05-03', '1965-04-25',\r\n      '1966-04-10', '1967-04-30', '1968-04-21', '1969-04-13', '1970-05-03', '1971-04-18',\r\n      '1972-04-09', '1973-04-29', '1974-04-14', '1975-05-04', '1976-04-25', '1977-04-10',\r\n      '1978-04-30', '1979-04-22', '1980-04-06', '1981-04-26', '1982-04-18', '1983-04-10',\r\n      '1984-04-29', '1985-04-14', '1986-05-04', '1987-04-19', '1988-04-10', '1989-04-30',\r\n      '1990-04-15', '1991-04-07', '1992-04-26', '1993-04-18', '1994-05-01', '1995-04-23',\r\n      '1996-04-14', '1997-04-27', '1998-04-19', '1999-04-11', '2000-04-30', '2001-04-15',\r\n      '2002-05-05', '2003-04-27', '2004-04-11', '2005-05-01', '2006-04-23', '2007-04-08',\r\n      '2008-04-27', '2009-04-19', '2010-04-04', '2011-04-24', '2012-04-15', '2013-05-05',\r\n      '2014-04-20', '2015-04-12', '2016-05-01', '2017-04-16', '2018-04-08', '2019-04-28',\r\n      '2020-04-19', '2021-05-02', '2022-04-24', '2023-04-16', '2024-05-05', '2025-04-20'\r\n    ]\r\n  }\r\n];\r\n\r\nexports.getSummary = async (req, res) => {\r\n  try {\r\n    const churchId = req.user?.church_id;\r\n    if (!churchId) return res.status(400).json({ error: 'Missing church_id' });\r\n    let db;\r\n    try {\r\n      db = await getChurchDb(churchId);\r\n    } catch (err) {\r\n      return res.status(500).json({ error: 'Failed to connect to church DB', details: err.message });\r\n    }\r\n    // Count all records, no filters\r\n    const [[summary]] = await db.query(`\r\n      SELECT\r\n        (SELECT COUNT(*) FROM baptism_records) AS total_baptisms,\r\n        (SELECT COUNT(*) FROM marriage_records) AS total_marriages,\r\n        (SELECT COUNT(*) FROM funeral_records) AS total_funerals\r\n    `);\r\n    res.json(summary);\r\n  } catch (err) {\r\n    res.status(500).json({ error: 'Failed to fetch summary', details: err.message });\r\n  }\r\n};\r\n\r\nexports.getMonthly = async (req, res) => {\r\n  try {\r\n    const churchId = req.user?.church_id;\r\n    if (!churchId) return res.status(400).json({ error: 'Missing church_id' });\r\n    const { recordType } = req.params;\r\n    const validTypes = ['baptism', 'marriage', 'funeral'];\r\n    if (!validTypes.includes(recordType)) return res.status(400).json({ error: 'Invalid recordType' });\r\n    let db;\r\n    try {\r\n      db = await getChurchDb(churchId);\r\n    } catch (err) {\r\n      return res.status(500).json({ error: 'Failed to connect to church DB', details: err.message });\r\n    }\r\n    const table = `${recordType}_records`;\r\n    // Use correct date column\r\n    const dateCol = recordType === 'baptism' ? 'reception_date' : recordType === 'marriage' ? 'mdate' : 'funeral_date';\r\n    // If the management table does not filter by date, do not filter here\r\n    const [monthly] = await db.query(`\r\n      SELECT DATE_FORMAT(${dateCol}, '%Y-%m') AS month, COUNT(*) AS count\r\n      FROM ${table}\r\n      GROUP BY month\r\n      ORDER BY month\r\n    `);\r\n    res.json(monthly);\r\n  } catch (err) {\r\n    res.status(500).json({ error: 'Failed to fetch monthly data', details: err.message });\r\n  }\r\n};\r\n\r\nexports.getByClergy = async (req, res) => {\r\n  try {\r\n    const churchId = req.user?.church_id;\r\n    if (!churchId) return res.status(400).json({ error: 'Missing church_id' });\r\n    let db;\r\n    try {\r\n      db = await getChurchDb(churchId);\r\n    } catch (err) {\r\n      return res.status(500).json({ error: 'Failed to connect to church DB', details: err.message });\r\n    }\r\n    const [clergy] = await db.query(`\r\n      SELECT clergy_name, COUNT(*) AS count\r\n      FROM (\r\n        SELECT clergy_name FROM baptism_records\r\n        UNION ALL\r\n        SELECT clergy_name FROM marriage_records\r\n        UNION ALL\r\n        SELECT clergy_name FROM funeral_records\r\n      ) AS combined\r\n      GROUP BY clergy_name\r\n      ORDER BY count DESC\r\n      LIMIT 5\r\n    `);\r\n    res.json(clergy);\r\n  } catch (err) {\r\n    res.status(500).json({ error: 'Failed to fetch clergy data', details: err.message });\r\n  }\r\n};\r\n\r\nexports.getAgeDistribution = async (req, res) => {\r\n  try {\r\n    const churchId = req.user?.church_id;\r\n    if (!churchId) return res.status(400).json({ error: 'Missing church_id' });\r\n    let db;\r\n    try {\r\n      db = await getChurchDb(churchId);\r\n    } catch (err) {\r\n      return res.status(500).json({ error: 'Failed to connect to church DB', details: err.message });\r\n    }\r\n    // Count all records with a date_of_birth\r\n    const [ages] = await db.query(`\r\n      SELECT FLOOR(TIMESTAMPDIFF(YEAR, date_of_birth, reception_date) / 10) * 10 AS age_group, COUNT(*) AS count\r\n      FROM baptism_records\r\n      WHERE date_of_birth IS NOT NULL\r\n      GROUP BY age_group\r\n      ORDER BY age_group\r\n    `);\r\n    res.json(ages);\r\n  } catch (err) {\r\n    res.status(500).json({ error: 'Failed to fetch age distribution', details: err.message });\r\n  }\r\n};\r\n\r\nexports.getGenderDistribution = async (req, res) => {\r\n  try {\r\n    const churchId = req.user?.church_id;\r\n    if (!churchId) return res.status(400).json({ error: 'Missing church_id' });\r\n    let db;\r\n    try {\r\n      db = await getChurchDb(churchId);\r\n    } catch (err) {\r\n      return res.status(500).json({ error: 'Failed to connect to church DB', details: err.message });\r\n    }\r\n    const [genders] = await db.query(`\r\n      SELECT gender, COUNT(*) AS count\r\n      FROM (\r\n        SELECT gender FROM baptism_records\r\n        UNION ALL\r\n        SELECT gender FROM marriage_records\r\n        UNION ALL\r\n        SELECT gender FROM funeral_records\r\n      ) AS combined\r\n      GROUP BY gender\r\n    `);\r\n    res.json(genders);\r\n  } catch (err) {\r\n    res.status(500).json({ error: 'Failed to fetch gender distribution', details: err.message });\r\n  }\r\n};\r\n\r\nexports.recordsByFeastDay = async (req, res) => {\r\n  try {\r\n    // Accept church_id from req.user, fallback to 14, but require it for clarity\r\n    const churchId = req.user?.church_id || 14;\r\n    if (!churchId) return res.status(400).json({ error: 'Missing church_id for feast analytics' });\r\n\r\n    // Lookup the church's database name from the platform DB\r\n    const [rows] = await promisePool.query('SELECT database_name FROM churches WHERE id = ?', [churchId]);\r\n    if (!rows.length || !rows[0].database_name) {\r\n      return res.status(400).json({ error: 'Invalid or missing church database for church_id ' + churchId });\r\n    }\r\n    const dbName = rows[0].database_name;\r\n\r\n    // Get a connection to the church-specific database\r\n    let db;\r\n    try {\r\n      db = await getChurchDbConnection(dbName);\r\n    } catch (err) {\r\n      return res.status(500).json({ error: 'Failed to connect to church database', details: err.message });\r\n    }\r\n\r\n    const recordTypes = [\r\n      { type: 'baptism', table: 'baptism_records', dateCol: 'reception_date' },\r\n      { type: 'marriage', table: 'marriage_records', dateCol: 'mdate' },\r\n      { type: 'funeral', table: 'funeral_records', dateCol: 'funeral_date' }\r\n    ];\r\n    let results = [];\r\n    for (const feast of feastDays) {\r\n      if (feast.dates) {\r\n        // Pascha: loop over all years\r\n        for (const paschaDate of feast.dates) {\r\n          for (const { type, table, dateCol } of recordTypes) {\r\n            try {\r\n              const [[{ count }]] = await db.query(\r\n                `SELECT COUNT(*) as count FROM ${table} WHERE ${dateCol} = ?`,\r\n                [paschaDate]\r\n              );\r\n              results.push({ feast: feast.name, date: paschaDate, type, count });\r\n            } catch (err) {\r\n              return res.status(500).json({ error: `Query failed for ${table} on ${paschaDate}`, details: err.message });\r\n            }\r\n          }\r\n        }\r\n      } else {\r\n        // Fixed feasts\r\n        for (const { type, table, dateCol } of recordTypes) {\r\n          try {\r\n            const [[{ count }]] = await db.query(\r\n              `SELECT COUNT(*) as count FROM ${table} WHERE MONTH(${dateCol}) = ? AND DAY(${dateCol}) = ?`,\r\n              [feast.month, feast.day]\r\n            );\r\n            // Use current year for the date (for display)\r\n            const year = new Date().getFullYear();\r\n            const date = `${year.toString().padStart(4, '0')}-${feast.month.toString().padStart(2, '0')}-${feast.day.toString().padStart(2, '0')}`;\r\n            results.push({ feast: feast.name, date, type, count });\r\n          } catch (err) {\r\n            return res.status(500).json({ error: `Query failed for ${table} on ${feast.name}`, details: err.message });\r\n          }\r\n        }\r\n      }\r\n    }\r\n    res.json(results);\r\n  } catch (err) {\r\n    console.error('Analytics by-feast-day error:', err);\r\n    res.status(500).json({ error: 'Failed to fetch feast day analytics', details: err.message });\r\n  }\r\n}; "
+    },
+    "complexity": {
+      "totalLines": 273,
+      "codeLines": 243,
+      "commentLines": 16,
+      "commentRatio": 0.06177606177606178,
+      "averageLineLength": 42.12741312741313
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.545Z"
+  },
+  "contentHash": "69a193e8363e7c145a6bf54686d050a193433c0810ef76f19ddc55dc810703ad",
+  "discoveredAt": "2025-07-28T07:19:59.545Z"
+}

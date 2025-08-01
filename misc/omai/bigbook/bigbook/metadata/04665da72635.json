@@ -1,0 +1,43 @@
+{
+  "id": "04665da72635",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/ADMIN_CLEANUP_PLAN.md",
+  "relativePath": "server/ADMIN_CLEANUP_PLAN.md",
+  "name": "ADMIN_CLEANUP_PLAN.md",
+  "extension": ".md",
+  "size": 3127,
+  "modified": "2025-07-22T09:08:32.252Z",
+  "created": "2025-07-22T09:08:30.547Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 77,
+      "characters": 3079,
+      "words": 425
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 77,
+      "codeLines": 44,
+      "commentLines": 15,
+      "commentRatio": 0.2542372881355932,
+      "averageLineLength": 50.59322033898305
+    },
+    "lastAnalyzed": "2025-07-26T04:17:10.339Z"
+  },
+  "contentHash": "968f0564510e89ad118c8b4de30558e4fdcba4eb6228c27cac087dee57196738",
+  "discoveredAt": "2025-07-26T04:17:10.339Z"
+}

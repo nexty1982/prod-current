@@ -1,0 +1,6 @@
+{
+  "id": "6ecaaf1c75e5",
+  "name": "update-notifications-with-actions.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/update-notifications-with-actions.sql",
+  "type": "Database Scripts"
+}

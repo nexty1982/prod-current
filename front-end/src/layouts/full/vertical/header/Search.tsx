@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import Menuitems from '../sidebar/MenuItems';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 
 interface menuType {
   title: string;

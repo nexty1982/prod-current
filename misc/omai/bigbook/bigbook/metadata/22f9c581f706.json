@@ -1,0 +1,54 @@
+{
+  "id": "22f9c581f706",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/records/useRecordManager.js",
+  "relativePath": "front-end/src/records/useRecordManager.js",
+  "name": "useRecordManager.js",
+  "extension": ".js",
+  "size": 16782,
+  "modified": "2025-07-12T17:29:00.000Z",
+  "created": "2025-07-13T04:51:07.672Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 607,
+      "characters": 16782,
+      "words": 1623
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "react-toastify",
+        "line": 6
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 607,
+      "codeLines": 422,
+      "commentLines": 116,
+      "commentRatio": 0.21561338289962825,
+      "averageLineLength": 29.65799256505576
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.885Z"
+  },
+  "contentHash": "a86f7a67c5bb27236dd1a54680b44689abebf114588318d2511a8c32d1d6c6a2",
+  "discoveredAt": "2025-07-28T07:19:58.885Z"
+}

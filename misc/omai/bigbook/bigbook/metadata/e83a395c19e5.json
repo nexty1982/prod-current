@@ -1,0 +1,43 @@
+{
+  "id": "e83a395c19e5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-24-25/HEADLINES_WEB_COMPONENT_GUIDE.md",
+  "relativePath": "docs/7-24-25/HEADLINES_WEB_COMPONENT_GUIDE.md",
+  "name": "HEADLINES_WEB_COMPONENT_GUIDE.md",
+  "extension": ".md",
+  "size": 7082,
+  "modified": "2025-07-23T00:13:52.716Z",
+  "created": "2025-07-23T00:13:50.551Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 218,
+      "characters": 6898,
+      "words": 931
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 218,
+      "codeLines": 134,
+      "commentLines": 37,
+      "commentRatio": 0.21637426900584794,
+      "averageLineLength": 38.7953216374269
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.701Z"
+  },
+  "contentHash": "f10fe4af5a2e77fbefeb9f6a9efc8400cdfd2b444964b4f0c53ef4f2734821d0",
+  "discoveredAt": "2025-07-28T07:19:57.701Z"
+}

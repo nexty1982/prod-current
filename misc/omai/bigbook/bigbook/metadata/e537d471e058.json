@@ -1,0 +1,54 @@
+{
+  "id": "e537d471e058",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/tasks/scripts/deploy-task132-blog-system.sh",
+  "relativePath": "tasks/scripts/deploy-task132-blog-system.sh",
+  "name": "deploy-task132-blog-system.sh",
+  "extension": ".sh",
+  "size": 2933,
+  "modified": "2025-07-28T05:36:33.989Z",
+  "created": "2025-07-28T05:36:25.223Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 99,
+      "characters": 2901,
+      "words": 387
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 63
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 68
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 99,
+      "codeLines": 65,
+      "commentLines": 12,
+      "commentRatio": 0.15584415584415584,
+      "averageLineLength": 36.35064935064935
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.593Z"
+  },
+  "contentHash": "7f26e0ed8a5e381e5d5158cdbc5b02807a286608f78df135425f06da5ad8d5de",
+  "discoveredAt": "2025-07-28T07:20:01.593Z"
+}

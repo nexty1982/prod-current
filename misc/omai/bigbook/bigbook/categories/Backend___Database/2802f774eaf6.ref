@@ -1,0 +1,6 @@
+{
+  "id": "2802f774eaf6",
+  "name": "debug_admin_user.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/debug_admin_user.sql",
+  "type": "Database Scripts"
+}

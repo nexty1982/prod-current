@@ -1,0 +1,43 @@
+{
+  "id": "03e1a0932438",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/OCR_SYSTEM_STATUS.md",
+  "relativePath": "docs/archive/07-09-25/OCR_SYSTEM_STATUS.md",
+  "name": "OCR_SYSTEM_STATUS.md",
+  "extension": ".md",
+  "size": 4960,
+  "modified": "2025-07-09T04:32:16.323Z",
+  "created": "2025-07-09T04:32:16.323Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 145,
+      "characters": 4940,
+      "words": 618
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 145,
+      "codeLines": 82,
+      "commentLines": 32,
+      "commentRatio": 0.2807017543859649,
+      "averageLineLength": 41.80701754385965
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.905Z"
+  },
+  "contentHash": "3bdc5e83ba867b47f95cad9cc412205241bdec9490d0967e1de0c7ba33cc5ba9",
+  "discoveredAt": "2025-07-28T07:19:57.905Z"
+}

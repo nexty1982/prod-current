@@ -1,0 +1,43 @@
+{
+  "id": "504293435f1d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/ORTHODOX_AVATAR_EXTRACTION_GUIDE.md",
+  "relativePath": "docs/archive/ORTHODOX_AVATAR_EXTRACTION_GUIDE.md",
+  "name": "ORTHODOX_AVATAR_EXTRACTION_GUIDE.md",
+  "extension": ".md",
+  "size": 4527,
+  "modified": "2025-07-15T02:15:36.706Z",
+  "created": "2025-07-15T02:13:01.645Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 128,
+      "characters": 4419,
+      "words": 545
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 128,
+      "codeLines": 88,
+      "commentLines": 18,
+      "commentRatio": 0.16981132075471697,
+      "averageLineLength": 40.25471698113208
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.119Z"
+  },
+  "contentHash": "d0c5980a0314507456c84257321f863ad1c6ad62358c15d69a8cc0f99cc3bcf8",
+  "discoveredAt": "2025-07-28T07:19:58.119Z"
+}

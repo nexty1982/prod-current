@@ -1,0 +1,59 @@
+{
+  "id": "a5730bd79235",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/fix-build-dependencies.sh",
+  "relativePath": "scripts/7-26-25/fix-build-dependencies.sh",
+  "name": "fix-build-dependencies.sh",
+  "extension": ".sh",
+  "size": 756,
+  "modified": "2025-07-26T22:01:09.680Z",
+  "created": "2025-07-26T22:01:05.407Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 23,
+      "characters": 738,
+      "words": 91
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 7
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 10
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 14
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 23,
+      "codeLines": 16,
+      "commentLines": 1,
+      "commentRatio": 0.058823529411764705,
+      "averageLineLength": 42.11764705882353
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.989Z"
+  },
+  "contentHash": "d0e8b208c158142fce588b663f4f6fbf11faff1dad25af5ade4f8672341106ed",
+  "discoveredAt": "2025-07-28T07:19:58.989Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "99a06a125891",
+  "name": "RunScript.ps1",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/deployment/RunScript.ps1",
+  "type": "Build Scripts"
+}

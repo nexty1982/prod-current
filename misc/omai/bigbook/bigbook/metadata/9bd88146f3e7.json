@@ -1,0 +1,91 @@
+{
+  "id": "9bd88146f3e7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/setup-calendar-system.sh",
+  "relativePath": "setup-calendar-system.sh",
+  "name": "setup-calendar-system.sh",
+  "extension": ".sh",
+  "size": 10518,
+  "modified": "2025-07-23T20:57:38.430Z",
+  "created": "2025-07-23T20:57:33.765Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 392,
+      "characters": 10474,
+      "words": 1258
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 58
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 59
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 120
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 129
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 149
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 158
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 294
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 303
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 86,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/bin/bash\n\n# OrthodoxMetrics AI Task Calendar System Setup Script\n# This script automates the installation and configuration of the calendar system\n\nset -e  # Exit on any error\n\necho \"🚀 OrthodoxMetrics AI Task Calendar System Setup\"\necho \"================================================\"\n\n# Colors for output\nRED='\\033[0;31m'\nGREEN='\\033[0;32m'\nYELLOW='\\033[1;33m'\nBLUE='\\033[0;34m'\nNC='\\033[0m' # No Color\n\n# Function to print colored output\nprint_status() {\n    echo -e \"${BLUE}[INFO]${NC} $1\"\n}\n\nprint_success() {\n    echo -e \"${GREEN}[SUCCESS]${NC} $1\"\n}\n\nprint_warning() {\n    echo -e \"${YELLOW}[WARNING]${NC} $1\"\n}\n\nprint_error() {\n    echo -e \"${RED}[ERROR]${NC} $1\"\n}\n\n# Check if running as root\nif [[ $EUID -eq 0 ]]; then\n   print_error \"This script should not be run as root\"\n   exit 1\nfi\n\n# Check prerequisites\nprint_status \"Checking prerequisites...\"\n\n# Check Node.js\nif ! command -v node &> /dev/null; then\n    print_error \"Node.js is not installed. Please install Node.js 18+ first.\"\n    exit 1\nfi\n\nNODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)\nif [ \"$NODE_VERSION\" -lt 18 ]; then\n    print_error \"Node.js version 18+ is required. Current version: $(node -v)\"\n    exit 1\nfi\n\nprint_success \"Node.js version: $(node -v)\"\n\n# Check npm\nif ! command -v npm &> /dev/null; then\n    print_error \"npm is not installed\"\n    exit 1\nfi\n\nprint_success \"npm version: $(npm -v)\"\n\n# Check MySQL\nif ! command -v mysql &> /dev/null; then\n    print_warning \"MySQL client not found. You may need to install it separately.\"\nfi\n\n# Check if we're in the right directory\nif [ ! -f \"server/index.js\" ] || [ ! -f \"front-end/package.json\" ]; then\n    print_error \"Please run this script from the OrthodoxMetrics project root directory\"\n    exit 1\nfi\n\nprint_success \"Prerequisites check completed\"\n\n# Database setup\nprint_status \"Setting up database schema...\"\n\nif [ -f \"server/calendar-schema.sql\" ]; then\n    read -p \"Enter MySQL username (default: orthodoxapps): \" MYSQL_USER\n    MYSQL_USER=${MYSQL_USER:-orthodoxapps}\n    \n    read -s -p \"Enter MySQL password: \"[REDACTED]\"Enter MySQL host (default: localhost): \" MYSQL_HOST\n    MYSQL_HOST=${MYSQL_HOST:-localhost}\n    \n    read -p \"Enter database name (default: orthodoxmetrics_db): \" DB_NAME\n    DB_NAME=${DB_NAME:-orthodoxmetrics_db}\n    \n    print_status \"Creating calendar database schema...\"\n    \n    if mysql -h \"$MYSQL_HOST\" -u \"$MYSQL_USER\" -p\"$MYSQL_PASSWORD\" \"$DB_NAME\" < server/calendar-schema.sql; then\n        print_success \"Database schema created successfully\"\n    else\n        print_error \"Failed to create database schema\"\n        exit 1\n    fi\nelse\n    print_error \"Calendar schema file not found: server/calendar-schema.sql\"\n    exit 1\nfi\n\n# Backend dependencies\nprint_status \"Installing backend dependencies...\"\n\ncd server\n\n# Check if package.json exists\nif [ ! -f \"package.json\" ]; then\n    print_error \"server/package.json not found\"\n    exit 1\nfi\n\n# Install dependencies\nif npm install; then\n    print_success \"Backend dependencies installed\"\nelse\n    print_error \"Failed to install backend dependencies\"\n    exit 1\nfi\n\n# Install calendar-specific dependencies\nprint_status \"Installing calendar-specific backend dependencies...\"\nif npm install react-big-calendar date-fns uuid; then\n    print_success \"Calendar backend dependencies installed\"\nelse\n    print_warning \"Some calendar dependencies may not be available\"\nfi\n\ncd ..\n\n# Frontend dependencies\nprint_status \"Installing frontend dependencies...\"\n\ncd front-end\n\n# Check if package.json exists\nif [ ! -f \"package.json\" ]; then\n    print_error \"front-end/package.json not found\"\n    exit 1\nfi\n\n# Install dependencies with legacy peer deps\nif npm install --legacy-peer-deps; then\n    print_success \"Frontend dependencies installed\"\nelse\n    print_error \"Failed to install frontend dependencies\"\n    exit 1\nfi\n\n# Install calendar-specific dependencies\nprint_status \"Installing calendar-specific frontend dependencies...\"\nif npm install --legacy-peer-deps react-big-calendar date-fns @tanstack/react-query; then\n    print_success \"Calendar frontend dependencies installed\"\nelse\n    print_warning \"Some calendar dependencies may not be available\"\nfi\n\ncd ..\n\n# Environment configuration\nprint_status \"Setting up environment configuration...\"\n\n# Create .env.example if it doesn't exist\nif [ ! -f \".env.example\" ]; then\n    cat > .env.example << EOF\n# OrthodoxMetrics Environment Configuration\n\n# Database Configuration\nDB_HOST=localhost\nDB_USER=orthodoxapps\nDB_PASSWORD=your_password_here\nDB_NAME=orthodoxmetrics_db\n\n# Calendar System Configuration\nCALENDAR_REFRESH_INTERVAL=30000\nCALENDAR_MAX_TASKS_PER_AGENT=10\nCALENDAR_DEFAULT_VIEW=month\nCALENDAR_ENABLE_REALTIME=true\nCALENDAR_ENABLE_CHATGPT=true\n\n# Redis Configuration (for sessions and caching)\nREDIS_HOST=localhost\nREDIS_PORT=6379\nREDIS_PASSWORD=\n\n# JWT Configuration\nJWT_SECRET=your_jwt_secret_here\nJWT_EXPIRES_IN=24h\n\n# Server Configuration\nPORT=3000\nNODE_ENV=development\nEOF\n    print_success \"Created .env.example file\"\nfi\n\n# Check if .env exists\nif [ ! -f \".env\" ]; then\n    print_warning \".env file not found. Please copy .env.example to .env and configure it.\"\nelse\n    print_success \".env file found\"\nfi\n\n# Create calendar-specific directories\nprint_status \"Creating calendar system directories...\"\n\n# Create data directories\nmkdir -p data/calendar\nmkdir -p data/calendar/tasks\nmkdir -p data/calendar/reports\nmkdir -p data/calendar/exports\nmkdir -p data/calendar/uploads\n\n# Create logs directory\nmkdir -p logs/calendar\n\nprint_success \"Calendar directories created\"\n\n# Set permissions\nprint_status \"Setting permissions...\"\nchmod 755 data/calendar\nchmod 755 data/calendar/tasks\nchmod 755 data/calendar/reports\nchmod 755 data/calendar/exports\nchmod 755 data/calendar/uploads\nchmod 755 logs/calendar\n\nprint_success \"Permissions set\"\n\n# Verify installation\nprint_status \"Verifying installation...\"\n\n# Check if calendar component exists\nif [ -f \"front-end/src/components/calendar/OMCalendar.tsx\" ]; then\n    print_success \"Calendar component found\"\nelse\n    print_error \"Calendar component not found: front-end/src/components/calendar/OMCalendar.tsx\"\nfi\n\n# Check if calendar API exists\nif [ -f \"front-end/src/api/calendar.api.ts\" ]; then\n    print_success \"Calendar API found\"\nelse\n    print_error \"Calendar API not found: front-end/src/api/calendar.api.ts\"\nfi\n\n# Check if calendar types exist\nif [ -f \"front-end/src/types/calendar.types.ts\" ]; then\n    print_success \"Calendar types found\"\nelse\n    print_error \"Calendar types not found: front-end/src/types/calendar.types.ts\"\nfi\n\n# Check if calendar routes exist\nif [ -f \"server/routes/calendar.js\" ]; then\n    print_success \"Calendar routes found\"\nelse\n    print_error \"Calendar routes not found: server/routes/calendar.js\"\nfi\n\n# Check if calendar schema exists\nif [ -f \"server/calendar-schema.sql\" ]; then\n    print_success \"Calendar schema found\"\nelse\n    print_error \"Calendar schema not found: server/calendar-schema.sql\"\nfi\n\n# Test database connection\nprint_status \"Testing database connection...\"\nif mysql -h \"$MYSQL_HOST\" -u \"$MYSQL_USER\" -p\"$MYSQL_PASSWORD\" \"$DB_NAME\" -e \"SELECT COUNT(*) FROM ai_tasks;\" &> /dev/null; then\n    print_success \"Database connection successful\"\nelse\n    print_warning \"Database connection test failed. Please check your database configuration.\"\nfi\n\n# Create startup script\nprint_status \"Creating startup script...\"\n\ncat > start-calendar-system.sh << 'EOF'\n#!/bin/bash\n\n# OrthodoxMetrics Calendar System Startup Script\n\necho \"🚀 Starting OrthodoxMetrics Calendar System...\"\n\n# Start backend server\necho \"Starting backend server...\"\ncd server\nnpm start &\nBACKEND_PID=$!\n\n# Wait a moment for backend to start\nsleep 3\n\n# Start frontend development server\necho \"Starting frontend development server...\"\ncd ../front-end\nnpm start &\nFRONTEND_PID=$!\n\necho \"✅ Calendar system started!\"\necho \"Backend PID: $BACKEND_PID\"\necho \"Frontend PID: $FRONTEND_PID\"\necho \"\"\necho \"Access the calendar at: http://localhost:3000/calendar\"\necho \"Backend API at: http://localhost:3000/api/calendar\"\necho \"\"\necho \"Press Ctrl+C to stop both servers\"\n\n# Wait for user to stop\nwait\nEOF\n\nchmod +x start-calendar-system.sh\nprint_success \"Startup script created: start-calendar-system.sh\"\n\n# Create test script\nprint_status \"Creating test script...\"\n\ncat > test-calendar-system.sh << 'EOF'\n#!/bin/bash\n\n# OrthodoxMetrics Calendar System Test Script\n\necho \"🧪 Testing OrthodoxMetrics Calendar System...\"\n\n# Test backend API\necho \"Testing backend API...\"\nif curl -s http://localhost:3000/api/calendar/tasks > /dev/null; then\n    echo \"✅ Backend API is responding\"\nelse\n    echo \"❌ Backend API is not responding\"\nfi\n\n# Test frontend\necho \"Testing frontend...\"\nif curl -s http://localhost:3000 > /dev/null; then\n    echo \"✅ Frontend is responding\"\nelse\n    echo \"❌ Frontend is not responding\"\nfi\n\n# Test database\necho \"Testing database...\"\nif mysql -u orthodoxapps -p -e \"USE orthodoxmetrics_db; SELECT COUNT(*) FROM ai_tasks;\" &> /dev/null; then\n    echo \"✅ Database is accessible\"\nelse\n    echo \"❌ Database is not accessible\"\nfi\n\necho \"🧪 Test completed!\"\nEOF\n\nchmod +x test-calendar-system.sh\nprint_success \"Test script created: test-calendar-system.sh\"\n\n# Final summary\necho \"\"\necho \"🎉 OrthodoxMetrics AI Task Calendar System Setup Complete!\"\necho \"========================================================\"\necho \"\"\necho \"📁 Files Created:\"\necho \"  ✅ Database schema: server/calendar-schema.sql\"\necho \"  ✅ Calendar component: front-end/src/components/calendar/OMCalendar.tsx\"\necho \"  ✅ Calendar API: front-end/src/api/calendar.api.ts\"\necho \"  ✅ Calendar types: front-end/src/types/calendar.types.ts\"\necho \"  ✅ Calendar routes: server/routes/calendar.js\"\necho \"  ✅ Documentation: ORTHODOX_METRICS_CALENDAR_SYSTEM.md\"\necho \"\"\necho \"🚀 Next Steps:\"\necho \"  1. Configure your .env file with database credentials\"\necho \"  2. Start the system: ./start-calendar-system.sh\"\necho \"  3. Test the system: ./test-calendar-system.sh\"\necho \"  4. Access the calendar at: http://localhost:3000/calendar\"\necho \"\"\necho \"📚 Documentation:\"\necho \"  - Full documentation: ORTHODOX_METRICS_CALENDAR_SYSTEM.md\"\necho \"  - API endpoints: /api/calendar/*\"\necho \"  - Database schema: server/calendar-schema.sql\"\necho \"\"\necho \"🔧 Troubleshooting:\"\necho \"  - Check logs in logs/calendar/\"\necho \"  - Verify database connection\"\necho \"  - Ensure all dependencies are installed\"\necho \"\"\nprint_success \"Setup completed successfully!\" "
+    },
+    "complexity": {
+      "totalLines": 392,
+      "codeLines": 260,
+      "commentLines": 54,
+      "commentRatio": 0.17197452229299362,
+      "averageLineLength": 32.047770700636946
+    },
+    "lastAnalyzed": "2025-07-26T04:17:11.883Z"
+  },
+  "contentHash": "333a0e78cbc05880cae7c8fece3911e875cc5f4b7c2b7a5454278cc80f394882",
+  "discoveredAt": "2025-07-26T04:17:11.883Z"
+}

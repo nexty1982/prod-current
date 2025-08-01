@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "security_policies": {
+    "allowed_users": ["root", "www-data"],
+    "blocked_commands": [
+      "rm -rf /",
+      "format",
+      "fdisk",
+      "parted"
+    ],
+    "require_confirmation": [
+      "systemctl stop",
+      "systemctl disable",
+      "userdel",
+      "groupdel"
+    ],
+    "log_all_commands": true,
+    "max_command_length": 1000,
+    "timeout_seconds": 300
+  }
+}

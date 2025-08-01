@@ -1,0 +1,64 @@
+{
+  "id": "d1dfb9299a9f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/testing/test-ocr-no-translation.js",
+  "relativePath": "server/testing/test-ocr-no-translation.js",
+  "name": "test-ocr-no-translation.js",
+  "extension": ".js",
+  "size": 4731,
+  "modified": "2025-07-11T10:49:29.373Z",
+  "created": "2025-07-11T01:14:29.040Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 117,
+      "characters": 4693,
+      "words": 444
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "canvas",
+        "line": 13
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 28
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 29
+      },
+      {
+        "type": "npm_package",
+        "name": "form-data",
+        "line": 64
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 117,
+      "codeLines": 78,
+      "commentLines": 13,
+      "commentRatio": 0.14285714285714285,
+      "averageLineLength": 49.05494505494506
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.213Z"
+  },
+  "contentHash": "b40a1121a4aee160336cc013370e3d7b31c4621dab813d9790c3935a53396fd4",
+  "discoveredAt": "2025-07-28T07:20:01.213Z"
+}

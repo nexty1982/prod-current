@@ -1,7 +1,20 @@
 // Church Records Management System Context Provider
+// 🔄 Refactored to use unified role system (see utils/roles.ts)
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useAuth } from '../api/church-records.hooks';
 import type { User } from '../types/church-records.types';
+import { 
+  hasRole as checkRole, 
+  hasAnyRole, 
+  canManageRecords as checkCanManageRecords,
+  canViewDashboard as checkCanViewDashboard,
+  canManageUsers as checkCanManageUsers,
+  canAccessOCR as checkCanAccessOCR,
+  canGenerateCertificates as checkCanGenerateCertificates,
+  canManageCalendar as checkCanManageCalendar,
+  canExportData as checkCanExportData,
+  canDeleteRecords as checkCanDeleteRecords
+} from '../utils/roles';
 
 interface ChurchRecordsContextType {
   user: User | null;
@@ -114,7 +127,7 @@ export const withChurchRecordsAuth = <P extends object>(
   };
 };
 
-// Role-based access control hook
+// 🔄 Role-based access control hook refactored to use unified role system (see utils/roles.ts)
 export const usePermissions = () => {
   const { user } = useChurchRecords();
 
@@ -122,42 +135,42 @@ export const usePermissions = () => {
     if (!user) return false;
     
     if (Array.isArray(role)) {
-      return role.includes(user.role);
+      return hasAnyRole(user, role as any);
     }
     
-    return user.role === role;
+    return checkRole(user, role as any);
   };
 
   const canManageRecords = (): boolean => {
-    return hasRole(['admin', 'priest', 'supervisor']);
+    return checkCanManageRecords(user);
   };
 
   const canViewDashboard = (): boolean => {
-    return hasRole(['admin', 'priest', 'supervisor']);
+    return checkCanViewDashboard(user);
   };
 
   const canManageUsers = (): boolean => {
-    return hasRole(['admin']);
+    return checkCanManageUsers(user);
   };
 
   const canAccessOCR = (): boolean => {
-    return hasRole(['admin', 'priest', 'supervisor', 'volunteer']);
+    return checkCanAccessOCR(user);
   };
 
   const canGenerateCertificates = (): boolean => {
-    return hasRole(['admin', 'priest', 'supervisor']);
+    return checkCanGenerateCertificates(user);
   };
 
   const canManageCalendar = (): boolean => {
-    return hasRole(['admin', 'priest']);
+    return checkCanManageCalendar(user);
   };
 
   const canExportData = (): boolean => {
-    return hasRole(['admin', 'priest', 'supervisor']);
+    return checkCanExportData(user);
   };
 
   const canDeleteRecords = (): boolean => {
-    return hasRole(['admin', 'priest']);
+    return checkCanDeleteRecords(user);
   };
 
   return {

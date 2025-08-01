@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import TopLoadingBar from 'react-top-loading-bar';
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 
 
 function LoadingBar() {

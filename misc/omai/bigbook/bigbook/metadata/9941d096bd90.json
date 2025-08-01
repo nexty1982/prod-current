@@ -1,0 +1,56 @@
+{
+  "id": "9941d096bd90",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/DISABLE_ROOT_SOCKET_ACCESS.md",
+  "relativePath": "DISABLE_ROOT_SOCKET_ACCESS.md",
+  "name": "DISABLE_ROOT_SOCKET_ACCESS.md",
+  "extension": ".md",
+  "size": 8944,
+  "modified": "2025-07-24T23:01:32.826Z",
+  "created": "2025-07-24T23:01:18.164Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 339,
+      "characters": 8912,
+      "words": 1142
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 216,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 232,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "# Disable Socket Access for root@localhost on MariaDB\r\n\r\n## 🔒 Security Overview\r\n\r\nBy default, MariaDB allows the `root` user to authenticate via Unix socket authentication when connecting from `localhost`. This means that any process running as the `root` system user can connect to MariaDB without a password, which is a security risk.\r\n\r\nThis guide shows you how to disable socket authentication and require password authentication for the `root` user.\r\n\r\n## 🚨 Why Disable Socket Authentication?\r\n\r\n### Security Risks\r\n- **Privilege Escalation**: Any process running as root can access the database\r\n- **No Audit Trail**: Socket authentication bypasses password logging\r\n- **Application Security**: Applications running as root can access database without credentials\r\n- **Compliance**: Many security standards require password authentication\r\n\r\n### Benefits of Disabling\r\n- **Password Protection**: Requires explicit password for database access\r\n- **Audit Trail**: All connections are logged with authentication method\r\n- **Application Security**: Forces applications to use proper credentials\r\n- **Compliance**: Meets security standards and best practices\r\n\r\n## 📋 Prerequisites\r\n\r\n- Root access to the server\r\n- MariaDB/MySQL running\r\n- Current root password (if already set)\r\n\r\n## 🛠️ Method 1: Automated Script (Recommended)\r\n\r\n### Step 1: Run the Disable Script\r\n\r\n```bash\r\nsudo ./disable-root-socket-access.sh\r\n```\r\n\r\nThe script will:\r\n- Check current authentication method\r\n- Prompt for new root password\r\n- Disable socket authentication\r\n- Verify the changes\r\n- Test the new configuration\r\n\r\n### Step 2: Follow the Prompts\r\n\r\nThe script will ask you to:\r\n1. Enter a new password for root@localhost\r\n2. Confirm the password\r\n3. Wait for the changes to be applied\r\n\r\n### Step 3: Verify the Changes\r\n\r\nThe script automatically verifies that:\r\n- Socket authentication is disabled\r\n- Password authentication works\r\n- All connections require credentials\r\n\r\n## 🛠️ Method 2: Manual SQL Commands\r\n\r\n### Step 1: Connect to MariaDB\r\n\r\n```bash\r\nmysql -u root\r\n```\r\n\r\n### Step 2: Check Current Authentication\r\n\r\n```sql\r\nSELECT user, host, plugin, authentication_string \r\nFROM mysql.user \r\nWHERE user = 'root' AND host = 'localhost';\r\n```\r\n\r\n### Step 3: Disable Socket Authentication\r\n\r\n```sql\r\n-- Set a new password for root@localhost\r\nALTER USER 'root'@'localhost' IDENTIFIED BY 'your_secure_password';\r\n\r\n-- Flush privileges to apply changes\r\nFLUSH PRIVILEGES;\r\n```\r\n\r\n### Step 4: Verify the Change\r\n\r\n```sql\r\nSELECT user, host, plugin \r\nFROM mysql.user \r\nWHERE user = 'root' AND host = 'localhost';\r\n```\r\n\r\nThe `plugin` should now show `mysql_native_password` instead of `unix_socket`.\r\n\r\n## 🔍 Verification Steps\r\n\r\n### Test Password Authentication\r\n\r\n```bash\r\nmysql -u root -p\r\n```\r\n\r\nYou should be prompted for a password.\r\n\r\n### Test Socket Authentication (Should Fail)\r\n\r\n```bash\r\nmysql -u root\r\n```\r\n\r\nThis should fail with an authentication error.\r\n\r\n### Check Authentication Method\r\n\r\n```sql\r\nSELECT user, host, plugin \r\nFROM mysql.user \r\nWHERE user = 'root' AND host = 'localhost';\r\n```\r\n\r\nExpected result:\r\n```\r\n+------+-----------+-----------------------+\r\n| user | host      | plugin                |\r\n+------+-----------+-----------------------+\r\n| root | localhost | mysql_native_password |\r\n+------+-----------+-----------------------+\r\n```\r\n\r\n## ⚠️ Important Considerations\r\n\r\n### Before Making Changes\r\n\r\n1. **Backup Your Database**\r\n   ```bash\r\n   mysqldump -u root -p --all-databases > backup_before_socket_disable.sql\r\n   ```\r\n\r\n2. **Document Current Configuration**\r\n   ```sql\r\n   SELECT user, host, plugin FROM mysql.user WHERE user = 'root';\r\n   ```\r\n\r\n3. **Test Application Connections**\r\n   - Ensure all applications can connect with the new password\r\n   - Update configuration files\r\n   - Test automated scripts\r\n\r\n### After Making Changes\r\n\r\n1. **Update Application Configurations**\r\n   - Database connection strings\r\n   - Environment variables\r\n   - Configuration files\r\n\r\n2. **Update Scripts**\r\n   - Database setup scripts\r\n   - Backup scripts\r\n   - Maintenance scripts\r\n\r\n3. **Test Everything**\r\n   - Application functionality\r\n   - Automated processes\r\n   - Backup and restore procedures\r\n\r\n## 🔧 Troubleshooting\r\n\r\n### Common Issues\r\n\r\n#### Issue: \"Access denied for user 'root'@'localhost'\"\r\n**Cause**: Socket authentication is disabled but no password is provided\r\n**Solution**: Use `mysql -u root -p` and provide the password\r\n\r\n#### Issue: \"Plugin 'unix_socket' is not loaded\"\r\n**Cause**: MariaDB is configured to use socket authentication but the plugin is missing\r\n**Solution**: Install the unix_socket plugin or switch to mysql_native_password\r\n\r\n#### Issue: Applications can't connect\r\n**Cause**: Applications are trying to connect without a password\r\n**Solution**: Update application configurations to include the root password\r\n\r\n### Recovery Options\r\n\r\n#### If You Forget the Root Password\r\n\r\n1. **Stop MariaDB**\r\n   ```bash\r\n   sudo systemctl stop mariadb\r\n   ```\r\n\r\n2. **Start in Safe Mode**\r\n   ```bash\r\n   sudo mysqld_safe --skip-grant-tables &\r\n   ```\r\n\r\n3. **Reset Password**\r\n   ```sql\r\n   USE mysql;\r\n   UPDATE user SET authentication_string = PASSWORD('new_password') WHERE user = 'root';\r\n   FLUSH PRIVILEGES;\r\n   ```\r\n\r\n4. **Restart MariaDB**\r\n   ```bash\r\n   sudo systemctl restart mariadb\r\n   ```\r\n\r\n## 📝 Configuration Files\r\n\r\n### Update Application Configurations\r\n\r\n#### Node.js Applications\r\n```javascript\r\nconst connection = mysql.createConnection({\r\n  host: 'localhost',\r\n  user: 'root',\r\n  password: '[REDACTED]',\r\n  database: 'your_database'\r\n});\r\n```\r\n\r\n#### PHP Applications\r\n```php\r\n$mysqli = new mysqli('localhost', 'root', 'your_secure_password', 'your_database');\r\n```\r\n\r\n#### Python Applications\r\n```python\r\nimport mysql.connector\r\nconnection = mysql.connector.connect(\r\n  host='localhost',\r\n  user='root',\r\n  password='[REDACTED]',\r\n  database='your_database'\r\n)\r\n```\r\n\r\n### Environment Variables\r\n\r\n```bash\r\n# Add to your environment or .env file\r\nDB_ROOT_PASSWORD=your_secure_password\r\n```\r\n\r\n## 🔐 Security Best Practices\r\n\r\n### Password Management\r\n\r\n1. **Use Strong Passwords**\r\n   - Minimum 12 characters\r\n   - Mix of uppercase, lowercase, numbers, and symbols\r\n   - Avoid common words and patterns\r\n\r\n2. **Store Passwords Securely**\r\n   - Use environment variables\r\n   - Encrypt configuration files\r\n   - Use password managers\r\n\r\n3. **Rotate Passwords Regularly**\r\n   - Change passwords every 90 days\r\n   - Use different passwords for different environments\r\n\r\n### Additional Security Measures\r\n\r\n1. **Create Application Users**\r\n   ```sql\r\n   CREATE USER 'app_user'@'localhost' IDENTIFIED BY 'app_password';\r\n   GRANT SELECT, INSERT, UPDATE, DELETE ON your_database.* TO 'app_user'@'localhost';\r\n   ```\r\n\r\n2. **Limit Root Access**\r\n   - Only use root for administrative tasks\r\n   - Use application-specific users for applications\r\n   - Implement least privilege principle\r\n\r\n3. **Enable Audit Logging**\r\n   ```sql\r\n   SET GLOBAL general_log = 'ON';\r\n   SET GLOBAL general_log_file = '/var/log/mysql/general.log';\r\n   ```\r\n\r\n## 📊 Impact on OMAI Database Setup\r\n\r\n### Updated Setup Process\r\n\r\nAfter disabling socket authentication, the OMAI database setup will require the root password:\r\n\r\n1. **Run OMAI Setup**\r\n   ```bash\r\n   sudo ./setup-omai-database.sh\r\n   ```\r\n\r\n2. **Provide Root Password**\r\n   - The script will prompt for the root password\r\n   - Enter the password you set when disabling socket authentication\r\n\r\n3. **Verify Setup**\r\n   ```bash\r\n   omai-db-status\r\n   ```\r\n\r\n### Updated Configuration\r\n\r\nThe OMAI database configuration will include the root password:\r\n\r\n```bash\r\n# omai-database.conf\r\nDB_HOST=localhost\r\nDB_NAME=omai_db\r\nDB_USER=omai_user\r\nDB_PASSWORD=omai_secure_password_2025\r\nDB_ROOT_PASSWORD=your_secure_root_password\r\n```\r\n\r\n## ✅ Checklist\r\n\r\n- [ ] Backup database before making changes\r\n- [ ] Document current authentication method\r\n- [ ] Set secure root password\r\n- [ ] Disable socket authentication\r\n- [ ] Verify password authentication works\r\n- [ ] Test socket authentication is disabled\r\n- [ ] Update application configurations\r\n- [ ] Update database scripts\r\n- [ ] Test all database connections\r\n- [ ] Update OMAI database setup\r\n- [ ] Document new password securely\r\n- [ ] Test backup and restore procedures\r\n\r\n## 🎯 Summary\r\n\r\nDisabling socket authentication for the root user is a critical security improvement that:\r\n\r\n- **Enforces password authentication** for all root connections\r\n- **Improves audit trail** by logging all authentication attempts\r\n- **Reduces attack surface** by eliminating socket-based bypasses\r\n- **Enhances compliance** with security standards\r\n- **Protects against privilege escalation** attacks\r\n\r\nThe automated script provides a safe, step-by-step process to make this change while ensuring all functionality continues to work correctly. "
+    },
+    "complexity": {
+      "totalLines": 339,
+      "codeLines": 200,
+      "commentLines": 51,
+      "commentRatio": 0.20318725099601595,
+      "averageLineLength": 33.808764940239044
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.173Z"
+  },
+  "contentHash": "b95ba3c3ebbca829956c779538e6d5f3fdbb6703919ef554b5fe8cfbe0185b04",
+  "discoveredAt": "2025-07-26T04:17:09.173Z"
+}

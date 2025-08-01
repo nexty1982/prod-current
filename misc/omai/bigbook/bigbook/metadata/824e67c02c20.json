@@ -1,0 +1,49 @@
+{
+  "id": "824e67c02c20",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/temp/apply-translation-schema.js",
+  "relativePath": "server/temp/apply-translation-schema.js",
+  "name": "apply-translation-schema.js",
+  "extension": ".js",
+  "size": 7521,
+  "modified": "2025-07-11T10:49:29.386Z",
+  "created": "2025-07-11T00:17:48.591Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 176,
+      "characters": 7445,
+      "words": 593
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 176,
+      "codeLines": 144,
+      "commentLines": 10,
+      "commentRatio": 0.06493506493506493,
+      "averageLineLength": 46.88961038961039
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.148Z"
+  },
+  "contentHash": "45c2c0806758198bab90c09b596e728cc1d2b9cde212a1f21fc0641cab0d81a0",
+  "discoveredAt": "2025-07-28T07:20:01.148Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "28e7645eea5c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/jurisdictions/serbian-scraper.js",
+  "relativePath": "server/scrapers/jurisdictions/serbian-scraper.js",
+  "name": "serbian-scraper.js",
+  "extension": ".js",
+  "size": 4158,
+  "modified": "2025-07-14T06:06:57.088Z",
+  "created": "2025-07-14T06:00:15.141Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 114,
+      "characters": 4156,
+      "words": 255
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 114,
+      "codeLines": 87,
+      "commentLines": 2,
+      "commentRatio": 0.02247191011235955,
+      "averageLineLength": 43.13483146067416
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.605Z"
+  },
+  "contentHash": "8be39111d2ed6ab47be523170298f29e12d74d1710dfd3833f64527121f42013",
+  "discoveredAt": "2025-07-28T07:20:00.605Z"
+}

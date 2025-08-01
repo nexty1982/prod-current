@@ -1,0 +1,74 @@
+{
+  "id": "c8d145a73722",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/setup/register-existing-church.js",
+  "relativePath": "server/setup/register-existing-church.js",
+  "name": "register-existing-church.js",
+  "extension": ".js",
+  "size": 6025,
+  "modified": "2025-07-24T14:50:26.296Z",
+  "created": "2025-07-24T14:50:26.296Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 162,
+      "characters": 5989,
+      "words": 573
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 12,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 15,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Simple script to register existing church in central database\r\n * This script specifically handles registering SSPPOC_001 with the saints_peter_and_paul_orthodox_church_db\r\n */\r\n\r\nconst mysql = require('mysql2/promise');\r\n\r\n// Database configuration\r\nconst dbConfig = {\r\n  host: process.env.[REDACTED] || 'localhost',\r\n  user: process.env.[REDACTED] || 'orthodoxapps',\r\n  password: process.env.[REDACTED] || 'Orthodox2024!',\r\n  port: process.env.[REDACTED] || 3306\r\n};\r\n\r\nasync function registerExistingChurch() {\r\n  console.log('🏛️ Registering existing church in central database...');\r\n  \r\n  let mainConnection;\r\n  let churchConnection;\r\n  \r\n  try {\r\n    // Step 1: Connect to main database and create churches table if needed\r\n    console.log('📊 Connecting to central database...');\r\n    mainConnection = await mysql.createConnection({\r\n      ...dbConfig,\r\n      database: 'orthodoxmetrics_db'\r\n    });\r\n\r\n    // Create churches table if it doesn't exist\r\n    console.log('🔧 Creating churches table if needed...');\r\n    await mainConnection.execute(`\r\n      CREATE TABLE IF NOT EXISTS churches (\r\n        id INT AUTO_INCREMENT PRIMARY KEY,\r\n        church_id VARCHAR(50) UNIQUE NOT NULL,\r\n        name VARCHAR(255) NOT NULL,\r\n        email VARCHAR(255) NOT NULL,\r\n        database_name VARCHAR(100) NOT NULL,\r\n        slug VARCHAR(100) NOT NULL,\r\n        is_active BOOLEAN DEFAULT TRUE,\r\n        setup_completed BOOLEAN DEFAULT FALSE,\r\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\r\n        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\r\n        \r\n        UNIQUE KEY uk_churches_email (email),\r\n        UNIQUE KEY uk_churches_db (database_name),\r\n        UNIQUE KEY uk_churches_slug (slug),\r\n        INDEX idx_churches_active (is_active)\r\n      )\r\n    `);\r\n\r\n    // Step 2: Get church info from existing church database\r\n    console.log('📖 Reading church info from saints_peter_and_paul_orthodox_church_db...');\r\n    churchConnection = await mysql.createConnection({\r\n      ...dbConfig,\r\n      database: 'saints_peter_and_paul_orthodox_church_db'\r\n    });\r\n\r\n    const [churchInfo] = await churchConnection.execute(\r\n      'SELECT * FROM church_info WHERE church_id = ? OR id = 1 LIMIT 1',\r\n      ['SSPPOC_001']\r\n    );\r\n\r\n    let church;\r\n    if (churchInfo.length > 0) {\r\n      church = churchInfo[0];\r\n      console.log('✅ Found existing church info:', church.name);\r\n    } else {\r\n      // Use default values if no church_info found\r\n      church = {\r\n        church_id: 'SSPPOC_001',\r\n        name: 'Saints Peter and Paul Orthodox Church',\r\n        email: 'admin@ssppoc.org'\r\n      };\r\n      console.log('⚠️  No church_info found, using default values');\r\n    }\r\n\r\n    // Step 3: Check if church is already registered\r\n    console.log('🔍 Checking if church is already registered...');\r\n    const [existing] = await mainConnection.execute(\r\n      'SELECT * FROM churches WHERE church_id = ? OR database_name = ?',\r\n      [church.church_id || 'SSPPOC_001', 'saints_peter_and_paul_orthodox_church_db']\r\n    );\r\n\r\n    if (existing.length > 0) {\r\n      console.log('✅ Church already registered:', existing[0]);\r\n      console.log('📋 Registration details:');\r\n      console.log('   Church ID:', existing[0].church_id);\r\n      console.log('   Name:', existing[0].name);\r\n      console.log('   Database:', existing[0].database_name);\r\n      console.log('   Active:', existing[0].is_active ? 'Yes' : 'No');\r\n    } else {\r\n      // Step 4: Register the church\r\n      console.log('📝 Registering church in central database...');\r\n      await mainConnection.execute(`\r\n        INSERT INTO churches (church_id, name, email, database_name, slug, is_active, setup_completed)\r\n        VALUES (?, ?, ?, ?, ?, TRUE, TRUE)\r\n      `, [\r\n        church.church_id || 'SSPPOC_001',\r\n        church.name || 'Saints Peter and Paul Orthodox Church',\r\n        church.email || 'admin@ssppoc.org',\r\n        'saints_peter_and_paul_orthodox_church_db',\r\n        'ssppoc-001'\r\n      ]);\r\n\r\n      console.log('✅ Church successfully registered!');\r\n    }\r\n\r\n    // Step 5: Verify registration\r\n    console.log('\\n🔍 Verifying registration...');\r\n    const [verification] = await mainConnection.execute(\r\n      'SELECT * FROM churches WHERE church_id = ?',\r\n      [church.church_id || 'SSPPOC_001']\r\n    );\r\n\r\n    if (verification.length > 0) {\r\n      const registered = verification[0];\r\n      console.log('✅ Church registration verified:');\r\n      console.log('   ID:', registered.id);\r\n      console.log('   Church ID:', registered.church_id);\r\n      console.log('   Name:', registered.name);\r\n      console.log('   Email:', registered.email);\r\n      console.log('   Database:', registered.database_name);\r\n      console.log('   Slug:', registered.slug);\r\n      console.log('   Active:', registered.is_active ? 'Yes' : 'No');\r\n      console.log('   Setup Complete:', registered.setup_completed ? 'Yes' : 'No');\r\n      console.log('   Created:', registered.created_at);\r\n    } else {\r\n      throw new Error('Registration verification failed!');\r\n    }\r\n\r\n    console.log('\\n🎉 Church registration completed successfully!');\r\n    console.log('📌 Next steps:');\r\n    console.log('   1. Try accessing the church admin panel at /admin/church/SSPPOC_001');\r\n    console.log('   2. Verify the church appears in the All Churches list');\r\n    console.log('   3. Test the Edit Church functionality');\r\n\r\n  } catch (error) {\r\n    console.error('❌ Registration failed:', error.message);\r\n    if (error.code) {\r\n      console.error('   Error Code:', error.code);\r\n    }\r\n    if (error.sqlMessage) {\r\n      console.error('   SQL Message:', error.sqlMessage);\r\n    }\r\n    process.exit(1);\r\n  } finally {\r\n    // Clean up connections\r\n    if (mainConnection) {\r\n      await mainConnection.end();\r\n    }\r\n    if (churchConnection) {\r\n      await churchConnection.end();\r\n    }\r\n  }\r\n}\r\n\r\n// Run the registration\r\nregisterExistingChurch().catch(console.error);\r\n"
+    },
+    "complexity": {
+      "totalLines": 162,
+      "codeLines": 127,
+      "commentLines": 15,
+      "commentRatio": 0.1056338028169014,
+      "averageLineLength": 40.82394366197183
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.141Z"
+  },
+  "contentHash": "a9e834c50adaf66ecb6c6fca08480aa5de2d6f4812921f5e0c0916663df7e81d",
+  "discoveredAt": "2025-07-28T07:20:01.141Z"
+}

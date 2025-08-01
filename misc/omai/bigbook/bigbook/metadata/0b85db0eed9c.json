@@ -1,0 +1,43 @@
+{
+  "id": "0b85db0eed9c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/todo.md",
+  "relativePath": "docs/archive/todo.md",
+  "name": "todo.md",
+  "extension": ".md",
+  "size": 4782,
+  "modified": "2025-07-16T19:08:41.149Z",
+  "created": "2025-07-12T01:42:27.525Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 114,
+      "characters": 4740,
+      "words": 681
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 114,
+      "codeLines": 51,
+      "commentLines": 38,
+      "commentRatio": 0.42696629213483145,
+      "averageLineLength": 51.71910112359551
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.311Z"
+  },
+  "contentHash": "17a764cf891ff18a344f219ed8de137775a62467279cbc085458011bd34f33ef",
+  "discoveredAt": "2025-07-28T07:19:58.311Z"
+}

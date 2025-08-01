@@ -1,0 +1,33 @@
+{
+  "oca": {
+    "working_urls": [
+      "https://www.oca.org/parishes"
+    ],
+    "note": "Simpler endpoint, less likely to timeout"
+  },
+  "goarch": {
+    "working_urls": [
+      "https://www.goarch.org/parishes"
+    ],
+    "note": "May still block, but less aggressive than locator"
+  },
+  "rocor": {
+    "working_urls": [
+      "https://synod.com/churches",
+      "https://synod.com/directory"
+    ],
+    "note": "Try without www prefix"
+  },
+  "antiochian": {
+    "working_urls": [
+      "https://www.antiochian.org/parish-locator"
+    ],
+    "note": "Different endpoint name"
+  },
+  "romanian": {
+    "working_urls": [
+      "https://www.roea.org/parishes"
+    ],
+    "note": "Different path structure"
+  }
+}

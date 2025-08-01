@@ -1,0 +1,43 @@
+{
+  "id": "a10c211e793b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/modules/OMLearn/omlearn.api.ts",
+  "relativePath": "front-end/src/modules/OMLearn/omlearn.api.ts",
+  "name": "omlearn.api.ts",
+  "extension": ".ts",
+  "size": 11574,
+  "modified": "2025-07-26T01:04:18.749Z",
+  "created": "2025-07-26T01:02:09.758Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 373,
+      "characters": 11574,
+      "words": 1093
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 373,
+      "codeLines": 316,
+      "commentLines": 19,
+      "commentRatio": 0.056716417910447764,
+      "averageLineLength": 33.25373134328358
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.872Z"
+  },
+  "contentHash": "c44d1d82ca66930f4f2db0fbe5b1146fe88e1efa73025d146461481449f52da1",
+  "discoveredAt": "2025-07-28T07:19:58.872Z"
+}

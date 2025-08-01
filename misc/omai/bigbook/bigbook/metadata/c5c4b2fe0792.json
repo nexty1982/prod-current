@@ -1,0 +1,43 @@
+{
+  "id": "c5c4b2fe0792",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/OMB_PHASE3_VISUAL_EDITOR.md",
+  "relativePath": "OMB_PHASE3_VISUAL_EDITOR.md",
+  "name": "OMB_PHASE3_VISUAL_EDITOR.md",
+  "extension": ".md",
+  "size": 9636,
+  "modified": "2025-07-25T00:17:23.004Z",
+  "created": "2025-07-25T00:17:09.126Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 306,
+      "characters": 9542,
+      "words": 1181
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 306,
+      "codeLines": 183,
+      "commentLines": 57,
+      "commentRatio": 0.2375,
+      "averageLineLength": 38.2125
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.216Z"
+  },
+  "contentHash": "d206f963ba1773df2cb4e336ecba5fa95ef0c01a6f39235a8bf804084f70ca95",
+  "discoveredAt": "2025-07-26T04:17:09.216Z"
+}

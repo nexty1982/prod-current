@@ -1,0 +1,6 @@
+{
+  "id": "841219b86765",
+  "name": "check-church-id-1.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/mysql/check-church-id-1.sql",
+  "type": "Database Scripts"
+}

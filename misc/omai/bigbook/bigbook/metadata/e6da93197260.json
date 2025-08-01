@@ -1,0 +1,43 @@
+{
+  "id": "e6da93197260",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/setup-sdlc-cron.sh",
+  "relativePath": "server/scripts/setup-sdlc-cron.sh",
+  "name": "setup-sdlc-cron.sh",
+  "extension": ".sh",
+  "size": 9296,
+  "modified": "2025-07-24T22:35:21.375Z",
+  "created": "2025-07-24T22:35:15.562Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 334,
+      "characters": 9296,
+      "words": 1061
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 334,
+      "codeLines": 217,
+      "commentLines": 53,
+      "commentRatio": 0.1962962962962963,
+      "averageLineLength": 32.648148148148145
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.073Z"
+  },
+  "contentHash": "2960a1249c2254bf7342b0f6fdd92569bce4bcc252036fda72a983e0c495b8a7",
+  "discoveredAt": "2025-07-28T07:20:01.073Z"
+}

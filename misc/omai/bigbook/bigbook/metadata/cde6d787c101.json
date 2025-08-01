@@ -1,0 +1,43 @@
+{
+  "id": "cde6d787c101",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/check-and-populate-menu-items.js",
+  "relativePath": "scripts/check-and-populate-menu-items.js",
+  "name": "check-and-populate-menu-items.js",
+  "extension": ".js",
+  "size": 23042,
+  "modified": "2025-07-27T02:34:04.885Z",
+  "created": "2025-07-27T02:33:44.715Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 239,
+      "characters": 23000,
+      "words": 2024
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 239,
+      "codeLines": 172,
+      "commentLines": 26,
+      "commentRatio": 0.13131313131313133,
+      "averageLineLength": 112.81313131313131
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.079Z"
+  },
+  "contentHash": "f9bb44d8b82e1223e28a268a4bca770e72f44d4fbd2319262ea4b34f0b721fc3",
+  "discoveredAt": "2025-07-28T07:19:59.079Z"
+}

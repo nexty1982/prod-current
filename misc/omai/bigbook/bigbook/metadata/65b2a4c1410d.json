@@ -1,0 +1,43 @@
+{
+  "id": "65b2a4c1410d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/GLOBAL_OMAI_IMPLEMENTATION.md",
+  "relativePath": "docs/7-26-25/GLOBAL_OMAI_IMPLEMENTATION.md",
+  "name": "GLOBAL_OMAI_IMPLEMENTATION.md",
+  "extension": ".md",
+  "size": 16656,
+  "modified": "2025-07-26T10:18:18.083Z",
+  "created": "2025-07-26T10:16:30.687Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 541,
+      "characters": 16496,
+      "words": 2023
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 541,
+      "codeLines": 336,
+      "commentLines": 97,
+      "commentRatio": 0.22401847575057737,
+      "averageLineLength": 36.60046189376443
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.737Z"
+  },
+  "contentHash": "b83e007e9178486449141656d28bf2da50d4c5dc325c5aba96f135d7c9ff1d4d",
+  "discoveredAt": "2025-07-28T07:19:57.737Z"
+}

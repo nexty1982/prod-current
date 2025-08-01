@@ -1,0 +1,6 @@
+{
+  "id": "ef9fe002b88b",
+  "name": "deploy.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/deploy.sh",
+  "type": "Build Scripts"
+}

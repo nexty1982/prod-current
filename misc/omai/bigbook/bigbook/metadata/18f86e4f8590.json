@@ -1,0 +1,43 @@
+{
+  "id": "18f86e4f8590",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/test-activity-logs.js",
+  "relativePath": "server/scripts/test-activity-logs.js",
+  "name": "test-activity-logs.js",
+  "extension": ".js",
+  "size": 3762,
+  "modified": "2025-07-20T20:13:45.374Z",
+  "created": "2025-07-20T20:13:17.506Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 111,
+      "characters": 3724,
+      "words": 342
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 111,
+      "codeLines": 90,
+      "commentLines": 6,
+      "commentRatio": 0.0625,
+      "averageLineLength": 37.083333333333336
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.079Z"
+  },
+  "contentHash": "c700090af94a20699d9d07f5025ca2fa1df2f16b273de724422b7769e3e773a3",
+  "discoveredAt": "2025-07-28T07:20:01.079Z"
+}

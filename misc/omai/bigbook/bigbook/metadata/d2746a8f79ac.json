@@ -1,0 +1,54 @@
+{
+  "id": "d2746a8f79ac",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/agents/omai-api-guardian.ts",
+  "relativePath": "services/om-ai/agents/omai-api-guardian.ts",
+  "name": "omai-api-guardian.ts",
+  "extension": ".ts",
+  "size": 2241,
+  "modified": "2025-07-25T00:35:37.487Z",
+  "created": "2025-07-25T00:35:33.359Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 60,
+      "characters": 2233,
+      "words": 198
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 60,
+      "codeLines": 53,
+      "commentLines": 2,
+      "commentRatio": 0.03636363636363636,
+      "averageLineLength": 39.10909090909091
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.366Z"
+  },
+  "contentHash": "58c9e0c74500bdbc79121b67144e28c0e179dc2c0dacb06cd9dbb7e58bce8a2b",
+  "discoveredAt": "2025-07-28T07:20:01.366Z"
+}

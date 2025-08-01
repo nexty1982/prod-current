@@ -1,0 +1,43 @@
+{
+  "id": "1c7153954b5f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/enhanced_invoice_schema.sql",
+  "relativePath": "server/database/enhanced_invoice_schema.sql",
+  "name": "enhanced_invoice_schema.sql",
+  "extension": ".sql",
+  "size": 10947,
+  "modified": "2025-07-04T23:08:01.000Z",
+  "created": "2025-07-09T00:48:35.106Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 99,
+      "characters": 9089,
+      "words": 932
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 99,
+      "codeLines": 89,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 100.92134831460675
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.989Z"
+  },
+  "contentHash": "43f3d978af184e012de546454587bf5fd60b753dfbaeb0febc0ffa3d7ad23008",
+  "discoveredAt": "2025-07-28T07:19:59.989Z"
+}

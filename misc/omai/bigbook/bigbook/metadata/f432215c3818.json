@@ -1,0 +1,43 @@
+{
+  "id": "f432215c3818",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/ADMIN_ACCOUNTS.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/ADMIN_ACCOUNTS.md",
+  "name": "ADMIN_ACCOUNTS.md",
+  "extension": ".md",
+  "size": 2573,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:04.412Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 87,
+      "characters": 2567,
+      "words": 323
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 87,
+      "codeLines": 48,
+      "commentLines": 12,
+      "commentRatio": 0.2,
+      "averageLineLength": 40.916666666666664
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.128Z"
+  },
+  "contentHash": "64fe6a08f3665401c3f6490f4ab35e9d09319e17f37062dfe0158ba350cf61dc",
+  "discoveredAt": "2025-07-28T07:19:58.128Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "88c28cf52e04",
+  "name": "diagnose-site-error.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/diagnose-site-error.sh",
+  "type": "Troubleshooting Utilities"
+}

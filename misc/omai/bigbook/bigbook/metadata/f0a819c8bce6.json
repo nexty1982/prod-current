@@ -1,0 +1,89 @@
+{
+  "id": "f0a819c8bce6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/diagnose-backend-issues.sh",
+  "relativePath": "scripts/diagnose-backend-issues.sh",
+  "name": "diagnose-backend-issues.sh",
+  "extension": ".sh",
+  "size": 5017,
+  "modified": "2025-07-25T19:35:21.242Z",
+  "created": "2025-07-25T19:35:18.784Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 175,
+      "characters": 4959,
+      "words": 645
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 30
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 92
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 93
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 94
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 95
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 96
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 98
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 110
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 159
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 175,
+      "codeLines": 129,
+      "commentLines": 19,
+      "commentRatio": 0.12837837837837837,
+      "averageLineLength": 32.277027027027025
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.090Z"
+  },
+  "contentHash": "28f2041ca5b84cecc0b1f2b127ec59b67ab430cd960873e59dbd6074e6915961",
+  "discoveredAt": "2025-07-28T07:19:59.090Z"
+}

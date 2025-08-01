@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { PlusIcon, BuildingOfficeIcon, UsersIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import ChurchWizard from './ChurchWizard';
+import EditChurchModal from './EditChurchModal';
 
 const ChurchManagement = () => {
   const [churches, setChurches] = useState([]);
   const [showWizard, setShowWizard] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedChurchId, setSelectedChurchId] = useState(null);
 
   // Fetch churches on component mount
   useEffect(() => {
@@ -25,7 +28,14 @@ const ChurchManagement = () => {
       }
 
       const data = await response.json();
-      setChurches(data.churches || []);
+      console.log('✅ Church API Response:', data);
+      
+      if (data.success && Array.isArray(data.churches)) {
+        setChurches(data.churches);
+      } else {
+        console.error('❌ Invalid API response format:', data);
+        setChurches([]);
+      }
     } catch (err) {
       setError(err.message);
       console.error('Error fetching churches:', err);
@@ -41,6 +51,15 @@ const ChurchManagement = () => {
     
     // Show success notification
     alert(`Church "${newChurch.name}" created successfully!`);
+  };
+
+  const handleEditChurch = (churchId) => {
+    setSelectedChurchId(churchId);
+    setEditModalOpen(true);
+  };
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setSelectedChurchId(null);
   };
 
   const formatDate = (dateString) => {
@@ -110,18 +129,21 @@ const ChurchManagement = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <div className="flex items-center">
-              <BuildingOfficeIcon className="h-8 w-8 text-blue-600" />
-              <div className="ml-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <BuildingOfficeIcon className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Churches</p>
                 <p className="text-2xl font-bold text-gray-900">{churches.length}</p>
               </div>
             </div>
-          </div>
           
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <div className="flex items-center">
-              <UsersIcon className="h-8 w-8 text-green-600" />
-              <div className="ml-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <UsersIcon className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Users</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {churches.reduce((sum, church) => sum + (church.user_count || 0), 0)}
@@ -132,8 +154,10 @@ const ChurchManagement = () => {
           
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <div className="flex items-center">
-              <DocumentTextIcon className="h-8 w-8 text-purple-600" />
-              <div className="ml-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <DocumentTextIcon className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Records</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {churches.reduce((sum, church) => {
@@ -147,13 +171,13 @@ const ChurchManagement = () => {
           
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <div className="flex items-center">
-              <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                <span className="text-yellow-600 font-bold">🌍</span>
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <span className="text-yellow-600 font-bold text-lg">🌍</span>
               </div>
-              <div className="ml-3">
+              <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Languages</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {new Set(churches.map(c => c.preferred_language)).size}
+                  {new Set(churches.map(c => c.preferred_language || c.language)).size}
                 </p>
               </div>
             </div>
@@ -186,27 +210,16 @@ const ChurchManagement = () => {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Church
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Language
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Users
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Records
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Church</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Language</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Users</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Records</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -226,36 +239,28 @@ const ChurchManagement = () => {
                           </div>
                         )}
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {church.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {church.database_name}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900">{church.name}</div>
+                          <div className="text-sm text-gray-500">{church.database_name}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {church.city}, {church.region}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {church.country}
-                      </div>
+                      <div className="text-sm text-gray-900">{church.city}, {church.region}</div>
+                      <div className="text-sm text-gray-500">{church.country}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{church.address || "Address not specified"}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{church.email || "Email not specified"}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <span className="text-lg mr-2">
-                          {getLanguageFlag(church.preferred_language)}
-                        </span>
-                        <span className="text-sm text-gray-900">
-                          {church.preferred_language?.toUpperCase()}
-                        </span>
+                        <span className="text-lg mr-2">{getLanguageFlag(church.preferred_language)}</span>
+                        <span className="text-sm text-gray-900">{church.preferred_language?.toUpperCase()}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {church.user_count || 0}
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{church.user_count || 0}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="space-y-1">
                         <div>B: {church.record_counts?.baptisms || 0}</div>
@@ -264,16 +269,16 @@ const ChurchManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        church.status === 'active' 
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {church.status}
-                      </span>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${church.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{church.status}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(church.created_at)}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(church.created_at)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                        onClick={() => handleEditChurch(church.id)}
+                      >
+                        Edit
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -290,6 +295,12 @@ const ChurchManagement = () => {
           onSuccess={handleChurchCreated}
         />
       )}
+      <EditChurchModal
+        open={editModalOpen}
+        onClose={handleCloseEditModal}
+        churchId={selectedChurchId}
+        onSave={fetchChurches}
+      />
     </div>
   );
 };

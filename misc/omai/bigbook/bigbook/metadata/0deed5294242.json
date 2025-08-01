@@ -1,0 +1,68 @@
+{
+  "id": "0deed5294242",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/7-8-25/CODE_CHANGES_MADE.md",
+  "relativePath": "docs/archive/temp_extract/7-8-25/CODE_CHANGES_MADE.md",
+  "name": "CODE_CHANGES_MADE.md",
+  "extension": ".md",
+  "size": 6902,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:07.948Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 257,
+      "characters": 6876,
+      "words": 816
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 10,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 22,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 26,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "# Code Changes Made During Troubleshooting - July 8, 2025\r\n\r\n## Session Configuration Changes\r\n\r\n### File: `z:\\server\\config\\session.js`\r\n\r\n**Original Cookie Configuration:**\r\n```javascript\r\ncookie: {\r\n  secure: process.env.[REDACTED] === 'production',\r\n  httpOnly: true,\r\n  maxAge: 24 * 60 * 60 * 1000, // 24 hours\r\n  sameSite: 'strict',\r\n  domain: process.env.[REDACTED],\r\n  name: 'orthodox.sid'\r\n}\r\n```\r\n\r\n**Modified Cookie Configuration:**\r\n```javascript\r\ncookie: {\r\n  secure: process.env.[REDACTED] === 'production',\r\n  httpOnly: true,\r\n  maxAge: 24 * 60 * 60 * 1000, // 24 hours  \r\n  sameSite: 'lax', // Changed from 'strict' to 'lax'\r\n  // domain: process.env.[REDACTED], // Commented out domain restriction\r\n  name: 'orthodox.sid'\r\n}\r\n```\r\n\r\n**Reason for Change:** \r\n- `sameSite: 'strict'` was preventing cookies from being sent in cross-site requests through nginx proxy\r\n- Domain restriction was interfering with proxy setup\r\n\r\n---\r\n\r\n## Frontend Configuration Changes\r\n\r\n### File: `z:\\front-end\\.env.development`\r\n\r\n**Original Configuration:**\r\n```\r\nREACT_APP_API_BASE_URL=http://localhost:3001\r\n```\r\n\r\n**Modified Configuration:**\r\n```\r\nREACT_APP_API_BASE_URL=https://orthodoxmetrics.com\r\n```\r\n\r\n**Reason for Change:**\r\n- Frontend was making requests to localhost instead of production domain\r\n- Needed to match nginx proxy configuration\r\n\r\n---\r\n\r\n## New Debug Routes Added\r\n\r\n### File: `z:\\server\\routes\\debug.js`\r\n\r\n**Completely New File Created with Following Endpoints:**\r\n\r\n#### 1. Session Debug Endpoint\r\n```javascript\r\nrouter.get('/session', (req, res) => {\r\n  // Returns session ID, user status, and session data\r\n});\r\n```\r\n\r\n#### 2. Cookie Debug Endpoint  \r\n```javascript\r\nrouter.get('/cookies', (req, res) => {\r\n  // Returns raw and parsed cookie data\r\n});\r\n```\r\n\r\n#### 3. Test Cookie Setting\r\n```javascript\r\nrouter.get('/test-cookie', (req, res) => {\r\n  // Manually sets test session value and saves\r\n});\r\n```\r\n\r\n#### 4. Check Cookie Persistence\r\n```javascript\r\nrouter.get('/check-cookie', (req, res) => {\r\n  // Checks if test cookie value persists\r\n});\r\n```\r\n\r\n#### 5. Session Continuity Test\r\n```javascript\r\nrouter.get('/session-continuity', (req, res) => {\r\n  // Tests session persistence with counter\r\n});\r\n```\r\n\r\n#### 6. Full Session Debug\r\n```javascript\r\nrouter.get('/session-full-debug', (req, res) => {\r\n  // Comprehensive session and header debugging\r\n});\r\n```\r\n\r\n#### 7. Notification Counts Debug\r\n```javascript\r\nrouter.get('/notification-counts', (req, res) => {\r\n  // Tests auth middleware with detailed logging\r\n});\r\n```\r\n\r\n**Status:** ❌ **All routes return 404 - not loading properly**\r\n\r\n---\r\n\r\n## Auth Route Modifications\r\n\r\n### File: `z:\\server\\routes\\auth.js`\r\n\r\n**Added New Endpoint:**\r\n```javascript\r\n// GET /api/auth/check - Check authentication status\r\nrouter.get('/check', (req, res) => {\r\n  console.log('🔍 Auth check - Session ID:', req.sessionID);\r\n  console.log('🔍 Auth check - User:', req.session?.user?.email);\r\n\r\n  if (req.session && req.session.user) {\r\n    console.log('✅ User is authenticated:', req.session.user.email);\r\n    res.json({\r\n      success: true,\r\n      authenticated: true,\r\n      user: {\r\n        id: req.session.user.id,\r\n        email: req.session.user.email,\r\n        first_name: req.session.user.first_name,\r\n        last_name: req.session.user.last_name,\r\n        role: req.session.user.role\r\n      }\r\n    });\r\n  } else {\r\n    console.log('❌ User not authenticated - no session user');\r\n    res.status(401).json({\r\n      success: false,\r\n      authenticated: false,\r\n      message: 'Not authenticated'\r\n    });\r\n  }\r\n});\r\n```\r\n\r\n**Status:** ❌ **Route returns 404 - not loading properly**\r\n\r\n---\r\n\r\n## Server Index Route Registration\r\n\r\n### File: `z:\\server\\index.js`\r\n\r\n**Added Test Routes:**\r\n```javascript\r\n// Simple test route to verify Express is working\r\napp.get('/api/test-basic', (req, res) => {\r\n  console.log('✅ Basic test route hit');\r\n  res.json({ \r\n    message: 'Basic Express routing is working', \r\n    timestamp: new Date().toISOString(),\r\n    method: req.method,\r\n    url: req.url \r\n  });\r\n});\r\n\r\n// Test route to debug proxy path forwarding  \r\napp.get('/api/test-proxy-path', (req, res) => {\r\n  console.log('🔍 Proxy path test:');\r\n  console.log('  Original URL:', req.originalUrl);\r\n  console.log('  URL:', req.url);\r\n  console.log('  Method:', req.method);\r\n  console.log('  Headers:', req.headers);\r\n  \r\n  res.json({\r\n    message: 'Proxy path debugging',\r\n    originalUrl: req.originalUrl,\r\n    url: req.url,\r\n    method: req.method,\r\n    headers: req.headers,\r\n    timestamp: new Date().toISOString()\r\n  });\r\n});\r\n\r\n// Test route at root level (no /api prefix)\r\napp.get('/test-direct-path', (req, res) => {\r\n  console.log('🔍 Direct path test:');\r\n  console.log('  Original URL:', req.originalUrl);\r\n  console.log('  URL:', req.url);\r\n  \r\n  res.json({\r\n    message: 'Direct path (no /api prefix)',\r\n    originalUrl: req.originalUrl,\r\n    url: req.url,\r\n    timestamp: new Date().toISOString()\r\n  });\r\n});\r\n```\r\n\r\n**Confirmed Route Registration:**\r\n```javascript\r\n// API prefixed routes (for direct API access)\r\napp.use('/api/auth', authRoutes);\r\napp.use('/api/admin', adminRoutes);\r\napp.use('/api', debugRoutes);\r\n\r\n// Direct routes (for nginx proxy without /api prefix)  \r\napp.use('/auth', authRoutes);\r\napp.use('/admin', adminRoutes);\r\napp.use('/debug', debugRoutes);\r\n```\r\n\r\n**Status:** ❌ **New routes still return 404**\r\n\r\n---\r\n\r\n## Files That Should Have Been Modified But May Have Issues\r\n\r\n### Potential Issues:\r\n\r\n1. **File Save Problems:** Changes may not have been saved correctly\r\n2. **Syntax Errors:** Code may have syntax errors preventing loading\r\n3. **Module Caching:** Node.js may be using cached versions\r\n4. **Server Restart:** Server may need clean restart to load changes\r\n\r\n### Files to Verify:\r\n- `z:\\server\\routes\\debug.js` - Verify file exists and has correct content\r\n- `z:\\server\\routes\\auth.js` - Verify /check endpoint was added correctly  \r\n- `z:\\server\\config\\session.js` - Verify cookie config changes\r\n- `z:\\server\\index.js` - Verify route registrations\r\n\r\n---\r\n\r\n## Summary of Changes Made\r\n\r\n### ✅ **Changes That Worked:**\r\n- Session cookie `sameSite` changed to 'lax' - cookies now being set\r\n- Frontend API URL updated - requests going to correct domain\r\n- Cookie domain restriction removed - proxy compatibility improved\r\n\r\n### ❌ **Changes That Failed:**\r\n- Debug routes added but return 404\r\n- Auth check endpoint added but returns 404  \r\n- Session user still undefined despite cookie fixes\r\n- Sessions still generating new IDs on each request\r\n\r\n### 🔍 **Root Cause:**\r\nThe cookie/session configuration fixes worked, but there are deeper issues:\r\n1. New route files are not being loaded by the server\r\n2. Users are not successfully logging in (session.user = undefined)\r\n3. Something is preventing session persistence despite cookie fixes\r\n"
+    },
+    "complexity": {
+      "totalLines": 257,
+      "codeLines": 154,
+      "commentLines": 52,
+      "commentRatio": 0.2524271844660194,
+      "averageLineLength": 31.87378640776699
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.299Z"
+  },
+  "contentHash": "3aaa8957e473d52fc3bc8445c140035683a9a2da723739ee8a645c70f94f9dc5",
+  "discoveredAt": "2025-07-28T07:19:58.299Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "47516312a1fa",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migrations/add-church-info-fields.sql",
+  "relativePath": "server/migrations/add-church-info-fields.sql",
+  "name": "add-church-info-fields.sql",
+  "extension": ".sql",
+  "size": 2967,
+  "modified": "2025-07-14T00:41:35.974Z",
+  "created": "2025-07-13T22:25:33.186Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 80,
+      "characters": 2967,
+      "words": 327
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 80,
+      "codeLines": 68,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 41.955882352941174
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.323Z"
+  },
+  "contentHash": "ad3994bb88b86ef3c06ad37c61506f6d1955130a7fecef92cc99a987fc7e5bb9",
+  "discoveredAt": "2025-07-28T07:20:00.323Z"
+}

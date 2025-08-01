@@ -1,0 +1,6 @@
+{
+  "id": "ebd17efd3793",
+  "name": "add_entity_extraction_tables.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/migrations/add_entity_extraction_tables.sql",
+  "type": "Database Scripts"
+}

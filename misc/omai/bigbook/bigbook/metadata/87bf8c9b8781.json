@@ -1,0 +1,54 @@
+{
+  "id": "87bf8c9b8781",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/orchestrator.js",
+  "relativePath": "services/om-ai/orchestrator.js",
+  "name": "orchestrator.js",
+  "extension": ".js",
+  "size": 22345,
+  "modified": "2025-07-27T03:15:53.638Z",
+  "created": "2025-07-25T19:46:06.794Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 765,
+      "characters": 22345,
+      "words": 1952
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 7
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 765,
+      "codeLines": 594,
+      "commentLines": 78,
+      "commentRatio": 0.11607142857142858,
+      "averageLineLength": 31.741071428571427
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.556Z"
+  },
+  "contentHash": "57fde85351f7e7cecf5d71e9318b3fdc67fdd9bfccdac92ee7837ef2ab4ce88a",
+  "discoveredAt": "2025-07-28T07:20:01.556Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "a32e7dc6d510",
+  "name": "run-calendar-schema-dynamic.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/run-calendar-schema-dynamic.sh",
+  "type": "Database Scripts"
+}

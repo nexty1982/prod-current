@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Box,
   Menu,
@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import * as dropdownData from './data';
 import { useAuth } from '../../../../context/AuthContext';
+import { useProfileSync } from '../../../../hooks/useProfileSync';
 
 import { IconMail } from '@tabler/icons-react';
 
@@ -23,6 +24,7 @@ const Profile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorEl2, setAnchorEl2] = useState(null);
+  const { profileImage, profileData } = useProfileSync(ProfileImg);
 
   const handleClick2 = (event: any) => {
     setAnchorEl2(event.currentTarget);
@@ -57,8 +59,8 @@ const Profile = () => {
         onClick={handleClick2}
       >
         <Avatar
-          src={ProfileImg}
-          alt={ProfileImg}
+          src={profileImage}
+          alt="Profile"
           sx={{
             width: 35,
             height: 35,
@@ -85,10 +87,12 @@ const Profile = () => {
       >
         <Typography variant="h5">User Profile</Typography>
         <Stack direction="row" py={3} spacing={2} alignItems="center">
-          <Avatar src={ProfileImg} alt={ProfileImg} sx={{ width: 95, height: 95 }} />
+          <Avatar src={profileImage} alt="Profile" sx={{ width: 95, height: 95 }} />
           <Box>
             <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
-              {user ? `${user.first_name} ${user.last_name}` : 'Unknown User'}
+              {user?.first_name?.trim() && user?.last_name?.trim()
+                ? `${user.first_name} ${user.last_name}`
+                : null}
             </Typography>
             <Typography variant="subtitle2" color="textSecondary">
               {user?.role || 'User'}

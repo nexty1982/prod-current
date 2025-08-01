@@ -6,6 +6,87 @@ const { promisePool } = require('../../config/db');
 
 const router = express.Router();
 
+/**
+ * Determine environment with IP-based detection logic
+ */
+function determineEnvironment() {
+    // Priority 1: IP-based detection (primary rule)
+    try {
+        const networkInterfaces = os.networkInterfaces();
+        const allAddresses = Object.values(networkInterfaces)
+            .flat()
+            .filter(iface => iface && iface.family === 'IPv4' && !iface.internal)
+            .map(iface => iface.address);
+        
+        // Check for production server IP
+        if (allAddresses.includes('192.168.1.239')) {
+            return 'production';
+        }
+        
+        // Check for development server IP  
+        if (allAddresses.includes('192.168.1.240')) {
+            return 'development';
+        }
+    } catch (error) {
+        console.warn('Failed to detect environment via IP address:', error.message);
+    }
+    
+    // Priority 2: Explicit NODE_ENV
+    if (process.env.NODE_ENV) {
+        return process.env.NODE_ENV;
+    }
+    
+    // Priority 3: Other environment indicators
+    if (process.env.ENVIRONMENT) {
+        return process.env.ENVIRONMENT;
+    }
+    
+    // Priority 4: Check for production indicators
+    const productionIndicators = [
+        process.env.PM2_HOME,           // PM2 process manager
+        process.env.PRODUCTION,         // Explicit production flag
+        process.env.PROD,              // Short production flag
+        process.cwd().includes('/prod'), // Directory contains 'prod'
+        process.cwd().includes('/production'),
+        process.env.NODE_OPTIONS?.includes('--max-old-space-size') // Production memory settings
+    ];
+    
+    // Check hostname for production indicators
+    const hostname = os.hostname();
+    const productionHostnames = ['prod', 'production', 'live', 'orthodoxmetrics'];
+    const isProductionHostname = productionHostnames.some(name => 
+        hostname.toLowerCase().includes(name)
+    );
+    
+    if (productionIndicators.some(Boolean) || isProductionHostname) {
+        return 'production';
+    }
+    
+    // Priority 5: Check for development indicators
+    const developmentIndicators = [
+        process.env.DEV,
+        process.env.DEVELOPMENT,
+        process.cwd().includes('/dev'),
+        process.cwd().includes('/development'),
+        process.env.NODE_ENV === 'dev'
+    ];
+    
+    if (developmentIndicators.some(Boolean)) {
+        return 'development';
+    }
+    
+    // Priority 6: Default based on server context
+    // If we're on orthodoxmetrics.com or production server, assume production
+    if (hostname.includes('orthodoxmetrics') || 
+        process.cwd().includes('/var/www') ||
+        process.cwd().includes('/site/prod')) {
+        return 'production';
+    }
+    
+    // Final fallback
+    return 'development';
+}
+
 // Middleware to check if user is admin or super_admin
 const checkRole = (allowedRoles) => {
     return async (req, res, next) => {
@@ -84,7 +165,7 @@ router.get('/system-info', checkRole(['super_admin', 'admin']), async (req, res)
             arch: os.arch(),
             
             // Application Settings
-            env: process.env.NODE_ENV || 'development',
+            env: determineEnvironment(),
             version: version,
             dateFormat: 'MM/DD/YYYY',
             language: 'en',

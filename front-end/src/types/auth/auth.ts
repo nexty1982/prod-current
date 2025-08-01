@@ -69,14 +69,16 @@ export interface AuthState {
   error: string | null;
 }
 
+// 🔄 Role type refactored to use unified role system (see utils/roles.ts)
 export type UserRole =
   | 'super_admin'
   | 'admin'
+  | 'manager'
   | 'priest'
   | 'deacon'
-  | 'secretary'
-  | 'treasurer'
-  | 'member';
+  | 'editor'
+  | 'viewer'
+  | 'guest';
 
 export type Permission =
   | 'users.read'

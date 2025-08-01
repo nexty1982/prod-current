@@ -1,0 +1,43 @@
+{
+  "id": "a0b1d21e82c0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/fix-database-errors.sh",
+  "relativePath": "server/scripts/fix-database-errors.sh",
+  "name": "fix-database-errors.sh",
+  "extension": ".sh",
+  "size": 2120,
+  "modified": "2025-07-22T09:39:07.263Z",
+  "created": "2025-07-22T09:39:04.683Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 61,
+      "characters": 2088,
+      "words": 284
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 61,
+      "codeLines": 48,
+      "commentLines": 2,
+      "commentRatio": 0.04,
+      "averageLineLength": 40.56
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.040Z"
+  },
+  "contentHash": "04ee9c44ecf030b269f10e4430d7dd33f78e3082d735074cd508c5580fd1215f",
+  "discoveredAt": "2025-07-28T07:20:01.040Z"
+}

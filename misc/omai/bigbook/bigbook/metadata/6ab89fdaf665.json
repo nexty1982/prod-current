@@ -1,0 +1,116 @@
+{
+  "id": "6ab89fdaf665",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-session-persistence.js",
+  "relativePath": "server/debug/test-session-persistence.js",
+  "name": "test-session-persistence.js",
+  "extension": ".js",
+  "size": 2870,
+  "modified": "2025-07-24T14:50:26.356Z",
+  "created": "2025-07-24T14:50:26.356Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 85,
+      "characters": 2856,
+      "words": 250
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 82,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 11,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 12,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 15,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 79,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 80,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 81,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 82,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 83,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// server/debug/test-session-persistence.js\r\nconst mysql = require('mysql2/promise');\r\n\r\nasync function testSessionPersistence() {\r\n  console.log('🔍 Session Persistence Diagnostic');\r\n  console.log('==================================');\r\n\r\n  try {\r\n    // Connect to database\r\n    const connection = await mysql.createConnection({\r\n      host: process.env.[REDACTED] || 'localhost',\r\n      port: process.env.[REDACTED] || 3306,\r\n      user: process.env.[REDACTED] || 'orthodoxapps',\r\n      password: process.env.[REDACTED] || 'Summerof1982@!',\r\n      database: process.env.[REDACTED] || 'orthodoxmetrics_db',\r\n    });\r\n\r\n    console.log('✅ Database connected');\r\n\r\n    // Check sessions table\r\n    const [sessions] = await connection.execute(`\r\n      SELECT \r\n        session_id, \r\n        FROM_UNIXTIME(expires) as expires_readable,\r\n        CASE WHEN FROM_UNIXTIME(expires) > NOW() THEN 'ACTIVE' ELSE 'EXPIRED' END as status,\r\n        CHAR_LENGTH(data) as data_size,\r\n        data\r\n      FROM sessions \r\n      ORDER BY expires DESC \r\n      LIMIT 10\r\n    `);\r\n\r\n    console.log(`\\n📊 Recent Sessions (${sessions.length} found):`);\r\n    sessions.forEach(session => {\r\n      console.log(`   ID: ${session.session_id}`);\r\n      console.log(`   Status: ${session.status}`);\r\n      console.log(`   Expires: ${session.expires_readable}`);\r\n      console.log(`   Data Size: ${session.data_size} bytes`);\r\n      \r\n      // Try to parse session data\r\n      try {\r\n        const sessionData = JSON.parse(session.data);\r\n        if (sessionData.user) {\r\n          console.log(`   User: ${sessionData.user.email} (${sessionData.user.role})`);\r\n        } else {\r\n          console.log(`   User: No user data in session`);\r\n        }\r\n      } catch (parseErr) {\r\n        console.log(`   User: Cannot parse session data`);\r\n      }\r\n      console.log('   ---');\r\n    });\r\n\r\n    // Look for the specific session from the logs\r\n    const loginSessionId = '7cCukbYpb-zdYa0b_oA1MXR-hQmgDre9';\r\n    console.log(`\\n🔍 Looking for login session: ${loginSessionId}`);\r\n    \r\n    const [specificSession] = await connection.execute(\r\n      'SELECT * FROM sessions WHERE session_id = ?',\r\n      [loginSessionId]\r\n    );\r\n\r\n    if (specificSession.length > 0) {\r\n      console.log('✅ Login session found in database');\r\n      const sessionData = JSON.parse(specificSession[0].data);\r\n      console.log('   User data:', sessionData.user);\r\n    } else {\r\n      console.log('❌ Login session NOT found in database');\r\n    }\r\n\r\n    await connection.end();\r\n\r\n  } catch (error) {\r\n    console.error('❌ Database error:', error.message);\r\n  }\r\n}\r\n\r\n// Set environment\r\nprocess.env.[REDACTED] = 'production';\r\nprocess.env.[REDACTED] = 'localhost';\r\nprocess.env.[REDACTED] = 'orthodoxapps';\r\nprocess.env.[REDACTED] = '[REDACTED]';\r\nprocess.env.[REDACTED] = 'orthodoxmetrics_db';\r\n\r\ntestSessionPersistence(); "
+    },
+    "complexity": {
+      "totalLines": 85,
+      "codeLines": 66,
+      "commentLines": 6,
+      "commentRatio": 0.08333333333333333,
+      "averageLineLength": 38.18055555555556
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.253Z"
+  },
+  "contentHash": "f881f4b96ec2664d05ecd0f0392e839d5b5c8824d1b80ac15908089512dc1527",
+  "discoveredAt": "2025-07-28T07:20:00.253Z"
+}

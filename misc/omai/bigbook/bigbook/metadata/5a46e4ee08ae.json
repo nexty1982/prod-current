@@ -1,0 +1,43 @@
+{
+  "id": "5a46e4ee08ae",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/force-config-reload.sh",
+  "relativePath": "server/scripts/force-config-reload.sh",
+  "name": "force-config-reload.sh",
+  "extension": ".sh",
+  "size": 1740,
+  "modified": "2025-07-24T14:50:26.368Z",
+  "created": "2025-07-24T14:50:26.368Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 54,
+      "characters": 1714,
+      "words": 235
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 54,
+      "codeLines": 43,
+      "commentLines": 1,
+      "commentRatio": 0.022727272727272728,
+      "averageLineLength": 37.75
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.046Z"
+  },
+  "contentHash": "e19de38cfede041ae7a2a69b55ec10e42e5efb2ed4c76aaed27efd8a1d1f7cd8",
+  "discoveredAt": "2025-07-28T07:20:01.046Z"
+}

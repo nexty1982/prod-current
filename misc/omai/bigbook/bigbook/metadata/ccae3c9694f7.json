@@ -1,0 +1,43 @@
+{
+  "id": "ccae3c9694f7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-after-fix.sh",
+  "relativePath": "scripts/restart-after-fix.sh",
+  "name": "restart-after-fix.sh",
+  "extension": ".sh",
+  "size": 4105,
+  "modified": "2025-07-25T20:26:35.388Z",
+  "created": "2025-07-25T20:26:34.229Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 115,
+      "characters": 4039,
+      "words": 511
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 115,
+      "codeLines": 81,
+      "commentLines": 14,
+      "commentRatio": 0.14736842105263157,
+      "averageLineLength": 41.31578947368421
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.471Z"
+  },
+  "contentHash": "71a9cfece0d71bba706211004aab6b58ab8961d159fd8f65e9e5bc2ca409a075",
+  "discoveredAt": "2025-07-28T07:19:59.471Z"
+}

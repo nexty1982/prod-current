@@ -1,0 +1,6 @@
+{
+  "id": "f9d9de3691e9",
+  "name": "verify-bigbook-integration.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/verify-bigbook-integration.sh",
+  "type": "Server Scripts"
+}

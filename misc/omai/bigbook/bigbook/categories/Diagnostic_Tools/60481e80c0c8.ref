@@ -1,0 +1,6 @@
+{
+  "id": "60481e80c0c8",
+  "name": "restart-with-fixed-jit.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-with-fixed-jit.sh",
+  "type": "Troubleshooting Utilities"
+}

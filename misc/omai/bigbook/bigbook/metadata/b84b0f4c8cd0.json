@@ -1,0 +1,43 @@
+{
+  "id": "b84b0f4c8cd0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/data/test-working-churches/validation-report.json",
+  "relativePath": "server/data/test-working-churches/validation-report.json",
+  "name": "validation-report.json",
+  "extension": ".json",
+  "size": 240,
+  "modified": "2025-07-23T11:49:04.789Z",
+  "created": "2025-07-23T11:49:04.789Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 16,
+      "characters": 240,
+      "words": 28
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 16,
+      "codeLines": 16,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 14.0625
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.571Z"
+  },
+  "contentHash": "5023aa6fb325f96c0f2ca6dc934e3e35a3dccd534124004f22b150daef00966d",
+  "discoveredAt": "2025-07-28T07:19:59.571Z"
+}

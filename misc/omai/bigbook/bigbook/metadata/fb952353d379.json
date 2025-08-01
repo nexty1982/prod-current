@@ -1,0 +1,59 @@
+{
+  "id": "fb952353d379",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-nfs-client-issue.sh",
+  "relativePath": "scripts/fix-nfs-client-issue.sh",
+  "name": "fix-nfs-client-issue.sh",
+  "extension": ".sh",
+  "size": 5096,
+  "modified": "2025-07-27T16:40:20.504Z",
+  "created": "2025-07-27T16:40:16.830Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 182,
+      "characters": 5038,
+      "words": 648
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "apt",
+        "line": 121
+      },
+      {
+        "type": "system_command",
+        "name": "apt",
+        "line": 122
+      },
+      {
+        "type": "system_command",
+        "name": "yum",
+        "line": 129
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 182,
+      "codeLines": 148,
+      "commentLines": 15,
+      "commentRatio": 0.09202453987730061,
+      "averageLineLength": 29.773006134969325
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.112Z"
+  },
+  "contentHash": "73ed85e2b31d39961920c0a9703682f124025f65e8aa9ce01dce24045c0bcf90",
+  "discoveredAt": "2025-07-28T07:19:59.112Z"
+}

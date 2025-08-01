@@ -1,0 +1,43 @@
+{
+  "id": "df17aedf9820",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/clear-frontend-cache.sh",
+  "relativePath": "server/debug/clear-frontend-cache.sh",
+  "name": "clear-frontend-cache.sh",
+  "extension": ".sh",
+  "size": 2337,
+  "modified": "2025-07-24T14:50:26.356Z",
+  "created": "2025-07-24T14:50:26.356Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 73,
+      "characters": 2305,
+      "words": 311
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 73,
+      "codeLines": 60,
+      "commentLines": 4,
+      "commentRatio": 0.0625,
+      "averageLineLength": 34.890625
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.088Z"
+  },
+  "contentHash": "8d49192a7e326684e95eb6d76c7f7e2c399acb53c75c75507e48ef226610433b",
+  "discoveredAt": "2025-07-28T07:20:00.088Z"
+}

@@ -1,0 +1,50 @@
+{
+  "id": "052fbaa6d369",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/utils/devLogger.ts",
+  "relativePath": "front-end/src/utils/devLogger.ts",
+  "name": "devLogger.ts",
+  "extension": ".ts",
+  "size": 5878,
+  "modified": "2025-07-13T01:51:44.907Z",
+  "created": "2025-07-13T01:47:24.425Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 194,
+      "characters": 5854,
+      "words": 684
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 6,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "/**\r\n * Development-focused debugging utilities\r\n * Provides data shape validation and logging for development mode only\r\n */\r\n\r\nconst isDevelopment = process.env.[REDACTED] === 'development';\r\n\r\ninterface DataValidationOptions {\r\n  expectedType?: 'array' | 'object' | 'string' | 'number' | 'boolean';\r\n  componentName?: string;\r\n  operation?: string;\r\n  required?: boolean;\r\n}\r\n\r\n/**\r\n * Validates and logs data shape in development mode\r\n * @param data - The data to validate\r\n * @param label - Label for the log entry\r\n * @param options - Validation options\r\n * @returns The original data (for chaining)\r\n */\r\nexport const devLogDataShape = function<T>(\r\n  data: T,\r\n  label: string,\r\n  options: DataValidationOptions = {}\r\n): T {\r\n  if (!isDevelopment) {\r\n    return data;\r\n  }\r\n\r\n  const {\r\n    expectedType,\r\n    componentName = 'Unknown',\r\n    operation = 'data processing',\r\n    required = true\r\n  } = options;\r\n\r\n  console.group(`🔍 [${componentName}] Data Shape Validation - ${label}`);\r\n  \r\n  // Log basic data information\r\n  console.log('typeof data:', typeof data);\r\n  console.log('Array.isArray(data):', Array.isArray(data));\r\n  console.log('data === null:', data === null);\r\n  console.log('data === undefined:', data === undefined);\r\n  console.log('data length (if applicable):', Array.isArray(data) ? data.length : 'N/A');\r\n  \r\n  // Log the actual data (truncated if large)\r\n  if (Array.isArray(data) && data.length > 5) {\r\n    console.log('data (first 5 items):', data.slice(0, 5));\r\n    console.log(`... and ${data.length - 5} more items`);\r\n  } else {\r\n    console.log('data:', data);\r\n  }\r\n\r\n  // Validation warnings\r\n  const actualType = Array.isArray(data) ? 'array' : typeof data;\r\n  \r\n  if (data === null || data === undefined) {\r\n    if (required) {\r\n      console.warn(`⚠️ WARNING: ${label} is ${data === null ? 'null' : 'undefined'} but required for ${operation}`);\r\n    } else {\r\n      console.info(`ℹ️ INFO: ${label} is ${data === null ? 'null' : 'undefined'} (optional)`);\r\n    }\r\n  }\r\n\r\n  if (expectedType && actualType !== expectedType) {\r\n    console.warn(`⚠️ WARNING: Expected ${expectedType} but got ${actualType} for ${label}`);\r\n    console.warn(`This may cause issues in ${operation}`);\r\n  }\r\n\r\n  // Array-specific validations\r\n  if (expectedType === 'array' && !Array.isArray(data)) {\r\n    console.error(`❌ ERROR: Expected array but got ${actualType}. This will likely break .map(), .filter(), etc.`);\r\n  }\r\n\r\n  // Object-specific validations\r\n  if (expectedType === 'object' && (typeof data !== 'object' || Array.isArray(data) || data === null)) {\r\n    console.error(`❌ ERROR: Expected object but got ${actualType}. This may break property access.`);\r\n  }\r\n\r\n  console.groupEnd();\r\n  \r\n  return data;\r\n};\r\n\r\n/**\r\n * Logs API response shape in development mode\r\n * @param response - API response data\r\n * @param endpoint - API endpoint name\r\n * @param expectedShape - Description of expected response shape\r\n */\r\nexport const devLogApiResponse = function<T>(\r\n  response: T,\r\n  endpoint: string,\r\n  expectedShape?: string\r\n): T {\r\n  if (!isDevelopment) {\r\n    return response;\r\n  }\r\n\r\n  console.group(`🌐 [API] Response from ${endpoint}`);\r\n  console.log('Response type:', typeof response);\r\n  console.log('Is array:', Array.isArray(response));\r\n  console.log('Response:', response);\r\n  \r\n  if (expectedShape) {\r\n    console.log('Expected shape:', expectedShape);\r\n  }\r\n\r\n  // Check for common API response patterns\r\n  if (typeof response === 'object' && response !== null) {\r\n    const obj = response as any;\r\n    if ('data' in obj) {\r\n      console.log('Response has .data property:', typeof obj.data);\r\n    }\r\n    if ('error' in obj) {\r\n      console.log('Response has .error property:', obj.error);\r\n    }\r\n    if ('success' in obj) {\r\n      console.log('Response has .success property:', obj.success);\r\n    }\r\n  }\r\n  \r\n  console.groupEnd();\r\n  \r\n  return response;\r\n};\r\n\r\n/**\r\n * Logs component state changes in development mode\r\n * @param stateName - Name of the state variable\r\n * @param oldValue - Previous value\r\n * @param newValue - New value\r\n * @param componentName - Component name\r\n */\r\nexport const devLogStateChange = function<T>(\r\n  stateName: string,\r\n  oldValue: T,\r\n  newValue: T,\r\n  componentName: string\r\n): void {\r\n  if (!isDevelopment) {\r\n    return;\r\n  }\r\n\r\n  console.group(`📊 [${componentName}] State Change: ${stateName}`);\r\n  console.log('Old value:', oldValue);\r\n  console.log('New value:', newValue);\r\n  console.log('Type changed:', typeof oldValue !== typeof newValue);\r\n  console.groupEnd();\r\n};\r\n\r\n/**\r\n * Logs menu filtering operations in development mode\r\n * @param menuItems - Menu items before filtering\r\n * @param filteredItems - Menu items after filtering\r\n * @param filterType - Type of filter applied\r\n */\r\nexport const devLogMenuFilter = (\r\n  menuItems: any[],\r\n  filteredItems: any[],\r\n  filterType: string\r\n): void => {\r\n  if (!isDevelopment) {\r\n    return;\r\n  }\r\n\r\n  console.group(`📋 [Menu] ${filterType} Filter Applied`);\r\n  console.log('Original items count:', Array.isArray(menuItems) ? menuItems.length : 'Not an array');\r\n  console.log('Filtered items count:', Array.isArray(filteredItems) ? filteredItems.length : 'Not an array');\r\n  \r\n  if (Array.isArray(menuItems) && Array.isArray(filteredItems)) {\r\n    const removed = menuItems.length - filteredItems.length;\r\n    console.log('Items removed:', removed);\r\n    \r\n    if (removed > 0) {\r\n      const removedTitles = menuItems\r\n        .filter(item => !filteredItems.find(filtered => filtered.id === item.id))\r\n        .map(item => item.title || item.subheader || 'Unknown')\r\n        .slice(0, 5);\r\n      console.log('Removed items (first 5):', removedTitles);\r\n    }\r\n  }\r\n  \r\n  console.groupEnd();\r\n};\r\n\r\nexport default {\r\n  devLogDataShape,\r\n  devLogApiResponse,\r\n  devLogStateChange,\r\n  devLogMenuFilter\r\n};\r\n"
+    },
+    "complexity": {
+      "totalLines": 194,
+      "codeLines": 129,
+      "commentLines": 36,
+      "commentRatio": 0.21818181818181817,
+      "averageLineLength": 34.00606060606061
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.943Z"
+  },
+  "contentHash": "ffdb4ad6e82762392d055d840b5c9b88c536202c6fb4f2ca04953a87f58d5d24",
+  "discoveredAt": "2025-07-28T07:19:58.943Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "c050e4478da7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/utils/data-cleaner.js",
+  "relativePath": "server/scrapers/utils/data-cleaner.js",
+  "name": "data-cleaner.js",
+  "extension": ".js",
+  "size": 13838,
+  "modified": "2025-07-14T06:06:57.186Z",
+  "created": "2025-07-14T06:02:09.689Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 390,
+      "characters": 13836,
+      "words": 1100
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 390,
+      "codeLines": 270,
+      "commentLines": 33,
+      "commentRatio": 0.10891089108910891,
+      "averageLineLength": 42.37953795379538
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.632Z"
+  },
+  "contentHash": "53702e84d617a3e8867d80aaae33facf6a1da7744ebfb18840d758f8649e45a5",
+  "discoveredAt": "2025-07-28T07:20:00.633Z"
+}

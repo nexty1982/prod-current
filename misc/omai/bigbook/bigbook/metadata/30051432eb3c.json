@@ -1,0 +1,43 @@
+{
+  "id": "30051432eb3c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/DATABASE_ARCHITECTURE_REFACTOR.md",
+  "relativePath": "docs/DATABASE_ARCHITECTURE_REFACTOR.md",
+  "name": "DATABASE_ARCHITECTURE_REFACTOR.md",
+  "extension": ".md",
+  "size": 1903,
+  "modified": "2025-07-19T14:45:09.510Z",
+  "created": "2025-07-19T14:42:03.850Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 51,
+      "characters": 1871,
+      "words": 255
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 51,
+      "codeLines": 31,
+      "commentLines": 10,
+      "commentRatio": 0.24390243902439024,
+      "averageLineLength": 44.19512195121951
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.791Z"
+  },
+  "contentHash": "18eac274fe74ea286b3d0a643456cb196c6be53721087206442554e79e9200c2",
+  "discoveredAt": "2025-07-28T07:19:57.791Z"
+}

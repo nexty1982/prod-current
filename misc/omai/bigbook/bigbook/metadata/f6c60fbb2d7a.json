@@ -1,0 +1,43 @@
+{
+  "id": "f6c60fbb2d7a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/CURRENT_STATUS_SUMMARY.md",
+  "relativePath": "docs/7-26-25/CURRENT_STATUS_SUMMARY.md",
+  "name": "CURRENT_STATUS_SUMMARY.md",
+  "extension": ".md",
+  "size": 3289,
+  "modified": "2025-07-26T23:09:52.622Z",
+  "created": "2025-07-26T23:09:33.113Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 79,
+      "characters": 3255,
+      "words": 450
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 79,
+      "codeLines": 40,
+      "commentLines": 20,
+      "commentRatio": 0.3333333333333333,
+      "averageLineLength": 52.63333333333333
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.727Z"
+  },
+  "contentHash": "a1404ff45c22018cb516e551a4443e5deecf8911a8b47f7fe4ee854b7104eff6",
+  "discoveredAt": "2025-07-28T07:19:57.727Z"
+}

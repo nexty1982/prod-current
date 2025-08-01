@@ -1,0 +1,43 @@
+{
+  "id": "b7f65f39d48e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migration/run_migration.js",
+  "relativePath": "server/migration/run_migration.js",
+  "name": "run_migration.js",
+  "extension": ".js",
+  "size": 0,
+  "modified": "2025-07-17T22:24:19.913Z",
+  "created": "2025-07-17T22:24:19.913Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1,
+      "characters": 0,
+      "words": 0
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 1,
+      "codeLines": 0,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 0
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.320Z"
+  },
+  "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "discoveredAt": "2025-07-28T07:20:00.320Z"
+}

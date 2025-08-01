@@ -1,0 +1,43 @@
+{
+  "id": "345a5ee0e436",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/temp/test-kanban.js",
+  "relativePath": "server/temp/test-kanban.js",
+  "name": "test-kanban.js",
+  "extension": ".js",
+  "size": 938,
+  "modified": "2025-07-16T17:40:35.784Z",
+  "created": "2025-07-16T17:40:35.688Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 29,
+      "characters": 928,
+      "words": 81
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 29,
+      "codeLines": 21,
+      "commentLines": 1,
+      "commentRatio": 0.045454545454545456,
+      "averageLineLength": 40.18181818181818
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.163Z"
+  },
+  "contentHash": "d385aed373f008331fbc6a11451ff74f8e523d24376c553e4fd0dee8dccfe7ae",
+  "discoveredAt": "2025-07-28T07:20:01.163Z"
+}

@@ -1,0 +1,61 @@
+{
+  "id": "0cf5ac55cca1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-omai-intelligence.js",
+  "relativePath": "scripts/test-omai-intelligence.js",
+  "name": "test-omai-intelligence.js",
+  "extension": ".js",
+  "size": 5726,
+  "modified": "2025-07-27T04:00:36.056Z",
+  "created": "2025-07-27T03:59:07.652Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 210,
+      "characters": 5670,
+      "words": 566
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 9
+      },
+      {
+        "type": "npm_package",
+        "name": "module",
+        "line": 13
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 12,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * OMAI Intelligence Test Script\r\n * Tests the upgraded intelligence engine with all required prompts\r\n * Created: 2025-07-27\r\n */\r\n\r\nconst path = require('path');\r\n\r\n// Add project root to module path\r\nprocess.env.[REDACTED] = path.join(__dirname, '..');\r\nrequire('module')._initPaths();\r\n\r\nconst { askOMAI, debugPrompt } = require('../services/om-ai');\r\n\r\nconsole.log('🧠 OMAI Intelligence Engine Test Suite');\r\nconsole.log('=====================================\\n');\r\n\r\n// Test cases as specified by the user\r\nconst testCases = [\r\n  {\r\n    name: 'Date Query',\r\n    prompt: 'what is today\\'s date',\r\n    expectedIntent: 'system_query',\r\n    shouldContain: ['📅', 'Today is']\r\n  },\r\n  {\r\n    name: 'Time Query',\r\n    prompt: 'what\\'s the time',\r\n    expectedIntent: 'system_query',\r\n    shouldContain: ['🕐', 'time is']\r\n  },\r\n  {\r\n    name: 'User Identity',\r\n    prompt: 'who am I',\r\n    expectedIntent: 'user_info',\r\n    shouldContain: ['👤', 'You are']\r\n  },\r\n  {\r\n    name: 'Self Check',\r\n    prompt: 'run self-check',\r\n    expectedIntent: 'self_check',\r\n    shouldContain: ['🔍', 'Self-Check Report', 'Healthy']\r\n  },\r\n  {\r\n    name: 'JSON Optimization',\r\n    prompt: 'optimize this json',\r\n    expectedIntent: 'code_request',\r\n    shouldContain: ['📋', 'JSON Optimization', 'optimize']\r\n  },\r\n  {\r\n    name: 'Gibberish Handling',\r\n    prompt: 'zzzzz',\r\n    expectedIntent: 'fallback',\r\n    shouldContain: ['🤔', 'programming language']\r\n  },\r\n  {\r\n    name: 'Weather Query',\r\n    prompt: 'what\\'s the weather',\r\n    expectedIntent: 'fallback',\r\n    shouldContain: ['🌤️', 'weather API']\r\n  },\r\n  {\r\n    name: 'Joke Request',\r\n    prompt: 'tell me a joke',\r\n    expectedIntent: 'fallback',\r\n    shouldContain: ['😂', 'debug']\r\n  },\r\n  {\r\n    name: 'Agent Command',\r\n    prompt: 'run autofix',\r\n    expectedIntent: 'agent_command',\r\n    shouldContain: ['🔧', 'Auto-Fix Engine']\r\n  },\r\n  {\r\n    name: 'Documentation Request',\r\n    prompt: 'help with omai',\r\n    expectedIntent: 'documentation_request',\r\n    shouldContain: ['📚', 'Documentation Assistant']\r\n  }\r\n];\r\n\r\nasync function runTests() {\r\n  console.log('Starting OMAI Intelligence Tests...\\n');\r\n  \r\n  let passed = 0;\r\n  let failed = 0;\r\n  \r\n  for (const testCase of testCases) {\r\n    console.log(`🔍 Testing: ${testCase.name}`);\r\n    console.log(`   Prompt: \"${testCase.prompt}\"`);\r\n    \r\n    try {\r\n      // Test prompt classification\r\n      const debugInfo = debugPrompt(testCase.prompt);\r\n      console.log(`   Intent: ${debugInfo.classifiedIntent}`);\r\n      \r\n      // Test actual response\r\n      const securityContext = {\r\n        user: { \r\n          name: 'Test User', \r\n          role: 'super_admin' \r\n        }\r\n      };\r\n      \r\n      const response = await askOMAI(testCase.prompt, securityContext);\r\n      \r\n      // Validate response\r\n      let success = true;\r\n      let missingContent = [];\r\n      \r\n      for (const expectedContent of testCase.shouldContain) {\r\n        if (!response.includes(expectedContent)) {\r\n          success = false;\r\n          missingContent.push(expectedContent);\r\n        }\r\n      }\r\n      \r\n      if (success) {\r\n        console.log(`   ✅ PASSED\\n`);\r\n        passed++;\r\n      } else {\r\n        console.log(`   ❌ FAILED - Missing: ${missingContent.join(', ')}`);\r\n        console.log(`   Response: ${response.substring(0, 100)}...\\n`);\r\n        failed++;\r\n      }\r\n      \r\n    } catch (error) {\r\n      console.log(`   ❌ ERROR: ${error.message}\\n`);\r\n      failed++;\r\n    }\r\n  }\r\n  \r\n  // Summary\r\n  console.log('\\n🎯 Test Results Summary');\r\n  console.log('======================');\r\n  console.log(`✅ Passed: ${passed}`);\r\n  console.log(`❌ Failed: ${failed}`);\r\n  console.log(`📊 Success Rate: ${Math.round((passed / (passed + failed)) * 100)}%`);\r\n  \r\n  if (failed === 0) {\r\n    console.log('\\n🎉 All tests passed! OMAI intelligence upgrade is working correctly.');\r\n  } else {\r\n    console.log('\\n⚠️  Some tests failed. Check the output above for details.');\r\n  }\r\n}\r\n\r\n// Additional debug tests\r\nasync function runDebugTests() {\r\n  console.log('\\n🛠️  Debug Function Tests');\r\n  console.log('========================\\n');\r\n  \r\n  const debugTestPrompts = [\r\n    'what is today\\'s date',\r\n    'optimize my json',\r\n    'tell me a joke',\r\n    'who am I',\r\n    'random gibberish xyz123'\r\n  ];\r\n  \r\n  for (const prompt of debugTestPrompts) {\r\n    console.log(`Debug: \"${prompt}\"`);\r\n    const debugInfo = debugPrompt(prompt);\r\n    console.log(`  Intent: ${debugInfo.classifiedIntent}`);\r\n    console.log(`  Patterns: ${debugInfo.matchedPatterns.length}`);\r\n    console.log('');\r\n  }\r\n}\r\n\r\n// Performance test\r\nasync function runPerformanceTest() {\r\n  console.log('\\n⚡ Performance Test');\r\n  console.log('==================\\n');\r\n  \r\n  const startTime = Date.now();\r\n  const iterations = 10;\r\n  \r\n  for (let i = 0; i < iterations; i++) {\r\n    await askOMAI('what is today\\'s date', { user: { role: 'admin' } });\r\n  }\r\n  \r\n  const totalTime = Date.now() - startTime;\r\n  const avgTime = totalTime / iterations;\r\n  \r\n  console.log(`Total time for ${iterations} requests: ${totalTime}ms`);\r\n  console.log(`Average response time: ${avgTime.toFixed(2)}ms`);\r\n  console.log(`Requests per second: ${(1000 / avgTime).toFixed(2)}`);\r\n}\r\n\r\n// Run all tests\r\nasync function main() {\r\n  try {\r\n    await runTests();\r\n    await runDebugTests();\r\n    await runPerformanceTest();\r\n  } catch (error) {\r\n    console.error('❌ Test suite failed:', error);\r\n    process.exit(1);\r\n  }\r\n}\r\n\r\n// Handle graceful shutdown\r\nprocess.on('SIGINT', () => {\r\n  console.log('\\n\\n👋 Test suite interrupted. Goodbye!');\r\n  process.exit(0);\r\n});\r\n\r\n// Run the tests\r\nmain(); "
+    },
+    "complexity": {
+      "totalLines": 210,
+      "codeLines": 164,
+      "commentLines": 17,
+      "commentRatio": 0.09392265193370165,
+      "averageLineLength": 29.679558011049725
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.519Z"
+  },
+  "contentHash": "da07d0991c8185014a10ac5b19650ef97fecf8f67671a99cf0261d39638f936b",
+  "discoveredAt": "2025-07-28T07:19:59.519Z"
+}

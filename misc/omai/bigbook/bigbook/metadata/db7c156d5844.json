@@ -1,0 +1,49 @@
+{
+  "id": "db7c156d5844",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/step3-demo.js",
+  "relativePath": "server/scrapers/step3-demo.js",
+  "name": "step3-demo.js",
+  "extension": ".js",
+  "size": 8284,
+  "modified": "2025-07-14T06:39:37.418Z",
+  "created": "2025-07-14T06:38:55.182Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 201,
+      "characters": 8202,
+      "words": 625
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 201,
+      "codeLines": 169,
+      "commentLines": 6,
+      "commentRatio": 0.03428571428571429,
+      "averageLineLength": 45.14857142857143
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.621Z"
+  },
+  "contentHash": "c6318b295f1876224ff61b3f819a9ecb04aa1000c8f503ef092de1da4bedd47b",
+  "discoveredAt": "2025-07-28T07:20:00.621Z"
+}

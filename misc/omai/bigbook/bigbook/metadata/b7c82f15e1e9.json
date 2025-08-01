@@ -1,0 +1,49 @@
+{
+  "id": "b7c82f15e1e9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/test-build-console-fixes.sh",
+  "relativePath": "scripts/7-26-25/test-build-console-fixes.sh",
+  "name": "test-build-console-fixes.sh",
+  "extension": ".sh",
+  "size": 11429,
+  "modified": "2025-07-26T06:02:25.116Z",
+  "created": "2025-07-26T06:02:23.586Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 368,
+      "characters": 11309,
+      "words": 1551
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 185
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 368,
+      "codeLines": 265,
+      "commentLines": 42,
+      "commentRatio": 0.13680781758957655,
+      "averageLineLength": 35.5114006514658
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.055Z"
+  },
+  "contentHash": "e411adbc43256e29fb6ed7950b221e155f6456736e5f8e747d951f52501e7f76",
+  "discoveredAt": "2025-07-28T07:19:59.055Z"
+}

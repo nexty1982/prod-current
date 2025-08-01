@@ -1,0 +1,309 @@
+# OMAI Commands Configuration
+# Maps natural language instructions to system commands
+# Version: 1.0.0
+# Location: /var/www/orthodox-church-mgmt/orthodoxmetrics/prod/omai_commands.yaml
+
+version: "1.0.0"
+created_at: "2025-01-26"
+description: "OMAI command mapping for natural language to system commands"
+
+# Global settings
+settings:
+  log_file: "/var/log/omai/executed.log"
+  max_log_size: "10MB"
+  require_confirmation: true
+  timeout_seconds: 300
+  allowed_users: ["root", "www-data"]
+  working_directory: "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod"
+
+# Safety levels
+safety_levels:
+  safe: "No confirmation required, auto-execute"
+  moderate: "Confirmation required before execution"
+  dangerous: "Requires explicit --force flag and confirmation"
+  trusted: "Marked as trusted, reduced checks"
+
+# Command categories
+categories:
+  
+  # Server Management
+  server_management:
+    patterns:
+      - "restart the server"
+      - "stop the server"
+      - "start the server"
+      - "check server status"
+      - "reload the application"
+    commands:
+      restart_server:
+        patterns: ["restart the server", "restart server", "server restart"]
+        command: "pm2 restart all"
+        safety: "moderate"
+        description: "Restart all PM2 processes"
+        requires_sudo: false
+        
+      stop_server:
+        patterns: ["stop the server", "stop server", "shutdown server"]
+        command: "pm2 stop all"
+        safety: "moderate"
+        description: "Stop all PM2 processes"
+        requires_sudo: false
+        
+      start_server:
+        patterns: ["start the server", "start server", "bring up server"]
+        command: "pm2 start all"
+        safety: "safe"
+        description: "Start all PM2 processes"
+        requires_sudo: false
+        
+      server_status:
+        patterns: ["check server status", "server status", "what's running"]
+        command: "pm2 status"
+        safety: "safe"
+        description: "Show PM2 process status"
+        requires_sudo: false
+
+  # Database Operations
+  database:
+    patterns:
+      - "backup the database"
+      - "check database status"
+      - "restart database"
+    commands:
+      backup_db:
+        patterns: ["backup the database", "database backup", "backup db"]
+        command: "mysqldump -u root orthodoxmetrics_db > /var/backups/db_$(date +%Y%m%d_%H%M%S).sql"
+        safety: "moderate"
+        description: "Create database backup"
+        requires_sudo: true
+        
+      db_status:
+        patterns: ["check database status", "database status", "db status"]
+        command: "systemctl status mysql"
+        safety: "safe"
+        description: "Check MySQL service status"
+        requires_sudo: false
+        
+      restart_db:
+        patterns: ["restart database", "restart mysql", "db restart"]
+        command: "systemctl restart mysql"
+        safety: "dangerous"
+        description: "Restart MySQL service"
+        requires_sudo: true
+
+  # Build and Deployment
+  build_deploy:
+    patterns:
+      - "build the frontend"
+      - "deploy the application"
+      - "rebuild everything"
+    commands:
+      build_frontend:
+        patterns: ["build the frontend", "frontend build", "npm build"]
+        command: "cd front-end && NODE_OPTIONS='--max-old-space-size=4096' npm install --legacy-peer-deps && NODE_OPTIONS='--max-old-space-size=4096' npm run build"
+        safety: "moderate"
+        description: "Build frontend with memory optimization"
+        requires_sudo: false
+        trusted: true
+        
+      full_deploy:
+        patterns: ["deploy the application", "full deployment", "deploy everything"]
+        command: "./scripts/deploy.sh"
+        safety: "dangerous"
+        description: "Run full application deployment"
+        requires_sudo: false
+        
+      clean_build:
+        patterns: ["clean build", "rebuild everything", "fresh build"]
+        command: "cd front-end && rm -rf node_modules dist && npm install --legacy-peer-deps && npm run build"
+        safety: "moderate"
+        description: "Clean and rebuild frontend"
+        requires_sudo: false
+
+  # Log Management
+  logs:
+    patterns:
+      - "show error logs"
+      - "check application logs"
+      - "tail the logs"
+    commands:
+      error_logs:
+        patterns: ["show error logs", "error logs", "check errors"]
+        command: "tail -n 50 /var/log/nginx/error.log"
+        safety: "safe"
+        description: "Show recent error logs"
+        requires_sudo: false
+        
+      app_logs:
+        patterns: ["check application logs", "app logs", "application logs"]
+        command: "pm2 logs --lines 50"
+        safety: "safe"
+        description: "Show PM2 application logs"
+        requires_sudo: false
+        
+      tail_logs:
+        patterns: ["tail the logs", "follow logs", "watch logs"]
+        command: "pm2 logs --follow"
+        safety: "safe"
+        description: "Follow PM2 logs in real-time"
+        requires_sudo: false
+
+  # System Monitoring
+  monitoring:
+    patterns:
+      - "check system resources"
+      - "disk usage"
+      - "memory usage"
+    commands:
+      system_resources:
+        patterns: ["check system resources", "system status", "resource usage"]
+        command: "top -n 1 -b | head -20"
+        safety: "safe"
+        description: "Show system resource usage"
+        requires_sudo: false
+        
+      disk_usage:
+        patterns: ["disk usage", "check disk space", "disk space"]
+        command: "df -h"
+        safety: "safe"
+        description: "Show disk usage"
+        requires_sudo: false
+        
+      memory_usage:
+        patterns: ["memory usage", "check memory", "ram usage"]
+        command: "free -h"
+        safety: "safe"
+        description: "Show memory usage"
+        requires_sudo: false
+
+  # File Operations
+  file_ops:
+    patterns:
+      - "list files"
+      - "find files"
+      - "check permissions"
+    commands:
+      list_files:
+        patterns: ["list files", "show files", "ls"]
+        command: "ls -la"
+        safety: "safe"
+        description: "List files in current directory"
+        requires_sudo: false
+        
+      find_files:
+        patterns: ["find files", "search files", "locate"]
+        command: "find . -name '*.js' -type f | head -20"
+        safety: "safe"
+        description: "Find JavaScript files"
+        requires_sudo: false
+        
+      check_permissions:
+        patterns: ["check permissions", "file permissions", "permissions"]
+        command: "ls -la | grep -E '^[d-]'"
+        safety: "safe"
+        description: "Show file permissions"
+        requires_sudo: false
+
+  # OMAI Specific
+  omai_specific:
+    patterns:
+      - "run omai discovery"
+      - "check big book"
+      - "omai status"
+    commands:
+      omai_discovery:
+        patterns: ["run omai discovery", "omai discovery", "discover files"]
+        command: "./test-omai-discovery-standalone.sh"
+        safety: "moderate"
+        description: "Run OMAI path discovery"
+        requires_sudo: false
+        trusted: true
+        
+      bigbook_status:
+        patterns: ["check big book", "big book status", "bigbook status"]
+        command: "ls -la bigbook/ && wc -l bigbook/bigbook-index.json"
+        safety: "safe"
+        description: "Check Big Book status"
+        requires_sudo: false
+        
+      omai_status:
+        patterns: ["omai status", "check omai", "omai health"]
+        command: "node -e \"const discovery = require('./server/services/omaiPathDiscoveryStandalone'); new discovery().getStatus().then(s => console.log(JSON.stringify(s, null, 2)))\""
+        safety: "safe"
+        description: "Check OMAI system status"
+        requires_sudo: false
+
+  # Emergency Commands
+  emergency:
+    patterns:
+      - "emergency restart"
+      - "kill all processes"
+      - "force shutdown"
+    commands:
+      emergency_restart:
+        patterns: ["emergency restart", "force restart", "emergency reboot"]
+        command: "pm2 kill && pm2 start ecosystem.config.js"
+        safety: "dangerous"
+        description: "Emergency restart of all services"
+        requires_sudo: false
+        
+      kill_processes:
+        patterns: ["kill all processes", "stop everything", "kill all"]
+        command: "pm2 kill"
+        safety: "dangerous"
+        description: "Kill all PM2 processes"
+        requires_sudo: false
+        
+      force_shutdown:
+        patterns: ["force shutdown", "emergency shutdown"]
+        command: "systemctl stop nginx && pm2 kill"
+        safety: "dangerous"
+        description: "Force shutdown of web services"
+        requires_sudo: true
+
+# Aliases for common commands
+aliases:
+  rs: "restart_server"
+  status: "server_status"
+  build: "build_frontend"
+  logs: "app_logs"
+  deploy: "full_deploy"
+  backup: "backup_db"
+  discovery: "omai_discovery"
+
+# Script mappings
+scripts:
+  # Map script names to actual files
+  deploy: "./scripts/deploy.sh"
+  backup: "./scripts/backup.sh"
+  test_omai: "./test-omai-discovery-standalone.sh"
+  fix_permissions: "./scripts/fix-permissions.sh"
+  
+# Environment-specific overrides
+environments:
+  production:
+    require_confirmation: true
+    log_level: "INFO"
+    
+  development:
+    require_confirmation: false
+    log_level: "DEBUG"
+    
+  staging:
+    require_confirmation: true
+    log_level: "INFO"
+
+# Memory system configuration
+memory:
+  enabled: true
+  cache_file: "/var/log/omai/command_cache.json"
+  frequency_threshold: 3  # Auto-cache after 3 uses
+  max_cache_entries: 100
+  cache_duration_hours: 24
+
+# Notification settings
+notifications:
+  enabled: true
+  webhook_url: null  # Optional webhook for notifications
+  email_alerts: false
+  log_commands: true 

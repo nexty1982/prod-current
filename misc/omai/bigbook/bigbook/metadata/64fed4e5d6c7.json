@@ -1,0 +1,69 @@
+{
+  "id": "64fed4e5d6c7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/admin/globalImages.js",
+  "relativePath": "server/routes/admin/globalImages.js",
+  "name": "globalImages.js",
+  "extension": ".js",
+  "size": 17555,
+  "modified": "2025-07-22T15:33:15.199Z",
+  "created": "2025-07-20T23:35:48.142Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 435,
+      "characters": 17513,
+      "words": 1539
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "multer",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 5
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 435,
+      "codeLines": 314,
+      "commentLines": 41,
+      "commentRatio": 0.11549295774647887,
+      "averageLineLength": 46.611267605633806
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.366Z"
+  },
+  "contentHash": "ba99f3ed3afd4c1218324bfc5eb77b636f2583e4b920bc4089b02aff283d735b",
+  "discoveredAt": "2025-07-28T07:20:00.366Z"
+}

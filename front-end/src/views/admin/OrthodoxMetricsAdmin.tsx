@@ -67,84 +67,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, formatDistanceToNow } from 'date-fns';
 import { devLogDataShape, devLogApiResponse, devLogStateChange } from '../../utils/devLogger';
-
-// API Service
-const adminAPI = {
-    // Client Management
-    getClients: async () => {
-        const response = await fetch('/api/clients');
-        if (!response.ok) throw new Error('Failed to fetch clients');
-        const data = await response.json();
-        return data.data?.clients || []; // Extract clients array from nested response
-    },
-
-    getClientStats: async (clientId: string) => {
-        const response = await fetch(`/api/clients/${clientId}/stats`);
-        if (!response.ok) throw new Error('Failed to fetch client stats');
-        return response.json();
-    },
-
-    testClientConnection: async (clientId: string) => {
-        const response = await fetch(`/api/clients/${clientId}/test-connection`);
-        if (!response.ok) throw new Error('Failed to test connection');
-        return response.json();
-    },
-
-    updateClientStatus: async (clientId: string, status: string) => {
-        const response = await fetch(`/api/clients/${clientId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status }),
-        });
-        if (!response.ok) throw new Error('Failed to update client status');
-        return response.json();
-    },
-
-    // SaaS Metrics Service
-    getSaasMetrics: async () => {
-        const response = await fetch('/api/metrics/orthodox');
-        if (!response.ok) throw new Error('Failed to fetch SaaS metrics');
-        const data = await response.json();
-        
-        // Development logging for API response
-        devLogApiResponse(data, '/api/metrics/orthodox', 'Object with metrics array property');
-        
-        return data;
-    },
-
-    // System Management
-    getSystemStats: async () => {
-        const response = await fetch('/api/admin/system/system-stats');
-        if (!response.ok) throw new Error('Failed to fetch system stats');
-        return response.json();
-    },
-
-    getDatabaseHealth: async () => {
-        const response = await fetch('/api/admin/system/database-health');
-        if (!response.ok) throw new Error('Failed to fetch database health');
-        return response.json();
-    },
-
-    getServerMetrics: async () => {
-        const response = await fetch('/api/admin/system/server-metrics');
-        if (!response.ok) throw new Error('Failed to fetch server metrics');
-        return response.json();
-    },
-
-    // Backup & Maintenance
-    createBackup: async (clientId?: string) => {
-        const url = clientId ? `/api/admin/system/backup/${clientId}` : '/api/admin/system/backup';
-        const response = await fetch(url, { method: 'POST' });
-        if (!response.ok) throw new Error('Failed to create backup');
-        return response.json();
-    },
-
-    getBackups: async () => {
-        const response = await fetch('/api/admin/system/backups');
-        if (!response.ok) throw new Error('Failed to fetch backups');
-        return response.json();
-    },
-};
+import { adminAPI } from '../../api/admin.api';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -181,38 +104,38 @@ const OrthodoxMetricsAdminDashboard: React.FC = () => {
     // Data Queries
     const { data: clients = [], isLoading: clientsLoading, refetch: refetchClients } = useQuery({
         queryKey: ['admin-clients'],
-        queryFn: adminAPI.getClients,
+        queryFn: adminAPI.clients.getAll,
         refetchInterval: 30000, // Refresh every 30 seconds
     });
 
     const { data: systemStats, isLoading: systemStatsLoading } = useQuery({
         queryKey: ['admin-system-stats'],
-        queryFn: adminAPI.getSystemStats,
+        queryFn: adminAPI.system.getSystemStats,
         refetchInterval: 15000, // Refresh every 15 seconds
     });
 
     const { data: databaseHealth, isLoading: dbHealthLoading } = useQuery({
         queryKey: ['admin-database-health'],
-        queryFn: adminAPI.getDatabaseHealth,
+        queryFn: adminAPI.system.getDatabaseHealth,
         refetchInterval: 20000, // Refresh every 20 seconds
     });
 
     const { data: serverMetrics, isLoading: serverMetricsLoading } = useQuery({
         queryKey: ['admin-server-metrics'],
-        queryFn: adminAPI.getServerMetrics,
+        queryFn: adminAPI.system.getServerMetrics,
         refetchInterval: 10000, // Refresh every 10 seconds
     });
 
     const { data: backups = [], isLoading: backupsLoading } = useQuery({
         queryKey: ['admin-backups'],
-        queryFn: adminAPI.getBackups,
+        queryFn: adminAPI.system.getBackups,
         refetchInterval: 60000, // Refresh every minute
     });
 
     // SaaS Metrics Query
     const { data: saasMetrics = [], isLoading: saasMetricsLoading, error: saasMetricsError } = useQuery({
         queryKey: ['admin-saas-metrics'],
-        queryFn: adminAPI.getSaasMetrics,
+        queryFn: adminAPI.metrics.getOrthodoxMetrics,
         refetchInterval: 30000, // Refresh every 30 seconds
         retry: 3,
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -235,7 +158,7 @@ const OrthodoxMetricsAdminDashboard: React.FC = () => {
     // Mutations
     const updateStatusMutation = useMutation({
         mutationFn: ({ clientId, status }: { clientId: string; status: string }) =>
-            adminAPI.updateClientStatus(clientId, status),
+            adminAPI.clients.update(Number(clientId), { status }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-clients'] });
             setAnchorEl(null);
@@ -243,11 +166,11 @@ const OrthodoxMetricsAdminDashboard: React.FC = () => {
     });
 
     const testConnectionMutation = useMutation({
-        mutationFn: adminAPI.testClientConnection,
+        mutationFn: (clientId: string) => adminAPI.clients.testConnection(Number(clientId)),
     });
 
     const createBackupMutation = useMutation({
-        mutationFn: adminAPI.createBackup,
+        mutationFn: adminAPI.backup.run,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-backups'] });
             setShowBackupDialog(false);

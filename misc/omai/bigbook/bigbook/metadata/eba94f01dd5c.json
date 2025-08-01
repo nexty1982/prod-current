@@ -1,0 +1,49 @@
+{
+  "id": "eba94f01dd5c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/7-11-25/AI_ENTITY_EXTRACTION_SYSTEM.md",
+  "relativePath": "docs/archive/7-11-25/AI_ENTITY_EXTRACTION_SYSTEM.md",
+  "name": "AI_ENTITY_EXTRACTION_SYSTEM.md",
+  "extension": ".md",
+  "size": 14932,
+  "modified": "2025-07-11T10:49:29.358Z",
+  "created": "2025-07-11T02:35:17.282Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 418,
+      "characters": 14888,
+      "words": 1786
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "@/components/ocr/EntityExtractionViewer",
+        "line": 319
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 418,
+      "codeLines": 241,
+      "commentLines": 90,
+      "commentRatio": 0.2719033232628399,
+      "averageLineLength": 43.45921450151057
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.039Z"
+  },
+  "contentHash": "0cd8ffaa59a261c248800055f9528b834854781d1f0a4bf58a35dab8dea62d9e",
+  "discoveredAt": "2025-07-28T07:19:58.039Z"
+}

@@ -3,9 +3,9 @@ import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import { Chip } from '@mui/material';
 
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 
 export const NavLinks = [
   {

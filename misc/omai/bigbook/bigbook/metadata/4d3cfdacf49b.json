@@ -1,0 +1,64 @@
+{
+  "id": "4d3cfdacf49b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/enhancedInvoices.js",
+  "relativePath": "server/routes/enhancedInvoices.js",
+  "name": "enhancedInvoices.js",
+  "extension": ".js",
+  "size": 34209,
+  "modified": "2025-07-04T23:08:08.000Z",
+  "created": "2025-07-09T00:48:38.478Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1154,
+      "characters": 33739,
+      "words": 3461
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "pdf-lib",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 6
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 1154,
+      "codeLines": 919,
+      "commentLines": 72,
+      "commentRatio": 0.07265388496468214,
+      "averageLineLength": 32.11099899091826
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.474Z"
+  },
+  "contentHash": "d3009c63e8cbd78393fd436e6cc6518e305cd566712fa35594b2ff06c2db5ed9",
+  "discoveredAt": "2025-07-28T07:20:00.474Z"
+}

@@ -1,0 +1,66 @@
+{
+  "id": "2dc8fa28a20d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/a611c90b0c1f.json",
+  "relativePath": "bigbook/metadata/a611c90b0c1f.json",
+  "name": "a611c90b0c1f.json",
+  "extension": ".json",
+  "size": 9925,
+  "modified": "2025-07-26T04:17:10.934Z",
+  "created": "2025-07-26T04:17:10.934Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 156,
+      "characters": 9867,
+      "words": 763
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 143
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 143
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 143
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 143,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"a611c90b0c1f\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-session-fix.js\",\n  \"relativePath\": \"server/debug/test-session-fix.js\",\n  \"name\": \"test-session-fix.js\",\n  \"extension\": \".js\",\n  \"size\": 5612,\n  \"modified\": \"2025-07-24T14:50:26.348Z\",\n  \"created\": \"2025-07-24T14:50:26.348Z\",\n  \"classification\": {\n    \"type\": \"Troubleshooting Utilities\",\n    \"category\": \"Diagnostic Tools\",\n    \"confidence\": 5\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 137,\n      \"characters\": 5554,\n      \"words\": 524\n    },\n    \"classification\": {\n      \"type\": \"Troubleshooting Utilities\",\n      \"category\": \"Diagnostic Tools\",\n      \"confidence\": 5\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"path\",\n        \"line\": 7\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"fs\",\n        \"line\": 8\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"dotenv\",\n        \"line\": 23\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 45,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 34,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 34,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 35,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 35,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 36,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 36,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 37,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 37,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 38,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 38,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 41,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 42,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 43,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 44,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"process\\\\.env\\\\.([A-Z_]+)\",\n          \"line\": 45,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"#!/usr/bin/env node\\r\\n\\r\\nconsole.log('🔍 COMPREHENSIVE SESSION DEBUG ANALYSIS');\\r\\nconsole.log('========================================\\\\n');\\r\\n\\r\\n// Load environment variables - try multiple locations\\r\\nconst path = require('path');\\r\\nconst fs = require('fs');\\r\\n\\r\\n// Try loading from various possible locations\\r\\nconst envPaths = [\\r\\n  path.resolve(__dirname, '../.env.production'),\\r\\n  path.resolve(__dirname, '../../.env.production'), \\r\\n  path.resolve(__dirname, '../.env'),\\r\\n  path.resolve(__dirname, '../../.env')\\r\\n];\\r\\n\\r\\nconsole.log('🔧 Loading environment variables...');\\r\\nlet envLoaded = false;\\r\\nfor (const envPath of envPaths) {\\r\\n  if (fs.existsSync(envPath)) {\\r\\n    console.log(`   ✅ Found env file: ${envPath}`);\\r\\n    require('dotenv').config({ path: envPath });\\r\\n    envLoaded = true;\\r\\n    break;\\r\\n  }\\r\\n}\\r\\n\\r\\nif (!envLoaded) {\\r\\n  console.log('   ⚠️  No .env file found, using system environment');\\r\\n}\\r\\n\\r\\n// Set production environment variables as fallback (from start-production.sh)\\r\\nprocess.env.[REDACTED] = process.env.[REDACTED] || 'production';\\r\\nprocess.env.[REDACTED] = process.env.[REDACTED] || 'localhost';\\r\\nprocess.env.[REDACTED] = process.env.[REDACTED] || 'orthodoxapps';\\r\\nprocess.env.[REDACTED] = process.env.[REDACTED] || 'Summerof1982@!';\\r\\nprocess.env.[REDACTED] = process.env.[REDACTED] || 'orthodoxmetrics_db';\\r\\n\\r\\nconsole.log('🔧 Environment check:');\\r\\nconsole.log('   NODE_ENV:', process.env.[REDACTED]);\\r\\nconsole.log('   DB_HOST:', process.env.[REDACTED]);\\r\\nconsole.log('   DB_USER:', process.env.[REDACTED]);\\r\\nconsole.log('   DB_NAME:', process.env.[REDACTED]);\\r\\nconsole.log('   DB_PASSWORD:'[REDACTED]'SET' : 'NOT SET');\\r\\nconsole.log('');\\r\\n\\r\\nconst { promisePool } = require('../config/db');\\r\\n\\r\\nasync function debugSessionIssue() {\\r\\n  try {\\r\\n    console.log('📋 ISSUE ANALYSIS:');\\r\\n    console.log('==================');\\r\\n    console.log('✅ Login succeeds, but sessions don\\\\'t persist across requests');\\r\\n    console.log('✅ Each request gets a different session ID');\\r\\n    console.log('✅ Database schema fixed (no more \\\"status\\\" column error)');\\r\\n    console.log('❌ Session cookies not being transmitted properly\\\\n');\\r\\n\\r\\n    // 1. Test database connection\\r\\n    console.log('1️⃣ TESTING DATABASE CONNECTION:');\\r\\n    console.log('--------------------------------');\\r\\n    const [dbTest] = await promisePool.query('SELECT 1 as test');\\r\\n    console.log('✅ Database connection: WORKING');\\r\\n    \\r\\n    // 2. Check user exists\\r\\n    console.log('\\\\n2️⃣ CHECKING USER IN DATABASE:');\\r\\n    console.log('------------------------------');\\r\\n    const [users] = await promisePool.query(\\r\\n      'SELECT id, email, role, is_active FROM users WHERE email = ?', \\r\\n      ['superadmin@orthodoxmetrics.com']\\r\\n    );\\r\\n    \\r\\n    if (users.length === 0) {\\r\\n      console.log('❌ User not found in database!');\\r\\n      return;\\r\\n    }\\r\\n    \\r\\n    const user = users[0];\\r\\n    console.log('✅ User found:');\\r\\n    console.log(`   Email: ${user.email}`);\\r\\n    console.log(`   Role: ${user.role}`);\\r\\n    console.log(`   Active: ${user.is_active}`);\\r\\n\\r\\n    // 3. Check session table\\r\\n    console.log('\\\\n3️⃣ CHECKING SESSION STORAGE:');\\r\\n    console.log('-----------------------------');\\r\\n    try {\\r\\n      const [sessions] = await promisePool.query('SELECT COUNT(*) as count FROM sessions');\\r\\n      console.log(`✅ Sessions table exists with ${sessions[0].count} sessions`);\\r\\n    } catch (sessionErr) {\\r\\n      console.log('❌ Sessions table issue:', sessionErr.message);\\r\\n    }\\r\\n\\r\\n    console.log('\\\\n🚨 ROOT CAUSE ANALYSIS:');\\r\\n    console.log('=======================');\\r\\n    console.log('The issue is COOKIE TRANSMISSION, not session storage.');\\r\\n    console.log('Each request creates a NEW session instead of using the existing one.\\\\n');\\r\\n\\r\\n    console.log('🔧 PROBABLE CAUSES:');\\r\\n    console.log('===================');\\r\\n    console.log('1. CORS configuration missing credentials: true');\\r\\n    console.log('2. Frontend not sending cookies with API requests');\\r\\n    console.log('3. Cookie domain/path mismatch');\\r\\n    console.log('4. SameSite policy blocking cookies');\\r\\n    console.log('5. Browser security settings blocking cookies\\\\n');\\r\\n\\r\\n    console.log('🎯 IMMEDIATE FIXES TO APPLY:');\\r\\n    console.log('============================');\\r\\n    console.log('1. Enable CORS credentials on server');\\r\\n    console.log('2. Configure frontend to send cookies with requests');\\r\\n    console.log('3. Adjust cookie settings for broader compatibility');\\r\\n    console.log('4. Add cookie debugging endpoints');\\r\\n    console.log('5. Test with simplified cookie configuration\\\\n');\\r\\n\\r\\n    console.log('🔍 DEBUGGING STEPS:');\\r\\n    console.log('===================');\\r\\n    console.log('1. Check browser DevTools > Application > Cookies');\\r\\n    console.log('   - Is \\\"orthodox.sid\\\" cookie being set after login?');\\r\\n    console.log('   - What domain/path is set on the cookie?');\\r\\n    console.log('');\\r\\n    console.log('2. Check browser DevTools > Network > Any API request');\\r\\n    console.log('   - Are cookies being sent in Request Headers?');\\r\\n    console.log('   - Look for \\\"Cookie: orthodox.sid=...\\\" in request');\\r\\n    console.log('');\\r\\n    console.log('3. Check server logs for consistent session IDs');\\r\\n    console.log('   - Same session ID should appear across multiple requests');\\r\\n    console.log('   - If different IDs, cookies are not being transmitted\\\\n');\\r\\n\\r\\n    console.log('✅ Database and user verification: COMPLETE');\\r\\n    console.log('🔧 Next step: Fix CORS and cookie configuration');\\r\\n\\r\\n  } catch (error) {\\r\\n    console.error('❌ Debug error:', error);\\r\\n  }\\r\\n}\\r\\n\\r\\ndebugSessionIssue(); \"\n    },\n    \"complexity\": {\n      \"totalLines\": 137,\n      \"codeLines\": 109,\n      \"commentLines\": 7,\n      \"commentRatio\": 0.0603448275862069,\n      \"averageLineLength\": 46.422413793103445\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:10.936Z\"\n  },\n  \"contentHash\": \"ed1fc93dbcc9858eca1f0817e559bda8e953d376abac7381ccde6d31d9d0d459\",\n  \"discoveredAt\": \"2025-07-26T04:17:10.937Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 156,
+      "codeLines": 156,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 62.256410256410255
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.313Z"
+  },
+  "contentHash": "e4e52f8b68aef545daa45b58e5e5bf0d5f6b27e1fb394137ab6344acb9bbd7f3",
+  "discoveredAt": "2025-07-28T07:19:57.313Z"
+}

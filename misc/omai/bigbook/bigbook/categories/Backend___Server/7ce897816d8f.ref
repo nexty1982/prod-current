@@ -1,0 +1,6 @@
+{
+  "id": "7ce897816d8f",
+  "name": "fix-jit-routes.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-jit-routes.sh",
+  "type": "Server Scripts"
+}

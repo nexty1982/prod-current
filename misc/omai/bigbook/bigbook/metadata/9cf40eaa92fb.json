@@ -1,0 +1,43 @@
+{
+  "id": "9cf40eaa92fb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/OMAI_AGENT_WEBHOOK_GUIDE.md",
+  "relativePath": "docs/OMAI_AGENT_WEBHOOK_GUIDE.md",
+  "name": "OMAI_AGENT_WEBHOOK_GUIDE.md",
+  "extension": ".md",
+  "size": 8648,
+  "modified": "2025-07-26T00:27:45.041Z",
+  "created": "2025-07-26T00:26:45.027Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 298,
+      "characters": 8624,
+      "words": 972
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 298,
+      "codeLines": 186,
+      "commentLines": 40,
+      "commentRatio": 0.17699115044247787,
+      "averageLineLength": 36.52654867256637
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.801Z"
+  },
+  "contentHash": "1c1c18a4a26e915eaac0d65909055e2ae07935ab1590072b9e6adf2ec2c148ce",
+  "discoveredAt": "2025-07-28T07:19:57.801Z"
+}

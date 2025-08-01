@@ -1,0 +1,144 @@
+const express = require('express');
+const router = express.Router();
+const { promisePool } = require('../../config/db');
+
+// <%= name %> API Routes
+// Generated from OMB component: <%= id %>
+
+// GET /api<%= route %> - Get all <%= name.toLowerCase() %> records
+router.get('<%= route %>', async (req, res) => {
+  try {
+    const [rows] = await promisePool.query(
+      'SELECT * FROM <%= dbTable %> ORDER BY created_at DESC'
+    );
+
+    res.json({
+      success: true,
+      data: rows,
+      count: rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching <%= name.toLowerCase() %>:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch <%= name.toLowerCase() %> data'
+    });
+  }
+});
+
+// GET /api<%= route %>/:id - Get single <%= name.toLowerCase() %> record
+router.get('<%= route %>/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [rows] = await promisePool.query(
+      'SELECT * FROM <%= dbTable %> WHERE id = ?',
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: '<%= name %> not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: rows[0]
+    });
+  } catch (error) {
+    console.error('Error fetching <%= name.toLowerCase() %>:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch <%= name.toLowerCase() %> data'
+    });
+  }
+});
+
+// POST /api<%= route %> - Create new <%= name.toLowerCase() %> record
+router.post('<%= route %>', async (req, res) => {
+  try {
+    const { /* Add your fields here */ } = req.body;
+    
+    const [result] = await promisePool.query(
+      'INSERT INTO <%= dbTable %> (/* Add your fields here */) VALUES (/* Add your values here */)',
+      [/* Add your values here */]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: '<%= name %> created successfully',
+      id: result.insertId
+    });
+  } catch (error) {
+    console.error('Error creating <%= name.toLowerCase() %>:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create <%= name.toLowerCase() %>'
+    });
+  }
+});
+
+// PUT /api<%= route %>/:id - Update <%= name.toLowerCase() %> record
+router.put('<%= route %>/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { /* Add your fields here */ } = req.body;
+    
+    const [result] = await promisePool.query(
+      'UPDATE <%= dbTable %> SET /* Add your fields here */ WHERE id = ?',
+      [/* Add your values here */, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        error: '<%= name %> not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: '<%= name %> updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating <%= name.toLowerCase() %>:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update <%= name.toLowerCase() %>'
+    });
+  }
+});
+
+// DELETE /api<%= route %>/:id - Delete <%= name.toLowerCase() %> record
+router.delete('<%= route %>/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [result] = await promisePool.query(
+      'DELETE FROM <%= dbTable %> WHERE id = ?',
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        error: '<%= name %> not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: '<%= name %> deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting <%= name.toLowerCase() %>:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete <%= name.toLowerCase() %>'
+    });
+  }
+});
+
+module.exports = router; 

@@ -1,0 +1,54 @@
+{
+  "id": "1f911b4d7102",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-login-redirect.sh",
+  "relativePath": "server/debug/fix-login-redirect.sh",
+  "name": "fix-login-redirect.sh",
+  "extension": ".sh",
+  "size": 2351,
+  "modified": "2025-07-23T14:21:57.327Z",
+  "created": "2025-07-23T14:21:55.764Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 81,
+      "characters": 2303,
+      "words": 321
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 34
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 38
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 81,
+      "codeLines": 62,
+      "commentLines": 5,
+      "commentRatio": 0.07462686567164178,
+      "averageLineLength": 33.17910447761194
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.138Z"
+  },
+  "contentHash": "6e9989dfee43603f7347b7af8525eb83728e1d7512b84446bbb5be4cb61ac614",
+  "discoveredAt": "2025-07-28T07:20:00.138Z"
+}

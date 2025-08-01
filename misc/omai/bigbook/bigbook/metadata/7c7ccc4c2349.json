@@ -1,0 +1,43 @@
+{
+  "id": "7c7ccc4c2349",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/orthodox-headlines-schema.sql",
+  "relativePath": "server/database/orthodox-headlines-schema.sql",
+  "name": "orthodox-headlines-schema.sql",
+  "extension": ".sql",
+  "size": 9410,
+  "modified": "2025-07-22T16:22:48.042Z",
+  "created": "2025-07-22T16:22:45.086Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 86,
+      "characters": 8967,
+      "words": 848
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 86,
+      "codeLines": 61,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 145.13114754098362
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.033Z"
+  },
+  "contentHash": "5fe5819fd3384650377d54dd43189a21845b472dede8e5b4fa5c69fe1ba54cd1",
+  "discoveredAt": "2025-07-28T07:20:00.033Z"
+}

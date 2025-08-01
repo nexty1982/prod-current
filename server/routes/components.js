@@ -22,7 +22,7 @@ router.get('/components/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [rows] = await pool.promise().query(
+    const [rows] = await promisePool.query(
       'SELECT id, name, description, type, properties FROM components WHERE id = ?',
       [id]
     );
@@ -47,12 +47,12 @@ router.post('/components', async (req, res) => {
   }
 
   try {
-    const [result] = await pool.promise().query(
+    const [result] = await promisePool.query(
       'INSERT INTO components (name, description, type, properties) VALUES (?, ?, ?, ?)',
       [name, description || '', type, JSON.stringify(properties || {})]
     );
 
-    const [newComponent] = await pool.promise().query(
+    const [newComponent] = await promisePool.query(
       'SELECT id, name, description, type, properties FROM components WHERE id = ?',
       [result.insertId]
     );
@@ -74,12 +74,12 @@ router.put('/components/:id', async (req, res) => {
   }
 
   try {
-    await pool.promise().query(
+    await promisePool.query(
       'UPDATE components SET name = ?, description = ?, type = ?, properties = ? WHERE id = ?',
       [name, description || '', type, JSON.stringify(properties || {}), id]
     );
 
-    const [updatedComponent] = await pool.promise().query(
+    const [updatedComponent] = await promisePool.query(
       'SELECT id, name, description, type, properties FROM components WHERE id = ?',
       [id]
     );
@@ -100,7 +100,7 @@ router.delete('/components/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [result] = await pool.promise().query(
+    const [result] = await promisePool.query(
       'DELETE FROM components WHERE id = ?',
       [id]
     );

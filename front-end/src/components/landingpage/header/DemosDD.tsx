@@ -2,7 +2,7 @@
 // @ts-ignore
 import React from 'react';
 import { Box, Typography, Avatar, Stack, styled, Button } from '@mui/material';
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 
 import mainDemo from 'src/assets/images/landingpage/demos/demo-main.jpg';
 import darkDemo from 'src/assets/images/landingpage/demos/demo-dark.jpg';

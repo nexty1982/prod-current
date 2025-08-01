@@ -1,0 +1,43 @@
+{
+  "id": "1cfceb20f9e0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/task_9_maintenance_mode.md",
+  "relativePath": "docs/7-26-25/task_9_maintenance_mode.md",
+  "name": "task_9_maintenance_mode.md",
+  "extension": ".md",
+  "size": 2236,
+  "modified": "2025-07-26T03:48:17.000Z",
+  "created": "2025-07-27T02:13:07.761Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 82,
+      "characters": 2200,
+      "words": 289
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 82,
+      "codeLines": 38,
+      "commentLines": 14,
+      "commentRatio": 0.2692307692307692,
+      "averageLineLength": 40.75
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.776Z"
+  },
+  "contentHash": "b092ea959802af990e46b446fb2a56b2ecbfb1d0b144735c23a1fa60bd8a3faa",
+  "discoveredAt": "2025-07-28T07:19:57.776Z"
+}

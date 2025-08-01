@@ -1,0 +1,43 @@
+{
+  "id": "f5ba6c242ce1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/check-invoice-tables.js",
+  "relativePath": "server/utils/check-invoice-tables.js",
+  "name": "check-invoice-tables.js",
+  "extension": ".js",
+  "size": 1314,
+  "modified": "2025-07-05T07:51:10.000Z",
+  "created": "2025-07-09T00:48:38.526Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 42,
+      "characters": 1302,
+      "words": 119
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 42,
+      "codeLines": 29,
+      "commentLines": 4,
+      "commentRatio": 0.12121212121212122,
+      "averageLineLength": 37.303030303030305
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.228Z"
+  },
+  "contentHash": "6b93a29a5ce667d7e904f3e8234024a0b17e172ac6f9fd9b0da81b7cfff3a01e",
+  "discoveredAt": "2025-07-28T07:20:01.229Z"
+}

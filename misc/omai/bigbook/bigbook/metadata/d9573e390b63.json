@@ -1,0 +1,43 @@
+{
+  "id": "d9573e390b63",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/OMAI_PATH_DISCOVERY_IMPLEMENTATION_SUMMARY.md",
+  "relativePath": "docs/7-26-25/OMAI_PATH_DISCOVERY_IMPLEMENTATION_SUMMARY.md",
+  "name": "OMAI_PATH_DISCOVERY_IMPLEMENTATION_SUMMARY.md",
+  "extension": ".md",
+  "size": 13398,
+  "modified": "2025-07-26T03:56:13.463Z",
+  "created": "2025-07-26T03:55:20.993Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 343,
+      "characters": 13244,
+      "words": 1493
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 343,
+      "codeLines": 236,
+      "commentLines": 53,
+      "commentRatio": 0.18339100346020762,
+      "averageLineLength": 44.45674740484429
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.744Z"
+  },
+  "contentHash": "df78cdfc55221e20c6c445f2b5a72994ea144847428aa227ea34b3b157f7e9f2",
+  "discoveredAt": "2025-07-28T07:19:57.744Z"
+}

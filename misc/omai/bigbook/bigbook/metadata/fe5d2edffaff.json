@@ -1,0 +1,49 @@
+{
+  "id": "fe5d2edffaff",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/watchdog.js",
+  "relativePath": "server/routes/watchdog.js",
+  "name": "watchdog.js",
+  "extension": ".js",
+  "size": 14018,
+  "modified": "2025-07-26T06:12:51.202Z",
+  "created": "2025-07-26T06:12:49.534Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 522,
+      "characters": 14008,
+      "words": 1309
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 522,
+      "codeLines": 395,
+      "commentLines": 65,
+      "commentRatio": 0.14130434782608695,
+      "averageLineLength": 28.806521739130435
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.577Z"
+  },
+  "contentHash": "83b523975243d8c0b6f1b0dd1205b8064c481e85d1f18be6ffaf49b280621367",
+  "discoveredAt": "2025-07-28T07:20:00.577Z"
+}

@@ -1,0 +1,59 @@
+{
+  "id": "4047a62ae83f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-phantom-user-complete.sh",
+  "relativePath": "server/debug/fix-phantom-user-complete.sh",
+  "name": "fix-phantom-user-complete.sh",
+  "extension": ".sh",
+  "size": 13388,
+  "modified": "2025-07-24T14:50:26.344Z",
+  "created": "2025-07-24T14:50:26.344Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 471,
+      "characters": 13318,
+      "words": 1454
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 33
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 415
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 419
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 471,
+      "codeLines": 368,
+      "commentLines": 21,
+      "commentRatio": 0.05398457583547558,
+      "averageLineLength": 32.940874035989715
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.155Z"
+  },
+  "contentHash": "db3aec57ed0e1fd000055039bf1c5bf05ee425457219a047b4a2f27a2b0bffe2",
+  "discoveredAt": "2025-07-28T07:20:00.155Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "de2c183afb57",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/9aab3534c090.json",
+  "relativePath": "bigbook/metadata/9aab3534c090.json",
+  "name": "9aab3534c090.json",
+  "extension": ".json",
+  "size": 1286,
+  "modified": "2025-07-26T04:17:11.130Z",
+  "created": "2025-07-26T04:17:11.130Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 49,
+      "characters": 1286,
+      "words": 93
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 49,
+      "codeLines": 49,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 25.26530612244898
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.254Z"
+  },
+  "contentHash": "15fd3b444c950baf4dcaf5e792bf5de9ff774f259050f295acfc53def72ca078",
+  "discoveredAt": "2025-07-28T07:19:57.254Z"
+}

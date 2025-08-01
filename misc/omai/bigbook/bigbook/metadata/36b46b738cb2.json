@@ -1,0 +1,43 @@
+{
+  "id": "36b46b738cb2",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/debug-mount-error.sh",
+  "relativePath": "scripts/7-26-25/debug-mount-error.sh",
+  "name": "debug-mount-error.sh",
+  "extension": ".sh",
+  "size": 4453,
+  "modified": "2025-07-26T04:28:42.398Z",
+  "created": "2025-07-26T04:28:04.335Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 129,
+      "characters": 4423,
+      "words": 583
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 129,
+      "codeLines": 101,
+      "commentLines": 5,
+      "commentRatio": 0.04716981132075472,
+      "averageLineLength": 40.5188679245283
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.981Z"
+  },
+  "contentHash": "d812a1a4f0d5bb96dd5b965d845ea52a358bf511d08da2ecd5c1af93a1e4e0b0",
+  "discoveredAt": "2025-07-28T07:19:58.981Z"
+}

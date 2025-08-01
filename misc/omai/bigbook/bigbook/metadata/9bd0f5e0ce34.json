@@ -1,0 +1,43 @@
+{
+  "id": "9bd0f5e0ce34",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/ai/learning/sample-mappings.json",
+  "relativePath": "ai/learning/sample-mappings.json",
+  "name": "sample-mappings.json",
+  "extension": ".json",
+  "size": 6475,
+  "modified": "2025-07-15T06:02:52.973Z",
+  "created": "2025-07-15T05:59:14.008Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 190,
+      "characters": 6475,
+      "words": 503
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 190,
+      "codeLines": 189,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 33.25925925925926
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.423Z"
+  },
+  "contentHash": "d3d3854e52ea2a5fe158803b316b85cac39dd502d817cb5a2905ad2a54872444",
+  "discoveredAt": "2025-07-28T07:19:56.423Z"
+}

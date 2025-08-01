@@ -1,0 +1,43 @@
+{
+  "id": "836189c6936f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/BUILD_SYSTEM_SUMMARY.md",
+  "relativePath": "BUILD_SYSTEM_SUMMARY.md",
+  "name": "BUILD_SYSTEM_SUMMARY.md",
+  "extension": ".md",
+  "size": 9779,
+  "modified": "2025-07-26T02:04:27.213Z",
+  "created": "2025-07-26T02:04:15.553Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 332,
+      "characters": 9629,
+      "words": 1164
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 332,
+      "codeLines": 180,
+      "commentLines": 73,
+      "commentRatio": 0.2885375494071146,
+      "averageLineLength": 36.43873517786561
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.170Z"
+  },
+  "contentHash": "120f43cdfb88a0506c5d84e2b6ae178fbf820d17f8e5a446ecb365676eb67958",
+  "discoveredAt": "2025-07-26T04:17:09.170Z"
+}

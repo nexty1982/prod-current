@@ -1,0 +1,49 @@
+{
+  "id": "ecac008284af",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-jit-terminal-menu-duplication.sh",
+  "relativePath": "scripts/fix-jit-terminal-menu-duplication.sh",
+  "name": "fix-jit-terminal-menu-duplication.sh",
+  "extension": ".sh",
+  "size": 6776,
+  "modified": "2025-07-25T21:05:36.723Z",
+  "created": "2025-07-25T21:05:30.292Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 170,
+      "characters": 6644,
+      "words": 812
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 143
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 170,
+      "codeLines": 117,
+      "commentLines": 18,
+      "commentRatio": 0.13333333333333333,
+      "averageLineLength": 47.96296296296296
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.110Z"
+  },
+  "contentHash": "dcd5fc54456fd9ec6a87dc8427c3e281bdbcc30c2febe8f928a3baef3951b30b",
+  "discoveredAt": "2025-07-28T07:19:59.110Z"
+}

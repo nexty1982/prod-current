@@ -1,0 +1,59 @@
+{
+  "id": "73003ff5e05e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/monitoring/monitoring-integration.js",
+  "relativePath": "server/scrapers/monitoring/monitoring-integration.js",
+  "name": "monitoring-integration.js",
+  "extension": ".js",
+  "size": 11060,
+  "modified": "2025-07-14T06:56:25.913Z",
+  "created": "2025-07-14T06:53:16.615Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 305,
+      "characters": 11028,
+      "words": 799
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "winston",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 27
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 305,
+      "codeLines": 243,
+      "commentLines": 12,
+      "commentRatio": 0.047058823529411764,
+      "averageLineLength": 41.07843137254902
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.613Z"
+  },
+  "contentHash": "8db6718d15ab514cb9d64ae6e3d7ee8f3b32df8094ce9b816342169fdaece62f",
+  "discoveredAt": "2025-07-28T07:20:00.613Z"
+}

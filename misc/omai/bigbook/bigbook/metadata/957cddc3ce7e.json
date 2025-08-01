@@ -1,0 +1,101 @@
+{
+  "id": "957cddc3ce7e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/setup-database.js",
+  "relativePath": "server/utils/setup-database.js",
+  "name": "setup-database.js",
+  "extension": ".js",
+  "size": 4988,
+  "modified": "2025-07-04T23:08:01.000Z",
+  "created": "2025-07-09T00:48:38.534Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 138,
+      "characters": 4942,
+      "words": 451
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 9
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 6,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 15,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 16,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 17,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "const mysql = require('mysql2/promise');\r\nconst fs = require('fs');\r\nconst path = require('path');\r\n\r\n// Load environment variables\r\nconst envFile = process.env.[REDACTED] === 'production' \r\n  ? '.env.production' \r\n  : '.env';\r\nrequire('dotenv').config({ path: path.resolve(__dirname, envFile) });\r\n\r\n// Database configuration\r\nconst dbConfig = {\r\n  host: process.env.[REDACTED] || '0.0.0.0',\r\n  user: process.env.[REDACTED] || 'ssppoc_user',\r\n  password: process.env.[REDACTED] || 'tN7afy5SzhNH6pJWU7ka%c',\r\n  database: process.env.[REDACTED] || 'ssppoc_records_db',\r\n  port: process.env.[REDACTED] || 3306,\r\n  charset: 'utf8mb4'\r\n};\r\n\r\nconsole.log('🔧 Database configuration:');\r\nconsole.log(`   Host: ${dbConfig.host}`);\r\nconsole.log(`   User: ${dbConfig.user}`);\r\nconsole.log(`   Database: ${dbConfig.database}`);\r\nconsole.log(`   Port: ${dbConfig.port}`);\r\nconsole.log(`   Password: ${dbConfig.password ? '***set***' : 'NOT SET'}`);\r\n\r\nasync function runSQLFile(connection, filePath) {\r\n  try {\r\n    console.log(`\\n📄 Running SQL file: ${path.basename(filePath)}`);\r\n    \r\n    if (!fs.existsSync(filePath)) {\r\n      console.log(`⚠️  File not found: ${filePath}`);\r\n      return false;\r\n    }\r\n\r\n    const sql = fs.readFileSync(filePath, 'utf8');\r\n    \r\n    // Split by semicolon and filter out empty statements\r\n    const statements = sql.split(';').filter(stmt => stmt.trim());\r\n    \r\n    for (const statement of statements) {\r\n      const trimmedStatement = statement.trim();\r\n      if (trimmedStatement) {\r\n        try {\r\n          await connection.execute(trimmedStatement);\r\n          console.log(`✅ Executed: ${trimmedStatement.substring(0, 50)}...`);\r\n        } catch (error) {\r\n          // Only log error if it's not about table already existing\r\n          if (!error.message.includes('already exists')) {\r\n            console.log(`⚠️  Error in statement: ${error.message}`);\r\n          } else {\r\n            console.log(`ℹ️  Table already exists, skipping...`);\r\n          }\r\n        }\r\n      }\r\n    }\r\n    \r\n    console.log(`✅ Completed: ${path.basename(filePath)}`);\r\n    return true;\r\n  } catch (error) {\r\n    console.error(`❌ Error running ${filePath}:`, error.message);\r\n    return false;\r\n  }\r\n}\r\n\r\nasync function setupDatabase() {\r\n  let connection;\r\n  \r\n  try {\r\n    console.log('🔗 Connecting to database...');\r\n    connection = await mysql.createConnection(dbConfig);\r\n    console.log('✅ Connected to database successfully!');\r\n\r\n    // Define the order of schema files to run\r\n    const schemaFiles = [\r\n      'users_schema_fix.sql',           // Ensure users table is correct\r\n      'churches_schema_update.sql',     // Create churches table\r\n      'billing_schema.sql',             // Create billing-related tables\r\n      'billing_history_schema.sql',     // Create billing history table\r\n      'church_provisioning_schema.sql', // Create provisioning tables\r\n      'church_records_schema.sql',      // Create baptism/marriage/funeral records tables\r\n      'ocr_sessions_schema.sql',        // Create OCR sessions table\r\n      'liturgical_calendar_schema.sql'  // Create liturgical calendar table\r\n    ];\r\n\r\n    console.log('\\n🚀 Setting up database schema...');\r\n    console.log('='.repeat(50));\r\n\r\n    const databaseDir = path.join(__dirname, 'database');\r\n    let successCount = 0;\r\n\r\n    for (const schemaFile of schemaFiles) {\r\n      const filePath = path.join(databaseDir, schemaFile);\r\n      const success = await runSQLFile(connection, filePath);\r\n      if (success) successCount++;\r\n    }\r\n\r\n    console.log('\\n' + '='.repeat(50));\r\n    console.log(`🎉 Database setup completed!`);\r\n    console.log(`📊 Successfully processed ${successCount}/${schemaFiles.length} schema files`);\r\n\r\n    // Verify critical tables exist\r\n    console.log('\\n🔍 Verifying critical tables...');\r\n    const criticalTables = ['users', 'churches', 'subscriptions', 'billing_history', 'church_provision_queue', 'baptism_records', 'marriage_records', 'funeral_records'];\r\n    \r\n    for (const table of criticalTables) {\r\n      try {\r\n        const [rows] = await connection.execute(`SHOW TABLES LIKE '${table}'`);\r\n        if (rows.length > 0) {\r\n          console.log(`✅ Table '${table}' exists`);\r\n        } else {\r\n          console.log(`❌ Table '${table}' missing`);\r\n        }\r\n      } catch (error) {\r\n        console.log(`❌ Error checking table '${table}': ${error.message}`);\r\n      }\r\n    }\r\n\r\n    console.log('\\n🎯 Next steps:');\r\n    console.log('1. Restart your server: npm start');\r\n    console.log('2. Test login with: admin@test.com / admin123');\r\n    console.log('3. Try accessing billing and church management features');\r\n\r\n  } catch (error) {\r\n    console.error('❌ Database setup failed:', error.message);\r\n    process.exit(1);\r\n  } finally {\r\n    if (connection) {\r\n      await connection.end();\r\n      console.log('🔌 Database connection closed');\r\n    }\r\n  }\r\n}\r\n\r\n// Run the setup\r\nsetupDatabase().catch(console.error);\r\n"
+    },
+    "complexity": {
+      "totalLines": 138,
+      "codeLines": 109,
+      "commentLines": 7,
+      "commentRatio": 0.0603448275862069,
+      "averageLineLength": 41.05172413793103
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.281Z"
+  },
+  "contentHash": "0a625af0335b9d68d82b0e28ecf954c1225ec7ac3e8c9aad451ad7b0fd175a43",
+  "discoveredAt": "2025-07-28T07:20:01.281Z"
+}

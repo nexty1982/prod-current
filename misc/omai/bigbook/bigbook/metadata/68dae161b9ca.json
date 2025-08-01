@@ -1,0 +1,43 @@
+{
+  "id": "68dae161b9ca",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/church_records_schema.sql",
+  "relativePath": "server/database/church_records_schema.sql",
+  "name": "church_records_schema.sql",
+  "extension": ".sql",
+  "size": 5441,
+  "modified": "2025-07-04T23:08:01.000Z",
+  "created": "2025-07-09T00:48:35.106Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 105,
+      "characters": 5441,
+      "words": 588
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 105,
+      "codeLines": 98,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 54.39795918367347
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.592Z"
+  },
+  "contentHash": "2ba64c897d8d8ccce5d87a36eec41e4091755e1345204b2cfeafcb6b1e226260",
+  "discoveredAt": "2025-07-28T07:19:59.592Z"
+}

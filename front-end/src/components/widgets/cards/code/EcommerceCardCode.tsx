@@ -5,7 +5,7 @@ const EcommerceCardCode = () => {
       <CodeDialog>
         {`
 import React, { useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { CardContent, Typography, Grid, Rating, Tooltip, Fab, Card } from '@mui/material';
 import { Stack } from '@mui/system';
 import { IconBasket } from '@tabler/icons-react';

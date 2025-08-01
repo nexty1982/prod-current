@@ -1,0 +1,43 @@
+{
+  "id": "b11e0e09190c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/credentials/README.md",
+  "relativePath": "server/credentials/README.md",
+  "name": "README.md",
+  "extension": ".md",
+  "size": 768,
+  "modified": "2025-07-11T10:49:29.406Z",
+  "created": "2025-07-10T21:56:51.387Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 24,
+      "characters": 768,
+      "words": 103
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 24,
+      "codeLines": 13,
+      "commentLines": 5,
+      "commentRatio": 0.2777777777777778,
+      "averageLineLength": 41.111111111111114
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.563Z"
+  },
+  "contentHash": "dc3f688281c72cccd7c3561c47fdcdfbb06a1d546d61ec7ae161be9d2ff04b64",
+  "discoveredAt": "2025-07-28T07:19:59.563Z"
+}

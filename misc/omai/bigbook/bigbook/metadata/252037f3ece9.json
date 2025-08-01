@@ -1,0 +1,49 @@
+{
+  "id": "252037f3ece9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/maintenance/database-maintenance.js",
+  "relativePath": "server/maintenance/database-maintenance.js",
+  "name": "database-maintenance.js",
+  "extension": ".js",
+  "size": 2299,
+  "modified": "2025-07-13T19:47:32.934Z",
+  "created": "2025-07-13T19:45:50.245Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 80,
+      "characters": 2267,
+      "words": 219
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 7
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 80,
+      "codeLines": 59,
+      "commentLines": 6,
+      "commentRatio": 0.09230769230769231,
+      "averageLineLength": 32.89230769230769
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.291Z"
+  },
+  "contentHash": "9bef94fd952d4e527442abd5448f1a6b69eaf11a29dddd03cda9b1e9c0b52ff0",
+  "discoveredAt": "2025-07-28T07:20:00.291Z"
+}

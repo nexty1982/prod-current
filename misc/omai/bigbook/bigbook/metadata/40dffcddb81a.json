@@ -1,0 +1,43 @@
+{
+  "id": "40dffcddb81a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/migrations/create_ocr_jobs_table.sql",
+  "relativePath": "server/database/migrations/create_ocr_jobs_table.sql",
+  "name": "create_ocr_jobs_table.sql",
+  "extension": ".sql",
+  "size": 3339,
+  "modified": "2025-07-11T10:49:29.415Z",
+  "created": "2025-07-10T21:48:21.608Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 75,
+      "characters": 3339,
+      "words": 337
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 75,
+      "codeLines": 64,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 50.671875
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.027Z"
+  },
+  "contentHash": "1f7775a73e6158a171f23e7e0ddc9e2002cb7661671550625f6a0dd9d44826a5",
+  "discoveredAt": "2025-07-28T07:20:00.027Z"
+}

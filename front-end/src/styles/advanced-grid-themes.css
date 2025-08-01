@@ -1,0 +1,194 @@
+/* Custom Advanced Grid Themes */
+
+/* Theme 1: Ocean Blue - Clean and Professional */
+.ag-theme-ocean-blue {
+  --ag-background-color: #ffffff;
+  --ag-header-background-color: #1e3a8a;
+  --ag-header-foreground-color: #ffffff;
+  --ag-row-hover-color: #dbeafe;
+  --ag-selected-row-background-color: #3b82f6;
+  --ag-selected-row-background-color-hover: #2563eb;
+  --ag-foreground-color: #1f2937;
+  --ag-border-color: #e5e7eb;
+  --ag-row-border-color: #f3f4f6;
+  --ag-header-column-separator-color: #ffffff;
+  --ag-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ag-font-size: 14px;
+  --ag-header-height: 48px;
+  --ag-row-height: 40px;
+  --ag-cell-horizontal-border: solid #f3f4f6;
+  --ag-cell-horizontal-border-width: 1px;
+  --ag-header-column-resize-handle-color: #ffffff;
+  --ag-header-column-resize-handle-height: 30px;
+  --ag-header-column-resize-handle-width: 4px;
+  --ag-input-border-color: #d1d5db;
+  --ag-input-focus-border-color: #3b82f6;
+  --ag-range-selection-border-color: #3b82f6;
+  --ag-range-selection-background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Theme 2: Forest Green - Natural and Calming */
+.ag-theme-forest-green {
+  --ag-background-color: #ffffff;
+  --ag-header-background-color: #166534;
+  --ag-header-foreground-color: #ffffff;
+  --ag-row-hover-color: #dcfce7;
+  --ag-selected-row-background-color: #16a34a;
+  --ag-selected-row-background-color-hover: #15803d;
+  --ag-foreground-color: #1f2937;
+  --ag-border-color: #e5e7eb;
+  --ag-row-border-color: #f3f4f6;
+  --ag-header-column-separator-color: #ffffff;
+  --ag-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ag-font-size: 14px;
+  --ag-header-height: 48px;
+  --ag-row-height: 40px;
+  --ag-cell-horizontal-border: solid #f3f4f6;
+  --ag-cell-horizontal-border-width: 1px;
+  --ag-header-column-resize-handle-color: #ffffff;
+  --ag-header-column-resize-handle-height: 30px;
+  --ag-header-column-resize-handle-width: 4px;
+  --ag-input-border-color: #d1d5db;
+  --ag-input-focus-border-color: #16a34a;
+  --ag-range-selection-border-color: #16a34a;
+  --ag-range-selection-background-color: rgba(22, 163, 74, 0.1);
+}
+
+/* Theme 3: Sunset Orange - Warm and Inviting */
+.ag-theme-sunset-orange {
+  --ag-background-color: #ffffff;
+  --ag-header-background-color: #ea580c;
+  --ag-header-foreground-color: #ffffff;
+  --ag-row-hover-color: #fed7aa;
+  --ag-selected-row-background-color: #f97316;
+  --ag-selected-row-background-color-hover: #ea580c;
+  --ag-foreground-color: #1f2937;
+  --ag-border-color: #e5e7eb;
+  --ag-row-border-color: #f3f4f6;
+  --ag-header-column-separator-color: #ffffff;
+  --ag-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ag-font-size: 14px;
+  --ag-header-height: 48px;
+  --ag-row-height: 40px;
+  --ag-cell-horizontal-border: solid #f3f4f6;
+  --ag-cell-horizontal-border-width: 1px;
+  --ag-header-column-resize-handle-color: #ffffff;
+  --ag-header-column-resize-handle-height: 30px;
+  --ag-header-column-resize-handle-width: 4px;
+  --ag-input-border-color: #d1d5db;
+  --ag-input-focus-border-color: #f97316;
+  --ag-range-selection-border-color: #f97316;
+  --ag-range-selection-background-color: rgba(249, 115, 22, 0.1);
+}
+
+/* Theme 4: Royal Purple - Elegant and Sophisticated */
+.ag-theme-royal-purple {
+  --ag-background-color: #ffffff;
+  --ag-header-background-color: #7c3aed;
+  --ag-header-foreground-color: #ffffff;
+  --ag-row-hover-color: #e9d5ff;
+  --ag-selected-row-background-color: #8b5cf6;
+  --ag-selected-row-background-color-hover: #7c3aed;
+  --ag-foreground-color: #1f2937;
+  --ag-border-color: #e5e7eb;
+  --ag-row-border-color: #f3f4f6;
+  --ag-header-column-separator-color: #ffffff;
+  --ag-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ag-font-size: 14px;
+  --ag-header-height: 48px;
+  --ag-row-height: 40px;
+  --ag-cell-horizontal-border: solid #f3f4f6;
+  --ag-cell-horizontal-border-width: 1px;
+  --ag-header-column-resize-handle-color: #ffffff;
+  --ag-header-column-resize-handle-height: 30px;
+  --ag-header-column-resize-handle-width: 4px;
+  --ag-input-border-color: #d1d5db;
+  --ag-input-focus-border-color: #8b5cf6;
+  --ag-range-selection-border-color: #8b5cf6;
+  --ag-range-selection-background-color: rgba(139, 92, 246, 0.1);
+}
+
+/* Theme 5: Midnight Dark - Modern and Sleek */
+.ag-theme-midnight-dark {
+  --ag-background-color: #1f2937;
+  --ag-header-background-color: #111827;
+  --ag-header-foreground-color: #ffffff;
+  --ag-row-hover-color: #374151;
+  --ag-selected-row-background-color: #4b5563;
+  --ag-selected-row-background-color-hover: #6b7280;
+  --ag-foreground-color: #f9fafb;
+  --ag-border-color: #374151;
+  --ag-row-border-color: #374151;
+  --ag-header-column-separator-color: #6b7280;
+  --ag-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ag-font-size: 14px;
+  --ag-header-height: 48px;
+  --ag-row-height: 40px;
+  --ag-cell-horizontal-border: solid #374151;
+  --ag-cell-horizontal-border-width: 1px;
+  --ag-header-column-resize-handle-color: #6b7280;
+  --ag-header-column-resize-handle-height: 30px;
+  --ag-header-column-resize-handle-width: 4px;
+  --ag-input-border-color: #4b5563;
+  --ag-input-focus-border-color: #6b7280;
+  --ag-range-selection-border-color: #6b7280;
+  --ag-range-selection-background-color: rgba(107, 114, 128, 0.2);
+}
+
+/* Additional styling for better visual appeal */
+.ag-theme-ocean-blue .ag-header-cell,
+.ag-theme-forest-green .ag-header-cell,
+.ag-theme-sunset-orange .ag-header-cell,
+.ag-theme-royal-purple .ag-header-cell,
+.ag-theme-midnight-dark .ag-header-cell {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+}
+
+/* Enhanced filter styling */
+.ag-theme-ocean-blue .ag-filter-toolpanel-header,
+.ag-theme-forest-green .ag-filter-toolpanel-header,
+.ag-theme-sunset-orange .ag-filter-toolpanel-header,
+.ag-theme-royal-purple .ag-filter-toolpanel-header,
+.ag-theme-midnight-dark .ag-filter-toolpanel-header {
+  background-color: var(--ag-header-background-color);
+  color: var(--ag-header-foreground-color);
+  font-weight: 600;
+}
+
+/* Better scrollbar styling */
+.ag-theme-ocean-blue .ag-body-vertical-scroll-viewport::-webkit-scrollbar,
+.ag-theme-forest-green .ag-body-vertical-scroll-viewport::-webkit-scrollbar,
+.ag-theme-sunset-orange .ag-body-vertical-scroll-viewport::-webkit-scrollbar,
+.ag-theme-royal-purple .ag-body-vertical-scroll-viewport::-webkit-scrollbar,
+.ag-theme-midnight-dark .ag-body-vertical-scroll-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ag-theme-ocean-blue .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track,
+.ag-theme-forest-green .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track,
+.ag-theme-sunset-orange .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track,
+.ag-theme-royal-purple .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track,
+.ag-theme-midnight-dark .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.ag-theme-ocean-blue .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb,
+.ag-theme-forest-green .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb,
+.ag-theme-sunset-orange .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb,
+.ag-theme-royal-purple .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb,
+.ag-theme-midnight-dark .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb {
+  background: var(--ag-header-background-color);
+  border-radius: 4px;
+}
+
+.ag-theme-ocean-blue .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.ag-theme-forest-green .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.ag-theme-sunset-orange .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.ag-theme-royal-purple .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.ag-theme-midnight-dark .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover {
+  background: var(--ag-selected-row-background-color);
+} 

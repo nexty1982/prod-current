@@ -1,0 +1,54 @@
+{
+  "id": "e4d1f06f8abb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-bigbook-auth.js",
+  "relativePath": "scripts/test-bigbook-auth.js",
+  "name": "test-bigbook-auth.js",
+  "extension": ".js",
+  "size": 3601,
+  "modified": "2025-07-27T05:26:14.369Z",
+  "created": "2025-07-27T05:26:10.090Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 114,
+      "characters": 3571,
+      "words": 341
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 114,
+      "codeLines": 89,
+      "commentLines": 4,
+      "commentRatio": 0.043010752688172046,
+      "averageLineLength": 36.29032258064516
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.507Z"
+  },
+  "contentHash": "4f183ea01788c7b9ab4fc34c81367116698bbed5c33157d4805fe005ed95def7",
+  "discoveredAt": "2025-07-28T07:19:59.507Z"
+}

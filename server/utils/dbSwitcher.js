@@ -20,7 +20,7 @@ async function getChurchDbConnection(dbName) {
     try {
       dbPool[dbName] = mysql.createPool({
         host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'orthodoxapp',
+        user: process.env.DB_USER || 'orthodoxapps',
         password: process.env.DB_PASSWORD || 'Summerof1982@!',
         database: dbName,
         waitForConnections: true,

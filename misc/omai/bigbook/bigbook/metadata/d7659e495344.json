@@ -1,0 +1,43 @@
+{
+  "id": "d7659e495344",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/7-11-25/MULTI_TENANT_TEMPLATE_SYSTEM_COMPLETE.md",
+  "relativePath": "docs/archive/temp_extract/7-11-25/MULTI_TENANT_TEMPLATE_SYSTEM_COMPLETE.md",
+  "name": "MULTI_TENANT_TEMPLATE_SYSTEM_COMPLETE.md",
+  "extension": ".md",
+  "size": 9732,
+  "modified": "2025-07-12T02:42:42.000Z",
+  "created": "2025-07-14T05:44:08.732Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 242,
+      "characters": 9662,
+      "words": 1193
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 242,
+      "codeLines": 164,
+      "commentLines": 30,
+      "commentRatio": 0.15463917525773196,
+      "averageLineLength": 48.28865979381443
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.267Z"
+  },
+  "contentHash": "e48be0359090f367d4cb747e9c6770ded2b2b1f073e90678586b75d3f6571953",
+  "discoveredAt": "2025-07-28T07:19:58.267Z"
+}

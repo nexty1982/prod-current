@@ -1,0 +1,49 @@
+{
+  "id": "155e329880cb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/public/entityExtraction.js",
+  "relativePath": "server/routes/public/entityExtraction.js",
+  "name": "entityExtraction.js",
+  "extension": ".js",
+  "size": 1103,
+  "modified": "2025-07-11T10:49:29.362Z",
+  "created": "2025-07-11T02:31:15.386Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 30,
+      "characters": 1103,
+      "words": 86
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 30,
+      "codeLines": 10,
+      "commentLines": 11,
+      "commentRatio": 0.5238095238095238,
+      "averageLineLength": 50.76190476190476
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.550Z"
+  },
+  "contentHash": "145a9cc246b5a6e4d634d49bc6a91e904e9c96ddaed7c3e23c628c586b49363d",
+  "discoveredAt": "2025-07-28T07:20:00.550Z"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "6407ab41f823",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/menuPermissions.js",
+  "relativePath": "server/routes/menuPermissions.js",
+  "name": "menuPermissions.js",
+  "extension": ".js",
+  "size": 10429,
+  "modified": "2025-07-06T00:39:01.000Z",
+  "created": "2025-07-09T00:48:38.478Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 327,
+      "characters": 10399,
+      "words": 944
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 327,
+      "codeLines": 260,
+      "commentLines": 24,
+      "commentRatio": 0.08450704225352113,
+      "averageLineLength": 35.320422535211264
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.511Z"
+  },
+  "contentHash": "96bc523d41fe1b3868f34e42620bf9e5dd149adbcc7e5de6739011b81d8b8277",
+  "discoveredAt": "2025-07-28T07:20:00.511Z"
+}

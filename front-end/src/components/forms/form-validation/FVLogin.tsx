@@ -2,7 +2,7 @@
 
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 
 import { Box, Button, Stack, FormGroup, FormControlLabel, Typography } from '@mui/material';
 

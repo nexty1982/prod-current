@@ -1,0 +1,49 @@
+{
+  "id": "3728400f4804",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/VALIDATION_SYSTEM.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/VALIDATION_SYSTEM.md",
+  "name": "VALIDATION_SYSTEM.md",
+  "extension": ".md",
+  "size": 11228,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:07.448Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 391,
+      "characters": 11097,
+      "words": 1268
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 171
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 391,
+      "codeLines": 259,
+      "commentLines": 61,
+      "commentRatio": 0.190625,
+      "averageLineLength": 33.159375
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.240Z"
+  },
+  "contentHash": "5c681310276dfbcc6ba24ae5ebc577f71c0930f9825f3eab005fa163650a8b54",
+  "discoveredAt": "2025-07-28T07:19:58.240Z"
+}

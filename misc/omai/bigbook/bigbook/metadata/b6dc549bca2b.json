@@ -1,0 +1,56 @@
+{
+  "id": "b6dc549bca2b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/testing/quick-permission-test.js",
+  "relativePath": "server/testing/quick-permission-test.js",
+  "name": "quick-permission-test.js",
+  "extension": ".js",
+  "size": 7561,
+  "modified": "2025-07-12T03:22:51.774Z",
+  "created": "2025-07-12T03:20:25.709Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 219,
+      "characters": 7503,
+      "words": 766
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 10
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Quick Permission Test for Orthodox Metrics\r\n * \r\n * Tests current authentication status and permissions\r\n * for common routes that superadmin should have access to.\r\n */\r\n\r\nconst axios = require('axios');\r\n\r\nclass QuickPermissionTest {\r\n  constructor() {\r\n    this.baseUrl = process.env.[REDACTED] || 'http://localhost:3001';\r\n    this.results = [];\r\n  }\r\n\r\n  async testRoute(path, description, expectedStatus = 200) {\r\n    const url = `${this.baseUrl}${path}`;\r\n    \r\n    try {\r\n      console.log(`Testing: ${description}`);\r\n      console.log(`URL: ${url}`);\r\n      \r\n      const response = await axios.get(url, {\r\n        timeout: 10000,\r\n        withCredentials: true,\r\n        // Don't throw on error status codes\r\n        validateStatus: () => true\r\n      });\r\n\r\n      const result = {\r\n        path,\r\n        description,\r\n        url,\r\n        status: response.status,\r\n        statusText: response.statusText,\r\n        expected: expectedStatus,\r\n        success: response.status === expectedStatus,\r\n        headers: response.headers,\r\n        timestamp: new Date().toISOString()\r\n      };\r\n\r\n      if (result.success) {\r\n        console.log(`✅ ${response.status} - ${description}`);\r\n      } else {\r\n        console.log(`❌ ${response.status} - ${description} (Expected ${expectedStatus})`);\r\n        \r\n        // Log additional info for failures\r\n        if (response.status === 403) {\r\n          console.log('   🚫 Permission denied - check user role and permissions');\r\n        } else if (response.status === 401) {\r\n          console.log('   🔒 Authentication required - check login status');\r\n        } else if (response.status === 404) {\r\n          console.log('   💥 Route not found - check if endpoint exists');\r\n        } else if (response.status >= 500) {\r\n          console.log('   🔥 Server error - check application logs');\r\n        }\r\n        \r\n        // Log response data if it contains useful info\r\n        if (response.data && typeof response.data === 'string' && response.data.length < 500) {\r\n          console.log(`   Response: ${response.data.substring(0, 200)}...`);\r\n        }\r\n      }\r\n\r\n      this.results.push(result);\r\n      console.log(''); // Empty line for readability\r\n      \r\n      return result;\r\n\r\n    } catch (error) {\r\n      const result = {\r\n        path,\r\n        description,\r\n        url,\r\n        status: 'ERROR',\r\n        error: error.message,\r\n        success: false,\r\n        timestamp: new Date().toISOString()\r\n      };\r\n\r\n      console.log(`💥 ERROR - ${description}: ${error.message}`);\r\n      \r\n      if (error.code === 'ECONNREFUSED') {\r\n        console.log('   🔌 Connection refused - is the server running?');\r\n      } else if (error.code === 'ETIMEDOUT') {\r\n        console.log('   ⏰ Request timeout - server may be overloaded');\r\n      }\r\n      \r\n      this.results.push(result);\r\n      console.log('');\r\n      \r\n      return result;\r\n    }\r\n  }\r\n\r\n  async runQuickTest() {\r\n    console.log('🚀 Quick Permission Test for Orthodox Metrics');\r\n    console.log('=' .repeat(50));\r\n    console.log('');\r\n\r\n    // Test core routes that superadmin should always have access to\r\n    const tests = [\r\n      { path: '/', desc: 'Home page', status: 200 },\r\n      { path: '/dashboard', desc: 'Main dashboard', status: 200 },\r\n      { path: '/admin', desc: 'Admin area', status: 200 },\r\n      { path: '/admin/dashboard', desc: 'Admin dashboard', status: 200 },\r\n      { path: '/admin/users', desc: 'User management', status: 200 },\r\n      { path: '/admin/churches', desc: 'Church management', status: 200 },\r\n      { path: '/admin/template-manager', desc: 'Template manager', status: 200 },\r\n      { path: '/api/auth/status', desc: 'Auth status API', status: 200 },\r\n      { path: '/api/templates', desc: 'Templates API', status: 200 },\r\n      { path: '/api/churches', desc: 'Churches API', status: 200 },\r\n      { path: '/api/users', desc: 'Users API', status: 200 },\r\n    ];\r\n\r\n    for (const test of tests) {\r\n      await this.testRoute(test.path, test.desc, test.status);\r\n      \r\n      // Small delay to avoid overwhelming server\r\n      await new Promise(resolve => setTimeout(resolve, 500));\r\n    }\r\n\r\n    this.printSummary();\r\n  }\r\n\r\n  printSummary() {\r\n    console.log('📊 SUMMARY');\r\n    console.log('=' .repeat(50));\r\n    \r\n    const total = this.results.length;\r\n    const successful = this.results.filter(r => r.success).length;\r\n    const failed = this.results.filter(r => !r.success).length;\r\n    const permissionDenied = this.results.filter(r => r.status === 403).length;\r\n    const authRequired = this.results.filter(r => r.status === 401).length;\r\n    const notFound = this.results.filter(r => r.status === 404).length;\r\n    const serverErrors = this.results.filter(r => r.status >= 500).length;\r\n\r\n    console.log(`Total tests: ${total}`);\r\n    console.log(`Successful: ${successful}`);\r\n    console.log(`Failed: ${failed}`);\r\n    console.log(`Success rate: ${((successful / total) * 100).toFixed(1)}%`);\r\n    console.log('');\r\n    \r\n    if (permissionDenied > 0) {\r\n      console.log(`🚫 Permission denied: ${permissionDenied} (CRITICAL - superadmin should have access)`);\r\n      this.results.filter(r => r.status === 403).forEach(r => {\r\n        console.log(`   - ${r.path} (${r.description})`);\r\n      });\r\n      console.log('');\r\n    }\r\n    \r\n    if (authRequired > 0) {\r\n      console.log(`🔒 Authentication required: ${authRequired}`);\r\n      this.results.filter(r => r.status === 401).forEach(r => {\r\n        console.log(`   - ${r.path} (${r.description})`);\r\n      });\r\n      console.log('');\r\n    }\r\n    \r\n    if (notFound > 0) {\r\n      console.log(`💥 Not found: ${notFound}`);\r\n      this.results.filter(r => r.status === 404).forEach(r => {\r\n        console.log(`   - ${r.path} (${r.description})`);\r\n      });\r\n      console.log('');\r\n    }\r\n    \r\n    if (serverErrors > 0) {\r\n      console.log(`🔥 Server errors: ${serverErrors}`);\r\n      this.results.filter(r => r.status >= 500).forEach(r => {\r\n        console.log(`   - ${r.path} (${r.description})`);\r\n      });\r\n      console.log('');\r\n    }\r\n\r\n    // Recommendations\r\n    console.log('💡 RECOMMENDATIONS');\r\n    console.log('-'.repeat(30));\r\n    \r\n    if (permissionDenied > 0) {\r\n      console.log('• Check user role and permissions in database');\r\n      console.log('• Verify session is properly authenticated');\r\n      console.log('• Check if user account is active and not locked');\r\n    }\r\n    \r\n    if (authRequired > 0) {\r\n      console.log('• Login to the application in your browser first');\r\n      console.log('• Check if session cookies are being sent properly');\r\n      console.log('• Verify authentication middleware is working');\r\n    }\r\n    \r\n    if (notFound > 0) {\r\n      console.log('• Check if routes are properly defined in the application');\r\n      console.log('• Verify server is running the latest version');\r\n    }\r\n    \r\n    if (serverErrors > 0) {\r\n      console.log('• Check application logs for detailed error information');\r\n      console.log('• Verify database connections are working');\r\n      console.log('• Check for any missing dependencies or configuration');\r\n    }\r\n\r\n    console.log('');\r\n    console.log('✅ Quick test complete!');\r\n  }\r\n}\r\n\r\n// Run the test\r\nif (require.main === module) {\r\n  const tester = new QuickPermissionTest();\r\n  tester.runQuickTest().catch(error => {\r\n    console.error('❌ Test failed:', error);\r\n    process.exit(1);\r\n  });\r\n}\r\n\r\nmodule.exports = QuickPermissionTest;\r\n"
+    },
+    "complexity": {
+      "totalLines": 219,
+      "codeLines": 167,
+      "commentLines": 14,
+      "commentRatio": 0.07734806629834254,
+      "averageLineLength": 39.53591160220994
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.194Z"
+  },
+  "contentHash": "42778ee94b37b6eb7b012476ad3c8fd9d8bc3fc01e592637e3a6b4a8ea82aaba",
+  "discoveredAt": "2025-07-28T07:20:01.194Z"
+}

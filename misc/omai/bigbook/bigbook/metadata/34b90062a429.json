@@ -1,0 +1,43 @@
+{
+  "id": "34b90062a429",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-notifications.js",
+  "relativePath": "server/debug/test-notifications.js",
+  "name": "test-notifications.js",
+  "extension": ".js",
+  "size": 2701,
+  "modified": "2025-07-22T14:45:26.017Z",
+  "created": "2025-07-22T14:39:22.443Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 55,
+      "characters": 2655,
+      "words": 252
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 55,
+      "codeLines": 41,
+      "commentLines": 4,
+      "commentRatio": 0.08888888888888889,
+      "averageLineLength": 56.24444444444445
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.233Z"
+  },
+  "contentHash": "6398725c3b111070671f0babac64c13d7d991a8139c1d9062ebf0d01a2569e1d",
+  "discoveredAt": "2025-07-28T07:20:00.233Z"
+}

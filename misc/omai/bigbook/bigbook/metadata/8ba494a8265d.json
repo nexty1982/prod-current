@@ -1,0 +1,43 @@
+{
+  "id": "8ba494a8265d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/types/layout/sidebar.ts",
+  "relativePath": "front-end/src/types/layout/sidebar.ts",
+  "name": "sidebar.ts",
+  "extension": ".ts",
+  "size": 377,
+  "modified": "2025-04-30T05:42:45.000Z",
+  "created": "2025-07-05T02:28:49.720Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 22,
+      "characters": 377,
+      "words": 41
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 22,
+      "codeLines": 20,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 17.75
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.929Z"
+  },
+  "contentHash": "af90ff037eba3c5f809e8cef2966a2f5b2ea2c8b6c09388fd20f5738f09af1c2",
+  "discoveredAt": "2025-07-28T07:19:58.929Z"
+}

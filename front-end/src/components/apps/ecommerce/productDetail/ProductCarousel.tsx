@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 
 //Carousel slider for product
 import Slider from 'react-slick';

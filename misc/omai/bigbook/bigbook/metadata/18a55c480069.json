@@ -1,0 +1,43 @@
+{
+  "id": "18a55c480069",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/OMAI_PHASE4_BIGBOOK_SYNC.md",
+  "relativePath": "docs/7-26-25/OMAI_PHASE4_BIGBOOK_SYNC.md",
+  "name": "OMAI_PHASE4_BIGBOOK_SYNC.md",
+  "extension": ".md",
+  "size": 10832,
+  "modified": "2025-07-25T00:26:28.534Z",
+  "created": "2025-07-25T00:26:27.319Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 388,
+      "characters": 10682,
+      "words": 1329
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 388,
+      "codeLines": 215,
+      "commentLines": 85,
+      "commentRatio": 0.2833333333333333,
+      "averageLineLength": 34.02333333333333
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.747Z"
+  },
+  "contentHash": "b3091c49beb5445d2c846227bcf0044391bf26cb5aaf56f1e6a733c9c572b205",
+  "discoveredAt": "2025-07-28T07:19:57.747Z"
+}

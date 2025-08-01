@@ -1,0 +1,84 @@
+{
+  "id": "cd2924243354",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/setup/register-ssppoc-church.js",
+  "relativePath": "server/setup/register-ssppoc-church.js",
+  "name": "register-ssppoc-church.js",
+  "extension": ".js",
+  "size": 5331,
+  "modified": "2025-07-24T14:50:26.300Z",
+  "created": "2025-07-24T14:50:26.300Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 143,
+      "characters": 5307,
+      "words": 489
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 9
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 9
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 38
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 41,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 42,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 43,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 44,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Simple script to run just the church registration part of the setup wizard\r\n * This uses the existing addExistingChurchToRegistry method from setup-church-wizard.js\r\n */\r\n\r\n// Load environment variables\r\nrequire('dotenv').config({ path: require('path').resolve(__dirname, '../.env.development') });\r\n\r\nconst ChurchSetupWizardSetup = require('../setup-church-wizard');\r\n\r\nasync function registerExistingChurch() {\r\n  console.log('🏛️ Registering existing Saints Peter and Paul Orthodox Church...');\r\n  \r\n  try {\r\n    // Create an instance of the setup wizard\r\n    const setupWizard = new ChurchSetupWizardSetup();\r\n    \r\n    // Just run the church registration part\r\n    console.log('📝 Adding church to central registry...');\r\n    await setupWizard.addExistingChurchToRegistry();\r\n    \r\n    console.log('✅ Church registration completed successfully!');\r\n    console.log('📌 Next steps:');\r\n    console.log('   1. Try accessing the church admin panel');\r\n    console.log('   2. Verify the church appears in the All Churches list');\r\n    console.log('   3. Test the Edit Church functionality');\r\n\r\n  } catch (error) {\r\n    console.error('❌ Registration failed:', error.message);\r\n    \r\n    // If the original method fails due to database name issue, \r\n    // let's try the simpler approach\r\n    if (error.message.includes('orthodoxmetrics_main')) {\r\n      console.log('🔄 Trying alternative registration method...');\r\n      \r\n      const mysql = require('mysql2/promise');\r\n      \r\n      const dbConfig = {\r\n        host: process.env.[REDACTED] || 'localhost',\r\n        user: process.env.[REDACTED] || 'orthodoxapps',\r\n        password: process.env.[REDACTED] || 'Summerof1982@!',\r\n        port: process.env.[REDACTED] || 3306\r\n      };\r\n\r\n      // Use orthodoxmetrics_db instead of orthodoxmetrics_main\r\n      const mainConnection = await mysql.createConnection({\r\n        ...dbConfig,\r\n        database: 'orthodoxmetrics_db'\r\n      });\r\n\r\n      try {\r\n        // The churches table already exists, no need to create it\r\n        console.log('✅ Churches table already exists');\r\n\r\n        // Get church info\r\n        const churchConnection = await mysql.createConnection({\r\n          ...dbConfig,\r\n          database: 'saints_peter_and_paul_orthodox_church_db'\r\n        });\r\n\r\n        const [churchInfo] = await churchConnection.execute(\r\n          'SELECT * FROM church_info WHERE church_id = ? OR id = 1 LIMIT 1',\r\n          ['SSPPOC_001']\r\n        );\r\n        await churchConnection.end();\r\n\r\n        const church = churchInfo.length > 0 ? churchInfo[0] : {\r\n          name: 'Saints Peter and Paul Orthodox Church',\r\n          email: 'admin@ssppoc.org'\r\n        };\r\n\r\n        // Check if church already exists by name or database_name\r\n        const [existing] = await mainConnection.execute(\r\n          'SELECT * FROM churches WHERE name = ? OR database_name = ?',\r\n          [church.name, 'saints_peter_and_paul_orthodox_church_db']\r\n        );\r\n\r\n        if (existing.length > 0) {\r\n          // Update existing church record\r\n          await mainConnection.execute(`\r\n            UPDATE churches \r\n            SET name = ?, \r\n                email = ?, \r\n                database_name = ?, \r\n                is_active = 1, \r\n                setup_complete = 1 \r\n            WHERE id = ?\r\n          `, [\r\n            church.name || 'Saints Peter and Paul Orthodox Church',\r\n            church.email || 'admin@ssppoc.org',\r\n            'saints_peter_and_paul_orthodox_church_db',\r\n            existing[0].id\r\n          ]);\r\n          console.log('✅ Updated existing church record:', existing[0].id);\r\n        } else {\r\n          // Insert new church record\r\n          await mainConnection.execute(`\r\n            INSERT INTO churches (name, email, database_name, is_active, setup_complete)\r\n            VALUES (?, ?, ?, 1, 1)\r\n          `, [\r\n            church.name || 'Saints Peter and Paul Orthodox Church',\r\n            church.email || 'admin@ssppoc.org',\r\n            'saints_peter_and_paul_orthodox_church_db'\r\n          ]);\r\n          console.log('✅ Created new church record');\r\n        }\r\n\r\n        console.log('✅ Alternative registration successful!');\r\n\r\n        // Verify the registration\r\n        const [verification] = await mainConnection.execute(\r\n          'SELECT * FROM churches WHERE database_name = ?',\r\n          ['saints_peter_and_paul_orthodox_church_db']\r\n        );\r\n\r\n        if (verification.length > 0) {\r\n          const registered = verification[0];\r\n          console.log('✅ Church registration verified:');\r\n          console.log('   ID:', registered.id);\r\n          console.log('   Name:', registered.name);\r\n          console.log('   Email:', registered.email);\r\n          console.log('   Database:', registered.database_name);\r\n          console.log('   Active:', registered.is_active ? 'Yes' : 'No');\r\n          console.log('   Setup Complete:', registered.setup_complete ? 'Yes' : 'No');\r\n          console.log('   Created:', registered.created_at);\r\n        } else {\r\n          throw new Error('Registration verification failed!');\r\n        }\r\n        \r\n      } finally {\r\n        await mainConnection.end();\r\n      }\r\n    } else {\r\n      throw error;\r\n    }\r\n  }\r\n}\r\n\r\n// Run the registration\r\nregisterExistingChurch().catch(console.error);\r\n"
+    },
+    "complexity": {
+      "totalLines": 143,
+      "codeLines": 101,
+      "commentLines": 18,
+      "commentRatio": 0.15126050420168066,
+      "averageLineLength": 42.924369747899156
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.142Z"
+  },
+  "contentHash": "56cf7e11531890d93470bdd85d82a30e0d625115deb6aa805d5396808645903e",
+  "discoveredAt": "2025-07-28T07:20:01.142Z"
+}

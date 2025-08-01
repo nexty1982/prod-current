@@ -1,0 +1,6 @@
+{
+  "id": "39bb8682602c",
+  "name": "quick-restart.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/quick-restart.sh",
+  "type": "Server Scripts"
+}

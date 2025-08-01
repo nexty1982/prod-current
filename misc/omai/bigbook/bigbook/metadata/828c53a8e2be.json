@@ -1,0 +1,43 @@
+{
+  "id": "828c53a8e2be",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/middleware/churchSecurity.js",
+  "relativePath": "server/middleware/churchSecurity.js",
+  "name": "churchSecurity.js",
+  "extension": ".js",
+  "size": 8083,
+  "modified": "2025-07-22T16:04:35.018Z",
+  "created": "2025-07-22T16:04:32.006Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 227,
+      "characters": 8065,
+      "words": 723
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 227,
+      "codeLines": 163,
+      "commentLines": 37,
+      "commentRatio": 0.185,
+      "averageLineLength": 39
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.308Z"
+  },
+  "contentHash": "b231aedf26e19723521b2182f1ac03e92d8a5b63cc2716961df4b450bc689084",
+  "discoveredAt": "2025-07-28T07:20:00.308Z"
+}

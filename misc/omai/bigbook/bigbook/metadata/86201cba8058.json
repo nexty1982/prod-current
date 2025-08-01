@@ -1,0 +1,49 @@
+{
+  "id": "86201cba8058",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/test-toggle.js",
+  "relativePath": "server/database/test-toggle.js",
+  "name": "test-toggle.js",
+  "extension": ".js",
+  "size": 3697,
+  "modified": "2025-07-07T01:02:13.263Z",
+  "created": "2025-07-07T00:58:41.252Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 115,
+      "characters": 3687,
+      "words": 339
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "http",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 115,
+      "codeLines": 90,
+      "commentLines": 6,
+      "commentRatio": 0.0625,
+      "averageLineLength": 37.03125
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.049Z"
+  },
+  "contentHash": "95aa0f4c2e1ee331ac0d920e58702fdae496c499c208703c59235585ed95e0e5",
+  "discoveredAt": "2025-07-28T07:20:00.049Z"
+}

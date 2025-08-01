@@ -1,0 +1,43 @@
+{
+  "id": "e01451741866",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/services/liturgicalService.ts",
+  "relativePath": "front-end/src/services/liturgicalService.ts",
+  "name": "liturgicalService.ts",
+  "extension": ".ts",
+  "size": 7501,
+  "modified": "2025-07-05T21:26:12.073Z",
+  "created": "2025-07-05T21:22:28.647Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 230,
+      "characters": 7501,
+      "words": 707
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 230,
+      "codeLines": 171,
+      "commentLines": 26,
+      "commentRatio": 0.1319796954314721,
+      "averageLineLength": 36.75126903553299
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.895Z"
+  },
+  "contentHash": "6a0d97fb5b0180d3f7d919e9053561be3ce608c0c5ff91a34a3a25a2cd2abb3c",
+  "discoveredAt": "2025-07-28T07:19:58.895Z"
+}

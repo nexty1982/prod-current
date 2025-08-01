@@ -1,0 +1,54 @@
+{
+  "id": "0754a6da6b27",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/maintenance/generate-ocr-text-files.js",
+  "relativePath": "server/maintenance/generate-ocr-text-files.js",
+  "name": "generate-ocr-text-files.js",
+  "extension": ".js",
+  "size": 6084,
+  "modified": "2025-07-11T10:49:29.391Z",
+  "created": "2025-07-11T00:08:10.697Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 158,
+      "characters": 6058,
+      "words": 532
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 9
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 158,
+      "codeLines": 118,
+      "commentLines": 11,
+      "commentRatio": 0.08527131782945736,
+      "averageLineLength": 44.78294573643411
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.305Z"
+  },
+  "contentHash": "5c0a14a3fb46d80a5c0e488f148c904fcfe5d4237cfebf9f4fdffb83e5ad239a",
+  "discoveredAt": "2025-07-28T07:20:00.305Z"
+}

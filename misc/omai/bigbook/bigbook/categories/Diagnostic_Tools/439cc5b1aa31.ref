@@ -1,0 +1,6 @@
+{
+  "id": "439cc5b1aa31",
+  "name": "check-nginx-cookie-config.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-nginx-cookie-config.sh",
+  "type": "Troubleshooting Utilities"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "74c71871dd71",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/find-service-manager.sh",
+  "relativePath": "server/scripts/find-service-manager.sh",
+  "name": "find-service-manager.sh",
+  "extension": ".sh",
+  "size": 1150,
+  "modified": "2025-07-19T13:43:36.575Z",
+  "created": "2025-07-19T13:43:02.914Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 38,
+      "characters": 1130,
+      "words": 166
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 37
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 38,
+      "codeLines": 29,
+      "commentLines": 2,
+      "commentRatio": 0.06451612903225806,
+      "averageLineLength": 35.25806451612903
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.034Z"
+  },
+  "contentHash": "d944755af0d14ab30fa1062695f3145b619b5387c1592cc90a3a18cf5dd68983",
+  "discoveredAt": "2025-07-28T07:20:01.034Z"
+}

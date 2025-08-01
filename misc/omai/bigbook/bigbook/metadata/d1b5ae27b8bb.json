@@ -1,0 +1,79 @@
+{
+  "id": "d1b5ae27b8bb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/components/apps/ecommerce/productDetail/SliderData.ts",
+  "relativePath": "front-end/src/components/apps/ecommerce/productDetail/SliderData.ts",
+  "name": "SliderData.ts",
+  "extension": ".ts",
+  "size": 818,
+  "modified": "2025-04-30T05:42:45.000Z",
+  "created": "2025-07-05T02:28:31.928Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 46,
+      "characters": 818,
+      "words": 87
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s1.jpg",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s2.jpg",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s3.jpg",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s4.jpg",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s5.jpg",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s6.jpg",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s7.jpg",
+        "line": 7
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 46,
+      "codeLines": 42,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 18.333333333333332
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.755Z"
+  },
+  "contentHash": "72a3d1d060d9b90eca736f6a38bc611439ff89f7c50b641b959d1ec867a1aef8",
+  "discoveredAt": "2025-07-28T07:19:58.755Z"
+}

@@ -1,0 +1,54 @@
+{
+  "id": "2a37694359ce",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/testing/check-runner.js",
+  "relativePath": "server/testing/check-runner.js",
+  "name": "check-runner.js",
+  "extension": ".js",
+  "size": 2852,
+  "modified": "2025-07-12T03:22:52.350Z",
+  "created": "2025-07-12T03:21:38.781Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 87,
+      "characters": 2844,
+      "words": 257
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "child_process",
+        "line": 9
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 10
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 87,
+      "codeLines": 69,
+      "commentLines": 7,
+      "commentRatio": 0.09210526315789473,
+      "averageLineLength": 35.973684210526315
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.182Z"
+  },
+  "contentHash": "fecddf768ebb849ac3b3d359d0f5f2021b5dfd9d6aca2eb380a982f7c3ee4af6",
+  "discoveredAt": "2025-07-28T07:20:01.182Z"
+}

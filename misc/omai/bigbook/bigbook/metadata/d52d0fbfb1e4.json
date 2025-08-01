@@ -1,0 +1,43 @@
+{
+  "id": "d52d0fbfb1e4",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/JIT_TERMINAL_CONFIG.md",
+  "relativePath": "JIT_TERMINAL_CONFIG.md",
+  "name": "JIT_TERMINAL_CONFIG.md",
+  "extension": ".md",
+  "size": 4635,
+  "modified": "2025-07-25T06:10:33.645Z",
+  "created": "2025-07-25T06:10:32.050Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 167,
+      "characters": 4633,
+      "words": 560
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 167,
+      "codeLines": 109,
+      "commentLines": 20,
+      "commentRatio": 0.15503875968992248,
+      "averageLineLength": 34.333333333333336
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.187Z"
+  },
+  "contentHash": "bc3c8d1078b555c3524865d5e26ade31da3b791b211e9b886295dc56564cd087",
+  "discoveredAt": "2025-07-26T04:17:09.187Z"
+}

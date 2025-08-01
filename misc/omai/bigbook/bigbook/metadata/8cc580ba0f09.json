@@ -1,0 +1,43 @@
+{
+  "id": "8cc580ba0f09",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-user-redirect.js",
+  "relativePath": "server/debug/check-user-redirect.js",
+  "name": "check-user-redirect.js",
+  "extension": ".js",
+  "size": 3145,
+  "modified": "2025-07-22T14:48:00.568Z",
+  "created": "2025-07-22T14:47:58.155Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 73,
+      "characters": 3101,
+      "words": 287
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 73,
+      "codeLines": 56,
+      "commentLines": 4,
+      "commentRatio": 0.06666666666666667,
+      "averageLineLength": 48.666666666666664
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.086Z"
+  },
+  "contentHash": "be746c049602fe5ffbaa3a727f7eb5989298fce51d0a25fbd995317a7af9b4c6",
+  "discoveredAt": "2025-07-28T07:20:00.086Z"
+}

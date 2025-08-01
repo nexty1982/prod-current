@@ -1,0 +1,59 @@
+{
+  "id": "b0f2e3a1aded",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/capture-bigbook-screenshots.sh",
+  "relativePath": "scripts/capture-bigbook-screenshots.sh",
+  "name": "capture-bigbook-screenshots.sh",
+  "extension": ".sh",
+  "size": 2379,
+  "modified": "2025-07-28T03:57:58.042Z",
+  "created": "2025-07-28T03:57:57.073Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 83,
+      "characters": 2343,
+      "words": 324
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "puppeteer",
+        "line": 27
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 30
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 33
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 83,
+      "codeLines": 63,
+      "commentLines": 8,
+      "commentRatio": 0.11267605633802817,
+      "averageLineLength": 31.845070422535212
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.075Z"
+  },
+  "contentHash": "2989c96e773ff4fb5c09ecf9d583e9b9c8cae614e6bc028a53f0bfd92f847af0",
+  "discoveredAt": "2025-07-28T07:19:59.075Z"
+}

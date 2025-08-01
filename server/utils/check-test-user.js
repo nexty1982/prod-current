@@ -1,4 +1,4 @@
-// Check if test user exists and create if needed
+// Check   database: 'orthodmetrics        ['admin@orthodmetrics.com', hashedPassword, 'Admin', 'User', 'super_admin', 1, 1]       ['admin@orthodmetrics.com', hashedPassword, 'Admin', 'User', 'super_admin', 1, 1]dev',f test user exists and create if needed
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 
@@ -7,7 +7,7 @@ const dbConfig = {
   host: 'localhost',
   user: 'root',
   password: 'Summerof1982@!', // Update this with your actual password
-  database: 'orthodoxmetrics_db',
+  database: 'orthodmetrics_dev',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -22,7 +22,7 @@ async function checkAndCreateTestUser() {
     // Check if user exists
     const [rows] = await promisePool.query(
       'SELECT id, email, first_name, last_name, role, is_active FROM users WHERE email = ?',
-      ['admin@orthodoxmetrics.com']
+      ['admin@orthodmetrics.com']
     );
     
     if (rows.length === 0) {
@@ -37,7 +37,7 @@ async function checkAndCreateTestUser() {
       );
       
       console.log('✅ Test user created successfully!');
-      console.log('   Email: admin@orthodoxmetrics.com');
+      console.log('   Email: admin@orthodmetrics.com');
       console.log('   Password: admin123');
       console.log('   Role: super_admin');
     } else {

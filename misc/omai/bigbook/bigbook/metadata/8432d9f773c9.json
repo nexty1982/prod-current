@@ -1,0 +1,43 @@
+{
+  "id": "8432d9f773c9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/diagnosis-report.md",
+  "relativePath": "server/database/diagnosis-report.md",
+  "name": "diagnosis-report.md",
+  "extension": ".md",
+  "size": 8967,
+  "modified": "2025-07-22T21:10:45.737Z",
+  "created": "2025-07-22T21:10:43.904Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 223,
+      "characters": 8799,
+      "words": 1043
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 223,
+      "codeLines": 120,
+      "commentLines": 40,
+      "commentRatio": 0.25,
+      "averageLineLength": 53.175
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.987Z"
+  },
+  "contentHash": "da6d46d6c649b03425907e20045a6b64f67d1607ed17d5d829efbc7c554a6963",
+  "discoveredAt": "2025-07-28T07:19:59.988Z"
+}

@@ -1,0 +1,62 @@
+{
+  "id": "f5b4835329cf",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/6cfed7c1d318.json",
+  "relativePath": "bigbook/metadata/6cfed7c1d318.json",
+  "name": "6cfed7c1d318.json",
+  "extension": ".json",
+  "size": 2571,
+  "modified": "2025-07-26T04:17:11.710Z",
+  "created": "2025-07-26T04:17:11.710Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 62,
+      "characters": 2571,
+      "words": 197
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "bcrypt",
+        "line": 49
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 49,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 49,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"6cfed7c1d318\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/temp/generate_admin_hash.js\",\n  \"relativePath\": \"server/temp/generate_admin_hash.js\",\n  \"name\": \"generate_admin_hash.js\",\n  \"extension\": \".js\",\n  \"size\": 916,\n  \"modified\": \"2025-07-05T23:34:05.000Z\",\n  \"created\": \"2025-07-09T00:48:35.106Z\",\n  \"classification\": {\n    \"type\": \"Server Scripts\",\n    \"category\": \"Backend > Server\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 27,\n      \"characters\": 916,\n      \"words\": 90\n    },\n    \"classification\": {\n      \"type\": \"Server Scripts\",\n      \"category\": \"Backend > Server\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"bcrypt\",\n        \"line\": 2\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 5,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 10,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"// Generate proper bcrypt hash for admin password\\r\\nconst bcrypt = require('bcrypt');\\r\\n\\r\\nasync function generateHash() {\\r\\n    const password = '[REDACTED]';\\r\\n    const saltRounds = 12;\\r\\n\\r\\n    try {\\r\\n        const hash = await bcrypt.hash(password, saltRounds);\\r\\n        console.log('Password:'[REDACTED]'Hash:', hash);\\r\\n\\r\\n        // Test the hash\\r\\n        const match = await bcrypt.compare(password, hash);\\r\\n        console.log('Hash verification:', match);\\r\\n\\r\\n        // Generate SQL\\r\\n        console.log('\\\\nSQL to create admin user:');\\r\\n        console.log(`INSERT INTO users (email, first_name, last_name, password_hash, role, is_active, landing_page, created_at, updated_at) VALUES ('admin@test.com', 'Admin', 'User', '${hash}', 'admin', TRUE, '/admin/users', NOW(), NOW());`);\\r\\n\\r\\n    } catch (error) {\\r\\n        console.error('Error generating hash:', error);\\r\\n    }\\r\\n}\\r\\n\\r\\ngenerateHash();\\r\\n\"\n    },\n    \"complexity\": {\n      \"totalLines\": 27,\n      \"codeLines\": 17,\n      \"commentLines\": 3,\n      \"commentRatio\": 0.15,\n      \"averageLineLength\": 44.2\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:11.713Z\"\n  },\n  \"contentHash\": \"ab753a08a3bf8d49311d31a5a4c1f8a7421ed7663a77774d18e3176191a9ab76\",\n  \"discoveredAt\": \"2025-07-26T04:17:11.713Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 62,
+      "codeLines": 62,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 40.483870967741936
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.066Z"
+  },
+  "contentHash": "d9bc925abf8e8edfe7ecec7815fa1f9df81ad9ea1adb22e83e49a2aa3cdebfa1",
+  "discoveredAt": "2025-07-28T07:19:57.066Z"
+}

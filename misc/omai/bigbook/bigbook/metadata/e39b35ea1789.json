@@ -1,0 +1,56 @@
+{
+  "id": "e39b35ea1789",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/services/autoLearningAPI.ts",
+  "relativePath": "front-end/src/services/autoLearningAPI.ts",
+  "name": "autoLearningAPI.ts",
+  "extension": ".ts",
+  "size": 2524,
+  "modified": "2025-07-26T02:41:43.854Z",
+  "created": "2025-07-15T06:11:06.921Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 97,
+      "characters": 2524,
+      "words": 264
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 4,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// Auto-Learning OCR API endpoints for Orthodox Metrics AI System\r\nimport axios from 'axios';\r\n\r\nconst API_BASE = process.env.[REDACTED] || '';\r\n\r\nexport const autoLearningAPI = {\r\n  // Health check\r\n  async healthCheck() {\r\n    try {\r\n      const response = await axios.get(`${API_BASE}/api/ai/ocr-learning/status`);\r\n      return response.data;\r\n    } catch (error) {\r\n      console.error('Health check failed:', error);\r\n      throw error;\r\n    }\r\n  },\r\n\r\n  // Get task status\r\n  async getStatus() {\r\n    try {\r\n      const response = await axios.get(`${API_BASE}/api/ai/ocr-learning/status`);\r\n      return response.data;\r\n    } catch (error) {\r\n      console.error('Failed to get status:', error);\r\n      throw error;\r\n    }\r\n  },\r\n\r\n  // Start task\r\n  async startTask(config: { path: string; hours: number }) {\r\n    try {\r\n      const response = await axios.post(`${API_BASE}/api/ai/ocr-learning/start`, config);\r\n      return response.data;\r\n    } catch (error) {\r\n      console.error('Failed to start task:', error);\r\n      throw error;\r\n    }\r\n  },\r\n\r\n  // Stop task\r\n  async stopTask() {\r\n    try {\r\n      const response = await axios.post(`${API_BASE}/api/ai/ocr-learning/stop`);\r\n      return response.data;\r\n    } catch (error) {\r\n      console.error('Failed to stop task:', error);\r\n      throw error;\r\n    }\r\n  },\r\n\r\n  // Get progress\r\n  async getProgress() {\r\n    try {\r\n      const response = await axios.get(`${API_BASE}/api/ai/ocr-learning/status`);\r\n      return response.data;\r\n    } catch (error) {\r\n      console.error('Failed to get progress:', error);\r\n      throw error;\r\n    }\r\n  },\r\n\r\n  // Get learning rules\r\n  async getLearningRules() {\r\n    try {\r\n      const response = await axios.get(`${API_BASE}/api/ai/ocr-learning/rules`);\r\n      return response.data;\r\n    } catch (error) {\r\n      console.error('Failed to get learning rules:', error);\r\n      throw error;\r\n    }\r\n  },\r\n\r\n  // Get results\r\n  async getResults(format = 'summary') {\r\n    try {\r\n      const response = await axios.get(`${API_BASE}/api/ai/ocr-learning/status`);\r\n      return response.data;\r\n    } catch (error) {\r\n      console.error('Failed to get results:', error);\r\n      throw error;\r\n    }\r\n  },\r\n\r\n  // Reset task\r\n  async resetTask() {\r\n    try {\r\n      const response = await axios.post(`${API_BASE}/api/ai/ocr-learning/reset`);\r\n      return response.data;\r\n    } catch (error) {\r\n      console.error('Failed to reset task:', error);\r\n      throw error;\r\n    }\r\n  }\r\n};\r\n\r\nexport default autoLearningAPI;\r\n"
+    },
+    "complexity": {
+      "totalLines": 97,
+      "codeLines": 77,
+      "commentLines": 9,
+      "commentRatio": 0.10465116279069768,
+      "averageLineLength": 28.11627906976744
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.892Z"
+  },
+  "contentHash": "68ab2cc0e5edaba0f0dfc66ebfb25c7ddad164fdbf79ea15951a1303c25c6b1e",
+  "discoveredAt": "2025-07-28T07:19:58.892Z"
+}

@@ -1,11 +1,11 @@
 /**
- * OrthodoxMetrics - Complete TypeScript Type Definitions
+ * OrthodMetrics - Complete TypeScript Type Definitions
  * Comprehensive type system for church management platform
  */
 
 // ===== CORE TYPES =====
 export type SupportedLanguage = 'en' | 'gr' | 'ru' | 'ro';
-export type UserRole = 'super_admin' | 'admin' | 'priest' | 'deacon' | 'user' | 'supervisor' | 'volunteer' | 'viewer' | 'church';
+export type UserRole = 'super_admin' | 'admin' | 'manager' | 'user' | 'viewer';
 export type CalendarType = 'julian' | 'revised_julian' | 'gregorian';
 export type RecordType = 'baptism' | 'marriage' | 'funeral';
 export type InvoiceStatus = 'draft' | 'pending' | 'paid' | 'overdue' | 'cancelled';
@@ -64,17 +64,13 @@ export interface Church {
   description_multilang?: string;
   settings?: string;
   is_active: boolean;
-  customer_id?: string; // Added for invoice integration
   created_at: string;
   updated_at: string;
-  // Calculated fields
-  contact_phone?: string; // For backward compatibility
-  priest_name?: string; // For backward compatibility
-  diocese?: string; // For backward compatibility
-  established_date?: string; // For backward compatibility
-  member_count?: number; // For backward compatibility
-  site_url?: string; // For backward compatibility
-  upload_capacity_mb?: number; // For backward compatibility
+  has_baptism_records?: boolean;
+  has_marriage_records?: boolean;
+  has_funeral_records?: boolean;
+  setup_complete?: boolean;
+  database_name?: string;
 }
 
 export interface ChurchContact {
@@ -108,6 +104,11 @@ export interface CreateChurchData {
   description_multilang?: string;
   settings?: string;
   is_active?: boolean;
+  has_baptism_records?: boolean;
+  has_marriage_records?: boolean;
+  has_funeral_records?: boolean;
+  setup_complete?: boolean;
+  database_name?: string;
 }
 
 export interface ChurchFilters {

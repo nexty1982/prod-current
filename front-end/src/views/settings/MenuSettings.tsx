@@ -104,6 +104,7 @@ const menuSections: MenuSection[] = [
             { id: 'admin-settings', title: 'Admin Settings', description: 'System administration settings', category: 'sidebar' },
             { id: 'admin-orthodox-metrics', title: 'Orthodox Metrics Admin', description: 'Orthodox Metrics administration', category: 'sidebar' },
             { id: 'admin-ai', title: 'AI Administration', description: 'AI system administration', category: 'sidebar' },
+            { id: 'admin-omai-logger', title: 'OMAI Ultimate Logger', description: 'Real-time system log monitoring and analysis', category: 'sidebar' },
             { id: 'admin-menu-permissions', title: 'Menu Permissions', description: 'Menu access control', category: 'sidebar' },
         ],
     },
@@ -131,6 +132,7 @@ const menuSections: MenuSection[] = [
         items: [
             { id: 'settings-menu', title: 'Menu Settings', description: 'Configure menu visibility', category: 'sidebar' },
             { id: 'settings-logs', title: 'Server Logs', description: 'Application server logs', category: 'sidebar' },
+            { id: 'settings-jit-terminal', title: 'JIT Terminal Access', description: 'Just-In-Time terminal access management', category: 'sidebar' },
         ],
     },
 ];

@@ -1,0 +1,69 @@
+{
+  "id": "7bab5046104f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/7de0ab849319.json",
+  "relativePath": "bigbook/metadata/7de0ab849319.json",
+  "name": "7de0ab849319.json",
+  "extension": ".json",
+  "size": 25955,
+  "modified": "2025-07-26T04:17:11.186Z",
+  "created": "2025-07-26T04:17:11.186Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 160,
+      "characters": 25955,
+      "words": 2281
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 147
+      },
+      {
+        "type": "npm_package",
+        "name": "multer",
+        "line": 147
+      },
+      {
+        "type": "npm_package",
+        "name": "csv-parser",
+        "line": 147
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 147
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 147
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 160,
+      "codeLines": 160,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 161.225
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.142Z"
+  },
+  "contentHash": "e0219e19dbbbdc80a83bf6551cb844f1c4b873383a191795b46d6382f9e6d696",
+  "discoveredAt": "2025-07-28T07:19:57.142Z"
+}

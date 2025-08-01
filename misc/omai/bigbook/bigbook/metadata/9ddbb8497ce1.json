@@ -1,0 +1,43 @@
+{
+  "id": "9ddbb8497ce1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/task-completion-protocol-executed.md",
+  "relativePath": "task-completion-protocol-executed.md",
+  "name": "task-completion-protocol-executed.md",
+  "extension": ".md",
+  "size": 2444,
+  "modified": "2025-07-28T06:15:11.817Z",
+  "created": "2025-07-28T06:14:38.216Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 69,
+      "characters": 2398,
+      "words": 315
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 69,
+      "codeLines": 36,
+      "commentLines": 15,
+      "commentRatio": 0.29411764705882354,
+      "averageLineLength": 45.333333333333336
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.581Z"
+  },
+  "contentHash": "dbc71024e0fb78c75a9d54615a893e7fd61c047424d69e595890d510071d504e",
+  "discoveredAt": "2025-07-28T07:20:01.581Z"
+}

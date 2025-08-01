@@ -6,8 +6,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Greek:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Cyrillic:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&subset=greek&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&subset=cyrillic&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@400;500;600;700&display=swap');
 
 /* Orthodox Color Palette & Global Font Stack */
 :root {
@@ -35,6 +36,7 @@
   --font-orthodox-slavic: 'Old Standard TT', 'Times New Roman', serif;
   --font-orthodox-greek: 'Noto Serif Greek', 'Noto Serif', serif;
   --font-orthodox-cyrillic: 'Noto Serif Cyrillic', 'Noto Serif', serif;
+  --font-orthodox-georgian: 'Noto Serif Georgian', 'Noto Serif', serif;
   
   /* Global font stack for easy application */
   --font-primary: var(--font-orthodox-serif);

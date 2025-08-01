@@ -1,0 +1,43 @@
+{
+  "id": "9fe652ea6591",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/tasks/scripts/generate-task-screenshots.sh",
+  "relativePath": "tasks/scripts/generate-task-screenshots.sh",
+  "name": "generate-task-screenshots.sh",
+  "extension": ".sh",
+  "size": 1959,
+  "modified": "2025-07-28T05:53:13.168Z",
+  "created": "2025-07-28T05:52:57.949Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 74,
+      "characters": 1931,
+      "words": 236
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 74,
+      "codeLines": 51,
+      "commentLines": 9,
+      "commentRatio": 0.15,
+      "averageLineLength": 30.966666666666665
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.596Z"
+  },
+  "contentHash": "ad9d7686c73f83dc81208dfe8959b375ea43e4ce6e417e7f8765d642a307b629",
+  "discoveredAt": "2025-07-28T07:20:01.596Z"
+}

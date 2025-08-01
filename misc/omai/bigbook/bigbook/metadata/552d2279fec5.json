@@ -1,0 +1,43 @@
+{
+  "id": "552d2279fec5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/BACKUP_DIAGNOSTIC_MANUAL.md",
+  "relativePath": "docs/archive/BACKUP_DIAGNOSTIC_MANUAL.md",
+  "name": "BACKUP_DIAGNOSTIC_MANUAL.md",
+  "extension": ".md",
+  "size": 3207,
+  "modified": "2025-07-13T19:36:40.057Z",
+  "created": "2025-07-13T19:36:08.428Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 107,
+      "characters": 3207,
+      "words": 401
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 107,
+      "codeLines": 42,
+      "commentLines": 40,
+      "commentRatio": 0.4878048780487805,
+      "averageLineLength": 37.52439024390244
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.109Z"
+  },
+  "contentHash": "66a6dd16e9834c558264905c7b40d590452475a510ebdb9ba58a4891df3bffe5",
+  "discoveredAt": "2025-07-28T07:19:58.109Z"
+}

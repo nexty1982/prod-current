@@ -1,0 +1,6 @@
+{
+  "id": "5f3b4de89704",
+  "name": "restart-backend-with-stubs.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-backend-with-stubs.sh",
+  "type": "Documentation"
+}

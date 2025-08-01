@@ -1,0 +1,56 @@
+{
+  "id": "aa6c9efacb03",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-current-sessions.js",
+  "relativePath": "server/debug/check-current-sessions.js",
+  "name": "check-current-sessions.js",
+  "extension": ".js",
+  "size": 2999,
+  "modified": "2025-07-24T14:50:26.344Z",
+  "created": "2025-07-24T14:50:26.344Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 87,
+      "characters": 2973,
+      "words": 276
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 19,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Check Current Sessions Script\r\n * Identifies what sessions exist and their content\r\n */\r\n\r\nconst mysql = require('mysql2/promise');\r\n\r\nasync function checkCurrentSessions() {\r\n  try {\r\n    console.log('🔍 CHECKING CURRENT SESSIONS');\r\n    console.log('============================');\r\n    \r\n    // Connect to database\r\n    const connection = await mysql.createConnection({\r\n      host: 'localhost',\r\n      user: 'orthodoxapps',\r\n      password: '[REDACTED]',\r\n      database: 'orthodoxmetrics_db'\r\n    });\r\n    \r\n    // Check total sessions\r\n    const [sessions] = await connection.execute('SELECT COUNT(*) as count FROM sessions');\r\n    console.log(`📊 Total active sessions: ${sessions[0].count}`);\r\n    \r\n    if (sessions[0].count > 0) {\r\n      // Get session details\r\n      const [sessionData] = await connection.execute(`\r\n        SELECT \r\n          session_id, \r\n          expires, \r\n          LENGTH(data) as data_length,\r\n          SUBSTRING(data, 1, 200) as data_preview\r\n        FROM sessions \r\n        ORDER BY expires DESC\r\n      `);\r\n      \r\n      console.log('\\n📋 Session Details:');\r\n      sessionData.forEach((session, i) => {\r\n        console.log(`\\n${i+1}. Session ID: ${session.session_id.substring(0, 20)}...`);\r\n        console.log(`   Expires: ${new Date(session.expires * 1000).toISOString()}`);\r\n        console.log(`   Data length: ${session.data_length} bytes`);\r\n        console.log(`   Data preview: ${session.data_preview}`);\r\n        \r\n        // Try to parse session data\r\n        try {\r\n          const sessionObj = JSON.parse(session.data_preview);\r\n          if (sessionObj.user) {\r\n            console.log(`   👤 User: ${sessionObj.user.email || 'No email'} (${sessionObj.user.role || 'No role'})`);\r\n          } else {\r\n            console.log(`   👤 User: NO USER DATA`);\r\n          }\r\n        } catch (e) {\r\n          console.log(`   👤 User: Cannot parse session data`);\r\n        }\r\n      });\r\n    }\r\n    \r\n    await connection.end();\r\n    \r\n    console.log('\\n🎯 ANALYSIS:');\r\n    console.log('============');\r\n    if (sessions[0].count === 0) {\r\n      console.log('✅ No sessions in database - this is good');\r\n      console.log('   The phantom user might be coming from frontend cache');\r\n    } else {\r\n      console.log('⚠️  Sessions exist in database');\r\n      console.log('   Check if any have user data or are empty sessions');\r\n    }\r\n    \r\n    console.log('\\n🔧 RECOMMENDED ACTIONS:');\r\n    console.log('=======================');\r\n    console.log('1. Clear all sessions: DELETE FROM sessions;');\r\n    console.log('2. Clear browser localStorage and sessionStorage');\r\n    console.log('3. Check frontend AuthContext for cached user data');\r\n    console.log('4. Restart both frontend and backend');\r\n    \r\n  } catch (error) {\r\n    console.error('❌ Error:', error.message);\r\n  }\r\n}\r\n\r\ncheckCurrentSessions().then(() => {\r\n  console.log('\\n🏁 SESSION CHECK COMPLETE');\r\n  process.exit(0);\r\n}); "
+    },
+    "complexity": {
+      "totalLines": 87,
+      "codeLines": 65,
+      "commentLines": 9,
+      "commentRatio": 0.12162162162162163,
+      "averageLineLength": 38.270270270270274
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.063Z"
+  },
+  "contentHash": "cec7b63e696765e6d3a8003354223cd03fb9dec845ae6e9097cc5ab0931ee55a",
+  "discoveredAt": "2025-07-28T07:20:00.063Z"
+}

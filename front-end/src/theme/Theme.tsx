@@ -10,7 +10,7 @@ import { DarkThemeColors } from './DarkThemeColors';
 import { LightThemeColors } from './LightThemeColors';
 import { baseDarkTheme, baselightTheme } from './DefaultColors';
 import * as locales from '@mui/material/locale';
-import { CustomizerContext } from 'src/context/CustomizerContext';
+import { CustomizerContext } from '../context/CustomizerContext';
 
 export const BuildTheme = (config: any = {}) => {
   const themeOptions = LightThemeColors.find((theme) => theme.name === config.theme);

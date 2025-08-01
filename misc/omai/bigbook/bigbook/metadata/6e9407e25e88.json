@@ -1,0 +1,43 @@
+{
+  "id": "6e9407e25e88",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/views/orthodox-calendar/index.ts",
+  "relativePath": "front-end/src/views/orthodox-calendar/index.ts",
+  "name": "index.ts",
+  "extension": ".ts",
+  "size": 0,
+  "modified": "2025-07-11T10:21:45.670Z",
+  "created": "2025-07-11T10:17:24.230Z",
+  "classification": {
+    "type": "Other",
+    "category": "Uncategorized",
+    "confidence": 0
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1,
+      "characters": 0,
+      "words": 0
+    },
+    "classification": {
+      "type": "Other",
+      "category": "Uncategorized",
+      "confidence": 0
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 1,
+      "codeLines": 0,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 0
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.955Z"
+  },
+  "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "discoveredAt": "2025-07-28T07:19:58.955Z"
+}

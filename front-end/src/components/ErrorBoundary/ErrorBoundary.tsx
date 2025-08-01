@@ -129,6 +129,7 @@ class ErrorBoundary extends Component<Props, State> {
 
     handleGoHome = () => {
         // [copilot-fix] Changed to redirect to admin instead of modernize homepage
+        console.error('🚨 ErrorBoundary redirecting to /admin due to error:', this.state.error);
         window.location.href = '/admin';
     };
 

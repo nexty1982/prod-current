@@ -1,0 +1,43 @@
+{
+  "id": "195d9d5a221f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-omai-endpoints.sh",
+  "relativePath": "scripts/test-omai-endpoints.sh",
+  "name": "test-omai-endpoints.sh",
+  "extension": ".sh",
+  "size": 3449,
+  "modified": "2025-07-25T20:37:07.356Z",
+  "created": "2025-07-25T19:18:09.158Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 90,
+      "characters": 3403,
+      "words": 419
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 90,
+      "codeLines": 65,
+      "commentLines": 9,
+      "commentRatio": 0.12162162162162163,
+      "averageLineLength": 44.78378378378378
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.516Z"
+  },
+  "contentHash": "53c1c4fe98a8629187119c4b0dd6a4aafc8fb8656753e750f7f7eed4dd53a1b2",
+  "discoveredAt": "2025-07-28T07:19:59.516Z"
+}

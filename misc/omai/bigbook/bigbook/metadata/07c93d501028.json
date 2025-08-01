@@ -1,0 +1,43 @@
+{
+  "id": "07c93d501028",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/security-policy.json",
+  "relativePath": "bigbook/security-policy.json",
+  "name": "security-policy.json",
+  "extension": ".json",
+  "size": 1062,
+  "modified": "2025-07-26T03:57:47.346Z",
+  "created": "2025-07-26T03:57:47.346Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 43,
+      "characters": 1062,
+      "words": 68
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 43,
+      "codeLines": 42,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 24.285714285714285
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.667Z"
+  },
+  "contentHash": "6bfc07b618afbdd038ed6738d34787d8bda1a2ad390009eb29ba6728e4541dc2",
+  "discoveredAt": "2025-07-28T07:19:57.667Z"
+}

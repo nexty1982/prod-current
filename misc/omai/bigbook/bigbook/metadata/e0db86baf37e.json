@@ -1,0 +1,73 @@
+{
+  "id": "e0db86baf37e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/66d0c934c909.json",
+  "relativePath": "bigbook/metadata/66d0c934c909.json",
+  "name": "66d0c934c909.json",
+  "extension": ".json",
+  "size": 11773,
+  "modified": "2025-07-26T04:17:11.642Z",
+  "created": "2025-07-26T04:17:11.642Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 73,
+      "characters": 11733,
+      "words": 953
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 60
+      },
+      {
+        "type": "npm_package",
+        "name": "bcrypt",
+        "line": 60
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 60,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 60,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 60,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"66d0c934c909\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/setup-complete-sessions.js\",\n  \"relativePath\": \"server/scripts/setup-complete-sessions.js\",\n  \"name\": \"setup-complete-sessions.js\",\n  \"extension\": \".js\",\n  \"size\": 9386,\n  \"modified\": \"2025-07-20T18:34:05.272Z\",\n  \"created\": \"2025-07-20T18:30:06.746Z\",\n  \"classification\": {\n    \"type\": \"Server Scripts\",\n    \"category\": \"Backend > Server\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 224,\n      \"characters\": 9346,\n      \"words\": 788\n    },\n    \"classification\": {\n      \"type\": \"Server Scripts\",\n      \"category\": \"Backend > Server\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"path\",\n        \"line\": 1\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"bcrypt\",\n        \"line\": 2\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 22,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 29,\n          \"redacted\": true\n        },\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 36,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"const path = require('path');\\r\\nconst bcrypt = require('bcrypt');\\r\\nconst DatabaseService = require('../services/databaseService');\\r\\n\\r\\n/**\\r\\n * Complete Session Management Setup Script\\r\\n * Creates users and session data for testing the Session Management Interface\\r\\n */\\r\\n\\r\\nasync function setupCompleteSessionData() {\\r\\n    console.log('🚀 COMPLETE SESSION MANAGEMENT SETUP');\\r\\n    console.log('========================================');\\r\\n\\r\\n    try {\\r\\n        // Step 1: Ensure we have test users\\r\\n        console.log('\\\\n📋 Step 1: Setting up test users...');\\r\\n        \\r\\n        const testUsers = [\\r\\n            { \\r\\n                email: 'test@orthodoxmetrics.com', \\r\\n                role: 'admin', \\r\\n                password: '[REDACTED]',\\r\\n                first_name: 'Test',\\r\\n                last_name: 'Administrator'\\r\\n            },\\r\\n            { \\r\\n                email: 'testuser@orthodoxmetrics.com', \\r\\n                role: 'user', \\r\\n                password: '[REDACTED]',\\r\\n                first_name: 'Test',\\r\\n                last_name: 'User'\\r\\n            },\\r\\n            { \\r\\n                email: 'testviewer@orthodoxmetrics.com', \\r\\n                role: 'viewer', \\r\\n                password: '[REDACTED]',\\r\\n                first_name: 'Test',\\r\\n                last_name: 'Viewer'\\r\\n            }\\r\\n        ];\\r\\n\\r\\n        const createdUsers = [];\\r\\n\\r\\n        for (const testUser of testUsers) {\\r\\n            // Check if user exists\\r\\n            const existingResult = await DatabaseService.queryPlatform(\\r\\n                'SELECT id, email, role FROM users WHERE email = ?', \\r\\n                [testUser.email]\\r\\n            );\\r\\n            const existingData = existingResult[0];\\r\\n            \\r\\n            if (existingData.length > 0) {\\r\\n                const user = existingData[0];\\r\\n                console.log(`   ✅ User ${user.email} already exists (ID: ${user.id})`);\\r\\n                createdUsers.push(user);\\r\\n            } else {\\r\\n                // Create new user\\r\\n                const hashedPassword = await bcrypt.hash(testUser.password, 10);\\r\\n                await DatabaseService.queryPlatform(\\r\\n                    'INSERT INTO users (email, password_hash, first_name, last_name, role, created_at) VALUES (?, ?, ?, ?, ?, NOW())',\\r\\n                    [testUser.email, hashedPassword, testUser.first_name, testUser.last_name, testUser.role]\\r\\n                );\\r\\n                \\r\\n                // Get the created user\\r\\n                const newUserResult = await DatabaseService.queryPlatform(\\r\\n                    'SELECT id, email, role FROM users WHERE email = ?', \\r\\n                    [testUser.email]\\r\\n                );\\r\\n                const newUserData = newUserResult[0];\\r\\n                const user = newUserData[0];\\r\\n                \\r\\n                console.log(`   ✅ Created user ${user.email} (ID: ${user.id}, Role: ${user.role})`);\\r\\n                createdUsers.push(user);\\r\\n            }\\r\\n        }\\r\\n\\r\\n        // Step 2: Create realistic session activities\\r\\n        console.log('\\\\n📊 Step 2: Creating realistic session activities...');\\r\\n        \\r\\n        const activities = [\\r\\n            'login', 'logout', 'view_page', 'edit_record', 'delete_record', \\r\\n            'upload_file', 'download_file', 'search', 'export_data'\\r\\n        ];\\r\\n        \\r\\n        const ipAddresses = [\\r\\n            '192.168.1.100', '192.168.1.101', '10.0.0.50', '172.16.0.10', \\r\\n            '203.0.113.45', '198.51.100.23', '127.0.0.1'\\r\\n        ];\\r\\n        \\r\\n        const userAgents = [\\r\\n            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',\\r\\n            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',\\r\\n            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',\\r\\n            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (Version/17.0 Mobile/15E148 Safari/604.1)',\\r\\n            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0'\\r\\n        ];\\r\\n\\r\\n        let totalActivities = 0;\\r\\n\\r\\n        // Create activities for each user over the past week\\r\\n        for (const user of createdUsers) {\\r\\n            const numActivities = Math.floor(Math.random() * 15) + 5; // 5-20 activities per user\\r\\n            \\r\\n            for (let i = 0; i < numActivities; i++) {\\r\\n                const activity = activities[Math.floor(Math.random() * activities.length)];\\r\\n                const ip = ipAddresses[Math.floor(Math.random() * ipAddresses.length)];\\r\\n                const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];\\r\\n                \\r\\n                // Random time in the past week\\r\\n                const hoursAgo = Math.floor(Math.random() * 168); // 0-168 hours (1 week)\\r\\n                \\r\\n                await DatabaseService.queryPlatform(\\r\\n                    `INSERT INTO activity_log (user_id, action, ip_address, user_agent, changes, created_at) \\r\\n                     VALUES (?, ?, ?, ?, ?, DATE_SUB(NOW(), INTERVAL ? HOUR))`,\\r\\n                    [\\r\\n                        user.id, \\r\\n                        activity, \\r\\n                        ip, \\r\\n                        userAgent, \\r\\n                        `${activity} action by ${user.email}`,\\r\\n                        hoursAgo\\r\\n                    ]\\r\\n                );\\r\\n                \\r\\n                totalActivities++;\\r\\n            }\\r\\n            \\r\\n            console.log(`   ✅ Created ${numActivities} activities for ${user.email}`);\\r\\n        }\\r\\n\\r\\n        // Step 3: Verify the setup\\r\\n        console.log('\\\\n🔍 Step 3: Verifying session data setup...');\\r\\n        \\r\\n        // Count total activities\\r\\n        const totalResult = await DatabaseService.queryPlatform(\\r\\n            'SELECT COUNT(*) as total FROM activity_log'\\r\\n        );\\r\\n        const totalData = totalResult[0];\\r\\n        console.log(`   ✅ Total activities in database: ${totalData[0].total}`);\\r\\n\\r\\n        // Count login activities specifically\\r\\n        const loginResult = await DatabaseService.queryPlatform(\\r\\n            'SELECT COUNT(*) as total FROM activity_log WHERE action = ?',\\r\\n            ['login']\\r\\n        );\\r\\n        const loginData = loginResult[0];\\r\\n        console.log(`   ✅ Login activities: ${loginData[0].total}`);\\r\\n\\r\\n        // Get session summary by user\\r\\n        console.log('\\\\n📈 Session Summary by User:');\\r\\n        const summaryResult = await DatabaseService.queryPlatform(\\r\\n            `SELECT u.email, u.role, COUNT(al.id) as activity_count,\\r\\n                    MAX(al.created_at) as last_activity\\r\\n             FROM users u \\r\\n             LEFT JOIN activity_log al ON u.id = al.user_id \\r\\n             GROUP BY u.id, u.email, u.role \\r\\n             ORDER BY activity_count DESC`\\r\\n        );\\r\\n        const summaryData = summaryResult[0];\\r\\n        \\r\\n        summaryData.forEach((summary, index) => {\\r\\n            console.log(`   ${index + 1}. ${summary.email} (${summary.role}): ${summary.activity_count} activities, last: ${summary.last_activity || 'never'}`);\\r\\n        });\\r\\n\\r\\n        // Step 4: Test the session management query\\r\\n        console.log('\\\\n🧪 Step 4: Testing session management query...');\\r\\n        \\r\\n        const sessionQuery = `\\r\\n            SELECT \\r\\n                u.id as user_id,\\r\\n                u.email,\\r\\n                u.role,\\r\\n                al.action,\\r\\n                al.ip_address,\\r\\n                al.user_agent,\\r\\n                al.created_at,\\r\\n                al.changes\\r\\n            FROM activity_log al\\r\\n            JOIN users u ON al.user_id = u.id\\r\\n            WHERE al.action IN ('login', 'logout')\\r\\n            ORDER BY al.created_at DESC\\r\\n            LIMIT 20\\r\\n        `;\\r\\n        \\r\\n        const sessionResult = await DatabaseService.queryPlatform(sessionQuery);\\r\\n        const sessionData = sessionResult[0];\\r\\n        \\r\\n        console.log(`   ✅ Session query returned ${sessionData.length} results`);\\r\\n        console.log('   Sample session data:');\\r\\n        \\r\\n        sessionData.slice(0, 5).forEach((session, index) => {\\r\\n            console.log(`      ${index + 1}. ${session.email} - ${session.action} from ${session.ip_address} at ${session.created_at}`);\\r\\n        });\\r\\n\\r\\n        console.log('\\\\n🎉 COMPLETE SESSION MANAGEMENT SETUP FINISHED!');\\r\\n        console.log(`✅ Created ${totalActivities} new activity log entries`);\\r\\n        console.log('✅ The Session Management Interface should now show proper data');\\r\\n        console.log('✅ Users can log in and their activities will be tracked');\\r\\n        \\r\\n        return true;\\r\\n\\r\\n    } catch (error) {\\r\\n        console.error('❌ Error during complete session setup:', error);\\r\\n        return false;\\r\\n    }\\r\\n}\\r\\n\\r\\n// Run the complete setup\\r\\nsetupCompleteSessionData()\\r\\n    .then((success) => {\\r\\n        if (success) {\\r\\n            console.log('\\\\n🚀 Session Management System is now fully set up!');\\r\\n            console.log('Navigate to the Session Management page to see the results.');\\r\\n            process.exit(0);\\r\\n        } else {\\r\\n            console.log('\\\\n❌ Session management setup failed');\\r\\n            process.exit(1);\\r\\n        }\\r\\n    })\\r\\n    .catch((error) => {\\r\\n        console.error('❌ Unexpected error:', error);\\r\\n        process.exit(1);\\r\\n    });\\r\\n\"\n    },\n    \"complexity\": {\n      \"totalLines\": 224,\n      \"codeLines\": 172,\n      \"commentLines\": 17,\n      \"commentRatio\": 0.08994708994708994,\n      \"averageLineLength\": 47.01058201058201\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:11.644Z\"\n  },\n  \"contentHash\": \"a242b46a6b1d66ccb2d72eccbac576415f6e4f6b0e0a572ef33ed6ca1edb1b4c\",\n  \"discoveredAt\": \"2025-07-26T04:17:11.644Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 73,
+      "codeLines": 73,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 159.73972602739727
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.049Z"
+  },
+  "contentHash": "7bf2f7fc42fd21d3472d4bbc46881ed53523695ac7825cf33d62eadd01cc0d0a",
+  "discoveredAt": "2025-07-28T07:19:57.049Z"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "7504f20d1012",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/invoices.js",
+  "relativePath": "server/routes/invoices.js",
+  "name": "invoices.js",
+  "extension": ".js",
+  "size": 23385,
+  "modified": "2025-07-22T19:26:34.756Z",
+  "created": "2025-07-09T00:48:38.478Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 678,
+      "characters": 23369,
+      "words": 2141
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 678,
+      "codeLines": 570,
+      "commentLines": 36,
+      "commentRatio": 0.0594059405940594,
+      "averageLineLength": 37.32838283828383
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.489Z"
+  },
+  "contentHash": "83de7c457a2f8a2d6a6d35f8e4f7c32a652d0c6125d5ecb552a74e4f37a99209",
+  "discoveredAt": "2025-07-28T07:20:00.489Z"
+}

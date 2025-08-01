@@ -1,0 +1,43 @@
+{
+  "id": "7937892e20eb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/mysql/quick-church-id-check.sql",
+  "relativePath": "scripts/mysql/quick-church-id-check.sql",
+  "name": "quick-church-id-check.sql",
+  "extension": ".sql",
+  "size": 1016,
+  "modified": "2025-07-22T22:30:44.054Z",
+  "created": "2025-07-22T22:30:42.279Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 25,
+      "characters": 1016,
+      "words": 123
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 25,
+      "codeLines": 20,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 49.35
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.142Z"
+  },
+  "contentHash": "e72f9ccdb2b46ba8d03f66b646cb1ba9310396cc694957a9aae1489509c4c66b",
+  "discoveredAt": "2025-07-28T07:19:59.142Z"
+}

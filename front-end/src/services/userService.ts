@@ -252,7 +252,7 @@ class UserService {
     // Get all churches
     async getChurches(): Promise<ApiResponse<Church[]>> {
         try {
-            const response = await fetch(`${this.baseUrl}/churches`, {
+            const response = await fetch('/api/churches', {
                 credentials: 'include'
             });
 
@@ -263,7 +263,7 @@ class UserService {
             const data = await response.json();
             return {
                 success: data.success,
-                churches: data.churches || [],
+                churches: data.data?.churches || [],
                 message: data.message
             };
         } catch (error) {
@@ -279,7 +279,7 @@ class UserService {
     // Utility functions
     formatLastLogin(lastLogin?: string): string {
         if (!lastLogin) return 'Never';
-        
+
         const date = new Date(lastLogin);
         const now = new Date();
         const diffInMs = now.getTime() - date.getTime();
@@ -318,23 +318,23 @@ class UserService {
         const length = 16;
         const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
         let password = '';
-        
+
         // Ensure at least one character from each category
         const lowercase = 'abcdefghijklmnopqrstuvwxyz';
         const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const numbers = '0123456789';
         const symbols = '!@#$%^&*';
-        
+
         password += lowercase[Math.floor(Math.random() * lowercase.length)];
         password += uppercase[Math.floor(Math.random() * uppercase.length)];
         password += numbers[Math.floor(Math.random() * numbers.length)];
         password += symbols[Math.floor(Math.random() * symbols.length)];
-        
+
         // Fill the rest randomly
         for (let i = 4; i < length; i++) {
             password += charset[Math.floor(Math.random() * charset.length)];
         }
-        
+
         // Shuffle the password
         return password.split('').sort(() => Math.random() - 0.5).join('');
     }

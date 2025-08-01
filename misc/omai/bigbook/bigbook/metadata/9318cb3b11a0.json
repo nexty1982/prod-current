@@ -1,0 +1,43 @@
+{
+  "id": "9318cb3b11a0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/task_7_reassign_dev_ops_omai.md",
+  "relativePath": "docs/7-26-25/task_7_reassign_dev_ops_omai.md",
+  "name": "task_7_reassign_dev_ops_omai.md",
+  "extension": ".md",
+  "size": 2756,
+  "modified": "2025-07-26T03:36:52.000Z",
+  "created": "2025-07-27T02:13:07.561Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 83,
+      "characters": 2716,
+      "words": 402
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 83,
+      "codeLines": 47,
+      "commentLines": 11,
+      "commentRatio": 0.1896551724137931,
+      "averageLineLength": 45.41379310344828
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.775Z"
+  },
+  "contentHash": "31e64127b211a9439e781d3188364ad8c08ddceec0d6e47965338c8274cacb1e",
+  "discoveredAt": "2025-07-28T07:19:57.775Z"
+}

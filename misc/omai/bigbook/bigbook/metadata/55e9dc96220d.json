@@ -1,0 +1,43 @@
+{
+  "id": "55e9dc96220d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-menu-management.sh",
+  "relativePath": "scripts/fix-menu-management.sh",
+  "name": "fix-menu-management.sh",
+  "extension": ".sh",
+  "size": 2536,
+  "modified": "2025-07-27T02:16:47.823Z",
+  "created": "2025-07-27T02:16:24.048Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 74,
+      "characters": 2496,
+      "words": 346
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 74,
+      "codeLines": 59,
+      "commentLines": 6,
+      "commentRatio": 0.09230769230769231,
+      "averageLineLength": 37.276923076923076
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.111Z"
+  },
+  "contentHash": "42fd79703d8b4f30d6b725e0a0297bb4c83028a4f1931432366d697773265533",
+  "discoveredAt": "2025-07-28T07:19:59.111Z"
+}

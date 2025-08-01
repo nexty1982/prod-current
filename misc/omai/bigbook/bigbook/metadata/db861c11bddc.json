@@ -1,0 +1,43 @@
+{
+  "id": "db861c11bddc",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/omai-ingest.ts",
+  "relativePath": "scripts/omai-ingest.ts",
+  "name": "omai-ingest.ts",
+  "extension": ".ts",
+  "size": 902,
+  "modified": "2025-07-25T00:00:55.159Z",
+  "created": "2025-07-25T00:00:48.681Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 36,
+      "characters": 896,
+      "words": 96
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 36,
+      "codeLines": 19,
+      "commentLines": 12,
+      "commentRatio": 0.3870967741935484,
+      "averageLineLength": 27.548387096774192
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.468Z"
+  },
+  "contentHash": "2810699d30a9dd5c550a8d6043900abeb52ee641eb497b588d1cd7a761183e69",
+  "discoveredAt": "2025-07-28T07:19:59.468Z"
+}

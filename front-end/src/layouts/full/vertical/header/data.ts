@@ -193,41 +193,31 @@ interface LinkType {
 
 const pageLinks: LinkType[] = [
   {
-    href: 'https://orthodoxmetrics.com/frontend-pages/homepage',
-    title: 'Homepage', // [copilot-fix] Updated homepage link to correct URL
-  },
-  {
-    href: '/pricing',
-    title: 'Pricing Page',
-  },
-  {
-    href: '/auth/login',
-    title: 'Authentication Design',
-  },
-  {
-    href: '/auth/register',
-    title: 'Register Now',
-  },
-  {
-    href: '/404',
-    title: '404 Error Page',
-  },
-  {
-    href: '/auth/login',
-    title: 'Login Page',
-  },
-  {
-    href: '/user-profile',
-    title: 'User Application',
-  },
-  {
-    href: '/apps/blog/posts',
-    title: 'Blog Design',
-  },
-  {
-    href: '/apps/ecommerce/eco-checkout',
-    title: 'Shopping Cart',
+    href: '/docs/ADMINISTRATION_GUIDE.md',
+    title: 'Users Guide',
   },
 ];
+
+// Export a function to get appsLink based on user role
+export const getAppsLink = (user) => {
+  if (user && user.role === 'super_admin') {
+    return appsLink;
+  }
+  // For non-superadmin users, only show Notes App and Liturgical Calendar
+  return [
+    {
+      href: '/apps/notes',
+      title: 'Notes App',
+      subtext: 'To-do and Daily tasks',
+      avatar: ddIcon3,
+    },
+    {
+      href: '/apps/liturgical-calendar',
+      title: 'Liturgical Calendar',
+      subtext: 'Orthodox Church Calendar',
+      avatar: ddIcon4,
+    },
+  ];
+};
 
 export { notifications, messages, profile, pageLinks, appsLink };

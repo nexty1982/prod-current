@@ -1,0 +1,43 @@
+{
+  "id": "6c45b6f7c286",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/testing/test-ocr-router.js",
+  "relativePath": "server/testing/test-ocr-router.js",
+  "name": "test-ocr-router.js",
+  "extension": ".js",
+  "size": 189,
+  "modified": "2025-07-08T00:10:50.000Z",
+  "created": "2025-07-09T00:48:38.526Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 2,
+      "characters": 189,
+      "words": 21
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 2,
+      "codeLines": 1,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 188
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.215Z"
+  },
+  "contentHash": "0fc910054db0e56500c995548f245534a1e1c929dea0b3bffdbd49f2affb2906",
+  "discoveredAt": "2025-07-28T07:20:01.215Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "b23e85d69a55",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/TROUBLESHOOTING_500_ERRORS.md",
+  "relativePath": "docs/archive/07-09-25/TROUBLESHOOTING_500_ERRORS.md",
+  "name": "TROUBLESHOOTING_500_ERRORS.md",
+  "extension": ".md",
+  "size": 7432,
+  "modified": "2025-07-09T04:32:16.323Z",
+  "created": "2025-07-09T04:32:16.323Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 322,
+      "characters": 7412,
+      "words": 852
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 322,
+      "codeLines": 155,
+      "commentLines": 87,
+      "commentRatio": 0.359504132231405,
+      "averageLineLength": 28.822314049586776
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.018Z"
+  },
+  "contentHash": "8e53e6d54c0ef7835f6f0c4ba4a16298bdc36824b10ee3f5d548ee8b33a0ccd8",
+  "discoveredAt": "2025-07-28T07:19:58.018Z"
+}

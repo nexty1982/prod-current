@@ -1,6 +1,6 @@
-// controllers/churchAdminController.js
+//const { promisePool } = require('../config/db'); // central DB connection (orthodmetrics_dev)controllers/churchAdminController.js
 const { getChurchDbConnection } = require('../utils/dbSwitcher');
-const { promisePool } = require('../config/db'); // central DB connection (orthodoxmetrics_db)
+const { promisePool } = require('../config/db'); // central DB connection (orthodmetrics_dev)
 const bcrypt = require('bcrypt');
 
 /**
@@ -194,5 +194,77 @@ exports.getChurchRecords = async (req, res) => {
       error: 'Failed to fetch church records',
       details: error.message 
     });
+  }
+};
+
+// Update advanced config for a church
+exports.updateChurchConfig = async (req, res) => {
+  try {
+    const churchId = req.params.id;
+    const fields = [
+      'records_database_name', 'avatar_dir', 'calendar_type',
+      'show_fast_days', 'show_local_saints', 'feast_overrides_path', 'theme_color',
+      'logo_path', 'banner_path', 'favicon_path', 'enable_certificates',
+      'enable_liturgical_calendar', 'enable_invoicing', 'enable_audit_logs', 'slug', 'name'
+    ];
+    const updates = [];
+    const values = [];
+    fields.forEach(field => {
+      if (field in req.body) {
+        updates.push(`${field} = ?`);
+        values.push(req.body[field]);
+      }
+    });
+    if (updates.length === 0) return res.status(400).json({ error: 'No valid fields to update' });
+    values.push(churchId);
+    await promisePool.query(`UPDATE churches SET ${updates.join(', ')} WHERE id = ?`, values);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update church config', details: err.message });
+  }
+};
+
+// List assigned users for a church
+exports.listAssignedUsers = async (req, res) => {
+  try {
+    const churchId = req.params.id;
+    const [users] = await promisePool.query(
+      `SELECT u.id, u.name, u.email, cu.role FROM church_users cu JOIN users u ON cu.user_id = u.id WHERE cu.church_id = ?`,
+      [churchId]
+    );
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to list assigned users', details: err.message });
+  }
+};
+
+// Assign user to church
+exports.assignUserToChurch = async (req, res) => {
+  try {
+    const churchId = req.params.id;
+    const { user_id, role } = req.body;
+    if (!user_id || !role) return res.status(400).json({ error: 'user_id and role required' });
+    await promisePool.query(
+      `INSERT INTO church_users (church_id, user_id, role) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE role = VALUES(role)`,
+      [churchId, user_id, role]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to assign user', details: err.message });
+  }
+};
+
+// Remove user from church
+exports.removeUserFromChurch = async (req, res) => {
+  try {
+    const churchId = req.params.id;
+    const userId = req.params.userId;
+    await promisePool.query(
+      `DELETE FROM church_users WHERE church_id = ? AND user_id = ?`,
+      [churchId, userId]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to remove user', details: err.message });
   }
 };

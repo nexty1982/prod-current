@@ -1,210 +1,298 @@
-// server/routes/churches.js
+// server/routes/churches.js - REFACTORED for API v2 consistency
 const express = require('express');
 const { promisePool } = require('../config/db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRole } = require('../middleware/auth');
 const { cleanRecords, cleanRecord } = require('../utils/dateFormatter');
 const { validateChurchData, sanitizeChurchData, generateChurchId } = require('../utils/churchValidation');
 
 const router = express.Router();
 
-// GET /api/churches - Get all churches (admin only)
-router.get('/', async (req, res) => {
+// Create middleware using requireRole - allows admin, super_admin, and manager access
+const requireChurchAccess = requireRole(['admin', 'super_admin', 'manager']);
+
+/**
+ * Standard API v2 response wrapper
+ */
+function apiResponse(success, data = null, error = null, meta = null) {
+  const response = { success };
+  if (data !== null) response.data = data;
+  if (error !== null) response.error = error;
+  if (meta !== null) response.meta = meta;
+  return response;
+}
+
+/**
+ * Validate church access for user - ensures proper church_id scoping
+ */
+function validateChurchAccess(user, churchId = null) {
+  // Super admins can access all churches
+  if (user.role === 'super_admin') {
+    return { allowed: true };
+  }
+
+  // Admins can access churches (allow access even without church assignment for Records Management)
+  if (user.role === 'admin') {
+    // If no church_id specified, allow access to see available churches
+    if (!churchId) {
+      return { allowed: true, church_id: user.church_id };
+    }
+
+    // If church_id specified, check if user has access to that specific church
+    if (!user.church_id) {
+      return { allowed: false, reason: 'Admin user has no church assignment' };
+    }
+    if (parseInt(churchId) !== user.church_id) {
+      return { allowed: false, reason: 'Access denied to church outside your assignment' };
+    }
+    return { allowed: true, church_id: user.church_id };
+  }
+
+  // Managers can access their assigned church only
+  if (user.role === 'manager') {
+    // If no church_id specified, allow access to see their assigned church
+    if (!churchId) {
+      return { allowed: true, church_id: user.church_id };
+    }
+
+    // If church_id specified, check if user has access to that specific church
+    if (!user.church_id) {
+      return { allowed: false, reason: 'Manager user has no church assignment' };
+    }
+    if (parseInt(churchId) !== user.church_id) {
+      return { allowed: false, reason: 'Access denied to church outside your assignment' };
+    }
+    return { allowed: true, church_id: user.church_id };
+  }
+
+  return { allowed: false, reason: 'Insufficient role for church management' };
+}
+
+// GET /api/churches - Get all churches (admin, super_admin, and manager roles)
+router.get('/', requireAuth, requireChurchAccess, async (req, res) => {
   try {
-    console.log('🔍 Churches endpoint called');
-    console.log('📋 Request details:', {
-      method: req.method,
-      url: req.url,
-      originalUrl: req.originalUrl,
-      headers: req.headers
-    });
-    
-    // For now, let's remove auth to debug the 500 error
-    // TODO: Re-add authentication after debugging
-    
-    const [churches] = await promisePool.query(`
+    console.log('🔍 Churches GET endpoint - User:', req.user?.email, 'Role:', req.user?.role);
+
+    // 🔧 SAFETY CHECK: Ensure req.user exists (should be set by auth middleware)
+    if (!req.user) {
+      console.error('❌ req.user is missing after auth middleware');
+      return res.status(401).json(apiResponse(false, null, {
+        message: 'Authentication error - user context missing',
+        code: 'USER_CONTEXT_MISSING'
+      }));
+    }
+
+    // Validate user access
+    const access = validateChurchAccess(req.user);
+    if (!access.allowed) {
+      console.log('❌ Access denied:', access.reason);
+      return res.status(403).json(apiResponse(false, null, {
+        message: 'Access denied',
+        code: 'INSUFFICIENT_PERMISSIONS',
+        details: access.reason
+      }));
+    }
+
+    // Build query based on user permissions
+    let query = `
       SELECT 
         id,
-        church_id,
         name,
         email,
         phone,
-        website,
         address,
         city,
         state_province,
         postal_code,
         country,
-        description,
-        founded_year,
-        language_preference,
+        preferred_language,
         timezone,
         currency,
         tax_id,
+        website,
+        description_multilang,
+        settings,
         is_active,
+        database_name,
+        setup_complete,
         created_at,
         updated_at
-      FROM church_info 
+      FROM churches 
       WHERE is_active = 1
-      ORDER BY created_at DESC
-    `);
+    `;
 
-    console.log(`✅ Found ${churches.length} churches`);
-    console.log('📋 Sample church data:', churches.length > 0 ? churches[0] : 'No churches found');
-    
-    console.log('🧹 Cleaning records with dateFormatter...');
+    const params = [];
+
+    // If admin or manager (not super_admin), restrict to their church only
+    if ((req.user.role === 'admin' || req.user.role === 'manager') && access.church_id) {
+      query += ' AND id = ?';
+      params.push(access.church_id);
+    }
+
+    query += ' ORDER BY name ASC';
+
+    // Execute query against orthodmetrics_dev (via promisePool)
+    const [churches] = await promisePool.query(query, params);
+
+    console.log(`✅ Found ${churches.length} churches from orthodmetrics_dev`);
+
+    // Clean records using dateFormatter
     const cleanedChurches = cleanRecords(churches);
-    console.log('✅ Records cleaned successfully');
-    
-    const response = { 
-      success: true,
-      churches: cleanedChurches 
-    };
-    console.log('📤 Sending response with', cleanedChurches.length, 'churches');
-    
+
+    const response = apiResponse(true, { churches: cleanedChurches }, null, {
+      total: churches.length,
+      user_role: req.user.role,
+      access_level: req.user.role === 'super_admin' ? 'all_churches' : 'assigned_church'
+    });
+
     res.json(response);
   } catch (error) {
     console.error('❌ Error fetching churches:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to fetch churches',
-      details: error.message 
-    });
+    res.status(500).json(apiResponse(false, null, {
+      message: 'Failed to fetch churches',
+      code: 'DATABASE_ERROR',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }));
   }
 });
 
 // GET /api/churches/:id - Get church by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireAuth, requireChurchAccess, async (req, res) => {
   try {
     const churchId = parseInt(req.params.id);
-    
-    console.log('🔍 GET /api/churches/:id request details:', {
-      originalUrl: req.originalUrl,
-      params: req.params,
-      rawId: req.params.id,
-      parsedId: churchId,
-      userAgent: req.get('User-Agent'),
-      contentType: req.get('Content-Type'),
-      sessionExists: !!req.session,
-      method: req.method,
-      headers: req.headers
-    });
-    
-    if (isNaN(churchId)) {
-      console.log('❌ Invalid church ID format - returning 400');
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid church ID format'
-      });
+
+    console.log('🔍 GET church by ID - User:', req.user?.email, 'Church ID:', churchId);
+
+    // 🔧 SAFETY CHECK: Ensure req.user exists (should be set by auth middleware)
+    if (!req.user) {
+      console.error('❌ req.user is missing after auth middleware');
+      return res.status(401).json(apiResponse(false, null, {
+        message: 'Authentication error - user context missing',
+        code: 'USER_CONTEXT_MISSING'
+      }));
     }
 
+    if (isNaN(churchId)) {
+      return res.status(400).json(apiResponse(false, null, {
+        message: 'Invalid church ID format',
+        code: 'INVALID_CHURCH_ID'
+      }));
+    }
+
+    // Validate user access to this specific church
+    const access = validateChurchAccess(req.user, churchId);
+    if (!access.allowed) {
+      console.log('❌ Access denied to church:', access.reason);
+      return res.status(403).json(apiResponse(false, null, {
+        message: 'Access denied',
+        code: 'INSUFFICIENT_PERMISSIONS',
+        details: access.reason
+      }));
+    }
+
+    // Query orthodmetrics_dev for church details
     const [churches] = await promisePool.query(`
       SELECT 
         id,
-        church_id,
         name,
         email,
         phone,
-        website,
         address,
         city,
         state_province,
         postal_code,
         country,
-        description,
-        founded_year,
-        language_preference,
+        preferred_language,
         timezone,
         currency,
         tax_id,
+        website,
+        description_multilang,
         is_active,
+        database_name,
+        setup_complete,
         created_at,
         updated_at
-      FROM church_info 
-      WHERE id = ?
+      FROM churches 
+      WHERE id = ? AND is_active = 1
     `, [churchId]);
 
     if (churches.length === 0) {
       console.log('❌ Church not found with ID:', churchId);
-      return res.status(404).json({
-        success: false,
-        error: 'Church not found'
-      });
+      return res.status(404).json(apiResponse(false, null, {
+        message: 'Church not found',
+        code: 'CHURCH_NOT_FOUND'
+      }));
     }
 
     console.log('✅ Church found:', churches[0].name);
     const cleanedChurch = cleanRecord(churches[0]);
-    
-    res.json(cleanedChurch);
+
+    res.json(apiResponse(true, { church: cleanedChurch }));
   } catch (error) {
     console.error('❌ Error fetching church by ID:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to fetch church',
-      details: error.message 
-    });
+    res.status(500).json(apiResponse(false, null, {
+      message: 'Failed to fetch church',
+      code: 'DATABASE_ERROR',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }));
   }
 });
 
-// POST /api/churches/create - Create new church with comprehensive information
-router.post('/create', requireAuth, async (req, res) => {
+// POST /api/churches/create - Create new church (super_admin only)
+router.post('/create', requireAuth, requireRole(['super_admin']), async (req, res) => {
   try {
-    // Check if user has admin or super_admin role
-    if (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin') {
-      return res.status(403).json({ error: 'Access denied. Admin role required.' });
-    }
-
-    console.log('🏛️ Creating new church with data:', req.body);
+    console.log('🏛️ Creating new church - User:', req.user?.email);
+    console.log('📝 Church data received:', req.body);
 
     // Validate church data
     const validation = validateChurchData(req.body);
     if (!validation.isValid) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
+      return res.status(400).json(apiResponse(false, null, {
+        message: 'Validation failed',
+        code: 'VALIDATION_ERROR',
         details: validation.errors,
         warnings: validation.warnings
-      });
+      }));
     }
 
     // Sanitize church data
     const churchData = sanitizeChurchData(req.body);
-    console.log('🧹 Sanitized church data:', churchData);
+    console.log('🧹 Sanitized church data');
 
-    // Check if church name already exists
+    // Check for existing church name in orthodmetrics_dev
     const [existingChurch] = await promisePool.query(
-      'SELECT id FROM church_info WHERE name = ?',
+      'SELECT id FROM churches WHERE name = ?',
       [churchData.name]
     );
 
     if (existingChurch.length > 0) {
-      return res.status(409).json({ 
-        success: false,
-        error: 'Church name already exists',
+      return res.status(409).json(apiResponse(false, null, {
+        message: 'Church name already exists',
+        code: 'DUPLICATE_CHURCH_NAME',
         field: 'name'
-      });
+      }));
     }
 
-    // Check if email already exists
+    // Check for existing email
     const [existingEmail] = await promisePool.query(
-      'SELECT id FROM church_info WHERE email = ?',
+      'SELECT id FROM churches WHERE email = ?',
       [churchData.email]
     );
 
     if (existingEmail.length > 0) {
-      return res.status(409).json({ 
-        success: false,
-        error: 'Email already in use',
+      return res.status(409).json(apiResponse(false, null, {
+        message: 'Email already in use',
+        code: 'DUPLICATE_EMAIL',
         field: 'email'
-      });
+      }));
     }
 
-    // Generate unique church_id
+    // Generate unique church identifier
     const church_id = generateChurchId(churchData.name);
 
-    // Insert new church into church_info table
+    // Insert new church into orthodmetrics_dev.churches
     const [result] = await promisePool.query(`
-      INSERT INTO church_info (
-        church_id,
+      INSERT INTO churches (
         name,
         email,
         phone,
@@ -214,303 +302,254 @@ router.post('/create', requireAuth, async (req, res) => {
         state_province,
         postal_code,
         country,
-        description,
-        founded_year,
-        language_preference,
-        timezone,
-        currency,
-        tax_id,
-        is_active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      church_id,
-      churchData.name,
-      churchData.email,
-      churchData.phone,
-      churchData.website,
-      churchData.address,
-      churchData.city,
-      churchData.state_province,
-      churchData.postal_code,
-      churchData.country,
-      churchData.description,
-      churchData.founded_year,
-      churchData.language_preference,
-      churchData.timezone,
-      churchData.currency,
-      churchData.tax_id,
-      churchData.is_active
-    ]);
-
-    console.log('✅ Church created with ID:', result.insertId, 'Church ID:', church_id);
-
-    // Create default OCR settings for the new church
-    try {
-      await promisePool.query(`
-        INSERT INTO ocr_settings (
-          church_id,
-          language_preference,
-          ai_model,
-          confidence_threshold,
-          auto_extract,
-          field_mapping,
-          created_at,
-          updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
-      `, [
-        church_id,
-        churchData.language_preference,
-        'gpt-4-vision-preview',
-        0.7,
-        false,
-        JSON.stringify({
-          firstName: 'first_name',
-          lastName: 'last_name',
-          dateOfBaptism: 'reception_date',
-          priest: 'clergy',
-          parents: 'parents',
-          godparents: 'sponsors'
-        })
-      ]);
-      console.log('✅ Default OCR settings created for church:', church_id);
-    } catch (ocrError) {
-      console.warn('⚠️ Failed to create OCR settings (non-critical):', ocrError.message);
-    }
-
-    // Fetch the created church with all details
-    const [newChurch] = await promisePool.query(
-      'SELECT * FROM church_info WHERE id = ?',
-      [result.insertId]
-    );
-
-    console.log('🎉 Church creation successful');
-
-    res.status(201).json({
-      success: true,
-      message: 'Church created successfully',
-      church: {
-        id: newChurch[0].id,
-        church_id: newChurch[0].church_id,
-        name: newChurch[0].name,
-        email: newChurch[0].email,
-        country: newChurch[0].country,
-        language_preference: newChurch[0].language_preference,
-        timezone: newChurch[0].timezone,
-        is_active: newChurch[0].is_active,
-        created_at: newChurch[0].created_at
-      },
-      validation: {
-        warnings: validation.warnings
-      }
-    });
-
-  } catch (error) {
-    console.error('❌ Error creating church:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to create church',
-      details: error.message
-    });
-  }
-});
-
-// PUT /api/churches/:id - Update church
-router.put('/:id', requireAuth, async (req, res) => {
-  try {
-    console.log('🚀 PUT /:id route handler started');
-    console.log('🔐 Session user:', req.session?.user);
-    console.log('🎭 User role:', req.session?.user?.role);
-    
-    if (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin') {
-      console.log('❌ Access denied - insufficient role:', req.session.user.role);
-      return res.status(403).json({ error: 'Access denied. Admin role required.' });
-    }
-
-    const churchId = parseInt(req.params.id);
-    console.log('🔄 Updating church ID:', churchId, 'with data:', req.body);
-
-    // Validate church data
-    const validation = validateChurchData(req.body);
-    console.log('📋 Validation result:', {
-      isValid: validation.isValid,
-      errors: validation.errors,
-      warnings: validation.warnings,
-      requestBody: req.body
-    });
-    
-    if (!validation.isValid) {
-      console.log('❌ Validation failed for church update:', validation.errors);
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: validation.errors,
-        warnings: validation.warnings
-      });
-    }
-
-    // Check if church exists
-    const [existingChurch] = await promisePool.query(
-      'SELECT id FROM church_info WHERE id = ?',
-      [churchId]
-    );
-
-    if (existingChurch.length === 0) {
-      console.log('❌ Church not found with ID:', churchId);
-      return res.status(404).json({ 
-        success: false,
-        error: 'Church not found' 
-      });
-    }
-
-    // Sanitize church data
-    const churchData = sanitizeChurchData(req.body);
-    console.log('🧹 Sanitized church data for update:', churchData);
-
-    // Build update query dynamically
-    const updates = [];
-    const values = [];
-
-    // Map all possible fields that can be updated
-    const fieldMapping = {
-      'name': 'name',
-      'email': 'email',
-      'phone': 'phone',
-      'website': 'website',
-      'address': 'address',
-      'city': 'city',
-      'state_province': 'state_province',
-      'postal_code': 'postal_code',
-      'country': 'country',
-      'description': 'description',
-      'founded_year': 'founded_year',
-      'language_preference': 'language_preference', // Use sanitized field name
-      'timezone': 'timezone',
-      'currency': 'currency',
-      'tax_id': 'tax_id',
-      'is_active': 'is_active'
-    };
-
-    // Build dynamic update query
-    Object.keys(fieldMapping).forEach(frontendField => {
-      const dbField = fieldMapping[frontendField];
-      if (churchData[frontendField] !== undefined) {
-        console.log(`🔄 Adding field: ${frontendField} -> ${dbField} = ${churchData[frontendField]}`);
-        updates.push(`${dbField} = ?`);
-        values.push(churchData[frontendField]);
-      } else {
-        console.log(`⚠️ Field ${frontendField} not found in sanitized data`);
-      }
-    });
-
-    console.log('🔄 Total updates to apply:', updates.length);
-    console.log('🔄 Update fields:', updates);
-
-    if (updates.length === 0) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'No fields to update' 
-      });
-    }
-
-    values.push(churchId);
-
-    console.log('🔄 Executing update query:', `UPDATE church_info SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`);
-    console.log('🔄 With values:', values);
-
-    await promisePool.query(
-      `UPDATE church_info SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-      values
-    );
-
-    // Fetch updated church
-    const [updatedChurch] = await promisePool.query(`
-      SELECT 
-        id,
-        church_id,
-        name,
-        email,
-        phone,
-        website,
-        address,
-        city,
-        state_province,
-        postal_code,
-        country,
-        description,
-        founded_year,
-        language_preference,
+        description_multilang,
+        preferred_language,
         timezone,
         currency,
         tax_id,
         is_active,
-        created_at,
-        updated_at
-      FROM church_info 
-      WHERE id = ?
-    `, [churchId]);
+        database_name,
+        created_by,
+        setup_complete
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      churchData.name,
+      churchData.email,
+      churchData.phone || null,
+      churchData.website || null,
+      churchData.address || null,
+      churchData.city || null,
+      churchData.state_province || null,
+      churchData.postal_code || null,
+      churchData.country || 'US',
+      churchData.description || null,
+      churchData.preferred_language || 'en',
+      churchData.timezone || 'America/New_York',
+      churchData.currency || 'USD',
+      churchData.tax_id || null,
+      true, // is_active
+      null, // database_name (will be set if/when church-specific DB is created)
+      req.user.id, // created_by
+      false // setup_complete
+    ]);
 
-    console.log('✅ Church updated successfully:', updatedChurch[0].name);
-    const cleanedChurch = cleanRecord(updatedChurch[0]);
+    const newChurchId = result.insertId;
+    console.log('✅ Church created with ID:', newChurchId);
 
-    res.json({
-      success: true,
-      message: 'Church updated successfully',
-      church: cleanedChurch
-    });
+    // Get the created church for response
+    const [newChurch] = await promisePool.query(
+      'SELECT * FROM churches WHERE id = ?',
+      [newChurchId]
+    );
+
+    const cleanedChurch = cleanRecord(newChurch[0]);
+
+    res.status(201).json(apiResponse(true, {
+      church: cleanedChurch,
+      message: 'Church created successfully'
+    }, null, {
+      church_id: newChurchId,
+      created_by: req.user.email
+    }));
 
   } catch (error) {
-    console.error('❌ Error updating church:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to update church',
-      details: error.message
-    });
+    console.error('❌ Error creating church:', error);
+    res.status(500).json(apiResponse(false, null, {
+      message: 'Failed to create church',
+      code: 'DATABASE_ERROR',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }));
   }
 });
 
-// DELETE /api/churches/:id - Delete church (soft delete)
-router.delete('/:id', requireAuth, async (req, res) => {
+// PUT /api/churches/:id - Update church (admin for own church, super_admin for any)
+router.put('/:id', requireAuth, requireChurchAccess, async (req, res) => {
   try {
-    if (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin') {
-      return res.status(403).json({ error: 'Access denied. Admin role required.' });
+    const churchId = parseInt(req.params.id);
+
+    console.log('🔧 Updating church ID:', churchId, 'User:', req.user?.email);
+
+    if (isNaN(churchId)) {
+      return res.status(400).json(apiResponse(false, null, {
+        message: 'Invalid church ID format',
+        code: 'INVALID_CHURCH_ID'
+      }));
     }
 
-    const churchId = parseInt(req.params.id);
-    console.log('🗑️ Deleting church ID:', churchId);
+    // Validate user access to this church
+    const access = validateChurchAccess(req.user, churchId);
+    if (!access.allowed) {
+      return res.status(403).json(apiResponse(false, null, {
+        message: 'Access denied',
+        code: 'INSUFFICIENT_PERMISSIONS',
+        details: access.reason
+      }));
+    }
+
+    // Validate update data
+    const validation = validateChurchData(req.body, true); // true = update mode
+    if (!validation.isValid) {
+      return res.status(400).json(apiResponse(false, null, {
+        message: 'Validation failed',
+        code: 'VALIDATION_ERROR',
+        details: validation.errors
+      }));
+    }
+
+    // Sanitize update data
+    const updateData = sanitizeChurchData(req.body, true);
 
     // Check if church exists
-    const [existingChurch] = await promisePool.query(
-      'SELECT id FROM church_info WHERE id = ?',
+    const [existing] = await promisePool.query(
+      'SELECT id, name, email FROM churches WHERE id = ? AND is_active = 1',
       [churchId]
     );
 
-    if (existingChurch.length === 0) {
-      console.log('❌ Church not found with ID:', churchId);
-      return res.status(404).json({ 
-        success: false,
-        error: 'Church not found' 
-      });
+    if (existing.length === 0) {
+      return res.status(404).json(apiResponse(false, null, {
+        message: 'Church not found',
+        code: 'CHURCH_NOT_FOUND'
+      }));
     }
 
-    // Soft delete by setting is_active to false
+    // Check for name conflicts (if name is being changed)
+    if (updateData.name && updateData.name !== existing[0].name) {
+      const [nameConflict] = await promisePool.query(
+        'SELECT id FROM churches WHERE name = ? AND id != ?',
+        [updateData.name, churchId]
+      );
+
+      if (nameConflict.length > 0) {
+        return res.status(409).json(apiResponse(false, null, {
+          message: 'Church name already exists',
+          code: 'DUPLICATE_CHURCH_NAME'
+        }));
+      }
+    }
+
+    // Check for email conflicts (if email is being changed)
+    if (updateData.email && updateData.email !== existing[0].email) {
+      const [emailConflict] = await promisePool.query(
+        'SELECT id FROM churches WHERE email = ? AND id != ?',
+        [updateData.email, churchId]
+      );
+
+      if (emailConflict.length > 0) {
+        return res.status(409).json(apiResponse(false, null, {
+          message: 'Email already in use',
+          code: 'DUPLICATE_EMAIL'
+        }));
+      }
+    }
+
+    // Build dynamic update query
+    const updateFields = [];
+    const updateValues = [];
+
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] !== undefined) {
+        updateFields.push(`${key} = ?`);
+        updateValues.push(updateData[key]);
+      }
+    });
+
+    if (updateFields.length === 0) {
+      return res.status(400).json(apiResponse(false, null, {
+        message: 'No valid fields to update',
+        code: 'NO_UPDATE_DATA'
+      }));
+    }
+
+    // Add updated_at and updated_by
+    updateFields.push('updated_at = CURRENT_TIMESTAMP');
+    updateFields.push('updated_by = ?');
+    updateValues.push(req.user.id);
+    updateValues.push(churchId); // for WHERE clause
+
+    // Execute update
     await promisePool.query(
-      'UPDATE church_info SET is_active = FALSE, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      `UPDATE churches SET ${updateFields.join(', ')} WHERE id = ?`,
+      updateValues
+    );
+
+    // Get updated church
+    const [updatedChurch] = await promisePool.query(
+      'SELECT * FROM churches WHERE id = ?',
       [churchId]
     );
 
-    console.log('✅ Church deactivated successfully');
-    res.json({ 
-      success: true,
-      message: 'Church deactivated successfully' 
-    });
+    const cleanedChurch = cleanRecord(updatedChurch[0]);
+
+    console.log('✅ Church updated successfully');
+
+    res.json(apiResponse(true, {
+      church: cleanedChurch,
+      message: 'Church updated successfully'
+    }, null, {
+      updated_by: req.user.email,
+      fields_updated: Object.keys(updateData)
+    }));
+
+  } catch (error) {
+    console.error('❌ Error updating church:', error);
+    res.status(500).json(apiResponse(false, null, {
+      message: 'Failed to update church',
+      code: 'DATABASE_ERROR',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }));
+  }
+});
+
+// DELETE /api/churches/:id - Soft delete church (super_admin only)
+router.delete('/:id', requireAuth, requireRole(['super_admin']), async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+
+    console.log('🗑️ Soft deleting church ID:', churchId, 'User:', req.user?.email);
+
+    if (isNaN(churchId)) {
+      return res.status(400).json(apiResponse(false, null, {
+        message: 'Invalid church ID format',
+        code: 'INVALID_CHURCH_ID'
+      }));
+    }
+
+    // Check if church exists
+    const [existing] = await promisePool.query(
+      'SELECT id, name FROM churches WHERE id = ? AND is_active = 1',
+      [churchId]
+    );
+
+    if (existing.length === 0) {
+      return res.status(404).json(apiResponse(false, null, {
+        message: 'Church not found',
+        code: 'CHURCH_NOT_FOUND'
+      }));
+    }
+
+    // Soft delete (set is_active = 0)
+    await promisePool.query(
+      'UPDATE churches SET is_active = 0, updated_at = CURRENT_TIMESTAMP, updated_by = ? WHERE id = ?',
+      [req.user.id, churchId]
+    );
+
+    console.log('✅ Church soft deleted successfully');
+
+    res.json(apiResponse(true, {
+      message: 'Church deleted successfully',
+      church_name: existing[0].name
+    }, null, {
+      deleted_by: req.user.email,
+      church_id: churchId
+    }));
 
   } catch (error) {
     console.error('❌ Error deleting church:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to delete church',
-      details: error.message
-    });
+    res.status(500).json(apiResponse(false, null, {
+      message: 'Failed to delete church',
+      code: 'DATABASE_ERROR',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }));
   }
 });
 

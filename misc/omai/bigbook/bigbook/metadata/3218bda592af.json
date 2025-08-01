@@ -1,0 +1,43 @@
+{
+  "id": "3218bda592af",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/BIG_BOOK_CENTRALIZED_INGESTION_SYSTEM.md",
+  "relativePath": "docs/BIG_BOOK_CENTRALIZED_INGESTION_SYSTEM.md",
+  "name": "BIG_BOOK_CENTRALIZED_INGESTION_SYSTEM.md",
+  "extension": ".md",
+  "size": 10893,
+  "modified": "2025-07-27T06:15:30.673Z",
+  "created": "2025-07-27T06:15:27.957Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 301,
+      "characters": 10537,
+      "words": 1301
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 301,
+      "codeLines": 184,
+      "commentLines": 62,
+      "commentRatio": 0.25203252032520324,
+      "averageLineLength": 41.390243902439025
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.789Z"
+  },
+  "contentHash": "cc86a843289b91d6065d1a45bfe801cf24266397fd3bd97412cbce99fe62d34b",
+  "discoveredAt": "2025-07-28T07:19:57.789Z"
+}

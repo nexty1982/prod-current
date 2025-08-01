@@ -1,0 +1,6 @@
+{
+  "id": "dbf745ce0e7f",
+  "name": "diagnose-api-v2.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/diagnose-api-v2.sh",
+  "type": "Server Scripts"
+}

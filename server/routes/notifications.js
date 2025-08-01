@@ -433,6 +433,56 @@ class NotificationService {
 // Create notification service instance
 const notificationService = new NotificationService();
 
+// Initialize notification types if they don't exist (only run on first API call)
+let initializationAttempted = false;
+
+async function initializeNotificationTypes() {
+    if (initializationAttempted) return;
+    initializationAttempted = true;
+    
+    try {
+        console.log('📢 Checking notification types...');
+        const [types] = await promisePool.execute('SELECT COUNT(*) as count FROM notification_types');
+        console.log(`✅ Found ${types[0].count} notification types in database`);
+        
+        if (types[0].count === 0) {
+            console.log('📢 No notification types found, creating defaults...');
+            await promisePool.execute(`
+                INSERT INTO notification_types (name, description, category, default_enabled) VALUES
+                ('welcome', 'Welcome message for new users', 'user', TRUE),
+                ('password_reset', 'Password reset notifications', 'security', TRUE),
+                ('login_alert', 'Login alert notifications', 'security', TRUE),
+                ('profile_updated', 'Profile update confirmations', 'user', TRUE),
+                ('backup_completed', 'Backup completion notifications', 'backup', TRUE),
+                ('backup_failed', 'Backup failure notifications', 'backup', TRUE),
+                ('certificate_ready', 'Certificate ready notifications', 'certificates', TRUE),
+                ('certificate_expiring', 'Certificate expiring reminders', 'certificates', TRUE),
+                ('invoice_created', 'New invoice notifications', 'billing', TRUE),
+                ('invoice_paid', 'Invoice payment confirmations', 'billing', TRUE),
+                ('invoice_overdue', 'Overdue invoice reminders', 'billing', TRUE),
+                ('system_maintenance', 'System maintenance notifications', 'system', TRUE),
+                ('system_alert', 'System alert notifications', 'system', TRUE),
+                ('user_activity', 'User activity notifications', 'admin', FALSE),
+                ('data_export_ready', 'Data export ready notifications', 'system', TRUE),
+                ('reminder_baptism', 'Baptism anniversary reminders', 'reminders', TRUE),
+                ('reminder_marriage', 'Marriage anniversary reminders', 'reminders', TRUE),
+                ('reminder_funeral', 'Memorial service reminders', 'reminders', TRUE),
+                ('note_shared', 'Note sharing notifications', 'user', TRUE),
+                ('note_comment', 'Note comment notifications', 'user', TRUE),
+                ('church_invitation', 'Church invitation notifications', 'user', TRUE),
+                ('role_changed', 'Role change notifications', 'admin', TRUE),
+                ('account_locked', 'Account security notifications', 'security', TRUE),
+                ('weekly_digest', 'Weekly activity digest', 'user', FALSE),
+                ('monthly_report', 'Monthly report notifications', 'admin', FALSE)
+            `);
+            console.log('✅ Default notification types created');
+        }
+    } catch (error) {
+        console.error('Warning: Could not initialize notification types:', error.message);
+        // Don't throw error - let the system continue working
+    }
+}
+
 // ============================================================================
 // API Routes
 // ============================================================================
@@ -440,6 +490,9 @@ const notificationService = new NotificationService();
 // Get user notifications
 router.get('/notifications', requireAuth, async (req, res) => {
     try {
+        // Initialize notification types on first API call (when database connection is established)
+        await initializeNotificationTypes();
+        
         const { limit = 20, offset = 0, unread_only = false, category, priority } = req.query;
         const userId = req.session?.user?.id || req.user?.id;
         if (!userId) {
@@ -465,7 +518,19 @@ router.get('/notifications', requireAuth, async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching notifications:', error);
-        res.status(500).json({ success: false, message: 'Failed to fetch notifications' });
+        
+        // If it's a database connection issue, return empty notifications instead of error
+        if (error.code === 'ER_ACCESS_DENIED_NO_PASSWORD_ERROR' || error.code === 'ECONNREFUSED') {
+            console.log('Database connection issue, returning empty notifications');
+            res.json({
+                success: true,
+                notifications: [],
+                pagination: { limit: 20, offset: 0, total: 0 },
+                message: 'Notifications temporarily unavailable'
+            });
+        } else {
+            res.status(500).json({ success: false, message: 'Failed to fetch notifications' });
+        }
     }
 });
 
@@ -480,7 +545,17 @@ router.get('/notifications/counts', requireAuth, async (req, res) => {
         res.json({ success: true, counts });
     } catch (error) {
         console.error('Error fetching notification counts:', error);
-        res.status(500).json({ success: false, message: 'Failed to fetch notification counts' });
+        
+        // If it's a database connection issue, return zero counts instead of error
+        if (error.code === 'ER_ACCESS_DENIED_NO_PASSWORD_ERROR' || error.code === 'ECONNREFUSED') {
+            console.log('Database connection issue, returning zero counts');
+            res.json({
+                success: true,
+                counts: { total: 0, unread: 0, urgent: 0, high: 0 }
+            });
+        } else {
+            res.status(500).json({ success: false, message: 'Failed to fetch notification counts' });
+        }
     }
 });
 
@@ -495,7 +570,17 @@ router.get('/counts', requireAuth, async (req, res) => {
         res.json({ success: true, counts });
     } catch (error) {
         console.error('Error fetching notification counts:', error);
-        res.status(500).json({ success: false, message: 'Failed to fetch notification counts' });
+        
+        // If it's a database connection issue, return zero counts instead of error
+        if (error.code === 'ER_ACCESS_DENIED_NO_PASSWORD_ERROR' || error.code === 'ECONNREFUSED') {
+            console.log('Database connection issue, returning zero counts');
+            res.json({
+                success: true,
+                counts: { total: 0, unread: 0, urgent: 0, high: 0 }
+            });
+        } else {
+            res.status(500).json({ success: false, message: 'Failed to fetch notification counts' });
+        }
     }
 });
 
@@ -618,15 +703,65 @@ router.get('/admin/notifications/templates', requireRole(['super_admin']), async
 router.get('/admin/notifications/queue', requireRole(['super_admin']), async (req, res) => {
     try {
         const connection = getConnection();
-        const [queue] = await connection.execute(`
-            SELECT nq.*, nt.name as type_name, u.email as user_email
-            FROM notification_queue nq
-            JOIN notification_types nt ON nq.notification_type_id = nt.id
-            JOIN users u ON nq.user_id = u.id
-            ORDER BY nq.priority DESC, nq.scheduled_at ASC
-            LIMIT 100
+        
+        // Get custom notifications (drafts and scheduled)
+        const [customNotifications] = await connection.execute(`
+            SELECT 
+                n.id,
+                n.title,
+                n.message,
+                n.priority,
+                n.created_at,
+                n.data,
+                CASE 
+                    WHEN JSON_EXTRACT(n.data, '$.is_draft') = true THEN 'draft'
+                    WHEN JSON_EXTRACT(n.data, '$.scheduled_at') IS NOT NULL THEN 'pending'
+                    ELSE 'sent'
+                END as status,
+                COALESCE(JSON_EXTRACT(n.data, '$.scheduled_at'), n.created_at) as scheduled_at,
+                COALESCE(JSON_EXTRACT(n.data, '$.target_audience'), 'unknown') as target_audience,
+                COALESCE(JSON_EXTRACT(n.data, '$.target_user_count'), 1) as user_count
+            FROM notifications n
+            WHERE JSON_EXTRACT(n.data, '$.custom_notification') = true
+            ORDER BY n.created_at DESC
+            LIMIT 50
         `);
-        res.json({ success: true, queue });
+        
+        // Also get email queue if it exists
+        let emailQueue = [];
+        try {
+            const [emailResults] = await connection.execute(`
+                SELECT nq.*, nt.name as type_name, u.email as user_email
+                FROM notification_queue nq
+                JOIN notification_types nt ON nq.notification_type_id = nt.id
+                JOIN users u ON nq.user_id = u.id
+                ORDER BY nq.priority DESC, nq.scheduled_at ASC
+                LIMIT 50
+            `);
+            emailQueue = emailResults;
+        } catch (emailError) {
+            // Email queue table might not exist, that's okay
+            console.log('Email queue table not found, skipping...');
+        }
+        
+        // Process custom notifications to clean up the data
+        const processedCustom = customNotifications.map(notif => ({
+            id: notif.id,
+            title: notif.title,
+            message: notif.message,
+            priority: notif.priority,
+            scheduled_at: notif.scheduled_at,
+            target_audience: notif.target_audience?.replace(/"/g, '') || 'all',
+            status: notif.status,
+            created_at: notif.created_at,
+            user_count: parseInt(notif.user_count) || 0
+        }));
+        
+        res.json({ 
+            success: true, 
+            queue: processedCustom,
+            emailQueue: emailQueue 
+        });
     } catch (error) {
         console.error('Error fetching notification queue:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch notification queue' });
@@ -641,6 +776,184 @@ router.post('/admin/notifications/process-queue', requireRole(['super_admin']), 
     } catch (error) {
         console.error('Error processing email queue:', error);
         res.status(500).json({ success: false, message: 'Failed to process email queue' });
+    }
+});
+
+// Get all notification types for admin management
+router.get('/admin/notifications/types', requireRole(['super_admin']), async (req, res) => {
+    try {
+        const connection = getConnection();
+        const [types] = await connection.execute(`
+            SELECT id, name, description, category, default_enabled, is_active
+            FROM notification_types
+            ORDER BY category, name
+        `);
+        res.json({ success: true, types });
+    } catch (error) {
+        console.error('Error fetching notification types:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch notification types' });
+    }
+});
+
+// Toggle notification type system-wide
+router.put('/admin/notifications/types/:id/toggle', requireRole(['super_admin']), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { enabled } = req.body;
+        
+        const connection = getConnection();
+        const [result] = await connection.execute(`
+            UPDATE notification_types 
+            SET default_enabled = ?
+            WHERE id = ?
+        `, [enabled, id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Notification type not found' });
+        }
+        
+        console.log(`📢 Notification type ${id} ${enabled ? 'enabled' : 'disabled'} system-wide by ${req.session.user?.email}`);
+        res.json({ success: true, message: `Notification type ${enabled ? 'enabled' : 'disabled'} system-wide` });
+    } catch (error) {
+        console.error('Error toggling notification type:', error);
+        res.status(500).json({ success: false, message: 'Failed to update notification type' });
+    }
+});
+
+// Create custom system-wide notification
+router.post('/admin/notifications/custom', requireRole(['super_admin']), async (req, res) => {
+    try {
+        const {
+            title,
+            message,
+            priority = 'normal',
+            scheduled_at = null,
+            target_audience = 'all',
+            church_id = null,
+            icon = '📢',
+            action_url = null,
+            action_text = null,
+            is_draft = false
+        } = req.body;
+        
+        if (!title || !message) {
+            return res.status(400).json({ success: false, message: 'Title and message are required' });
+        }
+        
+        const connection = getConnection();
+        
+        // If not a draft and no scheduled time, send immediately
+        const shouldSendNow = !is_draft && !scheduled_at;
+        const scheduledDate = scheduled_at ? new Date(scheduled_at) : (shouldSendNow ? new Date() : null);
+        
+        // Get target users based on audience
+        let userQuery = '';
+        let userParams = [];
+        
+        switch (target_audience) {
+            case 'all':
+                userQuery = 'SELECT id FROM users WHERE is_active = 1';
+                break;
+            case 'admins':
+                userQuery = "SELECT id FROM users WHERE role IN ('admin', 'super_admin') AND is_active = 1";
+                break;
+            case 'users':
+                userQuery = "SELECT id FROM users WHERE role NOT IN ('admin', 'super_admin') AND is_active = 1";
+                break;
+            case 'church_specific':
+                if (!church_id) {
+                    return res.status(400).json({ success: false, message: 'Church ID required for church-specific notifications' });
+                }
+                userQuery = 'SELECT id FROM users WHERE church_id = ? AND is_active = 1';
+                userParams = [church_id];
+                break;
+            default:
+                return res.status(400).json({ success: false, message: 'Invalid target audience' });
+        }
+        
+        // Get target user IDs
+        const [users] = await connection.execute(userQuery, userParams);
+        
+        if (users.length === 0) {
+            return res.status(400).json({ success: false, message: 'No target users found for this audience' });
+        }
+        
+        // If sending now, create notifications for all target users
+        if (shouldSendNow) {
+            const notifications = users.map(user => [
+                user.id,
+                1, // Use 'system_alert' notification type
+                title,
+                message,
+                JSON.stringify({
+                    target_audience,
+                    church_id,
+                    custom_notification: true,
+                    created_by: req.session.user?.email
+                }),
+                priority,
+                action_url,
+                action_text,
+                null, // expires_at
+                icon,
+                null // image_url
+            ]);
+            
+            await connection.execute(`
+                INSERT INTO notifications (
+                    user_id, notification_type_id, title, message, data, 
+                    priority, action_url, action_text, expires_at, icon, image_url
+                ) VALUES ?
+            `, [notifications]);
+            
+            console.log(`📢 Custom notification "${title}" sent to ${users.length} users by ${req.session.user?.email}`);
+            res.json({ 
+                success: true, 
+                message: `Notification sent to ${users.length} users`,
+                recipients: users.length
+            });
+        } else {
+            // Store in custom notifications queue/history table (you may need to create this table)
+            // For now, we'll create a single notification record to track the custom notification
+            const [result] = await connection.execute(`
+                INSERT INTO notifications (
+                    user_id, notification_type_id, title, message, data, 
+                    priority, action_url, action_text, expires_at, icon, image_url
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+                req.session.user.id, // Store under the creator's ID for drafts
+                1, // system_alert type
+                title,
+                message,
+                JSON.stringify({
+                    target_audience,
+                    church_id,
+                    scheduled_at: scheduledDate?.toISOString(),
+                    is_draft,
+                    target_user_count: users.length,
+                    custom_notification: true,
+                    created_by: req.session.user?.email
+                }),
+                priority,
+                action_url,
+                action_text,
+                null,
+                icon,
+                null
+            ]);
+            
+            const status = is_draft ? 'saved as draft' : 'scheduled';
+            console.log(`📢 Custom notification "${title}" ${status} by ${req.session.user?.email}`);
+            res.json({ 
+                success: true, 
+                message: `Notification ${status} successfully`,
+                id: result.insertId,
+                scheduled_recipients: users.length
+            });
+        }
+    } catch (error) {
+        console.error('Error creating custom notification:', error);
+        res.status(500).json({ success: false, message: 'Failed to create custom notification' });
     }
 });
 

@@ -1,0 +1,218 @@
+{
+  "id": "e0e5928716f1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/TESTING_GUIDE.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/TESTING_GUIDE.md",
+  "name": "TESTING_GUIDE.md",
+  "extension": ".md",
+  "size": 33016,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:07.300Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1207,
+      "characters": 32996,
+      "words": 2914
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "supertest",
+        "line": 94
+      },
+      {
+        "type": "npm_package",
+        "name": "supertest",
+        "line": 183
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 292
+      },
+      {
+        "type": "npm_package",
+        "name": "@testing-library/react",
+        "line": 293
+      },
+      {
+        "type": "npm_package",
+        "name": "@testing-library/react",
+        "line": 364
+      },
+      {
+        "type": "npm_package",
+        "name": "supertest",
+        "line": 403
+      },
+      {
+        "type": "npm_package",
+        "name": "supertest",
+        "line": 733
+      },
+      {
+        "type": "npm_package",
+        "name": "supertest",
+        "line": 812
+      },
+      {
+        "type": "npm_package",
+        "name": "artillery",
+        "line": 939
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 940
+      },
+      {
+        "type": "npm_package",
+        "name": "pidusage",
+        "line": 991
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 1121
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 1122
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 116,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 130,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 146,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 162,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 205,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 237,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 354,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 386,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 427,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 440,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 741,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 765,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 778,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 795,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 825,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 834,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 906,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 933,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "# Testing Guide\r\n\r\n## 🧪 Orthodox Metrics Testing Framework\r\n\r\nThis document provides comprehensive testing procedures and scripts for the Orthodox Metrics church management system.\r\n\r\n## 🎯 Testing Overview\r\n\r\n### Testing Strategy\r\n- **Unit Testing**: Individual component and function testing\r\n- **Integration Testing**: API endpoint and database testing\r\n- **End-to-End Testing**: Complete user workflow testing\r\n- **Security Testing**: Authentication and authorization testing\r\n- **Performance Testing**: Load and stress testing\r\n- **Manual Testing**: User acceptance testing\r\n\r\n### Testing Levels\r\n1. **Component Level**: Frontend components and backend functions\r\n2. **API Level**: REST endpoint testing\r\n3. **Database Level**: Data integrity and query testing\r\n4. **System Level**: Complete workflow testing\r\n5. **Security Level**: Authentication and authorization testing\r\n\r\n## 🔧 Test Environment Setup\r\n\r\n### 1. Development Environment\r\n\r\n#### Test Database Setup\r\n```bash\r\n# Create test database\r\nmysql -u root -p -e \"CREATE DATABASE orthodox_metrics_test;\"\r\n\r\n# Import test schema\r\nmysql -u root -p orthodox_metrics_test < database/schema.sql\r\n\r\n# Import test data\r\nmysql -u root -p orthodox_metrics_test < database/test_data.sql\r\n```\r\n\r\n#### Environment Configuration\r\n```bash\r\n# .env.test\r\nNODE_ENV=test\r\nDB_HOST=localhost\r\nDB_USER=root\r\nDB_PASSWORD=your_password\r\nDB_NAME=orthodox_metrics_test\r\nSESSION_SECRET=test_secret_key\r\nJWT_SECRET=test_jwt_secret\r\n```\r\n\r\n### 2. Testing Dependencies\r\n\r\n#### Package Installation\r\n```bash\r\n# Install testing dependencies\r\nnpm install --save-dev \\\r\n  jest \\\r\n  supertest \\\r\n  @testing-library/react \\\r\n  @testing-library/jest-dom \\\r\n  cypress \\\r\n  artillery \\\r\n  eslint-plugin-jest\r\n```\r\n\r\n#### Jest Configuration\r\n```javascript\r\n// jest.config.js\r\nmodule.exports = {\r\n  testEnvironment: 'node',\r\n  setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],\r\n  testMatch: [\r\n    '<rootDir>/tests/**/*.test.js',\r\n    '<rootDir>/tests/**/*.spec.js'\r\n  ],\r\n  collectCoverageFrom: [\r\n    'server/**/*.js',\r\n    '!server/node_modules/**',\r\n    '!server/tests/**'\r\n  ],\r\n  coverageDirectory: 'coverage',\r\n  coverageReporters: ['text', 'lcov', 'html']\r\n};\r\n```\r\n\r\n## 🧪 Unit Testing\r\n\r\n### 1. Backend Unit Tests\r\n\r\n#### Authentication Tests\r\n```javascript\r\n// tests/auth.test.js\r\nconst request = require('supertest');\r\nconst app = require('../server/index');\r\nconst db = require('../server/database/connection');\r\n\r\ndescribe('Authentication', () => {\r\n  beforeEach(async () => {\r\n    // Clear users table\r\n    await db.execute('DELETE FROM users');\r\n    \r\n    // Insert test user\r\n    await db.execute(`\r\n      INSERT INTO users (email, password, name, role, is_active) \r\n      VALUES ('test@example.com', '$2a$10$hashedpassword', 'Test User', 'admin', 1)\r\n    `);\r\n  });\r\n\r\n  describe('POST /auth/login', () => {\r\n    it('should login with valid credentials', async () => {\r\n      const response = await request(app)\r\n        .post('/auth/login')\r\n        .send({\r\n          email: 'test@example.com',\r\n          password: '[REDACTED]'\r\n        });\r\n\r\n      expect(response.status).toBe(200);\r\n      expect(response.body.success).toBe(true);\r\n      expect(response.body.user).toBeDefined();\r\n      expect(response.body.user.email).toBe('test@example.com');\r\n    });\r\n\r\n    it('should reject invalid credentials', async () => {\r\n      const response = await request(app)\r\n        .post('/auth/login')\r\n        .send({\r\n          email: 'test@example.com',\r\n          password: '[REDACTED]'\r\n        });\r\n\r\n      expect(response.status).toBe(401);\r\n      expect(response.body.success).toBe(false);\r\n      expect(response.body.error).toBe('Invalid credentials');\r\n    });\r\n\r\n    it('should reject inactive user', async () => {\r\n      // Deactivate user\r\n      await db.execute('UPDATE users SET is_active = 0 WHERE email = ?', ['test@example.com']);\r\n\r\n      const response = await request(app)\r\n        .post('/auth/login')\r\n        .send({\r\n          email: 'test@example.com',\r\n          password: '[REDACTED]'\r\n        });\r\n\r\n      expect(response.status).toBe(401);\r\n      expect(response.body.success).toBe(false);\r\n      expect(response.body.error).toBe('Account is inactive');\r\n    });\r\n  });\r\n\r\n  describe('POST /auth/logout', () => {\r\n    it('should logout successfully', async () => {\r\n      // Login first\r\n      const loginResponse = await request(app)\r\n        .post('/auth/login')\r\n        .send({\r\n          email: 'test@example.com',\r\n          password: '[REDACTED]'\r\n        });\r\n\r\n      const cookies = loginResponse.headers['set-cookie'];\r\n\r\n      // Logout\r\n      const response = await request(app)\r\n        .post('/auth/logout')\r\n        .set('Cookie', cookies);\r\n\r\n      expect(response.status).toBe(200);\r\n      expect(response.body.success).toBe(true);\r\n      expect(response.body.message).toBe('Logout successful');\r\n    });\r\n  });\r\n});\r\n```\r\n\r\n#### User Management Tests\r\n```javascript\r\n// tests/userManagement.test.js\r\nconst request = require('supertest');\r\nconst app = require('../server/index');\r\nconst db = require('../server/database/connection');\r\n\r\ndescribe('User Management', () => {\r\n  let adminSession;\r\n\r\n  beforeEach(async () => {\r\n    // Clear users table\r\n    await db.execute('DELETE FROM users');\r\n    \r\n    // Insert admin user\r\n    await db.execute(`\r\n      INSERT INTO users (email, password, name, role, is_active) \r\n      VALUES ('admin@example.com', '$2a$10$hashedpassword', 'Admin User', 'admin', 1)\r\n    `);\r\n\r\n    // Login as admin\r\n    const loginResponse = await request(app)\r\n      .post('/auth/login')\r\n      .send({\r\n        email: 'admin@example.com',\r\n        password: '[REDACTED]'\r\n      });\r\n\r\n    adminSession = loginResponse.headers['set-cookie'];\r\n  });\r\n\r\n  describe('GET /admin/users', () => {\r\n    it('should get all users', async () => {\r\n      const response = await request(app)\r\n        .get('/admin/users')\r\n        .set('Cookie', adminSession);\r\n\r\n      expect(response.status).toBe(200);\r\n      expect(response.body.success).toBe(true);\r\n      expect(response.body.users).toBeDefined();\r\n      expect(Array.isArray(response.body.users)).toBe(true);\r\n    });\r\n\r\n    it('should require authentication', async () => {\r\n      const response = await request(app)\r\n        .get('/admin/users');\r\n\r\n      expect(response.status).toBe(401);\r\n      expect(response.body.success).toBe(false);\r\n    });\r\n  });\r\n\r\n  describe('POST /admin/users', () => {\r\n    it('should create new user', async () => {\r\n      const userData = {\r\n        email: 'newuser@example.com',\r\n        name: 'New User',\r\n        password: '[REDACTED]',\r\n        role: 'user'\r\n      };\r\n\r\n      const response = await request(app)\r\n        .post('/admin/users')\r\n        .set('Cookie', adminSession)\r\n        .send(userData);\r\n\r\n      expect(response.status).toBe(201);\r\n      expect(response.body.success).toBe(true);\r\n      expect(response.body.user.email).toBe(userData.email);\r\n    });\r\n\r\n    it('should validate required fields', async () => {\r\n      const response = await request(app)\r\n        .post('/admin/users')\r\n        .set('Cookie', adminSession)\r\n        .send({\r\n          email: 'test@example.com'\r\n          // Missing name and password\r\n        });\r\n\r\n      expect(response.status).toBe(400);\r\n      expect(response.body.success).toBe(false);\r\n    });\r\n  });\r\n\r\n  describe('PUT /admin/users/:id/toggle', () => {\r\n    it('should toggle user status', async () => {\r\n      // Create test user\r\n      const [result] = await db.execute(`\r\n        INSERT INTO users (email, password, name, role, is_active) \r\n        VALUES ('toggleuser@example.com', '$2a$10$hashedpassword', 'Toggle User', 'user', 1)\r\n      `);\r\n\r\n      const userId = result.insertId;\r\n\r\n      const response = await request(app)\r\n        .put(`/admin/users/${userId}/toggle`)\r\n        .set('Cookie', adminSession);\r\n\r\n      expect(response.status).toBe(200);\r\n      expect(response.body.success).toBe(true);\r\n      expect(response.body.is_active).toBe(false);\r\n    });\r\n  });\r\n});\r\n```\r\n\r\n### 2. Frontend Unit Tests\r\n\r\n#### Component Testing\r\n```javascript\r\n// front-end/src/components/__tests__/Login.test.tsx\r\nimport React from 'react';\r\nimport { render, screen, fireEvent, waitFor } from '@testing-library/react';\r\nimport '@testing-library/jest-dom';\r\nimport { Login } from '../Login';\r\nimport { AuthProvider } from '../../contexts/AuthContext';\r\n\r\n// Mock the auth service\r\njest.mock('../../services/auth', () => ({\r\n  authService: {\r\n    login: jest.fn()\r\n  }\r\n}));\r\n\r\ndescribe('Login Component', () => {\r\n  const renderLogin = () => {\r\n    return render(\r\n      <AuthProvider>\r\n        <Login />\r\n      </AuthProvider>\r\n    );\r\n  };\r\n\r\n  it('should render login form', () => {\r\n    renderLogin();\r\n    \r\n    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();\r\n    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();\r\n    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();\r\n  });\r\n\r\n  it('should validate required fields', async () => {\r\n    renderLogin();\r\n    \r\n    const loginButton = screen.getByRole('button', { name: /login/i });\r\n    fireEvent.click(loginButton);\r\n    \r\n    await waitFor(() => {\r\n      expect(screen.getByText(/email is required/i)).toBeInTheDocument();\r\n      expect(screen.getByText(/password is required/i)).toBeInTheDocument();\r\n    });\r\n  });\r\n\r\n  it('should submit login form', async () => {\r\n    const mockLogin = require('../../services/auth').authService.login;\r\n    mockLogin.mockResolvedValue({\r\n      success: true,\r\n      user: { id: 1, email: 'test@example.com' }\r\n    });\r\n\r\n    renderLogin();\r\n    \r\n    const emailInput = screen.getByLabelText(/email/i);\r\n    const passwordInput = screen.getByLabelText(/password/i);\r\n    const loginButton = screen.getByRole('button', { name: /login/i });\r\n    \r\n    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });\r\n    fireEvent.change(passwordInput, { target: { value: 'password123' } });\r\n    fireEvent.click(loginButton);\r\n    \r\n    await waitFor(() => {\r\n      expect(mockLogin).toHaveBeenCalledWith({\r\n        email: 'test@example.com',\r\n        password: '[REDACTED]'\r\n      });\r\n    });\r\n  });\r\n});\r\n```\r\n\r\n#### Hook Testing\r\n```javascript\r\n// front-end/src/hooks/__tests__/useAuth.test.ts\r\nimport { renderHook, act } from '@testing-library/react';\r\nimport { useAuth } from '../useAuth';\r\nimport { AuthProvider } from '../../contexts/AuthContext';\r\n\r\ndescribe('useAuth Hook', () => {\r\n  const wrapper = ({ children }: { children: React.ReactNode }) => (\r\n    <AuthProvider>{children}</AuthProvider>\r\n  );\r\n\r\n  it('should initialize with no user', () => {\r\n    const { result } = renderHook(() => useAuth(), { wrapper });\r\n    \r\n    expect(result.current.user).toBeNull();\r\n    expect(result.current.isAuthenticated).toBe(false);\r\n  });\r\n\r\n  it('should login user', async () => {\r\n    const { result } = renderHook(() => useAuth(), { wrapper });\r\n    \r\n    await act(async () => {\r\n      await result.current.login({\r\n        email: 'test@example.com',\r\n        password: '[REDACTED]'\r\n      });\r\n    });\r\n    \r\n    expect(result.current.user).toBeDefined();\r\n    expect(result.current.isAuthenticated).toBe(true);\r\n  });\r\n});\r\n```\r\n\r\n## 🔗 Integration Testing\r\n\r\n### 1. API Integration Tests\r\n\r\n#### Complete API Flow Tests\r\n```javascript\r\n// tests/integration/apiFlow.test.js\r\nconst request = require('supertest');\r\nconst app = require('../../server/index');\r\nconst db = require('../../server/database/connection');\r\n\r\ndescribe('API Integration Flow', () => {\r\n  let adminSession;\r\n  let createdUserId;\r\n\r\n  beforeAll(async () => {\r\n    // Setup test database\r\n    await db.execute('DELETE FROM users');\r\n    await db.execute(`\r\n      INSERT INTO users (email, password, name, role, is_active) \r\n      VALUES ('admin@example.com', '$2a$10$hashedpassword', 'Admin', 'admin', 1)\r\n    `);\r\n  });\r\n\r\n  describe('Complete User Management Flow', () => {\r\n    it('should complete full user lifecycle', async () => {\r\n      // Step 1: Admin login\r\n      const loginResponse = await request(app)\r\n        .post('/auth/login')\r\n        .send({\r\n          email: 'admin@example.com',\r\n          password: '[REDACTED]'\r\n        });\r\n\r\n      expect(loginResponse.status).toBe(200);\r\n      adminSession = loginResponse.headers['set-cookie'];\r\n\r\n      // Step 2: Create user\r\n      const createResponse = await request(app)\r\n        .post('/admin/users')\r\n        .set('Cookie', adminSession)\r\n        .send({\r\n          email: 'newuser@example.com',\r\n          name: 'New User',\r\n          password: '[REDACTED]',\r\n          role: 'user'\r\n        });\r\n\r\n      expect(createResponse.status).toBe(201);\r\n      createdUserId = createResponse.body.user.id;\r\n\r\n      // Step 3: Get users list\r\n      const getUsersResponse = await request(app)\r\n        .get('/admin/users')\r\n        .set('Cookie', adminSession);\r\n\r\n      expect(getUsersResponse.status).toBe(200);\r\n      expect(getUsersResponse.body.users).toHaveLength(2);\r\n\r\n      // Step 4: Update user\r\n      const updateResponse = await request(app)\r\n        .put(`/admin/users/${createdUserId}`)\r\n        .set('Cookie', adminSession)\r\n        .send({\r\n          name: 'Updated User Name'\r\n        });\r\n\r\n      expect(updateResponse.status).toBe(200);\r\n\r\n      // Step 5: Toggle user status\r\n      const toggleResponse = await request(app)\r\n        .put(`/admin/users/${createdUserId}/toggle`)\r\n        .set('Cookie', adminSession);\r\n\r\n      expect(toggleResponse.status).toBe(200);\r\n      expect(toggleResponse.body.is_active).toBe(false);\r\n\r\n      // Step 6: Delete user\r\n      const deleteResponse = await request(app)\r\n        .delete(`/admin/users/${createdUserId}`)\r\n        .set('Cookie', adminSession);\r\n\r\n      expect(deleteResponse.status).toBe(200);\r\n\r\n      // Step 7: Verify deletion\r\n      const finalGetResponse = await request(app)\r\n        .get('/admin/users')\r\n        .set('Cookie', adminSession);\r\n\r\n      expect(finalGetResponse.body.users).toHaveLength(1);\r\n    });\r\n  });\r\n});\r\n```\r\n\r\n### 2. Database Integration Tests\r\n\r\n#### Database Operations Testing\r\n```javascript\r\n// tests/integration/database.test.js\r\nconst db = require('../../server/database/connection');\r\n\r\ndescribe('Database Operations', () => {\r\n  beforeEach(async () => {\r\n    // Clear test data\r\n    await db.execute('DELETE FROM users WHERE email LIKE \"%test%\"');\r\n  });\r\n\r\n  describe('User Operations', () => {\r\n    it('should insert and retrieve user', async () => {\r\n      // Insert user\r\n      const [insertResult] = await db.execute(`\r\n        INSERT INTO users (email, password, name, role, is_active) \r\n        VALUES ('dbtest@example.com', 'hashedpassword', 'DB Test', 'user', 1)\r\n      `);\r\n\r\n      expect(insertResult.insertId).toBeDefined();\r\n\r\n      // Retrieve user\r\n      const [users] = await db.execute(\r\n        'SELECT * FROM users WHERE id = ?',\r\n        [insertResult.insertId]\r\n      );\r\n\r\n      expect(users).toHaveLength(1);\r\n      expect(users[0].email).toBe('dbtest@example.com');\r\n    });\r\n\r\n    it('should handle duplicate email constraint', async () => {\r\n      // Insert first user\r\n      await db.execute(`\r\n        INSERT INTO users (email, password, name, role, is_active) \r\n        VALUES ('duplicate@example.com', 'hashedpassword', 'User 1', 'user', 1)\r\n      `);\r\n\r\n      // Try to insert duplicate\r\n      await expect(\r\n        db.execute(`\r\n          INSERT INTO users (email, password, name, role, is_active) \r\n          VALUES ('duplicate@example.com', 'hashedpassword', 'User 2', 'user', 1)\r\n        `)\r\n      ).rejects.toThrow();\r\n    });\r\n  });\r\n\r\n  describe('Session Operations', () => {\r\n    it('should store and retrieve session', async () => {\r\n      const sessionId = 'test-session-id';\r\n      const sessionData = JSON.stringify({\r\n        user: { id: 1, email: 'test@example.com' },\r\n        loginTime: new Date()\r\n      });\r\n\r\n      // Store session\r\n      await db.execute(`\r\n        INSERT INTO sessions (session_id, expires, data) \r\n        VALUES (?, DATE_ADD(NOW(), INTERVAL 1 HOUR), ?)\r\n      `, [sessionId, sessionData]);\r\n\r\n      // Retrieve session\r\n      const [sessions] = await db.execute(\r\n        'SELECT * FROM sessions WHERE session_id = ?',\r\n        [sessionId]\r\n      );\r\n\r\n      expect(sessions).toHaveLength(1);\r\n      expect(sessions[0].session_id).toBe(sessionId);\r\n    });\r\n  });\r\n});\r\n```\r\n\r\n## 🚀 End-to-End Testing\r\n\r\n### 1. Cypress E2E Tests\r\n\r\n#### E2E Test Setup\r\n```javascript\r\n// cypress/support/commands.js\r\nCypress.Commands.add('login', (email, password) => {\r\n  cy.request({\r\n    method: 'POST',\r\n    url: '/auth/login',\r\n    body: { email, password }\r\n  }).then((response) => {\r\n    expect(response.status).to.eq(200);\r\n    expect(response.body.success).to.be.true;\r\n  });\r\n});\r\n\r\nCypress.Commands.add('createUser', (userData) => {\r\n  cy.request({\r\n    method: 'POST',\r\n    url: '/admin/users',\r\n    body: userData\r\n  }).then((response) => {\r\n    expect(response.status).to.eq(201);\r\n    return response.body.user;\r\n  });\r\n});\r\n```\r\n\r\n#### User Management E2E Tests\r\n```javascript\r\n// cypress/e2e/userManagement.cy.js\r\ndescribe('User Management E2E', () => {\r\n  beforeEach(() => {\r\n    // Login as admin\r\n    cy.login('admin@example.com', 'password123');\r\n    cy.visit('/admin/users');\r\n  });\r\n\r\n  it('should create new user', () => {\r\n    // Click create user button\r\n    cy.get('[data-cy=\"create-user-button\"]').click();\r\n\r\n    // Fill form\r\n    cy.get('[data-cy=\"user-name\"]').type('Test User');\r\n    cy.get('[data-cy=\"user-email\"]').type('testuser@example.com');\r\n    cy.get('[data-cy=\"user-password\"]').type('password123');\r\n    cy.get('[data-cy=\"user-role\"]').select('user');\r\n\r\n    // Submit form\r\n    cy.get('[data-cy=\"submit-button\"]').click();\r\n\r\n    // Verify success message\r\n    cy.get('[data-cy=\"success-message\"]').should('contain', 'User created successfully');\r\n\r\n    // Verify user appears in list\r\n    cy.get('[data-cy=\"users-table\"]').should('contain', 'testuser@example.com');\r\n  });\r\n\r\n  it('should edit user', () => {\r\n    // Find user row and click edit\r\n    cy.get('[data-cy=\"users-table\"]')\r\n      .contains('testuser@example.com')\r\n      .closest('tr')\r\n      .find('[data-cy=\"edit-button\"]')\r\n      .click();\r\n\r\n    // Update name\r\n    cy.get('[data-cy=\"user-name\"]').clear().type('Updated User');\r\n\r\n    // Submit changes\r\n    cy.get('[data-cy=\"submit-button\"]').click();\r\n\r\n    // Verify update\r\n    cy.get('[data-cy=\"success-message\"]').should('contain', 'User updated successfully');\r\n    cy.get('[data-cy=\"users-table\"]').should('contain', 'Updated User');\r\n  });\r\n\r\n  it('should toggle user status', () => {\r\n    // Find user and click toggle\r\n    cy.get('[data-cy=\"users-table\"]')\r\n      .contains('testuser@example.com')\r\n      .closest('tr')\r\n      .find('[data-cy=\"toggle-button\"]')\r\n      .click();\r\n\r\n    // Verify status change\r\n    cy.get('[data-cy=\"users-table\"]')\r\n      .contains('testuser@example.com')\r\n      .closest('tr')\r\n      .should('contain', 'Inactive');\r\n  });\r\n\r\n  it('should delete user', () => {\r\n    // Find user and click delete\r\n    cy.get('[data-cy=\"users-table\"]')\r\n      .contains('testuser@example.com')\r\n      .closest('tr')\r\n      .find('[data-cy=\"delete-button\"]')\r\n      .click();\r\n\r\n    // Confirm deletion\r\n    cy.get('[data-cy=\"confirm-delete\"]').click();\r\n\r\n    // Verify user is removed\r\n    cy.get('[data-cy=\"users-table\"]').should('not.contain', 'testuser@example.com');\r\n  });\r\n});\r\n```\r\n\r\n#### Authentication E2E Tests\r\n```javascript\r\n// cypress/e2e/authentication.cy.js\r\ndescribe('Authentication E2E', () => {\r\n  it('should login and logout', () => {\r\n    // Visit login page\r\n    cy.visit('/login');\r\n\r\n    // Enter credentials\r\n    cy.get('[data-cy=\"email\"]').type('admin@example.com');\r\n    cy.get('[data-cy=\"password\"]').type('password123');\r\n\r\n    // Submit login\r\n    cy.get('[data-cy=\"login-button\"]').click();\r\n\r\n    // Verify redirect to dashboard\r\n    cy.url().should('include', '/admin/dashboard');\r\n    cy.get('[data-cy=\"welcome-message\"]').should('contain', 'Welcome');\r\n\r\n    // Logout\r\n    cy.get('[data-cy=\"logout-button\"]').click();\r\n\r\n    // Verify redirect to login\r\n    cy.url().should('include', '/login');\r\n  });\r\n\r\n  it('should handle invalid credentials', () => {\r\n    cy.visit('/login');\r\n\r\n    cy.get('[data-cy=\"email\"]').type('admin@example.com');\r\n    cy.get('[data-cy=\"password\"]').type('wrongpassword');\r\n    cy.get('[data-cy=\"login-button\"]').click();\r\n\r\n    // Verify error message\r\n    cy.get('[data-cy=\"error-message\"]').should('contain', 'Invalid credentials');\r\n  });\r\n\r\n  it('should protect admin routes', () => {\r\n    // Try to access admin page without login\r\n    cy.visit('/admin/users');\r\n\r\n    // Should redirect to login\r\n    cy.url().should('include', '/login');\r\n  });\r\n});\r\n```\r\n\r\n## 🔒 Security Testing\r\n\r\n### 1. Authentication Security Tests\r\n\r\n#### Authentication Security Testing\r\n```javascript\r\n// tests/security/auth.test.js\r\nconst request = require('supertest');\r\nconst app = require('../../server/index');\r\n\r\ndescribe('Authentication Security', () => {\r\n  describe('Rate Limiting', () => {\r\n    it('should rate limit login attempts', async () => {\r\n      const credentials = {\r\n        email: 'test@example.com',\r\n        password: '[REDACTED]'\r\n      };\r\n\r\n      // Make multiple failed attempts\r\n      for (let i = 0; i < 6; i++) {\r\n        await request(app)\r\n          .post('/auth/login')\r\n          .send(credentials);\r\n      }\r\n\r\n      // Next attempt should be rate limited\r\n      const response = await request(app)\r\n        .post('/auth/login')\r\n        .send(credentials);\r\n\r\n      expect(response.status).toBe(429);\r\n      expect(response.body.error).toMatch(/too many/i);\r\n    });\r\n  });\r\n\r\n  describe('Input Validation', () => {\r\n    it('should reject SQL injection attempts', async () => {\r\n      const maliciousInput = {\r\n        email: \"'; DROP TABLE users; --\",\r\n        [REDACTED]: 'password'\r\n      };\r\n\r\n      const response = await request(app)\r\n        .post('/auth/login')\r\n        .send(maliciousInput);\r\n\r\n      expect(response.status).toBe(400);\r\n    });\r\n\r\n    it('should reject XSS attempts', async () => {\r\n      const maliciousInput = {\r\n        email: '<script>alert(\"xss\")</script>',\r\n        [REDACTED]: 'password'\r\n      };\r\n\r\n      const response = await request(app)\r\n        .post('/auth/login')\r\n        .send(maliciousInput);\r\n\r\n      expect(response.status).toBe(400);\r\n    });\r\n  });\r\n\r\n  describe('Session Security', () => {\r\n    it('should set secure session cookies', async () => {\r\n      const response = await request(app)\r\n        .post('/auth/login')\r\n        .send({\r\n          email: 'admin@example.com',\r\n          password: '[REDACTED]'\r\n        });\r\n\r\n      const setCookie = response.headers['set-cookie'];\r\n      expect(setCookie).toBeDefined();\r\n      expect(setCookie[0]).toMatch(/HttpOnly/);\r\n      expect(setCookie[0]).toMatch(/SameSite=strict/);\r\n    });\r\n  });\r\n});\r\n```\r\n\r\n### 2. Authorization Security Tests\r\n\r\n#### Authorization Testing\r\n```javascript\r\n// tests/security/authorization.test.js\r\nconst request = require('supertest');\r\nconst app = require('../../server/index');\r\n\r\ndescribe('Authorization Security', () => {\r\n  let userSession;\r\n  let adminSession;\r\n\r\n  beforeEach(async () => {\r\n    // Create regular user session\r\n    const userLogin = await request(app)\r\n      .post('/auth/login')\r\n      .send({\r\n        email: 'user@example.com',\r\n        password: '[REDACTED]'\r\n      });\r\n    userSession = userLogin.headers['set-cookie'];\r\n\r\n    // Create admin session\r\n    const adminLogin = await request(app)\r\n      .post('/auth/login')\r\n      .send({\r\n        email: 'admin@example.com',\r\n        password: '[REDACTED]'\r\n      });\r\n    adminSession = adminLogin.headers['set-cookie'];\r\n  });\r\n\r\n  describe('Role-Based Access', () => {\r\n    it('should allow admin access to admin routes', async () => {\r\n      const response = await request(app)\r\n        .get('/admin/users')\r\n        .set('Cookie', adminSession);\r\n\r\n      expect(response.status).toBe(200);\r\n    });\r\n\r\n    it('should deny user access to admin routes', async () => {\r\n      const response = await request(app)\r\n        .get('/admin/users')\r\n        .set('Cookie', userSession);\r\n\r\n      expect(response.status).toBe(403);\r\n    });\r\n\r\n    it('should deny unauthenticated access', async () => {\r\n      const response = await request(app)\r\n        .get('/admin/users');\r\n\r\n      expect(response.status).toBe(401);\r\n    });\r\n  });\r\n\r\n  describe('Resource Access Control', () => {\r\n    it('should prevent user from accessing other users data', async () => {\r\n      // Try to access another user's profile\r\n      const response = await request(app)\r\n        .get('/admin/users/2')\r\n        .set('Cookie', userSession);\r\n\r\n      expect(response.status).toBe(403);\r\n    });\r\n  });\r\n});\r\n```\r\n\r\n## 🚀 Performance Testing\r\n\r\n### 1. Load Testing with Artillery\r\n\r\n#### Load Testing Configuration\r\n```yaml\r\n# artillery.yml\r\nconfig:\r\n  target: 'http://localhost:3000'\r\n  phases:\r\n    - duration: 60\r\n      arrivalRate: 10\r\n      name: \"Warm up\"\r\n    - duration: 120\r\n      arrivalRate: 50\r\n      name: \"Load test\"\r\n    - duration: 60\r\n      arrivalRate: 100\r\n      name: \"Stress test\"\r\n  processor: \"./artillery-processor.js\"\r\n\r\nscenarios:\r\n  - name: \"Login and browse\"\r\n    weight: 70\r\n    flow:\r\n      - post:\r\n          url: \"/auth/login\"\r\n          json:\r\n            email: \"{{ $randomEmail }}\"\r\n            password: \"[REDACTED]\"\r\n          capture:\r\n            - json: \"$.success\"\r\n              as: \"loginSuccess\"\r\n      - get:\r\n          url: \"/admin/users\"\r\n          headers:\r\n            Cookie: \"{{ sessionCookie }}\"\r\n      - get:\r\n          url: \"/admin/churches\"\r\n          headers:\r\n            Cookie: \"{{ sessionCookie }}\"\r\n\r\n  - name: \"API stress test\"\r\n    weight: 30\r\n    flow:\r\n      - get:\r\n          url: \"/api/admin/users\"\r\n          headers:\r\n            Cookie: \"{{ sessionCookie }}\"\r\n      - post:\r\n          url: \"/api/admin/users\"\r\n          headers:\r\n            Cookie: \"{{ sessionCookie }}\"\r\n          json:\r\n            name: \"Test User {{ $randomInt }}\"\r\n            email: \"test{{ $randomInt }}@example.com\"\r\n            password: \"[REDACTED]\"\r\n```\r\n\r\n#### Performance Test Scripts\r\n```javascript\r\n// tests/performance/loadTest.js\r\nconst artillery = require('artillery');\r\nconst path = require('path');\r\n\r\nconst runLoadTest = async () => {\r\n  const configPath = path.join(__dirname, 'artillery.yml');\r\n  \r\n  const runner = artillery.runner(configPath);\r\n  \r\n  runner.on('phaseStarted', (phase) => {\r\n    console.log(`Phase started: ${phase.name}`);\r\n  });\r\n  \r\n  runner.on('phaseCompleted', (phase) => {\r\n    console.log(`Phase completed: ${phase.name}`);\r\n  });\r\n  \r\n  runner.on('done', (report) => {\r\n    console.log('Load test completed');\r\n    console.log('Summary:', report.aggregate);\r\n  });\r\n  \r\n  runner.run();\r\n};\r\n\r\n// Database performance test\r\nconst testDatabasePerformance = async () => {\r\n  const db = require('../../server/database/connection');\r\n  \r\n  const startTime = Date.now();\r\n  const iterations = 1000;\r\n  \r\n  for (let i = 0; i < iterations; i++) {\r\n    await db.execute('SELECT * FROM users WHERE id = ?', [1]);\r\n  }\r\n  \r\n  const endTime = Date.now();\r\n  const avgTime = (endTime - startTime) / iterations;\r\n  \r\n  console.log(`Database performance: ${avgTime}ms per query`);\r\n};\r\n\r\nif (require.main === module) {\r\n  runLoadTest();\r\n  testDatabasePerformance();\r\n}\r\n```\r\n\r\n### 2. Memory and CPU Testing\r\n\r\n#### Performance Monitoring\r\n```javascript\r\n// tests/performance/monitor.js\r\nconst pidusage = require('pidusage');\r\n\r\nconst monitorPerformance = (pid, duration = 60000) => {\r\n  const stats = [];\r\n  \r\n  const interval = setInterval(async () => {\r\n    try {\r\n      const stat = await pidusage(pid);\r\n      stats.push({\r\n        timestamp: Date.now(),\r\n        cpu: stat.cpu,\r\n        memory: stat.memory,\r\n        elapsed: stat.elapsed\r\n      });\r\n    } catch (error) {\r\n      console.error('Performance monitoring error:', error);\r\n    }\r\n  }, 1000);\r\n  \r\n  setTimeout(() => {\r\n    clearInterval(interval);\r\n    \r\n    const avgCPU = stats.reduce((sum, stat) => sum + stat.cpu, 0) / stats.length;\r\n    const avgMemory = stats.reduce((sum, stat) => sum + stat.memory, 0) / stats.length;\r\n    \r\n    console.log('Performance Summary:');\r\n    console.log(`Average CPU: ${avgCPU.toFixed(2)}%`);\r\n    console.log(`Average Memory: ${(avgMemory / 1024 / 1024).toFixed(2)}MB`);\r\n    console.log(`Total samples: ${stats.length}`);\r\n  }, duration);\r\n};\r\n\r\nmodule.exports = { monitorPerformance };\r\n```\r\n\r\n## 🔄 Test Automation\r\n\r\n### 1. Continuous Integration Testing\r\n\r\n#### GitHub Actions Workflow\r\n```yaml\r\n# .github/workflows/test.yml\r\nname: Test Suite\r\n\r\non:\r\n  push:\r\n    branches: [ main, develop ]\r\n  pull_request:\r\n    branches: [ main ]\r\n\r\njobs:\r\n  test:\r\n    runs-on: ubuntu-latest\r\n    \r\n    services:\r\n      mysql:\r\n        image: mysql:8.0\r\n        env:\r\n          MYSQL_ROOT_PASSWORD: password\r\n          MYSQL_DATABASE: orthodox_metrics_test\r\n        ports:\r\n          - 3306:3306\r\n        options: --health-cmd=\"mysqladmin ping\" --health-interval=10s --health-timeout=5s --health-retries=3\r\n\r\n    steps:\r\n    - uses: actions/checkout@v3\r\n    \r\n    - name: Setup Node.js\r\n      uses: actions/setup-node@v3\r\n      with:\r\n        node-version: '18'\r\n        cache: 'npm'\r\n    \r\n    - name: Install dependencies\r\n      run: npm ci\r\n    \r\n    - name: Setup test database\r\n      run: |\r\n        mysql -h 127.0.0.1 -u root -ppassword orthodox_metrics_test < database/schema.sql\r\n    \r\n    - name: Run unit tests\r\n      run: npm run test:unit\r\n      env:\r\n        DB_HOST: 127.0.0.1\r\n        DB_USER: root\r\n        DB_PASSWORD: password\r\n        DB_NAME: orthodox_metrics_test\r\n    \r\n    - name: Run integration tests\r\n      run: npm run test:integration\r\n      env:\r\n        DB_HOST: 127.0.0.1\r\n        DB_USER: root\r\n        DB_PASSWORD: password\r\n        DB_NAME: orthodox_metrics_test\r\n    \r\n    - name: Run E2E tests\r\n      run: npm run test:e2e\r\n    \r\n    - name: Upload coverage reports\r\n      uses: codecov/codecov-action@v3\r\n```\r\n\r\n### 2. Test Scripts\r\n\r\n#### Package.json Test Scripts\r\n```json\r\n{\r\n  \"scripts\": {\r\n    \"test\": \"npm run test:unit && npm run test:integration\",\r\n    \"test:unit\": \"jest --testMatch='**/tests/unit/**/*.test.js'\",\r\n    \"test:integration\": \"jest --testMatch='**/tests/integration/**/*.test.js'\",\r\n    \"test:e2e\": \"cypress run\",\r\n    \"test:e2e:open\": \"cypress open\",\r\n    \"test:security\": \"jest --testMatch='**/tests/security/**/*.test.js'\",\r\n    \"test:performance\": \"node tests/performance/loadTest.js\",\r\n    \"test:watch\": \"jest --watch\",\r\n    \"test:coverage\": \"jest --coverage\",\r\n    \"test:all\": \"npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:security\"\r\n  }\r\n}\r\n```\r\n\r\n## 📊 Test Reporting\r\n\r\n### 1. Test Results Dashboard\r\n\r\n#### Test Results Analysis\r\n```javascript\r\n// tests/utils/testReporter.js\r\nconst fs = require('fs');\r\nconst path = require('path');\r\n\r\nclass TestReporter {\r\n  constructor() {\r\n    this.results = {\r\n      unit: [],\r\n      integration: [],\r\n      e2e: [],\r\n      security: [],\r\n      performance: []\r\n    };\r\n  }\r\n\r\n  addResult(type, result) {\r\n    this.results[type].push(result);\r\n  }\r\n\r\n  generateReport() {\r\n    const report = {\r\n      timestamp: new Date().toISOString(),\r\n      summary: {\r\n        total: 0,\r\n        passed: 0,\r\n        failed: 0,\r\n        coverage: 0\r\n      },\r\n      details: this.results\r\n    };\r\n\r\n    // Calculate summary\r\n    Object.values(this.results).forEach(typeResults => {\r\n      typeResults.forEach(result => {\r\n        report.summary.total++;\r\n        if (result.status === 'passed') {\r\n          report.summary.passed++;\r\n        } else {\r\n          report.summary.failed++;\r\n        }\r\n      });\r\n    });\r\n\r\n    return report;\r\n  }\r\n\r\n  saveReport(filename) {\r\n    const report = this.generateReport();\r\n    const reportPath = path.join(__dirname, '../reports', filename);\r\n    \r\n    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));\r\n    console.log(`Test report saved to: ${reportPath}`);\r\n  }\r\n}\r\n\r\nmodule.exports = TestReporter;\r\n```\r\n\r\n### 2. Coverage Reporting\r\n\r\n#### Coverage Configuration\r\n```javascript\r\n// jest.config.js (coverage section)\r\nmodule.exports = {\r\n  // ... other config\r\n  collectCoverageFrom: [\r\n    'server/**/*.js',\r\n    '!server/node_modules/**',\r\n    '!server/tests/**',\r\n    '!server/coverage/**'\r\n  ],\r\n  coverageDirectory: 'coverage',\r\n  coverageReporters: ['text', 'lcov', 'html', 'json'],\r\n  coverageThreshold: {\r\n    global: {\r\n      branches: 80,\r\n      functions: 80,\r\n      lines: 80,\r\n      statements: 80\r\n    }\r\n  }\r\n};\r\n```\r\n\r\n---\r\n\r\n*This testing guide provides comprehensive coverage of testing procedures for the Orthodox Metrics system. It should be updated whenever new features are added or testing procedures are modified.*\r\n"
+    },
+    "complexity": {
+      "totalLines": 1207,
+      "codeLines": 857,
+      "commentLines": 132,
+      "commentRatio": 0.13346814964610718,
+      "averageLineLength": 31.812942366026288
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.232Z"
+  },
+  "contentHash": "8394fda4e33047f8380bf3eedb66db8aa99c800fb7f8f7f29f6d4dda034cc721",
+  "discoveredAt": "2025-07-28T07:19:58.232Z"
+}

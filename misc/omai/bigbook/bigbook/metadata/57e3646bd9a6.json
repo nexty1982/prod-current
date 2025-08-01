@@ -1,0 +1,59 @@
+{
+  "id": "57e3646bd9a6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/learning/session-manager.ts",
+  "relativePath": "services/om-ai/learning/session-manager.ts",
+  "name": "session-manager.ts",
+  "extension": ".ts",
+  "size": 5880,
+  "modified": "2025-07-25T01:20:27.718Z",
+  "created": "2025-07-25T01:20:26.950Z",
+  "classification": {
+    "type": "Other",
+    "category": "Uncategorized",
+    "confidence": 0
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 178,
+      "characters": 5880,
+      "words": 533
+    },
+    "classification": {
+      "type": "Other",
+      "category": "Uncategorized",
+      "confidence": 0
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 178,
+      "codeLines": 140,
+      "commentLines": 3,
+      "commentRatio": 0.02097902097902098,
+      "averageLineLength": 39.38461538461539
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.536Z"
+  },
+  "contentHash": "4fd7a22a9c00db9d09657acd935af3abef2de6fc61ef8a78080f0c43ae772306",
+  "discoveredAt": "2025-07-28T07:20:01.536Z"
+}

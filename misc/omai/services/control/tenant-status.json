@@ -1,0 +1,39 @@
+{
+  "lastUpdated": "2025-01-27T00:00:00Z",
+  "tenants": {
+    "St. George": {
+      "records": { "status": "healthy", "lastCheck": "2025-01-27T00:00:00Z", "issues": [] },
+      "docs": { "status": "warning", "lastCheck": "2025-01-27T00:00:00Z", "issues": ["Missing component documentation"] },
+      "routes": { "status": "healthy", "lastCheck": "2025-01-27T00:00:00Z", "issues": [] },
+      "ui": { "status": "healthy", "lastCheck": "2025-01-27T00:00:00Z", "issues": [] },
+      "dbSync": { "status": "healthy", "lastCheck": "2025-01-27T00:00:00Z", "issues": [] },
+      "lastAudit": "2025-01-22T00:00:00Z",
+      "overallHealth": "good"
+    },
+    "SSPPOC": {
+      "records": { "status": "healthy", "lastCheck": "2025-01-27T00:00:00Z", "issues": [] },
+      "docs": { "status": "healthy", "lastCheck": "2025-01-27T00:00:00Z", "issues": [] },
+      "routes": { "status": "healthy", "lastCheck": "2025-01-27T00:00:00Z", "issues": [] },
+      "ui": { "status": "warning", "lastCheck": "2025-01-27T00:00:00Z", "issues": ["Outdated component versions"] },
+      "dbSync": { "status": "warning", "lastCheck": "2025-01-27T00:00:00Z", "issues": ["Pending schema updates"] },
+      "lastAudit": "2025-01-19T00:00:00Z",
+      "overallHealth": "needs_sync"
+    },
+    "Holy Resurrection": {
+      "records": { "status": "critical", "lastCheck": "2025-01-27T00:00:00Z", "issues": ["Database connection failed"] },
+      "docs": { "status": "critical", "lastCheck": "2025-01-27T00:00:00Z", "issues": ["No documentation found"] },
+      "routes": { "status": "critical", "lastCheck": "2025-01-27T00:00:00Z", "issues": ["API endpoints not responding"] },
+      "ui": { "status": "healthy", "lastCheck": "2025-01-27T00:00:00Z", "issues": [] },
+      "dbSync": { "status": "healthy", "lastCheck": "2025-01-27T00:00:00Z", "issues": [] },
+      "lastAudit": null,
+      "overallHealth": "critical"
+    }
+  },
+  "systemMetrics": {
+    "totalTenants": 3,
+    "healthyTenants": 1,
+    "warningTenants": 1,
+    "criticalTenants": 1,
+    "lastSystemCheck": "2025-01-27T00:00:00Z"
+  }
+} 

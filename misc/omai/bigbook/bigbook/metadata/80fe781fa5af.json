@@ -1,0 +1,43 @@
+{
+  "id": "80fe781fa5af",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/utils/logger.ts",
+  "relativePath": "front-end/src/utils/logger.ts",
+  "name": "logger.ts",
+  "extension": ".ts",
+  "size": 10354,
+  "modified": "2025-07-08T21:38:06.589Z",
+  "created": "2025-07-06T17:06:07.307Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 276,
+      "characters": 10352,
+      "words": 907
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 276,
+      "codeLines": 225,
+      "commentLines": 12,
+      "commentRatio": 0.05063291139240506,
+      "averageLineLength": 42.30801687763713
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.950Z"
+  },
+  "contentHash": "915964a799502948d9bc6122046ff5cbb362232d0f39692453de8bfe138ef0e7",
+  "discoveredAt": "2025-07-28T07:19:58.950Z"
+}

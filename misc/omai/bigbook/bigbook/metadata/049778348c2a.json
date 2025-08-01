@@ -1,0 +1,43 @@
+{
+  "id": "049778348c2a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/utils/thumbnailGenerator.ts",
+  "relativePath": "front-end/src/utils/thumbnailGenerator.ts",
+  "name": "thumbnailGenerator.ts",
+  "extension": ".ts",
+  "size": 4098,
+  "modified": "2025-07-18T00:49:22.133Z",
+  "created": "2025-07-18T00:38:53.851Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 128,
+      "characters": 4098,
+      "words": 382
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 128,
+      "codeLines": 96,
+      "commentLines": 11,
+      "commentRatio": 0.102803738317757,
+      "averageLineLength": 36.42056074766355
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.953Z"
+  },
+  "contentHash": "025cf0e7dfc303e53e812d00bb9a6d88efa374d76c91a1d50f2cdc6c220d8453",
+  "discoveredAt": "2025-07-28T07:19:58.953Z"
+}

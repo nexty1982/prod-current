@@ -1,0 +1,6 @@
+{
+  "id": "5668876b6a0f",
+  "name": "fix_ocr_permissions.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/fix_ocr_permissions.sql",
+  "type": "Database Scripts"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "28ced3fb111e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/test-extracted-routes-fixed.sh",
+  "relativePath": "server/scripts/test-extracted-routes-fixed.sh",
+  "name": "test-extracted-routes-fixed.sh",
+  "extension": ".sh",
+  "size": 7017,
+  "modified": "2025-07-22T09:18:29.178Z",
+  "created": "2025-07-22T09:18:27.334Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 209,
+      "characters": 6973,
+      "words": 775
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 209,
+      "codeLines": 161,
+      "commentLines": 15,
+      "commentRatio": 0.08522727272727272,
+      "averageLineLength": 38.27840909090909
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.082Z"
+  },
+  "contentHash": "00fc2b2f7c9bc91128563cf3ccc0de0454a444b34e4b2efe1387645b06d42abe",
+  "discoveredAt": "2025-07-28T07:20:01.082Z"
+}

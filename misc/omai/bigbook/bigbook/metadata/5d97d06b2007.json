@@ -1,0 +1,43 @@
+{
+  "id": "5d97d06b2007",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migrations/cleanup-unused-user-sessions-table.sql",
+  "relativePath": "server/migrations/cleanup-unused-user-sessions-table.sql",
+  "name": "cleanup-unused-user-sessions-table.sql",
+  "extension": ".sql",
+  "size": 535,
+  "modified": "2025-07-20T19:45:33.670Z",
+  "created": "2025-07-20T19:45:20.804Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 18,
+      "characters": 535,
+      "words": 69
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 18,
+      "codeLines": 14,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 36.785714285714285
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.325Z"
+  },
+  "contentHash": "b4b9612efb0a1f90deafa33ce06f6ec7c5a3e5728a1f42c608f279e68d2a92a7",
+  "discoveredAt": "2025-07-28T07:20:00.325Z"
+}

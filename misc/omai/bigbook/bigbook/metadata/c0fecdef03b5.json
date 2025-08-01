@@ -1,0 +1,43 @@
+{
+  "id": "c0fecdef03b5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/7-11-25/ENHANCED_CHURCH_SETUP_WITH_TEMPLATES.md",
+  "relativePath": "docs/archive/7-11-25/ENHANCED_CHURCH_SETUP_WITH_TEMPLATES.md",
+  "name": "ENHANCED_CHURCH_SETUP_WITH_TEMPLATES.md",
+  "extension": ".md",
+  "size": 8564,
+  "modified": "2025-07-12T03:13:33.908Z",
+  "created": "2025-07-12T03:13:11.988Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 247,
+      "characters": 8414,
+      "words": 961
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 247,
+      "codeLines": 156,
+      "commentLines": 42,
+      "commentRatio": 0.21212121212121213,
+      "averageLineLength": 40.98989898989899
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.049Z"
+  },
+  "contentHash": "14caa2289476778b48676d73f1358afac5613334f5682bd6a65ca68814ba2576",
+  "discoveredAt": "2025-07-28T07:19:58.049Z"
+}

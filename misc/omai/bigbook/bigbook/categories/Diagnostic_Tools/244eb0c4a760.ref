@@ -1,0 +1,6 @@
+{
+  "id": "244eb0c4a760",
+  "name": "fix-console-errors.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-console-errors.sh",
+  "type": "Troubleshooting Utilities"
+}

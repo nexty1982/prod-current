@@ -1,0 +1,49 @@
+{
+  "id": "5148ca146961",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/install-parish-map-simple.sh",
+  "relativePath": "scripts/install-parish-map-simple.sh",
+  "name": "install-parish-map-simple.sh",
+  "extension": ".sh",
+  "size": 4511,
+  "modified": "2025-07-28T00:13:30.453Z",
+  "created": "2025-07-28T00:12:40.288Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 150,
+      "characters": 4441,
+      "words": 542
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 31
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 150,
+      "codeLines": 107,
+      "commentLines": 22,
+      "commentRatio": 0.17054263565891473,
+      "averageLineLength": 33.24031007751938
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.129Z"
+  },
+  "contentHash": "767c97ec1c59c24039d616ce98825d27bcd71f713191df95df04bd4fc9d27812",
+  "discoveredAt": "2025-07-28T07:19:59.129Z"
+}

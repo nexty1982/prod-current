@@ -1,0 +1,49 @@
+{
+  "id": "cafc1ec8d2e4",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/components/ocr/MappingState.ts",
+  "relativePath": "front-end/src/components/ocr/MappingState.ts",
+  "name": "MappingState.ts",
+  "extension": ".ts",
+  "size": 11612,
+  "modified": "2025-07-15T00:51:57.360Z",
+  "created": "2025-07-15T00:23:38.583Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 417,
+      "characters": 11612,
+      "words": 1127
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 416
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 417,
+      "codeLines": 293,
+      "commentLines": 61,
+      "commentRatio": 0.17231638418079095,
+      "averageLineLength": 31.163841807909606
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.776Z"
+  },
+  "contentHash": "3e74e68d7c464a95d3256eecaef4fa26450477ab461c5b75273cb401d7123e89",
+  "discoveredAt": "2025-07-28T07:19:58.776Z"
+}

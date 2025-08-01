@@ -1,0 +1,6 @@
+{
+  "id": "a5ea2406372b",
+  "name": "add_church_setup_status.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/migrations/add_church_setup_status.sql",
+  "type": "Database Scripts"
+}

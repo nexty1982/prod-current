@@ -1,0 +1,6 @@
+{
+  "id": "b4d6965e83da",
+  "name": "fix_admin_role.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/fix_admin_role.sql",
+  "type": "Database Scripts"
+}

@@ -1,0 +1,54 @@
+{
+  "id": "416aa01dee37",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/setup-encrypted-storage.sh",
+  "relativePath": "scripts/7-26-25/setup-encrypted-storage.sh",
+  "name": "setup-encrypted-storage.sh",
+  "extension": ".sh",
+  "size": 12203,
+  "modified": "2025-07-26T03:02:17.478Z",
+  "created": "2025-07-26T03:01:58.385Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 424,
+      "characters": 12181,
+      "words": 1425
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "yum",
+        "line": 66
+      },
+      {
+        "type": "system_command",
+        "name": "yum",
+        "line": 67
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 424,
+      "codeLines": 275,
+      "commentLines": 61,
+      "commentRatio": 0.18154761904761904,
+      "averageLineLength": 34.93452380952381
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.031Z"
+  },
+  "contentHash": "55c5e7e7f346d00caec232d572388f7e61f5f9ef9dca3d09a3ac0112d8a455ac",
+  "discoveredAt": "2025-07-28T07:19:59.031Z"
+}

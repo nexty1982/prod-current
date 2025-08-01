@@ -1,0 +1,43 @@
+{
+  "id": "75d89bf453a9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-24-25/SDLC_BACKUP_SYSTEM_COMPLETE.md",
+  "relativePath": "docs/7-24-25/SDLC_BACKUP_SYSTEM_COMPLETE.md",
+  "name": "SDLC_BACKUP_SYSTEM_COMPLETE.md",
+  "extension": ".md",
+  "size": 10669,
+  "modified": "2025-07-23T23:31:48.853Z",
+  "created": "2025-07-23T23:31:34.651Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 307,
+      "characters": 10615,
+      "words": 1257
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 307,
+      "codeLines": 189,
+      "commentLines": 52,
+      "commentRatio": 0.2157676348547718,
+      "averageLineLength": 42.50207468879668
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.710Z"
+  },
+  "contentHash": "61bc5c267a1d698748d78a125d2a89a922ab8de7323e0516ec1513db2e588ff8",
+  "discoveredAt": "2025-07-28T07:19:57.710Z"
+}

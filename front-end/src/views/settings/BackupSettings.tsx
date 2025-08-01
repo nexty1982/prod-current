@@ -29,6 +29,8 @@ import {
     IconButton,
     Tooltip,
     CircularProgress,
+    Tabs,
+    Tab,
 } from '@mui/material';
 import {
     Backup as BackupIcon,
@@ -47,6 +49,9 @@ import {
 import PageContainer from '../../components/container/PageContainer';
 import BlankCard from '../../components/shared/BlankCard';
 import Breadcrumb from '../../layouts/full/shared/breadcrumb/Breadcrumb';
+import { adminAPI } from '../../api/admin.api';
+import { useAuth } from '../../context/AuthContext';
+import NFSBackupConfig from '../../components/admin/NFSBackupConfig';
 
 const BCrumb = [
     {
@@ -85,6 +90,8 @@ interface BackupFile {
 }
 
 const BackupSettings: React.FC = () => {
+    const { user } = useAuth();
+    const [activeTab, setActiveTab] = useState(0);
     const [settings, setSettings] = useState<BackupSettings>({
         enabled: true,
         schedule: '0 2 * * *', // Daily at 2 AM
@@ -131,19 +138,13 @@ const BackupSettings: React.FC = () => {
     const loadBackupSettings = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/backup/settings', {
-                credentials: 'include',
-            });
+            const response = await adminAPI.backup.getSettings();
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    setSettings(data.settings);
-                }
+            if (response.success) {
+                setSettings(response.settings);
             }
         } catch (error) {
             console.error('Error loading backup settings:', error);
-            setAlert({ type: 'error', message: 'Failed to load backup settings' });
         } finally {
             setLoading(false);
         }
@@ -151,15 +152,10 @@ const BackupSettings: React.FC = () => {
 
     const loadBackupFiles = async () => {
         try {
-            const response = await fetch('/api/backup/files', {
-                credentials: 'include',
-            });
+            const response = await adminAPI.backup.getFiles();
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    setBackupFiles(data.files);
-                }
+            if (Array.isArray(response)) {
+                setBackupFiles(response);
             }
         } catch (error) {
             console.error('Error loading backup files:', error);
@@ -168,15 +164,10 @@ const BackupSettings: React.FC = () => {
 
     const loadStorageInfo = async () => {
         try {
-            const response = await fetch('/api/backup/storage', {
-                credentials: 'include',
-            });
+            const response = await adminAPI.backup.getStorage();
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    setStorageInfo(data.storage);
-                }
+            if (response) {
+                setStorageInfo(response);
             }
         } catch (error) {
             console.error('Error loading storage info:', error);
@@ -186,57 +177,35 @@ const BackupSettings: React.FC = () => {
     const saveSettings = async () => {
         try {
             setSaving(true);
-            const response = await fetch('/api/backup/settings', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(settings),
-            });
+            const response = await adminAPI.backup.updateSettings(settings);
 
-            const data = await response.json();
-
-            if (data.success) {
+            if (response.success) {
                 setAlert({ type: 'success', message: 'Backup settings saved successfully' });
+                setSettings(response.data);
             } else {
-                setAlert({ type: 'error', message: data.message || 'Failed to save settings' });
+                setAlert({ type: 'error', message: response.message || 'Failed to save settings' });
             }
-        } catch (error) {
-            console.error('Error saving backup settings:', error);
-            setAlert({ type: 'error', message: 'Failed to save backup settings' });
+        } catch (error: any) {
+            setAlert({ type: 'error', message: error.message || 'Failed to save settings' });
         } finally {
             setSaving(false);
         }
     };
 
-    const runBackupNow = async (type: 'full' | 'database' | 'files' = 'full') => {
+    const runBackup = async (type: string) => {
         try {
             setBackupInProgress(true);
-            const response = await fetch('/api/backup/run', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ type }),
-            });
+            const response = await adminAPI.backup.run();
 
-            const data = await response.json();
-
-            if (data.success) {
+            if (response.success) {
                 setAlert({ type: 'success', message: 'Backup started successfully' });
-                // Refresh backup files list
-                setTimeout(() => {
-                    loadBackupFiles();
-                    loadStorageInfo();
-                }, 2000);
+                loadBackupFiles();
+                loadStorageInfo();
             } else {
-                setAlert({ type: 'error', message: data.message || 'Failed to start backup' });
+                setAlert({ type: 'error', message: response.message || 'Failed to start backup' });
             }
-        } catch (error) {
-            console.error('Error running backup:', error);
-            setAlert({ type: 'error', message: 'Failed to start backup' });
+        } catch (error: any) {
+            setAlert({ type: 'error', message: error.message || 'Failed to start backup' });
         } finally {
             setBackupInProgress(false);
         }
@@ -244,38 +213,28 @@ const BackupSettings: React.FC = () => {
 
     const downloadBackup = async (backupId: string) => {
         try {
-            const response = await fetch(`/api/backup/download/${backupId}`, {
-                credentials: 'include',
-            });
+            const response = await adminAPI.backup.download(backupId);
 
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
+            if (response.url) {
                 const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = `backup_${backupId}.tar.gz`;
+                a.href = response.url;
+                a.download = `backup-${backupId}.zip`;
                 document.body.appendChild(a);
                 a.click();
-                window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
             } else {
                 setAlert({ type: 'error', message: 'Failed to download backup' });
             }
-        } catch (error) {
-            console.error('Error downloading backup:', error);
-            setAlert({ type: 'error', message: 'Failed to download backup' });
+        } catch (error: any) {
+            setAlert({ type: 'error', message: error.message || 'Failed to download backup' });
         }
     };
 
     const deleteBackup = async (backupId: string) => {
         try {
-            const response = await fetch(`/api/backup/delete/${backupId}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            });
+            const response = await adminAPI.backup.delete(backupId);
 
-            const data = await response.json();
+            const data = response;
 
             if (data.success) {
                 setAlert({ type: 'success', message: 'Backup deleted successfully' });
@@ -331,6 +290,368 @@ const BackupSettings: React.FC = () => {
         ? (storageInfo.backup_space / storageInfo.total_space) * 100
         : 0;
 
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+        setActiveTab(newValue);
+    };
+
+    const renderBackupSettingsTab = () => (
+        <Grid container spacing={3}>
+            {/* Storage Information */}
+            <Grid item xs={12}>
+                <BlankCard>
+                    <CardContent>
+                        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                            <StorageIcon color="primary" />
+                            <Typography variant="h6">Storage Information</Typography>
+                            <IconButton size="small" onClick={loadStorageInfo}>
+                                <RefreshIcon />
+                            </IconButton>
+                        </Stack>
+
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={4}>
+                                <Box>
+                                    <Typography variant="body2" color="textSecondary">Total Storage</Typography>
+                                    <Typography variant="h6">{formatFileSize(storageInfo.total_space)}</Typography>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Box>
+                                    <Typography variant="body2" color="textSecondary">Used Space</Typography>
+                                    <Typography variant="h6">{formatFileSize(storageInfo.used_space)}</Typography>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={usagePercentage}
+                                        sx={{ mt: 1 }}
+                                        color={usagePercentage > 80 ? 'error' : 'primary'}
+                                    />
+                                    <Typography variant="caption">{usagePercentage.toFixed(1)}% used</Typography>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Box>
+                                    <Typography variant="body2" color="textSecondary">Backup Space</Typography>
+                                    <Typography variant="h6">{formatFileSize(storageInfo.backup_space)}</Typography>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={backupPercentage}
+                                        sx={{ mt: 1 }}
+                                        color="secondary"
+                                    />
+                                    <Typography variant="caption">{backupPercentage.toFixed(1)}% of total</Typography>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </CardContent>
+                </BlankCard>
+            </Grid>
+
+            {/* Backup Settings */}
+            <Grid item xs={12} lg={6}>
+                <BlankCard>
+                    <CardContent>
+                        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+                            <SettingsIcon color="primary" />
+                            <Typography variant="h6">Backup Configuration</Typography>
+                        </Stack>
+
+                        <Stack spacing={3}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={settings.enabled}
+                                        onChange={(e) => setSettings({ ...settings, enabled: e.target.checked })}
+                                    />
+                                }
+                                label="Enable Automatic Backups"
+                            />
+
+                            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                                <FormControl sx={{ minWidth: 200, flex: 1 }}>
+                                    <InputLabel>Backup Schedule</InputLabel>
+                                    <Select
+                                        value={settings.schedule}
+                                        label="Backup Schedule"
+                                        onChange={(e) => setSettings({ ...settings, schedule: e.target.value })}
+                                    >
+                                        {scheduleOptions.map((option) => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+
+                                <TextField
+                                    sx={{ minWidth: 150, flex: 1 }}
+                                    type="number"
+                                    label="Retention Period (days)"
+                                    value={settings.retention_days}
+                                    onChange={(e) => setSettings({ ...settings, retention_days: parseInt(e.target.value) })}
+                                    helperText="How long to keep backup files"
+                                />
+
+                                <TextField
+                                    sx={{ minWidth: 150, flex: 1 }}
+                                    type="number"
+                                    label="Maximum Backups"
+                                    value={settings.max_backups}
+                                    onChange={(e) => setSettings({ ...settings, max_backups: parseInt(e.target.value) })}
+                                    helperText="Maximum backup files to keep"
+                                />
+                            </Stack>
+
+                            {settings.schedule === 'custom' && (
+                                <TextField
+                                    fullWidth
+                                    label="Custom Cron Expression"
+                                    value={settings.schedule}
+                                    onChange={(e) => setSettings({ ...settings, schedule: e.target.value })}
+                                    helperText="Format: minute hour day month weekday (e.g., 0 2 * * * for daily at 2 AM)"
+                                />
+                            )}
+
+                            <Divider />
+
+                            <Typography variant="subtitle2">Backup Content</Typography>
+
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={settings.include_database}
+                                            onChange={(e) => setSettings({ ...settings, include_database: e.target.checked })}
+                                        />
+                                    }
+                                    label="Include Database"
+                                />
+
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={settings.include_files}
+                                            onChange={(e) => setSettings({ ...settings, include_files: e.target.checked })}
+                                        />
+                                    }
+                                    label="Include Application Files"
+                                />
+
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={settings.include_uploads}
+                                            onChange={(e) => setSettings({ ...settings, include_uploads: e.target.checked })}
+                                        />
+                                    }
+                                    label="Include User Uploads"
+                                />
+
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={settings.compression}
+                                            onChange={(e) => setSettings({ ...settings, compression: e.target.checked })}
+                                        />
+                                    }
+                                    label="Enable Compression"
+                                />
+                            </Stack>
+
+                            <Divider />
+
+                            <Typography variant="subtitle2">Notifications</Typography>
+
+                            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={settings.email_notifications}
+                                            onChange={(e) => setSettings({ ...settings, email_notifications: e.target.checked })}
+                                        />
+                                    }
+                                    label="Email Notifications"
+                                />
+
+                                {settings.email_notifications && (
+                                    <TextField
+                                        sx={{ flex: 1 }}
+                                        type="email"
+                                        label="Notification Email"
+                                        value={settings.notification_email}
+                                        onChange={(e) => setSettings({ ...settings, notification_email: e.target.value })}
+                                        helperText="Email address to receive backup notifications"
+                                    />
+                                )}
+                            </Stack>
+
+                            <TextField
+                                fullWidth
+                                label="Backup Location"
+                                value={settings.backup_location}
+                                onChange={(e) => setSettings({ ...settings, backup_location: e.target.value })}
+                                helperText="Server path where backup files are stored"
+                            />
+
+                            <Box sx={{ pt: 2 }}>
+                                <Button
+                                    variant="contained"
+                                    onClick={saveSettings}
+                                    disabled={saving}
+                                    startIcon={saving ? <CircularProgress size={20} /> : <SettingsIcon />}
+                                >
+                                    {saving ? 'Saving...' : 'Save Settings'}
+                                </Button>
+                            </Box>
+                        </Stack>
+                    </CardContent>
+                </BlankCard>
+            </Grid>
+
+            {/* Manual Backup Actions */}
+            <Grid item xs={12} lg={6}>
+                <BlankCard>
+                    <CardContent>
+                        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+                            <BackupIcon color="primary" />
+                            <Typography variant="h6">Manual Backup</Typography>
+                        </Stack>
+
+                        <Stack spacing={2}>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                onClick={() => runBackup('full')}
+                                disabled={backupInProgress}
+                                startIcon={backupInProgress ? <CircularProgress size={20} /> : <BackupIcon />}
+                                fullWidth
+                            >
+                                {backupInProgress ? 'Creating Full Backup...' : 'Create Full Backup'}
+                            </Button>
+
+                            <Button
+                                variant="outlined"
+                                onClick={() => runBackup('database')}
+                                disabled={backupInProgress}
+                                startIcon={<DatabaseIcon />}
+                                fullWidth
+                            >
+                                Database Only
+                            </Button>
+
+                            <Button
+                                variant="outlined"
+                                onClick={() => runBackup('files')}
+                                disabled={backupInProgress}
+                                startIcon={<FolderIcon />}
+                                fullWidth
+                            >
+                                Files Only
+                            </Button>
+
+                            <Alert severity="info" sx={{ mt: 2 }}>
+                                <Typography variant="body2">
+                                    Full backups include database, application files, and user uploads.
+                                    Large backups may take several minutes to complete.
+                                </Typography>
+                            </Alert>
+                        </Stack>
+                    </CardContent>
+                </BlankCard>
+            </Grid>
+        </Grid>
+    );
+
+    const renderYourBackupsTab = () => (
+        <Grid container spacing={3}>
+            {/* Backup Files List */}
+            <Grid item xs={12}>
+                <BlankCard>
+                    <CardContent>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                            <Stack direction="row" alignItems="center" spacing={2}>
+                                <ExportIcon color="primary" />
+                                <Typography variant="h6">Your Backup Files</Typography>
+                            </Stack>
+                            <Button
+                                variant="outlined"
+                                startIcon={<RefreshIcon />}
+                                onClick={loadBackupFiles}
+                                size="small"
+                            >
+                                Refresh
+                            </Button>
+                        </Stack>
+
+                        {loading ? (
+                            <Box display="flex" justifyContent="center" p={3}>
+                                <CircularProgress />
+                            </Box>
+                        ) : backupFiles.length === 0 ? (
+                            <Alert severity="info">
+                                No backup files found. Create your first backup using the manual backup options in the Backup Settings tab.
+                            </Alert>
+                        ) : (
+                            <List>
+                                {backupFiles.map((backup) => (
+                                    <ListItem key={backup.id} divider>
+                                        <ListItemText
+                                            primary={
+                                                <Stack direction="row" alignItems="center" spacing={1}>
+                                                    <Typography variant="body1">{backup.filename}</Typography>
+                                                    <Chip
+                                                        label={backup.type}
+                                                        size="small"
+                                                        color={getBackupTypeColor(backup.type) as any}
+                                                    />
+                                                    <Typography variant="body2">
+                                                        {getStatusIcon(backup.status)}
+                                                    </Typography>
+                                                </Stack>
+                                            }
+                                            secondary={
+                                                <Stack direction="row" spacing={2}>
+                                                    <Typography variant="caption">
+                                                        Size: {formatFileSize(backup.size)}
+                                                    </Typography>
+                                                    <Typography variant="caption">
+                                                        Created: {formatDate(backup.created_at)}
+                                                    </Typography>
+                                                </Stack>
+                                            }
+                                        />
+                                        <ListItemSecondaryAction>
+                                            <Stack direction="row" spacing={1}>
+                                                <Tooltip title="Download Backup">
+                                                    <IconButton
+                                                        onClick={() => downloadBackup(backup.id)}
+                                                        disabled={backup.status !== 'completed'}
+                                                    >
+                                                        <DownloadIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Delete Backup">
+                                                    <IconButton
+                                                        onClick={() => {
+                                                            setSelectedBackup(backup.id);
+                                                            setDeleteDialogOpen(true);
+                                                        }}
+                                                        color="error"
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Stack>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        )}
+                    </CardContent>
+                </BlankCard>
+            </Grid>
+        </Grid>
+    );
+
     return (
         <PageContainer title="Backup Settings" description="Manage system backups and data protection">
             <Breadcrumb title="Backup Settings" items={BCrumb} />
@@ -346,352 +667,19 @@ const BackupSettings: React.FC = () => {
             )}
 
             <Grid container spacing={3}>
-                {/* Storage Information */}
-                <Grid item xs={12}>
+                {/* Main Content */}
+                <Grid item xs={12} lg={user?.role === 'super_admin' ? 8 : 12}>
                     <BlankCard>
                         <CardContent>
-                            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-                                <StorageIcon color="primary" />
-                                <Typography variant="h6">Storage Information</Typography>
-                                <IconButton size="small" onClick={loadStorageInfo}>
-                                    <RefreshIcon />
-                                </IconButton>
-                            </Stack>
+                            <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
+                                <Tab label="Backup Settings" />
+                                <Tab label="Your Backups" />
+                                {user?.role === 'super_admin' && <Tab label="NFS Remote Backup" />}
+                            </Tabs>
 
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} md={4}>
-                                    <Box>
-                                        <Typography variant="body2" color="textSecondary">Total Storage</Typography>
-                                        <Typography variant="h6">{formatFileSize(storageInfo.total_space)}</Typography>
-                                    </Box>
-                                </Grid>
-                                <Grid item xs={12} md={4}>
-                                    <Box>
-                                        <Typography variant="body2" color="textSecondary">Used Space</Typography>
-                                        <Typography variant="h6">{formatFileSize(storageInfo.used_space)}</Typography>
-                                        <LinearProgress
-                                            variant="determinate"
-                                            value={usagePercentage}
-                                            sx={{ mt: 1 }}
-                                            color={usagePercentage > 80 ? 'error' : 'primary'}
-                                        />
-                                        <Typography variant="caption">{usagePercentage.toFixed(1)}% used</Typography>
-                                    </Box>
-                                </Grid>
-                                <Grid item xs={12} md={4}>
-                                    <Box>
-                                        <Typography variant="body2" color="textSecondary">Backup Space</Typography>
-                                        <Typography variant="h6">{formatFileSize(storageInfo.backup_space)}</Typography>
-                                        <LinearProgress
-                                            variant="determinate"
-                                            value={backupPercentage}
-                                            sx={{ mt: 1 }}
-                                            color="secondary"
-                                        />
-                                        <Typography variant="caption">{backupPercentage.toFixed(1)}% of total</Typography>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                        </CardContent>
-                    </BlankCard>
-                </Grid>
-
-                {/* Backup Settings */}
-                <Grid item xs={12} lg={6}>
-                    <BlankCard>
-                        <CardContent>
-                            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-                                <SettingsIcon color="primary" />
-                                <Typography variant="h6">Backup Configuration</Typography>
-                            </Stack>
-
-                            <Stack spacing={3}>
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={settings.enabled}
-                                            onChange={(e) => setSettings({ ...settings, enabled: e.target.checked })}
-                                        />
-                                    }
-                                    label="Enable Automatic Backups"
-                                />
-
-                                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-                                    <FormControl sx={{ minWidth: 200, flex: 1 }}>
-                                        <InputLabel>Backup Schedule</InputLabel>
-                                        <Select
-                                            value={settings.schedule}
-                                            label="Backup Schedule"
-                                            onChange={(e) => setSettings({ ...settings, schedule: e.target.value })}
-                                        >
-                                            {scheduleOptions.map((option) => (
-                                                <MenuItem key={option.value} value={option.value}>
-                                                    {option.label}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-
-                                    <TextField
-                                        sx={{ minWidth: 150, flex: 1 }}
-                                        type="number"
-                                        label="Retention Period (days)"
-                                        value={settings.retention_days}
-                                        onChange={(e) => setSettings({ ...settings, retention_days: parseInt(e.target.value) })}
-                                        helperText="How long to keep backup files"
-                                    />
-
-                                    <TextField
-                                        sx={{ minWidth: 150, flex: 1 }}
-                                        type="number"
-                                        label="Maximum Backups"
-                                        value={settings.max_backups}
-                                        onChange={(e) => setSettings({ ...settings, max_backups: parseInt(e.target.value) })}
-                                        helperText="Maximum backup files to keep"
-                                    />
-                                </Stack>
-
-                                {settings.schedule === 'custom' && (
-                                    <TextField
-                                        fullWidth
-                                        label="Custom Cron Expression"
-                                        value={settings.schedule}
-                                        onChange={(e) => setSettings({ ...settings, schedule: e.target.value })}
-                                        helperText="Format: minute hour day month weekday (e.g., 0 2 * * * for daily at 2 AM)"
-                                    />
-                                )}
-
-                                <Divider />
-
-                                <Typography variant="subtitle2">Backup Content</Typography>
-
-                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={settings.include_database}
-                                                onChange={(e) => setSettings({ ...settings, include_database: e.target.checked })}
-                                            />
-                                        }
-                                        label="Include Database"
-                                    />
-
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={settings.include_files}
-                                                onChange={(e) => setSettings({ ...settings, include_files: e.target.checked })}
-                                            />
-                                        }
-                                        label="Include Application Files"
-                                    />
-
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={settings.include_uploads}
-                                                onChange={(e) => setSettings({ ...settings, include_uploads: e.target.checked })}
-                                            />
-                                        }
-                                        label="Include User Uploads"
-                                    />
-
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={settings.compression}
-                                                onChange={(e) => setSettings({ ...settings, compression: e.target.checked })}
-                                            />
-                                        }
-                                        label="Enable Compression"
-                                    />
-                                </Stack>
-
-                                <Divider />
-
-                                <Typography variant="subtitle2">Notifications</Typography>
-
-                                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={settings.email_notifications}
-                                                onChange={(e) => setSettings({ ...settings, email_notifications: e.target.checked })}
-                                            />
-                                        }
-                                        label="Email Notifications"
-                                    />
-
-                                    {settings.email_notifications && (
-                                        <TextField
-                                            sx={{ flex: 1 }}
-                                            type="email"
-                                            label="Notification Email"
-                                            value={settings.notification_email}
-                                            onChange={(e) => setSettings({ ...settings, notification_email: e.target.value })}
-                                            helperText="Email address to receive backup notifications"
-                                        />
-                                    )}
-                                </Stack>
-
-                                <TextField
-                                    fullWidth
-                                    label="Backup Location"
-                                    value={settings.backup_location}
-                                    onChange={(e) => setSettings({ ...settings, backup_location: e.target.value })}
-                                    helperText="Server path where backup files are stored"
-                                />
-
-                                <Box sx={{ pt: 2 }}>
-                                    <Button
-                                        variant="contained"
-                                        onClick={saveSettings}
-                                        disabled={saving}
-                                        startIcon={saving ? <CircularProgress size={20} /> : <SettingsIcon />}
-                                    >
-                                        {saving ? 'Saving...' : 'Save Settings'}
-                                    </Button>
-                                </Box>
-                            </Stack>
-                        </CardContent>
-                    </BlankCard>
-                </Grid>
-
-                {/* Manual Backup Actions */}
-                <Grid item xs={12} lg={6}>
-                    <BlankCard>
-                        <CardContent>
-                            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-                                <BackupIcon color="primary" />
-                                <Typography variant="h6">Manual Backup</Typography>
-                            </Stack>
-
-                            <Stack spacing={2}>
-                                <Button
-                                    variant="contained"
-                                    size="large"
-                                    onClick={() => runBackupNow('full')}
-                                    disabled={backupInProgress}
-                                    startIcon={backupInProgress ? <CircularProgress size={20} /> : <BackupIcon />}
-                                    fullWidth
-                                >
-                                    {backupInProgress ? 'Creating Full Backup...' : 'Create Full Backup'}
-                                </Button>
-
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => runBackupNow('database')}
-                                    disabled={backupInProgress}
-                                    startIcon={<DatabaseIcon />}
-                                    fullWidth
-                                >
-                                    Database Only
-                                </Button>
-
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => runBackupNow('files')}
-                                    disabled={backupInProgress}
-                                    startIcon={<FolderIcon />}
-                                    fullWidth
-                                >
-                                    Files Only
-                                </Button>
-
-                                <Alert severity="info" sx={{ mt: 2 }}>
-                                    <Typography variant="body2">
-                                        Full backups include database, application files, and user uploads.
-                                        Large backups may take several minutes to complete.
-                                    </Typography>
-                                </Alert>
-                            </Stack>
-                        </CardContent>
-                    </BlankCard>
-                </Grid>
-
-                {/* Backup Files List */}
-                <Grid item xs={12}>
-                    <BlankCard>
-                        <CardContent>
-                            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-                                <Stack direction="row" alignItems="center" spacing={2}>
-                                    <ExportIcon color="primary" />
-                                    <Typography variant="h6">Backup Files</Typography>
-                                </Stack>
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<RefreshIcon />}
-                                    onClick={loadBackupFiles}
-                                    size="small"
-                                >
-                                    Refresh
-                                </Button>
-                            </Stack>
-
-                            {loading ? (
-                                <Box display="flex" justifyContent="center" p={3}>
-                                    <CircularProgress />
-                                </Box>
-                            ) : backupFiles.length === 0 ? (
-                                <Alert severity="info">
-                                    No backup files found. Create your first backup using the manual backup options above.
-                                </Alert>
-                            ) : (
-                                <List>
-                                    {backupFiles.map((backup) => (
-                                        <ListItem key={backup.id} divider>
-                                            <ListItemText
-                                                primary={
-                                                    <Stack direction="row" alignItems="center" spacing={1}>
-                                                        <Typography variant="body1">{backup.filename}</Typography>
-                                                        <Chip
-                                                            label={backup.type}
-                                                            size="small"
-                                                            color={getBackupTypeColor(backup.type) as any}
-                                                        />
-                                                        <Typography variant="body2">
-                                                            {getStatusIcon(backup.status)}
-                                                        </Typography>
-                                                    </Stack>
-                                                }
-                                                secondary={
-                                                    <Stack direction="row" spacing={2}>
-                                                        <Typography variant="caption">
-                                                            Size: {formatFileSize(backup.size)}
-                                                        </Typography>
-                                                        <Typography variant="caption">
-                                                            Created: {formatDate(backup.created_at)}
-                                                        </Typography>
-                                                    </Stack>
-                                                }
-                                            />
-                                            <ListItemSecondaryAction>
-                                                <Stack direction="row" spacing={1}>
-                                                    <Tooltip title="Download Backup">
-                                                        <IconButton
-                                                            onClick={() => downloadBackup(backup.id)}
-                                                            disabled={backup.status !== 'completed'}
-                                                        >
-                                                            <DownloadIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                    <Tooltip title="Delete Backup">
-                                                        <IconButton
-                                                            onClick={() => {
-                                                                setSelectedBackup(backup.id);
-                                                                setDeleteDialogOpen(true);
-                                                            }}
-                                                            color="error"
-                                                        >
-                                                            <DeleteIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </Stack>
-                                            </ListItemSecondaryAction>
-                                        </ListItem>
-                                    ))}
-                                </List>
-                            )}
+                            {activeTab === 0 && renderBackupSettingsTab()}
+                            {activeTab === 1 && renderYourBackupsTab()}
+                            {activeTab === 2 && user?.role === 'super_admin' && <NFSBackupConfig />}
                         </CardContent>
                     </BlankCard>
                 </Grid>

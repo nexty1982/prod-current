@@ -252,7 +252,7 @@ async function resetUserPassword(userId, newPassword = null) {
 
     // Update user password
     await connection.execute(
-      'UPDATE users SET password_hash = ?, password_reset_at = NOW() WHERE id = ?',
+      'UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [passwordHash, userId]
     );
 

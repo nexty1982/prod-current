@@ -43,11 +43,9 @@ import { useQuery } from '@tanstack/react-query';
 import { aiService } from '../../services/aiService';
 import AIContentGenerator from './AIContentGenerator';
 import AIAnalyticsDashboard from './AIAnalyticsDashboard';
-import AIOCRProcessor from './AIOCRProcessor';
 import AITranslationAssistant from './AITranslationAssistant';
 import AIDeploymentAutomation from './AIDeploymentAutomation';
 import AILogAnalysis from './AILogAnalysis';
-import AutoLearningOCR from './AutoLearningOCR';
 
 interface AIServiceStatusProps {
     serviceName: string;
@@ -183,8 +181,6 @@ export const AIAdminPanel: React.FC = () => {
         { label: 'Overview', icon: <IconBrain size={16} /> },
         { label: 'Analytics', icon: <IconChartBar size={16} /> },
         { label: 'Content Generator', icon: <IconRobot size={16} /> },
-        { label: 'OCR Processor', icon: <IconScan size={16} /> },
-        { label: 'Auto-Learning OCR', icon: <IconBrain size={16} /> },
         { label: 'Translation', icon: <IconLanguage size={16} /> },
         { label: 'Deployment', icon: <IconServer size={16} /> },
         { label: 'Log Analysis', icon: <IconActivity size={16} /> },
@@ -194,14 +190,24 @@ export const AIAdminPanel: React.FC = () => {
         setActiveTab(newValue);
     };
 
-    // Mock AI usage stats - in real implementation, these would come from APIs
-    const aiUsageStats = {
-        dailyRequests: 1247,
-        contentGenerated: 89,
-        documentsProcessed: 34,
-        translationsCompleted: 156,
-        averageResponseTime: 850,
-        successRate: 98.5,
+    // Real AI usage stats from backend
+    const {
+        data: aiMetrics,
+        isLoading: metricsLoading,
+        error: metricsError,
+        refetch: refetchMetrics,
+    } = useQuery({
+        queryKey: ['ai-metrics'],
+        queryFn: () => aiService.getMetrics(),
+        refetchInterval: 60000, // 1 minute
+    });
+
+    const aiUsageStats = aiMetrics || {
+        dailyRequests: 0,
+        contentGenerated: 0,
+        translations: 0,
+        avgResponseTime: 0,
+        successRate: 0,
     };
 
     return (
@@ -233,7 +239,7 @@ export const AIAdminPanel: React.FC = () => {
 
             {/* Quick Stats */}
             <Grid container spacing={2} mb={3}>
-                <Grid item xs={12} sm={6} md={2}>
+                <Grid item xs={12} sm={6} md={2.4}>
                     <AIQuickStats
                         title="Daily AI Requests"
                         value={aiUsageStats.dailyRequests}
@@ -242,7 +248,7 @@ export const AIAdminPanel: React.FC = () => {
                         color="primary"
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={2}>
+                <Grid item xs={12} sm={6} md={2.4}>
                     <AIQuickStats
                         title="Content Generated"
                         value={aiUsageStats.contentGenerated}
@@ -251,34 +257,25 @@ export const AIAdminPanel: React.FC = () => {
                         color="success"
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={2}>
-                    <AIQuickStats
-                        title="Documents Processed"
-                        value={aiUsageStats.documentsProcessed}
-                        change={-5}
-                        icon={<IconScan size={24} />}
-                        color="warning"
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={2}>
+                <Grid item xs={12} sm={6} md={2.4}>
                     <AIQuickStats
                         title="Translations"
-                        value={aiUsageStats.translationsCompleted}
+                        value={aiUsageStats.translations}
                         change={15}
                         icon={<IconLanguage size={24} />}
                         color="primary"
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={2}>
+                <Grid item xs={12} sm={6} md={2.4}>
                     <AIQuickStats
                         title="Avg Response (ms)"
-                        value={aiUsageStats.averageResponseTime}
+                        value={aiUsageStats.avgResponseTime}
                         change={-8}
                         icon={<IconClock size={24} />}
                         color="success"
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={2}>
+                <Grid item xs={12} sm={6} md={2.4}>
                     <AIQuickStats
                         title="Success Rate"
                         value={`${aiUsageStats.successRate}%`}
@@ -292,7 +289,7 @@ export const AIAdminPanel: React.FC = () => {
             {/* Service Status */}
             {aiHealth && (
                 <Grid container spacing={2} mb={3}>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={4}>
                         <AIServiceStatus
                             serviceName="Content Generation"
                             status={aiHealth.services?.content_generation ? 'online' : 'offline'}
@@ -301,16 +298,7 @@ export const AIAdminPanel: React.FC = () => {
                             icon={<IconRobot size={20} />}
                         />
                     </Grid>
-                    <Grid item xs={12} md={3}>
-                        <AIServiceStatus
-                            serviceName="OCR Processing"
-                            status={aiHealth.services?.ocr_processing ? 'online' : 'offline'}
-                            responseTime={1200}
-                            uptime={98.5}
-                            icon={<IconScan size={20} />}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={4}>
                         <AIServiceStatus
                             serviceName="Translation"
                             status={aiHealth.services?.translation ? 'online' : 'offline'}
@@ -319,7 +307,7 @@ export const AIAdminPanel: React.FC = () => {
                             icon={<IconLanguage size={20} />}
                         />
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={4}>
                         <AIServiceStatus
                             serviceName="Analytics Engine"
                             status={aiHealth.services?.analytics ? 'degraded' : 'offline'}
@@ -376,11 +364,9 @@ export const AIAdminPanel: React.FC = () => {
                                             </Typography>
                                             <Stack direction="row" spacing={1} flexWrap="wrap">
                                                 <AIContentGenerator />
-                                                <AIOCRProcessor />
                                                 <AITranslationAssistant />
                                                 <AIDeploymentAutomation />
                                                 <AILogAnalysis />
-                                                <AutoLearningOCR />
                                             </Stack>
                                         </Box>
 
@@ -394,13 +380,13 @@ export const AIAdminPanel: React.FC = () => {
                                                 • Generated system documentation for user management
                                             </Typography>
                                             <Typography variant="body2" color="text.secondary">
-                                                • Processed 12 church documents via OCR
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
                                                 • Translated interface to Greek and Serbian
                                             </Typography>
                                             <Typography variant="body2" color="text.secondary">
                                                 • Analyzed performance metrics and identified 3 optimization opportunities
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                • Generated automated deployment configurations
                                             </Typography>
                                         </Box>
                                     </Stack>
@@ -459,36 +445,6 @@ export const AIAdminPanel: React.FC = () => {
                     <Card>
                         <CardContent>
                             <Typography variant="h6" mb={3}>
-                                AI OCR Document Processing
-                            </Typography>
-                            <AIOCRProcessor />
-                            <Typography variant="body2" color="text.secondary" mt={2}>
-                                Extract text from images and PDF documents with AI enhancement.
-                                Supports multiple languages and provides structured data output.
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {activeTab === 4 && (
-                    <Card>
-                        <CardContent>
-                            <Typography variant="h6" mb={3}>
-                                24h Auto-Learning OCR System
-                            </Typography>
-                            <AutoLearningOCR />
-                            <Typography variant="body2" color="text.secondary" mt={2}>
-                                Continuously improve OCR accuracy by processing all available Orthodox church records.
-                                Generates learning rules and confidence analysis for better field mapping.
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {activeTab === 5 && (
-                    <Card>
-                        <CardContent>
-                            <Typography variant="h6" mb={3}>
                                 AI Translation Assistant
                             </Typography>
                             <AITranslationAssistant />
@@ -500,7 +456,7 @@ export const AIAdminPanel: React.FC = () => {
                     </Card>
                 )}
 
-                {activeTab === 6 && (
+                {activeTab === 4 && (
                     <Card>
                         <CardContent>
                             <Typography variant="h6" mb={3}>
@@ -515,7 +471,7 @@ export const AIAdminPanel: React.FC = () => {
                     </Card>
                 )}
 
-                {activeTab === 7 && (
+                {activeTab === 5 && (
                     <Card>
                         <CardContent>
                             <Typography variant="h6" mb={3}>

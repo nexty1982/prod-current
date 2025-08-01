@@ -1,0 +1,49 @@
+{
+  "id": "95575628bfc5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/COMPONENT_LOGGING_INTEGRATION.md",
+  "relativePath": "docs/archive/07-09-25/COMPONENT_LOGGING_INTEGRATION.md",
+  "name": "COMPONENT_LOGGING_INTEGRATION.md",
+  "extension": ".md",
+  "size": 8265,
+  "modified": "2025-07-09T04:32:16.331Z",
+  "created": "2025-07-09T04:32:16.331Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 295,
+      "characters": 8265,
+      "words": 948
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "src/utils/logger",
+        "line": 40
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 295,
+      "codeLines": 191,
+      "commentLines": 48,
+      "commentRatio": 0.200836820083682,
+      "averageLineLength": 32.97907949790795
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.862Z"
+  },
+  "contentHash": "248c043b5c1158f0bfae5b3b04308027d2db5121735639250f0af569401a1e97",
+  "discoveredAt": "2025-07-28T07:19:57.862Z"
+}

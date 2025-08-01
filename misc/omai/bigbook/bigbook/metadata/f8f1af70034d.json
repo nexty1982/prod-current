@@ -1,0 +1,67 @@
+{
+  "id": "f8f1af70034d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/79c565629c6a.json",
+  "relativePath": "bigbook/metadata/79c565629c6a.json",
+  "name": "79c565629c6a.json",
+  "extension": ".json",
+  "size": 2633,
+  "modified": "2025-07-26T04:17:10.826Z",
+  "created": "2025-07-26T04:17:10.826Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 61,
+      "characters": 2629,
+      "words": 214
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 48
+      },
+      {
+        "type": "npm_package",
+        "name": "bcrypt",
+        "line": 48
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 48,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 48,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"79c565629c6a\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/update-password.js\",\n  \"relativePath\": \"server/database/update-password.js\",\n  \"name\": \"update-password.js\",\n  \"extension\": \".js\",\n  \"size\": 1045,\n  \"modified\": \"2025-07-24T14:50:26.296Z\",\n  \"created\": \"2025-07-24T14:50:26.296Z\",\n  \"classification\": {\n    \"type\": \"Server Scripts\",\n    \"category\": \"Backend > Server\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 43,\n      \"characters\": 1041,\n      \"words\": 111\n    },\n    \"classification\": {\n      \"type\": \"Server Scripts\",\n      \"category\": \"Backend > Server\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"mysql2/promise\",\n        \"line\": 3\n      },\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"bcrypt\",\n        \"line\": 4\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 20,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"// Usage: node update-password.js user@example.com newpassword\\n\\nconst mysql = require('mysql2/promise');\\nconst bcrypt = require('bcrypt');\\n\\nconst [,, email, newPassword] = process.argv;\\n\\nif (!email || !newPassword) {\\n  console.error('Usage: node update-password.js <email> <newPassword>');\\n  process.exit(1);\\n}\\n\\nasync function updatePassword() {\\n  try {\\n    const hash = await bcrypt.hash(newPassword, 10);\\n\\n    const connection = await mysql.createConnection({\\n      host: 'localhost',\\n      user: 'orthodoxapps',\\n      password: '[REDACTED]',\\n      database: 'orthodoxmetrics_db'\\n    });\\n\\n    const [result] = await connection.execute(\\n      'UPDATE users SET password = ? WHERE email = ?',\\n      [hash, email]\\n    );\\n\\n    if (result.affectedRows === 0) {\\n      console.log(`❌ No user found with email: ${email}`);\\n    } else {\\n      console.log(`✅ Password updated successfully for: ${email}`);\\n    }\\n\\n    await connection.end();\\n  } catch (err) {\\n    console.error('Error updating password:'[REDACTED]\"\n    },\n    \"complexity\": {\n      \"totalLines\": 43,\n      \"codeLines\": 31,\n      \"commentLines\": 1,\n      \"commentRatio\": 0.03125,\n      \"averageLineLength\": 31.21875\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:10.828Z\"\n  },\n  \"contentHash\": \"3a073b303f999939e90232a55677bc84af16f3f0a4a38a4f4cd3730bd9339253\",\n  \"discoveredAt\": \"2025-07-26T04:17:10.828Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 61,
+      "codeLines": 61,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 42.114754098360656
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.122Z"
+  },
+  "contentHash": "24bece1b0f0f5aab8777fdaed08ab6c23970a65ad6bcd265132ae802836f9f27",
+  "discoveredAt": "2025-07-28T07:19:57.122Z"
+}

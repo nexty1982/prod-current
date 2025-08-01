@@ -1,0 +1,54 @@
+{
+  "id": "9ff318dc5f36",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-login-route.sh",
+  "relativePath": "server/debug/fix-login-route.sh",
+  "name": "fix-login-route.sh",
+  "extension": ".sh",
+  "size": 2010,
+  "modified": "2025-07-23T14:26:37.301Z",
+  "created": "2025-07-23T14:26:35.892Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 76,
+      "characters": 1966,
+      "words": 271
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 32
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 36
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 76,
+      "codeLines": 57,
+      "commentLines": 5,
+      "commentRatio": 0.08064516129032258,
+      "averageLineLength": 30.5
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.138Z"
+  },
+  "contentHash": "1c7c2fb503c1602f01c1a41245eecb2819dd2dd48e66feb1ee2788a33996b32b",
+  "discoveredAt": "2025-07-28T07:20:00.139Z"
+}

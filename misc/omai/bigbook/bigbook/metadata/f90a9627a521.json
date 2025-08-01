@@ -1,0 +1,61 @@
+{
+  "id": "f90a9627a521",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/diagnose-phantom-user.js",
+  "relativePath": "server/debug/diagnose-phantom-user.js",
+  "name": "diagnose-phantom-user.js",
+  "extension": ".js",
+  "size": 5537,
+  "modified": "2025-07-24T14:50:26.364Z",
+  "created": "2025-07-24T14:50:26.364Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 157,
+      "characters": 5499,
+      "words": 487
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "https",
+        "line": 9
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 24,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Phantom User Diagnostic Script\r\n * Identifies the root cause of authentication issues where sessions exist but user data is missing\r\n */\r\n\r\nconst mysql = require('mysql2/promise');\r\nconst https = require('https');\r\n\r\nconsole.log('🔍 PHANTOM USER DIAGNOSTIC SCRIPT');\r\nconsole.log('==================================');\r\nconsole.log('');\r\n\r\nasync function diagnosePhantomUser() {\r\n  try {\r\n    console.log('🔧 STEP 1: DATABASE CONNECTION TEST');\r\n    console.log('===================================');\r\n    \r\n    // Test database connection\r\n    const connection = await mysql.createConnection({\r\n      host: 'localhost',\r\n      user: 'orthodoxapps',\r\n      password: '[REDACTED]',\r\n      database: 'orthodoxmetrics_db'\r\n    });\r\n    \r\n    console.log('✅ Database connection successful');\r\n    \r\n    // Check sessions table\r\n    const [sessions] = await connection.execute('SELECT COUNT(*) as count FROM sessions');\r\n    console.log(`📊 Active sessions in database: ${sessions[0].count}`);\r\n    \r\n    if (sessions[0].count > 0) {\r\n      const [sessionData] = await connection.execute('SELECT session_id, expires, LENGTH(data) as data_length FROM sessions LIMIT 3');\r\n      console.log('📋 Sample sessions:');\r\n      sessionData.forEach((session, i) => {\r\n        console.log(`   ${i+1}. ID: ${session.session_id.substring(0, 20)}...`);\r\n        console.log(`      Expires: ${new Date(session.expires * 1000).toISOString()}`);\r\n        console.log(`      Data length: ${session.data_length} bytes`);\r\n      });\r\n    }\r\n    \r\n    await connection.end();\r\n    \r\n    console.log('');\r\n    console.log('🔧 STEP 2: API ENDPOINT TEST');\r\n    console.log('=============================');\r\n    \r\n    // Test auth check endpoint\r\n    const authCheckResult = await testEndpoint('/api/auth/check');\r\n    console.log('🔐 Auth check endpoint response:', authCheckResult);\r\n    \r\n    // Test health endpoint\r\n    const healthResult = await testEndpoint('/api/health');\r\n    console.log('🏥 Health endpoint response:', healthResult);\r\n    \r\n    console.log('');\r\n    console.log('🔧 STEP 3: SESSION CONFIGURATION ANALYSIS');\r\n    console.log('==========================================');\r\n    \r\n    // Check session configuration\r\n    const sessionConfig = require('../config/session.js');\r\n    console.log('✅ Session middleware loaded');\r\n    console.log('📋 Session middleware type:', typeof sessionConfig);\r\n    \r\n    console.log('');\r\n    console.log('🔧 STEP 4: DIAGNOSIS SUMMARY');\r\n    console.log('=============================');\r\n    \r\n    if (sessions[0].count === 0) {\r\n      console.log('❌ ISSUE: No sessions in database');\r\n      console.log('   This suggests sessions are not being saved properly');\r\n      console.log('   Possible causes:');\r\n      console.log('   - Session store connection issues');\r\n      console.log('   - Session middleware not configured correctly');\r\n      console.log('   - Database permissions issues');\r\n    } else if (authCheckResult.includes('authenticated: false')) {\r\n      console.log('❌ ISSUE: Sessions exist but authentication fails');\r\n      console.log('   This suggests session data corruption or cookie issues');\r\n      console.log('   Possible causes:');\r\n      console.log('   - Session data not being serialized properly');\r\n      console.log('   - Cookie domain/path mismatch');\r\n      console.log('   - Nginx proxy not forwarding cookies correctly');\r\n    } else {\r\n      console.log('✅ Sessions and authentication appear to be working');\r\n      console.log('   The phantom user issue may be frontend-related');\r\n    }\r\n    \r\n    console.log('');\r\n    console.log('🎯 RECOMMENDED ACTIONS:');\r\n    console.log('=======================');\r\n    console.log('1. Clear all sessions: DELETE FROM sessions;');\r\n    console.log('2. Restart the server to clear any cached sessions');\r\n    console.log('3. Clear browser cookies completely');\r\n    console.log('4. Test login flow with browser dev tools open');\r\n    console.log('5. Monitor server logs for session debugging output');\r\n    \r\n  } catch (error) {\r\n    console.error('❌ Diagnostic error:', error.message);\r\n    console.error('Stack trace:', error.stack);\r\n  }\r\n}\r\n\r\nfunction testEndpoint(path) {\r\n  return new Promise((resolve) => {\r\n    const options = {\r\n      hostname: 'orthodoxmetrics.com',\r\n      port: 443,\r\n      path: path,\r\n      method: 'GET',\r\n      headers: {\r\n        'Accept': 'application/json',\r\n        'User-Agent': 'PhantomUser-Diagnostic'\r\n      }\r\n    };\r\n    \r\n    const req = https.request(options, (res) => {\r\n      let data = '';\r\n      \r\n      res.on('data', (chunk) => {\r\n        data += chunk;\r\n      });\r\n      \r\n      res.on('end', () => {\r\n        try {\r\n          const parsed = JSON.parse(data);\r\n          resolve(`Status: ${res.statusCode}, Data: ${JSON.stringify(parsed).substring(0, 100)}...`);\r\n        } catch {\r\n          resolve(`Status: ${res.statusCode}, Raw: ${data.substring(0, 100)}...`);\r\n        }\r\n      });\r\n    });\r\n    \r\n    req.on('error', (err) => {\r\n      resolve(`Error: ${err.message}`);\r\n    });\r\n    \r\n    req.setTimeout(5000, () => {\r\n      req.destroy();\r\n      resolve('Timeout');\r\n    });\r\n    \r\n    req.end();\r\n  });\r\n}\r\n\r\n// Run the diagnostic\r\ndiagnosePhantomUser().then(() => {\r\n  console.log('');\r\n  console.log('🏁 DIAGNOSTIC COMPLETE');\r\n  console.log('======================');\r\n  process.exit(0);\r\n}).catch((error) => {\r\n  console.error('❌ Diagnostic failed:', error);\r\n  process.exit(1);\r\n}); "
+    },
+    "complexity": {
+      "totalLines": 157,
+      "codeLines": 120,
+      "commentLines": 11,
+      "commentRatio": 0.08396946564885496,
+      "averageLineLength": 39.94656488549618
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.099Z"
+  },
+  "contentHash": "94b5386b7abd8aa2a572d66496192ace0202d530a3e1650d137cd24a2abc0e52",
+  "discoveredAt": "2025-07-28T07:20:00.099Z"
+}

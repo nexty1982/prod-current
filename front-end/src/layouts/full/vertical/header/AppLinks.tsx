@@ -1,13 +1,19 @@
 import { Avatar, Box, Typography, Grid, Stack } from '@mui/material';
 import * as dropdownData from './data';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { useMenuVisibility } from '../../../../contexts/MenuVisibilityContext';
+import { useAuth } from 'src/context/AuthContext';
+import { getAppsLink } from './data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
 
 const AppLinks = () => {
+  const { user } = useAuth();
   const { visibleMenus } = useMenuVisibility();
+
+  // Use filtered appsLink based on user role
+  const visibleApps = getAppsLink(user);
 
   // Map dropdown app hrefs to menu IDs
   const appIdMap: { [href: string]: string } = {
@@ -19,11 +25,11 @@ const AppLinks = () => {
     '/apps/invoice/list': 'app-invoice',
   };
 
-  // Filter visible apps
-  const visibleApps = dropdownData.appsLink.filter(app => {
-    const menuId = appIdMap[app.href];
-    return menuId ? visibleMenus[menuId] : true; // Show by default if not mapped
-  });
+  // (Optional) If you want to further filter by visibleMenus, you can do so here, but only if needed.
+  // const filteredVisibleApps = visibleApps.filter(app => {
+  //   const menuId = appIdMap[app.href];
+  //   return menuId ? visibleMenus[menuId] : true;
+  // });
 
   return (
     (<Grid container spacing={3} mb={4}>

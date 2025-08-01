@@ -1,0 +1,6 @@
+{
+  "id": "e6b0be59ec88",
+  "name": "delete-duplicate-churches.js",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/delete-duplicate-churches.js",
+  "type": "Server Scripts"
+}

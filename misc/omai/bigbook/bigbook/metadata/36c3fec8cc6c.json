@@ -1,0 +1,43 @@
+{
+  "id": "36c3fec8cc6c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/API_AUDIT_GUIDE.md",
+  "relativePath": "docs/API_AUDIT_GUIDE.md",
+  "name": "API_AUDIT_GUIDE.md",
+  "extension": ".md",
+  "size": 5843,
+  "modified": "2025-07-27T04:25:39.777Z",
+  "created": "2025-07-27T04:25:22.204Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 210,
+      "characters": 5785,
+      "words": 748
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 210,
+      "codeLines": 120,
+      "commentLines": 42,
+      "commentRatio": 0.25925925925925924,
+      "averageLineLength": 34.123456790123456
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.783Z"
+  },
+  "contentHash": "78c6a3ab9c2aa3814246631cf460682ea72ec66ebb006b023331e75a398f091d",
+  "discoveredAt": "2025-07-28T07:19:57.783Z"
+}

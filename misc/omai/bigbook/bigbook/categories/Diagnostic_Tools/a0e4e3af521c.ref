@@ -1,0 +1,6 @@
+{
+  "id": "a0e4e3af521c",
+  "name": "check-frontend-auth.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-frontend-auth.sh",
+  "type": "Troubleshooting Utilities"
+}

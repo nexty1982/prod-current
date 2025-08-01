@@ -1,0 +1,6 @@
+{
+  "id": "eb2302ed10ab",
+  "name": "test-auth-status.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-auth-status.sh",
+  "type": "Testing Scripts"
+}

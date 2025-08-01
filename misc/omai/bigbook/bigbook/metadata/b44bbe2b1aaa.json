@@ -1,0 +1,43 @@
+{
+  "id": "b44bbe2b1aaa",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bundle_arsenal.sh",
+  "relativePath": "bundle_arsenal.sh",
+  "name": "bundle_arsenal.sh",
+  "extension": ".sh",
+  "size": 798,
+  "modified": "2025-07-24T22:03:31.887Z",
+  "created": "2025-07-24T22:03:31.887Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 29,
+      "characters": 788,
+      "words": 97
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 29,
+      "codeLines": 17,
+      "commentLines": 5,
+      "commentRatio": 0.22727272727272727,
+      "averageLineLength": 34.54545454545455
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.245Z"
+  },
+  "contentHash": "67bfe4288b5ce83601e7f5bd0ef312ad0f781fbd5e1b6702da762fc315ae0a2a",
+  "discoveredAt": "2025-07-26T04:17:09.245Z"
+}

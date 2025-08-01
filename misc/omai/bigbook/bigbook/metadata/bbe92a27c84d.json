@@ -1,0 +1,43 @@
+{
+  "id": "bbe92a27c84d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/testing/debug-churches-api.js",
+  "relativePath": "server/testing/debug-churches-api.js",
+  "name": "debug-churches-api.js",
+  "extension": ".js",
+  "size": 4705,
+  "modified": "2025-07-12T03:35:55.256Z",
+  "created": "2025-07-12T03:34:13.453Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 171,
+      "characters": 4677,
+      "words": 374
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 171,
+      "codeLines": 138,
+      "commentLines": 8,
+      "commentRatio": 0.0547945205479452,
+      "averageLineLength": 30.253424657534246
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.183Z"
+  },
+  "contentHash": "54590d99166429064af8c4c0ea398648bf87e81dbe2092a6ca2ed8a3db9cafe8",
+  "discoveredAt": "2025-07-28T07:20:01.183Z"
+}

@@ -1,4 +1,4 @@
-// Liturgical Calendar Types for OrthodoxMetrics
+// Liturgical Calendar Types for OrthodMetrics
 export interface LiturgicalDay {
   date: string;
   liturgicalColor?: string;

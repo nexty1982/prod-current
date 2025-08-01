@@ -1,0 +1,43 @@
+{
+  "id": "6b866847e956",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/DATABASE_SETUP_GUIDE.md",
+  "relativePath": "docs/archive/DATABASE_SETUP_GUIDE.md",
+  "name": "DATABASE_SETUP_GUIDE.md",
+  "extension": ".md",
+  "size": 4771,
+  "modified": "2025-07-14T07:12:33.583Z",
+  "created": "2025-07-14T07:10:02.614Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 185,
+      "characters": 4685,
+      "words": 595
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 185,
+      "codeLines": 103,
+      "commentLines": 35,
+      "commentRatio": 0.2536231884057971,
+      "averageLineLength": 32.28260869565217
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.115Z"
+  },
+  "contentHash": "b90d1f6cfd65ff5fe261173fb947d3289f357c2ae7abef7355913c515011ab8d",
+  "discoveredAt": "2025-07-28T07:19:58.115Z"
+}

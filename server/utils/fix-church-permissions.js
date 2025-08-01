@@ -35,16 +35,16 @@ async function fixPermissions() {
             console.log(`   Database: ${church.database_name}`);
             
             try {
-                // Grant all privileges on the church database to orthodoxapp user
-                const grantQuery = `GRANT ALL PRIVILEGES ON \`${church.database_name}\`.* TO 'orthodoxapp'@'localhost'`;
+                // Grant all privileges on the church database to orthodoxapps user
+                const grantQuery = `GRANT ALL PRIVILEGES ON \`${church.database_name}\`.* TO 'orthodoxapps'@'localhost'`;
                 await promisePool.query(grantQuery);
                 console.log(`   ✅ Granted permissions on ${church.database_name}`);
                 
                 // Also grant permissions for any specific tables that might need it
                 const tableGrants = [
-                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_jobs TO 'orthodoxapp'@'localhost'`,
-                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_settings TO 'orthodoxapp'@'localhost'`,
-                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_queue TO 'orthodoxapp'@'localhost'`
+                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_jobs TO 'orthodoxapps'@'localhost'`,
+                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_settings TO 'orthodoxapps'@'localhost'`,
+                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_queue TO 'orthodoxapps'@'localhost'`
                 ];
                 
                 for (const grantSql of tableGrants) {
@@ -99,7 +99,7 @@ async function fixPermissions() {
         console.log('\n🎉 Database Permissions Setup Complete!');
         console.log('\n📋 Summary:');
         console.log(`   📊 Processed ${churches.length} church databases`);
-        console.log('   🔐 Granted ALL PRIVILEGES to orthodoxapp user');
+        console.log('   🔐 Granted ALL PRIVILEGES to orthodoxapps user');
         console.log('   🔄 Flushed MySQL privileges');
         
         console.log('\n🚀 Next Steps:');

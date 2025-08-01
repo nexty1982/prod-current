@@ -1,0 +1,49 @@
+{
+  "id": "f2f97c692e42",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/restart-server.sh",
+  "relativePath": "server/restart-server.sh",
+  "name": "restart-server.sh",
+  "extension": ".sh",
+  "size": 410,
+  "modified": "2025-07-24T00:09:44.493Z",
+  "created": "2025-07-24T00:09:43.835Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 19,
+      "characters": 402,
+      "words": 62
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 19
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 19,
+      "codeLines": 9,
+      "commentLines": 5,
+      "commentRatio": 0.35714285714285715,
+      "averageLineLength": 27.428571428571427
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.351Z"
+  },
+  "contentHash": "1bc5f1967ea39eebb6bbdee2b37f70e1bd3757f5d49ef2a846f987e4c4f88ccd",
+  "discoveredAt": "2025-07-28T07:20:00.351Z"
+}

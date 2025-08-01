@@ -1,0 +1,43 @@
+{
+  "id": "7a60ce80c68d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/7-11-25/LINK_PERMISSION_ISSUES_RESOLUTION.md",
+  "relativePath": "docs/archive/temp_extract/7-11-25/LINK_PERMISSION_ISSUES_RESOLUTION.md",
+  "name": "LINK_PERMISSION_ISSUES_RESOLUTION.md",
+  "extension": ".md",
+  "size": 7254,
+  "modified": "2025-07-12T03:59:18.000Z",
+  "created": "2025-07-14T05:44:08.620Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 191,
+      "characters": 7232,
+      "words": 887
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 191,
+      "codeLines": 109,
+      "commentLines": 37,
+      "commentRatio": 0.2534246575342466,
+      "averageLineLength": 47.93150684931507
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.263Z"
+  },
+  "contentHash": "b4ae7b3e99f28054c4ab33c70dc958950f4a5798b611fa4d8777ed6c5db1652e",
+  "discoveredAt": "2025-07-28T07:19:58.263Z"
+}

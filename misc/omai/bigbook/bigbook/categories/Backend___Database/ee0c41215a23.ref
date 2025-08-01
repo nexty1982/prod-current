@@ -1,0 +1,6 @@
+{
+  "id": "ee0c41215a23",
+  "name": "churches_migration_fix.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/churches_migration_fix.sql",
+  "type": "Database Scripts"
+}

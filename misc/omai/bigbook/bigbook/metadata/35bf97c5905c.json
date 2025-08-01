@@ -1,0 +1,43 @@
+{
+  "id": "35bf97c5905c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/nginx-session-debug.js",
+  "relativePath": "server/debug/nginx-session-debug.js",
+  "name": "nginx-session-debug.js",
+  "extension": ".js",
+  "size": 5604,
+  "modified": "2025-07-22T03:58:17.786Z",
+  "created": "2025-07-22T03:58:17.786Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 112,
+      "characters": 5568,
+      "words": 486
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 112,
+      "codeLines": 98,
+      "commentLines": 1,
+      "commentRatio": 0.010101010101010102,
+      "averageLineLength": 54.02020202020202
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.187Z"
+  },
+  "contentHash": "93fc7e63dc616f5b5af5d48f2ffd54f3f74e33dd84f3dd0c78796ff85aa6b44e",
+  "discoveredAt": "2025-07-28T07:20:00.187Z"
+}

@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { CardContent, Typography, Grid, Rating, Tooltip, Fab, Stack, Skeleton } from '@mui/material';
 import img1 from 'src/assets/images/products/s4.jpg';
 import img2 from 'src/assets/images/products/s5.jpg';

@@ -1,0 +1,43 @@
+{
+  "id": "ae9627a9cdea",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/DEPLOYMENT_GUIDE.md",
+  "relativePath": "docs/DEPLOYMENT_GUIDE.md",
+  "name": "DEPLOYMENT_GUIDE.md",
+  "extension": ".md",
+  "size": 18597,
+  "modified": "2025-07-18T19:45:43.225Z",
+  "created": "2025-07-18T19:29:55.546Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 750,
+      "characters": 18571,
+      "words": 1969
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 750,
+      "codeLines": 409,
+      "commentLines": 190,
+      "commentRatio": 0.31719532554257096,
+      "averageLineLength": 29.462437395659432
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.793Z"
+  },
+  "contentHash": "1bd5aa4385429a2dd518026e7b3ce19dd8d09f4a7816b1403ad2e55807b51a14",
+  "discoveredAt": "2025-07-28T07:19:57.793Z"
+}

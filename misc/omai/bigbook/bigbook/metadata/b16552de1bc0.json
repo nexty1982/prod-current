@@ -1,0 +1,43 @@
+{
+  "id": "b16552de1bc0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/BIGBOOK_SYSTEM_SUMMARY.md",
+  "relativePath": "docs/7-26-25/BIGBOOK_SYSTEM_SUMMARY.md",
+  "name": "BIGBOOK_SYSTEM_SUMMARY.md",
+  "extension": ".md",
+  "size": 8668,
+  "modified": "2025-07-24T23:20:12.635Z",
+  "created": "2025-07-24T23:20:11.477Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 262,
+      "characters": 8536,
+      "words": 1064
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 262,
+      "codeLines": 144,
+      "commentLines": 60,
+      "commentRatio": 0.29411764705882354,
+      "averageLineLength": 40.279411764705884
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.718Z"
+  },
+  "contentHash": "f3ab531a133ccadd4336e07499ccfe1d3758bda4c52dcf610a517dbe3106b000",
+  "discoveredAt": "2025-07-28T07:19:57.718Z"
+}

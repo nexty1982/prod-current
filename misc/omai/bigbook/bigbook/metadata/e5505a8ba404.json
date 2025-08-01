@@ -1,0 +1,54 @@
+{
+  "id": "e5505a8ba404",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/utils/intelligent-validator.js",
+  "relativePath": "server/scrapers/utils/intelligent-validator.js",
+  "name": "intelligent-validator.js",
+  "extension": ".js",
+  "size": 17072,
+  "modified": "2025-07-14T06:39:37.400Z",
+  "created": "2025-07-14T06:37:16.550Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 444,
+      "characters": 17066,
+      "words": 1254
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "cheerio",
+        "line": 5
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 444,
+      "codeLines": 322,
+      "commentLines": 42,
+      "commentRatio": 0.11538461538461539,
+      "averageLineLength": 43.81318681318681
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.636Z"
+  },
+  "contentHash": "71985fff038dd05c343019a40e369ed8cb735dfb4fab01ff240a11e909834be5",
+  "discoveredAt": "2025-07-28T07:20:00.636Z"
+}

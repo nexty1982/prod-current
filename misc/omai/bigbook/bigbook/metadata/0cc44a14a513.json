@@ -1,0 +1,54 @@
+{
+  "id": "0cc44a14a513",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/utils/i18n.ts",
+  "relativePath": "front-end/src/utils/i18n.ts",
+  "name": "i18n.ts",
+  "extension": ".ts",
+  "size": 681,
+  "modified": "2025-07-17T22:20:47.969Z",
+  "created": "2025-07-05T02:28:49.764Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 34,
+      "characters": 681,
+      "words": 78
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "i18next",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "react-i18next",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 34,
+      "codeLines": 30,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 21.5
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.946Z"
+  },
+  "contentHash": "9f6ed84c61b3b18c0991ab97823b188b98cb8bfe0f5e0865f49c066a438c2446",
+  "discoveredAt": "2025-07-28T07:19:58.946Z"
+}

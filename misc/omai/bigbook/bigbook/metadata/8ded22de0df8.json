@@ -1,0 +1,43 @@
+{
+  "id": "8ded22de0df8",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/dialogue/translator.ts",
+  "relativePath": "services/om-ai/dialogue/translator.ts",
+  "name": "translator.ts",
+  "extension": ".ts",
+  "size": 13514,
+  "modified": "2025-07-25T02:40:46.767Z",
+  "created": "2025-07-25T02:40:45.568Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 442,
+      "characters": 13514,
+      "words": 1079
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 442,
+      "codeLines": 353,
+      "commentLines": 37,
+      "commentRatio": 0.09487179487179487,
+      "averageLineLength": 33.3
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.449Z"
+  },
+  "contentHash": "96520c82c99dd234d4b54db285aec78e54ee36a0653f35f97be68621a9a4aa72",
+  "discoveredAt": "2025-07-28T07:20:01.449Z"
+}

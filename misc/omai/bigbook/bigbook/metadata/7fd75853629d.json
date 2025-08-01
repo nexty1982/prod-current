@@ -1,0 +1,50 @@
+{
+  "id": "7fd75853629d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/fix-database-permissions.sh",
+  "relativePath": "server/scrapers/fix-database-permissions.sh",
+  "name": "fix-database-permissions.sh",
+  "extension": ".sh",
+  "size": 3022,
+  "modified": "2025-07-24T14:51:40.412Z",
+  "created": "2025-07-24T14:51:40.412Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 94,
+      "characters": 2990,
+      "words": 396
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 12,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/bin/bash\n\n# 📁 server/scrapers/fix-database-permissions.sh\n# Fix database permissions for orthodoxapps user\n\necho \"🔧 Fixing Database Permissions for Orthodox Church Scrapers\"\necho \"==========================================================\"\necho\n\n# Database configuration\nDB_USER=\"orthodoxapps\"\nDB_PASSWORD=\"[REDACTED]\"\nDB_NAME=\"orthodoxmetrics\"\n\necho \"🗄️  Database: $DB_NAME\"\necho \"👤 User: $DB_USER\"\necho\n\n# Function to run SQL commands as root\nrun_sql_as_root() {\n    local sql=\"$1\"\n    echo \"Running: $sql\"\n    mysql -u root -p -e \"$sql\"\n}\n\n# Check if we can connect as orthodoxapps first\necho \"🔍 Testing current connection...\"\nif mysql -u \"$DB_USER\" -p\"$DB_PASSWORD\" -e \"USE $DB_NAME; SELECT 1;\" 2>/dev/null; then\n    echo \"✅ Database connection already works!\"\n    echo \"Your scraper should be functioning. Try running:\"\n    echo \"   ./test-scrapers.sh\"\n    exit 0\nfi\n\necho \"❌ Cannot connect as $DB_USER. Fixing permissions...\"\necho\n\n# Create the database and user with proper permissions\necho \"🔧 Setting up database and permissions...\"\necho \"Please enter MySQL root password when prompted:\"\necho\n\ncat << EOF | mysql -u root -p\n-- Create database if it doesn't exist\nCREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n\n-- Create user if it doesn't exist\nCREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';\n\n-- Grant all privileges on the orthodoxmetrics database\nGRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';\n\n-- Also grant privileges to create temporary tables and execute\nGRANT CREATE TEMPORARY TABLES ON $DB_NAME.* TO '$DB_USER'@'localhost';\nGRANT EXECUTE ON $DB_NAME.* TO '$DB_USER'@'localhost';\n\n-- Flush privileges to apply changes\nFLUSH PRIVILEGES;\n\n-- Show current grants\nSHOW GRANTS FOR '$DB_USER'@'localhost';\n\n-- Test connection\nUSE $DB_NAME;\nSELECT 'Database access test successful' as result;\nEOF\n\nif [ $? -eq 0 ]; then\n    echo\n    echo \"✅ Database permissions fixed successfully!\"\n    echo\n    echo \"🧪 Testing connection...\"\n    if mysql -u \"$DB_USER\" -p\"$DB_PASSWORD\" -e \"USE $DB_NAME; SELECT 'Connection test successful' as result;\" 2>/dev/null; then\n        echo \"✅ Connection test passed!\"\n        echo\n        echo \"🚀 Next steps:\"\n        echo \"1. Run the scraper test: ./test-scrapers.sh\"\n        echo \"2. Or run a quick test: ./test-scrapers.sh scrapers\"\n        echo \"3. Or setup the database schema: ./test-scrapers.sh setup\"\n    else\n        echo \"❌ Connection test failed. Please check the error above.\"\n    fi\nelse\n    echo\n    echo \"❌ Failed to fix database permissions.\"\n    echo\n    echo \"💡 Manual fix steps:\"\n    echo \"1. Connect to MySQL as root: mysql -u root -p\"\n    echo \"2. Run these commands:\"\n    echo \"   CREATE DATABASE IF NOT EXISTS $DB_NAME;\"\n    echo \"   CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';\"\n    echo \"   GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';\"\n    echo \"   FLUSH PRIVILEGES;\"\nfi "
+    },
+    "complexity": {
+      "totalLines": 94,
+      "codeLines": 71,
+      "commentLines": 7,
+      "commentRatio": 0.08974358974358974,
+      "averageLineLength": 37.14102564102564
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.589Z"
+  },
+  "contentHash": "1b4bba0ae090de4ed6cd654b491736fe16dd7656d6328341c85628bc48fdc493",
+  "discoveredAt": "2025-07-28T07:20:00.589Z"
+}

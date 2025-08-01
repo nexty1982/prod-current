@@ -16,7 +16,8 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from '@mui/material';
-import { Link, useNavigate } from 'react-router';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { loginType } from 'src/types/auth/auth';
 import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheckbox';
@@ -142,8 +143,77 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
-          {error}
+        <Alert 
+          severity="error" 
+          icon={<ErrorOutlineIcon />}
+          sx={{ mt: 2, mb: 2 }}
+        >
+          <Box>
+            <Typography variant="body1" component="div" sx={{ mb: 1 }}>
+              {error}
+            </Typography>
+            {error.includes("connecting to the server") && (
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ fontSize: '0.875rem' }}
+              >
+                Still having trouble?{' '}
+                <Typography 
+                  component="a" 
+                  href="/support" 
+                  sx={{ 
+                    color: 'primary.main', 
+                    textDecoration: 'underline',
+                    cursor: 'pointer' 
+                  }}
+                >
+                  Contact support
+                </Typography>
+                {' '}or try refreshing the page.
+              </Typography>
+            )}
+            {(error.includes("Incorrect email or password") || error.includes("credentials")) && (
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ fontSize: '0.875rem' }}
+              >
+                Forgot your password?{' '}
+                <Typography 
+                  component={Link} 
+                  to="/auth/forgot-password" 
+                  sx={{ 
+                    color: 'primary.main', 
+                    textDecoration: 'underline' 
+                  }}
+                >
+                  Reset it here
+                </Typography>
+              </Typography>
+            )}
+            {error.includes("temporarily unavailable") && (
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ fontSize: '0.875rem' }}
+              >
+                Please check our{' '}
+                <Typography 
+                  component="a" 
+                  href="/status" 
+                  sx={{ 
+                    color: 'primary.main', 
+                    textDecoration: 'underline',
+                    cursor: 'pointer' 
+                  }}
+                >
+                  system status page
+                </Typography>
+                {' '}for updates.
+              </Typography>
+            )}
+          </Box>
         </Alert>
       )}
 

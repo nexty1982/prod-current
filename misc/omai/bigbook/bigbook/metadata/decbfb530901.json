@@ -1,0 +1,54 @@
+{
+  "id": "decbfb530901",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/omai/knowledge/knowledgeGraph.ts",
+  "relativePath": "front-end/src/omai/knowledge/knowledgeGraph.ts",
+  "name": "knowledgeGraph.ts",
+  "extension": ".ts",
+  "size": 16077,
+  "modified": "2025-07-25T19:15:35.294Z",
+  "created": "2025-07-25T05:14:39.202Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 548,
+      "characters": 16077,
+      "words": 1602
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 548,
+      "codeLines": 362,
+      "commentLines": 90,
+      "commentRatio": 0.19911504424778761,
+      "averageLineLength": 33.3716814159292
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.875Z"
+  },
+  "contentHash": "b145b4715dd90770c38d94e7290c2afb76fb2db9a0517573a40fef991531c57a",
+  "discoveredAt": "2025-07-28T07:19:58.875Z"
+}

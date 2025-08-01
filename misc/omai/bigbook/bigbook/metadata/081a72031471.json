@@ -1,0 +1,43 @@
+{
+  "id": "081a72031471",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/INTERACTIVE_TSX_QUESTIONNAIRE_SUMMARY.md",
+  "relativePath": "docs/7-26-25/INTERACTIVE_TSX_QUESTIONNAIRE_SUMMARY.md",
+  "name": "INTERACTIVE_TSX_QUESTIONNAIRE_SUMMARY.md",
+  "extension": ".md",
+  "size": 10933,
+  "modified": "2025-07-26T03:34:31.428Z",
+  "created": "2025-07-26T03:33:47.091Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 308,
+      "characters": 10837,
+      "words": 1317
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 308,
+      "codeLines": 197,
+      "commentLines": 58,
+      "commentRatio": 0.22745098039215686,
+      "averageLineLength": 41.08627450980392
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.739Z"
+  },
+  "contentHash": "5c6f9f60650e3097ee197859fb388acbd34e230b735c073015f50fad8614a98b",
+  "discoveredAt": "2025-07-28T07:19:57.739Z"
+}

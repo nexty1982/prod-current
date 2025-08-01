@@ -1,0 +1,43 @@
+{
+  "id": "aa182fb03ee1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-nginx-permissions.sh",
+  "relativePath": "server/debug/fix-nginx-permissions.sh",
+  "name": "fix-nginx-permissions.sh",
+  "extension": ".sh",
+  "size": 1785,
+  "modified": "2025-07-22T12:34:00.071Z",
+  "created": "2025-07-22T12:33:58.446Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 48,
+      "characters": 1751,
+      "words": 230
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 48,
+      "codeLines": 31,
+      "commentLines": 4,
+      "commentRatio": 0.11428571428571428,
+      "averageLineLength": 48.34285714285714
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.145Z"
+  },
+  "contentHash": "a7ade000b96191fa80e54a3730740c4b1f217912ca893abcd2803e146dffddd0",
+  "discoveredAt": "2025-07-28T07:20:00.145Z"
+}

@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "watchers": [
+    {
+      "id": "main_project",
+      "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod",
+      "patterns": ["**/*.md", "**/*.sql", "**/*.js", "**/*.ts", "**/*.sh", "**/*.ps1"],
+      "exclude": ["**/node_modules/**", "**/.git/**", "**/logs/**", "**/temp/**", "**/bigbook/**"],
+      "enabled": true,
+      "scan_interval": 300
+    },
+    {
+      "id": "server_scripts",
+      "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts",
+      "patterns": ["**/*.js", "**/*.sh", "**/*.sql"],
+      "exclude": ["**/backups/**", "**/temp/**"],
+      "enabled": true,
+      "scan_interval": 300
+    },
+    {
+      "id": "docs",
+      "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs",
+      "patterns": ["**/*.md", "**/*.sql"],
+      "exclude": ["**/archive/**"],
+      "enabled": true,
+      "scan_interval": 300
+    }
+  ]
+}

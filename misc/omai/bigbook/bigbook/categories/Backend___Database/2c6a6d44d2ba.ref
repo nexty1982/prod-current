@@ -1,0 +1,6 @@
+{
+  "id": "2c6a6d44d2ba",
+  "name": "fix-church-14.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/fix-church-14.sql",
+  "type": "Database Scripts"
+}

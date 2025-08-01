@@ -1,0 +1,6 @@
+{
+  "id": "d21c1e3e7286",
+  "name": "fix-session-deserialization.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/fix-session-deserialization.sh",
+  "type": "Server Scripts"
+}

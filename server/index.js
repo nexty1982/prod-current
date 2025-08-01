@@ -1,4 +1,4 @@
-// 📁 backend/server/index.js
+// ?? backend/server/index.js
 require('dotenv').config();
 
 const express = require('express');
@@ -6,14 +6,17 @@ const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 
-const sessionMW = require('./config/session');
+// 🔧 FIXED: Use the updated session configuration  
+const { sessionMiddleware } = require('./config/session');
 const db = require('./config/db');
 const { requestLogger, errorLogger } = require('./middleware/logger');
+const { requestLogger: dbRequestLogger } = require('./middleware/requestLogger');
 // Import client context middleware for multi-tenant support
 const { clientContext, clientContextCleanup } = require('./middleware/clientContext');
 
-// ─── API ROUTES ─────────────────────────────────────────────────────
+// --- API ROUTES -----------------------------------------------------
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const debugRoutes = require('./routes/debug');
@@ -27,7 +30,6 @@ const uniqueValuesRouter = require('./routes/unique-values');
 const dropdownOptionsRouter = require('./routes/dropdownOptions');
 const baptismCertificatesRouter = require('./routes/baptismCertificates');
 const marriageCertificatesRouter = require('./routes/marriageCertificates');
-const ocrRouter = require('./routes/ocr');
 const calendarRouter = require('./routes/calendar');
 const dashboardRouter = require('./routes/dashboard');
 const invoicesRouter = require('./routes/invoices');
@@ -37,160 +39,244 @@ const billingRouter = require('./routes/billing');
 const churchesRouter = require('./routes/churches');
 const provisionRouter = require('./routes/provision');
 const certificatesRouter = require('./routes/certificates');
-const ocrSessionsRouter = require('./routes/ocrSessions');
-const ocrVisionRouter = require('./routes/ocrVision');
 const ecommerceRouter = require('./routes/ecommerce');
-const backupRouter = require('./routes/backup');
 const { router: notificationRouter } = require('./routes/notifications');
 const kanbanRouter = require('./routes/kanban');
 const { router: logsRouter } = require('./routes/logs');
+const globalOmaiRouter = require('./routes/globalOmai');
+// Add missing router imports
+const churchRecordsRouter = require('./routes/records'); // Church records functionality
 const uploadTokenRouter = require('./routes/uploadToken');
 const templatesRouter = require('./routes/templates');
 const globalTemplatesRouter = require('./routes/globalTemplates');
 const metricsRouter = require('./routes/metrics');
 const recordsRouter = require('./routes/records');
 const importRecordsRouter = require('./routes/importRecords'); // Records import functionality
-const preprocessOcrRouter = require('./routes/preprocessOcr'); // Image preprocessing routes
 const scriptRunnerRouter = require('./routes/runScript'); // Secure script runner for admin users
-// Admin test routes for OCR system testing
-const adminTestRouter = require('./routes/admin-test');
-// Orthodox Church Directory scraper routes
-const churchScraperRouter = require('./routes/church-scraper');
+
 // Import client API router for multi-tenant client endpoints
 const clientApiRouter = require('./routes/clientApi');
-// Import main clients management router
-const clientsRouter = require('./routes/clients');
 // Import admin system management router
 const adminSystemRouter = require('./routes/adminSystem');
 // Import church admin management router for multi-database support
 const churchAdminRouter = require('./routes/admin/church');
 // Import churches management router for church provisioning
 const churchesManagementRouter = require('./routes/admin/churches');
-// Import church OCR management router for multi-tenant OCR pipeline
-const churchOcrRouter = require('./routes/church/ocr');
-// Import public OCR routes (no authentication required)
-const publicOcrRouter = require('./routes/public/ocr');
+const sessionsRouter = require('./routes/admin/sessions');
+const usersRouter = require('./routes/admin/users');
+const activityLogsRouter = require('./routes/admin/activity-logs');
+// Import new modular admin route files (extracted from monolithic admin.js)
+const churchUsersRouter = require('./routes/admin/church-users');
+const churchDatabaseRouter = require('./routes/admin/church-database');
+const userRouter = require('./routes/user'); // User routes
 const funeralCertificatesRouter = require('./routes/funeralCertificates');
 // Import pages and uploads management routes
 const pagesRouter = require('./routes/pages');
 const uploadsRouter = require('./routes/uploads');
 const orthodoxCalendarRouter = require('./routes/orthodoxCalendar');
-// Import auto-learning OCR routes for AI-powered OCR improvement
-const autoLearningRoutes = require('./routes/autoLearningRoutes');
+// Import global images management router for super admin content management
+const globalImagesRouter = require('./routes/admin/globalImages');
+// Import service management router for system monitoring and control
+const servicesRouter = require('./routes/admin/services');
+// Import components management router for system component control
+const componentsRouter = require('./routes/admin/components');
+const settingsRouter = require('./routes/settings');
+// Import social module routers
+const socialBlogRouter = require('./routes/social/blog');
+const socialFriendsRouter = require('./routes/social/friends');
+const socialChatRouter = require('./routes/social/chat');
+const socialNotificationsRouter = require('./routes/social/notifications');
+// Import backup management routers
+const backupRouter = require('./routes/admin/backups');
+// Import original backup system router
+const originalBackupRouter = require('./routes/backup');
+// Import NFS backup configuration router
+const nfsBackupRouter = require('./routes/admin/nfs-backup');
+// Import Big Book system router
+const bigBookRouter = require('./routes/bigbook');
+
+// Import OM-AI system router
+const omaiRouter = require('./routes/omai');
+const omaiMemoriesRouter = require('./routes/omai/memories');
+// const omaiRouter = require('./routes/omai-test'); // TEMPORARY TEST
+const ombRouter = require('./routes/omb');
+// Import mock APIs to prevent 404 errors
+const mockApisRouter = require('./routes/mock-apis');
+// Import JIT Terminal router for secure server access
+const jitTerminalRouter = require('./routes/jit-terminal');
+// Import Backend Diagnostics router for system monitoring
+const backendDiagnosticsRouter = require('./routes/backend_diagnostics');
+// Import Build System router for build orchestration
+const buildRouter = require('./routes/build');
+// Import AI Administration Panel router
+const aiRouter = require('./routes/ai');
 
 const app = express();
+const server = http.createServer(app);
+
+// 🔧 FIXED: Trust proxy configuration
 app.set('trust proxy', 1);
 
+// 🔧 PRODUCTION: CORS configuration for orthodmetrics.com
 const allowedOrigins = [
+  // Production domains
+  'https://orthodmetrics.com',
+  'http://orthodmetrics.com',
+  
+  // Development origins (keep for local dev)
   'http://localhost:3000',
   'https://localhost:3000',
-  'https://orthodoxmetrics.com',
-  'http://localhost:3001',
-  'https://localhost:3001',
-  'http://localhost:5173',
-  'https://localhost:5173',
-  'http://localhost:5174',
+  'http://0.0.0.0:5174',           // Development frontend (Vite)
+  'http://localhost:5174',         // Development frontend (Vite)
   'https://localhost:5174',
-  'http://127.0.0.1:3000',
-  'https://127.0.0.1:3000',
-  'http://127.0.0.1:3001',
-  'https://127.0.0.1:3001',
-  'http://127.0.0.1:5173',
-  'https://127.0.0.1:5173',
+  'http://localhost:5173',         // Vite dev server fallback
+  'https://localhost:5173',
   'http://127.0.0.1:5174',
   'https://127.0.0.1:5174',
-  'http://192.168.1.239',
-  'https://192.168.1.239',
-  'http://192.168.1.239:3000',
-  'https://192.168.1.239:3000',
-  'http://192.168.1.239:3001',
-  'https://192.168.1.239:3001',
-  'http://192.168.1.239:5173',
-  'https://192.168.1.239:5173',
-  'http://192.168.1.239:5174',
-  'https://192.168.1.239:5174',
-  'http://192.168.1.221',
-  'https://192.168.1.221',
-  'http://192.168.1.221:3000',
-  'https://192.168.1.221:3000',
-  'http://192.168.1.221:3001',
-  'https://192.168.1.221:3001',
-  'http://192.168.1.221:5173',
-  'https://192.168.1.221:5173',
-  'http://192.168.1.221:5174',
-  'https://192.168.1.221:5174',
-  'https://orthodmetrics.com',
-  'https://orthodoxmetrics.com',
-  'http://orthodoxmetrics.com',
-  'https://orthodoxmetrics.com:8080',
-  'http://orthodoxmetrics.com:8080',
-  'https://www.orthodoxmetrics.com',
-  'http://www.orthodoxmetrics.com'
+  'http://127.0.0.1:5173',
+  'https://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  'https://127.0.0.1:3000',
+  'http://127.0.0.1:5174',
+  'https://127.0.0.1:5174',
+  'http://192.168.1.240:5174',     // Network IP for Vite dev server
+  'https://192.168.1.240:5174'
 ];
 
-// ─── CORS SETUP ─────────────────────────────────────────────────────
+// --- CORS SETUP -----------------------------------------------------
 app.use(cors({
   origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
+    console.warn('❌ CORS blocked origin:', origin);
     callback(new Error('CORS policy does not allow access from origin: ' + origin));
   },
-  credentials: true
+  credentials: true, // 🔧 CRITICAL: Allow credentials (cookies)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Set-Cookie']
 }));
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 const HOST = process.env.HOST || '0.0.0.0';
 
-// ─── MIDDLEWARE ─────────────────────────────────────────────────────
+// 🔧 FIXED: Middleware order is CRITICAL for session authentication
+console.log('🔧 Setting up middleware in correct order...');
+
+// 1. Logging middleware (first)
 app.use(morgan('dev'));
 
-// Add debugging middleware to track request processing
+// 2. Body parsing middleware (before session)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// 3. Session middleware (CRITICAL: before any auth-protected routes)
+console.log('🍪 Applying session middleware...');
+app.use(sessionMiddleware);
+
+// 4. Database routing middleware
+const { databaseRouter } = require('./middleware/databaseRouter');
+app.use(databaseRouter);
+
+// 4a. Database-backed API logger (captures all routes + status code + duration)
+app.use(dbRequestLogger);
+
+// 5. Request debugging (after session, before routes)
 app.use((req, res, next) => {
-  console.log(`🚀 Request received: ${req.method} ${req.path}`);
-  console.log(`📦 Content-Type: ${req.headers['content-type']}`);
-  console.log(`📏 Content-Length: ${req.headers['content-length']}`);
-  
-  // Override res.status to log when status is set
-  const originalStatus = res.status;
-  res.status = function(code) {
-    if (code === 400) {
-      console.log(`❌ 400 status set for ${req.method} ${req.path}`);
-      console.log('📍 Stack trace:', new Error().stack);
-    }
-    return originalStatus.call(this, code);
-  };
-  
+  console.log(`🌍 Request: ${req.method} ${req.path}`);
+  console.log(`🍪 Session ID: ${req.sessionID}`);
+  console.log(`👤 Session User: ${req.session?.user?.email || 'Not authenticated'}`);
   next();
 });
 
-app.use(express.json({ limit: '10mb' })); // Increase limit in case body is too large
-app.use(sessionMW);
+// --- ROUTES ---------------------------------------------------------
+console.log('🛤️  Setting up routes in correct order...');
 
-// ─── ROUTES ─────────────────────────────────────────────────────────
-// PRIORITY: Churches API - moved to top to avoid middleware conflicts
+// Health check route (no auth required)
+app.get('/', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        message: 'OrthodMetrics Backend is running successfully!',
+        session: req.sessionID,
+        authenticated: !!req.session?.user
+    });
+});
+
+// Public routes first (no authentication required)
 app.use('/api/churches', churchesRouter);
 
-// API prefixed routes (for direct API access)
+// Authentication routes (no auth required for login itself)
 app.use('/api/auth', authRoutes);
-app.use('/api/public/ocr', publicOcrRouter); // Public OCR service (no auth required)
+
+// 🔧 FIXED: Specific admin routes BEFORE general admin routes
+app.use('/api/admin/church', churchAdminRouter);
+
+app.use('/api/admin/system', adminSystemRouter);
+app.use('/api/admin/churches', churchesManagementRouter);
+app.use('/api/admin/sessions', sessionsRouter);
+app.use('/api/admin/users', usersRouter); // 🎯 CRITICAL: This route was being intercepted
+app.use('/api/users', usersRouter); // 🔧 FIXED: Mount usersRouter for /api/users endpoint
+app.use('/api/admin/activity-logs', activityLogsRouter);
+app.use('/api/admin/global-images', globalImagesRouter);
+app.use('/api/backups', backupRouter);
+app.use('/api/backup', originalBackupRouter);
+app.use('/api/admin/nfs-backup', nfsBackupRouter);
+const socialPermissionsRouter = require('./routes/admin/social-permissions');
+const menuPermissionsRouter = require('./routes/admin/menu-permissions');
+const headlinesRouter = require('./routes/headlines');
+const headlinesConfigRouter = require('./routes/headlines-config');
+app.use('/api/admin/social-permissions', socialPermissionsRouter);
+app.use('/api/admin/menu-permissions', menuPermissionsRouter);
+app.use('/api/headlines', headlinesRouter);
+app.use('/api/headlines', headlinesConfigRouter);
+app.use('/api/admin/services', servicesRouter);
+app.use('/api/admin/components', componentsRouter);
+// OMAI-Spin environment mirroring routes
+const omaiSpinRouter = require('./routes/admin/omaiSpin');
+app.use('/api/admin/omai-spin', omaiSpinRouter);
+app.use('/api/settings', settingsRouter);
+app.use('/api/build', buildRouter);
+app.use('/api/ai', aiRouter);
+
+// Big Book system routes
+app.use('/api/bigbook', bigBookRouter);
+// OM-AI system routes
+app.use('/api/omai', omaiRouter);
+app.use('/api/omai/memories', omaiMemoriesRouter);
+// Global OMAI system routes for site-wide AI assistance
+app.use('/api/omai', globalOmaiRouter);
+app.use('/api/omb', ombRouter);
+// JIT Terminal routes for secure server access
+app.use('/api/jit', jitTerminalRouter);
+// Backend Diagnostics routes for system monitoring (super_admin only)
+app.use('/api/server', backendDiagnosticsRouter);
+// 🔧 NEW: Modular admin routes (extracted from monolithic admin.js)
+app.use('/api/admin/church-users', churchUsersRouter);
+app.use('/api/admin/church-database', churchDatabaseRouter);
+
+
+
+// General admin routes (AFTER specific routes to prevent conflicts)
 app.use('/api/admin', adminRoutes);
-app.use('/api/admin/test', adminTestRouter); // Admin OCR test panel routes
-app.use('/api/admin/system', adminSystemRouter); // System admin routes
-app.use('/api/admin/church', churchAdminRouter); // Church admin routes
-app.use('/api/admin/churches', churchesManagementRouter); // Church provisioning and management
-app.use('/api/church/:id/ocr', churchOcrRouter); // Church-specific OCR routes
-app.use('/api/ai/auto-learning', autoLearningRoutes); // Auto-learning OCR system API
-app.use('/api/ocr', preprocessOcrRouter); // Image preprocessing routes
-app.use('/api/backup', backupRouter);
-app.use('/api/templates', templatesRouter);
-app.use('/api/templates/global', globalTemplatesRouter);
-app.use('/api/metrics', metricsRouter); // SaaS metrics API
-app.use('/api/church-scraper', churchScraperRouter); // Orthodox Church Directory scraper
-app.use('/api/records', recordsRouter); // Church records CRUD API
-app.use('/api', scriptRunnerRouter); // Secure script runner for admin users
+
+// Other authenticated routes
+app.use('/api/user', userRouter);
+app.use('/api/church-records', churchRecordsRouter);
+app.use('/api/kanban', kanbanRouter);
+
+// User profile routes (authenticated)
+const userProfileRouter = require('./routes/user-profile');
+app.use('/api/user', userProfileRouter);
+
+// Notification routes (authenticated)
 app.use('/api', notificationRouter);
-app.use('/api/liturgical-calendar', orthodoxCalendarRouter); // Orthodox liturgical calendar
-app.use('/api', debugRoutes);
+
+// Social module routes
+app.use('/api/social/blog', socialBlogRouter);
+app.use('/api/social/friends', socialFriendsRouter);
+app.use('/api/social/chat', socialChatRouter);
+app.use('/api/social/notifications', socialNotificationsRouter);
 
 // Record management routes
 app.use('/api/baptism-records', baptismRouter);
@@ -200,46 +286,49 @@ app.use('/api/unique-values', uniqueValuesRouter);
 
 // Certificate routes
 app.use('/api/baptismCertificates', baptismCertificatesRouter);
+// Certificate routes
 app.use('/api/certificate/baptism', baptismCertificatesRouter);
 app.use('/api/marriageCertificates', marriageCertificatesRouter);
 app.use('/api/certificate/marriage', marriageCertificatesRouter);
 app.use('/api/funeralCertificates', funeralCertificatesRouter);
 app.use('/api/certificate/funeral', funeralCertificatesRouter);
 
-// OCR and Vision routes
-app.use('/api', ocrVisionRouter); // New Google Vision OCR routes
-app.use('/api', uploadTokenRouter); // Upload token management routes
-app.use('/api', ocrRouter);
-app.use('/api/ocr', ocrSessionsRouter);
+// Upload token management routes
+app.use('/api', uploadTokenRouter);
 
 // Business routes
 app.use('/api/calendar', calendarRouter);
+app.use('/api/calendar', orthodoxCalendarRouter); // Add liturgical calendar routes
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/invoices', invoicesRouter);
 app.use('/api/invoices-enhanced', enhancedInvoicesRouter);
 app.use('/api/invoices-ml', invoicesMultilingualRouter);
 app.use('/api/enhanced-invoices', enhancedInvoicesRouter);
 app.use('/api/billing', billingRouter);
-app.use('/api/clients', clientsRouter); // Client management API
 app.use('/api/provision', provisionRouter);
 app.use('/api/certificates', certificatesRouter);
 app.use('/api/eCommerce', ecommerceRouter);
-app.use('/api/logs', logsRouter);
+app.use('/api/admin/logs', logsRouter); // 🔧 FIXED: Mount logsRouter under /api/admin/logs
 
 // CMS Routes
 app.use('/api/pages', pagesRouter);
+app.use('/api/blogs', require('./routes/blogs')); // Blog functionality for Task 132
 app.use('/api/uploads', uploadsRouter);
+
+// Survey Routes (Task 131)
+app.use('/api/survey', require('./routes/survey')); // OMSiteSurvey functionality
 
 // Menu and admin routes
 app.use('/api/menu-management', menuManagementRoutes);
 app.use('/api/menu-permissions', menuPermissionsRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/kanban', kanbanRouter);
+app.use('/api/survey', require('./routes/survey')); // Site survey routes for super_admin
 
 // Multi-tenant client routes
 app.use('/client/:clientSlug/api', clientContext, clientApiRouter, clientContextCleanup);
 
-// ⬇️ Mount dropdownOptions routes here to prevent override
+// ?? Mount dropdownOptions routes here to prevent override
 app.use('/api', dropdownOptionsRouter);
 
 // Records import routes
@@ -260,11 +349,11 @@ app.get('/api/dropdown-options', (req, res) => {
 app.get('/api/config', (req, res) => {
   // Return app configuration
   res.json({
-    appName: 'OrthodoxMetrics',
+    appName: 'OrthodMetrics',
     version: '1.0.0',
     supportedLanguages: ['en', 'gr', 'ru', 'ro'],
     features: {
-      ocr: true,
+
       certificates: true,
       invoices: true,
       calendar: true
@@ -283,7 +372,7 @@ app.get('/api/search', (req, res) => {
   });
 });
 
-// ─── HEALTHCHECK ────────────────────────────────────────────────────
+// --- HEALTHCHECK ----------------------------------------------------
 app.get('/api/health', async (req, res) => {
   try {
     const dbStatus = await db.testConnection();
@@ -297,14 +386,84 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// ─── 404 HANDLER ────────────────────────────────────────────────────
+// --- OMAI FRONTEND COMPATIBILITY ENDPOINTS --------------------------
+// These endpoints are for frontend compatibility with the OMAI system
+
+// GET /api/status - OMAI status check for frontend
+app.get('/api/status', async (req, res) => {
+  try {
+    // Import OMAI health check function
+    const { getOMAIHealth } = require('/var/www/orthodmetrics/dev/misc/omai/services/index.js');
+    const health = await getOMAIHealth();
+    
+    res.json({
+      success: true,
+      status: health.status,
+      version: '1.0.0',
+      activeAgents: health.components?.agents || [],
+      timestamp: health.timestamp,
+      uptime: process.uptime(),
+      memory: process.memoryUsage()
+    });
+  } catch (error) {
+    console.error('OMAI status check failed:', error);
+    res.status(500).json({
+      success: false,
+      status: 'unhealthy',
+      error: error.message
+    });
+  }
+});
+
+// POST /api/fix - OMAI fix endpoint for frontend
+app.post('/api/fix', async (req, res) => {
+  try {
+    const { route, component, issues, props, currentCode, errorDetails } = req.body;
+    
+    // Log the fix request
+    console.log(`[OMAI] Fix request from user ${req.user?.id || 'unknown'} for component ${component}`);
+
+    // For now, return a stub response
+    // This would be implemented with actual AI fix logic
+    res.json({
+      success: true,
+      suggestion: `Fix for ${component} component`,
+      codeDiff: '',
+      explanation: 'This is a placeholder fix response. AI fix functionality will be implemented.',
+      confidence: 0.8,
+      estimatedTime: '5 minutes',
+      requiresManualReview: true
+    });
+  } catch (error) {
+    console.error('OMAI fix failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// --- 404 HANDLER ----------------------------------------------------
 app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-// ─── STATIC FRONTEND ────────────────────────────────────────────────
-app.use('/uploads', express.static(path.resolve(__dirname, '../public/uploads')));
+// --- STATIC FRONTEND ------------------------------------------------
+app.use('/uploads', express.static(path.resolve(__dirname, '../misc/public/uploads')));
 app.use('/assets', express.static(path.resolve(__dirname, '../src/assets')));
+
+// Serve dynamic addon components (development & production paths)
+const addonsPath = process.env.NODE_ENV === 'production' 
+  ? '/var/www/orthodmetrics/addons' 
+  : path.resolve(__dirname, '../misc/public/addons');
+app.use('/addons', express.static(addonsPath));
+
+// Explicit route for manifest.json to fix 403 errors
+app.get('/manifest.json', (req, res) => {
+  const manifestPath = path.resolve(__dirname, '../front-end/dist/manifest.json');
+  res.setHeader('Content-Type', 'application/json');
+  res.sendFile(manifestPath);
+});
 
 // Serve static files from the React app build directory
 app.use(express.static(path.resolve(__dirname, '../front-end/dist')));
@@ -320,7 +479,7 @@ app.get('*', (req, res) => {
   res.sendFile(indexPath);
 });
 
-// ─── EMAIL QUEUE PROCESSING ──────────────────────────────────────────
+// --- EMAIL QUEUE PROCESSING ------------------------------------------
 const { notificationService } = require('./routes/notifications');
 const cron = require('node-cron');
 
@@ -338,12 +497,19 @@ cron.schedule('*/5 * * * *', async () => {
 
 console.log('Email queue processor started (runs every 5 minutes)');
 
-// ─── START OCR PROCESSING SERVICE ─────────────────────────────────
-const ocrProcessingService = require('./services/ocrProcessingService');
-ocrProcessingService.start();
 
-// ─── START SERVER ───────────────────────────────────────────────────
-app.listen(PORT, HOST, () => {
+
+// --- WEBSOCKET INTEGRATION -----------------------------------------
+const websocketService = require('./services/websocketService');
+
+// Initialize JIT WebSocket
+if (jitTerminalRouter.setupJITWebSocket) {
+  const jitWebSocket = jitTerminalRouter.setupJITWebSocket(server);
+  console.log('🔌 JIT Terminal WebSocket initialized');
+}
+
+// --- START SERVER ---------------------------------------------------
+server.listen(PORT, HOST, () => {
   const nodeEnv = process.env.NODE_ENV || 'development';
   console.log(`🚀 Server running in ${nodeEnv.toUpperCase()} mode at http://${HOST}:${PORT}`);
   if (nodeEnv === 'development') {
@@ -351,4 +517,8 @@ app.listen(PORT, HOST, () => {
   } else if (nodeEnv === 'production') {
     console.log('🔧 Production mode: Optimized for performance and reduced logging');
   }
+  
+  // Initialize WebSocket service after server starts
+  websocketService.initialize(server, sessionMiddleware);
+  console.log('🔌 WebSocket service initialized');
 });

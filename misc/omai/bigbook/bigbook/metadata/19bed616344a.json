@@ -1,0 +1,43 @@
+{
+  "id": "19bed616344a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/setup-sdlc-backup-complete.sh",
+  "relativePath": "scripts/7-26-25/setup-sdlc-backup-complete.sh",
+  "name": "setup-sdlc-backup-complete.sh",
+  "extension": ".sh",
+  "size": 9142,
+  "modified": "2025-07-24T22:36:05.690Z",
+  "created": "2025-07-24T22:36:01.438Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 316,
+      "characters": 9096,
+      "words": 1040
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 316,
+      "codeLines": 207,
+      "commentLines": 46,
+      "commentRatio": 0.18181818181818182,
+      "averageLineLength": 34.70750988142292
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.049Z"
+  },
+  "contentHash": "edc76649c625be4b6a2feda553bd8c8ab64971f036870ac4fa383dd7437284cb",
+  "discoveredAt": "2025-07-28T07:19:59.049Z"
+}

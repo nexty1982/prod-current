@@ -1,0 +1,43 @@
+{
+  "id": "e75600c57bc1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/7-11-25/TEMPLATE_SYSTEM_DEVELOPER_GUIDE.md",
+  "relativePath": "docs/archive/7-11-25/TEMPLATE_SYSTEM_DEVELOPER_GUIDE.md",
+  "name": "TEMPLATE_SYSTEM_DEVELOPER_GUIDE.md",
+  "extension": ".md",
+  "size": 10919,
+  "modified": "2025-07-12T02:45:45.030Z",
+  "created": "2025-07-12T02:44:58.966Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 10
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 356,
+      "characters": 10825,
+      "words": 1243
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 10
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 356,
+      "codeLines": 244,
+      "commentLines": 42,
+      "commentRatio": 0.14685314685314685,
+      "averageLineLength": 36.35664335664335
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.074Z"
+  },
+  "contentHash": "54ead43b6ed2af75ec9ae1a88e61f301ec2cc066bbeb880f7468213b7bfc7c20",
+  "discoveredAt": "2025-07-28T07:19:58.074Z"
+}

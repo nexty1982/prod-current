@@ -1,0 +1,43 @@
+{
+  "id": "6d0076880063",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-omai-debug.sh",
+  "relativePath": "scripts/test-omai-debug.sh",
+  "name": "test-omai-debug.sh",
+  "extension": ".sh",
+  "size": 5957,
+  "modified": "2025-07-25T23:43:44.698Z",
+  "created": "2025-07-25T23:37:10.951Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 163,
+      "characters": 5871,
+      "words": 731
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 163,
+      "codeLines": 119,
+      "commentLines": 15,
+      "commentRatio": 0.11194029850746269,
+      "averageLineLength": 42.6044776119403
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.515Z"
+  },
+  "contentHash": "ae0176c979ef08f092f571c922812d28488008022393d839214edbb2a992fca0",
+  "discoveredAt": "2025-07-28T07:19:59.515Z"
+}

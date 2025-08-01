@@ -1,0 +1,49 @@
+{
+  "id": "0b7d96a9725c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/hooks/useInspectorState.ts",
+  "relativePath": "front-end/src/hooks/useInspectorState.ts",
+  "name": "useInspectorState.ts",
+  "extension": ".ts",
+  "size": 4445,
+  "modified": "2025-07-25T04:11:02.907Z",
+  "created": "2025-07-25T04:10:59.681Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 177,
+      "characters": 4445,
+      "words": 431
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 177,
+      "codeLines": 154,
+      "commentLines": 1,
+      "commentRatio": 0.0064516129032258064,
+      "averageLineLength": 27.4
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.849Z"
+  },
+  "contentHash": "ca013930cfa8a7dd08f2f96acabac4b7a99cb7fa97c0e0dba2a08ebd6f8925eb",
+  "discoveredAt": "2025-07-28T07:19:58.849Z"
+}

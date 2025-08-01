@@ -1,0 +1,74 @@
+{
+  "id": "b7f82d992733",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/services/ocrProcessingService.js",
+  "relativePath": "server/services/ocrProcessingService.js",
+  "name": "ocrProcessingService.js",
+  "extension": ".js",
+  "size": 24399,
+  "modified": "2025-07-19T13:52:38.127Z",
+  "created": "2025-07-10T21:51:35.713Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 655,
+      "characters": 24357,
+      "words": 2146
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "@google-cloud/vision",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "@google-cloud/translate",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "sharp",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 9
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 321
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 655,
+      "codeLines": 443,
+      "commentLines": 109,
+      "commentRatio": 0.19746376811594202,
+      "averageLineLength": 42.02355072463768
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.113Z"
+  },
+  "contentHash": "817a927c775bcdf5e963a38347c649312e7f0fc8f67a9f1cce08c3fc840a9fde",
+  "discoveredAt": "2025-07-28T07:20:01.113Z"
+}

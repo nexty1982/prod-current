@@ -1,0 +1,49 @@
+{
+  "id": "174083ab54b8",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/admin/social-permissions.js",
+  "relativePath": "server/routes/admin/social-permissions.js",
+  "name": "social-permissions.js",
+  "extension": ".js",
+  "size": 11798,
+  "modified": "2025-07-23T19:34:06.064Z",
+  "created": "2025-07-22T15:41:03.978Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 314,
+      "characters": 11788,
+      "words": 1057
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 314,
+      "codeLines": 249,
+      "commentLines": 23,
+      "commentRatio": 0.08455882352941177,
+      "averageLineLength": 40.94485294117647
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.374Z"
+  },
+  "contentHash": "a96988e9043422069b2f8c30b49035a4cb0c08639f6925a5dc486dd22f7ffd90",
+  "discoveredAt": "2025-07-28T07:20:00.374Z"
+}

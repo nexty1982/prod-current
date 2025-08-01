@@ -1,6 +1,8 @@
 // server/routes/invoices.js
 const express = require('express');
 const { promisePool } = require('../config/db');
+const { requireAuth } = require('../middleware/auth');
+const { requireChurchBilling } = require('../middleware/churchSecurity');
 const router = express.Router();
 
 // Import the invoice generator utilities (assuming Node.js compatible version)
@@ -295,7 +297,7 @@ function convertServiceToInvoice(serviceData, serviceType, locale) {
 }
 
 // GET /api/invoices - Get all invoices with filtering and pagination
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, requireChurchBilling(), async (req, res) => {
     try {
         const {
             page = 1,
@@ -432,7 +434,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/invoices - Create new invoice
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, requireChurchBilling(), async (req, res) => {
     try {
         const {
             church_id,

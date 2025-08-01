@@ -1,0 +1,43 @@
+{
+  "id": "74699129b10f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/test-corrected-encrypted-storage.sh",
+  "relativePath": "scripts/7-26-25/test-corrected-encrypted-storage.sh",
+  "name": "test-corrected-encrypted-storage.sh",
+  "extension": ".sh",
+  "size": 4731,
+  "modified": "2025-07-26T04:25:52.720Z",
+  "created": "2025-07-26T04:25:14.959Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 149,
+      "characters": 4685,
+      "words": 565
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 149,
+      "codeLines": 130,
+      "commentLines": 2,
+      "commentRatio": 0.015151515151515152,
+      "averageLineLength": 34.31060606060606
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.057Z"
+  },
+  "contentHash": "b205d1e929eeee8f2c6206479afd742e2f2dec3fea2d076ff73e74f4013f9b5d",
+  "discoveredAt": "2025-07-28T07:19:59.057Z"
+}

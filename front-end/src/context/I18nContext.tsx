@@ -1,5 +1,5 @@
 /**
- * OrthodoxMetrics Internationalization Context & Provider
+ * OrthodMetrics Internationalization Context & Provider
  * Multi-language support for EN, GR, RU, RO
  */
 

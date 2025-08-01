@@ -1,0 +1,6 @@
+{
+  "id": "a204dbba4ccc",
+  "name": "create_ocr_database.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/create_ocr_database.sql",
+  "type": "Database Scripts"
+}

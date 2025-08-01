@@ -1,0 +1,43 @@
+{
+  "id": "2b78408d5b35",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/install-parish-map-browser-guided.sh",
+  "relativePath": "scripts/install-parish-map-browser-guided.sh",
+  "name": "install-parish-map-browser-guided.sh",
+  "extension": ".sh",
+  "size": 4822,
+  "modified": "2025-07-28T00:20:42.171Z",
+  "created": "2025-07-28T00:20:41.321Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 121,
+      "characters": 4686,
+      "words": 729
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 121,
+      "codeLines": 106,
+      "commentLines": 5,
+      "commentRatio": 0.04504504504504504,
+      "averageLineLength": 41.13513513513514
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.124Z"
+  },
+  "contentHash": "d717367e9b5ebf7e40ebc706c5f39d15bd93756a934cb0fad634a30a03bf0cac",
+  "discoveredAt": "2025-07-28T07:19:59.124Z"
+}

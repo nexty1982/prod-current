@@ -1,0 +1,54 @@
+{
+  "id": "27821ffaecf8",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/dialogue/chat-engine.ts",
+  "relativePath": "services/om-ai/dialogue/chat-engine.ts",
+  "name": "chat-engine.ts",
+  "extension": ".ts",
+  "size": 10714,
+  "modified": "2025-07-25T02:39:25.697Z",
+  "created": "2025-07-25T02:39:24.144Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 355,
+      "characters": 10714,
+      "words": 990
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 355,
+      "codeLines": 261,
+      "commentLines": 38,
+      "commentRatio": 0.12709030100334448,
+      "averageLineLength": 34.2675585284281
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.428Z"
+  },
+  "contentHash": "51fcf36ca0d254626f0f8e15243354a82097cfe6e1b5cd832a1465a860b910a9",
+  "discoveredAt": "2025-07-28T07:20:01.428Z"
+}

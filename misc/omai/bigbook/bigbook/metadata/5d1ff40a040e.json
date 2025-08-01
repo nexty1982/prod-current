@@ -1,0 +1,54 @@
+{
+  "id": "5d1ff40a040e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-vite-base-path.sh",
+  "relativePath": "server/debug/fix-vite-base-path.sh",
+  "name": "fix-vite-base-path.sh",
+  "extension": ".sh",
+  "size": 2416,
+  "modified": "2025-07-23T14:37:10.753Z",
+  "created": "2025-07-23T14:37:09.312Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 91,
+      "characters": 2362,
+      "words": 335
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 34
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 38
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 91,
+      "codeLines": 69,
+      "commentLines": 6,
+      "commentRatio": 0.08,
+      "averageLineLength": 30.293333333333333
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.176Z"
+  },
+  "contentHash": "991ddc92bcd5e432ac32281a7294f3c351c66b51a4042ea4bf49b16a7b85f817",
+  "discoveredAt": "2025-07-28T07:20:00.176Z"
+}

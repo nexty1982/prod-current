@@ -1,0 +1,116 @@
+{
+  "id": "ff8a77acee03",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/emailSender.js",
+  "relativePath": "server/utils/emailSender.js",
+  "name": "emailSender.js",
+  "extension": ".js",
+  "size": 17836,
+  "modified": "2025-07-04T23:08:09.000Z",
+  "created": "2025-07-09T00:48:38.526Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 511,
+      "characters": 17006,
+      "words": 1274
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "nodemailer",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 9,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 10,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 11,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 18,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 19,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 298,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 301,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 365,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 366,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// Email Sender for OCR Upload Receipts\r\nconst nodemailer = require('nodemailer');\r\nconst logger = require('./logger');\r\n\r\nclass EmailSender {\r\n  \r\n  constructor() {\r\n    this.transporter = nodemailer.createTransport({\r\n      host: process.env.[REDACTED] || 'smtp.gmail.com',\r\n      port: parseInt(process.env.[REDACTED]) || 587,\r\n      secure: process.env.[REDACTED] === 'true',\r\n      auth: {\r\n        user: process.env.[REDACTED],\r\n        pass: process.env.[REDACTED]\r\n      }\r\n    });\r\n    \r\n    this.fromEmail = process.env.[REDACTED] || 'noreply@orthodoxmetrics.com';\r\n    this.fromName = process.env.[REDACTED] || 'Orthodox Metrics OCR System';\r\n  }\r\n  \r\n  /**\r\n   * Send upload receipt email\r\n   */\r\n  async sendUploadReceipt(toEmail, receiptData) {\r\n    try {\r\n      const { sessionId, uploadResults, timestamp, language } = receiptData;\r\n      \r\n      const subject = this.getLocalizedSubject(language);\r\n      const htmlContent = this.generateReceiptHTML(receiptData);\r\n      const textContent = this.generateReceiptText(receiptData);\r\n      \r\n      const mailOptions = {\r\n        from: `\"${this.fromName}\" <${this.fromEmail}>`,\r\n        to: toEmail,\r\n        subject,\r\n        text: textContent,\r\n        html: htmlContent,\r\n        headers: {\r\n          'X-Session-ID': sessionId\r\n        }\r\n      };\r\n      \r\n      const result = await this.transporter.sendMail(mailOptions);\r\n      logger.info(`Upload receipt sent to ${toEmail}, messageId: ${result.messageId}`);\r\n      \r\n      return {\r\n        success: true,\r\n        messageId: result.messageId\r\n      };\r\n      \r\n    } catch (error) {\r\n      logger.error('Failed to send upload receipt:', error);\r\n      throw error;\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Get localized email subject\r\n   */\r\n  getLocalizedSubject(language) {\r\n    const subjects = {\r\n      en: 'OCR Processing Complete - Orthodox Metrics',\r\n      gr: 'Ολοκλήρωση Επεξεργασίας OCR - Orthodox Metrics',\r\n      ru: 'Обработка OCR завершена - Orthodox Metrics',\r\n      ro: 'Procesarea OCR finalizată - Orthodox Metrics'\r\n    };\r\n    \r\n    return subjects[language] || subjects.en;\r\n  }\r\n  \r\n  /**\r\n   * Generate HTML email content\r\n   */\r\n  generateReceiptHTML(data) {\r\n    const { sessionId, uploadResults, timestamp, language } = data;\r\n    const successfulUploads = uploadResults.filter(r => r.success);\r\n    const failedUploads = uploadResults.filter(r => !r.success);\r\n    \r\n    const translations = this.getTranslations(language);\r\n    \r\n    return `\r\n    <!DOCTYPE html>\r\n    <html>\r\n    <head>\r\n      <meta charset=\"UTF-8\">\r\n      <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n      <title>${translations.subject}</title>\r\n      <style>\r\n        body {\r\n          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\r\n          line-height: 1.6;\r\n          color: #333;\r\n          margin: 0;\r\n          padding: 0;\r\n          background-color: #f4f4f4;\r\n        }\r\n        .container {\r\n          max-width: 600px;\r\n          margin: 20px auto;\r\n          background: white;\r\n          border-radius: 10px;\r\n          overflow: hidden;\r\n          box-shadow: 0 4px 6px rgba(0,0,0,0.1);\r\n        }\r\n        .header {\r\n          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\r\n          color: white;\r\n          padding: 30px;\r\n          text-align: center;\r\n        }\r\n        .header h1 {\r\n          margin: 0;\r\n          font-size: 28px;\r\n        }\r\n        .content {\r\n          padding: 30px;\r\n        }\r\n        .session-info {\r\n          background: #f8f9fa;\r\n          padding: 20px;\r\n          border-radius: 8px;\r\n          margin-bottom: 25px;\r\n        }\r\n        .session-info h3 {\r\n          margin-top: 0;\r\n          color: #495057;\r\n        }\r\n        .info-row {\r\n          display: flex;\r\n          justify-content: space-between;\r\n          margin-bottom: 10px;\r\n        }\r\n        .info-label {\r\n          font-weight: 600;\r\n          color: #6c757d;\r\n        }\r\n        .results-section {\r\n          margin-bottom: 25px;\r\n        }\r\n        .results-section h3 {\r\n          color: #495057;\r\n          border-bottom: 2px solid #dee2e6;\r\n          padding-bottom: 10px;\r\n        }\r\n        .file-result {\r\n          background: #f8f9fa;\r\n          padding: 15px;\r\n          border-radius: 6px;\r\n          margin-bottom: 10px;\r\n          border-left: 4px solid #28a745;\r\n        }\r\n        .file-result.failed {\r\n          border-left-color: #dc3545;\r\n        }\r\n        .file-name {\r\n          font-weight: 600;\r\n          margin-bottom: 5px;\r\n        }\r\n        .file-details {\r\n          font-size: 14px;\r\n          color: #6c757d;\r\n        }\r\n        .text-preview {\r\n          background: white;\r\n          border: 1px solid #dee2e6;\r\n          border-radius: 4px;\r\n          padding: 10px;\r\n          margin-top: 10px;\r\n          font-family: monospace;\r\n          font-size: 12px;\r\n          max-height: 100px;\r\n          overflow-y: auto;\r\n        }\r\n        .footer {\r\n          background: #f8f9fa;\r\n          padding: 20px;\r\n          text-align: center;\r\n          color: #6c757d;\r\n          font-size: 14px;\r\n        }\r\n        .download-links {\r\n          text-align: center;\r\n          margin: 25px 0;\r\n        }\r\n        .download-btn {\r\n          display: inline-block;\r\n          background: #007bff;\r\n          color: white;\r\n          text-decoration: none;\r\n          padding: 12px 24px;\r\n          border-radius: 6px;\r\n          margin: 0 10px;\r\n          font-weight: 600;\r\n        }\r\n        .download-btn:hover {\r\n          background: #0056b3;\r\n          color: white;\r\n          text-decoration: none;\r\n        }\r\n        .stats {\r\n          display: flex;\r\n          justify-content: space-around;\r\n          margin: 20px 0;\r\n          text-align: center;\r\n        }\r\n        .stat {\r\n          flex: 1;\r\n        }\r\n        .stat-number {\r\n          font-size: 24px;\r\n          font-weight: bold;\r\n          color: #007bff;\r\n        }\r\n        .stat-label {\r\n          font-size: 12px;\r\n          color: #6c757d;\r\n          text-transform: uppercase;\r\n        }\r\n      </style>\r\n    </head>\r\n    <body>\r\n      <div class=\"container\">\r\n        <div class=\"header\">\r\n          <h1>📄 ${translations.title}</h1>\r\n          <p>${translations.subtitle}</p>\r\n        </div>\r\n        \r\n        <div class=\"content\">\r\n          <div class=\"session-info\">\r\n            <h3>${translations.sessionInfo}</h3>\r\n            <div class=\"info-row\">\r\n              <span class=\"info-label\">${translations.sessionId}:</span>\r\n              <span><code>${sessionId}</code></span>\r\n            </div>\r\n            <div class=\"info-row\">\r\n              <span class=\"info-label\">${translations.timestamp}:</span>\r\n              <span>${new Date(timestamp).toLocaleString()}</span>\r\n            </div>\r\n            <div class=\"info-row\">\r\n              <span class=\"info-label\">${translations.language}:</span>\r\n              <span>${this.getLanguageName(language)}</span>\r\n            </div>\r\n          </div>\r\n          \r\n          <div class=\"stats\">\r\n            <div class=\"stat\">\r\n              <div class=\"stat-number\">${uploadResults.length}</div>\r\n              <div class=\"stat-label\">${translations.totalFiles}</div>\r\n            </div>\r\n            <div class=\"stat\">\r\n              <div class=\"stat-number\">${successfulUploads.length}</div>\r\n              <div class=\"stat-label\">${translations.successful}</div>\r\n            </div>\r\n            <div class=\"stat\">\r\n              <div class=\"stat-number\">${failedUploads.length}</div>\r\n              <div class=\"stat-label\">${translations.failed}</div>\r\n            </div>\r\n          </div>\r\n          \r\n          ${successfulUploads.length > 0 ? `\r\n          <div class=\"results-section\">\r\n            <h3>✅ ${translations.successfulFiles}</h3>\r\n            ${successfulUploads.map(result => `\r\n            <div class=\"file-result\">\r\n              <div class=\"file-name\">${result.filename}</div>\r\n              <div class=\"file-details\">\r\n                ${translations.confidence}: ${Math.round(result.confidence || 0)}% • \r\n                ${translations.processingTime}: ${Math.round((result.processingTime || 0) / 1000)}s\r\n              </div>\r\n              ${result.text ? `\r\n              <div class=\"text-preview\">\r\n                ${result.text.substring(0, 200)}${result.text.length > 200 ? '...' : ''}\r\n              </div>\r\n              ` : ''}\r\n            </div>\r\n            `).join('')}\r\n          </div>\r\n          ` : ''}\r\n          \r\n          ${failedUploads.length > 0 ? `\r\n          <div class=\"results-section\">\r\n            <h3>❌ ${translations.failedFiles}</h3>\r\n            ${failedUploads.map(result => `\r\n            <div class=\"file-result failed\">\r\n              <div class=\"file-name\">${result.filename}</div>\r\n              <div class=\"file-details\" style=\"color: #dc3545;\">\r\n                ${translations.error}: ${result.error}\r\n              </div>\r\n            </div>\r\n            `).join('')}\r\n          </div>\r\n          ` : ''}\r\n          \r\n          ${successfulUploads.length > 0 ? `\r\n          <div class=\"download-links\">\r\n            <p><strong>${translations.downloadResults}:</strong></p>\r\n            <a href=\"${process.env.[REDACTED]}/api/ocr/download/${sessionId}/pdf\" class=\"download-btn\">\r\n              📄 ${translations.downloadPdf}\r\n            </a>\r\n            <a href=\"${process.env.[REDACTED]}/api/ocr/download/${sessionId}/xlsx\" class=\"download-btn\">\r\n              📊 ${translations.downloadExcel}\r\n            </a>\r\n          </div>\r\n          ` : ''}\r\n        </div>\r\n        \r\n        <div class=\"footer\">\r\n          <p>${translations.footerText}</p>\r\n          <p><strong>${translations.supportText}</strong> support@orthodoxmetrics.com</p>\r\n        </div>\r\n      </div>\r\n    </body>\r\n    </html>\r\n    `;\r\n  }\r\n  \r\n  /**\r\n   * Generate plain text email content\r\n   */\r\n  generateReceiptText(data) {\r\n    const { sessionId, uploadResults, timestamp, language } = data;\r\n    const successfulUploads = uploadResults.filter(r => r.success);\r\n    const failedUploads = uploadResults.filter(r => !r.success);\r\n    \r\n    const translations = this.getTranslations(language);\r\n    \r\n    let text = `${translations.title}\\n`;\r\n    text += `${'='.repeat(50)}\\n\\n`;\r\n    text += `${translations.sessionInfo}:\\n`;\r\n    text += `${translations.sessionId}: ${sessionId}\\n`;\r\n    text += `${translations.timestamp}: ${new Date(timestamp).toLocaleString()}\\n`;\r\n    text += `${translations.language}: ${this.getLanguageName(language)}\\n\\n`;\r\n    \r\n    text += `${translations.summary}:\\n`;\r\n    text += `${translations.totalFiles}: ${uploadResults.length}\\n`;\r\n    text += `${translations.successful}: ${successfulUploads.length}\\n`;\r\n    text += `${translations.failed}: ${failedUploads.length}\\n\\n`;\r\n    \r\n    if (successfulUploads.length > 0) {\r\n      text += `${translations.successfulFiles}:\\n`;\r\n      text += `${'-'.repeat(30)}\\n`;\r\n      successfulUploads.forEach(result => {\r\n        text += `• ${result.filename}\\n`;\r\n        text += `  ${translations.confidence}: ${Math.round(result.confidence || 0)}%\\n`;\r\n        text += `  ${translations.processingTime}: ${Math.round((result.processingTime || 0) / 1000)}s\\n`;\r\n        if (result.text) {\r\n          text += `  ${translations.textPreview}: ${result.text.substring(0, 100)}...\\n`;\r\n        }\r\n        text += '\\n';\r\n      });\r\n    }\r\n    \r\n    if (failedUploads.length > 0) {\r\n      text += `${translations.failedFiles}:\\n`;\r\n      text += `${'-'.repeat(30)}\\n`;\r\n      failedUploads.forEach(result => {\r\n        text += `• ${result.filename}\\n`;\r\n        text += `  ${translations.error}: ${result.error}\\n\\n`;\r\n      });\r\n    }\r\n    \r\n    if (successfulUploads.length > 0) {\r\n      text += `${translations.downloadResults}:\\n`;\r\n      text += `PDF: ${process.env.[REDACTED]}/api/ocr/download/${sessionId}/pdf\\n`;\r\n      text += `Excel: ${process.env.[REDACTED]}/api/ocr/download/${sessionId}/xlsx\\n\\n`;\r\n    }\r\n    \r\n    text += `${translations.footerText}\\n`;\r\n    text += `${translations.supportText} support@orthodoxmetrics.com\\n`;\r\n    \r\n    return text;\r\n  }\r\n  \r\n  /**\r\n   * Get translations for different languages\r\n   */\r\n  getTranslations(language) {\r\n    const translations = {\r\n      en: {\r\n        subject: 'OCR Processing Complete - Orthodox Metrics',\r\n        title: 'OCR Processing Complete',\r\n        subtitle: 'Your church records have been processed',\r\n        sessionInfo: 'Session Information',\r\n        sessionId: 'Session ID',\r\n        timestamp: 'Processed At',\r\n        language: 'Language',\r\n        summary: 'Processing Summary',\r\n        totalFiles: 'Total Files',\r\n        successful: 'Successful',\r\n        failed: 'Failed',\r\n        successfulFiles: 'Successfully Processed Files',\r\n        failedFiles: 'Failed Files',\r\n        confidence: 'Confidence',\r\n        processingTime: 'Processing Time',\r\n        textPreview: 'Text Preview',\r\n        error: 'Error',\r\n        downloadResults: 'Download Your Results',\r\n        downloadPdf: 'Download PDF',\r\n        downloadExcel: 'Download Excel',\r\n        footerText: 'This is an automated message from Orthodox Metrics OCR System.',\r\n        supportText: 'For support, contact:'\r\n      },\r\n      gr: {\r\n        subject: 'Ολοκλήρωση Επεξεργασίας OCR - Orthodox Metrics',\r\n        title: 'Ολοκλήρωση Επεξεργασίας OCR',\r\n        subtitle: 'Τα εκκλησιαστικά σας αρχεία έχουν επεξεργαστεί',\r\n        sessionInfo: 'Πληροφορίες Συνεδρίας',\r\n        sessionId: 'ID Συνεδρίας',\r\n        timestamp: 'Επεξεργάστηκε Στις',\r\n        language: 'Γλώσσα',\r\n        summary: 'Σύνοψη Επεξεργασίας',\r\n        totalFiles: 'Συνολικά Αρχεία',\r\n        successful: 'Επιτυχή',\r\n        failed: 'Αποτυχημένα',\r\n        successfulFiles: 'Επιτυχώς Επεξεργασμένα Αρχεία',\r\n        failedFiles: 'Αποτυχημένα Αρχεία',\r\n        confidence: 'Εμπιστοσύνη',\r\n        processingTime: 'Χρόνος Επεξεργασίας',\r\n        textPreview: 'Προεπισκόπηση Κειμένου',\r\n        error: 'Σφάλμα',\r\n        downloadResults: 'Κατεβάστε τα Αποτελέσματα',\r\n        downloadPdf: 'Κατεβάστε PDF',\r\n        downloadExcel: 'Κατεβάστε Excel',\r\n        footerText: 'Αυτό είναι ένα αυτοματοποιημένο μήνυμα από το σύστημα OCR Orthodox Metrics.',\r\n        supportText: 'Για υποστήριξη, επικοινωνήστε:'\r\n      },\r\n      ru: {\r\n        subject: 'Обработка OCR завершена - Orthodox Metrics',\r\n        title: 'Обработка OCR завершена',\r\n        subtitle: 'Ваши церковные записи были обработаны',\r\n        sessionInfo: 'Информация о сессии',\r\n        sessionId: 'ID сессии',\r\n        timestamp: 'Обработано в',\r\n        language: 'Язык',\r\n        summary: 'Сводка обработки',\r\n        totalFiles: 'Всего файлов',\r\n        successful: 'Успешно',\r\n        failed: 'Неудачно',\r\n        successfulFiles: 'Успешно обработанные файлы',\r\n        failedFiles: 'Неудачные файлы',\r\n        confidence: 'Уверенность',\r\n        processingTime: 'Время обработки',\r\n        textPreview: 'Предварительный просмотр текста',\r\n        error: 'Ошибка',\r\n        downloadResults: 'Скачать результаты',\r\n        downloadPdf: 'Скачать PDF',\r\n        downloadExcel: 'Скачать Excel',\r\n        footerText: 'Это автоматическое сообщение от системы OCR Orthodox Metrics.',\r\n        supportText: 'Для поддержки обращайтесь:'\r\n      },\r\n      ro: {\r\n        subject: 'Procesarea OCR finalizată - Orthodox Metrics',\r\n        title: 'Procesarea OCR finalizată',\r\n        subtitle: 'Înregistrările dumneavoastră bisericești au fost procesate',\r\n        sessionInfo: 'Informații sesiune',\r\n        sessionId: 'ID sesiune',\r\n        timestamp: 'Procesat la',\r\n        language: 'Limba',\r\n        summary: 'Rezumat procesare',\r\n        totalFiles: 'Total fișiere',\r\n        successful: 'Reușite',\r\n        failed: 'Eșuate',\r\n        successfulFiles: 'Fișiere procesate cu succes',\r\n        failedFiles: 'Fișiere eșuate',\r\n        confidence: 'Încredere',\r\n        processingTime: 'Timp de procesare',\r\n        textPreview: 'Previzualizare text',\r\n        error: 'Eroare',\r\n        downloadResults: 'Descărcați rezultatele',\r\n        downloadPdf: 'Descărcați PDF',\r\n        downloadExcel: 'Descărcați Excel',\r\n        footerText: 'Acesta este un mesaj automatizat de la sistemul OCR Orthodox Metrics.',\r\n        supportText: 'Pentru suport, contactați:'\r\n      }\r\n    };\r\n    \r\n    return translations[language] || translations.en;\r\n  }\r\n  \r\n  /**\r\n   * Get language display name\r\n   */\r\n  getLanguageName(code) {\r\n    const names = {\r\n      en: 'English',\r\n      gr: 'Ελληνικά',\r\n      ru: 'Русский',\r\n      ro: 'Română'\r\n    };\r\n    \r\n    return names[code] || code.toUpperCase();\r\n  }\r\n  \r\n  /**\r\n   * Test email configuration\r\n   */\r\n  async testConnection() {\r\n    try {\r\n      await this.transporter.verify();\r\n      logger.info('Email configuration is valid');\r\n      return true;\r\n    } catch (error) {\r\n      logger.error('Email configuration error:', error);\r\n      return false;\r\n    }\r\n  }\r\n}\r\n\r\nmodule.exports = new EmailSender();\r\n"
+    },
+    "complexity": {
+      "totalLines": 511,
+      "codeLines": 453,
+      "commentLines": 22,
+      "commentRatio": 0.04631578947368421,
+      "averageLineLength": 34.322105263157894
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.246Z"
+  },
+  "contentHash": "f2852d8b6d00cea6df5d53a8b7825bf639a1fda22d97c6c33408e33526c0587b",
+  "discoveredAt": "2025-07-28T07:20:01.246Z"
+}

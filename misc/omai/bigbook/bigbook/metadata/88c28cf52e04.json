@@ -1,0 +1,54 @@
+{
+  "id": "88c28cf52e04",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/diagnose-site-error.sh",
+  "relativePath": "scripts/diagnose-site-error.sh",
+  "name": "diagnose-site-error.sh",
+  "extension": ".sh",
+  "size": 3839,
+  "modified": "2025-07-27T18:55:03.971Z",
+  "created": "2025-07-27T18:55:01.628Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 110,
+      "characters": 3789,
+      "words": 480
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 94
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 104
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 110,
+      "codeLines": 83,
+      "commentLines": 13,
+      "commentRatio": 0.13541666666666666,
+      "averageLineLength": 38.208333333333336
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.096Z"
+  },
+  "contentHash": "20e4a33c9a8a704933923edb4bd098c27c1b7fd2ad2225f0930e875a0c39d1dc",
+  "discoveredAt": "2025-07-28T07:19:59.096Z"
+}

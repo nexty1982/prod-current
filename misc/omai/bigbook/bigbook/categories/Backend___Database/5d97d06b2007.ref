@@ -1,0 +1,6 @@
+{
+  "id": "5d97d06b2007",
+  "name": "cleanup-unused-user-sessions-table.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migrations/cleanup-unused-user-sessions-table.sql",
+  "type": "Database Scripts"
+}

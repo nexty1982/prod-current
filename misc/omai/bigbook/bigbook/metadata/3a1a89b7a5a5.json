@@ -1,0 +1,43 @@
+{
+  "id": "3a1a89b7a5a5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/MULTI_TENANT_CLIENT_MANAGEMENT_GUIDE.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/MULTI_TENANT_CLIENT_MANAGEMENT_GUIDE.md",
+  "name": "MULTI_TENANT_CLIENT_MANAGEMENT_GUIDE.md",
+  "extension": ".md",
+  "size": 8589,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:05.924Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 226,
+      "characters": 8517,
+      "words": 1113
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 226,
+      "codeLines": 132,
+      "commentLines": 45,
+      "commentRatio": 0.2542372881355932,
+      "averageLineLength": 46.57627118644068
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.185Z"
+  },
+  "contentHash": "5d84d26519136ddbb4486677bdeb8e0bfcc032e3f6582f14dc5485285ea7cfb4",
+  "discoveredAt": "2025-07-28T07:19:58.185Z"
+}

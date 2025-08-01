@@ -1,0 +1,6 @@
+{
+  "id": "adb35913d678",
+  "name": "setup-backup-cron.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/setup-backup-cron.sh",
+  "type": "Setup Scripts"
+}

@@ -1,0 +1,195 @@
+{
+  "id": "5f9ba06514e4",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/PERFORMANCE_OPTIMIZATION.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/PERFORMANCE_OPTIMIZATION.md",
+  "name": "PERFORMANCE_OPTIMIZATION.md",
+  "extension": ".md",
+  "size": 27882,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:06.608Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1113,
+      "characters": 27882,
+      "words": 2765
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 14
+      },
+      {
+        "type": "npm_package",
+        "name": "react-router-dom",
+        "line": 15
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 43
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "react-window",
+        "line": 81
+      },
+      {
+        "type": "npm_package",
+        "name": "vite",
+        "line": 113
+      },
+      {
+        "type": "npm_package",
+        "name": "@vitejs/plugin-react",
+        "line": 114
+      },
+      {
+        "type": "npm_package",
+        "name": "rollup-plugin-visualizer",
+        "line": 115
+      },
+      {
+        "type": "npm_package",
+        "name": "compression",
+        "line": 241
+      },
+      {
+        "type": "npm_package",
+        "name": "helmet",
+        "line": 242
+      },
+      {
+        "type": "npm_package",
+        "name": "cors",
+        "line": 243
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 282
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 367
+      },
+      {
+        "type": "npm_package",
+        "name": "redis",
+        "line": 410
+      },
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 899
+      },
+      {
+        "type": "npm_package",
+        "name": "os",
+        "line": 926
+      },
+      {
+        "type": "npm_package",
+        "name": "perf_hooks",
+        "line": 1007
+      },
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 1008
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 657,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 964,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 271,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 370,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 371,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 372,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 373,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 412,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 413,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 414,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "# Orthodox Metrics System - Performance Optimization Guide\r\n\r\n## Overview\r\n\r\nThis guide provides comprehensive performance optimization strategies for the Orthodox Metrics church management system. It covers frontend optimization, backend performance tuning, database optimization, and system-level improvements.\r\n\r\n## Frontend Performance Optimization\r\n\r\n### 1. React Application Optimization\r\n\r\n#### Code Splitting and Lazy Loading\r\n```javascript\r\n// src/App.tsx\r\nimport React, { Suspense, lazy } from 'react';\r\nimport { BrowserRouter as Router, Routes, Route } from 'react-router-dom';\r\nimport LoadingSpinner from './components/LoadingSpinner';\r\n\r\n// Lazy load components\r\nconst Dashboard = lazy(() => import('./pages/Dashboard'));\r\nconst UserManagement = lazy(() => import('./pages/UserManagement'));\r\nconst ChurchManagement = lazy(() => import('./pages/ChurchManagement'));\r\nconst Reports = lazy(() => import('./pages/Reports'));\r\n\r\nfunction App() {\r\n  return (\r\n    <Router>\r\n      <Suspense fallback={<LoadingSpinner />}>\r\n        <Routes>\r\n          <Route path=\"/\" element={<Dashboard />} />\r\n          <Route path=\"/users\" element={<UserManagement />} />\r\n          <Route path=\"/churches\" element={<ChurchManagement />} />\r\n          <Route path=\"/reports\" element={<Reports />} />\r\n        </Routes>\r\n      </Suspense>\r\n    </Router>\r\n  );\r\n}\r\n```\r\n\r\n#### Memoization and Performance Hooks\r\n```javascript\r\n// src/components/UserList.tsx\r\nimport React, { memo, useMemo, useCallback } from 'react';\r\n\r\nconst UserList = memo(({ users, onUserSelect, onUserDelete }) => {\r\n  // Memoize expensive calculations\r\n  const sortedUsers = useMemo(() => {\r\n    return users.sort((a, b) => a.name.localeCompare(b.name));\r\n  }, [users]);\r\n\r\n  // Memoize callback functions\r\n  const handleUserClick = useCallback((userId) => {\r\n    onUserSelect(userId);\r\n  }, [onUserSelect]);\r\n\r\n  const handleDeleteClick = useCallback((userId) => {\r\n    onUserDelete(userId);\r\n  }, [onUserDelete]);\r\n\r\n  return (\r\n    <div className=\"user-list\">\r\n      {sortedUsers.map(user => (\r\n        <UserCard\r\n          key={user.id}\r\n          user={user}\r\n          onClick={handleUserClick}\r\n          onDelete={handleDeleteClick}\r\n        />\r\n      ))}\r\n    </div>\r\n  );\r\n});\r\n\r\nexport default UserList;\r\n```\r\n\r\n#### Virtual Scrolling for Large Lists\r\n```javascript\r\n// src/components/VirtualizedTable.tsx\r\nimport React from 'react';\r\nimport { FixedSizeList as List } from 'react-window';\r\n\r\nconst VirtualizedTable = ({ data, height = 400 }) => {\r\n  const Row = ({ index, style }) => (\r\n    <div style={style} className=\"table-row\">\r\n      <div className=\"cell\">{data[index].id}</div>\r\n      <div className=\"cell\">{data[index].name}</div>\r\n      <div className=\"cell\">{data[index].email}</div>\r\n      <div className=\"cell\">{data[index].role}</div>\r\n    </div>\r\n  );\r\n\r\n  return (\r\n    <List\r\n      height={height}\r\n      itemCount={data.length}\r\n      itemSize={50}\r\n      className=\"virtualized-table\"\r\n    >\r\n      {Row}\r\n    </List>\r\n  );\r\n};\r\n\r\nexport default VirtualizedTable;\r\n```\r\n\r\n### 2. Bundle Optimization\r\n\r\n#### Webpack Bundle Analysis\r\n```javascript\r\n// vite.config.ts\r\nimport { defineConfig } from 'vite';\r\nimport react from '@vitejs/plugin-react';\r\nimport { visualizer } from 'rollup-plugin-visualizer';\r\n\r\nexport default defineConfig({\r\n  plugins: [\r\n    react(),\r\n    visualizer({\r\n      filename: 'dist/stats.html',\r\n      open: true,\r\n      gzipSize: true,\r\n      brotliSize: true,\r\n    })\r\n  ],\r\n  build: {\r\n    rollupOptions: {\r\n      output: {\r\n        manualChunks: {\r\n          vendor: ['react', 'react-dom'],\r\n          material: ['@mui/material', '@mui/icons-material'],\r\n          charts: ['chart.js', 'react-chartjs-2'],\r\n          calendar: ['@fullcalendar/react', '@fullcalendar/daygrid'],\r\n        }\r\n      }\r\n    },\r\n    chunkSizeWarningLimit: 1000,\r\n  },\r\n  server: {\r\n    host: true,\r\n    port: 3000,\r\n  }\r\n});\r\n```\r\n\r\n#### Tree Shaking Optimization\r\n```javascript\r\n// src/utils/index.ts\r\n// Use named exports for better tree shaking\r\nexport const formatDate = (date: Date): string => {\r\n  return date.toLocaleDateString();\r\n};\r\n\r\nexport const validateEmail = (email: string): boolean => {\r\n  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\r\n  return emailRegex.test(email);\r\n};\r\n\r\n// Import only what you need\r\nimport { formatDate, validateEmail } from './utils';\r\n```\r\n\r\n### 3. Caching Strategies\r\n\r\n#### HTTP Caching Headers\r\n```javascript\r\n// src/services/api.ts\r\nclass ApiService {\r\n  private cache = new Map();\r\n\r\n  async fetchWithCache(url: string, options: RequestInit = {}) {\r\n    const cacheKey = `${url}:${JSON.stringify(options)}`;\r\n    \r\n    // Check cache first\r\n    if (this.cache.has(cacheKey)) {\r\n      const cached = this.cache.get(cacheKey);\r\n      if (Date.now() - cached.timestamp < 300000) { // 5 minutes\r\n        return cached.data;\r\n      }\r\n    }\r\n\r\n    // Add cache headers\r\n    const response = await fetch(url, {\r\n      ...options,\r\n      headers: {\r\n        ...options.headers,\r\n        'Cache-Control': 'max-age=300',\r\n        'If-None-Match': this.getETag(url),\r\n      }\r\n    });\r\n\r\n    if (response.ok) {\r\n      const data = await response.json();\r\n      this.cache.set(cacheKey, { data, timestamp: Date.now() });\r\n      return data;\r\n    }\r\n\r\n    throw new Error(`HTTP ${response.status}: ${response.statusText}`);\r\n  }\r\n}\r\n```\r\n\r\n#### Service Worker for Offline Caching\r\n```javascript\r\n// public/sw.js\r\nconst CACHE_NAME = 'orthodox-metrics-v1';\r\nconst urlsToCache = [\r\n  '/',\r\n  '/static/js/bundle.js',\r\n  '/static/css/main.css',\r\n  '/api/users',\r\n  '/api/churches',\r\n];\r\n\r\nself.addEventListener('install', event => {\r\n  event.waitUntil(\r\n    caches.open(CACHE_NAME)\r\n      .then(cache => cache.addAll(urlsToCache))\r\n  );\r\n});\r\n\r\nself.addEventListener('fetch', event => {\r\n  event.respondWith(\r\n    caches.match(event.request)\r\n      .then(response => {\r\n        // Return cached version or fetch from network\r\n        return response || fetch(event.request);\r\n      })\r\n  );\r\n});\r\n```\r\n\r\n## Backend Performance Optimization\r\n\r\n### 1. Express.js Optimization\r\n\r\n#### Middleware Optimization\r\n```javascript\r\n// server/middleware/performance.js\r\nconst compression = require('compression');\r\nconst helmet = require('helmet');\r\nconst cors = require('cors');\r\n\r\n// Compression middleware\r\napp.use(compression({\r\n  level: 6,\r\n  threshold: 1024,\r\n  filter: (req, res) => {\r\n    if (req.headers['x-no-compression']) {\r\n      return false;\r\n    }\r\n    return compression.filter(req, res);\r\n  }\r\n}));\r\n\r\n// Security headers\r\napp.use(helmet({\r\n  contentSecurityPolicy: {\r\n    directives: {\r\n      defaultSrc: [\"'self'\"],\r\n      styleSrc: [\"'self'\", \"'unsafe-inline'\"],\r\n      scriptSrc: [\"'self'\"],\r\n      imgSrc: [\"'self'\", \"data:\", \"https:\"],\r\n    },\r\n  },\r\n}));\r\n\r\n// CORS with caching\r\napp.use(cors({\r\n  origin: process.env.[REDACTED],\r\n  credentials: true,\r\n  maxAge: 86400, // 24 hours\r\n}));\r\n```\r\n\r\n#### Request Optimization\r\n```javascript\r\n// server/middleware/requestOptimization.js\r\nconst requestOptimization = (req, res, next) => {\r\n  // Add request ID for tracking\r\n  req.id = require('crypto').randomUUID();\r\n  \r\n  // Start performance timer\r\n  req.startTime = Date.now();\r\n  \r\n  // Optimize JSON parsing\r\n  if (req.is('application/json')) {\r\n    req.body = JSON.parse(req.body);\r\n  }\r\n  \r\n  // Add performance logging\r\n  res.on('finish', () => {\r\n    const duration = Date.now() - req.startTime;\r\n    \r\n    if (duration > 1000) {\r\n      console.warn(`Slow request: ${req.method} ${req.path} - ${duration}ms`);\r\n    }\r\n    \r\n    // Log to monitoring system\r\n    logPerformanceMetric({\r\n      requestId: req.id,\r\n      method: req.method,\r\n      path: req.path,\r\n      duration,\r\n      statusCode: res.statusCode,\r\n      timestamp: new Date().toISOString()\r\n    });\r\n  });\r\n  \r\n  next();\r\n};\r\n```\r\n\r\n### 2. Database Query Optimization\r\n\r\n#### Query Optimization\r\n```javascript\r\n// server/models/User.js\r\nclass UserModel {\r\n  // Optimized user search with pagination\r\n  static async searchUsers(search, page = 1, limit = 50) {\r\n    const offset = (page - 1) * limit;\r\n    \r\n    const query = `\r\n      SELECT \r\n        u.id, u.username, u.email, u.role, u.created_at,\r\n        c.name as church_name\r\n      FROM users u\r\n      LEFT JOIN churches c ON u.church_id = c.id\r\n      WHERE \r\n        u.username LIKE ? OR \r\n        u.email LIKE ? OR \r\n        c.name LIKE ?\r\n      ORDER BY u.created_at DESC\r\n      LIMIT ? OFFSET ?\r\n    `;\r\n    \r\n    const searchTerm = `%${search}%`;\r\n    const [rows] = await db.execute(query, [\r\n      searchTerm, searchTerm, searchTerm, limit, offset\r\n    ]);\r\n    \r\n    return rows;\r\n  }\r\n  \r\n  // Batch operations for better performance\r\n  static async createMultipleUsers(users) {\r\n    const query = `\r\n      INSERT INTO users (username, email, password_hash, role, church_id)\r\n      VALUES ?\r\n    `;\r\n    \r\n    const values = users.map(user => [\r\n      user.username, user.email, user.password_hash, user.role, user.church_id\r\n    ]);\r\n    \r\n    const [result] = await db.execute(query, [values]);\r\n    return result;\r\n  }\r\n}\r\n```\r\n\r\n#### Database Connection Pooling\r\n```javascript\r\n// server/config/database.js\r\nconst mysql = require('mysql2/promise');\r\n\r\nconst pool = mysql.createPool({\r\n  host: process.env.[REDACTED],\r\n  user: process.env.[REDACTED],\r\n  password: process.env.[REDACTED],\r\n  database: process.env.[REDACTED],\r\n  waitForConnections: true,\r\n  connectionLimit: 20,\r\n  queueLimit: 0,\r\n  acquireTimeout: 60000,\r\n  timeout: 60000,\r\n  reconnect: true,\r\n  // Performance optimizations\r\n  ssl: false,\r\n  bigNumberStrings: true,\r\n  supportBigNumbers: true,\r\n  dateStrings: true,\r\n});\r\n\r\n// Connection pool monitoring\r\npool.on('connection', (connection) => {\r\n  console.log('New connection established:', connection.threadId);\r\n});\r\n\r\npool.on('error', (err) => {\r\n  console.error('Database pool error:', err);\r\n  if (err.code === 'PROTOCOL_CONNECTION_LOST') {\r\n    // Reconnect logic\r\n    setTimeout(() => {\r\n      pool.getConnection();\r\n    }, 2000);\r\n  }\r\n});\r\n\r\nmodule.exports = pool;\r\n```\r\n\r\n### 3. Caching Implementation\r\n\r\n#### Redis Caching\r\n```javascript\r\n// server/middleware/cache.js\r\nconst redis = require('redis');\r\nconst client = redis.createClient({\r\n  host: process.env.[REDACTED],\r\n  port: process.env.[REDACTED],\r\n  password: process.env.[REDACTED],\r\n});\r\n\r\nconst cache = (duration = 300) => {\r\n  return async (req, res, next) => {\r\n    const key = `cache:${req.method}:${req.originalUrl}`;\r\n    \r\n    try {\r\n      const cached = await client.get(key);\r\n      if (cached) {\r\n        console.log('Cache hit:', key);\r\n        return res.json(JSON.parse(cached));\r\n      }\r\n      \r\n      // Store original json method\r\n      const originalJson = res.json;\r\n      \r\n      // Override json method to cache response\r\n      res.json = function(data) {\r\n        client.setex(key, duration, JSON.stringify(data));\r\n        console.log('Cache set:', key);\r\n        return originalJson.call(this, data);\r\n      };\r\n      \r\n      next();\r\n    } catch (error) {\r\n      console.error('Cache error:', error);\r\n      next();\r\n    }\r\n  };\r\n};\r\n\r\nmodule.exports = cache;\r\n```\r\n\r\n#### In-Memory Caching\r\n```javascript\r\n// server/utils/memoryCache.js\r\nclass MemoryCache {\r\n  constructor() {\r\n    this.cache = new Map();\r\n    this.timers = new Map();\r\n  }\r\n  \r\n  set(key, value, ttl = 300000) { // 5 minutes default\r\n    // Clear existing timer\r\n    if (this.timers.has(key)) {\r\n      clearTimeout(this.timers.get(key));\r\n    }\r\n    \r\n    // Set value\r\n    this.cache.set(key, {\r\n      value,\r\n      timestamp: Date.now(),\r\n      ttl\r\n    });\r\n    \r\n    // Set expiration timer\r\n    const timer = setTimeout(() => {\r\n      this.delete(key);\r\n    }, ttl);\r\n    \r\n    this.timers.set(key, timer);\r\n  }\r\n  \r\n  get(key) {\r\n    const item = this.cache.get(key);\r\n    if (!item) return null;\r\n    \r\n    // Check if expired\r\n    if (Date.now() - item.timestamp > item.ttl) {\r\n      this.delete(key);\r\n      return null;\r\n    }\r\n    \r\n    return item.value;\r\n  }\r\n  \r\n  delete(key) {\r\n    this.cache.delete(key);\r\n    \r\n    if (this.timers.has(key)) {\r\n      clearTimeout(this.timers.get(key));\r\n      this.timers.delete(key);\r\n    }\r\n  }\r\n  \r\n  clear() {\r\n    this.cache.clear();\r\n    this.timers.forEach(timer => clearTimeout(timer));\r\n    this.timers.clear();\r\n  }\r\n}\r\n\r\nmodule.exports = new MemoryCache();\r\n```\r\n\r\n## Database Performance Optimization\r\n\r\n### 1. Index Optimization\r\n\r\n#### Strategic Index Creation\r\n```sql\r\n-- Users table indexes\r\nCREATE INDEX idx_users_email ON users(email);\r\nCREATE INDEX idx_users_username ON users(username);\r\nCREATE INDEX idx_users_role ON users(role);\r\nCREATE INDEX idx_users_church_id ON users(church_id);\r\nCREATE INDEX idx_users_created_at ON users(created_at);\r\n\r\n-- Churches table indexes\r\nCREATE INDEX idx_churches_name ON churches(name);\r\nCREATE INDEX idx_churches_location ON churches(location);\r\nCREATE INDEX idx_churches_status ON churches(status);\r\n\r\n-- Logs table indexes (for performance monitoring)\r\nCREATE INDEX idx_logs_timestamp ON logs(timestamp);\r\nCREATE INDEX idx_logs_level ON logs(level);\r\nCREATE INDEX idx_logs_user_id ON logs(user_id);\r\n\r\n-- Composite indexes for common queries\r\nCREATE INDEX idx_users_role_church ON users(role, church_id);\r\nCREATE INDEX idx_logs_user_timestamp ON logs(user_id, timestamp);\r\n```\r\n\r\n#### Index Performance Analysis\r\n```sql\r\n-- Check index usage\r\nSELECT \r\n    table_name,\r\n    index_name,\r\n    column_name,\r\n    cardinality,\r\n    index_type\r\nFROM information_schema.statistics \r\nWHERE table_schema = 'orthodox_metrics'\r\nORDER BY table_name, index_name;\r\n\r\n-- Find unused indexes\r\nSELECT \r\n    t.table_schema,\r\n    t.table_name,\r\n    s.index_name,\r\n    s.column_name\r\nFROM information_schema.tables t\r\nLEFT JOIN information_schema.statistics s ON t.table_name = s.table_name\r\nWHERE t.table_schema = 'orthodox_metrics'\r\nAND s.index_name IS NULL;\r\n```\r\n\r\n### 2. Query Optimization\r\n\r\n#### Optimized Queries\r\n```sql\r\n-- Efficient pagination\r\nSELECT SQL_CALC_FOUND_ROWS\r\n    u.id, u.username, u.email, u.role,\r\n    c.name as church_name\r\nFROM users u\r\nLEFT JOIN churches c ON u.church_id = c.id\r\nWHERE u.status = 'active'\r\nORDER BY u.created_at DESC\r\nLIMIT 50 OFFSET ?;\r\n\r\n-- Get total count\r\nSELECT FOUND_ROWS() as total;\r\n\r\n-- Optimized search with full-text search\r\nALTER TABLE users ADD FULLTEXT(username, email);\r\nALTER TABLE churches ADD FULLTEXT(name, description);\r\n\r\n-- Full-text search query\r\nSELECT \r\n    u.id, u.username, u.email, u.role,\r\n    MATCH(u.username, u.email) AGAINST(? IN BOOLEAN MODE) as relevance\r\nFROM users u\r\nWHERE MATCH(u.username, u.email) AGAINST(? IN BOOLEAN MODE)\r\nORDER BY relevance DESC\r\nLIMIT 20;\r\n```\r\n\r\n#### Query Performance Monitoring\r\n```javascript\r\n// server/middleware/queryMonitor.js\r\nconst queryMonitor = (req, res, next) => {\r\n  const originalExecute = req.db.execute;\r\n  \r\n  req.db.execute = async function(query, params) {\r\n    const startTime = Date.now();\r\n    \r\n    try {\r\n      const result = await originalExecute.call(this, query, params);\r\n      const duration = Date.now() - startTime;\r\n      \r\n      // Log slow queries\r\n      if (duration > 1000) {\r\n        console.warn(`Slow query (${duration}ms):`, query);\r\n        \r\n        // Store in monitoring system\r\n        await storeSlowQuery({\r\n          query,\r\n          params,\r\n          duration,\r\n          timestamp: new Date().toISOString()\r\n        });\r\n      }\r\n      \r\n      return result;\r\n    } catch (error) {\r\n      console.error('Query error:', error);\r\n      throw error;\r\n    }\r\n  };\r\n  \r\n  next();\r\n};\r\n```\r\n\r\n### 3. Database Maintenance\r\n\r\n#### Regular Maintenance Tasks\r\n```sql\r\n-- Optimize tables\r\nOPTIMIZE TABLE users, churches, logs, sessions;\r\n\r\n-- Update table statistics\r\nANALYZE TABLE users, churches, logs, sessions;\r\n\r\n-- Check table integrity\r\nCHECK TABLE users, churches, logs, sessions;\r\n\r\n-- Rebuild indexes\r\nALTER TABLE users ENGINE=InnoDB;\r\nALTER TABLE churches ENGINE=InnoDB;\r\n```\r\n\r\n#### Automated Maintenance Script\r\n```bash\r\n#!/bin/bash\r\n# db-maintenance.sh\r\n\r\nDB_NAME=\"orthodox_metrics\"\r\nDB_USER=\"maintenance_user\"\r\nDB_PASS=\"[REDACTED]\"\r\n\r\necho \"Starting database maintenance...\"\r\n\r\n# Optimize tables\r\nmysql -u$DB_USER -p$DB_PASS $DB_NAME -e \"\r\nOPTIMIZE TABLE users, churches, logs, sessions;\r\nANALYZE TABLE users, churches, logs, sessions;\r\n\"\r\n\r\n# Clean up old logs (keep 90 days)\r\nmysql -u$DB_USER -p$DB_PASS $DB_NAME -e \"\r\nDELETE FROM logs WHERE timestamp < DATE_SUB(NOW(), INTERVAL 90 DAY);\r\n\"\r\n\r\n# Clean up old sessions\r\nmysql -u$DB_USER -p$DB_PASS $DB_NAME -e \"\r\nDELETE FROM sessions WHERE expires < NOW();\r\n\"\r\n\r\necho \"Database maintenance completed\"\r\n```\r\n\r\n## System-Level Optimization\r\n\r\n### 1. Nginx Optimization\r\n\r\n#### Nginx Configuration\r\n```nginx\r\n# /etc/nginx/sites-available/orthodox-metrics\r\nserver {\r\n    listen 80;\r\n    server_name orthodox-metrics.com;\r\n    \r\n    # Gzip compression\r\n    gzip on;\r\n    gzip_vary on;\r\n    gzip_min_length 1024;\r\n    gzip_proxied any;\r\n    gzip_comp_level 6;\r\n    gzip_types\r\n        text/plain\r\n        text/css\r\n        text/xml\r\n        text/javascript\r\n        application/json\r\n        application/javascript\r\n        application/xml+rss\r\n        application/atom+xml\r\n        image/svg+xml;\r\n    \r\n    # Browser caching\r\n    location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg)$ {\r\n        expires 1y;\r\n        add_header Cache-Control \"public, immutable\";\r\n    }\r\n    \r\n    # API proxy with caching\r\n    location /api/ {\r\n        proxy_pass http://localhost:3001;\r\n        proxy_cache api_cache;\r\n        proxy_cache_valid 200 5m;\r\n        proxy_cache_key $scheme$proxy_host$request_uri;\r\n        add_header X-Cache-Status $upstream_cache_status;\r\n    }\r\n    \r\n    # Static file serving\r\n    location / {\r\n        root /var/www/orthodox-metrics/dist;\r\n        try_files $uri $uri/ /index.html;\r\n        \r\n        # Security headers\r\n        add_header X-Content-Type-Options nosniff;\r\n        add_header X-Frame-Options DENY;\r\n        add_header X-XSS-Protection \"1; mode=block\";\r\n    }\r\n}\r\n\r\n# Cache configuration\r\nproxy_cache_path /var/cache/nginx/api levels=1:2 keys_zone=api_cache:10m max_size=100m inactive=60m;\r\n```\r\n\r\n### 2. PM2 Optimization\r\n\r\n#### PM2 Configuration\r\n```javascript\r\n// ecosystem.config.js\r\nmodule.exports = {\r\n  apps: [{\r\n    name: 'orthodox-metrics',\r\n    script: 'index.js',\r\n    instances: 'max',\r\n    exec_mode: 'cluster',\r\n    env: {\r\n      NODE_ENV: 'production',\r\n      PORT: 3001,\r\n      UV_THREADPOOL_SIZE: 16\r\n    },\r\n    node_args: [\r\n      '--max-old-space-size=2048',\r\n      '--optimize-for-size'\r\n    ],\r\n    max_memory_restart: '1G',\r\n    restart_delay: 4000,\r\n    kill_timeout: 5000,\r\n    listen_timeout: 8000,\r\n    wait_ready: true,\r\n    max_restarts: 5,\r\n    min_uptime: '10s'\r\n  }]\r\n};\r\n```\r\n\r\n### 3. System Resource Optimization\r\n\r\n#### Memory Optimization\r\n```bash\r\n# /etc/sysctl.conf\r\n# Memory optimization\r\nvm.swappiness=10\r\nvm.dirty_ratio=5\r\nvm.dirty_background_ratio=2\r\n\r\n# Network optimization\r\nnet.core.rmem_max=16777216\r\nnet.core.wmem_max=16777216\r\nnet.ipv4.tcp_rmem=4096 87380 16777216\r\nnet.ipv4.tcp_wmem=4096 65536 16777216\r\n```\r\n\r\n## Performance Monitoring\r\n\r\n### 1. Application Performance Monitoring\r\n\r\n#### Performance Metrics Collection\r\n```javascript\r\n// server/utils/performanceMonitor.js\r\nclass PerformanceMonitor {\r\n  constructor() {\r\n    this.metrics = {\r\n      requests: new Map(),\r\n      database: new Map(),\r\n      memory: [],\r\n      cpu: []\r\n    };\r\n    \r\n    // Start monitoring\r\n    this.startMonitoring();\r\n  }\r\n  \r\n  recordRequest(path, method, duration, statusCode) {\r\n    const key = `${method}:${path}`;\r\n    \r\n    if (!this.metrics.requests.has(key)) {\r\n      this.metrics.requests.set(key, {\r\n        count: 0,\r\n        totalDuration: 0,\r\n        avgDuration: 0,\r\n        maxDuration: 0,\r\n        minDuration: Infinity,\r\n        errors: 0\r\n      });\r\n    }\r\n    \r\n    const metric = this.metrics.requests.get(key);\r\n    metric.count++;\r\n    metric.totalDuration += duration;\r\n    metric.avgDuration = metric.totalDuration / metric.count;\r\n    metric.maxDuration = Math.max(metric.maxDuration, duration);\r\n    metric.minDuration = Math.min(metric.minDuration, duration);\r\n    \r\n    if (statusCode >= 400) {\r\n      metric.errors++;\r\n    }\r\n  }\r\n  \r\n  recordDatabase(query, duration) {\r\n    const key = query.substring(0, 50);\r\n    \r\n    if (!this.metrics.database.has(key)) {\r\n      this.metrics.database.set(key, {\r\n        count: 0,\r\n        totalDuration: 0,\r\n        avgDuration: 0,\r\n        maxDuration: 0\r\n      });\r\n    }\r\n    \r\n    const metric = this.metrics.database.get(key);\r\n    metric.count++;\r\n    metric.totalDuration += duration;\r\n    metric.avgDuration = metric.totalDuration / metric.count;\r\n    metric.maxDuration = Math.max(metric.maxDuration, duration);\r\n  }\r\n  \r\n  startMonitoring() {\r\n    setInterval(() => {\r\n      const memUsage = process.memoryUsage();\r\n      const cpuUsage = process.cpuUsage();\r\n      \r\n      this.metrics.memory.push({\r\n        timestamp: Date.now(),\r\n        heapUsed: memUsage.heapUsed,\r\n        heapTotal: memUsage.heapTotal,\r\n        external: memUsage.external,\r\n        rss: memUsage.rss\r\n      });\r\n      \r\n      this.metrics.cpu.push({\r\n        timestamp: Date.now(),\r\n        user: cpuUsage.user,\r\n        system: cpuUsage.system\r\n      });\r\n      \r\n      // Keep only last 100 entries\r\n      if (this.metrics.memory.length > 100) {\r\n        this.metrics.memory.shift();\r\n      }\r\n      if (this.metrics.cpu.length > 100) {\r\n        this.metrics.cpu.shift();\r\n      }\r\n    }, 60000); // Every minute\r\n  }\r\n  \r\n  getReport() {\r\n    return {\r\n      requests: Object.fromEntries(this.metrics.requests),\r\n      database: Object.fromEntries(this.metrics.database),\r\n      memory: this.metrics.memory.slice(-10),\r\n      cpu: this.metrics.cpu.slice(-10)\r\n    };\r\n  }\r\n}\r\n\r\nmodule.exports = new PerformanceMonitor();\r\n```\r\n\r\n### 2. Performance Dashboard\r\n\r\n#### Performance API Endpoint\r\n```javascript\r\n// server/routes/performance.js\r\nconst express = require('express');\r\nconst router = express.Router();\r\nconst performanceMonitor = require('../utils/performanceMonitor');\r\n\r\nrouter.get('/metrics', (req, res) => {\r\n  const report = performanceMonitor.getReport();\r\n  res.json(report);\r\n});\r\n\r\nrouter.get('/health', (req, res) => {\r\n  const uptime = process.uptime();\r\n  const memUsage = process.memoryUsage();\r\n  const cpuUsage = process.cpuUsage();\r\n  \r\n  res.json({\r\n    status: 'healthy',\r\n    uptime: uptime,\r\n    memory: {\r\n      heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024),\r\n      heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024),\r\n      external: Math.round(memUsage.external / 1024 / 1024),\r\n      rss: Math.round(memUsage.rss / 1024 / 1024)\r\n    },\r\n    cpu: {\r\n      user: cpuUsage.user,\r\n      system: cpuUsage.system\r\n    },\r\n    loadAverage: require('os').loadavg()\r\n  });\r\n});\r\n\r\nmodule.exports = router;\r\n```\r\n\r\n## Performance Testing\r\n\r\n### 1. Load Testing\r\n\r\n#### Artillery Load Test Configuration\r\n```yaml\r\n# load-test.yml\r\nconfig:\r\n  target: 'http://localhost:3001'\r\n  phases:\r\n    - duration: 60\r\n      arrivalRate: 10\r\n      name: \"Warm up\"\r\n    - duration: 120\r\n      arrivalRate: 50\r\n      name: \"Load test\"\r\n    - duration: 60\r\n      arrivalRate: 100\r\n      name: \"Stress test\"\r\n  defaults:\r\n    headers:\r\n      Content-Type: 'application/json'\r\n\r\nscenarios:\r\n  - name: \"User operations\"\r\n    weight: 70\r\n    flow:\r\n      - post:\r\n          url: \"/api/auth/login\"\r\n          json:\r\n            username: \"testuser\"\r\n            password: \"[REDACTED]\"\r\n      - get:\r\n          url: \"/api/users\"\r\n      - get:\r\n          url: \"/api/churches\"\r\n      - post:\r\n          url: \"/api/auth/logout\"\r\n  \r\n  - name: \"API endpoints\"\r\n    weight: 30\r\n    flow:\r\n      - get:\r\n          url: \"/api/health\"\r\n      - get:\r\n          url: \"/api/metrics\"\r\n```\r\n\r\n#### Load Testing Script\r\n```bash\r\n#!/bin/bash\r\n# run-load-test.sh\r\n\r\necho \"Starting load test...\"\r\n\r\n# Install Artillery if not installed\r\nif ! command -v artillery &> /dev/null; then\r\n    npm install -g artillery\r\nfi\r\n\r\n# Run load test\r\nartillery run load-test.yml --output load-test-results.json\r\n\r\n# Generate report\r\nartillery report load-test-results.json --output load-test-report.html\r\n\r\necho \"Load test completed. Report: load-test-report.html\"\r\n```\r\n\r\n### 2. Performance Benchmarks\r\n\r\n#### Benchmark Tests\r\n```javascript\r\n// scripts/benchmark.js\r\nconst { performance } = require('perf_hooks');\r\nconst axios = require('axios');\r\n\r\nclass Benchmark {\r\n  constructor(baseUrl) {\r\n    this.baseUrl = baseUrl;\r\n    this.results = [];\r\n  }\r\n  \r\n  async testEndpoint(path, method = 'GET', data = null) {\r\n    const url = `${this.baseUrl}${path}`;\r\n    const iterations = 100;\r\n    const times = [];\r\n    \r\n    console.log(`Testing ${method} ${path}...`);\r\n    \r\n    for (let i = 0; i < iterations; i++) {\r\n      const start = performance.now();\r\n      \r\n      try {\r\n        await axios({ method, url, data });\r\n        const end = performance.now();\r\n        times.push(end - start);\r\n      } catch (error) {\r\n        console.error(`Error in iteration ${i}:`, error.message);\r\n      }\r\n    }\r\n    \r\n    const avg = times.reduce((a, b) => a + b, 0) / times.length;\r\n    const min = Math.min(...times);\r\n    const max = Math.max(...times);\r\n    \r\n    const result = {\r\n      endpoint: `${method} ${path}`,\r\n      iterations,\r\n      avgTime: avg.toFixed(2),\r\n      minTime: min.toFixed(2),\r\n      maxTime: max.toFixed(2),\r\n      timestamp: new Date().toISOString()\r\n    };\r\n    \r\n    this.results.push(result);\r\n    console.log(`Average: ${avg.toFixed(2)}ms, Min: ${min.toFixed(2)}ms, Max: ${max.toFixed(2)}ms`);\r\n    \r\n    return result;\r\n  }\r\n  \r\n  async runBenchmarks() {\r\n    console.log('Starting performance benchmarks...');\r\n    \r\n    await this.testEndpoint('/api/health');\r\n    await this.testEndpoint('/api/users');\r\n    await this.testEndpoint('/api/churches');\r\n    await this.testEndpoint('/api/metrics');\r\n    \r\n    console.log('\\nBenchmark Results:');\r\n    console.table(this.results);\r\n    \r\n    return this.results;\r\n  }\r\n}\r\n\r\n// Run benchmarks\r\nconst benchmark = new Benchmark('http://localhost:3001');\r\nbenchmark.runBenchmarks().then(results => {\r\n  console.log('Benchmarks completed');\r\n});\r\n```\r\n\r\n## Best Practices\r\n\r\n### 1. Frontend Performance\r\n- Use React.memo for expensive components\r\n- Implement lazy loading for routes and components\r\n- Optimize images and assets\r\n- Use CDN for static assets\r\n- Implement proper caching strategies\r\n\r\n### 2. Backend Performance\r\n- Use database connection pooling\r\n- Implement caching at multiple levels\r\n- Optimize database queries and indexes\r\n- Use compression for HTTP responses\r\n- Monitor and log performance metrics\r\n\r\n### 3. Database Performance\r\n- Create appropriate indexes\r\n- Optimize query patterns\r\n- Use prepared statements\r\n- Implement query result caching\r\n- Regular database maintenance\r\n\r\n### 4. System Performance\r\n- Configure web server optimization\r\n- Use process managers (PM2)\r\n- Implement proper logging\r\n- Monitor system resources\r\n- Regular performance testing\r\n\r\n## Conclusion\r\n\r\nPerformance optimization is an ongoing process that requires continuous monitoring, testing, and improvement. This guide provides a comprehensive foundation for optimizing the Orthodox Metrics system across all layers of the application stack.\r\n\r\nRegular performance audits, combined with proactive monitoring and testing, ensure that the system maintains optimal performance as it scales and evolves. The strategies outlined in this guide should be implemented gradually and tested thoroughly in a staging environment before deployment to production.\r\n\r\nFor additional information on monitoring and maintenance, refer to the [MONITORING_GUIDE.md](MONITORING_GUIDE.md) and [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) documentation.\r\n"
+    },
+    "complexity": {
+      "totalLines": 1113,
+      "codeLines": 800,
+      "commentLines": 128,
+      "commentRatio": 0.13793103448275862,
+      "averageLineLength": 28.38146551724138
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.205Z"
+  },
+  "contentHash": "4e3a9251a913db3fbcc71651eb428ecde71e6c8126d423daff6932dca00407dc",
+  "discoveredAt": "2025-07-28T07:19:58.205Z"
+}

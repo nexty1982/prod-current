@@ -1,0 +1,6 @@
+{
+  "id": "0383a87bd849",
+  "name": "check-database-schema.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-database-schema.sh",
+  "type": "Database Scripts"
+}

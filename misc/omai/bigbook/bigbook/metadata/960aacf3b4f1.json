@@ -1,0 +1,74 @@
+{
+  "id": "960aacf3b4f1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/models/kanbanBoard.js",
+  "relativePath": "server/models/kanbanBoard.js",
+  "name": "kanbanBoard.js",
+  "extension": ".js",
+  "size": 11319,
+  "modified": "2025-07-16T17:41:44.661Z",
+  "created": "2025-07-15T19:58:10.607Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 368,
+      "characters": 11319,
+      "words": 1242
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 11,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 12,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "const mysql = require('mysql2/promise');\r\n\r\nclass KanbanBoard {\r\n  constructor() {\r\n    this.connection = null;\r\n  }\r\n\r\n  async getConnection() {\r\n    if (!this.connection) {\r\n      this.connection = await mysql.createConnection({\r\n        host: process.env.[REDACTED] || 'localhost',\r\n        user: process.env.[REDACTED] || 'root',\r\n        password: process.env.[REDACTED] || '',\r\n        database: process.env.[REDACTED] || 'orthodoxmetrics'\r\n      });\r\n    }\r\n    return this.connection;\r\n  }\r\n\r\n  async closeConnection() {\r\n    if (this.connection) {\r\n      await this.connection.end();\r\n      this.connection = null;\r\n    }\r\n  }\r\n\r\n  // Get all boards for a user\r\n  async getUserBoards(userId, includeArchived = false) {\r\n    const connection = await this.getConnection();\r\n    \r\n    const archivedCondition = includeArchived ? '' : 'AND b.is_archived = FALSE';\r\n    \r\n    const [boards] = await connection.execute(`\r\n      SELECT \r\n        b.id,\r\n        b.name,\r\n        b.description,\r\n        b.created_by,\r\n        b.created_at,\r\n        b.updated_at,\r\n        b.is_archived,\r\n        b.board_color,\r\n        bm.role as user_role,\r\n        COUNT(DISTINCT t.id) as total_tasks,\r\n        COUNT(DISTINCT CASE WHEN t.completed_at IS NULL THEN t.id END) as active_tasks,\r\n        u.username as created_by_name\r\n      FROM kanban_boards b\r\n      LEFT JOIN kanban_board_members bm ON b.id = bm.board_id AND bm.user_id = ?\r\n      LEFT JOIN kanban_tasks t ON b.id = t.board_id\r\n      LEFT JOIN users u ON b.created_by = u.id\r\n      WHERE (bm.user_id = ? OR b.created_by = ?) ${archivedCondition}\r\n      GROUP BY b.id, b.name, b.description, b.created_by, b.created_at, b.updated_at, \r\n               b.is_archived, b.board_color, bm.role, u.username\r\n      ORDER BY b.updated_at DESC\r\n    `, [userId, userId, userId]);\r\n\r\n    return boards;\r\n  }\r\n\r\n  // Get board by ID with full details\r\n  async getBoardById(boardId, userId) {\r\n    const connection = await this.getConnection();\r\n    \r\n    // First check access\r\n    const [boardAccess] = await connection.execute(`\r\n      SELECT \r\n        b.id,\r\n        b.name,\r\n        b.description,\r\n        b.created_by,\r\n        b.created_at,\r\n        b.updated_at,\r\n        b.board_color,\r\n        bm.role as user_role\r\n      FROM kanban_boards b\r\n      LEFT JOIN kanban_board_members bm ON b.id = bm.board_id AND bm.user_id = ?\r\n      WHERE b.id = ? AND (bm.user_id = ? OR b.created_by = ?)\r\n        AND b.is_archived = FALSE\r\n    `, [userId, boardId, userId, userId]);\r\n\r\n    if (boardAccess.length === 0) {\r\n      throw new Error('Board not found or access denied');\r\n    }\r\n\r\n    const board = boardAccess[0];\r\n\r\n    // Get columns\r\n    const [columns] = await connection.execute(`\r\n      SELECT id, name, position, color, wip_limit\r\n      FROM kanban_columns\r\n      WHERE board_id = ?\r\n      ORDER BY position ASC\r\n    `, [boardId]);\r\n\r\n    // Get tasks with user information\r\n    const [tasks] = await connection.execute(`\r\n      SELECT \r\n        t.id,\r\n        t.column_id,\r\n        t.title,\r\n        t.description,\r\n        t.position,\r\n        t.priority,\r\n        t.due_date,\r\n        t.assigned_to,\r\n        t.created_by,\r\n        t.created_at,\r\n        t.updated_at,\r\n        t.completed_at,\r\n        t.estimated_hours,\r\n        t.actual_hours,\r\n        t.task_color,\r\n        u_assigned.username as assigned_to_name,\r\n        u_assigned.email as assigned_to_email,\r\n        u_created.username as created_by_name\r\n      FROM kanban_tasks t\r\n      LEFT JOIN users u_assigned ON t.assigned_to = u_assigned.id\r\n      LEFT JOIN users u_created ON t.created_by = u_created.id\r\n      WHERE t.board_id = ?\r\n      ORDER BY t.position ASC\r\n    `, [boardId]);\r\n\r\n    // Get board members\r\n    const [members] = await connection.execute(`\r\n      SELECT \r\n        bm.user_id,\r\n        bm.role,\r\n        bm.joined_at,\r\n        u.username,\r\n        u.email\r\n      FROM kanban_board_members bm\r\n      JOIN users u ON bm.user_id = u.id\r\n      WHERE bm.board_id = ?\r\n      ORDER BY bm.joined_at ASC\r\n    `, [boardId]);\r\n\r\n    // Get board labels\r\n    const [labels] = await connection.execute(`\r\n      SELECT id, name, color\r\n      FROM kanban_labels\r\n      WHERE board_id = ?\r\n      ORDER BY name ASC\r\n    `, [boardId]);\r\n\r\n    return {\r\n      ...board,\r\n      columns,\r\n      tasks,\r\n      members,\r\n      labels\r\n    };\r\n  }\r\n\r\n  // Create new board\r\n  async createBoard(boardData, creatorId) {\r\n    const connection = await this.getConnection();\r\n    \r\n    try {\r\n      await connection.beginTransaction();\r\n\r\n      const { name, description = '', board_color = '#1976d2', columns = [] } = boardData;\r\n\r\n      // Create the board\r\n      const [boardResult] = await connection.execute(`\r\n        INSERT INTO kanban_boards (name, description, created_by, board_color)\r\n        VALUES (?, ?, ?, ?)\r\n      `, [name, description, creatorId, board_color]);\r\n\r\n      const boardId = boardResult.insertId;\r\n\r\n      // Add creator as board owner\r\n      await connection.execute(`\r\n        INSERT INTO kanban_board_members (board_id, user_id, role)\r\n        VALUES (?, ?, 'owner')\r\n      `, [boardId, creatorId]);\r\n\r\n      // Create default columns if none provided\r\n      const defaultColumns = columns.length > 0 ? columns : [\r\n        { name: 'Backlog', color: '#6c757d' },\r\n        { name: 'In Progress', color: '#ffc107' },\r\n        { name: 'Review', color: '#fd7e14' },\r\n        { name: 'Done', color: '#28a745' }\r\n      ];\r\n\r\n      for (let i = 0; i < defaultColumns.length; i++) {\r\n        await connection.execute(`\r\n          INSERT INTO kanban_columns (board_id, name, position, color)\r\n          VALUES (?, ?, ?, ?)\r\n        `, [boardId, defaultColumns[i].name, i, defaultColumns[i].color || '#1976d2']);\r\n      }\r\n\r\n      // Create default labels\r\n      const defaultLabels = [\r\n        { name: 'High Priority', color: '#dc3545' },\r\n        { name: 'Bug', color: '#fd7e14' },\r\n        { name: 'Feature', color: '#28a745' },\r\n        { name: 'Enhancement', color: '#17a2b8' }\r\n      ];\r\n\r\n      for (const label of defaultLabels) {\r\n        await connection.execute(`\r\n          INSERT INTO kanban_labels (board_id, name, color)\r\n          VALUES (?, ?, ?)\r\n        `, [boardId, label.name, label.color]);\r\n      }\r\n\r\n      await connection.commit();\r\n\r\n      return {\r\n        id: boardId,\r\n        name,\r\n        description,\r\n        board_color,\r\n        created_by: creatorId\r\n      };\r\n\r\n    } catch (error) {\r\n      await connection.rollback();\r\n      throw error;\r\n    }\r\n  }\r\n\r\n  // Update board\r\n  async updateBoard(boardId, updates, userId) {\r\n    const connection = await this.getConnection();\r\n    \r\n    // Check permissions\r\n    const [permissions] = await connection.execute(`\r\n      SELECT bm.role, b.created_by\r\n      FROM kanban_boards b\r\n      LEFT JOIN kanban_board_members bm ON b.id = bm.board_id AND bm.user_id = ?\r\n      WHERE b.id = ?\r\n    `, [userId, boardId]);\r\n\r\n    if (permissions.length === 0 || \r\n        (permissions[0].role !== 'owner' && permissions[0].role !== 'admin' && permissions[0].created_by !== userId)) {\r\n      throw new Error('Insufficient permissions to update this board');\r\n    }\r\n\r\n    const { name, description, board_color } = updates;\r\n\r\n    await connection.execute(`\r\n      UPDATE kanban_boards \r\n      SET name = ?, description = ?, board_color = ?, updated_at = CURRENT_TIMESTAMP\r\n      WHERE id = ?\r\n    `, [name, description, board_color, boardId]);\r\n\r\n    return { success: true };\r\n  }\r\n\r\n  // Archive board\r\n  async archiveBoard(boardId, userId) {\r\n    const connection = await this.getConnection();\r\n    \r\n    // Check if user is board owner\r\n    const [permissions] = await connection.execute(`\r\n      SELECT bm.role, b.created_by\r\n      FROM kanban_boards b\r\n      LEFT JOIN kanban_board_members bm ON b.id = bm.board_id AND bm.user_id = ?\r\n      WHERE b.id = ?\r\n    `, [userId, boardId]);\r\n\r\n    if (permissions.length === 0 || \r\n        (permissions[0].role !== 'owner' && permissions[0].created_by !== userId)) {\r\n      throw new Error('Only board owners can archive boards');\r\n    }\r\n\r\n    await connection.execute(`\r\n      UPDATE kanban_boards \r\n      SET is_archived = TRUE, updated_at = CURRENT_TIMESTAMP\r\n      WHERE id = ?\r\n    `, [boardId]);\r\n\r\n    return { success: true };\r\n  }\r\n\r\n  // Add member to board\r\n  async addMember(boardId, userId, role = 'member', invitedBy) {\r\n    const connection = await this.getConnection();\r\n    \r\n    try {\r\n      await connection.execute(`\r\n        INSERT INTO kanban_board_members (board_id, user_id, role, invited_by)\r\n        VALUES (?, ?, ?, ?)\r\n      `, [boardId, userId, role, invitedBy]);\r\n\r\n      return { success: true };\r\n    } catch (error) {\r\n      if (error.code === 'ER_DUP_ENTRY') {\r\n        throw new Error('User is already a member of this board');\r\n      }\r\n      throw error;\r\n    }\r\n  }\r\n\r\n  // Remove member from board\r\n  async removeMember(boardId, userId, removedBy) {\r\n    const connection = await this.getConnection();\r\n    \r\n    // Check permissions of the person removing\r\n    const [permissions] = await connection.execute(`\r\n      SELECT role FROM kanban_board_members\r\n      WHERE board_id = ? AND user_id = ?\r\n    `, [boardId, removedBy]);\r\n\r\n    if (permissions.length === 0 || (permissions[0].role !== 'owner' && permissions[0].role !== 'admin')) {\r\n      throw new Error('Insufficient permissions to remove members');\r\n    }\r\n\r\n    await connection.execute(`\r\n      DELETE FROM kanban_board_members\r\n      WHERE board_id = ? AND user_id = ?\r\n    `, [boardId, userId]);\r\n\r\n    return { success: true };\r\n  }\r\n\r\n  // Get board statistics\r\n  async getBoardStats(boardId, userId) {\r\n    const connection = await this.getConnection();\r\n    \r\n    // Check access\r\n    const [access] = await connection.execute(`\r\n      SELECT 1 FROM kanban_boards b\r\n      LEFT JOIN kanban_board_members bm ON b.id = bm.board_id AND bm.user_id = ?\r\n      WHERE b.id = ? AND (bm.user_id = ? OR b.created_by = ?)\r\n    `, [userId, boardId, userId, userId]);\r\n\r\n    if (access.length === 0) {\r\n      throw new Error('Access denied to this board');\r\n    }\r\n\r\n    // Get task statistics\r\n    const [stats] = await connection.execute(`\r\n      SELECT \r\n        COUNT(*) as total_tasks,\r\n        COUNT(CASE WHEN completed_at IS NULL THEN 1 END) as active_tasks,\r\n        COUNT(CASE WHEN completed_at IS NOT NULL THEN 1 END) as completed_tasks,\r\n        COUNT(CASE WHEN priority = 'high' OR priority = 'urgent' THEN 1 END) as high_priority_tasks,\r\n        COUNT(CASE WHEN due_date < CURDATE() AND completed_at IS NULL THEN 1 END) as overdue_tasks,\r\n        COUNT(CASE WHEN assigned_to IS NOT NULL THEN 1 END) as assigned_tasks,\r\n        AVG(CASE WHEN completed_at IS NOT NULL THEN actual_hours END) as avg_completion_hours\r\n      FROM kanban_tasks\r\n      WHERE board_id = ?\r\n    `, [boardId]);\r\n\r\n    // Get column statistics\r\n    const [columnStats] = await connection.execute(`\r\n      SELECT \r\n        c.id,\r\n        c.name,\r\n        COUNT(t.id) as task_count\r\n      FROM kanban_columns c\r\n      LEFT JOIN kanban_tasks t ON c.id = t.column_id\r\n      WHERE c.board_id = ?\r\n      GROUP BY c.id, c.name\r\n      ORDER BY c.position ASC\r\n    `, [boardId]);\r\n\r\n    return {\r\n      ...stats[0],\r\n      columns: columnStats\r\n    };\r\n  }\r\n}\r\n\r\nmodule.exports = KanbanBoard;\r\n"
+    },
+    "complexity": {
+      "totalLines": 368,
+      "codeLines": 289,
+      "commentLines": 23,
+      "commentRatio": 0.07371794871794872,
+      "averageLineLength": 34.81089743589744
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.330Z"
+  },
+  "contentHash": "f5f87cde70fbe82b33cdb1db75f5f110888e96da8d3afbc51911e20121f425a4",
+  "discoveredAt": "2025-07-28T07:20:00.330Z"
+}

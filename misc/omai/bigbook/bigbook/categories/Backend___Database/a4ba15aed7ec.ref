@@ -1,0 +1,6 @@
+{
+  "id": "a4ba15aed7ec",
+  "name": "upgrade-church-schema.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migrations/upgrade-church-schema.sql",
+  "type": "Database Scripts"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "0ce78bcce6cf",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/QUICK_START_SDLC_BACKUP.md",
+  "relativePath": "QUICK_START_SDLC_BACKUP.md",
+  "name": "QUICK_START_SDLC_BACKUP.md",
+  "extension": ".md",
+  "size": 2157,
+  "modified": "2025-07-24T22:37:26.128Z",
+  "created": "2025-07-24T22:37:19.430Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 90,
+      "characters": 2139,
+      "words": 273
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 90,
+      "codeLines": 47,
+      "commentLines": 19,
+      "commentRatio": 0.2878787878787879,
+      "averageLineLength": 30.696969696969695
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.222Z"
+  },
+  "contentHash": "4d167cd55f504b0cc144b52fdfd4a4abbe6c4b728c3e1af4b4434e99dcd6dd69",
+  "discoveredAt": "2025-07-26T04:17:09.222Z"
+}

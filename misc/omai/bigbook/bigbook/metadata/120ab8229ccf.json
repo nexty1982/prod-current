@@ -1,0 +1,43 @@
+{
+  "id": "120ab8229ccf",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migrations/002-database-architecture-separation.js",
+  "relativePath": "server/migrations/002-database-architecture-separation.js",
+  "name": "002-database-architecture-separation.js",
+  "extension": ".js",
+  "size": 5380,
+  "modified": "2025-07-19T14:31:46.753Z",
+  "created": "2025-07-19T14:31:16.156Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 152,
+      "characters": 5340,
+      "words": 504
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 152,
+      "codeLines": 111,
+      "commentLines": 20,
+      "commentRatio": 0.15267175572519084,
+      "averageLineLength": 38.89312977099237
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.322Z"
+  },
+  "contentHash": "a290c7fe23668cb39ef5b640858f3109613fd950e6c8230fcd0247a86d294a81",
+  "discoveredAt": "2025-07-28T07:20:00.322Z"
+}

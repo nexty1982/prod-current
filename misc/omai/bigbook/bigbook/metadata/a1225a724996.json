@@ -1,0 +1,43 @@
+{
+  "id": "a1225a724996",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/242e6efccd6c.json",
+  "relativePath": "bigbook/metadata/242e6efccd6c.json",
+  "name": "242e6efccd6c.json",
+  "extension": ".json",
+  "size": 16189,
+  "modified": "2025-07-26T04:17:09.718Z",
+  "created": "2025-07-26T04:17:09.718Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 56,
+      "characters": 16177,
+      "words": 1307
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 56,
+      "codeLines": 56,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 287.89285714285717
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.740Z"
+  },
+  "contentHash": "7673a17dcf7ab4ef98acf4e3c624326678af4e4f4b99aa14bf15519c5713be62",
+  "discoveredAt": "2025-07-28T07:19:56.740Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "2ac2915154fd",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-auth-check-endpoint.sh",
+  "relativePath": "server/debug/test-auth-check-endpoint.sh",
+  "name": "test-auth-check-endpoint.sh",
+  "extension": ".sh",
+  "size": 4045,
+  "modified": "2025-07-24T14:50:26.344Z",
+  "created": "2025-07-24T14:50:26.344Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 118,
+      "characters": 4003,
+      "words": 482
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 118,
+      "codeLines": 88,
+      "commentLines": 9,
+      "commentRatio": 0.09278350515463918,
+      "averageLineLength": 40.02061855670103
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.222Z"
+  },
+  "contentHash": "2d6eb23f894ec8ad1b1d0b0cb2dd7b9db01fa33edab65291386e202aff54d5b2",
+  "discoveredAt": "2025-07-28T07:20:00.222Z"
+}

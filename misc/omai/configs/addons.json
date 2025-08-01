@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-07-27T05:44:27.704Z",
+  "addons": {
+    "parish-map": {
+      "component": "ParishMap",
+      "entry": "/addons/parish-map/index.js",
+      "displayName": "Orthodox Parish Map",
+      "description": "Interactive mapping component for Orthodox parishes and communities worldwide. Displays church locations, service times, and community information.",
+      "version": "1.0.0",
+      "route": "/addons/parish-map",
+      "showInMenu": true,
+      "installedAt": "2025-07-27T05:44:27.703Z",
+      "installedBy": "admin"
+    }
+  }
+}

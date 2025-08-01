@@ -1,0 +1,54 @@
+{
+  "id": "31039cf5e4b9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-icon-errors-and-deploy.sh",
+  "relativePath": "scripts/fix-icon-errors-and-deploy.sh",
+  "name": "fix-icon-errors-and-deploy.sh",
+  "extension": ".sh",
+  "size": 2432,
+  "modified": "2025-07-25T21:53:26.983Z",
+  "created": "2025-07-25T21:51:10.678Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 74,
+      "characters": 2386,
+      "words": 304
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 15
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 20
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 74,
+      "codeLines": 52,
+      "commentLines": 8,
+      "commentRatio": 0.13333333333333333,
+      "averageLineLength": 38.016666666666666
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.104Z"
+  },
+  "contentHash": "15cf0948d6af50b0940522a779e9ebaa60e393d182dfe4b25c18cd1d7683aaee",
+  "discoveredAt": "2025-07-28T07:19:59.104Z"
+}

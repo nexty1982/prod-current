@@ -1,0 +1,101 @@
+{
+  "id": "65b249e508fc",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/temp/create-clients-table.js",
+  "relativePath": "server/temp/create-clients-table.js",
+  "name": "create-clients-table.js",
+  "extension": ".js",
+  "size": 3860,
+  "modified": "2025-07-09T11:40:51.577Z",
+  "created": "2025-07-09T11:40:33.210Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 100,
+      "characters": 3832,
+      "words": 329
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 11
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 8,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 21,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 22,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 23,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 24,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 25,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n// Script to create the clients table\r\nconst mysql = require('mysql2/promise');\r\nconst fs = require('fs');\r\nconst path = require('path');\r\n\r\n// Load environment variables\r\nconst envFile = process.env.[REDACTED] === 'production'\r\n    ? '.env.production'\r\n    : '.env.development';\r\nrequire('dotenv').config({ path: path.resolve(__dirname, envFile) });\r\n\r\nasync function createClientsTable() {\r\n    let connection;\r\n    \r\n    try {\r\n        console.log('🔗 Connecting to database...');\r\n        \r\n        // Create connection with individual parameters\r\n        connection = await mysql.createConnection({\r\n            host: process.env.[REDACTED] || 'localhost',\r\n            port: process.env.[REDACTED] || 3306,\r\n            user: process.env.[REDACTED] || 'root',\r\n            password: process.env.[REDACTED] || 'Summerof1982@!',\r\n            database: process.env.[REDACTED] || 'orthodoxmetrics_db',\r\n            multipleStatements: true\r\n        });\r\n\r\n        console.log('✅ Connected to database successfully!');\r\n\r\n        // Read and execute the clients schema\r\n        const schemaPath = path.join(__dirname, 'database', 'clients_schema.sql');\r\n        console.log(`📖 Reading schema from: ${schemaPath}`);\r\n        \r\n        const schema = fs.readFileSync(schemaPath, 'utf8');\r\n\r\n        // Split schema into individual statements\r\n        const statements = schema.split(';').filter(stmt => stmt.trim());\r\n\r\n        console.log(`🚀 Executing ${statements.length} SQL statements...`);\r\n\r\n        for (const statement of statements) {\r\n            if (statement.trim()) {\r\n                try {\r\n                    await connection.execute(statement);\r\n                    console.log('✅ Statement executed successfully');\r\n                } catch (error) {\r\n                    // Ignore \"table already exists\" and \"duplicate entry\" errors\r\n                    if (error.code === 'ER_TABLE_EXISTS_ERROR' || \r\n                        error.code === 'ER_DUP_ENTRY' ||\r\n                        error.message.includes('already exists')) {\r\n                        console.log(`ℹ️  Skipping (already exists): ${error.message}`);\r\n                    } else {\r\n                        throw error;\r\n                    }\r\n                }\r\n            }\r\n        }\r\n\r\n        console.log('\\n🎉 Clients table created successfully!');\r\n\r\n        // Verify the table was created\r\n        const [tables] = await connection.execute(\"SHOW TABLES LIKE 'clients'\");\r\n        if (tables.length > 0) {\r\n            console.log('✅ Clients table verified');\r\n            \r\n            // Show table structure\r\n            const [columns] = await connection.execute(\"DESCRIBE clients\");\r\n            console.log('\\n📋 Table structure:');\r\n            columns.forEach(col => {\r\n                console.log(`   ${col.Field}: ${col.Type} ${col.Null === 'NO' ? 'NOT NULL' : ''} ${col.Key ? `(${col.Key})` : ''}`);\r\n            });\r\n            \r\n            // Show sample data\r\n            const [rows] = await connection.execute(\"SELECT id, name, slug, status FROM clients LIMIT 3\");\r\n            if (rows.length > 0) {\r\n                console.log('\\n📋 Sample data:');\r\n                rows.forEach(row => {\r\n                    console.log(`   ID: ${row.id}, Name: ${row.name}, Slug: ${row.slug}, Status: ${row.status}`);\r\n                });\r\n            }\r\n        } else {\r\n            console.log('❌ Clients table verification failed');\r\n        }\r\n\r\n    } catch (error) {\r\n        console.error('❌ Error creating clients table:', error.message);\r\n        console.error('Full error:', error);\r\n        process.exit(1);\r\n    } finally {\r\n        if (connection) {\r\n            await connection.end();\r\n            console.log('🔌 Database connection closed');\r\n        }\r\n    }\r\n}\r\n\r\n// Run the script\r\ncreateClientsTable();\r\n"
+    },
+    "complexity": {
+      "totalLines": 100,
+      "codeLines": 72,
+      "commentLines": 11,
+      "commentRatio": 0.13253012048192772,
+      "averageLineLength": 44.25301204819277
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.152Z"
+  },
+  "contentHash": "175326c09e52ab7c647e548d98cb9bbcdd900ee2db31e0947497785fcd626316",
+  "discoveredAt": "2025-07-28T07:20:01.152Z"
+}

@@ -1,86 +1,187 @@
-// server/routes/admin.js - Extended admin routes for Orthodox Metrics management
+// server/routes/admin.js - Extended admin routes for Orthodox Metrics mana    const productionHos    // If we're on orthodmetrics.com or production server, assume productionnames = ['prod', 'production', 'live', 'orthodmetrics'];ement
 const express = require('express');
 const router = express.Router();
 const { promisePool } = require('../config/db');
+const { requireAuth } = require('../middleware/auth');
 const os = require('os');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Authentication middleware for all admin system routes
+router.use(requireAuth);
+
+// Role-based middleware for super admin only
+const requireSuperAdmin = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super admin access required' });
+    }
+    
+    next();
+};
+
+// Apply super admin middleware to all routes
+router.use(requireSuperAdmin);
+
+/**
+ * Determine environment with IP-based detection logic
+ */
+function determineEnvironment() {
+    // Priority 1: IP-based detection (primary rule)
+    try {
+        const networkInterfaces = os.networkInterfaces();
+        const allAddresses = Object.values(networkInterfaces)
+            .flat()
+            .filter(iface => iface && iface.family === 'IPv4' && !iface.internal)
+            .map(iface => iface.address);
+        
+        // Check for production server IP
+        if (allAddresses.includes('192.168.1.239')) {
+            return 'production';
+        }
+        
+        // Check for development server IP  
+        if (allAddresses.includes('192.168.1.240')) {
+            return 'development';
+        }
+    } catch (error) {
+        console.warn('Failed to detect environment via IP address:', error.message);
+    }
+    
+    // Priority 2: Explicit NODE_ENV
+    if (process.env.NODE_ENV) {
+        return process.env.NODE_ENV;
+    }
+    
+    // Priority 3: Other environment indicators
+    if (process.env.ENVIRONMENT) {
+        return process.env.ENVIRONMENT;
+    }
+    
+    // Priority 4: Check for production indicators
+    const productionIndicators = [
+        process.env.PM2_HOME,           // PM2 process manager
+        process.env.PRODUCTION,         // Explicit production flag
+        process.env.PROD,              // Short production flag
+        process.cwd().includes('/prod'), // Directory contains 'prod'
+        process.cwd().includes('/production'),
+        process.env.NODE_OPTIONS?.includes('--max-old-space-size') // Production memory settings
+    ];
+    
+    // Check hostname for production indicators
+    const hostname = os.hostname();
+    const productionHostnames = ['prod', 'production', 'live', 'orthodoxmetrics'];
+    const isProductionHostname = productionHostnames.some(name => 
+        hostname.toLowerCase().includes(name)
+    );
+    
+    if (productionIndicators.some(Boolean) || isProductionHostname) {
+        return 'production';
+    }
+    
+    // Priority 5: Check for development indicators
+    const developmentIndicators = [
+        process.env.DEV,
+        process.env.DEVELOPMENT,
+        process.cwd().includes('/dev'),
+        process.cwd().includes('/development'),
+        process.env.NODE_ENV === 'dev'
+    ];
+    
+    if (developmentIndicators.some(Boolean)) {
+        return 'development';
+    }
+    
+    // Priority 6: Default based on server context
+    // If we're on orthodoxmetrics.com or production server, assume production
+    if (hostname.includes('orthodoxmetrics') || 
+        process.cwd().includes('/var/www') ||
+        process.cwd().includes('/site/prod')) {
+        return 'production';
+    }
+    
+    // Final fallback
+    return 'development';
+}
+
 // System Statistics
 router.get('/system-stats', async (req, res) => {
     try {
-        // Get total clients
-        const [clientCount] = await promisePool.execute('SELECT COUNT(*) as count FROM clients');
+        // Get total churches
+        const [churchCount] = await promisePool.execute('SELECT COUNT(*) as count FROM churches');
 
-        // Get active clients
-        const [activeClientCount] = await promisePool.execute(
-            'SELECT COUNT(*) as count FROM clients WHERE status = "active"'
+        // Get active churches
+        const [activeChurchCount] = await promisePool.execute(
+            'SELECT COUNT(*) as count FROM churches WHERE is_active = 1'
         );
 
-        // Get total users across all client databases
+        // Get total users across all church databases
         let totalUsers = 0;
         let activeUsers = 0;
 
-        const [clients] = await promisePool.execute('SELECT database_name FROM clients WHERE status = "active"');
+        const [churches] = await promisePool.execute('SELECT database_name FROM churches WHERE is_active = 1');
 
-        for (const client of clients) {
+        for (const church of churches) {
             try {
                 const mysql = require('mysql2/promise');
-                const clientConnection = await mysql.createConnection({
+                const churchConnection = await mysql.createConnection({
                     host: process.env.DB_HOST || 'localhost',
                     user: process.env.DB_USER || 'root',
                     password: process.env.DB_PASSWORD || 'Summerof1982@!',
-                    database: client.database_name
+                    database: church.database_name
                 });
 
-                const [users] = await clientConnection.execute('SELECT COUNT(*) as count FROM users');
-                const [activeUsersResult] = await clientConnection.execute(
+                const [users] = await churchConnection.execute('SELECT COUNT(*) as count FROM users');
+                const [activeUsersResult] = await churchConnection.execute(
                     'SELECT COUNT(*) as count FROM users WHERE is_active = true'
                 );
 
                 totalUsers += users[0].count;
                 activeUsers += activeUsersResult[0].count;
 
-                await clientConnection.end();
+                await churchConnection.end();
             } catch (error) {
-                console.warn(`Error querying client database ${client.database_name}:`, error.message);
+                console.warn(`Error querying church database ${church.database_name}:`, error.message);
             }
         }
 
-        // Get total records across all client databases
+        // Get total records across all church databases
         let totalRecords = { baptisms: 0, marriages: 0, funerals: 0, total: 0 };
 
-        for (const client of clients) {
+        for (const church of churches) {
             try {
                 const mysql = require('mysql2/promise');
-                const clientConnection = await mysql.createConnection({
+                const churchConnection = await mysql.createConnection({
                     host: process.env.DB_HOST || 'localhost',
                     user: process.env.DB_USER || 'root',
                     password: process.env.DB_PASSWORD || 'Summerof1982@!',
-                    database: client.database_name
+                    database: church.database_name
                 });
 
-                const [baptisms] = await clientConnection.execute('SELECT COUNT(*) as count FROM baptism_records');
-                const [marriages] = await clientConnection.execute('SELECT COUNT(*) as count FROM marriage_records');
-                const [funerals] = await clientConnection.execute('SELECT COUNT(*) as count FROM funeral_records');
+                const [baptisms] = await churchConnection.execute('SELECT COUNT(*) as count FROM baptism_records');
+                const [marriages] = await churchConnection.execute('SELECT COUNT(*) as count FROM marriage_records');
+                const [funerals] = await churchConnection.execute('SELECT COUNT(*) as count FROM funeral_records');
 
                 totalRecords.baptisms += baptisms[0].count;
                 totalRecords.marriages += marriages[0].count;
                 totalRecords.funerals += funerals[0].count;
 
-                await clientConnection.end();
+                await churchConnection.end();
             } catch (error) {
-                console.warn(`Error querying records from ${client.database_name}:`, error.message);
+                console.warn(`Error querying records from ${church.database_name}:`, error.message);
             }
         }
 
         totalRecords.total = totalRecords.baptisms + totalRecords.marriages + totalRecords.funerals;
 
         res.json({
-            clients: {
-                total: clientCount[0].count,
-                active: activeClientCount[0].count,
-                inactive: clientCount[0].count - activeClientCount[0].count
+            churches: {
+                total: churchCount[0].count,
+                active: activeChurchCount[0].count,
+                inactive: churchCount[0].count - activeChurchCount[0].count
             },
             users: {
                 total: totalUsers,
@@ -110,7 +211,7 @@ router.get('/database-health', async (req, res) => {
         try {
             const [result] = await promisePool.execute('SELECT 1');
             healthResults.push({
-                database: 'orthodoxmetrics_db',
+                database: 'orthodmetrics_dev',
                 type: 'main',
                 status: 'healthy',
                 responseTime: Date.now(),
@@ -118,7 +219,7 @@ router.get('/database-health', async (req, res) => {
             });
         } catch (error) {
             healthResults.push({
-                database: 'orthodoxmetrics_db',
+                database: 'orthodmetrics_dev',
                 type: 'main',
                 status: 'error',
                 error: error.message,
@@ -126,36 +227,36 @@ router.get('/database-health', async (req, res) => {
             });
         }
 
-        // Check all client databases
-        const [clients] = await promisePool.execute(
-            'SELECT id, name, slug, database_name FROM clients WHERE status = "active"'
+        // Check all church databases
+        const [churches] = await promisePool.execute(
+            'SELECT id, name, slug, database_name FROM churches WHERE is_active = 1'
         );
 
-        for (const client of clients) {
+        for (const church of churches) {
             const startTime = Date.now();
             try {
                 const mysql = require('mysql2/promise');
-                const clientConnection = await mysql.createConnection({
+                const churchConnection = await mysql.createConnection({
                     host: process.env.DB_HOST || 'localhost',
                     user: process.env.DB_USER || 'root',
                     password: process.env.DB_PASSWORD || 'Summerof1982@!',
-                    database: client.database_name
+                    database: church.database_name
                 });
 
-                await clientConnection.execute('SELECT 1');
+                await churchConnection.execute('SELECT 1');
                 const responseTime = Date.now() - startTime;
 
                 // Get basic stats
-                const [baptisms] = await clientConnection.execute('SELECT COUNT(*) as count FROM baptism_records');
-                const [marriages] = await clientConnection.execute('SELECT COUNT(*) as count FROM marriage_records');
-                const [funerals] = await clientConnection.execute('SELECT COUNT(*) as count FROM funeral_records');
-                const [users] = await clientConnection.execute('SELECT COUNT(*) as count FROM users');
+                const [baptisms] = await churchConnection.execute('SELECT COUNT(*) as count FROM baptism_records');
+                const [marriages] = await churchConnection.execute('SELECT COUNT(*) as count FROM marriage_records');
+                const [funerals] = await churchConnection.execute('SELECT COUNT(*) as count FROM funeral_records');
+                const [users] = await churchConnection.execute('SELECT COUNT(*) as count FROM users');
 
                 healthResults.push({
-                    database: client.database_name,
-                    type: 'client',
-                    clientName: client.name,
-                    clientSlug: client.slug,
+                    database: church.database_name,
+                    type: 'church',
+                    churchName: church.name,
+                    churchSlug: church.slug,
                     status: 'healthy',
                     responseTime,
                     stats: {
@@ -167,13 +268,13 @@ router.get('/database-health', async (req, res) => {
                     lastChecked: new Date().toISOString()
                 });
 
-                await clientConnection.end();
+                await churchConnection.end();
             } catch (error) {
                 healthResults.push({
-                    database: client.database_name,
-                    type: 'client',
-                    clientName: client.name,
-                    clientSlug: client.slug,
+                    database: church.database_name,
+                    type: 'church',
+                    churchName: church.name,
+                    churchSlug: church.slug,
                     status: 'error',
                     error: error.message,
                     lastChecked: new Date().toISOString()
@@ -350,22 +451,22 @@ router.get('/backups', async (req, res) => {
     }
 });
 
-// Client-specific backup
-router.post('/backup/:clientId', async (req, res) => {
+// Church-specific backup
+router.post('/backup/:churchId', async (req, res) => {
     try {
-        const clientId = req.params.clientId;
+        const churchId = req.params.churchId;
 
-        // Get client info
-        const [clients] = await promisePool.execute(
-            'SELECT name, slug, database_name FROM clients WHERE id = ?',
-            [clientId]
+        // Get church info
+        const [churches] = await promisePool.execute(
+            'SELECT name, slug, database_name FROM churches WHERE id = ?',
+            [churchId]
         );
 
-        if (clients.length === 0) {
-            return res.status(404).json({ error: 'Client not found' });
+        if (churches.length === 0) {
+            return res.status(404).json({ error: 'Church not found' });
         }
 
-        const client = clients[0];
+        const church = churches[0];
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const backupDir = path.resolve(__dirname, '../../backups');
 
@@ -376,7 +477,7 @@ router.post('/backup/:clientId', async (req, res) => {
             await fs.mkdir(backupDir, { recursive: true });
         }
 
-        const backupFile = path.join(backupDir, `${client.slug}-backup-${timestamp}.sql`);
+        const backupFile = path.join(backupDir, `${church.slug}-backup-${timestamp}.sql`);
 
         // Create mysqldump command for specific database
         const { spawn } = require('child_process');
@@ -387,7 +488,7 @@ router.post('/backup/:clientId', async (req, res) => {
             `-p${process.env.DB_PASSWORD || 'Summerof1982@!'}`,
             '--routines',
             '--triggers',
-            client.database_name
+            church.database_name
         ]);
 
         const writeStream = require('fs').createWriteStream(backupFile);
@@ -397,15 +498,15 @@ router.post('/backup/:clientId', async (req, res) => {
             if (code === 0) {
                 res.json({
                     success: true,
-                    message: `Backup created for ${client.name}`,
-                    client: client.name,
+                    message: `Backup created for ${church.name}`,
+                    church: church.name,
                     file: backupFile,
                     timestamp: new Date().toISOString()
                 });
             } else {
                 res.status(500).json({
                     success: false,
-                    message: 'Client backup failed',
+                    message: 'Church backup failed',
                     code
                 });
             }
@@ -414,14 +515,14 @@ router.post('/backup/:clientId', async (req, res) => {
         mysqldumpProcess.on('error', (error) => {
             res.status(500).json({
                 success: false,
-                message: 'Client backup process failed',
+                message: 'Church backup process failed',
                 error: error.message
             });
         });
 
     } catch (error) {
-        console.error('Error creating client backup:', error);
-        res.status(500).json({ error: 'Failed to create client backup' });
+        console.error('Error creating church backup:', error);
+        res.status(500).json({ error: 'Failed to create church backup' });
     }
 });
 
@@ -432,7 +533,7 @@ router.get('/config', async (req, res) => {
             environment: process.env.NODE_ENV || 'development',
             database: {
                 host: process.env.DB_HOST || 'localhost',
-                name: process.env.DB_NAME || 'orthodoxmetrics_db',
+                name: process.env.DB_NAME || 'orthodmetrics_dev',
                 // Don't expose credentials
             },
             server: {
@@ -545,8 +646,8 @@ router.get('/system-info', checkRole(['super_admin', 'admin']), async (req, res)
             platform: os.platform(),
             arch: os.arch(),
             
-            // Application Settings
-            env: process.env.NODE_ENV || 'development',
+            // Application Settings  
+            env: determineEnvironment(),
             version: version,
             dateFormat: 'MM/DD/YYYY',
             language: 'en',

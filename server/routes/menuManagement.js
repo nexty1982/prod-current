@@ -163,11 +163,12 @@ router.put('/permissions', requireSuperAdmin, async (req, res) => {
                 );
 
                 if (menuItem.length > 0 && menuItem[0].is_system_required) {
-                    // System required items cannot be disabled for any role
-                    if (!is_visible) {
-                        console.log('⚠️ Skipping system required item:', menuItem[0].menu_key);
+                    // System required items cannot be disabled for super_admin and admin roles
+                    if (!is_visible && (role === 'super_admin' || role === 'admin')) {
+                        console.log('⚠️ Skipping system required item for admin/super_admin:', menuItem[0].menu_key);
                         continue;
                     }
+                    // For other roles, system required items can be disabled for access control
                 }
 
                 // Update or insert permission

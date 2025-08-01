@@ -1,0 +1,43 @@
+{
+  "id": "da7a92855b4c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/MANUAL_PASSWORD_RECOVERY.md",
+  "relativePath": "MANUAL_PASSWORD_RECOVERY.md",
+  "name": "MANUAL_PASSWORD_RECOVERY.md",
+  "extension": ".md",
+  "size": 5626,
+  "modified": "2025-07-24T23:11:49.188Z",
+  "created": "2025-07-24T23:11:39.717Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 254,
+      "characters": 5604,
+      "words": 752
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 254,
+      "codeLines": 130,
+      "commentLines": 57,
+      "commentRatio": 0.3048128342245989,
+      "averageLineLength": 28.25668449197861
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.189Z"
+  },
+  "contentHash": "299ba05d7c94f1e5f69d5940eb41413d8e4b34a6e4f2ef704c9ca4e777a331ec",
+  "discoveredAt": "2025-07-26T04:17:09.189Z"
+}

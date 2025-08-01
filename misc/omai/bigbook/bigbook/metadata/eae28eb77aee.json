@@ -1,0 +1,107 @@
+{
+  "id": "eae28eb77aee",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fixed-session-config.js",
+  "relativePath": "server/debug/fixed-session-config.js",
+  "name": "fixed-session-config.js",
+  "extension": ".js",
+  "size": 2572,
+  "modified": "2025-07-24T14:50:26.348Z",
+  "created": "2025-07-24T14:50:26.348Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 76,
+      "characters": 2550,
+      "words": 290
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express-session",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "express-mysql-session",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 9
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 6,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 14,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 15,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 16,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 17,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 48,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// server/config/session.js - FIXED VERSION\r\nconst session = require('express-session');\r\nconst MySQLStore = require('express-mysql-session')(session);\r\n\r\nconst path = require('path');\r\nconst envFile = process.env.[REDACTED] === 'production'\r\n  ? '../.env.production'\r\n  : '../.env.development';\r\nrequire('dotenv').config({ path: path.resolve(__dirname, envFile) });\r\n\r\n// Enhanced DB connection options\r\nconst dbOptions = {\r\n  host: process.env.[REDACTED] || '0.0.0.0',\r\n  port: process.env.[REDACTED] || 3306,\r\n  user: process.env.[REDACTED] || 'orthodoxapps',\r\n  password: process.env.[REDACTED] || 'Summerof1982@!',\r\n  database: process.env.[REDACTED] || 'orthodoxmetrics_db',\r\n  charset: 'utf8mb4',\r\n  // Session store specific options\r\n  expiration: 24 * 60 * 60 * 1000, // 1 day in milliseconds\r\n  checkExpirationInterval: 15 * 60 * 1000, // Check every 15 minutes\r\n  createDatabaseTable: true,\r\n  endConnectionOnClose: true,\r\n  schema: {\r\n    tableName: 'sessions',\r\n    columnNames: {\r\n      session_id: 'session_id',\r\n      expires: 'expires',\r\n      data: 'data'\r\n    }\r\n  }\r\n};\r\n\r\nconst store = new MySQLStore(dbOptions);\r\n\r\n// Handle store errors gracefully\r\nstore.on('error', (error) => {\r\n  console.error('❌ Session store error:', error);\r\n});\r\n\r\nstore.on('connect', () => {\r\n  console.log('✅ Session store connected successfully');\r\n});\r\n\r\nmodule.exports = session({\r\n  // 🔧 FIX: Use 'name' property only (not 'key')\r\n  name: 'orthodox.sid',\r\n  secret: process.env.[REDACTED] || 'fallback-secret-key-for-development',\r\n  store,\r\n  resave: false,\r\n  saveUninitialized: false,\r\n  rolling: true,\r\n  cookie: {\r\n    secure: false, // Set to true only for HTTPS in production\r\n    httpOnly: true,\r\n    maxAge: 1000 * 60 * 60 * 24, // 1 day\r\n    sameSite: 'lax',\r\n    // 🔧 FIX: Remove domain restriction for now\r\n    // domain: \".orthodoxmetrics.com\"  // This can cause issues\r\n  }\r\n});\r\n\r\n// 🚨 ISSUES FIXED:\r\n// 1. REMOVED conflicting 'key' property\r\n// 2. ONLY use 'name' property (correct for express-session)\r\n// 3. REMOVED domain restriction (can cause session issues)\r\n// 4. SIMPLIFIED cookie configuration\r\n\r\nconsole.log('🔧 SESSION CONFIG FIXES:');\r\nconsole.log('1. ❌ Removed conflicting \"key\" property');\r\nconsole.log('2. ✅ Using only \"name: orthodox.sid\"'); \r\nconsole.log('3. ❌ Removed cookie domain restriction');\r\nconsole.log('4. ✅ Simplified cookie configuration');\r\nconsole.log('');\r\nconsole.log('💡 Replace your server/config/session.js with this fixed version');\r\nconsole.log('Then restart your server and try logging in again.'); "
+    },
+    "complexity": {
+      "totalLines": 76,
+      "codeLines": 56,
+      "commentLines": 12,
+      "commentRatio": 0.17647058823529413,
+      "averageLineLength": 36.279411764705884
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.186Z"
+  },
+  "contentHash": "3315fbc26ee8bb9b01527abd90b82fe4976ad9b1c323c842df890c48d2299483",
+  "discoveredAt": "2025-07-28T07:20:00.186Z"
+}

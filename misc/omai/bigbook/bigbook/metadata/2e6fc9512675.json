@@ -1,0 +1,43 @@
+{
+  "id": "2e6fc9512675",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/MIGRATION_PLAN.md",
+  "relativePath": "server/MIGRATION_PLAN.md",
+  "name": "MIGRATION_PLAN.md",
+  "extension": ".md",
+  "size": 8128,
+  "modified": "2025-07-18T19:04:40.756Z",
+  "created": "2025-07-18T18:58:58.779Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 243,
+      "characters": 7942,
+      "words": 943
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 243,
+      "codeLines": 157,
+      "commentLines": 44,
+      "commentRatio": 0.21890547263681592,
+      "averageLineLength": 38.1044776119403
+    },
+    "lastAnalyzed": "2025-07-26T04:17:10.342Z"
+  },
+  "contentHash": "3e3464a1321f830e94b3e3936f47bcb1e900924a501aff1707e34e1b35a21249",
+  "discoveredAt": "2025-07-26T04:17:10.342Z"
+}

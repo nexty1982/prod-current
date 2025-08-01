@@ -22,23 +22,6 @@ export const ThemedLayout: React.FC<ThemedLayoutProps> = ({
 }) => {
   const { themeConfig } = useTheme();
 
-  useEffect(() => {
-    // Add theme class to body for global styling
-    document.body.className = document.body.className
-      .split(' ')
-      .filter(cls => !cls.startsWith('theme-'))
-      .concat(themeConfig.cssClass)
-      .join(' ');
-
-    // Cleanup on unmount
-    return () => {
-      document.body.className = document.body.className
-        .split(' ')
-        .filter(cls => !cls.startsWith('theme-'))
-        .join(' ');
-    };
-  }, [themeConfig]);
-
   return (
     <Box
       className={`${themeConfig.cssClass} ${className}`.trim()}

@@ -1,0 +1,59 @@
+{
+  "id": "87a818164c21",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/analytics/predictive-engine.ts",
+  "relativePath": "services/om-ai/analytics/predictive-engine.ts",
+  "name": "predictive-engine.ts",
+  "extension": ".ts",
+  "size": 10573,
+  "modified": "2025-07-25T01:48:56.252Z",
+  "created": "2025-07-25T01:40:44.059Z",
+  "classification": {
+    "type": "Other",
+    "category": "Uncategorized",
+    "confidence": 0
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 341,
+      "characters": 10573,
+      "words": 1083
+    },
+    "classification": {
+      "type": "Other",
+      "category": "Uncategorized",
+      "confidence": 0
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 341,
+      "codeLines": 278,
+      "commentLines": 6,
+      "commentRatio": 0.02112676056338028,
+      "averageLineLength": 35.58450704225352
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.389Z"
+  },
+  "contentHash": "8b1420060ab0e6d74152aa82f4dc19ac2b1d5f08642540cc9c3d81ebbf0b53ff",
+  "discoveredAt": "2025-07-28T07:20:01.389Z"
+}

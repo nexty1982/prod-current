@@ -1,0 +1,43 @@
+{
+  "id": "073baa625765",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/setup-enhanced-invoices.ps1",
+  "relativePath": "server/utils/setup-enhanced-invoices.ps1",
+  "name": "setup-enhanced-invoices.ps1",
+  "extension": ".ps1",
+  "size": 2816,
+  "modified": "2025-07-04T23:08:01.000Z",
+  "created": "2025-07-09T00:48:38.534Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 51,
+      "characters": 2816,
+      "words": 297
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 51,
+      "codeLines": 36,
+      "commentLines": 5,
+      "commentRatio": 0.12195121951219512,
+      "averageLineLength": 67.2439024390244
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.282Z"
+  },
+  "contentHash": "ac71ad9847557a5479515ad25c656b75c1b8fe7b6256cb12ec4f79090d654f17",
+  "discoveredAt": "2025-07-28T07:20:01.282Z"
+}

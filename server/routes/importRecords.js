@@ -158,6 +158,38 @@ function sanitizeRecord(record, recordType, churchId) {
 }
 
 /**
+ * GET /api/records - Simple records endpoint for the Records Browser
+ * Uses the same approach as Legacy Records - delegates to existing endpoints
+ */
+router.get('/', requireAuth, async (req, res) => {
+  try {
+    console.log('🔍 Records Browser API called by user:', req.session.user?.username, 'role:', req.session.user?.role);
+    
+    // For now, return a simple response that tells the frontend to use existing endpoints
+    // This matches how Legacy Records works - it calls separate endpoints for each type
+    res.json({
+      success: true,
+      message: 'Records Browser should use existing endpoints',
+      suggestion: 'Use /api/baptism-records, /api/marriage-records, /api/funeral-records endpoints instead',
+      endpoints: {
+        baptism: '/api/baptism-records',
+        marriage: '/api/marriage-records', 
+        funeral: '/api/funeral-records',
+        churches: '/api/admin/churches'
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error in records endpoint:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch records',
+      message: error.message
+    });
+  }
+});
+
+/**
  * POST /api/records/import - Import records from JSON
  */
 router.post('/import', requireAuth, async (req, res) => {
@@ -219,9 +251,9 @@ router.post('/import', requireAuth, async (req, res) => {
       });
     }
 
-    // Verify church exists
+    // Verify church exists in platform database
     const [churchExists] = await promisePool.query(
-      'SELECT id FROM church_info WHERE id = ? AND is_active = 1',
+      'SELECT id FROM churches WHERE id = ? AND is_active = 1',
       [churchId]
     );
 

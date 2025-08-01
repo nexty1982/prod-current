@@ -1,0 +1,64 @@
+{
+  "id": "3cd1999b45f6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/start-calendar-system.sh",
+  "relativePath": "scripts/7-26-25/start-calendar-system.sh",
+  "name": "start-calendar-system.sh",
+  "extension": ".sh",
+  "size": 3400,
+  "modified": "2025-07-23T21:30:17.178Z",
+  "created": "2025-07-23T21:30:14.012Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 139,
+      "characters": 3368,
+      "words": 449
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 49
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 52
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 74
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 77
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 139,
+      "codeLines": 94,
+      "commentLines": 17,
+      "commentRatio": 0.15315315315315314,
+      "averageLineLength": 28.99099099099099
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.051Z"
+  },
+  "contentHash": "1f0a7308e10d76498afdc6a688fefb4fd4919b41b53f96ee3c2fa25b8cd9bc7f",
+  "discoveredAt": "2025-07-28T07:19:59.051Z"
+}

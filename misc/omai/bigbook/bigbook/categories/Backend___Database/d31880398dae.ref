@@ -1,0 +1,6 @@
+{
+  "id": "d31880398dae",
+  "name": "create-training-data-tables.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migrations/create-training-data-tables.sql",
+  "type": "Database Scripts"
+}

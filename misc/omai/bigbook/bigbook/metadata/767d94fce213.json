@@ -1,0 +1,64 @@
+{
+  "id": "767d94fce213",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/components/dashboards/modern/TopPerformerData.ts",
+  "relativePath": "front-end/src/components/dashboards/modern/TopPerformerData.ts",
+  "name": "TopPerformerData.ts",
+  "extension": ".ts",
+  "size": 1150,
+  "modified": "2025-04-30T05:42:45.000Z",
+  "created": "2025-07-05T02:28:34.564Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 56,
+      "characters": 1150,
+      "words": 120
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-1.jpg",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-2.jpg",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-3.jpg",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-4.jpg",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 56,
+      "codeLines": 52,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 21
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.758Z"
+  },
+  "contentHash": "4936c0fa267a6d2e5aa0b08eb52a3101b8b039e86a2ab48e871c4ea5e07e9fc9",
+  "discoveredAt": "2025-07-28T07:19:58.758Z"
+}

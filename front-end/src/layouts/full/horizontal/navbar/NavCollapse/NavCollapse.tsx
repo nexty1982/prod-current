@@ -2,7 +2,7 @@
 // @ts-ignore
 import React, { useContext } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 
 // mui imports
 import { ListItemIcon, styled, ListItemText, Box, ListItemButton } from '@mui/material';

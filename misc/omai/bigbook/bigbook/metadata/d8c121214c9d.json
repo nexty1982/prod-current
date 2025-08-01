@@ -1,0 +1,49 @@
+{
+  "id": "d8c121214c9d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/services/testChurchDataGenerator.js",
+  "relativePath": "server/services/testChurchDataGenerator.js",
+  "name": "testChurchDataGenerator.js",
+  "extension": ".js",
+  "size": 11415,
+  "modified": "2025-07-14T00:41:35.991Z",
+  "created": "2025-07-14T00:37:46.208Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 330,
+      "characters": 11415,
+      "words": 1022
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "bcrypt",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 330,
+      "codeLines": 252,
+      "commentLines": 38,
+      "commentRatio": 0.1310344827586207,
+      "averageLineLength": 37.748275862068965
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.129Z"
+  },
+  "contentHash": "4fe44be2145902af66e433a8a0309a6d398e730677fccbdb4dc82f34ca22e14d",
+  "discoveredAt": "2025-07-28T07:20:01.129Z"
+}

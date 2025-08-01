@@ -1,0 +1,43 @@
+{
+  "id": "1434b163545d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/tools/utils/FileParser.ts",
+  "relativePath": "front-end/src/tools/utils/FileParser.ts",
+  "name": "FileParser.ts",
+  "extension": ".ts",
+  "size": 10809,
+  "modified": "2025-07-26T21:53:59.111Z",
+  "created": "2025-07-26T21:52:39.214Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 311,
+      "characters": 10809,
+      "words": 849
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 311,
+      "codeLines": 230,
+      "commentLines": 31,
+      "commentRatio": 0.11877394636015326,
+      "averageLineLength": 39.727969348659
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.907Z"
+  },
+  "contentHash": "ac4b2b2d10dcb751662dccb262b51f2c494e67c7869f55823fc2971e9c1fc08a",
+  "discoveredAt": "2025-07-28T07:19:58.907Z"
+}

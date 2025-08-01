@@ -1,0 +1,43 @@
+{
+  "id": "2ef774af596f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-backend-test-omai.sh",
+  "relativePath": "scripts/restart-backend-test-omai.sh",
+  "name": "restart-backend-test-omai.sh",
+  "extension": ".sh",
+  "size": 4325,
+  "modified": "2025-07-25T23:49:06.358Z",
+  "created": "2025-07-25T23:32:07.575Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 117,
+      "characters": 4261,
+      "words": 518
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 117,
+      "codeLines": 86,
+      "commentLines": 14,
+      "commentRatio": 0.14,
+      "averageLineLength": 41.45
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.473Z"
+  },
+  "contentHash": "a5cad663806cab29ae2ab84f712f47a54bde4605adaff374dfb034d81a694ca3",
+  "discoveredAt": "2025-07-28T07:19:59.473Z"
+}

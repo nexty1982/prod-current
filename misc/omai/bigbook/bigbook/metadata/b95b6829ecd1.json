@@ -1,0 +1,43 @@
+{
+  "id": "b95b6829ecd1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/create_user_blogs_table.sql",
+  "relativePath": "server/database/create_user_blogs_table.sql",
+  "name": "create_user_blogs_table.sql",
+  "extension": ".sql",
+  "size": 1591,
+  "modified": "2025-07-28T05:31:33.867Z",
+  "created": "2025-07-28T05:31:31.283Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 43,
+      "characters": 1591,
+      "words": 177
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 43,
+      "codeLines": 38,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 40.31578947368421
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.622Z"
+  },
+  "contentHash": "2fc44395bfa6a26219f5bb2a0c30762a54f94709c34b88a16c9b64375c956e25",
+  "discoveredAt": "2025-07-28T07:19:59.622Z"
+}

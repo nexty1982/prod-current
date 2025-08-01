@@ -1,6 +1,6 @@
 import { FC, useContext } from 'react';
 
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { ReactComponent as LogoDark } from 'src/assets/images/logos/dark-logo.svg';

@@ -1,0 +1,99 @@
+{
+  "id": "92173480579b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/fix-node-modules.sh",
+  "relativePath": "scripts/7-26-25/fix-node-modules.sh",
+  "name": "fix-node-modules.sh",
+  "extension": ".sh",
+  "size": 2365,
+  "modified": "2025-07-23T21:31:27.482Z",
+  "created": "2025-07-23T21:31:23.352Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 97,
+      "characters": 2363,
+      "words": 299
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 36
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 46
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 47
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 47
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 51
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 55
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 62
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 76
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 77
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 77
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 81
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 97,
+      "codeLines": 61,
+      "commentLines": 14,
+      "commentRatio": 0.18666666666666668,
+      "averageLineLength": 30.226666666666667
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.995Z"
+  },
+  "contentHash": "d1b526092b957ded8a86e0e645ce35382feeee3b6c4ca78e9d815232d05942b5",
+  "discoveredAt": "2025-07-28T07:19:58.995Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "9f3986204bc3",
+  "name": "check-church-database-name.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-church-database-name.sql",
+  "type": "Database Scripts"
+}

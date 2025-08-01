@@ -1,0 +1,54 @@
+{
+  "id": "8a59bc522b2d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/church-scraper.js",
+  "relativePath": "server/routes/church-scraper.js",
+  "name": "church-scraper.js",
+  "extension": ".js",
+  "size": 7802,
+  "modified": "2025-07-14T06:09:39.051Z",
+  "created": "2025-07-14T06:07:25.057Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 268,
+      "characters": 7800,
+      "words": 647
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 268,
+      "codeLines": 205,
+      "commentLines": 14,
+      "commentRatio": 0.0639269406392694,
+      "averageLineLength": 32.789954337899545
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.432Z"
+  },
+  "contentHash": "1781cf478406408725326fb7436f7768e89121491567e8b147672686dc740b0f",
+  "discoveredAt": "2025-07-28T07:20:00.432Z"
+}

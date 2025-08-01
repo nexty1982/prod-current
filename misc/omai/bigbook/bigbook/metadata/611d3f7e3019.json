@@ -1,0 +1,56 @@
+{
+  "id": "611d3f7e3019",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/legacy/phase1-verify-records-db.js",
+  "relativePath": "server/legacy/phase1-verify-records-db.js",
+  "name": "phase1-verify-records-db.js",
+  "extension": ".js",
+  "size": 3224,
+  "modified": "2025-07-24T14:51:40.492Z",
+  "created": "2025-07-24T14:51:40.492Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 93,
+      "characters": 3190,
+      "words": 278
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 18,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Phase 1: Database Schema & Core Infrastructure\r\n * Step 1: Verify ssppoc_records_db database exists and is accessible\r\n */\r\n\r\nconst mysql = require('mysql2/promise');\r\n\r\nasync function verifyRecordsDb() {\r\n  try {\r\n    console.log('🔍 PHASE 1 - Step 1: Verifying ssppoc_records_db database access...');\r\n    console.log('================================================================================');\r\n    \r\n    const connection = await mysql.createConnection({\r\n      host: 'localhost',\r\n      user: 'orthodoxapps',\r\n      password: '[REDACTED]',\r\n      database: 'ssppoc_records_db'\r\n    });\r\n    \r\n    console.log('✅ Connected to ssppoc_records_db successfully');\r\n    \r\n    // Check existing tables\r\n    const [tables] = await connection.query('SHOW TABLES');\r\n    console.log(`📊 Found ${tables.length} existing tables:`);\r\n    \r\n    const tableNames = tables.map(table => Object.values(table)[0]);\r\n    tableNames.forEach(table => {\r\n      console.log(`   - ${table}`);\r\n    });\r\n    \r\n    // Check for OCR-related tables that we need to create\r\n    const requiredTables = [\r\n      'ocr_field_configurations',\r\n      'ocr_processing_log', \r\n      'ocr_review_queue',\r\n      'ocr_job_transfers'\r\n    ];\r\n    \r\n    console.log('\\n🔍 Checking for required OCR tables...');\r\n    const missingTables = [];\r\n    \r\n    for (const table of requiredTables) {\r\n      if (tableNames.includes(table)) {\r\n        console.log(`   ✅ ${table} - EXISTS`);\r\n      } else {\r\n        console.log(`   ❌ ${table} - MISSING`);\r\n        missingTables.push(table);\r\n      }\r\n    }\r\n    \r\n    // Check for existing record tables\r\n    console.log('\\n📋 Checking for existing record tables...');\r\n    const recordTables = ['baptism_records', 'marriage_records', 'funeral_records'];\r\n    \r\n    for (const table of recordTables) {\r\n      if (tableNames.includes(table)) {\r\n        console.log(`   ✅ ${table} - EXISTS`);\r\n        \r\n        // Count records\r\n        const [countResult] = await connection.query(`SELECT COUNT(*) as count FROM ${table}`);\r\n        console.log(`      📊 Contains ${countResult[0].count} records`);\r\n      } else {\r\n        console.log(`   ❌ ${table} - MISSING (will need to be created)`);\r\n      }\r\n    }\r\n    \r\n    await connection.end();\r\n    \r\n    console.log('\\n================================================================================');\r\n    console.log('🎯 Database verification complete');\r\n    console.log(`📊 Total tables found: ${tables.length}`);\r\n    console.log(`❌ Missing OCR tables: ${missingTables.length}`);\r\n    \r\n    if (missingTables.length > 0) {\r\n      console.log('\\n📝 Next step: Run phase1-create-ocr-schema.js to create missing tables');\r\n    } else {\r\n      console.log('\\n✅ All required OCR tables exist - schema is ready!');\r\n    }\r\n    \r\n    console.log('================================================================================');\r\n    \r\n  } catch (error) {\r\n    console.error('❌ Database verification failed:', error.message);\r\n    console.error('📋 Check connection details and database permissions');\r\n    process.exit(1);\r\n  }\r\n}\r\n\r\n// Run verification\r\nverifyRecordsDb().catch(console.error);\r\n"
+    },
+    "complexity": {
+      "totalLines": 93,
+      "codeLines": 63,
+      "commentLines": 10,
+      "commentRatio": 0.136986301369863,
+      "averageLineLength": 41.3013698630137
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.280Z"
+  },
+  "contentHash": "0c90619adf9195e7d8b075af2b510556097994852ed19eb9a16ed99a263b9f45",
+  "discoveredAt": "2025-07-28T07:20:00.280Z"
+}

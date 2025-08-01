@@ -27,13 +27,13 @@ import {
   Error as ErrorIcon,
   CheckCircle as CheckCircleIcon,
   Star as StarIcon,
-  Phone as PhoneIcon,
+  Smartphone as PhoneIcon,
   Email as EmailIcon,
   LocationOn as LocationIcon,
   Schedule as ScheduleIcon,
   Person as PersonIcon,
-  Church as ChurchIcon,
-  Event as EventIcon
+  AccountBalance as ChurchIcon,
+  CalendarToday as EventIcon
 } from '@mui/icons-material';
 
 // Types for component props

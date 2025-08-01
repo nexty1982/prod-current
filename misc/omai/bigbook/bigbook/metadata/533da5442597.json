@@ -1,0 +1,43 @@
+{
+  "id": "533da5442597",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/debug-nfs-test.sh",
+  "relativePath": "scripts/7-26-25/debug-nfs-test.sh",
+  "name": "debug-nfs-test.sh",
+  "extension": ".sh",
+  "size": 6262,
+  "modified": "2025-07-24T22:30:33.451Z",
+  "created": "2025-07-24T22:30:30.154Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 199,
+      "characters": 6260,
+      "words": 759
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 199,
+      "codeLines": 150,
+      "commentLines": 20,
+      "commentRatio": 0.11764705882352941,
+      "averageLineLength": 35.423529411764704
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.982Z"
+  },
+  "contentHash": "6dbc947a69d64632698ae70d7453838c2f8f6859c85602eb6f8289e5406e806f",
+  "discoveredAt": "2025-07-28T07:19:58.982Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "aff210751d48",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/test-nfs-button.md",
+  "relativePath": "test-nfs-button.md",
+  "name": "test-nfs-button.md",
+  "extension": ".md",
+  "size": 4471,
+  "modified": "2025-07-24T22:31:11.304Z",
+  "created": "2025-07-24T22:31:02.414Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 156,
+      "characters": 4465,
+      "words": 658
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 156,
+      "codeLines": 88,
+      "commentLines": 34,
+      "commentRatio": 0.2786885245901639,
+      "averageLineLength": 35.049180327868854
+    },
+    "lastAnalyzed": "2025-07-26T04:17:12.220Z"
+  },
+  "contentHash": "2e9358f83f02f30012fa87016120849af1530b5b191f76394efdfa8ba358c3aa",
+  "discoveredAt": "2025-07-26T04:17:12.220Z"
+}

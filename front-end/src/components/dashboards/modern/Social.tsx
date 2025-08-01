@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { Stack, Typography, Avatar, Box, AvatarGroup } from '@mui/material';
 import { IconMessage2 } from '@tabler/icons-react';
 

@@ -1,0 +1,6 @@
+{
+  "id": "e537d471e058",
+  "name": "deploy-task132-blog-system.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/tasks/scripts/deploy-task132-blog-system.sh",
+  "type": "Build Scripts"
+}

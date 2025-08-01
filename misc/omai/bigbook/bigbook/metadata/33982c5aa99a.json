@@ -1,0 +1,43 @@
+{
+  "id": "33982c5aa99a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/Guidelines.md",
+  "relativePath": "docs/Guidelines.md",
+  "name": "Guidelines.md",
+  "extension": ".md",
+  "size": 5014,
+  "modified": "2025-07-21T10:03:56.466Z",
+  "created": "2025-07-21T10:03:56.153Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 202,
+      "characters": 4990,
+      "words": 586
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 202,
+      "codeLines": 114,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 41.23684210526316
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.797Z"
+  },
+  "contentHash": "527e54d1e4d588169b9b2faea7ccbb7f8ae40cc918f2d4b1f6502febfec0c6bf",
+  "discoveredAt": "2025-07-28T07:19:57.797Z"
+}

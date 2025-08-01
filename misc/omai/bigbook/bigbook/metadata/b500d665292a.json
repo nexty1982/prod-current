@@ -1,0 +1,49 @@
+{
+  "id": "b500d665292a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/importRecords.js",
+  "relativePath": "server/routes/importRecords.js",
+  "name": "importRecords.js",
+  "extension": ".js",
+  "size": 13461,
+  "modified": "2025-07-26T17:51:31.851Z",
+  "created": "2025-07-13T22:36:23.848Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 431,
+      "characters": 13447,
+      "words": 1299
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 431,
+      "codeLines": 333,
+      "commentLines": 45,
+      "commentRatio": 0.11904761904761904,
+      "averageLineLength": 34.25925925925926
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.485Z"
+  },
+  "contentHash": "a84adc4870ade23663760d59af718329a376fe3fd548e8287feed536163823ab",
+  "discoveredAt": "2025-07-28T07:20:00.486Z"
+}

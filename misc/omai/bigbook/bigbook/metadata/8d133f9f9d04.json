@@ -1,0 +1,54 @@
+{
+  "id": "8d133f9f9d04",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/omai/knowledge/queryEngine.ts",
+  "relativePath": "front-end/src/omai/knowledge/queryEngine.ts",
+  "name": "queryEngine.ts",
+  "extension": ".ts",
+  "size": 13875,
+  "modified": "2025-07-25T19:14:35.624Z",
+  "created": "2025-07-25T05:14:47.386Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 475,
+      "characters": 13875,
+      "words": 1334
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 475,
+      "codeLines": 345,
+      "commentLines": 53,
+      "commentRatio": 0.13316582914572864,
+      "averageLineLength": 32.91959798994975
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.878Z"
+  },
+  "contentHash": "4b93a276f6f549c40b7b98cdabbfc1d5a3afddcbbbc18aed12fee6071cf39319",
+  "discoveredAt": "2025-07-28T07:19:58.878Z"
+}

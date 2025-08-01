@@ -1,0 +1,43 @@
+{
+  "id": "26b588f582fb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/apply-domain-fix.sh",
+  "relativePath": "server/debug/apply-domain-fix.sh",
+  "name": "apply-domain-fix.sh",
+  "extension": ".sh",
+  "size": 1279,
+  "modified": "2025-07-23T12:39:57.523Z",
+  "created": "2025-07-23T12:39:55.848Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 45,
+      "characters": 1259,
+      "words": 178
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 45,
+      "codeLines": 32,
+      "commentLines": 4,
+      "commentRatio": 0.1111111111111111,
+      "averageLineLength": 33.75
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.057Z"
+  },
+  "contentHash": "97e39fa091358ddf0c4b5efa0e12a60352b2452b746afdd5dd3d5ba71710d6b4",
+  "discoveredAt": "2025-07-28T07:20:00.057Z"
+}

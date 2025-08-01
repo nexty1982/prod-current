@@ -8,14 +8,16 @@ import {
   Container,
   useTheme,
   alpha,
+  IconButton,
 } from '@mui/material';
 import {
   IconBabyCarriage,
   IconHeart,
   IconCross,
 } from '@tabler/icons-react';
-import BaptismRecordsPage from './BaptismRecordsPage';
+import SSPPOCRecordsPage from './SSPPOCRecordsPage';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import AnalyticsDashboard from '../../pages/AnalyticsDashboard';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -50,22 +52,28 @@ const UnifiedRecordsPage: React.FC = () => {
     const searchParams = new URLSearchParams(location.search);
     const type = searchParams.get('type');
     switch (type) {
-      case 'marriage':
+      case 'analysis':
         return 1;
-      case 'funeral':
-        return 2;
       default:
         return 0; // baptism
     }
   };
 
   const [tabValue, setTabValue] = useState(getInitialTab);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Update URL when tab changes
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    // Handle Upload Additional Records tab - open OCR page in a new tab
+    if (newValue === 2) {
+      const churchId = churchName; // assuming churchName is the ID
+      window.open(`https://orthodmetrics.com/admin/church/${churchId}/ocr`, '_blank');
+      return;
+    }
+    
     setTabValue(newValue);
     
-    const recordTypes = ['baptism', 'marriage', 'funeral'];
+    const recordTypes = ['baptism', 'analysis'];
     const recordType = recordTypes[newValue];
     
     // Update URL with query parameter
@@ -91,99 +99,93 @@ const UnifiedRecordsPage: React.FC = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {displayChurchName} - Records Management
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Manage baptism, marriage, and funeral records for your church
-        </Typography>
-      </Box>
-
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          borderRadius: 2,
-          overflow: 'hidden',
-          bgcolor: 'background.paper'
-        }}
-      >
-        <Box
-          sx={{
-            borderBottom: 1,
-            borderColor: 'divider',
-            bgcolor: alpha(theme.palette.primary.main, 0.05),
-            px: 2,
-          }}
-        >
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            aria-label="records management tabs"
-            sx={{
-              '& .MuiTab-root': {
-                minHeight: 64,
-                textTransform: 'none',
-                fontSize: '1rem',
-                fontWeight: 500,
-              }
-            }}
-          >
-            <Tab
-              icon={<IconBabyCarriage size={20} />}
-              iconPosition="start"
-              label="SSPPOC Records"
-              id="records-tab-0"
-              aria-controls="records-tabpanel-0"
-            />
-            <Tab
-              icon={<IconHeart size={20} />}
-              iconPosition="start"
-              label="Record Analysis"
-              id="records-tab-1"
-              aria-controls="records-tabpanel-1"
-            />
-            <Tab
-              icon={<IconCross size={20} />}
-              iconPosition="start"
-              label="Upload Additional Records"
-              id="records-tab-2"
-              aria-controls="records-tabpanel-2"
-            />
-          </Tabs>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            {displayChurchName} - SSPPOC Records
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Manage baptism, marriage, and funeral records for your church
+          </Typography>
         </Box>
 
-        <TabPanel value={tabValue} index={0}>
-          <BaptismRecordsPage />
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={1}>
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <IconHeart size={48} color={theme.palette.text.secondary} />
-            <Typography variant="h5" sx={{ mt: 2, mb: 1 }}>
-              Marriage Records
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Marriage records management will be available soon.
-              This will include ceremony details, couple information, and witnesses.
-            </Typography>
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            borderRadius: 2,
+            overflow: 'hidden',
+            bgcolor: 'background.paper'
+          }}
+        >
+          <Box
+            sx={{
+              borderBottom: 1,
+              borderColor: 'divider',
+              bgcolor: alpha(theme.palette.primary.main, 0.05),
+              px: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              aria-label="SSPPOC records management tabs"
+              sx={{
+                '& .MuiTab-root': {
+                  minHeight: 64,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                }
+              }}
+            >
+              <Tab
+                icon={<IconBabyCarriage size={20} />}
+                iconPosition="start"
+                label="SSPPOC Records"
+                id="records-tab-0"
+                aria-controls="records-tabpanel-0"
+              />
+              <Tab
+                icon={<IconHeart size={20} />}
+                iconPosition="start"
+                label="Record Analysis"
+                id="records-tab-1"
+                aria-controls="records-tabpanel-1"
+              />
+              <Tab
+                icon={<IconCross size={20} />}
+                iconPosition="start"
+                label="Upload Additional Records"
+                id="records-tab-2"
+                aria-controls="records-tabpanel-2"
+              />
+            </Tabs>
+           <Box>
+             <IconButton
+               onClick={() => setIsCollapsed(!isCollapsed)}
+               sx={{ ml: 2 }}
+               aria-label={isCollapsed ? 'Expand content' : 'Collapse content'}
+             >
+               {isCollapsed ? <IconBabyCarriage style={{ transform: 'rotate(180deg)' }} /> : <IconBabyCarriage />}
+             </IconButton>
+           </Box>
           </Box>
-        </TabPanel>
 
-        <TabPanel value={tabValue} index={2}>
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <IconCross size={48} color={theme.palette.text.secondary} />
-            <Typography variant="h5" sx={{ mt: 2, mb: 1 }}>
-              Funeral Records
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Funeral records management will be available soon.
-              This will include service details, deceased information, and memorial data.
-            </Typography>
-          </Box>
-        </TabPanel>
-      </Paper>
-    </Container>
+          {!isCollapsed && (
+            <>
+              <TabPanel value={tabValue} index={0}>
+                <SSPPOCRecordsPage />
+              </TabPanel>
+              <TabPanel value={tabValue} index={1}>
+                <AnalyticsDashboard />
+              </TabPanel>
+              {/* Tab 2 (Upload Additional Records) navigates away, so no TabPanel content needed */}
+            </>
+          )}
+        </Paper>
+      </Container>
   );
 };
 

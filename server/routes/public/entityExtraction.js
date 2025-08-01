@@ -5,7 +5,7 @@ const entityExtractionController = require('../../controllers/entityExtractionCo
 
 /**
  * Entity Extraction API Routes
- * All routes are relative to /api/church/:id/ocr/
+ * Entity extraction routes
  */
 
 // Get extracted entities for a specific job

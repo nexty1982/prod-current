@@ -1,0 +1,69 @@
+{
+  "id": "7e083ff44e14",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/integrate-bigbook-admin.sh",
+  "relativePath": "scripts/7-26-25/integrate-bigbook-admin.sh",
+  "name": "integrate-bigbook-admin.sh",
+  "extension": ".sh",
+  "size": 9493,
+  "modified": "2025-07-24T22:52:37.056Z",
+  "created": "2025-07-24T22:52:32.624Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 322,
+      "characters": 9477,
+      "words": 1220
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "@/components/admin/OMBigBook",
+        "line": 78
+      },
+      {
+        "type": "npm_package",
+        "name": "@/components/admin/OMBigBook",
+        "line": 81
+      },
+      {
+        "type": "npm_package",
+        "name": "@/components/admin/OMBigBook",
+        "line": 95
+      },
+      {
+        "type": "npm_package",
+        "name": "@/components/admin/OMBigBook",
+        "line": 150
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 114
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 322,
+      "codeLines": 197,
+      "commentLines": 56,
+      "commentRatio": 0.22134387351778656,
+      "averageLineLength": 36.17391304347826
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.003Z"
+  },
+  "contentHash": "4fa6f6c6d1fdc78e1b41019a24f7ab0e4e466f28d0e426419a593bcf7c79a863",
+  "discoveredAt": "2025-07-28T07:19:59.003Z"
+}

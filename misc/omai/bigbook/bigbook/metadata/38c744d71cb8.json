@@ -1,0 +1,56 @@
+{
+  "id": "38c744d71cb8",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/df0c0ab86d82.json",
+  "relativePath": "bigbook/metadata/df0c0ab86d82.json",
+  "name": "df0c0ab86d82.json",
+  "extension": ".json",
+  "size": 7478,
+  "modified": "2025-07-26T04:17:10.866Z",
+  "created": "2025-07-26T04:17:10.866Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 56,
+      "characters": 7448,
+      "words": 617
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 43
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 43,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "{\n  \"id\": \"df0c0ab86d82\",\n  \"originalPath\": \"/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/direct-session-check.js\",\n  \"relativePath\": \"server/debug/direct-session-check.js\",\n  \"name\": \"direct-session-check.js\",\n  \"extension\": \".js\",\n  \"size\": 5692,\n  \"modified\": \"2025-07-22T03:58:17.758Z\",\n  \"created\": \"2025-07-22T03:58:17.758Z\",\n  \"classification\": {\n    \"type\": \"Troubleshooting Utilities\",\n    \"category\": \"Diagnostic Tools\",\n    \"confidence\": 3\n  },\n  \"metadata\": {\n    \"fileStats\": {\n      \"lines\": 134,\n      \"characters\": 5662,\n      \"words\": 495\n    },\n    \"classification\": {\n      \"type\": \"Troubleshooting Utilities\",\n      \"category\": \"Diagnostic Tools\",\n      \"confidence\": 3\n    },\n    \"dependencies\": [\n      {\n        \"type\": \"npm_package\",\n        \"name\": \"mysql2/promise\",\n        \"line\": 1\n      }\n    ],\n    \"security\": {\n      \"findings\": [\n        {\n          \"type\": \"sensitive_data\",\n          \"pattern\": \"(?:password|pwd|pass)\\\\s*[:=]\\\\s*['\\\"]([^'\\\"]+)['\\\"]\",\n          \"line\": 13,\n          \"redacted\": true\n        }\n      ],\n      \"hasSecurityIssues\": true,\n      \"redactedContent\": \"const mysql = require('mysql2/promise');\\r\\n\\r\\n(async () => {\\r\\n    let connection;\\r\\n    \\r\\n    try {\\r\\n        console.log('🔍 Direct session database check...\\\\n');\\r\\n        \\r\\n        // Create direct MySQL connection\\r\\n        connection = await mysql.createConnection({\\r\\n            host: 'localhost',\\r\\n            user: 'root',\\r\\n            password: '[REDACTED]',\\r\\n            database: 'orthodoxmetrics_db'\\r\\n        });\\r\\n        \\r\\n        console.log('✅ Connected to orthodoxmetrics_db database');\\r\\n        \\r\\n        // 1. Check if sessions table exists\\r\\n        console.log('\\\\n1. Checking sessions table...');\\r\\n        try {\\r\\n            const [tableCheck] = await connection.execute('SHOW TABLES LIKE \\\"sessions\\\"');\\r\\n            if (tableCheck.length > 0) {\\r\\n                console.log('✅ Sessions table exists');\\r\\n                \\r\\n                // Get table structure\\r\\n                const [structure] = await connection.execute('DESCRIBE sessions');\\r\\n                console.log('   Table structure:');\\r\\n                structure.forEach(col => {\\r\\n                    console.log(`   - ${col.Field}: ${col.Type} ${col.Null === 'NO' ? 'NOT NULL' : 'NULL'}`);\\r\\n                });\\r\\n            } else {\\r\\n                console.log('❌ Sessions table does not exist!');\\r\\n                return;\\r\\n            }\\r\\n        } catch (err) {\\r\\n            console.log(`❌ Error checking sessions table: ${err.message}`);\\r\\n            return;\\r\\n        }\\r\\n        \\r\\n        // 2. Count all sessions\\r\\n        console.log('\\\\n2. Session counts...');\\r\\n        const [counts] = await connection.execute(`\\r\\n            SELECT \\r\\n                COUNT(*) as total_sessions,\\r\\n                SUM(CASE WHEN expires > NOW() THEN 1 ELSE 0 END) as active_sessions,\\r\\n                SUM(CASE WHEN expires <= NOW() THEN 1 ELSE 0 END) as expired_sessions\\r\\n            FROM sessions\\r\\n        `);\\r\\n        \\r\\n        const stats = counts[0];\\r\\n        console.log(`   Total sessions: ${stats.total_sessions}`);\\r\\n        console.log(`   Active sessions: ${stats.active_sessions}`);\\r\\n        console.log(`   Expired sessions: ${stats.expired_sessions}`);\\r\\n        \\r\\n        // 3. Show recent sessions (active and expired)\\r\\n        console.log('\\\\n3. Recent sessions (last 10)...');\\r\\n        const [recentSessions] = await connection.execute(`\\r\\n            SELECT \\r\\n                session_id,\\r\\n                expires,\\r\\n                TIMESTAMPDIFF(MINUTE, NOW(), expires) as minutes_remaining,\\r\\n                CASE WHEN expires > NOW() THEN 'ACTIVE' ELSE 'EXPIRED' END as status,\\r\\n                CHAR_LENGTH(data) as data_size,\\r\\n                LEFT(data, 150) as data_preview\\r\\n            FROM sessions \\r\\n            ORDER BY expires DESC \\r\\n            LIMIT 10\\r\\n        `);\\r\\n        \\r\\n        if (recentSessions.length > 0) {\\r\\n            recentSessions.forEach((session, index) => {\\r\\n                console.log(`   ${index + 1}. [${session.status}] ID: ${session.session_id.substring(0, 16)}...`);\\r\\n                console.log(`      Expires: ${session.expires} (${session.minutes_remaining} min)`);\\r\\n                console.log(`      Data: ${session.data_size} bytes`);\\r\\n                console.log(`      Preview: ${session.data_preview}...`);\\r\\n                console.log('      ---');\\r\\n            });\\r\\n        } else {\\r\\n            console.log('   No sessions found');\\r\\n        }\\r\\n        \\r\\n        // 4. Check if any sessions contain user data\\r\\n        console.log('\\\\n4. Looking for sessions with user data...');\\r\\n        const [userSessions] = await connection.execute(`\\r\\n            SELECT \\r\\n                session_id,\\r\\n                expires,\\r\\n                data,\\r\\n                CASE WHEN expires > NOW() THEN 'ACTIVE' ELSE 'EXPIRED' END as status\\r\\n            FROM sessions \\r\\n            WHERE data LIKE '%user%' \\r\\n            ORDER BY expires DESC \\r\\n            LIMIT 5\\r\\n        `);\\r\\n        \\r\\n        if (userSessions.length > 0) {\\r\\n            console.log(`   Found ${userSessions.length} sessions with user data:`);\\r\\n            userSessions.forEach((session, index) => {\\r\\n                console.log(`   ${index + 1}. [${session.status}] ${session.session_id.substring(0, 16)}...`);\\r\\n                console.log(`      Data: ${session.data}`);\\r\\n                console.log('      ---');\\r\\n            });\\r\\n        } else {\\r\\n            console.log('   No sessions with user data found');\\r\\n        }\\r\\n        \\r\\n        // 5. Current timestamp check\\r\\n        console.log('\\\\n5. Database time check...');\\r\\n        const [timeCheck] = await connection.execute('SELECT NOW() as current_time');\\r\\n        console.log(`   Current database time: ${timeCheck[0].current_time}`);\\r\\n        \\r\\n        console.log('\\\\n🎯 Diagnosis:');\\r\\n        if (stats.total_sessions === 0) {\\r\\n            console.log('   ❌ No sessions are being created at all');\\r\\n            console.log('   💡 This suggests the session middleware is not working');\\r\\n        } else if (stats.active_sessions === 0) {\\r\\n            console.log('   ⚠️  Sessions are being created but all have expired');\\r\\n            console.log('   💡 Try logging in again and immediately run this script');\\r\\n        } else {\\r\\n            console.log('   ✅ Sessions are being created and some are active');\\r\\n            console.log('   💡 The issue might be with session retrieval or cookies');\\r\\n        }\\r\\n        \\r\\n    } catch (error) {\\r\\n        console.error('❌ Direct session check failed:', error.message);\\r\\n        console.error('Full error:', error);\\r\\n    } finally {\\r\\n        if (connection) {\\r\\n            await connection.end();\\r\\n            console.log('\\\\n✅ Database connection closed');\\r\\n        }\\r\\n    }\\r\\n})(); \"\n    },\n    \"complexity\": {\n      \"totalLines\": 134,\n      \"codeLines\": 112,\n      \"commentLines\": 7,\n      \"commentRatio\": 0.058823529411764705,\n      \"averageLineLength\": 45.36134453781513\n    },\n    \"lastAnalyzed\": \"2025-07-26T04:17:10.866Z\"\n  },\n  \"contentHash\": \"4dbce4e0916e664eabf7a636fb5bba53d1f5e6c61b6aeeec6815e18b05346924\",\n  \"discoveredAt\": \"2025-07-26T04:17:10.866Z\"\n}"
+    },
+    "complexity": {
+      "totalLines": 56,
+      "codeLines": 56,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 132.01785714285714
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.536Z"
+  },
+  "contentHash": "a1f7acf8ec6adf73c36792b49790320b77abfa25dcbf481144ad72497ce1df42",
+  "discoveredAt": "2025-07-28T07:19:57.536Z"
+}

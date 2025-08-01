@@ -1,0 +1,43 @@
+{
+  "id": "516d4a3aedba",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/utils/invoicePDFGenerator.ts",
+  "relativePath": "front-end/src/utils/invoicePDFGenerator.ts",
+  "name": "invoicePDFGenerator.ts",
+  "extension": ".ts",
+  "size": 932,
+  "modified": "2025-07-06T19:36:51.282Z",
+  "created": "2025-07-06T19:36:51.282Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 37,
+      "characters": 932,
+      "words": 102
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 1
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 37,
+      "codeLines": 30,
+      "commentLines": 3,
+      "commentRatio": 0.09090909090909091,
+      "averageLineLength": 27.151515151515152
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.947Z"
+  },
+  "contentHash": "4c44b05f51a492c87e5a3819adec8bc7d28a363342eeedd91b735305e1d9ae83",
+  "discoveredAt": "2025-07-28T07:19:58.947Z"
+}

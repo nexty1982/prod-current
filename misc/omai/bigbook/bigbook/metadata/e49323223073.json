@@ -1,0 +1,49 @@
+{
+  "id": "e49323223073",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/setup-pm2-backend.sh",
+  "relativePath": "server/debug/setup-pm2-backend.sh",
+  "name": "setup-pm2-backend.sh",
+  "extension": ".sh",
+  "size": 2400,
+  "modified": "2025-07-22T13:25:58.117Z",
+  "created": "2025-07-22T13:16:57.609Z",
+  "classification": {
+    "type": "Setup Scripts",
+    "category": "DevOps > Setup",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 69,
+      "characters": 2356,
+      "words": 334
+    },
+    "classification": {
+      "type": "Setup Scripts",
+      "category": "DevOps > Setup",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 14
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 69,
+      "codeLines": 56,
+      "commentLines": 4,
+      "commentRatio": 0.06666666666666667,
+      "averageLineLength": 38.13333333333333
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.213Z"
+  },
+  "contentHash": "ac26d8b68e7f0c796e113adc0b61f54db2913c5ed102308145e20d44fd3f8e72",
+  "discoveredAt": "2025-07-28T07:20:00.213Z"
+}

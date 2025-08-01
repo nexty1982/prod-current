@@ -1,0 +1,43 @@
+{
+  "id": "f56b0301c6f2",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/7-8-25/QUICK_DIAGNOSTIC_COMMANDS.md",
+  "relativePath": "docs/archive/7-8-25/QUICK_DIAGNOSTIC_COMMANDS.md",
+  "name": "QUICK_DIAGNOSTIC_COMMANDS.md",
+  "extension": ".md",
+  "size": 4434,
+  "modified": "2025-07-09T04:32:16.307Z",
+  "created": "2025-07-09T04:32:16.307Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 158,
+      "characters": 4430,
+      "words": 557
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 158,
+      "codeLines": 75,
+      "commentLines": 47,
+      "commentRatio": 0.38524590163934425,
+      "averageLineLength": 34.73770491803279
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.107Z"
+  },
+  "contentHash": "dcc631f0c31b74ea35cedabc34d382079739bb8bff030f06087501ab6b78a007",
+  "discoveredAt": "2025-07-28T07:19:58.107Z"
+}

@@ -192,6 +192,51 @@ const NotificationList: React.FC = () => {
         setSelectedNotifications(prev => prev.filter(nId => nId !== id));
     };
 
+    const handleNotificationAction = async (notificationId: number, action: string) => {
+        try {
+            const response = await fetch(`/api/social/notifications/${notificationId}/action`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ action }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Refresh notifications to show updated state
+                await fetchNotifications();
+                
+                // Show success message based on action
+                let message = '';
+                switch (action) {
+                    case 'accept':
+                        message = 'Friend request accepted!';
+                        break;
+                    case 'decline':
+                        message = 'Friend request declined.';
+                        break;
+                    case 'unsend':
+                        message = 'Friend request unsent.';
+                        break;
+                    default:
+                        message = 'Action completed successfully.';
+                }
+                
+                // You could show a toast notification here if you have a toast system
+                console.log(message);
+            } else {
+                console.error('Action failed:', result.message);
+                // You could show an error toast here
+            }
+        } catch (error) {
+            console.error('Error handling notification action:', error);
+            // You could show an error toast here
+        }
+    };
+
     const handleBulkAction = async (action: string) => {
         setBulkActionAnchor(null);
 
@@ -532,6 +577,63 @@ const NotificationList: React.FC = () => {
                                                             />
                                                         )}
                                                     </Stack>
+                                                    
+                                                    {/* Notification Actions */}
+                                                    {notification.data && (() => {
+                                                        try {
+                                                            const data = typeof notification.data === 'string' 
+                                                                ? JSON.parse(notification.data) 
+                                                                : notification.data;
+                                                            
+                                                            if (data.actions && Array.isArray(data.actions) && !data.action_taken) {
+                                                                return (
+                                                                    <Box sx={{ mt: 1 }}>
+                                                                        <Stack direction="row" spacing={1}>
+                                                                            {data.actions.map((actionItem: any, actionIndex: number) => (
+                                                                                <Button
+                                                                                    key={actionIndex}
+                                                                                    size="small"
+                                                                                    variant={actionItem.style === 'primary' ? 'contained' : 'outlined'}
+                                                                                    color={
+                                                                                        actionItem.style === 'primary' ? 'primary' : 
+                                                                                        actionItem.action === 'decline' ? 'error' : 'inherit'
+                                                                                    }
+                                                                                    onClick={() => handleNotificationAction(notification.id, actionItem.action)}
+                                                                                    sx={{ 
+                                                                                        minWidth: 'auto',
+                                                                                        px: 2,
+                                                                                        py: 0.5,
+                                                                                        fontSize: '0.75rem'
+                                                                                    }}
+                                                                                >
+                                                                                    {actionItem.label}
+                                                                                </Button>
+                                                                            ))}
+                                                                        </Stack>
+                                                                    </Box>
+                                                                );
+                                                            }
+                                                            
+                                                            // Show action taken status
+                                                            if (data.action_taken) {
+                                                                return (
+                                                                    <Box sx={{ mt: 1 }}>
+                                                                        <Chip
+                                                                            size="small"
+                                                                            label={`${data.action_taken.charAt(0).toUpperCase() + data.action_taken.slice(1)}`}
+                                                                            color={data.action_taken === 'accepted' ? 'success' : 'default'}
+                                                                            variant="outlined"
+                                                                            sx={{ fontSize: '0.7rem', height: 24 }}
+                                                                        />
+                                                                    </Box>
+                                                                );
+                                                            }
+                                                            
+                                                            return null;
+                                                        } catch (e) {
+                                                            return null;
+                                                        }
+                                                    })()}
                                                 </Box>
                                             }
                                         />

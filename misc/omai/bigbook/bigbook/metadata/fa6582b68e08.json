@@ -1,0 +1,79 @@
+{
+  "id": "fa6582b68e08",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-bigbook-auto-install-tsx.sh",
+  "relativePath": "scripts/test-bigbook-auto-install-tsx.sh",
+  "name": "test-bigbook-auto-install-tsx.sh",
+  "extension": ".sh",
+  "size": 13840,
+  "modified": "2025-07-27T19:42:58.603Z",
+  "created": "2025-07-27T19:42:54.887Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 420,
+      "characters": 13792,
+      "words": 1493
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 86
+      },
+      {
+        "type": "npm_package",
+        "name": "@mui/material",
+        "line": 87
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 143
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 159
+      },
+      {
+        "type": "npm_package",
+        "name": "date-fns",
+        "line": 160
+      },
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 161
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 358
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 420,
+      "codeLines": 328,
+      "commentLines": 33,
+      "commentRatio": 0.09141274238227147,
+      "averageLineLength": 36.77839335180055
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.509Z"
+  },
+  "contentHash": "84a2f45e8127253ded29c15bf2b09bfe523602ca6e4af4c9ecfecc189c9a7cb5",
+  "discoveredAt": "2025-07-28T07:19:59.509Z"
+}

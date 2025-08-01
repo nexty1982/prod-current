@@ -10,7 +10,7 @@ import Demo4 from 'src/assets/images/landingpage/demos/demo-horizontal.jpg';
 
 import App1 from 'src/assets/images/landingpage/apps/app-chat.jpg';
 import App2 from 'src/assets/images/landingpage/apps/app-email.jpg';
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 
 const DozensCarousel = () => {
   const settings = {

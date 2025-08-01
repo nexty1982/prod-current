@@ -1,0 +1,6 @@
+{
+  "id": "eaeaee1acf36",
+  "name": "billing_schema.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/billing_schema.sql",
+  "type": "Database Scripts"
+}

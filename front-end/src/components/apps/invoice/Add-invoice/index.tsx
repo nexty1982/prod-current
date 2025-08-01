@@ -20,7 +20,7 @@ import {
   Divider,
   Grid,
 } from '@mui/material';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { format, isValid } from 'date-fns';
 import { IconPlus, IconSquareRoundedPlus, IconTrash } from '@tabler/icons-react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';

@@ -2,7 +2,7 @@
 // @ts-ignore
 import React, { useContext } from 'react';
 import { Box, Typography, Avatar, Stack, ButtonGroup, Button } from '@mui/material';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { IconMinus, IconPlus } from '@tabler/icons-react';
 
 import emptyCart from 'src/assets/images/products/empty-shopping-cart.svg';

@@ -1,0 +1,6 @@
+{
+  "id": "bfef36d58945",
+  "name": "fix-syntax-error.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-syntax-error.sh",
+  "type": "Troubleshooting Utilities"
+}

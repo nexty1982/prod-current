@@ -1,0 +1,43 @@
+{
+  "id": "8d0fa1d19745",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-active-sessions.js",
+  "relativePath": "server/debug/check-active-sessions.js",
+  "name": "check-active-sessions.js",
+  "extension": ".js",
+  "size": 1847,
+  "modified": "2025-07-22T03:58:17.742Z",
+  "created": "2025-07-22T03:58:17.742Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 47,
+      "characters": 1837,
+      "words": 146
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 47,
+      "codeLines": 40,
+      "commentLines": 2,
+      "commentRatio": 0.047619047619047616,
+      "averageLineLength": 41.57142857142857
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.059Z"
+  },
+  "contentHash": "b38fdb04cf2cd97e38d94f009b8f90f133ed29e39bc57ec007307829fbbdaa75",
+  "discoveredAt": "2025-07-28T07:20:00.059Z"
+}

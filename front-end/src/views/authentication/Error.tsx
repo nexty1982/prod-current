@@ -1,5 +1,5 @@
 import { Box, Container, Typography, Button } from '@mui/material';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import OrthodoxErrorImg from 'src/assets/images/backgrounds/orthodox-404.svg';
 

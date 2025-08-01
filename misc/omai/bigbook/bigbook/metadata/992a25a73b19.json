@@ -1,0 +1,43 @@
+{
+  "id": "992a25a73b19",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-inner-server-sessions.sh",
+  "relativePath": "server/debug/check-inner-server-sessions.sh",
+  "name": "check-inner-server-sessions.sh",
+  "extension": ".sh",
+  "size": 4842,
+  "modified": "2025-07-24T14:50:26.308Z",
+  "created": "2025-07-24T14:50:26.308Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 156,
+      "characters": 4758,
+      "words": 594
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 156,
+      "codeLines": 113,
+      "commentLines": 13,
+      "commentRatio": 0.10317460317460317,
+      "averageLineLength": 36.37301587301587
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.077Z"
+  },
+  "contentHash": "fe0e22c89d7d76b532a8519f8f19f8018ed5d4b5ace9ff519a58af69c9cdfd7c",
+  "discoveredAt": "2025-07-28T07:20:00.077Z"
+}

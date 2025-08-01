@@ -1,0 +1,6 @@
+{
+  "id": "1512a75ed194",
+  "name": "update_landing_pages.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/update_landing_pages.sql",
+  "type": "Database Scripts"
+}

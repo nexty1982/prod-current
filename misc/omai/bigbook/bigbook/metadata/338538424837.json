@@ -1,0 +1,43 @@
+{
+  "id": "338538424837",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-session-linux.sh",
+  "relativePath": "server/debug/test-session-linux.sh",
+  "name": "test-session-linux.sh",
+  "extension": ".sh",
+  "size": 4262,
+  "modified": "2025-07-22T03:26:28.586Z",
+  "created": "2025-07-22T03:26:26.285Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 121,
+      "characters": 4218,
+      "words": 568
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 121,
+      "codeLines": 104,
+      "commentLines": 3,
+      "commentRatio": 0.028037383177570093,
+      "averageLineLength": 38.22429906542056
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.252Z"
+  },
+  "contentHash": "f44c8e51f709b0bdbfc71beb4793d1dcdaa3935db3a46d2843796be0f15a38ac",
+  "discoveredAt": "2025-07-28T07:20:00.252Z"
+}

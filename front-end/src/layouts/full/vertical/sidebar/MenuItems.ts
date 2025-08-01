@@ -1,4 +1,5 @@
 import { uniqueId } from 'lodash';
+import { useAuth } from 'src/context/AuthContext';
 
 interface MenuitemsType {
   [x: string]: any;
@@ -32,6 +33,22 @@ import {
   IconBrain,
   IconBorderAll,
   IconFiles,
+  IconChartHistogram,
+  IconMessage,
+  IconUserPlus,
+  IconWriting,
+  IconBell,
+  IconHeart,
+  IconNews,
+  IconWorldWww,
+  IconShield,
+  IconHome,
+  IconTerminal,
+  IconCode,
+  IconBug,
+  IconDeviceDesktop,
+  IconSitemap,
+  IconActivity,
 } from '@tabler/icons-react';
 import OrthodoxChurchIcon from 'src/components/shared/OrthodoxChurchIcon';
 
@@ -42,27 +59,69 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
+    title: 'Admin Dashboard',
+    icon: IconShield,
+    href: '/dashboards/orthodmetrics',
+  },
+  {
+    id: uniqueId(),
+    title: 'Enhanced Modern Dashboard',
+    icon: IconHome,
+    href: '/dashboards/modern',
+  },
+  {
+    id: uniqueId(),
     title: 'Orthodox Metrics',
     icon: IconBuildingChurch,
     href: '/admin/orthodox-metrics',
-    chip: 'SaaS',
-    chipColor: 'success',
   },
   {
     id: uniqueId(),
     title: 'AI Administration',
     icon: IconBrain,
     href: '/admin/ai',
-    chip: 'Super',
-    chipColor: 'error',
+  },
+  {
+    id: uniqueId(),
+    title: 'OMAI Ultimate Logger',
+    icon: IconActivity,
+    href: '/admin/omai-logger',
+  },
+  {
+    id: uniqueId(),
+    title: 'Headlines Configuration',
+    icon: IconNews,
+    href: '/admin/headlines-config',
   },
   {
     id: uniqueId(),
     title: 'Settings',
     icon: IconSettings,
     href: '/admin/settings',
-    chip: 'Super',
-    chipColor: 'error',
+  },
+  {
+    id: uniqueId(),
+    title: '🛠 Site Editor',
+    icon: IconCode,
+    href: '/admin/site-editor',
+  },
+  {
+    id: uniqueId(),
+    title: '💻 JIT Terminal (Console)',
+    icon: IconTerminal,
+    href: '/admin/jit-terminal',
+  },
+  {
+    id: uniqueId(),
+    title: '🔍 Site Survey (SuperAdmin)',
+    icon: IconBug,
+    href: '/admin/tools/survey',
+  },
+  {
+    id: uniqueId(),
+    title: '📝 Page Editor',
+    icon: IconEdit,
+    href: '/admin/tools/page-editor',
   },
 
   {
@@ -74,6 +133,70 @@ const Menuitems: MenuitemsType[] = [
     title: 'User & Access Management',
     icon: IconUsers,
     href: '/admin/users',
+  },
+  {
+    id: uniqueId(),
+    title: 'Session Management',
+    icon: IconLock,
+    href: '/admin/sessions',
+  },
+  {
+    id: uniqueId(),
+    title: 'Activity Logs',
+    icon: IconFileDescription,
+    href: '/admin/activity-logs',
+  },
+  {
+    id: uniqueId(),
+    title: 'Menu Management',
+    icon: IconBorderAll,
+    href: '/admin/menu-management',
+  },
+  {
+    id: uniqueId(),
+    title: '⚙️ JIT Terminal Settings',
+    icon: IconTerminal,
+    href: '/settings/jit-terminal',
+  },
+
+  {
+    navlabel: true,
+    subheader: '🌍 Explore',
+  },
+  {
+    id: uniqueId(),
+    title: 'Orthodox Headlines',
+    icon: IconNews,
+    href: '/orthodox-headlines',
+  },
+
+  {
+    navlabel: true,
+    subheader: '💬 Social Experience',
+  },
+  {
+    id: uniqueId(),
+    title: 'Blog',
+    icon: IconWriting,
+    href: '/social/blog',
+  },
+  {
+    id: uniqueId(),
+    title: 'Friends',
+    icon: IconUserPlus,
+    href: '/social/friends',
+  },
+  {
+    id: uniqueId(),
+    title: 'Chat',
+    icon: IconMessage,
+    href: '/social/chat',
+  },
+  {
+    id: uniqueId(),
+    title: 'Notifications',
+    icon: IconBell,
+    href: '/social/notifications',
   },
 
   {
@@ -100,6 +223,12 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
+        title: 'Church Setup Wizard',
+        icon: IconPoint,
+        href: '/apps/church-management/wizard',
+      },
+      {
+        id: uniqueId(),
         title: 'Church Setup',
         icon: IconPoint,
         href: '/apps/client-management/church-setup',
@@ -122,7 +251,39 @@ const Menuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: 'Records Management',
     icon: IconFileDescription,
-    href: '/saints-peter-and-paul-Records', // [copilot-fix] Reverted to correct records page route
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Records Browser',
+        icon: IconPoint,
+        href: '/apps/records-ui',
+      },
+      {
+        id: uniqueId(),
+        title: 'Records Dashboard',
+        icon: IconPoint,
+        href: '/apps/records',
+      },
+      {
+        id: uniqueId(),
+        title: 'Legacy Records',
+        icon: IconPoint,
+        href: '/records',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Analytics',
+    icon: IconChartHistogram,
+    href: '/analytics',
+  },
+  {
+    id: uniqueId(),
+    title: 'Calendar',
+    icon: IconCalendar,
+    href: '/apps/liturgical-calendar',
   },
 
   {
@@ -131,7 +292,7 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: 'CMS',
+    title: 'CMS (Legacy)',
     icon: IconEdit,
     href: '/apps/cms/page-editor',
   },
@@ -140,8 +301,6 @@ const Menuitems: MenuitemsType[] = [
     title: 'Site Clone',
     icon: IconFiles,
     href: '/apps/site-clone',
-    chip: 'Super',
-    chipColor: 'error',
   },
   {
     id: uniqueId(),
@@ -153,10 +312,156 @@ const Menuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: 'Logs',
     icon: IconFileDescription,
-    href: '/admin/logs',
-    chip: 'Super',
-    chipColor: 'error',
+    href: '/admin/activity-logs',
   },
+
+  {
+    navlabel: true,
+    subheader: '🧠 AI Development',
+  },
+  {
+    id: uniqueId(),
+    title: '🧪 AI Lab',
+    icon: IconBrain,
+    href: '/sandbox/ai-lab',
+  },
+  {
+    id: uniqueId(),
+    title: '🔧 Project Generator',
+    icon: IconCode,
+    href: '/sandbox/project-generator',
+  },
+  {
+    id: uniqueId(),
+    title: '📝 OMB Editor',
+    icon: IconEdit,
+    href: '/omb/editor',
+  },
+  {
+    id: uniqueId(),
+    title: '📚 OM Big Book',
+    icon: IconNotebook,
+    href: '/admin/bigbook',
+  },
+  {
+    id: uniqueId(),
+    title: '🧠 OMLearn',
+    icon: IconBrain,
+    href: '/bigbook/omlearn',
+  },
+  {
+    id: uniqueId(),
+    title: '🔨 Build Console',
+    icon: IconCode,
+    href: '/admin/build',
+  },
+           {
+           id: uniqueId(),
+           title: 'Site Editor Demo',
+           icon: IconEdit,
+           href: '/demos/site-editor',
+         },
+                 {
+          id: uniqueId(),
+          title: 'Auto-Fix Demo',
+          icon: IconEdit,
+          href: '/demos/auto-fix',
+        },
+        {
+          id: uniqueId(),
+          title: 'GitOps Demo',
+          icon: IconEdit,
+          href: '/demos/gitops',
+        },
+        {
+          id: uniqueId(),
+          title: '🐞 VRT Demo',
+          icon: IconBug,
+          href: '/demos/vrt',
+        },
 ];
+
+export const getMenuItems = (user: any) => {
+  if (user && (user.role === 'super_admin' || user.role === 'admin')) {
+    return Menuitems;
+  }
+  // For non-admin users, show only Notes App and Liturgical Calendar under Apps, and Users Guide under Quick Links
+  return [
+    {
+      navlabel: true,
+      subheader: 'Dashboard',
+    },
+    {
+      id: uniqueId(),
+      title: 'Enhanced Modern Dashboard',
+      icon: IconHome,
+      href: '/dashboards/modern',
+    },
+    {
+      navlabel: true,
+      subheader: 'Apps',
+    },
+    {
+      id: uniqueId(),
+      title: 'Notes',
+      icon: IconNotes,
+      href: '/apps/notes',
+    },
+    {
+      id: uniqueId(),
+      title: 'Liturgical Calendar',
+      icon: IconCalendar,
+      href: '/apps/liturgical-calendar',
+    },
+    {
+      navlabel: true,
+      subheader: '💬 Social',
+    },
+    {
+      id: uniqueId(),
+      title: 'Blog',
+      icon: IconWriting,
+      href: '/social/blog',
+    },
+    {
+      id: uniqueId(),
+      title: 'Friends',
+      icon: IconUserPlus,
+      href: '/social/friends',
+    },
+    {
+      id: uniqueId(),
+      title: 'Chat',
+      icon: IconMessage,
+      href: '/social/chat',
+    },
+    {
+      id: uniqueId(),
+      title: 'Notifications',
+      icon: IconBell,
+      href: '/social/notifications',
+    },
+    {
+      navlabel: true,
+      subheader: '🛠️ Developer Tools',
+    },
+    {
+      id: uniqueId(),
+      title: 'Site Structure Visualizer',
+      icon: IconSitemap,
+      href: '/tools/site-structure',
+    },
+    {
+      navlabel: true,
+      subheader: 'Quick Links',
+    },
+    {
+      id: uniqueId(),
+      title: 'Users Guide',
+      icon: IconFileDescription,
+      href: '/frontend-pages/coming-soon',
+    },
+  ];
+};
 
 export default Menuitems;

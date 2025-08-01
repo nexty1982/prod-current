@@ -1,0 +1,20 @@
+{
+  "status": "System maintenance in progress",
+  "message": "We are currently performing scheduled maintenance to improve your experience.",
+  "eta": null,
+  "reason": "Sample configuration",
+  "activatedAt": null,
+  "activatedBy": "system",
+  "allowlist": [],
+  "exemptRoles": ["super_admin", "dev_admin"],
+  "exemptIPs": ["127.0.0.1", "::1"],
+  "contactInfo": {
+    "email": "support@orthodoxmetrics.com",
+    "phone": null
+  },
+  "theme": {
+    "backgroundColor": "#1e40af",
+    "textColor": "#ffffff",
+    "logoUrl": "/assets/logo.png"
+  }
+}

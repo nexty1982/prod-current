@@ -1,0 +1,43 @@
+{
+  "id": "f79bf86d5908",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/7-11-25/LINK_PERMISSION_CHECKER_GUIDE.md",
+  "relativePath": "docs/archive/7-11-25/LINK_PERMISSION_CHECKER_GUIDE.md",
+  "name": "LINK_PERMISSION_CHECKER_GUIDE.md",
+  "extension": ".md",
+  "size": 7886,
+  "modified": "2025-07-12T03:42:30.958Z",
+  "created": "2025-07-12T03:22:34.941Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 291,
+      "characters": 7886,
+      "words": 1083
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 291,
+      "codeLines": 160,
+      "commentLines": 60,
+      "commentRatio": 0.2727272727272727,
+      "averageLineLength": 34.20909090909091
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.050Z"
+  },
+  "contentHash": "09f986369e5013197b2a1d76a5b1796f46c6a5b526be0f728160b818dd6e6bf6",
+  "discoveredAt": "2025-07-28T07:19:58.050Z"
+}

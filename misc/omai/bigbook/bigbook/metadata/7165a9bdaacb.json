@@ -1,0 +1,43 @@
+{
+  "id": "7165a9bdaacb",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/diagnose-scrapers.sh",
+  "relativePath": "server/scrapers/diagnose-scrapers.sh",
+  "name": "diagnose-scrapers.sh",
+  "extension": ".sh",
+  "size": 4630,
+  "modified": "2025-07-23T11:51:10.877Z",
+  "created": "2025-07-23T11:51:09.161Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 129,
+      "characters": 4568,
+      "words": 614
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 129,
+      "codeLines": 105,
+      "commentLines": 7,
+      "commentRatio": 0.0625,
+      "averageLineLength": 39.214285714285715
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.588Z"
+  },
+  "contentHash": "1549c572b670c93bacff7a7b780c0bee1faa5fbc9c96d86787fc489118e9743e",
+  "discoveredAt": "2025-07-28T07:20:00.588Z"
+}

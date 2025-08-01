@@ -1,0 +1,6 @@
+{
+  "id": "2958da9491e3",
+  "name": "run-calendar-schema-simple.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/run-calendar-schema-simple.sh",
+  "type": "Database Scripts"
+}

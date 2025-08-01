@@ -1,0 +1,54 @@
+{
+  "id": "af05cd9c2edc",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/utils/logger.ts",
+  "relativePath": "services/om-ai/utils/logger.ts",
+  "name": "logger.ts",
+  "extension": ".ts",
+  "size": 3219,
+  "modified": "2025-07-24T23:55:55.295Z",
+  "created": "2025-07-24T23:55:54.492Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 106,
+      "characters": 3219,
+      "words": 338
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 106,
+      "codeLines": 85,
+      "commentLines": 4,
+      "commentRatio": 0.0449438202247191,
+      "averageLineLength": 34.46067415730337
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.578Z"
+  },
+  "contentHash": "eb9ff9f6bbb04ebacf56021ba5237a4d89969757bdf753ecda675bea5e7974f1",
+  "discoveredAt": "2025-07-28T07:20:01.578Z"
+}

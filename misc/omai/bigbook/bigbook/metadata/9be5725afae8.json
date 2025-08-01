@@ -1,0 +1,43 @@
+{
+  "id": "9be5725afae8",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/task_8_omai_big_book_path_setup.md",
+  "relativePath": "docs/7-26-25/task_8_omai_big_book_path_setup.md",
+  "name": "task_8_omai_big_book_path_setup.md",
+  "extension": ".md",
+  "size": 2591,
+  "modified": "2025-07-26T03:43:48.000Z",
+  "created": "2025-07-27T02:13:07.657Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 75,
+      "characters": 2563,
+      "words": 379
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 75,
+      "codeLines": 40,
+      "commentLines": 11,
+      "commentRatio": 0.21568627450980393,
+      "averageLineLength": 48.80392156862745
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.775Z"
+  },
+  "contentHash": "ad8c3ba0f3acf8924ae70097aefd0be97d22d8775f49e43d2d4d292f070c2cac",
+  "discoveredAt": "2025-07-28T07:19:57.775Z"
+}

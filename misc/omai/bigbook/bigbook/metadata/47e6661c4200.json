@@ -1,0 +1,43 @@
+{
+  "id": "47e6661c4200",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/components/OCRUploader/index.ts",
+  "relativePath": "front-end/src/components/OCRUploader/index.ts",
+  "name": "index.ts",
+  "extension": ".ts",
+  "size": 254,
+  "modified": "2025-07-06T06:26:30.602Z",
+  "created": "2025-07-06T06:13:38.275Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 5,
+      "characters": 254,
+      "words": 32
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 5,
+      "codeLines": 4,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 62.5
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.698Z"
+  },
+  "contentHash": "e58e56a8c467a89bb1f641569fd9afda9a42e8d03f1ea435919cbfb346fc87ce",
+  "discoveredAt": "2025-07-28T07:19:58.698Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "aed11f8ca697",
+  "name": "2024_add_church_advanced_config.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/migrations/2024_add_church_advanced_config.sql",
+  "type": "Database Scripts"
+}

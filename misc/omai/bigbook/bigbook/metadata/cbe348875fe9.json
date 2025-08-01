@@ -1,0 +1,54 @@
+{
+  "id": "cbe348875fe9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/DEVELOPMENT_GUIDE.md",
+  "relativePath": "docs/DEVELOPMENT_GUIDE.md",
+  "name": "DEVELOPMENT_GUIDE.md",
+  "extension": ".md",
+  "size": 18014,
+  "modified": "2025-07-18T19:28:14.450Z",
+  "created": "2025-07-18T19:27:48.446Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 692,
+      "characters": 17884,
+      "words": 1946
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 9
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "@mui/material/styles",
+        "line": 392
+      },
+      {
+        "type": "npm_package",
+        "name": "@testing-library/react",
+        "line": 415
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 692,
+      "codeLines": 401,
+      "commentLines": 171,
+      "commentRatio": 0.29895104895104896,
+      "averageLineLength": 29.84965034965035
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.795Z"
+  },
+  "contentHash": "e2c842f4f42a77e587f3782b780e645bfbe153ceb0992eb37cf4ff91529be457",
+  "discoveredAt": "2025-07-28T07:19:57.796Z"
+}

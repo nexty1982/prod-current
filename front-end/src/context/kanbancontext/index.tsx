@@ -131,13 +131,28 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
         }
     }, [currentBoard]);
 
+    // Clear boards when user is not authenticated (but don't auto-fetch on authentication)
+    useEffect(() => {
+        if (!authenticated) {
+            console.log('User not authenticated, clearing boards');
+            setBoards([]);
+            setCurrentBoard(null);
+        }
+        // Note: Removed auto-fetch on authentication to improve login performance
+        // Boards will be fetched only when explicitly requested (e.g., visiting Kanban page)
+    }, [authenticated]);
+
     // Fetch all boards for the user
     const fetchBoards = async () => {
-        if (!authenticated) return;
+        if (!authenticated) {
+            console.log('Not authenticated, skipping board fetch');
+            return;
+        }
 
         try {
             setLoading(true);
             setError(null);
+            console.log('Fetching boards from API...');
 
             const response = await fetch('/api/kanban/boards', {
                 method: 'GET',
@@ -147,18 +162,29 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
                 },
             });
 
+            console.log('Boards API response status:', response.status);
+
             if (!response.ok) {
-                throw new Error(`Failed to fetch boards: ${response.status}`);
+                throw new Error(`Failed to fetch boards: ${response.status} ${response.statusText}`);
             }
 
             const data = await response.json();
+            console.log('Boards API response data:', data);
+            
             if (data.success) {
-                setBoards(data.boards);
+                // Ensure boards is always an array
+                const boardsArray = Array.isArray(data.boards) ? data.boards : [];
+                console.log(`Setting ${boardsArray.length} boards in context`);
+                setBoards(boardsArray);
             } else {
+                console.error('API returned success=false:', data.message);
+                setBoards([]); // Ensure empty array on failure
                 throw new Error(data.message || 'Failed to fetch boards');
             }
         } catch (err: any) {
+            console.error('Error in fetchBoards:', err);
             setError(err.message || 'Failed to fetch boards');
+            setBoards([]); // Ensure empty array on error
         } finally {
             setLoading(false);
         }
@@ -507,25 +533,20 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
         await deleteTask(taskId);
     };
 
-    // Load boards when authenticated or auto-load first board
+    // Clear data when not authenticated
     useEffect(() => {
-        if (authenticated) {
-            fetchBoards().then(() => {
-                // Auto-load first board if no current board is selected
-                if (!currentBoard && boards.length > 0) {
-                    fetchBoard(boards[0].id);
-                }
-            });
-        } else {
+        if (!authenticated) {
             setBoards([]);
             setCurrentBoard(null);
             setTodoCategories([]);
         }
+        // Note: Removed auto-loading of boards to improve login performance
+        // Boards and tasks will be loaded only when user explicitly navigates to Kanban page
     }, [authenticated]);
 
-    // Auto-load first board when boards are fetched
+    // Auto-load first board when boards are fetched (only if user is actively using Kanban)
     useEffect(() => {
-        if (boards.length > 0 && !currentBoard) {
+        if (boards.length > 0 && !currentBoard && window.location.pathname.includes('/kanban')) {
             fetchBoard(boards[0].id);
         }
     }, [boards]);

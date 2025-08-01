@@ -1,0 +1,74 @@
+{
+  "id": "448f0964af8d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/1c6b6bc34d07.json",
+  "relativePath": "bigbook/metadata/1c6b6bc34d07.json",
+  "name": "1c6b6bc34d07.json",
+  "extension": ".json",
+  "size": 16947,
+  "modified": "2025-07-26T04:17:11.758Z",
+  "created": "2025-07-26T04:17:11.758Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 135,
+      "characters": 16897,
+      "words": 1469
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 122
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 122
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 122
+      },
+      {
+        "type": "npm_package",
+        "name": "axios",
+        "line": 122
+      },
+      {
+        "type": "npm_package",
+        "name": "form-data",
+        "line": 122
+      },
+      {
+        "type": "npm_package",
+        "name": "@google-cloud/vision",
+        "line": 122
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 135,
+      "codeLines": 135,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 124.17037037037036
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.708Z"
+  },
+  "contentHash": "5571197ca5368140aedbab3ab666d233b18b1fef1eae62a590cd13e30336c7b5",
+  "discoveredAt": "2025-07-28T07:19:56.708Z"
+}

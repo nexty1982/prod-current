@@ -1,0 +1,43 @@
+{
+  "id": "bc9e1ed49d3f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/PHASE_17_OMAI_BACKEND_COMPLETION.md",
+  "relativePath": "docs/PHASE_17_OMAI_BACKEND_COMPLETION.md",
+  "name": "PHASE_17_OMAI_BACKEND_COMPLETION.md",
+  "extension": ".md",
+  "size": 9918,
+  "modified": "2025-07-25T19:19:13.591Z",
+  "created": "2025-07-25T19:19:12.362Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 341,
+      "characters": 9752,
+      "words": 1168
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 341,
+      "codeLines": 195,
+      "commentLines": 67,
+      "commentRatio": 0.25572519083969464,
+      "averageLineLength": 35.62213740458015
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.807Z"
+  },
+  "contentHash": "d6f9cc535f31181723aef0ec569982523de70056de18721f347231c9e541a020",
+  "discoveredAt": "2025-07-28T07:19:57.807Z"
+}

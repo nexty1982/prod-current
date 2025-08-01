@@ -1,0 +1,59 @@
+{
+  "id": "8b026d37bc68",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/services/jitSessionManager.js",
+  "relativePath": "server/services/jitSessionManager.js",
+  "name": "jitSessionManager.js",
+  "extension": ".js",
+  "size": 8529,
+  "modified": "2025-07-25T20:17:59.460Z",
+  "created": "2025-07-25T20:04:22.953Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 295,
+      "characters": 8529,
+      "words": 806
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 8
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 295,
+      "codeLines": 191,
+      "commentLines": 56,
+      "commentRatio": 0.22672064777327935,
+      "averageLineLength": 32.59514170040486
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.108Z"
+  },
+  "contentHash": "78b32bf1d240206ea27e78cfabd2b7ffc3d903212b398b9c0f2a323a97d0f072",
+  "discoveredAt": "2025-07-28T07:20:01.108Z"
+}

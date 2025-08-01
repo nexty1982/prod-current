@@ -38,9 +38,9 @@ interface ChurchFormData {
   state_province: string;
   postal_code: string;
   country: string;
-  description: string;
+  description_multilang: string;
   founded_year: number | '';
-  language_preference: string;
+  preferred_language: string;
   timezone: string;
   currency: string;
   tax_id: string;
@@ -105,9 +105,9 @@ export default function AddChurchPage() {
     state_province: '',
     postal_code: '',
     country: 'United States',
-    description: '',
+    description_multilang: '',
     founded_year: '',
-    language_preference: 'en',
+    preferred_language: 'en',
     timezone: 'America/New_York',
     currency: 'USD',
     tax_id: ''
@@ -287,10 +287,10 @@ export default function AddChurchPage() {
                       label="Description"
                       multiline
                       rows={3}
-                      value={formData.description}
-                      onChange={handleInputChange('description')}
-                      error={!!errors.description}
-                      helperText={errors.description}
+                      value={formData.description_multilang}
+                      onChange={handleInputChange('description_multilang')}
+                      error={!!errors.description_multilang}
+                      helperText={errors.description_multilang}
                       placeholder="Brief description of the church..."
                     />
                   </Grid>
@@ -414,8 +414,8 @@ export default function AddChurchPage() {
                     <FormControl fullWidth>
                       <InputLabel>Language</InputLabel>
                       <Select
-                        value={formData.language_preference}
-                        onChange={handleSelectChange('language_preference')}
+                        value={formData.preferred_language}
+                        onChange={handleSelectChange('preferred_language')}
                       >
                         {LANGUAGES.map(lang => (
                           <MenuItem key={lang.code} value={lang.code}>

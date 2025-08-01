@@ -1,0 +1,43 @@
+{
+  "id": "8f8a82ba4254",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/7-11-25/CHURCH_ADMIN_PANEL_IMPLEMENTATION_7-10-25.md",
+  "relativePath": "docs/archive/7-11-25/CHURCH_ADMIN_PANEL_IMPLEMENTATION_7-10-25.md",
+  "name": "CHURCH_ADMIN_PANEL_IMPLEMENTATION_7-10-25.md",
+  "extension": ".md",
+  "size": 9768,
+  "modified": "2025-07-11T10:49:29.416Z",
+  "created": "2025-07-10T21:39:47.800Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 294,
+      "characters": 9470,
+      "words": 1184
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 294,
+      "codeLines": 175,
+      "commentLines": 55,
+      "commentRatio": 0.2391304347826087,
+      "averageLineLength": 39.62608695652174
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.042Z"
+  },
+  "contentHash": "19635bed52e789afec537012ad45a189ab8794c9add2f55dc44796d4a0fbad15",
+  "discoveredAt": "2025-07-28T07:19:58.042Z"
+}

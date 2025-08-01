@@ -1,0 +1,8 @@
+{
+  "mode": "full",
+  "memory": 4096,
+  "installPackage": "",
+  "legacyPeerDeps": true,
+  "skipInstall": false,
+  "dryRun": false
+}

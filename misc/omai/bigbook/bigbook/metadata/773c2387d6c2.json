@@ -1,0 +1,43 @@
+{
+  "id": "773c2387d6c2",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/plugins/codeExplainer.plugin.ts",
+  "relativePath": "services/om-ai/plugins/codeExplainer.plugin.ts",
+  "name": "codeExplainer.plugin.ts",
+  "extension": ".ts",
+  "size": 5303,
+  "modified": "2025-07-24T23:56:42.592Z",
+  "created": "2025-07-24T23:56:41.817Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 161,
+      "characters": 5303,
+      "words": 511
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 161,
+      "codeLines": 121,
+      "commentLines": 8,
+      "commentRatio": 0.06201550387596899,
+      "averageLineLength": 38.86046511627907
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.558Z"
+  },
+  "contentHash": "b940a456dbc379b8ba9775ed8e70e2a9ef931be7e0af2b44cf66500c96550dd5",
+  "discoveredAt": "2025-07-28T07:20:01.558Z"
+}

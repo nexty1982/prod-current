@@ -131,29 +131,64 @@ const UserManagement: React.FC = () => {
     const loadData = async () => {
         setLoading(true);
         try {
+            console.log('📊 Frontend: Loading data...');
             const [usersResponse, churchesResponse] = await Promise.all([
                 userService.getUsers(),
                 userService.getChurches()
             ]);
 
+            console.log('📊 Frontend: Users response:', usersResponse);
             if (usersResponse.success) {
+                console.log('📊 Frontend: Setting users to:', usersResponse.users?.length, 'users');
+                // Debug: Log each user's is_active status
+                usersResponse.users?.forEach((u, i) => {
+                    console.log(`👤 User ${i+1}: ${u.email} - is_active: ${u.is_active} (type: ${typeof u.is_active})`);
+                });
                 setUsers(usersResponse.users || []);
             } else {
                 setError(usersResponse.message || 'Failed to load users');
             }
 
             if (churchesResponse.success) {
+                console.log('✅ Churches loaded:', churchesResponse.churches);
+                console.log('🔍 Looking for Saints Peter and Paul:', 
+                    churchesResponse.churches?.find(ch => ch.name && ch.name.includes('Saints Peter and Paul')));
                 setChurches(churchesResponse.churches || []);
+            } else {
+                console.error('❌ Failed to load churches:', churchesResponse.message);
+                setError('Failed to load churches: ' + churchesResponse.message);
             }
         } catch (err) {
+            console.error('❌ Error loading data:', err);
             setError('Failed to load data');
-            console.error('Error loading data:', err);
         } finally {
             setLoading(false);
         }
     };
 
     const handleCreateUser = async () => {
+        // Validate required fields
+        if (!newUser.email.trim()) {
+            setError('Email is required');
+            return;
+        }
+        if (!newUser.first_name.trim()) {
+            setError('First name is required');
+            return;
+        }
+        if (!newUser.last_name.trim()) {
+            setError('Last name is required');
+            return;
+        }
+        if (!newUser.role) {
+            setError('Role is required');
+            return;
+        }
+        if (!newUser.church_id) {
+            setError('Church selection is required');
+            return;
+        }
+
         try {
             setLoading(true);
             const response = await userService.createUser(newUser);
@@ -238,11 +273,15 @@ const UserManagement: React.FC = () => {
 
     const handleToggleUserStatus = async (userId: number, currentStatus: boolean) => {
         try {
+            console.log(`🔄 Frontend: Toggling user ${userId} from ${currentStatus} to ${!currentStatus}`);
             const response = await userService.toggleUserStatus(userId);
+            console.log('🔄 Frontend: Toggle response:', response);
 
             if (response.success) {
                 setSuccess(response.message || `User ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+                console.log('🔄 Frontend: Calling loadData to refresh users list...');
                 await loadData();
+                console.log('🔄 Frontend: loadData completed');
             } else {
                 setError(response.message || 'Failed to update user status');
             }
@@ -255,9 +294,9 @@ const UserManagement: React.FC = () => {
     // Filter users based on search and filters
     const filteredUsers = users.filter((userData: User) => {
         const matchesSearch =
-            userData.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            userData.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            userData.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (userData.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (userData.first_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (userData.last_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
             (userData.church_name && userData.church_name.toLowerCase().includes(searchTerm.toLowerCase()));
 
         const matchesRole = roleFilter === 'all' || userData.role === roleFilter;
@@ -361,8 +400,6 @@ const UserManagement: React.FC = () => {
                                                     <MenuItem value="super_admin">Super Admin</MenuItem>
                                                 </>
                                             )}
-                                            <MenuItem value="priest">Priest</MenuItem>
-                                            <MenuItem value="deacon">Deacon</MenuItem>
                                             <MenuItem value="manager">Manager</MenuItem>
                                             <MenuItem value="user">User</MenuItem>
                                             <MenuItem value="viewer">Viewer</MenuItem>
@@ -577,6 +614,11 @@ const UserManagement: React.FC = () => {
                 <DialogTitle>Create New User</DialogTitle>
                 <DialogContent>
                     <Stack spacing={3} sx={{ mt: 1 }}>
+                        {error && (
+                            <Alert severity="error" onClose={() => setError(null)}>
+                                {error}
+                            </Alert>
+                        )}
                         <Stack direction="row" spacing={2}>
                             <TextField
                                 fullWidth
@@ -608,8 +650,6 @@ const UserManagement: React.FC = () => {
                                 >
                                     <MenuItem value="user">User</MenuItem>
                                     <MenuItem value="viewer">Viewer</MenuItem>
-                                    <MenuItem value="priest">Priest</MenuItem>
-                                    <MenuItem value="deacon">Deacon</MenuItem>
                                     <MenuItem value="manager">Manager</MenuItem>
                                     {canCreateAdmins() && (
                                         <MenuItem value="admin">Admin</MenuItem>
@@ -619,15 +659,15 @@ const UserManagement: React.FC = () => {
                                     )}
                                 </Select>
                             </FormControl>
-                            <FormControl fullWidth>
-                                <InputLabel>Church</InputLabel>
+                            <FormControl fullWidth required>
+                                <InputLabel>Church *</InputLabel>
                                 <Select
                                     value={newUser.church_id}
                                     onChange={(e) => setNewUser({ ...newUser, church_id: e.target.value })}
-                                    label="Church"
+                                    label="Church *"
                                 >
-                                    <MenuItem value="">No Church</MenuItem>
-                                    {churches.map((church) => (
+                                    <MenuItem value="">Select a church...</MenuItem>
+                                    {churches.sort((a, b) => a.name.localeCompare(b.name)).map((church) => (
                                         <MenuItem key={church.id} value={church.id.toString()}>
                                             {church.name}
                                         </MenuItem>

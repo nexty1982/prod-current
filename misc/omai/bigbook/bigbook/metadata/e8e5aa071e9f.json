@@ -1,0 +1,64 @@
+{
+  "id": "e8e5aa071e9f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/funeralCertificates.js",
+  "relativePath": "server/routes/funeralCertificates.js",
+  "name": "funeralCertificates.js",
+  "extension": ".js",
+  "size": 7896,
+  "modified": "2025-07-11T08:45:10.992Z",
+  "created": "2025-07-09T00:48:38.478Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 223,
+      "characters": 7896,
+      "words": 779
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "canvas",
+        "line": 5
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 223,
+      "codeLines": 162,
+      "commentLines": 22,
+      "commentRatio": 0.11956521739130435,
+      "averageLineLength": 41.34782608695652
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.477Z"
+  },
+  "contentHash": "5749fde8322c3982c23b252e608a2bbf691593c3836f777ef2890eda2bf86149",
+  "discoveredAt": "2025-07-28T07:20:00.477Z"
+}

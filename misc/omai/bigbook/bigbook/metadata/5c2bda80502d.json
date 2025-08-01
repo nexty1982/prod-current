@@ -1,0 +1,49 @@
+{
+  "id": "5c2bda80502d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/api/notes/NotesData.ts",
+  "relativePath": "front-end/src/api/notes/NotesData.ts",
+  "name": "NotesData.ts",
+  "extension": ".ts",
+  "size": 4805,
+  "modified": "2025-04-30T05:42:44.000Z",
+  "created": "2025-07-05T02:28:23.388Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 137,
+      "characters": 4805,
+      "words": 601
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "msw",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 137,
+      "codeLines": 118,
+      "commentLines": 6,
+      "commentRatio": 0.04838709677419355,
+      "averageLineLength": 37.556451612903224
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.683Z"
+  },
+  "contentHash": "7c54788340ba2cc0104c8b767f0c7e3f130d1b7575e86e4c312432dfba1b363e",
+  "discoveredAt": "2025-07-28T07:19:58.683Z"
+}

@@ -1,0 +1,113 @@
+{
+  "id": "c24cedb42412",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/survey.js",
+  "relativePath": "server/routes/survey.js",
+  "name": "survey.js",
+  "extension": ".js",
+  "size": 15558,
+  "modified": "2025-07-28T03:25:47.249Z",
+  "created": "2025-07-28T03:25:45.548Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 450,
+      "characters": 15534,
+      "words": 1446
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 5
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 121,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 122,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 123,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 124,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 168,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 169,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 170,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 171,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "const express = require('express');\r\nconst router = express.Router();\r\nconst fs = require('fs').promises;\r\nconst path = require('path');\r\nconst mysql = require('mysql2/promise');\r\nconst { requireRole } = require('../middleware/auth');\r\n\r\n// Filesystem analysis endpoint\r\nrouter.post('/filesystem', requireRole(['super_admin']), async (req, res) => {\r\n  try {\r\n    console.log('🔍 Starting filesystem analysis...');\r\n    \r\n    const prodPath = path.resolve(__dirname, '../../');\r\n    const results = [];\r\n    \r\n    // Recursive function to scan directories\r\n    async function scanDirectory(dirPath, relativePath = '') {\r\n      try {\r\n        const items = await fs.readdir(dirPath, { withFileTypes: true });\r\n        \r\n        for (const item of items) {\r\n          const fullPath = path.join(dirPath, item.name);\r\n          const relativeFullPath = path.join(relativePath, item.name);\r\n          \r\n          // Skip node_modules, .git, dist, and other build directories\r\n          if (['node_modules', '.git', 'dist', 'build', '.next', 'coverage'].includes(item.name)) {\r\n            continue;\r\n          }\r\n          \r\n          if (item.isDirectory()) {\r\n            // Add directory entry\r\n            const dirStats = await fs.stat(fullPath);\r\n            results.push({\r\n              path: relativeFullPath,\r\n              type: 'directory',\r\n              lastModified: dirStats.mtime.toISOString(),\r\n              lastAccessed: dirStats.atime.toISOString(),\r\n              size: 0,\r\n              isStale: (Date.now() - dirStats.mtime.getTime()) > (60 * 24 * 60 * 60 * 1000) // 60 days\r\n            });\r\n            \r\n            // Recursively scan subdirectory\r\n            await scanDirectory(fullPath, relativeFullPath);\r\n          } else if (item.isFile()) {\r\n            const ext = path.extname(item.name).toLowerCase();\r\n            \r\n            // Filter for relevant file types\r\n            if (['.ts', '.tsx', '.js', '.jsx', '.sql', '.json', '.md'].includes(ext)) {\r\n              const fileStats = await fs.stat(fullPath);\r\n              \r\n              results.push({\r\n                path: relativeFullPath,\r\n                type: 'file',\r\n                extension: ext.substring(1), // Remove leading dot\r\n                lastModified: fileStats.mtime.toISOString(),\r\n                lastAccessed: fileStats.atime.toISOString(),\r\n                size: fileStats.size,\r\n                isStale: (Date.now() - fileStats.mtime.getTime()) > (60 * 24 * 60 * 60 * 1000) // 60 days\r\n              });\r\n            }\r\n          }\r\n        }\r\n      } catch (error) {\r\n        console.warn(`Error scanning directory ${dirPath}:`, error.message);\r\n      }\r\n    }\r\n    \r\n    await scanDirectory(prodPath);\r\n    \r\n    console.log(`✅ Filesystem analysis complete: ${results.length} items found`);\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: results.sort((a, b) => a.path.localeCompare(b.path))\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Filesystem analysis error:', error);\r\n    res.status(500).json({\r\n      success: false,\r\n      error: error.message\r\n    });\r\n  }\r\n});\r\n\r\n// Menu audit endpoint\r\nrouter.post('/menu-audit', requireRole(['super_admin']), async (req, res) => {\r\n  try {\r\n    console.log('📋 Starting menu audit...');\r\n    \r\n    const menuItems = [];\r\n    \r\n    // Mock menu data - in a real implementation, this would scan actual menu files\r\n    // You would scan files like:\r\n    // - front-end/src/layouts/full/vertical/sidebar/MenuItems.ts\r\n    // - front-end/src/layouts/full/horizontal/navbar/MenuItems.ts\r\n    // - front-end/src/layouts/full/shared/quicklinks/QuickLinks.ts\r\n    \r\n    const mockVerticalMenu = [\r\n      { id: 'dashboard', title: 'Dashboard', route: '/dashboard', roles: ['admin', 'super_admin'], menuType: 'vertical' },\r\n      { id: 'users', title: 'User Management', route: '/admin/users', roles: ['super_admin'], menuType: 'vertical' },\r\n      { id: 'churches', title: 'Churches', route: '/admin/churches', roles: ['super_admin'], menuType: 'vertical' },\r\n      { id: 'records', title: 'Records', route: '/records', roles: ['admin', 'super_admin', 'user'], menuType: 'vertical' },\r\n      { id: 'bigbook', title: 'Big Book', route: '/admin/bigbook', roles: ['super_admin', 'admin'], menuType: 'vertical' },\r\n      { id: 'survey', title: 'Site Survey', route: '/admin/tools/survey', roles: ['super_admin'], menuType: 'vertical' }\r\n    ];\r\n    \r\n    const mockHorizontalMenu = [\r\n      { id: 'home', title: 'Home', route: '/', roles: ['public'], menuType: 'horizontal' },\r\n      { id: 'about', title: 'About', route: '/about', roles: ['public'], menuType: 'horizontal' },\r\n      { id: 'contact', title: 'Contact', route: '/contact', roles: ['public'], menuType: 'horizontal' }\r\n    ];\r\n    \r\n    const mockQuickLinks = [\r\n      { id: 'profile', title: 'My Profile', route: '/profile', roles: ['user', 'admin', 'super_admin'], menuType: 'quicklinks' },\r\n      { id: 'settings', title: 'Settings', route: '/settings', roles: ['admin', 'super_admin'], menuType: 'quicklinks' }\r\n    ];\r\n    \r\n    // Get all users to determine visibility\r\n    const connection = await mysql.createConnection({\r\n      host: process.env.[REDACTED] || 'localhost',\r\n      user: process.env.[REDACTED] || 'root',\r\n      password: process.env.[REDACTED] || '',\r\n      database: process.env.[REDACTED] || 'orthodoxmetrics_db'\r\n    });\r\n    \r\n    const [users] = await connection.execute(\r\n      'SELECT id, email, name, role FROM users WHERE is_active = 1'\r\n    );\r\n    \r\n    await connection.end();\r\n    \r\n    // Process all menu items\r\n    [...mockVerticalMenu, ...mockHorizontalMenu, ...mockQuickLinks].forEach(item => {\r\n      const visibleToUsers = users\r\n        .filter(user => item.roles.includes(user.role) || item.roles.includes('public'))\r\n        .map(user => user.email);\r\n      \r\n      menuItems.push({\r\n        ...item,\r\n        isOrphaned: visibleToUsers.length === 0 && !item.roles.includes('public'),\r\n        visibleToUsers\r\n      });\r\n    });\r\n    \r\n    console.log(`✅ Menu audit complete: ${menuItems.length} menu items analyzed`);\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: menuItems\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Menu audit error:', error);\r\n    res.status(500).json({\r\n      success: false,\r\n      error: error.message\r\n    });\r\n  }\r\n});\r\n\r\n// User roles analysis endpoint\r\nrouter.post('/user-roles', requireRole(['super_admin']), async (req, res) => {\r\n  try {\r\n    console.log('👥 Starting user role analysis...');\r\n    \r\n    const connection = await mysql.createConnection({\r\n      host: process.env.[REDACTED] || 'localhost',\r\n      user: process.env.[REDACTED] || 'root',\r\n      password: process.env.[REDACTED] || '',\r\n      database: process.env.[REDACTED] || 'orthodoxmetrics_db'\r\n    });\r\n    \r\n    // Get all users with their roles\r\n    const [users] = await connection.execute(`\r\n      SELECT \r\n        u.id,\r\n        u.email,\r\n        u.name,\r\n        u.role,\r\n        u.created_at,\r\n        u.last_login\r\n      FROM users u \r\n      WHERE u.is_active = 1\r\n      ORDER BY u.created_at DESC\r\n    `);\r\n    \r\n    await connection.end();\r\n    \r\n    // Process user data\r\n    const userRoleData = users.map(user => {\r\n      const isTestUser = /test\\d+@example\\.com/.test(user.email) || user.email.includes('test');\r\n      \r\n      // Mock menu visibility - in real implementation, calculate based on role permissions\r\n      const visibleMenuItems = [];\r\n      if (user.role === 'super_admin') {\r\n        visibleMenuItems.push('dashboard', 'users', 'churches', 'records', 'bigbook', 'survey', 'profile', 'settings');\r\n      } else if (user.role === 'admin') {\r\n        visibleMenuItems.push('dashboard', 'records', 'bigbook', 'profile', 'settings');\r\n      } else if (user.role === 'user') {\r\n        visibleMenuItems.push('records', 'profile');\r\n      }\r\n      \r\n      return {\r\n        userId: user.id,\r\n        email: user.email,\r\n        name: user.name || 'Unknown',\r\n        roles: [user.role], // Convert single role to array for consistency\r\n        visibleMenuItems,\r\n        isTestUser\r\n      };\r\n    });\r\n    \r\n    console.log(`✅ User role analysis complete: ${userRoleData.length} users analyzed`);\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: userRoleData\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('User role analysis error:', error);\r\n    res.status(500).json({\r\n      success: false,\r\n      error: error.message\r\n    });\r\n  }\r\n});\r\n\r\n// Database analysis endpoint\r\nrouter.post('/database-analysis', requireRole(['super_admin']), async (req, res) => {\r\n  try {\r\n    console.log('🗄️ Starting database analysis...');\r\n    \r\n    const { host, username, password, databases } = req.body;\r\n    \r\n    if (!username || !password) {\r\n      return res.status(400).json({\r\n        success: false,\r\n        error: 'Database credentials required'\r\n      });\r\n    }\r\n    \r\n    const connection = await mysql.createConnection({\r\n      host: host || 'localhost',\r\n      user: username,\r\n      password: password\r\n    });\r\n    \r\n    // Get list of databases\r\n    const [dbList] = await connection.execute('SHOW DATABASES');\r\n    const targetDatabases = databases.split(',').map(db => db.trim());\r\n    const availableDatabases = dbList\r\n      .map(row => row.Database)\r\n      .filter(db => targetDatabases.includes(db));\r\n    \r\n    const databaseAnalysis = {\r\n      databases: availableDatabases,\r\n      tables: {},\r\n      duplicateTables: [],\r\n      staleTables: [],\r\n      userRoleMappings: []\r\n    };\r\n    \r\n    // Analyze each database\r\n    for (const dbName of availableDatabases) {\r\n      await connection.execute(`USE \\`${dbName}\\``);\r\n      \r\n      // Get table information\r\n      const [tables] = await connection.execute(`\r\n        SELECT \r\n          TABLE_NAME as name,\r\n          TABLE_ROWS as rows,\r\n          ROUND(((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024), 2) as size_mb,\r\n          CREATE_TIME as created\r\n        FROM information_schema.TABLES \r\n        WHERE TABLE_SCHEMA = ?\r\n        ORDER BY TABLE_NAME\r\n      `, [dbName]);\r\n      \r\n      databaseAnalysis.tables[dbName] = tables.map(table => ({\r\n        name: table.name,\r\n        rows: table.rows,\r\n        size: table.size_mb ? `${table.size_mb} MB` : 'N/A',\r\n        created: table.created ? table.created.toISOString().split('T')[0] : 'N/A'\r\n      }));\r\n    }\r\n    \r\n    // Find duplicate tables across databases\r\n    const allTableNames = [];\r\n    Object.values(databaseAnalysis.tables).forEach(tables => {\r\n      tables.forEach(table => allTableNames.push(table.name));\r\n    });\r\n    \r\n    const tableCountMap = {};\r\n    allTableNames.forEach(name => {\r\n      tableCountMap[name] = (tableCountMap[name] || 0) + 1;\r\n    });\r\n    \r\n    databaseAnalysis.duplicateTables = Object.keys(tableCountMap)\r\n      .filter(name => tableCountMap[name] > 1);\r\n    \r\n    // Mock stale tables (tables with no recent activity)\r\n    databaseAnalysis.staleTables = Object.values(databaseAnalysis.tables)\r\n      .flat()\r\n      .filter(table => {\r\n        if (table.created === 'N/A') return false;\r\n        const createdDate = new Date(table.created);\r\n        const monthsOld = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24 * 30);\r\n        return monthsOld > 12 && (table.rows === 0 || table.rows === null);\r\n      })\r\n      .map(table => table.name);\r\n    \r\n    await connection.end();\r\n    \r\n    console.log(`✅ Database analysis complete: ${availableDatabases.length} databases analyzed`);\r\n    \r\n    res.json({\r\n      success: true,\r\n      data: databaseAnalysis\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Database analysis error:', error);\r\n    res.status(500).json({\r\n      success: false,\r\n      error: error.message\r\n    });\r\n  }\r\n});\r\n\r\n// Start crawler endpoint\r\nrouter.post('/start-crawler', requireRole(['super_admin']), async (req, res) => {\r\n  try {\r\n    const { crawlerId, userEmail, password, concurrentPages } = req.body;\r\n    \r\n    console.log(`🕷️ Starting crawler ${crawlerId} for user ${userEmail}`);\r\n    \r\n    // In a real implementation, this would:\r\n    // 1. Launch a Puppeteer instance\r\n    // 2. Login with the test user credentials\r\n    // 3. Navigate through key pages\r\n    // 4. Log errors and warnings\r\n    // 5. Use WebSocket to send real-time updates\r\n    \r\n    // Mock response for now\r\n    res.json({\r\n      success: true,\r\n      message: `Crawler ${crawlerId} started successfully`,\r\n      crawlerId,\r\n      status: 'running'\r\n    });\r\n    \r\n    // Mock crawler progress (in real implementation, this would be handled by WebSocket)\r\n    setTimeout(() => {\r\n      console.log(`📊 Crawler ${crawlerId} completed mock run`);\r\n    }, 5000);\r\n    \r\n  } catch (error) {\r\n    console.error('Crawler start error:', error);\r\n    res.status(500).json({\r\n      success: false,\r\n      error: error.message\r\n    });\r\n  }\r\n});\r\n\r\n// Get crawler status endpoint\r\nrouter.get('/crawler-status/:crawlerId', requireRole(['super_admin']), async (req, res) => {\r\n  try {\r\n    const { crawlerId } = req.params;\r\n    \r\n    // Mock crawler status - in real implementation, this would check actual crawler state\r\n    res.json({\r\n      success: true,\r\n      data: {\r\n        id: crawlerId,\r\n        status: 'completed',\r\n        pagesVisited: Math.floor(Math.random() * 50) + 10,\r\n        errorsFound: [],\r\n        consoleWarnings: ['Deprecated API warning on /admin/users'],\r\n        currentUrl: '',\r\n        logs: [\r\n          `${new Date().toISOString()} - Crawler ${crawlerId} started`,\r\n          `${new Date().toISOString()} - Logged in successfully`,\r\n          `${new Date().toISOString()} - Navigating to dashboard`,\r\n          `${new Date().toISOString()} - Testing menu navigation`,\r\n          `${new Date().toISOString()} - Crawler completed`\r\n        ]\r\n      }\r\n    });\r\n    \r\n  } catch (error) {\r\n    console.error('Crawler status error:', error);\r\n    res.status(500).json({\r\n      success: false,\r\n      error: error.message\r\n    });\r\n  }\r\n});\r\n\r\n// Export survey results endpoint\r\nrouter.get('/export/:format', requireRole(['super_admin']), async (req, res) => {\r\n  try {\r\n    const { format } = req.params;\r\n    \r\n    if (!['json', 'csv', 'markdown'].includes(format)) {\r\n      return res.status(400).json({\r\n        success: false,\r\n        error: 'Invalid export format'\r\n      });\r\n    }\r\n    \r\n    // This would compile all survey data and return in requested format\r\n    const timestamp = new Date().toISOString();\r\n    const filename = `orthodoxmetrics-survey-${timestamp.split('T')[0]}.${format}`;\r\n    \r\n    res.setHeader('Content-Disposition', `attachment; filename=\"${filename}\"`);\r\n    \r\n    switch (format) {\r\n      case 'json':\r\n        res.setHeader('Content-Type', 'application/json');\r\n        res.json({\r\n          timestamp,\r\n          survey: 'Complete survey data would be here',\r\n          format: 'json'\r\n        });\r\n        break;\r\n        \r\n      case 'csv':\r\n        res.setHeader('Content-Type', 'text/csv');\r\n        res.send('Category,Count,Issues\\nFiles,1000,50\\nMenus,25,2\\nUsers,15,0');\r\n        break;\r\n        \r\n      case 'markdown':\r\n        res.setHeader('Content-Type', 'text/markdown');\r\n        res.send(`# OrthodoxMetrics Survey Report\\n\\nGenerated: ${new Date().toLocaleString()}\\n\\n## Summary\\n\\nSurvey completed successfully.`);\r\n        break;\r\n    }\r\n    \r\n  } catch (error) {\r\n    console.error('Export error:', error);\r\n    res.status(500).json({\r\n      success: false,\r\n      error: error.message\r\n    });\r\n  }\r\n});\r\n\r\nmodule.exports = router; "
+    },
+    "complexity": {
+      "totalLines": 450,
+      "codeLines": 341,
+      "commentLines": 37,
+      "commentRatio": 0.09788359788359788,
+      "averageLineLength": 38.88095238095238
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.566Z"
+  },
+  "contentHash": "c021c1f5d080468ddf648211c2cb152cecdf432e6be96afbb547305bd135ab94",
+  "discoveredAt": "2025-07-28T07:20:00.566Z"
+}

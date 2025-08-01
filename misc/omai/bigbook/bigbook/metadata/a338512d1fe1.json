@@ -1,0 +1,105 @@
+{
+  "id": "a338512d1fe1",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/controllers/ocrController.js",
+  "relativePath": "server/controllers/ocrController.js",
+  "name": "ocrController.js",
+  "extension": ".js",
+  "size": 17360,
+  "modified": "2025-07-04T23:08:01.000Z",
+  "created": "2025-07-09T00:48:35.106Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 572,
+      "characters": 17358,
+      "words": 1554
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "crypto",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "qrcode",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "sharp",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "google-auth-library",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "@google-cloud/vision",
+        "line": 7
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 15,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 16,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 20,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 21,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 35,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// Secure OCR Session Controller with Barcode Validation\r\nconst { v4: uuidv4 } = require('uuid');\r\nconst crypto = require('crypto');\r\nconst QRCode = require('qrcode');\r\nconst sharp = require('sharp');\r\nconst { GoogleAuth } = require('google-auth-library');\r\nconst vision = require('@google-cloud/vision');\r\nconst db = require('../config/db');\r\nconst emailSender = require('../utils/emailSender');\r\nconst imageProcessor = require('../utils/imageProcessor');\r\nconst logger = require('../utils/logger');\r\n\r\n// Initialize Google Vision client\r\nconst visionClient = new vision.ImageAnnotatorClient({\r\n  keyFilename: process.env.[REDACTED],\r\n  projectId: process.env.[REDACTED]\r\n});\r\n\r\n// Session timeout in minutes\r\nconst SESSION_TIMEOUT = parseInt(process.env.[REDACTED]) || 10;\r\nconst UPLOAD_TIMEOUT = parseInt(process.env.[REDACTED]) || 30;\r\n\r\nclass OCRController {\r\n  \r\n  /**\r\n   * Generate a new OCR session with barcode\r\n   */\r\n  async createSession(req, res) {\r\n    try {\r\n      const sessionId = uuidv4();\r\n      const pinCode = crypto.randomInt(100000, 999999).toString();\r\n      const expiresAt = new Date(Date.now() + SESSION_TIMEOUT * 60 * 1000);\r\n      \r\n      // Generate barcode data\r\n      const barcodeData = `${process.env.[REDACTED]}/validate-upload?id=${sessionId}&pin=${pinCode}`;\r\n      \r\n      // Generate QR code image\r\n      const qrCodeBuffer = await QRCode.toBuffer(barcodeData, {\r\n        width: 256,\r\n        margin: 2,\r\n        color: {\r\n          dark: '#000000',\r\n          light: '#FFFFFF'\r\n        }\r\n      });\r\n      \r\n      // Save session to database\r\n      await db.query(`\r\n        INSERT INTO ocr_sessions (\r\n          id, pin_code, barcode_data, expires_at, session_metadata\r\n        ) VALUES (?, ?, ?, ?, ?)\r\n      `, [\r\n        sessionId,\r\n        pinCode,\r\n        barcodeData,\r\n        expiresAt,\r\n        JSON.stringify({\r\n          userAgent: req.headers['user-agent'],\r\n          ipAddress: req.ip,\r\n          createdFrom: 'web'\r\n        })\r\n      ]);\r\n      \r\n      logger.info(`Created OCR session: ${sessionId} with PIN: ${pinCode}`);\r\n      \r\n      res.json({\r\n        success: true,\r\n        sessionId,\r\n        pinCode,\r\n        qrCode: `data:image/png;base64,${qrCodeBuffer.toString('base64')}`,\r\n        barcodeUrl: barcodeData,\r\n        expiresAt: expiresAt.toISOString(),\r\n        timeoutMinutes: SESSION_TIMEOUT\r\n      });\r\n      \r\n    } catch (error) {\r\n      logger.error('Failed to create OCR session:', error);\r\n      res.status(500).json({\r\n        success: false,\r\n        error: 'Failed to create session'\r\n      });\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Validate barcode scan and activate session\r\n   */\r\n  async validateSession(req, res) {\r\n    try {\r\n      const { id: sessionId, pin } = req.query;\r\n      \r\n      if (!sessionId || !pin) {\r\n        return res.status(400).json({\r\n          success: false,\r\n          error: 'Session ID and PIN are required'\r\n        });\r\n      }\r\n      \r\n      // Find and validate session\r\n      const [sessions] = await db.query(`\r\n        SELECT * FROM ocr_sessions \r\n        WHERE id = ? AND pin_code = ? AND expires_at > NOW()\r\n      `, [sessionId, pin]);\r\n      \r\n      if (sessions.length === 0) {\r\n        return res.status(404).json({\r\n          success: false,\r\n          error: 'Invalid or expired session'\r\n        });\r\n      }\r\n      \r\n      const session = sessions[0];\r\n      \r\n      if (session.is_verified) {\r\n        return res.status(400).json({\r\n          success: false,\r\n          error: 'Session already verified'\r\n        });\r\n      }\r\n      \r\n      // Mark session as verified\r\n      await db.query(`\r\n        UPDATE ocr_sessions \r\n        SET is_verified = TRUE, verified_at = NOW()\r\n        WHERE id = ?\r\n      `, [sessionId]);\r\n      \r\n      logger.info(`Session verified: ${sessionId}`);\r\n      \r\n      // If accessed via mobile (barcode scan), show success page\r\n      const isMobile = req.headers['user-agent']?.includes('Mobile');\r\n      \r\n      if (isMobile) {\r\n        res.send(`\r\n          <!DOCTYPE html>\r\n          <html>\r\n          <head>\r\n            <meta charset=\"UTF-8\">\r\n            <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n            <title>Upload Validated</title>\r\n            <style>\r\n              body { \r\n                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\r\n                text-align: center; \r\n                padding: 40px 20px; \r\n                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\r\n                color: white;\r\n                margin: 0;\r\n              }\r\n              .container { \r\n                max-width: 400px; \r\n                margin: 0 auto; \r\n                background: white; \r\n                color: #333; \r\n                border-radius: 12px; \r\n                padding: 30px; \r\n                box-shadow: 0 10px 25px rgba(0,0,0,0.2);\r\n              }\r\n              .success-icon { \r\n                font-size: 64px; \r\n                color: #28a745; \r\n                margin-bottom: 20px; \r\n              }\r\n              h1 { \r\n                color: #28a745; \r\n                margin-bottom: 10px; \r\n              }\r\n              p { \r\n                margin-bottom: 20px; \r\n                line-height: 1.5; \r\n              }\r\n              .session-info {\r\n                background: #f8f9fa;\r\n                padding: 15px;\r\n                border-radius: 8px;\r\n                margin: 20px 0;\r\n              }\r\n              .small {\r\n                font-size: 0.9em;\r\n                color: #666;\r\n              }\r\n            </style>\r\n          </head>\r\n          <body>\r\n            <div class=\"container\">\r\n              <div class=\"success-icon\">✅</div>\r\n              <h1>Upload Validated!</h1>\r\n              <p>Your session has been successfully verified. You can now return to your computer to upload church records.</p>\r\n              <div class=\"session-info\">\r\n                <strong>Session ID:</strong><br>\r\n                <code>${sessionId.substring(0, 8)}...</code>\r\n              </div>\r\n              <p class=\"small\">This window can be closed. Return to your computer to continue.</p>\r\n            </div>\r\n          </body>\r\n          </html>\r\n        `);\r\n      } else {\r\n        // API response for web interface\r\n        res.json({\r\n          success: true,\r\n          message: 'Session verified successfully',\r\n          sessionId\r\n        });\r\n      }\r\n      \r\n    } catch (error) {\r\n      logger.error('Failed to validate session:', error);\r\n      res.status(500).json({\r\n        success: false,\r\n        error: 'Failed to validate session'\r\n      });\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Check session status\r\n   */\r\n  async checkSessionStatus(req, res) {\r\n    try {\r\n      const { sessionId } = req.params;\r\n      \r\n      const [sessions] = await db.query(`\r\n        SELECT id, is_verified, expires_at, created_at, disclaimer_accepted\r\n        FROM ocr_sessions \r\n        WHERE id = ?\r\n      `, [sessionId]);\r\n      \r\n      if (sessions.length === 0) {\r\n        return res.status(404).json({\r\n          success: false,\r\n          error: 'Session not found'\r\n        });\r\n      }\r\n      \r\n      const session = sessions[0];\r\n      const now = new Date();\r\n      const expired = new Date(session.expires_at) < now;\r\n      \r\n      res.json({\r\n        success: true,\r\n        sessionId: session.id,\r\n        isVerified: !!session.is_verified,\r\n        isExpired: expired,\r\n        disclaimerAccepted: !!session.disclaimer_accepted,\r\n        expiresAt: session.expires_at,\r\n        timeRemaining: expired ? 0 : Math.max(0, new Date(session.expires_at) - now)\r\n      });\r\n      \r\n    } catch (error) {\r\n      logger.error('Failed to check session status:', error);\r\n      res.status(500).json({\r\n        success: false,\r\n        error: 'Failed to check session status'\r\n      });\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Accept disclaimer and update session\r\n   */\r\n  async acceptDisclaimer(req, res) {\r\n    try {\r\n      const { sessionId } = req.params;\r\n      const { \r\n        accepted, \r\n        language = 'en', \r\n        email, \r\n        tierLevel = 'standard' \r\n      } = req.body;\r\n      \r\n      if (!accepted) {\r\n        return res.status(400).json({\r\n          success: false,\r\n          error: 'Disclaimer must be accepted'\r\n        });\r\n      }\r\n      \r\n      // Verify session exists and is verified\r\n      const [sessions] = await db.query(`\r\n        SELECT * FROM ocr_sessions \r\n        WHERE id = ? AND is_verified = TRUE AND expires_at > NOW()\r\n      `, [sessionId]);\r\n      \r\n      if (sessions.length === 0) {\r\n        return res.status(404).json({\r\n          success: false,\r\n          error: 'Invalid or expired session'\r\n        });\r\n      }\r\n      \r\n      // Update session with disclaimer acceptance\r\n      await db.query(`\r\n        UPDATE ocr_sessions \r\n        SET disclaimer_accepted = TRUE, \r\n            disclaimer_language = ?, \r\n            user_email = ?, \r\n            tier_level = ?\r\n        WHERE id = ?\r\n      `, [language, email, tierLevel, sessionId]);\r\n      \r\n      logger.info(`Disclaimer accepted for session: ${sessionId}`);\r\n      \r\n      res.json({\r\n        success: true,\r\n        message: 'Disclaimer accepted successfully'\r\n      });\r\n      \r\n    } catch (error) {\r\n      logger.error('Failed to accept disclaimer:', error);\r\n      res.status(500).json({\r\n        success: false,\r\n        error: 'Failed to accept disclaimer'\r\n      });\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Upload and process images with Google Vision OCR\r\n   */\r\n  async uploadAndProcess(req, res) {\r\n    try {\r\n      const { sessionId } = req.params;\r\n      const files = req.files;\r\n      const { targetLanguage = 'en' } = req.body;\r\n      \r\n      if (!files || files.length === 0) {\r\n        return res.status(400).json({\r\n          success: false,\r\n          error: 'No files uploaded'\r\n        });\r\n      }\r\n      \r\n      // Verify session is ready for upload\r\n      const [sessions] = await db.query(`\r\n        SELECT * FROM ocr_sessions \r\n        WHERE id = ? AND is_verified = TRUE AND disclaimer_accepted = TRUE \r\n        AND expires_at > NOW() AND is_used = FALSE\r\n      `, [sessionId]);\r\n      \r\n      if (sessions.length === 0) {\r\n        return res.status(404).json({\r\n          success: false,\r\n          error: 'Invalid session or session not ready for upload'\r\n        });\r\n      }\r\n      \r\n      const session = sessions[0];\r\n      const uploadResults = [];\r\n      \r\n      // Process each uploaded file\r\n      for (const file of files) {\r\n        try {\r\n          const uploadId = uuidv4();\r\n          const startTime = Date.now();\r\n          \r\n          // Validate and enhance image\r\n          const enhancedImagePath = await imageProcessor.enhanceForOCR(file.path);\r\n          \r\n          // Insert upload record\r\n          await db.query(`\r\n            INSERT INTO ocr_uploads (\r\n              id, session_id, original_filename, file_path, file_size, \r\n              file_type, enhanced_image_path, processing_status\r\n            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'processing')\r\n          `, [\r\n            uploadId, sessionId, file.originalname, file.path, \r\n            file.size, file.mimetype, enhancedImagePath\r\n          ]);\r\n          \r\n          // Perform OCR with Google Vision\r\n          const [result] = await visionClient.textDetection(enhancedImagePath);\r\n          const detections = result.textAnnotations;\r\n          \r\n          if (!detections || detections.length === 0) {\r\n            throw new Error('No text detected in image');\r\n          }\r\n          \r\n          const extractedText = detections[0].description;\r\n          const confidence = this.calculateConfidence(detections);\r\n          \r\n          // Translate if target language is different\r\n          let translatedText = extractedText;\r\n          if (targetLanguage !== 'en') {\r\n            // Implement translation logic here\r\n            translatedText = await this.translateText(extractedText, targetLanguage);\r\n          }\r\n          \r\n          const processingTime = Date.now() - startTime;\r\n          \r\n          // Update upload record with results\r\n          await db.query(`\r\n            UPDATE ocr_uploads \r\n            SET processing_status = 'completed', \r\n                ocr_result = ?, \r\n                translated_text = ?, \r\n                confidence_score = ?, \r\n                processing_time_ms = ?,\r\n                processed_at = NOW()\r\n            WHERE id = ?\r\n          `, [\r\n            extractedText, translatedText, confidence, processingTime, uploadId\r\n          ]);\r\n          \r\n          uploadResults.push({\r\n            uploadId,\r\n            filename: file.originalname,\r\n            success: true,\r\n            text: extractedText,\r\n            translatedText,\r\n            confidence,\r\n            processingTime\r\n          });\r\n          \r\n          logger.info(`OCR completed for upload: ${uploadId}`);\r\n          \r\n        } catch (fileError) {\r\n          logger.error(`OCR failed for file ${file.originalname}:`, fileError);\r\n          \r\n          await db.query(`\r\n            UPDATE ocr_uploads \r\n            SET processing_status = 'failed', \r\n                error_message = ?,\r\n                processed_at = NOW()\r\n            WHERE original_filename = ? AND session_id = ?\r\n          `, [fileError.message, file.originalname, sessionId]);\r\n          \r\n          uploadResults.push({\r\n            filename: file.originalname,\r\n            success: false,\r\n            error: fileError.message\r\n          });\r\n        }\r\n      }\r\n      \r\n      // Mark session as used\r\n      await db.query(`\r\n        UPDATE ocr_sessions \r\n        SET is_used = TRUE, upload_completed_at = NOW()\r\n        WHERE id = ?\r\n      `, [sessionId]);\r\n      \r\n      // Send email receipt if email provided\r\n      if (session.user_email) {\r\n        try {\r\n          await emailSender.sendUploadReceipt(session.user_email, {\r\n            sessionId,\r\n            uploadResults,\r\n            timestamp: new Date(),\r\n            language: targetLanguage\r\n          });\r\n        } catch (emailError) {\r\n          logger.error('Failed to send email receipt:', emailError);\r\n        }\r\n      }\r\n      \r\n      res.json({\r\n        success: true,\r\n        sessionId,\r\n        results: uploadResults,\r\n        totalFiles: files.length,\r\n        successfulFiles: uploadResults.filter(r => r.success).length\r\n      });\r\n      \r\n    } catch (error) {\r\n      logger.error('Failed to process uploads:', error);\r\n      res.status(500).json({\r\n        success: false,\r\n        error: 'Failed to process uploads'\r\n      });\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Get processing status and results\r\n   */\r\n  async getResults(req, res) {\r\n    try {\r\n      const { sessionId } = req.params;\r\n      \r\n      const [uploads] = await db.query(`\r\n        SELECT * FROM ocr_uploads \r\n        WHERE session_id = ?\r\n        ORDER BY created_at ASC\r\n      `, [sessionId]);\r\n      \r\n      const [sessions] = await db.query(`\r\n        SELECT user_email, tier_level, target_language \r\n        FROM ocr_sessions \r\n        WHERE id = ?\r\n      `, [sessionId]);\r\n      \r\n      if (sessions.length === 0) {\r\n        return res.status(404).json({\r\n          success: false,\r\n          error: 'Session not found'\r\n        });\r\n      }\r\n      \r\n      res.json({\r\n        success: true,\r\n        sessionId,\r\n        uploads: uploads.map(upload => ({\r\n          id: upload.id,\r\n          filename: upload.original_filename,\r\n          status: upload.processing_status,\r\n          text: upload.ocr_result,\r\n          translatedText: upload.translated_text,\r\n          confidence: upload.confidence_score,\r\n          processingTime: upload.processing_time_ms,\r\n          error: upload.error_message,\r\n          createdAt: upload.created_at,\r\n          processedAt: upload.processed_at\r\n        }))\r\n      });\r\n      \r\n    } catch (error) {\r\n      logger.error('Failed to get results:', error);\r\n      res.status(500).json({\r\n        success: false,\r\n        error: 'Failed to get results'\r\n      });\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Calculate confidence score from Google Vision detections\r\n   */\r\n  calculateConfidence(detections) {\r\n    if (!detections || detections.length === 0) return 0;\r\n    \r\n    let totalConfidence = 0;\r\n    let count = 0;\r\n    \r\n    detections.forEach(detection => {\r\n      if (detection.confidence !== undefined) {\r\n        totalConfidence += detection.confidence;\r\n        count++;\r\n      }\r\n    });\r\n    \r\n    return count > 0 ? Math.round((totalConfidence / count) * 100) : 85;\r\n  }\r\n  \r\n  /**\r\n   * Translate text (placeholder - implement with Google Translate API)\r\n   */\r\n  async translateText(text, targetLanguage) {\r\n    // Implement Google Translate API integration\r\n    // For now, return original text\r\n    return text;\r\n  }\r\n  \r\n  /**\r\n   * Cleanup expired sessions\r\n   */\r\n  async cleanupExpiredSessions() {\r\n    try {\r\n      const [result] = await db.query(`\r\n        DELETE FROM ocr_sessions \r\n        WHERE expires_at < NOW() AND created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)\r\n      `);\r\n      \r\n      logger.info(`Cleaned up ${result.affectedRows} expired sessions`);\r\n    } catch (error) {\r\n      logger.error('Failed to cleanup expired sessions:', error);\r\n    }\r\n  }\r\n}\r\n\r\nmodule.exports = new OCRController();\r\n"
+    },
+    "complexity": {
+      "totalLines": 572,
+      "codeLines": 448,
+      "commentLines": 51,
+      "commentRatio": 0.10220440881763528,
+      "averageLineLength": 32.65931863727455
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.560Z"
+  },
+  "contentHash": "7095faea70658082934f8eaec08016ab5a59c03e568b3f62c71a84a138c3be9a",
+  "discoveredAt": "2025-07-28T07:19:59.561Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "a1435edf46a8",
+  "name": "fix_admin_passwords.sql",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/fix_admin_passwords.sql",
+  "type": "Database Scripts"
+}

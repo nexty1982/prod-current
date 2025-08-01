@@ -1,0 +1,54 @@
+{
+  "id": "01d1fce1407a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/tasks/runner.sh",
+  "relativePath": "tasks/runner.sh",
+  "name": "runner.sh",
+  "extension": ".sh",
+  "size": 3792,
+  "modified": "2025-07-28T06:26:02.175Z",
+  "created": "2025-07-28T06:26:02.175Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 124,
+      "characters": 3732,
+      "words": 518
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 86
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 87
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 124,
+      "codeLines": 90,
+      "commentLines": 11,
+      "commentRatio": 0.10891089108910891,
+      "averageLineLength": 35.73267326732673
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.590Z"
+  },
+  "contentHash": "649c6b14d82015a0514267b06a232a68573f29fd532c678185b9936e4659b2f7",
+  "discoveredAt": "2025-07-28T07:20:01.590Z"
+}

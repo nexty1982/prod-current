@@ -1,0 +1,102 @@
+{
+  "id": "1179b287471f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/temp/diagnose-backup-system.js",
+  "relativePath": "server/temp/diagnose-backup-system.js",
+  "name": "diagnose-backup-system.js",
+  "extension": ".js",
+  "size": 12105,
+  "modified": "2025-07-13T19:35:04.291Z",
+  "created": "2025-07-13T19:34:14.436Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 327,
+      "characters": 12023,
+      "words": 1042
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 13
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 15
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 16
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 99,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 163,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 164,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 165,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 166,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 167,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 255,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "#!/usr/bin/env node\r\n\r\n/**\r\n * Backup System Diagnostic Tool\r\n * \r\n * This script diagnoses issues with:\r\n * 1. Storage information not loading\r\n * 2. Backup files not listing\r\n * 3. Database table existence\r\n * 4. API endpoint functionality\r\n */\r\n\r\nrequire('dotenv').config();\r\nconst { promisePool } = require('./config/db');\r\nconst fs = require('fs').promises;\r\nconst path = require('path');\r\n\r\nconsole.log('🔍 BACKUP SYSTEM DIAGNOSTIC TOOL');\r\nconsole.log('================================\\n');\r\n\r\nasync function checkDatabaseTables() {\r\n    console.log('📊 1. Checking Database Tables...');\r\n    \r\n    try {\r\n        // Check if backup_settings table exists\r\n        const [settingsResult] = await promisePool.query(`\r\n            SELECT COUNT(*) as count \r\n            FROM information_schema.tables \r\n            WHERE table_schema = DATABASE() \r\n            AND table_name = 'backup_settings'\r\n        `);\r\n        \r\n        console.log(`   backup_settings table exists: ${settingsResult[0].count > 0 ? '✅' : '❌'}`);\r\n        \r\n        // Check if backup_files table exists\r\n        const [filesResult] = await promisePool.query(`\r\n            SELECT COUNT(*) as count \r\n            FROM information_schema.tables \r\n            WHERE table_schema = DATABASE() \r\n            AND table_name = 'backup_files'\r\n        `);\r\n        \r\n        console.log(`   backup_files table exists: ${filesResult[0].count > 0 ? '✅' : '❌'}`);\r\n        \r\n        // If tables don't exist, create them\r\n        if (settingsResult[0].count === 0) {\r\n            console.log('   🔧 Creating backup_settings table...');\r\n            await promisePool.query(`\r\n                CREATE TABLE backup_settings (\r\n                    id INT PRIMARY KEY,\r\n                    settings JSON NOT NULL,\r\n                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\r\n                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\r\n                )\r\n            `);\r\n            console.log('   ✅ backup_settings table created');\r\n        }\r\n        \r\n        if (filesResult[0].count === 0) {\r\n            console.log('   🔧 Creating backup_files table...');\r\n            await promisePool.query(`\r\n                CREATE TABLE backup_files (\r\n                    id VARCHAR(255) PRIMARY KEY,\r\n                    filename VARCHAR(255) NOT NULL,\r\n                    size BIGINT DEFAULT 0,\r\n                    type ENUM('full', 'database', 'files') NOT NULL,\r\n                    status ENUM('completed', 'in_progress', 'failed') NOT NULL,\r\n                    error_message TEXT,\r\n                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\r\n                )\r\n            `);\r\n            console.log('   ✅ backup_files table created');\r\n        }\r\n        \r\n        // Check current data\r\n        const [settingsData] = await promisePool.query('SELECT * FROM backup_settings');\r\n        const [filesData] = await promisePool.query('SELECT * FROM backup_files ORDER BY created_at DESC LIMIT 5');\r\n        \r\n        console.log(`   Settings records: ${settingsData.length}`);\r\n        console.log(`   Backup files records: ${filesData.length}`);\r\n        \r\n        if (filesData.length > 0) {\r\n            console.log('   Recent backup files:');\r\n            filesData.forEach(file => {\r\n                console.log(`     - ${file.filename} (${file.status}) - ${file.created_at}`);\r\n            });\r\n        }\r\n        \r\n    } catch (error) {\r\n        console.error('   ❌ Database check failed:', error.message);\r\n    }\r\n    \r\n    console.log('');\r\n}\r\n\r\nasync function checkBackupDirectory() {\r\n    console.log('📁 2. Checking Backup Directory...');\r\n    \r\n    const backupDir = process.env.[REDACTED] || '/opt/backups/orthodox-metrics';\r\n    console.log(`   Configured backup directory: ${backupDir}`);\r\n    \r\n    try {\r\n        // Check if directory exists\r\n        const stats = await fs.stat(backupDir);\r\n        console.log(`   Directory exists: ✅`);\r\n        console.log(`   Directory created: ${stats.birthtime}`);\r\n        \r\n        // List files in backup directory\r\n        const files = await fs.readdir(backupDir);\r\n        console.log(`   Files in backup directory: ${files.length}`);\r\n        \r\n        if (files.length > 0) {\r\n            console.log('   Backup files found:');\r\n            for (const file of files.slice(0, 5)) {\r\n                try {\r\n                    const filePath = path.join(backupDir, file);\r\n                    const fileStats = await fs.stat(filePath);\r\n                    const sizeMB = (fileStats.size / (1024 * 1024)).toFixed(2);\r\n                    console.log(`     - ${file} (${sizeMB} MB) - ${fileStats.mtime}`);\r\n                } catch (err) {\r\n                    console.log(`     - ${file} (cannot read stats)`);\r\n                }\r\n            }\r\n        }\r\n        \r\n        // Calculate total backup space\r\n        let totalSize = 0;\r\n        for (const file of files) {\r\n            try {\r\n                const filePath = path.join(backupDir, file);\r\n                const fileStats = await fs.stat(filePath);\r\n                totalSize += fileStats.size;\r\n            } catch (err) {\r\n                // Skip files that can't be read\r\n            }\r\n        }\r\n        \r\n        const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);\r\n        console.log(`   Total backup space used: ${totalSizeMB} MB`);\r\n        \r\n    } catch (error) {\r\n        if (error.code === 'ENOENT') {\r\n            console.log(`   Directory exists: ❌`);\r\n            console.log(`   🔧 Creating backup directory...`);\r\n            try {\r\n                await fs.mkdir(backupDir, { recursive: true });\r\n                console.log(`   ✅ Backup directory created`);\r\n            } catch (createError) {\r\n                console.error(`   ❌ Failed to create directory: ${createError.message}`);\r\n            }\r\n        } else {\r\n            console.error(`   ❌ Directory check failed: ${error.message}`);\r\n        }\r\n    }\r\n    \r\n    console.log('');\r\n}\r\n\r\nasync function checkEnvironmentConfig() {\r\n    console.log('⚙️  3. Checking Environment Configuration...');\r\n    \r\n    const config = {\r\n        'BACKUP_DIR': process.env.[REDACTED] || '/opt/backups/orthodox-metrics',\r\n        'APP_DIR': process.env.[REDACTED] || '/var/www/orthodox-church-mgmt',\r\n        'DB_HOST': process.env.[REDACTED] || 'localhost',\r\n        'DB_USER': process.env.[REDACTED] || 'ocm_user',\r\n        'DB_NAME': process.env.[REDACTED] || 'orthodox_church_management'\r\n    };\r\n    \r\n    console.log('   Environment variables:');\r\n    Object.entries(config).forEach(([key, value]) => {\r\n        console.log(`     ${key}: ${value}`);\r\n    });\r\n    \r\n    console.log('');\r\n}\r\n\r\nasync function testDatabaseConnection() {\r\n    console.log('🔌 4. Testing Database Connection...');\r\n    \r\n    try {\r\n        const [result] = await promisePool.query('SELECT NOW() as current_time, DATABASE() as current_db');\r\n        console.log(`   Database connection: ✅`);\r\n        console.log(`   Current database: ${result[0].current_db}`);\r\n        console.log(`   Server time: ${result[0].current_time}`);\r\n        \r\n        // Test backup settings access\r\n        try {\r\n            const [settings] = await promisePool.query('SELECT * FROM backup_settings WHERE id = 1');\r\n            console.log(`   Backup settings accessible: ✅`);\r\n            if (settings.length > 0) {\r\n                const config = JSON.parse(settings[0].settings);\r\n                console.log(`   Settings loaded: enabled=${config.enabled}, schedule='${config.schedule}'`);\r\n            } else {\r\n                console.log(`   No settings found, will use defaults`);\r\n            }\r\n        } catch (settingsError) {\r\n            console.error(`   ❌ Backup settings access failed: ${settingsError.message}`);\r\n        }\r\n        \r\n    } catch (error) {\r\n        console.error(`   ❌ Database connection failed: ${error.message}`);\r\n    }\r\n    \r\n    console.log('');\r\n}\r\n\r\nasync function checkDatabaseList() {\r\n    console.log('🗄️  5. Checking Available Databases...');\r\n    \r\n    try {\r\n        const [databases] = await promisePool.query(`\r\n            SHOW DATABASES \r\n            WHERE \\`Database\\` NOT IN ('information_schema', 'mysql', 'performance_schema', 'sys')\r\n        `);\r\n        \r\n        console.log(`   Found ${databases.length} databases to backup:`);\r\n        databases.forEach(db => {\r\n            console.log(`     - ${db.Database}`);\r\n        });\r\n        \r\n    } catch (error) {\r\n        console.error(`   ❌ Database list failed: ${error.message}`);\r\n    }\r\n    \r\n    console.log('');\r\n}\r\n\r\nasync function checkRequiredPackages() {\r\n    console.log('📦 6. Checking Required Packages...');\r\n    \r\n    const requiredPackages = [\r\n        'mysqldump',\r\n        'archiver',\r\n        'node-cron'\r\n    ];\r\n    \r\n    for (const pkg of requiredPackages) {\r\n        try {\r\n            require(pkg);\r\n            console.log(`   ${pkg}: ✅`);\r\n        } catch (error) {\r\n            console.log(`   ${pkg}: ❌ (${error.message})`);\r\n        }\r\n    }\r\n    \r\n    console.log('');\r\n}\r\n\r\nasync function testBackupFunctionality() {\r\n    console.log('🧪 7. Testing Core Backup Functions...');\r\n    \r\n    try {\r\n        // Test backup directory creation\r\n        const backupDir = process.env.[REDACTED] || '/opt/backups/orthodox-metrics';\r\n        await fs.mkdir(backupDir, { recursive: true });\r\n        console.log(`   Backup directory creation: ✅`);\r\n        \r\n        // Test file writing\r\n        const testFile = path.join(backupDir, 'test-write.txt');\r\n        await fs.writeFile(testFile, 'Test backup system write access');\r\n        await fs.unlink(testFile);\r\n        console.log(`   File write permissions: ✅`);\r\n        \r\n        // Test backup settings initialization\r\n        const defaultSettings = {\r\n            enabled: true,\r\n            schedule: '0 2 * * *',\r\n            retention_days: 30,\r\n            include_database: true,\r\n            include_files: true,\r\n            include_uploads: true,\r\n            compression: true,\r\n            email_notifications: false,\r\n            notification_email: '',\r\n            backup_location: backupDir,\r\n            max_backups: 50,\r\n        };\r\n        \r\n        await promisePool.query(\r\n            'INSERT INTO backup_settings (id, settings) VALUES (1, ?) ON DUPLICATE KEY UPDATE settings = ?',\r\n            [JSON.stringify(defaultSettings), JSON.stringify(defaultSettings)]\r\n        );\r\n        console.log(`   Backup settings initialization: ✅`);\r\n        \r\n    } catch (error) {\r\n        console.error(`   ❌ Backup functionality test failed: ${error.message}`);\r\n    }\r\n    \r\n    console.log('');\r\n}\r\n\r\nasync function main() {\r\n    try {\r\n        await checkDatabaseTables();\r\n        await checkBackupDirectory();\r\n        await checkEnvironmentConfig();\r\n        await testDatabaseConnection();\r\n        await checkDatabaseList();\r\n        await checkRequiredPackages();\r\n        await testBackupFunctionality();\r\n        \r\n        console.log('🎉 DIAGNOSTIC COMPLETE!');\r\n        console.log('========================');\r\n        console.log('');\r\n        console.log('📋 SUMMARY:');\r\n        console.log('- Database tables should now be created if they were missing');\r\n        console.log('- Backup directory should be created and accessible');\r\n        console.log('- Default settings should be initialized');\r\n        console.log('- Check the logs above for any ❌ errors that need attention');\r\n        console.log('');\r\n        console.log('🔧 NEXT STEPS:');\r\n        console.log('1. Restart your server to pick up any database changes');\r\n        console.log('2. Access the backup settings at /admin/settings (Backup tab)');\r\n        console.log('3. Check if storage information and backup files now load correctly');\r\n        console.log('');\r\n        \r\n    } catch (error) {\r\n        console.error('❌ DIAGNOSTIC FAILED:', error);\r\n    } finally {\r\n        process.exit(0);\r\n    }\r\n}\r\n\r\n// Run the diagnostic\r\nmain().catch(console.error);\r\n"
+    },
+    "complexity": {
+      "totalLines": 327,
+      "codeLines": 250,
+      "commentLines": 23,
+      "commentRatio": 0.08424908424908426,
+      "averageLineLength": 41.6996336996337
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.154Z"
+  },
+  "contentHash": "926f4674f3e282883b559f45429fdaed266b6224128374e91b80d13a0a3b87a9",
+  "discoveredAt": "2025-07-28T07:20:01.154Z"
+}

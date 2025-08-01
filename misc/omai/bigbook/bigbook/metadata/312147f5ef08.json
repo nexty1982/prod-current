@@ -1,0 +1,83 @@
+{
+  "id": "312147f5ef08",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/ocrSecure.js",
+  "relativePath": "server/routes/ocrSecure.js",
+  "name": "ocrSecure.js",
+  "extension": ".js",
+  "size": 8527,
+  "modified": "2025-07-04T23:08:08.000Z",
+  "created": "2025-07-09T00:48:38.482Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 270,
+      "characters": 8109,
+      "words": 919
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "multer",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "express-rate-limit",
+        "line": 5
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 19,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 30,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 31,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// OCR Routes with Barcode Validation - New Secure System\r\nconst express = require('express');\r\nconst multer = require('multer');\r\nconst path = require('path');\r\nconst rateLimit = require('express-rate-limit');\r\nconst ocrController = require('../controllers/ocrController');\r\n\r\nconst router = express.Router();\r\n\r\n// Mock logger for compatibility\r\nconst logger = {\r\n  info: (msg) => console.log('[INFO]', msg),\r\n  error: (msg) => console.error('[ERROR]', msg)\r\n};\r\n\r\n// Configure multer for file uploads\r\nconst storage = multer.diskStorage({\r\n  destination: (req, file, cb) => {\r\n    cb(null, process.env.[REDACTED] || './uploads');\r\n  },\r\n  filename: (req, file, cb) => {\r\n    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);\r\n    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));\r\n  }\r\n});\r\n\r\nconst upload = multer({\r\n  storage,\r\n  limits: {\r\n    fileSize: parseInt(process.env.[REDACTED]) || 20 * 1024 * 1024, // 20MB\r\n    files: parseInt(process.env.[REDACTED]) || 10\r\n  },\r\n  fileFilter: (req, file, cb) => {\r\n    const allowedTypes = [\r\n      'image/jpeg',\r\n      'image/png',\r\n      'image/tiff',\r\n      'image/gif',\r\n      'image/webp',\r\n      'application/pdf'\r\n    ];\r\n    \r\n    if (allowedTypes.includes(file.mimetype)) {\r\n      cb(null, true);\r\n    } else {\r\n      cb(new Error(`Unsupported file type: ${file.mimetype}`), false);\r\n    }\r\n  }\r\n});\r\n\r\n// Rate limiting for session creation\r\nconst sessionCreateLimit = rateLimit({\r\n  windowMs: 15 * 60 * 1000, // 15 minutes\r\n  max: 5, // 5 sessions per IP per 15 minutes\r\n  message: {\r\n    success: false,\r\n    error: 'Too many session creation attempts. Please try again later.'\r\n  }\r\n});\r\n\r\n// Rate limiting for uploads\r\nconst uploadLimit = rateLimit({\r\n  windowMs: 60 * 60 * 1000, // 1 hour\r\n  max: 20, // 20 uploads per IP per hour\r\n  message: {\r\n    success: false,\r\n    error: 'Upload limit exceeded. Please try again later.'\r\n  }\r\n});\r\n\r\n// Middleware to log requests\r\nrouter.use((req, res, next) => {\r\n  logger.info(`OCR API Request: ${req.method} ${req.path} from ${req.ip}`);\r\n  next();\r\n});\r\n\r\n/**\r\n * POST /api/ocr/session\r\n * Create a new OCR session with barcode\r\n */\r\nrouter.post('/session', sessionCreateLimit, ocrController.createSession);\r\n\r\n/**\r\n * GET /validate-upload\r\n * Validate barcode scan (public endpoint for mobile access)\r\n */\r\nrouter.get('/validate-upload', ocrController.validateSession);\r\n\r\n/**\r\n * GET /api/ocr/session/:sessionId/status\r\n * Check session status and verification state\r\n */\r\nrouter.get('/session/:sessionId/status', ocrController.checkSessionStatus);\r\n\r\n/**\r\n * POST /api/ocr/session/:sessionId/disclaimer\r\n * Accept disclaimer and configure session\r\n */\r\nrouter.post('/session/:sessionId/disclaimer', ocrController.acceptDisclaimer);\r\n\r\n/**\r\n * POST /api/ocr/session/:sessionId/upload\r\n * Upload and process images (requires verified session)\r\n */\r\nrouter.post('/session/:sessionId/upload', \r\n  uploadLimit,\r\n  upload.array('images', 10),\r\n  (req, res, next) => {\r\n    // Validate file upload\r\n    if (!req.files || req.files.length === 0) {\r\n      return res.status(400).json({\r\n        success: false,\r\n        error: 'No files uploaded'\r\n      });\r\n    }\r\n    \r\n    // Log upload details\r\n    logger.info(`Received ${req.files.length} files for session ${req.params.sessionId}`);\r\n    req.files.forEach(file => {\r\n      logger.info(`  - ${file.originalname} (${file.size} bytes, ${file.mimetype})`);\r\n    });\r\n    \r\n    next();\r\n  },\r\n  ocrController.uploadAndProcess\r\n);\r\n\r\n/**\r\n * GET /api/ocr/session/:sessionId/results\r\n * Get processing results\r\n */\r\nrouter.get('/session/:sessionId/results', ocrController.getResults);\r\n\r\n/**\r\n * GET /api/ocr/download/:sessionId/:format\r\n * Download results in PDF or Excel format\r\n */\r\nrouter.get('/download/:sessionId/:format', async (req, res) => {\r\n  try {\r\n    const { sessionId, format } = req.params;\r\n    \r\n    if (!['pdf', 'xlsx'].includes(format)) {\r\n      return res.status(400).json({\r\n        success: false,\r\n        error: 'Invalid format. Use pdf or xlsx.'\r\n      });\r\n    }\r\n    \r\n    // For now, return a placeholder response\r\n    res.json({\r\n      success: true,\r\n      message: `${format.toUpperCase()} download will be available soon`,\r\n      sessionId,\r\n      format\r\n    });\r\n    \r\n  } catch (error) {\r\n    logger.error('Download failed:', error);\r\n    res.status(500).json({\r\n      success: false,\r\n      error: 'Failed to generate download'\r\n    });\r\n  }\r\n});\r\n\r\n/**\r\n * GET /api/ocr/languages\r\n * Get supported languages\r\n */\r\nrouter.get('/languages', (req, res) => {\r\n  res.json({\r\n    success: true,\r\n    languages: [\r\n      { code: 'en', name: 'English', flag: '🇺🇸' },\r\n      { code: 'gr', name: 'Greek', flag: '🇬🇷' },\r\n      { code: 'ru', name: 'Russian', flag: '🇷🇺' },\r\n      { code: 'ro', name: 'Romanian', flag: '🇷🇴' },\r\n      { code: 'sr', name: 'Serbian', flag: '🇷🇸' },\r\n      { code: 'bg', name: 'Bulgarian', flag: '🇧🇬' }\r\n    ]\r\n  });\r\n});\r\n\r\n/**\r\n * GET /api/ocr/disclaimers/:language\r\n * Get disclaimer text in specified language\r\n */\r\nrouter.get('/disclaimers/:language', (req, res) => {\r\n  const { language } = req.params;\r\n  \r\n  const disclaimers = {\r\n    en: {\r\n      title: 'Terms of Use - OCR Processing Service',\r\n      sections: [\r\n        {\r\n          title: 'Data Processing',\r\n          content: 'By uploading documents, you consent to OCR processing using Google Vision API. Your images will be temporarily stored and processed on our secure servers.'\r\n        },\r\n        {\r\n          title: 'Privacy',\r\n          content: 'Uploaded documents are automatically deleted after 24 hours. We do not retain copies of your documents or extracted text beyond this period.'\r\n        },\r\n        {\r\n          title: 'Accuracy',\r\n          content: 'OCR results may contain errors. We recommend reviewing all extracted text for accuracy before using it for official purposes.'\r\n        },\r\n        {\r\n          title: 'Liability',\r\n          content: 'This service is provided \"as-is\" without warranties. We are not liable for any errors, omissions, or damages arising from the use of this service.'\r\n        },\r\n        {\r\n          title: 'Acceptable Use',\r\n          content: 'This service is intended for Orthodox church records only. Do not upload personal documents, copyrighted material, or sensitive information.'\r\n        }\r\n      ],\r\n      acceptance: 'I understand and accept these terms',\r\n      required: 'You must accept the terms to continue'\r\n    },\r\n    gr: {\r\n      title: 'Όροι Χρήσης - Υπηρεσία Επεξεργασίας OCR',\r\n      sections: [\r\n        {\r\n          title: 'Επεξεργασία Δεδομένων',\r\n          content: 'Ανεβάζοντας έγγραφα, συναινείτε στην επεξεργασία OCR με χρήση Google Vision API. Οι εικόνες σας θα αποθηκευτούν προσωρινά και θα επεξεργαστούν στους ασφαλείς διακομιστές μας.'\r\n        },\r\n        {\r\n          title: 'Απόρρητο',\r\n          content: 'Τα έγγραφα που ανεβάζετε διαγράφονται αυτόματα μετά από 24 ώρες. Δεν διατηρούμε αντίγραφα των εγγράφων ή του εξαγόμενου κειμένου πέρα από αυτό το διάστημα.'\r\n        }\r\n      ],\r\n      acceptance: 'Κατανοώ και αποδέχομαι αυτούς τους όρους',\r\n      required: 'Πρέπει να αποδεχτείτε τους όρους για να συνεχίσετε'\r\n    }\r\n  };\r\n  \r\n  const disclaimer = disclaimers[language] || disclaimers.en;\r\n  \r\n  res.json({\r\n    success: true,\r\n    language,\r\n    disclaimer\r\n  });\r\n});\r\n\r\n// Error handling middleware\r\nrouter.use((error, req, res, next) => {\r\n  logger.error('OCR API Error:', error);\r\n  \r\n  if (error instanceof multer.MulterError) {\r\n    if (error.code === 'LIMIT_FILE_SIZE') {\r\n      return res.status(400).json({\r\n        success: false,\r\n        error: 'File too large. Maximum size is 20MB.'\r\n      });\r\n    } else if (error.code === 'LIMIT_FILE_COUNT') {\r\n      return res.status(400).json({\r\n        success: false,\r\n        error: 'Too many files. Maximum 10 files per upload.'\r\n      });\r\n    }\r\n  }\r\n  \r\n  res.status(500).json({\r\n    success: false,\r\n    error: error.message || 'Internal server error'\r\n  });\r\n});\r\n\r\nmodule.exports = router;\r\n"
+    },
+    "complexity": {
+      "totalLines": 270,
+      "codeLines": 194,
+      "commentLines": 46,
+      "commentRatio": 0.19166666666666668,
+      "averageLineLength": 32.40416666666667
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.526Z"
+  },
+  "contentHash": "157bab595591bb7960f143ebe63c85a7b2825d94c209d8df7dbc8b3c4b028fb3",
+  "discoveredAt": "2025-07-28T07:20:00.526Z"
+}

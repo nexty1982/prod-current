@@ -1,0 +1,43 @@
+{
+  "id": "17100c309343",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/diagnose-build-history-issue.sh",
+  "relativePath": "scripts/diagnose-build-history-issue.sh",
+  "name": "diagnose-build-history-issue.sh",
+  "extension": ".sh",
+  "size": 6181,
+  "modified": "2025-07-27T16:58:19.563Z",
+  "created": "2025-07-27T16:54:21.918Z",
+  "classification": {
+    "type": "Build Scripts",
+    "category": "DevOps > Build",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 185,
+      "characters": 6079,
+      "words": 848
+    },
+    "classification": {
+      "type": "Build Scripts",
+      "category": "DevOps > Build",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 185,
+      "codeLines": 149,
+      "commentLines": 15,
+      "commentRatio": 0.09146341463414634,
+      "averageLineLength": 35.798780487804876
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.093Z"
+  },
+  "contentHash": "82cfe4c69d89f2f7530344cdb139de88fb1fde2ffc4aba1d22ee3054f78e0fba",
+  "discoveredAt": "2025-07-28T07:19:59.093Z"
+}

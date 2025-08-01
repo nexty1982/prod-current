@@ -3,7 +3,7 @@
 import React from 'react';
 import { Tabs, Tab, Box } from '@mui/material';
 import { IconUserCircle } from '@tabler/icons-react';
-import { Link, useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router-dom';
 
 const ProfileTab = () => {
   const location = useLocation();

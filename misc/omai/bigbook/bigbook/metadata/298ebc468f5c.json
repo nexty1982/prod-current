@@ -1,0 +1,64 @@
+{
+  "id": "298ebc468f5c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/setup-jit-terminal.sh",
+  "relativePath": "scripts/7-26-25/setup-jit-terminal.sh",
+  "name": "setup-jit-terminal.sh",
+  "extension": ".sh",
+  "size": 6999,
+  "modified": "2025-07-25T06:37:45.527Z",
+  "created": "2025-07-25T06:31:32.245Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 254,
+      "characters": 6963,
+      "words": 807
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 62
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 81
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 177
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 186
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 254,
+      "codeLines": 179,
+      "commentLines": 26,
+      "commentRatio": 0.12682926829268293,
+      "averageLineLength": 32.73170731707317
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.036Z"
+  },
+  "contentHash": "403534f9a77a8cee5dc92298f1f08a5bee6c40f773235437dfb95e1b0957d21d",
+  "discoveredAt": "2025-07-28T07:19:59.036Z"
+}

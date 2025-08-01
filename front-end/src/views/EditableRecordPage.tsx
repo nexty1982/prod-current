@@ -73,7 +73,7 @@ const EditableRecordPage: React.FC<EditableRecordPageProps> = ({
   const recordType = propRecordType || (params.recordType as RecordType) || 'baptism';
   
   // Check if user has edit permissions
-  const canEdit = user && ['super_admin', 'admin', 'priest', 'deacon'].includes(user.role);
+  const canEdit = user && ['super_admin', 'admin', 'manager'].includes(user.role);
   const isReadonly = readonly || !canEdit;
   
   // Initialize record state

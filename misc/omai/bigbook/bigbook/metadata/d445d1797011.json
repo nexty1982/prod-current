@@ -1,0 +1,43 @@
+{
+  "id": "d445d1797011",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/fix-kanban-position-conflicts-robust.sql",
+  "relativePath": "server/fix-kanban-position-conflicts-robust.sql",
+  "name": "fix-kanban-position-conflicts-robust.sql",
+  "extension": ".sql",
+  "size": 6429,
+  "modified": "2025-07-23T19:56:57.041Z",
+  "created": "2025-07-23T19:56:53.263Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 201,
+      "characters": 6427,
+      "words": 646
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 201,
+      "codeLines": 170,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 36.305882352941175
+    },
+    "lastAnalyzed": "2025-07-26T04:17:10.948Z"
+  },
+  "contentHash": "83727ad9f40beeeb3febc8a88f3e9d734b49c2914279ef6dcaecea25d94d296f",
+  "discoveredAt": "2025-07-26T04:17:10.948Z"
+}

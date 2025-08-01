@@ -1,0 +1,43 @@
+{
+  "id": "8b6ec166a9a4",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/testing/analyze-ocr-patterns.js",
+  "relativePath": "server/testing/analyze-ocr-patterns.js",
+  "name": "analyze-ocr-patterns.js",
+  "extension": ".js",
+  "size": 10724,
+  "modified": "2025-07-14T02:37:07.397Z",
+  "created": "2025-07-11T03:05:38.817Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 291,
+      "characters": 10311,
+      "words": 930
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 291,
+      "codeLines": 221,
+      "commentLines": 20,
+      "commentRatio": 0.08298755186721991,
+      "averageLineLength": 40.995850622406635
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.177Z"
+  },
+  "contentHash": "ad999e5538b70f4a760023bb6422ff0e3743fd3a72981610a835d636c8303301",
+  "discoveredAt": "2025-07-28T07:20:01.177Z"
+}

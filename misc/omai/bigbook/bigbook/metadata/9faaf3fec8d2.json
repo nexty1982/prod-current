@@ -1,0 +1,49 @@
+{
+  "id": "9faaf3fec8d2",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/sample-parish-map/ParishMap.js",
+  "relativePath": "sample-parish-map/ParishMap.js",
+  "name": "ParishMap.js",
+  "extension": ".js",
+  "size": 4809,
+  "modified": "2025-07-27T04:46:44.602Z",
+  "created": "2025-07-27T04:46:41.047Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 125,
+      "characters": 4781,
+      "words": 485
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 125,
+      "codeLines": 114,
+      "commentLines": 1,
+      "commentRatio": 0.008695652173913044,
+      "averageLineLength": 40.21739130434783
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.972Z"
+  },
+  "contentHash": "10bf5b790d6269b900f57e429bdd5983451c6daf85cb29c8c5c8beedf58c692c",
+  "discoveredAt": "2025-07-28T07:19:58.972Z"
+}

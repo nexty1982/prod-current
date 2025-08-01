@@ -15,7 +15,7 @@ class EmailSender {
       }
     });
     
-    this.fromEmail = process.env.FROM_EMAIL || 'noreply@orthodoxmetrics.com';
+    this.fromEmail = process.env.FROM_EMAIL || 'noreply@orthodmetrics.com';
     this.fromName = process.env.FROM_NAME || 'Orthodox Metrics OCR System';
   }
   
@@ -307,7 +307,7 @@ class EmailSender {
         
         <div class="footer">
           <p>${translations.footerText}</p>
-          <p><strong>${translations.supportText}</strong> support@orthodoxmetrics.com</p>
+          <p><strong>${translations.supportText}</strong> support@orthodmetrics.com</p>
         </div>
       </div>
     </body>
@@ -367,7 +367,7 @@ class EmailSender {
     }
     
     text += `${translations.footerText}\n`;
-    text += `${translations.supportText} support@orthodoxmetrics.com\n`;
+    text += `${translations.supportText} support@orthodmetrics.com\n`;
     
     return text;
   }

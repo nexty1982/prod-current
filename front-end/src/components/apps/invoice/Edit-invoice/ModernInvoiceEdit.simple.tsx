@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
     Typography,
     Button,
@@ -66,7 +66,7 @@ const ModernInvoiceEdit: React.FC = () => {
 
     // Form state
     const [formData, setFormData] = useState({
-        church_id: 1,
+        church_id: 14,
         issue_date: new Date(),
         due_date: new Date(),
         currency: 'USD',

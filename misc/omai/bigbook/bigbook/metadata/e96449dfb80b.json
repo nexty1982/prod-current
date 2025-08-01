@@ -1,0 +1,43 @@
+{
+  "id": "e96449dfb80b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/VRT_E2E_TEST_SCRIPT.md",
+  "relativePath": "VRT_E2E_TEST_SCRIPT.md",
+  "name": "VRT_E2E_TEST_SCRIPT.md",
+  "extension": ".md",
+  "size": 19015,
+  "modified": "2025-07-25T05:39:25.132Z",
+  "created": "2025-07-25T05:39:23.674Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 6
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 672,
+      "characters": 19015,
+      "words": 3074
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 6
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 672,
+      "codeLines": 382,
+      "commentLines": 158,
+      "commentRatio": 0.29259259259259257,
+      "averageLineLength": 33.72592592592593
+    },
+    "lastAnalyzed": "2025-07-26T04:17:09.226Z"
+  },
+  "contentHash": "cd806018921e07800e251d9e0b468ba20bf7c85937afc8a11377d28c42fee499",
+  "discoveredAt": "2025-07-26T04:17:09.226Z"
+}

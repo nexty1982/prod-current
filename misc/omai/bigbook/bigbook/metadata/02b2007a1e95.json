@@ -1,0 +1,69 @@
+{
+  "id": "02b2007a1e95",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/3143c684159e.json",
+  "relativePath": "bigbook/metadata/3143c684159e.json",
+  "name": "3143c684159e.json",
+  "extension": ".json",
+  "size": 21847,
+  "modified": "2025-07-26T04:17:09.678Z",
+  "created": "2025-07-26T04:17:09.678Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 105,
+      "characters": 21835,
+      "words": 1774
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 5
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 92
+      },
+      {
+        "type": "npm_package",
+        "name": "rollup-plugin-visualizer",
+        "line": 92
+      },
+      {
+        "type": "npm_package",
+        "name": "nodemailer",
+        "line": 92
+      },
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 92
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 92
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 105,
+      "codeLines": 105,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 206.96190476190475
+    },
+    "lastAnalyzed": "2025-07-28T07:19:56.822Z"
+  },
+  "contentHash": "99d5e49cbe857ed64a033e404bd248622a33ab29000c2eafa762c228f5a15925",
+  "discoveredAt": "2025-07-28T07:19:56.822Z"
+}

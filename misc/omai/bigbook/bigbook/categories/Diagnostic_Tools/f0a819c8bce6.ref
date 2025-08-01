@@ -1,0 +1,6 @@
+{
+  "id": "f0a819c8bce6",
+  "name": "diagnose-backend-issues.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/diagnose-backend-issues.sh",
+  "type": "Troubleshooting Utilities"
+}

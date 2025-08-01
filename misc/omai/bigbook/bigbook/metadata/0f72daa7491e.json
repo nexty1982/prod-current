@@ -1,0 +1,74 @@
+{
+  "id": "0f72daa7491e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/update-api-imports.sh",
+  "relativePath": "server/debug/update-api-imports.sh",
+  "name": "update-api-imports.sh",
+  "extension": ".sh",
+  "size": 5953,
+  "modified": "2025-07-23T15:11:19.624Z",
+  "created": "2025-07-23T15:11:17.893Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 148,
+      "characters": 5895,
+      "words": 622
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "\\",
+        "line": 43
+      },
+      {
+        "type": "npm_package",
+        "name": "\\",
+        "line": 46
+      },
+      {
+        "type": "npm_package",
+        "name": "\\",
+        "line": 49
+      },
+      {
+        "type": "npm_package",
+        "name": "\\",
+        "line": 52
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 116
+      },
+      {
+        "type": "system_command",
+        "name": "npm",
+        "line": 120
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 148,
+      "codeLines": 102,
+      "commentLines": 16,
+      "commentRatio": 0.13559322033898305,
+      "averageLineLength": 47.96610169491525
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.255Z"
+  },
+  "contentHash": "83ede1cbd37841f3934dfce4c2789ac0cb25852cca52088284cb7b53ddf73815",
+  "discoveredAt": "2025-07-28T07:20:00.255Z"
+}

@@ -35,6 +35,7 @@ import {
   Info as InfoIcon
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
+import { adminAPI } from '../api/admin.api';
 
 // ─── TYPES ─────────────────────────────────────────────────────
 interface Church {
@@ -95,17 +96,17 @@ const ImportRecordsButton: React.FC = () => {
   const fetchChurches = async () => {
     setLoadingChurches(true);
     try {
-      const response = await axios.get('/api/churches');
-      console.log('Churches API response:', response.data);
+      const response = await adminAPI.churches.getAll();
+      console.log('Churches API response:', response);
       
       // Handle different response formats
       let churchesData = [];
-      if (response.data.success && response.data.churches) {
-        churchesData = response.data.churches;
-      } else if (Array.isArray(response.data)) {
-        churchesData = response.data;
+      if (response.churches) {
+        churchesData = response.churches;
+      } else if (Array.isArray(response)) {
+        churchesData = response;
       } else {
-        console.error('Unexpected churches API response format:', response.data);
+        console.error('Unexpected churches API response format:', response);
         setErrors(['Unexpected response format from churches API']);
         return;
       }

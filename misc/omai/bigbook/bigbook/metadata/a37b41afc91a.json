@@ -1,0 +1,59 @@
+{
+  "id": "a37b41afc91a",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/analytics/anomaly-detector.ts",
+  "relativePath": "services/om-ai/analytics/anomaly-detector.ts",
+  "name": "anomaly-detector.ts",
+  "extension": ".ts",
+  "size": 15866,
+  "modified": "2025-07-25T01:48:56.300Z",
+  "created": "2025-07-25T01:42:21.671Z",
+  "classification": {
+    "type": "Other",
+    "category": "Uncategorized",
+    "confidence": 0
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 430,
+      "characters": 15863,
+      "words": 1544
+    },
+    "classification": {
+      "type": "Other",
+      "category": "Uncategorized",
+      "confidence": 0
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 430,
+      "codeLines": 341,
+      "commentLines": 9,
+      "commentRatio": 0.025714285714285714,
+      "averageLineLength": 43.26857142857143
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.386Z"
+  },
+  "contentHash": "e2c3251a82a504f584d561cdc3358c13d39a7bb01609b256084241fc8739b14d",
+  "discoveredAt": "2025-07-28T07:20:01.386Z"
+}

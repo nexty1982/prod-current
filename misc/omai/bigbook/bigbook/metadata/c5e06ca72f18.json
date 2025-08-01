@@ -1,0 +1,43 @@
+{
+  "id": "c5e06ca72f18",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/api-audit-quick.sh",
+  "relativePath": "scripts/api-audit-quick.sh",
+  "name": "api-audit-quick.sh",
+  "extension": ".sh",
+  "size": 8242,
+  "modified": "2025-07-27T04:25:39.793Z",
+  "created": "2025-07-27T04:24:33.056Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 265,
+      "characters": 8194,
+      "words": 898
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 265,
+      "codeLines": 194,
+      "commentLines": 29,
+      "commentRatio": 0.13004484304932734,
+      "averageLineLength": 35.14798206278027
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.070Z"
+  },
+  "contentHash": "04967080ea4b2b0e4fba75e8c4b2cfe27629fcb4ce28c9b85901fd03312d8cba",
+  "discoveredAt": "2025-07-28T07:19:59.070Z"
+}

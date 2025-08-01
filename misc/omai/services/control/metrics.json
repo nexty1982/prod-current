@@ -1,0 +1,84 @@
+{
+  "lastUpdated": "2025-01-27T00:00:00Z",
+  "agentMetrics": {
+    "omai-doc-bot": {
+      "tasksRun": 15,
+      "successRate": 93.33,
+      "averageDuration": 1200,
+      "lastRun": "2025-01-27T10:00:00Z",
+      "commonFailures": ["File permission denied", "Template not found"],
+      "topIssues": ["Missing component documentation", "Outdated doc templates"]
+    },
+    "omai-api-guardian": {
+      "tasksRun": 23,
+      "successRate": 95.65,
+      "averageDuration": 1800,
+      "lastRun": "2025-01-27T09:30:00Z",
+      "commonFailures": ["Connection timeout", "Invalid route format"],
+      "topIssues": ["Missing API endpoints", "Route validation errors"]
+    },
+    "omai-schema-sentinel": {
+      "tasksRun": 8,
+      "successRate": 75.00,
+      "averageDuration": 3500,
+      "lastRun": "2025-01-27T09:00:00Z",
+      "commonFailures": ["Database connection failed", "Schema mismatch"],
+      "topIssues": ["Missing record schemas", "Database sync issues"]
+    },
+    "omai-ui-validator": {
+      "tasksRun": 12,
+      "successRate": 91.67,
+      "averageDuration": 900,
+      "lastRun": "2025-01-27T08:45:00Z",
+      "commonFailures": ["Component not found", "Invalid props"],
+      "topIssues": ["Unlinked components", "Outdated component versions"]
+    },
+    "omai-audit-agent": {
+      "tasksRun": 5,
+      "successRate": 100.00,
+      "averageDuration": 600,
+      "lastRun": "2025-01-27T08:30:00Z",
+      "commonFailures": [],
+      "topIssues": ["Pages without audit tracking", "Missing audit logs"]
+    }
+  },
+  "systemMetrics": {
+    "totalTasksRun": 63,
+    "overallSuccessRate": 92.06,
+    "averageTaskDuration": 1600,
+    "activeAgents": 5,
+    "lastSystemCheck": "2025-01-27T10:00:00Z"
+  },
+  "topUnresolvedIssues": [
+    {
+      "issue": "Database connection failed for Holy Resurrection",
+      "priority": "critical",
+      "assignedAgent": "omai-schema-sentinel",
+      "daysOpen": 2
+    },
+    {
+      "issue": "Missing chrismation record schema",
+      "priority": "high",
+      "assignedAgent": "omai-schema-sentinel",
+      "daysOpen": 1
+    },
+    {
+      "issue": "Outdated component versions in SSPPOC",
+      "priority": "medium",
+      "assignedAgent": "omai-ui-validator",
+      "daysOpen": 3
+    },
+    {
+      "issue": "Missing API endpoint for chrismation records",
+      "priority": "high",
+      "assignedAgent": "omai-api-guardian",
+      "daysOpen": 1
+    },
+    {
+      "issue": "Unlinked confession-tracker component",
+      "priority": "medium",
+      "assignedAgent": "omai-ui-validator",
+      "daysOpen": 2
+    }
+  ]
+} 

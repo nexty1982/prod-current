@@ -2,7 +2,7 @@
 // @ts-ignore
 import React from 'react';
 import { Grid, Typography, Box, Breadcrumbs, Link, Theme } from '@mui/material';
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 
 import { IconCircle } from '@tabler/icons-react';
 import OrthodoxChurchIcon from 'src/components/shared/OrthodoxChurchIcon';

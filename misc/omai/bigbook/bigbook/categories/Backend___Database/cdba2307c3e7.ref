@@ -1,0 +1,6 @@
+{
+  "id": "cdba2307c3e7",
+  "name": "migration_status.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/migration_status.sh",
+  "type": "Database Scripts"
+}

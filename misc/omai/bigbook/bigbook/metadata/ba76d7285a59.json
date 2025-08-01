@@ -1,0 +1,43 @@
+{
+  "id": "ba76d7285a59",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-church-database-connection.js",
+  "relativePath": "server/debug/test-church-database-connection.js",
+  "name": "test-church-database-connection.js",
+  "extension": ".js",
+  "size": 4304,
+  "modified": "2025-07-22T21:50:47.687Z",
+  "created": "2025-07-22T21:50:45.831Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 114,
+      "characters": 4256,
+      "words": 357
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 114,
+      "codeLines": 86,
+      "commentLines": 8,
+      "commentRatio": 0.0851063829787234,
+      "averageLineLength": 42.37234042553192
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.223Z"
+  },
+  "contentHash": "161b2ac914c6eefcc589de24948b65358e74801c5a48d0230a9b0288596c3048",
+  "discoveredAt": "2025-07-28T07:20:00.223Z"
+}

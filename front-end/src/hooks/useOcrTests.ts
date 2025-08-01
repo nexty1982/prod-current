@@ -20,7 +20,7 @@ export const useOcrTests = (churchId: string, userEmail?: string) => {
   const [currentTest, setCurrentTest] = useState<string>('');
 
   // Check if user is superadmin
-  const isSuperAdmin = userEmail === 'superadmin@orthodoxmetrics.com';
+  const isSuperAdmin = userEmail === 'superadmin@orthodmetrics.com';
 
   // Update test result
   const updateTestResult = useCallback((

@@ -1,0 +1,12 @@
+{
+  "testMode": true,
+  "scanDirectories": [
+    "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server",
+    "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src",
+    "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod"
+  ],
+  "supportedExtensions": [".md", ".js", ".ts", ".json", ".sh", ".sql"],
+  "excludeDirectories": ["node_modules", ".git", "dist", "build"],
+  "securityRedaction": true,
+  "maxFileSize": 10485760
+}

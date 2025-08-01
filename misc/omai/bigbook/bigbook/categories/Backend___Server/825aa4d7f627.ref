@@ -1,0 +1,6 @@
+{
+  "id": "825aa4d7f627",
+  "name": "restart-with-https.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/restart-with-https.sh",
+  "type": "Server Scripts"
+}

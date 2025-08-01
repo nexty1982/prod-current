@@ -2,7 +2,7 @@
 // @ts-ignore
 import React, { useContext } from 'react';
 import Menudata from '../Menudata';
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 import { Box, List, Theme, useMediaQuery } from '@mui/material';
 import NavItem from '../NavItem/NavItem';
 import NavCollapse from '../NavCollapse/NavCollapse';

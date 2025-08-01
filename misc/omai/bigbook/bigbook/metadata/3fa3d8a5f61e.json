@@ -1,0 +1,43 @@
+{
+  "id": "3fa3d8a5f61e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/test-tsx-endpoint-auth.sh",
+  "relativePath": "scripts/test-tsx-endpoint-auth.sh",
+  "name": "test-tsx-endpoint-auth.sh",
+  "extension": ".sh",
+  "size": 3099,
+  "modified": "2025-07-27T20:18:42.678Z",
+  "created": "2025-07-27T20:18:40.303Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 98,
+      "characters": 3063,
+      "words": 416
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 98,
+      "codeLines": 79,
+      "commentLines": 6,
+      "commentRatio": 0.07058823529411765,
+      "averageLineLength": 34.705882352941174
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.532Z"
+  },
+  "contentHash": "2f3751fffab30c6eee54232d1d493b0a89005ba5f8cb807340bf9955104e9a1a",
+  "discoveredAt": "2025-07-28T07:19:59.532Z"
+}

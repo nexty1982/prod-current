@@ -1,0 +1,43 @@
+{
+  "id": "50dd6d888b9c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/backups/church-linkage-fix-20250722_171552/orthodoxmetrics_ocr_db_backup.sql",
+  "relativePath": "server/scripts/backups/church-linkage-fix-20250722_171552/orthodoxmetrics_ocr_db_backup.sql",
+  "name": "orthodoxmetrics_ocr_db_backup.sql",
+  "extension": ".sql",
+  "size": 1038482,
+  "modified": "2025-07-22T21:15:52.442Z",
+  "created": "2025-07-22T21:15:52.422Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 171,
+      "characters": 1032668,
+      "words": 8297
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 171,
+      "codeLines": 120,
+      "commentLines": 34,
+      "commentRatio": 0.22077922077922077,
+      "averageLineLength": 6704.532467532467
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.819Z"
+  },
+  "contentHash": "0fcb00e81ca120c31b9d59179e44f0eab8428d35c6a0fc355de8e8004c6365e6",
+  "discoveredAt": "2025-07-28T07:20:00.823Z"
+}

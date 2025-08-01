@@ -1,0 +1,43 @@
+{
+  "id": "327bf80dd0ca",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/API_DOCUMENTATION.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/API_DOCUMENTATION.md",
+  "name": "API_DOCUMENTATION.md",
+  "extension": ".md",
+  "size": 16277,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:04.564Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 765,
+      "characters": 16231,
+      "words": 1681
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 765,
+      "codeLines": 393,
+      "commentLines": 253,
+      "commentRatio": 0.39164086687306504,
+      "averageLineLength": 23.758513931888544
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.133Z"
+  },
+  "contentHash": "b0cd78a29decdfc53936bc2e1e6803413feb06b70fbac9a8e5d1657653eb4c5a",
+  "discoveredAt": "2025-07-28T07:19:58.134Z"
+}

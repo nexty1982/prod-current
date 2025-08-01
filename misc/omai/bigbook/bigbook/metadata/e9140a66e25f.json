@@ -1,0 +1,64 @@
+{
+  "id": "e9140a66e25f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/pageRegistrar.js",
+  "relativePath": "server/utils/pageRegistrar.js",
+  "name": "pageRegistrar.js",
+  "extension": ".js",
+  "size": 3284,
+  "modified": "2025-07-04T23:08:09.000Z",
+  "created": "2025-07-09T00:48:38.534Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 96,
+      "characters": 3284,
+      "words": 352
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "${p.importPath}",
+        "line": 49
+      },
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 53
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 96,
+      "codeLines": 66,
+      "commentLines": 20,
+      "commentRatio": 0.23255813953488372,
+      "averageLineLength": 37.08139534883721
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.275Z"
+  },
+  "contentHash": "ad8f93b70f6b553b07534bd0e665de0cffd41f73e5458566576c98b76722bd24",
+  "discoveredAt": "2025-07-28T07:20:01.275Z"
+}

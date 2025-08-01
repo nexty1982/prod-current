@@ -1,0 +1,43 @@
+{
+  "id": "2f99950a34e3",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/list-all-churches.js",
+  "relativePath": "server/scripts/list-all-churches.js",
+  "name": "list-all-churches.js",
+  "extension": ".js",
+  "size": 1127,
+  "modified": "2025-07-21T17:58:08.681Z",
+  "created": "2025-07-21T17:57:08.736Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 29,
+      "characters": 1127,
+      "words": 97
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 29,
+      "codeLines": 26,
+      "commentLines": 1,
+      "commentRatio": 0.037037037037037035,
+      "averageLineLength": 40.629629629629626
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.055Z"
+  },
+  "contentHash": "f4c72ecbf3e7734ae630c0538a15609067d0009c0532322219fab50df91a87ed",
+  "discoveredAt": "2025-07-28T07:20:01.055Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "76b52d782146",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/7-26-25/CHURCH_RECORDS_UI_IMPLEMENTATION.md",
+  "relativePath": "docs/7-26-25/CHURCH_RECORDS_UI_IMPLEMENTATION.md",
+  "name": "CHURCH_RECORDS_UI_IMPLEMENTATION.md",
+  "extension": ".md",
+  "size": 12651,
+  "modified": "2025-07-26T09:43:14.508Z",
+  "created": "2025-07-26T09:43:12.960Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 382,
+      "characters": 12521,
+      "words": 1526
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 382,
+      "codeLines": 239,
+      "commentLines": 64,
+      "commentRatio": 0.21122112211221122,
+      "averageLineLength": 39.76567656765677
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.724Z"
+  },
+  "contentHash": "536532c49520dea664f89b7449cd0820791a75d698b89de61deac79bdd5034f5",
+  "discoveredAt": "2025-07-28T07:19:57.724Z"
+}

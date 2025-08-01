@@ -30,6 +30,7 @@ import {
     IconCopy
 } from '@tabler/icons-react';
 import { User, UpdateUser, Church, ResetPasswordData } from '../services/userService';
+import SocialPermissionsToggle from './SocialPermissionsToggle';
 
 interface UserFormModalProps {
     open: boolean;
@@ -77,6 +78,14 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
     // Initialize form data when user changes
     useEffect(() => {
         if (user && mode === 'edit') {
+            console.log('🔍 UserFormModal - User data:', user);
+            console.log('🔍 UserFormModal - Available churches:', churches);
+            console.log('🔍 UserFormModal - User church_id:', user.church_id);
+            console.log('🔍 UserFormModal - Looking for church with ID:', user.church_id);
+            
+            const matchingChurch = churches.find(ch => ch.id === user.church_id);
+            console.log('🔍 UserFormModal - Matching church found:', matchingChurch);
+            
             setFormData({
                 email: user.email,
                 first_name: user.first_name,
@@ -87,7 +96,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 is_active: user.is_active
             });
         }
-    }, [user, mode]);
+    }, [user, mode, churches]);
 
     // Reset form state when modal closes
     useEffect(() => {
@@ -122,6 +131,11 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
 
         if (!formData.role) {
             errors.role = 'Role is required';
+        }
+
+        // Church selection is only required for non-super_admin users
+        if (!formData.church_id && formData.role !== 'super_admin') {
+            errors.church_id = 'Church selection is required';
         }
 
         setFormErrors(errors);
@@ -215,8 +229,6 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
         const allRoles = [
             { value: 'user', label: 'User', description: 'Basic user access' },
             { value: 'viewer', label: 'Viewer', description: 'Read-only access' },
-            { value: 'priest', label: 'Priest', description: 'Clergy member with record access' },
-            { value: 'deacon', label: 'Deacon', description: 'Deacon with limited access' },
             { value: 'manager', label: 'Manager', description: 'Church management access' }
         ];
 
@@ -301,21 +313,28 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                     )}
                 </FormControl>
 
-                <FormControl fullWidth>
-                    <InputLabel>Church</InputLabel>
+                <FormControl fullWidth required={formData.role !== 'super_admin'} error={!!formErrors.church_id}>
+                    <InputLabel>Church {formData.role !== 'super_admin' ? '*' : ''}</InputLabel>
                     <Select
                         value={formData.church_id || ''}
-                        label="Church"
+                        label={`Church ${formData.role !== 'super_admin' ? '*' : ''}`}
                         onChange={(e) => setFormData(prev => ({ ...prev, church_id: e.target.value || null }))}
                         disabled={loading}
                     >
-                        <MenuItem value="">No Church</MenuItem>
-                        {churches.map((church) => (
+                        <MenuItem value="">
+                            {formData.role === 'super_admin' ? 'No specific church (Global access)' : 'Select a church...'}
+                        </MenuItem>
+                        {churches.sort((a, b) => a.name.localeCompare(b.name)).map((church) => (
                             <MenuItem key={church.id} value={church.id.toString()}>
                                 {church.name}
                             </MenuItem>
                         ))}
                     </Select>
+                    {formErrors.church_id && (
+                        <Typography variant="caption" color="error" sx={{ mt: 1, ml: 2 }}>
+                            {formErrors.church_id}
+                        </Typography>
+                    )}
                 </FormControl>
             </Stack>
 
@@ -523,6 +542,17 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 {mode === 'edit' && renderEditForm()}
                 {mode === 'reset-password' && renderPasswordForm()}
                 {mode === 'delete-confirm' && renderDeleteConfirm()}
+                
+                {/* Social Permissions Section - Only show for edit mode and super admin */}
+                {mode === 'edit' && user && (
+                    <Box sx={{ mt: 3 }}>
+                        <SocialPermissionsToggle
+                            userId={user.id}
+                            userEmail={user.email}
+                            userRole={user.role}
+                        />
+                    </Box>
+                )}
             </DialogContent>
 
             <DialogActions sx={{ px: 3, pb: 3 }}>

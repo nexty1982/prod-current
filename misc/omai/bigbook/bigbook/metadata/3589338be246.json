@@ -1,0 +1,78 @@
+{
+  "id": "3589338be246",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/imageProcessor.js",
+  "relativePath": "server/utils/imageProcessor.js",
+  "name": "imageProcessor.js",
+  "extension": ".js",
+  "size": 9856,
+  "modified": "2025-07-04T23:08:09.000Z",
+  "created": "2025-07-09T00:48:38.526Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 326,
+      "characters": 9856,
+      "words": 961
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "sharp",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 10,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 12,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 13,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// Image Processing Utilities for OCR Enhancement\r\nconst sharp = require('sharp');\r\nconst path = require('path');\r\nconst fs = require('fs').promises;\r\nconst logger = require('./logger');\r\n\r\nclass ImageProcessor {\r\n  \r\n  constructor() {\r\n    this.uploadDir = process.env.[REDACTED] || './uploads';\r\n    this.enhancedDir = path.join(this.uploadDir, 'enhanced');\r\n    this.maxWidth = parseInt(process.env.[REDACTED]) || 2048;\r\n    this.maxHeight = parseInt(process.env.[REDACTED]) || 2048;\r\n    \r\n    // Ensure directories exist\r\n    this.ensureDirectories();\r\n  }\r\n  \r\n  async ensureDirectories() {\r\n    try {\r\n      await fs.mkdir(this.uploadDir, { recursive: true });\r\n      await fs.mkdir(this.enhancedDir, { recursive: true });\r\n    } catch (error) {\r\n      logger.error('Failed to create directories:', error);\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Validate uploaded image file\r\n   */\r\n  async validateImage(filePath) {\r\n    try {\r\n      const metadata = await sharp(filePath).metadata();\r\n      \r\n      const validations = {\r\n        isValid: true,\r\n        errors: [],\r\n        metadata\r\n      };\r\n      \r\n      // Check if file is actually an image\r\n      if (!metadata.format) {\r\n        validations.isValid = false;\r\n        validations.errors.push('File is not a valid image');\r\n        return validations;\r\n      }\r\n      \r\n      // Check supported formats\r\n      const supportedFormats = ['jpeg', 'png', 'tiff', 'webp', 'gif'];\r\n      if (!supportedFormats.includes(metadata.format)) {\r\n        validations.isValid = false;\r\n        validations.errors.push(`Unsupported format: ${metadata.format}`);\r\n      }\r\n      \r\n      // Check minimum dimensions\r\n      if (metadata.width < 100 || metadata.height < 100) {\r\n        validations.isValid = false;\r\n        validations.errors.push('Image too small (minimum 100x100 pixels)');\r\n      }\r\n      \r\n      // Check maximum dimensions\r\n      if (metadata.width > 10000 || metadata.height > 10000) {\r\n        validations.isValid = false;\r\n        validations.errors.push('Image too large (maximum 10000x10000 pixels)');\r\n      }\r\n      \r\n      return validations;\r\n      \r\n    } catch (error) {\r\n      logger.error('Image validation failed:', error);\r\n      return {\r\n        isValid: false,\r\n        errors: ['Unable to process image file'],\r\n        metadata: null\r\n      };\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Enhance image for better OCR results\r\n   */\r\n  async enhanceForOCR(inputPath) {\r\n    try {\r\n      const filename = path.basename(inputPath, path.extname(inputPath));\r\n      const outputPath = path.join(this.enhancedDir, `${filename}_enhanced.png`);\r\n      \r\n      logger.info(`Enhancing image for OCR: ${inputPath}`);\r\n      \r\n      // Validate input image first\r\n      const validation = await this.validateImage(inputPath);\r\n      if (!validation.isValid) {\r\n        throw new Error(`Invalid image: ${validation.errors.join(', ')}`);\r\n      }\r\n      \r\n      const metadata = validation.metadata;\r\n      \r\n      // Create enhancement pipeline\r\n      let pipeline = sharp(inputPath);\r\n      \r\n      // Auto-rotate based on EXIF orientation\r\n      pipeline = pipeline.rotate();\r\n      \r\n      // Resize if too large (maintain aspect ratio)\r\n      if (metadata.width > this.maxWidth || metadata.height > this.maxHeight) {\r\n        pipeline = pipeline.resize(this.maxWidth, this.maxHeight, {\r\n          fit: 'inside',\r\n          withoutEnlargement: false\r\n        });\r\n      }\r\n      \r\n      // Convert to grayscale for better OCR\r\n      pipeline = pipeline.grayscale();\r\n      \r\n      // Enhance contrast and sharpness\r\n      pipeline = pipeline\r\n        .normalize() // Auto-adjust levels\r\n        .sharpen({\r\n          sigma: 1,\r\n          flat: 1,\r\n          jagged: 2\r\n        })\r\n        .gamma(1.2) // Slight gamma correction\r\n        .linear(1.2, -(128 * 1.2) + 128); // Increase contrast\r\n      \r\n      // Apply noise reduction for scanned documents\r\n      pipeline = pipeline.median(2);\r\n      \r\n      // Convert to PNG for lossless storage\r\n      pipeline = pipeline.png({\r\n        quality: 95,\r\n        compressionLevel: 6\r\n      });\r\n      \r\n      // Save enhanced image\r\n      await pipeline.toFile(outputPath);\r\n      \r\n      // Verify the enhanced image was created successfully\r\n      const enhancedStats = await fs.stat(outputPath);\r\n      if (enhancedStats.size === 0) {\r\n        throw new Error('Enhanced image file is empty');\r\n      }\r\n      \r\n      logger.info(`Image enhanced successfully: ${outputPath}`);\r\n      return outputPath;\r\n      \r\n    } catch (error) {\r\n      logger.error('Image enhancement failed:', error);\r\n      throw new Error(`Image enhancement failed: ${error.message}`);\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Auto-crop document borders (experimental)\r\n   */\r\n  async autoCropDocument(inputPath) {\r\n    try {\r\n      const filename = path.basename(inputPath, path.extname(inputPath));\r\n      const outputPath = path.join(this.enhancedDir, `${filename}_cropped.png`);\r\n      \r\n      // Get image info\r\n      const { width, height } = await sharp(inputPath).metadata();\r\n      \r\n      // Create edge detection pipeline\r\n      const edges = await sharp(inputPath)\r\n        .grayscale()\r\n        .normalise()\r\n        .convolve({\r\n          width: 3,\r\n          height: 3,\r\n          kernel: [-1, -1, -1, -1, 8, -1, -1, -1, -1] // Edge detection kernel\r\n        })\r\n        .threshold(50)\r\n        .raw()\r\n        .toBuffer({ resolveWithObject: true });\r\n      \r\n      // Simple crop detection (placeholder algorithm)\r\n      // In production, implement more sophisticated document detection\r\n      const cropMargin = Math.min(width, height) * 0.05; // 5% margin\r\n      const cropBox = {\r\n        left: Math.round(cropMargin),\r\n        top: Math.round(cropMargin),\r\n        width: Math.round(width - (cropMargin * 2)),\r\n        height: Math.round(height - (cropMargin * 2))\r\n      };\r\n      \r\n      // Apply crop if it would be meaningful\r\n      if (cropBox.width > width * 0.8 && cropBox.height > height * 0.8) {\r\n        await sharp(inputPath)\r\n          .extract(cropBox)\r\n          .toFile(outputPath);\r\n        \r\n        logger.info(`Document auto-cropped: ${outputPath}`);\r\n        return outputPath;\r\n      } else {\r\n        // Return original if crop wouldn't help\r\n        return inputPath;\r\n      }\r\n      \r\n    } catch (error) {\r\n      logger.error('Auto-crop failed:', error);\r\n      // Return original image if cropping fails\r\n      return inputPath;\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Generate thumbnail for preview\r\n   */\r\n  async generateThumbnail(inputPath, maxSize = 300) {\r\n    try {\r\n      const filename = path.basename(inputPath, path.extname(inputPath));\r\n      const outputPath = path.join(this.enhancedDir, `${filename}_thumb.jpg`);\r\n      \r\n      await sharp(inputPath)\r\n        .resize(maxSize, maxSize, {\r\n          fit: 'inside',\r\n          withoutEnlargement: true\r\n        })\r\n        .jpeg({\r\n          quality: 80,\r\n          progressive: true\r\n        })\r\n        .toFile(outputPath);\r\n      \r\n      return outputPath;\r\n      \r\n    } catch (error) {\r\n      logger.error('Thumbnail generation failed:', error);\r\n      return null;\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Extract image metadata for analysis\r\n   */\r\n  async extractMetadata(inputPath) {\r\n    try {\r\n      const metadata = await sharp(inputPath).metadata();\r\n      const stats = await fs.stat(inputPath);\r\n      \r\n      return {\r\n        format: metadata.format,\r\n        width: metadata.width,\r\n        height: metadata.height,\r\n        channels: metadata.channels,\r\n        depth: metadata.depth,\r\n        density: metadata.density,\r\n        hasAlpha: metadata.hasAlpha,\r\n        hasProfile: metadata.hasProfile,\r\n        isProgressive: metadata.isProgressive,\r\n        fileSize: stats.size,\r\n        lastModified: stats.mtime,\r\n        aspectRatio: metadata.width / metadata.height,\r\n        megapixels: (metadata.width * metadata.height) / 1000000\r\n      };\r\n      \r\n    } catch (error) {\r\n      logger.error('Metadata extraction failed:', error);\r\n      return null;\r\n    }\r\n  }\r\n  \r\n  /**\r\n   * Estimate processing time based on image characteristics\r\n   */\r\n  estimateProcessingTime(metadata) {\r\n    if (!metadata) return 30; // Default 30 seconds\r\n    \r\n    const { width, height, fileSize, format } = metadata;\r\n    const megapixels = (width * height) / 1000000;\r\n    \r\n    // Base time calculation (in seconds)\r\n    let estimatedTime = 10; // Base processing time\r\n    \r\n    // Add time based on image size\r\n    estimatedTime += megapixels * 2; // 2 seconds per megapixel\r\n    \r\n    // Add time based on file size\r\n    estimatedTime += (fileSize / (1024 * 1024)) * 1; // 1 second per MB\r\n    \r\n    // Adjust for format complexity\r\n    const formatMultipliers = {\r\n      'jpeg': 1.0,\r\n      'png': 1.2,\r\n      'tiff': 1.5,\r\n      'gif': 0.8,\r\n      'webp': 1.1\r\n    };\r\n    \r\n    estimatedTime *= formatMultipliers[format] || 1.0;\r\n    \r\n    // Minimum 5 seconds, maximum 120 seconds\r\n    return Math.max(5, Math.min(120, Math.round(estimatedTime)));\r\n  }\r\n  \r\n  /**\r\n   * Clean up old enhanced images\r\n   */\r\n  async cleanupOldFiles(maxAgeHours = 24) {\r\n    try {\r\n      const files = await fs.readdir(this.enhancedDir);\r\n      const cutoffTime = Date.now() - (maxAgeHours * 60 * 60 * 1000);\r\n      let cleanedCount = 0;\r\n      \r\n      for (const file of files) {\r\n        const filePath = path.join(this.enhancedDir, file);\r\n        const stats = await fs.stat(filePath);\r\n        \r\n        if (stats.mtime.getTime() < cutoffTime) {\r\n          await fs.unlink(filePath);\r\n          cleanedCount++;\r\n        }\r\n      }\r\n      \r\n      logger.info(`Cleaned up ${cleanedCount} old enhanced images`);\r\n      return cleanedCount;\r\n      \r\n    } catch (error) {\r\n      logger.error('Cleanup failed:', error);\r\n      return 0;\r\n    }\r\n  }\r\n}\r\n\r\nmodule.exports = new ImageProcessor();\r\n"
+    },
+    "complexity": {
+      "totalLines": 326,
+      "codeLines": 221,
+      "commentLines": 49,
+      "commentRatio": 0.1814814814814815,
+      "averageLineLength": 34.096296296296295
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.257Z"
+  },
+  "contentHash": "c72968973dd993e0999c784a10c03c5654c51f064d37598d86212455b497917a",
+  "discoveredAt": "2025-07-28T07:20:01.257Z"
+}

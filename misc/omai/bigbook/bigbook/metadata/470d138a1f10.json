@@ -1,0 +1,49 @@
+{
+  "id": "470d138a1f10",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/learning/teaching-interface.ts",
+  "relativePath": "services/om-ai/learning/teaching-interface.ts",
+  "name": "teaching-interface.ts",
+  "extension": ".ts",
+  "size": 9373,
+  "modified": "2025-07-25T01:22:35.588Z",
+  "created": "2025-07-25T01:22:34.186Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 267,
+      "characters": 9373,
+      "words": 776
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 267,
+      "codeLines": 203,
+      "commentLines": 12,
+      "commentRatio": 0.05581395348837209,
+      "averageLineLength": 41.82790697674419
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.537Z"
+  },
+  "contentHash": "da7fd5a1416bf6e12b55b90347c55deef6fa60b3d62a2ada8348304cab18a76d",
+  "discoveredAt": "2025-07-28T07:20:01.537Z"
+}

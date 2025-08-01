@@ -1,0 +1,73 @@
+{
+  "id": "c996c0aa85d9",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/clientApi.js",
+  "relativePath": "server/routes/clientApi.js",
+  "name": "clientApi.js",
+  "extension": ".js",
+  "size": 12577,
+  "modified": "2025-07-19T14:45:09.476Z",
+  "created": "2025-07-09T00:48:38.478Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 296,
+      "characters": 11065,
+      "words": 1033
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 9
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 5
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 19,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 20,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 21,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// routes/clientApi.js\r\n// Client-specific API endpoints that work with individual client databases\r\n\r\nconst express = require('express');\r\nconst mysql = require('mysql2/promise');\r\nconst { promisePool } = require('../config/db'); // For platform database access\r\n\r\nconst router = express.Router();\r\n\r\n// Middleware to establish client database connection\r\nrouter.use(async (req, res, next) => {\r\n    if (!req.clientDatabase) {\r\n        return res.status(400).json({ error: 'Client context not initialized' });\r\n    }\r\n\r\n    try {\r\n        // Create connection to client database\r\n        req.clientDb = await mysql.createConnection({\r\n            host: process.env.[REDACTED] || 'localhost',\r\n            user: process.env.[REDACTED],\r\n            password: process.env.[REDACTED],\r\n            database: req.clientDatabase\r\n        });\r\n\r\n        console.log(`Connected to client database: ${req.clientDatabase}`);\r\n        next();\r\n    } catch (error) {\r\n        console.error('Client database connection failed:', error);\r\n        res.status(500).json({ error: 'Client database connection failed' });\r\n    }\r\n});\r\n\r\n// ═══════════════════════════════════════════════════════════════\r\n// CHURCH INFO ENDPOINTS\r\n// ═══════════════════════════════════════════════════════════════\r\n\r\n// Get church information\r\nrouter.get('/church-info', async (req, res) => {\r\n    try {\r\n        // Get church metadata from platform database (orthodoxmetrics_db)\r\n        // Use church_id from session or default to church ID 14 (Saints Peter and Paul)\r\n        const churchId = req.session?.user?.church_id || 14;\r\n        \r\n        const [rows] = await promisePool.query('SELECT * FROM churches WHERE id = ?', [churchId]);\r\n        const churchInfo = rows[0] || {};\r\n\r\n        // Add client branding from main database\r\n        if (req.client && req.client.branding_config) {\r\n            const branding = JSON.parse(req.client.branding_config);\r\n            churchInfo.branding = branding;\r\n        }\r\n\r\n        res.json(churchInfo);\r\n    } catch (error) {\r\n        console.error('Error fetching church info:', error);\r\n        res.status(500).json({ error: error.message });\r\n    }\r\n});\r\n\r\n// Update church information\r\nrouter.put('/church-info', async (req, res) => {\r\n    try {\r\n        const { name, address, phone, email, website, primary_color, secondary_color } = req.body;\r\n        const churchId = req.session?.user?.church_id || 14;\r\n\r\n        await promisePool.query(`\r\n            UPDATE churches SET \r\n                name = ?, address = ?, phone = ?, email = ?, website = ?,\r\n                updated_at = CURRENT_TIMESTAMP\r\n            WHERE id = ?\r\n        `, [name, address, phone, email, website, churchId]);\r\n\r\n        res.json({ success: true, message: 'Church information updated' });\r\n    } catch (error) {\r\n        res.status(500).json({ error: error.message });\r\n    }\r\n});\r\n\r\n// ═══════════════════════════════════════════════════════════════\r\n// BAPTISM RECORDS ENDPOINTS\r\n// ═══════════════════════════════════════════════════════════════\r\n\r\n// Get baptism records with pagination and search\r\nrouter.get('/baptism-records', async (req, res) => {\r\n    try {\r\n        const page = parseInt(req.query.page) || 1;\r\n        const limit = parseInt(req.query.limit) || 10;\r\n        const search = req.query.search || '';\r\n        const offset = (page - 1) * limit;\r\n\r\n        let query = 'SELECT * FROM baptism_records';\r\n        let countQuery = 'SELECT COUNT(*) as total FROM baptism_records';\r\n        let params = [];\r\n\r\n        if (search) {\r\n            const searchCondition = ` WHERE first_name LIKE ? OR last_name LIKE ? OR clergy LIKE ? OR parents LIKE ?`;\r\n            query += searchCondition;\r\n            countQuery += searchCondition;\r\n            params = [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`];\r\n        }\r\n\r\n        query += ' ORDER BY reception_date DESC LIMIT ? OFFSET ?';\r\n        params.push(limit, offset);\r\n\r\n        const [records] = await req.clientDb.execute(query, params);\r\n        const [countResult] = await req.clientDb.execute(countQuery, search ? [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`] : []);\r\n\r\n        res.json({\r\n            records,\r\n            pagination: {\r\n                page,\r\n                limit,\r\n                total: countResult[0].total,\r\n                pages: Math.ceil(countResult[0].total / limit)\r\n            }\r\n        });\r\n    } catch (error) {\r\n        res.status(500).json({ error: error.message });\r\n    }\r\n});\r\n\r\n// Create baptism record\r\nrouter.post('/baptism-records', async (req, res) => {\r\n    try {\r\n        const {\r\n            first_name, last_name, birth_date, reception_date,\r\n            birthplace, entry_type, sponsors, parents, clergy, notes\r\n        } = req.body;\r\n\r\n        const [result] = await req.clientDb.execute(`\r\n            INSERT INTO baptism_records \r\n            (first_name, last_name, birth_date, reception_date, birthplace, \r\n             entry_type, sponsors, parents, clergy, notes)\r\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\r\n        `, [first_name, last_name, birth_date, reception_date, birthplace,\r\n            entry_type, sponsors, parents, clergy, notes]);\r\n\r\n        res.json({ success: true, id: result.insertId });\r\n    } catch (error) {\r\n        res.status(500).json({ error: error.message });\r\n    }\r\n});\r\n\r\n// ═══════════════════════════════════════════════════════════════\r\n// MARRIAGE RECORDS ENDPOINTS\r\n// ═══════════════════════════════════════════════════════════════\r\n\r\n// Get marriage records\r\nrouter.get('/marriage-records', async (req, res) => {\r\n    try {\r\n        const page = parseInt(req.query.page) || 1;\r\n        const limit = parseInt(req.query.limit) || 10;\r\n        const search = req.query.search || '';\r\n        const offset = (page - 1) * limit;\r\n\r\n        let query = 'SELECT * FROM marriage_records';\r\n        let countQuery = 'SELECT COUNT(*) as total FROM marriage_records';\r\n        let params = [];\r\n\r\n        if (search) {\r\n            const searchCondition = ` WHERE groom_first_name LIKE ? OR groom_last_name LIKE ? OR \r\n                                      bride_first_name LIKE ? OR bride_last_name LIKE ? OR clergy LIKE ?`;\r\n            query += searchCondition;\r\n            countQuery += searchCondition;\r\n            params = [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`];\r\n        }\r\n\r\n        query += ' ORDER BY marriage_date DESC LIMIT ? OFFSET ?';\r\n        params.push(limit, offset);\r\n\r\n        const [records] = await req.clientDb.execute(query, params);\r\n        const [countResult] = await req.clientDb.execute(countQuery, search ?\r\n            [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`] : []);\r\n\r\n        res.json({\r\n            records,\r\n            pagination: {\r\n                page,\r\n                limit,\r\n                total: countResult[0].total,\r\n                pages: Math.ceil(countResult[0].total / limit)\r\n            }\r\n        });\r\n    } catch (error) {\r\n        res.status(500).json({ error: error.message });\r\n    }\r\n});\r\n\r\n// Create marriage record\r\nrouter.post('/marriage-records', async (req, res) => {\r\n    try {\r\n        const {\r\n            groom_first_name, groom_last_name, groom_birth_date,\r\n            bride_first_name, bride_last_name, bride_birth_date,\r\n            marriage_date, marriage_place, witnesses, clergy, notes\r\n        } = req.body;\r\n\r\n        const [result] = await req.clientDb.execute(`\r\n            INSERT INTO marriage_records \r\n            (groom_first_name, groom_last_name, groom_birth_date,\r\n             bride_first_name, bride_last_name, bride_birth_date,\r\n             marriage_date, marriage_place, witnesses, clergy, notes)\r\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\r\n        `, [groom_first_name, groom_last_name, groom_birth_date,\r\n            bride_first_name, bride_last_name, bride_birth_date,\r\n            marriage_date, marriage_place, witnesses, clergy, notes]);\r\n\r\n        res.json({ success: true, id: result.insertId });\r\n    } catch (error) {\r\n        res.status(500).json({ error: error.message });\r\n    }\r\n});\r\n\r\n// ═══════════════════════════════════════════════════════════════\r\n// FUNERAL RECORDS ENDPOINTS\r\n// ═══════════════════════════════════════════════════════════════\r\n\r\n// Get funeral records\r\nrouter.get('/funeral-records', async (req, res) => {\r\n    try {\r\n        const page = parseInt(req.query.page) || 1;\r\n        const limit = parseInt(req.query.limit) || 10;\r\n        const offset = (page - 1) * limit;\r\n\r\n        const [records] = await req.clientDb.execute(\r\n            'SELECT * FROM funeral_records ORDER BY death_date DESC LIMIT ? OFFSET ?',\r\n            [limit, offset]\r\n        );\r\n\r\n        const [countResult] = await req.clientDb.execute('SELECT COUNT(*) as total FROM funeral_records');\r\n\r\n        res.json({\r\n            records,\r\n            pagination: {\r\n                page,\r\n                limit,\r\n                total: countResult[0].total,\r\n                pages: Math.ceil(countResult[0].total / limit)\r\n            }\r\n        });\r\n    } catch (error) {\r\n        res.status(500).json({ error: error.message });\r\n    }\r\n});\r\n\r\n// ═══════════════════════════════════════════════════════════════\r\n// STATISTICS ENDPOINTS\r\n// ═══════════════════════════════════════════════════════════════\r\n\r\n// Get dashboard statistics\r\nrouter.get('/stats', async (req, res) => {\r\n    try {\r\n        const [baptismCount] = await req.clientDb.execute('SELECT COUNT(*) as count FROM baptism_records');\r\n        const [marriageCount] = await req.clientDb.execute('SELECT COUNT(*) as count FROM marriage_records');\r\n        const [funeralCount] = await req.clientDb.execute('SELECT COUNT(*) as count FROM funeral_records');\r\n        const [cemeteryCount] = await req.clientDb.execute('SELECT COUNT(*) as count FROM cemetery_records');\r\n\r\n        // Recent activity\r\n        const [recentBaptisms] = await req.clientDb.execute(\r\n            'SELECT first_name, last_name, reception_date FROM baptism_records ORDER BY created_at DESC LIMIT 5'\r\n        );\r\n\r\n        res.json({\r\n            totals: {\r\n                baptisms: baptismCount[0].count,\r\n                marriages: marriageCount[0].count,\r\n                funerals: funeralCount[0].count,\r\n                cemetery: cemeteryCount[0].count\r\n            },\r\n            recent: {\r\n                baptisms: recentBaptisms\r\n            }\r\n        });\r\n    } catch (error) {\r\n        res.status(500).json({ error: error.message });\r\n    }\r\n});\r\n\r\n// ═══════════════════════════════════════════════════════════════\r\n// CLEANUP MIDDLEWARE\r\n// ═══════════════════════════════════════════════════════════════\r\n\r\n// Clean up database connection\r\nrouter.use(async (req, res, next) => {\r\n    if (req.clientDb) {\r\n        try {\r\n            await req.clientDb.end();\r\n        } catch (error) {\r\n            console.error('Error closing client database connection:', error);\r\n        }\r\n    }\r\n    next();\r\n});\r\n\r\nmodule.exports = router;\r\n"
+    },
+    "complexity": {
+      "totalLines": 296,
+      "codeLines": 215,
+      "commentLines": 35,
+      "commentRatio": 0.14,
+      "averageLineLength": 42.868
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.440Z"
+  },
+  "contentHash": "528f31ccd3e858d31fca55940a7073e5b69b66f696158531cfa74139284ca51e",
+  "discoveredAt": "2025-07-28T07:20:00.440Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "ec637df43724",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/COMPREHENSIVE_TASK_LIST.md",
+  "relativePath": "docs/archive/07-09-25/COMPREHENSIVE_TASK_LIST.md",
+  "name": "COMPREHENSIVE_TASK_LIST.md",
+  "extension": ".md",
+  "size": 25783,
+  "modified": "2025-07-09T04:32:16.331Z",
+  "created": "2025-07-09T04:32:16.331Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 687,
+      "characters": 25135,
+      "words": 3068
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 8
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 687,
+      "codeLines": 419,
+      "commentLines": 138,
+      "commentRatio": 0.24775583482944344,
+      "averageLineLength": 43.66247755834829
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.865Z"
+  },
+  "contentHash": "18176e47c19dd4fd8f623d3e08be7c88f7e5ffc358521053d0e32d692c455a16",
+  "discoveredAt": "2025-07-28T07:19:57.866Z"
+}

@@ -1,5 +1,5 @@
 import { Box, Container, Typography, Button } from '@mui/material';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import MaintenanceImg from 'src/assets/images/backgrounds/maintenance.svg';
 
 const Maintenance = () => (

@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { useContext } from 'react';
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 
 // mui imports
 import {

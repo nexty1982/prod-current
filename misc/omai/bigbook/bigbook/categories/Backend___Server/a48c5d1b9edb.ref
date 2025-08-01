@@ -1,0 +1,6 @@
+{
+  "id": "a48c5d1b9edb",
+  "name": "check-activity-log-table.js",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/check-activity-log-table.js",
+  "type": "Server Scripts"
+}

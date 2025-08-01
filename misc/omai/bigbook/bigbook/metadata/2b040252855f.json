@@ -1,0 +1,43 @@
+{
+  "id": "2b040252855f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/control/tasks.json",
+  "relativePath": "services/om-ai/control/tasks.json",
+  "name": "tasks.json",
+  "extension": ".json",
+  "size": 1670,
+  "modified": "2025-07-25T00:55:07.299Z",
+  "created": "2025-07-25T00:55:03.197Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 59,
+      "characters": 1670,
+      "words": 126
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 59,
+      "codeLines": 59,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 27.322033898305083
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.416Z"
+  },
+  "contentHash": "6d07e03e391133533a247c6e2edd1aaa63444842edb9451cd7ac4714d787d01c",
+  "discoveredAt": "2025-07-28T07:20:01.416Z"
+}

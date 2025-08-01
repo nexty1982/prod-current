@@ -1,0 +1,49 @@
+{
+  "id": "fb1c83e705fd",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/funeral.js",
+  "relativePath": "server/routes/funeral.js",
+  "name": "funeral.js",
+  "extension": ".js",
+  "size": 16723,
+  "modified": "2025-07-22T22:45:17.684Z",
+  "created": "2025-07-09T00:48:38.478Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 421,
+      "characters": 16685,
+      "words": 1475
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 421,
+      "codeLines": 325,
+      "commentLines": 36,
+      "commentRatio": 0.0997229916897507,
+      "averageLineLength": 44.24930747922438
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.476Z"
+  },
+  "contentHash": "de0b541ac25116054fd1900b2305b4785c5ea23a2907cde936c0ef94d8eea6e8",
+  "discoveredAt": "2025-07-28T07:20:00.476Z"
+}

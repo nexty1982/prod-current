@@ -1,0 +1,43 @@
+{
+  "id": "4a3073885d84",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/api/user.api.ts",
+  "relativePath": "front-end/src/api/user.api.ts",
+  "name": "user.api.ts",
+  "extension": ".ts",
+  "size": 2320,
+  "modified": "2025-07-23T15:27:27.778Z",
+  "created": "2025-07-23T15:08:54.989Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 76,
+      "characters": 2320,
+      "words": 198
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 76,
+      "codeLines": 49,
+      "commentLines": 9,
+      "commentRatio": 0.15517241379310345,
+      "averageLineLength": 38.39655172413793
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.686Z"
+  },
+  "contentHash": "8e441ca1076ac6b356035df35f25f75378947c8d23720834e01dbd4825f5a8f1",
+  "discoveredAt": "2025-07-28T07:19:58.686Z"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "5f79c0249944",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/DEVELOPMENT_SETUP.md",
+  "relativePath": "docs/archive/07-09-25/DEVELOPMENT_SETUP.md",
+  "name": "DEVELOPMENT_SETUP.md",
+  "extension": ".md",
+  "size": 15267,
+  "modified": "2025-07-09T04:32:16.331Z",
+  "created": "2025-07-09T04:32:16.331Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 8
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 724,
+      "characters": 15241,
+      "words": 1691
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 8
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "winston",
+        "line": 614
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 724,
+      "codeLines": 418,
+      "commentLines": 165,
+      "commentRatio": 0.2830188679245283,
+      "averageLineLength": 24.662092624356774
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.876Z"
+  },
+  "contentHash": "9b6faa2fefaa3aa3683c354019fee0138de0c7281a441e8b2f11951bb97ec55f",
+  "discoveredAt": "2025-07-28T07:19:57.876Z"
+}

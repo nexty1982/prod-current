@@ -6,7 +6,11 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import Spinner from './views/spinner/Spinner';
 import './utils/i18n';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { setupGlobalErrorHandlers } from './utils/globalErrorHandler';
 
+// Initialize global error handlers for OMAI
+setupGlobalErrorHandlers();
 
 async function deferRender() {
   // Only enable mock service worker in development

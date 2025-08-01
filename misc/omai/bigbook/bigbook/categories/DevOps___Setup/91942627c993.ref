@@ -1,0 +1,6 @@
+{
+  "id": "91942627c993",
+  "name": "install-nfs-dependencies.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/install-nfs-dependencies.sh",
+  "type": "Setup Scripts"
+}

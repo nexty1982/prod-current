@@ -248,7 +248,7 @@ const getSystemDarkMode = (): boolean => {
 // Get stored theme from localStorage
 const getStoredTheme = (): ThemeName | null => {
   if (typeof window === 'undefined') return null;
-  const stored = localStorage.getItem('orthodoxmetrics-theme');
+  const stored = localStorage.getItem('orthodmetrics-theme');
   return stored as ThemeName || null;
 };
 
@@ -351,8 +351,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     }
     
     setCurrentThemeState(theme);
-    localStorage.setItem('orthodoxmetrics-theme', theme);
-    localStorage.setItem('orthodoxmetrics-auto-theme', 'false');
+    localStorage.setItem('orthodmetrics-theme', theme);
+    localStorage.setItem('orthodmetrics-auto-theme', 'false');
     setAutoThemeEnabled(false);
   };
   

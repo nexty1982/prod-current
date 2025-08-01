@@ -1,0 +1,66 @@
+{
+  "id": "61e196f9e4a0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/test-auth.js",
+  "relativePath": "server/utils/test-auth.js",
+  "name": "test-auth.js",
+  "extension": ".js",
+  "size": 1848,
+  "modified": "2025-07-04T23:08:01.000Z",
+  "created": "2025-07-09T00:48:38.534Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 53,
+      "characters": 1832,
+      "words": 178
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "bcrypt",
+        "line": 6
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "(?:password|pwd|pass)\\s*[:=]\\s*['\"]([^'\"]+)['\"]",
+          "line": 34,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// Test script to check database connection and user authentication\r\nconst path = require('path');\r\nrequire('dotenv').config({ path: path.resolve(__dirname, '.env.development') });\r\n\r\nconst db = require('./config/db');\r\nconst bcrypt = require('bcrypt');\r\n\r\nasync function testAuth() {\r\n  try {\r\n    console.log('🔧 Testing database connection and authentication...\\n');\r\n    \r\n    // Test database connection\r\n    const pool = db.getConnection();\r\n    console.log('✅ Database connection successful');\r\n    \r\n    // Check if admin user exists\r\n    const [users] = await pool.query('SELECT id, email, username, role, is_active, password_hash FROM users WHERE email = ?', ['admin@test.com']);\r\n    \r\n    if (users.length === 0) {\r\n      console.log('❌ Admin user not found');\r\n      return;\r\n    }\r\n    \r\n    const user = users[0];\r\n    console.log('✅ Admin user found:');\r\n    console.log(`   ID: ${user.id}`);\r\n    console.log(`   Email: ${user.email}`);\r\n    console.log(`   Username: ${user.username}`);\r\n    console.log(`   Role: ${user.role}`);\r\n    console.log(`   Active: ${user.is_active}`);\r\n    console.log(`   Password hash exists: ${!!user.password_hash}`);\r\n    \r\n    // Test password verification\r\n    const testPassword = '[REDACTED]';\r\n    const match = await bcrypt.compare(testPassword, user.password_hash);\r\n    console.log(`   Password test (${testPassword}): ${match ? '✅ MATCH' : '❌ NO MATCH'}`);\r\n    \r\n    // Check session storage table\r\n    const [sessions] = await pool.query('SELECT COUNT(*) as count FROM sessions');\r\n    console.log(`   Sessions table records: ${sessions[0].count}`);\r\n    \r\n    console.log('\\n🎯 Test complete!');\r\n    process.exit(0);\r\n    \r\n  } catch (error) {\r\n    console.error('❌ Test failed:', error.message);\r\n    console.error(error);\r\n    process.exit(1);\r\n  }\r\n}\r\n\r\ntestAuth();\r\n"
+    },
+    "complexity": {
+      "totalLines": 53,
+      "codeLines": 36,
+      "commentLines": 5,
+      "commentRatio": 0.12195121951219512,
+      "averageLineLength": 42.36585365853659
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.284Z"
+  },
+  "contentHash": "2ec49185648546d7f44739bcfe9c1003f77d05c7f791afa6046d208e05d44f24",
+  "discoveredAt": "2025-07-28T07:20:01.284Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "61322fac3a18",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/NOTIFICATION_ROUTES_FIX.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/NOTIFICATION_ROUTES_FIX.md",
+  "name": "NOTIFICATION_ROUTES_FIX.md",
+  "extension": ".md",
+  "size": 19524,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:06.212Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 637,
+      "characters": 19516,
+      "words": 1881
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 637,
+      "codeLines": 479,
+      "commentLines": 66,
+      "commentRatio": 0.12110091743119267,
+      "averageLineLength": 34.377981651376146
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.191Z"
+  },
+  "contentHash": "3e592f87f045d56f692f2e63dd20ba83f95b1935b262a1437afa56aee922a887",
+  "discoveredAt": "2025-07-28T07:19:58.191Z"
+}

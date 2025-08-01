@@ -1,0 +1,49 @@
+{
+  "id": "108baa0f78e2",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/mock-apis.js",
+  "relativePath": "server/routes/mock-apis.js",
+  "name": "mock-apis.js",
+  "extension": ".js",
+  "size": 1349,
+  "modified": "2025-07-22T15:00:06.299Z",
+  "created": "2025-07-21T23:55:59.185Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 9
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 68,
+      "characters": 1349,
+      "words": 168
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 9
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 68,
+      "codeLines": 44,
+      "commentLines": 16,
+      "commentRatio": 0.26666666666666666,
+      "averageLineLength": 21.233333333333334
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.514Z"
+  },
+  "contentHash": "29bc499850930243a8c4d8541d8cd326998b8506375ac7856d963d85c9efd413",
+  "discoveredAt": "2025-07-28T07:20:00.514Z"
+}

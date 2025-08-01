@@ -1,0 +1,43 @@
+{
+  "id": "d19cca60b016",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-friend-notifications.js",
+  "relativePath": "server/debug/check-friend-notifications.js",
+  "name": "check-friend-notifications.js",
+  "extension": ".js",
+  "size": 4620,
+  "modified": "2025-07-26T20:40:52.526Z",
+  "created": "2025-07-26T20:28:27.873Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 120,
+      "characters": 4594,
+      "words": 375
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 120,
+      "codeLines": 94,
+      "commentLines": 7,
+      "commentRatio": 0.06930693069306931,
+      "averageLineLength": 42.81188118811881
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.069Z"
+  },
+  "contentHash": "4803e0962c9072c83b66163f376677df8cbfb1c6d6a4bffe155a1f120727b9db",
+  "discoveredAt": "2025-07-28T07:20:00.070Z"
+}

@@ -1,0 +1,64 @@
+{
+  "id": "77262178f9e8",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/temp/step6-standalone-demo.js",
+  "relativePath": "server/temp/step6-standalone-demo.js",
+  "name": "step6-standalone-demo.js",
+  "extension": ".js",
+  "size": 19174,
+  "modified": "2025-07-24T14:51:40.516Z",
+  "created": "2025-07-24T14:51:40.516Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 483,
+      "characters": 18808,
+      "words": 1356
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "winston",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 23
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 483,
+      "codeLines": 391,
+      "commentLines": 23,
+      "commentRatio": 0.05555555555555555,
+      "averageLineLength": 43.888888888888886
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.161Z"
+  },
+  "contentHash": "dfbf0a068711805752bb91db89b0e9c480a19265ef8bb1239299d88649f7684e",
+  "discoveredAt": "2025-07-28T07:20:01.161Z"
+}

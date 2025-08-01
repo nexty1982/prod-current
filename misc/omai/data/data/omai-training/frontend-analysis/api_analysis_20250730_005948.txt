@@ -1,0 +1,1108 @@
+=== API Integration Analysis ===
+File: front-end/src/services/api.js
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/records/api.js
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+    const response = await fetch(`${BASE_URL}${endpoint}/import`, {
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/records/constants.js
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/records/index.js
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/records/useRecordManager.js
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+        newSet.delete(fieldName);
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/config/church.config.js
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/tools/vite.config.js
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/globalFetcher.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/church-records.hooks.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+    (_, { arg }: { arg: { recordId: number; type: string } }) => 
+      churchRecordsApi.certificates.previewCertificate(arg.recordId, arg.type)
+  );
+
+  return {
+    generateBaptismCertificate,
+
+=== API Integration Analysis ===
+File: front-end/src/api/language/LanguageData.js
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/utils/axiosInstance.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+ * Provides unified error handling, baseURL, and interceptors
+const API_BASE_URL = API_CONFIG.BASE_URL;
+    console.log(`🔧 Initializing API Client with baseURL: "${API_BASE_URL}"`);
+      baseURL: API_BASE_URL,
+        const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
+        console.log(`🔧 BaseURL: "${config.baseURL || 'none'}", URL: "${config.url}"`);
+export const apiClient = new ApiClient();
+export default apiClient; 
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/components.api.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+    return apiClient.get(url);
+    apiClient.get(`/admin/components/${id}`);
+    apiClient.patch(`/admin/components/${id}`, { enabled });
+    apiClient.get(`/admin/components/${id}/logs${limit ? `?limit=${limit}` : ''}`);
+    apiClient.get(`/admin/components/${id}/health`);
+    apiClient.post(`/admin/components/${id}/restart`);
+    apiClient.post(`/admin/components/${id}/test`);
+    apiClient.get('/admin/components/stats');
+    apiClient.get(`/admin/components/${id}/config`);
+    apiClient.put(`/admin/components/${id}/config`, config);
+
+--- BASE URLS ---
+import { apiClient } from './utils/axiosInstance';
+    return apiClient.get(url);
+    apiClient.get(`/admin/components/${id}`);
+    apiClient.patch(`/admin/components/${id}`, { enabled });
+    apiClient.get(`/admin/components/${id}/logs${limit ? `?limit=${limit}` : ''}`);
+    apiClient.get(`/admin/components/${id}/health`);
+    apiClient.post(`/admin/components/${id}/restart`);
+    apiClient.post(`/admin/components/${id}/test`);
+    apiClient.get('/admin/components/stats');
+    apiClient.get(`/admin/components/${id}/config`);
+    apiClient.put(`/admin/components/${id}/config`, config);
+
+--- DATA TYPES ---
+interface Component {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  health: 'healthy' | 'degraded' | 'failed';
+--
+interface ComponentsResponse {
+  components: Component[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+--
+interface ComponentFilters {
+  page?: number;
+  limit?: number;
+  category?: string;
+  status?: string;
+  usageStatus?: string;
+--
+interface ComponentToggleRequest {
+  enabled: boolean;
+}
+
+interface ComponentLog {
+  id: string;
+  level: 'info' | 'warn' | 'error' | 'debug';
+  message: string;
+  timestamp: string;
+  metadata?: Record<string, any>;
+--
+interface ComponentLogsResponse {
+  logs: ComponentLog[];
+  total: number;
+  component: string;
+}
+
+
+=== API Integration Analysis ===
+File: front-end/src/api/eCommerce/ProductsData.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+  http.get('/api/data/eCommerce/ProductsData', () => {
+  http.post('/api/eCommerce/carts', async () => {
+  http.post('/api/data/eCommerce/add', async ({ request }) => {
+  http.put('/api/eCommerce/carts/increment-decrementqty', async ({ request }) => {
+  http.delete('/api/eCommerce/remove-item-carts', async ({ request }) => {
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/church-records.api.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+  private baseURL: string;
+  constructor(baseURL: string = API_BASE_URL, timeout: number = API_TIMEOUT) {
+    this.baseURL = baseURL;
+    const url = `${this.baseURL}/api${endpoint}`;
+      xhr.open('POST', `${this.baseURL}/api${endpoint}`);
+
+--- DATA TYPES ---
+    previewCertificate: (recordId: number, type: string): Promise<CertificateResponse> =>
+      this.request(`/certificate/${type}/${recordId}/preview`, {
+        method: 'POST',
+      }),
+
+    testCertificate: (type: string): Promise<CertificateResponse> =>
+      this.request(`/certificate/${type}/test`),
+  };
+
+  // Dashboard APIs
+  dashboard = {
+--
+      this.request(`/${type}-records/export?format=${format}${this.buildQueryString(filters)}`),
+  };
+
+  // Helper method to build query strings
+  private buildQueryString(params?: Record<string, any>): string {
+    if (!params) return '';
+
+=== API Integration Analysis ===
+File: front-end/src/api/client-management.api.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+                    result = await apiClient.post(endpoint, data);
+                    result = await apiClient.put(endpoint, data);
+                    result = await apiClient.patch(endpoint, data);
+                    result = await apiClient.delete(endpoint);
+                    result = await apiClient.get(endpoint);
+
+--- BASE URLS ---
+import { apiClient } from './utils/axiosInstance';
+                    result = await apiClient.post(endpoint, data);
+                    result = await apiClient.put(endpoint, data);
+                    result = await apiClient.patch(endpoint, data);
+                    result = await apiClient.delete(endpoint);
+                    result = await apiClient.get(endpoint);
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/user.api.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+      apiClient.post('/auth/login', credentials),
+      apiClient.post('/auth/logout'),
+      apiClient.get('/auth/check'),
+      apiClient.post('/auth/forgot-password', { email }),
+      apiClient.post('/auth/reset-password', { token, password }),
+      apiClient.get('/sessions/current'),
+      apiClient.get('/sessions'),
+      apiClient.delete(`/sessions/${sessionId}`),
+      apiClient.delete('/sessions'),
+      apiClient.get('/user/church'),
+      apiClient.put('/user/profile', userData),
+      apiClient.put('/user/change-password', { currentPassword, newPassword }),
+      apiClient.get('/languages'),
+      apiClient.get('/admin/menu-permissions/user-permissions'),
+
+--- BASE URLS ---
+import { apiClient } from './utils/axiosInstance';
+      apiClient.post('/auth/login', credentials),
+      apiClient.post('/auth/logout'),
+      apiClient.get('/auth/check'),
+      apiClient.post('/auth/forgot-password', { email }),
+      apiClient.post('/auth/reset-password', { token, password }),
+      apiClient.get('/sessions/current'),
+      apiClient.get('/sessions'),
+      apiClient.delete(`/sessions/${sessionId}`),
+      apiClient.delete('/sessions'),
+      apiClient.get('/user/church'),
+      apiClient.put('/user/profile', userData),
+      apiClient.put('/user/change-password', { currentPassword, newPassword }),
+      apiClient.uploadFile('/user/profile/avatar', file),
+      apiClient.get('/languages'),
+      apiClient.get('/admin/menu-permissions/user-permissions'),
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/blog/blogData.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+  http.get('/api/data/blog/BlogPosts', () => {
+  http.post('/api/data/blog/post/add', async ({ request }) => {
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/orthodox-metrics.api.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/metrics.api.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+      apiClient.get(`/calendar${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/calendar/day/${date}?lang=${language}`),
+      apiClient.get(`/calendar/season/current?lang=${language}`),
+      apiClient.get(`/calendar/pascha/${year}`),
+      apiClient.get(`/calendar/feasts/${year}?lang=${language}`),
+      apiClient.get(`/calendar/saints/${date}?lang=${language}`),
+      apiClient.get(`/baptism-records${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/baptism-records/${id}`),
+      apiClient.post('/baptism-records', record),
+      apiClient.put(`/baptism-records/${id}`, record),
+      apiClient.delete(`/baptism-records/${id}`),
+      apiClient.get(`/marriage-records${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/marriage-records/${id}`),
+      apiClient.post('/marriage-records', record),
+      apiClient.put(`/marriage-records/${id}`, record),
+      apiClient.delete(`/marriage-records/${id}`),
+      apiClient.get(`/funeral-records${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/funeral-records/${id}`),
+      apiClient.post('/funeral-records', record),
+      apiClient.put(`/funeral-records/${id}`, record),
+      apiClient.delete(`/funeral-records/${id}`),
+      apiClient.get(`/${recordType}-records/dropdown-options/${field}`),
+      apiClient.post(`/${recordType}-records/export`, { filters, options }),
+      apiClient.get(`/invoices${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/invoices/${id}`),
+      apiClient.post('/invoices', invoice),
+      apiClient.put(`/invoices/${id}`, invoice),
+      apiClient.delete(`/invoices/${id}`),
+      apiClient.post(`/invoices/${id}/send`),
+      apiClient.post(`/invoices/${id}/mark-paid`),
+      apiClient.post(`/invoices/${id}/pdf`),
+      apiClient.get('/invoices/stats'),
+      apiClient.get(`/ocr${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/ocr/${id}`),
+      apiClient.post(`/ocr/${id}/process`),
+      apiClient.get(`/ocr/${id}/results`),
+      apiClient.delete(`/ocr/${id}`),
+      apiClient.get('/ocr/stats'),
+      apiClient.post('/test-ocr', data),
+      apiClient.post('/public/ocr/process', data),
+      apiClient.get(`/church/${churchId}/ocr/settings`),
+      apiClient.put(`/church/${churchId}/ocr/settings`, settings),
+      apiClient.get(`/church/${churchId}/ocr/jobs`),
+      apiClient.post(`/church/${churchId}/ocr/jobs/${jobId}/retry`),
+      apiClient.delete(`/church/${churchId}/ocr/jobs/${jobId}`),
+      apiClient.get(`/church/${churchId}/ocr/jobs/${jobId}`),
+      apiClient.get(`/church/${churchId}/ocr/jobs/${jobId}/export`),
+      apiClient.get('/dashboard/metrics'),
+      apiClient.get('/dashboard/recent-activity'),
+      apiClient.get('/dashboard/charts'),
+      apiClient.get('/utils/config'),
+      apiClient.get('/utils/languages'),
+      apiClient.post('/utils/validate-email', { email }),
+      apiClient.get('/utils/generate-password'),
+      apiClient.get('/utils/system-info'),
+      apiClient.post(`/certificates/baptism/${recordId}`, { template_id: templateId }),
+      apiClient.post(`/certificates/marriage/${recordId}`, { template_id: templateId }),
+      apiClient.post(`/certificates/funeral/${recordId}`, { template_id: templateId }),
+
+--- BASE URLS ---
+import { apiClient } from './utils/axiosInstance';
+      apiClient.get(`/calendar${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/calendar/day/${date}?lang=${language}`),
+      apiClient.get(`/calendar/season/current?lang=${language}`),
+      apiClient.get(`/calendar/pascha/${year}`),
+      apiClient.get(`/calendar/feasts/${year}?lang=${language}`),
+      apiClient.get(`/calendar/saints/${date}?lang=${language}`),
+      apiClient.get(`/baptism-records${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/baptism-records/${id}`),
+      apiClient.post('/baptism-records', record),
+      apiClient.put(`/baptism-records/${id}`, record),
+      apiClient.delete(`/baptism-records/${id}`),
+      apiClient.get(`/marriage-records${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/marriage-records/${id}`),
+      apiClient.post('/marriage-records', record),
+      apiClient.put(`/marriage-records/${id}`, record),
+      apiClient.delete(`/marriage-records/${id}`),
+      apiClient.get(`/funeral-records${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/funeral-records/${id}`),
+      apiClient.post('/funeral-records', record),
+      apiClient.put(`/funeral-records/${id}`, record),
+      apiClient.delete(`/funeral-records/${id}`),
+      apiClient.get(`/${recordType}-records/dropdown-options/${field}`),
+      apiClient.post(`/${recordType}-records/export`, { filters, options }),
+      apiClient.uploadFile(`/${recordType}-records/import`, file, undefined, onProgress),
+      apiClient.get(`/invoices${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/invoices/${id}`),
+      apiClient.post('/invoices', invoice),
+      apiClient.put(`/invoices/${id}`, invoice),
+      apiClient.delete(`/invoices/${id}`),
+      apiClient.post(`/invoices/${id}/send`),
+      apiClient.post(`/invoices/${id}/mark-paid`),
+      apiClient.post(`/invoices/${id}/pdf`),
+      apiClient.get('/invoices/stats'),
+      apiClient.get(`/ocr${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/ocr/${id}`),
+      apiClient.uploadFile('/ocr/upload', file, undefined, onProgress),
+      apiClient.post(`/ocr/${id}/process`),
+      apiClient.get(`/ocr/${id}/results`),
+      apiClient.delete(`/ocr/${id}`),
+      apiClient.get('/ocr/stats'),
+      apiClient.post('/test-ocr', data),
+      apiClient.post('/public/ocr/process', data),
+      apiClient.get(`/church/${churchId}/ocr/settings`),
+      apiClient.put(`/church/${churchId}/ocr/settings`, settings),
+      apiClient.get(`/church/${churchId}/ocr/jobs`),
+      apiClient.uploadFile(`/church/${churchId}/ocr/upload`, file, undefined, onProgress),
+      apiClient.post(`/church/${churchId}/ocr/jobs/${jobId}/retry`),
+      apiClient.delete(`/church/${churchId}/ocr/jobs/${jobId}`),
+      apiClient.get(`/church/${churchId}/ocr/jobs/${jobId}`),
+      apiClient.get(`/church/${churchId}/ocr/jobs/${jobId}/export`),
+      apiClient.get('/dashboard/metrics'),
+      apiClient.get('/dashboard/recent-activity'),
+      apiClient.get('/dashboard/charts'),
+      apiClient.get('/utils/config'),
+      apiClient.get('/utils/languages'),
+      apiClient.post('/utils/validate-email', { email }),
+      apiClient.get('/utils/generate-password'),
+      apiClient.get('/utils/system-info'),
+      apiClient.post(`/certificates/baptism/${recordId}`, { template_id: templateId }),
+      apiClient.post(`/certificates/marriage/${recordId}`, { template_id: templateId }),
+      apiClient.post(`/certificates/funeral/${recordId}`, { template_id: templateId }),
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/mocks/browser.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/mocks/handlers/mockhandlers.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+No endpoints found
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/omai.api.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+    apiClient.post('/omai/task-link', { email });
+    apiClient.get(`/omai/validate-token?token=${encodeURIComponent(token)}`);
+    apiClient.post('/omai/submit-task', { token, tasks });
+    apiClient.get(`/omai/task-logs?limit=${limit}`);
+    apiClient.delete(`/omai/task-link/${token}`);
+
+--- BASE URLS ---
+import { apiClient } from './utils/axiosInstance';
+    apiClient.post('/omai/task-link', { email });
+    apiClient.get(`/omai/validate-token?token=${encodeURIComponent(token)}`);
+    apiClient.post('/omai/submit-task', { token, tasks });
+    apiClient.get(`/omai/task-logs?limit=${limit}`);
+    apiClient.delete(`/omai/task-link/${token}`);
+
+--- DATA TYPES ---
+export interface Task {
+  title: string;
+  description: string;
+  priority: '🔥' | '⚠️' | '🧊' | 'high' | 'medium' | 'low';
+}
+
+export interface TaskLinkResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    email: string;
+--
+export interface TokenValidationResponse {
+  success: boolean;
+  data?: {
+    email: string;
+    created_at: string;
+    is_used: boolean;
+--
+export interface TaskSubmissionResponse {
+  success: boolean;
+  message: string;
+  data: {
+    submission_id: number;
+    email: string;
+--
+export interface TaskLogsResponse {
+  success: boolean;
+  data: {
+    recent_links: Array<{
+      id: number;
+      email: string;
+
+=== API Integration Analysis ===
+File: front-end/src/api/userprofile/PostData.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+  http.get('/api/data/postData', () => {
+  http.post('/api/data/posts/like', async ({ request }) => {
+  http.post('/api/data/posts/comments/add', async ({ request }) => {
+  http.post('/api/data/posts/replies/add', async ({ request }) => {
+  http.post('/api/data/posts/replies/like', async ({ request }) => {
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/userprofile/UsersData.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+  http.get('/api/data/users', () => {
+  http.get('/api/data/gallery', () => {
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/ticket/TicketData.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+  http.get('/api/data/ticket/TicketData', () => {
+  http.delete('/api/data/ticket/delete', async ({ request }) => {
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/calendar.api.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+      apiClient.get('/calendar/tasks'),
+      apiClient.get(`/calendar/tasks/${id}`),
+      apiClient.post('/calendar/tasks', task),
+      apiClient.put(`/calendar/tasks/${id}`, task),
+      apiClient.delete(`/calendar/tasks/${id}`),
+      apiClient.get(`/calendar/tasks/range?start=${startDate}&end=${endDate}`),
+      apiClient.get(`/calendar/tasks/agent/${agent}`),
+      apiClient.get(`/calendar/tasks/status/${status}`),
+      apiClient.get(`/calendar/tasks/priority/${priority}`),
+      apiClient.put('/calendar/tasks/bulk', { updates }),
+      apiClient.get('/calendar/tasks/stats'),
+      apiClient.get('/calendar/kanban/tasks'),
+      apiClient.post(`/calendar/tasks/${taskId}/sync-kanban`, { kanbanId }),
+      apiClient.delete(`/calendar/tasks/${taskId}/sync-kanban`),
+      apiClient.get('/calendar/kanban/sync-status'),
+      apiClient.post('/calendar/kanban/force-sync'),
+      apiClient.get('/calendar/kanban/columns'),
+      apiClient.put(`/calendar/tasks/${taskId}/kanban-status`, { status }),
+      apiClient.get('/calendar/agents'),
+      apiClient.get(`/calendar/agents/${agentName}/status`),
+      apiClient.post(`/calendar/tasks/${taskId}/assign`, { agent: agentName }),
+      apiClient.get(`/calendar/agents/${agentName}/performance?period=${period}`),
+      apiClient.get(`/calendar/agents/${agentName}/queue`),
+      apiClient.get(`/calendar/realtime/recent?limit=${limit}`),
+      apiClient.get(`/calendar/tasks/${taskId}/files`),
+      apiClient.delete(`/calendar/tasks/${taskId}/files/${filename}`),
+      apiClient.post(`/calendar/tasks/${taskId}/report`, { format }),
+      apiClient.post(`/calendar/tasks/${taskId}/chatgpt-session`),
+      apiClient.get(`/calendar/tasks/${taskId}/chatgpt-session`),
+      apiClient.post(`/calendar/tasks/${taskId}/chatgpt-message`, { message }),
+      apiClient.get(`/calendar/tasks/${taskId}/chatgpt-conversation`),
+      apiClient.get(`/calendar/tasks/${taskId}/notifications`),
+      apiClient.put(`/calendar/notifications/${notificationId}/read`),
+      apiClient.post(`/calendar/tasks/${taskId}/notifications/subscribe`),
+      apiClient.delete(`/calendar/notifications/subscriptions/${subscriptionId}`),
+      apiClient.post('/calendar/export/json', filters || {}),
+      apiClient.post('/calendar/export/csv', filters || {}),
+      apiClient.post('/calendar/import/json', { data }),
+
+--- BASE URLS ---
+import { apiClient } from './utils/axiosInstance';
+      apiClient.get('/calendar/tasks'),
+      apiClient.get(`/calendar/tasks/${id}`),
+      apiClient.post('/calendar/tasks', task),
+      apiClient.put(`/calendar/tasks/${id}`, task),
+      apiClient.delete(`/calendar/tasks/${id}`),
+      apiClient.get(`/calendar/tasks/range?start=${startDate}&end=${endDate}`),
+      apiClient.get(`/calendar/tasks/agent/${agent}`),
+      apiClient.get(`/calendar/tasks/status/${status}`),
+      apiClient.get(`/calendar/tasks/priority/${priority}`),
+      apiClient.put('/calendar/tasks/bulk', { updates }),
+      apiClient.get('/calendar/tasks/stats'),
+      apiClient.get('/calendar/kanban/tasks'),
+      apiClient.post(`/calendar/tasks/${taskId}/sync-kanban`, { kanbanId }),
+      apiClient.delete(`/calendar/tasks/${taskId}/sync-kanban`),
+      apiClient.get('/calendar/kanban/sync-status'),
+      apiClient.post('/calendar/kanban/force-sync'),
+      apiClient.get('/calendar/kanban/columns'),
+      apiClient.put(`/calendar/tasks/${taskId}/kanban-status`, { status }),
+      apiClient.get('/calendar/agents'),
+      apiClient.get(`/calendar/agents/${agentName}/status`),
+      apiClient.post(`/calendar/tasks/${taskId}/assign`, { agent: agentName }),
+      apiClient.get(`/calendar/agents/${agentName}/performance?period=${period}`),
+      apiClient.get(`/calendar/agents/${agentName}/queue`),
+      apiClient.get(`/calendar/realtime/recent?limit=${limit}`),
+      apiClient.get(`/calendar/tasks/${taskId}/files`),
+      return apiClient.uploadFile(`/calendar/tasks/${taskId}/files`, formData);
+      apiClient.delete(`/calendar/tasks/${taskId}/files/${filename}`),
+      apiClient.post(`/calendar/tasks/${taskId}/report`, { format }),
+      apiClient.post(`/calendar/tasks/${taskId}/chatgpt-session`),
+      apiClient.get(`/calendar/tasks/${taskId}/chatgpt-session`),
+      apiClient.post(`/calendar/tasks/${taskId}/chatgpt-message`, { message }),
+      apiClient.get(`/calendar/tasks/${taskId}/chatgpt-conversation`),
+      apiClient.get(`/calendar/tasks/${taskId}/notifications`),
+      apiClient.put(`/calendar/notifications/${notificationId}/read`),
+      apiClient.post(`/calendar/tasks/${taskId}/notifications/subscribe`),
+      apiClient.delete(`/calendar/notifications/subscriptions/${subscriptionId}`),
+      apiClient.post('/calendar/export/json', filters || {}),
+      apiClient.post('/calendar/export/csv', filters || {}),
+      apiClient.post('/calendar/import/json', { data }),
+      return apiClient.uploadFile('/calendar/import/csv', formData);
+
+--- DATA TYPES ---
+    subscribe: (callback: (update: { type: 'create' | 'update' | 'delete'; task: AITask }) => void): () => void => {
+      // Implementation for WebSocket or Server-Sent Events
+      const eventSource = new EventSource('/api/calendar/realtime/tasks');
+      
+      eventSource.onmessage = (event) => {
+        const update = JSON.parse(event.data);
+
+=== API Integration Analysis ===
+File: front-end/src/api/chat/Chatdata.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+  http.get('/api/data/chat/ChatData', () => {
+  http.post('/api/sendMessage', async ({ request }: any) => {
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/admin.api.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+      apiClient.get(`/admin/churches${apiClient.buildQueryString(filters)}`),
+      apiClient.post('/admin/churches', church),
+      apiClient.put(`/admin/churches/${id}`, church),
+      apiClient.delete(`/admin/churches/${id}`, { 
+      apiClient.post(`/admin/churches/${id}/approve`, { notes }),
+      apiClient.post(`/admin/churches/${id}/suspend`, { reason }),
+      apiClient.post(`/admin/churches/${id}/activate`),
+      apiClient.patch(`/admin/churches/${id}/status`, { active }),
+      apiClient.post(`/admin/churches/${id}/remove-all-users`),
+      apiClient.get('/admin/churches?is_active=1'),
+      apiClient.get(`/admin/churches?preferred_language=${language}`),
+      apiClient.get(`/admin/churches/${churchId}/users`),
+      apiClient.get(`/admin/churches/${churchId}/record-counts`),
+      apiClient.get(`/admin/churches/${churchId}/database-info`),
+      apiClient.post(`/admin/churches/${churchId}/test-connection`),
+      apiClient.post(`/admin/churches/${churchId}/users/${userId}/${action}`),
+      apiClient.post(`/admin/churches/${churchId}/users/${userId}/reset-password`),
+      apiClient.get(`/admin/churches/${churchId}/tables`),
+      apiClient.post('/admin/churches/wizard', data),
+      apiClient.get(`/admin/church/${churchId}/overview`),
+      apiClient.get(`/admin/church-database/${churchDbId}/record-counts`),
+      apiClient.get(`/admin/users${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/admin/users/${id}`),
+      apiClient.post('/admin/users', user),
+      apiClient.put(`/admin/users/${id}`, user),
+      apiClient.delete(`/admin/users/${id}`),
+      apiClient.put(`/admin/users/${id}/toggle-status`),
+      apiClient.post(`/auth/admin-reset-password`, { userId }),
+      apiClient.get(`/admin/activity-logs${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/admin/activity-logs/${id}`),
+      apiClient.get('/admin/activity-logs/stats'),
+      apiClient.get(`/provisioning${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/provisioning/${id}`),
+      apiClient.post('/provisioning', request),
+      apiClient.put(`/provisioning/${id}`, request),
+      apiClient.delete(`/provisioning/${id}`),
+      apiClient.post(`/provisioning/${id}/approve`, { notes }),
+      apiClient.post(`/provisioning/${id}/reject`, { reason }),
+      apiClient.get('/provisioning/stats'),
+      apiClient.post('/email/test', emailData),
+      apiClient.post('/email/bulk', emailData),
+      apiClient.post('/email/send-ocr-results', emailData),
+      apiClient.get('/admin/system/system-stats'),
+      apiClient.get('/admin/system/database-health'),
+      apiClient.get('/admin/system/server-metrics'),
+      apiClient.get('/admin/system/system-info'),
+      apiClient.get('/admin/system/backups'),
+      apiClient.post(url),
+      apiClient.get('/admin/services/status'),
+      apiClient.get('/admin/services/health'),
+      apiClient.get('/admin/services/actions/recent'),
+      apiClient.post(`/admin/services/${serviceName}/${action}`),
+      apiClient.get(`/admin/services/backend/logs?lines=${lines}`),
+      apiClient.post('/admin/services/frontend/rebuild'),
+      apiClient.get(`/admin/services/${serviceName}/logs?lines=${lines}`),
+      apiClient.get('/api/omai/status'),
+      apiClient.get('/api/omai/health'),
+      apiClient.get(`/api/omai/logs?max=${maxEntries}`),
+      apiClient.get('/api/omai/settings'),
+      apiClient.put('/api/omai/settings', settings),
+      apiClient.post(`/api/omai/control/${action}`),
+      apiClient.get('/api/omai/stats'),
+      apiClient.get(`/api/omai/agent-results/${componentId}`),
+      apiClient.get('/api/omai/agent-metrics'),
+      apiClient.get('/clients'),
+      apiClient.get(`/clients/${clientId}/stats`),
+      apiClient.get(`/clients/${clientId}/test-connection`),
+      apiClient.put(`/clients/${clientId}`, data),
+      apiClient.get('/metrics/orthodox'),
+      apiClient.get('/menu-management/permissions'),
+      apiClient.put('/menu-management/permissions', permissions),
+      apiClient.get('/menu-permissions'),
+      apiClient.get(`/menu-permissions/${menuId}`),
+      apiClient.post('/menu-permissions/menu-item', data),
+      apiClient.get('/admin/global-images'),
+      apiClient.put(`/admin/global-images/${imageId}`, params),
+      apiClient.post('/admin/global-images/save-extracted', data),
+      apiClient.get('/backup/settings'),
+      apiClient.put('/backup/settings', settings),
+      apiClient.get('/backup/files'),
+      apiClient.get('/backup/storage'),
+      apiClient.post('/backup/run'),
+      apiClient.get(`/backup/download/${backupId}`),
+      apiClient.delete(`/backup/delete/${backupId}`),
+      apiClient.get('/admin/nfs-backup/config'),
+      apiClient.post('/admin/nfs-backup/config', config),
+      apiClient.post('/admin/nfs-backup/test', { nfsServerIP, remotePath }),
+      apiClient.post('/admin/nfs-backup/mount'),
+      apiClient.post('/admin/nfs-backup/unmount'),
+      apiClient.get('/admin/nfs-backup/status'),
+      apiClient.get('/logs/components'),
+      apiClient.get(`/logs${apiClient.buildQueryString(params)}`),
+      apiClient.get(`/logs/components/${component}/level`),
+      apiClient.post(`/logs/components/${component}/toggle`),
+      apiClient.post('/logs/test'),
+      apiClient.post('/logs/frontend'),
+      apiClient.post('/admin/test/retry-failed-jobs'),
+
+--- BASE URLS ---
+import { apiClient } from './utils/axiosInstance';
+      apiClient.get(`/admin/churches${apiClient.buildQueryString(filters)}`),
+      apiClient.get<{ success: boolean; church: Church }>(`/admin/churches/${id}`)
+      apiClient.post('/admin/churches', church),
+      apiClient.put(`/admin/churches/${id}`, church),
+      apiClient.delete(`/admin/churches/${id}`, { 
+      apiClient.post(`/admin/churches/${id}/approve`, { notes }),
+      apiClient.post(`/admin/churches/${id}/suspend`, { reason }),
+      apiClient.post(`/admin/churches/${id}/activate`),
+      apiClient.patch(`/admin/churches/${id}/status`, { active }),
+      apiClient.post(`/admin/churches/${id}/remove-all-users`),
+      apiClient.get('/admin/churches?is_active=1'),
+      apiClient.get(`/admin/churches?preferred_language=${language}`),
+      apiClient.get(`/admin/churches/${churchId}/users`),
+      apiClient.get(`/admin/churches/${churchId}/record-counts`),
+      apiClient.get(`/admin/churches/${churchId}/database-info`),
+      apiClient.post(`/admin/churches/${churchId}/test-connection`),
+      apiClient.post(`/admin/churches/${churchId}/users/${userId}/${action}`),
+      apiClient.post(`/admin/churches/${churchId}/users/${userId}/reset-password`),
+      apiClient.get(`/admin/churches/${churchId}/tables`),
+      apiClient.post('/admin/churches/wizard', data),
+      apiClient.get(`/admin/church/${churchId}/overview`),
+      apiClient.get(`/admin/church-database/${churchDbId}/record-counts`),
+      apiClient.get(`/admin/users${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/admin/users/${id}`),
+      apiClient.post('/admin/users', user),
+      apiClient.put(`/admin/users/${id}`, user),
+      apiClient.delete(`/admin/users/${id}`),
+      apiClient.put(`/admin/users/${id}/toggle-status`),
+      apiClient.post(`/auth/admin-reset-password`, { userId }),
+      apiClient.get(`/admin/activity-logs${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/admin/activity-logs/${id}`),
+      apiClient.get('/admin/activity-logs/stats'),
+      apiClient.get(`/provisioning${apiClient.buildQueryString(filters)}`),
+      apiClient.get(`/provisioning/${id}`),
+      apiClient.post('/provisioning', request),
+      apiClient.put(`/provisioning/${id}`, request),
+      apiClient.delete(`/provisioning/${id}`),
+      apiClient.post(`/provisioning/${id}/approve`, { notes }),
+      apiClient.post(`/provisioning/${id}/reject`, { reason }),
+      apiClient.get('/provisioning/stats'),
+      apiClient.post('/email/test', emailData),
+      apiClient.post('/email/bulk', emailData),
+      apiClient.post('/email/send-ocr-results', emailData),
+      apiClient.get('/admin/system/system-stats'),
+      apiClient.get('/admin/system/database-health'),
+      apiClient.get('/admin/system/server-metrics'),
+      apiClient.get('/admin/system/system-info'),
+      apiClient.get('/admin/system/backups'),
+      apiClient.post(url),
+      apiClient.get('/admin/services/status'),
+      apiClient.get('/admin/services/health'),
+      apiClient.get('/admin/services/actions/recent'),
+      apiClient.post(`/admin/services/${serviceName}/${action}`),
+      apiClient.get(`/admin/services/backend/logs?lines=${lines}`),
+      apiClient.post('/admin/services/frontend/rebuild'),
+      apiClient.get(`/admin/services/${serviceName}/logs?lines=${lines}`),
+      apiClient.get('/api/omai/status'),
+      apiClient.get('/api/omai/health'),
+      apiClient.get(`/api/omai/logs?max=${maxEntries}`),
+      apiClient.get('/api/omai/settings'),
+      apiClient.put('/api/omai/settings', settings),
+      apiClient.post(`/api/omai/control/${action}`),
+      apiClient.get('/api/omai/stats'),
+      apiClient.get(`/api/omai/agent-results/${componentId}`),
+      apiClient.get('/api/omai/agent-metrics'),
+      apiClient.get('/clients'),
+      apiClient.get(`/clients/${clientId}/stats`),
+      apiClient.get(`/clients/${clientId}/test-connection`),
+      apiClient.put(`/clients/${clientId}`, data),
+      apiClient.get('/metrics/orthodox'),
+      apiClient.get('/menu-management/permissions'),
+      apiClient.put('/menu-management/permissions', permissions),
+      apiClient.get('/menu-permissions'),
+      apiClient.get(`/menu-permissions/${menuId}`),
+      apiClient.post('/menu-permissions/menu-item', data),
+      apiClient.get('/admin/global-images'),
+      apiClient.uploadFile('/admin/global-images/upload', formData as any),
+      apiClient.put(`/admin/global-images/${imageId}`, params),
+      apiClient.post('/admin/global-images/save-extracted', data),
+      apiClient.get('/backup/settings'),
+      apiClient.put('/backup/settings', settings),
+      apiClient.get('/backup/files'),
+      apiClient.get('/backup/storage'),
+      apiClient.post('/backup/run'),
+      apiClient.get(`/backup/download/${backupId}`),
+      apiClient.delete(`/backup/delete/${backupId}`),
+      apiClient.get('/admin/nfs-backup/config'),
+      apiClient.post('/admin/nfs-backup/config', config),
+      apiClient.post('/admin/nfs-backup/test', { nfsServerIP, remotePath }),
+      apiClient.post('/admin/nfs-backup/mount'),
+      apiClient.post('/admin/nfs-backup/unmount'),
+      apiClient.get('/admin/nfs-backup/status'),
+      apiClient.get('/logs/components'),
+      apiClient.get(`/logs${apiClient.buildQueryString(params)}`),
+      apiClient.get(`/logs/components/${component}/level`),
+      apiClient.post(`/logs/components/${component}/toggle`),
+      apiClient.post('/logs/test'),
+      apiClient.post('/logs/frontend'),
+      apiClient.post('/admin/test/retry-failed-jobs'),
+
+--- DATA TYPES ---
+No types found
+
+=== API Integration Analysis ===
+File: front-end/src/api/social.api.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+      apiClient.get('/social/chat/conversations'),
+      apiClient.get(`/social/chat/conversations/${conversationId}/messages`),
+      apiClient.get(`/social/chat/conversations/${conversationId}`),
+      apiClient.put(`/social/chat/conversations/${conversationId}/read`),
+      apiClient.post(`/social/chat/conversations/${conversationId}/messages`, data),
+      apiClient.put(`/social/chat/messages/${messageId}`, data),
+      apiClient.delete(`/social/chat/messages/${messageId}`),
+      apiClient.post(`/social/chat/messages/${messageId}/react`, data),
+      apiClient.post(`/social/chat/start/${friendId}`),
+      apiClient.get('/social/friends'),
+      apiClient.get('/social/friends/requests'),
+      apiClient.get(`/social/friends/search?q=${encodeURIComponent(query)}`),
+      apiClient.post(`/social/friends/request/${userId}`),
+      apiClient.put(`/social/friends/requests/${requestId}`, data),
+      apiClient.delete(`/social/friends/${friendId}`),
+      apiClient.get(`/social/blog/posts${apiClient.buildQueryString(params)}`),
+      apiClient.get(`/social/blog/posts/${postId}`),
+      apiClient.post('/social/blog/posts', data),
+      apiClient.put(`/social/blog/posts/${postId}`, data),
+      apiClient.delete(`/social/blog/posts/${postId}`),
+      apiClient.post(`/social/blog/posts/${postId}/like`),
+      apiClient.post(`/social/blog/posts/${postId}/react`, data),
+      apiClient.delete(`/social/blog/posts/${postId}/react`),
+      apiClient.post(`/social/blog/posts/${postId}/comments`, data),
+      apiClient.get(`/social/notifications${apiClient.buildQueryString(params)}`),
+      apiClient.get('/social/notifications/settings'),
+      apiClient.put('/social/notifications/settings', settings),
+      apiClient.put(`/social/notifications/${notificationId}/read`),
+      apiClient.put('/social/notifications/mark-all-read'),
+      apiClient.delete(`/social/notifications/${notificationId}`),
+
+--- BASE URLS ---
+import { apiClient } from './utils/axiosInstance';
+      apiClient.get('/social/chat/conversations'),
+      apiClient.get(`/social/chat/conversations/${conversationId}/messages`),
+      apiClient.get(`/social/chat/conversations/${conversationId}`),
+      apiClient.put(`/social/chat/conversations/${conversationId}/read`),
+      apiClient.post(`/social/chat/conversations/${conversationId}/messages`, data),
+      apiClient.put(`/social/chat/messages/${messageId}`, data),
+      apiClient.delete(`/social/chat/messages/${messageId}`),
+      apiClient.post(`/social/chat/messages/${messageId}/react`, data),
+      apiClient.post(`/social/chat/start/${friendId}`),
+      apiClient.get('/social/friends'),
+      apiClient.get('/social/friends/requests'),
+      apiClient.get(`/social/friends/search?q=${encodeURIComponent(query)}`),
+      apiClient.post(`/social/friends/request/${userId}`),
+      apiClient.put(`/social/friends/requests/${requestId}`, data),
+      apiClient.delete(`/social/friends/${friendId}`),
+      apiClient.get(`/social/blog/posts${apiClient.buildQueryString(params)}`),
+      apiClient.get(`/social/blog/posts/${postId}`),
+      apiClient.post('/social/blog/posts', data),
+      apiClient.put(`/social/blog/posts/${postId}`, data),
+      apiClient.delete(`/social/blog/posts/${postId}`),
+      apiClient.post(`/social/blog/posts/${postId}/like`),
+      apiClient.post(`/social/blog/posts/${postId}/react`, data),
+      apiClient.delete(`/social/blog/posts/${postId}/react`),
+      apiClient.post(`/social/blog/posts/${postId}/comments`, data),
+      apiClient.get(`/social/notifications${apiClient.buildQueryString(params)}`),
+      apiClient.get('/social/notifications/settings'),
+      apiClient.put('/social/notifications/settings', settings),
+      apiClient.put(`/social/notifications/${notificationId}/read`),
+      apiClient.put('/social/notifications/mark-all-read'),
+      apiClient.delete(`/social/notifications/${notificationId}`),
+
+--- DATA TYPES ---
+interface Conversation {
+  id: number;
+  type: 'direct' | 'group';
+  name?: string;
+  avatar_url?: string;
+  last_activity: string;
+--
+interface Message {
+  id: number;
+  conversation_id: number;
+  sender_id: number;
+  sender_name: string;
+  sender_avatar?: string;
+--
+interface Friend {
+  friend_id: number;
+  first_name: string;
+  last_name: string;
+  display_name?: string;
+  profile_image_url?: string;
+--
+interface FriendRequest {
+  id: number;
+  sender_id: number;
+  receiver_id: number;
+  first_name: string;
+  last_name: string;
+--
+interface SearchUser {
+  id: number;
+  first_name: string;
+  last_name: string;
+  display_name?: string;
+  profile_image_url?: string;
+--
+interface BlogPost {
+  id: number;
+  title: string;
+  content: string;
+  excerpt: string;
+  visibility: 'public' | 'private' | 'friends_only';
+--
+interface Notification {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+--
+interface NotificationSettings {
+  email_notifications: boolean;
+  push_notifications: boolean;
+  friend_requests: boolean;
+  blog_comments: boolean;
+  blog_likes: boolean;
+--
+    sendMessage: (conversationId: number, data: { content: string; message_type: string }): Promise<{ message: Message }> =>
+      apiClient.post(`/social/chat/conversations/${conversationId}/messages`, data),
+
+    // Edit a message
+    editMessage: (messageId: number, data: { content: string }): Promise<ApiResponse> =>
+      apiClient.put(`/social/chat/messages/${messageId}`, data),
+--
+    reactToMessage: (messageId: number, data: { reaction_type: string }): Promise<ApiResponse> =>
+      apiClient.post(`/social/chat/messages/${messageId}/react`, data),
+
+    // Start a conversation with a friend
+    startConversation: (friendId: number): Promise<{ conversation_id: number }> =>
+      apiClient.post(`/social/chat/start/${friendId}`),
+--
+    reactToPost: (postId: number, data: { reaction_type: string }): Promise<ApiResponse> =>
+      apiClient.post(`/social/blog/posts/${postId}/react`, data),
+
+    // Remove reaction from a blog post
+    removeReaction: (postId: number): Promise<ApiResponse> =>
+      apiClient.delete(`/social/blog/posts/${postId}/react`),
+
+=== API Integration Analysis ===
+File: front-end/src/api/notes/NotesData.ts
+Date: Wed Jul 30 01:00:01 AM EDT 2025
+
+--- API ENDPOINTS ---
+  http.get('/api/data/notes/NotesData', () => {
+  http.delete('/api/notes/delete', async ({ request }) => {
+  http.post('/api/notes/add', async ({ request }) => {
+  http.put('/api/notes/update', async ({ request }) => {
+
+--- BASE URLS ---
+No base URLs found
+
+--- DATA TYPES ---
+interface notesType {
+  id: number;
+  color: string;
+  title: string;
+  datef: string;
+  deleted: boolean;
+

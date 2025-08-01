@@ -1,0 +1,43 @@
+{
+  "id": "da6aafb944f7",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/test-role-fix.js",
+  "relativePath": "server/test-role-fix.js",
+  "name": "test-role-fix.js",
+  "extension": ".js",
+  "size": 835,
+  "modified": "2025-07-19T13:59:38.003Z",
+  "created": "2025-07-19T13:59:17.374Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 30,
+      "characters": 825,
+      "words": 94
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 30,
+      "codeLines": 20,
+      "commentLines": 3,
+      "commentRatio": 0.13043478260869565,
+      "averageLineLength": 34.34782608695652
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.175Z"
+  },
+  "contentHash": "bc791e1566009a9ca0cd9b4a6d59765f91c39d783f61bfaae39a401b621dfa7c",
+  "discoveredAt": "2025-07-28T07:20:01.175Z"
+}

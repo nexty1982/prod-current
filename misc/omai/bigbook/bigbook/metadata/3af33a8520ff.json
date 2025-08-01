@@ -1,0 +1,74 @@
+{
+  "id": "3af33a8520ff",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata/80285e03549f.json",
+  "relativePath": "bigbook/metadata/80285e03549f.json",
+  "name": "80285e03549f.json",
+  "extension": ".json",
+  "size": 19035,
+  "modified": "2025-07-26T04:17:11.154Z",
+  "created": "2025-07-26T04:17:11.154Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 93,
+      "characters": 19035,
+      "words": 1774
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "multer",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "uuid",
+        "line": 80
+      },
+      {
+        "type": "npm_package",
+        "name": "qrcode",
+        "line": 80
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 93,
+      "codeLines": 93,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 203.68817204301075
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.150Z"
+  },
+  "contentHash": "fce9d10ef6e328b0461e33aaaaa92b81e6eec6df2e82b3069798055114f72b5c",
+  "discoveredAt": "2025-07-28T07:19:57.150Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "f1c9d3f574f6",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/deploy-api-v2-fixes-fixed.sh",
+  "relativePath": "server/scripts/deploy-api-v2-fixes-fixed.sh",
+  "name": "deploy-api-v2-fixes-fixed.sh",
+  "extension": ".sh",
+  "size": 14371,
+  "modified": "2025-07-24T14:50:26.364Z",
+  "created": "2025-07-24T14:50:26.364Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 430,
+      "characters": 14361,
+      "words": 1481
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 430,
+      "codeLines": 285,
+      "commentLines": 66,
+      "commentRatio": 0.18803418803418803,
+      "averageLineLength": 39.03133903133903
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.025Z"
+  },
+  "contentHash": "012e8b3f31a3c988d2931a90d55c3d75c95dfb7a7f503ba2d02f59cb1184e670",
+  "discoveredAt": "2025-07-28T07:20:01.025Z"
+}

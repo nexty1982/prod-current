@@ -1,0 +1,43 @@
+{
+  "id": "d5f4fd54df2b",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/pm2-headlines.config.js",
+  "relativePath": "server/scripts/pm2-headlines.config.js",
+  "name": "pm2-headlines.config.js",
+  "extension": ".js",
+  "size": 1749,
+  "modified": "2025-07-22T16:26:18.988Z",
+  "created": "2025-07-22T16:26:15.842Z",
+  "classification": {
+    "type": "Configuration",
+    "category": "Configuration",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 70,
+      "characters": 1749,
+      "words": 182
+    },
+    "classification": {
+      "type": "Configuration",
+      "category": "Configuration",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 70,
+      "codeLines": 31,
+      "commentLines": 32,
+      "commentRatio": 0.5079365079365079,
+      "averageLineLength": 25.984126984126984
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.056Z"
+  },
+  "contentHash": "ce29d687d676fabc37847bb4ff565f79dfd4601dd3fb276cc582de559cf45689",
+  "discoveredAt": "2025-07-28T07:20:01.056Z"
+}

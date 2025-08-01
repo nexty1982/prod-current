@@ -18,6 +18,7 @@ import { UserDataContext } from "src/context/UserDataContext/index";
 import { IconDotsVertical, IconSearch } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { GallaryType } from 'src/types/apps/users';
+import { ensureArray } from 'src/utils/arrayUtils';
 
 import FsLightbox from 'fslightbox-react';
 
@@ -27,10 +28,12 @@ const GalleryCard = () => {
   const [search, setSearch] = React.useState('');
 
   const filterPhotos = (photos: GallaryType[], cSearch: string) => {
-    if (photos)
-      return photos.filter((t) => t.name.toLocaleLowerCase().includes(cSearch.toLocaleLowerCase()));
-
-    return photos;
+    const safePhotos = ensureArray(photos, []);
+    if (safePhotos.length === 0) return [];
+    
+    return safePhotos.filter((t) => 
+      t.name.toLocaleLowerCase().includes(cSearch.toLocaleLowerCase())
+    );
   };
 
   const getPhotos = filterPhotos(gallery, search);

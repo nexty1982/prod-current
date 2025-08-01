@@ -1,0 +1,43 @@
+{
+  "id": "591f2ada9c5f",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/mysql/emergency-kanban-fix.sql",
+  "relativePath": "scripts/mysql/emergency-kanban-fix.sql",
+  "name": "emergency-kanban-fix.sql",
+  "extension": ".sql",
+  "size": 3154,
+  "modified": "2025-07-23T19:57:10.807Z",
+  "created": "2025-07-23T19:57:10.183Z",
+  "classification": {
+    "type": "Database Scripts",
+    "category": "Backend > Database",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 88,
+      "characters": 3152,
+      "words": 271
+    },
+    "classification": {
+      "type": "Database Scripts",
+      "category": "Backend > Database",
+      "confidence": 4
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 88,
+      "codeLines": 70,
+      "commentLines": 0,
+      "commentRatio": 0,
+      "averageLineLength": 43.52857142857143
+    },
+    "lastAnalyzed": "2025-07-28T07:19:59.135Z"
+  },
+  "contentHash": "a2a0140e4397e359881403d75c7ab987b0bf018d4da02486383e5f7ca0c7c78e",
+  "discoveredAt": "2025-07-28T07:19:59.135Z"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "333c82230bee",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/07-09-25/LOGS_PANEL_COMPLETE.md",
+  "relativePath": "docs/archive/07-09-25/LOGS_PANEL_COMPLETE.md",
+  "name": "LOGS_PANEL_COMPLETE.md",
+  "extension": ".md",
+  "size": 6318,
+  "modified": "2025-07-09T04:32:16.323Z",
+  "created": "2025-07-09T04:32:16.323Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 176,
+      "characters": 6246,
+      "words": 895
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 176,
+      "codeLines": 113,
+      "commentLines": 28,
+      "commentRatio": 0.19858156028368795,
+      "averageLineLength": 42.815602836879435
+    },
+    "lastAnalyzed": "2025-07-28T07:19:57.883Z"
+  },
+  "contentHash": "7884efb270f34ee8dfcfebca29a67d65aeef64fd3cc6feaa382968e0f874051b",
+  "discoveredAt": "2025-07-28T07:19:57.883Z"
+}

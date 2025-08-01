@@ -1,0 +1,54 @@
+{
+  "id": "2d5090922ac5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/hooks/useLiturgicalCalendar.ts",
+  "relativePath": "front-end/src/hooks/useLiturgicalCalendar.ts",
+  "name": "useLiturgicalCalendar.ts",
+  "extension": ".ts",
+  "size": 11679,
+  "modified": "2025-07-05T22:58:14.235Z",
+  "created": "2025-07-05T03:42:04.367Z",
+  "classification": {
+    "type": "Frontend Scripts",
+    "category": "Frontend > Components",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 411,
+      "characters": 11671,
+      "words": 1159
+    },
+    "classification": {
+      "type": "Frontend Scripts",
+      "category": "Frontend > Components",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "react",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "swr",
+        "line": 3
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 411,
+      "codeLines": 345,
+      "commentLines": 24,
+      "commentRatio": 0.06504065040650407,
+      "averageLineLength": 30.40650406504065
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.851Z"
+  },
+  "contentHash": "763a6dce9eeab82cd497d9a310b1e6f0c2ecf269475badcf8d1bb94ae0fca9c6",
+  "discoveredAt": "2025-07-28T07:19:58.851Z"
+}

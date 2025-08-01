@@ -1,0 +1,43 @@
+{
+  "id": "08f2a3dcf2da",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/jurisdictions/goarch-scraper.js",
+  "relativePath": "server/scrapers/jurisdictions/goarch-scraper.js",
+  "name": "goarch-scraper.js",
+  "extension": ".js",
+  "size": 19119,
+  "modified": "2025-07-14T06:06:57.015Z",
+  "created": "2025-07-14T05:59:15.436Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 563,
+      "characters": 19117,
+      "words": 1373
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 563,
+      "codeLines": 417,
+      "commentLines": 33,
+      "commentRatio": 0.07333333333333333,
+      "averageLineLength": 39.09111111111111
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.600Z"
+  },
+  "contentHash": "4b76049438cc01d047ef41d54636de08413d4d2b5fa8b928ae93a366fad2fb7a",
+  "discoveredAt": "2025-07-28T07:20:00.600Z"
+}

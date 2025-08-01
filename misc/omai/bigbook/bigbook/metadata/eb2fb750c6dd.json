@@ -1,0 +1,43 @@
+{
+  "id": "eb2fb750c6dd",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/07-09-25/IMPLEMENTATION_PRIORITY_GUIDE.md",
+  "relativePath": "docs/archive/temp_extract/07-09-25/IMPLEMENTATION_PRIORITY_GUIDE.md",
+  "name": "IMPLEMENTATION_PRIORITY_GUIDE.md",
+  "extension": ".md",
+  "size": 10756,
+  "modified": "2025-07-09T04:32:16.000Z",
+  "created": "2025-07-14T05:44:05.496Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 10
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 363,
+      "characters": 10722,
+      "words": 1430
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 10
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 363,
+      "codeLines": 200,
+      "commentLines": 97,
+      "commentRatio": 0.3265993265993266,
+      "averageLineLength": 34.66329966329966
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.172Z"
+  },
+  "contentHash": "dc4f54285845631855725f7eed03e857a5ba196227e5f0bbb0c8547a2f44e3b5",
+  "discoveredAt": "2025-07-28T07:19:58.172Z"
+}

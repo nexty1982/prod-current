@@ -1,0 +1,6 @@
+{
+  "id": "9e3dd89449d2",
+  "name": "migrate-church-info.js",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migration/migrate-church-info.js",
+  "type": "Database Scripts"
+}

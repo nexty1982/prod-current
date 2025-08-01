@@ -1,0 +1,6 @@
+{
+  "id": "6d602a98eb13",
+  "name": "restart-server-for-bigbook.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-server-for-bigbook.sh",
+  "type": "Server Scripts"
+}

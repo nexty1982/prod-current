@@ -1,0 +1,43 @@
+{
+  "id": "6f894aea54de",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/api/globalFetcher.ts",
+  "relativePath": "front-end/src/api/globalFetcher.ts",
+  "name": "globalFetcher.ts",
+  "extension": ".ts",
+  "size": 1493,
+  "modified": "2025-04-30T05:42:44.000Z",
+  "created": "2025-07-05T02:28:22.804Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 60,
+      "characters": 1493,
+      "words": 175
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 60,
+      "codeLines": 52,
+      "commentLines": 1,
+      "commentRatio": 0.018867924528301886,
+      "averageLineLength": 26.943396226415093
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.679Z"
+  },
+  "contentHash": "ac2fff4463fa8d0987d608ff6d8f9bb154fcacf37f415fb2e528a8f9a93e66c5",
+  "discoveredAt": "2025-07-28T07:19:58.679Z"
+}

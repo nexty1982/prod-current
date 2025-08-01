@@ -13,7 +13,7 @@ const router = express.Router();
 // Configure multer for logo uploads
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../uploads/logos');
+    const uploadDir = path.join(__dirname, '../misc/uploads/logos');
     await fs.mkdir(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
@@ -376,9 +376,10 @@ router.get('/:church_id/details', async (req, res) => {
     });
 
     try {
-      // Get church info
-      const [churchInfo] = await churchConnection.execute(
-        'SELECT * FROM church_info WHERE id = 1'
+      // Get church info from platform database
+      const [churchInfo] = await promisePool.query(
+        'SELECT * FROM churches WHERE id = ?',
+        [req.params.id || 1]
       );
 
       if (churchInfo.length === 0) {

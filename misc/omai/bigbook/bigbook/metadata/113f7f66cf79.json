@@ -1,0 +1,54 @@
+{
+  "id": "113f7f66cf79",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/memory/memory-manager.ts",
+  "relativePath": "services/om-ai/memory/memory-manager.ts",
+  "name": "memory-manager.ts",
+  "extension": ".ts",
+  "size": 7738,
+  "modified": "2025-07-25T00:06:14.375Z",
+  "created": "2025-07-25T00:06:10.301Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 1
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 240,
+      "characters": 7738,
+      "words": 693
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 1
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "fs/promises",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 2
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 240,
+      "codeLines": 206,
+      "commentLines": 3,
+      "commentRatio": 0.014354066985645933,
+      "averageLineLength": 35.52153110047847
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.546Z"
+  },
+  "contentHash": "60e673386b13250c96d440ab3fb4954683c613f7e8b808764a79cdb11794b07a",
+  "discoveredAt": "2025-07-28T07:20:01.546Z"
+}

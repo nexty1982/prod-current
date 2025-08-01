@@ -1,0 +1,43 @@
+{
+  "id": "7fac6518aa11",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/run-fix.js",
+  "relativePath": "server/debug/run-fix.js",
+  "name": "run-fix.js",
+  "extension": ".js",
+  "size": 817,
+  "modified": "2025-07-26T20:55:22.427Z",
+  "created": "2025-07-26T20:55:21.667Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 21,
+      "characters": 809,
+      "words": 83
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 21,
+      "codeLines": 18,
+      "commentLines": 1,
+      "commentRatio": 0.05263157894736842,
+      "averageLineLength": 41.421052631578945
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.202Z"
+  },
+  "contentHash": "d8798b3876aa2c7642ff30bf7e3cc98b74eab941c39d54370fca712662cf23e4",
+  "discoveredAt": "2025-07-28T07:20:00.202Z"
+}

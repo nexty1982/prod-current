@@ -1,0 +1,43 @@
+{
+  "id": "bf86f8bde9e0",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/jobs/auto-learning-runner.js",
+  "relativePath": "server/jobs/auto-learning-runner.js",
+  "name": "auto-learning-runner.js",
+  "extension": ".js",
+  "size": 9352,
+  "modified": "2025-07-15T06:06:31.097Z",
+  "created": "2025-07-15T05:56:31.164Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 283,
+      "characters": 9280,
+      "words": 907
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 283,
+      "codeLines": 196,
+      "commentLines": 35,
+      "commentRatio": 0.15151515151515152,
+      "averageLineLength": 38.44588744588744
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.261Z"
+  },
+  "contentHash": "d37319d95617f00cb68aa10eb0db859eb0326d6accc9b8142c595429e2877f66",
+  "discoveredAt": "2025-07-28T07:20:00.262Z"
+}

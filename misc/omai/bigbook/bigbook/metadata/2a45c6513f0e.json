@@ -1,0 +1,43 @@
+{
+  "id": "2a45c6513f0e",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/fix-church-permissions.js",
+  "relativePath": "server/utils/fix-church-permissions.js",
+  "name": "fix-church-permissions.js",
+  "extension": ".js",
+  "size": 5337,
+  "modified": "2025-07-24T14:50:26.280Z",
+  "created": "2025-07-24T14:50:26.280Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 119,
+      "characters": 5277,
+      "words": 436
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 119,
+      "codeLines": 83,
+      "commentLines": 13,
+      "commentRatio": 0.13541666666666666,
+      "averageLineLength": 51.552083333333336
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.251Z"
+  },
+  "contentHash": "96deb7597940485e2b2286be35830b7eb9dc4e40be92200cd13e532a99d8a878",
+  "discoveredAt": "2025-07-28T07:20:01.251Z"
+}

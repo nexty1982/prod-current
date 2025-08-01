@@ -1,0 +1,43 @@
+{
+  "id": "509476e7b87c",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/setup-user-lockout.js",
+  "relativePath": "server/scripts/setup-user-lockout.js",
+  "name": "setup-user-lockout.js",
+  "extension": ".js",
+  "size": 1891,
+  "modified": "2025-07-20T19:04:53.471Z",
+  "created": "2025-07-20T19:04:40.970Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 61,
+      "characters": 1877,
+      "words": 189
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 61,
+      "codeLines": 42,
+      "commentLines": 5,
+      "commentRatio": 0.10638297872340426,
+      "averageLineLength": 37.61702127659574
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.077Z"
+  },
+  "contentHash": "5b424da10ae5f2eadff7989d0a34ed945e0b94ba4a781ecb7461b68f942de45f",
+  "discoveredAt": "2025-07-28T07:20:01.077Z"
+}

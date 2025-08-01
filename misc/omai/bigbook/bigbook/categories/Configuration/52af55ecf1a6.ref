@@ -1,0 +1,6 @@
+{
+  "id": "52af55ecf1a6",
+  "name": "metrics.json",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/services/om-ai/control/metrics.json",
+  "type": "Configuration"
+}

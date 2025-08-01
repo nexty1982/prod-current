@@ -1,12 +1,24 @@
 /**
- * OrthodoxMetrics Authentication Context & Provider
- * Session-based authentication with role-based access control
+ * OrthodMetrics Authentication Context & Provider
+ * Simplified version to prevent blank page
+ * 🔄 Refactored to use unified role system (see utils/roles.ts)
  */
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import AuthService from '../services/authService';
-import { devLogDataShape, devLogApiResponse } from '../utils/devLogger';
 import type { User, UserRole } from '../types/orthodox-metrics.types';
+import { 
+  hasRole as checkRole, 
+  hasAnyRole, 
+  canManageUser as checkCanManageUser,
+  isSuperAdmin as checkIsSuperAdmin,
+  isAdmin,
+  canManageChurches as checkCanManageChurches,
+  canViewDashboard as checkCanViewDashboard,
+  canAccessOCR as checkCanAccessOCR,
+  canManageProvisioning as checkCanManageProvisioning,
+  getUserLevel
+} from '../utils/roles';
 
 interface AuthContextType {
   user: User | null;
@@ -43,41 +55,25 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false to render immediately
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from localStorage ONLY - no API calls
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const storedUser = AuthService.getStoredUser();
-
-        if (storedUser) {
-          setUser(storedUser);
-
-          // Verify authentication with server
-          try {
-            const authCheck = await AuthService.checkAuth();
-            if (!authCheck.authenticated || !authCheck.user) {
-              // User is no longer authenticated, clear stored data
-              setUser(null);
-            } else {
-              // Update user data from server
-              setUser(authCheck.user);
-            }
-          } catch (err) {
-            // Auth check failed, clear stored data
-            setUser(null);
-          }
-        }
-      } catch (err) {
-        console.error('Error initializing auth:', err);
-      } finally {
-        setLoading(false);
+    try {
+      const storedUser = AuthService.getStoredUser();
+      
+      if (storedUser) {
+        console.log('🔍 AuthContext: Found stored user data:', storedUser.email);
+        setUser(storedUser);
+      } else {
+        console.log('🔍 AuthContext: No stored user data found');
       }
-    };
-
-    initializeAuth();
+    } catch (err) {
+      console.error('❌ AuthContext: Error initializing auth:', err);
+      setUser(null);
+      localStorage.removeItem('auth_user');
+    }
   }, []);
 
   const login = async (username: string, password: string, rememberMe: boolean = false) => {
@@ -86,25 +82,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setError(null);
 
       const response = await AuthService.login({
-        username: username, // Can be email or actual username
+        username: username,
         password,
         remember_me: rememberMe,
       });
 
-      // Development logging for login response
-      devLogApiResponse(response, 'AuthService.login', 'Object with user property');
-      
       if (response.user) {
-        devLogDataShape(
-          response.user,
-          'Login User Data',
-          {
-            expectedType: 'object',
-            componentName: 'AuthContext',
-            operation: 'user login',
-            required: true
-          }
-        );
+        console.log('🔑 AuthContext: Setting user data after successful login');
         setUser(response.user);
       } else {
         throw new Error('Login failed - no user data received');
@@ -122,17 +106,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setLoading(true);
 
-      // Call logout API to invalidate session on server
       try {
         await AuthService.logout();
       } catch (err) {
-        // Continue with logout even if API call fails
         console.warn('Logout API call failed:', err);
       }
 
-      // Clear local state
       setUser(null);
       setError(null);
+      localStorage.removeItem('auth_user');
 
     } catch (err) {
       console.error('Error during logout:', err);
@@ -149,7 +131,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(authCheck.user);
         localStorage.setItem('auth_user', JSON.stringify(authCheck.user));
       } else {
-        // User is no longer authenticated
         await logout();
       }
     } catch (err) {
@@ -162,25 +143,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
   };
 
-  // Role and permission checking functions
+  // 🔄 Role and permission checking functions refactored to use unified role system
   const hasRole = (role: UserRole | UserRole[]): boolean => {
     if (!user) return false;
 
     if (Array.isArray(role)) {
-      return role.includes(user.role);
+      return hasAnyRole(user, role);
     }
 
-    return user.role === role;
+    return checkRole(user, role);
   };
 
+  // 🔄 Permission system updated to use canonical role hierarchy
   const hasPermission = (permission: string): boolean => {
     if (!user) return false;
 
-    // Define role-based permissions
     const rolePermissions: Record<UserRole, string[]> = {
-      super_admin: ['*'], // Super admin has all permissions
-      admin: ['*'], // Admin has all permissions
-      priest: [
+      super_admin: ['*'],
+      admin: ['*'],
+      manager: [
         'manage_records',
         'view_dashboard',
         'manage_calendar',
@@ -190,48 +171,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         'manage_invoices',
         'manage_church_data',
       ],
-      deacon: [
+      priest: [
         'manage_records',
         'view_dashboard',
+        'view_calendar',
         'manage_calendar',
         'access_ocr',
         'view_invoices',
         'manage_church_data',
+        'generate_certificates',
       ],
-      user: [
+      deacon: [
+        'manage_records',
         'view_dashboard',
         'view_calendar',
-        'view_records',
         'access_ocr',
+        'view_invoices',
+        'generate_certificates',
       ],
-      supervisor: [
+      editor: [
         'manage_records',
         'view_dashboard',
         'access_ocr',
         'view_invoices',
-        'view_calendar',
-        'export_data',
-      ],
-      volunteer: [
-        'access_ocr',
-        'view_calendar',
-        'view_records',
       ],
       viewer: [
-        'view_calendar',
-        'view_records',
-      ],
-      church: [
-        'view_calendar',
-        'view_records',
-        'manage_church_data',
+        'view_dashboard',
         'view_invoices',
+      ],
+      guest: [
+        'view_dashboard',
       ],
     };
 
     const userPermissions = rolePermissions[user.role] || [];
 
-    // Admin has all permissions
     if (userPermissions.includes('*')) {
       return true;
     }
@@ -239,87 +213,67 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return userPermissions.includes(permission);
   };
 
-  // Convenience permission functions
+  // 🔄 Convenience functions refactored to use unified role system
   const canManageChurches = (): boolean => {
-    return hasRole(['admin', 'super_admin', 'supervisor']) || hasPermission('manage_churches');
+    return checkCanManageChurches(user);
   };
 
   const canViewDashboard = (): boolean => {
-    return hasPermission('view_dashboard');
+    return checkCanViewDashboard(user);
   };
 
   const canManageProvisioning = (): boolean => {
-    return hasRole(['admin', 'super_admin']);
+    return checkCanManageProvisioning(user);
   };
 
   const canAccessOCR = (): boolean => {
-    return hasPermission('access_ocr');
+    return checkCanAccessOCR(user);
   };
 
   const canManageInvoices = (): boolean => {
-    return hasRole(['admin', 'super_admin', 'priest']);
+    return checkRole(user, 'manager');
   };
 
   const canViewCalendar = (): boolean => {
     return hasPermission('view_calendar');
   };
 
-  // Super admin specific permissions
+  // 🔄 Role check refactored to use unified role system
   const isSuperAdmin = (): boolean => {
-    return hasRole('super_admin');
+    return checkIsSuperAdmin(user);
   };
 
   const canCreateAdmins = (): boolean => {
-    return hasRole('super_admin');
+    return checkIsSuperAdmin(user);
   };
 
   const canManageAllUsers = (): boolean => {
-    return hasRole('super_admin');
+    return checkIsSuperAdmin(user);
   };
 
   const canManageChurchesFullAccess = (): boolean => {
-    return hasRole('super_admin');
+    return checkIsSuperAdmin(user);
   };
 
-  // Root super admin specific permissions
-  const ROOT_SUPERADMIN_EMAIL = 'superadmin@orthodoxmetrics.com';
+  const ROOT_SUPERADMIN_EMAIL = 'admin@devchurch.org';
 
   const isRootSuperAdmin = (): boolean => {
     return user?.email === ROOT_SUPERADMIN_EMAIL;
   };
 
+  // 🔄 User management refactored to use unified role system
   const canManageUser = (targetUser: User): boolean => {
     if (!user || !targetUser) return false;
 
+    // Special handling for root super admin
     const isRoot = isRootSuperAdmin();
-    const isManagingSelf = user.id === targetUser.id;
     const isTargetRoot = targetUser.email === ROOT_SUPERADMIN_EMAIL;
 
-    // Root super admin can manage anyone
     if (isRoot) return true;
-
-    // Nobody (except root) can manage the root super admin
     if (isTargetRoot) return false;
 
-    // Users can manage themselves (limited operations)
-    if (isManagingSelf) return true;
-
-    // super_admins cannot manage other super_admins (except root manages all)
-    if (user.role === 'super_admin' && targetUser.role === 'super_admin') {
-      return false;
-    }
-
-    // super_admins can manage admins and below
-    if (user.role === 'super_admin' && targetUser.role !== 'super_admin') {
-      return true;
-    }
-
-    // Admins can manage users below their level
-    if (user.role === 'admin' && !['admin', 'super_admin'].includes(targetUser.role)) {
-      return true;
-    }
-
-    return false;
+    // Use unified role system for general user management
+    return checkCanManageUser(user, targetUser);
   };
 
   const canPerformDestructiveOperation = (targetUser: User): boolean => {
@@ -329,31 +283,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const isManagingSelf = user.id === targetUser.id;
     const isTargetRoot = targetUser.email === ROOT_SUPERADMIN_EMAIL;
 
-    // Root super admin can do anything
     if (isRoot) return true;
-
-    // Cannot perform destructive operations on root super admin
     if (isTargetRoot) return false;
+    if (isManagingSelf) return false; // Users cannot perform destructive ops on themselves
 
-    // Cannot disable/delete yourself
-    if (isManagingSelf) return false;
-
-    // super_admins cannot perform destructive operations on other super_admins
-    if (user.role === 'super_admin' && targetUser.role === 'super_admin') {
-      return false;
-    }
-
-    // super_admins can perform destructive operations on non-super_admins
-    if (user.role === 'super_admin' && targetUser.role !== 'super_admin') {
-      return true;
-    }
-
-    // Admins can perform destructive operations on users below their level
-    if (user.role === 'admin' && !['admin', 'super_admin'].includes(targetUser.role)) {
-      return true;
-    }
-
-    return false;
+    // 🔄 Use unified role system for destructive operations
+    return checkCanManageUser(user, targetUser);
   };
 
   const canChangeRole = (targetUser: User, newRole: UserRole): boolean => {
@@ -362,27 +297,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const isRoot = isRootSuperAdmin();
     const isTargetRoot = targetUser.email === ROOT_SUPERADMIN_EMAIL;
 
-    // Root super admin can change any role
     if (isRoot) return true;
-
-    // Cannot change root super admin's role
     if (isTargetRoot) return false;
-
-    // Cannot assign super_admin role unless you are root
     if (newRole === 'super_admin' && !isRoot) return false;
 
-    // super_admins cannot change other super_admin roles
-    if (user.role === 'super_admin' && targetUser.role === 'super_admin') {
-      return false;
-    }
+    // 🔄 Use unified role system for role change validation
+    const currentUserLevel = getUserLevel(user);
+    const targetUserLevel = getUserLevel(targetUser);
+    const newRoleLevel = getUserLevel({ role: newRole } as User);
 
-    // Use general management rules for other role changes
-    return canManageUser(targetUser);
+    // User must be able to manage the target user and have sufficient privileges for the new role
+    return checkCanManageUser(user, targetUser) && currentUserLevel >= newRoleLevel;
   };
 
   const contextValue: AuthContextType = {
     user,
-    authenticated: !!user, // Session-based: authenticated if user exists
+    authenticated: !!user,
     loading,
     error,
     login,
@@ -420,78 +350,6 @@ export const useAuth = (): AuthContextType => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-// Higher-order component for protected routes
-export const withAuth = <P extends object>(
-  Component: React.ComponentType<P>,
-  requiredRole?: UserRole | UserRole[],
-  requiredPermission?: string
-): React.ComponentType<P> => {
-  return (props: P) => {
-    const { authenticated, loading, user, hasRole, hasPermission } = useAuth();
-
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      );
-    }
-
-    if (!authenticated) {
-      // Redirect to login page
-      window.location.href = '/auth/sign-in';
-      return null;
-    }
-
-    // Check role requirements
-    if (requiredRole && !hasRole(requiredRole)) {
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-            <p className="text-gray-600">You don't have permission to access this page.</p>
-          </div>
-        </div>
-      );
-    }
-
-    // Check permission requirements
-    if (requiredPermission && !hasPermission(requiredPermission)) {
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-            <p className="text-gray-600">You don't have permission to access this feature.</p>
-          </div>
-        </div>
-      );
-    }
-
-    return <Component {...props} />;
-  };
-};
-
-// Hook for checking if user can access a route
-export const useRouteAccess = (requiredRole?: UserRole | UserRole[], requiredPermission?: string) => {
-  const { authenticated, user, hasRole, hasPermission } = useAuth();
-
-  const canAccess = () => {
-    if (!authenticated) return false;
-
-    if (requiredRole && !hasRole(requiredRole)) return false;
-
-    if (requiredPermission && !hasPermission(requiredPermission)) return false;
-
-    return true;
-  };
-
-  return {
-    canAccess: canAccess(),
-    authenticated,
-    user,
-  };
 };
 
 export default AuthProvider;

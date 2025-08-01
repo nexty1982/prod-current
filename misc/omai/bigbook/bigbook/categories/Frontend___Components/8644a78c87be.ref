@@ -1,0 +1,6 @@
+{
+  "id": "8644a78c87be",
+  "name": "check-frontend-auth.sh",
+  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/check-frontend-auth.sh",
+  "type": "Frontend Scripts"
+}

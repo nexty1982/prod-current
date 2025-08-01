@@ -1,0 +1,59 @@
+{
+  "id": "cda5fe6662c5",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/utils/imagePreprocessor.js",
+  "relativePath": "server/utils/imagePreprocessor.js",
+  "name": "imagePreprocessor.js",
+  "extension": ".js",
+  "size": 11467,
+  "modified": "2025-07-14T23:40:20.522Z",
+  "created": "2025-07-14T22:35:19.076Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 3
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 359,
+      "characters": 11447,
+      "words": 1118
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 3
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "sharp",
+        "line": 14
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 15
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 16
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 359,
+      "codeLines": 246,
+      "commentLines": 70,
+      "commentRatio": 0.22151898734177214,
+      "averageLineLength": 34.65506329113924
+    },
+    "lastAnalyzed": "2025-07-28T07:20:01.256Z"
+  },
+  "contentHash": "1d2f128d94b33bc6a93fa0a4d9319b36b8986eb2864774eeac9ae728a1b68cd4",
+  "discoveredAt": "2025-07-28T07:20:01.256Z"
+}

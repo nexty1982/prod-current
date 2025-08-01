@@ -1,0 +1,104 @@
+{
+  "id": "f8b0b6dad933",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end/src/api/userprofile/PostData.ts",
+  "relativePath": "front-end/src/api/userprofile/PostData.ts",
+  "name": "PostData.ts",
+  "extension": ".ts",
+  "size": 8363,
+  "modified": "2025-04-30T05:42:44.000Z",
+  "created": "2025-07-05T02:28:23.484Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 2
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 267,
+      "characters": 8363,
+      "words": 902
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 2
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s1.jpg",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s2.jpg",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/products/s4.jpg",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-1.jpg",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-2.jpg",
+        "line": 5
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-3.jpg",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-4.jpg",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-5.jpg",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "src/assets/images/profile/user-1.jpg",
+        "line": 9
+      },
+      {
+        "type": "npm_package",
+        "name": "chance",
+        "line": 10
+      },
+      {
+        "type": "npm_package",
+        "name": "src/types/apps/userProfile",
+        "line": 11
+      },
+      {
+        "type": "npm_package",
+        "name": "msw",
+        "line": 12
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 267,
+      "codeLines": 249,
+      "commentLines": 6,
+      "commentRatio": 0.023529411764705882,
+      "averageLineLength": 31.70980392156863
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.687Z"
+  },
+  "contentHash": "5fb2b8381701e8dece040d8c2ed87e5e0c22d9f246824455e76d05c0893d52cc",
+  "discoveredAt": "2025-07-28T07:19:58.687Z"
+}

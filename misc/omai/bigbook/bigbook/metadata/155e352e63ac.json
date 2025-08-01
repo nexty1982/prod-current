@@ -1,0 +1,43 @@
+{
+  "id": "155e352e63ac",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-frjames-role.js",
+  "relativePath": "server/debug/fix-frjames-role.js",
+  "name": "fix-frjames-role.js",
+  "extension": ".js",
+  "size": 5734,
+  "modified": "2025-07-22T15:07:52.217Z",
+  "created": "2025-07-22T15:07:49.183Z",
+  "classification": {
+    "type": "Troubleshooting Utilities",
+    "category": "Diagnostic Tools",
+    "confidence": 5
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 136,
+      "characters": 5692,
+      "words": 517
+    },
+    "classification": {
+      "type": "Troubleshooting Utilities",
+      "category": "Diagnostic Tools",
+      "confidence": 5
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 136,
+      "codeLines": 104,
+      "commentLines": 11,
+      "commentRatio": 0.09565217391304348,
+      "averageLineLength": 46.678260869565214
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.123Z"
+  },
+  "contentHash": "937a74393673b395c5ed34d93402c6d3130bbb38f78d018f8181c577b6d84d22",
+  "discoveredAt": "2025-07-28T07:20:00.123Z"
+}

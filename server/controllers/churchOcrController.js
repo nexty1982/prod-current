@@ -1,5 +1,6 @@
 // controllers/churchOcrController.js
 const { getChurchDbConnection } = require('../utils/dbSwitcher');
+const { getOcrDbPool } = require('../utils/dbConnections');
 const { promisePool } = require('../config/db'); // central DB connection
 const ImagePreprocessor = require('../utils/imagePreprocessor');
 const multer = require('multer');
@@ -207,13 +208,14 @@ exports.getOcrJobs = async (req, res) => {
     
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    // Get church database connection
-    const [churchRows] = await promisePool.query('SELECT database_name FROM churches WHERE id = ?', [churchId]);
+    // Validate church exists in central database
+    const [churchRows] = await promisePool.query('SELECT id, name FROM churches WHERE id = ?', [churchId]);
     if (!churchRows.length) {
       return res.status(404).json({ error: 'Church not found' });
     }
 
-    const db = await getChurchDbConnection(churchRows[0].database_name);
+    // Use OCR database for OCR-related operations
+    const ocrDb = getOcrDbPool();
 
     // Build WHERE clause dynamically
     let whereConditions = ['church_id = ?'];
@@ -242,8 +244,8 @@ exports.getOcrJobs = async (req, res) => {
 
     const whereClause = 'WHERE ' + whereConditions.join(' AND ');
 
-    // Get jobs with pagination
-    const [jobs] = await db.query(`
+    // Get jobs with pagination from OCR database
+    const [jobs] = await ocrDb.query(`
       SELECT 
         id, filename, original_filename, status, record_type, language,
         confidence_score, created_at, updated_at, description,
@@ -254,8 +256,8 @@ exports.getOcrJobs = async (req, res) => {
       LIMIT ? OFFSET ?
     `, [...queryParams, parseInt(limit), offset]);
 
-    // Get total count for pagination
-    const [[countResult]] = await db.query(`
+    // Get total count for pagination from OCR database
+    const [[countResult]] = await ocrDb.query(`
       SELECT COUNT(*) as total FROM ocr_jobs ${whereClause}
     `, queryParams);
 

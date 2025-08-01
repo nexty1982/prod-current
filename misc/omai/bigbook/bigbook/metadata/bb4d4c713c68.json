@@ -1,0 +1,79 @@
+{
+  "id": "bb4d4c713c68",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/test-scraper.js",
+  "relativePath": "server/scrapers/test-scraper.js",
+  "name": "test-scraper.js",
+  "extension": ".js",
+  "size": 6414,
+  "modified": "2025-07-24T14:51:40.412Z",
+  "created": "2025-07-24T14:51:40.412Z",
+  "classification": {
+    "type": "Testing Scripts",
+    "category": "DevOps > Test",
+    "confidence": 4
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 164,
+      "characters": 6392,
+      "words": 513
+    },
+    "classification": {
+      "type": "Testing Scripts",
+      "category": "DevOps > Test",
+      "confidence": 4
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "dotenv",
+        "line": 4
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 6
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 19,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 20,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 21,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 22,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// 📁 server/scrapers/test-scraper.js\r\n// Test script for the Orthodox Church Directory Builder\r\n\r\nrequire('dotenv').config();\r\nconst ChurchDirectoryBuilder = require('./index');\r\nconst path = require('path');\r\n\r\nasync function runTest() {\r\n    console.log('🧪 Testing Orthodox Church Directory Builder...\\n');\r\n    \r\n    const options = {\r\n        outputDir: path.join(__dirname, '../data/test-churches'),\r\n        logLevel: 'info',\r\n        maxConcurrentScrapers: 2, // Lower for testing\r\n        validateUrls: false, // Skip URL validation for faster testing\r\n        enableDuplicateDetection: true,\r\n        saveToDatabase: true, // Test database integration\r\n        databaseConfig: {\r\n            host: process.env.[REDACTED] || 'localhost',\r\n            user: process.env.[REDACTED] || 'orthodoxapps',\r\n            password: process.env.[REDACTED] || 'Summerof1982@!',\r\n            database: process.env.[REDACTED] || 'orthodoxmetrics'\r\n        }\r\n    };\r\n    \r\n    try {\r\n        const builder = new ChurchDirectoryBuilder(options);\r\n        \r\n        console.log('Configuration:');\r\n        console.log('- Output Directory:', options.outputDir);\r\n        console.log('- Max Concurrent Scrapers:', options.maxConcurrentScrapers);\r\n        console.log('- URL Validation:', options.validateUrls ? 'Enabled' : 'Disabled');\r\n        console.log('- Duplicate Detection:', options.enableDuplicateDetection ? 'Enabled' : 'Disabled');\r\n        console.log('- Database Save:', options.saveToDatabase ? 'Enabled' : 'Disabled');\r\n        console.log('');\r\n        \r\n        const startTime = Date.now();\r\n        const results = await builder.runAutonomousScraping();\r\n        const duration = (Date.now() - startTime) / 1000;\r\n        \r\n        console.log('\\n✅ Test completed successfully!');\r\n        console.log('📊 Results Summary:');\r\n        console.log(`   Duration: ${duration.toFixed(2)} seconds`);\r\n        console.log(`   Total Churches: ${results.statistics.totalChurches}`);\r\n        console.log(`   Validated URLs: ${results.statistics.validatedUrls}`);\r\n        console.log(`   Duplicates Found: ${results.statistics.duplicatesFound}`);\r\n        console.log(`   Errors: ${results.errors.length}`);\r\n        console.log(`   Session ID: ${results.sessionId || 'N/A'}`);\r\n        \r\n        console.log('\\n📈 Jurisdiction Breakdown:');\r\n        for (const [jurisdiction, count] of Object.entries(results.statistics.jurisdictionCounts)) {\r\n            console.log(`   ${jurisdiction}: ${count} churches`);\r\n        }\r\n        \r\n        if (results.errors.length > 0) {\r\n            console.log('\\n⚠️  Errors encountered:');\r\n            results.errors.forEach((error, index) => {\r\n                console.log(`   ${index + 1}. ${error.jurisdiction || error.type}: ${error.error}`);\r\n            });\r\n        }\r\n        \r\n        console.log(`\\n📁 Results saved to: ${options.outputDir}`);\r\n        \r\n        // Show sample churches\r\n        if (results.churches.length > 0) {\r\n            console.log('\\n📍 Sample Churches:');\r\n            results.churches.slice(0, 3).forEach((church, index) => {\r\n                console.log(`   ${index + 1}. ${church.name}`);\r\n                console.log(`      Jurisdiction: ${church.jurisdiction}`);\r\n                console.log(`      Location: ${church.city}, ${church.state}`);\r\n                console.log(`      Website: ${church.website || 'N/A'}`);\r\n                console.log('');\r\n            });\r\n        }\r\n        \r\n        return results;\r\n        \r\n    } catch (error) {\r\n        console.error('❌ Test failed:', error.message);\r\n        console.error('Stack trace:', error.stack);\r\n        process.exit(1);\r\n    }\r\n}\r\n\r\n// Simple CLI argument parsing for test options\r\nfunction parseTestArgs() {\r\n    const args = process.argv.slice(2);\r\n    const options = {};\r\n    \r\n    for (let i = 0; i < args.length; i++) {\r\n        switch (args[i]) {\r\n            case '--no-db':\r\n                options.saveToDatabase = false;\r\n                break;\r\n            case '--validate-urls':\r\n                options.validateUrls = true;\r\n                break;\r\n            case '--debug':\r\n                options.logLevel = 'debug';\r\n                break;\r\n            case '--quick':\r\n                options.maxConcurrentScrapers = 1;\r\n                options.validateUrls = false;\r\n                break;\r\n        }\r\n    }\r\n    \r\n    return options;\r\n}\r\n\r\n// Performance test\r\nasync function runPerformanceTest() {\r\n    console.log('⚡ Running performance test...\\n');\r\n    \r\n    const testOptions = [\r\n        { name: 'Single Scraper', maxConcurrentScrapers: 1 },\r\n        { name: 'Three Scrapers', maxConcurrentScrapers: 3 },\r\n        { name: 'Five Scrapers', maxConcurrentScrapers: 5 }\r\n    ];\r\n    \r\n    for (const testOption of testOptions) {\r\n        const options = {\r\n            outputDir: path.join(__dirname, `../data/perf-test-${testOption.maxConcurrentScrapers}`),\r\n            logLevel: 'warn', // Reduce logging for performance test\r\n            maxConcurrentScrapers: testOption.maxConcurrentScrapers,\r\n            validateUrls: false,\r\n            enableDuplicateDetection: false,\r\n            saveToDatabase: false\r\n        };\r\n        \r\n        const startTime = Date.now();\r\n        const builder = new ChurchDirectoryBuilder(options);\r\n        const results = await builder.runAutonomousScraping();\r\n        const duration = (Date.now() - startTime) / 1000;\r\n        \r\n        console.log(`${testOption.name}: ${duration.toFixed(2)}s (${results.statistics.totalChurches} churches)`);\r\n    }\r\n}\r\n\r\n// Memory usage test\r\nfunction logMemoryUsage(label) {\r\n    const usage = process.memoryUsage();\r\n    console.log(`Memory Usage (${label}):`);\r\n    console.log(`  RSS: ${Math.round(usage.rss / 1024 / 1024 * 100) / 100} MB`);\r\n    console.log(`  Heap Used: ${Math.round(usage.heapUsed / 1024 / 1024 * 100) / 100} MB`);\r\n    console.log(`  External: ${Math.round(usage.external / 1024 / 1024 * 100) / 100} MB`);\r\n}\r\n\r\n// Main execution\r\nif (require.main === module) {\r\n    const args = process.argv.slice(2);\r\n    \r\n    if (args.includes('--performance')) {\r\n        runPerformanceTest().catch(console.error);\r\n    } else {\r\n        logMemoryUsage('Initial');\r\n        runTest().then(() => {\r\n            logMemoryUsage('Final');\r\n        }).catch(console.error);\r\n    }\r\n}\r\n\r\nmodule.exports = { runTest, runPerformanceTest };\r\n"
+    },
+    "complexity": {
+      "totalLines": 164,
+      "codeLines": 131,
+      "commentLines": 7,
+      "commentRatio": 0.050724637681159424,
+      "averageLineLength": 44.11594202898551
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.629Z"
+  },
+  "contentHash": "0b2e2c4a1494dfeef267a8bf9c1e8224f00f6face007eb90d0acb1dd8102ccd6",
+  "discoveredAt": "2025-07-28T07:20:00.629Z"
+}

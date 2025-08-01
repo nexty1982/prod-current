@@ -1,0 +1,59 @@
+{
+  "id": "62d088a24184",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/omai.js",
+  "relativePath": "server/routes/omai.js",
+  "name": "omai.js",
+  "extension": ".js",
+  "size": 47670,
+  "modified": "2025-07-27T04:14:28.602Z",
+  "created": "2025-07-24T23:58:32.189Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 1543,
+      "characters": 47670,
+      "words": 4641
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 1
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 3
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 4
+      }
+    ],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 1543,
+      "codeLines": 1232,
+      "commentLines": 125,
+      "commentRatio": 0.09211495946941783,
+      "averageLineLength": 33.628592483419304
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.533Z"
+  },
+  "contentHash": "1a7d0599056b838c0101b3e2f15d6019d5fcd38f01fbe54c2a83c7d999fd0fee",
+  "discoveredAt": "2025-07-28T07:20:00.533Z"
+}

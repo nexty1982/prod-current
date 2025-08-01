@@ -1,0 +1,43 @@
+{
+  "id": "2732b096dd56",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/docs/archive/temp_extract/7-11-25/OCR_FIELD_MAPPING_ENHANCEMENTS.md",
+  "relativePath": "docs/archive/temp_extract/7-11-25/OCR_FIELD_MAPPING_ENHANCEMENTS.md",
+  "name": "OCR_FIELD_MAPPING_ENHANCEMENTS.md",
+  "extension": ".md",
+  "size": 6893,
+  "modified": "2025-07-11T10:49:28.000Z",
+  "created": "2025-07-14T05:44:08.788Z",
+  "classification": {
+    "type": "Documentation",
+    "category": "Documentation",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 161,
+      "characters": 6879,
+      "words": 906
+    },
+    "classification": {
+      "type": "Documentation",
+      "category": "Documentation",
+      "confidence": 7
+    },
+    "dependencies": [],
+    "security": {
+      "findings": [],
+      "hasSecurityIssues": false,
+      "redactedContent": null
+    },
+    "complexity": {
+      "totalLines": 161,
+      "codeLines": 97,
+      "commentLines": 31,
+      "commentRatio": 0.2421875,
+      "averageLineLength": 52.2421875
+    },
+    "lastAnalyzed": "2025-07-28T07:19:58.269Z"
+  },
+  "contentHash": "8031940820cc9edbfec2e38a9a5efe9a0b7e6168d4f1884dbbe75a7bba89b07e",
+  "discoveredAt": "2025-07-28T07:19:58.269Z"
+}
