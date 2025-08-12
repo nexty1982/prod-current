@@ -1,0 +1,232 @@
+{
+  "id": "ffe65439b20d",
+  "originalPath": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/routes/adminSystem.js",
+  "relativePath": "server/routes/adminSystem.js",
+  "name": "adminSystem.js",
+  "extension": ".js",
+  "size": 21961,
+  "modified": "2025-07-23T20:04:11.063Z",
+  "created": "2025-07-09T00:48:38.478Z",
+  "classification": {
+    "type": "Server Scripts",
+    "category": "Backend > Server",
+    "confidence": 7
+  },
+  "metadata": {
+    "fileStats": {
+      "lines": 604,
+      "characters": 21955,
+      "words": 1777
+    },
+    "classification": {
+      "type": "Server Scripts",
+      "category": "Backend > Server",
+      "confidence": 7
+    },
+    "dependencies": [
+      {
+        "type": "npm_package",
+        "name": "express",
+        "line": 2
+      },
+      {
+        "type": "npm_package",
+        "name": "os",
+        "line": 6
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 7
+      },
+      {
+        "type": "npm_package",
+        "name": "path",
+        "line": 8
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 48
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 75
+      },
+      {
+        "type": "npm_package",
+        "name": "mysql2/promise",
+        "line": 157
+      },
+      {
+        "type": "npm_package",
+        "name": "child_process",
+        "line": 287
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 298
+      },
+      {
+        "type": "npm_package",
+        "name": "child_process",
+        "line": 402
+      },
+      {
+        "type": "npm_package",
+        "name": "fs",
+        "line": 413
+      }
+    ],
+    "security": {
+      "findings": [
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 50,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 51,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 52,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 77,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 78,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 79,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 159,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 160,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 161,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 290,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 291,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 292,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 405,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 406,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 407,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 452,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 454,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 455,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 459,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 460,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 569,
+          "redacted": true
+        },
+        {
+          "type": "sensitive_data",
+          "pattern": "process\\.env\\.([A-Z_]+)",
+          "line": 598,
+          "redacted": true
+        }
+      ],
+      "hasSecurityIssues": true,
+      "redactedContent": "// server/routes/admin.js - Extended admin routes for Orthodox Metrics management\r\nconst express = require('express');\r\nconst router = express.Router();\r\nconst { promisePool } = require('../../config/db');\r\nconst { requireAuth } = require('../middleware/auth');\r\nconst os = require('os');\r\nconst fs = require('fs').promises;\r\nconst path = require('path');\r\n\r\n// Authentication middleware for all admin system routes\r\nrouter.use(requireAuth);\r\n\r\n// Role-based middleware for super admin only\r\nconst requireSuperAdmin = (req, res, next) => {\r\n    if (!req.user) {\r\n        return res.status(401).json({ error: 'Authentication required' });\r\n    }\r\n    \r\n    if (req.user.role !== 'super_admin') {\r\n        return res.status(403).json({ error: 'Super admin access required' });\r\n    }\r\n    \r\n    next();\r\n};\r\n\r\n// Apply super admin middleware to all routes\r\nrouter.use(requireSuperAdmin);\r\n\r\n// System Statistics\r\nrouter.get('/system-stats', async (req, res) => {\r\n    try {\r\n        // Get total churches\r\n        const [churchCount] = await promisePool.execute('SELECT COUNT(*) as count FROM churches');\r\n\r\n        // Get active churches\r\n        const [activeChurchCount] = await promisePool.execute(\r\n            'SELECT COUNT(*) as count FROM churches WHERE is_active = 1'\r\n        );\r\n\r\n        // Get total users across all church databases\r\n        let totalUsers = 0;\r\n        let activeUsers = 0;\r\n\r\n        const [churches] = await promisePool.execute('SELECT database_name FROM churches WHERE is_active = 1');\r\n\r\n        for (const church of churches) {\r\n            try {\r\n                const mysql = require('mysql2/promise');\r\n                const churchConnection = await mysql.createConnection({\r\n                    host: process.env.[REDACTED] || 'localhost',\r\n                    user: process.env.[REDACTED] || 'root',\r\n                    password: process.env.[REDACTED] || 'Summerof1982@!',\r\n                    database: church.database_name\r\n                });\r\n\r\n                const [users] = await churchConnection.execute('SELECT COUNT(*) as count FROM users');\r\n                const [activeUsersResult] = await churchConnection.execute(\r\n                    'SELECT COUNT(*) as count FROM users WHERE is_active = true'\r\n                );\r\n\r\n                totalUsers += users[0].count;\r\n                activeUsers += activeUsersResult[0].count;\r\n\r\n                await churchConnection.end();\r\n            } catch (error) {\r\n                console.warn(`Error querying church database ${church.database_name}:`, error.message);\r\n            }\r\n        }\r\n\r\n        // Get total records across all church databases\r\n        let totalRecords = { baptisms: 0, marriages: 0, funerals: 0, total: 0 };\r\n\r\n        for (const church of churches) {\r\n            try {\r\n                const mysql = require('mysql2/promise');\r\n                const churchConnection = await mysql.createConnection({\r\n                    host: process.env.[REDACTED] || 'localhost',\r\n                    user: process.env.[REDACTED] || 'root',\r\n                    password: process.env.[REDACTED] || 'Summerof1982@!',\r\n                    database: church.database_name\r\n                });\r\n\r\n                const [baptisms] = await churchConnection.execute('SELECT COUNT(*) as count FROM baptism_records');\r\n                const [marriages] = await churchConnection.execute('SELECT COUNT(*) as count FROM marriage_records');\r\n                const [funerals] = await churchConnection.execute('SELECT COUNT(*) as count FROM funeral_records');\r\n\r\n                totalRecords.baptisms += baptisms[0].count;\r\n                totalRecords.marriages += marriages[0].count;\r\n                totalRecords.funerals += funerals[0].count;\r\n\r\n                await churchConnection.end();\r\n            } catch (error) {\r\n                console.warn(`Error querying records from ${church.database_name}:`, error.message);\r\n            }\r\n        }\r\n\r\n        totalRecords.total = totalRecords.baptisms + totalRecords.marriages + totalRecords.funerals;\r\n\r\n        res.json({\r\n            churches: {\r\n                total: churchCount[0].count,\r\n                active: activeChurchCount[0].count,\r\n                inactive: churchCount[0].count - activeChurchCount[0].count\r\n            },\r\n            users: {\r\n                total: totalUsers,\r\n                active: activeUsers\r\n            },\r\n            records: totalRecords,\r\n            system: {\r\n                uptime: process.uptime(),\r\n                nodeVersion: process.version,\r\n                platform: os.platform(),\r\n                arch: os.arch(),\r\n                hostname: os.hostname()\r\n            }\r\n        });\r\n    } catch (error) {\r\n        console.error('Error fetching system stats:', error);\r\n        res.status(500).json({ error: 'Failed to fetch system statistics' });\r\n    }\r\n});\r\n\r\n// Database Health Check\r\nrouter.get('/database-health', async (req, res) => {\r\n    try {\r\n        const healthResults = [];\r\n\r\n        // Check main database\r\n        try {\r\n            const [result] = await promisePool.execute('SELECT 1');\r\n            healthResults.push({\r\n                database: 'orthodoxmetrics_db',\r\n                type: 'main',\r\n                status: 'healthy',\r\n                responseTime: Date.now(),\r\n                lastChecked: new Date().toISOString()\r\n            });\r\n        } catch (error) {\r\n            healthResults.push({\r\n                database: 'orthodoxmetrics_db',\r\n                type: 'main',\r\n                status: 'error',\r\n                error: error.message,\r\n                lastChecked: new Date().toISOString()\r\n            });\r\n        }\r\n\r\n        // Check all church databases\r\n        const [churches] = await promisePool.execute(\r\n            'SELECT id, name, slug, database_name FROM churches WHERE is_active = 1'\r\n        );\r\n\r\n        for (const church of churches) {\r\n            const startTime = Date.now();\r\n            try {\r\n                const mysql = require('mysql2/promise');\r\n                const churchConnection = await mysql.createConnection({\r\n                    host: process.env.[REDACTED] || 'localhost',\r\n                    user: process.env.[REDACTED] || 'root',\r\n                    password: process.env.[REDACTED] || 'Summerof1982@!',\r\n                    database: church.database_name\r\n                });\r\n\r\n                await churchConnection.execute('SELECT 1');\r\n                const responseTime = Date.now() - startTime;\r\n\r\n                // Get basic stats\r\n                const [baptisms] = await churchConnection.execute('SELECT COUNT(*) as count FROM baptism_records');\r\n                const [marriages] = await churchConnection.execute('SELECT COUNT(*) as count FROM marriage_records');\r\n                const [funerals] = await churchConnection.execute('SELECT COUNT(*) as count FROM funeral_records');\r\n                const [users] = await churchConnection.execute('SELECT COUNT(*) as count FROM users');\r\n\r\n                healthResults.push({\r\n                    database: church.database_name,\r\n                    type: 'church',\r\n                    churchName: church.name,\r\n                    churchSlug: church.slug,\r\n                    status: 'healthy',\r\n                    responseTime,\r\n                    stats: {\r\n                        baptisms: baptisms[0].count,\r\n                        marriages: marriages[0].count,\r\n                        funerals: funerals[0].count,\r\n                        users: users[0].count\r\n                    },\r\n                    lastChecked: new Date().toISOString()\r\n                });\r\n\r\n                await churchConnection.end();\r\n            } catch (error) {\r\n                healthResults.push({\r\n                    database: church.database_name,\r\n                    type: 'church',\r\n                    churchName: church.name,\r\n                    churchSlug: church.slug,\r\n                    status: 'error',\r\n                    error: error.message,\r\n                    lastChecked: new Date().toISOString()\r\n                });\r\n            }\r\n        }\r\n\r\n        const healthyDatabases = healthResults.filter(db => db.status === 'healthy').length;\r\n        const totalDatabases = healthResults.length;\r\n\r\n        res.json({\r\n            overall: {\r\n                status: healthyDatabases === totalDatabases ? 'healthy' : 'degraded',\r\n                healthyCount: healthyDatabases,\r\n                totalCount: totalDatabases,\r\n                healthPercentage: Math.round((healthyDatabases / totalDatabases) * 100)\r\n            },\r\n            databases: healthResults\r\n        });\r\n    } catch (error) {\r\n        console.error('Error checking database health:', error);\r\n        res.status(500).json({ error: 'Failed to check database health' });\r\n    }\r\n});\r\n\r\n// Server Metrics\r\nrouter.get('/server-metrics', async (req, res) => {\r\n    try {\r\n        const metrics = {\r\n            cpu: {\r\n                usage: 0, // Calculate CPU usage\r\n                cores: os.cpus().length,\r\n                model: os.cpus()[0]?.model || 'Unknown'\r\n            },\r\n            memory: {\r\n                total: os.totalmem(),\r\n                free: os.freemem(),\r\n                used: os.totalmem() - os.freemem(),\r\n                usage: Math.round(((os.totalmem() - os.freemem()) / os.totalmem()) * 100)\r\n            },\r\n            disk: {\r\n                // Basic disk info - in production, use a proper disk usage library\r\n                usage: 50 // Placeholder\r\n            },\r\n            network: {\r\n                interfaces: Object.keys(os.networkInterfaces())\r\n            },\r\n            process: {\r\n                uptime: process.uptime(),\r\n                pid: process.pid,\r\n                memoryUsage: process.memoryUsage(),\r\n                cpuUsage: process.cpuUsage()\r\n            },\r\n            load: os.loadavg(),\r\n            platform: {\r\n                type: os.type(),\r\n                platform: os.platform(),\r\n                arch: os.arch(),\r\n                release: os.release(),\r\n                hostname: os.hostname()\r\n            }\r\n        };\r\n\r\n        // Calculate approximate CPU usage\r\n        const cpuUsage = os.loadavg()[0] / os.cpus().length * 100;\r\n        metrics.cpu.usage = Math.min(Math.round(cpuUsage), 100);\r\n\r\n        res.json(metrics);\r\n    } catch (error) {\r\n        console.error('Error fetching server metrics:', error);\r\n        res.status(500).json({ error: 'Failed to fetch server metrics' });\r\n    }\r\n});\r\n\r\n// System Backup\r\nrouter.post('/backup', async (req, res) => {\r\n    try {\r\n        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');\r\n        const backupDir = path.resolve(__dirname, '../../backups');\r\n\r\n        // Ensure backup directory exists\r\n        try {\r\n            await fs.access(backupDir);\r\n        } catch {\r\n            await fs.mkdir(backupDir, { recursive: true });\r\n        }\r\n\r\n        const backupFile = path.join(backupDir, `orthodox-metrics-backup-${timestamp}.sql`);\r\n\r\n        // Create mysqldump command for all databases\r\n        const { spawn } = require('child_process');\r\n\r\n        const mysqldumpProcess = spawn('mysqldump', [\r\n            '-h', process.env.[REDACTED] || 'localhost',\r\n            '-u', process.env.[REDACTED] || 'root',\r\n            `-p${process.env.[REDACTED] || 'Summerof1982@!'}`,\r\n            '--all-databases',\r\n            '--routines',\r\n            '--triggers'\r\n        ]);\r\n\r\n        const writeStream = require('fs').createWriteStream(backupFile);\r\n        mysqldumpProcess.stdout.pipe(writeStream);\r\n\r\n        mysqldumpProcess.on('close', (code) => {\r\n            if (code === 0) {\r\n                res.json({\r\n                    success: true,\r\n                    message: 'Backup created successfully',\r\n                    file: backupFile,\r\n                    timestamp: new Date().toISOString()\r\n                });\r\n            } else {\r\n                res.status(500).json({\r\n                    success: false,\r\n                    message: 'Backup failed',\r\n                    code\r\n                });\r\n            }\r\n        });\r\n\r\n        mysqldumpProcess.on('error', (error) => {\r\n            res.status(500).json({\r\n                success: false,\r\n                message: 'Backup process failed',\r\n                error: error.message\r\n            });\r\n        });\r\n\r\n    } catch (error) {\r\n        console.error('Error creating backup:', error);\r\n        res.status(500).json({ error: 'Failed to create backup' });\r\n    }\r\n});\r\n\r\n// List Backups\r\nrouter.get('/backups', async (req, res) => {\r\n    try {\r\n        const backupDir = path.resolve(__dirname, '../../backups');\r\n\r\n        try {\r\n            const files = await fs.readdir(backupDir);\r\n            const backupFiles = files.filter(file => file.endsWith('.sql'));\r\n\r\n            const backups = await Promise.all(\r\n                backupFiles.map(async (file) => {\r\n                    const filePath = path.join(backupDir, file);\r\n                    const stats = await fs.stat(filePath);\r\n\r\n                    return {\r\n                        filename: file,\r\n                        path: filePath,\r\n                        size: stats.size,\r\n                        created: stats.birthtime,\r\n                        modified: stats.mtime\r\n                    };\r\n                })\r\n            );\r\n\r\n            // Sort by creation date, newest first\r\n            backups.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());\r\n\r\n            res.json(backups);\r\n        } catch (error) {\r\n            if (error.code === 'ENOENT') {\r\n                res.json([]); // No backup directory yet\r\n            } else {\r\n                throw error;\r\n            }\r\n        }\r\n    } catch (error) {\r\n        console.error('Error listing backups:', error);\r\n        res.status(500).json({ error: 'Failed to list backups' });\r\n    }\r\n});\r\n\r\n// Church-specific backup\r\nrouter.post('/backup/:churchId', async (req, res) => {\r\n    try {\r\n        const churchId = req.params.churchId;\r\n\r\n        // Get church info\r\n        const [churches] = await promisePool.execute(\r\n            'SELECT name, slug, database_name FROM churches WHERE id = ?',\r\n            [churchId]\r\n        );\r\n\r\n        if (churches.length === 0) {\r\n            return res.status(404).json({ error: 'Church not found' });\r\n        }\r\n\r\n        const church = churches[0];\r\n        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');\r\n        const backupDir = path.resolve(__dirname, '../../backups');\r\n\r\n        // Ensure backup directory exists\r\n        try {\r\n            await fs.access(backupDir);\r\n        } catch {\r\n            await fs.mkdir(backupDir, { recursive: true });\r\n        }\r\n\r\n        const backupFile = path.join(backupDir, `${church.slug}-backup-${timestamp}.sql`);\r\n\r\n        // Create mysqldump command for specific database\r\n        const { spawn } = require('child_process');\r\n\r\n        const mysqldumpProcess = spawn('mysqldump', [\r\n            '-h', process.env.[REDACTED] || 'localhost',\r\n            '-u', process.env.[REDACTED] || 'root',\r\n            `-p${process.env.[REDACTED] || 'Summerof1982@!'}`,\r\n            '--routines',\r\n            '--triggers',\r\n            church.database_name\r\n        ]);\r\n\r\n        const writeStream = require('fs').createWriteStream(backupFile);\r\n        mysqldumpProcess.stdout.pipe(writeStream);\r\n\r\n        mysqldumpProcess.on('close', (code) => {\r\n            if (code === 0) {\r\n                res.json({\r\n                    success: true,\r\n                    message: `Backup created for ${church.name}`,\r\n                    church: church.name,\r\n                    file: backupFile,\r\n                    timestamp: new Date().toISOString()\r\n                });\r\n            } else {\r\n                res.status(500).json({\r\n                    success: false,\r\n                    message: 'Church backup failed',\r\n                    code\r\n                });\r\n            }\r\n        });\r\n\r\n        mysqldumpProcess.on('error', (error) => {\r\n            res.status(500).json({\r\n                success: false,\r\n                message: 'Church backup process failed',\r\n                error: error.message\r\n            });\r\n        });\r\n\r\n    } catch (error) {\r\n        console.error('Error creating church backup:', error);\r\n        res.status(500).json({ error: 'Failed to create church backup' });\r\n    }\r\n});\r\n\r\n// System Configuration\r\nrouter.get('/config', async (req, res) => {\r\n    try {\r\n        const config = {\r\n            environment: process.env.[REDACTED] || 'development',\r\n            database: {\r\n                host: process.env.[REDACTED] || 'localhost',\r\n                name: process.env.[REDACTED] || 'orthodoxmetrics_db',\r\n                // Don't expose credentials\r\n            },\r\n            server: {\r\n                port: process.env.[REDACTED] || 3001,\r\n                host: process.env.[REDACTED] || '0.0.0.0'\r\n            },\r\n            features: {\r\n                multiTenant: true,\r\n                backup: true,\r\n                monitoring: true\r\n            }\r\n        };\r\n\r\n        res.json(config);\r\n    } catch (error) {\r\n        console.error('Error fetching config:', error);\r\n        res.status(500).json({ error: 'Failed to fetch configuration' });\r\n    }\r\n});\r\n\r\n// Update System Configuration\r\nrouter.put('/config', async (req, res) => {\r\n    try {\r\n        // In a real implementation, you'd update configuration files or environment variables\r\n        // For now, just return success\r\n        res.json({\r\n            success: true,\r\n            message: 'Configuration updated successfully'\r\n        });\r\n    } catch (error) {\r\n        console.error('Error updating config:', error);\r\n        res.status(500).json({ error: 'Failed to update configuration' });\r\n    }\r\n});\r\n\r\n// Middleware to check if user is admin or super_admin\r\nconst checkRole = (allowedRoles) => {\r\n    return async (req, res, next) => {\r\n        try {\r\n            // Check if user is authenticated\r\n            if (!req.session?.user) {\r\n                return res.status(401).json({\r\n                    success: false,\r\n                    message: 'Authentication required'\r\n                });\r\n            }\r\n\r\n            const userRole = req.session.user.role;\r\n            \r\n            // Check if user has required role\r\n            if (!allowedRoles.includes(userRole)) {\r\n                return res.status(403).json({\r\n                    success: false,\r\n                    message: 'Insufficient privileges'\r\n                });\r\n            }\r\n\r\n            next();\r\n        } catch (error) {\r\n            console.error('Error in checkRole middleware:', error);\r\n            res.status(500).json({\r\n                success: false,\r\n                message: 'Internal server error'\r\n            });\r\n        }\r\n    };\r\n};\r\n\r\n// GET /api/admin/system/system-info - Get system information\r\nrouter.get('/system-info', checkRole(['super_admin', 'admin']), async (req, res) => {\r\n    try {\r\n        console.log('📊 Fetching system information...');\r\n\r\n        // Get package.json version\r\n        let version = 'Unknown';\r\n        try {\r\n            const packageJson = require('../../package.json');\r\n            version = packageJson.version || 'Unknown';\r\n        } catch (error) {\r\n            console.warn('Could not read package.json version:', error.message);\r\n        }\r\n\r\n        // Get church count from database\r\n        let churchCount = 0;\r\n        try {\r\n            const [result] = await promisePool.query('SELECT COUNT(*) as count FROM churches');\r\n            churchCount = result[0]?.count || 0;\r\n        } catch (error) {\r\n            console.warn('Could not fetch church count:', error.message);\r\n        }\r\n\r\n        // Format memory usage in MB\r\n        const memoryUsage = process.memoryUsage();\r\n        const memoryInMB = Math.round(memoryUsage.rss / 1024 / 1024);\r\n\r\n        // Format uptime in hours and minutes\r\n        const uptimeSeconds = process.uptime();\r\n        const hours = Math.floor(uptimeSeconds / 3600);\r\n        const minutes = Math.floor((uptimeSeconds % 3600) / 60);\r\n        const formattedUptime = `${hours}h ${minutes}m`;\r\n\r\n        // Get system information\r\n        const systemInfo = {\r\n            // System Information\r\n            nodeVersion: process.version,\r\n            uptime: formattedUptime,\r\n            uptimeSeconds: Math.round(uptimeSeconds),\r\n            hostname: os.hostname(),\r\n            memory: memoryInMB,\r\n            platform: os.platform(),\r\n            arch: os.arch(),\r\n            \r\n            // Application Settings\r\n            env: process.env.[REDACTED] || 'development',\r\n            version: version,\r\n            dateFormat: 'MM/DD/YYYY',\r\n            language: 'en',\r\n            churchCount: churchCount,\r\n            \r\n            // Additional system details\r\n            totalMemory: Math.round(os.totalmem() / 1024 / 1024),\r\n            freeMemory: Math.round(os.freemem() / 1024 / 1024),\r\n            cpuCount: os.cpus().length,\r\n            loadAverage: os.loadavg()[0].toFixed(2)\r\n        };\r\n\r\n        console.log('✅ System information retrieved successfully');\r\n        console.log('   Node.js version:', systemInfo.nodeVersion);\r\n        console.log('   Uptime:', systemInfo.uptime);\r\n        console.log('   Memory usage:', systemInfo.memory, 'MB');\r\n        console.log('   Church count:', systemInfo.churchCount);\r\n\r\n        res.json({\r\n            success: true,\r\n            data: systemInfo\r\n        });\r\n\r\n    } catch (error) {\r\n        console.error('❌ Error fetching system information:', error);\r\n        res.status(500).json({\r\n            success: false,\r\n            message: 'Failed to retrieve system information',\r\n            error: process.env.[REDACTED] === 'development' ? error.message : undefined\r\n        });\r\n    }\r\n});\r\n\r\nmodule.exports = router;\r\n"
+    },
+    "complexity": {
+      "totalLines": 604,
+      "codeLines": 482,
+      "commentLines": 42,
+      "commentRatio": 0.08015267175572519,
+      "averageLineLength": 40.51335877862596
+    },
+    "lastAnalyzed": "2025-07-28T07:20:00.387Z"
+  },
+  "contentHash": "17b97b7ad8ca03ec30b5e9fe845dd20a421dc9d05412cd1f383c07d3e89f9bfc",
+  "discoveredAt": "2025-07-28T07:20:00.387Z"
+}

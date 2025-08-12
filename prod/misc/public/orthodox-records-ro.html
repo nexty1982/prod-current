@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionarea Arhivelor Bisericești | OrthodoxMetrics.com</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --orthodox-gold: #DAA520;
+            --orthodox-blue: #4169E1;
+            --orthodox-red: #DC143C;
+            --orthodox-purple: #800080;
+            --orthodox-green: #228B22;
+            --orthodox-white: #FFFFFF;
+            --orthodox-black: #2F2F2F;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--orthodox-blue) 0%, var(--orthodox-gold) 100%);
+            color: white;
+            padding: 80px 0;
+        }
+        
+        .liturgical-swatch {
+            width: 120px;
+            height: 80px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-align: center;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .liturgical-swatch:hover {
+            transform: translateY(-5px);
+        }
+        
+        .paschal-white { background-color: #FFFFFF; color: #333; }
+        .feast-gold { background-color: #FFD700; color: #333; }
+        .lenten-purple { background-color: #800080; }
+        .pentecost-green { background-color: #228B22; }
+        .martyr-red { background-color: #DC143C; }
+        .theotokos-blue { background-color: #4169E1; }
+        .funeral-black { background-color: #2F2F2F; }
+        .triumphal-red { background-color: #FF0000; }
+        
+        .record-card {
+            border-left: 4px solid var(--orthodox-gold);
+            transition: all 0.3s ease;
+        }
+        
+        .record-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-icon {
+            font-size: 3rem;
+            color: var(--orthodox-gold);
+            margin-bottom: 1rem;
+        }
+        
+        .pricing-card {
+            border: 2px solid var(--orthodox-gold);
+            transition: all 0.3s ease;
+        }
+        
+        .pricing-card:hover {
+            border-color: var(--orthodox-blue);
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--orthodox-red);
+            background: linear-gradient(145deg, #fff 0%, #f8f9fa 100%);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 40px 0;
+            }
+            
+            .liturgical-swatch {
+                width: 80px;
+                height: 60px;
+                font-size: 0.7rem;
+                margin: 5px;
+            }
+            
+            .section-icon {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--orthodox-blue);">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-cross me-2"></i>OrthodoxMetrics
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#records">Arhive</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#themes">Teme</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#pricing">Prețuri</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h1 class="display-4 fw-bold mb-4">Gestionarea Arhivelor Bisericești</h1>
+                    <p class="lead mb-4">Soluție digitală completă pentru gestionarea arhivelor de Botez, Căsătorie și Înmormântare cu acuratețe liturgică și tradiție Ortodoxă.</p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="#contact" class="btn btn-light btn-lg">Începeți</a>
+                        <a href="#records" class="btn btn-outline-light btn-lg">Vedeți Exemple</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Liturgical Color Themes -->
+    <section id="themes" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Teme Liturgice de Culoare</h2>
+                <p class="text-muted">Experimentați frumusețea sezoanelor liturgice Ortodoxe prin interfața noastră codificată prin culori</p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap justify-content-center">
+                        <div class="liturgical-swatch paschal-white">Paștele<br>Alb</div>
+                        <div class="liturgical-swatch feast-gold">Sărbătoarea<br>Auriu</div>
+                        <div class="liturgical-swatch lenten-purple">Postul<br>Violet</div>
+                        <div class="liturgical-swatch pentecost-green">Rusaliile<br>Verde</div>
+                        <div class="liturgical-swatch martyr-red">Martirii<br>Roșu</div>
+                        <div class="liturgical-swatch theotokos-blue">Maica Domnului<br>Albastru</div>
+                        <div class="liturgical-swatch funeral-black">Înmormântare<br>Negru</div>
+                        <div class="liturgical-swatch triumphal-red">Triumfal<br>Roșu</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Example Church Records -->
+    <section id="records" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Exemple de Arhive Bisericești</h2>
+                <p class="text-muted">Exemplu de înregistrări care demonstrează sistemul nostru comprehensiv de management</p>
+            </div>
+
+            <!-- Baptism Records -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-water section-icon"></i>
+                        <h3>Arhive de Botez</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Numele Copilului</th>
+                                    <th>Părinții</th>
+                                    <th>Nașii</th>
+                                    <th>Preot</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>15/01/2024</td>
+                                    <td>Sofia Alexandra</td>
+                                    <td>Ion & Maria Popescu</td>
+                                    <td>Petru & Ana Dimitrescu</td>
+                                    <td>Păr. Nicolae</td>
+                                </tr>
+                                <tr>
+                                    <td>03/02/2024</td>
+                                    <td>Mihai Constantin</td>
+                                    <td>George & Elena Petrescu</td>
+                                    <td>Andrei & Cătălina Ionescu</td>
+                                    <td>Păr. Alexandru</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marriage Records -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-rings-wedding section-icon"></i>
+                        <h3>Arhive de Căsătorie</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Mirele</th>
+                                    <th>Mireasa</th>
+                                    <th>Nașul</th>
+                                    <th>Nașa</th>
+                                    <th>Preot</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>20/03/2024</td>
+                                    <td>Dimitrie Costin</td>
+                                    <td>Anastasia Nicolaescu</td>
+                                    <td>Stavros Costin</td>
+                                    <td>Maria Nicolaescu</td>
+                                    <td>Păr. Serafim</td>
+                                </tr>
+                                <tr>
+                                    <td>14/04/2024</td>
+                                    <td>Ștefan Rădulescu</td>
+                                    <td>Natalia Stoianescu</td>
+                                    <td>Mihai Rădulescu</td>
+                                    <td>Elena Stoianescu</td>
+                                    <td>Păr. Maxim</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Funeral Records -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-cross section-icon"></i>
+                        <h3>Arhive de Înmormântare</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Decedat</th>
+                                    <th>Vârsta</th>
+                                    <th>Data Decesului</th>
+                                    <th>Preot</th>
+                                    <th>Cimitir</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>10/05/2024</td>
+                                    <td>Olga Milivojević</td>
+                                    <td>84</td>
+                                    <td>08/05/2024</td>
+                                    <td>Păr. Damaschin</td>
+                                    <td>Sf. Sava</td>
+                                </tr>
+                                <tr>
+                                    <td>02/06/2024</td>
+                                    <td>Petru Jovanović</td>
+                                    <td>67</td>
+                                    <td>31/05/2024</td>
+                                    <td>Păr. Teodor</td>
+                                    <td>Sf. Treime</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Pachete de Servicii</h2>
+                <p class="text-muted">Alegeți soluția perfectă pentru nevoile parohiei dumneavoastră</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card pricing-card h-100">
+                        <div class="card-body text-center">
+                            <h4 class="card-title">De Bază</h4>
+                            <h2 class="text-primary">29 RON/lună</h2>
+                            <p class="card-text">Perfect pentru parohii mici</p>
+                            <ul class="list-unstyled">
+                                <li>✓ Până la 500 de înregistrări</li>
+                                <li>✓ Raportare de bază</li>
+                                <li>✓ Suport email</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary">Începeți</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card pricing-card featured h-100">
+                        <div class="card-body text-center">
+                            <h4 class="card-title">Profesional</h4>
+                            <h2 class="text-primary">69 RON/lună</h2>
+                            <p class="card-text">Cea mai populară alegere</p>
+                            <ul class="list-unstyled">
+                                <li>✓ Înregistrări nelimitate</li>
+                                <li>✓ Raportare avansată</li>
+                                <li>✓ Suport prioritar</li>
+                                <li>✓ Multilingv</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary">Începeți</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card pricing-card h-100">
+                        <div class="card-body text-center">
+                            <h4 class="card-title">Întreprindere</h4>
+                            <h2 class="text-primary">149 RON/lună</h2>
+                            <p class="card-text">Pentru parohii mari</p>
+                            <ul class="list-unstyled">
+                                <li>✓ Tot din Profesional</li>
+                                <li>✓ Integrări personalizate</li>
+                                <li>✓ Suport telefonic 24/7</li>
+                                <li>✓ Training personalizat</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary">Începeți</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-5" style="background: linear-gradient(135deg, var(--orthodox-blue) 0%, var(--orthodox-purple) 100%);">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center text-white">
+                    <h2 class="fw-bold mb-4">Gata să Transformați Arhivele Parohiei Dumneavoastră?</h2>
+                    <p class="lead mb-4">Alăturați-vă sutelor de parohii ortodoxe din întreaga lume care se bazează pe OrthodoxMetrics pentru păstrarea arhivelor lor sacre.</p>
+                    <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                        <a href="#" class="btn btn-light btn-lg">Încercare Gratuită</a>
+                        <a href="#" class="btn btn-outline-light btn-lg">Programați Demo</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-cross me-2"></i>OrthodoxMetrics</h5>
+                    <p class="mb-0">Păstrând tradiția ortodoxă prin tehnologia modernă</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; 2025 OrthodoxMetrics.com | Toate Drepturile Rezervate</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

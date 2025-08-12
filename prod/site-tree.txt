@@ -1,0 +1,621 @@
+/var/www/orthodoxmetrics/prod
+├── cleanup.log
+├── cleanup_structure.sh
+├── component-analysis-report.md
+├── docs
+│   ├── ORTHODOX_CALENDAR_REDESIGN.md
+│   ├── ROLE_MIGRATION_READY.md
+│   ├── ROLE_SIMPLIFICATION_IMPLEMENTATION.md
+│   ├── ROLE_SIMPLIFICATION_UPDATE_SUMMARY.md
+│   └── ROLES_REFERENCE.md
+├── dump-omai_db-202508031556.sql
+├── dump-omai_db-202508031557.sql
+├── dump-omai_error_tracking_db-202508031556.sql
+├── dump-omai_error_tracking_db-202508031557.sql
+├── dump-orthodoxmetrics_db-202508031556.sql
+├── dump-orthodoxmetrics_db-202508031557.sql
+├── ecosystem.config.js
+├── front-end
+│   ├── auto-install-missing-deps.sh
+│   ├── build.log
+│   ├── build.meta.json
+│   ├── DEV-SETUP.md
+│   ├── docs
+│   │   ├── ai-errors
+│   │   ├── all_databases_2025-07-19T06-00-00-106Z.sql
+│   │   ├── backup_2025-07-19T06-00-00-106Z_full.tar.gz
+│   │   ├── files_complete_2025-07-19T06-00-00-106Z.tar.gz
+│   │   ├── OMAI_LOGGER_ADVANCED_FEATURES.md
+│   │   ├── OMAI_LOGGER_COMPLETE_IMPLEMENTATION.md
+│   │   ├── OMAI_LOGGER_REDESIGN_COMPLETE.md
+│   │   ├── OMAI_LOGGER_SUCCESS_DEBUG_QA.md
+│   │   ├── orthodox_ssppoc2_only.sql
+│   │   ├── ORTHODOX_STYLING_GUIDE.md
+│   │   ├── PHASE_13_SITE_EDITOR_IMPLEMENTATION.md
+│   │   ├── PHASE_14_AUTONOMOUS_FIXES_IMPLEMENTATION.md
+│   │   ├── PHASE_15_GITOPS_IMPLEMENTATION.md
+│   │   ├── PHASE_15_SUMMARY.md
+│   │   └── SITE_EDITOR_GUIDE.md
+│   ├── error-handling-test.md
+│   ├── front-end
+│   │   ├── front-end
+│   │   └── src
+│   ├── frontend-manager.sh
+│   ├── index.html
+│   ├── logs
+│   │   ├── orthodox-frontend-error.log
+│   │   ├── orthodox-frontend.log
+│   │   └── orthodox-frontend-out.log
+│   ├── MOBILE_AUDIT_LOG.md
+│   ├── @om
+│   │   └── components
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── postcss.config.js
+│   ├── public
+│   │   ├── assets
+│   │   ├── build.meta.json
+│   │   ├── images
+│   │   ├── logoIcon.svg
+│   │   ├── mockServiceWorker.js
+│   │   ├── workspace
+│   │   └── workspace.zip
+│   ├── README.md
+│   ├── rebuild-frontend.sh
+│   ├── scripts
+│   │   └── useTableStyleStore.ts
+│   ├── src
+│   │   ├── ai
+│   │   ├── api
+│   │   ├── App.css
+│   │   ├── App.tsx
+│   │   ├── assets
+│   │   ├── components
+│   │   ├── config
+│   │   ├── constants
+│   │   ├── context
+│   │   ├── contexts
+│   │   ├── data
+│   │   ├── demos
+│   │   ├── examples
+│   │   ├── helpers
+│   │   ├── hooks
+│   │   ├── index.css
+│   │   ├── layouts
+│   │   ├── LoadingBar.tsx
+│   │   ├── main.tsx
+│   │   ├── modules
+│   │   ├── @om
+│   │   ├── omai
+│   │   ├── pages
+│   │   ├── records
+│   │   ├── routes
+│   │   ├── schemas
+│   │   ├── services
+│   │   ├── store
+│   │   ├── styles
+│   │   ├── test-grid.tsx
+│   │   ├── Test.tsx
+│   │   ├── theme
+│   │   ├── tools
+│   │   ├── types
+│   │   ├── utils
+│   │   ├── views
+│   │   └── vite-env.d.ts
+│   ├── tailwind.config.js
+│   ├── tailwind.orthodox.config.js
+│   ├── TASK_144_COMPLETION_SUMMARY.md
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
+├── logs
+│   ├── combined-21__2025-08-04.log.gz
+│   ├── combined-21__2025-08-05.log.gz
+│   ├── combined-21__2025-08-06.log.gz
+│   ├── combined-21.log
+│   ├── err-21__2025-08-04.log.gz
+│   ├── err-21__2025-08-05.log.gz
+│   ├── err-21__2025-08-06.log.gz
+│   ├── err-21.log
+│   ├── omai-combined-22__2025-08-04.log.gz
+│   ├── omai-combined-22__2025-08-05.log.gz
+│   ├── omai-combined-22__2025-08-06.log.gz
+│   ├── omai-combined-22.log
+│   ├── omai-err-22__2025-08-04.log.gz
+│   ├── omai-err-22__2025-08-05.log.gz
+│   ├── omai-err-22.log
+│   ├── omai-out-22__2025-08-04.log.gz
+│   ├── omai-out-22__2025-08-05.log.gz
+│   ├── omai-out-22__2025-08-06.log.gz
+│   ├── omai-out-22.log
+│   ├── out-21__2025-08-04.log.gz
+│   ├── out-21__2025-08-05.log.gz
+│   ├── out-21__2025-08-06.log.gz
+│   └── out-21.log
+├── misc
+│   ├── ai
+│   │   └── learning
+│   ├── AI-agent-workspace.txt
+│   ├── api-route-frontend.md
+│   ├── api-routes-viewer.tsx
+│   ├── AUTHENTICATION_REBRANDING_COMPLETE.md
+│   ├── bigbook
+│   │   └── archived-backend
+│   ├── build.config.json
+│   ├── cleanup-dev.sh
+│   ├── daily
+│   │   ├── debug-session-config.js
+│   │   ├── fix_church_14_local.js
+│   │   ├── maintenance
+│   │   ├── restart-server.sh
+│   │   ├── run-church-schema-fix.js
+│   │   ├── start-production.sh
+│   │   ├── start-server.bat
+│   │   ├── test-backup-system.sh
+│   │   ├── test-dependencies.js
+│   │   ├── test-ocr-connection.js
+│   │   ├── test-original-backup-system.sh
+│   │   └── test-role-fix.js
+│   ├── debug
+│   │   └── README.md
+│   ├── demo.html
+│   ├── docs
+│   │   ├── 7-24-25
+│   │   ├── 7-26-25
+│   │   ├── ADMIN_CLEANUP_PLAN.md
+│   │   ├── ADMINISTRATION_GUIDE.md
+│   │   ├── ADMIN_MONOLITH_BREAKDOWN_SUMMARY.md
+│   │   ├── API_AUDIT_GUIDE.md
+│   │   ├── API_REFERENCE.md
+│   │   ├── API_V2_REFACTOR_SUMMARY.md
+│   │   ├── archive
+│   │   ├── BIG_BOOK_CENTRALIZED_INGESTION_SYSTEM.md
+│   │   ├── BUILD-CONSOLE-ENHANCEMENT.md
+│   │   ├── CONSOLIDATION_COMPLETE.md
+│   │   ├── DATABASE_ARCHITECTURE_REFACTOR.md
+│   │   ├── DEPLOYMENT_GUIDE.md
+│   │   ├── DEVELOPMENT_ENVIRONMENT.md
+│   │   ├── DEVELOPMENT_GUIDE.md
+│   │   ├── DEVELOPMENT_SETUP_COMPLETE.md
+│   │   ├── FRONTEND_CONFIG_UPDATE.md
+│   │   ├── Guidelines.md
+│   │   ├── inner-nginx-complete.conf
+│   │   ├── MIGRATION_PLAN.md
+│   │   ├── Multi-Tenant-Provisioning.md
+│   │   ├── OMAI_AGENT_WEBHOOK_GUIDE.md
+│   │   ├── OMAI_BIBLE.md
+│   │   ├── OMAI_INTELLIGENCE_UPGRADE_GUIDE.md
+│   │   ├── OMAI-MEMORY-MANAGEMENT.md
+│   │   ├── OMAI-NEXT-STEPS.md
+│   │   ├── OMAI_OPERATORS_MANUAL.md
+│   │   ├── OMAI-SITE-MASTERY.md
+│   │   ├── OMAI-TRAINING-BLUEPRINT.md
+│   │   ├── OMAI-TRAINING-QUICK-REFERENCE.md
+│   │   ├── OM-BigBook
+│   │   ├── OMLEARN-ETHICS-INTEGRATION.md
+│   │   ├── outer-nginx-corrected.conf
+│   │   ├── PHASE_17_OMAI_BACKEND_COMPLETION.md
+│   │   ├── PHASE_17_SITE_EDITOR_COMPLETION.md
+│   │   ├── QUICK_START_GUIDE.md
+│   │   ├── README-Headlines-Deployment.md
+│   │   ├── README.md
+│   │   ├── README-scripts.md
+│   │   ├── role-refactor-summary.md
+│   │   ├── ROUTE_AUDIT_TABLE.md
+│   │   ├── server-route-analysis.md
+│   │   ├── SOCIAL_MODULE_DOCUMENTATION.md
+│   │   ├── SYSTEM_ARCHITECTURE.md
+│   │   ├── tasks
+│   │   ├── todo 7-22.md
+│   │   ├── todo.md
+│   │   ├── TROUBLESHOOTING.md
+│   │   ├── USER_MANAGEMENT_ARCHITECTURE.md
+│   │   └── WORK_SUMMARY_AND_STATUS.md
+│   ├── err.log
+│   ├── logs
+│   │   └── server-main
+│   ├── omai
+│   │   ├── bigbook
+│   │   ├── configs
+│   │   ├── data
+│   │   ├── database
+│   │   ├── logs
+│   │   ├── ocr-results
+│   │   ├── scripts
+│   │   └── services
+│   ├── orthodoxmetrics-log-for-fix-api.log
+│   ├── package-lock.json
+│   ├── public
+│   │   ├── 404-not-found.png
+│   │   ├── ChatGPT Image Jul 15, 2025, 02_10_32 AM.png
+│   │   ├── css
+│   │   ├── dev.zip
+│   │   ├── Jul 15, 2025, 02_09_52 AM.png
+│   │   ├── manifest.json
+│   │   ├── nick.html
+│   │   ├── orthodox-avatars
+│   │   ├── orthodox-banners
+│   │   ├── orthodox-calendar.html
+│   │   ├── orthodox-records-el.html
+│   │   ├── orthodox_records_el.html
+│   │   ├── orthodox-records-en.html
+│   │   ├── orthodox_records_en.html
+│   │   ├── orthodox-records-ro.html
+│   │   ├── orthodox_records_ro.html
+│   │   ├── orthodox-records-ru.html
+│   │   ├── orthodox_records_ru.html
+│   │   ├── sneak-peek-records
+│   │   ├── ssppoc.html
+│   │   └── uploads
+│   ├── README-FIRST.md
+│   ├── README-SECOND.md
+│   ├── sample-questionnaires
+│   │   └── Grade6-8_Personality_Questionnaire.tsx
+│   ├── server-archive
+│   │   ├── automation
+│   │   ├── backups
+│   │   ├── certificates
+│   │   ├── credentials
+│   │   ├── debug
+│   │   ├── docs
+│   │   ├── jobs
+│   │   ├── legacy
+│   │   ├── migration
+│   │   ├── migrations
+│   │   ├── ocr-results
+│   │   ├── REFACTOR_SUMMARY.md
+│   │   ├── scrapers
+│   │   ├── scripts
+│   │   ├── setup
+│   │   ├── temp
+│   │   ├── templates
+│   │   └── testing
+│   ├── tasks
+│   │   └── node
+│   └── uploads
+│       ├── kanban
+│       └── temp
+├── package.json
+├── package-lock.json
+├── public
+│   └── uploads
+├── server
+│   ├── certificates
+│   ├── church-provisioner.js
+│   ├── CLEANUP_COMPLETE_SUMMARY.md
+│   ├── COMPLETE_FIXES_SUMMARY.md
+│   ├── config
+│   │   ├── db.js
+│   │   ├── db-root.js
+│   │   └── session.js
+│   ├── controllers
+│   │   ├── admin
+│   │   ├── analyticsController.js
+│   │   ├── churchAdminController.js
+│   │   ├── churchOcrController.js
+│   │   ├── entityExtractionController.js
+│   │   ├── OcrAdminTestController.js
+│   │   └── records.js
+│   ├── cookies.txt
+│   ├── create-test-user.js
+│   ├── data
+│   │   ├── build-config.json
+│   │   ├── build-history.json
+│   │   ├── churches
+│   │   ├── componentManifest.json
+│   │   ├── componentUsage.json
+│   │   ├── jit-config.json
+│   │   ├── test-churches
+│   │   └── test-working-churches
+│   ├── database
+│   │   ├── add_cms_menu.sql
+│   │   ├── add_cms_page_editor.sql
+│   │   ├── add-markdown-field.sql
+│   │   ├── add_markdown_fields.sql
+│   │   ├── add_omai_md_tables.sql
+│   │   ├── add_orthodox_calendar_menu.sql
+│   │   ├── alter-omai-memories-agents.sql
+│   │   ├── backup_schema.sql
+│   │   ├── bigbook-schema.sql
+│   │   ├── billing_history_schema.sql
+│   │   ├── billing_schema.sql
+│   │   ├── chat-system-schema.sql
+│   │   ├── check-database-connection.js
+│   │   ├── churches_and_users_schema.sql
+│   │   ├── churches_comprehensive_fix.sql
+│   │   ├── churches_migration_fix.sql
+│   │   ├── churches_schema_fix_comprehensive.sql
+│   │   ├── churches_schema.sql
+│   │   ├── churches_schema_update.sql
+│   │   ├── church_provisioning_schema.sql
+│   │   ├── church_records_schema.sql
+│   │   ├── clientDatabaseTemplate.sql
+│   │   ├── clients_schema.sql
+│   │   ├── cms_schema.sql
+│   │   ├── create_admin_user.sql
+│   │   ├── create_error_tracking_db.sql
+│   │   ├── create-omai-memories-table.sql
+│   │   ├── create-system-logs-table.sql
+│   │   ├── create_user_blogs_table.sql
+│   │   ├── create_working_admin.sql
+│   │   ├── database
+│   │   ├── database-manager.js
+│   │   ├── db_dumps
+│   │   ├── debug_admin_user.sql
+│   │   ├── diagnosis-report.md
+│   │   ├── dump
+│   │   ├── dump_full.sh
+│   │   ├── dump-orthodoxmetrics_db-202507311409.sql
+│   │   ├── dump_schema.sh
+│   │   ├── enhanced_invoice_schema.sql
+│   │   ├── fix_admin_landing_pages.sql
+│   │   ├── fix_admin_passwords.sql
+│   │   ├── fix_admin_role.sql
+│   │   ├── fix_church_database_ref.sh
+│   │   ├── fix_church_db_reference_final.sql
+│   │   ├── fix-churches-schema.sql
+│   │   ├── fix_churches_schema.sql
+│   │   ├── fix-church-linkage.sql
+│   │   ├── fix-database-tables.js
+│   │   ├── fixed-church-database-template.sql
+│   │   ├── headlines-config-schema.sql
+│   │   ├── insert-ssppoc-church.sql
+│   │   ├── just_churches.sql
+│   │   ├── kanban_schema.sql
+│   │   ├── landing_page_fix.sql
+│   │   ├── liturgical_calendar_schema.sql
+│   │   ├── manual_schema_fix.sql
+│   │   ├── menu_permissions_schema.sql
+│   │   ├── migrations
+│   │   ├── migration_status.sh
+│   │   ├── news-headlines-schema.sql
+│   │   ├── notes_schema.sql
+│   │   ├── notifications_schema.sql
+│   │   ├── ocm-db-schema.zip
+│   │   ├── omai-schema.sql
+│   │   ├── orthodox_calendar_schema.sql
+│   │   ├── orthodox-headlines-schema.sql
+│   │   ├── orthodoxmetrics_db_schema.sql
+│   │   ├── run_verification.bat
+│   │   ├── safe_churches_migration.sql
+│   │   ├── safe_migration_final.sql
+│   │   ├── saints_peter_and_paul_orthodox_church_db_schema.sql
+│   │   ├── schema.sql
+│   │   ├── simple_migration.sql
+│   │   ├── social-module-schema-simple.sql
+│   │   ├── social-module-schema.sql
+│   │   ├── test-404-debug.js
+│   │   ├── test_admin_users.sql
+│   │   ├── test-frontend-calls.js
+│   │   ├── test-notifications-fix.js
+│   │   ├── test-toggle-fix-verification.js
+│   │   ├── test-toggle.js
+│   │   ├── test-toggle-simple.js
+│   │   ├── test-toggle-with-db.js
+│   │   ├── test-user-toggle.js
+│   │   ├── Untitled-2.sql
+│   │   ├── update_church_database_name.sql
+│   │   ├── update_email_settings_to_godaddy.sql
+│   │   ├── update_landing_pages.sql
+│   │   ├── update-password.js
+│   │   └── users_schema_fix.sql
+│   ├── ecosystem.config.cjs
+│   ├── FINAL_UI_BUILD_CHECKLIST.md
+│   ├── index.js
+│   ├── LOGGING_CENTRALIZATION_SUMMARY.md
+│   ├── logs
+│   │   ├── api.log
+│   │   ├── auth.log
+│   │   ├── builds
+│   │   ├── combined.log
+│   │   ├── database.log
+│   │   ├── db-logger-fallback.log
+│   │   ├── email.log
+│   │   ├── error.log
+│   │   ├── ocr.log
+│   │   └── upload.log
+│   ├── middleware
+│   │   ├── auditLogger.js
+│   │   ├── auth.js
+│   │   ├── churchSecurity.js
+│   │   ├── clientContext.js
+│   │   ├── databaseRouter.js
+│   │   ├── logger.js
+│   │   ├── maintenanceMiddleware.js
+│   │   ├── requestLogger.js
+│   │   ├── sessionValidation.js
+│   │   └── userAuthorization.js
+│   ├── models
+│   │   ├── kanbanBoard.js
+│   │   └── kanbanTask.js
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── README-server.md
+│   ├── REFERENCE_ANALYSIS_SUMMARY.md
+│   ├── routes
+│   │   ├── admin
+│   │   ├── admin.js
+│   │   ├── adminSystem.js
+│   │   ├── ai.js
+│   │   ├── analytics.js
+│   │   ├── auth.js
+│   │   ├── auth.js.backup-session-fix
+│   │   ├── autonomy.js
+│   │   ├── backend_diagnostics.js
+│   │   ├── backup.js
+│   │   ├── baptismCertificates.js
+│   │   ├── baptism.js
+│   │   ├── bigbook.js
+│   │   ├── billing.js
+│   │   ├── blogs.js
+│   │   ├── build.js
+│   │   ├── calendar.js
+│   │   ├── certificates.js
+│   │   ├── church
+│   │   ├── churches.js
+│   │   ├── churchSetupWizard.js
+│   │   ├── clientApi.js
+│   │   ├── componentDiscovery.js
+│   │   ├── components.js
+│   │   ├── dashboard.js
+│   │   ├── debug.js
+│   │   ├── dropdownOptions.js
+│   │   ├── ecommerce.js
+│   │   ├── enhancedInvoices.js
+│   │   ├── funeralCertificates.js
+│   │   ├── funeral.js
+│   │   ├── github-issues.js
+│   │   ├── globalOmai.js
+│   │   ├── globalTemplates.js
+│   │   ├── headlines-config.js
+│   │   ├── headlines.js
+│   │   ├── images.js
+│   │   ├── importRecords.js
+│   │   ├── index.js
+│   │   ├── invoices.js
+│   │   ├── invoicesMultilingual.js
+│   │   ├── jit-terminal.js
+│   │   ├── kanban
+│   │   ├── kanban.js
+│   │   ├── kanbanSync.js
+│   │   ├── logger.js
+│   │   ├── logs.js
+│   │   ├── maintenance.js
+│   │   ├── marriageCertificates.js
+│   │   ├── marriage.js
+│   │   ├── menu.js
+│   │   ├── menuManagement.js
+│   │   ├── menuPermissions.js
+│   │   ├── metrics.js
+│   │   ├── mock-apis.js
+│   │   ├── nlp.js
+│   │   ├── notes.js
+│   │   ├── notifications.js
+│   │   ├── omai
+│   │   ├── omai.js
+│   │   ├── omai-test.js
+│   │   ├── omb.js
+│   │   ├── orthodoxCalendar.js
+│   │   ├── pages.js
+│   │   ├── pages-new.js
+│   │   ├── permissionConfig.js
+│   │   ├── permissions.js
+│   │   ├── provision.js
+│   │   ├── public
+│   │   ├── records.js
+│   │   ├── routes.js
+│   │   ├── runScript.js
+│   │   ├── settings.js
+│   │   ├── social
+│   │   ├── survey.js
+│   │   ├── teaching.js
+│   │   ├── templates.js
+│   │   ├── unique-values.js
+│   │   ├── upload.js
+│   │   ├── uploads.js
+│   │   ├── uploadToken.js
+│   │   ├── user.js
+│   │   ├── user-profile.js
+│   │   ├── users.js
+│   │   ├── watchdog.js
+│   │   └── websocket
+│   ├── scripts
+│   │   ├── migrate-logs-to-database.js
+│   │   ├── reset-user-password.js
+│   │   ├── run_role_migration.js
+│   │   ├── test-database-logging.js
+│   │   ├── test-logging-system.js
+│   │   └── validate_role_migration.js
+│   ├── services
+│   │   ├── ai
+│   │   ├── bigBookKanbanSync.js
+│   │   ├── bigBookWatchdogIntegration.js
+│   │   ├── churchRecordEntityExtractor.js
+│   │   ├── churchSetupService.js
+│   │   ├── componentRegistryService.js
+│   │   ├── componentsService.js
+│   │   ├── databaseService.js
+│   │   ├── fieldConfigService.ts
+│   │   ├── jitSessionManager.js
+│   │   ├── kanbanIntegrationService.js
+│   │   ├── maintenanceService.js
+│   │   ├── omaiBackgroundService.js
+│   │   ├── omaiCommandService.js
+│   │   ├── omaiPathDiscovery.js
+│   │   ├── omaiPathDiscoveryStandalone.js
+│   │   ├── omaiWatchdogService.js
+│   │   ├── omb
+│   │   ├── taskDiscoveryService.js
+│   │   ├── templateService.js
+│   │   ├── terminalManager.js
+│   │   ├── testChurchDataGenerator.js
+│   │   └── websocketService.js
+│   ├── test-component-optimization.js
+│   ├── types
+│   │   ├── ocrTypes.ts
+│   │   └── ocrUtils.ts
+│   ├── uploads
+│   │   ├── enhanced
+│   │   └── temp
+│   ├── utils
+│   │   ├── add-church.js
+│   │   ├── add-test-dev-user.js
+│   │   ├── billingInvoiceGenerator.js
+│   │   ├── buildOutputParser.js
+│   │   ├── check-invoice-tables.js
+│   │   ├── check-test-user.js
+│   │   ├── churchValidation.js
+│   │   ├── componentDiscovery.js
+│   │   ├── componentUsageTrackerDB.js
+│   │   ├── componentUsageTracker.js
+│   │   ├── createReactSite.js
+│   │   ├── create-superadmin-prod.js
+│   │   ├── create-test-user.js
+│   │   ├── create-test-user.sql
+│   │   ├── dateFormatter.js
+│   │   ├── dbConnections.js
+│   │   ├── dbConnections.ts
+│   │   ├── dbLogger.js
+│   │   ├── dbSwitcher.js
+│   │   ├── debug-auth.js
+│   │   ├── emailSender.js
+│   │   ├── emailService.js
+│   │   ├── encryptedStorage.js
+│   │   ├── fix-church-permissions.js
+│   │   ├── fix-schema.js
+│   │   ├── formatTimestamp.js
+│   │   ├── generateCredentials.js
+│   │   ├── headlineCache.js
+│   │   ├── imagePreprocessor.js
+│   │   ├── imageProcessor.js
+│   │   ├── jsonToDatabaseMigrator.js
+│   │   ├── logger.js
+│   │   ├── logs
+│   │   ├── notifications.js
+│   │   ├── ocm-utils.zip
+│   │   ├── omaiCommandExecutor.js
+│   │   ├── omaiMaintenanceInterface.js
+│   │   ├── OMAIRequest.js
+│   │   ├── pageRegistrar.js
+│   │   ├── preprocessImage.js
+│   │   ├── questionnaireParser.js
+│   │   ├── roles.js
+│   │   ├── sendProvisionEmail.js
+│   │   ├── setup-database.js
+│   │   ├── setup-enhanced-invoices.ps1
+│   │   ├── test-auth.js
+│   │   ├── test-church-creation.js
+│   │   ├── test-db.js
+│   │   ├── testDeployedSite.js
+│   │   ├── test-login.js
+│   │   ├── translationCostMonitor.js
+│   │   └── translation-costs.json
+│   └── websockets
+│       └── logStream.js
+├── services
+│   └── omb
+│       └── layouts
+└── uploads
+    └── temp
+
+145 directories, 473 files

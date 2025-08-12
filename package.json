@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "tsc": "tsc",
+    "build": "tsc --build"
+  },
+  "dependencies": {
+    "mysql2": "^3.14.3"
+  }
+}

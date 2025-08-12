@@ -1,0 +1,1 @@
+export const CHURCH_CONFIG = {}; 

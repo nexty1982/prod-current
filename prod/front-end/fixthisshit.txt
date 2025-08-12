@@ -1,0 +1,2014 @@
+[34m
+Scanning /var/www/orthodoxmetrics/prod/front-end/src for import errors...
+[0m
+[90mFound 1299 source files to check
+[0m
+[34m
+=== Import Check Results ===
+[0m
+Total files scanned: [33m1299[0m
+Total imports found: [33m6091[0m
+[31m
+✗ Found 729 broken imports:
+[0m
+[33m
+Broken imports in: src/@om/components/features/liturgical-calendar-modern.tsx[0m
+[90m  Line 42:[0m import "[31mreact-big-calendar/lib/css/react-big-calendar.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/@om/components/ui/forms/PasswordFormInput.tsx[0m
+[90m  Line 8:[0m import "[31mreact-hook-form[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/@om/components/ui/forms/SelectFormInput.tsx[0m
+[90m  Line 8:[0m import "[31mreact-hook-form[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/@om/components/ui/forms/TextAreaFormInput.tsx[0m
+[90m  Line 7:[0m import "[31mreact-hook-form[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/@om/components/ui/forms/TextFormInput.tsx[0m
+[90m  Line 7:[0m import "[31mreact-hook-form[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/App.tsx[0m
+[90m  Line 26:[0m import "[31m./styles/themes/orthodox-traditional.css[0m"
+[90m    Error: File or directory not found[0m
+[90m  Line 27:[0m import "[31m./styles/themes/lent-season.css[0m"
+[90m    Error: File or directory not found[0m
+[90m  Line 28:[0m import "[31m./styles/themes/pascha-theme.css[0m"
+[90m    Error: File or directory not found[0m
+[33m
+Broken imports in: src/ai/git/commitHandler.ts[0m
+[90m  Line 1:[0m import "[31mgitOpsBridge[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/ai/git/gitOpsBridge.ts[0m
+[90m  Line 76:[0m require "[31msimple-git[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/ai/git/prGenerator.ts[0m
+[90m  Line 1:[0m import "[31mgitOpsBridge[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/ai/vrt/vrtConfigManager.ts[0m
+[90m  Line 9:[0m import "[31mvrtSecurity[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/api/blog/blogData.ts[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/blog/blog-img1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/blog/blog-img2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/blog/blog-img3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/blog/blog-img4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/blog/blog-img5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/blog/blog-img6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/blog/blog-img11.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/blog/blog-img8.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/blog/blog-img9.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 13:[0m import "[31msrc/assets/images/blog/blog-img10.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 15:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 16:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 17:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 18:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 19:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 20:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/chat/Chatdata.ts[0m
+[90m  Line 1:[0m import "[31msrc/assets/images/blog/blog-img1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/chat/icon-adobe.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/chat/icon-chrome.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/chat/icon-figma.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/chat/icon-javascript.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/chat/icon-zip-folder.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/church-records.hooks.ts[0m
+[90m  Line 3:[0m import "[31mswr/mutation[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/churches/churchData.tsx[0m
+[90m  Line 2:[0m import "[31msrc/types/orthodox-metrics.types[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/contacts/ContactsData.tsx[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/eCommerce/ProductsData.ts[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/products/s1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/products/s2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/products/s3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/products/s4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/products/s5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/products/s6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/products/s7.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/products/s8.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/products/s9.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/products/s10.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 13:[0m import "[31msrc/assets/images/products/s11.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 14:[0m import "[31msrc/assets/images/products/s12.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/email/EmailData.tsx[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/chat/icon-adobe.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/chat/icon-chrome.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 13:[0m import "[31msrc/assets/images/chat/icon-figma.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 14:[0m import "[31msrc/assets/images/chat/icon-javascript.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 15:[0m import "[31msrc/assets/images/chat/icon-zip-folder.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/language/LanguageData.js[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/svgs/icon-flag-en.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/svgs/icon-flag-fr.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/svgs/icon-flag-cn.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/svgs/icon-flag-sa.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/svgs/icon-flag-vn.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/mocks/browser.ts[0m
+[90m  Line 1:[0m import "[31mmsw/browser[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/orthodox-metrics.api.ts[0m
+[90m  Line 11:[0m import "[31m@/api/admin.api[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 12:[0m import "[31m@/api/user.api[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 13:[0m import "[31m@/api/metrics.api[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 16:[0m import "[31m@/api/admin.api[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 17:[0m import "[31m@/api/user.api[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 18:[0m import "[31m@/api/metrics.api[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/api/ticket/TicketData.ts[0m
+[90m  Line 1:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/userprofile/PostData.ts[0m
+[90m  Line 1:[0m import "[31msrc/assets/images/products/s1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/products/s2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/products/s4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/api/userprofile/UsersData.ts[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/profile/user-6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-7.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/profile/user-8.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/profile/user-9.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/profile/user-10.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/products/s1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 13:[0m import "[31msrc/assets/images/products/s2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 14:[0m import "[31msrc/assets/images/products/s3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 15:[0m import "[31msrc/assets/images/products/s4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 16:[0m import "[31msrc/assets/images/products/s5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 17:[0m import "[31msrc/assets/images/products/s6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 18:[0m import "[31msrc/assets/images/products/s7.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 19:[0m import "[31msrc/assets/images/products/s8.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 20:[0m import "[31msrc/assets/images/products/s9.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 21:[0m import "[31msrc/assets/images/products/s10.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/products/s11.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31msrc/assets/images/products/s12.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/AGGridViewOnly/AGGridViewOnly.tsx[0m
+[90m  Line 35:[0m import "[31mag-grid-community/styles/ag-grid.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 36:[0m import "[31mag-grid-community/styles/ag-theme-material.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/AdvancedGridDialog.tsx[0m
+[90m  Line 33:[0m import "[31mag-grid-community/styles/ag-grid.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 34:[0m import "[31mag-grid-community/styles/ag-theme-alpine.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 35:[0m import "[31mag-grid-community/styles/ag-theme-balham.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 36:[0m import "[31mag-grid-community/styles/ag-theme-material.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 37:[0m import "[31mag-grid-community/styles/ag-theme-quartz.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/ChurchSetupWizard.tsx[0m
+[90m  Line 43:[0m import "[31mnotistack[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/ComponentInspector.tsx[0m
+[90m  Line 36:[0m import "[31mGitOpsPanel[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 37:[0m import "[31mVisualRegressionDashboard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 38:[0m import "[31mManualFixEditor[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/ImportRecordsButton.tsx[0m
+[90m  Line 37:[0m import "[31mnotistack[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/KanbanBoard.tsx[0m
+[90m  Line 8:[0m import "[31mKanbanColumn[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/KanbanColumn.tsx[0m
+[90m  Line 13:[0m import "[31mKanbanTaskCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/KanbanTaskCard.tsx[0m
+[90m  Line 26:[0m import "[31mKanbanTaskModal[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/KanbanTaskModal.tsx[0m
+[90m  Line 48:[0m import "[31mMarkdownUpload[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/ManualFixEditor.tsx[0m
+[90m  Line 43:[0m dynamic "[31mmonaco-editor[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/SiteEditor.tsx[0m
+[90m  Line 37:[0m import "[31mSiteEditorOverlay[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 38:[0m import "[31mSiteEditorErrorBoundary[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/SiteEditorOverlay.tsx[0m
+[90m  Line 15:[0m import "[31mComponentInspector[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 17:[0m import "[31mVRTSettingsPanel[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/TableThemeDemo.tsx[0m
+[90m  Line 16:[0m import "[31mTableThemeSelector[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/UserFormModal.tsx[0m
+[90m  Line 31:[0m import "[31mSocialPermissionsToggle[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/admin/AdminDashboardLayout.tsx[0m
+[90m  Line 10:[0m import "[31mSuperAdminDashboard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/admin/BigBookConsolePage.tsx[0m
+[90m  Line 27:[0m import "[31mUploadedFileList[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 28:[0m import "[31mFileViewer[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 29:[0m import "[31mBigBookSettings[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/admin/ChurchManagement.tsx[0m
+[90m  Line 3:[0m import "[31mChurchWizard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 4:[0m import "[31mEditChurchModal[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/admin/NFSBackupConfig.tsx[0m
+[90m  Line 36:[0m import "[31mSDLCBackupPanel[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/admin/OMBigBook.tsx[0m
+[90m  Line 45:[0m import "[31mBigBookConsolePage[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 47:[0m import "[31mEncryptedStoragePanel[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 48:[0m import "[31mQuestionnairePreview[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 49:[0m import "[31mOMAIDiscoveryPanel[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 50:[0m import "[31mTSXComponentInstallWizard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 51:[0m import "[31mBigBookCustomComponentViewer[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 52:[0m import "[31mMemoryManager[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/admin/SuperAdminDashboard.tsx[0m
+[90m  Line 44:[0m import "[31mAdminTile[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/ai/AIAdminPanel.tsx[0m
+[90m  Line 44:[0m import "[31mAIContentGenerator[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 45:[0m import "[31mAIAnalyticsDashboard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 46:[0m import "[31mAITranslationAssistant[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 47:[0m import "[31mAIDeploymentAutomation[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 48:[0m import "[31mAILogAnalysis[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/ai/AIAnalyticsDashboard.tsx[0m
+[90m  Line 41:[0m import "[31mreact-chartjs-2[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/blog/BlogListing.tsx[0m
+[90m  Line 5:[0m import "[31mBlogCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 8:[0m import "[31mBlogFeaturedCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/blog/detail/BlogDetail.tsx[0m
+[90m  Line 19:[0m import "[31mBlogComment[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/chat/ChatWindow.tsx[0m
+[90m  Line 58:[0m import "[31mMessageInput[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/chats/ChatContent.tsx[0m
+[90m  Line 18:[0m import "[31mChatInsideSidebar[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/chats/ChatListing.tsx[0m
+[90m  Line 27:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/chats/ChatSidebar.tsx[0m
+[90m  Line 5:[0m import "[31mChatListing[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/contacts/ContactDetails.tsx[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/breadcrumb/emailSv.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/contacts/ContactFilter.tsx[0m
+[90m  Line 16:[0m import "[31mContactAdd[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/contacts/ContactList.tsx[0m
+[90m  Line 7:[0m import "[31mContactListItem[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/ecommerce/productCart/AddToCart.tsx[0m
+[90m  Line 21:[0m import "[31msrc/assets/images/products/empty-shopping-cart.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/ecommerce/productCheckout/FinalStep.tsx[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/products/payment-complete.gif[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/ecommerce/productCheckout/ProductCheckout.tsx[0m
+[90m  Line 9:[0m import "[31mHorizontalStepper[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 10:[0m import "[31mFirstStep[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 11:[0m import "[31mSecondStep[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 12:[0m import "[31mThirdStep[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 13:[0m import "[31mFinalStep[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/ecommerce/productCheckout/ThirdStep.tsx[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/svgs/paypal.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/products/payment.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/svgs/mastercard.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/ecommerce/productDetail/ProductCarousel.tsx[0m
+[90m  Line 7:[0m import "[31mslick-carousel/slick/slick.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31mslick-carousel/slick/slick-theme.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31mSliderData[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/ecommerce/productDetail/SliderData.ts[0m
+[90m  Line 1:[0m import "[31msrc/assets/images/products/s1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/products/s2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/products/s3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/products/s4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/products/s5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/products/s6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/products/s7.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/ecommerce/productEdit/CustomersReviews.tsx[0m
+[90m  Line 16:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 17:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 18:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 19:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 20:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 21:[0m import "[31msrc/assets/images/profile/user-6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/profile/user-7.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31msrc/assets/images/profile/user-8.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/ecommerce/productEdit/Thumbnail.tsx[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/blog/blog-img1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/ecommerce/productGrid/ProductList.tsx[0m
+[90m  Line 22:[0m import "[31mProductSearch[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 25:[0m import "[31msrc/assets/images/products/empty-shopping-cart.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/ecommerce/productGrid/ProductSidebar.tsx[0m
+[90m  Line 6:[0m import "[31mProductFilter[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/email/EmailContent.tsx[0m
+[90m  Line 21:[0m import "[31msrc/assets/images/breadcrumb/emailSv.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/email/EmailFilter.tsx[0m
+[90m  Line 16:[0m import "[31mEmailCompose[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/email/EmailList.tsx[0m
+[90m  Line 5:[0m import "[31mEmailListItem[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/invoice/Edit-invoice/ModernInvoiceEdit.simple.tsx[0m
+[90m  Line 35:[0m import "[31msrc/types/orthodox-metrics.types[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/invoice/Edit-invoice/ModernInvoiceEdit.tsx[0m
+[90m  Line 35:[0m import "[31msrc/types/orthodox-metrics.types[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/invoice/Edit-invoice/index.tsx[0m
+[90m  Line 2:[0m import "[31mModernInvoiceEdit[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/invoice/Invoice-detail/InvoicePDFPreview.tsx[0m
+[90m  Line 17:[0m import "[31msrc/types/orthodox-metrics.types[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/invoice/Invoice-detail/ModernInvoiceDetail.simple.tsx[0m
+[90m  Line 40:[0m import "[31msrc/types/orthodox-metrics.types[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/invoice/Invoice-detail/ModernInvoiceDetail.tsx[0m
+[90m  Line 33:[0m import "[31msrc/types/orthodox-metrics.types[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/invoice/Invoice-detail/index.tsx[0m
+[90m  Line 1:[0m import "[31mModernInvoiceDetail[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/invoice/Invoice-list/ModernInvoiceList.tsx[0m
+[90m  Line 60:[0m import "[31msrc/types/orthodox-metrics.types[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/invoice/Invoice-list/index.tsx[0m
+[90m  Line 1:[0m import "[31mModernInvoiceList[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/invoice/Invoice-view/InvoiceViewByNumber.tsx[0m
+[90m  Line 33:[0m import "[31msrc/types/orthodox-metrics.types[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/invoice/Invoice-view/index.tsx[0m
+[90m  Line 2:[0m import "[31mInvoiceViewByNumber[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/notes/NoteContent.tsx[0m
+[90m  Line 16:[0m import "[31mAddNotes[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/notes/NoteSidebar.tsx[0m
+[90m  Line 5:[0m import "[31mNoteList[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/records/recordGrid/RecordList.tsx[0m
+[90m  Line 24:[0m import "[31mRecordCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 25:[0m import "[31mRecordSearch[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/records/recordGrid/RecordSidebar.tsx[0m
+[90m  Line 3:[0m import "[31mRecordFilter[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/userprofile/profile/PhotosCard.tsx[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/profile/user-10.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/profile/user-6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/profile/user-7.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/profile/user-8.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 13:[0m import "[31msrc/assets/images/profile/user-9.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/userprofile/profile/Post.tsx[0m
+[90m  Line 7:[0m import "[31mPostItem[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 8:[0m import "[31mPostTextBox[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/userprofile/profile/PostComments.tsx[0m
+[90m  Line 6:[0m import "[31mlodash/uniqueId[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/apps/userprofile/profile/PostItem.tsx[0m
+[90m  Line 20:[0m import "[31mlodash/uniqueId[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31mPostComments[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/apps/userprofile/profile/ProfileBanner.tsx[0m
+[90m  Line 35:[0m import "[31mProfileTab[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 37:[0m import "[31mOrthodoxAvatarSelector[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 42:[0m import "[31msrc/assets/images/backgrounds/profilebg.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 43:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/bigbook/custom/ParishMap.tsx[0m
+[90m  Line 4:[0m import "[31mleaflet/dist/leaflet.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31mreact-leaflet-markercluster/dist/styles.min.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/calendar/OMCalendar.tsx[0m
+[90m  Line 59:[0m import "[31mreact-big-calendar/lib/css/react-big-calendar.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 103:[0m require "[31mdate-fns/locale/en-US[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/custom/ParishMap.tsx[0m
+[90m  Line 4:[0m import "[31mleaflet/dist/leaflet.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31mreact-leaflet-markercluster/dist/styles.min.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/custom-scroll/Scrollbar.tsx[0m
+[90m  Line 2:[0m import "[31msimplebar/dist/simplebar.min.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/dashboards/ecommerce/Growth.tsx[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/svgs/icon-bars.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/dashboards/ecommerce/MonthlyEarnings.tsx[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/svgs/icon-master-card-2.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/dashboards/ecommerce/PaymentGateways.tsx[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/svgs/icon-paypal.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/svgs/icon-office-bag.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/svgs/icon-master-card.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/svgs/icon-pie.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/dashboards/ecommerce/ProductPerformances.tsx[0m
+[90m  Line 24:[0m import "[31msrc/assets/images/products/s6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 25:[0m import "[31msrc/assets/images/products/s9.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 26:[0m import "[31msrc/assets/images/products/s7.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 27:[0m import "[31msrc/assets/images/products/s4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/dashboards/ecommerce/WelcomeCard.tsx[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/backgrounds/welcome-bg2.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/dashboards/modern/TopPerformerData.ts[0m
+[90m  Line 1:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/dashboards/modern/TopPerformers.tsx[0m
+[90m  Line 20:[0m import "[31mTopPerformerData[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/dashboards/orthodoxmetrics/AdminWelcomeCard.tsx[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/backgrounds/welcome-bg2.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/forms/form-custom/code/FormCustomCode.tsx[0m
+[90m  Line 36:[0m import "[31m@/store/hooks[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 37:[0m import "[31m@/store/store[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/components/forms/form-layouts/index.tsx[0m
+[90m  Line 1:[0m import "[31mFbOrdinaryForm[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 2:[0m import "[31mFbDefaultForm[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mFbBasicHeaderForm[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 4:[0m import "[31mFbReadonlyForm[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 5:[0m import "[31mFbDisabledForm[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 6:[0m import "[31mFbLeftIconForm[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 7:[0m import "[31mFbRightIconForm[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 8:[0m import "[31mFbInputVariants[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/frontend-pages/about/key-metric/index.tsx[0m
+[90m  Line 3:[0m import "[31mKey[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/frontend-pages/about/process/index.tsx[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/svgs/icon-briefcase.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/frontend-pages/homepage/feature-apps.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/svgs/icon-speech-bubble.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/svgs/icon-favorites.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/contact/form/Address.tsx[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/frontend-pages/contact/shape1.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/contact/form/index.tsx[0m
+[90m  Line 6:[0m import "[31mAddress[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/frontend-pages/homepage/banner/Banner.tsx[0m
+[90m  Line 21:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-react.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-mui.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-next.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 24:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-ts.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 25:[0m import "[31msrc/assets/images/frontend-pages/icons/logos_swr.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 26:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-tabler.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 28:[0m import "[31msrc/assets/images/frontend-pages/homepage/banner-top-left.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 29:[0m import "[31msrc/assets/images/frontend-pages/homepage/bottom-part.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 30:[0m import "[31msrc/assets/images/frontend-pages/homepage/banner-top-right.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 32:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 33:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 34:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 36:[0m import "[31msrc/assets/images/frontend-pages/homepage/icon-play.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/homepage/defend-focus/TabEmbedding.tsx[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/frontend-pages/homepage/accordian1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/homepage/defend-focus/TabPayments.tsx[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/frontend-pages/homepage/accordian1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/homepage/defend-focus/TabTeamScheduling.tsx[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/frontend-pages/homepage/accordian1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/homepage/defend-focus/TabWorkflows.tsx[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/frontend-pages/homepage/accordian1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/homepage/defend-focus/index.tsx[0m
+[90m  Line 10:[0m import "[31mTabTeamScheduling[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 11:[0m import "[31mTabPayments[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 12:[0m import "[31mTabEmbedding[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 13:[0m import "[31mTabWorkflows[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/frontend-pages/homepage/exceptional-feature/index.tsx[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-color.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-sidebar.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-pages.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-components.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-framework.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-icons.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-responsive.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-sass.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 13:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-customize.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 14:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-chart.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 15:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-table.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 16:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-update.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 17:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-support.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/homepage/features/Features.tsx[0m
+[90m  Line 2:[0m import "[31mFeatureTitle[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/svgs/icon-briefcase.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/frontend-pages/homepage/feature-apps.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/logos/logoIcon.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/frontend-pages/homepage/screen1.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/svgs/icon-speech-bubble.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/svgs/icon-favorites.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/homepage/powerful-dozens/DozensCarousel.tsx[0m
+[90m  Line 2:[0m import "[31mslick-carousel/slick/slick.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/landingpage/demos/demo-main.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/landingpage/demos/demo-dark.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/landingpage/demos/demo-rtl.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/landingpage/demos/demo-horizontal.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/landingpage/apps/app-chat.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/landingpage/apps/app-email.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/homepage/powerful-dozens/index.tsx[0m
+[90m  Line 2:[0m import "[31mDozensCarousel[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/c2a/index.tsx[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/frontend-pages/homepage/design-collection.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/footer/index.tsx[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-facebook.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-twitter.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-instagram.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/logos/logoIcon.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/header/HeaderAlert.tsx[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/frontend-pages/homepage/notification-right.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/frontend-pages/homepage/notification-top-right.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/frontend-pages/homepage/notification-left.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/leadership/Contact.tsx[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/leadership/LeaderShipCarousel.tsx[0m
+[90m  Line 3:[0m import "[31mslick-carousel/slick/slick.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/frontend-pages/homepage/user1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/frontend-pages/homepage/user2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/frontend-pages/homepage/user3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/frontend-pages/homepage/user4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 13:[0m import "[31msrc/assets/images/frontend-pages/homepage/user5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/leadership/index.tsx[0m
+[90m  Line 2:[0m import "[31mslick-carousel/slick/slick.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31mLeaderShipCarousel[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 5:[0m import "[31mContact[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/pricing/PaymentMethods.tsx[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/frontend-pages/payments/icon-visa.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/frontend-pages/payments/icon-mastercard.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/frontend-pages/payments/icon-american-express.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/frontend-pages/payments/icon-discover.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/frontend-pages/payments/icon-paypal.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/frontend-pages/payments/icon-masetro.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/frontend-pages/payments/icon-jcb.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/frontend-pages/payments/icon-diners.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/pricing/PricingCard.tsx[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-check.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/frontend-pages/icons/icon-close.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/pricing/index.tsx[0m
+[90m  Line 2:[0m import "[31mPricingCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mPaymentMethods[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/reviews/ContentArea.tsx[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/logos/logoIcon.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/reviews/ReviewCarousel.tsx[0m
+[90m  Line 4:[0m import "[31mslick-carousel/slick/slick.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/frontend-pages/shared/reviews/index.tsx[0m
+[90m  Line 2:[0m import "[31mContentArea[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mReviewCarousel[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/global/GlobalOMAI.tsx[0m
+[90m  Line 91:[0m import "[31mErrorDetailsCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/landingpage/banner/Banner.tsx[0m
+[90m  Line 5:[0m import "[31mBannerContent[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/landingpage/bannerimg1.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/landingpage/bannerimg2.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/landingpage/c2a/C2a.tsx[0m
+[90m  Line 16:[0m import "[31msrc/assets/images/landingpage/shape/line-bg.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/landingpage/c2a/C2a2.tsx[0m
+[90m  Line 6:[0m import "[31mGuaranteeCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/landingpage/c2a/GuaranteeCard.tsx[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/landingpage/shape/badge.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/landingpage/shape/line-bg-2.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/landingpage/demo-slider/DemoSlider.tsx[0m
+[90m  Line 14:[0m import "[31msrc/assets/images/landingpage/demos/demo-main.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 15:[0m import "[31msrc/assets/images/landingpage/demos/demo-dark.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 16:[0m import "[31msrc/assets/images/landingpage/demos/demo-horizontal.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 17:[0m import "[31msrc/assets/images/landingpage/demos/demo-firebase.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 18:[0m import "[31msrc/assets/images/landingpage/demos/demo-rtl.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 19:[0m import "[31msrc/assets/images/landingpage/demos/demo-minisidebar.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 21:[0m import "[31msrc/assets/images/landingpage/apps/app-calendar.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/landingpage/apps/app-chat.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31msrc/assets/images/landingpage/apps/app-contact.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 24:[0m import "[31msrc/assets/images/landingpage/apps/app-email.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 25:[0m import "[31msrc/assets/images/landingpage/apps/app-note.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 26:[0m import "[31msrc/assets/images/landingpage/apps/app-user-profile.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 27:[0m import "[31msrc/assets/images/landingpage/apps/app-blog.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 28:[0m import "[31msrc/assets/images/landingpage/apps/app-ticket.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 29:[0m import "[31msrc/assets/images/landingpage/apps/app-ecommerce-shop.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 30:[0m import "[31msrc/assets/images/landingpage/apps/app-ecommerce-detail.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 31:[0m import "[31msrc/assets/images/landingpage/apps/app-ecommerce-checkout.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 32:[0m import "[31msrc/assets/images/landingpage/apps/app-ecommerce-list.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 33:[0m import "[31msrc/assets/images/landingpage/apps/app-blog-detail.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 34:[0m import "[31msrc/assets/images/landingpage/apps/app-kanban.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 35:[0m import "[31msrc/assets/images/landingpage/apps/app-invoice.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 37:[0m import "[31msrc/assets/images/landingpage/f-pages/page-homepage.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 38:[0m import "[31msrc/assets/images/landingpage/f-pages/page-about.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 39:[0m import "[31msrc/assets/images/landingpage/f-pages/page-portfolio.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 40:[0m import "[31msrc/assets/images/landingpage/f-pages/page-pricing.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 42:[0m import "[31mDemoTitle[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/landingpage/demo-slider/DemoTitle.tsx[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/landingpage/features/Features.tsx[0m
+[90m  Line 4:[0m import "[31mFeaturesTitle[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/landingpage/footer/Footer.tsx[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/logos/logoIcon.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/landingpage/frameworks/Frameworks.tsx[0m
+[90m  Line 5:[0m import "[31mFrameworksTitle[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/landingpage/background/slider-group.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/landingpage/header/DemosDD.tsx[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/landingpage/demos/demo-main.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/landingpage/demos/demo-dark.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/landingpage/demos/demo-horizontal.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/landingpage/demos/demo-firebase.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/landingpage/demos/demo-rtl.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/landingpage/demos/demo-minisidebar.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 14:[0m import "[31msrc/assets/images/landingpage/apps/app-calendar.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 15:[0m import "[31msrc/assets/images/landingpage/apps/app-chat.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 16:[0m import "[31msrc/assets/images/landingpage/apps/app-contact.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 17:[0m import "[31msrc/assets/images/landingpage/apps/app-email.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 18:[0m import "[31msrc/assets/images/landingpage/apps/app-note.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/landingpage/header/Header.tsx[0m
+[90m  Line 17:[0m import "[31mNavigations[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 18:[0m import "[31mMobileSidebar[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/landingpage/header/MobileSidebar.tsx[0m
+[90m  Line 7:[0m import "[31mDemosDD[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/landingpage/header/Navigations.tsx[0m
+[90m  Line 8:[0m import "[31mDemosDD[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/landingpage/testimonial/Testimonial.tsx[0m
+[90m  Line 5:[0m import "[31mTestimonialTitle[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 14:[0m import "[31mslick-carousel/slick/slick.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 15:[0m import "[31mslick-carousel/slick/slick-theme.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/logs/CriticalConsole.tsx[0m
+[90m  Line 2:[0m import "[31mConsoleCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mCriticalAlert[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 4:[0m import "[31mGitHubIssueModal[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/logs/DateLogsConsole.tsx[0m
+[90m  Line 2:[0m import "[31mConsoleCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mHistoricalLogItem[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/logs/RealTimeConsole.tsx[0m
+[90m  Line 2:[0m import "[31mConsoleCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mLogCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/logs/SystemMessagesConsole.tsx[0m
+[90m  Line 2:[0m import "[31mConsoleCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mSystemMessageCard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/material-ui/chip/code/CustomIconCode.tsx[0m
+[90m  Line 16:[0m import "[31m@/app/components/shared/InlineItemCard[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/components/material-ui/chip/code/CustomOutlinedIcon.tsx[0m
+[90m  Line 13:[0m import "[31m@/app/components/shared/InlineItemCard[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/components/material-ui/chip/code/DisabledCode.tsx[0m
+[90m  Line 14:[0m import "[31m@/app/components/shared/InlineItemCard[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/components/material-ui/chip/code/FilledCode.tsx[0m
+[90m  Line 11:[0m import "[31m@/app/components/shared/InlineItemCard[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/components/material-ui/chip/code/OutlinedCode.tsx[0m
+[90m  Line 15:[0m import "[31m@/app/components/shared/InlineItemCard[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/components/material-ui/chip/code/SizesCode.tsx[0m
+[90m  Line 13:[0m import "[31m@/app/components/shared/InlineItemCard[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/components/material-ui/tooltip/code/PositionsTooltipCode.tsx[0m
+[90m  Line 12:[0m import "[31m@/app/components/shared/InlineItemCard[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/components/muicharts/code/linechartscode/LinewithforecastCode.tsx[0m
+[90m  Line 15:[0m import "[31mLinewithforecastCode[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/muicharts/code/piechartcode/TwoLevelPieCode.tsx[0m
+[90m  Line 10:[0m import "[31mTwoLevelPieCode[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/muicharts/code/scatterchartscode/ScatterClickNoSnapCode.tsx[0m
+[90m  Line 17:[0m import "[31mreact-syntax-highlighter/dist/esm/styles/hljs[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/muicharts/scattercharts/ScatterClickNoSnapChart.tsx[0m
+[90m  Line 12:[0m import "[31mreact-syntax-highlighter/dist/esm/styles/hljs[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/pages/account-setting/AccountTab.tsx[0m
+[90m  Line 16:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/pages/faq/StillQuestions.tsx[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/raydar/VectorMap/WorldMap.tsx[0m
+[90m  Line 1:[0m import "[31mBaseVectorMap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/raydar/form/PasswordFormInput.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mreact-bootstrap/esm/Feedback[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31mreact-hook-form[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/react-tables/dense/page.tsx[0m
+[90m  Line 27:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 28:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 29:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 30:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 31:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/react-tables/drag-drop/page.tsx[0m
+[90m  Line 2:[0m import "[31mRowdragdrop[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mColumndragdrop[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/react-tables/editable/page.tsx[0m
+[90m  Line 33:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 34:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 35:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 36:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 37:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 38:[0m import "[31msrc/assets/images/profile/user-6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/react-tables/empty/page.tsx[0m
+[90m  Line 26:[0m import "[31msrc/assets/images/svgs/no-data.webp[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/react-tables/filter/FilterTableData.ts[0m
+[90m  Line 1:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/react-tables/pagination/PaginationData.ts[0m
+[90m  Line 1:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/profile/user-6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/react-tables/pagination/page.tsx[0m
+[90m  Line 23:[0m import "[31mPaginationData[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/components/shared/CodeDialog.tsx[0m
+[90m  Line 4:[0m import "[31mreact-syntax-highlighter/dist/esm/styles/hljs[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/tables/Table1.tsx[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 24:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 25:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 26:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 27:[0m import "[31msrc/assets/images/profile/user-6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/tables/Table2.tsx[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 24:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 25:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 26:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 27:[0m import "[31msrc/assets/images/profile/user-6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/tables/Table3.tsx[0m
+[90m  Line 21:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 24:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 25:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 26:[0m import "[31msrc/assets/images/profile/user-6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/tables/Table4.tsx[0m
+[90m  Line 21:[0m import "[31msrc/assets/images/blog/blog-img1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/blog/blog-img2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31msrc/assets/images/blog/blog-img3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 24:[0m import "[31msrc/assets/images/blog/blog-img4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 25:[0m import "[31msrc/assets/images/blog/blog-img5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/tables/code/BasicTableCode.tsx[0m
+[90m  Line 26:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 27:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 28:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 29:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 30:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 31:[0m import "[31msrc/assets/images/profile/user-6.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/tables/tableData.ts[0m
+[90m  Line 1:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/templates/TemplatePreviewDialog.tsx[0m
+[90m  Line 184:[0m import "[31mag-grid-community/styles/ag-grid.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 185:[0m import "[31mag-grid-community/styles/ag-theme-alpine.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/terminal/JITTerminal.tsx[0m
+[90m  Line 30:[0m import "[31mxterm/css/xterm.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/banners/Banner1.tsx[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/backgrounds/login-bg.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/banners/Banner2.tsx[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/backgrounds/gold.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/banners/Banner3.tsx[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/banners/Banner4.tsx[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/backgrounds/maintenance.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/banners/Banner5.tsx[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/products/empty-shopping-cart.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/cards/ComplexCard.tsx[0m
+[90m  Line 19:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 20:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 21:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/blog/blog-img1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31msrc/assets/images/blog/blog-img2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 24:[0m import "[31msrc/assets/images/blog/blog-img3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/cards/EcommerceCard.tsx[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/products/s4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/products/s5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/products/s7.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/products/s11.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/cards/FollowerCard.tsx[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/cards/FriendCard.tsx[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/cards/GiftCard.tsx[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/products/s1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/products/s2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/cards/MusicCard.tsx[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/blog/blog-img5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/blog/blog-img4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/blog/blog-img3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/cards/ProfileCard.tsx[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 13:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 14:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/components/widgets/cards/code/EcommerceCardCode.tsx[0m
+[90m  Line 12:[0m import "[31mnext/image[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/context/CustomizerContext.tsx[0m
+[90m  Line 3:[0m import "[31mconfig[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/data/orthodoxRoutesData.ts[0m
+[90m  Line 62:[0m import "[31m], description: [0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/hooks/useFilteredMenuItems.ts[0m
+[90m  Line 4:[0m import "[31museDynamicMenuPermissions[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/layouts/full/shared/logo/Logo.tsx[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/logos/dark-logo.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/logos/dark-rtl-logo.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/logos/light-logo.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 15:[0m import "[31msrc/assets/images/logos/light-logo-rtl.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/layouts/full/vertical/header/Cart.tsx[0m
+[90m  Line 8:[0m import "[31mCartItem[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/layouts/full/vertical/header/CartItem.tsx[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/products/empty-shopping-cart.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/layouts/full/vertical/header/Header.tsx[0m
+[90m  Line 7:[0m import "[31mNotification[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 8:[0m import "[31mProfile[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 9:[0m import "[31mSearch[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 10:[0m import "[31mLanguage[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 11:[0m import "[31mNavigation[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 12:[0m import "[31mMobileRightSidebar[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/layouts/full/vertical/header/Language.tsx[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/flag/icon-flag-us.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/flag/icon-flag-gr.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/flag/icon-flag-ro.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/flag/icon-flag-ru.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/layouts/full/vertical/header/MobileRightSidebar.tsx[0m
+[90m  Line 26:[0m import "[31mAppLinks[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 27:[0m import "[31mQuickLinks[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/layouts/full/vertical/header/Navigation.tsx[0m
+[90m  Line 5:[0m import "[31mAppLinks[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 6:[0m import "[31mQuickLinks[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/layouts/full/vertical/header/Profile.tsx[0m
+[90m  Line 21:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/layouts/full/vertical/header/data.ts[0m
+[90m  Line 1:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31msrc/assets/images/svgs/icon-account.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/svgs/icon-inbox.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/svgs/icon-tasks.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/svgs/icon-dd-chat.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/svgs/icon-dd-cart.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/svgs/icon-dd-invoice.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 13:[0m import "[31msrc/assets/images/svgs/icon-dd-date.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 14:[0m import "[31msrc/assets/images/svgs/icon-dd-mobile.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 15:[0m import "[31msrc/assets/images/svgs/icon-dd-lifebuoy.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 16:[0m import "[31msrc/assets/images/svgs/icon-dd-message-box.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 17:[0m import "[31msrc/assets/images/svgs/icon-dd-application.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/layouts/full/vertical/sidebar/Sidebar.tsx[0m
+[90m  Line 2:[0m import "[31mSidebarItems[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/layouts/full/vertical/sidebar/SidebarProfile/Profile.tsx[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/main.tsx[0m
+[90m  Line 5:[0m import "[31mreact-dom/client[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31mbootstrap/dist/css/bootstrap.min.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/modules/OMLearn/OMLearn.tsx[0m
+[90m  Line 4:[0m import "[31mOMLearnDashboard[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 5:[0m import "[31mQuestionnaireRunner[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/modules/omai-logger/Demo.tsx[0m
+[90m  Line 2:[0m import "[31mOMAIUltimateLogger[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mSimpleLogViewer[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 81:[0m import "[31m../../components/OMAI/Logger/Demo[0m"
+[90m    Error: File or directory not found[0m
+[33m
+Broken imports in: src/modules/omai-logger/OMAIUltimateLogger.tsx[0m
+[90m  Line 6:[0m import "[31mHistoricalLogViewer[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/modules/settings/AdminSettings.tsx[0m
+[90m  Line 38:[0m import "[31mBackupSettings[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 39:[0m import "[31mContentSettings[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 40:[0m import "[31mServiceManagement[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/modules/settings/ContentSettings.tsx[0m
+[90m  Line 36:[0m import "[31mImageGridExtractor[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/omai/knowledge/fileToKnowledge.ts[0m
+[90m  Line 1:[0m import "[31mfs/promises[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31mpath[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/omai/knowledge/knowledgeGraph.ts[0m
+[90m  Line 1:[0m import "[31mfs/promises[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31mpath[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/omai/knowledge/knowledgeIndexer.ts[0m
+[90m  Line 1:[0m import "[31mfs/promises[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31mpath[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/omai/knowledge/queryEngine.ts[0m
+[90m  Line 1:[0m import "[31mfs/promises[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 2:[0m import "[31mpath[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/pages/AddChurchPage.tsx[0m
+[90m  Line 26:[0m import "[31mnotistack[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/pages/ChurchManagement/ChurchManagement.tsx[0m
+[90m  Line 3:[0m import "[31mag-grid-community/styles/ag-grid.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 4:[0m import "[31mag-grid-community/styles/ag-theme-alpine.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31m../../hooks/useAuth[0m"
+[90m    Error: File or directory not found[0m
+[33m
+Broken imports in: src/pages/ChurchManagement/EditChurchModal.tsx[0m
+[90m  Line 5:[0m import "[31mreact-tabs[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 6:[0m import "[31mreact-tabs/style/react-tabs.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/pages/omb/CodePreviewModal.tsx[0m
+[90m  Line 18:[0m import "[31mreact-syntax-highlighter/dist/esm/styles/prism[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 126:[0m require "[31mexpress[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/pages/omb/OMBEditor.tsx[0m
+[90m  Line 12:[0m import "[31mComponentPalette[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 13:[0m import "[31mComponentPreview[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 14:[0m import "[31mMetadataForm[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 15:[0m import "[31mPluginResultsPanel[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 16:[0m import "[31mComponentAgentPanel[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 17:[0m import "[31mCodePreviewModal[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/pages/omb/editor.tsx[0m
+[90m  Line 3:[0m import "[31mOMBEditor[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/pages/sandbox/component-library.tsx[0m
+[90m  Line 381:[0m import "[31m@om/components/ui/forms[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 382:[0m import "[31m@om/components/features/auth[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 383:[0m import "[31m@om/components/ui/theme[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 386:[0m import "[31m@om/components/ui[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 387:[0m import "[31m@om/components/features[0m"
+[90m    Error: Scoped package not installed[0m
+[90m  Line 390:[0m import "[31mreact-hook-form[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/records/CertificatePreviewer.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mreact-icons/fa[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/records/DeleteConfirmationModal.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mreact-icons/fa[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/records/ImportModal.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/records/RecordFilters.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mreact-icons/fa[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/records/RecordFormModal.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 5:[0m import "[31mreact-icons/fa[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/records/RecordHeader.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mreact-icons/fa[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 6:[0m import "[31m@react-pdf/renderer[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/records/RecordHistoryModal.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mreact-icons/fa[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/records/RecordManager.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 4:[0m import "[31mreact-toastify/dist/ReactToastify.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 7:[0m import "[31mRecordHeader[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 9:[0m import "[31mRecordFilters[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 10:[0m import "[31mRecordTable[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 11:[0m import "[31mRecordFormModal[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 12:[0m import "[31mRecordHistoryModal[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 13:[0m import "[31mCertificatePreviewer[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 14:[0m import "[31mImportModal[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 15:[0m import "[31mDeleteConfirmationModal[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 16:[0m import "[31mRecordPagination[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/records/RecordPagination.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/records/RecordSearch.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 3:[0m import "[31mreact-icons/fa[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/records/RecordTable.tsx[0m
+[90m  Line 2:[0m import "[31mreact-bootstrap[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/records/api.js[0m
+[90m  Line 5:[0m import "[31m@/helpers/httpClient[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/services/logsService.ts[0m
+[90m  Line 6:[0m import "[31mapiClient[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/theme/Theme.tsx[0m
+[90m  Line 9:[0m import "[31mDarkThemeColors[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 10:[0m import "[31mLightThemeColors[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/utils/formatTimestamp.ts[0m
+[90m  Line 2:[0m import "[31mdayjs/plugin/relativeTime[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/utils/generateDummyRecords.ts[0m
+[90m  Line 4:[0m import "[31m@faker-js/faker[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/utils/logger.ts[0m
+[90m  Line 188:[0m import "[31m@/utils/logger[0m"
+[90m    Error: Scoped package not installed[0m
+[33m
+Broken imports in: src/views/admin/AccessControlDashboard.tsx[0m
+[90m  Line 28:[0m import "[31mSessionManagement[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/admin/tools/PageEditor.tsx[0m
+[90m  Line 49:[0m import "[31mreact-quill/dist/quill.snow.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/apps/calendar/BigCalendar.tsx[0m
+[90m  Line 19:[0m import "[31mreact-big-calendar/lib/css/react-big-calendar.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/apps/calendar/LiturgicalCalendar.tsx[0m
+[90m  Line 30:[0m import "[31mreact-big-calendar/lib/css/react-big-calendar.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/apps/church-management/ChurchForm.tsx[0m
+[90m  Line 65:[0m import "[31msrc/api/admin.api[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 88:[0m import "[31mUserManagementDialog[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/apps/church-management/ChurchList.tsx[0m
+[90m  Line 54:[0m import "[31msrc/api/admin.api[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/apps/cms/ContentRenderer.tsx[0m
+[90m  Line 19:[0m import "[31mDynamicComponentRenderer[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/apps/cms/EnhancedPageEditor.tsx[0m
+[90m  Line 47:[0m import "[31mDynamicComponentRenderer[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 48:[0m import "[31mContentRenderer[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/apps/cms/EnhancedPageEditorTest.tsx[0m
+[90m  Line 3:[0m import "[31mEnhancedPageEditor[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/apps/cms/PageEditor.tsx[0m
+[90m  Line 32:[0m import "[31mreact-quill/dist/quill.snow.css[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/apps/cms/SimplePageEditor.tsx[0m
+[90m  Line 47:[0m import "[31mDynamicComponentRenderer[0m"
+[90m    Error: Package not installed in node_modules[0m
+[90m  Line 48:[0m import "[31mContentRenderer[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/apps/cms/SimplePageEditorTest.tsx[0m
+[90m  Line 3:[0m import "[31mSimplePageEditor[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/apps/email/Email.tsx[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/breadcrumb/emailSv.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/authentication/Error.tsx[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/backgrounds/orthodox-404.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/authentication/Maintenance.tsx[0m
+[90m  Line 3:[0m import "[31msrc/assets/images/backgrounds/maintenance.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/authentication/auth1/ForgotPassword.tsx[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/backgrounds/login-bg.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/authentication/auth1/Login.tsx[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/backgrounds/login-bg.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/authentication/auth1/Register.tsx[0m
+[90m  Line 8:[0m import "[31msrc/assets/images/backgrounds/login-bg.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/authentication/auth1/TwoSteps.tsx[0m
+[90m  Line 7:[0m import "[31msrc/assets/images/backgrounds/login-bg.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/authentication/authForms/AuthLogin.tsx[0m
+[90m  Line 26:[0m import "[31mAuthSocialButtons[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/authentication/authForms/AuthRegister.tsx[0m
+[90m  Line 10:[0m import "[31mAuthSocialButtons[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/authentication/authForms/AuthSocialButtons.tsx[0m
+[90m  Line 4:[0m import "[31msrc/assets/images/svgs/google-icon.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 5:[0m import "[31msrc/assets/images/svgs/facebook-icon.svg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/forms/from-tiptap/TiptapEditor.tsx[0m
+[90m  Line 8:[0m import "[31mTiptapEdit[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/orthodox-calendar/OrthodoxCalendar.tsx[0m
+[90m  Line 2:[0m import "[31mreact-icons/fa[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/pages/pricing/Pricing.tsx[0m
+[90m  Line 25:[0m import "[31msrc/assets/images/backgrounds/silver.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 26:[0m import "[31msrc/assets/images/backgrounds/bronze.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 27:[0m import "[31msrc/assets/images/backgrounds/gold.png[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/records/ChurchRecordsPage.tsx[0m
+[90m  Line 31:[0m import "[31mSSPPOCRecordsPage[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/records/UnifiedRecordsPage.tsx[0m
+[90m  Line 18:[0m import "[31mSSPPOCRecordsPage[0m"
+[90m    Error: Package not installed in node_modules[0m
+[33m
+Broken imports in: src/views/tables/CollapsibleTable.tsx[0m
+[90m  Line 28:[0m import "[31msrc/assets/images/products/s1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 29:[0m import "[31msrc/assets/images/products/s2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 30:[0m import "[31msrc/assets/images/products/s3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 31:[0m import "[31msrc/assets/images/products/s4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/tables/FixedHeaderTable.tsx[0m
+[90m  Line 22:[0m import "[31msrc/assets/images/products/s1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 23:[0m import "[31msrc/assets/images/products/s2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 24:[0m import "[31msrc/assets/images/products/s3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 25:[0m import "[31msrc/assets/images/products/s4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/tables/PaginationTable.tsx[0m
+[90m  Line 31:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 32:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 33:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 34:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 35:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/ui-components/MuiAvatar.tsx[0m
+[90m  Line 9:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/profile/user-3.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/profile/user-4.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 13:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[33m
+Broken imports in: src/views/ui-components/MuiChip.tsx[0m
+[90m  Line 10:[0m import "[31msrc/assets/images/profile/user-1.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 11:[0m import "[31msrc/assets/images/profile/user-2.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[90m  Line 12:[0m import "[31msrc/assets/images/profile/user-5.jpg[0m"
+[90m    Error: Module not found (not in node_modules or src)[0m
+[31m
+✗ Fix 729 import errors before building.
+[0m
