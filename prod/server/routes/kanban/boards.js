@@ -22,7 +22,7 @@ router.get('/', requireAuth, async (req, res) => {
       FROM kanban_boards b
       LEFT JOIN kanban_board_members bm ON b.id = bm.board_id AND bm.user_id = ?
       LEFT JOIN kanban_tasks t ON b.id = t.board_id AND t.completed_at IS NULL
-      LEFT JOIN orthodoxmetrics_auth_db.users u ON b.created_by = u.id
+      LEFT JOIN orthodoxmetrics_db.users u ON b.created_by = u.id
       WHERE (b.created_by = ? OR bm.user_id = ?) AND b.is_archived = 0
       GROUP BY b.id
       ORDER BY b.updated_at DESC
@@ -79,8 +79,8 @@ router.get('/:id', requireAuth, async (req, res) => {
         u1.email as assigned_to_email,
         COALESCE(u2.full_name, CONCAT(u2.first_name, ' ', u2.last_name), u2.email) as created_by_name
       FROM kanban_tasks t
-      LEFT JOIN orthodoxmetrics_auth_db.users u1 ON t.assigned_to = u1.id
-      LEFT JOIN orthodoxmetrics_auth_db.users u2 ON t.created_by = u2.id
+      LEFT JOIN orthodoxmetrics_db.users u1 ON t.assigned_to = u1.id
+      LEFT JOIN orthodoxmetrics_db.users u2 ON t.created_by = u2.id
       WHERE t.board_id = ?
       ORDER BY t.column_id, t.position
     `, [boardId]);
@@ -105,7 +105,7 @@ router.get('/:id', requireAuth, async (req, res) => {
         COALESCE(u.full_name, CONCAT(u.first_name, ' ', u.last_name), u.email) as name,
         u.email
       FROM kanban_board_members bm
-      JOIN orthodoxmetrics_auth_db.users u ON bm.user_id = u.id
+      JOIN orthodoxmetrics_db.users u ON bm.user_id = u.id
       WHERE bm.board_id = ?
     `, [boardId]);
     
@@ -315,7 +315,7 @@ router.get('/:id/export', requireAuth, async (req, res) => {
                COALESCE(u.full_name, CONCAT(u.first_name, ' ', u.last_name), u.email) as assigned_to_name,
                t.estimated_hours, t.actual_hours, t.created_at, t.completed_at
         FROM kanban_tasks t
-        LEFT JOIN orthodoxmetrics_auth_db.users u ON t.assigned_to = u.id
+        LEFT JOIN orthodoxmetrics_db.users u ON t.assigned_to = u.id
         WHERE t.column_id = ?
         ORDER BY t.position
       `, [column.id]);
@@ -417,7 +417,7 @@ router.get('/export/all', requireAuth, async (req, res) => {
                    COALESCE(u.full_name, CONCAT(u.first_name, ' ', u.last_name), u.email) as assigned_to_name,
                    t.estimated_hours, t.actual_hours, t.created_at, t.completed_at
             FROM kanban_tasks t
-            LEFT JOIN orthodoxmetrics_auth_db.users u ON t.assigned_to = u.id
+            LEFT JOIN orthodoxmetrics_db.users u ON t.assigned_to = u.id
             WHERE t.column_id = ?
             ORDER BY t.position
           `, [column.id]);

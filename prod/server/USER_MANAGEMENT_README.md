@@ -101,7 +101,7 @@ node scripts/user-management-direct.js view admin@orthodoxmetrics.com
 
 ## Database Information
 
-The scripts automatically connect to the `orthodoxmetrics_auth_db` database where user information is stored. The database schema includes:
+The scripts automatically connect to the `orthodoxmetrics_db` database where user information is stored. The database schema includes:
 
 - **users table**: Contains user accounts with email, password_hash, full_name, role_id, etc.
 - **roles table**: Contains role definitions and descriptions

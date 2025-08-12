@@ -15,7 +15,7 @@ async function testAuth() {
     console.log('✅ Database connection successful');
     
     // Check if admin user exists
-    const [users] = await getAppPool().query('SELECT id, email, username, role, is_active, password_hash FROM orthodoxmetrics_auth_db.users WHERE email = ?', ['admin@test.com']);
+    const [users] = await getAppPool().query('SELECT id, email, username, role, is_active, password_hash FROM orthodoxmetrics_db.users WHERE email = ?', ['admin@test.com']);
     
     if (users.length === 0) {
       console.log('❌ Admin user not found');

@@ -68,7 +68,7 @@ class RoleMigrationRunner {
 
     // Check current role column structure
     const [columns] = await this.connection.execute(
-      "SHOW COLUMNS FROM orthodoxmetrics_auth_db.users LIKE 'role'"
+      "SHOW COLUMNS FROM orthodoxmetrics_db.users LIKE 'role'"
     );
     
     if (columns.length === 0) {
@@ -114,7 +114,7 @@ class RoleMigrationRunner {
     // Get current role distribution
     const [currentRoles] = await this.connection.execute(`
       SELECT role, COUNT(*) as count 
-      FROM orthodoxmetrics_auth_db.users 
+      FROM orthodoxmetrics_db.users 
       WHERE role IS NOT NULL 
       GROUP BY role 
       ORDER BY count DESC
@@ -212,7 +212,7 @@ class RoleMigrationRunner {
 
       // Restore original roles from backup
       await this.connection.execute(`
-        UPDATE orthodoxmetrics_auth_db.users u
+        UPDATE orthodoxmetrics_db.users u
         JOIN role_migration_backup rmb ON u.id = rmb.user_id
         SET u.original_role = rmb.original_role
       `);
@@ -284,7 +284,7 @@ class RoleMigrationRunner {
       // Show final role distribution
       const [finalRoles] = await this.connection.execute(`
         SELECT role, COUNT(*) as count 
-        FROM orthodoxmetrics_auth_db.users 
+        FROM orthodoxmetrics_db.users 
         GROUP BY role 
         ORDER BY 
           CASE role

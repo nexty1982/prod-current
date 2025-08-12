@@ -28,7 +28,7 @@ exports.getChurchOverview = async (req, res) => {
       const [[info]] = await db.query('SELECT * FROM church_info WHERE church_id = ?', [churchId]);
       
       // Admin users
-      const [users] = await db.query("SELECT id, name, email, role FROM orthodoxmetrics_auth_db.users WHERE role = 'admin' OR role = 'super_admin'");
+      const [users] = await db.query("SELECT id, name, email, role FROM orthodoxmetrics_db.users WHERE role = 'admin' OR role = 'super_admin'");
       
       // Record counts
       const [[baptismCount]] = await db.query('SELECT COUNT(*) as count FROM baptism_records WHERE church_id = ?', [churchId]);
@@ -104,14 +104,14 @@ exports.resetUserPassword = async (req, res) => {
     const db = await getChurchDbConnection(rows[0].database_name);
 
     // Step 3: Verify user exists in church database
-    const [userCheck] = await db.query('SELECT id, name, email FROM orthodoxmetrics_auth_db.users WHERE id = ?', [userId]);
+    const [userCheck] = await db.query('SELECT id, name, email FROM orthodoxmetrics_db.users WHERE id = ?', [userId]);
     if (!userCheck.length) {
       return res.status(404).json({ error: 'User not found in church database' });
     }
 
     // Step 4: Hash new password and update
     const hash = await bcrypt.hash(newPassword, 10);
-    await db.query('UPDATE orthodoxmetrics_auth_db.users SET password = ? WHERE id = ?', [hash, userId]);
+    await db.query('UPDATE orthodoxmetrics_db.users SET password = ? WHERE id = ?', [hash, userId]);
 
     // Step 5: Log the password reset activity
     try {
@@ -229,7 +229,7 @@ exports.listAssignedUsers = async (req, res) => {
   try {
     const churchId = req.params.id;
     const [users] = await promisePool.query(
-      `SELECT u.id, u.name, u.email, cu.role FROM church_users cu JOIN orthodoxmetrics_auth_db.users u ON cu.user_id = u.id WHERE cu.church_id = ?`,
+      `SELECT u.id, u.name, u.email, cu.role FROM church_users cu JOIN orthodoxmetrics_db.users u ON cu.user_id = u.id WHERE cu.church_id = ?`,
       [churchId]
     );
     res.json({ users });

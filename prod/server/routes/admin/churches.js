@@ -270,7 +270,7 @@ router.get('/', async (req, res) => {
         // Test if connection is valid and database exists
         await churchDb.execute('SELECT 1');
         
-        const [userCount] = await churchDb.execute('SELECT COUNT(*) as count FROM orthodoxmetrics_auth_db.users');
+        const [userCount] = await churchDb.execute('SELECT COUNT(*) as count FROM orthodoxmetrics_db.users');
         church.user_count = userCount[0].count;
         
         const [recordCounts] = await churchDb.execute(`
@@ -639,7 +639,7 @@ router.post('/:id/remove-all-users', async (req, res) => {
   try {
     const churchId = parseInt(req.params.id);
     // Set church_id to NULL for all users assigned to this church
-    await getAppPool().query('UPDATE orthodoxmetrics_auth_db.users SET church_id = NULL WHERE church_id = ?', [churchId]);
+    await getAppPool().query('UPDATE orthodoxmetrics_db.users SET church_id = NULL WHERE church_id = ?', [churchId]);
     res.json({ success: true, message: 'All users removed from church.' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to remove users from church.', error: error.message });

@@ -246,7 +246,7 @@ const getAuditLogs = async (req, res) => {
     const sql = `
       SELECT al.*, u.username, u.role
       FROM audit_log al
-      LEFT JOIN orthodoxmetrics_auth_db.users u ON al.user_id = u.id
+      LEFT JOIN orthodoxmetrics_db.users u ON al.user_id = u.id
       ${whereClause}
       ORDER BY al.created_at DESC
       LIMIT ? OFFSET ?

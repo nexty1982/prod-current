@@ -43,7 +43,7 @@ async function createTestUser() {
     // Check if user already exists
     console.log('🔍 Checking if user exists...');
     const [existingUsers] = await connection.execute(
-      'SELECT id FROM orthodoxmetrics_auth_db.users WHERE email = ?',
+      'SELECT id FROM orthodoxmetrics_db.users WHERE email = ?',
       [testUser.email]
     );
     
@@ -57,7 +57,7 @@ async function createTestUser() {
     // Create test user
     console.log('👤 Creating test user...');
     const [result] = await connection.execute(
-      `INSERT INTO orthodoxmetrics_auth_db.users (email, password_hash, first_name, last_name, role, preferred_language, is_active, email_verified, created_at, updated_at) 
+      `INSERT INTO orthodoxmetrics_db.users (email, password_hash, first_name, last_name, role, preferred_language, is_active, email_verified, created_at, updated_at) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         testUser.email,

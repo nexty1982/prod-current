@@ -101,7 +101,7 @@ class ChurchProvisioner {
       
       // 6. Update admin user
       await connection.execute(`
-        UPDATE orthodoxmetrics_auth_db.users SET 
+        UPDATE orthodoxmetrics_db.users SET 
           name = ?,
           email = ?,
           password = ?

@@ -54,7 +54,7 @@ function generateTestEmail(adminEmail, siteSlug) {
 async function createUserAccount(connection, userData) {
   try {
     const [result] = await getAppPool().query(`
-      INSERT INTO orthodoxmetrics_auth_db.users (
+      INSERT INTO orthodoxmetrics_db.users (
         username, email, password_hash, role, church_id, 
         first_name, last_name, is_active, created_at,
         email_verified, last_login, account_type
@@ -253,13 +253,13 @@ async function resetUserPassword(userId, newPassword = null) {
 
     // Update user password
     await getAppPool().query(
-      'UPDATE orthodoxmetrics_auth_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      'UPDATE orthodoxmetrics_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [passwordHash, userId]
     );
 
     // Get user info for logging
     const [userRows] = await getAppPool().query(
-      'SELECT username, email FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+      'SELECT username, email FROM orthodoxmetrics_db.users WHERE id = ?',
       [userId]
     );
 

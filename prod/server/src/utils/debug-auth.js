@@ -23,7 +23,7 @@ async function debugAuth() {
     
     // Check current user
     console.log('\n📋 Checking existing users...');
-    const [users] = await getAppPool().query('SELECT id, email, password_hash, first_name, last_name, role, is_active FROM orthodoxmetrics_auth_db.users WHERE email = ?', ['admin@orthodoxmetrics_db.com']);
+    const [users] = await getAppPool().query('SELECT id, email, password_hash, first_name, last_name, role, is_active FROM orthodoxmetrics_db.users WHERE email = ?', ['admin@orthodoxmetrics_db.com']);
     
     if (users.length > 0) {
       const user = users[0];
@@ -49,7 +49,7 @@ async function debugAuth() {
         console.log('New hash:', newHash);
         
         // Update with new hash
-        await getAppPool().query('UPDATE orthodoxmetrics_auth_db.users SET password_hash = ? WHERE id = ?', [newHash, user.id]);
+        await getAppPool().query('UPDATE orthodoxmetrics_db.users SET password_hash = ? WHERE id = ?', [newHash, user.id]);
         console.log('✅ Password updated');
         
         // Test again
@@ -70,7 +70,7 @@ async function debugAuth() {
       const password_hash = await bcrypt.hash(testUser.password, 10);
       
       const [result] = await getAppPool().query(
-        `INSERT INTO orthodoxmetrics_auth_db.users (email, password_hash, first_name, last_name, role, preferred_language, is_active, email_verified, created_at, updated_at) 
+        `INSERT INTO orthodoxmetrics_db.users (email, password_hash, first_name, last_name, role, preferred_language, is_active, email_verified, created_at, updated_at) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
         [
           testUser.email,

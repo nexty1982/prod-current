@@ -51,7 +51,7 @@ router.get('/search', requireAuth, async (req, res) => {
                     WHEN f.addressee_id = ? THEN 'received'
                     ELSE NULL
                 END as friendship_direction
-            FROM orthodoxmetrics_auth_db.users u
+            FROM orthodoxmetrics_db.users u
             LEFT JOIN user_profiles up ON up.user_id = u.id
             LEFT JOIN friendships f ON (
                 (f.requester_id = ? AND f.addressee_id = u.id) OR 
@@ -80,7 +80,7 @@ router.get('/search', requireAuth, async (req, res) => {
         // Get total count
         const [countResult] = await promisePool.query(`
             SELECT COUNT(*) as total
-            FROM orthodoxmetrics_auth_db.users u
+            FROM orthodoxmetrics_db.users u
             LEFT JOIN user_profiles up ON up.user_id = u.id
             WHERE u.id != ? 
             AND u.is_active = 1
@@ -140,7 +140,7 @@ router.post('/request/:userId', requireAuth, async (req, res) => {
 
         // Check if target user exists and is active
         const [targetUser] = await promisePool.query(
-            'SELECT id, first_name, last_name FROM orthodoxmetrics_auth_db.users WHERE id = ? AND is_active = 1',
+            'SELECT id, first_name, last_name FROM orthodoxmetrics_db.users WHERE id = ? AND is_active = 1',
             [addresseeId]
         );
 
@@ -231,7 +231,7 @@ router.get('/requests', requireAuth, async (req, res) => {
                     up.is_online,
                     up.last_seen
                 FROM friendships f
-                JOIN orthodoxmetrics_auth_db.users u ON u.id = f.addressee_id
+                JOIN orthodoxmetrics_db.users u ON u.id = f.addressee_id
                 LEFT JOIN user_profiles up ON up.user_id = u.id
                 WHERE f.requester_id = ?
             `;
@@ -265,7 +265,7 @@ router.get('/requests', requireAuth, async (req, res) => {
                     up.is_online,
                     up.last_seen
                 FROM friendships f
-                JOIN orthodoxmetrics_auth_db.users u ON u.id = f.requester_id
+                JOIN orthodoxmetrics_db.users u ON u.id = f.requester_id
                 LEFT JOIN user_profiles up ON up.user_id = u.id
                 WHERE f.addressee_id = ?
             `;

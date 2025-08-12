@@ -207,7 +207,7 @@ const validateUserChurchBinding = async (userId, churchId) => {
     try {
         // Check if user exists in the church's database
         const [users] = await getAppPool().query(
-            'SELECT id, church_id FROM orthodoxmetrics_auth_db.users WHERE id = ? AND church_id = ?',
+            'SELECT id, church_id FROM orthodoxmetrics_db.users WHERE id = ? AND church_id = ?',
             [userId, churchId]
         );
 

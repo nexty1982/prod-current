@@ -155,7 +155,7 @@ router.post('/menu-audit', requireRole(['super_admin']), async (req, res) => {
     });
     
     const [users] = await getAppPool().query(
-      'SELECT id, email, first_name, last_name, role FROM orthodoxmetrics_auth_db.users WHERE is_active = 1'
+      'SELECT id, email, first_name, last_name, role FROM orthodoxmetrics_db.users WHERE is_active = 1'
     );
     
     await connection.end();
@@ -225,7 +225,7 @@ router.post('/user-roles', requireRole(['super_admin']), async (req, res) => {
         u.role,
         u.created_at,
         u.last_login
-      FROM orthodoxmetrics_auth_db.users u 
+      FROM orthodoxmetrics_db.users u 
       WHERE u.is_active = 1
       ORDER BY u.created_at DESC
     `);

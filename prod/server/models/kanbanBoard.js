@@ -47,7 +47,7 @@ class KanbanBoard {
       FROM kanban_boards b
       LEFT JOIN kanban_board_members bm ON b.id = bm.board_id AND bm.user_id = ?
       LEFT JOIN kanban_tasks t ON b.id = t.board_id
-      LEFT JOIN orthodoxmetrics_auth_db.users u ON b.created_by = u.id
+      LEFT JOIN orthodoxmetrics_db.users u ON b.created_by = u.id
       WHERE (bm.user_id = ? OR b.created_by = ?) ${archivedCondition}
       GROUP BY b.id, b.name, b.description, b.created_by, b.created_at, b.updated_at, 
                b.is_archived, b.board_color, bm.role, u.username
@@ -114,8 +114,8 @@ class KanbanBoard {
         u_assigned.email as assigned_to_email,
         u_created.username as created_by_name
       FROM kanban_tasks t
-      LEFT JOIN orthodoxmetrics_auth_db.users u_assigned ON t.assigned_to = u_assigned.id
-      LEFT JOIN orthodoxmetrics_auth_db.users u_created ON t.created_by = u_created.id
+      LEFT JOIN orthodoxmetrics_db.users u_assigned ON t.assigned_to = u_assigned.id
+      LEFT JOIN orthodoxmetrics_db.users u_created ON t.created_by = u_created.id
       WHERE t.board_id = ?
       ORDER BY t.position ASC
     `, [boardId]);
@@ -129,7 +129,7 @@ class KanbanBoard {
         u.username,
         u.email
       FROM kanban_board_members bm
-      JOIN orthodoxmetrics_auth_db.users u ON bm.user_id = u.id
+      JOIN orthodoxmetrics_db.users u ON bm.user_id = u.id
       WHERE bm.board_id = ?
       ORDER BY bm.joined_at ASC
     `, [boardId]);

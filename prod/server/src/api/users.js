@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
     // either select * or list every column explicitly — NO '...' placeholders!
     const [rows] = await getAppPool().query(`
       SELECT *
-      FROM orthodoxmetrics_auth_db.users
+      FROM orthodoxmetrics_db.users
     `);
 
     return res.json({ users: rows });

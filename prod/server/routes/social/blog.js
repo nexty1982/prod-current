@@ -111,7 +111,7 @@ router.get('/posts', async (req, res) => {
                 (SELECT COUNT(*) FROM social_reactions sr WHERE sr.target_type = 'blog_post' AND sr.target_id = bp.id) as reaction_count,
                 (SELECT COUNT(*) FROM blog_comments bc WHERE bc.post_id = bp.id) as comment_count
             FROM blog_posts bp
-            JOIN orthodoxmetrics_auth_db.users u ON u.id = bp.user_id
+            JOIN orthodoxmetrics_db.users u ON u.id = bp.user_id
             LEFT JOIN user_profiles up ON up.user_id = bp.user_id
             WHERE 1=1
         `;
@@ -225,7 +225,7 @@ router.get('/posts/:id', async (req, res) => {
                 up.bio,
                 (SELECT COUNT(*) FROM social_reactions sr WHERE sr.target_type = 'blog_post' AND sr.target_id = bp.id) as reaction_count
             FROM blog_posts bp
-            JOIN orthodoxmetrics_auth_db.users u ON u.id = bp.user_id
+            JOIN orthodoxmetrics_db.users u ON u.id = bp.user_id
             LEFT JOIN user_profiles up ON up.user_id = bp.user_id
             WHERE bp.id = ?
         `, [id]);
@@ -298,7 +298,7 @@ router.get('/posts/:id', async (req, res) => {
                 up.display_name,
                 up.profile_image_url
             FROM blog_comments bc
-            JOIN orthodoxmetrics_auth_db.users u ON u.id = bc.user_id
+            JOIN orthodoxmetrics_db.users u ON u.id = bc.user_id
             LEFT JOIN user_profiles up ON up.user_id = bc.user_id
             WHERE bc.post_id = ? AND bc.is_approved = 1
             ORDER BY bc.created_at ASC

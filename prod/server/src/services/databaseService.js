@@ -38,7 +38,7 @@ async function getChurchRecordDatabase(userId) {
     try {
         const [result] = await getAppPool().query(`
             SELECT c.database_name 
-            FROM orthodoxmetrics_auth_db.users u 
+            FROM orthodoxmetrics_db.users u 
             JOIN churches c ON u.church_id = c.id 
             WHERE u.id = ?
         `, [userId]);

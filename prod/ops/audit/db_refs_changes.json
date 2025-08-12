@@ -1,0 +1,307 @@
+[
+  {
+    "file": "server/create-test-user.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/church-provisioner.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/utils/test-db.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/utils/test-auth.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/utils/generateCredentials.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/utils/fix-schema.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/utils/debug-auth.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/utils/create-test-user.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/utils/create-superadmin-prod.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/utils/check-test-user.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/utils/add-test-dev-user.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/utils/test-db.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/utils/test-auth.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/utils/generateCredentials.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/utils/fix-schema.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/utils/debug-auth.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/utils/create-test-user.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/utils/create-superadmin-prod.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/utils/check-test-user.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/utils/add-test-dev-user.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/services/websocketService.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/services/databaseService.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/middlewares/churchSecurity.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/middlewares/auditLogger.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/users.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/user.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/user-profile.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/survey.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/provision.js",
+    "matches": 4,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/permissions.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/notifications.js",
+    "matches": 6,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/notes.js",
+    "matches": 6,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/churchSetupWizard.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/blogs.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/adminSystem.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/src/api/admin.js",
+    "matches": 11,
+    "status": "updated"
+  },
+  {
+    "file": "server/services/websocketService.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/services/databaseService.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/scripts/validate_role_migration.js",
+    "matches": 4,
+    "status": "updated"
+  },
+  {
+    "file": "server/scripts/user-management-direct.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/scripts/test-auth.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/scripts/run_role_migration.js",
+    "matches": 4,
+    "status": "updated"
+  },
+  {
+    "file": "server/scripts/reset-user-password.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/social/notifications.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/social/friends.js",
+    "matches": 5,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/social/chat.js",
+    "matches": 5,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/social/blog.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/kanban/tasks_new.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/kanban/tasks.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/kanban/boards_new.js",
+    "matches": 4,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/kanban/boards.js",
+    "matches": 6,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/admin/users.js",
+    "matches": 17,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/admin/social-permissions.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/admin/churches.js",
+    "matches": 2,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/admin/church-users.js",
+    "matches": 15,
+    "status": "updated"
+  },
+  {
+    "file": "server/routes/admin/activity-logs.js",
+    "matches": 3,
+    "status": "updated"
+  },
+  {
+    "file": "server/models/kanbanTask.js",
+    "matches": 8,
+    "status": "updated"
+  },
+  {
+    "file": "server/models/kanbanBoard.js",
+    "matches": 4,
+    "status": "updated"
+  },
+  {
+    "file": "server/database/update-password.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/controllers/records.js",
+    "matches": 1,
+    "status": "updated"
+  },
+  {
+    "file": "server/controllers/churchAdminController.js",
+    "matches": 4,
+    "status": "updated"
+  }
+]

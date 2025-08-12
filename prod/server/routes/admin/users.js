@@ -24,7 +24,7 @@ router.get('/', requireRole(['super_admin', 'admin']), async (req, res) => {
         u.created_at,
         u.last_login,
         c.name as church_name
-      FROM orthodoxmetrics_auth_db.users u
+      FROM orthodoxmetrics_db.users u
       LEFT JOIN churches c ON u.church_id = c.id
       WHERE 1=1
     `;
@@ -60,7 +60,7 @@ router.get('/', requireRole(['super_admin', 'admin']), async (req, res) => {
     // Get total count for pagination
     let countQuery = `
       SELECT COUNT(*) as total
-      FROM orthodoxmetrics_auth_db.users u
+      FROM orthodoxmetrics_db.users u
       WHERE 1=1
     `;
     
@@ -109,7 +109,7 @@ router.post('/', requireRole(['super_admin', 'admin']), async (req, res) => {
     }
     
     // Check if user already exists
-    const existingUserQuery = `SELECT id FROM orthodoxmetrics_auth_db.users WHERE email = ?`;
+    const existingUserQuery = `SELECT id FROM orthodoxmetrics_db.users WHERE email = ?`;
     const existingUserResult = await DatabaseService.queryPlatform(existingUserQuery, [email]);
     const existingUserData = existingUserResult[0] || [];
     
@@ -128,7 +128,7 @@ router.post('/', requireRole(['super_admin', 'admin']), async (req, res) => {
     
     // Create user
     const createUserQuery = `
-      INSERT INTO orthodoxmetrics_auth_db.users (email, first_name, last_name, role, church_id, phone, preferred_language, password_hash, is_active, created_at)
+      INSERT INTO orthodoxmetrics_db.users (email, first_name, last_name, role, church_id, phone, preferred_language, password_hash, is_active, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())
     `;
     
@@ -187,7 +187,7 @@ router.patch('/:userId/reset-password', requireRole(['super_admin', 'admin']), a
     }
     
     // Check if user exists
-    const userQuery = `SELECT id, email FROM orthodoxmetrics_auth_db.users WHERE id = ?`;
+    const userQuery = `SELECT id, email FROM orthodoxmetrics_db.users WHERE id = ?`;
     const userResult = await DatabaseService.queryPlatform(userQuery, [userId]);
     const userData = userResult[0] || [];
     
@@ -207,7 +207,7 @@ router.patch('/:userId/reset-password', requireRole(['super_admin', 'admin']), a
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     
     // Update password
-    const updateQuery = `UPDATE orthodoxmetrics_auth_db.users SET password_hash = ?, updated_at = NOW() WHERE id = ?`;
+    const updateQuery = `UPDATE orthodoxmetrics_db.users SET password_hash = ?, updated_at = NOW() WHERE id = ?`;
     await DatabaseService.queryPlatform(updateQuery, [hashedPassword, userId]);
     
     console.log(`🔑 Password reset for user: ${user.email} by ${req.user?.email}`);
@@ -247,7 +247,7 @@ router.delete('/:id', requireRole(['super_admin', 'admin']), async (req, res) =>
     }
     
     // Check if user exists
-    const userQuery = `SELECT id, email, role FROM orthodoxmetrics_auth_db.users WHERE id = ?`;
+    const userQuery = `SELECT id, email, role FROM orthodoxmetrics_db.users WHERE id = ?`;
     const userResult = await DatabaseService.queryPlatform(userQuery, [id]);
     const userData = userResult[0] || [];
     
@@ -271,7 +271,7 @@ router.delete('/:id', requireRole(['super_admin', 'admin']), async (req, res) =>
     }
     
     // Delete user
-    const deleteQuery = `DELETE FROM orthodoxmetrics_auth_db.users WHERE id = ?`;
+    const deleteQuery = `DELETE FROM orthodoxmetrics_db.users WHERE id = ?`;
     const deleteResult = await DatabaseService.queryPlatform(deleteQuery, [id]);
     
     if (deleteResult[0].affectedRows === 0) {
@@ -310,7 +310,7 @@ router.post('/:userId/lockout', requireRole(['super_admin', 'admin']), async (re
     const lockoutReason = req.body.reason || 'Administrative action';
     
     // First check if user exists
-    const userQuery = `SELECT id, email, is_locked FROM orthodoxmetrics_auth_db.users WHERE id = ?`;
+    const userQuery = `SELECT id, email, is_locked FROM orthodoxmetrics_db.users WHERE id = ?`;
     const userResult = await DatabaseService.queryPlatform(userQuery, [userId]);
     const userData = userResult[0] || [];
     
@@ -333,7 +333,7 @@ router.post('/:userId/lockout', requireRole(['super_admin', 'admin']), async (re
     
     // Lockout the user
     const lockoutQuery = `
-      UPDATE orthodoxmetrics_auth_db.users 
+      UPDATE orthodoxmetrics_db.users 
       SET is_locked = 1, locked_at = NOW(), locked_by = ?, lockout_reason = ?
       WHERE id = ?
     `;
@@ -400,7 +400,7 @@ router.post('/:userId/unlock', requireRole(['super_admin', 'admin']), async (req
     const { userId } = req.params;
     
     // First check if user exists and is locked
-    const userQuery = `SELECT id, email, is_locked FROM orthodoxmetrics_auth_db.users WHERE id = ?`;
+    const userQuery = `SELECT id, email, is_locked FROM orthodoxmetrics_db.users WHERE id = ?`;
     const userResult = await DatabaseService.queryPlatform(userQuery, [userId]);
     const userData = userResult[0] || [];
     
@@ -423,7 +423,7 @@ router.post('/:userId/unlock', requireRole(['super_admin', 'admin']), async (req
     
     // Unlock the user
     const unlockQuery = `
-      UPDATE orthodoxmetrics_auth_db.users 
+      UPDATE orthodoxmetrics_db.users 
       SET is_locked = 0, locked_at = NULL, locked_by = NULL, lockout_reason = NULL
       WHERE id = ?
     `;
@@ -486,7 +486,7 @@ router.put('/:id/toggle-status', requireRole(['super_admin', 'admin']), async (r
     
     // Check if user exists and get current status
     console.log(`🔍 Looking up user with ID: ${id}`);
-    const userQuery = `SELECT id, email, is_active FROM orthodoxmetrics_auth_db.users WHERE id = ?`;
+    const userQuery = `SELECT id, email, is_active FROM orthodoxmetrics_db.users WHERE id = ?`;
     const userResult = await DatabaseService.queryPlatform(userQuery, [id]);
     const userData = userResult[0] || [];
     console.log(`📊 User query result:`, userData.length, 'users found');
@@ -507,7 +507,7 @@ router.put('/:id/toggle-status', requireRole(['super_admin', 'admin']), async (r
     console.log(`🔄 Toggling status: ${user.is_active} -> ${newStatus}`);
     
     // Update user status
-    const updateQuery = `UPDATE orthodoxmetrics_auth_db.users SET is_active = ? WHERE id = ?`;
+    const updateQuery = `UPDATE orthodoxmetrics_db.users SET is_active = ? WHERE id = ?`;
     console.log(`📝 Executing update query with newStatus: ${newStatus}, id: ${id}`);
     const updateResult = await DatabaseService.queryPlatform(updateQuery, [newStatus, id]);
     console.log(`📊 Update result:`, updateResult[0]);
@@ -561,7 +561,7 @@ router.put('/:id', requireRole(['super_admin', 'admin']), async (req, res) => {
     }
     
     // Check if user exists
-    const userQuery = `SELECT id, email, role FROM orthodoxmetrics_auth_db.users WHERE id = ?`;
+    const userQuery = `SELECT id, email, role FROM orthodoxmetrics_db.users WHERE id = ?`;
     const userResult = await DatabaseService.queryPlatform(userQuery, [id]);
     const userData = userResult[0] || [];
     
@@ -601,7 +601,7 @@ router.put('/:id', requireRole(['super_admin', 'admin']), async (req, res) => {
     values.push(id);
     
     const updateQuery = `
-      UPDATE orthodoxmetrics_auth_db.users 
+      UPDATE orthodoxmetrics_db.users 
       SET ${setClause}, updated_at = NOW()
       WHERE id = ?
     `;
@@ -628,7 +628,7 @@ router.put('/:id', requireRole(['super_admin', 'admin']), async (req, res) => {
         u.created_at,
         u.updated_at,
         c.name as church_name
-      FROM orthodoxmetrics_auth_db.users u
+      FROM orthodoxmetrics_db.users u
       LEFT JOIN churches c ON u.church_id = c.id
       WHERE u.id = ?
     `;

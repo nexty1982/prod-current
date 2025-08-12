@@ -40,7 +40,7 @@ async function validateChurchAccess(churchId) {
  */
 async function validateUserChurchAssignment(userId, churchId) {
     const [assignments] = await promisePool.query(
-        'SELECT u.id, u.email FROM orthodoxmetrics_auth_db.users u JOIN church_users cu ON u.id = cu.user_id WHERE u.id = ? AND cu.church_id = ?',
+        'SELECT u.id, u.email FROM orthodoxmetrics_db.users u JOIN church_users cu ON u.id = cu.user_id WHERE u.id = ? AND cu.church_id = ?',
         [userId, churchId]
     );
     
@@ -74,7 +74,7 @@ router.get('/:churchId', requireAuth, requireAdmin, async (req, res) => {
                 u.updated_at,
                 cu.role as church_role
             FROM church_users cu
-            JOIN orthodoxmetrics_auth_db.users u ON cu.user_id = u.id
+            JOIN orthodoxmetrics_db.users u ON cu.user_id = u.id
             WHERE cu.church_id = ?
             ORDER BY u.created_at DESC
         `, [churchId]);
@@ -113,7 +113,7 @@ router.post('/:churchId', requireAuth, requireAdmin, async (req, res) => {
 
         // Check if user already exists
         const [existingUsers] = await promisePool.query(
-            'SELECT id FROM orthodoxmetrics_auth_db.users WHERE email = ?',
+            'SELECT id FROM orthodoxmetrics_db.users WHERE email = ?',
             [email]
         );
 
@@ -126,9 +126,9 @@ router.post('/:churchId', requireAuth, requireAdmin, async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert user into orthodoxmetrics_auth_db.users
+        // Insert user into orthodoxmetrics_db.users
         const [result] = await promisePool.query(`
-            INSERT INTO orthodoxmetrics_auth_db.users 
+            INSERT INTO orthodoxmetrics_db.users 
             (email, first_name, last_name, phone, role, is_active, landing_page, password_hash, church_id, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
         `, [email, first_name, last_name, phone, role, is_active, landing_page, hashedPassword, churchId]);
@@ -170,7 +170,7 @@ router.put('/:churchId/:userId', requireAuth, requireAdmin, async (req, res) => 
 
         // Validate user exists in system
         const [existingUsers] = await promisePool.query(
-            'SELECT id FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+            'SELECT id FROM orthodoxmetrics_db.users WHERE id = ?',
             [userId]
         );
 
@@ -180,7 +180,7 @@ router.put('/:churchId/:userId', requireAuth, requireAdmin, async (req, res) => 
             );
         }
 
-        // Prepare update query for orthodoxmetrics_auth_db.users
+        // Prepare update query for orthodoxmetrics_db.users
         let updateFields = [];
         let updateValues = [];
 
@@ -227,9 +227,9 @@ router.put('/:churchId/:userId', requireAuth, requireAdmin, async (req, res) => 
         updateFields.push('updated_at = NOW()');
         updateValues.push(userId);
 
-        // Update user in orthodoxmetrics_auth_db.users
+        // Update user in orthodoxmetrics_db.users
         await promisePool.query(`
-            UPDATE orthodoxmetrics_auth_db.users SET ${updateFields.join(', ')} WHERE id = ?
+            UPDATE orthodoxmetrics_db.users SET ${updateFields.join(', ')} WHERE id = ?
         `, updateValues);
 
         // Update church role if provided
@@ -271,9 +271,9 @@ router.post('/:churchId/:userId/reset-password', requireAuth, requireAdmin, asyn
         const newPassword = Math.random().toString(36).slice(-8);
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Update user password in orthodoxmetrics_auth_db.users
+        // Update user password in orthodoxmetrics_db.users
         await promisePool.query(
-            'UPDATE orthodoxmetrics_auth_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            'UPDATE orthodoxmetrics_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [hashedPassword, userId]
         );
 
@@ -304,9 +304,9 @@ router.post('/:churchId/:userId/lock', requireAuth, requireAdmin, async (req, re
         // Validate user assignment to church
         await validateUserChurchAssignment(userId, churchId);
 
-        // Lock user account in orthodoxmetrics_auth_db.users
+        // Lock user account in orthodoxmetrics_db.users
         await promisePool.query(
-            'UPDATE orthodoxmetrics_auth_db.users SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            'UPDATE orthodoxmetrics_db.users SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [userId]
         );
 
@@ -336,9 +336,9 @@ router.post('/:churchId/:userId/unlock', requireAuth, requireAdmin, async (req, 
         // Validate user assignment to church
         await validateUserChurchAssignment(userId, churchId);
 
-        // Unlock user account in orthodoxmetrics_auth_db.users
+        // Unlock user account in orthodoxmetrics_db.users
         await promisePool.query(
-            'UPDATE orthodoxmetrics_auth_db.users SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            'UPDATE orthodoxmetrics_db.users SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [userId]
         );
 

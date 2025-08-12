@@ -36,7 +36,7 @@ router.get('/', requireAuth, async (req, res) => {
                 n.updated_at,
                 CONCAT(u.first_name, ' ', u.last_name) as created_by_name
             FROM notes n
-            JOIN orthodoxmetrics_auth_db.users u ON n.created_by = u.id
+            JOIN orthodoxmetrics_db.users u ON n.created_by = u.id
             WHERE (n.created_by = ? OR n.id IN (
                 SELECT note_id FROM note_shares WHERE shared_with_user_id = ?
             ))
@@ -143,7 +143,7 @@ router.post('/', requireAuth, async (req, res) => {
         const [newNote] = await getAppPool().query(
             `SELECT n.*, CONCAT(u.first_name, ' ', u.last_name) as created_by_name 
              FROM notes n
-             JOIN orthodoxmetrics_auth_db.users u ON n.created_by = u.id 
+             JOIN orthodoxmetrics_db.users u ON n.created_by = u.id 
              WHERE n.id = ?`,
             [result.insertId]
         );
@@ -179,7 +179,7 @@ router.get('/:id', requireAuth, async (req, res) => {
         const [note] = await getAppPool().query(
             `SELECT n.*, CONCAT(u.first_name, ' ', u.last_name) as created_by_name 
              FROM notes n
-             JOIN orthodoxmetrics_auth_db.users u ON n.created_by = u.id 
+             JOIN orthodoxmetrics_db.users u ON n.created_by = u.id 
              WHERE n.id = ? AND (n.created_by = ? OR n.id IN (
                  SELECT note_id FROM note_shares WHERE shared_with_user_id = ?
              ))`,
@@ -288,7 +288,7 @@ router.put('/:id', requireAuth, async (req, res) => {
         const [updatedNote] = await getAppPool().query(
             `SELECT n.*, CONCAT(u.first_name, ' ', u.last_name) as created_by_name 
              FROM notes n
-             JOIN orthodoxmetrics_auth_db.users u ON n.created_by = u.id 
+             JOIN orthodoxmetrics_db.users u ON n.created_by = u.id 
              WHERE n.id = ?`,
             [noteId]
         );
@@ -371,7 +371,7 @@ router.post('/:id/share', requireAuth, async (req, res) => {
 
         // Check if target user exists
         const [targetUser] = await getAppPool().query(
-            'SELECT id FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+            'SELECT id FROM orthodoxmetrics_db.users WHERE id = ?',
             [shared_with_user_id]
         );
 
@@ -477,7 +477,7 @@ router.post('/add', requireAuth, async (req, res) => {
         const [newNote] = await getAppPool().query(
             `SELECT n.*, CONCAT(u.first_name, ' ', u.last_name) as created_by_name 
              FROM notes n
-             JOIN orthodoxmetrics_auth_db.users u ON n.created_by = u.id 
+             JOIN orthodoxmetrics_db.users u ON n.created_by = u.id 
              WHERE n.id = ?`,
             [result.insertId]
         );

@@ -46,8 +46,8 @@ class DirectUserManager {
         host: 'localhost',
         user: 'orthodoxapps',
         password: 'Summerof1982@!',
-        database: 'orthodoxmetrics_auth_db',
-        name: 'orthodoxmetrics_auth_db'
+        database: 'orthodoxmetrics_db',
+        name: 'orthodoxmetrics_db'
       },
       {
         host: 'localhost',

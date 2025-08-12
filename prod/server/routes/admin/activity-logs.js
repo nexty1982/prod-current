@@ -51,7 +51,7 @@ router.get('/', requireAuth, requireRole(['super_admin', 'admin']), async (req, 
     const countQuery = `
       SELECT COUNT(*) as total
       FROM activity_log al
-      LEFT JOIN orthodoxmetrics_auth_db.users u ON al.user_id = u.id
+      LEFT JOIN orthodoxmetrics_db.users u ON al.user_id = u.id
       ${whereClause}
     `;
 
@@ -73,7 +73,7 @@ router.get('/', requireAuth, requireRole(['super_admin', 'admin']), async (req, 
         u.last_name,
         u.role as user_role
       FROM activity_log al
-      LEFT JOIN orthodoxmetrics_auth_db.users u ON al.user_id = u.id
+      LEFT JOIN orthodoxmetrics_db.users u ON al.user_id = u.id
       ${whereClause}
       ORDER BY al.created_at DESC
       LIMIT ? OFFSET ?
@@ -153,7 +153,7 @@ router.get('/:id', requireAuth, requireRole(['super_admin', 'admin']), async (re
         u.last_name,
         u.role as user_role
       FROM activity_log al
-      LEFT JOIN orthodoxmetrics_auth_db.users u ON al.user_id = u.id
+      LEFT JOIN orthodoxmetrics_db.users u ON al.user_id = u.id
       WHERE al.id = ?
     `;
 

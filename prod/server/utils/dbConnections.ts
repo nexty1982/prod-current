@@ -195,7 +195,7 @@ export async function validateUserPermissions(
     // Get user role and permissions
     const [userRows] = await executeCentralQuery(
       `SELECT u.*, ur.role_name 
-       FROM orthodoxmetrics_auth_db.users u 
+       FROM orthodoxmetrics_db.users u 
        LEFT JOIN user_roles ur ON u.role_id = ur.id 
        WHERE u.id = ?`,
       [userId]

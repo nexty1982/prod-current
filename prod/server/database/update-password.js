@@ -22,7 +22,7 @@ async function updatePassword() {
     });
 
     const [result] = await connection.execute(
-      'UPDATE orthodoxmetrics_auth_db.users SET password_hash = ? WHERE email = ?',
+      'UPDATE orthodoxmetrics_db.users SET password_hash = ? WHERE email = ?',
       [hash, email]
     );
 

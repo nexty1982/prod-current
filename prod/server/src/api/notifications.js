@@ -257,7 +257,7 @@ class NotificationService {
             // Get recipient email if not provided
             if (!recipientEmail) {
                 const [userRows] = await getAppPool().query(
-                    'SELECT email FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+                    'SELECT email FROM orthodoxmetrics_db.users WHERE id = ?',
                     [userId]
                 );
 
@@ -735,7 +735,7 @@ router.get('/admin/notifications/queue', requireRole(['super_admin']), async (re
                 SELECT nq.*, nt.name as type_name, u.email as user_email
                 FROM notification_queue nq
                 JOIN notification_types nt ON nq.notification_type_id = nt.id
-                JOIN orthodoxmetrics_auth_db.users u ON nq.user_id = u.id
+                JOIN orthodoxmetrics_db.users u ON nq.user_id = u.id
                 ORDER BY nq.priority DESC, nq.scheduled_at ASC
                 LIMIT 50
             `);
@@ -853,19 +853,19 @@ router.post('/admin/notifications/custom', requireRole(['super_admin']), async (
         
         switch (target_audience) {
             case 'all':
-                userQuery = 'SELECT id FROM orthodoxmetrics_auth_db.users WHERE is_active = 1';
+                userQuery = 'SELECT id FROM orthodoxmetrics_db.users WHERE is_active = 1';
                 break;
             case 'admins':
-                userQuery = "SELECT id FROM orthodoxmetrics_auth_db.users WHERE role IN ('admin', 'super_admin') AND is_active = 1";
+                userQuery = "SELECT id FROM orthodoxmetrics_db.users WHERE role IN ('admin', 'super_admin') AND is_active = 1";
                 break;
             case 'users':
-                userQuery = "SELECT id FROM orthodoxmetrics_auth_db.users WHERE role NOT IN ('admin', 'super_admin') AND is_active = 1";
+                userQuery = "SELECT id FROM orthodoxmetrics_db.users WHERE role NOT IN ('admin', 'super_admin') AND is_active = 1";
                 break;
             case 'church_specific':
                 if (!church_id) {
                     return res.status(400).json({ success: false, message: 'Church ID required for church-specific notifications' });
                 }
-                userQuery = 'SELECT id FROM orthodoxmetrics_auth_db.users WHERE church_id = ? AND is_active = 1';
+                userQuery = 'SELECT id FROM orthodoxmetrics_db.users WHERE church_id = ? AND is_active = 1';
                 userParams = [church_id];
                 break;
             default:

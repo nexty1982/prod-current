@@ -713,7 +713,7 @@ router.post('/churches/wizard', requireSuperAdmin, async (req, res) => {
                     try {
                         // Check if user already exists in orthodoxmetrics_db
                         const [existingUsers] = await getAppPool().query(
-                            'SELECT id FROM orthodoxmetrics_auth_db.users WHERE email = ?',
+                            'SELECT id FROM orthodoxmetrics_db.users WHERE email = ?',
                             [user.email]
                         );
 
@@ -729,7 +729,7 @@ router.post('/churches/wizard', requireSuperAdmin, async (req, res) => {
 
                             // Get role_id for the user role
                             const [roleResult] = await getAppPool().query(
-                                'SELECT id FROM orthodoxmetrics_auth_db.roles WHERE name = ?',
+                                'SELECT id FROM orthodoxmetrics_db.roles WHERE name = ?',
                                 [user.role]
                             );
                             
@@ -741,7 +741,7 @@ router.post('/churches/wizard', requireSuperAdmin, async (req, res) => {
                             const full_name = `${user.first_name} ${user.last_name}`;
 
                             const [result] = await getAppPool().query(`
-                                INSERT INTO orthodoxmetrics_auth_db.users (
+                                INSERT INTO orthodoxmetrics_db.users (
                                     email, full_name, role_id, church_id, 
                                     password_hash, is_active, created_at, updated_at
                                 ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
@@ -865,7 +865,7 @@ router.delete('/churches/:id', requireSuperAdmin, async (req, res) => {
 
         // Check if there are users assigned to this church
         const [userRows] = await getAppPool().query(
-            'SELECT COUNT(*) as user_count FROM orthodoxmetrics_auth_db.users WHERE church_id = ?',
+            'SELECT COUNT(*) as user_count FROM orthodoxmetrics_db.users WHERE church_id = ?',
             [churchId]
         );
 
@@ -925,7 +925,7 @@ router.post('/users/:id/reset-password', requireAdmin, async (req, res) => {
 
         // Get user info and check permissions
         const [userRows] = await getAppPool().query(
-            'SELECT email, role FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+            'SELECT email, role FROM orthodoxmetrics_db.users WHERE id = ?',
             [userId]
         );
 
@@ -968,7 +968,7 @@ router.post('/users/:id/reset-password', requireAdmin, async (req, res) => {
 
         // Update user password
         await getAppPool().query(
-            'UPDATE orthodoxmetrics_auth_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            'UPDATE orthodoxmetrics_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [passwordHash, userId]
         );
 
@@ -1009,7 +1009,7 @@ router.patch('/users/:id/reset-password', requireAdmin, async (req, res) => {
 
         // Get target user information
         const [userRows] = await getAppPool().query(
-            'SELECT id, email, role, first_name, last_name FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+            'SELECT id, email, role, first_name, last_name FROM orthodoxmetrics_db.users WHERE id = ?',
             [userId]
         );
 
@@ -1053,7 +1053,7 @@ router.patch('/users/:id/reset-password', requireAdmin, async (req, res) => {
 
         // Update user password
         await getAppPool().query(
-            'UPDATE orthodoxmetrics_auth_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            'UPDATE orthodoxmetrics_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [passwordHash, userId]
         );
 
@@ -1091,7 +1091,7 @@ router.patch('/users/:id/status', requireAdmin, async (req, res) => {
 
         // Get target user information
         const [userRows] = await getAppPool().query(
-            'SELECT id, email, role, first_name, last_name FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+            'SELECT id, email, role, first_name, last_name FROM orthodoxmetrics_db.users WHERE id = ?',
             [userId]
         );
 
@@ -1126,7 +1126,7 @@ router.patch('/users/:id/status', requireAdmin, async (req, res) => {
 
         // Update user status
         await getAppPool().query(
-            'UPDATE orthodoxmetrics_auth_db.users SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            'UPDATE orthodoxmetrics_db.users SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [is_active ? 1 : 0, userId]
         );
 
@@ -1170,7 +1170,7 @@ router.get('/test-users', requireAdmin, async (req, res) => {
                 u.created_at,
                 u.updated_at,
                 u.last_login
-            FROM orthodoxmetrics_auth_db.users u
+            FROM orthodoxmetrics_db.users u
             LEFT JOIN churches c ON u.church_id = c.id
             ORDER BY u.created_at DESC
         `);

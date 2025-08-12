@@ -37,7 +37,7 @@ router.get('/queue', requireAuth, requireRole(['admin', 'supervisor']), async (r
         u.username as approved_by_username
       FROM church_provision_queue cpq
       LEFT JOIN churches c ON cpq.church_id = c.id
-      LEFT JOIN orthodoxmetrics_auth_db.users u ON cpq.approved_by = u.id
+      LEFT JOIN orthodoxmetrics_db.users u ON cpq.approved_by = u.id
       WHERE 1=1
     `;
     
@@ -643,7 +643,7 @@ router.post('/churches/provision', async (req, res) => {
 
     // Check if admin email already exists
     const [existingUser] = await db.getAppPool().query(
-      'SELECT id FROM orthodoxmetrics_auth_db.users WHERE email = ?',
+      'SELECT id FROM orthodoxmetrics_db.users WHERE email = ?',
       [adminEmail]
     );
 
@@ -741,7 +741,7 @@ async function provisionChurchSimple({
       const adminUsername = `${adminFirstName.toLowerCase()}.${adminLastName.toLowerCase()}`;
       
       await db.getAppPool().query(`
-        INSERT INTO orthodoxmetrics_auth_db.users (
+        INSERT INTO orthodoxmetrics_db.users (
           email, username, password_hash, role, landing_page, 
           created_at, church_id, is_active
         ) VALUES (?, ?, ?, 'admin', '/pages/admin/dashboard', NOW(), ?, true)
@@ -799,7 +799,7 @@ async function provisionChurchSimple({
         const adminUsername = `${adminFirstName.toLowerCase()}.${adminLastName.toLowerCase()}`;
         
         await db.getAppPool().query(`
-          INSERT INTO orthodoxmetrics_auth_db.users (
+          INSERT INTO orthodoxmetrics_db.users (
             email, username, password_hash, role, landing_page, created_at, is_active
           ) VALUES (?, ?, ?, 'admin', '/pages/admin/dashboard', NOW(), true)
         `, [adminEmail, adminUsername, hashedPassword]);

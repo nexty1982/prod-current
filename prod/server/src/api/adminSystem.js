@@ -135,9 +135,9 @@ router.get('/system-stats', async (req, res) => {
                     database: church.database_name
                 });
 
-                const [users] = await getAppPool().query('SELECT COUNT(*) as count FROM orthodoxmetrics_auth_db.users');
+                const [users] = await getAppPool().query('SELECT COUNT(*) as count FROM orthodoxmetrics_db.users');
                 const [activeUsersResult] = await getAppPool().query(
-                    'SELECT COUNT(*) as count FROM orthodoxmetrics_auth_db.users WHERE is_active = true'
+                    'SELECT COUNT(*) as count FROM orthodoxmetrics_db.users WHERE is_active = true'
                 );
 
                 totalUsers += users[0].count;
@@ -251,7 +251,7 @@ router.get('/database-health', async (req, res) => {
                 const [baptisms] = await getAppPool().query('SELECT COUNT(*) as count FROM baptism_records');
                 const [marriages] = await getAppPool().query('SELECT COUNT(*) as count FROM marriage_records');
                 const [funerals] = await getAppPool().query('SELECT COUNT(*) as count FROM funeral_records');
-                const [users] = await getAppPool().query('SELECT COUNT(*) as count FROM orthodoxmetrics_auth_db.users');
+                const [users] = await getAppPool().query('SELECT COUNT(*) as count FROM orthodoxmetrics_db.users');
 
                 healthResults.push({
                     database: church.database_name,

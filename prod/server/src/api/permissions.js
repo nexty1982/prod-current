@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
         can_edit_funeral,
         landing_page,
         visible_menu_items
-        FROM orthodoxmetrics_auth_db.users`
+        FROM orthodoxmetrics_db.users`
           );
                res.json({ users: rows });
           } catch (err) {
@@ -96,7 +96,7 @@ router.post('/update-permission', (req, res) => {
   if (!allowed.includes(permission)) {
     return res.status(400).json({ error: 'Invalid permission field' });
   }
-  const sql = `UPDATE orthodoxmetrics_auth_db.users SET \`${permission}\` = ? WHERE username = ?`;
+  const sql = `UPDATE orthodoxmetrics_db.users SET \`${permission}\` = ? WHERE username = ?`;
     getAppPool().query(sql, [value, username])
     .then(([result]) => {
       if (result.affectedRows === 0) {

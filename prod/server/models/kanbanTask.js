@@ -113,8 +113,8 @@ class KanbanTask {
         c.name as column_name,
         c.color as column_color
       FROM kanban_tasks t
-      LEFT JOIN orthodoxmetrics_auth_db.users u_assigned ON t.assigned_to = u_assigned.id
-      LEFT JOIN orthodoxmetrics_auth_db.users u_created ON t.created_by = u_created.id
+      LEFT JOIN orthodoxmetrics_db.users u_assigned ON t.assigned_to = u_assigned.id
+      LEFT JOIN orthodoxmetrics_db.users u_created ON t.created_by = u_created.id
       LEFT JOIN kanban_columns c ON t.column_id = c.id
       ${whereClause}
       ORDER BY c.position ASC, t.position ASC
@@ -184,8 +184,8 @@ class KanbanTask {
         c.name as column_name,
         b.name as board_name
       FROM kanban_tasks t
-      LEFT JOIN orthodoxmetrics_auth_db.users u_assigned ON t.assigned_to = u_assigned.id
-      LEFT JOIN orthodoxmetrics_auth_db.users u_created ON t.created_by = u_created.id
+      LEFT JOIN orthodoxmetrics_db.users u_assigned ON t.assigned_to = u_assigned.id
+      LEFT JOIN orthodoxmetrics_db.users u_created ON t.created_by = u_created.id
       LEFT JOIN kanban_columns c ON t.column_id = c.id
       LEFT JOIN kanban_boards b ON t.board_id = b.id
       WHERE t.id = ?
@@ -224,7 +224,7 @@ class KanbanTask {
         u.username,
         u.email
       FROM kanban_task_comments c
-      JOIN orthodoxmetrics_auth_db.users u ON c.user_id = u.id
+      JOIN orthodoxmetrics_db.users u ON c.user_id = u.id
       WHERE c.task_id = ?
       ORDER BY c.created_at ASC
     `, [taskId]);
@@ -241,7 +241,7 @@ class KanbanTask {
         a.uploaded_at,
         u.username as uploaded_by_name
       FROM kanban_task_attachments a
-      JOIN orthodoxmetrics_auth_db.users u ON a.uploaded_by = u.id
+      JOIN orthodoxmetrics_db.users u ON a.uploaded_by = u.id
       WHERE a.task_id = ?
       ORDER BY a.uploaded_at DESC
     `, [taskId]);
@@ -257,7 +257,7 @@ class KanbanTask {
         a.created_at,
         u.username
       FROM kanban_task_activity a
-      JOIN orthodoxmetrics_auth_db.users u ON a.user_id = u.id
+      JOIN orthodoxmetrics_db.users u ON a.user_id = u.id
       WHERE a.task_id = ?
       ORDER BY a.created_at DESC
       LIMIT 50
@@ -687,7 +687,7 @@ class KanbanTask {
         u.username,
         u.email
       FROM kanban_task_comments c
-      JOIN orthodoxmetrics_auth_db.users u ON c.user_id = u.id
+      JOIN orthodoxmetrics_db.users u ON c.user_id = u.id
       WHERE c.task_id = ?
       ORDER BY c.created_at ASC
     `, [taskId]);

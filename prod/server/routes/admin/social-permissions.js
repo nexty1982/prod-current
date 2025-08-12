@@ -12,7 +12,7 @@ router.get('/user/:userId', requireRole(['super_admin', 'admin']), async (req, r
         
         // Get user role
         const [users] = await promisePool.execute(
-            'SELECT role FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+            'SELECT role FROM orthodoxmetrics_db.users WHERE id = ?',
             [userId]
         );
         
@@ -73,7 +73,7 @@ router.put('/user/:userId', requireRole(['super_admin']), async (req, res) => {
         
         // Get user role
         const [users] = await promisePool.execute(
-            'SELECT role FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+            'SELECT role FROM orthodoxmetrics_db.users WHERE id = ?',
             [userId]
         );
         
@@ -140,7 +140,7 @@ router.post('/user/:userId/enable', requireRole(['super_admin']), async (req, re
         
         // Get user details
         const [users] = await promisePool.execute(
-            'SELECT email, role FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+            'SELECT email, role FROM orthodoxmetrics_db.users WHERE id = ?',
             [userId]
         );
         

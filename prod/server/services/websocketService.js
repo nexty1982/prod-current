@@ -264,7 +264,7 @@ class WebSocketService {
             // Get sender info for the message
             const [senderInfo] = await promisePool.query(`
                 SELECT u.id, u.first_name, u.last_name, up.display_name, up.profile_image_url
-                FROM orthodoxmetrics_auth_db.users u
+                FROM orthodoxmetrics_db.users u
                 LEFT JOIN user_profiles up ON up.user_id = u.id
                 WHERE u.id = ?
             `, [userId]);
@@ -453,13 +453,13 @@ class WebSocketService {
             const [participants] = await promisePool.query(`
                 SELECT p.user_id, u.first_name, u.last_name
                 FROM chat_participants p
-                JOIN orthodoxmetrics_auth_db.users u ON u.id = p.user_id
+                JOIN orthodoxmetrics_db.users u ON u.id = p.user_id
                 WHERE p.conversation_id = ? AND p.user_id != ? AND p.is_active = 1
             `, [conversationId, senderId]);
 
             // Get sender info
             const [senderInfo] = await promisePool.query(`
-                SELECT first_name, last_name FROM orthodoxmetrics_auth_db.users WHERE id = ?
+                SELECT first_name, last_name FROM orthodoxmetrics_db.users WHERE id = ?
             `, [senderId]);
 
             const senderName = `${senderInfo[0].first_name} ${senderInfo[0].last_name}`;

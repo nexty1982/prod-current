@@ -21,7 +21,7 @@ router.get('/profile', requireAuth, async (req, res) => {
                 u.email,
                 u.role
             FROM user_profiles up
-            RIGHT JOIN orthodoxmetrics_auth_db.users u ON up.user_id = u.id
+            RIGHT JOIN orthodoxmetrics_db.users u ON up.user_id = u.id
             WHERE u.id = ?
         `, [userId]);
 
@@ -52,7 +52,7 @@ router.get('/profile', requireAuth, async (req, res) => {
             };
         } else {
             // Return basic user info if no profile exists
-            const [users] = await getAppPool().query('SELECT * FROM orthodoxmetrics_auth_db.users WHERE id = ?', [userId]);
+            const [users] = await getAppPool().query('SELECT * FROM orthodoxmetrics_db.users WHERE id = ?', [userId]);
             if (users.length > 0) {
                 const user = users[0];
                 profileData = {

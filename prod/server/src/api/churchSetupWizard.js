@@ -775,7 +775,7 @@ async function insertTestDataIntoDatabase(database_name, sampleData) {
       ]);
 
       await getAppPool().query(
-        `INSERT INTO orthodoxmetrics_auth_db.users 
+        `INSERT INTO orthodoxmetrics_db.users 
          (church_id, username, email, password, full_name, role, is_active) 
          VALUES ?`,
         [userValues]

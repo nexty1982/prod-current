@@ -49,7 +49,7 @@ router.get('/', requireAuth, async (req, res) => {
                 up.profile_image_url as sender_avatar
             FROM notifications n
             LEFT JOIN notification_types nt ON n.notification_type_id = nt.id
-            LEFT JOIN orthodoxmetrics_auth_db.users u ON n.sender_id = u.id
+            LEFT JOIN orthodoxmetrics_db.users u ON n.sender_id = u.id
             LEFT JOIN user_profiles up ON up.user_id = u.id
             WHERE n.user_id = ?
             AND (n.expires_at IS NULL OR n.expires_at > NOW())
@@ -356,7 +356,7 @@ router.post('/:id/action', requireAuth, async (req, res) => {
 
                 // Create notification for the requester that their request was accepted
                 const [requesterInfo] = await promisePool.query(`
-                    SELECT first_name, last_name FROM orthodoxmetrics_auth_db.users WHERE id = ?
+                    SELECT first_name, last_name FROM orthodoxmetrics_db.users WHERE id = ?
                 `, [userId]);
 
                 const [friendRequestTypeId] = await promisePool.query(`
@@ -601,7 +601,7 @@ router.post('/send', requireAuth, async (req, res) => {
 
         // Check if sender has permission (admin/super_admin)
         const [sender] = await promisePool.query(
-            'SELECT role FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+            'SELECT role FROM orthodoxmetrics_db.users WHERE id = ?',
             [senderId]
         );
 

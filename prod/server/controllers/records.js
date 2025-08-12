@@ -387,7 +387,7 @@ const getRecordHistory = async (req, res) => {
     const sql = `
       SELECT ral.*, u.username, u.role
       FROM record_audit_log ral
-      LEFT JOIN orthodoxmetrics_auth_db.users u ON ral.user_id = u.id
+      LEFT JOIN orthodoxmetrics_db.users u ON ral.user_id = u.id
       WHERE ral.record_type = ? AND ral.record_id = ?
       ORDER BY ral.created_at DESC
     `;

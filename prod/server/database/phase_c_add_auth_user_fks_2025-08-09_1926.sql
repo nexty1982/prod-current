@@ -1,10 +1,10 @@
 -- phase_c_add_auth_user_fks_v2_2025-08-09_1929.sql
--- Purpose: add FKs to orthodoxmetrics_auth_db.users(id) WITHOUT stored procedures.
+-- Purpose: add FKs to orthodoxmetrics_db.users(id) WITHOUT stored procedures.
 -- Each block checks if an auth FK already exists for (table, column); if not, it adds it.
 -- Run after Phase A (drop legacy FKs) and Phase B (orphan repair).
 DROP PROCEDURE IF EXISTS add_auth_user_fks;  -- cleanup from previous attempt, harmless if not present
 SET @db_app := 'orthodoxmetrics_db';
-SET @db_auth := 'orthodoxmetrics_auth_db';
+SET @db_auth := 'orthodoxmetrics_db';
 
 -- activity_feed.actor_id -> CASCADE
 SET @exists := (

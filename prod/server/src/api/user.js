@@ -12,7 +12,7 @@ router.get('/church', requireAuth, async (req, res) => {
 
         // Get user's church assignment from the main users table
         const [userResult] = await getAppPool().query(
-            'SELECT u.church_id FROM orthodoxmetrics_auth_db.users u WHERE u.id = ?',
+            'SELECT u.church_id FROM orthodoxmetrics_db.users u WHERE u.id = ?',
             [userId]
         );
 

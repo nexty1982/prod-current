@@ -19,7 +19,7 @@ export const authPool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: 'orthodoxmetrics_auth_db',
+  database: 'orthodoxmetrics_db',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0

@@ -34,7 +34,7 @@ FROM information_schema.REFERENTIAL_CONSTRAINTS rc
 JOIN information_schema.KEY_COLUMN_USAGE kcu
   ON rc.CONSTRAINT_SCHEMA = kcu.CONSTRAINT_SCHEMA
  AND rc.CONSTRAINT_NAME  = kcu.CONSTRAINT_NAME
-WHERE kcu.REFERENCED_TABLE_SCHEMA = 'orthodoxmetrics_auth_db'
+WHERE kcu.REFERENCED_TABLE_SCHEMA = 'orthodoxmetrics_db'
   AND kcu.REFERENCED_TABLE_NAME = 'users'
   AND kcu.TABLE_SCHEMA = 'orthodoxmetrics_db'
 ORDER BY kcu.TABLE_NAME, kcu.COLUMN_NAME;

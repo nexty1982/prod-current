@@ -53,12 +53,12 @@ async function fixUserSchema() {
       }
       
       // Update existing users to have admin role if they don't have one
-      await promisePool.query("UPDATE orthodoxmetrics_auth_db.users SET role = 'admin' WHERE role IS NULL OR role = ''");
+      await promisePool.query("UPDATE orthodoxmetrics_db.users SET role = 'admin' WHERE role IS NULL OR role = ''");
       console.log('✅ Updated existing users with admin role');
     }
 
     // Ensure admin user exists
-    const [adminUsers] = await promisePool.query("SELECT id FROM orthodoxmetrics_auth_db.users WHERE email = 'admin' OR username = 'admin'");
+    const [adminUsers] = await promisePool.query("SELECT id FROM orthodoxmetrics_db.users WHERE email = 'admin' OR username = 'admin'");
     
     if (adminUsers.length === 0) {
       console.log('🔧 Creating default admin user...');
@@ -66,7 +66,7 @@ async function fixUserSchema() {
       const adminPassword = await bcrypt.hash('admin123', 12);
       
       await promisePool.query(`
-        INSERT INTO orthodoxmetrics_auth_db.users (email, username, password_hash, role, landing_page) 
+        INSERT INTO orthodoxmetrics_db.users (email, username, password_hash, role, landing_page) 
         VALUES ('admin', 'admin', ?, 'admin', '/pages/admin/dashboard')
       `, [adminPassword]);
       

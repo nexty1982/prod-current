@@ -37,8 +37,8 @@ router.get('/', requireAuth, async (req, res) => {
         u1.email as assigned_to_email,
         u2.name as created_by_name
       FROM kanban_tasks t
-      LEFT JOIN orthodoxmetrics_auth_db.users u1 ON t.assigned_to = u1.id
-      LEFT JOIN orthodoxmetrics_auth_db.users u2 ON t.created_by = u2.id
+      LEFT JOIN orthodoxmetrics_db.users u1 ON t.assigned_to = u1.id
+      LEFT JOIN orthodoxmetrics_db.users u2 ON t.created_by = u2.id
       WHERE t.board_id = ?
       ORDER BY t.column_id, t.position
     `, [board_id]);
@@ -465,7 +465,7 @@ router.get('/:id/comments', requireAuth, async (req, res) => {
         c.created_at,
         u.name as user_name
       FROM kanban_task_comments c
-      JOIN orthodoxmetrics_auth_db.users u ON c.user_id = u.id
+      JOIN orthodoxmetrics_db.users u ON c.user_id = u.id
       WHERE c.task_id = ?
       ORDER BY c.created_at ASC
     `, [taskId]);

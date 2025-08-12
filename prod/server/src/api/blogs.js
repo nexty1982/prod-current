@@ -55,7 +55,7 @@ router.get('/', async (req, res) => {
     const query = `
       SELECT ub.*, u.name as author_name, u.email as author_email
       FROM user_blogs ub
-      LEFT JOIN orthodoxmetrics_auth_db.users u ON ub.author_id = u.id
+      LEFT JOIN orthodoxmetrics_db.users u ON ub.author_id = u.id
       ${whereClause}
       ORDER BY ${sortColumn} ${sortOrder}
       LIMIT ? OFFSET ?
@@ -99,7 +99,7 @@ router.get('/:slug', async (req, res) => {
     const query = `
       SELECT ub.*, u.name as author_name, u.email as author_email
       FROM user_blogs ub
-      LEFT JOIN orthodoxmetrics_auth_db.users u ON ub.author_id = u.id
+      LEFT JOIN orthodoxmetrics_db.users u ON ub.author_id = u.id
       WHERE ub.slug = ?
     `;
 
@@ -259,7 +259,7 @@ router.get('/author/:authorId',
       const query = `
         SELECT ub.*, u.name as author_name
         FROM user_blogs ub
-        LEFT JOIN orthodoxmetrics_auth_db.users u ON ub.author_id = u.id
+        LEFT JOIN orthodoxmetrics_db.users u ON ub.author_id = u.id
         WHERE ub.author_id = ?
         ORDER BY ub.updated_at DESC
       `;

@@ -118,11 +118,11 @@ async function resetPassword() {
         // Find the user
         let query, params;
         if (searchByUserId) {
-            query = 'SELECT id, email, first_name, last_name, role FROM orthodoxmetrics_auth_db.users WHERE id = ?';
+            query = 'SELECT id, email, first_name, last_name, role FROM orthodoxmetrics_db.users WHERE id = ?';
             params = [userIdentifier];
             colorLog(`🔍 Looking for user with ID: ${userIdentifier}`, 'blue');
         } else {
-            query = 'SELECT id, email, first_name, last_name, role FROM orthodoxmetrics_auth_db.users WHERE email = ?';
+            query = 'SELECT id, email, first_name, last_name, role FROM orthodoxmetrics_db.users WHERE email = ?';
             params = [userIdentifier];
             colorLog(`🔍 Looking for user with email: ${userIdentifier}`, 'blue');
         }
@@ -146,7 +146,7 @@ async function resetPassword() {
         
         // Update the password
         colorLog('💾 Updating password in database...', 'blue');
-        const updateQuery = 'UPDATE orthodoxmetrics_auth_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+        const updateQuery = 'UPDATE orthodoxmetrics_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
         const [updateResult] = await connection.execute(updateQuery, [passwordHash, user.id]);
         
         if (updateResult.affectedRows === 1) {

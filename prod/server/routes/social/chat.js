@@ -101,7 +101,7 @@ router.get('/conversations', requireAuth, async (req, res) => {
                             'last_seen', other_profile.last_seen
                         )
                         FROM chat_participants other_p
-                        JOIN orthodoxmetrics_auth_db.users other_user ON other_user.id = other_p.user_id
+                        JOIN orthodoxmetrics_db.users other_user ON other_user.id = other_p.user_id
                         LEFT JOIN user_profiles other_profile ON other_profile.user_id = other_user.id
                         WHERE other_p.conversation_id = c.id 
                         AND other_p.user_id != ?
@@ -112,7 +112,7 @@ router.get('/conversations', requireAuth, async (req, res) => {
             FROM chat_conversations c
             JOIN chat_participants p ON c.id = p.conversation_id
             LEFT JOIN chat_messages cm ON c.last_message_id = cm.id
-            LEFT JOIN orthodoxmetrics_auth_db.users sender ON cm.sender_id = sender.id
+            LEFT JOIN orthodoxmetrics_db.users sender ON cm.sender_id = sender.id
             WHERE p.user_id = ? 
             AND c.is_active = 1
             ORDER BY c.last_activity DESC
@@ -300,10 +300,10 @@ router.get('/conversations/:id/messages', requireAuth, async (req, res) => {
                 reply_m.content as reply_to_content,
                 reply_u.first_name as reply_to_sender_name
             FROM chat_messages m
-            JOIN orthodoxmetrics_auth_db.users u ON m.sender_id = u.id
+            JOIN orthodoxmetrics_db.users u ON m.sender_id = u.id
             LEFT JOIN user_profiles up ON up.user_id = u.id
             LEFT JOIN chat_messages reply_m ON m.reply_to_id = reply_m.id
-            LEFT JOIN orthodoxmetrics_auth_db.users reply_u ON reply_m.sender_id = reply_u.id
+            LEFT JOIN orthodoxmetrics_db.users reply_u ON reply_m.sender_id = reply_u.id
             WHERE m.conversation_id = ?
             AND m.is_deleted = 0
         `;
@@ -408,7 +408,7 @@ router.post('/conversations/:id/messages', requireAuth, async (req, res) => {
 
         // Create notifications for other participants
         const [sender] = await promisePool.query(
-            'SELECT first_name, last_name FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+            'SELECT first_name, last_name FROM orthodoxmetrics_db.users WHERE id = ?',
             [userId]
         );
 

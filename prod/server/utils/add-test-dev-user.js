@@ -18,7 +18,7 @@ async function addTestUser() {
   const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
   const query = `
-    INSERT INTO orthodoxmetrics_auth_db.users (email, password_hash, role)
+    INSERT INTO orthodoxmetrics_db.users (email, password_hash, role)
     VALUES (?, ?, ?)
     ON DUPLICATE KEY UPDATE hashedPassword = VALUES(password_hash), role = VALUES(role);
   `;

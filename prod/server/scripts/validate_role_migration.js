@@ -33,7 +33,7 @@ async function validateRoleMigration() {
     // Test 1: Verify all user roles are canonical
     console.log('🧪 Test 1: Canonical Role Validation');
     const [users] = await connection.execute(
-      'SELECT DISTINCT role FROM orthodoxmetrics_auth_db.users ORDER BY role'
+      'SELECT DISTINCT role FROM orthodoxmetrics_db.users ORDER BY role'
     );
     
     const userRoles = users.map(u => u.role);
@@ -52,7 +52,7 @@ async function validateRoleMigration() {
     console.log('\n🧪 Test 2: Role Distribution Analysis');
     const [roleStats] = await connection.execute(`
       SELECT role, COUNT(*) as count 
-      FROM orthodoxmetrics_auth_db.users 
+      FROM orthodoxmetrics_db.users 
       GROUP BY role 
       ORDER BY 
         CASE role
@@ -77,7 +77,7 @@ async function validateRoleMigration() {
     // Test 3: Super admin validation
     console.log('\n🧪 Test 3: Super Admin Validation');
     const [superAdmins] = await connection.execute(
-      'SELECT COUNT(*) as count FROM orthodoxmetrics_auth_db.users WHERE role = "super_admin"'
+      'SELECT COUNT(*) as count FROM orthodoxmetrics_db.users WHERE role = "super_admin"'
     );
     
     const superAdminCount = superAdmins[0].count;
@@ -181,7 +181,7 @@ async function validateRoleMigration() {
           COUNT(*) as total_users,
           COUNT(profile_attributes) as users_with_attributes,
           COUNT(CASE WHEN JSON_VALID(profile_attributes) THEN 1 END) as valid_json_count
-        FROM orthodoxmetrics_auth_db.users
+        FROM orthodoxmetrics_db.users
       `);
       
       const stats = profileCheck[0];

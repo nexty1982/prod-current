@@ -43,7 +43,7 @@ async function createSuperAdmin() {
     // Check if user already exists
     console.log('🔍 Checking if superadmin user exists...');
     const [existingUsers] = await getAppPool().query(
-      'SELECT id, email, role FROM orthodoxmetrics_auth_db.users WHERE email = ?',
+      'SELECT id, email, role FROM orthodoxmetrics_db.users WHERE email = ?',
       [superAdminUser.email]
     );
     
@@ -56,7 +56,7 @@ async function createSuperAdmin() {
       // Update password if user exists
       console.log('🔄 Updating password and ensuring super_admin role...');
       await getAppPool().query(
-        'UPDATE orthodoxmetrics_auth_db.users SET password_hash = ?, role = ?, is_active = 1, email_verified = 1, updated_at = NOW() WHERE email = ?',
+        'UPDATE orthodoxmetrics_db.users SET password_hash = ?, role = ?, is_active = 1, email_verified = 1, updated_at = NOW() WHERE email = ?',
         [password_hash, 'super_admin', superAdminUser.email]
       );
       console.log('✅ Superadmin user updated!');
@@ -66,7 +66,7 @@ async function createSuperAdmin() {
     // Create superadmin user
     console.log('👤 Creating superadmin user...');
     const [result] = await getAppPool().query(
-      `INSERT INTO orthodoxmetrics_auth_db.users (email, password_hash, first_name, last_name, role, preferred_language, is_active, email_verified, created_at, updated_at) 
+      `INSERT INTO orthodoxmetrics_db.users (email, password_hash, first_name, last_name, role, preferred_language, is_active, email_verified, created_at, updated_at) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         superAdminUser.email,

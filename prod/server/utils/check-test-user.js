@@ -21,7 +21,7 @@ async function checkAndCreateTestUser() {
   try {
     // Check if user exists
     const [rows] = await promisePool.query(
-      'SELECT id, email, first_name, last_name, role, is_active FROM orthodoxmetrics_auth_db.users WHERE email = ?',
+      'SELECT id, email, first_name, last_name, role, is_active FROM orthodoxmetrics_db.users WHERE email = ?',
       ['admin@orthodoxmetrics_db.com']
     );
     
@@ -32,7 +32,7 @@ async function checkAndCreateTestUser() {
       const hashedPassword = await bcrypt.hash('admin123', 10);
       
       await promisePool.query(
-        'INSERT INTO orthodoxmetrics_auth_db.users (email, password_hash, first_name, last_name, role, is_active, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO orthodoxmetrics_db.users (email, password_hash, first_name, last_name, role, is_active, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?)',
         ['admin@orthodoxmetrics.com', hashedPassword, 'Admin', 'User', 'super_admin', 1, 1]
       );
       
