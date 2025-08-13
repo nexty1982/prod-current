@@ -61,6 +61,7 @@ import { AGGridViewOnly } from '../../components/AGGridViewOnly/AGGridViewOnly';
 import { ChurchRecord, RecordType as ChurchRecordType } from '../../types/church-records-advanced.types';
 import ImportRecordsButton from '../../components/ImportRecordsButton';
 import ImportRecordsButtonV2 from '../../components/ImportRecordsButtonV2';
+import ImportRecordsButtonSimple from '../../components/ImportRecordsButtonSimple';
 import { AdvancedGridDialog } from '../../components/AdvancedGridDialog';
 import { FIELD_DEFINITIONS, RECORD_TYPES } from '../../records/constants.js';
 import { TableThemeSelector } from '../../components/TableThemeSelector';
@@ -1151,7 +1152,7 @@ const SSPPOCRecordsPage: React.FC<SSPPOCRecordsPageProps> = ({
                     Add Record
                   </Button>
                   
-                  <ImportRecordsButtonV2
+                  <ImportRecordsButtonSimple
                     churchId={selectedChurch?.id}
                     recordType={selectedRecordType === 'baptism' ? 'baptisms' : 
                                selectedRecordType === 'marriage' ? 'marriages' : 
