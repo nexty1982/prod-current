@@ -7,7 +7,6 @@ import svgr from '@svgr/rollup';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
     base: '/', // Ensure assets are loaded from root
-    root: resolve(__dirname, 'front-end'),
     resolve: {
         alias: {
             '@': resolve(__dirname, 'src'),
@@ -16,11 +15,11 @@ export default defineConfig(({ mode }) => ({
     },
     esbuild: {
         loader: 'tsx',
-        include: [/src\/.*\.tsx?$/, /node_modules\/react-csv\/.*\.jsx?$/],
+        include: [/src\/.*\.tsx?$/],
         exclude: [],
     },
     optimizeDeps: {
-        include: ['react-csv'],
+        include: [],
         force: false, // Don't force pre-bundling in dev
         esbuildOptions: {
             plugins: [
@@ -52,14 +51,13 @@ export default defineConfig(({ mode }) => ({
         sourcemap: true, // Enable source maps for debugging
         target: mode === 'production' ? 'es2015' : 'esnext', // Use modern JS in dev
         commonjsOptions: {
-            include: [/react-csv/, /node_modules/],
+            include: [/node_modules/],
         },
         rollupOptions: {
             external: [],
             output: {
                 manualChunks: mode === 'production' ? {
                     vendor: ['react', 'react-dom'],
-                    csv: ['react-csv'],
                 } : undefined, // No chunking in dev for faster builds
             },
         },
