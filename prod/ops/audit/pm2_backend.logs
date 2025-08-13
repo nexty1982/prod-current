@@ -1,0 +1,105 @@
+[TAILING] Tailing last 50 lines for [orthodox-backend] process (change the value with --lines option)
+/root/.pm2/logs/orthodox-backend-error.log last 50 lines:
+3|orthodox |     at next (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/route.js:149:13)
+3|orthodox |     at Route.dispatch (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/route.js:119:3)
+3|orthodox |     at Layer.handle [as handle_request] (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/layer.js:95:5)
+3|orthodox |     at /var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/index.js:284:15
+3|orthodox |     at Function.process_params (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/index.js:346:12)
+3|orthodox | [33m[2025-08-13T00:01:38.071Z] WARN[0m [API Response] GET /api/admin/menu-permissions/user-permissions - 500 (0ms)
+3|orthodox | [33m[2025-08-13T00:01:38.071Z] WARN[0m [API Response] GET /api/admin/menu-permissions/user-permissions - 500 (0ms)
+3|orthodox | [33m[2025-08-13T00:01:38.091Z] WARN[0m [API Response] GET /api/user/profile - 404 (0ms)
+3|orthodox | [33m[2025-08-13T00:01:38.091Z] WARN[0m [API Response] GET /api/user/profile - 404 (0ms)
+3|orthodox | [33m[2025-08-13T00:01:38.093Z] WARN[0m [API Response] GET /api/user/profile - 404 (0ms)
+3|orthodox | [33m[2025-08-13T00:01:38.094Z] WARN[0m [API Response] GET /api/user/profile - 404 (1ms)
+3|orthodox | Error logging component usage to database: TypeError: Cannot read properties of undefined (reading 'getConnection')
+3|orthodox |     at ComponentUsageTrackerDB.updateSummaryTables (/var/www/orthodoxmetrics/prod/server/src/utils/componentUsageTrackerDB.js:61:42)
+3|orthodox |     at ComponentUsageTrackerDB.logComponentUsage (/var/www/orthodoxmetrics/prod/server/src/utils/componentUsageTrackerDB.js:44:18)
+3|orthodox |     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+3|orthodox |     at async ComponentsController.getAllComponents (/var/www/orthodoxmetrics/prod/server/controllers/admin/componentsController.js:207:9)
+3|orthodox |     at async /var/www/orthodoxmetrics/prod/server/routes/admin/components.js:62:9
+3|orthodox | [33m[2025-08-13T00:01:38.863Z] WARN[0m [API Response] POST /api/logs/admin-errors - 404 (0ms)
+3|orthodox | [33m[2025-08-13T00:01:38.864Z] WARN[0m [API Response] POST /api/logs/admin-errors - 404 (0ms)
+3|orthodox | ⚠️ Record request without church context
+3|orthodox | ⚠️ Record request without church context
+3|orthodox | ⚠️ Record request without church context
+3|orthodox | ⚠️ Record request without church context
+3|orthodox | ⚠️ Record request without church context
+3|orthodox | ⚠️ Record request without church context
+3|orthodox | Error getting user menu permissions: TypeError: Cannot read properties of undefined (reading 'execute')
+3|orthodox |     at /var/www/orthodoxmetrics/prod/server/routes/admin/menu-permissions.js:19:47
+3|orthodox |     at Layer.handle [as handle_request] (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/layer.js:95:5)
+3|orthodox |     at next (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/route.js:149:13)
+3|orthodox |     at authMiddleware (/var/www/orthodoxmetrics/prod/server/middleware/auth.js:75:3)
+3|orthodox |     at Layer.handle [as handle_request] (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/layer.js:95:5)
+3|orthodox |     at next (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/route.js:149:13)
+3|orthodox |     at Route.dispatch (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/route.js:119:3)
+3|orthodox |     at Layer.handle [as handle_request] (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/layer.js:95:5)
+3|orthodox |     at /var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/index.js:284:15
+3|orthodox |     at Function.process_params (/var/www/orthodoxmetrics/prod/server/node_modules/express/lib/router/index.js:346:12)
+3|orthodox | [33m[2025-08-13T00:01:41.156Z] WARN[0m [API Response] GET /api/admin/menu-permissions/user-permissions - 500 (1ms)
+3|orthodox | [33m[2025-08-13T00:01:41.156Z] WARN[0m [API Response] GET /api/admin/menu-permissions/user-permissions - 500 (1ms)
+3|orthodox | [33m[2025-08-13T00:01:41.191Z] WARN[0m [API Response] GET /api/user/profile - 404 (0ms)
+3|orthodox | [33m[2025-08-13T00:01:41.191Z] WARN[0m [API Response] GET /api/user/profile - 404 (0ms)
+3|orthodox | [33m[2025-08-13T00:01:41.193Z] WARN[0m [API Response] GET /api/user/profile - 404 (0ms)
+3|orthodox | [33m[2025-08-13T00:01:41.193Z] WARN[0m [API Response] GET /api/user/profile - 404 (0ms)
+3|orthodox | Error logging component usage to database: TypeError: Cannot read properties of undefined (reading 'getConnection')
+3|orthodox |     at ComponentUsageTrackerDB.updateSummaryTables (/var/www/orthodoxmetrics/prod/server/src/utils/componentUsageTrackerDB.js:61:42)
+3|orthodox |     at ComponentUsageTrackerDB.logComponentUsage (/var/www/orthodoxmetrics/prod/server/src/utils/componentUsageTrackerDB.js:44:18)
+3|orthodox |     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+3|orthodox |     at async ComponentsController.getAllComponents (/var/www/orthodoxmetrics/prod/server/controllers/admin/componentsController.js:207:9)
+3|orthodox |     at async /var/www/orthodoxmetrics/prod/server/routes/admin/components.js:62:9
+3|orthodox | [33m[2025-08-13T00:01:42.017Z] WARN[0m [API Response] POST /api/logs/admin-errors - 404 (0ms)
+3|orthodox | [33m[2025-08-13T00:01:42.017Z] WARN[0m [API Response] POST /api/logs/admin-errors - 404 (0ms)
+
+/root/.pm2/logs/orthodox-backend-out.log last 50 lines:
+3|orthodox | 🌐 Request routed to platform database (orthodoxmetrics_db)
+3|orthodox | 🌍 Request: GET /api/notifications/counts
+3|orthodox | 🍪 Session ID: jp-z8S1KTogvxz-jEXaoJt0GMWGuvnrm
+3|orthodox | 👤 Session User: admin@orthodoxmetrics.com
+3|orthodox | 🔐 Auth middleware - Session ID: jp-z8S1KTogvxz-jEXaoJt0GMWGuvnrm
+3|orthodox | 🔐 Auth middleware - User: admin@orthodoxmetrics.com
+3|orthodox | 🔐 Auth middleware - Method: GET /api/notifications/counts
+3|orthodox | 🔐 Cookie check for orthodmetrics.sid: false
+3|orthodox | 🔐 Session cookie received: true
+3|orthodox | 🔐 Session store available: true
+3|orthodox | 🔐 Session data exists: [ 'cookie', 'user', 'loginTime', 'lastActivity' ]
+3|orthodox | 🔐 Session user data: PRESENT
+3|orthodox | ✅ Authentication successful for: admin@orthodoxmetrics.com Role: super_admin
+3|orthodox | [0mGET /build.meta.json?1755043419370 [32m200[0m 2.914 ms - 133[0m
+3|orthodox | [0mGET /api/notifications/counts [32m200[0m 2.147 ms - 77[0m
+3|orthodox | [36m[2025-08-13T00:03:41.071Z] INFO[0m [API Request] GET /build.meta.json?1755043419370
+3|orthodox |   Meta: {"method":"GET","url":"/build.meta.json?1755043419370","query":{"1755043419370":""},"params":{}}
+3|orthodox | [36m[2025-08-13T00:03:41.074Z] INFO[0m [API Response] GET /api/notifications/counts - 200 (2ms)
+3|orthodox |   Meta: {"statusCode":200,"duration":"2ms","contentLength":77}
+3|orthodox | [36m[2025-08-13T00:03:41.074Z] INFO[0m [API Response] GET /api/notifications/counts - 200 (2ms)
+3|orthodox |   Meta: {"statusCode":200,"duration":"2ms","dataType":"json"}
+3|orthodox | [36m[2025-08-13T00:03:41.072Z] INFO[0m [API Request] GET /api/notifications/counts
+3|orthodox |   Meta: {"method":"GET","url":"/api/notifications/counts","query":{},"params":{}}
+3|orthodox | 🌐 Request routed to platform database (orthodoxmetrics_db)
+3|orthodox | 🌍 Request: GET /api/notifications/counts
+3|orthodox | 🍪 Session ID: jp-z8S1KTogvxz-jEXaoJt0GMWGuvnrm
+3|orthodox | 👤 Session User: admin@orthodoxmetrics.com
+3|orthodox | 🔐 Auth middleware - Session ID: jp-z8S1KTogvxz-jEXaoJt0GMWGuvnrm
+3|orthodox | 🔐 Auth middleware - User: admin@orthodoxmetrics.com
+3|orthodox | 🔐 Auth middleware - Method: GET /api/notifications/counts
+3|orthodox | 🔐 Cookie check for orthodmetrics.sid: false
+3|orthodox | 🔐 Session cookie received: true
+3|orthodox | 🔐 Session store available: true
+3|orthodox | 🔐 Session data exists: [ 'cookie', 'user', 'loginTime', 'lastActivity' ]
+3|orthodox | 🔐 Session user data: PRESENT
+3|orthodox | ✅ Authentication successful for: admin@orthodoxmetrics.com Role: super_admin
+3|orthodox | 🌐 Request routed to platform database (orthodoxmetrics_db)
+3|orthodox | 🌍 Request: GET /build.meta.json
+3|orthodox | 🍪 Session ID: jp-z8S1KTogvxz-jEXaoJt0GMWGuvnrm
+3|orthodox | 👤 Session User: admin@orthodoxmetrics.com
+3|orthodox | [0mGET /api/notifications/counts [32m200[0m 2.847 ms - 77[0m
+3|orthodox | [0mGET /build.meta.json?1755043449362 [32m200[0m 1.791 ms - 133[0m
+3|orthodox | [36m[2025-08-13T00:04:10.944Z] INFO[0m [API Request] GET /api/notifications/counts
+3|orthodox |   Meta: {"method":"GET","url":"/api/notifications/counts","query":{},"params":{}}
+3|orthodox | [36m[2025-08-13T00:04:10.946Z] INFO[0m [API Response] GET /api/notifications/counts - 200 (2ms)
+3|orthodox |   Meta: {"statusCode":200,"duration":"2ms","dataType":"json"}
+3|orthodox | [36m[2025-08-13T00:04:10.946Z] INFO[0m [API Response] GET /api/notifications/counts - 200 (2ms)
+3|orthodox |   Meta: {"statusCode":200,"duration":"2ms","contentLength":77}
+3|orthodox | [36m[2025-08-13T00:04:10.945Z] INFO[0m [API Request] GET /build.meta.json?1755043449362
+3|orthodox |   Meta: {"method":"GET","url":"/build.meta.json?1755043449362","query":{"1755043449362":""},"params":{}}
+
