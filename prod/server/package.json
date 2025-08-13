@@ -72,6 +72,7 @@
     "express-validator": "^7.2.1",
     "express-winston": "^4.2.0",
     "extract-zip": "^2.0.1",
+    "fast-csv": "^5.0.5",
     "fs": "^0.0.1-security",
     "google-auth-library": "^10.1.0",
     "iconv-lite": "^0.6.3",
@@ -109,6 +110,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.9",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
     "prettier": "^3.5.3",
     "supertest": "^7.1.3"
   }
