@@ -51,7 +51,7 @@ const templatesRouter = require('./routes/templates');
 const globalTemplatesRouter = require('./routes/globalTemplates');
 const metricsRouter = require('./routes/metrics');
 // Removed duplicate: recordsRouter - already loaded as churchRecordsRouter
-const importRecordsRouter = require('./routes/importRecords'); // Records import functionality
+const importRecordsRouter = require('./routes/records-import'); // Records import functionality
 const scriptRunnerRouter = require('./routes/runScript'); // Secure script runner for admin users
 
 // Import client API router for multi-tenant client endpoints
@@ -361,7 +361,7 @@ app.use('/client/:clientSlug/api', clientContext, clientApiRouter, clientContext
 app.use('/api', dropdownOptionsRouter);
 
 // Records import routes
-app.use('/api/records', importRecordsRouter);
+app.use('/api/records/import', importRecordsRouter);
 
 // Additional utility routes expected by frontend
 app.get('/api/dropdown-options', (req, res) => {

@@ -376,4 +376,52 @@ function suggestFieldMappings(type: RecordType, fields: string[]): any {
   return mappings;
 }
 
+// GET /api/records/import/status/:jobId - Get import job status
+router.get('/status/:jobId', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const jobId = parseInt(req.params.jobId);
+    const churchId = (req as any).user.church_id;
+
+    if (!jobId || isNaN(jobId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid job ID'
+      });
+    }
+
+    const pool = await getPool();
+    const [jobs] = await pool.execute(
+      `SELECT 
+        id, church_id, type, format, filename, size_bytes,
+        status, total_rows, processed_rows, imported_rows as inserted_rows,
+        skipped_rows, 
+        COALESCE(imported_rows - skipped_rows, 0) as updated_rows,
+        0 as error_rows,
+        error_text, started_at, finished_at,
+        created_at, updated_at
+      FROM import_jobs 
+      WHERE id = ? AND church_id = ?`,
+      [jobId, churchId]
+    ) as any;
+
+    if (jobs.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Import job not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      job: jobs[0]
+    });
+  } catch (error: any) {
+    console.error('Error getting import status:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get import status'
+    });
+  }
+});
+
 export default router;
