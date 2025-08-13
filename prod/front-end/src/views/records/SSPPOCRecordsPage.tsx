@@ -60,6 +60,7 @@ import { ColorPaletteSelector } from '../../components/ColorPaletteSelector';
 import { AGGridViewOnly } from '../../components/AGGridViewOnly/AGGridViewOnly';
 import { ChurchRecord, RecordType as ChurchRecordType } from '../../types/church-records-advanced.types';
 import ImportRecordsButton from '../../components/ImportRecordsButton';
+import ImportRecordsButtonV2 from '../../components/ImportRecordsButtonV2';
 import { AdvancedGridDialog } from '../../components/AdvancedGridDialog';
 import { FIELD_DEFINITIONS, RECORD_TYPES } from '../../records/constants.js';
 import { TableThemeSelector } from '../../components/TableThemeSelector';
@@ -1150,23 +1151,13 @@ const SSPPOCRecordsPage: React.FC<SSPPOCRecordsPageProps> = ({
                     Add Record
                   </Button>
                   
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => {/* TODO: Import functionality */}}
-                    disabled={loading}
-                    sx={{ 
-                      background: 'linear-gradient(45deg, #4CAF50 30%, #8BC34A 90%)',
-                      boxShadow: '0 3px 5px 2px rgba(76, 175, 80, .3)',
-                      '&:hover': {
-                        background: 'linear-gradient(45deg, #388E3C 30%, #689F38 90%)',
-                        transform: 'translateY(-1px)',
-                        boxShadow: '0 4px 8px 2px rgba(76, 175, 80, .4)',
-                      }
-                    }}
-                  >
-                    Import Records
-                  </Button>
+                  <ImportRecordsButtonV2
+                    churchId={selectedChurch?.id}
+                    recordType={selectedRecordType === 'baptism' ? 'baptisms' : 
+                               selectedRecordType === 'marriage' ? 'marriages' : 
+                               'funerals'}
+                    onImportComplete={loadRecords}
+                  />
                   
                   {/* Table Theme Selector */}
                   {useAgGrid && (
