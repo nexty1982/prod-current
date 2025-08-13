@@ -54,6 +54,7 @@
     "archiver": "^7.0.1",
     "axios": "^1.6.0",
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "canvas": "^2.11.2",
     "cheerio": "^1.1.2",
@@ -105,6 +106,9 @@
     "xterm-addon-web-links": "^0.9.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/jsonwebtoken": "^9.0.10",
     "prettier": "^3.5.3",
     "supertest": "^7.1.3"
   }
