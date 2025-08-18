@@ -1,6 +1,0 @@
-{
-  "id": "992a25a73b19",
-  "name": "check-inner-server-sessions.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-inner-server-sessions.sh",
-  "type": "Troubleshooting Utilities"
-}

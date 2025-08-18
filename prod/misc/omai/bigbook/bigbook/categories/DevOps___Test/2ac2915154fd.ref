@@ -1,6 +1,0 @@
-{
-  "id": "2ac2915154fd",
-  "name": "test-auth-check-endpoint.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/test-auth-check-endpoint.sh",
-  "type": "Testing Scripts"
-}

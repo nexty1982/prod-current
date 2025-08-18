@@ -1,6 +1,0 @@
-{
-  "id": "cb25444e845a",
-  "name": "fix-icon-error-and-deploy.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-icon-error-and-deploy.sh",
-  "type": "Build Scripts"
-}

@@ -1,6 +1,0 @@
-{
-  "id": "9bd7c0fce8d9",
-  "name": "autonomous-bigbook-deploy.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/tasks/autonomous-bigbook-deploy.sh",
-  "type": "Build Scripts"
-}

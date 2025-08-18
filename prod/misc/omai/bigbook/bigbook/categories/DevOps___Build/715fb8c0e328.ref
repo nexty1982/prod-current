@@ -1,6 +1,0 @@
-{
-  "id": "715fb8c0e328",
-  "name": "backup-system-diagnostics.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/backup-system-diagnostics.sh",
-  "type": "Build Scripts"
-}

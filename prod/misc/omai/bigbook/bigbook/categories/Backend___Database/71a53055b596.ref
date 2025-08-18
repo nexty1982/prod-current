@@ -1,6 +1,0 @@
-{
-  "id": "71a53055b596",
-  "name": "disable-root-socket-access.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/disable-root-socket-access.sh",
-  "type": "Database Scripts"
-}

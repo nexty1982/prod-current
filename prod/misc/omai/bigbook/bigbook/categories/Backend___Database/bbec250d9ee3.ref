@@ -1,6 +1,0 @@
-{
-  "id": "bbec250d9ee3",
-  "name": "reset-mariadb-root-password.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/reset-mariadb-root-password.sh",
-  "type": "Database Scripts"
-}

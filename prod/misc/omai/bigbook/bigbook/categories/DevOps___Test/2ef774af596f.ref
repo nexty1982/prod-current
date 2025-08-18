@@ -1,6 +1,0 @@
-{
-  "id": "2ef774af596f",
-  "name": "restart-backend-test-omai.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-backend-test-omai.sh",
-  "type": "Testing Scripts"
-}

@@ -1,6 +1,0 @@
-{
-  "id": "311b5dc3f72d",
-  "name": "churches_schema_update.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/churches_schema_update.sql",
-  "type": "Database Scripts"
-}

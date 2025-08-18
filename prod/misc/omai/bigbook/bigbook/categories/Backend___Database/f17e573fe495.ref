@@ -1,6 +1,0 @@
-{
-  "id": "f17e573fe495",
-  "name": "verify_ocr_migration.js",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/verify_ocr_migration.js",
-  "type": "Database Scripts"
-}

@@ -1,6 +1,0 @@
-{
-  "id": "6d4f95e43014",
-  "name": "migrate-ocr-database.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/migrate-ocr-database.sql",
-  "type": "Database Scripts"
-}

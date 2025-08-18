@@ -1,6 +1,0 @@
-{
-  "id": "e476fe435514",
-  "name": "backup_schema.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/backup_schema.sql",
-  "type": "Database Scripts"
-}

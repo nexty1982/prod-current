@@ -1,6 +1,0 @@
-{
-  "id": "c9949ce80936",
-  "name": "rebuild-frontend-after-fix.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/rebuild-frontend-after-fix.sh",
-  "type": "Build Scripts"
-}

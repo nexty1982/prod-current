@@ -1,6 +1,0 @@
-{
-  "id": "32b5c4ab34ca",
-  "name": "fix-api-response-format.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/fix-api-response-format.sh",
-  "type": "Server Scripts"
-}

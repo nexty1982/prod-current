@@ -1,6 +1,0 @@
-{
-  "id": "53f5e1fc5f45",
-  "name": "fix-notifications-schema.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/fix-notifications-schema.sql",
-  "type": "Database Scripts"
-}

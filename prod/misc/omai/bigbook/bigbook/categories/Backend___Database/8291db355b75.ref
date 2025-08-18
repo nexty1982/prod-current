@@ -1,6 +1,0 @@
-{
-  "id": "8291db355b75",
-  "name": "debug-church-database-structure.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/mysql/debug-church-database-structure.sql",
-  "type": "Database Scripts"
-}

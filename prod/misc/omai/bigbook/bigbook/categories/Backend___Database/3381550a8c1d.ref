@@ -1,6 +1,0 @@
-{
-  "id": "3381550a8c1d",
-  "name": "reset-password-skip-grant-tables.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/reset-password-skip-grant-tables.sh",
-  "type": "Database Scripts"
-}

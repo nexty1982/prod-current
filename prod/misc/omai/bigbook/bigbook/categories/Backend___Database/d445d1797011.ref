@@ -1,6 +1,0 @@
-{
-  "id": "d445d1797011",
-  "name": "fix-kanban-position-conflicts-robust.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/fix-kanban-position-conflicts-robust.sql",
-  "type": "Database Scripts"
-}

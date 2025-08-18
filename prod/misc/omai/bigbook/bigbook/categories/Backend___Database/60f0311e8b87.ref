@@ -1,6 +1,0 @@
-{
-  "id": "60f0311e8b87",
-  "name": "fix-church-linkage.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/fix-church-linkage.sql",
-  "type": "Database Scripts"
-}

@@ -1,6 +1,0 @@
-{
-  "id": "4d1628461eab",
-  "name": "check-cursor-ai-schema.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/check-cursor-ai-schema.sh",
-  "type": "Database Scripts"
-}

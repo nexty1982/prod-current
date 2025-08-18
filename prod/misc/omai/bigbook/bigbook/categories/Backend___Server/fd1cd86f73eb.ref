@@ -1,6 +1,0 @@
-{
-  "id": "fd1cd86f73eb",
-  "name": "fix-wrong-api-route.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-wrong-api-route.sh",
-  "type": "Server Scripts"
-}

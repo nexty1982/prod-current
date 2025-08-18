@@ -1,6 +1,0 @@
-{
-  "id": "092dd7a7a794",
-  "name": "fix-church-database-simple.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/fix-church-database-simple.sh",
-  "type": "Troubleshooting Utilities"
-}

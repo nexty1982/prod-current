@@ -1,6 +1,0 @@
-{
-  "id": "243a3baccab6",
-  "name": "fix-double-nginx-proxy.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-double-nginx-proxy.sh",
-  "type": "Troubleshooting Utilities"
-}

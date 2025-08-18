@@ -1,6 +1,0 @@
-{
-  "id": "0bf2d07563d0",
-  "name": "create_admin_user.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/create_admin_user.sql",
-  "type": "Database Scripts"
-}

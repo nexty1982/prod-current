@@ -1,6 +1,0 @@
-{
-  "id": "40dffcddb81a",
-  "name": "create_ocr_jobs_table.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/migrations/create_ocr_jobs_table.sql",
-  "type": "Database Scripts"
-}

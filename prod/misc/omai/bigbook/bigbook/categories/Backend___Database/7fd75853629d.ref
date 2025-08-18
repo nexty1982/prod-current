@@ -1,6 +1,0 @@
-{
-  "id": "7fd75853629d",
-  "name": "fix-database-permissions.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scrapers/fix-database-permissions.sh",
-  "type": "Database Scripts"
-}

@@ -1,6 +1,0 @@
-{
-  "id": "ec9a6952b64c",
-  "name": "fix-login-syntax-error.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-login-syntax-error.sh",
-  "type": "Troubleshooting Utilities"
-}

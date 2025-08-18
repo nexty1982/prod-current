@@ -1,6 +1,0 @@
-{
-  "id": "33d3ba208f90",
-  "name": "fix-kanban-position-conflicts.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/mysql/fix-kanban-position-conflicts.sql",
-  "type": "Database Scripts"
-}

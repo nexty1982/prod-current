@@ -1,6 +1,0 @@
-{
-  "id": "9f447b4592fd",
-  "name": "fix-blank-page-and-phantom.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-blank-page-and-phantom.sh",
-  "type": "Troubleshooting Utilities"
-}

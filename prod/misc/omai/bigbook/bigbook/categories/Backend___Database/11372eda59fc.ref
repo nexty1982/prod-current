@@ -1,6 +1,0 @@
-{
-  "id": "11372eda59fc",
-  "name": "clientDatabaseTemplate.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/clientDatabaseTemplate.sql",
-  "type": "Database Scripts"
-}

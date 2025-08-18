@@ -1,6 +1,0 @@
-{
-  "id": "2f56e47ebfeb",
-  "name": "manual_schema_fix.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/manual_schema_fix.sql",
-  "type": "Database Scripts"
-}

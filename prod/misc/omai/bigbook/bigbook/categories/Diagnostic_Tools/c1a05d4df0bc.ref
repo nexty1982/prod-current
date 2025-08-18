@@ -1,6 +1,0 @@
-{
-  "id": "c1a05d4df0bc",
-  "name": "check-full-server-logs.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/check-full-server-logs.sh",
-  "type": "Troubleshooting Utilities"
-}

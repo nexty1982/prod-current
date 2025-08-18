@@ -1,6 +1,0 @@
-{
-  "id": "387b6ee37218",
-  "name": "fix-jit-and-restart.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/fix-jit-and-restart.sh",
-  "type": "Troubleshooting Utilities"
-}

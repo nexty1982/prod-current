@@ -1,6 +1,0 @@
-{
-  "id": "18521ffd923b",
-  "name": "create-ai-training-tables.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/migrations/create-ai-training-tables.sql",
-  "type": "Database Scripts"
-}

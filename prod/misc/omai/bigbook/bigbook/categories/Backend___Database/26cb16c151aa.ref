@@ -1,6 +1,0 @@
-{
-  "id": "26cb16c151aa",
-  "name": "fix-church-permissions.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/temp/fix-church-permissions.sql",
-  "type": "Database Scripts"
-}

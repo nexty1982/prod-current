@@ -1,6 +1,0 @@
-{
-  "id": "e0e5863150b5",
-  "name": "fix-frontend-session-cookies.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/fix-frontend-session-cookies.sh",
-  "type": "Server Scripts"
-}

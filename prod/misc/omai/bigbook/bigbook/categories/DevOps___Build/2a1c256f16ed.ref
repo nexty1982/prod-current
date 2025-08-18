@@ -1,6 +1,0 @@
-{
-  "id": "2a1c256f16ed",
-  "name": "rebuild-questionnaire-preview.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/rebuild-questionnaire-preview.sh",
-  "type": "Build Scripts"
-}

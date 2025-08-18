@@ -1,6 +1,0 @@
-{
-  "id": "69aac7f055a7",
-  "name": "check-port.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/check-port.sh",
-  "type": "Server Scripts"
-}

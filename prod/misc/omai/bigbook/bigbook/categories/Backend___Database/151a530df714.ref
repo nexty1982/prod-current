@@ -1,6 +1,0 @@
-{
-  "id": "151a530df714",
-  "name": "add_church_templates.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/migrations/add_church_templates.sql",
-  "type": "Database Scripts"
-}

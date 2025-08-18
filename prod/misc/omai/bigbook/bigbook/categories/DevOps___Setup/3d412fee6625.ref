@@ -1,6 +1,0 @@
-{
-  "id": "3d412fee6625",
-  "name": "setup-agent-webhook.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/setup-agent-webhook.sh",
-  "type": "Setup Scripts"
-}

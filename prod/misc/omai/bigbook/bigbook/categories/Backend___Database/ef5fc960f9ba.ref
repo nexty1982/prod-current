@@ -1,6 +1,0 @@
-{
-  "id": "ef5fc960f9ba",
-  "name": "fix-all-errors.sql",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/fix-all-errors.sql",
-  "type": "Database Scripts"
-}

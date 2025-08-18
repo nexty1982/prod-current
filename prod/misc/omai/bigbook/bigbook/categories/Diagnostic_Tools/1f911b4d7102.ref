@@ -1,6 +1,0 @@
-{
-  "id": "1f911b4d7102",
-  "name": "fix-login-redirect.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-login-redirect.sh",
-  "type": "Troubleshooting Utilities"
-}

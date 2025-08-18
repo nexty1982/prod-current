@@ -1,6 +1,0 @@
-{
-  "id": "9c96aef8e64f",
-  "name": "fix-nginx-cookie-forwarding.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-nginx-cookie-forwarding.sh",
-  "type": "Troubleshooting Utilities"
-}

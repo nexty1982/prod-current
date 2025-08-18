@@ -1,6 +1,0 @@
-{
-  "id": "ccae3c9694f7",
-  "name": "restart-after-fix.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/restart-after-fix.sh",
-  "type": "Troubleshooting Utilities"
-}

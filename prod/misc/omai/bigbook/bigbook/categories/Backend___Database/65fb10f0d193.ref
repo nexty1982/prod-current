@@ -1,6 +1,0 @@
-{
-  "id": "65fb10f0d193",
-  "name": "quick-mariadb-check.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/quick-mariadb-check.sh",
-  "type": "Database Scripts"
-}

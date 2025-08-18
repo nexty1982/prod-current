@@ -1,6 +1,0 @@
-{
-  "id": "9a59c267c775",
-  "name": "fix-mariadb-lock-issue.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/scripts/7-26-25/fix-mariadb-lock-issue.sh",
-  "type": "Database Scripts"
-}

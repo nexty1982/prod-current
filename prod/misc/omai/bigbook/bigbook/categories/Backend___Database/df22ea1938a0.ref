@@ -1,6 +1,0 @@
-{
-  "id": "df22ea1938a0",
-  "name": "fix_church_database_ref.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/database/fix_church_database_ref.sh",
-  "type": "Database Scripts"
-}

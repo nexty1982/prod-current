@@ -1,6 +1,0 @@
-{
-  "id": "13edeb663c05",
-  "name": "auditLogger.js",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/middleware/auditLogger.js",
-  "type": "Server Scripts"
-}

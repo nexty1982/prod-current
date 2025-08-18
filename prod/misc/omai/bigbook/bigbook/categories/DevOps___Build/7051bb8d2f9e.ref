@@ -1,6 +1,0 @@
-{
-  "id": "7051bb8d2f9e",
-  "name": "fix-frontend-build.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/fix-frontend-build.sh",
-  "type": "Build Scripts"
-}

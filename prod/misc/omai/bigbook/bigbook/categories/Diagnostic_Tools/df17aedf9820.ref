@@ -1,6 +1,0 @@
-{
-  "id": "df17aedf9820",
-  "name": "clear-frontend-cache.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/clear-frontend-cache.sh",
-  "type": "Troubleshooting Utilities"
-}

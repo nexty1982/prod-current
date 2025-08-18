@@ -1,6 +1,0 @@
-{
-  "id": "9d90bb116286",
-  "name": "restart-and-test-routes.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/restart-and-test-routes.sh",
-  "type": "Server Scripts"
-}

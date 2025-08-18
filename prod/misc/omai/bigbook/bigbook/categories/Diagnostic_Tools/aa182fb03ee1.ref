@@ -1,6 +1,0 @@
-{
-  "id": "aa182fb03ee1",
-  "name": "fix-nginx-permissions.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/debug/fix-nginx-permissions.sh",
-  "type": "Troubleshooting Utilities"
-}

@@ -1,6 +1,0 @@
-{
-  "id": "5db045bb7f8e",
-  "name": "fix-https-sessions.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/fix-https-sessions.sh",
-  "type": "Troubleshooting Utilities"
-}

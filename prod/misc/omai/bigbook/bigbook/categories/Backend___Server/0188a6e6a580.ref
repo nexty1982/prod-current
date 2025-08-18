@@ -1,6 +1,0 @@
-{
-  "id": "0188a6e6a580",
-  "name": "deploy-api-v2-fixes.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/server/scripts/deploy-api-v2-fixes.sh",
-  "type": "Server Scripts"
-}

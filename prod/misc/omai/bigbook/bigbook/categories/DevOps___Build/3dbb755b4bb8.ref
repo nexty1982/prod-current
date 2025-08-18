@@ -1,6 +1,0 @@
-{
-  "id": "3dbb755b4bb8",
-  "name": "rebuild-encrypted-storage.sh",
-  "path": "/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/rebuild-encrypted-storage.sh",
-  "type": "Build Scripts"
-}
