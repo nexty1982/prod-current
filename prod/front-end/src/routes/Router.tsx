@@ -18,6 +18,36 @@ const ModernDash = Loadable(lazy(() => import('../views/dashboard/EnhancedModern
 const EcommerceDash = Loadable(lazy(() => import('../views/dashboard/Ecommerce')));
 const OrthodMetricsDash = Loadable(lazy(() => import('../views/dashboard/OrthodoxMetrics')));
 
+/* ****Raydar Components***** */
+const RaydarAnalytics = Loadable(lazy(() => import('../views/raydar/dashboard/Analytics')));
+const RaydarAlerts = Loadable(lazy(() => import('../views/raydar/ui/Alerts')));
+const RaydarButtons = Loadable(lazy(() => import('../views/raydar/ui/Buttons')));
+const RaydarCards = Loadable(lazy(() => import('../views/raydar/ui/Cards')));
+const RaydarBadges = Loadable(lazy(() => import('../views/raydar/ui/Badges')));
+const RaydarAvatars = Loadable(lazy(() => import('../views/raydar/ui/Avatars')));
+const RaydarRatings = Loadable(lazy(() => import('../views/raydar/advanced/Ratings')));
+
+// Charts
+const RaydarAreaCharts = Loadable(lazy(() => import('../views/raydar/charts/Area')));
+
+// Forms  
+const RaydarFormValidation = Loadable(lazy(() => import('../views/raydar/forms/Validation')));
+
+// Vector Maps
+const RaydarWorldMap = Loadable(lazy(() => import('../views/raydar/vector-maps/World')));
+
+// Pages
+const RaydarWelcome = Loadable(lazy(() => import('../views/raydar/pages/Welcome')));
+
+// Tables
+const RaydarAdvancedBasic = Loadable(lazy(() => import('../views/raydar/tables/Basic')));
+
+// Widgets
+const RaydarWidgets = Loadable(lazy(() => import('../views/raydar/widgets/index')));
+
+// Icons
+const RaydarBoxIcons = Loadable(lazy(() => import('../views/raydar/icons/BoxIcons')));
+
 /* ****Apps***** */
 // const Blog = Loadable(lazy(() => import('../views/apps/blog/Blog')));
 // const BlogDetail = Loadable(lazy(() => import('../views/apps/blog/BlogPost')));
@@ -99,15 +129,24 @@ const ActivityLogs = Loadable(lazy(() => import('../views/admin/ActivityLogs')))
 const MenuPermissions = Loadable(lazy(() => import('../views/admin/MenuPermissions')));
 const MenuManagement = Loadable(lazy(() => import('../views/admin/MenuManagement')));
 const OrthodMetricsAdmin = Loadable(lazy(() => import('../views/admin/OrthodoxMetricsAdmin')));
+const AIAdminPanel = Loadable(lazy(() => import('../components/ai/AIAdminPanel')));
 const OMAIUltimateLogger = Loadable(lazy(() => import('../views/logs/LoggerDashboard')));
 const ScriptRunner = Loadable(lazy(() => import('../components/admin/ScriptRunner')));
 const SuperAdminDashboard = Loadable(lazy(() => import('../components/admin/SuperAdminDashboard')));
+const SiteEditorDemo = Loadable(lazy(() => import('../views/demo/SiteEditorDemo')));
+const AutoFixDemo = Loadable(lazy(() => import('../views/demo/AutoFixDemo')));
+const GitOpsDemo = Loadable(lazy(() => import('../views/demo/GitOpsDemo')));
 
 // Site Editor and JIT Terminal Components
+const SiteEditor = Loadable(lazy(() => import('../components/SiteEditor')));
 const JITTerminal = Loadable(lazy(() => import('../components/terminal/JITTerminal')));
 const JITTerminalConsole = Loadable(lazy(() => import('../views/admin/JITTerminalConsole')));
 
 // AI Lab
+const OMAILab = Loadable(lazy(() => import('../pages/sandbox/ai-lab')));
+const ProjectGenerator = Loadable(lazy(() => import('../pages/sandbox/project-generator')));
+const ComponentLibrary = Loadable(lazy(() => import('../pages/sandbox/component-library')));
+const ComponentPreview = Loadable(lazy(() => import('../pages/sandbox/component-preview')));
 const OMBEditor = Loadable(lazy(() => import('../pages/omb/editor')));
 const AdminDashboardLayout = Loadable(lazy(() => import('../components/admin/AdminDashboardLayout')));
 const AdminPageFallback = Loadable(lazy(() => import('../components/admin/AdminPageFallback')));
@@ -128,7 +167,16 @@ const OMLearn = Loadable(lazy(() => import('../modules/OMLearn/OMLearn')));
 // Build System
 const BuildConsole = Loadable(lazy(() => import('../components/admin/BuildConsole')));
 
+// Demos
+const OrthodoxThemeDemo = Loadable(lazy(() => import('../components/demos/OrthodoxThemeDemo')));
+const AdvancedRecordsDemo = Loadable(lazy(() => import('../views/AdvancedRecordsDemo')));
+const EditableRecordPage = Loadable(lazy(() => import('../views/EditableRecordPage')));
+const TableThemeEditor = Loadable(lazy(() => import('../demos/TableThemeEditor')));
+const RecordGeneratorPage = Loadable(lazy(() => import('../pages/RecordGeneratorPage')));
+const VisualTestDemo = Loadable(lazy(() => import('../views/demo/VisualTestDemo')));
+
 // Records Pages
+const SSPPOCRecordsPage = Loadable(lazy(() => import('../views/records/SSPPOCRecordsPage')));
 const UnifiedRecordsPage = Loadable(lazy(() => import('../views/records/UnifiedRecordsPage')));
 const ChurchAdminList = Loadable(lazy(() => import('../views/admin/ChurchAdminList')));
 const ChurchAdminPanel = Loadable(lazy(() => import('../views/admin/ChurchAdminPanelWorking')));
@@ -258,6 +306,7 @@ const Landingpage = Loadable(lazy(() => import('../views/pages/landingpage/Landi
 
 // front end pages
 const Homepage = Loadable(lazy(() => import('../views/pages/frontend-pages/Homepage')));
+const OrthodMetricsDemo = Loadable(lazy(() => import('../views/pages/frontend-pages/OrthodoxMetricsDemo')));
 const About = Loadable(lazy(() => import('../views/pages/frontend-pages/About')));
 const Contact = Loadable(lazy(() => import('../views/pages/frontend-pages/Contact')));
 const Portfolio = Loadable(lazy(() => import('../views/pages/frontend-pages/Portfolio')));
@@ -305,6 +354,126 @@ const Router = [
           </ProtectedRoute>
         )
       },
+      // Raydar Dashboard Routes
+              {
+          path: '/raydar/dashboard/analytics',
+          element: (
+            <ProtectedRoute>
+              <RaydarAnalytics />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: '/raydar/ui/alerts',
+          element: (
+            <ProtectedRoute>
+              <RaydarAlerts />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: '/raydar/ui/buttons',
+          element: (
+            <ProtectedRoute>
+              <RaydarButtons />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: '/raydar/ui/cards',
+          element: (
+            <ProtectedRoute>
+              <RaydarCards />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: '/raydar/ui/badges',
+          element: (
+            <ProtectedRoute>
+              <RaydarBadges />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: '/raydar/ui/avatars',
+          element: (
+            <ProtectedRoute>
+              <RaydarAvatars />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: '/raydar/advanced/ratings',
+          element: (
+            <ProtectedRoute>
+              <RaydarRatings />
+            </ProtectedRoute>
+          )
+        },
+        // Charts Routes
+        {
+          path: '/raydar/charts/area',
+          element: (
+            <ProtectedRoute>
+              <RaydarAreaCharts />
+            </ProtectedRoute>
+          )
+        },
+        // Forms Routes
+        {
+          path: '/raydar/forms/validation',
+          element: (
+            <ProtectedRoute>
+              <RaydarFormValidation />
+            </ProtectedRoute>
+          )
+        },
+        // Vector Maps Routes
+        {
+          path: '/raydar/vector-maps/world',
+          element: (
+            <ProtectedRoute>
+              <RaydarWorldMap />
+            </ProtectedRoute>
+          )
+        },
+        // Pages Routes
+        {
+          path: '/raydar/pages/welcome',
+          element: (
+            <ProtectedRoute>
+              <RaydarWelcome />
+            </ProtectedRoute>
+          )
+        },
+        // Tables Routes
+        {
+          path: '/raydar/tables/basic',
+          element: (
+            <ProtectedRoute>
+              <RaydarAdvancedBasic />
+            </ProtectedRoute>
+          )
+        },
+        // Widgets Routes
+        {
+          path: '/raydar/widgets',
+          element: (
+            <ProtectedRoute>
+              <RaydarWidgets />
+            </ProtectedRoute>
+          )
+        },
+        // Icons Routes
+        {
+          path: '/raydar/icons/boxicons',
+          element: (
+            <ProtectedRoute>
+              <RaydarBoxIcons />
+            </ProtectedRoute>
+          )
+        },
       {
         path: '/apps/contacts',
         element: (
@@ -713,11 +882,29 @@ const Router = [
         )
       },
       {
+        path: '/admin/ai',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AIAdminPanel />
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/admin/omai-logger',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin']}>
             <AdminErrorBoundary>
               <OMAIUltimateLogger />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/site-editor',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <SiteEditor />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -811,6 +998,76 @@ const Router = [
         )
       },
       {
+        path: '/sandbox/ai-lab',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <OMAILab />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/sandbox/project-generator',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ProjectGenerator />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/sandbox/component-library',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <ComponentLibrary />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/sandbox/component-preview',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <ComponentPreview />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/sandbox/component-preview/:source',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <ComponentPreview />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/sandbox/component-preview/:source/:category',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <ComponentPreview />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/sandbox/component-preview/:source/:category/:component',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <ComponentPreview />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/omb/editor',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
@@ -821,10 +1078,102 @@ const Router = [
         )
       },
       {
+        path: '/demos/orthodox-theme',
+        element: <OrthodoxThemeDemo />
+      },
+      {
+        path: '/demos/advanced-records',
+        element: (
+                  <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin']}>
+          <AdvancedRecordsDemo />
+        </ProtectedRoute>
+        )
+      },
+      {
+        path: '/demos/editable-record',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <EditableRecordPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/demos/editable-record/:recordType',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <EditableRecordPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/demos/editable-record/:recordType/:recordId',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <EditableRecordPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/demos/table-tester',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <TableThemeEditor />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/demos/record-generator',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <RecordGeneratorPage />
+          </ProtectedRoute>
+        )
+      },
+                   {
+               path: '/demos/site-editor',
+               element: (
+                 <ProtectedRoute requiredRole={['super_admin']}>
+                   <SiteEditorDemo />
+                 </ProtectedRoute>
+               )
+             },
+                         {
+              path: '/demos/auto-fix',
+              element: (
+                <ProtectedRoute requiredRole={['super_admin']}>
+                  <AutoFixDemo />
+                </ProtectedRoute>
+              )
+            },
+            {
+              path: '/demos/gitops',
+              element: (
+                <ProtectedRoute requiredRole={['super_admin']}>
+                  <GitOpsDemo />
+                </ProtectedRoute>
+              )
+            },
+            {
+              path: '/demos/vrt',
+              element: (
+                <ProtectedRoute requiredRole={['super_admin']}>
+                  <VisualTestDemo />
+                </ProtectedRoute>
+              )
+            },
+      {
         path: '/records/baptism',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
             <SSPPOCRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/saints-peter-and-paul-Records',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <ChurchRecordsPage />
           </ProtectedRoute>
         )
       },
@@ -1129,6 +1478,7 @@ const Router = [
       { path: '/pages/pricing', element: <ComingSoon pageName="The pricing page" /> },
       { path: '/pages/faq', element: <ComingSoon pageName="The FAQ page" /> },
       { path: '/frontend-pages/homepage', element: <Homepage /> },
+      { path: '/demo', element: <OrthodMetricsDemo /> },
       { path: '/assign-task', element: <AssignTaskPage /> },
       { path: '/frontend-pages/about', element: <ComingSoon pageName="The about page" /> },
       { path: '/frontend-pages/contact', element: <ComingSoon pageName="The contact page" /> },

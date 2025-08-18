@@ -10,7 +10,6 @@
     "dev:test": "vite --mode development --port 5177",
     "build": "rm -rf dist && NODE_OPTIONS=\"--max-old-space-size=4096\" vite build --mode production",
     "build:dev": "vite build --mode development",
-    "build:ship": "vite build",
     "preview": "vite preview --port 5175 --host 0.0.0.0",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },

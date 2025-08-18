@@ -1,0 +1,9 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "Audit: Typecheck", "type": "shell", "command": "npm run typecheck", "problemMatcher": "$tsc" },
+    { "label": "Audit: ESLint Fix", "type": "shell", "command": "npm run lint" },
+    { "label": "Audit: Unused Exports (ts-prune)", "type": "shell", "command": "npm run prune" },
+    { "label": "Audit: Unused Deps (depcheck)", "type": "shell", "command": "npm run depcheck" }
+  ]
+}

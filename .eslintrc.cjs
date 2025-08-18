@@ -1,26 +1,21 @@
 module.exports = {
   root: true,
-  parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'unused-imports'],
+  env: { node: true, browser: true, es2022: true },
+  parser: "@typescript-eslint/parser",
+  parserOptions: { ecmaVersion: "latest", sourceType: "module" },
+  plugins: ["@typescript-eslint","react","react-hooks"],
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:import/recommended',
-    'plugin:import/typescript',
-    'prettier'
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "eslint-config-prettier"
   ],
-  settings: { react: { version: 'detect' } },
-  rules: {
-    'unused-imports/no-unused-imports': 'error',
-    'import/order': ['warn', {
-      'newlines-between': 'always',
-      groups: [['builtin', 'external'], 'internal', ['parent', 'sibling', 'index']],
-      alphabetize: { order: 'asc', caseInsensitive: true }
-    }],
-    '@typescript-eslint/no-explicit-any': 'warn',
-    'react/react-in-jsx-scope': 'off'
-  },
-  ignorePatterns: ['dist', 'build', '.next', 'node_modules']
+  settings: { react: { version: "detect" } },
+  overrides: [{ files: ["**/*.ts","**/*.tsx"], rules: { "no-undef": "off" } }],
+  ignorePatterns: [
+    "**/node_modules/**","**/dist/**","**/build/**","**/.next/**","**/public/**",
+    "prod/build/**","prod/front-end/public/**","prod/front-end/build/**","prod/server/public/**",
+    "logs/**","*.min.js"
+  ]
 };

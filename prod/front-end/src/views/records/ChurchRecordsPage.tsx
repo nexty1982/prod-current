@@ -43,10 +43,6 @@ interface RecordTable {
   last_updated: string;
 }
 
-const loadRecords = async () => {
-  return []; // temp stub if needed
-};
-
 const ChurchRecordsPage: React.FC = () => {
   const { churchId } = useParams<{ churchId: string }>();
   const navigate = useNavigate();

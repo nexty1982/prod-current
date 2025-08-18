@@ -1,98 +1,48 @@
-# Node
+# Dependencies
 node_modules/
-.env
-npm-debug.log*
-package-lock.json
+**/node_modules/
 
-# Logs
-*.log
-logs/
-debug/
-
-# Build
+# Builds
 dist/
+**/dist/
 build/
+**/build/
 
-# Frontend Artifacts
-.vite/
-coverage/
-*.tsbuildinfo
+# Env & credentials
+.env
+.env.*
+*.env
+**/credentials/**
+**/*credentials*
+**/*secret*
+**/*password*
+**/*key*
+**/*cert*
 
-# VSCode
-.vscode/
+# Docs (anywhere)
+docs/
+**/docs/
+*.md
 
-# OS/Editor junk
+# Ops (anywhere)
+ops/
+**/ops/
+
+# Misc root folder
+misc/
+
+# Logs & dumps
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.sql
+*.sql.gz
+*.dump
+*.dump.gz
+
+# System cruft
 .DS_Store
 Thumbs.db
 *.swp
-*.swo
-
-# Uploads / User content
-misc/uploads/
-misc/public/
-
-# Generated
-VERSION
-
-
-# Binaries and executables
-*.exe
-*.dll
-*.so
-*.bin
-*.img
-
-# Video files
-*.mp4
-*.mov
-*.avi
-*.mkv
-
-# Image files
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.svg
-*.webp
-
-# Audio files
-*.mp3
-*.wav
-*.ogg
-*.flac
-
-# Document files
-*.pdf
-
-# Font files
-*.woff
-*.woff2
-*.ttf
-*.eot
-
-# Compressed/Archive files
-*.zip
-*.tar
-*.gz
-*.7z
-*.rar
-*.iso
-
-# Build artifacts
-/dist/
-/build/
-/node_modules/
-/out/
-
-# Logs and temp
-*.log
-*.tmp
-
-# macOS files
-.DS_Store
-__MACOSX/
-
-# Git
-.git
-
