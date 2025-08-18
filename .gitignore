@@ -1,48 +1,23 @@
-# Dependencies
 node_modules/
 **/node_modules/
-
-# Builds
 dist/
 **/dist/
 build/
 **/build/
-
-# Env & credentials
+misc/
+ops/
+docs/
+**/docs/
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
 .env
 .env.*
 *.env
-**/credentials/**
 **/*credentials*
 **/*secret*
 **/*password*
 **/*key*
 **/*cert*
-
-# Docs (anywhere)
-docs/
-**/docs/
-*.md
-
-# Ops (anywhere)
-ops/
-**/ops/
-
-# Misc root folder
-misc/
-
-# Logs & dumps
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.sql
-*.sql.gz
-*.dump
-*.dump.gz
-
-# System cruft
-.DS_Store
-Thumbs.db
-*.swp
+**/dumps/**

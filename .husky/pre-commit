@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-set -Eeuo pipefail
-cd "$(git rev-parse --show-toplevel)"
-#!/usr/bin/env bash
-set -Eeuo pipefail
-npx --yes lint-staged
-npx --yes lint-staged
