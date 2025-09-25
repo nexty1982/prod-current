@@ -191,6 +191,7 @@ const ChurchRecordsList = Loadable(lazy(() => import('../pages/apps/records-ui/i
 
 // Records Centralized - New Auto-Discovery System
 const BasicRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/BasicRecordsPage')));
+const SSPPOCRecordsPageNew = Loadable(lazy(() => import('../features/records-centralized/components/SSPPOCRecordsPageNew')));
 
 // ui components
 const MuiAlert = Loadable(lazy(() => import('../views/ui-components/MuiAlert')));
@@ -1268,6 +1269,16 @@ const Router = [
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
             <RecordsProvider>
               <BasicRecordsPage />
+            </RecordsProvider>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/records/enhanced',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <RecordsProvider>
+              <SSPPOCRecordsPageNew />
             </RecordsProvider>
           </ProtectedRoute>
         )

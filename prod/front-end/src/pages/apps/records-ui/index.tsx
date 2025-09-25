@@ -1,9 +1,8 @@
 import React from 'react';
 import Breadcrumb from '../../../layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '../../../components/container/PageContainer';
-import ChurchRecordTableList from '../../../components/apps/records-ui/ChurchRecordTableList/ChurchRecordTableList';
 import BlankCard from '../../../components/shared/BlankCard';
-import { ChurchRecordsProvider } from '../../../context/ChurchRecordsContext';
+import ModernRecordsPage from '../../../features/records-centralized/components/ModernRecordsPage';
 
 const BCrumb = [
   {
@@ -19,13 +18,11 @@ const ChurchRecordsList: React.FC = () => {
   return (
     <PageContainer title="Church Records" description="Church Records Management">
       <Breadcrumb title="Church Records" items={BCrumb} />
-      <ChurchRecordsProvider>
-        <BlankCard>
-          <ChurchRecordTableList />
-        </BlankCard>
-      </ChurchRecordsProvider>
+      <BlankCard>
+        <ModernRecordsPage />
+      </BlankCard>
     </PageContainer>
   );
 };
 
-export default ChurchRecordsList; 
+export default ChurchRecordsList;
