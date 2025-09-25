@@ -11,7 +11,11 @@
     "build": "rm -rf dist && NODE_OPTIONS=\"--max-old-space-size=4096\" vite build --mode production",
     "build:dev": "vite build --mode development",
     "preview": "vite preview --port 5175 --host 0.0.0.0",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "om:reg:scan": "node ../../scripts/omos.mjs reg:scan",
+    "om:reg:patch": "node ../../scripts/omos.mjs reg:patch",
+    "om:errors": "node ../../scripts/omos.mjs errors:open",
+    "om:release:weekly": "node ../../scripts/omos.mjs release:weekly"
   },
   "dependencies": {
     "@casl/ability": "^6.7.3",

@@ -40,7 +40,8 @@
     "ai:auto-learning": "node jobs/auto-learning-runner.js",
     "ai:auto-learning:help": "node jobs/auto-learning-runner.js --help",
     "headlines:setup": "node scripts/setup-headlines-data.js",
-    "headlines:fetch": "node cron/fetch-headlines.js"
+    "headlines:fetch": "node cron/fetch-headlines.js",
+    "om:records:migrate": "node scripts/records-suite/migrate.js"
   },
   "dependencies": {
     "@google-cloud/translate": "^9.2.0",

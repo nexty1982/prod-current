@@ -56,13 +56,6 @@ const ChatApp = Loadable(lazy(() => import('../views/apps/chat/ChatApp')));
 const Notes = Loadable(lazy(() => import('../views/apps/notes/Notes')));
 const Tickets = Loadable(lazy(() => import('../views/apps/tickets/Tickets')));
 
-/* ****OM OS Components***** */
-const OMOSRegistry = Loadable(lazy(() => import('../features/om-os/registry/RegistryAdmin')));
-const RecordsSuiteHome = Loadable(lazy(() => import('../features/records-suite/pages/RecordsSuiteHome')));
-const TemplateGallery = Loadable(lazy(() => import('../features/records-suite/pages/TemplateGallery')));
-const ParishCustomizer = Loadable(lazy(() => import('../features/records-suite/pages/ParishCustomizer')));
-const RecordsViewer = Loadable(lazy(() => import('../features/records-suite/pages/RecordsViewer')));
-
 /* ****Developer Tools***** */
 const SiteStructureVisualizer = Loadable(lazy(() => import('../tools/SiteStructureVisualizer')));
 const Kanban = Loadable(lazy(() => import('../views/apps/kanban/Kanban')));
@@ -506,50 +499,6 @@ const Router = [
         element: (
           <ProtectedRoute requiredPermission="admin">
             <SiteStructureVisualizer />
-          </ProtectedRoute>
-        )
-      },
-      
-      // OM OS Registry
-      {
-        path: '/devel/om-os/registry',
-        element: (
-          <ProtectedRoute requiredPermission="admin">
-            <OMOSRegistry />
-          </ProtectedRoute>
-        )
-      },
-      
-      // Records Suite
-      {
-        path: '/devel/records-suite',
-        element: (
-          <ProtectedRoute requiredPermission="admin">
-            <RecordsSuiteHome />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/devel/records-suite/templates',
-        element: (
-          <ProtectedRoute requiredPermission="admin">
-            <TemplateGallery />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/devel/records-suite/customize',
-        element: (
-          <ProtectedRoute requiredPermission="admin">
-            <ParishCustomizer />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/devel/records-suite/view',
-        element: (
-          <ProtectedRoute requiredPermission="admin">
-            <RecordsViewer />
           </ProtectedRoute>
         )
       },
