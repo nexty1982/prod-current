@@ -8,6 +8,7 @@ import HeadlineSourcePicker from '../components/headlines/HeadlineSourcePicker';
 import SmartRedirect from '../components/routing/SmartRedirect';
 import ComingSoon from '../components/shared/ComingSoon';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
+import { RecordsProvider } from '../features/records-centralized/context/RecordsProvider';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -187,6 +188,9 @@ const RecordsManagement = Loadable(lazy(() => import('../pages/apps/records/inde
 
 // Church Records UI (based on eco-product-list)
 const ChurchRecordsList = Loadable(lazy(() => import('../pages/apps/records-ui/index')));
+
+// Records Centralized - New Auto-Discovery System
+const BasicRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/BasicRecordsPage')));
 
 // ui components
 const MuiAlert = Loadable(lazy(() => import('../views/ui-components/MuiAlert')));
@@ -1165,7 +1169,9 @@ const Router = [
         path: '/records/baptism',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <SSPPOCRecordsPage />
+            <RecordsProvider>
+              <SSPPOCRecordsPage />
+            </RecordsProvider>
           </ProtectedRoute>
         )
       },
@@ -1197,7 +1203,9 @@ const Router = [
         path: '/records',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <ChurchRecordsPage />
+            <RecordsProvider>
+              <ChurchRecordsPage />
+            </RecordsProvider>
           </ProtectedRoute>
         )
       },
@@ -1206,7 +1214,9 @@ const Router = [
         path: '/apps/records',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <RecordsManagement />
+            <RecordsProvider>
+              <RecordsManagement />
+            </RecordsProvider>
           </ProtectedRoute>
         )
       },
@@ -1214,7 +1224,9 @@ const Router = [
         path: '/apps/records/baptism',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <SSPPOCRecordsPage />
+            <RecordsProvider>
+              <SSPPOCRecordsPage />
+            </RecordsProvider>
           </ProtectedRoute>
         )
       },
@@ -1222,7 +1234,9 @@ const Router = [
         path: '/apps/records/marriage',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <SSPPOCRecordsPage />
+            <RecordsProvider>
+              <SSPPOCRecordsPage />
+            </RecordsProvider>
           </ProtectedRoute>
         )
       },
@@ -1230,7 +1244,9 @@ const Router = [
         path: '/apps/records/funeral',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <SSPPOCRecordsPage />
+            <RecordsProvider>
+              <SSPPOCRecordsPage />
+            </RecordsProvider>
           </ProtectedRoute>
         )
       },
@@ -1239,7 +1255,20 @@ const Router = [
         path: '/apps/records-ui',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <ChurchRecordsList />
+            <RecordsProvider>
+              <ChurchRecordsList />
+            </RecordsProvider>
+          </ProtectedRoute>
+        )
+      },
+      // Test Records Auto-Discovery
+      {
+        path: '/apps/records/explorer',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <RecordsProvider>
+              <BasicRecordsPage />
+            </RecordsProvider>
           </ProtectedRoute>
         )
       },

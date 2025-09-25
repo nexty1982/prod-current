@@ -161,6 +161,12 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
+        title: 'Records Explorer',
+        icon: IconPoint,
+        href: '/apps/records/explorer',
+      },
+      {
+        id: uniqueId(),
         title: 'Legacy Records',
         icon: IconPoint,
         href: '/records',
