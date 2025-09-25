@@ -182,6 +182,17 @@ const Menuitems: MenuitemsType[] = [
 
   {
     navlabel: true,
+    subheader: '🛠️ Devel Tools',
+  },
+  {
+    id: uniqueId(),
+    title: 'Records Explorer',
+    icon: IconDatabase,
+    href: '/devel/records-explorer',
+  },
+
+  {
+    navlabel: true,
     subheader: '🤖 Orthodox Metrics Admin OMAI Studio',
   },
   {

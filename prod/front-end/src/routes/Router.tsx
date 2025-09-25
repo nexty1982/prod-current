@@ -78,7 +78,7 @@ const EcomProductCheckout = Loadable(
 const Calendar = Loadable(lazy(() => import('../views/apps/calendar/BigCalendar')));
 const OrthodoxLiturgicalCalendar = Loadable(lazy(() => import('../views/apps/calendar/OrthodoxLiturgicalCalendar')));
 const SiteClone = Loadable(lazy(() => import('../views/apps/site-clone/SiteClone')));
-const Logs = Loadable(lazy(() => import('../views/apps/logs/Logs')));
+// const Logs = Loadable(lazy(() => import('../views/apps/logs/Logs')));
 const UserProfile = Loadable(lazy(() => import('../views/apps/user-profile/UserProfile')));
 const Followers = Loadable(lazy(() => import('../views/apps/user-profile/Followers')));
 const Friends = Loadable(lazy(() => import('../views/apps/user-profile/Friends')));
@@ -174,6 +174,9 @@ const EditableRecordPage = Loadable(lazy(() => import('../views/EditableRecordPa
 const TableThemeEditor = Loadable(lazy(() => import('../demos/TableThemeEditor')));
 const RecordGeneratorPage = Loadable(lazy(() => import('../pages/RecordGeneratorPage')));
 const VisualTestDemo = Loadable(lazy(() => import('../views/demo/VisualTestDemo')));
+
+// Records Explorer (Devel Tools)
+const RecordsExplorer = Loadable(lazy(() => import('../features/records/explorer/RecordsExplorer')));
 
 // Records Pages
 const SSPPOCRecordsPage = Loadable(lazy(() => import('../views/records/SSPPOCRecordsPage')));
@@ -1161,6 +1164,15 @@ const Router = [
                 </ProtectedRoute>
               )
             },
+            // Dynamic Records Explorer - Devel Tools
+            {
+              path: '/devel/records-explorer',
+              element: (
+                <ProtectedRoute requiredRole={['super_admin']}>
+                  <RecordsExplorer />
+                </ProtectedRoute>
+              )
+            },
       {
         path: '/records/baptism',
         element: (
@@ -1303,14 +1315,14 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/apps/logs',
-        element: (
-          <ProtectedRoute>
-            <Logs />
-          </ProtectedRoute>
-        )
-      },
+      // {
+      //   path: '/apps/logs',
+      //   element: (
+      //     <ProtectedRoute>
+      //       <Logs />
+      //     </ProtectedRoute>
+      //   )
+      // },
       
       // =====================================================
       // DYNAMIC ADDON ROUTES
