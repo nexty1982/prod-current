@@ -78,7 +78,7 @@ const EcomProductCheckout = Loadable(
 const Calendar = Loadable(lazy(() => import('../views/apps/calendar/BigCalendar')));
 const OrthodoxLiturgicalCalendar = Loadable(lazy(() => import('../views/apps/calendar/OrthodoxLiturgicalCalendar')));
 const SiteClone = Loadable(lazy(() => import('../views/apps/site-clone/SiteClone')));
-// const Logs = Loadable(lazy(() => import('../views/apps/logs/Logs')));
+
 const UserProfile = Loadable(lazy(() => import('../views/apps/user-profile/UserProfile')));
 const Followers = Loadable(lazy(() => import('../views/apps/user-profile/Followers')));
 const Friends = Loadable(lazy(() => import('../views/apps/user-profile/Friends')));
@@ -130,7 +130,7 @@ const MenuPermissions = Loadable(lazy(() => import('../views/admin/MenuPermissio
 const MenuManagement = Loadable(lazy(() => import('../views/admin/MenuManagement')));
 const OrthodMetricsAdmin = Loadable(lazy(() => import('../views/admin/OrthodoxMetricsAdmin')));
 const AIAdminPanel = Loadable(lazy(() => import('../components/ai/AIAdminPanel')));
-const OMAIUltimateLogger = Loadable(lazy(() => import('../views/logs/LoggerDashboard')));
+const OMAIUltimateLogger = Loadable(lazy(() => import('../components/OMAI/Logger/OMAIUltimateLogger')));
 const ScriptRunner = Loadable(lazy(() => import('../components/admin/ScriptRunner')));
 const SuperAdminDashboard = Loadable(lazy(() => import('../components/admin/SuperAdminDashboard')));
 const SiteEditorDemo = Loadable(lazy(() => import('../views/demo/SiteEditorDemo')));
@@ -1315,14 +1315,14 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      // {
-      //   path: '/apps/logs',
-      //   element: (
-      //     <ProtectedRoute>
-      //       <Logs />
-      //     </ProtectedRoute>
-      //   )
-      // },
+      {
+        path: '/apps/logs',
+        element: (
+          <ProtectedRoute>
+            <ComingSoon pageName="Logs" />
+          </ProtectedRoute>
+        )
+      },
       
       // =====================================================
       // DYNAMIC ADDON ROUTES

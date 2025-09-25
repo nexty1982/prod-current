@@ -43,7 +43,7 @@ export const useRecordsApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const apiCall = useCallback(async <T>(url: string): Promise<T> => {
+  const apiCall = useCallback(async <T,>(url: string): Promise<T> => {
     const response = await fetch(url, {
       method: 'GET',
       credentials: 'include', // Important for session cookies
