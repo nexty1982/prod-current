@@ -167,9 +167,9 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
-        title: 'Enhanced Records',
+        title: 'Records Demo',
         icon: IconPoint,
-        href: '/apps/records/enhanced',
+        href: '/apps/records/demo',
       },
       {
         id: uniqueId(),
@@ -207,6 +207,12 @@ const Menuitems: MenuitemsType[] = [
     title: 'Build Console',
     icon: IconTerminal,
     href: '/admin/build',
+  },
+  {
+    id: uniqueId(),
+    title: 'Records API Detection',
+    icon: IconDatabase,
+    href: '/apps/records/detection-report',
   },
   {
     id: uniqueId(),
