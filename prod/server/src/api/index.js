@@ -10,6 +10,8 @@ const teachingRoutes = require('./teaching');
 const autonomyRoutes = require('./autonomy');
 const analyticsRoutes = require('./analytics');
 const nlpRoutes = require('./nlp'); // New import
+const omOsRoutes = require('./om-os'); // OM OS Registry
+const recordsSuiteRoutes = require('./records-suite'); // Records Suite
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -20,5 +22,7 @@ router.use('/teaching', teachingRoutes);
 router.use('/autonomy', autonomyRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/nlp', nlpRoutes); // New mount
+router.use('/om-os', omOsRoutes); // OM OS Registry routes
+router.use('/records-suite', recordsSuiteRoutes); // Records Suite routes
 
-module.exports = router; 
+module.exports = router;
