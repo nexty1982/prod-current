@@ -319,19 +319,19 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
   // Grid ready event
   const onGridReady = (params: GridReadyEvent) => {
     setGridApi(params.api);
-    console.log('✅ AG Grid ready with', params.api.getDisplayedRowCount(), 'rows');
+    console.log('✅ AG Grid ready with', params?.api?.getDisplayedRowCount(), 'rows');
     console.log('🔍 Grid API methods available:', Object.getOwnPropertyNames(Object.getPrototypeOf(params.api)));
     
     // Get all column definitions
-    const allColumnDefs = params.api.getColumnDefs();
+    const allColumnDefs = params?.api?.getColumnDefs();
     console.log('📋 All column definitions:', allColumnDefs?.map(col => (col as any).field || col.headerName));
     
     // Ensure all columns are visible by default
-    const allColumns = params.api.getAllDisplayedColumns();
+    const allColumns = params?.api?.getAllDisplayedColumns?.() || [];
     console.log('📊 All displayed columns:', allColumns.map(col => col.getColId()));
     
     // Get all columns (including hidden ones)
-    const allGridColumns = params.api.getAllGridColumns();
+    const allGridColumns = params?.api?.getAllGridColumns?.() || [];
     console.log('🔍 All grid columns:', allGridColumns.map(col => col.getColId()));
     
     // Ensure all columns are shown and expand them to show full content
@@ -341,34 +341,34 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
         // Set minimum width to ensure content is not truncated
         // Use a larger minimum width for better content visibility
         const minWidth = Math.max(column.getActualWidth(), 200);
-        if (typeof params.api.setColumnWidths === 'function') {
-          params.api.setColumnWidths([{ key: column.getColId(), newWidth: minWidth }]);
+        if (typeof params?.api?.setColumnWidths === 'function') {
+          params?.api?.setColumnWidths([{ key: column.getColId(), newWidth: minWidth }]);
         }
       }
     });
     
     // Force refresh to ensure all columns are displayed
-    if (typeof params.api.refreshCells === 'function') {
-      params.api.refreshCells();
+    if (typeof params?.api?.refreshCells === 'function') {
+      params?.api?.refreshCells();
     }
     
     // Apply default sort for the current tab
     const defaultSort = DEFAULT_SORT[activeTab];
-    if (typeof params.api.setSortModel === 'function') {
+    if (typeof params?.api?.setSortModel === 'function') {
       console.log(`🎯 Grid ready - applying default sort: ${defaultSort.field} ${defaultSort.dir}`);
-      params.api.setSortModel([{ colId: defaultSort.field, sort: defaultSort.dir }]);
+      params?.api?.setSortModel([{ colId: defaultSort.field, sort: defaultSort.dir }]);
       
       // Force refresh to ensure sorting is visible
       setTimeout(() => {
-        if (typeof params.api.refreshCells === 'function') {
-          params.api.refreshCells();
+        if (typeof params?.api?.refreshCells === 'function') {
+          params?.api?.refreshCells();
         }
       }, 50);
     }
 
 
     
-    console.log('🎯 Final column count:', params.api.getAllDisplayedColumns().length);
+    console.log('🎯 Final column count:', params?.api?.getAllDisplayedColumns?.() || [].length);
   };
 
   // Theme change handler - removed for cleaner UI

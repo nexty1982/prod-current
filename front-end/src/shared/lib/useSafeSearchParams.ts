@@ -15,12 +15,12 @@ export function useSafeSearchParams(): URLSearchParams {
     if (sp && typeof sp.getAll === 'function') {
       searchParams = sp;
     } else {
-      // Fallback: create URLSearchParams from location.search
-      searchParams = new URLSearchParams(location.search || '');
+      // Fallback: create URLSearchParams from location?.search || window?.location?.search
+      searchParams = new URLSearchParams(location?.search || window?.location?.search || '');
     }
   } catch (error) {
-    // Fallback: create URLSearchParams from location.search
-    searchParams = new URLSearchParams(location.search || '');
+    // Fallback: create URLSearchParams from location?.search || window?.location?.search
+    searchParams = new URLSearchParams(location?.search || window?.location?.search || '');
   }
   
   return searchParams;
