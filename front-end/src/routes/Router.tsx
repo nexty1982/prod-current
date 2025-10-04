@@ -111,7 +111,7 @@ const AIAdminPanel = Loadable(lazy(() => import('../features/admin/ai/AIAdminPan
 const OMAIUltimateLogger = Loadable(lazy(() => import('../features/admin/logs/LoggerDashboard')));
 const ScriptRunner = Loadable(lazy(() => import('../features/admin/admin/ScriptRunner')));
 const SuperAdminDashboard = Loadable(lazy(() => import('../features/admin/admin/SuperAdminDashboard')));
-const RouterMenuStudio = Loadable(lazy(() => import('../features/devel-tools/RouterMenuStudio/RouterMenuStudioPage')));
+const RouterMenuStudio = Loadable(lazy(() => import('../features/router-menu-studio/RouterMenuStudioPage')));
 const DynamicRecordsInspector = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsInspector')));
 const RefactorConsole = Loadable(lazy(() => import('../features/devel-tools/refactor-console/RefactorConsole')));
 

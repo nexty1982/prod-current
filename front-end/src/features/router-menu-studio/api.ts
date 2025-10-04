@@ -116,6 +116,12 @@ class RouterMenuStudioAPI {
 
     try {
       const response = await fetch(url, config);
+      
+      // Defensive check for non-JSON responses
+      if (!response.headers.get('content-type')?.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Non-JSON response (${response.status}): ${text.slice(0,120)}`);
+      }
       const data = await response.json();
       
       if (!response.ok) {
