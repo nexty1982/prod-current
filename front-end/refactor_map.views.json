@@ -1,0 +1,282 @@
+{
+  "refactor_plan": {
+    "description": "Move all components from src/views/** to src/components/** using OrthodoxMetrics naming convention",
+    "timestamp": "2024-01-15T19:00:00Z",
+    "convention": "src/components/<domain>-management/<slug>/<ComponentName>.tsx",
+    "excludes": {
+      "description": "Files to exclude from canonical tree - archive to src/misc/lab/",
+      "patterns": [
+        "**/*Test.tsx",
+        "**/*Tests.tsx", 
+        "**/*Working.tsx",
+        "**/*.backup.*",
+        "**/*_broken*.*",
+        "**/*_corrupted*.*",
+        "**/*_old*.*"
+      ]
+    },
+    "moves": [
+      {
+        "from": "src/views/admin/UserManagement.tsx",
+        "to": "src/components/user-management/usr-core/UserManagement.tsx",
+        "domain": "user",
+        "slug": "usr-core",
+        "reasoning": "User management core functionality",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/SessionManagement.tsx",
+        "to": "src/components/user-management/usr-core/SessionManagement.tsx",
+        "domain": "user",
+        "slug": "usr-core",
+        "reasoning": "User session management",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/RoleManagement.tsx",
+        "to": "src/components/user-management/usr-roles/RoleManagement.tsx",
+        "domain": "user",
+        "slug": "usr-roles",
+        "reasoning": "User roles and permissions management",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/MenuManagement.tsx",
+        "to": "src/components/user-management/usr-roles/MenuManagement.tsx",
+        "domain": "user",
+        "slug": "usr-roles",
+        "reasoning": "Menu permissions management",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/MenuPermissions.tsx",
+        "to": "src/components/user-management/usr-roles/MenuPermissions.tsx",
+        "domain": "user",
+        "slug": "usr-roles",
+        "reasoning": "Menu permissions configuration",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/ChurchAdminPanel.tsx",
+        "to": "src/components/church-management/ch-panel/ChurchAdminPanel.tsx",
+        "domain": "church",
+        "slug": "ch-panel",
+        "reasoning": "Church admin panel (prefix rule)",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/ChurchAdminList.tsx",
+        "to": "src/components/church-management/ch-panel/ChurchAdminList.tsx",
+        "domain": "church",
+        "slug": "ch-panel",
+        "reasoning": "Church directory/list management",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/AccessControlDashboard.tsx",
+        "to": "src/components/dashboard-management/acl-dash/AccessControlDashboard.tsx",
+        "domain": "dashboard",
+        "slug": "acl-dash",
+        "reasoning": "Access control dashboard (prefix rule)",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/RecordTemplateManager.tsx",
+        "to": "src/components/record-management/rec-template/RecordTemplateManager.tsx",
+        "domain": "record",
+        "slug": "rec-template",
+        "reasoning": "Record template management",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/AdminSettings.tsx",
+        "to": "src/components/site-management/site-set/AdminSettings.tsx",
+        "domain": "site",
+        "slug": "site-set",
+        "reasoning": "Site settings and configuration",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/ActivityLogs.tsx",
+        "to": "src/components/log-management/log-core/ActivityLogs.tsx",
+        "domain": "log",
+        "slug": "log-core",
+        "reasoning": "Activity logging core functionality",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/AdminLogs.tsx",
+        "to": "src/components/log-management/log-core/AdminLogs.tsx",
+        "domain": "log",
+        "slug": "log-core",
+        "reasoning": "Admin logging functionality",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/BlogAdmin.tsx",
+        "to": "src/components/blog-management/blog-core/BlogAdmin.tsx",
+        "domain": "blog",
+        "slug": "blog-core",
+        "reasoning": "Blog administration",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/OmaiSpinSettings.tsx",
+        "to": "src/components/omai-management/omai-set/OmaiSpinSettings.tsx",
+        "domain": "omai",
+        "slug": "omai-set",
+        "reasoning": "OMAI settings and configuration",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/OrthodoxMetricsAdmin.tsx",
+        "to": "src/components/dashboard-management/dash-core/OrthodoxMetricsAdmin.tsx",
+        "domain": "dashboard",
+        "slug": "dash-core",
+        "reasoning": "OrthodoxMetrics admin core",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/admin/JITTerminalConsole.tsx",
+        "to": "src/components/helper-management/hlp-console/JITTerminalConsole.tsx",
+        "domain": "helper",
+        "slug": "hlp-console",
+        "reasoning": "Helper terminal console tool",
+        "routed": true,
+        "category": "admin"
+      },
+      {
+        "from": "src/views/SSPPOCRecordsPage.tsx",
+        "to": "src/components/record-management/rec-dis/SSPPOCRecordsPage.tsx",
+        "domain": "record",
+        "slug": "rec-dis",
+        "reasoning": "SSP POC records display page",
+        "routed": true,
+        "category": "records"
+      },
+      {
+        "from": "src/views/AdvancedRecordsDemo.tsx",
+        "to": "src/components/record-management/rec-dis/AdvancedRecordsDemo.tsx",
+        "domain": "record",
+        "slug": "rec-dis",
+        "reasoning": "Advanced records demo display",
+        "routed": true,
+        "category": "records"
+      },
+      {
+        "from": "src/views/EditableRecordPage.tsx",
+        "to": "src/components/record-management/rec-dis/EditableRecordPage.tsx",
+        "domain": "record",
+        "slug": "rec-dis",
+        "reasoning": "Editable record page display",
+        "routed": true,
+        "category": "records"
+      },
+      {
+        "from": "src/views/spinner/Spinner.tsx",
+        "to": "src/components/om-ui/Spinner.tsx",
+        "domain": "om-ui",
+        "slug": "om-ui",
+        "reasoning": "UI primitive - merge into om-ui",
+        "routed": false,
+        "category": "ui"
+      }
+    ],
+    "archives": [
+      {
+        "from": "src/views/admin/UserManagement-Fixed.tsx",
+        "to": "src/misc/lab/UserManagement-Fixed.tsx",
+        "reasoning": "Experimental variant - archive to lab"
+      },
+      {
+        "from": "src/views/admin/UserManagement_Enhanced.tsx",
+        "to": "src/misc/lab/UserManagement_Enhanced.tsx",
+        "reasoning": "Experimental variant - archive to lab"
+      },
+      {
+        "from": "src/views/admin/UserManagement_Fixed.tsx",
+        "to": "src/misc/lab/UserManagement_Fixed.tsx",
+        "reasoning": "Experimental variant - archive to lab"
+      },
+      {
+        "from": "src/views/admin/UserManagement_backup.tsx",
+        "to": "src/misc/lab/UserManagement_backup.tsx",
+        "reasoning": "Backup file - archive to lab"
+      },
+      {
+        "from": "src/views/admin/UserManagement_Enhanced.tsx",
+        "to": "src/misc/lab/UserManagement_Enhanced.tsx",
+        "reasoning": "Enhanced variant - archive to lab"
+      },
+      {
+        "from": "src/views/admin/UserManagement_corrupted.tsx",
+        "to": "src/misc/lab/UserManagement_corrupted.tsx",
+        "reasoning": "Corrupted file - archive to lab"
+      },
+      {
+        "from": "src/views/admin/UserManagement-Broken.tsx",
+        "to": "src/misc/lab/UserManagement-Broken.tsx",
+        "reasoning": "Broken variant - archive to lab"
+      },
+      {
+        "from": "src/views/admin/ChurchAdminPanelWorking.tsx",
+        "to": "src/misc/lab/ChurchAdminPanelWorking.tsx",
+        "reasoning": "Working variant - archive to lab"
+      },
+      {
+        "from": "src/views/admin/ChurchAdminPanelTest.tsx",
+        "to": "src/misc/lab/ChurchAdminPanelTest.tsx",
+        "reasoning": "Test variant - archive to lab"
+      },
+      {
+        "from": "src/views/admin/ChurchAdminPanel.jsx",
+        "to": "src/misc/lab/ChurchAdminPanel.jsx",
+        "reasoning": "JSX variant - archive to lab"
+      },
+      {
+        "from": "src/views/admin/SessionManagement.tsx.backup",
+        "to": "src/misc/lab/SessionManagement.tsx.backup",
+        "reasoning": "Backup file - archive to lab"
+      },
+      {
+        "from": "src/views/admin/ActivityLogs.tsx.backup",
+        "to": "src/misc/lab/ActivityLogs.tsx.backup",
+        "reasoning": "Backup file - archive to lab"
+      }
+    ],
+    "summary": {
+      "total_files": 32,
+      "canonical_moves": 20,
+      "archived_variants": 12,
+      "routed_components": 18,
+      "non_routed_components": 2,
+      "domains": {
+        "user-management": 5,
+        "church-management": 2,
+        "dashboard-management": 2,
+        "record-management": 4,
+        "log-management": 2,
+        "site-management": 1,
+        "blog-management": 1,
+        "omai-management": 1,
+        "helper-management": 1,
+        "om-ui": 1
+      }
+    }
+  }
+}

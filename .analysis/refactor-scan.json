@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2025-10-04T17:35:03.494Z",
+  "root": "/var/www/orthodoxmetrics/prod",
+  "summary": {
+    "totalFiles": 0,
+    "totalDirs": 0,
+    "duplicates": 0,
+    "likelyInProd": 0,
+    "highRisk": 0,
+    "inDevelopment": 0,
+    "legacyOrDupes": 0
+  },
+  "nodes": []
+}

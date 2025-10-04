@@ -1,0 +1,11 @@
+{
+  "from": "src/views/admin/AccessControlDashboard.tsx",
+  "to": "src/components/dashboard-management/acl-dash/AccessControlDashboard.tsx",
+  "domain": "dashboard-management",
+  "slug": "acl-dash",
+  "importUpdates": 0,
+  "notes": [
+    "Dry run: no changes made"
+  ],
+  "success": true
+}

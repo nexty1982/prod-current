@@ -1,0 +1,922 @@
+{
+  "moved": [
+    {
+      "source": "front-end/src/components/charts/Area Chart/code/AreaChartCode.tsx",
+      "target": "front-end/src/dev/examples/components/charts/Area Chart/code/AreaChartCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/charts/Candlestick Chart/code/CandlestickChartCode.tsx",
+      "target": "front-end/src/dev/examples/components/charts/Candlestick Chart/code/CandlestickChartCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/charts/Column Chart/code/ColumnChartCode.tsx",
+      "target": "front-end/src/dev/examples/components/charts/Column Chart/code/ColumnChartCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/charts/Doughnut Charts/code/DoughnutChartsCode.tsx",
+      "target": "front-end/src/dev/examples/components/charts/Doughnut Charts/code/DoughnutChartsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/charts/Gradient Chart/code/GradientChartCode.tsx",
+      "target": "front-end/src/dev/examples/components/charts/Gradient Chart/code/GradientChartCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/charts/Line Chart/code/LineChartCode.tsx",
+      "target": "front-end/src/dev/examples/components/charts/Line Chart/code/LineChartCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/charts/Pie Charts/code/PieChartsCode.tsx",
+      "target": "front-end/src/dev/examples/components/charts/Pie Charts/code/PieChartsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/charts/Radar Charts/code/RadarChartsCode.tsx",
+      "target": "front-end/src/dev/examples/components/charts/Radar Charts/code/RadarChartsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/charts/Radialbar Charts/code/RadialbarChartsCode.tsx",
+      "target": "front-end/src/dev/examples/components/charts/Radialbar Charts/code/RadialbarChartsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-custom/code/FormCustomCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-custom/code/FormCustomCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/autoComplete/code/CheckboxesCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/autoComplete/code/CheckboxesCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/autoComplete/code/ComboBoxCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/autoComplete/code/ComboBoxCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/autoComplete/code/ControlledStateCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/autoComplete/code/ControlledStateCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/autoComplete/code/CountrySelectCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/autoComplete/code/CountrySelectCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/autoComplete/code/FreeSoloCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/autoComplete/code/FreeSoloCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/autoComplete/code/MultipleValuesCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/autoComplete/code/MultipleValuesCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/autoComplete/code/SizesCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/autoComplete/code/SizesCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/ColorButtonGroupCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/ColorButtonGroupCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/ColorsCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/ColorsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/DefaultButtonGroupCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/DefaultButtonGroupCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/DefaultCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/DefaultCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/FABCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/FABCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/FABColorCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/FABColorCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/FABSizeCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/FABSizeCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/IconColorCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/IconColorCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/IconSizesCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/IconSizesCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/LoadingButtonsCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/LoadingButtonsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/OutlineSizeCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/OutlineSizeCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/OutlinedCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/OutlinedCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/OutlinedIconCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/OutlinedIconCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/SizeButtonGroupCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/SizeButtonGroupCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/SizesCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/SizesCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/TextButtonGroupCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/TextButtonGroupCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/TextCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/TextCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/TextColorCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/TextColorCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/TextSizesCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/TextSizesCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/button/code/VerticalButtonGroupCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/button/code/VerticalButtonGroupCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/checkbox/code/ColorsCheckboxCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/checkbox/code/ColorsCheckboxCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/checkbox/code/CustomEleCheckboxCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/checkbox/code/CustomEleCheckboxCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/checkbox/code/DefaultCheckboxCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/checkbox/code/DefaultCheckboxCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/checkbox/code/DefaultcolorsCheckboxCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/checkbox/code/DefaultcolorsCheckboxCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/checkbox/code/PositionCheckboxCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/checkbox/code/PositionCheckboxCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/checkbox/code/SizesCheckboxCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/checkbox/code/SizesCheckboxCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/date-time/code/BasicDateTimeCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/date-time/code/BasicDateTimeCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/date-time/code/DifferentDesignCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/date-time/code/DifferentDesignCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/date-time/code/TimepickerCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/date-time/code/TimepickerCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/radio/code/ColorLabelRadioCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/radio/code/ColorLabelRadioCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/radio/code/ColorsRadioCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/radio/code/ColorsRadioCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/radio/code/CustomExRadioCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/radio/code/CustomExRadioCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/radio/code/DefaultRadioCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/radio/code/DefaultRadioCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/radio/code/PositionRadioCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/radio/code/PositionRadioCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/radio/code/SizesRadioCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/radio/code/SizesRadioCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/slider/code/CustomSliderCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/slider/code/CustomSliderCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/slider/code/DefaultsliderCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/slider/code/DefaultsliderCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/slider/code/DisabledSliderCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/slider/code/DisabledSliderCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/slider/code/DiscreteSliderCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/slider/code/DiscreteSliderCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/slider/code/RangesliderCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/slider/code/RangesliderCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/slider/code/TemperatureRangeCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/slider/code/TemperatureRangeCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/slider/code/VolumesliderCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/slider/code/VolumesliderCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/switch/code/ColorsSwitchCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/switch/code/ColorsSwitchCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/switch/code/CustomSwitchCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/switch/code/CustomSwitchCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/switch/code/DefaultLabelSwitchCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/switch/code/DefaultLabelSwitchCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/switch/code/DefaultSwitchCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/switch/code/DefaultSwitchCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/switch/code/PositionSwitchCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/switch/code/PositionSwitchCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-elements/switch/code/SizesSwitchCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-elements/switch/code/SizesSwitchCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-horizontal/code/BasicIconsCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-horizontal/code/BasicIconsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-horizontal/code/BasicLayoutCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-horizontal/code/BasicLayoutCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-horizontal/code/FormSeparatorCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-horizontal/code/FormSeparatorCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-layouts/code/BasicHeaderFormCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-layouts/code/BasicHeaderFormCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-layouts/code/DefaultFormCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-layouts/code/DefaultFormCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-layouts/code/InputVariantsCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-layouts/code/InputVariantsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-layouts/code/LeftIconFormCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-layouts/code/LeftIconFormCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-validation/code/CheckboxCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-validation/code/CheckboxCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-validation/code/OnLeaveCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-validation/code/OnLeaveCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-validation/code/RadioCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-validation/code/RadioCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-validation/code/SelectCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-validation/code/SelectCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-vertical/code/BasicIconsCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-vertical/code/BasicIconsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-vertical/code/BasicLayoutCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-vertical/code/BasicLayoutCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/forms/form-wizard/code/FormWizardCode.tsx",
+      "target": "front-end/src/dev/examples/components/forms/form-wizard/code/FormWizardCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/accordion/code/BasicCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/accordion/code/BasicCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/accordion/code/ControlledCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/accordion/code/ControlledCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/alert/code/ActionCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/alert/code/ActionCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/alert/code/DescriptionCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/alert/code/DescriptionCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/alert/code/FilledCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/alert/code/FilledCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/alert/code/OutlinedCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/alert/code/OutlinedCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/alert/code/TransitionCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/alert/code/TransitionCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/avatar/code/GroupedCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/avatar/code/GroupedCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/avatar/code/GroupedSizeCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/avatar/code/GroupedSizeCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/avatar/code/IconAvatarsCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/avatar/code/IconAvatarsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/avatar/code/ImageAvatarsCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/avatar/code/ImageAvatarsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/avatar/code/LetterAvatarsCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/avatar/code/LetterAvatarsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/avatar/code/SizesCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/avatar/code/SizesCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/avatar/code/VariantCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/avatar/code/VariantCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/avatar/code/WithBadgeCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/avatar/code/WithBadgeCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/chip/code/CustomIconCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/chip/code/CustomIconCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/chip/code/DisabledCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/chip/code/DisabledCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/chip/code/FilledCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/chip/code/FilledCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/chip/code/OutlinedCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/chip/code/OutlinedCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/chip/code/SizesCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/chip/code/SizesCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/dialog/code/AlertCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/dialog/code/AlertCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/dialog/code/FormCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/dialog/code/FormCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/dialog/code/FullScreenCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/dialog/code/FullScreenCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/dialog/code/MaxWidthCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/dialog/code/MaxWidthCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/dialog/code/ResponsiveFullscreenCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/dialog/code/ResponsiveFullscreenCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/dialog/code/ScrollingContentCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/dialog/code/ScrollingContentCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/dialog/code/SimpleCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/dialog/code/SimpleCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/dialog/code/TransitionCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/dialog/code/TransitionCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/lists/code/ControlsListCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/lists/code/ControlsListCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/lists/code/FolderListCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/lists/code/FolderListCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/lists/code/NestedListCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/lists/code/NestedListCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/lists/code/SelectedListCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/lists/code/SelectedListCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/lists/code/SimpleListCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/lists/code/SimpleListCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/lists/code/SwitchListCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/lists/code/SwitchListCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/popover/code/ClickPopoverCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/popover/code/ClickPopoverCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/popover/code/HoverPopoverCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/popover/code/HoverPopoverCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tabs/code/IconBottomCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tabs/code/IconBottomCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tabs/code/IconCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tabs/code/IconCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tabs/code/IconLeftCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tabs/code/IconLeftCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tabs/code/IconRightCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tabs/code/IconRightCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tabs/code/IconWithLabelCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tabs/code/IconWithLabelCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tabs/code/ScrollableCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tabs/code/ScrollableCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tabs/code/TextCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tabs/code/TextCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tabs/code/VerticalCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tabs/code/VerticalCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tooltip/code/ArrowTooltipCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tooltip/code/ArrowTooltipCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tooltip/code/PositionsTooltipCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tooltip/code/PositionsTooltipCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tooltip/code/SimpleTooltipCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tooltip/code/SimpleTooltipCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tooltip/code/TransitionsCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tooltip/code/TransitionsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/tooltip/code/VariableWidthCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/tooltip/code/VariableWidthCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/transfer-list/code/BasicTransferListCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/transfer-list/code/BasicTransferListCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/transfer-list/code/EnhancedTransferListCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/transfer-list/code/EnhancedTransferListCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/Heading1Code.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/Heading1Code.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/Heading2Code.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/Heading2Code.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/Heading3Code.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/Heading3Code.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/Heading4Code.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/Heading4Code.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/Heading5Code.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/Heading5Code.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/Heading6Code.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/Heading6Code.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/Subtitle1Code.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/Subtitle1Code.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/Subtitle2Code.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/Subtitle2Code.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/TextErrorCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/TextErrorCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/TextInfoCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/TextInfoCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/TextPrimaryCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/TextPrimaryCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/TextSecondaryCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/TextSecondaryCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/TextSuccessCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/TextSuccessCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/material-ui/typography/code/TextWarningCode.tsx",
+      "target": "front-end/src/dev/examples/components/material-ui/typography/code/TextWarningCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/areachartscode/AreaChartConnectNullsCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/areachartscode/AreaChartConnectNullsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/areachartscode/AreaChartFillByValueCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/areachartscode/AreaChartFillByValueCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/areachartscode/PercentAreaCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/areachartscode/PercentAreaCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/areachartscode/SimpleAreaCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/areachartscode/SimpleAreaCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/areachartscode/StackedAreaCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/areachartscode/StackedAreaCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/areachartscode/TinyAreaCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/areachartscode/TinyAreaCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/barchartcode/BarChartStackedBySignCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/barchartcode/BarChartStackedBySignCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/barchartcode/BiaxialBarCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/barchartcode/BiaxialBarCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/barchartcode/MixedBarCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/barchartcode/MixedBarCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/barchartcode/PositiveAndNegativeBarCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/barchartcode/PositiveAndNegativeBarCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/barchartcode/SimpleBarCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/barchartcode/SimpleBarCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/barchartcode/StackedBarCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/barchartcode/StackedBarCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/barchartcode/TinyBarCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/barchartcode/TinyBarCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/gaugechartscode/ArcDesignCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/gaugechartscode/ArcDesignCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/gaugechartscode/BasicGaugesCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/gaugechartscode/BasicGaugesCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/gaugechartscode/GaugePointerCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/gaugechartscode/GaugePointerCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/linechartscode/BiaxialLineCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/linechartscode/BiaxialLineCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/linechartscode/DashedLineCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/linechartscode/DashedLineCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/linechartscode/LineChartWithReferenceLinesCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/linechartscode/LineChartWithReferenceLinesCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/linechartscode/LinewithforecastCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/linechartscode/LinewithforecastCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/linechartscode/SimpleLineCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/linechartscode/SimpleLineCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/linechartscode/TinyLineCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/linechartscode/TinyLineCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/piechartcode/BasicPieCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/piechartcode/BasicPieCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/piechartcode/OnSeriesItemClickCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/piechartcode/OnSeriesItemClickCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/piechartcode/PieChartWithCenterLabelCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/piechartcode/PieChartWithCenterLabelCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/piechartcode/PieChartWithCustomizedLabelCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/piechartcode/PieChartWithCustomizedLabelCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/piechartcode/PieChartWithPaddingAngleCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/piechartcode/PieChartWithPaddingAngleCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/piechartcode/StraightAnglePieCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/piechartcode/StraightAnglePieCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/piechartcode/TwoLevelPieCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/piechartcode/TwoLevelPieCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/piechartcode/TwoSimplePieCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/piechartcode/TwoSimplePieCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/scatterchartscode/BasicScatterCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/scatterchartscode/BasicScatterCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/scatterchartscode/ScatterClickNoSnapCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/scatterchartscode/ScatterClickNoSnapCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/scatterchartscode/ScatterDatasetCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/scatterchartscode/ScatterDatasetCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/scatterchartscode/VoronoiInteractionCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/scatterchartscode/VoronoiInteractionCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/sparklinecode/AreaSparkLineCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/sparklinecode/AreaSparkLineCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/sparklinecode/BasicSparkLineCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/sparklinecode/BasicSparkLineCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muicharts/code/sparklinecode/BasicSparkLineCustomizationCode.tsx",
+      "target": "front-end/src/dev/examples/components/muicharts/code/sparklinecode/BasicSparkLineCustomizationCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muitrees/code/simpletreecode/ApiMethodFocusItemCode.tsx",
+      "target": "front-end/src/dev/examples/components/muitrees/code/simpletreecode/ApiMethodFocusItemCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muitrees/code/simpletreecode/ApiMethodSetItemExpansionCode.tsx",
+      "target": "front-end/src/dev/examples/components/muitrees/code/simpletreecode/ApiMethodSetItemExpansionCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muitrees/code/simpletreecode/BasicCustomIconsCode.tsx",
+      "target": "front-end/src/dev/examples/components/muitrees/code/simpletreecode/BasicCustomIconsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muitrees/code/simpletreecode/BasicSimpleTreeViewCode.tsx",
+      "target": "front-end/src/dev/examples/components/muitrees/code/simpletreecode/BasicSimpleTreeViewCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muitrees/code/simpletreecode/CheckboxSelectionCode.tsx",
+      "target": "front-end/src/dev/examples/components/muitrees/code/simpletreecode/CheckboxSelectionCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muitrees/code/simpletreecode/ControlledExpansionTreeCode.tsx",
+      "target": "front-end/src/dev/examples/components/muitrees/code/simpletreecode/ControlledExpansionTreeCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muitrees/code/simpletreecode/ControlledSelectionCode.tsx",
+      "target": "front-end/src/dev/examples/components/muitrees/code/simpletreecode/ControlledSelectionCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muitrees/code/simpletreecode/CustomTreeItemCode.tsx",
+      "target": "front-end/src/dev/examples/components/muitrees/code/simpletreecode/CustomTreeItemCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muitrees/code/simpletreecode/MultiSelectTreeViewCode.tsx",
+      "target": "front-end/src/dev/examples/components/muitrees/code/simpletreecode/MultiSelectTreeViewCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/muitrees/code/simpletreecode/TrackitemclicksTreeCode.tsx",
+      "target": "front-end/src/dev/examples/components/muitrees/code/simpletreecode/TrackitemclicksTreeCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/tables/code/BasicTableCode.tsx",
+      "target": "front-end/src/dev/examples/components/tables/code/BasicTableCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/banners/code/EmptyCartCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/banners/code/EmptyCartCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/banners/code/ErrorBannerCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/banners/code/ErrorBannerCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/banners/code/FriendCardCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/banners/code/FriendCardCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/banners/code/NotificationCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/banners/code/NotificationCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/banners/code/TransectionCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/banners/code/TransectionCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/cards/code/ComplexCardCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/cards/code/ComplexCardCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/cards/code/EcommerceCardCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/cards/code/EcommerceCardCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/cards/code/FollowerCardCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/cards/code/FollowerCardCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/cards/code/FriendCardCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/cards/code/FriendCardCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/cards/code/GiftCardCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/cards/code/GiftCardCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/cards/code/MusicCardCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/cards/code/MusicCardCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/cards/code/ProfileCardCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/cards/code/ProfileCardCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/cards/code/SettingsCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/cards/code/SettingsCode.tsx"
+    },
+    {
+      "source": "front-end/src/components/widgets/cards/code/UpcomingActivityCode.tsx",
+      "target": "front-end/src/dev/examples/components/widgets/cards/code/UpcomingActivityCode.tsx"
+    },
+    {
+      "source": "front-end/src/Test.tsx",
+      "target": "front-end/src/dev/Test.tsx"
+    },
+    {
+      "source": "front-end/src/components/OMAI/Logger/Demo.tsx",
+      "target": "front-end/src/dev/Demo.tsx"
+    },
+    {
+      "source": "front-end/src/components/OcrScanPreview.tsx",
+      "target": "front-end/src/dev/OcrScanPreview.tsx"
+    },
+    {
+      "source": "front-end/src/components/SiteEditorTest.tsx",
+      "target": "front-end/src/dev/SiteEditorTest.tsx"
+    },
+    {
+      "source": "front-end/src/components/TableThemeDemo.tsx",
+      "target": "front-end/src/dev/TableThemeDemo.tsx"
+    },
+    {
+      "source": "front-end/src/components/admin/QuestionnairePreview.tsx",
+      "target": "front-end/src/dev/QuestionnairePreview.tsx"
+    },
+    {
+      "source": "front-end/src/components/apps/invoice/Invoice-detail/InvoicePDFPreview.tsx",
+      "target": "front-end/src/dev/InvoicePDFPreview.tsx"
+    },
+    {
+      "source": "front-end/src/components/demos/OrthodoxThemeDemo.tsx",
+      "target": "front-end/src/dev/OrthodoxThemeDemo.tsx"
+    },
+    {
+      "source": "front-end/src/pages/omb/ComponentPreview.tsx",
+      "target": "front-end/src/dev/ComponentPreview.tsx"
+    },
+    {
+      "source": "front-end/src/pages/sandbox/component-preview.tsx",
+      "target": "front-end/src/dev/component-preview.tsx"
+    },
+    {
+      "source": "front-end/src/views/AdvancedRecordsDemo.tsx",
+      "target": "front-end/src/dev/AdvancedRecordsDemo.tsx"
+    },
+    {
+      "source": "front-end/src/views/admin/ChurchAdminPanelTest.tsx",
+      "target": "front-end/src/dev/ChurchAdminPanelTest.tsx"
+    },
+    {
+      "source": "front-end/src/views/apps/cms/EnhancedPageEditorTest.tsx",
+      "target": "front-end/src/dev/EnhancedPageEditorTest.tsx"
+    },
+    {
+      "source": "front-end/src/views/apps/cms/PageEditorTest.tsx",
+      "target": "front-end/src/dev/PageEditorTest.tsx"
+    },
+    {
+      "source": "front-end/src/views/apps/cms/SimplePageEditorTest.tsx",
+      "target": "front-end/src/dev/SimplePageEditorTest.tsx"
+    },
+    {
+      "source": "front-end/src/views/demo/AutoFixDemo.tsx",
+      "target": "front-end/src/dev/AutoFixDemo.tsx"
+    },
+    {
+      "source": "front-end/src/views/demo/GitOpsDemo.tsx",
+      "target": "front-end/src/dev/GitOpsDemo.tsx"
+    },
+    {
+      "source": "front-end/src/views/demo/OcrScanPreviewDemo.tsx",
+      "target": "front-end/src/dev/OcrScanPreviewDemo.tsx"
+    },
+    {
+      "source": "front-end/src/views/demo/SiteEditorDemo.tsx",
+      "target": "front-end/src/dev/SiteEditorDemo.tsx"
+    },
+    {
+      "source": "front-end/src/views/demo/VisualTestDemo.tsx",
+      "target": "front-end/src/dev/VisualTestDemo.tsx"
+    },
+    {
+      "source": "front-end/src/views/pages/frontend-pages/OrthodoxMetricsDemo.tsx",
+      "target": "front-end/src/dev/OrthodoxMetricsDemo.tsx"
+    },
+    {
+      "source": "front-end/src/components/OcrScanPreview.md",
+      "target": "docs/components/OcrScanPreview.md"
+    },
+    {
+      "source": "front-end/src/components/bigbook/custom/README.md",
+      "target": "docs/components/bigbook/custom/README.md"
+    }
+  ],
+  "skipped": [],
+  "failed": []
+}

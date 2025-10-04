@@ -1,0 +1,20 @@
+{
+  "summary": {
+    "filesScanned": 7,
+    "jwtFindings": 0,
+    "clientFindings": 0,
+    "serverFindings": 0,
+    "riskScore": 0
+  },
+  "findings": [],
+  "recommendedActions": [
+    "Set secure cookie attributes: HttpOnly, Secure, SameSite=Lax or Strict",
+    "Implement server-side session store with proper logout invalidation",
+    "Add security headers: X-Frame-Options, CSP, X-Content-Type-Options"
+  ],
+  "metadata": {
+    "timestamp": "2025-08-24T23:00:12.034Z",
+    "version": "2.0.0-enhanced",
+    "generator": "omtrace auth-audit"
+  }
+}

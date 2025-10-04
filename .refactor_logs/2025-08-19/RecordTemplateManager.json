@@ -1,0 +1,11 @@
+{
+  "from": "src/views/admin/RecordTemplateManager.tsx",
+  "to": "src/components/record-management/rec-template/RecordTemplateManager.tsx",
+  "domain": "record-management",
+  "slug": "rec-template",
+  "importUpdates": 0,
+  "notes": [
+    "Dry run: no changes made"
+  ],
+  "success": true
+}

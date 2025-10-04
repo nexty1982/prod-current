@@ -1,0 +1,11 @@
+{
+  "from": "src/views/admin/MenuPermissions.tsx",
+  "to": "src/components/site-management/site-roles/MenuPermissions.tsx",
+  "domain": "site-management",
+  "slug": "site-roles",
+  "importUpdates": 0,
+  "notes": [
+    "Dry run: no changes made"
+  ],
+  "success": true
+}

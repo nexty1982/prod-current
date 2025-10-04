@@ -1,0 +1,34 @@
+import Grid2 from '@/components/compat/Grid2';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import React from 'react';
+import { Grid, Typography } from '@mui/material';
+
+
+const FeaturesTitle = () => {
+
+    return (
+        (<Grid2 container spacing={3} justifyContent="center">
+            <Grid2
+                size={{
+                    xs: 12,
+                    sm: 10,
+                    lg: 6
+                }}>
+                <Typography fontSize="16" textTransform="uppercase" color="primary.main" fontWeight={500} textAlign="center" mb={1}>ALMOST COVERED EVERYTHING</Typography>
+                <Typography variant='h2' fontWeight={700} textAlign="center" sx={{
+                    fontSize: {
+                        lg: '36px',
+                        xs: '25px'
+                    },
+                    lineHeight: {
+                        lg: '43px',
+                        xs: '30px'
+                    }
+                }}>Other Amazing Features & Flexibility Provided</Typography>
+            </Grid2>
+        </Grid2>)
+    );
+};
+
+export default FeaturesTitle;

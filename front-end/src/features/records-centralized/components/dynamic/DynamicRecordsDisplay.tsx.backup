@@ -1,0 +1,441 @@
+/**
+ * Canonical Dynamic Records Display Component
+ */
+
+import React, { useMemo, useState } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  Paper,
+  IconButton,
+  Tooltip,
+  CircularProgress,
+  Typography,
+  Box,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+} from '@mui/material';
+import {
+  Visibility as ViewIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  MoreVert as MoreVertIcon,
+} from '@mui/icons-material';
+import { inferColumnsFromRecords, mapFieldDefinitionsToDynamicColumns } from './columnMappers';
+import { renderCellValue } from './cellRenderers';
+
+export interface DynamicColumn {
+  field: string;
+  headerName?: string;
+  valueGetter?: (row: any) => any;
+  cellRenderer?: (value: any, row: any) => React.ReactNode;
+  sortable?: boolean;
+  width?: number;
+  hide?: boolean;
+}
+
+export interface DynamicRecordsDisplayProps {
+  records: any[];
+  columns?: DynamicColumn[];
+  inferColumns?: boolean;
+  columnOrder?: string[];
+  hiddenFields?: string[];
+  dateFields?: string[];
+  loading?: boolean;
+  onView?: (row: any) => void;
+  onEdit?: (row: any) => void;
+  onDelete?: (id: string | number) => void;
+  maxHeight?: number;
+  dense?: boolean;
+  showActions?: boolean;
+  emptyMessage?: string;
+  className?: string;
+}
+
+export interface SortConfig {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
+export const DynamicRecordsDisplay: React.FC<DynamicRecordsDisplayProps> = ({
+  records = [],
+  columns: providedColumns,
+  inferColumns = true,
+  columnOrder = [],
+  hiddenFields = [],
+  dateFields = [],
+  loading = false,
+  onView,
+  onEdit,
+  onDelete,
+  maxHeight = 600,
+  dense = false,
+  showActions = true,
+  emptyMessage = 'No records found',
+  className = '',
+}) => {
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedRow, setSelectedRow] = useState<any>(null);
+
+  const columns = useMemo(() => {
+    if (providedColumns && providedColumns.length > 0) {
+      return providedColumns.filter(col => !col.hide && !hiddenFields.includes(col.field));
+    }
+
+    if (inferColumns && records.length > 0) {
+      return inferColumnsFromRecords(records, {
+        columnOrder,
+        hiddenFields,
+        dateFields,
+      });
+    }
+
+    return [];
+  }, [providedColumns, inferColumns, records, columnOrder, hiddenFields, dateFields]);
+
+  const sortedRecords = useMemo(() => {
+    if (!sortConfig || records.length === 0) {
+      return records;
+    }
+
+    const sortedData = [...records].sort((a, b) => {
+      const column = columns.find((col: any) => col.field === sortConfig.field);
+
+      let aVal = column?.valueGetter ? column.valueGetter(a) : a[sortConfig.field];
+      let bVal = column?.valueGetter ? column.valueGetter(b) : b[sortConfig.field];
+
+      // Handle null/undefined values
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+
+      // Date comparison for date fields or values that parse as dates
+      if (dateFields.includes(sortConfig.field) || 
+          (!isNaN(Date.parse(aVal)) && !isNaN(Date.parse(bVal)))) {
+        const dateA = new Date(aVal);
+        const dateB = new Date(bVal);
+        const result = dateA.getTime() - dateB.getTime();
+        return sortConfig.direction === "asc" ? result : -result;
+      }
+
+      // Numeric comparison
+      const numA = parseFloat(aVal);
+      const numB = parseFloat(bVal);
+      if (!isNaN(numA) && !isNaN(numB)) {
+        const result = numA - numB;
+        return sortConfig.direction === "asc" ? result : -result;
+      }
+
+      // String comparison (case-insensitive)
+      const strA = String(aVal).toLowerCase();
+      const strB = String(bVal).toLowerCase();
+      const result = strA.localeCompare(strB);
+      return sortConfig.direction === "asc" ? result : -result;
+    });
+
+    return sortedData;
+  }, [records, sortConfig, columns, dateFields]);
+
+  const handleSort = (field: string) => {
+    const column = columns.find((col: any) => col.field === field);
+    if (!column?.sortable) return;
+
+    setSortConfig((current: any) => {
+      const newSort = current?.field === field
+        ? current.direction === "asc"
+          ? { field, direction: "desc" as const }
+          : null
+        : { field, direction: "asc" as const };
+      
+      // Call onSortChange callback if provided
+      if (newSort && onSortChange) {
+        onSortChange(newSort);
+      }
+      
+      return newSort;
+    });
+  };
+
+  const handleActionClick = (event: React.MouseEvent<HTMLElement>, row: any) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedRow(row);
+  };
+
+  const handleActionClose = () => {
+    setAnchorEl(null);
+    setSelectedRow(null);
+  };
+
+  const handleAction = (action: 'view' | 'edit' | 'delete') => {
+    if (!selectedRow) return;
+
+    switch (action) {
+      case 'view':
+        onView?.(selectedRow);
+        break;
+      case 'edit':
+        onEdit?.(selectedRow);
+        break;
+      case 'delete':
+        const id = selectedRow.id || selectedRow._id || selectedRow.ID;
+        if (id != null) {
+          onDelete?.(id);
+        }
+        break;
+    }
+    handleActionClose();
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (records.length === 0) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+        <Typography variant="body1" color="textSecondary">
+          {emptyMessage}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (columns.length === 0) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+        <Typography variant="body1" color="textSecondary">
+          No columns available to display
+        </Typography>
+      </Box>
+    );
+  }
+
+  const hasActions = showActions && (onView || onEdit || onDelete);
+
+  // Render table layout (default and dense)
+  const renderTableLayout = () => (
+    <Paper className={className} elevation={1}>
+      <TableContainer style={{ maxHeight }}>
+        <Table stickyHeader size={layout === 'dense' ? 'small' : 'medium'}>
+          <TableHead>
+            <TableRow>
+              {columns.map((column: any) => (
+                <TableCell
+                  key={column.field}
+                  style={{ width: column.width }}
+                  sortDirection={
+                    sortConfig?.field === column.field ? sortConfig.direction : false
+                  }
+                >
+                  {column.sortable ? (
+                    <TableSortLabel
+                      active={sortConfig?.field === column.field}
+                      direction={sortConfig?.field === column.field ? sortConfig.direction : 'asc'}
+                      onClick={() => handleSort(column.field)}
+                    >
+                      {column.headerName || column.field}
+                    </TableSortLabel>
+                  ) : (
+                    column.headerName || column.field
+                  )}
+                </TableCell>
+              ))}
+              {hasActions && (
+                <TableCell width={60} align="center">
+                  Actions
+                </TableCell>
+              )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sortedRecords.map((row: any, index: number) => {
+              const rowId = row.id || row._id || row.ID || index;
+              
+              return (
+                <TableRow key={rowId} hover>
+                  {columns.map((column: any) => {
+                    const value = column.valueGetter ? column.valueGetter(row) : row[column.field];
+                    const renderedValue = column.cellRenderer 
+                      ? column.cellRenderer(value, row)
+                      : renderCellValue(value, column.field, dateFields);
+
+                    return (
+                      <TableCell key={`${rowId}-${column.field}`}>
+                        {renderedValue}
+                      </TableCell>
+                    );
+                  })}
+                  {hasActions && (
+                    <TableCell align="center">
+                      <Tooltip title="Actions">
+                        <IconButton
+                          size="small"
+                          onClick={(event: any) => handleActionClick(event, row)}
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleActionClose}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        {onView && (
+          <MenuItem onClick={() => handleAction('view')}>
+            <ListItemIcon>
+              <ViewIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>View</ListItemText>
+          </MenuItem>
+        )}
+        {onEdit && (
+          <MenuItem onClick={() => handleAction('edit')}>
+            <ListItemIcon>
+              <EditIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Edit</ListItemText>
+          </MenuItem>
+        )}
+        {onDelete && (
+          <MenuItem onClick={() => handleAction('delete')}>
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Delete</ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
+    </Paper>
+  );
+
+  // Render cards layout
+  const renderCardsLayout = () => (
+    <Box className={className}>
+      {/* Sort chips for key fields */}
+      <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        {columns.slice(0, 4).map((column: any) => (
+          <Chip
+            key={column.field}
+            label={column.headerName || column.field}
+            variant={sortConfig?.field === column.field ? 'filled' : 'outlined'}
+            color={sortConfig?.field === column.field ? 'primary' : 'default'}
+            onClick={() => column.sortable && handleSort(column.field)}
+            sx={{ cursor: column.sortable ? 'pointer' : 'default' }}
+          />
+        ))}
+      </Box>
+      
+      <Grid container spacing={2}>
+        {sortedRecords.map((row: any, index: number) => {
+          const rowId = row.id || row._id || row.ID || index;
+          
+          return (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={rowId}>
+              <Card elevation={2} sx={{ height: '100%' }}>
+                <CardContent>
+                  {columns.slice(0, 6).map((column: any) => {
+                    const value = column.valueGetter ? column.valueGetter(row) : row[column.field];
+                    const renderedValue = column.cellRenderer 
+                      ? column.cellRenderer(value, row)
+                      : renderCellValue(value, column.field, dateFields);
+
+                    return (
+                      <Box key={column.field} sx={{ mb: 1 }}>
+                        <Typography variant="caption" color="textSecondary" display="block">
+                          {column.headerName || column.field}
+                        </Typography>
+                        <Typography variant="body2">
+                          {renderedValue}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
+                  
+                  {hasActions && (
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                      <IconButton
+                        size="small"
+                        onClick={(event: any) => handleActionClick(event, row)}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
+      </Grid>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleActionClose}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        {onView && (
+          <MenuItem onClick={() => handleAction('view')}>
+            <ListItemIcon>
+              <ViewIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>View</ListItemText>
+          </MenuItem>
+        )}
+        {onEdit && (
+          <MenuItem onClick={() => handleAction('edit')}>
+            <ListItemIcon>
+              <EditIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Edit</ListItemText>
+          </MenuItem>
+        )}
+        {onDelete && (
+          <MenuItem onClick={() => handleAction('delete')}>
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Delete</ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
+    </Box>
+  );
+
+  return (
+    <>
+      {layout === 'cards' ? renderCardsLayout() : renderTableLayout()}
+    </>
+  );
+
+};
+
+export default DynamicRecordsDisplay;

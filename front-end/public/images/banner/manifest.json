@@ -1,0 +1,14 @@
+{
+  "images": [
+    { "file": "1.png", "label": "Orthodox Banner 1" },
+    { "file": "2.png", "label": "Orthodox Banner 2" },
+    { "file": "3.png", "label": "Orthodox Banner 3" },
+    { "file": "4.png", "label": "Orthodox Banner 4" },
+    { "file": "5.png", "label": "Orthodox Banner 5" },
+    { "file": "6.png", "label": "Orthodox Banner 6" },
+    { "file": "7.png", "label": "Orthodox Banner 7" },
+    { "file": "8.png", "label": "Orthodox Banner 8" },
+    { "file": "9.png", "label": "Orthodox Banner 9" }
+  ]
+}
+

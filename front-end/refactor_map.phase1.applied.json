@@ -1,0 +1,5 @@
+
+> orthodoxmetrics@1.0.0 omtrace /var/www/orthodoxmetrics/prod/front-end
+> tsx src/tools/omtrace/omtrace.ts -- src/views/admin/UserManagement.tsx --refactor --yes --pick-first --json
+
+ ELIFECYCLE  Command failed.

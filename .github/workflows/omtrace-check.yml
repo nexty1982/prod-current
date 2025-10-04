@@ -1,0 +1,164 @@
+name: OMTrace Route Consistency Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'front-end/src/routes/**'
+      - 'front-end/src/**/Router.tsx'
+      - 'front-end/src/**/*menu*'
+      - 'front-end/src/**/*Menu*'
+      - '.github/workflows/omtrace-check.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'front-end/src/routes/**'
+      - 'front-end/src/**/Router.tsx'
+      - 'front-end/src/**/*menu*'
+      - 'front-end/src/**/*Menu*'
+
+jobs:
+  omtrace-consistency-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'front-end/package-lock.json'
+        
+    - name: Install dependencies
+      run: |
+        cd front-end
+        npm install --legacy-peer-deps
+        
+    - name: Run OMTrace consistency check
+      run: |
+        cd front-end
+        npm run omtrace:check
+      env:
+        NODE_OPTIONS: "--max-old-space-size=4096"
+        
+    - name: Generate route map artifact (on failure)
+      if: failure()
+      run: |
+        cd front-end
+        npm run omtrace:enhanced map --out ../artifacts/omtrace
+        
+    - name: Upload artifacts on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: omtrace-failure-report
+        path: |
+          artifacts/omtrace/
+          docs/trace/
+        retention-days: 7
+        
+    - name: Comment on PR with results
+      if: github.event_name == 'pull_request' && failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Try to read route map if it exists
+          let routeMapContent = '';
+          const routeMapPath = 'artifacts/omtrace/routes.map.json';
+          
+          if (fs.existsSync(routeMapPath)) {
+            const routeMap = JSON.parse(fs.readFileSync(routeMapPath, 'utf8'));
+            routeMapContent = `
+## 📊 Route Map Summary
+
+- **Total Routes:** ${routeMap.summary.totalRoutes}
+- **Total Menus:** ${routeMap.summary.totalMenus}
+- **Definitive Matches:** ${routeMap.summary.definitive}
+- **Router-Only Routes:** ${routeMap.summary.routerOnly}
+- **Conflicts:** ${routeMap.summary.conflicts}
+
+${routeMap.summary.conflicts > 0 ? '❌ **Conflicts detected!**' : ''}
+${routeMap.summary.routerOnly > 0 ? '⚠️ **Router-only routes found**' : ''}
+            `;
+          }
+          
+          const comment = `
+## 🔍 OMTrace Route Consistency Check Failed
+
+The router↔menu↔component consistency check has detected issues in this PR.
+
+${routeMapContent}
+
+### 🔧 How to fix:
+
+1. **For conflicts:** Ensure menu items reference the same components as their corresponding routes
+2. **For missing menu items:** Add menu entries for new routes in the appropriate MenuItems.ts file
+3. **For orphaned menus:** Remove unused menu items or add corresponding routes
+
+### 📁 Artifacts
+
+Route map and detailed trace results have been uploaded as build artifacts.
+
+### 🚀 Re-run check locally:
+
+\`\`\`bash
+cd front-end
+npm run omtrace:check
+npm run omtrace:enhanced map
+\`\`\`
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  omtrace-example-traces:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'front-end/package-lock.json'
+        
+    - name: Install dependencies
+      run: |
+        cd front-end
+        npm install --legacy-peer-deps
+        
+    - name: Run example traces
+      run: |
+        cd front-end
+        mkdir -p ../artifacts/omtrace-examples
+        
+        # Trace some common routes
+        npm run omtrace:enhanced trace --url /apps/records-ui/46 --out ../artifacts/omtrace-examples || true
+        npm run omtrace:enhanced trace --url /admin/users --out ../artifacts/omtrace-examples || true
+        npm run omtrace:enhanced trace --url /dashboards/modern --out ../artifacts/omtrace-examples || true
+        
+        # Generate full route map
+        npm run omtrace:enhanced map --out ../artifacts/omtrace-examples || true
+      env:
+        NODE_OPTIONS: "--max-old-space-size=4096"
+        
+    - name: Upload example traces
+      uses: actions/upload-artifact@v4
+      with:
+        name: omtrace-examples
+        path: artifacts/omtrace-examples/
+        retention-days: 30

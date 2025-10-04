@@ -1,0 +1,141 @@
+<svg width="800" height="1100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Purple to Gold Gradient -->
+    <linearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#663399;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9966CC;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gold Accent Gradient -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Light Background -->
+    <linearGradient id="backgroundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F8F6FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFF9E6;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Table Header Gradient -->
+    <linearGradient id="tableHeaderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A1A5C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#663399;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main Background -->
+  <rect width="800" height="1100" fill="url(#backgroundGradient)"/>
+  
+  <!-- Header Section -->
+  <rect width="800" height="200" fill="url(#headerGradient)"/>
+  
+  <!-- Logo Circle -->
+  <circle cx="60" cy="80" r="30" fill="white"/>
+  <text x="60" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#663399">OM</text>
+  
+  <!-- Company Name -->
+  <text x="110" y="70" font-family="Arial, sans-serif" font-size="28" font-weight="300" fill="white">Orthodox Metrics</text>
+  <text x="110" y="95" font-family="Arial, sans-serif" font-size="14" fill="#E6E6FA">Λύσεις και Αναλύσεις Βασισμένες σε Δεδομένα</text>
+  
+  <!-- Invoice Title -->
+  <text x="720" y="80" text-anchor="end" font-family="Arial, sans-serif" font-size="48" font-weight="100" fill="white" opacity="0.4">ΤΙΜΟΛΟΓΙΟ</text>
+  
+  <!-- Company Info Box -->
+  <rect x="50" y="120" width="280" height="70" fill="rgba(255,255,255,0.1)" rx="8"/>
+  <text x="60" y="140" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="white">Από:</text>
+  <text x="60" y="155" font-family="Arial, sans-serif" font-size="12" fill="#E6E6FA">Orthodox Metrics ΕΠΕ</text>
+  <text x="60" y="170" font-family="Arial, sans-serif" font-size="12" fill="#E6E6FA">Λεωφ. Αναλυτικής 123, Αθήνα 12345</text>
+  <text x="60" y="185" font-family="Arial, sans-serif" font-size="12" fill="#E6E6FA">billing@orthodoxmetrics.com | (210) 123-4567</text>
+  
+  <!-- Client Info Box -->
+  <rect x="470" y="120" width="280" height="70" fill="rgba(255,255,255,0.1)" rx="8"/>
+  <text x="480" y="140" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="white">Προς:</text>
+  <text x="480" y="155" font-family="Arial, sans-serif" font-size="12" fill="#E6E6FA">Όνομα Πελάτη</text>
+  <text x="480" y="170" font-family="Arial, sans-serif" font-size="12" fill="#E6E6FA">Διεύθυνση Πελάτη</text>
+  <text x="480" y="185" font-family="Arial, sans-serif" font-size="12" fill="#E6E6FA">client@email.com</text>
+  
+  <!-- Invoice Details Section -->
+  <rect x="50" y="230" width="700" height="100" fill="white" rx="8" stroke="#DDA0DD" stroke-width="1"/>
+  
+  <!-- Left Column -->
+  <text x="70" y="255" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#663399">Αριθμός Τιμολογίου:</text>
+  <text x="230" y="255" font-family="Arial, sans-serif" font-size="14" fill="url(#goldGradient)" font-weight="600">#OM-2025-001</text>
+  
+  <text x="70" y="280" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#663399">Ημερομηνία Έκδοσης:</text>
+  <text x="230" y="280" font-family="Arial, sans-serif" font-size="14" fill="#666">6 Ιουλίου 2025</text>
+  
+  <!-- Right Column -->
+  <text x="420" y="255" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#663399">Ημερομηνία Λήξης:</text>
+  <text x="560" y="255" font-family="Arial, sans-serif" font-size="14" fill="url(#goldGradient)" font-weight="600">5 Αυγούστου 2025</text>
+  
+  <text x="420" y="280" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#663399">Όροι Πληρωμής:</text>
+  <text x="560" y="280" font-family="Arial, sans-serif" font-size="14" fill="#666">30 ημέρες</text>
+  
+  <!-- Services Section Title -->
+  <text x="50" y="370" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#663399">Παρεχόμενες Υπηρεσίες</text>
+  <line x1="50" y1="375" x2="750" y2="375" stroke="url(#goldGradient)" stroke-width="2"/>
+  
+  <!-- Table Header -->
+  <rect x="50" y="390" width="700" height="40" fill="url(#tableHeaderGradient)" rx="8 8 0 0"/>
+  <text x="70" y="413" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="white">Περιγραφή</text>
+  <text x="540" y="413" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="white">Ποσότητα</text>
+  <text x="620" y="413" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="white">Τιμή</text>
+  <text x="700" y="413" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="white">Ποσό</text>
+  
+  <!-- Empty Table Rows -->
+  <rect x="50" y="430" width="700" height="40" fill="white" stroke="#E6E6FA" stroke-width="1"/>
+  <rect x="50" y="470" width="700" height="40" fill="#F8F6FF" stroke="#E6E6FA" stroke-width="1"/>
+  <rect x="50" y="510" width="700" height="40" fill="white" stroke="#E6E6FA" stroke-width="1"/>
+  <rect x="50" y="550" width="700" height="40" fill="#F8F6FF" stroke="#E6E6FA" stroke-width="1"/>
+  <rect x="50" y="590" width="700" height="40" fill="white" stroke="#E6E6FA" stroke-width="1" rx="0 0 8 8"/>
+  
+  <!-- Totals Section -->
+  <rect x="450" y="660" width="300" height="120" fill="#F8F6FF" rx="8" stroke="#DDA0DD" stroke-width="1"/>
+  
+  <text x="470" y="685" font-family="Arial, sans-serif" font-size="14" fill="#663399">Υποσύνολο:</text>
+  <text x="720" y="685" text-anchor="end" font-family="Arial, sans-serif" font-size="14" fill="#666">€0,00</text>
+  
+  <text x="470" y="710" font-family="Arial, sans-serif" font-size="14" fill="#663399">ΦΠΑ:</text>
+  <text x="720" y="710" text-anchor="end" font-family="Arial, sans-serif" font-size="14" fill="#666">€0,00</text>
+  
+  <line x1="470" y1="720" x2="730" y2="720" stroke="url(#goldGradient)" stroke-width="2"/>
+  
+  <text x="470" y="745" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#663399">Συνολικό Ποσό:</text>
+  <text x="720" y="745" text-anchor="end" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="url(#goldGradient)">€0,00</text>
+  
+  <!-- Payment Instructions -->
+  <rect x="50" y="810" width="320" height="100" fill="white" rx="8" stroke="#DDA0DD" stroke-width="1"/>
+  <text x="70" y="835" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#663399">Οδηγίες Πληρωμής</text>
+  <text x="70" y="855" font-family="Arial, sans-serif" font-size="12" fill="#666">Τραπεζικό Έμβασμα: Orthodox Metrics</text>
+  <text x="70" y="870" font-family="Arial, sans-serif" font-size="12" fill="#666">Αριθμός Λογαριασμού: 1234567890</text>
+  <text x="70" y="885" font-family="Arial, sans-serif" font-size="12" fill="#666">Κωδικός Τράπεζας: 987654321</text>
+  <text x="70" y="900" font-family="Arial, sans-serif" font-size="12" fill="#666">Αναφορά: Αριθμός Τιμολογίου</text>
+  
+  <!-- Notes Section -->
+  <rect x="430" y="810" width="320" height="100" fill="white" rx="8" stroke="#DDA0DD" stroke-width="1"/>
+  <text x="450" y="835" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#663399">Σημειώσεις</text>
+  <text x="450" y="855" font-family="Arial, sans-serif" font-size="12" fill="#666">Σας ευχαριστούμε που επιλέξατε</text>
+  <text x="450" y="870" font-family="Arial, sans-serif" font-size="12" fill="#666">την Orthodox Metrics για τις</text>
+  <text x="450" y="885" font-family="Arial, sans-serif" font-size="12" fill="#666">υπηρεσίες αναλυτικής δεδομένων.</text>
+  
+  <!-- Footer -->
+  <rect x="0" y="940" width="800" height="160" fill="#663399"/>
+  
+  <text x="400" y="970" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="600" fill="white">Orthodox Metrics</text>
+  <text x="400" y="990" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#E6E6FA">Μετατρέποντας Δεδομένα σε Πρακτικές Λύσεις</text>
+  
+  <text x="400" y="1020" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#E6E6FA">Για ερωτήσεις σχετικά με αυτό το τιμολόγιο, επικοινωνήστε μαζί μας στο billing@orthodoxmetrics.com</text>
+  
+  <!-- Payment Terms Box -->
+  <rect x="50" y="1040" width="700" height="50" fill="rgba(255,255,255,0.1)" rx="8"/>
+  <text x="400" y="1060" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="url(#goldGradient)">Όροι και Προϋποθέσεις Πληρωμής</text>
+  <text x="400" y="1075" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#E6E6FA">Η πληρωμή οφείλεται εντός 30 ημερών από την ημερομηνία του τιμολογίου.</text>
+  
+  <!-- Decorative Elements -->
+  <circle cx="750" cy="50" r="3" fill="url(#goldGradient)" opacity="0.6"/>
+  <circle cx="730" cy="30" r="2" fill="url(#goldGradient)" opacity="0.4"/>
+  <circle cx="770" cy="70" r="1.5" fill="url(#goldGradient)" opacity="0.8"/>
+  
+</svg>

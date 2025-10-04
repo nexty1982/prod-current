@@ -1,0 +1,31 @@
+{
+  "name": "omls",
+  "version": "1.0.0",
+  "description": "Component Validator & Superadmin Menu Refresher for OrthodoxMetrics Frontend",
+  "main": "generateRefactoredMenu.ts",
+  "type": "module",
+  "scripts": {
+    "scan": "tsx generateRefactoredMenu.ts",
+    "scan:dry": "tsx generateRefactoredMenu.ts --dry-run",
+    "scan:verbose": "tsx generateRefactoredMenu.ts --verbose",
+    "scan:help": "tsx generateRefactoredMenu.ts --help"
+  },
+  "dependencies": {
+    "glob": "^10.3.10",
+    "tsx": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  },
+  "keywords": [
+    "component",
+    "validator",
+    "menu",
+    "refactoring",
+    "frontend",
+    "typescript",
+    "react"
+  ],
+  "author": "OrthodoxMetrics Development Team",
+  "license": "MIT"
+}

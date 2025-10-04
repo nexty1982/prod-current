@@ -1,0 +1,67 @@
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F3F4F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E5E7EB;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gold gradient for the cross -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F6C90E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4A80A;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Royal purple gradient -->
+    <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4C1D95;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E1065;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Drop shadow filters -->
+    <filter id="crossShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#F6C90E" flood-opacity="0.3"/>
+    </filter>
+    
+    <filter id="textShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#4C1D95" flood-opacity="0.2"/>
+    </filter>
+    
+    <filter id="goldTextShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#F6C90E" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="300" height="200" fill="url(#bgGradient)" rx="20"/>
+  
+  <!-- Orthodox Cross (centered, top) -->
+  <g transform="translate(150, 60)">
+    <!-- Vertical beam -->
+    <rect x="-4" y="-30" width="8" height="60" rx="4" fill="url(#goldGradient)" filter="url(#crossShadow)"/>
+    
+    <!-- Top horizontal bar -->
+    <rect x="-20" y="-25" width="40" height="6" rx="3" fill="url(#goldGradient)" filter="url(#crossShadow)"/>
+    
+    <!-- Main horizontal bar -->
+    <rect x="-25" y="-5" width="50" height="8" rx="4" fill="url(#goldGradient)" filter="url(#crossShadow)"/>
+    
+    <!-- Bottom angled bar -->
+    <rect x="-15" y="15" width="30" height="6" rx="3" fill="url(#goldGradient)" filter="url(#crossShadow)" transform="rotate(-20 0 18)"/>
+    
+    <!-- 3D highlights -->
+    <rect x="-4" y="-30" width="4" height="60" rx="2" fill="#FFE55C" opacity="0.6"/>
+    <rect x="-20" y="-25" width="20" height="3" rx="1.5" fill="#FFE55C" opacity="0.6"/>
+    <rect x="-25" y="-5" width="25" height="4" rx="2" fill="#FFE55C" opacity="0.6"/>
+  </g>
+  
+  <!-- Company Name: "Orthodox Metrics LLC" -->
+  <text x="150" y="120" text-anchor="middle" font-family="'Noto Serif', 'Times New Roman', serif" font-size="24" font-weight="600" fill="url(#purpleGradient)" filter="url(#textShadow)">
+    Orthodox Metrics LLC
+  </text>
+  
+  <!-- Tagline: "Recording the Saints Among Us" -->
+  <text x="150" y="150" text-anchor="middle" font-family="'Noto Serif', 'Times New Roman', serif" font-size="16" font-style="italic" fill="url(#goldGradient)" filter="url(#goldTextShadow)">
+    Recording the Saints Among Us
+  </text>
+</svg>

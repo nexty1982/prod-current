@@ -1,0 +1,11 @@
+{
+  "from": "src/views/admin/UserManagement.tsx",
+  "to": "src/components/user-management/usr-core/UserManagement.tsx",
+  "domain": "user-management",
+  "slug": "usr-core",
+  "importUpdates": 0,
+  "notes": [
+    "Dry run: no changes made"
+  ],
+  "success": true
+}

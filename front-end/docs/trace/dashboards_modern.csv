@@ -1,0 +1,19 @@
+type,file,kind,importType,section,label,path,componentName,httpStatus,httpMethod,timing
+component,,main,root,,,/dashboards/modern,,,,
+menu,,menu,reference,,Modern,/dashboards/modern,,,,
+menu,,menu,reference,,Modern,/dashboards/modern,,,,
+menu,,menu,reference,,Enhanced Modern Dashboard,/dashboards/modern,,,,
+menu,,menu,reference,,Enhanced Modern Dashboard,/dashboards/modern,,,,
+menu,,menu,reference,,Enhanced Modern Dashboard,/dashboards/modern,,,,
+menu,,menu,reference,,Enhanced Modern Dashboard,/dashboards/modern,,,,
+menu,,menu,reference,,Modern,/dashboards/modern,,,,
+menu,,menu,reference,,Modern,/dashboards/modern,,,,
+menu,,menu,reference,,Enhanced Modern Dashboard,/dashboards/modern,,,,
+menu,,menu,reference,,Enhanced Modern Dashboard,/dashboards/modern,,,,
+menu,,menu,reference,,Enhanced Modern Dashboard,/dashboards/modern,,,,
+menu,,menu,reference,,Enhanced Modern Dashboard,/dashboards/modern,,,,
+menu,,menu,reference,,Enhanced Modern Dashboard,/dashboards/modern,,,,
+menu,,menu,reference,,Enhanced Modern Dashboard,/dashboards/modern,,,,
+http_probe,https://orthodoxmetrics.com/dashboards/modern,http_request,probe,,,/dashboards/modern,,200,HTML,133ms
+http_probe,https://orthodoxmetrics.com/dashboards/modern,http_request,probe,,,/dashboards/modern,,200,JSON,132ms
+http_probe,https://orthodoxmetrics.com/dashboards/modern,http_request,probe,,,/dashboards/modern,,405,OPTIONS,115ms

@@ -1,0 +1,235 @@
+{
+  "queriedUrl": "/dashboards/modern",
+  "routeMatch": {
+    "pattern": "/dashboards/modern",
+    "specificity": 1000,
+    "params": {}
+  },
+  "router": {},
+  "menus": [
+    {
+      "label": "Modern",
+      "path": "/dashboards/modern",
+      "icon": "IconPoint"
+    },
+    {
+      "label": "Modern",
+      "path": "/dashboards/modern",
+      "icon": "IconPoint"
+    },
+    {
+      "label": "Enhanced Modern Dashboard",
+      "path": "/dashboards/modern",
+      "icon": "IconHome"
+    },
+    {
+      "label": "Enhanced Modern Dashboard",
+      "path": "/dashboards/modern",
+      "icon": "IconHome"
+    },
+    {
+      "label": "Enhanced Modern Dashboard",
+      "path": "/dashboards/modern",
+      "icon": "IconHome"
+    },
+    {
+      "label": "Enhanced Modern Dashboard",
+      "path": "/dashboards/modern",
+      "icon": "IconHome"
+    },
+    {
+      "label": "Modern",
+      "path": "/dashboards/modern",
+      "icon": "IconPoint"
+    },
+    {
+      "label": "Modern",
+      "path": "/dashboards/modern",
+      "icon": "IconPoint"
+    },
+    {
+      "label": "Enhanced Modern Dashboard",
+      "path": "/dashboards/modern",
+      "icon": "IconHome"
+    },
+    {
+      "label": "Enhanced Modern Dashboard",
+      "path": "/dashboards/modern",
+      "icon": "IconHome"
+    },
+    {
+      "label": "Enhanced Modern Dashboard",
+      "path": "/dashboards/modern",
+      "icon": "IconHome"
+    },
+    {
+      "label": "Enhanced Modern Dashboard",
+      "path": "/dashboards/modern",
+      "icon": "IconHome"
+    },
+    {
+      "label": "Enhanced Modern Dashboard",
+      "path": "/dashboards/modern",
+      "icon": "'IconHome'"
+    },
+    {
+      "label": "Enhanced Modern Dashboard",
+      "path": "/dashboards/modern",
+      "icon": "'IconHome'"
+    }
+  ],
+  "truth": "definitive",
+  "dynamicParams": {},
+  "dependencies": [],
+  "warnings": [],
+  "httpProbe": {
+    "baseUrl": "https://orthodoxmetrics.com",
+    "requestedPath": "/dashboards/modern",
+    "auth": {
+      "mode": "none",
+      "cookiesInitial": [],
+      "cookiesAfterLogin": []
+    },
+    "results": {
+      "html": {
+        "status": 200,
+        "headers": {
+          "Server": "nginx/1.18.0 (Ubuntu)",
+          "Date": "Sun, 24 Aug 2025 23:28:02 GMT",
+          "Content-Type": "text/html",
+          "Content-Length": "1127",
+          "Connection": "keep-alive",
+          "Last-Modified": "Sun, 24 Aug 2025 23:19:42 GMT",
+          "Vary": "Accept-Encoding",
+          "ETag": "\"68ab9e0e-467\"",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "Accept-Ranges": "bytes",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "contentType": "text/html",
+        "bodySample": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n\r\n<head>\r\n  <meta charset=\"UTF-8\" />\r\n  <link rel=\"icon\" type=\"image/png\" sizes=\"192x192\" href=\"/brand/om-favicon-192.png\" />\r\n  <link rel=\"icon\" type=\"image/png\" sizes=\"512x512\" href=\"/brand/om-favicon-512.png\" />\r\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n  <title>Orthodox Metrics</title>\r\n  \r\n\r\n  \r\n  <link href=\"https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap\" rel=\"stylesheet\" />\r...[truncated]",
+        "timings": {
+          "ip": "73.160.15.116",
+          "proto": "1.1",
+          "dns": 0.021338,
+          "connect": 0.04704,
+          "tls": 0.107343,
+          "ttfb": 0.133019,
+          "total": 0.133091,
+          "speed": 8467,
+          "size": 1127
+        },
+        "redirects": [],
+        "cookies": [],
+        "securityHeaders": {
+          "server": "nginx/1.18.0 (Ubuntu)",
+          "cache-control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          "pragma": "no-cache",
+          "x-frame-options": "SAMEORIGIN",
+          "x-content-type-options": "nosniff",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      "json": {
+        "status": 200,
+        "headers": {
+          "Server": "nginx/1.18.0 (Ubuntu)",
+          "Date": "Sun, 24 Aug 2025 23:28:03 GMT",
+          "Content-Type": "text/html",
+          "Content-Length": "1127",
+          "Connection": "keep-alive",
+          "Last-Modified": "Sun, 24 Aug 2025 23:19:42 GMT",
+          "Vary": "Accept-Encoding",
+          "ETag": "\"68ab9e0e-467\"",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "Accept-Ranges": "bytes",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "contentType": "text/html",
+        "bodySample": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n\r\n<head>\r\n  <meta charset=\"UTF-8\" />\r\n  <link rel=\"icon\" type=\"image/png\" sizes=\"192x192\" href=\"/brand/om-favicon-192.png\" />\r\n  <link rel=\"icon\" type=\"image/png\" sizes=\"512x512\" href=\"/brand/om-favicon-512.png\" />\r\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n  <title>Orthodox Metrics</title>\r\n  \r\n\r\n  \r\n  <link href=\"https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap\" rel=\"stylesheet\" />\r...[truncated]",
+        "timings": {
+          "ip": "73.160.15.116",
+          "proto": "1.1",
+          "dns": 0.020841,
+          "connect": 0.046601,
+          "tls": 0.106648,
+          "ttfb": 0.132241,
+          "total": 0.132287,
+          "speed": 8519,
+          "size": 1127
+        },
+        "redirects": [],
+        "cookies": [],
+        "securityHeaders": {
+          "server": "nginx/1.18.0 (Ubuntu)",
+          "cache-control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          "pragma": "no-cache",
+          "x-frame-options": "SAMEORIGIN",
+          "x-content-type-options": "nosniff",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      "options": {
+        "status": 405,
+        "headers": {
+          "Server": "nginx/1.18.0 (Ubuntu)",
+          "Date": "Sun, 24 Aug 2025 23:28:13 GMT",
+          "Content-Type": "text/html",
+          "Content-Length": "166",
+          "Connection": "keep-alive",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "contentType": "text/html",
+        "bodySample": "<html>\r\n<head><title>405 Not Allowed</title></head>\r\n<body>\r\n<center><h1>405 Not Allowed</h1></center>\r\n<hr><center>nginx/1.18.0 (Ubuntu)</center>\r\n</body>\r\n</html>\r\n",
+        "timings": {
+          "ip": "73.160.15.116",
+          "proto": "1.1",
+          "dns": 0.028442,
+          "connect": 0.053872,
+          "tls": 0.113483,
+          "ttfb": 0.114905,
+          "total": 0.114949,
+          "speed": 1444,
+          "size": 166
+        },
+        "redirects": [],
+        "cookies": [],
+        "securityHeaders": {
+          "server": "nginx/1.18.0 (Ubuntu)",
+          "cache-control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          "pragma": "no-cache",
+          "x-frame-options": "SAMEORIGIN",
+          "x-content-type-options": "nosniff",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "x-xss-protection": "1; mode=block"
+        }
+      }
+    },
+    "errors": [
+      "HEAD probe failed: curl failed with exit code null: "
+    ]
+  },
+  "metadata": {
+    "timestamp": "2025-08-24T23:28:02.031Z",
+    "version": "2.0.0-enhanced",
+    "processingTime": 110
+  }
+}

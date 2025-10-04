@@ -1,0 +1,165 @@
+{
+  "audit_date": "2025-08-12",
+  "environment": "production",
+  "path": "/var/www/orthodoxmetrics/prod",
+  "summary": {
+    "critical_issues": 3,
+    "high_priority_issues": 3,
+    "medium_priority_issues": 3,
+    "total_files_analyzed": 1000,
+    "database_references_to_fix": 382,
+    "dependencies_to_install": 12,
+    "dependencies_to_remove": 44,
+    "large_files_to_archive": 2,
+    "large_files_size_mb": 658,
+    "pm2_restarts": 396,
+    "pm2_uptime_minutes": 114
+  },
+  "issues": {
+    "critical": [
+      {
+        "id": 1,
+        "title": "Deprecated Database References",
+        "impact": "HIGH",
+        "effort": "MED",
+        "risk": "HIGH",
+        "description": "382+ references to deprecated orthodoxmetrics_auth_db database",
+        "files_affected": [
+          "prod/server/routes/admin/users.js",
+          "prod/server/routes/admin/churches.js",
+          "prod/server/src/api/admin.js",
+          "prod/server/src/services/databaseService.js",
+          "prod/server/src/utils/generateCredentials.js"
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Missing Critical Dependencies",
+        "impact": "HIGH",
+        "effort": "LOW",
+        "risk": "MED",
+        "missing_packages": [
+          "@mui/utils",
+          "react-icons",
+          "@faker-js/faker",
+          "react-bootstrap",
+          "@react-pdf/renderer",
+          "notistack",
+          "ag-grid-community",
+          "react-tabs",
+          "@dnd-kit/utilities",
+          "clsx",
+          "react-chartjs-2"
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Large Archive Files",
+        "impact": "HIGH",
+        "effort": "LOW",
+        "risk": "LOW",
+        "files": [
+          {
+            "path": "/prod/front-end/docs/backup_2025-07-19T06-00-00-106Z_full.tar.gz",
+            "size_mb": 329
+          },
+          {
+            "path": "/prod/front-end/docs/files_complete_2025-07-19T06-00-00-106Z.tar.gz",
+            "size_mb": 329
+          }
+        ]
+      }
+    ],
+    "high": [
+      {
+        "id": 4,
+        "title": "Extensive Unused Dependencies",
+        "impact": "MED",
+        "effort": "MED",
+        "risk": "LOW",
+        "unused_count": 44
+      },
+      {
+        "id": 5,
+        "title": "Build Configuration Issues",
+        "impact": "MED",
+        "effort": "LOW",
+        "risk": "LOW",
+        "problems": [
+          "No tsconfig.json in front-end root",
+          "Vite cannot find index.html entry point",
+          "TypeScript compilation not configured"
+        ]
+      },
+      {
+        "id": 6,
+        "title": "PM2 Process Instability",
+        "impact": "MED",
+        "effort": "HIGH",
+        "risk": "MED",
+        "process": "orthodox-backend",
+        "restarts": 396,
+        "uptime_minutes": 114
+      }
+    ],
+    "medium": [
+      {
+        "id": 7,
+        "title": "Environment Variable Inconsistencies",
+        "impact": "MED",
+        "effort": "MED",
+        "risk": "LOW"
+      },
+      {
+        "id": 8,
+        "title": "Dead Code and Unused Components",
+        "impact": "LOW",
+        "effort": "MED",
+        "risk": "LOW"
+      },
+      {
+        "id": 9,
+        "title": "Route Organization Issues",
+        "impact": "LOW",
+        "effort": "LOW",
+        "risk": "LOW",
+        "route_count": 100
+      }
+    ]
+  },
+  "infrastructure": {
+    "pm2": {
+      "processes": [
+        {
+          "name": "orthodox-backend",
+          "status": "online",
+          "restarts": 396,
+          "memory_mb": 144.3,
+          "cpu_percent": 0
+        }
+      ],
+      "modules": [
+        "pm2-logrotate",
+        "pm2-server-monit"
+      ]
+    },
+    "nginx": {
+      "status": "valid",
+      "sites_enabled": ["orthodoxmetrics.com"]
+    },
+    "environment_files": {
+      "frontend": [
+        "/prod/front-end/.env",
+        "/prod/front-end/.env.production",
+        "/prod/front-end/.env.development",
+        "/prod/front-end/.env.local"
+      ],
+      "backend": [
+        "/prod/server/.env",
+        "/prod/server/.env.production",
+        "/prod/server/.env.global",
+        "/prod/server/.env.development"
+      ]
+    }
+  }
+}

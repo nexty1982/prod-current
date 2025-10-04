@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="20" height="20" rx="2" fill="#E3E8F0"/>
+  <!-- Greek flag stripes -->
+  <rect width="20" height="2.22" fill="#0D5EAF"/>
+  <rect y="4.44" width="20" height="2.22" fill="#0D5EAF"/>
+  <rect y="8.89" width="20" height="2.22" fill="#0D5EAF"/>
+  <rect y="13.33" width="20" height="2.22" fill="#0D5EAF"/>
+  <rect y="17.78" width="20" height="2.22" fill="#0D5EAF"/>
+  <!-- Blue canton -->
+  <rect width="7.78" height="8.89" fill="#0D5EAF"/>
+  <!-- White cross -->
+  <rect x="3.33" width="1.11" height="8.89" fill="white"/>
+  <rect y="3.89" width="7.78" height="1.11" fill="white"/>
+</svg>

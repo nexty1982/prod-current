@@ -1,0 +1,20 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Eastern Orthodox Cross (3-bar) in Gold - centered -->
+  <g transform="translate(12, 6)">
+    <!-- Vertical beam -->
+    <rect x="3" y="1" width="2" height="14" fill="#FFD700"/>
+    
+    <!-- Top horizontal bar (titulus) -->
+    <rect x="1" y="2.5" width="6" height="1" fill="#FFD700"/>
+    
+    <!-- Middle horizontal bar (main crossbeam) -->
+    <rect x="0" y="6" width="8" height="1.5" fill="#FFD700"/>
+    
+    <!-- Bottom slanted bar (footrest) -->
+    <rect x="0.5" y="11" width="7" height="1" fill="#FFD700" transform="rotate(-15 4 11.5)"/>
+  </g>
+  
+  <!-- "Orthodox Metrics" Text in Purple - stacked vertically -->
+  <text x="16" y="23" font-family="serif" font-size="5" font-weight="600" fill="#6B46C1" text-anchor="middle">Orthodox</text>
+  <text x="16" y="29" font-family="serif" font-size="5" font-weight="600" fill="#6B46C1" text-anchor="middle">Metrics</text>
+</svg>

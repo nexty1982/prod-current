@@ -1,0 +1,11 @@
+{
+  "from": "src/components/church-management/ch-wiz/ChurchSetupWizard.tsx",
+  "to": "src/components/church-management/ch-panel/ChurchSetupWizard.tsx",
+  "domain": "church-management",
+  "slug": "ch-panel",
+  "importUpdates": 0,
+  "notes": [
+    "Dry run: no changes made"
+  ],
+  "success": true
+}

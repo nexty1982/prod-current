@@ -1,0 +1,20 @@
+server/church-provisioner.js:104:        UPDATE orthodoxmetrics_auth_db.users SET 
+server/routes/admin/churches.js:273:        const [userCount] = await churchDb.execute('SELECT COUNT(*) as count FROM orthodoxmetrics_auth_db.users');
+server/routes/admin/churches.js:642:    await getAppPool().query('UPDATE orthodoxmetrics_auth_db.users SET church_id = NULL WHERE church_id = ?', [churchId]);
+server/routes/admin/church-users.js:43:        'SELECT u.id, u.email FROM orthodoxmetrics_auth_db.users u JOIN church_users cu ON u.id = cu.user_id WHERE u.id = ? AND cu.church_id = ?',
+server/routes/admin/church-users.js:77:            JOIN orthodoxmetrics_auth_db.users u ON cu.user_id = u.id
+server/routes/admin/church-users.js:116:            'SELECT id FROM orthodoxmetrics_auth_db.users WHERE email = ?',
+server/routes/admin/church-users.js:129:        // Insert user into orthodoxmetrics_auth_db.users
+server/routes/admin/church-users.js:131:            INSERT INTO orthodoxmetrics_auth_db.users 
+server/routes/admin/church-users.js:173:            'SELECT id FROM orthodoxmetrics_auth_db.users WHERE id = ?',
+server/routes/admin/church-users.js:183:        // Prepare update query for orthodoxmetrics_auth_db.users
+server/routes/admin/church-users.js:230:        // Update user in orthodoxmetrics_auth_db.users
+server/routes/admin/church-users.js:232:            UPDATE orthodoxmetrics_auth_db.users SET ${updateFields.join(', ')} WHERE id = ?
+server/routes/admin/church-users.js:274:        // Update user password in orthodoxmetrics_auth_db.users
+server/routes/admin/church-users.js:276:            'UPDATE orthodoxmetrics_auth_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+server/routes/admin/church-users.js:307:        // Lock user account in orthodoxmetrics_auth_db.users
+server/routes/admin/church-users.js:309:            'UPDATE orthodoxmetrics_auth_db.users SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+server/routes/admin/church-users.js:339:        // Unlock user account in orthodoxmetrics_auth_db.users
+server/routes/admin/church-users.js:341:            'UPDATE orthodoxmetrics_auth_db.users SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+server/routes/admin/users.js:27:      FROM orthodoxmetrics_auth_db.users u
+server/routes/admin/users.js:63:      FROM orthodoxmetrics_auth_db.users u

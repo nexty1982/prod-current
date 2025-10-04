@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="20" height="20" rx="2" fill="#E3E8F0"/>
+  <!-- Russian flag stripes -->
+  <rect width="20" height="6.67" fill="white"/>
+  <rect y="6.67" width="20" height="6.67" fill="#0033A0"/>
+  <rect y="13.33" width="20" height="6.67" fill="#DA020E"/>
+</svg>

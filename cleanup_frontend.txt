@@ -1,0 +1,603 @@
+front-end/
+├── _archive
+│   ├── legacy-records
+│   │   ├── pages
+│   │   └── services
+│   └── omtrace-removed
+│       └── 2025-08-22T22-23-43Z
+│           └── TestComponent
+│               └── src
+│                   └── components
+│                       └── test
+├── docs
+│   ├── ai-errors
+│   ├── auth
+│   └── trace
+├── logs
+├── node-compile-cache
+│   └── v22.16.0-x64-efe9a9df-0
+├── om-src-staging
+│   └── src
+│       ├── auth
+│       ├── components
+│       │   ├── apps
+│       │   │   └── records
+│       │   │       └── recordGrid
+│       │   ├── frontend-pages
+│       │   │   └── shared
+│       │   │       ├── c2a
+│       │   │       ├── footer
+│       │   │       ├── header
+│       │   │       ├── leadership
+│       │   │       ├── pricing
+│       │   │       ├── reviews
+│       │   │       └── scroll-to-top
+│       │   ├── records
+│       │   └── shared
+│       ├── features
+│       │   └── records
+│       │       └── api
+│       ├── routes
+│       └── theme
+├── ops-logs
+├── public
+│   ├── assets
+│   │   └── avatars
+│   ├── brand
+│   ├── feasts
+│   ├── images
+│   │   ├── banner
+│   │   ├── global
+│   │   │   ├── banner
+│   │   │   └── profile
+│   │   └── profile
+│   ├── orthodox
+│   │   ├── avatars
+│   │   └── banners
+│   ├── saints
+│   └── workspace
+│       └── pages
+├── refactor_logs
+├── scripts
+└── src
+    ├── ai
+    │   ├── git
+    │   ├── learning
+    │   ├── visualTesting
+    │   └── vrt
+    ├── api
+    │   ├── mocks
+    │   │   └── handlers
+    │   └── utils
+    ├── assets
+    │   └── images
+    │       ├── backgrounds
+    │       ├── blog
+    │       ├── breadcrumb
+    │       ├── chat
+    │       ├── flag
+    │       ├── frontend-pages
+    │       │   ├── contact
+    │       │   ├── homepage
+    │       │   ├── icons
+    │       │   └── payments
+    │       ├── kanban
+    │       ├── landingpage
+    │       │   ├── apps
+    │       │   ├── background
+    │       │   ├── demos
+    │       │   ├── f-pages
+    │       │   ├── frameworks
+    │       │   ├── profile
+    │       │   └── shape
+    │       ├── logos
+    │       ├── products
+    │       ├── profile
+    │       └── svgs
+    ├── auth
+    ├── blog
+    ├── chat
+    ├── churches
+    ├── components
+    │   ├── admin
+    │   ├── admin-management
+    │   │   ├── admin-core
+    │   │   ├── admin-opt
+    │   │   └── admin-tools
+    │   ├── AGGridViewOnly
+    │   ├── ai
+    │   ├── apps
+    │   │   ├── account-settings
+    │   │   ├── blog
+    │   │   │   └── detail
+    │   │   ├── chat
+    │   │   ├── chats
+    │   │   ├── contacts
+    │   │   ├── ecommerce
+    │   │   │   ├── productAdd
+    │   │   │   ├── productCart
+    │   │   │   ├── productCheckout
+    │   │   │   ├── productDetail
+    │   │   │   ├── productEdit
+    │   │   │   ├── productGrid
+    │   │   │   └── ProductTableList
+    │   │   ├── email
+    │   │   ├── invoice
+    │   │   │   ├── Add-invoice
+    │   │   │   ├── Edit-invoice
+    │   │   │   ├── Invoice-detail
+    │   │   │   ├── Invoice-list
+    │   │   │   └── Invoice-view
+    │   │   ├── kanban
+    │   │   │   └── TaskModal
+    │   │   ├── notes
+    │   │   ├── records
+    │   │   │   └── recordGrid
+    │   │   ├── tickets
+    │   │   └── userprofile
+    │   │       ├── followers
+    │   │       ├── friends
+    │   │       ├── gallery
+    │   │       └── profile
+    │   ├── auth
+    │   ├── avatars
+    │   ├── bigbook
+    │   │   └── custom
+    │   ├── blog-management
+    │   │   └── blog-core
+    │   ├── calendar
+    │   ├── calendar-management
+    │   ├── charts
+    │   │   ├── Area Chart
+    │   │   │   └── code
+    │   │   ├── Candlestick Chart
+    │   │   │   └── code
+    │   │   ├── Column Chart
+    │   │   │   └── code
+    │   │   ├── Doughnut Charts
+    │   │   │   └── code
+    │   │   ├── Gradient Chart
+    │   │   │   └── code
+    │   │   ├── Line Chart
+    │   │   │   └── code
+    │   │   ├── Pie Charts
+    │   │   │   └── code
+    │   │   ├── Radar Charts
+    │   │   │   └── code
+    │   │   └── Radialbar Charts
+    │   │       └── code
+    │   ├── charts-management
+    │   ├── church-management
+    │   │   ├── ch-dir
+    │   │   ├── ch-panel
+    │   │   ├── ch-view
+    │   │   └── ch-wiz
+    │   ├── ColorPickerPopover
+    │   ├── container
+    │   ├── custom
+    │   ├── custom-scroll
+    │   ├── dashboard-management
+    │   │   ├── acl-dash
+    │   │   └── dash-core
+    │   ├── dashboards
+    │   │   ├── ecommerce
+    │   │   ├── modern
+    │   │   └── orthodoxmetrics
+    │   ├── debug
+    │   ├── demos
+    │   ├── dev
+    │   ├── ErrorBoundary
+    │   ├── FieldRenderer
+    │   ├── forms
+    │   │   ├── form-custom
+    │   │   │   └── code
+    │   │   ├── form-elements
+    │   │   │   ├── autoComplete
+    │   │   │   │   └── code
+    │   │   │   ├── button
+    │   │   │   │   └── code
+    │   │   │   ├── checkbox
+    │   │   │   │   └── code
+    │   │   │   ├── date-time
+    │   │   │   │   └── code
+    │   │   │   ├── radio
+    │   │   │   │   └── code
+    │   │   │   ├── slider
+    │   │   │   │   └── code
+    │   │   │   └── switch
+    │   │   │       └── code
+    │   │   ├── form-horizontal
+    │   │   │   └── code
+    │   │   ├── form-layouts
+    │   │   │   └── code
+    │   │   ├── form-validation
+    │   │   │   └── code
+    │   │   ├── form-vertical
+    │   │   │   └── code
+    │   │   ├── form-wizard
+    │   │   │   └── code
+    │   │   └── theme-elements
+    │   ├── frontend-pages
+    │   │   ├── about
+    │   │   │   ├── banner
+    │   │   │   ├── key-metric
+    │   │   │   └── process
+    │   │   ├── blog
+    │   │   │   └── banner
+    │   │   ├── contact
+    │   │   │   ├── banner
+    │   │   │   └── form
+    │   │   ├── homepage
+    │   │   │   ├── banner
+    │   │   │   ├── baptism-record-viewer
+    │   │   │   ├── defend-focus
+    │   │   │   ├── exceptional-feature
+    │   │   │   ├── faq
+    │   │   │   ├── features
+    │   │   │   ├── multilingual-showcase
+    │   │   │   ├── powerful-dozens
+    │   │   │   └── why-choose-us
+    │   │   ├── portfolio
+    │   │   ├── pricing
+    │   │   └── shared
+    │   │       ├── c2a
+    │   │       ├── footer
+    │   │       ├── header
+    │   │       ├── leadership
+    │   │       ├── pricing
+    │   │       ├── reviews
+    │   │       └── scroll-to-top
+    │   ├── global
+    │   ├── headlines
+    │   ├── helper-management
+    │   │   └── hlp-console
+    │   ├── image-management
+    │   ├── landingpage
+    │   │   ├── animation
+    │   │   ├── banner
+    │   │   ├── c2a
+    │   │   ├── demo-slider
+    │   │   ├── features
+    │   │   ├── footer
+    │   │   ├── frameworks
+    │   │   ├── header
+    │   │   └── testimonial
+    │   ├── landingpage-management
+    │   ├── lib-management
+    │   ├── log-management
+    │   │   └── log-core
+    │   ├── logs
+    │   ├── material-ui
+    │   │   ├── accordion
+    │   │   │   └── code
+    │   │   ├── alert
+    │   │   │   └── code
+    │   │   ├── avatar
+    │   │   │   └── code
+    │   │   ├── chip
+    │   │   │   └── code
+    │   │   ├── dialog
+    │   │   │   └── code
+    │   │   ├── lists
+    │   │   │   └── code
+    │   │   ├── popover
+    │   │   │   └── code
+    │   │   ├── tabs
+    │   │   │   └── code
+    │   │   ├── tooltip
+    │   │   │   └── code
+    │   │   ├── transfer-list
+    │   │   │   └── code
+    │   │   └── typography
+    │   │       └── code
+    │   ├── muicharts
+    │   │   ├── barcharts
+    │   │   ├── code
+    │   │   │   ├── areachartscode
+    │   │   │   ├── barchartcode
+    │   │   │   ├── gaugechartscode
+    │   │   │   ├── linechartscode
+    │   │   │   ├── piechartcode
+    │   │   │   ├── scatterchartscode
+    │   │   │   └── sparklinecode
+    │   │   ├── gaugecharts
+    │   │   ├── linescharts
+    │   │   │   ├── areacharts
+    │   │   │   └── linechart
+    │   │   ├── piecharts
+    │   │   ├── scattercharts
+    │   │   └── sparklinecharts
+    │   ├── muitrees
+    │   │   ├── code
+    │   │   │   └── simpletreecode
+    │   │   └── simpletree
+    │   ├── notifications
+    │   ├── OMAI
+    │   │   ├── Logger
+    │   │   └── MarkdownIngestion
+    │   ├── omai-management
+    │   │   ├── omai-opt
+    │   │   └── omai-set
+    │   ├── om-ui
+    │   ├── OrthodoxBanner
+    │   ├── pages
+    │   │   ├── account-setting
+    │   │   └── faq
+    │   ├── react-tables
+    │   │   ├── basic
+    │   │   ├── column-visiblity
+    │   │   ├── dense
+    │   │   ├── drag-drop
+    │   │   ├── editable
+    │   │   ├── empty
+    │   │   ├── expanding
+    │   │   ├── filter
+    │   │   ├── pagination
+    │   │   ├── row-selection
+    │   │   ├── sorting
+    │   │   └── sticky
+    │   ├── record-management
+    │   │   ├── rec-core
+    │   │   ├── rec-dis
+    │   │   └── rec-template
+    │   ├── RecordPreviewPane
+    │   ├── records
+    │   ├── registry
+    │   ├── routing
+    │   ├── schema-management
+    │   ├── setup
+    │   ├── shared
+    │   ├── site-management
+    │   │   └── site-set
+    │   ├── table-management
+    │   ├── tables
+    │   │   └── code
+    │   ├── templates
+    │   ├── terminal
+    │   ├── Theme
+    │   ├── ui
+    │   ├── ui-tools
+    │   │   └── omtrace
+    │   │       ├── hooks
+    │   │       └── __tests__
+    │   ├── user-management
+    │   │   ├── usr-core
+    │   │   ├── usr-roles
+    │   │   └── usr-wiz
+    │   └── widgets
+    │       ├── banners
+    │       │   └── code
+    │       ├── cards
+    │       │   └── code
+    │       └── charts
+    ├── config
+    ├── consolidate
+    ├── constants
+    ├── contacts
+    ├── context
+    │   ├── BlogContext
+    │   ├── ChatContext
+    │   ├── ConatactContext
+    │   ├── EcommerceContext
+    │   ├── EmailContext
+    │   ├── InvoiceContext
+    │   ├── kanbancontext
+    │   ├── NotesContext
+    │   ├── OCRContext
+    │   ├── TicketContext
+    │   └── UserDataContext
+    ├── contexts
+    ├── core
+    │   └── types
+    ├── data
+    ├── demos
+    ├── eCommerce
+    ├── email
+    ├── examples
+    ├── features
+    │   ├── account
+    │   │   ├── api
+    │   │   ├── components
+    │   │   ├── hooks
+    │   │   ├── pages
+    │   │   │   ├── AccountSettings
+    │   │   │   └── UserProfile
+    │   │   └── __tests__
+    │   ├── auth
+    │   ├── church
+    │   ├── church-management
+    │   │   └── new_church_wizard
+    │   ├── overlays
+    │   │   ├── path
+    │   │   └── version
+    │   ├── records
+    │   │   └── api
+    │   └── superadmin
+    ├── helpers
+    ├── hooks
+    ├── invoice
+    ├── kanban
+    ├── language
+    ├── layouts
+    │   ├── blank
+    │   └── full
+    │       ├── horizontal
+    │       │   ├── header
+    │       │   └── navbar
+    │       │       ├── NavCollapse
+    │       │       ├── NavItem
+    │       │       └── NavListing
+    │       ├── shared
+    │       │   ├── breadcrumb
+    │       │   ├── customizer
+    │       │   ├── loadable
+    │       │   ├── logo
+    │       │   └── welcome
+    │       └── vertical
+    │           ├── header
+    │           └── sidebar
+    │               ├── NavCollapse
+    │               ├── NavGroup
+    │               ├── NavItem
+    │               └── SidebarProfile
+    ├── mocks
+    │   └── handlers
+    ├── modules
+    │   └── OMLearn
+    ├── mui
+    ├── notes
+    ├── @om
+    │   └── components
+    │       ├── features
+    │       │   └── auth
+    │       └── ui
+    │           ├── forms
+    │           └── theme
+    ├── omai
+    │   ├── cli
+    │   └── knowledge
+    ├── pages
+    │   ├── apps
+    │   │   ├── church-management
+    │   │   ├── records
+    │   │   └── records-ui
+    │   ├── calendar
+    │   ├── ChurchManagement
+    │   │   └── FormSections
+    │   ├── church-wizard
+    │   ├── ch_wiz
+    │   ├── kanban
+    │   ├── omai
+    │   ├── omb
+    │   └── sandbox
+    ├── records
+    ├── routes
+    │   └── __tests__
+    ├── sandbox
+    │   └── field-mapper
+    │       ├── api
+    │       ├── components
+    │       ├── pages
+    │       └── __tests__
+    ├── schemas
+    ├── services
+    │   └── om-ai
+    ├── src-old
+    │   ├── api
+    │   │   ├── mocks
+    │   │   │   └── handlers
+    │   │   └── utils
+    │   └── user-profile
+    ├── store
+    ├── styles
+    ├── theme
+    ├── ticket
+    ├── tools
+    │   ├── om-deps
+    │   │   └── scripts
+    │   ├── omls
+    │   ├── omtrace
+    │   │   ├── core
+    │   │   ├── lib
+    │   │   ├── src
+    │   │   └── __tests__
+    │   └── utils
+    ├── types
+    │   ├── apps
+    │   ├── auth
+    │   └── layout
+    ├── ui
+    │   └── components
+    │       └── base
+    ├── utils
+    │   └── languages
+    └── views
+        ├── admin
+        │   ├── components
+        │   ├── tabs
+        │   └── tools
+        ├── apps
+        │   ├── blog
+        │   ├── calendar
+        │   ├── chat
+        │   ├── church-management
+        │   ├── client-management
+        │   ├── cms
+        │   ├── contacts
+        │   ├── eCommerce
+        │   ├── email
+        │   ├── invoice
+        │   ├── kanban
+        │   ├── logs
+        │   ├── notes
+        │   ├── records
+        │   │   └── components
+        │   ├── site-clone
+        │   ├── tickets
+        │   └── user-profile
+        ├── authentication
+        │   ├── auth1
+        │   ├── auth2
+        │   └── authForms
+        ├── blog
+        ├── charts
+        ├── dashboard
+        ├── demo
+        ├── forms
+        │   ├── form-elements
+        │   └── from-tiptap
+        ├── logs
+        ├── muicharts
+        │   ├── barcharts
+        │   ├── gaugecharts
+        │   ├── linecharts
+        │   │   ├── area
+        │   │   └── line
+        │   ├── piecharts
+        │   ├── scattercharts
+        │   └── sparklinecharts
+        ├── mui-trees
+        │   └── simpletree
+        │       ├── simpletree-customization
+        │       ├── simpletree-expansion
+        │       ├── simpletree-focus
+        │       ├── simpletree-items
+        │       └── simpletree-selection
+        ├── orthodox-calendar
+        ├── pages
+        │   ├── account-setting
+        │   ├── faq
+        │   ├── frontend-pages
+        │   ├── landingpage
+        │   ├── pricing
+        │   └── rollbaseCASL
+        ├── react-tables
+        │   ├── basic
+        │   ├── columnvisibility
+        │   ├── dense
+        │   ├── drag-drop
+        │   ├── editable
+        │   ├── empty
+        │   ├── expanding
+        │   ├── filtering
+        │   ├── pagination
+        │   ├── row-selection
+        │   ├── sorting
+        │   └── sticky
+        ├── records
+        ├── settings
+        │   └── services
+        ├── social
+        │   ├── blog
+        │   ├── chat
+        │   ├── friends
+        │   └── notifications
+        ├── spinner
+        ├── tables
+        ├── ui-components
+        └── widgets
+            ├── banners
+            ├── cards
+            └── charts
+
+600 directories

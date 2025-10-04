@@ -1,0 +1,168 @@
+/**
+ * Universal API Client with automatic session cookies and church context
+ */
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+export type ApiOpts = {
+  method?: HttpMethod;
+  params?: Record<string, string | number | boolean | undefined>;
+  body?: unknown;
+  headers?: Record<string, string>;
+  churchId?: number;
+  signal?: AbortSignal;
+};
+
+/**
+ * Get church ID from options, localStorage, or default to 46
+ */
+function getChurchId(opts?: ApiOpts): number {
+  if (opts?.churchId !== undefined) {
+    return opts.churchId;
+  }
+
+  const stored = localStorage.getItem('om.selectedChurchId');
+  if (stored) {
+    const parsed = parseInt(stored, 10);
+    if (!isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  return 46;
+}
+
+/**
+ * Build URL with query parameters
+ */
+function buildUrl(path: string, params?: Record<string, string | number | boolean | undefined>, churchId?: number): string {
+  const url = new URL(path, window.location.origin);
+
+  // Skip church_id for auth endpoints
+  const isAuthEndpoint = path.startsWith("/api/auth/") || path === "/api/auth" || path.startsWith("/auth/") || path === "/auth";
+  if (!isAuthEndpoint && churchId !== undefined) {
+    url.searchParams.set("church_id", String(churchId));
+  }
+
+  // Add other parameters
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        url.searchParams.set(key, String(value));
+      }
+    });
+  }
+
+  return url.toString();
+}
+
+/**
+ * Core API fetch function with automatic church context and session handling
+ */
+export async function apiFetch(path: string, opts: ApiOpts = {}): Promise<any> {
+  // Skip church context for auth endpoints
+  const isAuthEndpoint = path.startsWith('/api/auth/') || path === '/api/auth' || path.startsWith('/auth/') || path === '/auth';
+  const churchId = isAuthEndpoint ? undefined : getChurchId(opts);
+  const method = opts.method || 'GET';
+  const hasBody = opts.body !== undefined;
+
+  // Build URL with parameters
+  const url = buildUrl(path, opts.params, churchId);
+  
+  // Debug logging for auth endpoints
+  if (isAuthEndpoint) {
+    console.log(`🔑 Auth API call: ${method} ${url} (churchId skipped: ${churchId === undefined})`);
+  }
+
+  // Build headers
+  const headers: Record<string, string> = {
+    'Accept': 'application/json',
+    ...opts.headers,
+  };
+
+  // Only add church ID header for non-auth endpoints
+  if (!isAuthEndpoint && churchId !== undefined) {
+    headers['X-OM-Church-ID'] = String(churchId);
+  }
+
+  if (hasBody) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  // Build request config
+  const config: RequestInit = {
+    method,
+    headers,
+    credentials: 'include',
+    signal: opts.signal,
+  };
+
+  if (hasBody) {
+    config.body = JSON.stringify(opts.body);
+  }
+
+  // Make request
+  const response = await fetch(url, config);
+
+  // Handle non-2xx responses
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  // Parse JSON response
+  try {
+    return await response.json();
+  } catch (error) {
+    // Handle empty responses or non-JSON responses
+    return null;
+  }
+}
+
+/**
+ * Legacy API function for backward compatibility with authService
+ * This matches the old apiJson interface expected by authService
+ */
+export async function apiJson(path: string, options: {
+  method?: string;
+  body?: string;
+  headers?: Record<string, string>;
+} = {}): Promise<any> {
+  const method = (options.method || 'GET') as HttpMethod;
+  let body: unknown;
+
+  // Parse JSON body if provided as string
+  if (options.body) {
+    try {
+      body = JSON.parse(options.body);
+    } catch {
+      body = options.body;
+    }
+  }
+
+  return apiFetch(path, {
+    method,
+    body,
+    headers: options.headers,
+  });
+}
+
+/**
+ * Convenience methods for common HTTP verbs
+ */
+export const api = {
+  get: (path: string, opts: Omit<ApiOpts, 'method'> = {}) =>
+    apiFetch(path, { ...opts, method: 'GET' }),
+
+  post: (path: string, body?: unknown, opts: Omit<ApiOpts, 'method' | 'body'> = {}) =>
+    apiFetch(path, { ...opts, method: 'POST', body }),
+
+  put: (path: string, body?: unknown, opts: Omit<ApiOpts, 'method' | 'body'> = {}) =>
+    apiFetch(path, { ...opts, method: 'PUT', body }),
+
+  patch: (path: string, body?: unknown, opts: Omit<ApiOpts, 'method' | 'body'> = {}) =>
+    apiFetch(path, { ...opts, method: 'PATCH', body }),
+
+  del: (path: string, opts: Omit<ApiOpts, 'method'> = {}) =>
+    apiFetch(path, { ...opts, method: 'DELETE' }),
+};
