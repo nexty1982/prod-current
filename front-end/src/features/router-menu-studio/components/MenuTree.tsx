@@ -4,10 +4,12 @@
  */
 
 import React, { useState } from 'react';
+import { SimpleTreeView as TreeView } from '@mui/x-tree-view/SimpleTreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import {
   Box,
-  TreeView,
-  TreeItem,
+  
+  
   IconButton,
   Button,
   Chip,
@@ -304,7 +306,6 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu }) => {
             key={role}
             label={role}
             size="small"
-            key={role}
           />
         ))}
       </Box>
