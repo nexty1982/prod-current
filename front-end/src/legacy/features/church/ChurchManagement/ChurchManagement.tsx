@@ -8,6 +8,24 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'react-toastify';
 import api from '@/orthodox-metrics.api';
 
+// Surgical fix for searchParams.churches.getAll issue
+const useSafeSearchParams = () => {
+  const { search } = useLocation();
+  const [_sp] = useSearchParams();
+  return _sp && typeof _sp.getAll === 'function' ? _sp : new URLSearchParams(search || '';
+};
+
+// Small helpers
+const readOne = (sp: URLSearchParams, k: string, fallback = ''): => sp.get(k) ?? fallback;
+const readMany = (sp: URLSearchParams, keyVariants: string[]): => {
+  for (const k of keyVariants) {
+    const vals = (typeof sp.getAll === 'function' ? sp.getAll(k) : []) as string[];
+    if (vals && vals.length) return vals;
+  }
+  return [];
+};
+
+
 const ChurchManagement = () => {
   const [churches, setChurches] = useState([]);
   const [loading, setLoading] = useState(true);
