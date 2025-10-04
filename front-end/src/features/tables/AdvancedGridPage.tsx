@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useSafeSearchParams } from '@/shared/lib/useSafeSearchParams';
 import { AdvancedGridDialog } from './AdvancedGridDialog';
 import { listRecords, type TableKey, type SortDir } from '@/shared/lib/recordsApi';
 
@@ -12,7 +13,7 @@ type GridCounts = { baptism: number; marriage: number; funeral: number };
 
 const AdvancedGridPage: React.FC = () => {
   const { state } = useLocation() as { state?: any };
-  const [sp] = useSearchParams();
+  const sp = useSafeSearchParams();
 
   const initialTab = (state?.table || sp.get('table') || 'baptism') as TableKey;
   const churchId = Number(state?.churchId || sp.get('churchId') || sp.get('church_id') || 46);

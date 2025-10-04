@@ -1,5 +1,6 @@
 import React from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useSafeSearchParams } from '@/shared/lib/useSafeSearchParams';
 import RecordsPage from '@/features/records/RecordsPage';
 
 /**
@@ -8,7 +9,7 @@ import RecordsPage from '@/features/records/RecordsPage';
  */
 const RecordsPageWrapper: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
+  const searchParams = useSafeSearchParams();
   
   const churchId = Number(id);
   const initialTable = searchParams.get('table') || undefined;

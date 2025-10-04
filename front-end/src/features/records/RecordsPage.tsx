@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSafeSearchParams } from '@/shared/lib/useSafeSearchParams';
+import { useSearchParams } 'react-router-dom';
 import {
   Box,
   Button,
@@ -44,7 +45,8 @@ interface HeaderColumn {
 }
 
 const RecordsPage: React.FC<RecordsPageProps> = ({ churchId, initialTable }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [_, setSearchParams] = useSearchParams();
+  const searchParams = useSafeSearchParams();
   
   // State
   const [tables, setTables] = useState<string[]>([]);

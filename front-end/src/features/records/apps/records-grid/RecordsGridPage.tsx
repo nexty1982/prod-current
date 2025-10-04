@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation, useSearchParams, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useSafeSearchParams } from '@/shared/lib/useSafeSearchParams';
 import {
   Box,
   Typography,
@@ -16,7 +17,7 @@ import AdvancedGrid from '../records/components/AdvancedGrid';
 export default function RecordsGridPage() {
   const navigate = useNavigate();
   const { state } = useLocation() as { state?: any };
-  const [sp] = useSearchParams();
+  const sp = useSafeSearchParams();
 
   // read from state first, then from query params
   const table = (state?.table || sp.get('table') || 'baptism') as TableKey;
