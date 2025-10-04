@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSafeSearchParams } from '@/shared/lib/useSafeSearchParams';
-import { useSearchParams } 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   Box,
   Button,
