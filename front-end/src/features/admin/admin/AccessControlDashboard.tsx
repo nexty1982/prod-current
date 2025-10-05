@@ -23,7 +23,7 @@ import {
 } from '@tabler/icons-react';
 
 // Tab Components
-import UserManagement from './tabs/UserManagement';
+import UserManagement from './UserManagement';
 import RoleManagement from './tabs/RoleManagement';
 import SessionManagement from './tabs/SessionManagement';
 import MenuManagement from './tabs/MenuManagement';

@@ -370,11 +370,24 @@ const ChurchSetupWizard: React.FC = () => {
         });
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create church');
+        
+        // Handle 400 validation errors by showing specific missing fields
+        if (response.status === 400 && errorData.required) {
+          const missingFields = errorData.required.join(", ");
+          alert(`Please fill in all required fields: ${missingFields}`);
+        } else {
+          alert(errorData.message || "Failed to create church");
+        }
+        
+        throw new Error(errorData.message || "Failed to create church");
       }
     } catch (error) {
-      console.error('Error creating church:', error);
-      // Handle error display
+      console.error("Error creating church:", error);
+      // Error is already handled above for API responses
+      // This catch handles network errors or other unexpected issues
+      if (!error.message.includes("required fields")) {
+        alert("Network error or unexpected issue occurred. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

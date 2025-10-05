@@ -65,7 +65,7 @@ const NotFound404 = Loadable(lazy(() => import('../features/misc-legacy/pages/No
 // Church Management
 const ChurchList = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchList')));
 const ChurchForm = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchForm')));
-const ChurchSetupWizard = Loadable(lazy(() => import('../features/church/church-management/ch-wiz/ChurchSetupWizard')));
+const ChurchSetupWizard = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchSetupWizard')));
 const FieldMapperPage = Loadable(lazy(() => import('../features/church/FieldMapperPage')));
 const RecordsPageWrapper = Loadable(lazy(() => import('../features/records/apps/church-management/RecordsPageWrapper')));
 

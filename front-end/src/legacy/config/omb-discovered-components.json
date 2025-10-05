@@ -8661,7 +8661,7 @@
       ],
       "props": [],
       "configurable": false,
-      "path": "views/apps/church-management/ChurchForm.tsx",
+      "path": "features/church/apps/church-management/ChurchForm.tsx",
       "usage": {
         "inMenu": false,
         "inRoutes": false,
@@ -8696,7 +8696,7 @@
       ],
       "props": [],
       "configurable": false,
-      "path": "views/apps/church-management/ChurchList.tsx",
+      "path": "features/church/apps/church-management/ChurchList.tsx",
       "usage": {
         "inMenu": false,
         "inRoutes": false,
@@ -14821,7 +14821,7 @@
       ],
       "props": [],
       "configurable": false,
-      "path": "views/admin/UserManagement_corrupted.tsx",
+      "path": "features/admin/admin/UserManagement.tsx",
       "usage": {
         "inMenu": false,
         "inRoutes": false,

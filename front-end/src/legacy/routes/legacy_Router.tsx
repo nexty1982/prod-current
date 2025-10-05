@@ -101,9 +101,9 @@ const OrthodoxHeadlines = Loadable(lazy(() => import('../pages/OrthodoxHeadlines
 const AssignTaskPage = Loadable(lazy(() => import('../pages/AssignTaskPage')));
 
 // Church Management
-const ChurchList = Loadable(lazy(() => import('../views/apps/church-management/ChurchList')));
-const ChurchForm = Loadable(lazy(() => import('../views/apps/church-management/ChurchForm')));
-const ChurchSetupWizard = Loadable(lazy(() => import('../features/church-management/wizard/ChurchSetupWizard')));
+const ChurchList = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchList')));
+const ChurchForm = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchForm')));
+const ChurchSetupWizard = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchSetupWizard')));
 
 
 

@@ -292,7 +292,7 @@ export const DynamicMenuProvider: React.FC<DynamicMenuProviderProps> = ({ childr
                         id: 305,
                         menu_key: 'church_form',
                         title: 'Church Form',
-                        path: '/features/records-centralized/components/forms/ChurchForm',
+                        path: '/features/church/apps/church-management/ChurchForm',
                         icon: 'IconBuildingChurch',
                         parent_id: 300,
                         display_order: 5

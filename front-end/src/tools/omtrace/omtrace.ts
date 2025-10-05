@@ -381,7 +381,7 @@ async function runSelfTest(feRoot: string): Promise<SelfTestResult> {
     }
 
     // Test trace on a known component
-    const testComponent = 'src/components/church-management/ch-wiz/ChurchSetupWizard.tsx';
+    const testComponent = 'src/features/church/apps/church-management/ChurchSetupWizard.tsx';
     let traceProbe: SelfTestResult['traceProbe'];
     
     if (fs.existsSync(path.join(feRoot, testComponent))) {

@@ -22,7 +22,7 @@ const MOCK_FILE_TREE: FileTreeResponse = {
               children: [
                 {
                   name: 'ChurchSetupWizard.tsx',
-                  path: 'src/components/church-management/ch-wiz/ChurchSetupWizard.tsx',
+                  path: 'src/features/church/apps/church-management/ChurchSetupWizard.tsx',
                   type: 'file',
                   size: 31245,
                   modified: '2024-01-15T10:30:00Z'
@@ -87,7 +87,7 @@ const MOCK_FILE_TREE: FileTreeResponse = {
           children: [
             {
               name: 'UserManagement.tsx',
-              path: 'src/views/admin/UserManagement.tsx',
+              path: 'src/features/admin/admin/UserManagement.tsx',
               type: 'file',
               size: 28456,
               modified: '2024-01-14T14:20:00Z'

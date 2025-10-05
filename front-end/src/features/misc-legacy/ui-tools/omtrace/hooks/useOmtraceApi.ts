@@ -5,7 +5,7 @@ import { OmtraceRunFlags, OmtraceRunResult, RefactorRequest, RefactorResponse, S
 const MOCK_RESULTS: OmtraceRunResult[] = [
   {
     entry: 'ChurchSetupWizard',
-    resolvedPath: 'src/components/church-management/ch-wiz/ChurchSetupWizard.tsx',
+    resolvedPath: 'src/features/church/apps/church-management/ChurchSetupWizard.tsx',
     direct: [
       '@/shared/ui/FormField.tsx',
       '@/shared/ui/Button.tsx',
@@ -29,8 +29,8 @@ const MOCK_RESULTS: OmtraceRunResult[] = [
       { file: 'src/routes/Router.tsx', line: 156, type: 'ProtectedRoute', roles: ['admin', 'super_admin'] }
     ],
     refactorPlan: {
-      from: 'src/components/church-management/ch-wiz/ChurchSetupWizard.tsx',
-      to: 'src/components/church-management/ch-wiz/ChurchSetupWizard.tsx',
+      from: 'src/features/church/apps/church-management/ChurchSetupWizard.tsx',
+      to: 'src/features/church/apps/church-management/ChurchSetupWizard.tsx',
       domain: 'church',
       slug: 'ch-wiz'
     },
@@ -41,7 +41,7 @@ const MOCK_RESULTS: OmtraceRunResult[] = [
   },
   {
     entry: 'UserManagement',
-    resolvedPath: 'src/views/admin/UserManagement.tsx',
+    resolvedPath: 'src/features/admin/admin/UserManagement.tsx',
     direct: [
       '@/shared/ui/DataTable.tsx',
       '@/shared/ui/Modal.tsx',
@@ -99,7 +99,7 @@ const MOCK_HISTORY: RefactorHistoryItem[] = [
     timestamp: '2024-01-15T10:30:00Z',
     entry: 'ChurchSetupWizard',
     from: 'src/components/ChurchSetupWizard.tsx',
-    to: 'src/components/church-management/ch-wiz/ChurchSetupWizard.tsx',
+    to: 'src/features/church/apps/church-management/ChurchSetupWizard.tsx',
     importUpdates: 12,
     result: 'success',
     refactorMdPath: 'refactor.md',

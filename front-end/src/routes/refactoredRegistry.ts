@@ -52,7 +52,7 @@ export const REFACTORED_ROUTES: RefRoute[] = [
   // 🔄 REFACTORED-4 (F-K, next 10 items alphabetically)
   { path: "refactored-4/church-management",         importPath: "@/components/admin/ChurchManagement",                                 label: "Church Management",        icon: "List" },
   { path: "refactored-4/church-server-manager",     importPath: "@/components/admin/ChurchServerManager",                              label: "Church Server Manager",    icon: "Server" },
-  { path: "refactored-4/church-setup-wizard",       importPath: "@/components/church-management/ch-wiz/ChurchSetupWizard",             label: "Church Setup Wizard",      icon: "Shield" },
+  { path: "refactored-4/church-setup-wizard",       importPath: "@/features/church/apps/church-management/ChurchSetupWizard",             label: "Church Setup Wizard",      icon: "Shield" },
   { path: "refactored-4/church-wizard",             importPath: "@/components/admin/ChurchWizard",                                     label: "Church Wizard",            icon: "Wand" },
   { path: "refactored-4/color-picker-popover",     importPath: "@/components/ColorPickerPopover",                                     label: "Color Picker Popover",     icon: "Color" },
   { path: "refactored-4/component-inspector",       importPath: "@/components/ComponentInspector",                                    label: "Component Inspector",      icon: "Bug" },
@@ -165,7 +165,7 @@ export const REFACTORED_IMPORTS: Record<string, ReturnType<typeof lazy>> = {
   // 🔄 REFACTORED-4
   "refactored-4/church-management":         lazy(() => import("@/components/admin/ChurchManagement")),
   "refactored-4/church-server-manager":     lazy(() => import("@/components/admin/ChurchServerManager")),
-  "refactored-4/church-setup-wizard":       lazy(() => import("@/components/church-management/ch-wiz/ChurchSetupWizard")),
+  "refactored-4/church-setup-wizard":       lazy(() => import("@/features/church/apps/church-management/ChurchSetupWizard")),
   "refactored-4/church-wizard":             lazy(() => import("@/components/admin/ChurchWizard")),
   "refactored-4/color-picker-popover":     lazy(() => import("@/components/ColorPickerPopover")),
   "refactored-4/component-inspector":       lazy(() => import("@/components/ComponentInspector")),

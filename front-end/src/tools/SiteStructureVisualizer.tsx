@@ -316,7 +316,7 @@ const SiteStructureVisualizer: React.FC = () => {
             console.warn('File scanning failed, falling back to basic structure:', error);
             // Fallback to basic file structure
             files.push(
-                { path: 'src/views/admin/UserManagement.tsx', type: 'page' },
+                { path: 'src/features/admin/admin/UserManagement.tsx', type: 'page' },
                 { path: 'src/services/userService.ts', type: 'service' },
                 { path: '/api/users', type: 'api' },
                 { path: '/api/churches', type: 'api' }
