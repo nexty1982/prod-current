@@ -3,13 +3,11 @@
  * MUI TreeView for displaying and editing menu hierarchy
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { SimpleTreeView as TreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import {
   Box,
-  
-  
   IconButton,
   Button,
   Chip,
@@ -51,6 +49,7 @@ import {
   ReorderMenuData,
   routerMenuStudioAPI,
 } from '../api';
+import { normalizeTreeItems, validateTreeItems } from '../normalizeTreeItems';
 import { toast } from 'react-hot-toast';
 
 interface MenuTreeProps {
@@ -80,6 +79,18 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu }) => {
     queryKey: ['menus'],
     queryFn: () => routerMenuStudioAPI.getMenus(),
   });
+
+  // Normalize tree items to ensure unique IDs
+  const normalizedMenuTree = useMemo(() => {
+    if (!menuTree?.length) return [];
+    
+    // Validate items in development
+    if (process.env.NODE_ENV === 'development') {
+      validateTreeItems(menuTree, 'menuTree');
+    }
+    
+    return normalizeTreeItems(menuTree);
+  }, [menuTree]);
 
   // Mutations
   const createMutation = useMutation({
@@ -142,7 +153,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu }) => {
     return (
       <TreeItem
         key={menu.id}
-        nodeId={menu.id!.toString()}
+        itemId={String(menu.id)} // Use itemId for MUI X TreeView
         label={(
           <Box
             sx={{
@@ -201,7 +212,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu }) => {
                   color="info"
                 />
               )}
-              
+
               <Tooltip title="Add Child">
                 <IconButton
                   size="small"
@@ -260,14 +271,14 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu }) => {
   const handleReorder = (draggedItem: MenuNode, targetItem: MenuNode) => {
     // Find all items that need to be updated
     const allItems = flatMenus.filter(item => item.parent_id === targetItem.parent_id);
-    
+
     // Remove the dragged item from its original position
     const remainingItems = allItems.filter(item => item.id !== draggedItem.id);
-    
+
     // Insert the dragged item at the target position
     const targetIndex = remainingItems.findIndex(item => item.id === targetItem.id);
     remainingItems.splice(targetIndex, 0, draggedItem);
-    
+
     // Update order indexes
     const reorderData: ReorderMenuData = {
       items: remainingItems.map((item, index) => ({
@@ -276,7 +287,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu }) => {
         order_index: index,
       })),
     };
-    
+
     // Also update the parent relationship if needed
     if (targetItem.id !== draggedItem.id) {
       reorderData.items.forEach(item => {
@@ -285,16 +296,16 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu }) => {
         }
       });
     }
-    
+
     reorderMutation.mutate(reorderData);
   };
 
   const formatRoles = (roles: string[]) => {
     if (!roles || roles.length === 0) return 'None';
-    
+
     const roleColors: Record<string, string> = {
       super_admin: 'error',
-      admin: 'warning', 
+      admin: 'warning',
       user: 'info',
       guest: 'default',
     };
@@ -334,7 +345,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu }) => {
             <IconMenu2 size={20} />
             Menu Tree
           </Typography>
-          
+
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               startIcon={<IconPlus size={16} />}
@@ -367,9 +378,10 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu }) => {
             defaultCollapseIcon={<IconChevronDown />}
             defaultExpandIcon={<IconChevronRight />}
             defaultEndIcon={<IconFolder />}
+            getItemId={(item) => String(item.id)} // Custom ID getter for normalized items
             sx={{ height: '100%', flexGrow: 1 }}
           >
-            {menuTree.map(renderMenuItem)}
+            {normalizedMenuTree.map(renderMenuItem)}
           </TreeView>
         )}
       </Box>
@@ -380,7 +392,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu }) => {
           <Typography variant="h6" gutterBottom>
             Menu Details
           </Typography>
-          
+
           <Stack spacing={2}>
             <Box>
               <Typography variant="subtitle2" color="text.secondary">
@@ -549,7 +561,7 @@ const MenuEditDialog: React.FC<MenuEditDialogProps> = ({
         <DialogTitle>
           {mode === 'create' ? 'Create Menu Item' : 'Edit Menu Item'}
         </DialogTitle>
-        
+
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             <TextField

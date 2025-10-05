@@ -114,6 +114,7 @@ const SuperAdminDashboard = Loadable(lazy(() => import('../features/admin/admin/
 const RouterMenuStudio = Loadable(lazy(() => import('../features/router-menu-studio/RouterMenuStudioPage')));
 const DynamicRecordsInspector = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsInspector')));
 const RefactorConsole = Loadable(lazy(() => import('../features/devel-tools/refactor-console/RefactorConsole')));
+const TreeInspector = Loadable(lazy(() => import("../features/devel-tools/TreeInspector")));
 
 const JITTerminal = Loadable(lazy(() => import('../features/misc-legacy/terminal/JITTerminal')));
 const JITTerminalConsole = Loadable(lazy(() => import('../features/admin/admin/JITTerminalConsole')));
@@ -846,10 +847,100 @@ const Router = [
       },
       {
         path: '/devel-tools/refactor-console',
+      {
+        path: "/devel-tools/tree-inspector",
         element: (
-          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+          <ProtectedRoute requiredRole={["super_admin"]}>
             <AdminErrorBoundary>
+              <TreeInspector />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+        element: (
+      {
+        path: "/devel-tools/tree-inspector",
+        element: (
+          <ProtectedRoute requiredRole={["super_admin"]}>
+            <AdminErrorBoundary>
+              <TreeInspector />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+      {
+        path: "/devel-tools/tree-inspector",
+        element: (
+          <ProtectedRoute requiredRole={["super_admin"]}>
+            <AdminErrorBoundary>
+              <TreeInspector />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+            <AdminErrorBoundary>
+      {
+        path: "/devel-tools/tree-inspector",
+        element: (
+          <ProtectedRoute requiredRole={["super_admin"]}>
+            <AdminErrorBoundary>
+              <TreeInspector />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
               <RefactorConsole />
+      {
+        path: "/devel-tools/tree-inspector",
+        element: (
+          <ProtectedRoute requiredRole={["super_admin"]}>
+            <AdminErrorBoundary>
+              <TreeInspector />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+            </AdminErrorBoundary>
+      {
+        path: "/devel-tools/tree-inspector",
+        element: (
+          <ProtectedRoute requiredRole={["super_admin"]}>
+            <AdminErrorBoundary>
+              <TreeInspector />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+          </ProtectedRoute>
+      {
+        path: "/devel-tools/tree-inspector",
+        element: (
+          <ProtectedRoute requiredRole={["super_admin"]}>
+            <AdminErrorBoundary>
+              <TreeInspector />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+        )
+      {
+        path: "/devel-tools/tree-inspector",
+        element: (
+          <ProtectedRoute requiredRole={["super_admin"]}>
+            <AdminErrorBoundary>
+              <TreeInspector />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      },
+      {
+        path: "/devel-tools/tree-inspector",
+        element: (
+          <ProtectedRoute requiredRole={["super_admin"]}>
+            <AdminErrorBoundary>
+              <TreeInspector />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
