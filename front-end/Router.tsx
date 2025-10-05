@@ -15,27 +15,27 @@ const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
 
 /* ****Pages***** */
-const ModernDash = Loadable(lazy(() => import('../views/dashboard/EnhancedModernDashboard')));
-const EcommerceDash = Loadable(lazy(() => import('../views/dashboard/Ecommerce')));
-const OrthodMetricsDash = Loadable(lazy(() => import('../views/dashboard/OrthodoxMetrics')));
+const ModernDash = Loadable(lazy(() => import('../legacy/features/admin/dashboard/EnhancedModernDashboard')));
+const EcommerceDash = Loadable(lazy(() => import('../legacy/features/dashboard/Ecommerce')));
+const OrthodMetricsDash = Loadable(lazy(() => import('../features/admin/dashboard/OrthodoxMetrics')));
 
 /* ****Apps***** */
 // const Blog = Loadable(lazy(() => import('../views/apps/blog/Blog')));
 // const BlogDetail = Loadable(lazy(() => import('../views/apps/blog/BlogPost')));
 const Contacts = Loadable(lazy(() => import('../views/apps/contacts/Contacts')));
-const ChatApp = Loadable(lazy(() => import('../views/apps/chat/ChatApp')));
-const Notes = Loadable(lazy(() => import('../views/apps/notes/Notes')));
+const ChatApp = Loadable(lazy(() => import('../legacy/features/apps/chat/Chat')));
+const Notes = Loadable(lazy(() => import('../legacy/features/apps/notes/Notes')));
 const Tickets = Loadable(lazy(() => import('../views/apps/tickets/Tickets')));
 
 /* ****Developer Tools***** */
 const SiteStructureVisualizer = Loadable(lazy(() => import('../tools/SiteStructureVisualizer')));
-const Kanban = Loadable(lazy(() => import('../views/apps/kanban/Kanban')));
-const InvoiceList = Loadable(lazy(() => import('../views/apps/invoice/List')));
-const InvoiceCreate = Loadable(lazy(() => import('../views/apps/invoice/Create')));
-const InvoiceDetail = Loadable(lazy(() => import('../views/apps/invoice/Detail')));
-const InvoiceEdit = Loadable(lazy(() => import('../views/apps/invoice/Edit')));
-const Ecommerce = Loadable(lazy(() => import('../views/apps/eCommerce/Ecommerce')));
-const EcommerceDetail = Loadable(lazy(() => import('../views/apps/eCommerce/EcommerceDetail')));
+const Kanban = Loadable(lazy(() => import('../legacy/features/apps/kanban/Kanban')));
+// const InvoiceList = Loadable(lazy(() => import('../views/apps/invoice/List')));
+// const InvoiceCreate = Loadable(lazy(() => import('../views/apps/invoice/Create')));
+// const InvoiceDetail = Loadable(lazy(() => import('../views/apps/invoice/Detail')));
+// const InvoiceEdit = Loadable(lazy(() => import('../views/apps/invoice/Edit')));
+// const Ecommerce = Loadable(lazy(() => import('../views/apps/eCommerce/Ecommerce')));
+// const EcommerceDetail = Loadable(lazy(() => import('../views/apps/eCommerce/EcommerceDetail')));
 const EcommerceAddProduct = Loadable(
   lazy(() => import('../views/apps/eCommerce/EcommerceAddProduct')),
 );
@@ -72,9 +72,9 @@ const OrthodoxHeadlines = Loadable(lazy(() => import('../pages/OrthodoxHeadlines
 const AssignTaskPage = Loadable(lazy(() => import('../pages/AssignTaskPage')));
 
 // Church Management
-const ChurchList = Loadable(lazy(() => import('../views/apps/church-management/ChurchList')));
-const ChurchForm = Loadable(lazy(() => import('../views/apps/church-management/ChurchForm')));
-const ChurchSetupWizard = Loadable(lazy(() => import('../features/church-management/wizard/ChurchSetupWizard')));
+const ChurchList = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchList')));
+const ChurchForm = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchForm')));
+const ChurchSetupWizard = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchSetupWizard')));
 
 
 
@@ -87,19 +87,19 @@ const NotificationList = Loadable(lazy(() => import('../components/notifications
 const NotificationPreferences = Loadable(lazy(() => import('../components/notifications/NotificationPreferences')));
 
 // Admin
-const UserManagement = Loadable(lazy(() => import('../views/admin/UserManagement')));
+const UserManagement = Loadable(lazy(() => import('../features/admin/admin/UserManagement')));
 const RoleManagement = Loadable(lazy(() => import('../views/admin/RoleManagement')));
 const AdminSettings = Loadable(lazy(() => import('../views/admin/AdminSettings')));
 const OMSiteSurvey = Loadable(lazy(() => import('../views/admin/tools/OMSiteSurvey')));
 const PageEditor = Loadable(lazy(() => import('../views/admin/tools/PageEditor')));
 const BlogFeed = Loadable(lazy(() => import('../views/blog/BlogFeed')));
 const BlogAdmin = Loadable(lazy(() => import('../views/admin/BlogAdmin')));
-const SessionManagement = Loadable(lazy(() => import('../views/admin/SessionManagement')));
-const AdminLogs = Loadable(lazy(() => import('../views/admin/SessionManagement')));
-const ActivityLogs = Loadable(lazy(() => import('../views/admin/ActivityLogs')));
+const SessionManagement = Loadable(lazy(() => import('../legacy/features/auth/admin/SessionManagement')));
+const AdminLogs = Loadable(lazy(() => import('../legacy/features/auth/admin/SessionManagement')));
+const ActivityLogs = Loadable(lazy(() => import('../features/admin/admin/ActivityLogs')));
 const MenuPermissions = Loadable(lazy(() => import('../views/admin/MenuPermissions')));
 const MenuManagement = Loadable(lazy(() => import('../views/admin/MenuManagement')));
-const OrthodMetricsAdmin = Loadable(lazy(() => import('../views/admin/OrthodoxMetricsAdmin')));
+const OrthodMetricsAdmin = Loadable(lazy(() => import('../features/admin/admin/OrthodoxMetricsAdmin')));
 const AIAdminPanel = Loadable(lazy(() => import('../components/ai/AIAdminPanel')));
 const OMAIUltimateLogger = Loadable(lazy(() => import('../views/logs/LoggerDashboard')));
 const ScriptRunner = Loadable(lazy(() => import('../components/admin/ScriptRunner')));
