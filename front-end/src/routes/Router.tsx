@@ -847,93 +847,13 @@ const Router = [
       },
       {
         path: '/devel-tools/refactor-console',
-      {
-        path: "/devel-tools/tree-inspector",
         element: (
-          <ProtectedRoute requiredRole={["super_admin"]}>
-            <AdminErrorBoundary>
-              <TreeInspector />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-        element: (
-      {
-        path: "/devel-tools/tree-inspector",
-        element: (
-          <ProtectedRoute requiredRole={["super_admin"]}>
-            <AdminErrorBoundary>
-              <TreeInspector />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
           <ProtectedRoute requiredRole={['super_admin', 'admin']}>
-      {
-        path: "/devel-tools/tree-inspector",
-        element: (
-          <ProtectedRoute requiredRole={["super_admin"]}>
             <AdminErrorBoundary>
-              <TreeInspector />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-            <AdminErrorBoundary>
-      {
-        path: "/devel-tools/tree-inspector",
-        element: (
-          <ProtectedRoute requiredRole={["super_admin"]}>
-            <AdminErrorBoundary>
-              <TreeInspector />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
               <RefactorConsole />
-      {
-        path: "/devel-tools/tree-inspector",
-        element: (
-          <ProtectedRoute requiredRole={["super_admin"]}>
-            <AdminErrorBoundary>
-              <TreeInspector />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
-      },
-            </AdminErrorBoundary>
-      {
-        path: "/devel-tools/tree-inspector",
-        element: (
-          <ProtectedRoute requiredRole={["super_admin"]}>
-            <AdminErrorBoundary>
-              <TreeInspector />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-          </ProtectedRoute>
-      {
-        path: "/devel-tools/tree-inspector",
-        element: (
-          <ProtectedRoute requiredRole={["super_admin"]}>
-            <AdminErrorBoundary>
-              <TreeInspector />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-        )
-      {
-        path: "/devel-tools/tree-inspector",
-        element: (
-          <ProtectedRoute requiredRole={["super_admin"]}>
-            <AdminErrorBoundary>
-              <TreeInspector />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
       },
       {
         path: "/devel-tools/tree-inspector",

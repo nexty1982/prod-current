@@ -420,33 +420,14 @@ const Menuitems: MenuitemsType[] = [
       {
         id: uniqueId(),
         title: 'Refactor Console',
-      {
-        id: uniqueId(),
-        title: "Tree Inspector",
-        icon: IconTree,
-        href: "/devel-tools/tree-inspector",
-      },
         icon: IconTool,
-  IconTree,
-      {
-        id: uniqueId(),
-        title: "Tree Inspector",
-        icon: IconTree,
-        href: "/devel-tools/tree-inspector",
-      },
         href: '/devel-tools/refactor-console',
-      {
-        id: uniqueId(),
-        title: "Tree Inspector",
-        icon: IconTree,
-        href: "/devel-tools/tree-inspector",
-      },
       },
       {
         id: uniqueId(),
-        title: "Tree Inspector",
+        title: 'Tree Inspector',
         icon: IconTree,
-        href: "/devel-tools/tree-inspector",
+        href: '/devel-tools/tree-inspector',
       },
       {
         id: uniqueId(),
