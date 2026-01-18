@@ -81,6 +81,8 @@ const ProfileBanner = () => {
   const [globalImages, setGlobalImages] = useState<any[]>([]);
   const [showGlobalImages, setShowGlobalImages] = useState(false);
   const [profileImages, setProfileImages] = useState<string[]>([]);
+  const [orthodoxAvatars, setOrthodoxAvatars] = useState<string[]>([]);
+  const [orthodoxBanners, setOrthodoxBanners] = useState<string[]>([]);
 
   // Edit mode state
   const [isEditing, setIsEditing] = useState(false);
@@ -102,6 +104,9 @@ const ProfileBanner = () => {
 
     // Load global images
     fetchGlobalImages();
+    // Load orthodox images
+    fetchOrthodoxAvatars();
+    fetchOrthodoxBanners();
   }, [profileData]);
 
   // Fetch all available profile images from the backend
@@ -135,6 +140,48 @@ const ProfileBanner = () => {
       }
     } catch (error) {
       console.error('Failed to fetch global images:', error);
+    }
+  };
+
+  // Fetch orthodox avatars from public directory
+  const fetchOrthodoxAvatars = async () => {
+    try {
+      console.log('📸 Fetching orthodox avatars...');
+      const response = await fetch('/api/images/list?directory=orthodox/avatars');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.files && Array.isArray(data.files)) {
+          const avatarPaths = data.files.map((file: string) => `/images/orthodox/avatars/${file}`);
+          setOrthodoxAvatars(avatarPaths);
+          console.log('📸 Loaded orthodox avatars:', avatarPaths.length);
+        }
+      } else {
+        // Fallback: try to fetch from a manifest or use common image extensions
+        console.log('📸 API not available, trying alternative method...');
+        // We'll handle this in the dialog by trying common filenames
+      }
+    } catch (error) {
+      console.error('Failed to fetch orthodox avatars:', error);
+    }
+  };
+
+  // Fetch orthodox banners from public directory
+  const fetchOrthodoxBanners = async () => {
+    try {
+      console.log('📸 Fetching orthodox banners...');
+      const response = await fetch('/api/images/list?directory=orthodox/banners');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.files && Array.isArray(data.files)) {
+          const bannerPaths = data.files.map((file: string) => `/images/orthodox/banners/${file}`);
+          setOrthodoxBanners(bannerPaths);
+          console.log('📸 Loaded orthodox banners:', bannerPaths.length);
+        }
+      } else {
+        console.log('📸 API not available, trying alternative method...');
+      }
+    } catch (error) {
+      console.error('Failed to fetch orthodox banners:', error);
     }
   };
 
@@ -304,7 +351,10 @@ const ProfileBanner = () => {
                   backgroundColor: 'rgba(255, 255, 255, 1)',
                 }
               }}
-              onClick={() => setCoverUploadOpen(true)}
+              onClick={() => {
+                fetchOrthodoxBanners(); // Refresh banners when opening dialog
+                setCoverUploadOpen(true);
+              }}
             >
               <IconCamera size={20} />
             </IconButton>
@@ -454,7 +504,10 @@ const ProfileBanner = () => {
                               backgroundColor: 'primary.dark',
                             }
                           }}
-                          onClick={() => setAvatarUploadOpen(true)}
+                          onClick={() => {
+                            fetchOrthodoxAvatars(); // Refresh avatars when opening dialog
+                            setAvatarUploadOpen(true);
+                          }}
                         >
                           <IconEdit size={16} />
                         </IconButton>
@@ -464,7 +517,10 @@ const ProfileBanner = () => {
                     {renderCurrentAvatar(100, {
                       borderRadius: '50%',
                       border: '4px solid #fff'
-                    }, () => setAvatarUploadOpen(true))}
+                    }, () => {
+                      fetchOrthodoxAvatars(); // Refresh avatars when opening dialog
+                      setAvatarUploadOpen(true);
+                    })}
                   </Badge>
                 </ProfileImage>
                 <Box mt={1}>
@@ -547,6 +603,83 @@ const ProfileBanner = () => {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Select a banner image from the available options below
             </Typography>
+
+            {/* Orthodox Banners from public directory */}
+            {orthodoxBanners.length > 0 && (
+              <Box sx={{ mt: 4, mb: 4 }}>
+                <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
+                  Orthodox Banners
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mb: 3 }}>
+                  Choose from available banner images
+                </Typography>
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                  gap: 2
+                }}>
+                  {orthodoxBanners.map((bannerPath, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        p: 1,
+                        borderRadius: 1,
+                        border: '2px solid',
+                        borderColor: coverPhoto === bannerPath ? 'primary.main' : 'transparent',
+                        '&:hover': {
+                          borderColor: 'primary.main',
+                          backgroundColor: 'action.hover'
+                        }
+                      }}
+                      onClick={async () => {
+                        try {
+                          const updateResponse = await fetch('/api/user/profile/images', {
+                            method: 'PUT',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            credentials: 'include',
+                            body: JSON.stringify({ cover_image_url: bannerPath })
+                          });
+
+                          if (updateResponse.ok) {
+                            setCoverPhoto(bannerPath);
+                            localStorage.setItem('userBannerImage', bannerPath);
+                            setSnackbarMessage('Banner image updated and saved!');
+                            setSnackbarOpen(true);
+                            setCoverUploadOpen(false);
+                            console.log('📸 Banner image saved to database:', bannerPath);
+                          } else {
+                            throw new Error('Failed to save banner to database');
+                          }
+                        } catch (error) {
+                          console.error('Failed to save banner:', error);
+                          setSnackbarMessage('Failed to save banner image');
+                          setSnackbarOpen(true);
+                        }
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: '100%',
+                          height: 80,
+                          borderRadius: 1,
+                          backgroundImage: `url(${bannerPath})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          mb: 1
+                        }}
+                      />
+                      <Typography variant="caption" display="block" noWrap>
+                        Banner {index + 1}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )}
 
             {/* Banner Images */}
             {globalImages.length > 0 ? (
@@ -764,6 +897,73 @@ const ProfileBanner = () => {
                 </Box>
               </CardContent>
             </Card>
+
+            {/* Orthodox Avatars from public directory */}
+            {orthodoxAvatars.length > 0 && (
+              <Card sx={{ mb: 4 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
+                    Orthodox Avatars
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mb: 3 }}>
+                    Choose from available avatar images
+                  </Typography>
+                  <Box sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
+                    gap: 2
+                  }}>
+                    {orthodoxAvatars.map((avatarPath, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          p: 1,
+                          borderRadius: 1,
+                          border: '2px solid',
+                          borderColor: avatarImage === avatarPath ? 'primary.main' : 'transparent',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                            backgroundColor: 'action.hover'
+                          }
+                        }}
+                        onClick={async () => {
+                          try {
+                            await updateProfileImage(avatarPath);
+                            setSelectedAvatarId(null);
+                            setSnackbarMessage('Profile image updated and saved!');
+                            setSnackbarOpen(true);
+                            setAvatarUploadOpen(false);
+                            console.log('📸 Orthodox avatar saved using sync hook:', avatarPath);
+                          } catch (error) {
+                            console.error('Failed to save profile image:', error);
+                            setSnackbarMessage('Failed to save profile image');
+                            setSnackbarOpen(true);
+                          }
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 60,
+                            height: 60,
+                            borderRadius: '50%',
+                            backgroundImage: `url(${avatarPath})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            mx: 'auto',
+                            mb: 1
+                          }}
+                        />
+                        <Typography variant="caption" display="block" noWrap>
+                          Avatar {index + 1}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Global Images Section */}
             {globalImages.length > 0 && (

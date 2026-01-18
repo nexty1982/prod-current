@@ -24,7 +24,9 @@ interface CustomizerContextState {
     isSidebarHover: boolean;
     setIsSidebarHover: (isHover: boolean) => void;
     isMobileSidebar: boolean;  // Add this
-    setIsMobileSidebar: (isMobileSidebar: boolean) => void
+    setIsMobileSidebar: (isMobileSidebar: boolean) => void;
+    headerBackground: number;
+    setHeaderBackground: (bg: number) => void;
 }
 
 // Create the context with an initial value
@@ -34,6 +36,18 @@ export const CustomizerContext = createContext<CustomizerContextState | any>(und
 interface CustomizerContextProps {
     children: ReactNode;
 }
+
+// Helper function to determine if it's between sunset and sunrise (dark mode time)
+const isDarkModeTime = (): boolean => {
+    if (typeof window === 'undefined') return true; // Default to dark mode on server
+    
+    const now = new Date();
+    const hours = now.getHours();
+    
+    // Simple logic: dark mode from 6 PM (18:00) to 6 AM (06:00)
+    // This can be enhanced with actual sunset/sunrise calculations based on location
+    return hours >= 18 || hours < 6;
+};
 
 // Helper functions for localStorage
 const getStoredValue = (key: string, defaultValue: any): any => {
@@ -63,9 +77,17 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
     const [activeDir, setActiveDirState] = useState<string>(() => 
         getStoredValue('activeDir', config.activeDir)
     );
-    const [activeMode, setActiveModeState] = useState<string>(() => 
-        getStoredValue('activeMode', config.activeMode)
-    );
+    
+    // Initialize activeMode: check if user has manually set it, otherwise use time-based logic
+    const [activeMode, setActiveModeState] = useState<string>(() => {
+        const stored = getStoredValue('activeMode', null);
+        // If user has manually set a preference, use it
+        if (stored !== null) {
+            return stored;
+        }
+        // Otherwise, default to dark mode and use time-based logic
+        return isDarkModeTime() ? 'dark' : 'light';
+    });
     const [activeTheme, setActiveThemeState] = useState<string>(() => 
         getStoredValue('activeTheme', config.activeTheme)
     );
@@ -87,6 +109,9 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
     const [isLanguage, setIsLanguage] = useState<string>(config.isLanguage);
     const [isSidebarHover, setIsSidebarHover] = useState<boolean>(false);
     const [isMobileSidebar, setIsMobileSidebar] = useState<boolean>(false);
+    const [headerBackground, setHeaderBackgroundState] = useState<number>(() => 
+        getStoredValue('headerBackground', 1)
+    );
 
     // Enhanced setter functions that also save to localStorage
     const setActiveDir = (dir: string) => {
@@ -129,6 +154,11 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
         setStoredValue('isCollapse', collapse);
     };
 
+    const setHeaderBackground = (bg: number) => {
+        setHeaderBackgroundState(bg);
+        setStoredValue('headerBackground', bg);
+    };
+
     // Set attributes immediately
     useEffect(() => {
         document.documentElement.setAttribute("class", activeMode);
@@ -139,6 +169,34 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
         document.documentElement.setAttribute("data-sidebar-type", isCollapse);
 
     }, [activeMode, activeDir, activeTheme, activeLayout, isLayout, isCollapse]);
+
+    // Auto-update mode based on time of day (sunset to sunrise)
+    useEffect(() => {
+        // Only auto-update if user hasn't manually set a preference
+        const hasManualPreference = getStoredValue('activeMode', null) !== null;
+        if (hasManualPreference) {
+            return; // Don't auto-update if user has manually set preference
+        }
+
+        const updateModeBasedOnTime = () => {
+            const shouldBeDark = isDarkModeTime();
+            const currentMode = activeMode;
+            
+            if (shouldBeDark && currentMode !== 'dark') {
+                setActiveModeState('dark');
+            } else if (!shouldBeDark && currentMode !== 'light') {
+                setActiveModeState('light');
+            }
+        };
+
+        // Update immediately
+        updateModeBasedOnTime();
+
+        // Set up interval to check every minute
+        const interval = setInterval(updateModeBasedOnTime, 60000);
+
+        return () => clearInterval(interval);
+    }, [activeMode]);
 
     return (
         <CustomizerContext.Provider
@@ -165,7 +223,9 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
                 isSidebarHover,
                 setIsSidebarHover,
                 isMobileSidebar,
-                setIsMobileSidebar
+                setIsMobileSidebar,
+                headerBackground,
+                setHeaderBackground
             }}
         >
             {children}

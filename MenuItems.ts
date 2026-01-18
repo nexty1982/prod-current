@@ -441,6 +441,24 @@ const Menuitems: MenuitemsType[] = [
         icon: IconLayoutDashboard,
         href: '/sandbox/component-preview/modernize',
       },
+      {
+        id: uniqueId(),
+        title: 'Baptism Record Entry',
+        icon: IconForms,
+        href: '/apps/records/baptism/new',
+      },
+      {
+        id: uniqueId(),
+        title: 'Marriage Record Entry',
+        icon: IconForms,
+        href: '/apps/records/marriage/new',
+      },
+      {
+        id: uniqueId(),
+        title: 'Funeral Record Entry',
+        icon: IconForms,
+        href: '/apps/records/funeral/new',
+      },
 
     ],
   },

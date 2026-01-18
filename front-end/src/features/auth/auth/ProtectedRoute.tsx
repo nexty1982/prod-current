@@ -31,7 +31,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!authenticated) {
-    return <Navigate to="/frontend-pages/homepage" replace />;
+    return <Navigate to="/auth/login2" replace />;
   }
 
   // Check role requirements

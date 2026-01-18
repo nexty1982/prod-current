@@ -155,34 +155,16 @@ const appsLink: appsLinkType[] = [
     avatar: ddIcon3,
   },
   {
-    href: '/apps/liturgical-calendar',
-    title: 'Orthodox Liturgical Calendar',
-    subtext: 'Saints, Feasts, Readings & Fasting',
-    avatar: ddIcon4,
-  },
-  {
     href: '/apps/email',
     title: 'Email App',
     subtext: 'Get new emails',
     avatar: ddIcon7,
   },
   {
-    href: '/apps/kanban',
-    title: 'Kanban App',
-    subtext: 'Project management boards',
-    avatar: ddIcon8,
-  },
-  {
     href: '/apps/ocr-upload',
     title: 'OCR Upload',
     subtext: 'Document processing',
     avatar: ddIcon5,
-  },
-  {
-    href: '/apps/invoice/list',
-    title: 'Invoice App',
-    subtext: 'Billing management',
-    avatar: ddIcon6,
   },
 ];
 
@@ -195,6 +177,10 @@ const pageLinks: LinkType[] = [
   {
     href: '/docs/ADMINISTRATION_GUIDE.md',
     title: 'Users Guide',
+  },
+  {
+    href: '/auth/login2',
+    title: 'Church Portal',
   },
 ];
 

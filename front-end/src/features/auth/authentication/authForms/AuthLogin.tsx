@@ -8,13 +8,8 @@ import {
   FormControlLabel,
   Button,
   Stack,
-  Divider,
   Alert,
   CircularProgress,
-  FormControl,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
 } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { Link, useNavigate } from 'react-router-dom';
@@ -23,7 +18,6 @@ import { loginType } from '@/types/auth/auth';
 import CustomCheckbox from '@/components/forms/theme-elements/CustomCheckbox';
 import CustomTextField from '@/components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '@/components/forms/theme-elements/CustomFormLabel';
-import AuthSocialButtons from './AuthSocialButtons';
 
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const navigate = useNavigate();
@@ -33,7 +27,6 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     username: '',
     password: '',
     rememberMe: false,
-    platform: 'orthodox-metrics', // Default to Orthodox Metrics
   });
 
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -65,17 +58,6 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     }));
   };
 
-  const handlePlatformChange = (event: SelectChangeEvent<string>) => {
-    setFormData(prev => ({
-      ...prev,
-      platform: event.target.value,
-    }));
-
-    // Clear errors when changing platform
-    if (error) {
-      clearError();
-    }
-  };
 
   const validateForm = () => {
     const errors: { [key: string]: string } = {};
@@ -99,17 +81,15 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       return;
     }
 
-    // Redirect to OrthodMetrics portal if selected
-    if (formData.platform === 'orthodmetrics') {
-      // Redirect to OrthodMetrics portal login
-      window.location.href = 'http://localhost:5175/login';
-      return;
-    }
 
     try {
-      await login(formData.username, formData.password, formData.rememberMe);
-      // Redirect to dashboard on successful login
-      navigate('/');
+      const result = await login(formData.username, formData.password, formData.rememberMe);
+      // Use redirectUrl from login response if available, otherwise redirect to Super Dashboard
+      if (result && typeof result === 'object' && 'redirectUrl' in result && result.redirectUrl) {
+        window.location.href = result.redirectUrl;
+      } else {
+        navigate('/dashboards/super');
+      }
     } catch (err) {
       // Error is handled by the auth context
       console.error('Login failed:', err);
@@ -118,29 +98,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
 
   return (
     <>
-      {title ? (
-        <Typography fontWeight="700" variant="h3" mb={1}>
-          {title}
-        </Typography>
-      ) : null}
-
       {subtext}
-
-      <AuthSocialButtons title="Sign in with" />
-      <Box mt={3}>
-        <Divider>
-          <Typography
-            component="span"
-            color="textSecondary"
-            variant="h6"
-            fontWeight="400"
-            position="relative"
-            px={2}
-          >
-            or sign in with
-          </Typography>
-        </Divider>
-      </Box>
 
       {error && (
         <Alert 
@@ -219,21 +177,6 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
 
       <Box component="form" onSubmit={handleSubmit}>
         <Stack spacing={3}>
-          <Box>
-            <CustomFormLabel htmlFor="platform">Login Platform</CustomFormLabel>
-            <FormControl fullWidth>
-              <Select
-                id="platform"
-                value={formData.platform}
-                onChange={handlePlatformChange}
-                disabled={loading}
-                sx={{ mt: 1 }}
-              >
-                <MenuItem value="orthodox-metrics">Orthodox Metrics (Full System)</MenuItem>
-                <MenuItem value="orthodmetrics">OrthodMetrics (Church Portal)</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
           <Box>
             <CustomFormLabel htmlFor="username">Email or Username</CustomFormLabel>
             <CustomTextField

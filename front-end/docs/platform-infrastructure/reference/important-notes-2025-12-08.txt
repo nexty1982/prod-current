@@ -1,0 +1,206 @@
+Act as a senior engineer on the OrthodoxMetrics prod stack.
+
+Goal
+-----
+1) Extend the existing OCR upload flow to support **multiple upload buckets** (records, test, benchmark) instead of a single hardcoded directory.
+2) Store the chosen bucket per job in `ocr_jobs` and allow filtering by bucket.
+3) Expose the bucket selection in the OCR UI (OCR Studio / OCR Uploader).
+4) Add a **batch OCR benchmark runner** that can run accuracy tests on folders of images + ground-truth text.
+5) Keep all changes small, focused, and consistent with the existing code style.
+
+Context
+--------
+- Repo root: this workspace (OrthodoxMetrics prod).
+- Backend is Node/Express (mounted under `/api`).
+- OCR endpoints already exist, e.g.:
+  - `POST /api/church/:churchId/ocr/upload`
+  - `GET  /api/church/:churchId/ocr/jobs`
+  - `GET  /api/church/:churchId/ocr/jobs/:jobId`
+  - `POST /api/test-ocr` (test/debug)
+- Front-end uses Vite + React + MUI.
+- There is already an OCR Studio/OCR Uploader (recently refactored from legacy):
+  - `prod/front-end/src/features/ocr/pages/OCRStudioPage.tsx` (main OCR Studio page)
+  - `prod/front-end/src/features/ocr/pages/ChurchOCRPage.tsx` (church-specific OCR page)
+  - `prod/front-end/src/features/ocr/components/UploadZone.tsx` (upload component)
+  - `prod/front-end/src/features/ocr/components/JobList.tsx` (jobs list component)
+  - `prod/front-end/src/features/ocr/components/ConfigPanel.tsx` (settings panel)
+  - `prod/front-end/src/features/ocr/components/OutputViewer.tsx` (results viewer)
+  - `prod/front-end/src/features/ocr/lib/ocrApi.ts` (API service layer)
+  - Routes are already configured:
+    - `/apps/ocr-upload` → OCR Studio (for Apps menu)
+    - `/devel/ocr-studio` → OCR Studio (for Developer Tools menu)
+    - `/devel/ocr-studio/church/:churchId` → Church-specific OCR
+- There is a Python-based image enhancement pipeline in:
+  - `prod/front-end/scripts/image_enhancer/` (not to be broken).
+
+IMPORTANT: Any new front-end pages MUST be wired into `Router.tsx` and `MenuItems.ts` under the **Devel Tools** section of the menu.
+
+Phase 1 – Backend: multi-bucket OCR uploads
+--------------------------------------------
+1) Locate the OCR upload route and job model:
+   - Find the router/controller handling:
+     - `POST /api/church/:churchId/ocr/upload`
+   - Find the DB access code and type definitions for `ocr_jobs` (or equivalent), e.g.:
+     - `ocrJobsRepo`, `OcrJob`, etc.
+
+2) Add support for **upload buckets**:
+   - Concept: a "bucket" is a small enum determining *where* on disk the image is stored and how we categorize the job.
+   - Buckets:
+       - `records`   → production record scans (current default)
+       - `test`      → ad-hoc test uploads
+       - `benchmark` → curated benchmark datasets for accuracy testing
+
+3) Environment/config:
+   - Add these env/config values (if not present) to the server:
+     - `OCR_UPLOAD_ROOT=/var/www/orthodoxmetrics/ocr_uploads`
+     - `OCR_BUCKETS=records,test,benchmark`
+   - Implement a helper:
+     - `resolveBucket(req: Request): 'records' | 'test' | 'benchmark'`
+       - Check req.query.bucket and req.body.bucket.
+       - If value is not in `OCR_BUCKETS`, default to `records`.
+
+4) Update multer storage for OCR uploads:
+   - Where we currently decide the `destination` for uploaded images, replace the fixed path with:
+     - `const bucket = resolveBucket(req);`
+     - Target directory: `${OCR_UPLOAD_ROOT}/${bucket}`
+     - `fs.mkdirSync(dir, { recursive: true })` before writing.
+   - Keep filename logic similar (timestamp + random + extension).
+
+5) Extend `ocr_jobs` schema:
+   - Add a `bucket` column (if it does not exist):
+     - `VARCHAR(32) NOT NULL DEFAULT 'records'`.
+   - Update any insert logic to set the job’s `bucket` based on `resolveBucket(req)` and the chosen upload directory.
+   - Make sure `OcrJob` types/interfaces include `bucket`.
+
+6) Add optional bucket filtering to job listing:
+   - For `GET /api/church/:churchId/ocr/jobs`, accept optional query param `bucket`.
+   - If provided and valid, filter jobs by that bucket.
+   - If omitted, default to “all buckets” (for now).
+   - Keep this change backwards-compatible: existing callers with no `bucket` work as before.
+
+7) Ensure the OCR processing worker (if separate) can handle the updated `ocr_jobs` rows and does not break when `bucket` is present.
+
+Phase 2 – Front-end: bucket selection in OCR Studio/uploader
+-------------------------------------------------------------
+1) Locate OCR Studio/Uploader code:
+   - Existing OCR page(s) under:
+     - `src/features/ocr/pages/OCRStudioPage.tsx` (main page)
+     - `src/features/ocr/pages/ChurchOCRPage.tsx` (church-specific page)
+   - OCR components:
+     - `src/features/ocr/components/UploadZone.tsx` (upload component - needs bucket selector)
+     - `src/features/ocr/components/JobList.tsx` (jobs list - needs bucket filtering)
+     - `src/features/ocr/components/ConfigPanel.tsx` (settings panel)
+   - OCR API service:
+     - `src/features/ocr/lib/ocrApi.ts` (API calls - needs bucket parameter support)
+
+2) Add a **bucket selector** in the OCR Studio page:
+   - Simple approach: a select or segmented control with options:
+     - "Production Records" → `records`
+     - "Test Images" → `test`
+     - "Benchmark Set" → `benchmark`
+   - Use React state:
+     - `const [bucket, setBucket] = useState<'records' | 'test' | 'benchmark'>('records');`
+
+3) Pass the selected bucket to:
+   - The upload call (when they upload a file):
+     - Update `uploadFiles()` in `src/features/ocr/lib/ocrApi.ts` to accept optional `bucket` parameter
+     - Append `?bucket=${bucket}` to the upload URL OR send `bucket` in the form body (query param preferred).
+     - Update `UploadZone.tsx` to pass bucket to `uploadFiles()`
+   - The jobs listing:
+     - Update `fetchJobs()` in `src/features/ocr/lib/ocrApi.ts` to accept optional `bucket` parameter
+     - When provided, call `/api/church/:churchId/ocr/jobs?bucket=${bucket}`.
+     - Update `JobList.tsx` to pass bucket to `fetchJobs()`
+
+4) Surface the bucket visually:
+   - On the jobs list panel, show which bucket is currently active.
+   - For each job in the list, show the job’s `bucket` as a small tag/pill so we can visually verify separation between datasets.
+
+5) Routing & menu:
+   - ✅ **ALREADY DONE**: OCR Studio page is already reachable under **Devel Tools**:
+     - In `Router.tsx`: routes exist for `/devel/ocr-studio` and `/devel/ocr-studio/church/:churchId`
+     - In `MenuItems.ts`: OCR Studio is already listed under Developer Tools
+     - In Apps menu: `/apps/ocr-upload` route also points to OCR Studio
+   - ✅ **ALREADY DONE**: All OCR components have been refactored from `legacy` to `features/ocr`
+   - Do NOT break existing OCR routes; this is additive.
+
+Phase 3 – Batch OCR benchmark runner (backend script)
+------------------------------------------------------
+Goal: be able to point at a folder of images (and optional ground-truth text) and compute OCR accuracy metrics.
+
+1) Create a new Node script in the server side, something like:
+   - `server/scripts/runOcrBenchmark.ts` (or `.js` if the server is JS-only).
+
+2) Script behavior:
+   - Usage:
+     - `node dist/scripts/runOcrBenchmark.js /path/to/folder --churchId=<id> --bucket=benchmark`
+   - Inputs:
+     - Required: folder path.
+     - Optional: churchId (for calling church-specific OCR endpoint) and bucket (for logical grouping).
+   - For each image file in the folder (`.jpg`, `.jpeg`, `.png`, `.tif`, `.tiff`):
+     - Call the existing OCR stack, using the internal logic or HTTP endpoint:
+       - Preferred: call the internal OCR function/service (no HTTP) if that’s easily importable.
+       - Otherwise, send HTTP POST to:
+         - `/api/test-ocr` OR `/api/church/:churchId/ocr/upload` + job polling, whichever is cleaner.
+     - Look for ground-truth:
+       - For `img001.jpg`, check alongside:
+         - `img001.txt` (plain expected text), or
+         - `img001.json` (structured expected fields).
+       - If none exist, still store the OCR output but mark accuracy as `null`.
+
+3) Metrics:
+   - Implement basic text accuracy metrics:
+     - Character-level Levenshtein distance → character accuracy %.
+     - Word-level overlap / word accuracy % (simple tokenization on spaces/punctuation is fine).
+   - For JSON ground truth (optional), compute simple field accuracy:
+     - For each key, compare expected vs actual string values.
+     - Record how many fields match exactly and field accuracy %.
+
+4) Output:
+   - Write:
+     - `benchmark_results.json` in the folder.
+     - `benchmark_results.html` with:
+       - summary (num files, avg char accuracy, avg word accuracy, number with ground truth).
+       - table per image:
+         - filename
+         - OCR status (ok/error)
+         - char accuracy %
+         - word accuracy %
+         - link or path to raw OCR output
+         - note if ground truth is missing.
+
+   - Keep the HTML layout simple but readable (similar style to the Python `image_enhancer` quality report: table, basic CSS, summary at the top).
+
+5) Implementation details:
+   - Reuse existing HTTP client utilities or import the OCR logic directly where possible (do not rewrite OCR).
+   - Add logging but no interactive prompts.
+   - Exit with non-zero code if the script itself fails; individual image failures should be logged but not crash the entire run.
+
+Phase 4 – Sanity checks & docs
+-------------------------------
+1) Add or update a short doc (e.g. in `docs/OCR_BUCKETS_AND_BENCHMARKS.md`) that explains:
+   - What buckets exist (`records`, `test`, `benchmark`).
+   - Where files are stored on disk (`OCR_UPLOAD_ROOT`).
+   - How to run the batch benchmark:
+     - Example command:
+       - `node dist/scripts/runOcrBenchmark.js /var/www/orthodoxmetrics/ocr_benchmarks/baptism_1 --churchId=14 --bucket=benchmark`
+
+2) Confirm:
+   - Existing OCR uploads for `records` still behave exactly as before.
+   - New `test` and `benchmark` buckets work (uploads land in correct directory, jobs tagged with correct bucket).
+   - OCR Studio UI:
+     - Can switch buckets.
+     - Shows jobs and runs OCR against the currently selected bucket.
+   - Benchmark runner script produces both JSON and HTML and prints a short summary to stdout.
+
+Constraints / style
+-------------------
+- Do not break existing OCR behavior; new bucket support must be backwards-compatible.
+- Keep TypeScript types updated wherever you add `bucket`.
+- Keep changes tight and focused; avoid large unrelated refactors.
+- Prefer small, composable utilities (e.g., a `resolveBucket` helper, a `listOcrJobs` function with optional bucket param).
+- No new heavy dependencies for the benchmark script beyond what’s already in the server unless absolutely necessary (a small Levenshtein implementation is fine, can be written inline if needed).
+
+Start by:
+- Identifying the OCR upload route + job model.
+- Implementing the bucket support end-to-end (DB, server, UI).
+- Then add the benchmark script and wire it to the existing OCR logic.

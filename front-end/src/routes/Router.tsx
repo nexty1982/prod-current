@@ -7,7 +7,6 @@ import ProtectedRoute from '../components/auth/ProtectedRoute';
 import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
 import HeadlineSourcePicker from '../components/headlines/HeadlineSourcePicker';
 import SmartRedirect from '../components/routing/SmartRedirect';
-import ComingSoon from '../shared/ui/ComingSoon';
 import AppErrorBoundary from '@/shared/ui/AppErrorBoundary';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import OMDeps from '../tools/om-deps/OM-deps';
@@ -19,13 +18,14 @@ const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')))
 /* ****Pages***** */
 const ModernDash = Loadable(lazy(() => import('../features/dashboard/ModernDashboard')));
 const EcommerceDash = Loadable(lazy(() => import('../features/dashboard/Ecommerce')));
-const OrthodMetricsDash = Loadable(lazy(() => import('../features/admin/dashboard/OrthodoxMetrics')));
+const OrthodoxMetricsDash = Loadable(lazy(() => import('../features/admin/dashboard/OrthodoxMetrics')));
 
 /* ****Apps***** */
 const Contacts = Loadable(lazy(() => import('../features/apps/contacts/Contacts')));
-const ChatApp = Loadable(lazy(() => import('../features/misc-legacy/apps/chat/ChatApp')));
+// Removed: ChatApp from misc-legacy
 const Notes = Loadable(lazy(() => import('../features/apps/notes/Notes')));
 const Tickets = Loadable(lazy(() => import('../features/apps/tickets/Tickets')));
+const ImageAI = Loadable(lazy(() => import('../features/apps/image-ai/ImageAI')));
 
 /* ****Developer Tools***** */
 const SiteStructureVisualizer = Loadable(lazy(() => import('../tools/SiteStructureVisualizer')));
@@ -35,71 +35,69 @@ const InvoiceList = Loadable(lazy(() => import('../features/apps/invoice/List'))
 const InvoiceCreate = Loadable(lazy(() => import('../features/apps/invoice/Create')));
 const InvoiceDetail = Loadable(lazy(() => import('../features/apps/invoice/Detail')));
 const InvoiceEdit = Loadable(lazy(() => import('../features/apps/invoice/Edit')));
-const LiturgicalCalendarPage = Loadable(lazy(() => import('../features/misc-legacy/calendar/LiturgicalCalendarPage')));
-const SiteClone = Loadable(lazy(() => import('../features/misc-legacy/apps/site-clone/SiteClone')));
+// Removed: LiturgicalCalendarPage, SiteClone from misc-legacy
 const Logs = Loadable(lazy(() => import('../features/system/apps/logs/Logs')));
 const UserProfile = Loadable(lazy(() => import('../features/apps/user-profile/UserProfile')));
 const Followers = Loadable(lazy(() => import('../features/apps/user-profile/Followers')));
 const Friends = Loadable(lazy(() => import('../features/apps/user-profile/Friends')));
-const Gallery = Loadable(lazy(() => import('../features/apps/user-profile/Gallery')));
+const UserProfileGallery = Loadable(lazy(() => import('../features/apps/user-profile/Gallery')));
 const Email = Loadable(lazy(() => import('../features/apps/email/Email')));
 
 /* ****Social Features***** */
-const SocialBlogList = Loadable(lazy(() => import('../features/misc-legacy/social/blog/BlogList')));
-const SocialBlogCreate = Loadable(lazy(() => import('../features/misc-legacy/social/blog/BlogCreate')));
-const SocialBlogEdit = Loadable(lazy(() => import('../features/misc-legacy/social/blog/BlogEdit')));
-const SocialBlogView = Loadable(lazy(() => import('../features/misc-legacy/social/blog/BlogView')));
-const SocialFriends = Loadable(lazy(() => import('../features/misc-legacy/social/friends/FriendsList')));
-const SocialChat = Loadable(lazy(() => import('../features/misc-legacy/social/chat/SocialChat')));
-const SocialNotifications = Loadable(lazy(() => import('../features/misc-legacy/social/notifications/NotificationCenter')));
+const SocialChat = Loadable(lazy(() => import('../features/social/chat/SocialChat')));
+const NotificationCenter = Loadable(lazy(() => import('../features/social/notifications/NotificationCenter')));
+const SocialFriends = Loadable(lazy(() => import('../features/social/friends/FriendsList')));
 
 // Orthodox Headlines
-const OrthodoxHeadlines = Loadable(lazy(() => import('../features/misc-legacy/OrthodoxHeadlines')));
+// Removed: OrthodoxHeadlines from misc-legacy
 
 // OMAI Task Assignment
-const AssignTaskPage = Loadable(lazy(() => import('../features/misc-legacy/pages/AssignTask')));
+// Removed: AssignTaskPage from misc-legacy
 
 // 404 Page
-const NotFound404 = Loadable(lazy(() => import('../features/misc-legacy/pages/NotFound404')));
+// Removed: NotFound404 from misc-legacy - redirects to Super Dashboard
 
 // Church Management
 const ChurchList = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchList')));
 const ChurchForm = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchForm')));
-const ChurchSetupWizard = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchSetupWizard')));
+const ChurchSetupWizard = Loadable(lazy(() => import('../features/devel-tools/om-church-wizard/ChurchSetupWizard')));
 const FieldMapperPage = Loadable(lazy(() => import('../features/church/FieldMapperPage')));
 const RecordsPageWrapper = Loadable(lazy(() => import('../features/records/apps/church-management/RecordsPageWrapper')));
 
 // Records Management
 const AdvancedGridPage = Loadable(lazy(() => import('../features/tables/AdvancedGridPage')));
-const RecordsGridPage = Loadable(lazy(() => import('../features/records/apps/records-grid/RecordsGridPage')));
-const ChurchRecordsSimplePage = Loadable(lazy(() => import('../features/records/records/ChurchRecordsSimplePage')));
-const DynamicRecordsPageWrapper = Loadable(lazy(() => import('../features/records/apps/records/DynamicRecordsPageWrapper')));
+//const RecordsGridPage = Loadable(lazy(() => import('../features/records/apps/records-grid/RecordsGridPage')));
+//const ChurchRecordsSimplePage = Loadable(lazy(() => import('../features/records/records/ChurchRecordsSimplePage')));
+//const DynamicRecordsPageWrapper = Loadable(lazy(() => import('../features/records/apps/records/DynamicRecordsPageWrapper')));
 const EnhancedRecordsGrid = Loadable(lazy(() => import('../features/records/EnhancedRecordsGrid')));
 
 // Records Centralized Pages (unchanged by phase3)
 const BaptismRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/baptism/BaptismRecordsPage')));
-const MarriageRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/marriage/MarriageRecords')));
-const FuneralRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/records/FuneralRecords')));
+const MarriageRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/marriage/MarriageRecordsPage')));
+const FuneralRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/death/FuneralRecordsPage')));
 const CentralizedRecordsPageWrapper = Loadable(lazy(() => import('../features/records-centralized/components/records/RecordsPageWrapper')));
-const DynamicRecordsManager = Loadable(lazy(() => import('../features/records-centralized/components/records/DynamicRecordsManager')));
-const ModernDynamicRecordsManager = Loadable(lazy(() => import('../features/records-centralized/components/records/ModernDynamicRecordsManager')));
-const EditableRecordPage = Loadable(lazy(() => import('../features/records-centralized/components/records/EditableRecordPage')));
+
+// Record Entry Forms
+const BaptismRecordEntryPage = Loadable(lazy(() => import('../features/records/baptism/BaptismRecordEntryPage')));
+const MarriageRecordEntryPage = Loadable(lazy(() => import('../features/records/marriage/MarriageRecordEntryPage')));
+const FuneralRecordEntryPage = Loadable(lazy(() => import('../features/records/funeral/FuneralRecordEntryPage')));
+//const DynamicRecordsManager = Loadable(lazy(() => import('../features/records-centralized/components/records/DynamicRecordsManager')));
+//const ModernDynamicRecordsManager = Loadable(lazy(() => import('../features/records-centralized/components/records/ModernDynamicRecordsManager')));
+//const EditableRecordPage = Loadable(lazy(() => import('../features/records-centralized/components/records/EditableRecordPage')));
 
 // Settings
-const MenuSettings = Loadable(lazy(() => import('../features/misc-legacy/settings/MenuSettings')));
+// Removed: MenuSettings from misc-legacy
 const JITTerminalAccess = Loadable(lazy(() => import('../features/security/settings/JITTerminalAccess')));
 
 // Notifications
-const NotificationList = Loadable(lazy(() => import('../features/misc-legacy/notifications/NotificationList')));
-const NotificationPreferences = Loadable(lazy(() => import('../features/misc-legacy/notifications/NotificationPreferences')));
+// Removed: NotificationList, NotificationPreferences from misc-legacy
 
 // Admin
 const UserManagement = Loadable(lazy(() => import('../features/admin/admin/UserManagement')));
-const PermissionsManagement = Loadable(lazy(() => import('../features/admin/admin/PermissionsManagement')));
-const RoleManagement = Loadable(lazy(() => import('../features/admin/admin/RoleManagement')));
+const OMPermissionCenter = Loadable(lazy(() => import('../features/devel-tools/om-permission-center/PermissionsManagement')));
 const AdminSettings = Loadable(lazy(() => import('../features/admin/admin/AdminSettings')));
 const OMSiteSurvey = Loadable(lazy(() => import('../features/admin/admin/tools/OMSiteSurvey')));
-const BlogFeed = Loadable(lazy(() => import('../features/misc-legacy/blog/BlogFeed')));
+// Removed: BlogFeed from misc-legacy
 const BlogAdmin = Loadable(lazy(() => import('../features/admin/admin/BlogAdmin')));
 const SessionManagement = Loadable(lazy(() => import('../features/auth/admin/SessionManagement')));
 const AdminLogs = Loadable(lazy(() => import('../features/admin/admin/AdminLogs')));
@@ -108,22 +106,29 @@ const MenuPermissions = Loadable(lazy(() => import('../features/admin/admin/Menu
 const MenuManagement = Loadable(lazy(() => import('../features/admin/admin/MenuManagement')));
 const OrthodMetricsAdmin = Loadable(lazy(() => import('../features/admin/admin/OrthodoxMetricsAdmin')));
 const AIAdminPanel = Loadable(lazy(() => import('../features/admin/ai/AIAdminPanel')));
-const OMAIUltimateLogger = Loadable(lazy(() => import('../features/admin/logs/LoggerDashboard')));
+const OMAIUltimateLogger = Loadable(lazy(() => import('../features/devel-tools/om-ultimatelogger/LoggerDashboard')));
 const ScriptRunner = Loadable(lazy(() => import('../features/admin/admin/ScriptRunner')));
-const SuperAdminDashboard = Loadable(lazy(() => import('../features/admin/admin/SuperAdminDashboard')));
+const SuperDashboard = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/SuperDashboard')));
+const SuperDashboardCustomizer = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/SuperDashboardCustomizer')));
+const UserDashboard = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/UserDashboard')));
 const RouterMenuStudio = Loadable(lazy(() => import('../features/router-menu-studio/RouterMenuStudioPage')));
 const DynamicRecordsInspector = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsInspector')));
 const RefactorConsole = Loadable(lazy(() => import('../features/devel-tools/refactor-console/RefactorConsole')));
-const TreeInspector = Loadable(lazy(() => import("../features/devel-tools/TreeInspector")));
+const OMSpecDocumentation = Loadable(lazy(() => import('../features/devel-tools/system-documentation/om-spec/OMSpecDocumentation')));
+const OMMagicImage = Loadable(lazy(() => import('../features/devel-tools/om-magic-image/om-magic-image')));
+const OCRStudioPage = Loadable(lazy(() => import('../features/ocr/pages/OCRStudioPage')));
+const OcrUploader = Loadable(lazy(() => import('../features/ocr/OcrUploader')));
+const ChurchOCRPage = Loadable(lazy(() => import('../features/ocr/pages/ChurchOCRPage')));
+const EnhancedOCRUploader = Loadable(lazy(() => import('../features/devel-tools/om-ocr/EnhancedOCRUploader')));
+const OCRSettingsPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OCRSettingsPage')));
+const OMTasksPage = Loadable(lazy(() => import('../features/devel-tools/om-tasks/OMTasksPage')));
+const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
 
-const JITTerminal = Loadable(lazy(() => import('../features/misc-legacy/terminal/JITTerminal')));
+// Removed: JITTerminal from misc-legacy
 const JITTerminalConsole = Loadable(lazy(() => import('../features/admin/admin/JITTerminalConsole')));
 
 // AI Lab
-const OMAILab = Loadable(lazy(() => import('../features/misc-legacy/sandbox/ai-lab')));
-const ProjectGenerator = Loadable(lazy(() => import('../features/misc-legacy/sandbox/project-generator')));
-const ComponentLibrary = Loadable(lazy(() => import('../features/misc-legacy/sandbox/component-library')));
-const ComponentPreview = Loadable(lazy(() => import('../features/misc-legacy/sandbox/component-preview')));
+// Removed: All sandbox components from misc-legacy
 const AdminDashboardLayout = Loadable(lazy(() => import('../features/admin/admin/AdminDashboardLayout')));
 const AdminPageFallback = Loadable(lazy(() => import('../features/admin/admin/AdminPageFallback')));
 
@@ -135,13 +140,13 @@ const BigBookDynamicRoute = Loadable(lazy(() => import('../features/admin/admin/
 const OMAIDiscoveryPanelMobile = Loadable(lazy(() => import('../features/admin/admin/OMAIDiscoveryPanelMobile')));
 
 // Component Registry for Dynamic Addons
-import { DynamicAddonRoute } from '../features/misc-legacy/registry/ComponentRegistry';
+// Removed: DynamicAddonRoute from misc-legacy
 
 // OMLearn Module (unchanged in phase3 map)
 const OMLearn = Loadable(lazy(() => import('../modules/OMLearn/OMLearn')));
 
 // Build System
-const BuildConsole = Loadable(lazy(() => import('../features/admin/admin/BuildConsole')));
+const BuildConsole = Loadable(lazy(() => import('../features/devel-tools/om-build-console/BuildConsole')));
 
 // Records Pages
 import { RECORDS_LEGACY_ENABLED } from '../config/featureFlags';
@@ -149,61 +154,24 @@ import { RECORDS_LEGACY_ENABLED } from '../config/featureFlags';
 const ChurchAdminList = Loadable(lazy(() => import('../features/admin/admin/ChurchAdminList')));
 const ChurchAdminPanel = Loadable(lazy(() => import('../features/admin/admin/ChurchAdminPanelWorking')));
 
-// New Records Management (Shop Layout)
-const RecordsManagement = Loadable(lazy(() => import('../features/records/apps/records/index')));
 
 // Records UI Page
 const RecordsUIPage = Loadable(lazy(() => import('../features/records/apps/records-ui/index')));
 
 // ui components
-const MuiAlert = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiAlert')));
-const MuiAccordion = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiAccordion')));
-const MuiAvatar = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiAvatar')));
-const MuiChip = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiChip')));
-const MuiDialog = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiDialog')));
-const MuiList = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiList')));
-const MuiPopover = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiPopover')));
-const MuiRating = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiRating')));
-const MuiTabs = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiTabs')));
-const MuiTooltip = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiTooltip')));
-const MuiTransferList = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiTransferList')));
-const MuiTypography = Loadable(lazy(() => import('../features/misc-legacy/ui-components/MuiTypography')));
+// Removed: All MUI UI components from misc-legacy
 
 // form elements
-const MuiAutoComplete = Loadable(lazy(() => import('../features/misc-legacy/forms/form-elements/MuiAutoComplete')));
-const MuiButton = Loadable(lazy(() => import('../features/misc-legacy/forms/form-elements/MuiButton')));
-const MuiCheckbox = Loadable(lazy(() => import('../features/misc-legacy/forms/form-elements/MuiCheckbox')));
-const MuiRadio = Loadable(lazy(() => import('../features/misc-legacy/forms/form-elements/MuiRadio')));
-const MuiSlider = Loadable(lazy(() => import('../features/misc-legacy/forms/form-elements/MuiSlider')));
-const MuiDateTime = Loadable(lazy(() => import('../features/misc-legacy/forms/form-elements/MuiDateTime')));
-const MuiSwitch = Loadable(lazy(() => import('../features/misc-legacy/forms/form-elements/MuiSwitch')));
+// Removed: All MUI form elements from misc-legacy
 
 // forms
-const FormLayouts = Loadable(lazy(() => import('../features/misc-legacy/forms/FormLayouts')));
-const FormCustom = Loadable(lazy(() => import('../features/misc-legacy/forms/FormCustom')));
-const FormHorizontal = Loadable(lazy(() => import('../features/misc-legacy/forms/FormHorizontal')));
-const FormVertical = Loadable(lazy(() => import('../features/misc-legacy/forms/FormVertical')));
-const FormWizard = Loadable(lazy(() => import('../features/misc-legacy/forms/FormWizard')));
-const FormValidation = Loadable(lazy(() => import('../features/misc-legacy/forms/FormValidation')));
-const TiptapEditor = Loadable(lazy(() => import('../features/misc-legacy/forms/from-tiptap/TiptapEditor')));
+// Removed: All form components from misc-legacy
 
 // pages
-const RollbaseCASL = Loadable(lazy(() => import('../features/misc-legacy/pages/rollbaseCASL/RollbaseCASL')));
-const Faq = Loadable(lazy(() => import('../features/misc-legacy/pages/faq/Faq')));
-
-const Pricing = Loadable(lazy(() => import('../features/misc-legacy/pages/pricing/Pricing')));
-const AccountSetting = Loadable(
-  lazy(() => import('../features/misc-legacy/pages/account-setting/AccountSetting')),
-);
+// Removed: RollbaseCASL, Faq, Pricing, AccountSetting from misc-legacy
 
 // charts
-const AreaChart = Loadable(lazy(() => import('../features/misc-legacy/charts/AreaChart')));
-const CandlestickChart = Loadable(lazy(() => import('../features/misc-legacy/charts/CandlestickChart')));
-const ColumnChart = Loadable(lazy(() => import('../features/misc-legacy/charts/ColumnChart')));
-const DoughnutChart = Loadable(lazy(() => import('../features/misc-legacy/charts/DoughnutChart')));
-const GredientChart = Loadable(lazy(() => import('../features/misc-legacy/charts/GredientChart')));
-const RadialbarChart = Loadable(lazy(() => import('../features/misc-legacy/charts/RadialbarChart')));
-const LineChart = Loadable(lazy(() => import('../features/misc-legacy/charts/LineChart')));
+// Removed: All chart components from misc-legacy
 
 // tables
 const BasicTable = Loadable(lazy(() => import('../features/tables/tables/BasicTable')));
@@ -233,25 +201,13 @@ const ReactSortingTable = Loadable(lazy(() => import('../features/tables/react-t
 const ReactStickyTable = Loadable(lazy(() => import('../features/tables/react-tables/sticky/page')));
 
 // mui charts (Recharts demos)
-const BarCharts = Loadable(lazy(() => import('../features/misc-legacy/muicharts/barcharts/page')));
-const GaugeCharts = Loadable(lazy(() => import('../features/misc-legacy/muicharts/gaugecharts/page')));
-const AreaCharts = Loadable(lazy(() => import('../features/misc-legacy/muicharts/linecharts/area/page')));
-const LineCharts = Loadable(lazy(() => import('../features/misc-legacy/muicharts/linecharts/line/page')));
-const PieCharts = Loadable(lazy(() => import('../features/misc-legacy/muicharts/piecharts/page')));
-const ScatterCharts = Loadable(lazy(() => import('../features/misc-legacy/muicharts/scattercharts/page')));
-const SparklineCharts = Loadable(lazy(() => import('../features/misc-legacy/muicharts/sparklinecharts/page')));
+// Removed: All MUI chart demos from misc-legacy
 
 // mui trees
-const SimpletreeCustomization = Loadable(lazy(() => import('../features/misc-legacy/mui-trees/simpletree/simpletree-customization/page')));
-const SimpletreeExpansion = Loadable(lazy(() => import('../features/misc-legacy/mui-trees/simpletree/simpletree-expansion/page')));
-const SimpletreeFocus = Loadable(lazy(() => import('../features/misc-legacy/mui-trees/simpletree/simpletree-focus/page')));
-const SimpletreeItems = Loadable(lazy(() => import('../features/misc-legacy/mui-trees/simpletree/simpletree-items/page')));
-const SimpletreeSelection = Loadable(lazy(() => import('../features/misc-legacy/mui-trees/simpletree/simpletree-selection/page')));
+// Removed: All MUI tree components from misc-legacy
 
 // widgets
-const WidgetCards = Loadable(lazy(() => import('../features/misc-legacy/widgets/cards/WidgetCards')));
-const WidgetBanners = Loadable(lazy(() => import('../features/misc-legacy/widgets/banners/WidgetBanners')));
-const WidgetCharts = Loadable(lazy(() => import('../features/misc-legacy/widgets/charts/WidgetCharts')));
+// Removed: All widget components from misc-legacy
 
 // authentication
 const OrthodoxLogin = Loadable(lazy(() => import('../features/auth/authentication/auth1/OrthodoxLogin')));
@@ -271,12 +227,23 @@ const Landingpage = Loadable(lazy(() => import('../features/pages/landingpage/La
 
 // front end pages
 const Homepage = Loadable(lazy(() => import('../features/pages/frontend-pages/Homepage')));
+// Removed: HomepageOriginal - old homepage, no longer used
 const About = Loadable(lazy(() => import('../features/pages/frontend-pages/About')));
 const Contact = Loadable(lazy(() => import('../features/pages/frontend-pages/Contact')));
 const Portfolio = Loadable(lazy(() => import('../features/pages/frontend-pages/Portfolio')));
 const PagePricing = Loadable(lazy(() => import('../features/pages/frontend-pages/Pricing')));
 const BlogPage = Loadable(lazy(() => import('../features/pages/frontend-pages/Blog')));
 const BlogPost = Loadable(lazy(() => import('../features/pages/frontend-pages/BlogPost')));
+const PagesMenu = Loadable(lazy(() => import('../features/pages/frontend-pages/PagesMenu')));
+const HTMLViewer = Loadable(lazy(() => import('../features/pages/frontend-pages/HTMLViewer')));
+const GreekRecordsViewer = Loadable(lazy(() => import('../features/pages/frontend-pages/GreekRecordsViewer')));
+const Samples = Loadable(lazy(() => import('../features/pages/frontend-pages/Samples')));
+const Gallery = Loadable(lazy(() => import('../features/devel-tools/om-gallery/Gallery')));
+const OCATimeline = Loadable(lazy(() => import('../features/pages/frontend-pages/OCATimeline')));
+const PublicTasksListPage = Loadable(lazy(() => import('../features/pages/frontend-pages/PublicTasksListPage')));
+const PublicTaskDetailPage = Loadable(lazy(() => import('../features/pages/frontend-pages/PublicTaskDetailPage')));
+const WelcomeMessage = Loadable(lazy(() => import('../features/pages/frontend-pages/WelcomeMessage')));
+const Tour = Loadable(lazy(() => import('../features/pages/frontend-pages/Tour')));
 
 const Router = [
   {
@@ -305,20 +272,48 @@ const Router = [
         )
       },
       {
-      },
-      {
         path: '/dashboards/orthodmetrics',
         exact: true,
         element: (
           <ProtectedRoute requiredPermission="admin_dashboard">
-            <OrthodMetricsDash />
+            <OrthodoxMetricsDash />
           </ProtectedRoute>
         )
       },
       {
-        path: '/liturgical-calendar',
-        element: <LiturgicalCalendarPage />
+        path: '/dashboards/user',
+        exact: true,
+        element: (
+          <ProtectedRoute>
+            <AppErrorBoundary>
+              <UserDashboard />
+            </AppErrorBoundary>
+          </ProtectedRoute>
+        ),
       },
+      {
+        path: '/dashboards/super',
+        exact: true,
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <SuperDashboard />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/dashboards/super/customize',
+        exact: true,
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <SuperDashboardCustomizer />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      // Removed: /liturgical-calendar route (misc-legacy)
       {
         path: '/apps/contacts',
         element: (
@@ -329,14 +324,7 @@ const Router = [
       },
       // { path: '/apps/blog/posts', element: <Blog /> },
       // { path: '/frontend-pages/blog/detail/:id', element: <BlogDetail /> },
-      {
-        path: '/apps/chats',
-        element: (
-          <ProtectedRoute>
-            <ChatApp />
-          </ProtectedRoute>
-        )
-      },
+      // Removed: /apps/chats route (misc-legacy)
 
       // Developer Tools
       {
@@ -348,36 +336,12 @@ const Router = [
         )
       },
 
-      // Social Experience Routes
+      // Social Features Routes
       {
-        path: '/social/blog',
+        path: '/social/chat',
         element: (
           <ProtectedRoute>
-            <SocialBlogList />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/social/blog/create',
-        element: (
-          <ProtectedRoute>
-            <SocialBlogCreate />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/social/blog/edit/:id',
-        element: (
-          <ProtectedRoute>
-            <SocialBlogEdit />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/social/blog/post/:id',
-        element: (
-          <ProtectedRoute>
-            <SocialBlogView />
+            <SocialChat />
           </ProtectedRoute>
         )
       },
@@ -390,28 +354,18 @@ const Router = [
         )
       },
       {
-        path: '/social/chat',
-        element: (
-          <ProtectedRoute>
-            <SocialChat />
-          </ProtectedRoute>
-        )
-      },
-      {
         path: '/social/notifications',
         element: (
           <ProtectedRoute>
-            <SocialNotifications />
+            <NotificationCenter />
           </ProtectedRoute>
         )
       },
-
-      // Orthodox Headlines - Authenticated news aggregator
       {
-        path: '/orthodox-headlines',
+        path: '/notifications',
         element: (
           <ProtectedRoute>
-            <OrthodoxHeadlines />
+            <NotificationCenter />
           </ProtectedRoute>
         )
       },
@@ -441,6 +395,14 @@ const Router = [
         )
       },
       {
+        path: '/apps/image-ai',
+        element: (
+          <ProtectedRoute>
+            <ImageAI />
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/apps/followers',
         element: (
           <ProtectedRoute>
@@ -462,7 +424,7 @@ const Router = [
           <ProtectedRoute>
             <Gallery />
           </ProtectedRoute>
-        )
+        ) 
       },
       {
         path: '/apps/kanban',
@@ -541,7 +503,7 @@ const Router = [
       {
         path: '/apps/church-management/:id/field-mapper',
         element: (
-          <ProtectedRoute requiredPermission="manage_churches">
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
             <FieldMapperPage />
           </ProtectedRoute>
         )
@@ -551,6 +513,26 @@ const Router = [
         element: (
           <ProtectedRoute requiredPermission="manage_churches">
             <RecordsPageWrapper />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/church/om-spec',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <OMSpecDocumentation />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/church/omai-logger',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <OMAIUltimateLogger />
+            </AdminErrorBoundary>
           </ProtectedRoute>
         )
       },
@@ -583,7 +565,7 @@ const Router = [
         path: '/apps/user-profile/gallery',
         element: (
           <ProtectedRoute>
-            <Gallery />
+            <UserProfileGallery />
           </ProtectedRoute>
         )
       },
@@ -596,16 +578,7 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/settings/menu',
-        element: (
-          <ProtectedRoute>
-            <AdminErrorBoundary>
-              <MenuSettings />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
+      // Removed: /settings/menu route (misc-legacy)
       {
         path: '/settings/jit-terminal',
         element: (
@@ -627,19 +600,9 @@ const Router = [
         )
       },
       {
-        path: '/admin/permissions',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <PermissionsManagement />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
         path: '/admin/menu-permissions',
         element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
             <AdminErrorBoundary>
               <MenuPermissions />
             </AdminErrorBoundary>
@@ -649,18 +612,10 @@ const Router = [
       {
         path: '/admin/menu-management',
         element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
             <AdminErrorBoundary>
               <MenuManagement />
             </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/admin/roles',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <RoleManagement />
           </ProtectedRoute>
         )
       },
@@ -763,21 +718,11 @@ const Router = [
         )
       },
       {
-        path: '/admin/dashboard',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <SuperAdminDashboard />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
         path: '/admin/orthodox-metrics',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin']}>
             <AdminErrorBoundary>
-              <OrthodMetricsDash />
+              <OrthodoxMetricsDash />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -856,20 +801,101 @@ const Router = [
         )
       },
       {
-        path: "/devel-tools/tree-inspector",
+        path: '/devel-tools/om-magic-image',
         element: (
-          <ProtectedRoute requiredRole={["super_admin"]}>
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
             <AdminErrorBoundary>
-              <TreeInspector />
+              <OMMagicImage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
       },
       {
+        path: '/devel-tools/om-tasks',
         element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
             <AdminErrorBoundary>
-              <OmtraceConsole />
+              <OMTasksPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/live-table-builder',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <LiveTableBuilderPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/om-permission-center',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <OMPermissionCenter />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/ocr-upload',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <OCRStudioPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/ocr-studio',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <OCRStudioPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/ocr-studio/church/:churchId',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <ChurchOCRPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/records/ocr-uploader',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <OcrUploader />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/enhanced-ocr-uploader',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <EnhancedOCRUploader />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/ocr-settings',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <OCRSettingsPage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -884,133 +910,14 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/sandbox/ai-lab',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <OMAILab />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/sandbox/project-generator',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <ProjectGenerator />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/sandbox/component-library',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <ComponentLibrary />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-
-      {
-        path: '/sandbox/component-preview',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <ComponentPreview />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/sandbox/component-preview/:source',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <ComponentPreview />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/sandbox/component-preview/:source/:category',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <ComponentPreview />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/sandbox/component-preview/:source/:category/:component',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <ComponentPreview />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
+      // Removed: All sandbox routes (misc-legacy)
       {
         path: '/omb/editor',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
+              <div>OMB Editor</div>
             </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/:churchId(\\d+)-records',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/:churchName-Records',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/records',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-          </ProtectedRoute>
-        )
-      },
-      // New Records Management with Shop Layout
-      {
-        path: '/apps/records',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <RecordsManagement />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/apps/records/baptism',
-        element: <BaptismRecordsPage />
-      },
-      {
-        path: '/apps/records/marriage',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <MarriageRecordsPage />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/apps/records/funeral',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <FuneralRecordsPage />
           </ProtectedRoute>
         )
       },
@@ -1022,38 +929,7 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/apps/records/manager',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <DynamicRecordsManager />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/apps/records/modern-manager',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <ModernDynamicRecordsManager />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/apps/records/editable',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <EditableRecordPage />
-          </ProtectedRoute>
-        )
-      },
       // Church Records UI - Professional Record Browser
-      {
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-          </ProtectedRoute>
-        )
-      },
-
       // Advanced Grid Route
       {
         path: '/apps/records-grid',
@@ -1063,35 +939,6 @@ const Router = [
           </ProtectedRoute>
         )
       },
-
-      // Dynamic Records Explorer
-      {
-        path: '/apps/records/dynamic',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <DynamicRecordsPageWrapper />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/apps/records/dynamic/:churchId',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <DynamicRecordsPageWrapper />
-          </ProtectedRoute>
-        )
-      },
-
-      // Enhanced Records Grid with Field Mapping
-      {
-        path: '/apps/records/enhanced',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <EnhancedRecordsGrid defaultChurchId={46} />
-          </ProtectedRoute>
-        )
-      },
-
       // Enhanced Records Grid for specific church
       {
         path: '/apps/records/enhanced/:churchId',
@@ -1127,7 +974,6 @@ const Router = [
           </ProtectedRoute>
         )
       },
-
       {
         path: '/admin/church/:id',
         element: (
@@ -1136,26 +982,8 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/notifications',
-        element: (
-          <ProtectedRoute>
-            <NotificationList />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/settings/notifications',
-        element: (
-          <ProtectedRoute>
-            <NotificationPreferences />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/apps/liturgical-calendar',
-        element: <LiturgicalCalendarPage />
-      },
+      // Removed: /notifications, /settings/notifications routes (misc-legacy)
+      // Removed: /apps/liturgical-calendar route (misc-legacy)
       {
         path: '/apps/logs',
         element: (
@@ -1165,23 +993,7 @@ const Router = [
         )
       },
 
-      // =====================================================
-      // DYNAMIC ADDON ROUTES
-      // =====================================================
-
-
-      // Generic addon route pattern for future addons
-      // Note: More specific routes should be added above this catch-all
-      {
-        path: '/addons/*',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <DynamicAddonRoute route={window.location.pathname} />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
+      // Removed: Dynamic addon routes (misc-legacy)
 
       // =====================================================
       // BIG BOOK CUSTOM COMPONENT ROUTES
@@ -1199,53 +1011,17 @@ const Router = [
         )
       },
 
-      { path: '/ui-components/alert', element: <MuiAlert /> },
-      { path: '/ui-components/accordion', element: <MuiAccordion /> },
-      { path: '/ui-components/avatar', element: <MuiAvatar /> },
-      { path: '/ui-components/chip', element: <MuiChip /> },
-      { path: '/ui-components/dialog', element: <MuiDialog /> },
-      { path: '/ui-components/list', element: <MuiList /> },
-      { path: '/ui-components/popover', element: <MuiPopover /> },
-      { path: '/ui-components/rating', element: <MuiRating /> },
-      { path: '/ui-components/tabs', element: <MuiTabs /> },
-      { path: '/ui-components/tooltip', element: <MuiTooltip /> },
-      { path: '/ui-components/transfer-list', element: <MuiTransferList /> },
-      { path: '/ui-components/typography', element: <MuiTypography /> },
-      { path: '/pages/casl', element: <RollbaseCASL /> },
-      { path: '/pages/pricing', element: <Pricing /> },
-      { path: '/pages/faq', element: <Faq /> },
-      { path: '/pages/account-settings', element: <AccountSetting /> },
+      // Removed: All UI component routes (misc-legacy)
+      // Removed: All page routes (misc-legacy)
       { path: '/tables/basic', element: <BasicTable /> },
       { path: '/tables/enhanced', element: <EnhanceTable /> },
       { path: '/tables/pagination', element: <PaginationTable /> },
       { path: '/tables/fixed-header', element: <FixedHeaderTable /> },
       { path: '/tables/collapsible', element: <CollapsibleTable /> },
       { path: '/tables/search', element: <SearchTable /> },
-      { path: '/forms/form-elements/autocomplete', element: <MuiAutoComplete /> },
-      { path: '/forms/form-elements/button', element: <MuiButton /> },
-      { path: '/forms/form-elements/checkbox', element: <MuiCheckbox /> },
-      { path: '/forms/form-elements/radio', element: <MuiRadio /> },
-      { path: '/forms/form-elements/slider', element: <MuiSlider /> },
-      { path: '/forms/form-elements/date-time', element: <MuiDateTime /> },
-      { path: '/forms/form-elements/switch', element: <MuiSwitch /> },
-      { path: '/forms/form-elements/switch', element: <MuiSwitch /> },
-      { path: '/forms/form-layouts', element: <FormLayouts /> },
-      { path: '/forms/form-custom', element: <FormCustom /> },
-      { path: '/forms/form-wizard', element: <FormWizard /> },
-      { path: '/forms/form-validation', element: <FormValidation /> },
-      { path: '/forms/form-horizontal', element: <FormHorizontal /> },
-      { path: '/forms/form-vertical', element: <FormVertical /> },
-      { path: '/forms/form-tiptap', element: <TiptapEditor /> },
-      { path: '/charts/area-chart', element: <AreaChart /> },
-      { path: '/charts/line-chart', element: <LineChart /> },
-      { path: '/charts/gredient-chart', element: <GredientChart /> },
-      { path: '/charts/candlestick-chart', element: <CandlestickChart /> },
-      { path: '/charts/column-chart', element: <ColumnChart /> },
-      { path: '/charts/doughnut-pie-chart', element: <DoughnutChart /> },
-      { path: '/charts/radialbar-chart', element: <RadialbarChart /> },
-      { path: '/widgets/cards', element: <WidgetCards /> },
-      { path: '/widgets/banners', element: <WidgetBanners /> },
-      { path: '/widgets/charts', element: <WidgetCharts /> },
+      // Removed: All form routes (misc-legacy)
+      // Removed: All chart routes (misc-legacy)
+      // Removed: All widget routes (misc-legacy)
       { path: '/react-tables/basic', element: <ReactBasicTable /> },
       { path: '/react-tables/column-visiblity', element: <ReactColumnVisibilityTable /> },
       { path: '/react-tables/drag-drop', element: <ReactDragDropTable /> },
@@ -1259,28 +1035,69 @@ const Router = [
       { path: '/react-tables/sorting', element: <ReactSortingTable /> },
       { path: '/react-tables/sticky', element: <ReactStickyTable /> },
 
-      { path: '/muicharts/barcharts', element: <BarCharts /> },
-      { path: '/muicharts/gaugecharts', element: <GaugeCharts /> },
-      { path: '/muicharts/linecharts/area', element: <AreaCharts /> },
-      { path: '/muicharts/linecharts/line', element: <LineCharts /> },
-      { path: '/muicharts/piecharts', element: <PieCharts /> },
-      { path: '/muicharts/scattercharts', element: <ScatterCharts /> },
-      { path: '/muicharts/sparklinecharts', element: <SparklineCharts /> },
-
-      { path: '/mui-trees/simpletree/simpletree-customization', element: <SimpletreeCustomization /> },
-      { path: '/mui-trees/simpletree/simpletree-expansion', element: <SimpletreeExpansion /> },
-      { path: '/mui-trees/simpletree/simpletree-focus', element: <SimpletreeFocus /> },
-      { path: '/mui-trees/simpletree/simpletree-items', element: <SimpletreeItems /> },
-      { path: '/mui-trees/simpletree/simpletree-selection', element: <SimpletreeSelection /> },
+      // Removed: All MUI chart routes (misc-legacy)
+      // Removed: All MUI tree routes (misc-legacy)
 
       // Records Centralized Routes
-      { path: '/apps/records/baptism', element: <BaptismRecordsPage /> },
-      { path: '/apps/records/marriage', element: <MarriageRecordsPage /> },
-      { path: '/apps/records/funeral', element: <FuneralRecordsPage /> },
-      { path: '/apps/records/centralized', element: <CentralizedRecordsPageWrapper /> },
-      { path: '/apps/records/manager', element: <DynamicRecordsManager /> },
-      { path: '/apps/records/modern-manager', element: <ModernDynamicRecordsManager /> },
-      { path: '/apps/records/editable', element: <EditableRecordPage /> },
+      {
+        path: '/apps/records/baptism',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <BaptismRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/records/marriage',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <MarriageRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/records/funeral',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <FuneralRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/records/baptism/new',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <BaptismRecordEntryPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/records/marriage/new',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <MarriageRecordEntryPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/records/funeral/new',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <FuneralRecordEntryPage />
+          </ProtectedRoute>
+        )
+      },
+     {
+       path: '/apps/records/centralized',
+       element: (
+         <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+           <CentralizedRecordsPageWrapper />
+         </ProtectedRoute>
+       )
+     },
+     // { path: '/apps/records/manager', element: <DynamicRecordsManager /> },
+     // { path: '/apps/records/modern-manager', element: <ModernDynamicRecordsManager /> },
+     // { path: '/apps/records/editable', element: <EditableRecordPage /> },
 
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
@@ -1289,10 +1106,10 @@ const Router = [
     path: '/',
     element: <BlankLayout />,
     children: [
-      { path: '/auth/404', element: <NotFound404 /> },
+      { path: '/auth/404', element: <Navigate to="/dashboards/super" replace /> },
       { path: '/auth/unauthorized', element: <Unauthorized /> },
-      { path: '/auth/login', element: <OrthodoxLogin /> },
-      { path: '/login', element: <Navigate to="/auth/login" replace /> },
+      { path: '/auth/login', element: <Navigate to="/auth/login2" replace /> },
+      { path: '/login', element: <Navigate to="/auth/login2" replace /> },
       { path: '/auth/login2', element: <Login2 /> },
       { path: '/auth/register', element: <Register /> },
       { path: '/auth/register2', element: <Register2 /> },
@@ -1301,19 +1118,33 @@ const Router = [
       { path: '/auth/two-steps', element: <TwoSteps /> },
       { path: '/auth/two-steps2', element: <TwoSteps2 /> },
       { path: '/auth/maintenance', element: <Maintenance /> },
-      { path: '/landingpage', element: <ComingSoon pageName="The landing page" /> },
-      { path: '/pages/pricing', element: <ComingSoon pageName="The pricing page" /> },
-      { path: '/pages/faq', element: <ComingSoon pageName="The FAQ page" /> },
+      { path: '/landingpage', element: <Navigate to="/dashboards/super" replace /> },
+      { path: '/pages/pricing', element: <Navigate to="/dashboards/super" replace /> },
+      { path: '/pages/faq', element: <Navigate to="/dashboards/super" replace /> },
       { path: '/frontend-pages/homepage', element: <Homepage /> },
-      { path: '/assign-task', element: <AssignTaskPage /> },
-      { path: '/frontend-pages/about', element: <ComingSoon pageName="The about page" /> },
-      { path: '/frontend-pages/contact', element: <ComingSoon pageName="The contact page" /> },
-      { path: '/frontend-pages/portfolio', element: <ComingSoon pageName="The portfolio page" /> },
-      { path: '/frontend-pages/pricing', element: <ComingSoon pageName="The pricing page" /> },
-      { path: '/blog', element: <BlogFeed /> },
+      // Removed: /frontend-pages/homepage1 route - old homepage no longer used
+      { path: '/frontend-pages/menu', element: <PagesMenu /> },
+      { path: '/samples', element: <Samples /> },
+      { path: '/frontend-pages/samples', element: <Samples /> },
+      // Removed: /assign-task route (misc-legacy)
+      { path: '/frontend-pages/about', element: <Navigate to="/dashboards/super" replace /> },
+      { path: '/frontend-pages/contact', element: <Contact /> },
+      { path: '/frontend-pages/portfolio', element: <Navigate to="/dashboards/super" replace /> },
+      { path: '/frontend-pages/pricing', element: <PagePricing /> },
+      { path: '/frontend-pages/oca-timeline', element: <OCATimeline /> },
+      { path: '/frontend-pages/welcome-message', element: <WelcomeMessage /> },
+      { path: '/tour', element: <Tour /> },
+      // Removed: /blog route (misc-legacy)
       { path: '/blog/:slug', element: <BlogPost /> },
-      { path: '/frontend-pages/blog', element: <ComingSoon pageName="The blog page" /> },
+      { path: '/frontend-pages/blog', element: <Navigate to="/dashboards/super" replace /> },
       { path: '/frontend-pages/blog/detail/:id', element: <BlogPost /> },
+      { path: '/frontend-pages/gallery', element: <Gallery /> },
+      { path: '/greek_baptism_table_demo.html', element: <GreekRecordsViewer /> },
+      { path: '/russian_wedding_table_demo.html', element: <HTMLViewer htmlFile="/russian_wedding_table_demo.html" /> },
+      { path: '/romanian_funeral_table_demo.html', element: <HTMLViewer htmlFile="/romanian_funeral_table_demo.html" /> },
+      // Public Task Pages (no authentication required)
+      { path: '/tasks', element: <PublicTasksListPage /> },
+      { path: '/tasks/:id', element: <PublicTaskDetailPage /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },

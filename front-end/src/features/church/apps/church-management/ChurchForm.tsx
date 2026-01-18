@@ -840,14 +840,14 @@ const ChurchForm: React.FC<ChurchFormProps> = () => {
                   <TextField
                     fullWidth
                     label="Description"
-                    name="description"
+                    name="description_multilang"
                     multiline
                     rows={4}
-                    value={formik.values.description}
+                    value={formik.values.description_multilang}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    error={formik.touched.description && Boolean(formik.errors.description)}
-                    helperText={formik.touched.description && formik.errors.description}
+                    error={formik.touched.description_multilang && Boolean(formik.errors.description_multilang)}
+                    helperText={formik.touched.description_multilang && formik.errors.description_multilang}
                     placeholder="Brief description of the church..."
                   />
                 </Stack>
@@ -887,11 +887,11 @@ const ChurchForm: React.FC<ChurchFormProps> = () => {
                       onChange={formik.handleChange}
                       label="Preferred Language"
                     >
-                      <MenuItem value="english">English</MenuItem>
-                      <MenuItem value="greek">Greek</MenuItem>
-                      <MenuItem value="russian">Russian</MenuItem>
+                      <MenuItem value="en">English</MenuItem>
+                      <MenuItem value="el">Greek</MenuItem>
+                      <MenuItem value="ru">Russian</MenuItem>
                       <MenuItem value="serbian">Serbian</MenuItem>
-                      <MenuItem value="romanian">Romanian</MenuItem>
+                      <MenuItem value="ro">Romanian</MenuItem>
                       <MenuItem value="bulgarian">Bulgarian</MenuItem>
                       <MenuItem value="arabic">Arabic</MenuItem>
                     </Select>

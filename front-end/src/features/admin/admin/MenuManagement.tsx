@@ -200,7 +200,7 @@ const MenuManagement: React.FC = () => {
 
     const renderMenuItemRow = (item: MenuItem, isChild: boolean = false) => {
         return (
-            <TableRow key={item.id} sx={{ backgroundColor: isChild ? '#f8f9fa' : 'inherit' }}>
+            <TableRow key={item.id} sx={{ backgroundColor: isChild ? 'action.hover' : 'inherit' }}>
                 <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
                         {isChild && <Box width={20} />}

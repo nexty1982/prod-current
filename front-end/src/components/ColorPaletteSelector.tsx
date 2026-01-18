@@ -27,7 +27,7 @@ interface ColorPaletteProps {
 
 // Orthodox Color Palettes
 const orthodoxTraditionalColors = [
-  '#2c5aa0', // Orthodox blue
+  '#bd56fa', // Orthodox purple
   '#1976d2', // Light blue
   '#0d47a1', // Dark blue
   '#c62828', // Red
@@ -57,7 +57,7 @@ const liturgicalSeasonColors = [
 ];
 
 const recentColors = [
-  '#2c5aa0', '#4a148c', '#c62828', '#2e7d32', '#c9b037'
+  '#bd56fa', '#4a148c', '#c62828', '#2e7d32', '#c9b037'
 ];
 
 export const ColorPaletteSelector: React.FC<ColorPaletteProps> = ({

@@ -30,6 +30,7 @@ import {
   Pagination,
   Snackbar,
   Grid,
+  useTheme,
 } from '@mui/material';
 import {
   IconRefresh,
@@ -44,11 +45,10 @@ import {
   IconX,
   IconEye,
   IconAlertTriangle,
+  IconMessage,
 } from '@tabler/icons-react';
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI } from '@/api/admin.api';
-import { userAPI } from '@/api/user.api';
-import { metricsAPI } from '@/api/metrics.api';
 import PageContainer from '@/shared/ui/PageContainer';
 import DashboardCard from '@/shared/ui/DashboardCard';
 
@@ -79,7 +79,8 @@ interface SessionStats {
 }
 
 const SessionManagement: React.FC = () => {
-  const { hasRole } = useAuth();
+  const theme = useTheme();
+  const { user, authenticated, loading: authLoading, hasRole } = useAuth();
   const [sessions, setSessions] = useState<SessionData[]>([]);
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -101,6 +102,12 @@ const SessionManagement: React.FC = () => {
   });
   const [cleanupDialog, setCleanupDialog] = useState(false);
   const [killAllDialog, setKillAllDialog] = useState(false);
+  const [messageDialog, setMessageDialog] = useState<{ open: boolean; session: SessionData | null }>({
+    open: false,
+    session: null,
+  });
+  const [messageText, setMessageText] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -118,8 +125,19 @@ const SessionManagement: React.FC = () => {
     setTimeout(() => setErrorMessage(''), 5000);
   };
 
-  // Check permissions
-  if (!hasRole(['super_admin', 'admin'])) {
+  // Show loading state while auth is initializing
+  if (authLoading) {
+    return (
+      <PageContainer title="Session Management" description="Manage user sessions">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+        </Box>
+      </PageContainer>
+    );
+  }
+
+  // Check permissions - only check after auth is loaded
+  if (!authenticated || !user || !hasRole(['super_admin', 'admin'])) {
     return (
       <PageContainer title="Session Management" description="Manage user sessions">
         <Alert severity="error" sx={{ mt: 2 }}>
@@ -132,6 +150,12 @@ const SessionManagement: React.FC = () => {
 
   // Fetch sessions data
   const fetchSessions = async () => {
+    // Don't fetch if not authenticated or doesn't have permission
+    if (!authenticated || !user || !hasRole(['super_admin', 'admin'])) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const filters = {
@@ -141,9 +165,28 @@ const SessionManagement: React.FC = () => {
         offset: (page - 1) * ITEMS_PER_PAGE,
       };
 
-      const response = await userAPI.sessions.getAll(filters);
-      setSessions(response.sessions || response);
-      setTotalPages(Math.ceil(response.pagination.total / ITEMS_PER_PAGE));
+      const response = await adminAPI.sessions.getAll(filters);
+      // Transform backend response to match frontend SessionData interface
+      const transformedSessions = (response.sessions || []).map((session: any) => {
+        const user = session.user || {};
+        return {
+          session_id: session.session_id,
+          user_id: user.id || user.user_id || 0,
+          email: user.email || 'Unknown',
+          first_name: user.first_name || user.firstName || '',
+          last_name: user.last_name || user.lastName || '',
+          role: user.role || 'unknown',
+          church_name: user.church_name || user.churchName || user.church_name || '',
+          ip_address: session.ip_address || 'N/A',
+          user_agent: session.user_agent || 'Unknown',
+          login_time: session.login_time || session.created_at || new Date().toISOString(),
+          expires: session.expires || session.expires_readable,
+          is_active: session.is_active === 1 || session.is_active === true,
+          minutes_until_expiry: session.minutes_until_expiry || 0,
+        };
+      });
+      setSessions(transformedSessions);
+      setTotalPages(Math.ceil((response.total || transformedSessions.length) / ITEMS_PER_PAGE));
     } catch (error) {
       console.error('Failed to fetch sessions:', error);
       showError('Failed to load sessions');
@@ -154,9 +197,28 @@ const SessionManagement: React.FC = () => {
 
   // Fetch session statistics
   const fetchStats = async () => {
+    // Don't fetch if not authenticated or doesn't have permission
+    if (!authenticated || !user || !hasRole(['super_admin', 'admin'])) {
+      return;
+    }
+
     try {
-      const response = await userAPI.sessions.getStats();
-      setStats(response.statistics);
+      const response = await adminAPI.sessions.getStats();
+      // Transform backend response to match frontend SessionStats interface
+      const backendStats = response.stats || response.statistics || response;
+      if (backendStats) {
+        setStats({
+          total_sessions: backendStats.total_sessions || 0,
+          active_sessions: backendStats.active_sessions || 0,
+          expired_sessions: backendStats.expired_sessions || 0,
+          unique_users: backendStats.unique_users || 0, // May need to be calculated separately
+          unique_ips: backendStats.unique_ips || 0, // May need to be calculated separately
+          latest_login: backendStats.newest_session || backendStats.latest_login || '',
+          earliest_login: backendStats.oldest_session || backendStats.earliest_login || '',
+        });
+      } else {
+        setStats(null);
+      }
     } catch (error) {
       console.error('Failed to fetch session stats:', error);
     }
@@ -165,7 +227,7 @@ const SessionManagement: React.FC = () => {
   // Terminate session
   const handleTerminateSession = async (session: SessionData) => {
     try {
-      await userAPI.sessions.terminate(session.session_id);
+      await adminAPI.sessions.terminate(session.session_id);
       showSuccess(`Session terminated for ${session.email}`);
       setTerminateDialog({ open: false, session: null });
       fetchSessions();
@@ -181,12 +243,12 @@ const SessionManagement: React.FC = () => {
     try {
       // First terminate any active sessions
       if (session.is_active) {
-        await userAPI.sessions.terminate(session.session_id);
+        await adminAPI.sessions.terminate(session.session_id);
       }
       
-      // Then lockout the user account
-      await adminAPI.users.lockout(session.user_id);
-      showSuccess(`User ${session.email} has been locked out and all sessions terminated`);
+      // Then deactivate the user account
+      await adminAPI.users.toggleStatus(session.user_id);
+      showSuccess(`User ${session.email} has been deactivated and all sessions terminated`);
       setLockoutDialog({ open: false, session: null });
       fetchSessions();
       fetchStats();
@@ -199,7 +261,7 @@ const SessionManagement: React.FC = () => {
   // Terminate all sessions for a user
   const handleTerminateAllUserSessions = async (session: SessionData) => {
     try {
-      await userAPI.sessions.terminateAllForUser(session.user_id);
+      await adminAPI.sessions.terminateAllForUser(session.user_id);
       showSuccess(`All sessions terminated for ${session.email}`);
       setTerminateAllDialog({ open: false, session: null });
       fetchSessions();
@@ -213,7 +275,7 @@ const SessionManagement: React.FC = () => {
   // Cleanup expired sessions
   const handleCleanup = async () => {
     try {
-      const response = await userAPI.sessions.cleanup(7);
+      const response = await adminAPI.sessions.cleanup(7);
       showSuccess('Cleanup completed successfully');
       setCleanupDialog(false);
       fetchSessions();
@@ -227,7 +289,7 @@ const SessionManagement: React.FC = () => {
   // Kill all active sessions
   const handleKillAllSessions = async () => {
     try {
-      const response = await userAPI.sessions.terminateAll();
+      const response = await adminAPI.sessions.terminateAll();
       showSuccess('All active sessions terminated successfully');
       setKillAllDialog(false);
       fetchSessions();
@@ -235,6 +297,27 @@ const SessionManagement: React.FC = () => {
     } catch (error) {
       console.error('Failed to terminate all sessions:', error);
       showError('Failed to terminate all sessions');
+    }
+  };
+
+  // Send message to user
+  const handleSendMessage = async () => {
+    if (!messageDialog.session || !messageText.trim()) {
+      showError('Please enter a message');
+      return;
+    }
+
+    try {
+      setSendingMessage(true);
+      await adminAPI.messages.sendToSession(messageDialog.session.session_id, messageText);
+      showSuccess(`Message sent to ${messageDialog.session.email}`);
+      setMessageDialog({ open: false, session: null });
+      setMessageText('');
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      showError('Failed to send message');
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -269,9 +352,15 @@ const SessionManagement: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchSessions();
-    fetchStats();
-  }, [search, statusFilter, page]);
+    // Only fetch data when authenticated and has proper role
+    if (!authLoading && authenticated && user && hasRole(['super_admin', 'admin'])) {
+      fetchSessions();
+      fetchStats();
+    } else if (!authLoading) {
+      // If auth is done loading but user is not authenticated, stop loading state
+      setLoading(false);
+    }
+  }, [search, statusFilter, page, authenticated, user, authLoading]);
 
   return (
     <PageContainer title="Session Management" description="Monitor and manage user sessions">
@@ -384,7 +473,7 @@ const SessionManagement: React.FC = () => {
           {/* Sessions Table */}
           <TableContainer component={Paper}>
             <Table>
-              <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
+              <TableHead sx={{ backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#f5f5f5' }}>
                 <TableRow>
                   <TableCell><strong>User</strong></TableCell>
                   <TableCell><strong>Email</strong></TableCell>
@@ -417,8 +506,14 @@ const SessionManagement: React.FC = () => {
                     <TableRow
                       key={session.session_id}
                       sx={{
-                        backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9f9f9',
-                        '&:hover': { backgroundColor: '#f0f0f0' },
+                        backgroundColor: index % 2 === 0 
+                          ? (theme.palette.mode === 'dark' ? theme.palette.grey[900] : '#ffffff')
+                          : (theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#f9f9f9'),
+                        '&:hover': { 
+                          backgroundColor: theme.palette.mode === 'dark' 
+                            ? theme.palette.grey[700] 
+                            : '#f0f0f0' 
+                        },
                       }}
                     >
                       <TableCell>
@@ -492,6 +587,17 @@ const SessionManagement: React.FC = () => {
                               <IconShieldOff size={18} />
                             </IconButton>
                           </Tooltip>
+                          {session.is_active && (
+                            <Tooltip title="Send Message">
+                              <IconButton
+                                color="primary"
+                                size="small"
+                                onClick={() => setMessageDialog({ open: true, session })}
+                              >
+                                <IconMessage size={18} />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           <Tooltip title="Lockout User">
                             <IconButton
                               color="warning"
@@ -646,6 +752,59 @@ const SessionManagement: React.FC = () => {
             </Button>
             <Button onClick={handleCleanup} color="warning" variant="contained">
               Cleanup Sessions
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Send Message Dialog */}
+        <Dialog
+          open={messageDialog.open}
+          onClose={() => {
+            setMessageDialog({ open: false, session: null });
+            setMessageText('');
+          }}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Send Message to User</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+              Send an instant message to <strong>{messageDialog.session?.email}</strong>
+            </Typography>
+            <TextField
+              autoFocus
+              fullWidth
+              multiline
+              rows={4}
+              label="Message"
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              placeholder="Enter your message here..."
+              sx={{ mt: 1 }}
+            />
+            <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
+              The message will appear instantly if the user is online, or be saved for when they log in.
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setMessageDialog({ open: false, session: null });
+                setMessageText('');
+              }}
+              color="inherit"
+              disabled={sendingMessage}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendMessage}
+              color="primary"
+              variant="contained"
+              disabled={!messageText.trim() || sendingMessage}
+              startIcon={sendingMessage ? <CircularProgress size={16} /> : <IconMessage size={18} />}
+            >
+              {sendingMessage ? 'Sending...' : 'Send Message'}
             </Button>
           </DialogActions>
         </Dialog>

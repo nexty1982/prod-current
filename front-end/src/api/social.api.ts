@@ -405,6 +405,215 @@ export class SocialAPI {
   async searchTags(query: string): Promise<Array<{ name: string; count: number }>> {
     return apiJson(`${this.baseUrl}/tags/search?q=${encodeURIComponent(query)}`);
   }
+
+  // Chat
+  chat = {
+    /**
+     * Get all conversations for the current user
+     */
+    getConversations: async (): Promise<any[]> => {
+      return apiJson<any[]>(`${this.baseUrl}/chat/conversations`);
+    },
+
+    /**
+     * Get a specific conversation
+     */
+    getConversation: async (conversationId: number): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/chat/conversations/${conversationId}`);
+    },
+
+    /**
+     * Get messages for a conversation
+     */
+    getMessages: async (conversationId: number, page: number = 1, limit: number = 50): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/chat/conversations/${conversationId}/messages?page=${page}&limit=${limit}`);
+    },
+
+    /**
+     * Send a message
+     */
+    sendMessage: async (conversationId: number, data: { content: string; messageType?: string; replyToId?: number }): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/chat/conversations/${conversationId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+    },
+
+    /**
+     * Edit a message
+     */
+    editMessage: async (messageId: number, data: { content: string }): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/chat/messages/${messageId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
+    },
+
+    /**
+     * Delete a message
+     */
+    deleteMessage: async (messageId: number): Promise<void> => {
+      return apiJson<void>(`${this.baseUrl}/chat/messages/${messageId}`, {
+        method: 'DELETE'
+      });
+    },
+
+    /**
+     * Mark conversation as read
+     */
+    markAsRead: async (conversationId: number): Promise<void> => {
+      return apiJson<void>(`${this.baseUrl}/chat/conversations/${conversationId}/read`, {
+        method: 'POST'
+      });
+    },
+
+    /**
+     * React to a message
+     */
+    reactToMessage: async (messageId: number, data: { emoji: string }): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/chat/messages/${messageId}/react`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+    },
+
+    /**
+     * Create a new conversation
+     */
+    createConversation: async (data: { participantIds: number[]; title?: string }): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/chat/conversations`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+    },
+
+    /**
+     * Start a conversation with a user
+     */
+    startConversation: async (userId: number): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/chat/conversations`, {
+        method: 'POST',
+        body: JSON.stringify({ participantIds: [userId] })
+      });
+    },
+  };
+
+  // Friends
+  friends = {
+    /**
+     * Get all friends
+     */
+    getAll: async (): Promise<any[]> => {
+      return apiJson<any[]>(`${this.baseUrl}/friends`);
+    },
+
+    /**
+     * Get friend requests
+     */
+    getRequests: async (): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/friends/requests?type=all&status=all`);
+    },
+
+    /**
+     * Search for friends
+     */
+    search: async (query: string): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/friends/search?q=${encodeURIComponent(query)}`);
+    },
+
+    /**
+     * Send friend request
+     */
+    sendRequest: async (userId: number): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/friends/request/${userId}`, {
+        method: 'POST',
+        body: JSON.stringify({})
+      });
+    },
+
+    /**
+     * Respond to friend request (accept/reject)
+     */
+    respondToRequest: async (requestId: number, data: { action: 'accept' | 'reject' }): Promise<any> => {
+      // Backend expects PUT with action in body
+      const action = data.action === 'accept' ? 'accept' : 'decline';
+      return apiJson<any>(`${this.baseUrl}/friends/requests/${requestId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ action })
+      });
+    },
+
+    /**
+     * Remove friend
+     */
+    remove: async (friendId: number): Promise<void> => {
+      return apiJson<void>(`${this.baseUrl}/friends/${friendId}`, {
+        method: 'DELETE'
+      });
+    },
+  };
+
+  // Notifications
+  notifications = {
+    /**
+     * Get all notifications
+     */
+    getAll: async (filters?: any): Promise<any> => {
+      const params = new URLSearchParams();
+      if (filters?.unread) params.append('unread', 'true');
+      if (filters?.type) params.append('type', filters.type);
+      if (filters?.page) params.append('page', filters.page.toString());
+      if (filters?.limit) params.append('limit', filters.limit.toString());
+      
+      const queryString = params.toString();
+      const url = queryString ? `${this.baseUrl}/notifications?${queryString}` : `${this.baseUrl}/notifications`;
+      return apiJson<any>(url);
+    },
+
+    /**
+     * Get notification settings
+     */
+    getSettings: async (): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/notifications/settings`);
+    },
+
+    /**
+     * Mark notification as read
+     */
+    markAsRead: async (notificationId: number): Promise<void> => {
+      return apiJson<void>(`${this.baseUrl}/notifications/${notificationId}/read`, {
+        method: 'POST'
+      });
+    },
+
+    /**
+     * Mark all notifications as read
+     */
+    markAllAsRead: async (): Promise<void> => {
+      return apiJson<void>(`${this.baseUrl}/notifications/read-all`, {
+        method: 'POST'
+      });
+    },
+
+    /**
+     * Delete notification
+     */
+    delete: async (notificationId: number): Promise<void> => {
+      return apiJson<void>(`${this.baseUrl}/notifications/${notificationId}`, {
+        method: 'DELETE'
+      });
+    },
+
+    /**
+     * Update notification settings
+     */
+    updateSettings: async (settings: any): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/notifications/settings`, {
+        method: 'PUT',
+        body: JSON.stringify(settings)
+      });
+    },
+  };
 }
 
 // Export singleton instance

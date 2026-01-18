@@ -214,7 +214,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ anchorEl, o
                                     <Badge
                                         color={getPriorityColor(notification.priority) as any}
                                         variant="dot"
-                                        invisible={notification.is_read}
+                                        invisible={Boolean(notification.is_read)}
                                     >
                                         <Avatar
                                             sx={{

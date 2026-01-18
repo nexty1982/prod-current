@@ -3,7 +3,6 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import { styled } from '@mui/material/styles';
 import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
-import './carousel.css';
 import { useTheme } from '@mui/material/styles';
 
 import user1 from '@/assets/images/frontend-pages/homepage/user1.jpg';

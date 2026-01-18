@@ -1,0 +1,24 @@
+# Orthodox Church Discovery Pipeline - Dependencies
+
+# HTTP requests with connection pooling
+requests>=2.28.0
+
+# HTML parsing
+beautifulsoup4>=4.11.0
+
+# HTML parser (faster than html.parser)
+lxml>=4.9.0
+
+# Excel export
+openpyxl>=3.1.0
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Type checking (optional)
+# mypy>=1.0.0
+
+# Code formatting (optional)
+# black>=23.0.0
+# isort>=5.12.0

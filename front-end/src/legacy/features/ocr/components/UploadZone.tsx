@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { FileUp, Loader2, AlertCircle } from 'lucide-react';
+import { Box, Typography, Paper, Alert, useTheme } from '@mui/material';
 import { uploadFiles } from '../lib/ocrApi';
 
 interface UploadZoneProps {
@@ -9,6 +10,7 @@ interface UploadZoneProps {
 }
 
 const UploadZone: React.FC<UploadZoneProps> = ({ onUploaded, churchId, className = '' }) => {
+  const theme = useTheme();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -50,28 +52,44 @@ const UploadZone: React.FC<UploadZoneProps> = ({ onUploaded, churchId, className
   }, [handleFiles]);
 
   return (
-    <div className={`rounded-2xl border bg-white shadow-sm ${className}`}>
-      <div className="p-4 border-b">
-        <h2 className="text-sm font-medium text-gray-900">Upload Documents</h2>
-        <p className="text-xs text-gray-500 mt-1">
+    <Paper elevation={1} sx={{ borderRadius: 2, overflow: 'hidden' }} className={className}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Typography variant="subtitle2" fontWeight="medium" color="text.primary">
+          Upload Documents
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
           Supported formats: PDF, PNG, JPG, JPEG, TIFF
-        </p>
-      </div>
+        </Typography>
+      </Box>
       
-      <div className="p-6">
+      <Box sx={{ p: 3 }}>
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-            <span className="text-sm text-red-700">{error}</span>
-          </div>
+          <Alert severity="error" sx={{ mb: 2 }} icon={<AlertCircle size={16} />}>
+            {error}
+          </Alert>
         )}
 
-        <label
-          className={`
-            relative flex items-center justify-center border-2 border-dashed rounded-xl h-40 cursor-pointer transition-all
-            ${busy ? 'opacity-60 pointer-events-none' : ''}
-            ${dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
-          `}
+        <Box
+          component="label"
+          sx={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: 2,
+            borderStyle: 'dashed',
+            borderRadius: 2,
+            height: 160,
+            cursor: busy ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s',
+            opacity: busy ? 0.6 : 1,
+            borderColor: dragActive ? 'primary.main' : 'divider',
+            bgcolor: dragActive ? 'primary.light' : 'transparent',
+            '&:hover': {
+              borderColor: busy ? 'divider' : 'primary.main',
+              bgcolor: busy ? 'transparent' : 'action.hover'
+            }
+          }}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
@@ -81,7 +99,7 @@ const UploadZone: React.FC<UploadZoneProps> = ({ onUploaded, churchId, className
             type="file"
             multiple
             accept=".pdf,.png,.jpg,.jpeg,.tiff"
-            className="hidden"
+            style={{ display: 'none' }}
             onChange={(e) => {
               if (e.target.files) {
                 handleFiles(Array.from(e.target.files));
@@ -90,32 +108,44 @@ const UploadZone: React.FC<UploadZoneProps> = ({ onUploaded, churchId, className
             disabled={busy}
           />
           
-          <div className="text-center text-gray-600">
+          <Box sx={{ textAlign: 'center' }}>
             {busy ? (
               <>
-                <Loader2 className="h-6 w-6 mx-auto mb-2 animate-spin text-blue-600" />
-                <div className="text-sm font-medium text-blue-600">Uploading...</div>
-                <div className="text-xs text-gray-500">Processing your documents</div>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1, color: 'primary.main' }}>
+                  <Loader2 size={24} className="animate-spin" />
+                </Box>
+                <Typography variant="body2" fontWeight="medium" color="primary.main">
+                  Uploading...
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Processing your documents
+                </Typography>
               </>
             ) : (
               <>
-                <FileUp className="h-6 w-6 mx-auto mb-2 text-gray-400" />
-                <div className="text-sm font-medium">Drop files here or click to upload</div>
-                <div className="text-xs text-gray-500">
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1, color: 'text.secondary' }}>
+                  <FileUp size={24} />
+                </Box>
+                <Typography variant="body2" fontWeight="medium" color="text.primary">
+                  Drop files here or click to upload
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
                   PDF, PNG, JPG, TIFF • Max 10MB per file
-                </div>
+                </Typography>
               </>
             )}
-          </div>
-        </label>
+          </Box>
+        </Box>
 
-        <div className="mt-4 text-xs text-gray-500 space-y-1">
-          <p>• Documents will be processed automatically using OCR</p>
-          <p>• Supported languages: English, Greek, Russian, Romanian</p>
-          <p>• Processing time varies based on document size and complexity</p>
-        </div>
-      </div>
-    </div>
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="caption" color="text.secondary" component="div" sx={{ '& p': { mb: 0.5 } }}>
+            <Typography component="p" variant="caption">• Documents will be processed automatically using OCR</Typography>
+            <Typography component="p" variant="caption">• Supported languages: English, Greek, Russian, Romanian</Typography>
+            <Typography component="p" variant="caption">• Processing time varies based on document size and complexity</Typography>
+          </Typography>
+        </Box>
+      </Box>
+    </Paper>
   );
 };
 

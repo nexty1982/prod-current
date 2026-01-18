@@ -29,11 +29,14 @@ const Header = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
 
   // drawer
-  const { isLayout, setIsMobileSidebar, isMobileSidebar, activeMode, setActiveMode } = React.useContext(CustomizerContext);
+  const { isLayout, setIsMobileSidebar, isMobileSidebar, activeMode, setActiveMode, headerBackground } = React.useContext(CustomizerContext);
   const TopbarHeight = config.topbarHeight;
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
-    background: theme.palette.background.paper,
+    background: headerBackground 
+      ? `url(/images/bgtiled${headerBackground}.png) repeat`
+      : theme.palette.background.paper,
+    backgroundSize: 'auto',
     justifyContent: 'center',
     backdropFilter: 'blur(4px)',
 
@@ -85,12 +88,15 @@ const Header = () => {
           {/* ------------------------------------------- */}
           {/* Dark/Light Mode Toggle */}
           {/* ------------------------------------------- */}
-          <IconButton size="large" color="inherit">
+          <IconButton 
+            size="large" 
+            color="inherit"
+            onClick={() => setActiveMode(activeMode === 'light' ? 'dark' : 'light')}
+          >
             {activeMode === 'light' ? (
-              <IconMoon size="21" stroke="1.5" onClick={() => setActiveMode("dark")} />
+              <IconMoon size="21" stroke="1.5" />
             ) : (
-              <IconSun size="21" stroke="1.5" onClick={() => setActiveMode("light")}
-              />
+              <IconSun size="21" stroke="1.5" />
             )}
           </IconButton>
           <Notifications />

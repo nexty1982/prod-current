@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Αρχεία Βαπτίσεων – Ελληνική Ορθόδοξη Εκκλησία</title>
+<style>
+  :root{
+    --blue-deep:#0F3D69;
+    --blue-100:#E9F3FF;
+    --blue-200:#D3E8FF;
+    --blue-300:#B9DAFF;
+    --ink:#1b2740;
+    --muted:#5c6b80;
+    --gold:#d9b650;
+    --border:#dfe7f1;
+  }
+  html,body{margin:0;padding:0;background:#ffffff;color:var(--ink);font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans', 'Noto Sans Greek', Arial, sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 16px 60px}
+  .title{font-size:28px;font-weight:800;margin:6px 0 4px;color:var(--ink)}
+  .subtitle{margin:0 0 18px;color:var(--muted)}
+  .table-card{border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 34px rgba(15,61,105,.08);overflow:hidden}
+  .header{background:var(--blue-deep);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .header h2{font-size:18px;margin:0;font-weight:800}
+  .search{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .search input{height:36px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;padding:0 12px;outline:none;min-width:220px}
+  .search input::placeholder{color:rgba(255,255,255,.8)}
+  .table{width:100%;border-collapse:separate;border-spacing:0}
+  .table thead th{
+    position:sticky;top:0;background:linear-gradient(0deg, var(--blue-200), var(--blue-100));
+    font-size:13px;color:#103355;text-align:left;padding:10px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none
+  }
+  .table tbody td{padding:10px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:top}
+  .table tbody tr:hover{background:var(--blue-100)}
+  .sort-ind{font-size:11px;opacity:.75;margin-left:6px}
+  .actions-btn{background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+  .actions-btn:hover{border-color:var(--gold);box-shadow:0 2px 0 rgba(217,182,80,.3)}
+  .pagination{display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:10px 12px;background:var(--blue-100);border-top:1px solid var(--border)}
+  .pg-btn{background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:999px;cursor:pointer}
+  .pg-btn[disabled]{opacity:.5;cursor:not-allowed}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+  .badge.bap{background:#e7f7ec;color:#1c6b35;border:1px solid #bfe6cd}
+  .badge.chr{background:#fff7e6;color:#8a5a00;border:1px solid #ffe0a3}
+  .watermark{
+    position:absolute;inset:auto 16px 16px auto;opacity:.06;
+    font-size:120px;font-weight:900;line-height:1;pointer-events:none;color:var(--blue-deep)
+  }
+  .table-wrap{position:relative}
+  /* Modal */
+  .modal{position:fixed;inset:0;background:rgba(16,30,50,.55);display:none;place-items:center;padding:16px;z-index:30}
+  .modal[open]{display:grid}
+  .dialog{background:#fff;border-radius:16px;max-width:720px;width:100%;box-shadow:0 22px 60px rgba(0,0,0,.3);border:1px solid var(--border);overflow:hidden}
+  .dialog-head{background:var(--blue-deep);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+  .dialog-body{padding:16px}
+  .dl{display:grid;grid-template-columns:200px 1fr;gap:10px 16px}
+  .dl dt{font-weight:700;color:#2a3a55}
+  .dl dd{margin:0;color:#163559}
+  .close{background:#fff;border:1px solid rgba(255,255,255,.35);color:var(--blue-deep);border-radius:10px;padding:6px 10px;cursor:pointer}
+  .footer{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:34px;font-weight:900;color:var(--ink)">Αρχεία Βαπτίσεων – Ελληνική Ορθόδοξη Εκκλησία</div>
+    </div>
+
+    <div class="table-card">
+      <div class="header">
+        <h2>Πίνακας Εγγραφών</h2>
+        <div class="search">
+          <input id="q" type="search" placeholder="Αναζήτηση…" aria-label="Αναζήτηση" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="watermark">✝︎</div>
+        <table class="table" aria-label="Αρχεία Βαπτίσεων">
+          <thead>
+            <tr>
+              <th data-key="first_name">Όνομα <span class="sort-ind">↕</span></th>
+              <th data-key="last_name">Επώνυμο <span class="sort-ind">↕</span></th>
+              <th data-key="birth_date">Ημερομηνία Γέννησης <span class="sort-ind">↕</span></th>
+              <th data-key="reception_date">Ημερομηνία Βάπτισης <span class="sort-ind">↕</span></th>
+              <th data-key="birthplace">Τόπος Γέννησης <span class="sort-ind">↕</span></th>
+              <th data-key="entry_type">Τύπος Εισόδου <span class="sort-ind">↕</span></th>
+              <th data-key="clergy">Ιερέας <span class="sort-ind">↕</span></th>
+              <th data-key="church_id">Κωδικός Ενορίας <span class="sort-ind">↕</span></th>
+              <th>Ενέργειες</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button class="pg-btn" id="prev">Προηγούμενη</button>
+        <div id="pageinfo" aria-live="polite">Σελίδα 1 από 1</div>
+        <button class="pg-btn" id="next">Επόμενη</button>
+      </div>
+    </div>
+
+    <div class="footer">Ταξινόμηση κάνοντας κλικ στις επικεφαλίδες • 10 εγγραφές ανά σελίδα • Κουμπί «Προβολή Εγγραφής» για πλήρη στοιχεία</div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div id="dialog-title">Προβολή Εγγραφής</div>
+        <button class="close" id="close">Κλείσιμο</button>
+      </div>
+      <div class="dialog-body">
+        <dl class="dl" id="detail"></dl>
+      </div>
+    </div>
+  </div>
+
+<script id="embedded-data" type="application/json">[{"first_name": "Ιωάννα", "last_name": "Λαμπρόπουλος", "birth_date": "1995-06-06", "reception_date": "1996-05-14", "birthplace": "Ηράκλειο", "entry_type": "Βάπτιση", "sponsors": "Αθηνά Λαμπρόπουλος, Αθανάσιος Νικολάου", "parents": "Δημήτριος & Θεοδώρα Λαμπρόπουλος", "clergy": "Π. Σπυρίδων Γεωργίου", "church_id": 46}, {"first_name": "Λουκάς", "last_name": "Αναγνωστόπουλος", "birth_date": "2011-07-01", "reception_date": "2012-01-01", "birthplace": "Τρίκαλα", "entry_type": "Βάπτιση", "sponsors": "Δέσποινα Σαββίδης, Αικατερίνη Χριστοδούλου", "parents": "Παύλος & Αναστασία Αναγνωστόπουλος", "clergy": "Π. Θεόδωρος Αλεξίου", "church_id": 46}, {"first_name": "Αθηνά", "last_name": "Δημητρίου", "birth_date": "1972-06-02", "reception_date": "1973-05-29", "birthplace": "Κέρκυρα", "entry_type": "Χρίσμα", "sponsors": "Ελένη Κατσίκας", "parents": "Θεόδωρος & Ιωάννα Δημητρίου", "clergy": "Π. Χρυσόστομος Καραγιάννης", "church_id": 46}, {"first_name": "Αικατερίνη", "last_name": "Γεωργίου", "birth_date": "1983-08-27", "reception_date": "1983-09-21", "birthplace": "Καλαμάτα", "entry_type": "Βάπτιση", "sponsors": "Ευαγγελία Κατσίκας", "parents": "Αθανάσιος & Αθηνά Γεωργίου", "clergy": "Π. Γεώργιος Σταματίου", "church_id": 46}, {"first_name": "Νικόλαος", "last_name": "Αλεξίου", "birth_date": "2011-07-26", "reception_date": "2011-10-12", "birthplace": "Αθήνα", "entry_type": "Βάπτιση", "sponsors": "Αλέξανδρος Κωνσταντίνου, Ιωάννα Χριστοδούλου", "parents": "Χρήστος & Ελένη Αλεξίου", "clergy": "Π. Νικόλαος Καραγιάννης", "church_id": 46}, {"first_name": "Ιωάννα", "last_name": "Σαββίδης", "birth_date": "1980-08-09", "reception_date": "1980-12-23", "birthplace": "Ρόδος", "entry_type": "Χρίσμα", "sponsors": "Νικόλαος Δημητρίου", "parents": "Σπυρίδων & Αγγελική Σαββίδης", "clergy": "Π. Φίλιππος Κατσίκας", "church_id": 46}, {"first_name": "Ευαγγελία", "last_name": "Παπαδόπουλος", "birth_date": "2013-06-13", "reception_date": "2013-08-17", "birthplace": "Τρίκαλα", "entry_type": "Βάπτιση", "sponsors": "Ειρήνη Νικολάου", "parents": "Αλέξανδρος & Σοφία Παπαδόπουλος", "clergy": "Π. Παύλος Γεωργίου", "church_id": 46}, {"first_name": "Ιωάννα", "last_name": "Νικολάου", "birth_date": "2006-04-11", "reception_date": "2007-04-02", "birthplace": "Σύρος", "entry_type": "Χρίσμα", "sponsors": "Δημήτριος Καραγιάννης", "parents": "Γεώργιος & Χριστίνα Νικολάου", "clergy": "Π. Αθανάσιος Σαββίδης", "church_id": 46}, {"first_name": "Λουκάς", "last_name": "Αλεξίου", "birth_date": "1992-09-09", "reception_date": "1993-06-26", "birthplace": "Τρίκαλα", "entry_type": "Βάπτιση", "sponsors": "Χριστίνα Κωνσταντίνου, Μαρία Σαββίδης", "parents": "Γεώργιος & Ελένη Αλεξίου", "clergy": "Π. Γεώργιος Γεωργίου", "church_id": 46}, {"first_name": "Αλέξανδρος", "last_name": "Χριστοδούλου", "birth_date": "1978-03-03", "reception_date": "1978-11-19", "birthplace": "Καλαμάτα", "entry_type": "Βάπτιση", "sponsors": "Κωνσταντίνος Σαββίδης, Ειρήνη Γεωργίου", "parents": "Αλέξανδρος & Αγγελική Χριστοδούλου", "clergy": "Π. Αθανάσιος Δημητρίου", "church_id": 46}, {"first_name": "Ειρήνη", "last_name": "Ιωάννου", "birth_date": "1986-01-19", "reception_date": "1986-09-12", "birthplace": "Καλαμάτα", "entry_type": "Βάπτιση", "sponsors": "Αγγελική Χριστοδούλου", "parents": "Αλέξανδρος & Αθηνά Ιωάννου", "clergy": "Π. Σπυρίδων Καραγιάννης", "church_id": 46}, {"first_name": "Ευαγγελία", "last_name": "Αλεξίου", "birth_date": "1985-09-12", "reception_date": "1986-02-04", "birthplace": "Χανιά", "entry_type": "Βάπτιση", "sponsors": "Ελένη Ιωάννου, Δημήτριος Γεωργίου", "parents": "Παναγιώτης & Ειρήνη Αλεξίου", "clergy": "Π. Χρυσόστομος Παπαδόπουλος", "church_id": 46}, {"first_name": "Ειρήνη", "last_name": "Χριστοδούλου", "birth_date": "2014-04-24", "reception_date": "2014-07-03", "birthplace": "Ρόδος", "entry_type": "Χρίσμα", "sponsors": "Μιχαήλ Χριστοδούλου", "parents": "Ιωάννης & Ειρήνη Χριστοδούλου", "clergy": "Π. Σπυρίδων Ιωάννου", "church_id": 46}, {"first_name": "Δέσποινα", "last_name": "Χριστοδούλου", "birth_date": "1971-06-13", "reception_date": "1972-01-29", "birthplace": "Ηράκλειο", "entry_type": "Βάπτιση", "sponsors": "Παναγιώτης Χριστοδούλου", "parents": "Δημήτριος & Ελένη Χριστοδούλου", "clergy": "Π. Νικόλαος Κατσίκας", "church_id": 46}, {"first_name": "Ελένη", "last_name": "Παππάς", "birth_date": "1999-11-09", "reception_date": "2000-07-21", "birthplace": "Ηράκλειο", "entry_type": "Χρίσμα", "sponsors": "Αναστασία Νικολάου, Ειρήνη Αλεξίου", "parents": "Χρήστος & Φωτεινή Παππάς", "clergy": "Π. Αθανάσιος Καραγιάννης", "church_id": 46}, {"first_name": "Αγγελική", "last_name": "Παπαδόπουλος", "birth_date": "2006-07-03", "reception_date": "2006-12-30", "birthplace": "Ρόδος", "entry_type": "Χρίσμα", "sponsors": "Αναστασία Κωνσταντίνου", "parents": "Αθανάσιος & Θεοδώρα Παπαδόπουλος", "clergy": "Π. Σπυρίδων Σταματίου", "church_id": 46}, {"first_name": "Παναγιώτης", "last_name": "Αλεξίου", "birth_date": "2015-07-17", "reception_date": "2015-09-19", "birthplace": "Τρίκαλα", "entry_type": "Χρίσμα", "sponsors": "Σπυρίδων Κωνσταντίνου", "parents": "Θεόδωρος & Αναστασία Αλεξίου", "clergy": "Π. Παύλος Καραγιάννης", "church_id": 46}, {"first_name": "Στέφανος", "last_name": "Δημητρίου", "birth_date": "1997-12-30", "reception_date": "1998-05-28", "birthplace": "Βόλος", "entry_type": "Βάπτιση", "sponsors": "Δημήτριος Νικολάου", "parents": "Κωνσταντίνος & Ευαγγελία Δημητρίου", "clergy": "Π. Παύλος Καραγιάννης", "church_id": 46}, {"first_name": "Παναγιώτης", "last_name": "Ιωάννου", "birth_date": "1983-12-17", "reception_date": "1984-06-19", "birthplace": "Λάρισα", "entry_type": "Χρίσμα", "sponsors": "Αικατερίνη Δημητρίου, Αθηνά Λαμπρόπουλος", "parents": "Χρήστος & Ευαγγελία Ιωάννου", "clergy": "Π. Φίλιππος Αναγνωστόπουλος", "church_id": 46}, {"first_name": "Θεόδωρος", "last_name": "Χριστοδούλου", "birth_date": "1985-10-11", "reception_date": "1986-06-08", "birthplace": "Τρίκαλα", "entry_type": "Χρίσμα", "sponsors": "Λουκάς Κατσίκας", "parents": "Θεόδωρος & Αικατερίνη Χριστοδούλου", "clergy": "Π. Παύλος Γεωργίου", "church_id": 46}, {"first_name": "Θεοδώρα", "last_name": "Παπαδόπουλος", "birth_date": "1990-01-30", "reception_date": "1990-04-21", "birthplace": "Θεσσαλονίκη", "entry_type": "Βάπτιση", "sponsors": "Φωτεινή Αναγνωστόπουλος", "parents": "Παύλος & Ελένη Παπαδόπουλος", "clergy": "Π. Φίλιππος Αλεξίου", "church_id": 46}, {"first_name": "Φωτεινή", "last_name": "Νικολάου", "birth_date": "1983-04-14", "reception_date": "1983-11-08", "birthplace": "Κέρκυρα", "entry_type": "Βάπτιση", "sponsors": "Κωνσταντίνος Αλεξίου", "parents": "Νικόλαος & Χριστίνα Νικολάου", "clergy": "Π. Χρυσόστομος Νικολάου", "church_id": 46}, {"first_name": "Ιωάννης", "last_name": "Αλεξίου", "birth_date": "2010-01-14", "reception_date": "2010-11-02", "birthplace": "Χανιά", "entry_type": "Βάπτιση", "sponsors": "Ελένη Λαμπρόπουλος, Αικατερίνη Παπαδόπουλος", "parents": "Δημήτριος & Μαρία Αλεξίου", "clergy": "Π. Φίλιππος Κωνσταντίνου", "church_id": 46}, {"first_name": "Αναστασία", "last_name": "Νικολάου", "birth_date": "2008-08-03", "reception_date": "2009-02-25", "birthplace": "Πάτρα", "entry_type": "Βάπτιση", "sponsors": "Θεοδώρα Λαμπρόπουλος", "parents": "Αθανάσιος & Αθηνά Νικολάου", "clergy": "Π. Παύλος Σταματίου", "church_id": 46}, {"first_name": "Παύλος", "last_name": "Κωνσταντίνου", "birth_date": "2014-02-25", "reception_date": "2014-09-14", "birthplace": "Κέρκυρα", "entry_type": "Χρίσμα", "sponsors": "Ειρήνη Κωνσταντίνου", "parents": "Αθανάσιος & Θεοδώρα Κωνσταντίνου", "clergy": "Π. Νικόλαος Παπαδόπουλος", "church_id": 46}, {"first_name": "Αναστασία", "last_name": "Χριστοδούλου", "birth_date": "1986-10-16", "reception_date": "1987-02-06", "birthplace": "Χανιά", "entry_type": "Χρίσμα", "sponsors": "Χρήστος Νικολάου, Αικατερίνη Λαμπρόπουλος", "parents": "Στέφανος & Ειρήνη Χριστοδούλου", "clergy": "Π. Ιωάννης Αναγνωστόπουλος", "church_id": 46}, {"first_name": "Δημήτριος", "last_name": "Χριστοδούλου", "birth_date": "2003-11-25", "reception_date": "2004-09-02", "birthplace": "Καβάλα", "entry_type": "Βάπτιση", "sponsors": "Αθηνά Κατσίκας", "parents": "Παύλος & Θεοδώρα Χριστοδούλου", "clergy": "Π. Φίλιππος Χριστοδούλου", "church_id": 46}, {"first_name": "Αλέξανδρος", "last_name": "Κατσίκας", "birth_date": "2015-07-23", "reception_date": "2016-02-12", "birthplace": "Ηράκλειο", "entry_type": "Χρίσμα", "sponsors": "Δημήτριος Παππάς, Ιωάννα Λαμπρόπουλος", "parents": "Παναγιώτης & Ευαγγελία Κατσίκας", "clergy": "Π. Φίλιππος Παππάς", "church_id": 46}, {"first_name": "Δέσποινα", "last_name": "Κατσίκας", "birth_date": "1989-10-23", "reception_date": "1990-04-22", "birthplace": "Ρόδος", "entry_type": "Βάπτιση", "sponsors": "Αθηνά Δημητρίου", "parents": "Παναγιώτης & Δέσποινα Κατσίκας", "clergy": "Π. Αθανάσιος Παππάς", "church_id": 46}, {"first_name": "Παναγιώτης", "last_name": "Κατσίκας", "birth_date": "2014-02-18", "reception_date": "2015-01-19", "birthplace": "Ρόδος", "entry_type": "Βάπτιση", "sponsors": "Νικόλαος Παπαδόπουλος", "parents": "Σπυρίδων & Σοφία Κατσίκας", "clergy": "Π. Φίλιππος Δημητρίου", "church_id": 46}, {"first_name": "Μιχαήλ", "last_name": "Παππάς", "birth_date": "2001-01-13", "reception_date": "2001-07-20", "birthplace": "Σύρος", "entry_type": "Χρίσμα", "sponsors": "Δέσποινα Ιωάννου, Χρήστος Λαμπρόπουλος", "parents": "Σπυρίδων & Αγγελική Παππάς", "clergy": "Π. Γεώργιος Νικολάου", "church_id": 46}, {"first_name": "Ιωάννα", "last_name": "Λαμπρόπουλος", "birth_date": "1981-12-01", "reception_date": "1982-03-28", "birthplace": "Καβάλα", "entry_type": "Χρίσμα", "sponsors": "Δημήτριος Γεωργίου, Ιωάννα Σταματίου", "parents": "Παύλος & Θεοδώρα Λαμπρόπουλος", "clergy": "Π. Φίλιππος Γεωργίου", "church_id": 46}, {"first_name": "Γεώργιος", "last_name": "Παππάς", "birth_date": "1971-04-20", "reception_date": "1971-07-01", "birthplace": "Ιωάννινα", "entry_type": "Χρίσμα", "sponsors": "Χριστίνα Σταματίου", "parents": "Αλέξανδρος & Ειρήνη Παππάς", "clergy": "Π. Παύλος Παπαδόπουλος", "church_id": 46}, {"first_name": "Ιωάννης", "last_name": "Κωνσταντίνου", "birth_date": "2002-06-29", "reception_date": "2002-10-14", "birthplace": "Κέρκυρα", "entry_type": "Χρίσμα", "sponsors": "Ιωάννης Λαμπρόπουλος, Λουκάς Γεωργίου", "parents": "Γεώργιος & Αθηνά Κωνσταντίνου", "clergy": "Π. Σπυρίδων Σταματίου", "church_id": 46}, {"first_name": "Μιχαήλ", "last_name": "Δημητρίου", "birth_date": "2005-01-28", "reception_date": "2005-12-14", "birthplace": "Σύρος", "entry_type": "Βάπτιση", "sponsors": "Δέσποινα Αλεξίου", "parents": "Νικόλαος & Αγγελική Δημητρίου", "clergy": "Π. Νικόλαος Κατσίκας", "church_id": 46}, {"first_name": "Ιωάννα", "last_name": "Γεωργίου", "birth_date": "1996-11-06", "reception_date": "1996-12-18", "birthplace": "Πάτρα", "entry_type": "Χρίσμα", "sponsors": "Αγγελική Δημητρίου", "parents": "Κωνσταντίνος & Ιωάννα Γεωργίου", "clergy": "Π. Παύλος Καραγιάννης", "church_id": 46}, {"first_name": "Γεώργιος", "last_name": "Ιωάννου", "birth_date": "1976-09-06", "reception_date": "1977-02-26", "birthplace": "Πάτρα", "entry_type": "Χρίσμα", "sponsors": "Ιωάννης Χριστοδούλου", "parents": "Σπυρίδων & Θεοδώρα Ιωάννου", "clergy": "Π. Παύλος Κωνσταντίνου", "church_id": 46}, {"first_name": "Μαρία", "last_name": "Αναγνωστόπουλος", "birth_date": "1998-03-19", "reception_date": "1998-10-17", "birthplace": "Καβάλα", "entry_type": "Βάπτιση", "sponsors": "Ευαγγελία Παπαδόπουλος, Ιωάννα Αναγνωστόπουλος", "parents": "Αλέξανδρος & Χριστίνα Αναγνωστόπουλος", "clergy": "Π. Φίλιππος Κωνσταντίνου", "church_id": 46}, {"first_name": "Θεόδωρος", "last_name": "Κατσίκας", "birth_date": "1972-04-30", "reception_date": "1972-09-08", "birthplace": "Τρίκαλα", "entry_type": "Βάπτιση", "sponsors": "Αθηνά Παπαδόπουλος, Παρασκευή Καραγιάννης", "parents": "Χρήστος & Αικατερίνη Κατσίκας", "clergy": "Π. Παύλος Παππάς", "church_id": 46}, {"first_name": "Ιωάννα", "last_name": "Γεωργίου", "birth_date": "1981-07-03", "reception_date": "1981-09-29", "birthplace": "Καλαμάτα", "entry_type": "Χρίσμα", "sponsors": "Θεοδώρα Χριστοδούλου", "parents": "Σπυρίδων & Ευαγγελία Γεωργίου", "clergy": "Π. Γεώργιος Λαμπρόπουλος", "church_id": 46}, {"first_name": "Αθανάσιος", "last_name": "Δημητρίου", "birth_date": "1996-07-11", "reception_date": "1996-08-03", "birthplace": "Τρίκαλα", "entry_type": "Βάπτιση", "sponsors": "Σπυρίδων Παπαδόπουλος", "parents": "Θεόδωρος & Αθηνά Δημητρίου", "clergy": "Π. Σπυρίδων Λαμπρόπουλος", "church_id": 46}, {"first_name": "Παναγιώτης", "last_name": "Δημητρίου", "birth_date": "1996-06-20", "reception_date": "1997-01-24", "birthplace": "Βόλος", "entry_type": "Βάπτιση", "sponsors": "Αλέξανδρος Χριστοδούλου", "parents": "Κωνσταντίνος & Ελένη Δημητρίου", "clergy": "Π. Χρυσόστομος Αλεξίου", "church_id": 46}, {"first_name": "Αθηνά", "last_name": "Γεωργίου", "birth_date": "1991-07-11", "reception_date": "1991-08-29", "birthplace": "Τρίκαλα", "entry_type": "Βάπτιση", "sponsors": "Κωνσταντίνος Ιωάννου, Λουκάς Χριστοδούλου", "parents": "Αθανάσιος & Θεοδώρα Γεωργίου", "clergy": "Π. Χρυσόστομος Δημητρίου", "church_id": 46}, {"first_name": "Αικατερίνη", "last_name": "Αναγνωστόπουλος", "birth_date": "2005-10-21", "reception_date": "2006-03-08", "birthplace": "Ηράκλειο", "entry_type": "Χρίσμα", "sponsors": "Νικόλαος Κατσίκας", "parents": "Παύλος & Αγγελική Αναγνωστόπουλος", "clergy": "Π. Παύλος Κωνσταντίνου", "church_id": 46}, {"first_name": "Γεώργιος", "last_name": "Αλεξίου", "birth_date": "1981-05-15", "reception_date": "1982-05-13", "birthplace": "Θεσσαλονίκη", "entry_type": "Βάπτιση", "sponsors": "Ειρήνη Σταματίου, Στέφανος Δημητρίου", "parents": "Γεώργιος & Ιωάννα Αλεξίου", "clergy": "Π. Φίλιππος Παπαδόπουλος", "church_id": 46}, {"first_name": "Αναστασία", "last_name": "Δημητρίου", "birth_date": "1986-12-05", "reception_date": "1987-01-07", "birthplace": "Βόλος", "entry_type": "Βάπτιση", "sponsors": "Αλέξανδρος Κωνσταντίνου", "parents": "Αθανάσιος & Θεοδώρα Δημητρίου", "clergy": "Π. Παύλος Δημητρίου", "church_id": 46}, {"first_name": "Χριστίνα", "last_name": "Κατσίκας", "birth_date": "1987-07-24", "reception_date": "1988-05-29", "birthplace": "Λάρισα", "entry_type": "Βάπτιση", "sponsors": "Χρήστος Νικολάου", "parents": "Αθανάσιος & Δέσποινα Κατσίκας", "clergy": "Π. Φίλιππος Καραγιάννης", "church_id": 46}, {"first_name": "Αλέξανδρος", "last_name": "Λαμπρόπουλος", "birth_date": "1972-09-09", "reception_date": "1973-04-07", "birthplace": "Λάρισα", "entry_type": "Χρίσμα", "sponsors": "Ειρήνη Αλεξίου, Χριστίνα Αναγνωστόπουλος", "parents": "Θεόδωρος & Παρασκευή Λαμπρόπουλος", "clergy": "Π. Ιωάννης Δημητρίου", "church_id": 46}, {"first_name": "Θεοδώρα", "last_name": "Γεωργίου", "birth_date": "1973-09-08", "reception_date": "1974-07-09", "birthplace": "Ρόδος", "entry_type": "Βάπτιση", "sponsors": "Ιωάννης Παππάς, Γεώργιος Παπαδόπουλος", "parents": "Μιχαήλ & Παρασκευή Γεωργίου", "clergy": "Π. Φίλιππος Κατσίκας", "church_id": 46}, {"first_name": "Ελένη", "last_name": "Λαμπρόπουλος", "birth_date": "1975-11-17", "reception_date": "1976-10-28", "birthplace": "Τρίκαλα", "entry_type": "Χρίσμα", "sponsors": "Αναστασία Παπαδόπουλος", "parents": "Νικόλαος & Αθηνά Λαμπρόπουλος", "clergy": "Π. Γεώργιος Γεωργίου", "church_id": 46}]</script>
+
+<script>
+let DATA = [];
+// ... keep the rest of your table code the same ...
+DATA = JSON.parse(document.getElementById('embedded-data').textContent);
+
+// --- State ---
+let state = {
+  sortKey: null,
+  sortDir: 1, // 1 asc, -1 desc
+  page: 1,
+  pageSize: 10,
+  q: ""
+};
+
+const rowsEl = document.getElementById('rows');
+const prevEl = document.getElementById('prev');
+const nextEl = document.getElementById('next');
+const pageinfoEl = document.getElementById('pageinfo');
+const qEl = document.getElementById('q');
+const modal = document.getElementById('modal');
+const detail = document.getElementById('detail');
+const closeBtn = document.getElementById('close');
+
+function normalize(s){ return (s||"").toString().toLowerCase(); }
+
+function filtered(){
+  const q = normalize(state.q);
+  if(!q) return DATA.slice();
+  return DATA.filter(r => {
+    return [r.first_name, r.last_name, r.birthplace].some(v => normalize(v).includes(q));
+  });
+}
+
+function sorted(list){
+  if(!state.sortKey) return list;
+  const key = state.sortKey;
+  const dir = state.sortDir;
+  return list.slice().sort((a,b)=> (a[key] > b[key] ? 1 : a[key] < b[key] ? -1 : 0) * dir);
+}
+
+function paged(list){
+  const start = (state.page-1)*state.pageSize;
+  return list.slice(start, start+state.pageSize);
+}
+
+function render(){
+  const f = filtered();
+  const s = sorted(f);
+  const p = paged(s);
+  const totalPages = Math.max(1, Math.ceil(f.length / state.pageSize));
+
+  rowsEl.innerHTML = p.map((r,i)=> `
+    <tr>
+      <td>${r.first_name}</td>
+      <td>${r.last_name}</td>
+      <td>${r.birth_date}</td>
+      <td>${r.reception_date}</td>
+      <td>${r.birthplace}</td>
+      <td>${r.entry_type === 'Βάπτιση' ? '<span class="badge bap">Βάπτιση</span>' : '<span class="badge chr">Χρίσμα</span>'}</td>
+      <td>${r.clergy}</td>
+      <td>${r.church_id}</td>
+      <td><button class="actions-btn" data-view="${(state.page-1)*state.pageSize + i}">Προβολή Εγγραφής</button></td>
+    </tr>
+  `).join('');
+
+  pageinfoEl.textContent = `Σελίδα ${state.page} από ${totalPages}`;
+  prevEl.disabled = state.page <= 1;
+  nextEl.disabled = state.page >= totalPages;
+}
+
+function openModal(record){
+  detail.innerHTML = `
+    <dt>Όνομα</dt><dd>${record.first_name}</dd>
+    <dt>Επώνυμο</dt><dd>${record.last_name}</dd>
+    <dt>Ημερομηνία Γέννησης</dt><dd>${record.birth_date}</dd>
+    <dt>Ημερομηνία Βάπτισης</dt><dd>${record.reception_date}</dd>
+    <dt>Τόπος Γέννησης</dt><dd>${record.birthplace}</dd>
+    <dt>Τύπος Εισόδου</dt><dd>${record.entry_type}</dd>
+    <dt>Ανάδοχοι</dt><dd>${record.sponsors || '—'}</dd>
+    <dt>Γονείς</dt><dd>${record.parents}</dd>
+    <dt>Ιερέας</dt><dd>${record.clergy}</dd>
+    <dt>Κωδικός Ενορίας</dt><dd>${record.church_id}</dd>
+  `;
+  modal.setAttribute('open','');
+}
+
+document.querySelectorAll('th[data-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const k = th.getAttribute('data-key');
+    if(state.sortKey === k){ state.sortDir *= -1; } else { state.sortKey = k; state.sortDir = 1; }
+    render();
+  });
+});
+
+rowsEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-view]');
+  if(!btn) return;
+  const idx = parseInt(btn.getAttribute('data-view'), 10);
+  const list = sorted(filtered());
+  const rec = list[idx];
+  openModal(rec);
+});
+
+prevEl.addEventListener('click', () => { state.page = Math.max(1, state.page-1); render(); });
+nextEl.addEventListener('click', () => {
+  const totalPages = Math.max(1, Math.ceil(filtered().length / state.pageSize));
+  state.page = Math.min(totalPages, state.page+1);
+  render();
+});
+
+qEl.addEventListener('input', () => { state.q = qEl.value; state.page = 1; render(); });
+closeBtn.addEventListener('click', () => modal.removeAttribute('open'));
+modal.addEventListener('click', (e) => { if(e.target === modal) modal.removeAttribute('open'); });
+
+render();
+</script>
+</body>
+</html>

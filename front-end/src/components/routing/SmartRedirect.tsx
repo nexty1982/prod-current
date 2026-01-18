@@ -45,9 +45,9 @@ const SmartRedirect: React.FC = () => {
 
         // 1. Safe useAuth handling - check if auth context exists
         if (!auth) {
-          debugLog('Auth context not available, redirecting to login');
+          debugLog('Auth context not available, redirecting to homepage');
           clearAuthData();
-          safeNavigate('/login', { replace: true });
+          safeNavigate('/frontend-pages/homepage', { replace: true });
           return;
         }
 
@@ -65,16 +65,20 @@ const SmartRedirect: React.FC = () => {
               id: contextUser.id
             });
 
-            // Route based on user role
-            if (contextUser.role === 'super_admin') {
-              safeNavigate('/admin/dashboard', { replace: true });
+            // Special case: frjames@ssppoc.org always goes to user dashboard
+            if (contextUser.email === 'frjames@ssppoc.org') {
+              safeNavigate('/dashboards/user', { replace: true });
+            }
+            // Redirect based on role: super_admin/admin to Super Dashboard, others to User Dashboard
+            else if (contextUser.role === 'super_admin' || contextUser.role === 'admin') {
+              safeNavigate('/dashboards/super', { replace: true });
             } else {
-              safeNavigate('/dashboards/modern', { replace: true });
+              safeNavigate('/dashboards/user', { replace: true });
             }
           } else {
             debugLog('Context auth - user not authenticated');
             clearAuthData();
-            safeNavigate('/login', { replace: true });
+            safeNavigate('/frontend-pages/homepage', { replace: true });
           }
 
           if (mountedRef.current) {
@@ -105,10 +109,15 @@ const SmartRedirect: React.FC = () => {
               church_id: currentUser.church_id
             });
 
-            if (currentUser.role === 'super_admin') {
-              safeNavigate('/admin/dashboard', { replace: true });
+            // Special case: frjames@ssppoc.org always goes to user dashboard
+            if (currentUser.email === 'frjames@ssppoc.org') {
+              safeNavigate('/dashboards/user', { replace: true });
+            }
+            // Redirect based on role: super_admin/admin to Super Dashboard, others to User Dashboard
+            else if (currentUser.role === 'super_admin' || currentUser.role === 'admin') {
+              safeNavigate('/dashboards/super', { replace: true });
             } else {
-              safeNavigate('/dashboards/modern', { replace: true });
+              safeNavigate('/dashboards/user', { replace: true });
             }
           } else {
             // Authenticated but no user data - try to refresh auth
@@ -119,30 +128,35 @@ const SmartRedirect: React.FC = () => {
                 // After refresh, try again
                 const refreshedUser = auth.user || getCurrentUser();
                 if (refreshedUser) {
-                  if (refreshedUser.role === 'super_admin') {
-                    safeNavigate('/admin/dashboard', { replace: true });
+                  // Special case: frjames@ssppoc.org always goes to user dashboard
+                  if (refreshedUser.email === 'frjames@ssppoc.org') {
+                    safeNavigate('/dashboards/user', { replace: true });
+                  }
+                  // Redirect based on role: super_admin/admin to Super Dashboard, others to User Dashboard
+                  else if (refreshedUser.role === 'super_admin' || refreshedUser.role === 'admin') {
+                    safeNavigate('/dashboards/super', { replace: true });
                   } else {
-                    safeNavigate('/dashboards/modern', { replace: true });
+                    safeNavigate('/dashboards/user', { replace: true });
                   }
                 } else {
                   // Still no user data after refresh
-                  safeNavigate('/login', { replace: true });
+                  safeNavigate('/frontend-pages/homepage', { replace: true });
                 }
               } catch (refreshError) {
                 debugLog('Auth refresh failed', { error: refreshError });
                 clearAuthData();
-                safeNavigate('/login', { replace: true });
+                safeNavigate('/frontend-pages/homepage', { replace: true });
               }
             } else {
-              // Can't refresh, redirect to login
-              safeNavigate('/login', { replace: true });
+              // Can't refresh, redirect to homepage
+              safeNavigate('/frontend-pages/homepage', { replace: true });
             }
           }
         } else {
           // User is not authenticated
-          debugLog('User not authenticated, redirecting to login');
+          debugLog('User not authenticated, redirecting to homepage');
           clearAuthData();
-          safeNavigate('/login', { replace: true });
+          safeNavigate('/frontend-pages/homepage', { replace: true });
         }
 
       } catch (error) {
@@ -151,10 +165,10 @@ const SmartRedirect: React.FC = () => {
           name: error instanceof Error ? error.name : 'UnknownError'
         });
 
-        // On any error, clear auth data and redirect to login
+        // On any error, clear auth data and redirect to homepage
         if (mountedRef.current) {
           clearAuthData();
-          safeNavigate('/login', { replace: true });
+          safeNavigate('/frontend-pages/homepage', { replace: true });
         }
       } finally {
         // Always set loading to false if component is still mounted

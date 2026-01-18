@@ -25,6 +25,7 @@ interface WebSocketContextType {
   onNewMessage: (callback: (message: any) => void) => () => void;
   onUserTyping: (callback: (data: any) => void) => () => void;
   onNewNotification: (callback: (notification: any) => void) => () => void;
+  onAdminMessage: (callback: (message: any) => void) => () => void;
   onFriendPresenceUpdate: (callback: (data: any) => void) => () => void;
   onMessageRead: (callback: (data: any) => void) => () => void;
 }
@@ -258,6 +259,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     return addEventListener('new_notification', callback);
   }, [addEventListener]);
 
+  const onAdminMessage = useCallback((callback: (message: any) => void) => {
+    return addEventListener('admin_message', callback);
+  }, [addEventListener]);
+
   const onFriendPresenceUpdate = useCallback((callback: (data: any) => void) => {
     return addEventListener('friend_presence_update', (data: any) => {
       // Update online users set
@@ -314,6 +319,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     onNewMessage,
     onUserTyping,
     onNewNotification,
+    onAdminMessage,
     onFriendPresenceUpdate,
     onMessageRead,
   };

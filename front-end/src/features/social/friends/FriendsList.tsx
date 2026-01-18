@@ -116,7 +116,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const FriendsList: React.FC = () => {
-  const { user } = useAuth();
+  const { user, authenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
   const [tabValue, setTabValue] = useState(0);
@@ -143,12 +143,15 @@ const FriendsList: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (tabValue === 0) {
-      fetchFriends();
-    } else if (tabValue === 1) {
-      fetchRequests();
+    // Only fetch if authenticated
+    if (!authLoading && authenticated && user) {
+      if (tabValue === 0) {
+        fetchFriends();
+      } else if (tabValue === 1) {
+        fetchRequests();
+      }
     }
-  }, [tabValue]);
+  }, [tabValue, authLoading, authenticated, user]);
 
   useEffect(() => {
     const searchTimeout = setTimeout(() => {
@@ -628,11 +631,11 @@ const FriendsList: React.FC = () => {
                   </Paper>
                 ))}
               </Stack>
-            ) : requests.filter(r => r.status === 'pending').length === 0 ? (
+            ) : requests.length === 0 ? (
               <Box textAlign="center" py={8}>
                 <IconUserCheck size={64} color="lightgray" />
                 <Typography variant="h6" mt={2} color="text.secondary">
-                  No pending friend requests
+                  No friend requests
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   You're all caught up!
@@ -640,9 +643,7 @@ const FriendsList: React.FC = () => {
               </Box>
             ) : (
               <Stack spacing={2}>
-                {requests
-                  .filter(request => request.status === 'pending')
-                  .map(renderRequestCard)}
+                {requests.map(renderRequestCard)}
               </Stack>
             )}
           </Box>

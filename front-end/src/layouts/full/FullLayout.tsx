@@ -16,20 +16,21 @@ import config from '@/context/config';
 // import GlobalOMAI from '../../components/global/GlobalOMAI';
 // import ErrorNotificationToast from '../../components/global/ErrorNotificationToast';
 
-const MainWrapper = styled('div')(() => ({
+const MainWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   minHeight: '100vh',
   width: '100%',
+  backgroundColor: theme.palette.background.default,
 }));
 
-const PageWrapper = styled('div')(() => ({
+const PageWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   flexGrow: 1,
   paddingBottom: '60px',
   flexDirection: 'column',
   zIndex: 1,
   width: '100%',
-  backgroundColor: 'transparent',
+  backgroundColor: theme.palette.background.default,
 }));
 
 const FullLayout: FC = () => {

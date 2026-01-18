@@ -1,7 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { requireRole } = require('../../middleware/auth');
-const DatabaseService = require('../../src/services/databaseService');
+// Support both development and production paths
+let DatabaseService;
+try {
+    DatabaseService = require('../../services/databaseService');
+} catch (e) {
+    DatabaseService = require('../../src/services/databaseService');
+}
 
 /**
  * User Management API Routes

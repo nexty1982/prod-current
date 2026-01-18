@@ -6,26 +6,41 @@ import { useContext } from "react";
 import { IconMenu2 } from '@tabler/icons-react';
 import Notifications from './Notification';
 import Profile from './Profile';
-import Search from './Search';
+import LastLoggedIn from './LastLoggedIn';
 import Language from './Language';
 import Navigation from './Navigation';
 import MobileRightSidebar from './MobileRightSidebar';
 import OrthodoxThemeToggle from '@/shared/ui/OrthodoxThemeToggle';
 import { CustomizerContext } from '@/context/CustomizerContext';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
+  const { authenticated } = useAuth();
 
   const TopbarHeight = config.topbarHeight;
 
   // drawer
-  const { setIsCollapse, isCollapse, isMobileSidebar, setIsMobileSidebar } = useContext(CustomizerContext);
+  const { setIsCollapse, isCollapse, isMobileSidebar, setIsMobileSidebar, headerBackground } = useContext(CustomizerContext);
 
+  // Default background for authenticated users is bgtiled.png
+  const getBackground = () => {
+    if (headerBackground) {
+      return `url(/images/bgtiled${headerBackground}.png) repeat`;
+    }
+    // For authenticated users, default to bgtiled.png
+    if (authenticated) {
+      return `url(/images/bgtiled.png) repeat`;
+    }
+    // For unauthenticated users, use gradient
+    return 'linear-gradient(135deg, #1a0d2e 0%, #2d1b4e 50%, #3d1f5d 100%)';
+  };
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: 'none',
-    background: theme.palette.background.paper,
+    background: getBackground(),
+    backgroundSize: 'auto',
     justifyContent: 'center',
     backdropFilter: 'blur(4px)',
     [theme.breakpoints.up('lg')]: {
@@ -34,7 +49,7 @@ const Header = () => {
   }));
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: '100%',
-    color: theme.palette.text.secondary,
+    color: '#FFFFFF', // Explicit white color for header text to override theme inheritance
   }));
 
   return (
@@ -60,10 +75,6 @@ const Header = () => {
           <IconMenu2 size="20" />
         </IconButton>
 
-        {/* ------------------------------------------- */}
-        {/* Search Dropdown */}
-        {/* ------------------------------------------- */}
-        <Search />
         {lgUp ? (
           <>
             <Navigation />
@@ -72,6 +83,7 @@ const Header = () => {
 
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
+          <LastLoggedIn />
           <Language />
           {/* ------------------------------------------- */}
           {/* Orthodox Theme Toggle */}

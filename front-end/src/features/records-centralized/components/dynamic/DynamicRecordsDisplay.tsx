@@ -3,6 +3,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { Global } from '@emotion/react';
 import {
   Table,
   TableBody,
@@ -21,16 +22,17 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Grid,
   Card,
   CardContent,
   Chip,
+  Checkbox,
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   MoreVert as MoreVertIcon,
+  Description as CertificateIcon,
 } from '@mui/icons-material';
 import { inferColumnsFromRecords, mapFieldDefinitionsToDynamicColumns } from './columnMappers';
 import { renderCellValue } from './cellRenderers';
@@ -62,10 +64,15 @@ export interface DynamicRecordsDisplayProps {
   onView?: (row: any) => void;
   onEdit?: (row: any) => void;
   onDelete?: (id: string | number) => void;
+  onGenerateCertificate?: (row: any) => void;
   maxHeight?: number;
   showActions?: boolean;
   emptyMessage?: string;
   className?: string;
+  selectedRecords?: string[];
+  onRecordSelect?: (recordId: string, selected: boolean) => void;
+  onSelectAll?: (selected: boolean) => void;
+  rowStyle?: (record: any) => React.CSSProperties;
   themeTokens?: {
     headerBg: string;
     headerText: string;
@@ -99,12 +106,17 @@ export const DynamicRecordsDisplay: React.FC<DynamicRecordsDisplayProps> = ({
   onView,
   onEdit,
   onDelete,
+  onGenerateCertificate,
   maxHeight = 600,
   showActions = true,
   emptyMessage = 'No records found',
    className = '',
   themeTokens,
   fieldRules = [],
+  selectedRecords = [],
+  onRecordSelect,
+  onSelectAll,
+  rowStyle,
 }) => {
   const [sortConfig, setSortConfig] = useState<SortModel | null>(initialSort || null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -203,7 +215,7 @@ export const DynamicRecordsDisplay: React.FC<DynamicRecordsDisplayProps> = ({
     setSelectedRow(null);
   };
 
-  const handleAction = (action: 'view' | 'edit' | 'delete') => {
+  const handleAction = (action: 'view' | 'edit' | 'delete' | 'certificate') => {
     if (!selectedRow) return;
 
     switch (action) {
@@ -218,6 +230,9 @@ export const DynamicRecordsDisplay: React.FC<DynamicRecordsDisplayProps> = ({
         if (rowId != null) {
           onDelete?.(rowId);
         }
+        break;
+      case 'certificate':
+        onGenerateCertificate?.(selectedRow);
         break;
     }
     handleActionClose();
@@ -241,11 +256,36 @@ export const DynamicRecordsDisplay: React.FC<DynamicRecordsDisplayProps> = ({
     );
   }
 
-  const renderTableLayout = () => (
+  const renderTableLayout = () => {
+    const showCheckboxes = !!onRecordSelect;
+    const allSelected = sortedRecords.length > 0 && sortedRecords.every((row: any) => {
+      const rowId = String(row.id || row._id || '');
+      return selectedRecords.includes(rowId);
+    });
+    const someSelected = sortedRecords.some((row: any) => {
+      const rowId = String(row.id || row._id || '');
+      return selectedRecords.includes(rowId);
+    });
+
+    // Debug: Log to ensure showActions is true
+    // if (showActions) {
+    //   console.log('✅ Action buttons should be visible. showActions:', showActions, 'onView:', !!onView, 'onEdit:', !!onEdit, 'onDelete:', !!onDelete);
+    // }
+
+    return (
     <TableContainer component={Paper} style={{ maxHeight }} className={className}>
       <Table stickyHeader size={layout === 'dense' ? 'small' : 'medium'}>
         <TableHead>
           <TableRow sx={themeTokens ? { bgcolor: themeTokens.headerBg, color: themeTokens.headerText } : {}}>
+            {showCheckboxes && (
+              <TableCell padding="checkbox" sx={themeTokens ? { bgcolor: themeTokens.headerBg, color: themeTokens.headerText, borderBottom: `1px solid ${themeTokens.border}` } : {}}>
+                <Checkbox
+                  indeterminate={someSelected && !allSelected}
+                  checked={allSelected}
+                  onChange={(e) => onSelectAll?.(e.target.checked)}
+                />
+              </TableCell>
+            )}
             {columns.map((column: DynamicColumn) => (
               <TableCell key={column.field} sx={themeTokens ? { bgcolor: themeTokens.headerBg, color: themeTokens.headerText, borderBottom: `1px solid ${themeTokens.border}` } : {}}>
                 {column.sortable !== false ? (
@@ -261,36 +301,94 @@ export const DynamicRecordsDisplay: React.FC<DynamicRecordsDisplayProps> = ({
                 )}
               </TableCell>
             ))}
-            {showActions && <TableCell sx={themeTokens ? { bgcolor: themeTokens.headerBg, color: themeTokens.headerText, borderBottom: `1px solid ${themeTokens.border}` } : {}}>Actions</TableCell>}
+            {showActions && (
+              <TableCell 
+                sx={{ 
+                  ...(themeTokens ? { bgcolor: themeTokens.headerBg, color: themeTokens.headerText, borderBottom: `1px solid ${themeTokens.border}` } : {}),
+                  width: 60,
+                  minWidth: 60,
+                  position: 'sticky',
+                  right: 0,
+                  backgroundColor: themeTokens?.headerBg || 'background.paper',
+                  zIndex: 10
+                }}
+              >
+                Actions
+              </TableCell>
+            )}
           </TableRow>
         </TableHead>
         <TableBody>
           {sortedRecords.map((row: any, index: number) => {
-            const rowId = row.id || row._id || index;
+            const rowId = String(row.id || row._id || index);
+            const isSelected = selectedRecords.includes(rowId);
+            const isNew = row._isNew;
+            const rowStyleProps = rowStyle ? rowStyle(row) : {};
+            
             return (
-              <TableRow key={rowId} hover sx={themeTokens ? { bgcolor: index % 2 === 0 ? themeTokens.rowEvenBg : themeTokens.rowOddBg, borderBottom: `1px solid ${themeTokens.border}` } : {}}>
+              <TableRow 
+                key={rowId} 
+                hover 
+                selected={isSelected}
+                className={isNew ? 'new-record-row' : ''}
+                sx={{
+                  ...(themeTokens ? { 
+                    bgcolor: index % 2 === 0 ? themeTokens.rowEvenBg : themeTokens.rowOddBg, 
+                    borderBottom: `1px solid ${themeTokens.border}` 
+                  } : {}),
+                  ...(isNew ? {
+                    backgroundColor: '#e8f5e9 !important',
+                    borderLeft: '4px solid #4caf50 !important',
+                    '& .MuiTableCell-root': {
+                      backgroundColor: 'transparent',
+                    },
+                  } : {}),
+                  ...rowStyleProps,
+                }}
+              >
+                {showCheckboxes && (
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={isSelected}
+                      onChange={(e) => onRecordSelect?.(rowId, e.target.checked)}
+                    />
+                  </TableCell>
+                )}
                 {columns.map((column: DynamicColumn) => {
                   const value = column.valueGetter ? column.valueGetter(row) : row[column.field];
                   return (
                     <TableCell key={column.field} sx={getFieldCellStyle(column.field)}>
                       {column.cellRenderer 
                         ? column.cellRenderer(value, row) 
-                        : renderCellValue(value, { 
-                            isDate: dateFields.includes(column.field),
-                            field: column.field 
-                          })
+                        : renderCellValue(value, column.field, dateFields)
                       }
                     </TableCell>
                   );
                 })}
                 {showActions && (
-                  <TableCell>
-                    <IconButton
-                      size="small"
-                      onClick={(event: React.MouseEvent<HTMLElement>) => handleActionClick(event, row)}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
+                  <TableCell 
+                    sx={{ 
+                      width: 60,
+                      minWidth: 60,
+                      position: 'sticky',
+                      right: 0,
+                      backgroundColor: isNew ? '#e8f5e9' : (themeTokens ? (index % 2 === 0 ? themeTokens.rowEvenBg : themeTokens.rowOddBg) : 'background.paper'),
+                      zIndex: 5
+                    }}
+                  >
+                    <Tooltip title="Actions">
+                      <IconButton
+                        size="small"
+                        onClick={(event: React.MouseEvent<HTMLElement>) => handleActionClick(event, row)}
+                        sx={{ 
+                          '&:hover': { 
+                            backgroundColor: 'action.hover' 
+                          } 
+                        }}
+                      >
+                        <MoreVertIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 )}
               </TableRow>
@@ -299,7 +397,8 @@ export const DynamicRecordsDisplay: React.FC<DynamicRecordsDisplayProps> = ({
         </TableBody>
       </Table>
     </TableContainer>
-  );
+    );
+  };
 
   const renderCardsLayout = () => (
     <Box>
@@ -316,21 +415,18 @@ export const DynamicRecordsDisplay: React.FC<DynamicRecordsDisplayProps> = ({
         ))}
       </Box>
       
-      <Grid container spacing={2}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
         {sortedRecords.map((row: any, index: number) => {
           const rowId = row.id || row._id || index;
           return (
-            <Grid item xs={12} sm={6} md={4} key={rowId}>
+            <Box key={rowId} sx={{ width: { xs: '100%', sm: 'calc(50% - 8px)', md: 'calc(33.333% - 11px)' } }}>
               <Card variant="outlined" sx={{ height: '100%' }}>
                 <CardContent>
                   {columns.slice(0, 6).map((column: DynamicColumn) => {
                     const value = column.valueGetter ? column.valueGetter(row) : row[column.field];
                     const displayValue = column.cellRenderer 
                       ? column.cellRenderer(value, row) 
-                      : renderCellValue(value, { 
-                          isDate: dateFields.includes(column.field),
-                          field: column.field 
-                        });
+                      : renderCellValue(value, column.field, dateFields);
                     
                     return (
                       <Box key={column.field} sx={{ mb: 1 }}>
@@ -377,44 +473,84 @@ export const DynamicRecordsDisplay: React.FC<DynamicRecordsDisplayProps> = ({
                   )}
                 </CardContent>
               </Card>
-            </Grid>
+            </Box>
           );
         })}
-      </Grid>
+      </Box>
     </Box>
   );
 
   return (
     <>
+      <Global
+        styles={{
+          '@keyframes fadeIn': {
+            from: {
+              opacity: 0,
+              transform: 'translateY(-10px)',
+            },
+            to: {
+              opacity: 1,
+              transform: 'translateY(0)',
+            },
+          },
+          '.new-record-row': {
+            backgroundColor: '#e8f5e9 !important',
+            borderLeft: '4px solid #4caf50 !important',
+            animation: 'fadeIn 0.5s ease-in',
+          },
+        }}
+      />
       {layout === 'cards' ? renderCardsLayout() : renderTableLayout()}
       
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleActionClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
       >
-        {onView && (
+        {onView ? (
           <MenuItem onClick={() => handleAction('view')}>
             <ListItemIcon>
               <ViewIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>View</ListItemText>
           </MenuItem>
-        )}
-        {onEdit && (
+        ) : null}
+        {onEdit ? (
           <MenuItem onClick={() => handleAction('edit')}>
             <ListItemIcon>
               <EditIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>Edit</ListItemText>
           </MenuItem>
-        )}
-        {onDelete && (
+        ) : null}
+        {onDelete ? (
           <MenuItem onClick={() => handleAction('delete')}>
             <ListItemIcon>
               <DeleteIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>Delete</ListItemText>
+          </MenuItem>
+        ) : null}
+        {onGenerateCertificate ? (
+          <MenuItem onClick={() => handleAction('certificate')}>
+            <ListItemIcon>
+              <CertificateIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Generate Certificate</ListItemText>
+          </MenuItem>
+        ) : null}
+        {!onView && !onEdit && !onDelete && !onGenerateCertificate && (
+          <MenuItem disabled>
+            <ListItemText>No actions available</ListItemText>
           </MenuItem>
         )}
       </Menu>

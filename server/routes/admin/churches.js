@@ -5,9 +5,23 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
 const { getAppPool } = require('../../config/db');
-const { getChurchDbConnection } = require('../../src/utils/dbSwitcher');
-const churchSetupService = require('../../src/services/churchSetupService'); // Add template integration
+// Support both development and production paths
+let dbSwitcherModule;
+try {
+    dbSwitcherModule = require('../../src/utils/dbSwitcher');
+} catch (e) {
+    dbSwitcherModule = require('../../utils/dbSwitcher');
+}
+const { getChurchDbConnection } = dbSwitcherModule;
+
+let churchSetupService;
+try {
+    churchSetupService = require('../../src/services/churchSetupService');
+} catch (e) {
+    churchSetupService = require('../../services/churchSetupService');
+}
 const { requireAuth } = require("../../middleware/requireAuth");
+const APP_DB = process.env.APP_DB_NAME || 'orthodoxmetrics_db';
 // 🔒 Apply authentication to ALL admin church routes
 router.use(requireAuth);
 
@@ -48,7 +62,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 20 * 1024 * 1024, // 20MB limit
   },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
@@ -797,6 +811,159 @@ async function validateChurchAccess(churchId) {
     return churches[0];
 }
 
+// GET /api/admin/churches/:id/columns?table=<table>
+router.get('/:id/columns', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id, 10);
+    const table = String(req.query.table || '').trim();
+    if (!churchId || !table) {
+      return res.status(400).json({ success: false, error: 'churchId and table are required' });
+    }
+
+    // Validate and get DB name (reuses your helper)
+    const { database_name } = await validateChurchAccess(churchId);
+
+    // Read column names from INFORMATION_SCHEMA
+    const [rows] = await getAppPool().query(
+      `SELECT COLUMN_NAME
+         FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
+        ORDER BY ORDINAL_POSITION`,
+      [database_name, table]
+    );
+
+    const columns = rows.map(r => r.COLUMN_NAME);
+    return res.json({ success: true, columns });
+  } catch (err) {
+    console.error('❌ Error getting columns:', err);
+    return res.status(500).json({ success: false, error: err.message || 'failed to load columns' });
+  }
+});
+
+// GET /api/admin/churches/:id/tables/:table/columns
+router.get('/:id/tables/:table/columns', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id, 10);
+    const table = String(req.params.table || '').trim();
+    if (!churchId || !table) {
+      return res.status(400).json({ success: false, error: 'churchId and table are required' });
+    }
+
+    const { database_name } = await validateChurchAccess(churchId);
+
+    const [rows] = await getAppPool().query(
+      `SELECT COLUMN_NAME
+         FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
+        ORDER BY ORDINAL_POSITION`,
+      [database_name, table]
+    );
+
+    const columns = rows.map(r => r.COLUMN_NAME);
+    return res.json({ success: true, columns });
+  } catch (err) {
+    console.error('❌ Error getting columns:', err);
+    return res.status(500).json({ success: false, error: err.message || 'failed to load columns' });
+  }
+});
+
+// POST /api/admin/churches/:id/field-mapper
+router.post('/:id/field-mapper', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id, 10);
+    const { table, mapping = {}, field_settings = {} } = req.body || {};
+
+    if (!churchId || !table) {
+      return res.status(400).json({ success: false, error: 'churchId and table are required' });
+    }
+
+    await validateChurchAccess(churchId);
+
+    // Ensure table exists in the central app DB (MariaDB 10.6: LONGTEXT + JSON_VALID)
+    await getAppPool().query(`
+      CREATE TABLE IF NOT EXISTS \`${APP_DB}\`.church_field_mappings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        church_id INT NOT NULL,
+        table_name VARCHAR(128) NOT NULL,
+        mapping_json LONGTEXT NULL,
+        field_settings_json LONGTEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_church_table (church_id, table_name),
+        CHECK (JSON_VALID(mapping_json)),
+        CHECK (JSON_VALID(field_settings_json))
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // Add missing columns/constraints if table pre-existed in an older shape
+    await getAppPool().query(`
+      ALTER TABLE \`${APP_DB}\`.church_field_mappings
+        ADD COLUMN IF NOT EXISTS mapping_json LONGTEXT NULL,
+        ADD COLUMN IF NOT EXISTS field_settings_json LONGTEXT NULL
+    `);
+
+    // Schema-qualified upsert (forces write into orthodoxmetrics_db)
+    await getAppPool().query(
+      `INSERT INTO \`${APP_DB}\`.church_field_mappings
+         (church_id, table_name, mapping_json, field_settings_json)
+       VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         mapping_json = VALUES(mapping_json),
+         field_settings_json = VALUES(field_settings_json),
+         updated_at = CURRENT_TIMESTAMP`,
+      [churchId, table, JSON.stringify(mapping), JSON.stringify(field_settings)]
+    );
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('❌ Error saving field mapping:', err);
+    return res.status(500).json({ success: false, error: err.message || 'failed to save mapping' });
+  }
+});
+
+// GET /api/admin/churches/:id/field-mapper?table=TABLE_NAME
+router.get('/:id/field-mapper', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id, 10);
+    const table = String(req.query.table || '').trim();
+    if (!churchId || !table) {
+      return res.status(400).json({ success: false, error: 'churchId and table are required' });
+    }
+
+    await validateChurchAccess(churchId);
+
+    const [rows] = await getAppPool().query(
+      `SELECT mapping_json, field_settings_json
+         FROM \`${APP_DB}\`.church_field_mappings
+        WHERE church_id = ? AND table_name = ?
+        LIMIT 1`,
+      [churchId, table]
+    );
+
+    if (!rows.length) {
+      return res.json({ success: true, mappings: {}, field_settings: {} });
+    }
+
+    // MariaDB returns LONGTEXT; ensure we parse to objects if strings
+    let { mapping_json, field_settings_json } = rows[0] || {};
+    if (typeof mapping_json === 'string') {
+      try { mapping_json = JSON.parse(mapping_json); } catch {}
+    }
+    if (typeof field_settings_json === 'string') {
+      try { field_settings_json = JSON.parse(field_settings_json); } catch {}
+    }
+
+    return res.json({
+      success: true,
+      mappings: mapping_json || {},
+      field_settings: field_settings_json || {}
+    });
+  } catch (err) {
+    console.error('❌ Error loading field mapping:', err);
+    return res.status(500).json({ success: false, error: err.message || 'failed to load mapping' });
+  }
+});
+
 // GET /api/admin/churches/:id/debug - Debug church database connection
 router.get('/:id/debug', async (req, res) => {
     try {
@@ -805,7 +972,7 @@ router.get('/:id/debug', async (req, res) => {
 
         // Check what's actually in the church record
         const [churches] = await getAppPool().query(
-            'SELECT * FROM orthodoxmetrics_db.churches WHERE id = ?',
+            'SELECT * FROM churches WHERE id = ?',
             [churchId]
         );
 
@@ -1007,66 +1174,69 @@ router.post('/:id/test-connection', async (req, res) => {
     }
 });
 
-// GET /api/admin/churches/:id/tables - Get available tables for a church
+// GET /api/admin/churches/:id/tables
 router.get('/:id/tables', async (req, res) => {
-    try {
-        const churchId = req.params.id;
-        
-        // Get church details
-        const [churchResult] = await getAppPool().query(
-            'SELECT id, church_name as name, database_name FROM churches WHERE id = ?',
-            [churchId]
-        );
-        
-        if (churchResult.length === 0) {
-            return res.status(404).json({
-                success: false,
-                error: 'Church not found'
-            });
-        }
-        
-        const church = churchResult[0];
-        const database_name = church.database_name;
-        
-        // Get list of tables in the church database
-        const [tables] = await getAppPool().query(`
-            SELECT 
-                TABLE_NAME as name,
-                TABLE_ROWS as row_count,
-                ROUND(DATA_LENGTH / 1024 / 1024, 2) as size_mb,
-                TABLE_COMMENT as comment
-            FROM information_schema.TABLES 
-            WHERE TABLE_SCHEMA = ?
-            ORDER BY TABLE_NAME
-        `, [database_name]);
-        
-        // Filter to only include relevant tables (exclude system tables)
-        const relevantTables = tables.filter(table => {
-            const tableName = table.name.toLowerCase();
-            return tableName.includes('baptism') || 
-                   tableName.includes('marriage') || 
-                   tableName.includes('funeral') ||
-                   tableName.includes('member') ||
-                   tableName.includes('family') ||
-                   tableName.includes('donation') ||
-                   tableName.includes('event');
-        });
-        
-        res.json({
-            success: true,
-            tables: relevantTables.length > 0 ? relevantTables : tables,
-            total_tables: tables.length,
-            database_name: database_name
-        });
-        
-    } catch (error) {
-        console.error('❌ Error fetching church tables:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to fetch church tables'
-        });
-    }
+  try {
+    const churchId = parseInt(req.params.id, 10);
+    if (!churchId) return res.status(400).json({ success: false, error: 'churchId is required' });
+
+    // Use your helper to validate + fetch the DB name
+    const { database_name } = await validateChurchAccess(churchId);
+
+    // Pull tables from INFORMATION_SCHEMA (names + rough size)
+    const [rows] = await getAppPool().query(
+      `SELECT
+         TABLE_NAME              AS table_name,
+         TABLE_ROWS              AS row_count,
+         DATA_LENGTH + INDEX_LENGTH AS size_bytes
+       FROM INFORMATION_SCHEMA.TABLES
+       WHERE TABLE_SCHEMA = ?
+       ORDER BY TABLE_NAME`,
+      [database_name]
+    );
+
+    // Normalize + filter out system/internal tables
+    const allTables = rows.map(r => ({
+      name: r.table_name,
+      row_count: Number(r.row_count ?? 0),
+      size_mb: r.size_bytes ? Math.round((Number(r.size_bytes) / 1024 / 1024) * 100) / 100 : 0
+    }));
+
+    const isRelevant = (t) => {
+      const n = t.name.toLowerCase();
+      // include obvious domain tables
+      const includes = [
+        'baptism', 'marriage', 'funeral',
+        'member', 'family', 'donation', 'record'
+      ].some(k => n.includes(k));
+
+      // exclude obvious system tables
+      const excludes = [
+        'migrations', 'knex', 'sys', 'information_schema',
+        'performance_schema', 'mysql', 'audit', 'event'
+      ].some(k => n.includes(k));
+
+      return includes && !excludes;
+    };
+
+    const relevant = allTables.filter(isRelevant);
+
+    return res.json({
+      success: true,
+      tables: relevant.map(t => t.name),    // simple list for front-end fallback
+      meta: {
+        total_tables: allTables.length,
+        relevant_count: relevant.length,
+        database: database_name,
+        details: relevant                    // richer info if you need it later
+      }
+    });
+  } catch (err) {
+    console.error('❌ Error getting tables:', err);
+    return res.status(500).json({ success: false, error: err.message || 'failed to load tables' });
+  }
 });
+
 
 // POST /api/admin/churches/:id/update-database - Update church database with template tables
 router.post('/:id/update-database', async (req, res) => {
@@ -1236,7 +1406,938 @@ router.get('/:id/record-counts', async (req, res) => {
     }
 });
 
-module.exports = router;
+// Configure multer for record images (separate from logo uploads)
+// Uses RECORD_IMAGES_DIR env var, defaults to /var/www/orthodoxmetrics/uploads/record-images
+const RECORD_IMAGES_BASE_DIR = process.env.RECORD_IMAGES_DIR || '/var/www/orthodoxmetrics/uploads/record-images';
+const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+const ALLOWED_TYPES = ['baptism', 'marriage', 'funeral', 'logo', 'bg', 'g1', 'omLogo', 'recordImage'];
+
+// Ensure base directory exists at startup
+(async () => {
+  try {
+    await fs.mkdir(RECORD_IMAGES_BASE_DIR, { recursive: true });
+    console.log(`✅ Record images base directory ready: ${RECORD_IMAGES_BASE_DIR}`);
+  } catch (err) {
+    console.error(`❌ Failed to create record images base directory: ${err.message}`);
+  }
+})();
+
+const recordImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // Use synchronous approach with promise handling
+    // Wrap in try-catch to catch any synchronous errors
+    try {
+      const asyncFn = (async () => {
+        try {
+          const churchId = req.params.id || req.params.churchId;
+          const type = req.query.type || (req.body && req.body.type) || 'image';
+          
+          if (!churchId) {
+            const err = new Error('Church ID is required');
+            err.code = 'MISSING_CHURCH_ID';
+            return cb(err);
+          }
+          
+          // Sanitize type to prevent directory traversal
+          const sanitizedType = type.replace(/[^a-zA-Z0-9_-]/g, '') || 'image';
+          
+          // Create directory structure: baseDir/churchId/type/
+          const uploadDir = path.join(RECORD_IMAGES_BASE_DIR, String(churchId), sanitizedType);
+          
+          console.log(`📁 Creating record images directory: ${uploadDir}`);
+          
+          // Create directory recursively
+          await fs.mkdir(uploadDir, { recursive: true });
+          
+          console.log(`✅ Record images directory ready: ${uploadDir}`);
+          cb(null, uploadDir);
+        } catch (err) {
+          console.error('❌ Error creating record images directory:', {
+            path: RECORD_IMAGES_BASE_DIR,
+            churchId: req.params.id,
+            type: req.query.type || req.body?.type,
+            error: err.message,
+            code: err.code,
+            stack: err.stack
+          });
+          // Create a proper error object for multer
+          const multerError = new Error(`Failed to create upload directory: ${err.message}`);
+          multerError.code = err.code || 'DIRECTORY_ERROR';
+          cb(multerError);
+        }
+      })();
+      
+      // Catch any unhandled promise rejections
+      asyncFn.catch((unhandledErr) => {
+        console.error('❌ Unhandled promise rejection in destination callback:', {
+          error: unhandledErr.message,
+          code: unhandledErr.code,
+          stack: unhandledErr.stack
+        });
+        const multerError = new Error(`Unhandled error in upload destination: ${unhandledErr.message}`);
+        multerError.code = unhandledErr.code || 'UNHANDLED_ERROR';
+        cb(multerError);
+      });
+    } catch (syncErr) {
+      // Catch any synchronous errors in the destination callback setup
+      console.error('❌ Synchronous error in destination callback:', {
+        error: syncErr.message,
+        code: syncErr.code,
+        stack: syncErr.stack
+      });
+      const multerError = new Error(`Failed to setup upload destination: ${syncErr.message}`);
+      multerError.code = syncErr.code || 'DESTINATION_ERROR';
+      cb(multerError);
+    }
+  },
+  filename: (req, file, cb) => {
+    try {
+      // Generate safe filename: timestamp-random + original extension
+      const uniqueId = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+      const ext = path.extname(file.originalname) || '.png';
+      const safeExt = ext.toLowerCase().replace(/[^a-z0-9.]/g, '');
+      const filename = `${uniqueId}${safeExt}`;
+      
+      cb(null, filename);
+    } catch (err) {
+      console.error('❌ Error in filename callback:', err);
+      cb(err);
+    }
+  }
+});
+
+const recordImageUpload = multer({
+  storage: recordImageStorage,
+  limits: {
+    fileSize: MAX_FILE_SIZE,
+  },
+  fileFilter: (req, file, cb) => {
+    // Check mimetype
+    if (!file.mimetype || !ALLOWED_IMAGE_TYPES.includes(file.mimetype.toLowerCase())) {
+      return cb(new Error(`Invalid file type. Allowed types: ${ALLOWED_IMAGE_TYPES.join(', ')}`));
+    }
+    cb(null, true);
+  }
+});
+
+// GET /api/admin/churches/:id/record-images/test - Test endpoint to verify route is accessible
+router.get('/:id/record-images/test', (req, res) => {
+  console.log('✅✅✅ TEST ROUTE HIT:', req.params.id);
+  res.json({ success: true, message: 'Route is accessible', churchId: req.params.id });
+});
+
+// POST /api/admin/churches/:id/record-images - Upload record images (logo, bg, baptism, marriage, funeral, g1, omLogo)
+router.post('/:id/record-images', async (req, res, next) => {
+  const requestId = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+  
+  // Log immediately to ensure we can track the request
+  console.log(`[${requestId}] 🚀 ROUTE HIT: POST /api/admin/churches/:id/record-images`);
+  
+  // Wrap in error handler to ensure JSON responses
+  const handleError = (err, statusCode = 500) => {
+    if (res.headersSent) {
+      console.error(`[${requestId}] ⚠️ Headers already sent, cannot send JSON error`);
+      return next(err);
+    }
+    console.error(`[${requestId}] ❌ Error in record-images route:`, {
+      message: err.message,
+      code: err.code,
+      statusCode,
+      stack: err.stack
+    });
+    try {
+      return res.status(statusCode).json({
+        success: false,
+        error: err.message || 'Internal server error',
+        code: err.code || 'INTERNAL_ERROR'
+      });
+    } catch (jsonErr) {
+      console.error(`[${requestId}] ❌ Failed to send JSON error response:`, jsonErr);
+      // Last resort - try to send plain text
+      if (!res.headersSent) {
+        res.status(statusCode).send(`Error: ${err.message || 'Internal server error'}`);
+      }
+    }
+  };
+  
+  const userId = req.user?.id || req.session?.user?.id || 'anonymous';
+  const userEmail = req.user?.email || req.session?.user?.email || 'unknown';
+  const churchIdParam = req.params.id; // Route is /:id/record-images
+  
+  // Initial logging
+  console.log(`[${requestId}] 📤 POST /api/admin/churches/:id/record-images`, {
+    churchId: churchIdParam,
+    userId,
+    userEmail,
+    contentType: req.headers['content-type'],
+    contentLength: req.headers['content-length'],
+    timestamp: new Date().toISOString()
+  });
+
+  // Check if recordImageUpload is defined
+  if (!recordImageUpload) {
+    console.error(`[${requestId}] ❌ recordImageUpload is not defined`);
+    return handleError(new Error('Upload handler not configured'), 500);
+  }
+
+  // Wrap multer middleware call in try-catch to catch any initialization errors
+  try {
+    // Use multer middleware manually to catch errors
+    recordImageUpload.single('image')(req, res, async (multerErr) => {
+    if (multerErr) {
+      // Handle multer-specific errors
+      let statusCode = 400;
+      let errorCode = 'UPLOAD_ERROR';
+      
+      if (multerErr.code === 'LIMIT_FILE_SIZE') {
+        errorCode = 'FILE_TOO_LARGE';
+        multerErr.message = `File size exceeds maximum allowed size of ${MAX_FILE_SIZE / 1024 / 1024}MB`;
+      } else if (multerErr.code === 'LIMIT_UNEXPECTED_FILE') {
+        errorCode = 'UNEXPECTED_FIELD';
+        multerErr.message = 'Unexpected field name. Expected field name: "image"';
+      } else if (multerErr.code === 'DIRECTORY_ERROR' || multerErr.message?.includes('directory')) {
+        errorCode = 'DIRECTORY_ERROR';
+        statusCode = 500;
+        multerErr.message = multerErr.message || 'Failed to create upload directory. Please check server permissions.';
+      }
+      
+      console.error(`[${requestId}] ❌ Multer error:`, {
+        code: multerErr.code,
+        message: multerErr.message,
+        field: multerErr.field,
+        ...(process.env.NODE_ENV === 'development' && { stack: multerErr.stack })
+      });
+      
+      // Ensure we return JSON, not HTML
+      if (!res.headersSent) {
+        return res.status(statusCode).json({
+          success: false,
+          error: multerErr.message || 'File upload error',
+          code: errorCode
+        });
+      }
+      return;
+    }
+
+    try {
+      // Validate churchId
+      const churchId = parseInt(churchIdParam, 10);
+      if (isNaN(churchId) || churchId <= 0) {
+        console.error(`[${requestId}] ❌ Invalid church ID:`, churchIdParam);
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid church ID. Must be a positive integer.',
+          code: 'INVALID_CHURCH_ID'
+        });
+      }
+      
+      // Validate type
+      const type = (req.body.type || req.query.type || '').trim();
+      if (!type) {
+        console.error(`[${requestId}] ❌ Missing type parameter`);
+        return res.status(400).json({ 
+          success: false,
+          error: 'Image type is required (e.g., baptism, marriage, funeral, logo, bg, g1, omLogo)',
+          code: 'MISSING_TYPE'
+        });
+      }
+      
+      // Sanitize and validate type
+      const sanitizedType = type.replace(/[^a-zA-Z0-9_-]/g, '');
+      if (!ALLOWED_TYPES.includes(sanitizedType)) {
+        console.warn(`[${requestId}] ⚠️  Unknown type "${type}", but allowing upload`);
+      }
+      
+      // Validate file exists
+      if (!req.file) {
+        console.error(`[${requestId}] ❌ No file in request`);
+        return res.status(400).json({ 
+          success: false,
+          error: 'No image file provided. Ensure field name is "image".',
+          code: 'NO_FILE'
+        });
+      }
+      
+      // Log file metadata
+      console.log(`[${requestId}] 📁 File received:`, {
+        originalname: req.file.originalname,
+        filename: req.file.filename,
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+        destination: req.file.destination,
+        path: req.file.path
+      });
+      
+      // Validate church access (throws error if invalid)
+      console.log(`[${requestId}] 🔍 Validating church access for church ${churchId}...`);
+      await validateChurchAccess(churchId);
+      console.log(`[${requestId}] ✅ Church access validated`);
+      
+      // Generate URL path (relative to public directory or configured base URL)
+      // Files are stored in: RECORD_IMAGES_BASE_DIR/churchId/type/filename
+      // For serving, we need to map this to a URL path
+      // If using front-end/public/images/records, use that path
+      // Otherwise, use a configured base URL or serve from uploads directory
+      const imageUrl = `/images/records/${churchId}/${sanitizedType}/${req.file.filename}`;
+      const fullPath = req.file.path;
+      
+      console.log(`[${requestId}] ✅ Upload successful:`, {
+        churchId,
+        type: sanitizedType,
+        filename: req.file.filename,
+        url: imageUrl,
+        path: fullPath
+      });
+      
+      // Return success response
+      res.status(201).json({
+        ok: true,
+        success: true,
+        message: 'Image uploaded successfully',
+        churchId,
+        type: sanitizedType,
+        filename: req.file.filename,
+        path: fullPath,
+        url: imageUrl
+      });
+      
+    } catch (error) {
+      // Pass error to global error handler
+      console.error(`[${requestId}] ❌ Upload handler error:`, {
+        message: error.message,
+        code: error.code,
+        churchId: churchIdParam,
+        type: req.body?.type || req.query?.type,
+        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+      });
+      
+      // Set status code if not already set
+      error.statusCode = error.statusCode || 500;
+      error.status = error.statusCode;
+      
+      // Use handleError instead of next to ensure JSON response
+      return handleError(error, error.statusCode || 500);
+    }
+  });
+  } catch (initError) {
+    // Catch any errors during multer middleware initialization
+    console.error(`[${requestId}] ❌ Multer initialization error:`, {
+      message: initError.message,
+      code: initError.code,
+      stack: initError.stack
+    });
+    return handleError(initError, 500);
+  }
+});
+
+// GET /api/admin/churches/:id/record-settings - Get record settings
+router.get('/:id/record-settings', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id, 10);
+    if (!churchId) {
+      return res.status(400).json({ success: false, error: 'Invalid church ID' });
+    }
+    
+    await validateChurchAccess(churchId);
+    
+    // Ensure table exists with correct schema
+    await getAppPool().query(`
+      CREATE TABLE IF NOT EXISTS ${APP_DB}.church_record_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        church_id INT NOT NULL,
+        settings JSON NOT NULL,
+        updated_by INT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_church (church_id),
+        INDEX idx_church_id (church_id),
+        INDEX idx_updated_at (updated_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    
+    // Check for and add missing columns
+    try {
+      const [existingColumns] = await getAppPool().query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = ? 
+        AND TABLE_NAME = 'church_record_settings'
+      `, [APP_DB]);
+      
+      const columnNames = existingColumns.map(col => col.COLUMN_NAME);
+      const requiredColumns = [
+        { name: 'settings', def: 'JSON NOT NULL', after: 'church_id' },
+        { name: 'updated_by', def: 'INT NULL', after: 'settings' },
+        { name: 'updated_at', def: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP', after: 'updated_by' },
+        { name: 'created_at', def: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP', after: 'updated_at' }
+      ];
+      
+      for (const col of requiredColumns) {
+        if (!columnNames.includes(col.name)) {
+          await getAppPool().query(`
+            ALTER TABLE ${APP_DB}.church_record_settings 
+            ADD COLUMN ${col.name} ${col.def} ${col.after ? `AFTER ${col.after}` : ''}
+          `);
+          console.log(`✅ Added ${col.name} column to church_record_settings table`);
+        }
+      }
+    } catch (alterError) {
+      console.error('⚠️ Error checking/adding columns:', alterError);
+      // Continue anyway, might already exist
+    }
+    
+    // Fetch settings from database
+    const [rows] = await getAppPool().query(
+      `SELECT settings FROM ${APP_DB}.church_record_settings WHERE church_id = ?`,
+      [churchId]
+    );
+    
+    if (rows.length > 0 && rows[0].settings) {
+      const settings = typeof rows[0].settings === 'string' 
+        ? JSON.parse(rows[0].settings) 
+        : rows[0].settings;
+      res.json({ success: true, settings });
+    } else {
+      // Return empty settings if none exist
+      res.json({ success: true, settings: {} });
+    }
+  } catch (error) {
+    console.error('❌ Error fetching record settings:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch record settings'
+    });
+  }
+});
+
+// POST /api/admin/churches/:id/record-settings - Save record settings
+router.post('/:id/record-settings', upload.single('logo'), async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id, 10);
+    if (!churchId) {
+      return res.status(400).json({ success: false, error: 'Invalid church ID' });
+    }
+    
+    await validateChurchAccess(churchId);
+    
+    // Parse settings from FormData
+    let settings = {};
+    if (req.body.settings) {
+      try {
+        settings = typeof req.body.settings === 'string' 
+          ? JSON.parse(req.body.settings) 
+          : req.body.settings;
+      } catch (parseError) {
+        console.error('❌ Error parsing settings JSON:', parseError);
+        return res.status(400).json({ success: false, error: 'Invalid settings JSON' });
+      }
+    }
+    
+    // Handle logo file upload if provided
+    if (req.file) {
+      const logoPath = `/uploads/church-logos/${req.file.filename}`;
+      if (!settings.logo) settings.logo = {};
+      settings.logo.path = logoPath;
+    }
+    
+    // Ensure table exists
+    await getAppPool().query(`
+      CREATE TABLE IF NOT EXISTS ${APP_DB}.church_record_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        church_id INT NOT NULL,
+        settings JSON NOT NULL,
+        updated_by INT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_church (church_id),
+        INDEX idx_church_id (church_id),
+        INDEX idx_updated_at (updated_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    
+    // Check for and add missing columns
+    try {
+      const [existingColumns] = await getAppPool().query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = ? 
+        AND TABLE_NAME = 'church_record_settings'
+      `, [APP_DB]);
+      
+      const columnNames = existingColumns.map(col => col.COLUMN_NAME);
+      const requiredColumns = [
+        { name: 'settings', def: 'JSON NOT NULL', after: 'church_id' },
+        { name: 'updated_by', def: 'INT NULL', after: 'settings' },
+        { name: 'updated_at', def: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP', after: 'updated_by' },
+        { name: 'created_at', def: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP', after: 'updated_at' }
+      ];
+      
+      for (const col of requiredColumns) {
+        if (!columnNames.includes(col.name)) {
+          await getAppPool().query(`
+            ALTER TABLE ${APP_DB}.church_record_settings 
+            ADD COLUMN ${col.name} ${col.def} ${col.after ? `AFTER ${col.after}` : ''}
+          `);
+          console.log(`✅ Added ${col.name} column to church_record_settings table`);
+        }
+      }
+    } catch (alterError) {
+      console.error('⚠️ Error checking/adding columns:', alterError);
+      // Continue anyway, might already exist
+    }
+    
+    // Get user ID from session if available
+    const userId = req.user?.id || req.session?.user?.id || null;
+    
+    // Save or update settings
+    await getAppPool().query(
+      `INSERT INTO ${APP_DB}.church_record_settings (church_id, settings, updated_by)
+       VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE 
+         settings = VALUES(settings),
+         updated_by = VALUES(updated_by),
+         updated_at = CURRENT_TIMESTAMP`,
+      [churchId, JSON.stringify(settings), userId]
+    );
+    
+    res.json({ success: true, message: 'Settings saved successfully', settings });
+  } catch (error) {
+    console.error('❌ Error saving record settings:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to save record settings'
+    });
+  }
+});
+
+// GET /api/admin/churches/:id/themes - Get church themes
+router.get('/:id/themes', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id, 10);
+    if (!churchId) {
+      return res.status(400).json({ success: false, error: 'Invalid church ID' });
+    }
+    
+    await validateChurchAccess(churchId);
+    
+    // Ensure table exists with correct schema
+    await getAppPool().query(`
+      CREATE TABLE IF NOT EXISTS ${APP_DB}.church_themes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        church_id INT NOT NULL,
+        themes JSON NOT NULL,
+        updated_by INT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_church (church_id),
+        INDEX idx_church_id (church_id),
+        INDEX idx_updated_at (updated_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // Ensure all required columns exist (themes, updated_by, updated_at)
+    try {
+      const [columns] = await getAppPool().query(`
+        SELECT COLUMN_NAME, DATA_TYPE 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = ? 
+        AND TABLE_NAME = 'church_themes'
+      `, [APP_DB]);
+
+      const existingColumns = new Set(columns.map((c) => c.COLUMN_NAME));
+      const alterStatements = [];
+
+      // Add themes column if missing (use LONGTEXT for compatibility, MySQL will handle JSON)
+      if (!existingColumns.has('themes')) {
+        console.log('⚠️  Adding missing "themes" column to church_themes table');
+        alterStatements.push(`ADD COLUMN themes LONGTEXT NOT NULL DEFAULT ('[]') AFTER church_id`);
+      }
+
+      // Add updated_by column if missing
+      if (!existingColumns.has('updated_by')) {
+        console.log('⚠️  Adding missing "updated_by" column to church_themes table');
+        alterStatements.push(`ADD COLUMN updated_by INT NULL AFTER themes`);
+      }
+
+      // Add updated_at column if missing
+      if (!existingColumns.has('updated_at')) {
+        console.log('⚠️  Adding missing "updated_at" column to church_themes table');
+        alterStatements.push(`ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER updated_by`);
+      }
+
+      if (alterStatements.length > 0) {
+        await getAppPool().query(`
+          ALTER TABLE ${APP_DB}.church_themes 
+          ${alterStatements.join(', ')}
+        `);
+        console.log(`✅ Successfully added ${alterStatements.length} column(s)`);
+      } else {
+        console.log('✅ All required columns exist');
+      }
+    } catch (alterError) {
+      console.warn('⚠️  Could not check/add columns:', alterError.message);
+      // Continue anyway - table might have different structure
+    }
+
+    // Get existing themes from the themes table
+    // Use COALESCE to handle missing columns gracefully
+    const [themes] = await getAppPool().query(
+      `SELECT 
+        COALESCE(themes, '{}') as themes,
+        COALESCE(updated_at, created_at, NOW()) as updated_at,
+        updated_by
+       FROM ${APP_DB}.church_themes
+       WHERE church_id = ?`,
+      [churchId]
+    );
+
+    let themesData = {};
+    if (themes.length > 0 && themes[0].themes) {
+      try {
+        const rawThemes = themes[0].themes;
+        if (typeof rawThemes === 'string') {
+          themesData = JSON.parse(rawThemes);
+        } else {
+          themesData = rawThemes;
+        }
+        // Ensure it's an object (for backward compatibility) or convert array to object
+        if (Array.isArray(themesData)) {
+          // Convert array to object map for frontend compatibility
+          themesData = themesData.reduce((acc, theme, idx) => {
+            const key = theme.name || theme.id || `theme_${idx}`;
+            acc[key] = theme;
+            return acc;
+          }, {});
+        }
+      } catch (parseError) {
+        console.warn('⚠️  Failed to parse themes JSON:', parseError);
+        themesData = {};
+      }
+    }
+
+    res.json({ 
+      success: true, 
+      themes: themesData,
+      updated_at: themes[0]?.updated_at || null,
+      updated_by: themes[0]?.updated_by || null
+    });
+  } catch (error) {
+    console.error('❌ Error fetching themes:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch themes'
+    });
+  }
+});
+
+// POST /api/admin/churches/:id/themes - Save/upsert church themes
+// 
+// Example curl tests:
+// 
+// Standard format (themes as array in object):
+// curl -X POST http://localhost:3000/api/admin/churches/46/themes \
+//   -H "Content-Type: application/json" \
+//   -H "Cookie: orthodoxmetrics.sid=YOUR_SESSION_ID" \
+//   -d '{"themes": [{"name": "Orthodox Traditional", "palette": {"primary": "#5B2EBF", "secondary": "#D4AF37"}}]}'
+//
+// Direct array format (if body is array):
+// curl -X POST http://localhost:3000/api/admin/churches/46/themes \
+//   -H "Content-Type: application/json" \
+//   -H "Cookie: orthodoxmetrics.sid=YOUR_SESSION_ID" \
+//   -d '[{"name": "Orthodox Traditional", "palette": {"primary": "#5B2EBF"}}]'
+//
+// Production example:
+// curl -sS -X POST "https://orthodoxmetrics.com/api/admin/churches/46/themes" \
+//   -H "Content-Type: application/json" \
+//   -H "Cookie: orthodoxmetrics.sid=YOUR_SESSION_ID" \
+//   -d '{"themes":[{"name":"Test","palette":{"primary":"#000000"}}]}' | head
+//
+router.post('/:id/themes', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id, 10);
+    if (!churchId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid church ID' 
+      });
+    }
+
+    // Validate church access
+    await validateChurchAccess(churchId);
+
+    // Debug logging to understand incoming request shape
+    console.log('📥 POST /api/admin/churches/:id/themes - Request received');
+    console.log('   typeof req.body:', typeof req.body);
+    console.log('   typeof req.body?.themes:', typeof req.body?.themes);
+    console.log('   Array.isArray(req.body):', Array.isArray(req.body));
+    console.log('   Array.isArray(req.body?.themes):', Array.isArray(req.body?.themes));
+    console.log('   req.body keys:', req.body ? Object.keys(req.body) : 'null');
+    if (req.body?.themes) {
+      console.log('   req.body.themes sample:', JSON.stringify(req.body.themes).substring(0, 200));
+    }
+
+    // Robust normalization: handle multiple input shapes
+    let themes = null;
+    let receivedType = 'unknown';
+
+    // Case 1: req.body is already an array
+    if (Array.isArray(req.body)) {
+      themes = req.body;
+      receivedType = 'array (direct)';
+      console.log('✅ Normalized: Using req.body as themes array');
+    }
+    // Case 2: req.body.themes is an array
+    else if (Array.isArray(req.body?.themes)) {
+      themes = req.body.themes;
+      receivedType = 'array (nested)';
+      console.log('✅ Normalized: Using req.body.themes as themes array');
+    }
+    // Case 3: req.body.themes is a string (JSON string)
+    else if (typeof req.body?.themes === 'string') {
+      try {
+        const parsed = JSON.parse(req.body.themes);
+        if (Array.isArray(parsed)) {
+          themes = parsed;
+          receivedType = 'string (parsed to array)';
+          console.log('✅ Normalized: Parsed JSON string to themes array');
+        } else {
+          receivedType = 'string (parsed but not array)';
+          console.warn('⚠️  Parsed string but result is not an array:', typeof parsed);
+        }
+      } catch (parseError) {
+        receivedType = 'string (invalid JSON)';
+        console.error('❌ Failed to parse themes string:', parseError.message);
+      }
+    }
+    // Case 4: req.body.themes is an object/map (Record<string, Theme>)
+    else if (req.body?.themes && typeof req.body.themes === 'object' && !Array.isArray(req.body.themes)) {
+      // Check if it looks like a single theme object (has name or palette)
+      if (req.body.themes.name || req.body.themes.palette || req.body.themes.colors) {
+        // It's a single theme object, wrap it in an array
+        themes = [req.body.themes];
+        receivedType = 'object (single theme, wrapped in array)';
+        console.log('✅ Normalized: Wrapped single theme object in array');
+      } else {
+        // It's a map/object of themes (Record<string, Theme>) - convert to array
+        const themesMap = req.body.themes;
+        const themesArray = Object.values(themesMap).filter((theme) => 
+          theme && (theme.name || theme.palette || theme.colors)
+        );
+        if (themesArray.length > 0) {
+          themes = themesArray;
+          receivedType = 'object (map converted to array)';
+          console.log(`✅ Normalized: Converted themes map to array (${themesArray.length} themes)`);
+        } else {
+          // Empty object - treat as empty array
+          themes = [];
+          receivedType = 'object (empty map, treated as empty array)';
+          console.log('✅ Normalized: Empty themes map treated as empty array');
+        }
+      }
+    }
+    // Case 5: req.body.themes exists but is not array/string/object
+    else if (req.body?.themes !== undefined) {
+      receivedType = typeof req.body.themes;
+      console.warn('⚠️  req.body.themes exists but is not array, string, or object:', receivedType);
+    }
+    // Case 5: No themes found
+    else {
+      receivedType = 'undefined';
+      console.warn('⚠️  No themes found in request body');
+    }
+
+    // Validate we have an array
+    if (!themes || !Array.isArray(themes)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Themes must be an array',
+        code: 'INVALID_THEMES_FORMAT',
+        receivedType: receivedType,
+        receivedValue: req.body?.themes !== undefined 
+          ? (typeof req.body.themes === 'string' 
+              ? req.body.themes.substring(0, 100) 
+              : String(req.body.themes).substring(0, 100))
+          : 'undefined',
+        hint: 'Expected: {"themes": [...]} or [...] (direct array)'
+      });
+    }
+
+    // Validate each theme has required fields
+    for (let i = 0; i < themes.length; i++) {
+      const theme = themes[i];
+      if (!theme.name || typeof theme.name !== 'string') {
+        return res.status(400).json({
+          success: false,
+          error: `Theme at index ${i} is missing required field: name`,
+          code: 'INVALID_THEME'
+        });
+      }
+      // Palette is optional but if present should be an object
+      if (theme.palette && typeof theme.palette !== 'object') {
+        return res.status(400).json({
+          success: false,
+          error: `Theme "${theme.name}" has invalid palette (must be an object)`,
+          code: 'INVALID_PALETTE'
+        });
+      }
+    }
+
+    // Get user ID for updated_by
+    const userId = req.user?.id || req.session?.user?.id || null;
+
+    // Create table if it doesn't exist
+    await getAppPool().query(`
+      CREATE TABLE IF NOT EXISTS ${APP_DB}.church_themes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        church_id INT NOT NULL,
+        themes LONGTEXT NOT NULL DEFAULT ('[]'),
+        updated_by INT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_church (church_id),
+        INDEX idx_church_id (church_id),
+        INDEX idx_updated_at (updated_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // Ensure all required columns exist (for existing tables with old schema)
+    try {
+      const [columns] = await getAppPool().query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = ? 
+        AND TABLE_NAME = 'church_themes'
+      `, [APP_DB]);
+
+      const existingColumns = new Set(columns.map((c) => c.COLUMN_NAME));
+      const alterStatements = [];
+
+      if (!existingColumns.has('themes')) {
+        console.log('⚠️  Adding missing "themes" column to church_themes table');
+        alterStatements.push(`ADD COLUMN themes LONGTEXT NOT NULL DEFAULT ('[]') AFTER church_id`);
+      }
+      if (!existingColumns.has('updated_by')) {
+        console.log('⚠️  Adding missing "updated_by" column to church_themes table');
+        alterStatements.push(`ADD COLUMN updated_by INT NULL AFTER themes`);
+      }
+      if (!existingColumns.has('updated_at')) {
+        console.log('⚠️  Adding missing "updated_at" column to church_themes table');
+        alterStatements.push(`ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER updated_by`);
+      }
+
+      if (alterStatements.length > 0) {
+        await getAppPool().query(`
+          ALTER TABLE ${APP_DB}.church_themes 
+          ${alterStatements.join(', ')}
+        `);
+        console.log(`✅ Successfully added ${alterStatements.length} column(s) in POST route`);
+      }
+    } catch (alterError) {
+      console.warn('⚠️  Could not check/add columns in POST route:', alterError.message);
+    }
+
+    // Upsert the themes (store as JSON string in LONGTEXT column)
+    await getAppPool().query(`
+      INSERT INTO ${APP_DB}.church_themes
+        (church_id, themes, updated_by)
+      VALUES (?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        themes = VALUES(themes),
+        updated_by = VALUES(updated_by),
+        updated_at = CURRENT_TIMESTAMP
+    `, [
+      churchId,
+      JSON.stringify(themes),
+      userId
+    ]);
+
+    // Fetch the saved themes to return (use COALESCE for missing columns)
+    const [saved] = await getAppPool().query(
+      `SELECT 
+        COALESCE(themes, '[]') as themes,
+        COALESCE(updated_at, created_at, NOW()) as updated_at,
+        updated_by
+       FROM ${APP_DB}.church_themes
+       WHERE church_id = ?`,
+      [churchId]
+    );
+
+    let savedThemes = {}; // Default to empty object for frontend compatibility
+    if (saved.length > 0 && saved[0].themes) {
+      try {
+        const rawThemes = saved[0].themes;
+        const parsed = typeof rawThemes === 'string' ? JSON.parse(rawThemes) : rawThemes;
+        // Convert array back to object map for frontend compatibility (Record<string, Theme>)
+        if (Array.isArray(parsed)) {
+          savedThemes = parsed.reduce((acc, theme, idx) => {
+            const key = theme.name || theme.id || `theme_${idx}`;
+            acc[key] = theme;
+            return acc;
+          }, {});
+        } else if (typeof parsed === 'object' && parsed !== null) {
+          // Already an object/map
+          savedThemes = parsed;
+        }
+      } catch (parseError) {
+        console.warn('⚠️  Failed to parse saved themes:', parseError);
+        // Convert input themes array to object map as fallback
+        savedThemes = themes.reduce((acc, theme, idx) => {
+          const key = theme.name || theme.id || `theme_${idx}`;
+          acc[key] = theme;
+          return acc;
+        }, {});
+      }
+    } else {
+      // No saved themes, convert input array to object map
+      savedThemes = themes.reduce((acc, theme, idx) => {
+        const key = theme.name || theme.id || `theme_${idx}`;
+        acc[key] = theme;
+        return acc;
+      }, {});
+    }
+
+    console.log(`✅ Themes saved for church ${churchId} by user ${userId}`);
+
+    // Return response consistent with GET format (themes as object map)
+    res.json({
+      success: true,
+      themes: savedThemes,
+      updated_at: saved[0]?.updated_at || null,
+      updated_by: saved[0]?.updated_by || userId
+    });
+
+  } catch (error) {
+    console.error('❌ Error saving themes:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to save themes',
+      code: 'DATABASE_ERROR',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+// GET /api/admin/churches/:id/dynamic-records-config - Get dynamic records configuration
+router.get('/:id/dynamic-records-config', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id, 10);
+    if (!churchId) {
+      return res.status(400).json({ success: false, error: 'Invalid church ID' });
+    }
+    
+    await validateChurchAccess(churchId);
+    
+    // Return empty config for now - can be extended later
+    res.json({ success: true, config: {} });
+  } catch (error) {
+    console.error('❌ Error fetching dynamic records config:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch dynamic records config'
+    });
+  }
+});
 
 // POST /api/admin/churches/wizard - Create church via wizard interface
 router.post('/wizard', upload.single('logo'), async (req, res) => {
@@ -1385,3 +2486,4 @@ router.post('/wizard', upload.single('logo'), async (req, res) => {
   }
 });
 module.exports = router;
+

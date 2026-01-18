@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OrthodoxMetrics — Multilingual Records Gallery (Brand)</title>
+<style>
+  :root{
+    --om-navy:#0E2A47; /* deep navy from logo */
+    --om-navy-700:#123556;
+    --om-gold:#C8A24B; /* brand gold */
+    --ink:#eaf2ff;
+    --muted:#b9c4d9;
+    --bg:#0a1322;
+    --panel:#0e1730;
+  }
+  html,body{height:100%;margin:0;background:
+    radial-gradient(140% 120% at 50% 0%, #0f1f3a 0%, #0a1322 55%, #070b12 100%);
+    color:#eef3ff; font-family:Inter, 'Noto Sans', 'Noto Sans Greek', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; overflow:hidden}
+  a{color:var(--om-gold)}
+  .hud{
+    position:fixed;left:16px;top:16px;z-index:99;background:rgba(10,20,35,.55);
+    border:1px solid rgba(255,255,255,.08); padding:10px 12px;border-radius:12px;backdrop-filter:blur(8px);
+    color:#dfe6ff; font-size:12px; display:flex; align-items:center; gap:10px
+  }
+  .hud input[type="range"]{vertical-align:middle}
+  .toggle{display:flex; gap:6px}
+  .chip{border:1px solid rgba(255,255,255,.15); padding:6px 10px; border-radius:999px; cursor:pointer; user-select:none}
+  .chip.active{border-color:var(--om-gold); box-shadow:0 0 0 1px rgba(200,162,75,.35) inset}
+  .scene{position:absolute; inset:70px 0 64px 0; display:grid; place-items:center; perspective:1200px; perspective-origin:50% 30%}
+  .gallery{position:relative; width:1200px; max-width:94vw; height:600px; transform-style:preserve-3d}
+  .ring{position:absolute; inset:0; transform-style:preserve-3d; animation: spin 28s linear infinite}
+  .ring.paused{animation-play-state:paused}
+  @keyframes spin{ from{ transform: translateZ(-540px) rotateY(0deg) } to{ transform: translateZ(-540px) rotateY(-360deg) } }
+  .grid{display:none; position:absolute; inset:0; overflow:auto; padding:10px}
+  .grid-inner{display:grid; grid-template-columns:repeat(3, minmax(260px, 1fr)); gap:16px; padding:10px}
+  @media (max-width:1100px){ .grid-inner{grid-template-columns:repeat(2, minmax(260px, 1fr));} }
+  @media (max-width:740px){ .grid-inner{grid-template-columns:1fr;} }
+  .item{position:absolute; top:50%; left:50%; width:320px; height:460px; transform-style:preserve-3d; transition: transform .6s ease}
+  .card{
+    position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,30,55,.92), rgba(12,18,35,.92));
+    border-radius:18px; border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 30px 60px rgba(0,0,0,.45), inset 0 0 0 1px rgba(175,200,255,.04);
+    overflow:hidden; transform:translateZ(10px);
+    display:flex; flex-direction:column;
+  }
+  .brand-top{position:absolute; inset:0 0 auto 0; height:5px; background:linear-gradient(90deg, var(--om-gold), #f0d890 60%, var(--om-gold)); opacity:.9}
+  .badge{position:absolute; top:14px; right:14px; width:38px; height:38px; border-radius:12px; background:radial-gradient(120% 120% at 0% 0%, var(--om-gold), #f2deaa); color:#2f2300; display:grid; place-items:center; font-weight:900; box-shadow:0 8px 18px rgba(200,162,75,.35)}
+  .badge::before{ content:"✝"; font-size:18px; transform:translateY(-1px)}
+  .title{font-weight:900; font-size:20px; letter-spacing:.3px; color:#e8edff; margin:12px 16px 4px; text-shadow:0 1px 0 rgba(255,255,255,.08)}
+  .subtitle{ margin:0 16px 8px; font-size:12px; color:#b7c2dc}
+  .fields{ display:grid; grid-template-columns:120px 1fr; gap:8px 10px; padding:8px 16px 16px; font-size:13px }
+  .fields dt{ color:#c8d6ff; font-weight:700 }
+  .fields dd{ margin:0; color:#ecf2ff }
+  .shine{ position:absolute; inset:-40% -40%; background:linear-gradient(130deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.22) 47%, rgba(255,255,255,0) 52%); transform:translateX(-60%) rotate(10deg); animation: shine 6s ease-in-out infinite; mix-blend-mode:overlay; pointer-events:none }
+  @keyframes shine{ 0%{ transform:translateX(-60%) rotate(10deg) } 50%{ transform:translateX(60%) rotate(10deg) } 100%{ transform:translateX(160%) rotate(10deg) } }
+  .reflection{ position:absolute; left:0; right:0; bottom:-470px; height:400px; transform:scaleY(-1) translateZ(0); filter:blur(1px) saturate(.9); opacity:.55; mask-image:linear-gradient(to bottom, rgba(0,0,0,.5), rgba(0,0,0,0)); -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.5), rgba(0,0,0,0)) }
+  .reflect-surface{ position:absolute; inset:auto 0 0 0; height:120px; background:linear-gradient(180deg, rgba(14,53,95,.2), rgba(0,0,0,.0)); border-top:1px solid rgba(255,255,255,.06); box-shadow:0 -10px 60px rgba(14,53,95,.25) }
+  .flag-banner{ display:flex; align-items:center; gap:12px; padding:12px 14px 8px 14px; border-bottom:1px solid rgba(255,255,255,.06); background:linear-gradient(180deg, rgba(20,34,60,.45), rgba(10,14,28,.0)) }
+  .flag-title{ display:flex; flex-direction:column }
+  .flag-title .label{ font-weight:900; letter-spacing:.4px; color:#eaf2ff }
+  .flag-title .sub{ font-size:12px; color:#cbd6ee }
+  .snippet{ background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.07); margin:10px 14px 0; border-radius:12px; padding:10px 12px; font-family:"Fira Code","Consolas",monospace; color:#f3f6ff; font-size:12px; }
+  .snippet .k{ color:#9fd0ff } .snippet .v{ color:#ffe49a }
+  /* grid card appearance */
+  .grid-card{background:linear-gradient(180deg, rgba(20,30,55,.9), rgba(12,18,35,.9)); border-radius:16px; border:1px solid rgba(255,255,255,.08); box-shadow:0 14px 38px rgba(0,0,0,.4); overflow:hidden}
+  .grid-card img{display:block; max-width:100%}
+</style>
+</head>
+<body>
+  <div class="hud">
+    <div class="toggle">
+      <div class="chip active" id="chipRing">3D Ring</div>
+      <div class="chip" id="chipGrid">Grid</div>
+    </div>
+    <label><input type="checkbox" id="toggleSpin" checked /> Auto-rotate</label>
+    <label><input type="range" id="speed" min="8" max="60" value="28" /> Speed</label>
+  </div>
+
+  <div class="scene">
+    <div class="gallery">
+      <div class="ring" id="ring"></div>
+      <div class="grid" id="grid"><div class="grid-inner" id="gridInner"></div></div>
+      <div class="reflect-surface"></div>
+    </div>
+  </div>
+
+  <div class="controls" style="position:fixed; left:0; right:0; bottom:16px; display:flex; justify-content:center; gap:12px; z-index:90;">
+    <button class="chip" id="prev">◀ Prev</button>
+    <button class="chip" id="next">Next ▶</button>
+  </div>
+
+<script>
+// --- Inline SVG flags ---
+const Flags = {
+  Greece: () => `<svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="42" fill="#0D5EAF"/><g fill="#FFFFFF"><rect x="0" y="16" width="64" height="6"/><rect x="0" y="28" width="64" height="6"/><rect x="0" y="4" width="64" height="6"/><rect x="0" y="40" width="64" height="2"/></g><g><rect x="0" y="0" width="28" height="24" fill="#0D5EAF"/><rect x="10" y="0" width="6" height="24" fill="#FFFFFF"/><rect x="0" y="9" width="28" height="6" fill="#FFFFFF"/></g></svg>`,
+  Russia: () => `<svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="14" y="0" fill="#FFFFFF"/><rect width="64" height="14" y="14" fill="#0D5EAF"/><rect width="64" height="14" y="28" fill="#CE1126"/></svg>`,
+  Romania: () => `<svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg"><rect width="21.33" height="42" x="0" fill="#002B7F"/><rect width="21.33" height="42" x="21.33" fill="#FCD116"/><rect width="21.33" height="42" x="42.66" fill="#CE1126"/></svg>`,
+  China: () => `<svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="42" fill="#DE2910"/><circle cx="14" cy="14" r="6" fill="#FFDE00"/><circle cx="26" cy="8" r="2" fill="#FFDE00"/><circle cx="30" cy="14" r="2" fill="#FFDE00"/><circle cx="28" cy="20" r="2" fill="#FFDE00"/><circle cx="22" cy="22" r="2" fill="#FFDE00"/></svg>`,
+  Georgia: () => `<svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="42" fill="#FFFFFF"/><rect x="28" y="0" width="8" height="42" fill="#FF0000"/><rect x="0" y="17" width="64" height="8" fill="#FF0000"/><rect x="8" y="8" width="8" height="8" fill="#FF0000"/><rect x="48" y="8" width="8" height="8" fill="#FF0000"/><rect x="8" y="26" width="8" height="8" fill="#FF0000"/><rect x="48" y="26" width="8" height="8" fill="#FF0000"/></svg>`,
+  Vatican: () => `<svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="42" fill="#FFD700"/><rect x="32" width="32" height="42" fill="#FFFFFF"/></svg>`,
+  Slavonic: () => `<svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="42" fill="#1d2a44"/><text x="32" y="26" font-size="16" text-anchor="middle" fill="#C8A24B" font-family="serif">☦</text></svg>`
+};
+
+// --- Data including LOGO card ---
+const ITEMS = [
+  { type:'logo', title:'Orthodox Metrics', sub:'Recording the Saints Among Us', img:'logo-new.png', info:[['Brand','Navy & Gold'],['Since','2024'],['Tagline','Recording the Saints Among Us']]},
+  { flag:'Greece', label:'Αρχεία Βαπτίσεων', sub:'Baptism Records (Greek)', title:'Βάπτιση', sample:[['Όνομα','Μαρία'],['Επώνυμο','Παπαδοπούλου'],['Ημ. Βάπτισης','1990-04-01'],['Ιερέας','Π. Νικόλαος Ιωάννου']], fields:[['Τόπος','Αθήνα'],['Ημ. Γέννησης','1990-03-14']]},
+  { flag:'Russia', label:'Записи о Браке', sub:'Marriage Records (Russian)', title:'Бракосочетание', sample:[['Имя жениха','Александр'],['Имя невесты','Мария'],['Дата брака','2012-06-17'],['Священник','Пр. Николай Георгиев']], fields:[['Свидетели','Дмитрий Соколов'],['Лицензия','№ АБ-204812']]},
+  { flag:'Romania', label:'Registre de Înmormântări', sub:'Funeral Records (Romanian)', title:'Înmormântare', sample:[['Prenume','Ion'],['Nume','Popescu'],['Data decesului','2021-03-12'],['Preot','Pr. Nicolae Ionescu']], fields:[['Locul','Cimitirul Central, București'],['Vârsta','82']]},
+  { flag:'Slavonic', label:'Церковныя записи', sub:'Church Records (Church Slavonic)', title:'Церковныя книги', sample:[['Имѧ','Іоанн'],['Родъ','Петровъ'],['Лѣто','Аѳіѳ'],['Священнослужитель','Пр. Феодоръ']], fields:[['Мѣсто','Крамъ Св. Николы']]},
+  { flag:'Vatican', label:'Registra Ecclesiastica', sub:'Church Records (Latin)', title:'Registrum', sample:[['Nomen','Marcus'],['Cognomen','Valerius'],['Dies','MMXII-IX-V'],['Sacerdos','P. Ioannes']], fields:[['Locus','Paroecia S. Nicolai']]},
+  { flag:'China', label:'教会记录', sub:'Church Records (Chinese)', title:'教会登记', sample:[['姓名','王明'],['日期','2018-06-12'],['神父','若望神父'],['地点','北京']], fields:[['证人','李华']]},
+  { flag:'Georgia', label:'ეკლესიის ჩანაწერები', sub:'Church Records (Georgian)', title:'ეკლესიის ჩანაწერი', sample:[['სახელი','გიორგი'],['გვარი','პაპაშვილი'],['თარიღი','2016-02-28'],['მღვიმე','მამა იოანე']], fields:[['ადგილი','წმ. ნიკოლოზის ტაძარი, თბილისი']]}
+];
+
+const ring = document.getElementById('ring');
+const grid = document.getElementById('grid');
+const gridInner = document.getElementById('gridInner');
+const speed = document.getElementById('speed');
+const toggleSpin = document.getElementById('toggleSpin');
+const chipRing = document.getElementById('chipRing');
+const chipGrid = document.getElementById('chipGrid');
+
+const N = ITEMS.length;
+const radius = 580;
+const step = 360 / N;
+
+// build: 3D ring
+ITEMS.forEach((it, i) => {
+  const holder = document.createElement('div');
+  holder.className = 'item';
+  holder.style.transform = `translate3d(-50%,-50%,0) rotateY(${i*step}deg) translateZ(${radius}px)`;
+
+  const card = document.createElement('div'); card.className = 'card';
+  card.innerHTML = `<div class="brand-top"></div>`;
+
+  if(it.type === 'logo'){
+    const banner = document.createElement('div'); banner.className = 'flag-banner';
+    const img = document.createElement('img'); img.src = it.img; img.alt = 'Orthodox Metrics Logo'; img.style.maxWidth = '140px'; img.style.background='transparent';
+    const title = document.createElement('div'); title.className = 'flag-title';
+    title.innerHTML = `<div class="label">Orthodox Metrics</div><div class="sub">Recording the Saints Among Us</div>`;
+    banner.appendChild(img); banner.appendChild(title);
+    card.appendChild(banner);
+    const inner = document.createElement('div');
+    inner.innerHTML = `<div class="shine"></div><div class="title">Brand Card</div><div class="subtitle">Navy & Gold Theme</div>
+      <dl class="fields">${it.info.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+    card.appendChild(inner);
+  } else {
+    const banner = document.createElement('div'); banner.className = 'flag-banner';
+    const flagDiv = document.createElement('div'); flagDiv.innerHTML = (Flags[it.flag] ? Flags[it.flag]() : '');
+    const labelWrap = document.createElement('div'); labelWrap.className = 'flag-title';
+    labelWrap.innerHTML = `<div class="label">${it.label}</div><div class="sub">${it.sub}</div>`;
+    banner.appendChild(flagDiv); banner.appendChild(labelWrap); card.appendChild(banner);
+
+    const snip = document.createElement('div'); snip.className = 'snippet';
+    snip.innerHTML = it.sample.map(([k,v]) => `<div><span class="k">${k}</span>: <span class="v">${v}</span></div>`).join(''); card.appendChild(snip);
+
+    const inner = document.createElement('div');
+    inner.innerHTML = `<div class="badge"></div><div class="shine"></div><div class="title">${it.title}</div><div class="subtitle">${it.sub}</div>
+      <dl class="fields">${it.fields.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+    card.appendChild(inner);
+  }
+
+  // reflection
+  const refl = card.cloneNode(true); refl.classList.add('reflection');
+
+  holder.appendChild(card); holder.appendChild(refl); ring.appendChild(holder);
+});
+
+// build: Grid cards
+ITEMS.forEach((it) => {
+  const c = document.createElement('div'); c.className = 'grid-card';
+  if(it.type === 'logo'){
+    c.innerHTML = `<div style="padding:12px 12px 8px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,.08)">
+      <img src="${it.img}" alt="Orthodox Metrics Logo" style="max-width:140px" />
+      <div><div style="font-weight:900">Orthodox Metrics</div><div style="opacity:.8; font-size:12px">Recording the Saints Among Us</div></div>
+    </div>
+    <div style="padding:12px">
+      ${it.info.map(([k,v])=>`<div style="display:flex; gap:8px"><div style="min-width:120px; color:#ffd990">${k}</div><div>${v}</div></div>`).join('')}
+    </div>`;
+  } else {
+    c.innerHTML = `<div style="padding:12px 12px 8px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,.08)">
+      ${(Flags[it.flag] ? Flags[it.flag]() : '')}
+      <div><div style="font-weight:900">${it.label}</div><div style="opacity:.8; font-size:12px">${it.sub}</div></div>
+    </div>
+    <div style="padding:12px; font-family:'Fira Code','Consolas',monospace; background:rgba(255,255,255,.03); border-top:1px solid rgba(255,255,255,.06)">
+      ${it.sample.map(([k,v])=>`<div><span style="color:#9fd0ff">${k}</span>: <span style="color:#ffe49a">${v}</span></div>`).join('')}
+    </div>
+    <div style="padding:12px">
+      ${it.fields.map(([k,v])=>`<div style="display:flex; gap:8px"><div style="min-width:120px; color:#ffd990">${k}</div><div>${v}</div></div>`).join('')}
+    </div>`;
+  }
+  gridInner.appendChild(c);
+});
+
+// particles (subtle stars)
+const particles = document.createElement('div'); particles.style.position='absolute'; particles.style.inset='0'; particles.style.pointerEvents='none';
+for(let i=0;i<120;i++){ const d = document.createElement('div'); d.style.position='absolute'; d.style.width='2px'; d.style.height='2px'; d.style.borderRadius='50%'; d.style.background='radial-gradient(circle, #bde0ff, transparent 60%)'; d.style.left=Math.random()*100+'%'; d.style.bottom=Math.random()*40+'px'; d.style.opacity='.9'; d.style.animation=`dr ${8+Math.random()*14}s linear infinite`; d.style.animationDelay=`-${Math.random()*6}s`; particles.appendChild(d); }
+document.querySelector('.gallery').appendChild(particles);
+const styleAnim = document.createElement('style'); styleAnim.textContent = `@keyframes dr{from{transform:translateY(0) translateX(0); opacity:.9}to{transform:translateY(-180px) translateX(60px); opacity:.1}}`; document.head.appendChild(styleAnim);
+
+// controls
+function updateSpeed(){ ring.style.animationDuration = speed.value + 's'; }
+speed.addEventListener('input', updateSpeed); updateSpeed();
+toggleSpin.addEventListener('change', e => { ring.classList.toggle('paused', !toggleSpin.checked); });
+
+let manualAngle = 0;
+function rotate(delta){
+  manualAngle += delta;
+  ring.style.animation = 'none';
+  ring.style.transform = `translateZ(-540px) rotateY(${manualAngle}deg)`;
+  if(toggleSpin.checked){
+    setTimeout(()=>{ ring.style.animation='spin '+speed.value+'s linear infinite'; ring.style.transform=''; }, 60);
+  }
+}
+document.getElementById('prev').addEventListener('click', ()=> rotate( 360/ITEMS.length ));
+document.getElementById('next').addEventListener('click', ()=> rotate(-360/ITEMS.length ));
+
+// view toggle
+function setView(view){
+  if(view==='grid'){
+    grid.style.display='block'; ring.style.display='none';
+    chipGrid.classList.add('active'); chipRing.classList.remove('active');
+    document.body.style.overflow='auto';
+  }else{
+    grid.style.display='none'; ring.style.display='block';
+    chipRing.classList.add('active'); chipGrid.classList.remove('active');
+    document.body.style.overflow='hidden';
+  }
+}
+chipRing.addEventListener('click', ()=> setView('ring'));
+chipGrid.addEventListener('click', ()=> setView('grid'));
+</script>
+</body>
+</html>

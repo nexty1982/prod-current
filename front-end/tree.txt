@@ -1,0 +1,1153 @@
+src/
+├── ai
+│   ├── git
+│   ├── learning
+│   ├── visualTesting
+│   └── vrt
+├── api
+│   ├── mocks
+│   │   └── handlers
+│   └── utils
+├── assets
+│   └── images
+│       ├── backgrounds
+│       ├── blog
+│       ├── breadcrumb
+│       ├── chat
+│       ├── flag
+│       ├── frontend-pages
+│       │   ├── contact
+│       │   ├── homepage
+│       │   ├── icons
+│       │   └── payments
+│       ├── kanban
+│       ├── landingpage
+│       │   ├── apps
+│       │   ├── background
+│       │   ├── demos
+│       │   ├── f-pages
+│       │   ├── frameworks
+│       │   ├── profile
+│       │   └── shape
+│       ├── logos
+│       ├── products
+│       ├── profile
+│       └── svgs
+├── auth
+├── components
+│   ├── admin
+│   ├── AGGridViewOnly
+│   ├── ai
+│   ├── apps
+│   │   ├── account-settings
+│   │   ├── blog
+│   │   │   └── detail
+│   │   ├── chat
+│   │   ├── chats
+│   │   ├── contacts
+│   │   ├── ecommerce
+│   │   │   ├── productAdd
+│   │   │   ├── productCart
+│   │   │   ├── productCheckout
+│   │   │   ├── productDetail
+│   │   │   ├── productEdit
+│   │   │   ├── productGrid
+│   │   │   └── ProductTableList
+│   │   ├── email
+│   │   ├── invoice
+│   │   │   ├── Add-invoice
+│   │   │   ├── Edit-invoice
+│   │   │   ├── Invoice-detail
+│   │   │   ├── Invoice-list
+│   │   │   └── Invoice-view
+│   │   ├── kanban
+│   │   │   └── TaskModal
+│   │   ├── notes
+│   │   ├── records
+│   │   │   └── recordGrid
+│   │   ├── tickets
+│   │   └── userprofile
+│   │       ├── followers
+│   │       ├── friends
+│   │       ├── gallery
+│   │       └── profile
+│   ├── auth
+│   ├── avatars
+│   ├── bigbook
+│   │   └── custom
+│   ├── calendar
+│   ├── charts
+│   │   ├── Area Chart
+│   │   │   └── code
+│   │   ├── Candlestick Chart
+│   │   │   └── code
+│   │   ├── Column Chart
+│   │   │   └── code
+│   │   ├── Doughnut Charts
+│   │   │   └── code
+│   │   ├── Gradient Chart
+│   │   │   └── code
+│   │   ├── Line Chart
+│   │   │   └── code
+│   │   ├── Pie Charts
+│   │   │   └── code
+│   │   ├── Radar Charts
+│   │   │   └── code
+│   │   └── Radialbar Charts
+│   │       └── code
+│   ├── church-management
+│   ├── ColorPickerPopover
+│   ├── compat
+│   ├── container
+│   ├── custom
+│   ├── custom-scroll
+│   ├── dashboards
+│   │   ├── ecommerce
+│   │   ├── modern
+│   │   └── orthodoxmetrics
+│   ├── debug
+│   ├── demos
+│   ├── dev
+│   ├── ErrorBoundary
+│   ├── FieldRenderer
+│   ├── forms
+│   │   ├── form-custom
+│   │   │   └── code
+│   │   ├── form-elements
+│   │   │   ├── autoComplete
+│   │   │   ├── button
+│   │   │   ├── checkbox
+│   │   │   ├── date-time
+│   │   │   ├── radio
+│   │   │   ├── slider
+│   │   │   └── switch
+│   │   ├── form-horizontal
+│   │   │   └── code
+│   │   ├── form-layouts
+│   │   │   └── code
+│   │   ├── form-validation
+│   │   │   └── code
+│   │   ├── form-vertical
+│   │   │   └── code
+│   │   ├── form-wizard
+│   │   │   └── code
+│   │   └── theme-elements
+│   ├── frontend-pages
+│   │   ├── about
+│   │   │   ├── banner
+│   │   │   ├── key-metric
+│   │   │   └── process
+│   │   ├── blog
+│   │   │   └── banner
+│   │   ├── contact
+│   │   │   ├── banner
+│   │   │   └── form
+│   │   ├── homepage
+│   │   │   ├── banner
+│   │   │   ├── baptism-record-viewer
+│   │   │   ├── defend-focus
+│   │   │   ├── exceptional-feature
+│   │   │   ├── faq
+│   │   │   ├── features
+│   │   │   ├── multilingual-showcase
+│   │   │   ├── powerful-dozens
+│   │   │   └── why-choose-us
+│   │   ├── portfolio
+│   │   ├── pricing
+│   │   └── shared
+│   │       ├── c2a
+│   │       ├── footer
+│   │       ├── header
+│   │       ├── leadership
+│   │       ├── pricing
+│   │       ├── reviews
+│   │       └── scroll-to-top
+│   ├── global
+│   ├── headlines
+│   ├── landingpage
+│   │   ├── animation
+│   │   ├── banner
+│   │   ├── c2a
+│   │   ├── demo-slider
+│   │   ├── features
+│   │   ├── footer
+│   │   ├── frameworks
+│   │   ├── header
+│   │   └── testimonial
+│   ├── material-ui
+│   │   ├── accordion
+│   │   │   └── code
+│   │   ├── alert
+│   │   │   └── code
+│   │   ├── avatar
+│   │   │   └── code
+│   │   ├── chip
+│   │   │   └── code
+│   │   ├── dialog
+│   │   │   └── code
+│   │   ├── lists
+│   │   │   └── code
+│   │   ├── popover
+│   │   │   └── code
+│   │   ├── tabs
+│   │   │   └── code
+│   │   ├── tooltip
+│   │   │   └── code
+│   │   ├── transfer-list
+│   │   │   └── code
+│   │   └── typography
+│   │       └── code
+│   ├── muicharts
+│   │   ├── barcharts
+│   │   ├── code
+│   │   │   ├── areachartscode
+│   │   │   ├── barchartcode
+│   │   │   ├── gaugechartscode
+│   │   │   ├── linechartscode
+│   │   │   ├── piechartcode
+│   │   │   ├── scatterchartscode
+│   │   │   └── sparklinecode
+│   │   ├── gaugecharts
+│   │   ├── linescharts
+│   │   │   ├── areacharts
+│   │   │   └── linechart
+│   │   ├── piecharts
+│   │   ├── scattercharts
+│   │   └── sparklinecharts
+│   ├── muitrees
+│   │   ├── code
+│   │   │   └── simpletreecode
+│   │   └── simpletree
+│   ├── notifications
+│   ├── OMAI
+│   │   ├── Logger
+│   │   └── MarkdownIngestion
+│   ├── OrthodoxBanner
+│   ├── pages
+│   │   ├── account-setting
+│   │   └── faq
+│   ├── react-tables
+│   │   ├── basic
+│   │   ├── column-visiblity
+│   │   ├── dense
+│   │   ├── drag-drop
+│   │   ├── editable
+│   │   ├── empty
+│   │   ├── expanding
+│   │   ├── filter
+│   │   ├── pagination
+│   │   ├── row-selection
+│   │   ├── sorting
+│   │   └── sticky
+│   ├── RecordPreviewPane
+│   ├── records
+│   ├── registry
+│   ├── routing
+│   ├── setup
+│   ├── shared
+│   ├── tables
+│   │   └── code
+│   ├── templates
+│   ├── terminal
+│   ├── Theme
+│   ├── ui
+│   ├── ui-tools
+│   │   └── omtrace
+│   │       ├── hooks
+│   │       └── __tests__
+│   └── widgets
+│       ├── banners
+│       │   └── code
+│       ├── cards
+│       │   └── code
+│       └── charts
+├── config
+├── constants
+├── context
+│   ├── BlogContext
+│   ├── ChatContext
+│   ├── ConatactContext
+│   ├── EcommerceContext
+│   ├── EmailContext
+│   ├── InvoiceContext
+│   ├── kanbancontext
+│   ├── NotesContext
+│   ├── OCRContext
+│   ├── TicketContext
+│   └── UserDataContext
+├── core
+│   └── types
+├── data
+├── demos
+├── eCommerce
+├── examples
+├── features
+│   ├── account
+│   │   └── api
+│   ├── admin
+│   │   ├── admin
+│   │   │   ├── components
+│   │   │   ├── tabs
+│   │   │   └── tools
+│   │   ├── ai
+│   │   ├── apps
+│   │   │   └── client-management
+│   │   ├── components
+│   │   ├── dashboard
+│   │   ├── dashboards
+│   │   │   ├── ecommerce
+│   │   │   ├── modern
+│   │   │   └── orthodoxmetrics
+│   │   ├── ErrorBoundary
+│   │   ├── logs
+│   │   ├── omai
+│   │   ├── tabs
+│   │   ├── Theme
+│   │   └── tools
+│   ├── apps
+│   │   ├── blog
+│   │   ├── calendar
+│   │   ├── chat
+│   │   ├── contacts
+│   │   ├── eCommerce
+│   │   ├── email
+│   │   ├── invoice
+│   │   ├── kanban
+│   │   ├── notes
+│   │   ├── tickets
+│   │   └── user-profile
+│   ├── auth
+│   │   ├── admin
+│   │   │   └── tabs
+│   │   ├── auth
+│   │   ├── authentication
+│   │   │   ├── auth1
+│   │   │   ├── auth2
+│   │   │   └── authForms
+│   │   └── forms
+│   │       └── form-validation
+│   ├── authentication
+│   │   ├── auth1
+│   │   ├── auth2
+│   │   └── authForms
+│   ├── charts
+│   ├── church
+│   │   ├── apps
+│   │   │   ├── church-management
+│   │   │   └── client-management
+│   │   ├── bigbook
+│   │   │   └── custom
+│   │   ├── ChurchManagement
+│   │   │   └── FormSections
+│   │   └── setup
+│   ├── cms
+│   │   ├── ai
+│   │   ├── apps
+│   │   │   ├── chats
+│   │   │   ├── cms
+│   │   │   ├── email
+│   │   │   └── notes
+│   │   ├── demos
+│   │   ├── frontend-pages
+│   │   │   ├── about
+│   │   │   └── shared
+│   │   ├── landingpage
+│   │   │   └── banner
+│   │   ├── material-ui
+│   │   │   └── dialog
+│   │   └── settings
+│   ├── container
+│   ├── dashboard
+│   ├── dashboards
+│   │   ├── ecommerce
+│   │   ├── modern
+│   │   └── orthodoxmetrics
+│   ├── devel-tools
+│   │   ├── ChurchToolsPreview
+│   │   ├── demos
+│   │   ├── om-api
+│   │   │   ├── lib
+│   │   │   └── pages
+│   │   ├── PerfDiagnostics
+│   │   ├── refactor-console
+│   │   │   ├── api
+│   │   │   ├── components
+│   │   │   └── hooks
+│   │   └── RouterMenuStudio
+│   │       └── components
+│   ├── FieldRenderer
+│   ├── forms
+│   │   ├── form-elements
+│   │   └── from-tiptap
+│   ├── frontend-pages
+│   │   └── shared
+│   │       └── header
+│   ├── headlines
+│   ├── landingpage
+│   │   ├── banner
+│   │   └── c2a
+│   ├── logs
+│   ├── marketing
+│   │   └── pages
+│   │       └── account-setting
+│   ├── misc-legacy
+│   │   ├── ai
+│   │   ├── apps
+│   │   │   ├── account-settings
+│   │   │   ├── blog
+│   │   │   ├── calendar
+│   │   │   ├── chat
+│   │   │   ├── chats
+│   │   │   ├── client-management
+│   │   │   ├── contacts
+│   │   │   ├── ecommerce
+│   │   │   ├── eCommerce
+│   │   │   ├── email
+│   │   │   ├── invoice
+│   │   │   ├── kanban
+│   │   │   ├── notes
+│   │   │   ├── site-clone
+│   │   │   ├── tickets
+│   │   │   ├── user-profile
+│   │   │   └── userprofile
+│   │   ├── avatars
+│   │   ├── bigbook
+│   │   │   └── custom
+│   │   ├── blog
+│   │   ├── calendar
+│   │   ├── charts
+│   │   │   ├── Area Chart
+│   │   │   ├── Candlestick Chart
+│   │   │   ├── Column Chart
+│   │   │   ├── Doughnut Charts
+│   │   │   ├── Gradient Chart
+│   │   │   ├── Line Chart
+│   │   │   ├── Pie Charts
+│   │   │   ├── Radar Charts
+│   │   │   └── Radialbar Charts
+│   │   ├── ch_wiz
+│   │   ├── ColorPickerPopover
+│   │   ├── container
+│   │   ├── custom
+│   │   ├── custom-scroll
+│   │   ├── demo
+│   │   ├── demos
+│   │   ├── dev
+│   │   ├── ErrorBoundary
+│   │   ├── FieldRenderer
+│   │   ├── forms
+│   │   │   ├── form-custom
+│   │   │   ├── form-elements
+│   │   │   ├── form-horizontal
+│   │   │   ├── form-layouts
+│   │   │   ├── form-validation
+│   │   │   ├── form-vertical
+│   │   │   ├── form-wizard
+│   │   │   ├── from-tiptap
+│   │   │   └── theme-elements
+│   │   ├── frontend-pages
+│   │   │   ├── about
+│   │   │   ├── blog
+│   │   │   ├── contact
+│   │   │   ├── homepage
+│   │   │   ├── portfolio
+│   │   │   ├── pricing
+│   │   │   └── shared
+│   │   ├── global
+│   │   ├── headlines
+│   │   ├── kanban
+│   │   ├── landingpage
+│   │   │   ├── animation
+│   │   │   ├── banner
+│   │   │   ├── c2a
+│   │   │   ├── demo-slider
+│   │   │   ├── features
+│   │   │   ├── footer
+│   │   │   ├── frameworks
+│   │   │   ├── header
+│   │   │   └── testimonial
+│   │   ├── material-ui
+│   │   │   ├── accordion
+│   │   │   ├── alert
+│   │   │   ├── avatar
+│   │   │   ├── chip
+│   │   │   ├── dialog
+│   │   │   ├── lists
+│   │   │   ├── popover
+│   │   │   ├── tabs
+│   │   │   ├── tooltip
+│   │   │   ├── transfer-list
+│   │   │   └── typography
+│   │   ├── muicharts
+│   │   │   ├── barcharts
+│   │   │   ├── code
+│   │   │   ├── gaugecharts
+│   │   │   ├── linecharts
+│   │   │   ├── linescharts
+│   │   │   ├── piecharts
+│   │   │   ├── scattercharts
+│   │   │   └── sparklinecharts
+│   │   ├── mui-trees
+│   │   │   └── simpletree
+│   │   ├── muitrees
+│   │   │   ├── code
+│   │   │   └── simpletree
+│   │   ├── notifications
+│   │   ├── OMAI
+│   │   │   ├── Logger
+│   │   │   └── MarkdownIngestion
+│   │   ├── omb
+│   │   ├── OrthodoxBanner
+│   │   ├── orthodox-calendar
+│   │   ├── pages
+│   │   │   ├── account-setting
+│   │   │   ├── faq
+│   │   │   ├── frontend-pages
+│   │   │   ├── landingpage
+│   │   │   ├── pricing
+│   │   │   └── rollbaseCASL
+│   │   ├── react-tables
+│   │   │   ├── basic
+│   │   │   ├── columnvisibility
+│   │   │   ├── dense
+│   │   │   ├── drag-drop
+│   │   │   ├── editable
+│   │   │   ├── empty
+│   │   │   ├── expanding
+│   │   │   ├── filtering
+│   │   │   ├── pagination
+│   │   │   ├── row-selection
+│   │   │   ├── sorting
+│   │   │   └── sticky
+│   │   ├── registry
+│   │   ├── routing
+│   │   ├── sample-page
+│   │   ├── sandbox
+│   │   ├── settings
+│   │   │   └── services
+│   │   ├── social
+│   │   │   ├── blog
+│   │   │   ├── chat
+│   │   │   ├── friends
+│   │   │   └── notifications
+│   │   ├── spinner
+│   │   ├── templates
+│   │   ├── terminal
+│   │   ├── Theme
+│   │   ├── ui
+│   │   ├── ui-components
+│   │   ├── ui-tools
+│   │   │   └── omtrace
+│   │   └── widgets
+│   │       ├── banners
+│   │       ├── cards
+│   │       └── charts
+│   ├── ocr
+│   │   ├── demo
+│   │   └── ui-tools
+│   │       └── omtrace
+│   ├── omai
+│   │   └── task-assign
+│   ├── omb
+│   ├── overlays
+│   │   ├── path
+│   │   └── version
+│   ├── pages
+│   │   ├── account-setting
+│   │   ├── faq
+│   │   ├── frontend-pages
+│   │   ├── landingpage
+│   │   ├── pricing
+│   │   └── rollbaseCASL
+│   ├── react-tables
+│   │   ├── basic
+│   │   ├── column-visiblity
+│   │   ├── dense
+│   │   ├── drag-drop
+│   │   ├── editable
+│   │   ├── empty
+│   │   ├── expanding
+│   │   ├── filter
+│   │   ├── pagination
+│   │   ├── row-selection
+│   │   ├── sorting
+│   │   └── sticky
+│   ├── records
+│   │   └── apps
+│   │       ├── church-management
+│   │       ├── records
+│   │       ├── records-grid
+│   │       └── records-ui
+│   ├── records-centralized
+│   │   ├── components
+│   │   │   ├── AdvancedGridDialog
+│   │   │   ├── baptism
+│   │   │   ├── census
+│   │   │   ├── ColorPaletteSelector
+│   │   │   ├── ColorPickerPopover
+│   │   │   ├── communion
+│   │   │   ├── confirmation
+│   │   │   ├── death
+│   │   │   ├── dynamic
+│   │   │   ├── entries
+│   │   │   ├── FieldRenderer
+│   │   │   ├── forms
+│   │   │   ├── marriage
+│   │   │   ├── members
+│   │   │   ├── RecordPreviewPane
+│   │   │   ├── records
+│   │   │   ├── TableControlPanel
+│   │   │   └── Theme
+│   │   ├── constants
+│   │   ├── context
+│   │   ├── schemas
+│   │   ├── services
+│   │   └── utils
+│   ├── records.old
+│   │   ├── admin
+│   │   ├── api
+│   │   ├── ChurchManagement
+│   │   │   └── FormSections
+│   │   ├── frontend-pages
+│   │   │   └── homepage
+│   │   ├── recordGrid
+│   │   ├── RecordPreviewPane
+│   │   └── records
+│   ├── router-menu-studio
+│   │   └── components
+│   ├── security
+│   │   ├── apps
+│   │   │   └── account-settings
+│   │   ├── debug
+│   │   ├── pages
+│   │   │   └── account-setting
+│   │   └── settings
+│   ├── settings
+│   ├── shared
+│   ├── social
+│   │   ├── blog
+│   │   ├── chat
+│   │   ├── friends
+│   │   └── notifications
+│   ├── system
+│   │   ├── apps
+│   │   │   └── logs
+│   │   ├── logs
+│   │   └── settings
+│   ├── tables
+│   │   ├── AGGridViewOnly
+│   │   ├── apps
+│   │   │   └── ecommerce
+│   │   ├── code
+│   │   ├── demos
+│   │   ├── react-tables
+│   │   │   ├── basic
+│   │   │   ├── columnvisibility
+│   │   │   ├── column-visiblity
+│   │   │   ├── dense
+│   │   │   ├── drag-drop
+│   │   │   ├── editable
+│   │   │   ├── empty
+│   │   │   ├── expanding
+│   │   │   ├── filter
+│   │   │   ├── filtering
+│   │   │   ├── pagination
+│   │   │   ├── row-selection
+│   │   │   ├── sorting
+│   │   │   └── sticky
+│   │   ├── settings
+│   │   └── tables
+│   │       └── code
+│   └── Theme
+├── helpers
+├── kanban
+├── language
+├── layouts
+│   ├── blank
+│   └── full
+│       ├── horizontal
+│       │   ├── header
+│       │   └── navbar
+│       ├── shared
+│       │   ├── breadcrumb
+│       │   ├── customizer
+│       │   ├── loadable
+│       │   ├── logo
+│       │   └── welcome
+│       └── vertical
+│           ├── header
+│           └── sidebar
+├── legacy
+│   ├── ai
+│   │   ├── git
+│   │   ├── learning
+│   │   ├── visualTesting
+│   │   └── vrt
+│   ├── assets
+│   │   └── images
+│   │       ├── backgrounds
+│   │       ├── blog
+│   │       ├── breadcrumb
+│   │       ├── chat
+│   │       ├── flag
+│   │       ├── frontend-pages
+│   │       ├── kanban
+│   │       ├── landingpage
+│   │       ├── logos
+│   │       ├── products
+│   │       ├── profile
+│   │       └── svgs
+│   ├── auth
+│   ├── blog
+│   ├── chat
+│   ├── churches
+│   ├── components
+│   │   ├── admin
+│   │   ├── AGGridViewOnly
+│   │   ├── ai
+│   │   ├── apps
+│   │   │   ├── account-settings
+│   │   │   ├── blog
+│   │   │   ├── chat
+│   │   │   ├── chats
+│   │   │   ├── contacts
+│   │   │   ├── ecommerce
+│   │   │   ├── email
+│   │   │   ├── invoice
+│   │   │   ├── kanban
+│   │   │   ├── notes
+│   │   │   ├── records
+│   │   │   ├── tickets
+│   │   │   └── userprofile
+│   │   ├── auth
+│   │   ├── avatars
+│   │   ├── bigbook
+│   │   │   └── custom
+│   │   ├── calendar
+│   │   ├── charts
+│   │   │   ├── Area Chart
+│   │   │   ├── Candlestick Chart
+│   │   │   ├── Column Chart
+│   │   │   ├── Doughnut Charts
+│   │   │   ├── Gradient Chart
+│   │   │   ├── Line Chart
+│   │   │   ├── Pie Charts
+│   │   │   ├── Radar Charts
+│   │   │   └── Radialbar Charts
+│   │   ├── ColorPickerPopover
+│   │   ├── compat
+│   │   ├── container
+│   │   ├── custom
+│   │   ├── custom-scroll
+│   │   ├── dashboards
+│   │   │   ├── ecommerce
+│   │   │   ├── modern
+│   │   │   └── orthodoxmetrics
+│   │   ├── debug
+│   │   ├── demos
+│   │   ├── dev
+│   │   ├── ErrorBoundary
+│   │   ├── FieldRenderer
+│   │   ├── forms
+│   │   │   ├── form-custom
+│   │   │   ├── form-elements
+│   │   │   ├── form-horizontal
+│   │   │   ├── form-layouts
+│   │   │   ├── form-validation
+│   │   │   ├── form-vertical
+│   │   │   ├── form-wizard
+│   │   │   └── theme-elements
+│   │   ├── frontend-pages
+│   │   │   ├── about
+│   │   │   ├── blog
+│   │   │   ├── contact
+│   │   │   ├── homepage
+│   │   │   ├── portfolio
+│   │   │   ├── pricing
+│   │   │   └── shared
+│   │   ├── global
+│   │   ├── headlines
+│   │   ├── landingpage
+│   │   │   ├── animation
+│   │   │   ├── banner
+│   │   │   ├── c2a
+│   │   │   ├── demo-slider
+│   │   │   ├── features
+│   │   │   ├── footer
+│   │   │   ├── frameworks
+│   │   │   ├── header
+│   │   │   └── testimonial
+│   │   ├── material-ui
+│   │   │   ├── accordion
+│   │   │   ├── alert
+│   │   │   ├── avatar
+│   │   │   ├── chip
+│   │   │   ├── dialog
+│   │   │   ├── lists
+│   │   │   ├── popover
+│   │   │   ├── tabs
+│   │   │   ├── tooltip
+│   │   │   ├── transfer-list
+│   │   │   └── typography
+│   │   ├── muicharts
+│   │   │   ├── barcharts
+│   │   │   ├── code
+│   │   │   ├── gaugecharts
+│   │   │   ├── linescharts
+│   │   │   ├── piecharts
+│   │   │   ├── scattercharts
+│   │   │   └── sparklinecharts
+│   │   ├── muitrees
+│   │   │   ├── code
+│   │   │   └── simpletree
+│   │   ├── notifications
+│   │   ├── OMAI
+│   │   │   ├── Logger
+│   │   │   └── MarkdownIngestion
+│   │   ├── OrthodoxBanner
+│   │   ├── pages
+│   │   │   ├── account-setting
+│   │   │   └── faq
+│   │   ├── react-tables
+│   │   │   ├── basic
+│   │   │   ├── column-visiblity
+│   │   │   ├── dense
+│   │   │   ├── drag-drop
+│   │   │   ├── editable
+│   │   │   ├── empty
+│   │   │   ├── expanding
+│   │   │   ├── filter
+│   │   │   ├── pagination
+│   │   │   ├── row-selection
+│   │   │   ├── sorting
+│   │   │   └── sticky
+│   │   ├── RecordPreviewPane
+│   │   ├── records
+│   │   ├── registry
+│   │   ├── routing
+│   │   ├── setup
+│   │   ├── shared
+│   │   ├── tables
+│   │   │   └── code
+│   │   ├── templates
+│   │   ├── terminal
+│   │   ├── Theme
+│   │   ├── ui
+│   │   ├── ui-tools
+│   │   │   └── omtrace
+│   │   └── widgets
+│   │       ├── banners
+│   │       ├── cards
+│   │       └── charts
+│   ├── config
+│   ├── constants
+│   ├── contacts
+│   ├── context
+│   │   ├── BlogContext
+│   │   ├── ChatContext
+│   │   ├── ConatactContext
+│   │   ├── EcommerceContext
+│   │   ├── EmailContext
+│   │   ├── InvoiceContext
+│   │   ├── kanbancontext
+│   │   ├── NotesContext
+│   │   ├── OCRContext
+│   │   ├── TicketContext
+│   │   └── UserDataContext
+│   ├── core
+│   │   └── types
+│   ├── data
+│   ├── demos
+│   ├── eCommerce
+│   ├── email
+│   ├── examples
+│   ├── features
+│   │   ├── account
+│   │   │   └── api
+│   │   ├── admin
+│   │   │   ├── admin
+│   │   │   ├── ai
+│   │   │   ├── apps
+│   │   │   ├── dashboard
+│   │   │   ├── dashboards
+│   │   │   ├── ErrorBoundary
+│   │   │   ├── lib
+│   │   │   └── omai
+│   │   ├── apps
+│   │   │   ├── blog
+│   │   │   ├── calendar
+│   │   │   ├── chat
+│   │   │   ├── contacts
+│   │   │   ├── eCommerce
+│   │   │   ├── email
+│   │   │   ├── invoice
+│   │   │   ├── kanban
+│   │   │   ├── notes
+│   │   │   ├── tickets
+│   │   │   └── user-profile
+│   │   ├── auth
+│   │   │   ├── admin
+│   │   │   ├── auth
+│   │   │   ├── authentication
+│   │   │   ├── forms
+│   │   │   └── lib
+│   │   ├── authentication
+│   │   │   ├── auth1
+│   │   │   ├── auth2
+│   │   │   └── authForms
+│   │   ├── charts
+│   │   ├── church
+│   │   │   ├── apps
+│   │   │   ├── bigbook
+│   │   │   ├── ChurchManagement
+│   │   │   └── setup
+│   │   ├── cms
+│   │   │   ├── ai
+│   │   │   ├── apps
+│   │   │   ├── frontend-pages
+│   │   │   ├── landingpage
+│   │   │   ├── material-ui
+│   │   │   └── settings
+│   │   ├── dashboard
+│   │   ├── devel-tools
+│   │   │   ├── ChurchToolsPreview
+│   │   │   ├── om-api
+│   │   │   ├── PerfDiagnostics
+│   │   │   └── RouterMenuStudio
+│   │   ├── forms
+│   │   │   ├── form-elements
+│   │   │   └── from-tiptap
+│   │   ├── misc-legacy
+│   │   │   ├── ai
+│   │   │   ├── apps
+│   │   │   ├── avatars
+│   │   │   ├── bigbook
+│   │   │   ├── blog
+│   │   │   ├── calendar
+│   │   │   ├── charts
+│   │   │   ├── ch_wiz
+│   │   │   ├── ColorPickerPopover
+│   │   │   ├── container
+│   │   │   ├── custom
+│   │   │   ├── custom-scroll
+│   │   │   ├── demo
+│   │   │   ├── demos
+│   │   │   ├── dev
+│   │   │   ├── ErrorBoundary
+│   │   │   ├── FieldRenderer
+│   │   │   ├── forms
+│   │   │   ├── frontend-pages
+│   │   │   ├── global
+│   │   │   ├── headlines
+│   │   │   ├── kanban
+│   │   │   ├── landingpage
+│   │   │   ├── material-ui
+│   │   │   ├── muicharts
+│   │   │   ├── mui-trees
+│   │   │   ├── muitrees
+│   │   │   ├── notifications
+│   │   │   ├── OMAI
+│   │   │   ├── omb
+│   │   │   ├── OrthodoxBanner
+│   │   │   ├── orthodox-calendar
+│   │   │   ├── pages
+│   │   │   ├── react-tables
+│   │   │   ├── registry
+│   │   │   ├── routing
+│   │   │   ├── sample-page
+│   │   │   ├── sandbox
+│   │   │   ├── settings
+│   │   │   ├── social
+│   │   │   ├── spinner
+│   │   │   ├── templates
+│   │   │   ├── terminal
+│   │   │   ├── Theme
+│   │   │   ├── ui
+│   │   │   ├── ui-components
+│   │   │   ├── ui-tools
+│   │   │   └── widgets
+│   │   ├── ocr
+│   │   │   ├── components
+│   │   │   ├── demo
+│   │   │   ├── lib
+│   │   │   ├── pages
+│   │   │   └── ui-tools
+│   │   ├── overlays
+│   │   │   ├── path
+│   │   │   └── version
+│   │   ├── pages
+│   │   │   ├── account-setting
+│   │   │   ├── faq
+│   │   │   ├── frontend-pages
+│   │   │   ├── landingpage
+│   │   │   ├── pricing
+│   │   │   └── rollbaseCASL
+│   │   ├── records
+│   │   │   ├── admin
+│   │   │   ├── api
+│   │   │   ├── apps
+│   │   │   ├── ChurchManagement
+│   │   │   ├── frontend-pages
+│   │   │   ├── lib
+│   │   │   ├── RecordPreviewPane
+│   │   │   └── records
+│   │   ├── records-centralized
+│   │   │   ├── components
+│   │   │   ├── constants
+│   │   │   ├── context
+│   │   │   ├── schemas
+│   │   │   ├── services
+│   │   │   └── utils
+│   │   ├── security
+│   │   │   ├── apps
+│   │   │   ├── debug
+│   │   │   ├── pages
+│   │   │   └── settings
+│   │   ├── system
+│   │   │   ├── lib
+│   │   │   └── settings
+│   │   └── tables
+│   │       ├── AGGridViewOnly
+│   │       ├── apps
+│   │       ├── react-tables
+│   │       ├── settings
+│   │       └── tables
+│   ├── helpers
+│   ├── invoice
+│   ├── kanban
+│   ├── language
+│   ├── layouts
+│   │   ├── blank
+│   │   └── full
+│   │       ├── horizontal
+│   │       ├── shared
+│   │       └── vertical
+│   ├── mocks
+│   │   └── handlers
+│   ├── modules
+│   │   └── OMLearn
+│   ├── mui
+│   ├── NavCollapse
+│   ├── NavGroup
+│   ├── NavItem
+│   ├── notes
+│   ├── @om
+│   │   └── components
+│   │       ├── features
+│   │       └── ui
+│   ├── routes
+│   │   ├── omai
+│   │   │   ├── cli
+│   │   │   └── knowledge
+│   │   └── __tests__
+│   ├── sandbox
+│   │   └── field-mapper
+│   │       ├── api
+│   │       ├── components
+│   │       ├── pages
+│   │       └── __tests__
+│   ├── schemas
+│   ├── shared
+│   │   ├── lib
+│   │   │   ├── apps
+│   │   │   ├── auth
+│   │   │   ├── languages
+│   │   │   ├── layout
+│   │   │   └── om-ai
+│   │   └── ui
+│   │       └── legacy
+│   ├── src-old
+│   │   ├── api
+│   │   └── user-profile
+│   ├── store
+│   ├── styles
+│   ├── theme
+│   ├── ticket
+│   ├── tools
+│   │   ├── om-deps
+│   │   │   └── scripts
+│   │   ├── omls
+│   │   ├── omtrace
+│   │   │   ├── core
+│   │   │   ├── lib
+│   │   │   └── __tests__
+│   │   └── utils
+│   ├── types
+│   │   ├── apps
+│   │   └── auth
+│   ├── ui
+│   │   └── components
+│   │       └── base
+│   └── utils
+│       └── languages
+├── lib
+│   ├── apps
+│   ├── auth
+│   ├── languages
+│   ├── layout
+│   └── om-ai
+├── mocks
+│   └── handlers
+├── modules
+│   └── OMLearn
+├── mui
+├── NavCollapse
+├── NavGroup
+├── NavItem
+├── @om
+│   ├── components
+│   │   ├── features
+│   │   │   └── auth
+│   │   └── ui
+│   │       ├── forms
+│   │       └── theme
+│   └── shared
+│       └── ui
+│           └── legacy
+├── omai
+│   ├── cli
+│   └── knowledge
+├── records
+├── routes
+│   └── __tests__
+├── sandbox
+│   └── field-mapper
+│       ├── api
+│       ├── components
+│       ├── pages
+│       └── __tests__
+├── schemas
+├── shared
+│   ├── lib
+│   │   ├── apps
+│   │   ├── auth
+│   │   ├── languages
+│   │   ├── layout
+│   │   └── om-ai
+│   └── ui
+│       └── legacy
+│           ├── apps
+│           ├── frontend-pages
+│           └── logs
+├── store
+├── styles
+├── theme
+├── tools
+│   ├── om-deps
+│   │   └── scripts
+│   ├── omls
+│   ├── omtrace
+│   │   ├── core
+│   │   ├── lib
+│   │   └── __tests__
+│   └── utils
+├── types
+│   ├── apps
+│   └── auth
+├── ui
+│   └── components
+│       └── base
+└── utils
+    └── languages
+
+1150 directories

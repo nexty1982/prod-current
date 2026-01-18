@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Container,
   Typography,
-  TextField,
   Button,
   Card,
-  CardContent,
-  AppBar,
-  Toolbar,
   Stack,
-  Paper,
-  InputAdornment,
   IconButton,
+  keyframes,
+  Paper,
   Table,
   TableBody,
   TableCell,
@@ -22,197 +17,39 @@ import {
   TableHead,
   TableRow,
   Chip,
-  keyframes,
+  Tabs,
+  Tab,
+  useTheme,
+  Menu,
+  MenuItem,
+  Divider,
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import {
-  IconEye,
-  IconEyeOff,
   IconShield,
   IconWorld,
   IconDatabase,
-  IconArrowRight,
-  IconSparkles,
   IconFile,
+  IconUsers,
+  IconHistory,
+  IconSearch,
   IconPlus,
   IconSettings,
   IconArchive,
   IconDownload,
+  IconEye,
   IconEye as IconView,
   IconCheck,
   IconTrash,
-  IconSearch,
-  IconUsers,
-  IconHistory,
   IconChevronDown,
+  IconSparkles,
+  IconArrowLeft,
+  IconArrowRight,
 } from '@tabler/icons-react';
 import { styled } from '@mui/material/styles';
-
-// Orthodox Cross component
-const OrthodoxCross = styled(Box)({
-  position: 'relative',
-  width: '80px',
-  height: '120px',
-  filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.5))',
-  
-  '& .cross-bar': {
-    background: '#FFD700',
-    position: 'absolute',
-    left: '50%',
-    transform: 'translateX(-50%)',
-  },
-  
-  '& .vertical-beam': {
-    width: '12px',
-    height: '120px',
-    top: '0',
-  },
-  
-  '& .top-bar': {
-    width: '30px',
-    height: '8px',
-    top: '20px',
-  },
-  
-  '& .main-bar': {
-    width: '70px',
-    height: '10px',
-    top: '45px',
-  },
-  
-  '& .bottom-bar': {
-    width: '50px',
-    height: '8px',
-    top: '80px',
-    transform: 'translateX(-50%) rotate(-20deg)',
-  },
-});
-
-// Animation for text rotation
-const fadeIn = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
-`;
-
-const fadeOut = keyframes`
-  from { opacity: 1; }
-  to { opacity: 0; }
-`;
-
-const blink = keyframes`
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-`;
-
-// Styled components for the Orthodox Metrics design
-const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: '#ffffff',
-  boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-  borderBottom: '1px solid #e0e0e0',
-}));
-
-const StyledToolbar = styled(Toolbar)({
-  justifyContent: 'space-between',
-  padding: '0 2rem',
-});
-
-const LogoText = styled(Typography)({
-  fontWeight: 700,
-  fontSize: '1.5rem',
-  color: '#1a1a1a',
-  fontFamily: '"Inter", sans-serif',
-});
-
-const NavButton = styled(Button)({
-  color: '#666666',
-  textTransform: 'none',
-  fontWeight: 500,
-  fontSize: '1rem',
-  padding: '0.5rem 1rem',
-  '&:hover': {
-    backgroundColor: 'transparent',
-    color: '#F5B800',
-  },
-});
-
-const GetStartedButton = styled(Button)({
-  backgroundColor: '#F5B800',
-  color: '#1a1a1a',
-  textTransform: 'none',
-  fontWeight: 600,
-  padding: '0.75rem 2rem',
-  borderRadius: '8px',
-  '&:hover': {
-    backgroundColor: '#E6A600',
-  },
-});
-
-// Orthodox Banner Section with Light Ray Animation
-const BannerSection = styled(Box)({
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  padding: '3rem 0',
-  color: 'white',
-  position: 'relative',
-  overflow: 'hidden',
-});
-
-// Light Ray Animation Components
-const LightRay = styled(Box)({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  zIndex: 1,
-  pointerEvents: 'none',
-});
-
-const RayLayer1 = styled(Box)({
-  position: 'absolute',
-  top: '-50%',
-  left: '-100%',
-  width: '200%',
-  height: '200%',
-  background: 'linear-gradient(45deg, transparent 30%, rgba(255, 215, 0, 0.15) 50%, transparent 70%)',
-  animation: 'rayFlow1 16s infinite linear',
-  transform: 'rotate(15deg)',
-});
-
-const RayLayer2 = styled(Box)({
-  position: 'absolute',
-  top: '-50%',
-  left: '-100%',
-  width: '200%',
-  height: '200%',
-  background: 'linear-gradient(45deg, transparent 30%, rgba(138, 43, 226, 0.12) 50%, transparent 70%)',
-  animation: 'rayFlow2 16s infinite linear',
-  transform: 'rotate(-10deg)',
-  animationDelay: '-4s',
-});
-
-const RayLayer3 = styled(Box)({
-  position: 'absolute',
-  top: '-50%',
-  left: '-100%',
-  width: '200%',
-  height: '200%',
-  background: 'linear-gradient(45deg, transparent 30%, rgba(100, 149, 237, 0.1) 50%, transparent 70%)',
-  animation: 'rayFlow3 16s infinite linear',
-  transform: 'rotate(25deg)',
-  animationDelay: '-8s',
-});
-
-const RayLayer4 = styled(Box)({
-  position: 'absolute',
-  top: '-50%',
-  left: '-100%',
-  width: '200%',
-  height: '200%',
-  background: 'linear-gradient(45deg, transparent 30%, rgba(255, 182, 193, 0.08) 50%, transparent 70%)',
-  animation: 'rayFlow4 16s infinite linear',
-  transform: 'rotate(-5deg)',
-  animationDelay: '-12s',
-});
+import Header from './Header';
+import Footer from './Footer';
+import QuickContactSidebar from '@/features/devel-tools/contactbar/QuickContactSidebar';
+import LeftSideMenu from './LeftSideMenu';
 
 // Add keyframes to the global styles
 const GlobalStyles = styled('style')(`
@@ -279,6 +116,33 @@ const GlobalStyles = styled('style')(`
     50% { box-shadow: 0 0 20px rgba(245, 184, 0, 0.6), 0 0 30px rgba(245, 184, 0, 0.4); }
   }
 
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-2deg); }
+    75% { transform: rotate(2deg); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
   /* Footer Animation Keyframes */
   @keyframes footerSweepLeft {
     0% { transform: translateX(-100%) rotate(15deg); opacity: 0; }
@@ -325,44 +189,62 @@ const GlobalStyles = styled('style')(`
   }
 `);
 
-const BannerContainer = styled(Box)({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '2rem',
-  flexWrap: 'wrap',
-  marginBottom: '1.5rem',
-  position: 'relative',
-  zIndex: 2,
-});
-
-const BannerText = styled(Typography)({
-  fontSize: '1.75rem',
-  fontWeight: 600,
-  textAlign: 'center',
-  lineHeight: 1.3,
-  minWidth: '250px',
-  height: '60px',
-  position: 'relative',
-});
-
-const RotatingText = styled(Box)({
+// Light Ray Animation Components for Banner
+const LightRay = styled(Box)({
   position: 'absolute',
-  width: '100%',
-  opacity: 0,
-  transition: 'opacity 1s ease-in-out',
-  
-  '&.active': {
-    opacity: 1,
-  },
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 1,
+  pointerEvents: 'none',
 });
 
-const TaglineText = styled(Typography)({
-  textAlign: 'center',
-  fontSize: '1.25rem',
-  fontStyle: 'italic',
-  position: 'relative',
-  height: '30px',
+const RayLayer1 = styled(Box)({
+  position: 'absolute',
+  top: '-50%',
+  left: '-100%',
+  width: '200%',
+  height: '200%',
+  background: 'linear-gradient(45deg, transparent 30%, rgba(255, 215, 0, 0.15) 50%, transparent 70%)',
+  animation: 'rayFlow1 16s infinite linear',
+  transform: 'rotate(15deg)',
+});
+
+const RayLayer2 = styled(Box)({
+  position: 'absolute',
+  top: '-50%',
+  left: '-100%',
+  width: '200%',
+  height: '200%',
+  background: 'linear-gradient(45deg, transparent 30%, rgba(138, 43, 226, 0.12) 50%, transparent 70%)',
+  animation: 'rayFlow2 16s infinite linear',
+  transform: 'rotate(-10deg)',
+  animationDelay: '-4s',
+});
+
+const RayLayer3 = styled(Box)({
+  position: 'absolute',
+  top: '-50%',
+  left: '-100%',
+  width: '200%',
+  height: '200%',
+  background: 'linear-gradient(45deg, transparent 30%, rgba(100, 149, 237, 0.1) 50%, transparent 70%)',
+  animation: 'rayFlow3 16s infinite linear',
+  transform: 'rotate(25deg)',
+  animationDelay: '-8s',
+});
+
+const RayLayer4 = styled(Box)({
+  position: 'absolute',
+  top: '-50%',
+  left: '-100%',
+  width: '200%',
+  height: '200%',
+  background: 'linear-gradient(45deg, transparent 30%, rgba(255, 182, 193, 0.08) 50%, transparent 70%)',
+  animation: 'rayFlow4 16s infinite linear',
+  transform: 'rotate(-5deg)',
+  animationDelay: '-12s',
 });
 
 // Footer Animation Components
@@ -444,77 +326,27 @@ const FooterRadialLayer = styled(Box)({
   animationDelay: '-12s',
 });
 
-const HeroSection = styled(Box)({
-  backgroundColor: '#ffffff',
-  padding: '4rem 0',
-  minHeight: '80vh',
-  display: 'flex',
-  alignItems: 'center',
-});
-
-const LoginCard = styled(Card)({
+const FeatureCard = styled(Card)(({ theme }) => ({
   padding: '2rem',
   borderRadius: '16px',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-  border: '1px solid #f0f0f0',
-});
-
-const MainHeading = styled(Typography)({
-  fontSize: '3.5rem',
-  fontWeight: 700,
-  color: '#1a1a1a',
-  lineHeight: 1.2,
-  marginBottom: '1.5rem',
-  fontFamily: '"Inter", sans-serif',
-});
-
-const SubHeading = styled(Typography)({
-  fontSize: '1.25rem',
-  color: '#666666',
-  lineHeight: 1.6,
-  marginBottom: '2rem',
-});
-
-const CTAButton = styled(Button)({
-  backgroundColor: '#F5B800',
-  color: '#1a1a1a',
-  textTransform: 'none',
-  fontWeight: 600,
-  padding: '1rem 2.5rem',
-  borderRadius: '12px',
-  fontSize: '1.1rem',
-  marginRight: '1rem',
-  '&:hover': {
-    backgroundColor: '#E6A600',
-  },
-});
-
-const SecondaryButton = styled(Button)({
-  color: '#1a1a1a',
-  textTransform: 'none',
-  fontWeight: 600,
-  padding: '1rem 2.5rem',
-  border: '2px solid #e0e0e0',
-  borderRadius: '12px',
-  fontSize: '1.1rem',
-  '&:hover': {
-    borderColor: '#F5B800',
-    backgroundColor: 'transparent',
-  },
-});
-
-const FeatureCard = styled(Card)({
-  padding: '2rem',
-  borderRadius: '16px',
-  boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-  border: '1px solid #f0f0f0',
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0 4px 24px rgba(0,0,0,0.3)' 
+    : '0 4px 24px rgba(0,0,0,0.08)',
+  border: theme.palette.mode === 'dark' 
+    ? '1px solid rgba(255,255,255,0.1)' 
+    : '1px solid #f0f0f0',
+  backgroundColor: theme.palette.mode === 'dark' 
+    ? theme.palette.background.paper 
+    : '#ffffff',
   height: '100%',
   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   '&:hover': {
     transform: 'translateY(-4px)',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+    boxShadow: theme.palette.mode === 'dark' 
+      ? '0 8px 32px rgba(0,0,0,0.4)' 
+      : '0 8px 32px rgba(0,0,0,0.12)',
   },
-});
+}));
 
 const FeatureIcon = styled(Box)({
   width: '64px',
@@ -527,134 +359,266 @@ const FeatureIcon = styled(Box)({
   marginBottom: '1.5rem',
 });
 
-const SectionTitle = styled(Typography)({
-  fontSize: '2.5rem',
-  fontWeight: 700,
-  color: '#1a1a1a',
-  textAlign: 'center',
-  marginBottom: '3rem',
-  fontFamily: '"Inter", sans-serif',
-});
-
-// Sneak Peek Section
-const DemoSection = styled(Box)({
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+const CustomRecordsSection = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
   padding: '5rem 0',
-  color: 'white',
-});
+}));
 
-const DemoTitle = styled(Typography)({
-  fontSize: '2.5rem',
+
+// Welcome Card Styled Components
+const WelcomeCard = styled(Card)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: '12px',
+  padding: '2rem',
+  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+  maxWidth: '800px',
+  margin: '0 auto',
+}));
+
+const WelcomeTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '1.75rem',
   fontWeight: 700,
-  textAlign: 'center',
+  color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a',
   marginBottom: '1rem',
-  fontFamily: '"Inter", sans-serif',
-});
+  textAlign: 'left',
+}));
 
-const DemoSubtitle = styled(Typography)({
-  fontSize: '1.1rem',
-  textAlign: 'center',
-  marginBottom: '3rem',
-  opacity: 0.9,
-});
-
-const DemoCard = styled(Card)({
-  borderRadius: '16px',
-  overflow: 'hidden',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-});
-
-const DemoHeader = styled(Box)({
-  backgroundColor: '#ffffff',
-  padding: '1.5rem',
-  textAlign: 'center',
-  borderBottom: '1px solid #e0e0e0',
-});
-
-const TabButtons = styled(Box)({
-  display: 'flex',
-  justifyContent: 'center',
-  gap: '0.5rem',
+const WelcomeIntro = styled(Typography)(({ theme }) => ({
+  fontSize: '1rem',
+  color: theme.palette.mode === 'dark' ? '#ffffff' : '#333',
+  lineHeight: 1.6,
   marginBottom: '1.5rem',
-});
+  textAlign: 'left',
+}));
 
-const TabButton = styled(Chip)(({ active }: { active?: boolean }) => ({
-  backgroundColor: active ? '#F5B800' : '#f0f0f0',
-  color: active ? '#1a1a1a' : '#666666',
+const SectionHeading = styled(Typography)(({ theme }) => ({
+  fontSize: '1.25rem',
   fontWeight: 600,
-  padding: '0.5rem 1rem',
-  '&:hover': {
-    backgroundColor: active ? '#E6A600' : '#e0e0e0',
+  color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a',
+  marginBottom: '0.75rem',
+  textAlign: 'left',
+}));
+
+const FeatureList = styled('ul')(({ theme }) => ({
+  marginBottom: '1.5rem',
+  margin: 0,
+  paddingLeft: '1.5rem',
+  listStyleType: 'disc',
+  '& li': {
+    fontSize: '1rem',
+    color: theme.palette.mode === 'dark' ? '#ffffff' : '#333',
+    lineHeight: 1.8,
+    marginBottom: '0.5rem',
   },
 }));
 
-const CustomRecordsSection = styled(Box)({
-  backgroundColor: '#ffffff',
-  padding: '5rem 0',
-});
+const AboutDesignBox = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : '#E3F2FD',
+  borderRadius: '8px',
+  padding: '1.5rem',
+  marginTop: '1.5rem',
+  border: `1px solid ${theme.palette.divider}`,
+}));
 
+const AboutDesignTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '1.1rem',
+  fontWeight: 600,
+  color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a',
+  marginBottom: '0.75rem',
+  textAlign: 'left',
+}));
+
+const AboutDesignText = styled(Typography)(({ theme }) => ({
+  fontSize: '1rem',
+  color: theme.palette.mode === 'dark' ? '#ffffff' : '#333',
+  lineHeight: 1.6,
+  textAlign: 'left',
+}));
+
+// Light traveling animation from left to right
+const lightTravel = keyframes`
+  0% {
+    transform: translateX(-100%) skewX(-20deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%) skewX(-20deg);
+    opacity: 0;
+  }
+`;
+
+const SectionHeaderBox = styled(Box)(({ theme }) => ({
+  width: '100%',
+  height: 90,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '0 32px',
+  borderRadius: '12px',
+  position: 'relative',
+  overflow: 'hidden',
+  // Solid background color - gradient removed
+  backgroundColor: theme.palette.mode === 'dark' 
+    ? theme.palette.background.paper 
+    : '#faf8f4',
+  boxShadow: '0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04)',
+  border: '2px solid rgba(212, 175, 55, 0.4)',
+  borderBottom: '3px solid rgba(212, 175, 55, 0.5)',
+  gap: theme.spacing(2),
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect x='21' y='6' width='6' height='36' fill='%23C8A24B' fill-opacity='0.06'/%3E%3Crect x='10' y='14' width='28' height='5' fill='%23C8A24B' fill-opacity='0.06'/%3E%3C/svg%3E")`,
+    backgroundSize: '48px 48px',
+    backgroundRepeat: 'repeat',
+    zIndex: 0,
+  },
+  // Light traveling effect overlay
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '30%',
+    height: '100%',
+    background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)',
+    animation: `${lightTravel} 3s ease-in-out infinite`,
+    zIndex: 1,
+    pointerEvents: 'none',
+  },
+  '& > *': {
+    position: 'relative',
+    zIndex: 2,
+  },
+  [theme.breakpoints.down('md')]: {
+    height: 80,
+    padding: '0 24px',
+  },
+  [theme.breakpoints.down('sm')]: {
+    height: 70,
+    padding: '0 20px',
+  },
+}));
+
+const SectionHeaderTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '26px',
+  fontWeight: 700,
+  color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a2e',
+  fontFamily: '"Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
+  letterSpacing: '0.5px',
+  lineHeight: 1.3,
+  textTransform: 'none',
+  fontStyle: 'normal',
+  textShadow: theme.palette.mode === 'dark' 
+    ? '0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 1px rgba(0, 0, 0, 0.3)' 
+    : '0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(255, 255, 255, 0.9)',
+  '@media (max-width: 900px)': {
+    fontSize: '22px',
+    letterSpacing: '0.3px',
+  },
+  '@media (max-width: 600px)': {
+    fontSize: '18px',
+    letterSpacing: '0.2px',
+  },
+}));
+
+// Tab button styled component
+const TabButton = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'active',
+})<{ active: boolean }>(({ theme, active }) => ({
+  padding: theme.spacing(1.5, 3),
+  cursor: 'pointer',
+  fontSize: '18px',
+  fontWeight: active ? 700 : 500,
+  color: theme.palette.mode === 'dark' 
+    ? (active ? '#ffffff' : '#cccccc')
+    : (active ? '#2E0F46' : '#666666'),
+  fontFamily: '"Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
+  letterSpacing: '0.3px',
+  position: 'relative',
+  transition: 'all 0.3s ease',
+  borderBottom: active ? '3px solid #C8A24B' : '3px solid transparent',
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1),
+  '&:hover': {
+    color: theme.palette.mode === 'dark' ? '#ffffff' : '#2E0F46',
+    backgroundColor: 'rgba(200, 162, 75, 0.1)',
+  },
+  [theme.breakpoints.down('md')]: {
+    padding: theme.spacing(1, 2),
+    fontSize: '16px',
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(0.75, 1.5),
+    fontSize: '14px',
+  },
+}));
+
+// ============================================================================
+// HOMEPAGE COMPONENT
+// ============================================================================
+// Main homepage component featuring:
+// - Two-tier header with navigation and utilities
+// - About Us section with paginated content (book-like pages)
+// - 3D rotating gallery of multilingual parish records
+// - Features section highlighting platform capabilities
+// - Call-to-action section
+// - Footer with animation effects
+// ============================================================================
 const HomePage: React.FC = () => {
-  const { login } = useAuth();
+  const theme = useTheme();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState(0);
-  const [activeTab, setActiveTab] = useState('Baptism');
+  const location = useLocation();
+  
+  // ====================================================================
+  // STATE MANAGEMENT
+  // ====================================================================
+  
+  
+  // Language Section State
+  // Tracks which language section is currently active (English, Greek, Russian, Romanian, Georgian)
+  const [activeLanguage, setActiveLanguage] = useState<'English' | 'Greek' | 'Russian' | 'Romanian' | 'Georgian'>('English');
+  
+  // Track language changes to trigger smooth transition
+  const [isLanguageChanging, setIsLanguageChanging] = useState(false);
+  
+  // Sacrament Selection State
+  const [activeSacrament, setActiveSacrament] = useState<'Baptism' | 'Marriage' | 'Funeral' | null>(null);
+  
+  // Track which card is selected/clicked to show data
+  const [selectedCard, setSelectedCard] = useState<{ language: string; title: string } | null>(null);
+  
+  // Track which card is flipped (key: `${language}-${title}`)
+  const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
+
+  // FAQ State
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingComplete, setProcessingComplete] = useState(false);
-  const [showOriginalImages, setShowOriginalImages] = useState(true);
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [loginError, setLoginError] = useState('');
 
-  const languages = [
-    { code: 'en', title: 'Orthodox\nMetrics', tagline: 'Recording the Saints Amongst Us!' },
-    { code: 'el', title: 'Ορθόδοξες\nΜετρήσεις', tagline: 'Καταγράφοντας τοὺς Ἁγίους ἀνάμεσά μας!' },
-    { code: 'ru', title: 'Православные\nМетрики', tagline: 'Записывая святых среди нас!' },
-    { code: 'ro', title: 'Metrici\nOrtodoxe', tagline: 'Înregistrăm sfinții din mijlocul nostru!' },
-    { code: 'ka', title: 'მართმადიდებლური\nმეტრიკა', tagline: 'ვაკონწილებთ ჩვენ შორის წმინდანებს!' },
-  ];
+  // Section Tab State - tracks which main section is active
+  const [activeSection, setActiveSection] = useState<'about-orthodox-christianity' | 'custom-records' | 'sample-data' | 'powerful-features' | 'graphical-analysis'>('graphical-analysis');
+  
+  // Header collapse state - tracks if header is collapsed into tabbed view
+  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+  
+  // Ref for FAQ section to scroll to it
+  const faqSectionRef = useRef<HTMLDivElement>(null);
+  
+  // Sample Data submenu state
+  const [sampleDataMenuAnchor, setSampleDataMenuAnchor] = useState<null | HTMLElement>(null);
+  const sampleDataMenuOpen = Boolean(sampleDataMenuAnchor);
 
-  // Sample records data for all three types
-  const baptismRecords = [
-    { firstName: 'Maria', lastName: 'Dimitriou', birthDate: 'March 15, 1980', baptismDate: 'April 22, 1980', baptismPlace: 'Athens, Greece', clergy: 'Fr. Nicholas Ioannou' },
-    { firstName: 'John', lastName: 'Konstantinos', birthDate: 'July 8, 1982', baptismDate: 'August 16, 1982', baptismPlace: 'Thessaloniki, Greece', clergy: 'Fr. Peter Angelos' },
-    { firstName: 'Elena', lastName: 'Papadakis', birthDate: 'December 3, 1979', baptismDate: 'January 9, 1980', baptismPlace: 'Patras, Greece', clergy: 'Fr. Ilias Stavridis' },
-    { firstName: 'Alexander', lastName: 'Petrov', birthDate: 'June 12, 1981', baptismDate: 'July 4, 1981', baptismPlace: 'Moscow, Russia', clergy: 'Fr. Sergei Volkov' },
-    { firstName: 'Sophia', lastName: 'Georgios', birthDate: 'September 21, 1984', baptismDate: 'October 18, 1984', baptismPlace: 'Patros, Greece', clergy: 'Fr. Michael Demos' },
-    { firstName: 'Dimitri', lastName: 'Alexandrou', birthDate: 'February 14, 1986', baptismDate: 'March 25, 1986', baptismPlace: 'Cyprus', clergy: 'Fr. Andreas Christos' },
-    { firstName: 'Anna', lastName: 'Radu', birthDate: 'May 30, 1984', baptismDate: 'June 24, 1984', baptismPlace: 'Cluj, Romania', clergy: 'Fr. Stefan Vasile' },
-    { firstName: 'Theodoros', lastName: 'Nikolaou', birthDate: 'November 11, 1983', baptismDate: 'December 8, 1983', baptismPlace: 'Crete, Greece', clergy: 'Fr. Emmanuel Manos' },
-    { firstName: 'Ekaterina', lastName: 'Fedorov', birthDate: 'April 7, 1985', baptismDate: 'May 1, 1985', baptismPlace: 'St. Petersburg, Russia', clergy: 'Fr. Maxim Petrov' },
-    { firstName: 'Georgios', lastName: 'Vassiliou', birthDate: 'October 25, 1986', baptismDate: 'November 21, 1986', baptismPlace: 'Nicosia, Cyprus', clergy: 'Fr. John Papadakis' },
-  ];
+  // About Orthodox Christianity submenu state
+  const [aboutOrthodoxMenuAnchor, setAboutOrthodoxMenuAnchor] = useState<null | HTMLElement>(null);
+  const aboutOrthodoxMenuOpen = Boolean(aboutOrthodoxMenuAnchor);
 
-  const marriageRecords = [
-    { groomFirst: 'Alexander', groomLast: 'Dimitriou', brideFirst: 'Maria', brideLast: 'Konstantinos', marriageDate: 'June 15, 2018', clergy: 'Fr. Nicholas Stavros' },
-    { groomFirst: 'Petros', groomLast: 'Angelis', brideFirst: 'Elena', brideLast: 'Popescu', marriageDate: 'September 22, 2019', clergy: 'Fr. Ioan Marianescu' },
-    { groomFirst: 'Mikhail', groomLast: 'Petrov', brideFirst: 'Sophia', brideLast: 'Georgios', marriageDate: 'May 8, 2020', clergy: 'Fr. Sergei Volkov' },
-    { groomFirst: 'Dimitri', groomLast: 'Alexandrou', brideFirst: 'Anna', brideLast: 'Radu', marriageDate: 'August 14, 2021', clergy: 'Fr. Andreas Christou' },
-    { groomFirst: 'Theodoros', groomLast: 'Nikolaou', brideFirst: 'Ekaterina', brideLast: 'Fedorov', marriageDate: 'October 30, 2022', clergy: 'Fr. Emmanuel Manos' },
-    { groomFirst: 'Georgios', groomLast: 'Vasquez', brideFirst: 'Christina', brideLast: 'Kostas', marriageDate: 'April 17, 2021', clergy: 'Fr. John Papadakis' },
-    { groomFirst: 'Stefan', groomLast: 'Vasile', brideFirst: 'Mirela', brideLast: 'Ionescu', marriageDate: 'July 3, 2020', clergy: 'Fr. Stefan Vasile' },
-    { groomFirst: 'Vladimir', groomLast: 'Petrov', brideFirst: 'Anastasia', brideLast: 'Volkov', marriageDate: 'December 12, 2019', clergy: 'Fr. Vladimir Petrov' },
-    { groomFirst: 'Michael', groomLast: 'Kostas', brideFirst: 'Irene', brideLast: 'Manos', marriageDate: 'February 28, 2023', clergy: 'Fr. Michael Kostas' },
-    { groomFirst: 'Andreas', groomLast: 'Christou', brideFirst: 'Despina', brideLast: 'Papadakis', marriageDate: 'November 19, 2022', clergy: 'Fr. Andreas Christou' },
-  ];
-
-  const funeralRecords = [
-    { firstName: 'Constantine', lastName: 'Dimitriou', dateOfDeath: 'March 20, 2023', funeralDate: 'March 23, 2023', age: 89, burialLocation: 'St. Nicholas Cemetery', clergy: 'Fr. Nicholas Stavros' },
-    { firstName: 'Vasiliki', lastName: 'Konstantinos', dateOfDeath: 'July 15, 2023', funeralDate: 'July 18, 2023', age: 76, burialLocation: 'Holy Trinity Cemetery', clergy: 'Fr. Peter Angelis' },
-    { firstName: 'Dimitri', lastName: 'Popescu', dateOfDeath: 'November 8, 2023', funeralDate: 'November 11, 2023', age: 82, burialLocation: 'Orthodox Memorial Gardens', clergy: 'Fr. Ioan Marianescu' },
-    { firstName: 'Anastasia', lastName: 'Petrov', dateOfDeath: 'February 2, 2023', funeralDate: 'February 5, 2023', age: 94, burialLocation: 'St. Sergius Cemetery', clergy: 'Fr. Sergei Volkov' },
-    { firstName: 'Nikolaos', lastName: 'Georgios', dateOfDeath: 'June 30, 2023', funeralDate: 'July 3, 2023', age: 71, burialLocation: 'Holy Cross Cemetery', clergy: 'Fr. Michael Kostas' },
-    { firstName: 'Fotini', lastName: 'Alexandrou', dateOfDeath: 'September 14, 2023', funeralDate: 'September 17, 2023', age: 88, burialLocation: 'St. Andreas Cemetery', clergy: 'Fr. Andreas Christou' },
-    { firstName: 'Ioanna', lastName: 'Radu', dateOfDeath: 'December 25, 2023', funeralDate: 'December 28, 2023', age: 79, burialLocation: 'Memorial Park Orthodox', clergy: 'Fr. Stefan Vasile' },
-    { firstName: 'Panagiotis', lastName: 'Nikolaou', dateOfDeath: 'April 12, 2023', funeralDate: 'April 15, 2023', age: 85, burialLocation: 'St. Emmanuel Cemetery', clergy: 'Fr. Emmanuel Manos' },
-    { firstName: 'Paraskevi', lastName: 'Fedorov', dateOfDeath: 'August 7, 2023', funeralDate: 'August 10, 2023', age: 73, burialLocation: 'St. Vladimir Cemetery', clergy: 'Fr. Vladimir Petrov' },
-    { firstName: 'Stephanos', lastName: 'Vasquez', dateOfDeath: 'October 1, 2023', funeralDate: 'October 4, 2023', age: 91, burialLocation: 'St. John Cemetery', clergy: 'Fr. John Papadakis' },
-  ];
 
   // FAQ Data
   const faqData = [
@@ -684,755 +648,2972 @@ const HomePage: React.FC = () => {
     }
   ];
 
-  const getRecordData = () => {
-    switch (activeTab) {
-      case 'Marriage':
-        return marriageRecords;
-      case 'Funeral':
-        return funeralRecords;
-      default:
-        return baptismRecords;
-    }
-  };
-
-  const getTableHeaders = () => {
-    switch (activeTab) {
-      case 'Marriage':
-        return ['GROOM FIRST', 'GROOM LAST', 'BRIDE FIRST', 'BRIDE LAST', 'MARRIAGE DATE', 'CLERGY'];
-      case 'Funeral':
-        return ['FIRST NAME', 'LAST NAME', 'DATE OF DEATH', 'FUNERAL DATE', 'AGE', 'BURIAL LOCATION', 'CLERGY'];
-      default:
-        return ['FIRST NAME', 'LAST NAME', 'BIRTH DATE', 'BAPTISM DATE', 'BAPTISM PLACE', 'CLERGY'];
-    }
-  };
-
-  const getTableTitle = () => {
-    switch (activeTab) {
-      case 'Marriage':
-        return 'Parish Marriage Records - St. Nicholas Cathedral';
-      case 'Funeral':
-        return 'Parish Funeral Records - St. Nicholas Cathedral';
-      default:
-        return 'Parish Baptismal Records - St. Nicholas Cathedral';
-    }
-  };
-
-  const getTotalRecords = () => {
-    switch (activeTab) {
-      case 'Marriage':
-        return '10 of 542 total records';
-      case 'Funeral':
-        return '10 of 318 total records';
-      default:
-        return '10 of 1,247 total records';
-    }
-  };
-
   const toggleFAQ = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index);
   };
 
-  const startProcessing = () => {
-    setIsProcessing(true);
-    setShowOriginalImages(false);
-    setProcessingComplete(false);
+  
+  // 3D Gallery Rotation State
+  // Tracks the current rotation angle (in degrees) for the 3D records gallery
+  // Continuously increments when hovering or clicked to create rotation effect
+  const [currentRotation, setCurrentRotation] = useState(0);
+  
+  // Hover State for 3D Gallery
+  // Indicates whether user is hovering over the 3D gallery
+  // When true, auto-rotation is active
+  const [isHovering, setIsHovering] = useState(false);
+  
+  // Click State for 3D Gallery
+  // Indicates whether user has clicked on the 3D gallery
+  // When true, auto-rotation is active
+  const [isClicked, setIsClicked] = useState(false);
+  
+  // Drag State for 3D Gallery
+  // Tracks mouse position during drag to rotate cards manually
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [dragStartRotation, setDragStartRotation] = useState(0);
+  
+  // Book Page Navigation State
+  // Tracks which page (0-3) is currently displayed in the "About Us" book section
+  // Pages: 0=About Us, 1=What We Offer, 2=Why Orthodox Metrics?, 3=Looking Forward
+  const [currentPage, setCurrentPage] = useState(0);
+  
+  // Typed Text State
+  // Stores the progressively typed text content for the current book page
+  // Used to create typing animation effect when pages change
+  const [pageTypedText, setPageTypedText] = useState('');
+  
+  // Scroll detection for heading underline effect
+  const [isHeadingInView, setIsHeadingInView] = useState(false);
+  const headingRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for heading scroll detection
+  useEffect(() => {
+    // Reset underline state when page changes
+    setIsHeadingInView(false);
     
-    // Simulate processing time
-    setTimeout(() => {
-      setIsProcessing(false);
-      setProcessingComplete(true);
-    }, 6000);
+    // Small delay to allow the new heading to render before observing
+    const timer = setTimeout(() => {
+      if (headingRef.current) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                setIsHeadingInView(true);
+              }
+            });
+          },
+          {
+            threshold: 0.3, // Trigger when 30% of the element is visible
+            rootMargin: '-50px 0px', // Start animation slightly before element is fully in view
+          }
+        );
+        observer.observe(headingRef.current);
+        
+        return () => {
+          observer.disconnect();
+        };
+      }
+    }, 100);
+    
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [currentPage]); // Re-observe when page changes
+
+  // ====================================================================
+  // DATA ARRAYS
+  // ====================================================================
+  
+  // Book Pages Data
+  // Content for the paginated "About Us" section
+  // Each page contains a title, image, and full content text describing Orthodox Metrics
+  const bookPages = [
+    {
+      title: 'About Us',
+      image: '/images/sections/about.png',
+      crossesImage: '/images/sections/dune-crosses.png',
+      content: 'Orthodox Metrics LLC. is an Orthodox-grown solution built to serve communities across the world with full multilingual support. Our platform seamlessly adapts to English, Greek, Russian, Church Slavonic, Georgian, Romanian, Latin, and Chinese, ensuring that every record, interface, and report can be read and managed in the language of your church\'s tradition. Whether you are a large parish or a small mission, Orthodox Metrics was built with care to honor the unique heritage of every Orthodox community.'
+    },
+    {
+      title: 'What We Offer',
+      image: '/images/sections/what-we-offer.png',
+      crossesImage: '/images/sections/dune-crosses.png',
+      content: 'At Orthodox Metrics, we provide a complete ecosystem designed to modernize and simplify how churches manage their records, communications, and digital presence. From baptism, marriage, and funeral records to parish directories, donation management, and multilingual reports, our platform brings clarity and organization to the most essential areas of church life. We also assist with website integration, secure data hosting, and tailored solutions for each jurisdiction and language — all while maintaining the reverence and integrity of Orthodox tradition.'
+    },
+    {
+      title: 'Why Orthodox Metrics?',
+      image: '/images/sections/why-orthodox-metrics.png',
+      crossesImage: '/images/sections/dune-crosses.png',
+      content: 'Our mission is simple: to help Orthodox parishes thrive in the modern age without losing their timeless roots. Unlike generic church management tools, Orthodox Metrics was created by Orthodox Christians for Orthodox Christians — with an understanding of how cultural, linguistic, and liturgical nuances shape parish life. We believe that technology should strengthen the bonds of faith and community, not complicate them. Every feature we build is guided by that principle, ensuring reliability, privacy, and ease of use for clergy, staff, and faithful alike.'
+    },
+    {
+      title: 'Looking Forward to Speaking With You',
+      image: '/images/sections/looking-forward.png',
+      crossesImage: '/images/sections/dune-crosses.png',
+      content: 'We are located in Phillipsburg, New Jersey, and are humbled to serve the growing needs of Orthodox Churches both locally and around the world. Having recently launched, we are eager to connect with parishes, monasteries, and missions seeking to bring their administrative and archival work into a unified, beautiful, and spiritually mindful digital space. We warmly invite our brothers and sisters in Christ to reach out — whether you are just beginning your digital journey or ready to expand your existing systems — and let us walk alongside you in building a stronger, more connected Orthodox future.'
+    }
+  ];
+
+  // 3D Gallery Items Array - All Languages
+  // Contains multilingual parish record samples for the 3D rotating gallery
+  // Each item includes: flag country, language label, record type title, sample data, and date fields
+  const allItems = {
+    English: [
+      { flag: 'USA', label: 'English', title: 'Baptism Records', sampleData: 'First Name\nLast Name\nDate of Birth\nDate of Baptism\nBirthplace\nSponsors\nParents Names\nClergy Name', fields: '' },
+      { flag: 'USA', label: 'English', title: 'Marriage Records', sampleData: 'Date Married\nGroom\nBride\nGrooms Parents\nBrides Parents\nWitnesses\nMarriage License\nClergy', fields: '' },
+      { flag: 'USA', label: 'English', title: 'Funeral Records', sampleData: 'Date Deceased\nBurial Date\nAge\nBurial Location\nFirst Name\nLast Name\nClergy', fields: '' },
+    ],
+    Greek: [
+      { flag: 'Greece', label: 'Ελληνικά', title: 'Βάπτιση', sampleData: 'Όνομα\nΕπώνυμο\nΗμ. Γέννησης\nΗμ. Βάπτισης\nΤόπος Γέννησης\nΑνάδοχοι\nΓονείς\nΙερέας', fields: '' },
+      { flag: 'Greece', label: 'Ελληνικά', title: 'Γάμος', sampleData: 'Ημ. Γάμου\nΓαμπρός\nΝύφη\nΓονείς Γαμπρού\nΓονείς Νύφης\nΜάρτυρες\nΆδεια Γάμου\nΙερέας', fields: '' },
+      { flag: 'Greece', label: 'Ελληνικά', title: 'Κηδεία', sampleData: 'Ημ. Θανάτου\nΗμ. Κηδείας\nΗλικία\nΤόπος Κηδείας\nΌνομα\nΕπώνυμο\nΙερέας', fields: '' },
+    ],
+    Russian: [
+      { flag: 'Russia', label: 'Русский', title: 'Крещение', sampleData: 'Имя\nФамилия\nДата рождения\nДата крещения\nМесто рождения\nВосприемники\nРодители\nСвященник', fields: '' },
+      { flag: 'Russia', label: 'Русский', title: 'Брак', sampleData: 'Дата брака\nЖених\nНевеста\nРодители жениха\nРодители невесты\nСвидетели\nСвидетельство о браке\nСвященник', fields: '' },
+      { flag: 'Russia', label: 'Русский', title: 'Похороны', sampleData: 'Дата смерти\nДата похорон\nВозраст\nМесто захоронения\nИмя\nФамилия\nСвященник', fields: '' },
+    ],
+    Romanian: [
+      { flag: 'Romania', label: 'Română', title: 'Botez', sampleData: 'Prenume\nNume de familie\nData nașterii\nData botezului\nLocul nașterii\nNași\nPărinți\nPreot', fields: '' },
+      { flag: 'Romania', label: 'Română', title: 'Căsătorie', sampleData: 'Data căsătoriei\nMire\nMireasă\nPărinții mirelui\nPărinții miresei\nMartori\nLicență de căsătorie\nPreot', fields: '' },
+      { flag: 'Romania', label: 'Română', title: 'Înmormântare', sampleData: 'Data decesului\nData înmormântării\nVârsta\nLocul înmormântării\nPrenume\nNume de familie\nPreot', fields: '' },
+    ],
+    Georgian: [
+      { flag: 'Georgia', label: 'ქართული', title: 'ნათლობის ჩანაწერები', sampleData: 'სახელი\nგვარი\nდაბადების თარიღი\nნათლობის თარიღი\nდაბადების ადგილი\nნათლიები\nმშობლების სახელები\nმღვდლის სახელი', fields: '' },
+      { flag: 'Georgia', label: 'ქართული', title: 'ქორწინების ჩანაწერები', sampleData: 'ქორწინების თარიღი\nსიძე\nპატარძალი\nსიძის მშობლები\nპატარძლის მშობლები\nმოწმეები\nქორწინების მოწმობა\nმღვდელი', fields: '' },
+      { flag: 'Georgia', label: 'ქართული', title: 'დასაფლავების ჩანაწერები', sampleData: 'გარდაცვალების თარიღი\nდასაფლავების თარიღი\nასაკი\nდასაფლავების ადგილი\nსახელი\nგვარი\nმღვდელი', fields: '' },
+    ],
   };
 
+  // Get items for currently active language
+  const items = allItems[activeLanguage];
+  
+  // Sample data for English Baptism Records
+  const englishBaptismData = {
+    firstName: 'Mary Alice',
+    lastName: 'Kulina',
+    dateOfBirth: '9/27/1951',
+    dateOfBaptism: '10/27/1951',
+    birthplace: 'Somerville NJ',
+    sponsors: 'Michael Kulina Doris Kateles',
+    parentsNames: 'Joseph Kulina & Alice Mae Hortzog',
+    clergyName: 'Rev. Nicholas Kiryluk',
+  };
+
+  // Sample data for Greek Baptism Records
+  const greekBaptismData = {
+    firstName: 'Αναστασία',
+    lastName: 'Αναγνωστόπουλος',
+    dateOfBirth: '1987-03-06',
+    dateOfBaptism: '1987-09-19',
+    birthplace: 'Ιωάννινα',
+    sponsors: 'Ειρήνη Ιωάννου, Παναγιώτης Νικολάου',
+    parentsNames: 'Ιωάννης & Φωτεινή Αναγνωστόπουλος',
+    clergyName: 'Π. Παύλος Λαμπρόπουλος',
+  };
+
+  // Sample data for Georgian Baptism Records
+  const georgianBaptismData = {
+    firstName: 'გიორგი',
+    lastName: 'მელაძე',
+    dateOfBirth: '2018-04-12',
+    dateOfBaptism: '2018-05-06',
+    birthplace: 'თბილისი, საქართველო',
+    sponsors: 'ლევან ქავთარაძე, ნინო მაისურაძე',
+    parentsNames: 'ირაკლი მელაძე და ქეთევან გუგუშვილი',
+    clergyName: 'მამა დავით კვიწინაძე',
+  };
+
+  // Sample data for English Marriage Records
+  const englishMarriageData = {
+    dateMarried: '6/11/2005',
+    groom: 'John Parsells',
+    bride: 'Emily Joyce Straut',
+    groomsParents: 'James & Daria',
+    bridesParents: 'David & Donna',
+    witnesses: 'Gregory Parsells Anna Straut',
+    marriageLicense: '',
+    clergyName: 'Bishop Tikhon',
+  };
+
+  // Sample data for Georgian Marriage Records
+  const georgianMarriageData = {
+    dateMarried: '2021-09-18',
+    groom: 'თორნიკე ბერიძე',
+    bride: 'ანასტასია დოლიძე',
+    groomsParents: 'დავით ბერიძე და ნანა ბარამიძე',
+    bridesParents: 'გიორგი დოლიძე და მაკა კაპანაძე',
+    witnesses: 'გიგა გიორგაძე, თამარ შალამბერიძე',
+    marriageLicense: 'GE-2021-49127',
+    clergyName: 'მამა იოანე მიქელაძე',
+  };
+
+  // Sample data for English Funeral Records
+  const englishFuneralData = {
+    dateDeceased: '7/14/2025',
+    burialDate: '7/31/2025',
+    age: '88',
+    burialLocation: 'Ss. Peter & Paul Cemetery',
+    firstName: 'Kathyrn',
+    lastName: 'Motoviloff',
+    clergyName: 'Rev. James Parsells',
+  };
+
+  // Sample data for Georgian Funeral Records
+  const georgianFuneralData = {
+    dateDeceased: '2023-11-02',
+    burialDate: '2023-11-05',
+    age: '78',
+    burialLocation: 'მუხათგვერდის სასაფლაო, თბილისი',
+    firstName: 'მერაბ',
+    lastName: 'ჭანტურია',
+    clergyName: 'მამა ზაქარია თანდილაშვილი',
+  };
+
+  // Sample data for Greek Marriage Records
+  const greekMarriageData = {
+    dateMarried: '15/06/2010',
+    groom: 'Γιάννης Παπαδόπουλος',
+    bride: 'Μαρία Νικολάου',
+    groomsParents: 'Δημήτρης & Ελένη Παπαδόπουλος',
+    bridesParents: 'Νίκος & Σοφία Νικολάου',
+    witnesses: 'Κώστας Παπαδόπουλος, Άννα Νικολάου',
+    marriageLicense: 'Αριθμός 12345',
+    clergyName: 'Π. Παύλος Λαμπρόπουλος',
+  };
+
+  // Sample data for Greek Funeral Records
+  const greekFuneralData = {
+    dateDeceased: '2021-11-14',
+    burialDate: '2021-11-16',
+    age: '78',
+    burialLocation: 'Κοιμητήριο Αγίου Νικολάου',
+    firstName: 'Σπυρίδων',
+    lastName: 'Γεωργίου',
+    clergyName: 'Π. Δημήτριος Παπαδόπουλος',
+  };
+
+  // Sample data for Russian Baptism Records
+  const russianBaptismData = {
+    firstName: 'Александр',
+    lastName: 'Иванов',
+    dateOfBirth: '2016-03-12',
+    dateOfBaptism: '2016-05-08',
+    birthplace: 'Москва',
+    sponsors: 'Мария Петрова; Дмитрий Волков',
+    parentsNames: 'Иван Иванов и Ольга Николаева',
+    clergyName: 'Свящ. Михаил Сидоров',
+  };
+
+  // Sample data for Russian Marriage Records
+  const russianMarriageData = {
+    dateMarried: '2019-09-22',
+    groom: 'Павел Георгиев',
+    bride: 'Екатерина Морозова',
+    groomsParents: 'Сергей Георгиев и Наталья Георгиева',
+    bridesParents: 'Алексей Морозов и Татьяна Морозова',
+    witnesses: 'Иван Орлов; Полина Фёдорова',
+    marriageLicense: 'БР-482915',
+    clergyName: 'Свящ. Николай Александров',
+  };
+
+  // Sample data for Russian Funeral Records
+  const russianFuneralData = {
+    dateDeceased: '2021-11-03',
+    burialDate: '2021-11-06',
+    age: '74',
+    burialLocation: 'Никольское кладбище, Санкт-Петербург',
+    firstName: 'Александр',
+    lastName: 'Иванов',
+    clergyName: 'протоиерей Сергий Петров',
+  };
+
+  // Sample data for Romanian Baptism Records
+  const romanianBaptismData = {
+    firstName: 'Andrei',
+    lastName: 'Popescu',
+    dateOfBirth: '2017-04-19',
+    dateOfBaptism: '2017-06-11',
+    birthplace: 'București',
+    sponsors: 'Elena Ionescu; Gabriel Tudor',
+    parentsNames: 'Ion Popescu și Maria Popescu',
+    clergyName: 'Pr. Nicolae Munteanu',
+  };
+
+  // Sample data for Romanian Marriage Records
+  const romanianMarriageData = {
+    dateMarried: '2020-08-29',
+    groom: 'Cristian Dumitrescu',
+    bride: 'Alexandra Stan',
+    groomsParents: 'Vasile Dumitrescu și Adriana Dumitrescu',
+    bridesParents: 'Gheorghe Stan și Mihaela Stan',
+    witnesses: 'Radu Enache; Bianca Iliescu',
+    marriageLicense: 'CT-593821',
+    clergyName: 'Pr. Ioan Popescu',
+  };
+
+  // Sample data for Romanian Funeral Records
+  const romanianFuneralData = {
+    dateDeceased: '2021-03-17',
+    burialDate: '2021-03-20',
+    age: '76',
+    burialLocation: 'Cimitirul Sfânta Treime',
+    firstName: 'Mihai',
+    lastName: 'Georgescu',
+    clergyName: 'Pr. Petru Ionescu',
+  };
+
+  // ====================================================================
+  // EFFECT HOOKS
+  // ====================================================================
+  
+  // Auto-Rotation Effect for 3D Gallery
+  // Continuously rotates the 3D records gallery when user is hovering or has clicked
+  // Rotation speed: 0.1 degrees per frame at ~60fps (16ms interval) = ~6 degrees per second
+  // Only rotates when isHovering or isClicked is true, and not dragging
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentLanguage((prev) => (prev + 1) % languages.length);
-    }, 4000);
+    if ((!isHovering && !isClicked) || isDragging) {
+      // Don't rotate when not hovering/clicked or when dragging
+      return;
+    }
 
-    return () => clearInterval(interval);
-  }, []);
+    // Auto-rotate continuously for dynamic visual effect
+    const rotationInterval = setInterval(() => {
+      setCurrentRotation(prev => prev + 0.1); // Smooth rotation increment (1 full rotation every ~60 seconds)
+    }, 16); // ~60fps animation rate
 
-  const handleLogin = async () => {
-    setLoginLoading(true);
-    setLoginError('');
+    // Cleanup: clear interval when component unmounts or state changes
+    return () => clearInterval(rotationInterval);
+  }, [isHovering, isClicked, isDragging]);
 
-    try {
-      await login(email, password);
-      
-      // Check if user has @ssppoc.org domain
-      if (email.match(/@ssppoc\.org$/)) {
-        // Redirect SSPPOC users to their specific records page using relative path
-        navigate('/saints-peter-and-paul-Records');
+  // Global mouse move handler for dragging
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - dragStartX;
+      const rotationDelta = deltaX * 0.5; // Adjust sensitivity
+      setCurrentRotation(dragStartRotation + rotationDelta);
+    };
+
+    const handleMouseUp = () => {
+      setIsClicked(false);
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragStartX, dragStartRotation]);
+
+  // Typing Effect for Book Pages
+  // Creates a typing animation effect when book pages change
+  // Types out the page content character by character for visual appeal
+  // Note: Currently shows text immediately but includes typing logic for future enhancement
+  useEffect(() => {
+    const currentPageData = bookPages[currentPage];
+    if (!currentPageData) return; // Guard against invalid page index
+
+    // Show text immediately for faster loading (can be changed to progressive typing)
+    setPageTypedText(currentPageData.content);
+
+    // Optional: Progressive typing effect (currently disabled for performance)
+    // Types 5 characters at a time every 5ms for smooth animation
+    let currentIndex = 0;
+    setPageTypedText(''); // Reset text
+
+    const typeInterval = setInterval(() => {
+      if (currentIndex < currentPageData.content.length) {
+        setPageTypedText(currentPageData.content.slice(0, currentIndex + 5));
+        currentIndex += 5; // Increment by 5 characters per interval
       } else {
-        // Regular redirect for other users
-        navigate('/');
+        clearInterval(typeInterval); // Stop when content is fully typed
       }
-    } catch (err: any) {
-      setLoginError(err.message || 'Login failed');
-    } finally {
-      setLoginLoading(false);
+    }, 5); // Very fast typing with 5 characters at a time
+
+    // Cleanup: clear interval when component unmounts or page changes
+    return () => clearInterval(typeInterval);
+  }, [currentPage]); // Re-run when page changes
+
+  // ====================================================================
+  // EVENT HANDLERS
+  // ====================================================================
+  
+  // Book Page Navigation Handlers
+  // Navigate between book pages (forward and backward)
+  const handleNextPage = () => {
+    // Move to next page if not already on last page
+    if (currentPage < bookPages.length - 1) {
+      setCurrentPage(prev => prev + 1);
     }
   };
 
+  const handlePrevPage = () => {
+    // Move to previous page if not already on first page
+    if (currentPage > 0) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
+  
+  // Handle arrow click - collapse header and show FAQ at top
+  const handleArrowClick = () => {
+    setIsHeaderCollapsed(!isHeaderCollapsed);
+  };
+  
+  // FAQ Section Component - reusable
+  const renderFAQSection = () => (
+    <Box ref={faqSectionRef} sx={{ backgroundColor: theme.palette.background.default, padding: '5rem 0' }}>
+      <Container maxWidth="md">
+        <SectionHeaderBox sx={{ mb: 6 }}>
+          <SectionHeaderTitle component="h3">
+            Frequently Asked Questions
+          </SectionHeaderTitle>
+        </SectionHeaderBox>
+        <Box textAlign="center" mb={6}>
+          <Typography
+            variant="h6"
+            sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666' }}
+          >
+            Common questions about OrthodoxMetrics and how it can help your parish.
+          </Typography>
+        </Box>
+        
+        <Box sx={{ maxWidth: '100%' }}>
+          {faqData.map((faq, index) => (
+            <Box
+              key={index}
+              sx={{
+                marginBottom: '1rem',
+                border: '1px solid #e0e0e0',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  borderColor: '#F5B800',
+                  boxShadow: '0 4px 12px rgba(245, 184, 0, 0.1)',
+                },
+              }}
+            >
+              <Box
+                onClick={() => toggleFAQ(index)}
+                sx={{
+                  padding: '1.5rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  backgroundColor: openFAQ === index 
+                    ? (theme.palette.mode === 'dark' ? 'rgba(255, 249, 230, 0.1)' : '#FFF9E6')
+                    : theme.palette.background.paper,
+                  transition: 'background-color 0.3s ease',
+                }}
+              >
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    color: theme.palette.mode === 'dark' ? '#ffffff' : '#6B46C1',
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                    flex: 1,
+                    marginRight: '1rem',
+                  }}
+                >
+                  {faq.question}
+                </Typography>
+                <IconChevronDown 
+                  size={24} 
+                  color={theme.palette.mode === 'dark' ? '#ffffff' : '#666666'}
+                  style={{
+                    transform: openFAQ === index ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease',
+                  }}
+                />
+              </Box>
+              {openFAQ === index && (
+                <Box
+                    sx={{
+                      padding: '0 1.5rem 1.5rem 1.5rem',
+                      backgroundColor: theme.palette.mode === 'dark' 
+                        ? theme.palette.background.default 
+                        : '#FAFAFA',
+                      borderTop: `1px solid ${theme.palette.divider}`,
+                    animation: 'fadeIn 0.3s ease',
+                    '@keyframes fadeIn': {
+                      from: { opacity: 0, transform: 'translateY(-10px)' },
+                      to: { opacity: 1, transform: 'translateY(0)' },
+                    },
+                  }}
+                >
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666',
+                      lineHeight: 1.7,
+                      fontSize: '1rem' 
+                    }}
+                  >
+                    {faq.answer}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          ))}
+        </Box>
+      </Container>
+    </Box>
+  );
+  
+  // Map section names to tab indices
+  const sectionToTabIndex: Record<string, number> = {
+    'custom-records': 0,
+    'sample-data': 1,
+    'powerful-features': 2,
+    'graphical-analysis': 3,
+  };
+  
+  const tabIndexToSection: Record<number, string> = {
+    0: 'custom-records',
+    1: 'sample-data',
+    2: 'powerful-features',
+    3: 'graphical-analysis',
+  };
+  
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveSection(tabIndexToSection[newValue] as typeof activeSection);
+  };
+  
+  // Sample Data menu handlers
+  const handleSampleDataMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setSampleDataMenuAnchor(event.currentTarget);
+  };
+  
+  const handleSampleDataMenuClose = () => {
+    setSampleDataMenuAnchor(null);
+  };
+  
+  const handleSampleDataMenuItemClick = (path: string) => {
+    handleSampleDataMenuClose();
+    navigate(path);
+  };
+
+  // About Orthodox Christianity menu handlers
+  const handleAboutOrthodoxMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAboutOrthodoxMenuAnchor(event.currentTarget);
+  };
+
+  const handleAboutOrthodoxMenuClose = () => {
+    setAboutOrthodoxMenuAnchor(null);
+  };
+
+  const handleAboutOrthodoxMenuItemClick = (path: string) => {
+    handleAboutOrthodoxMenuClose();
+    navigate(path);
+  };
+
+  const handleSubmenuItemClick = (path: string) => {
+    // Ensure path is absolute and prevent duplication
+    const absolutePath = path.startsWith('/') ? path : `/${path}`;
+    // Only navigate if we're not already on that path
+    if (location.pathname !== absolutePath) {
+      navigate(absolutePath, { replace: false });
+    }
+  };
+  
+
   return (
     <Box>
+      <Header />
+      
+      {/* Left Side Popout Menu */}
+      <LeftSideMenu
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        onSubmenuItemClick={handleSubmenuItemClick}
+      />
 
-
-      {/* Orthodox Multilingual Banner */}
-      <BannerSection>
-        <GlobalStyles />
-        <LightRay>
-          <RayLayer1 />
-          <RayLayer2 />
-          <RayLayer3 />
-          <RayLayer4 />
-        </LightRay>
+      {/* Orthodox Metrics Welcome Section */}
+      <Box
+        sx={{
+          background: theme.palette.background.default,
+          padding: { xs: '3rem 0', sm: '4rem 0', md: '5rem 0' },
+          position: 'relative',
+        }}
+      >
         <Container maxWidth="lg">
-          <BannerContainer>
+          <Box sx={{ textAlign: 'center', maxWidth: '900px', mx: 'auto' }}>
             <Typography
               variant="h4"
-              fontWeight={600}
-              textAlign="right"
-              lineHeight={1.3}
+              component="h1"
+              sx={{
+                fontFamily: '"Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
+                fontWeight: 700,
+                color: theme.palette.mode === 'dark' ? '#ffffff' : '#2E0F46',
+                mb: 3,
+                fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.5rem' },
+              }}
             >
-              Orthodox<br />Metrics
+              Orthodox Metrics
             </Typography>
-            
-            <OrthodoxCross>
-              <Box className="cross-bar vertical-beam" />
-              <Box className="cross-bar top-bar" />
-              <Box className="cross-bar main-bar" />
-              <Box className="cross-bar bottom-bar" />
-            </OrthodoxCross>
-            
-            <BannerText>
-              {languages.map((lang, index) => (
-                <RotatingText
-                  key={lang.code}
-                  className={index === currentLanguage ? 'active' : ''}
-                  dangerouslySetInnerHTML={{ __html: lang.title }}
-                />
-              ))}
-            </BannerText>
-          </BannerContainer>
-          
-          <TaglineText>
-            {languages.map((lang, index) => (
-              <RotatingText
-                key={`tagline-${lang.code}`}
-                className={index === currentLanguage ? 'active' : ''}
+            <Typography
+              variant="body1"
+              sx={{
+                color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.9)' : '#666666',
+                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.15rem' },
+                lineHeight: 1.8,
+                mb: 2,
+              }}
+            >
+              Welcome to Orthodox Metrics, LLC, your gateway to modern, beautifully organized Orthodox Church record management. We're honored to support your parish with tools that make history, sacraments, and data come alive with clarity and reverence.
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.9)' : '#666666',
+                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.15rem' },
+                lineHeight: 1.8,
+              }}
+            >
+              To get started quickly, we recommend visiting the{' '}
+              <Box
+                component="span"
+                onClick={() => navigate('/samples')}
+                sx={{
+                  color: '#C8A24B',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  '&:hover': {
+                    color: '#E6A600',
+                  },
+                }}
               >
-                {lang.tagline}
-              </RotatingText>
-            ))}
-          </TaglineText>
-        </Container>
-      </BannerSection>
-
-      {/* Hero Section */}
-      <HeroSection>
-        <Container maxWidth="xl">
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                lg: '5fr 7fr',
-              },
-              gap: 6,
-              alignItems: 'center',
-            }}
-          >
-            {/* Left Side - Login Form */}
-            <Box>
-              <LoginCard>
-                <Typography
-                  variant="h5"
-                  fontWeight={600}
-                  color="#1a1a1a"
-                  gutterBottom
-                  textAlign="center"
-                >
-                  Church Portal
-                </Typography>
-                
-                <Box component="form" onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
-                  <TextField
-                    fullWidth
-                    label="Email Address"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    sx={{ mb: 2 }}
-                    variant="outlined"
-                    error={!!loginError}
-                  />
-                  
-                  <TextField
-                    fullWidth
-                    label="Password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    sx={{ mb: 2 }}
-                    variant="outlined"
-                    error={!!loginError}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowPassword(!showPassword)}
-                            edge="end"
-                          >
-                            {showPassword ? <IconEyeOff /> : <IconEye />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  
-                  {loginError && (
-                    <Typography 
-                      variant="body2" 
-                      color="error" 
-                      sx={{ mb: 2, textAlign: 'center' }}
-                    >
-                      {loginError}
-                    </Typography>
-                  )}
-                  
-                  <Button
-                    fullWidth
-                    type="submit"
-                    disabled={loginLoading}
-                    sx={{
-                      backgroundColor: '#F5B800',
-                      color: '#1a1a1a',
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      padding: '1rem',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
-                      '&:hover': {
-                        backgroundColor: '#E6A600',
-                      },
-                      '&:disabled': {
-                        backgroundColor: '#ccc',
-                        color: '#666',
-                      },
-                    }}
-                  >
-                    {loginLoading ? 'Signing In...' : 'Sign In'}
-                  </Button>
-                </Box>
-                
-                <Box textAlign="center" mt={2}>
-                  <Typography variant="body2" color="#666666" component="span">
-                    Don't have access?{' '}
-                  </Typography>
-                  <Button variant="text" sx={{ textTransform: 'none', color: '#F5B800' }}>
-                    Contact Administrator
-                  </Button>
-                </Box>
-              </LoginCard>
-            </Box>
-
-            {/* Right Side - Main Content */}
-            <Box sx={{ pl: { lg: 4 } }}>
-              <MainHeading>
-                Digitizing Orthodox Records.
-                <br />
-                Empowering the Church.
-              </MainHeading>
-              
-              <SubHeading>
-                Transform your parish record-keeping with our comprehensive digital platform. 
-                Securely digitize baptisms, marriages, funerals, and more while preserving 
-                Orthodox traditions for future generations.
-              </SubHeading>
-              
-              <Stack direction="row" spacing={2} flexWrap="wrap">
-                <CTAButton endIcon={<IconArrowRight />}>
-                  Start Free Trial
-                </CTAButton>
-                <SecondaryButton>
-                  Schedule Demo
-                </SecondaryButton>
-              </Stack>
-            </Box>
-          </Box>
-        </Container>
-      </HeroSection>
-
-      {/* Sneak Peek Section */}
-      <DemoSection>
-        <Container maxWidth="lg">
-          <DemoTitle>Sneak Peek</DemoTitle>
-          <DemoSubtitle>
-            Experience how OrthodoxMetrics processes and organizes your parish records from scanned historical documents.
-            Click "Process Records" to see our AI technology extract data from authentic Orthodox parish records dating back to the 1970s and 1980s.
-          </DemoSubtitle>
-          
-          {showOriginalImages && !isProcessing && !processingComplete && (
-            <DemoCard>
-              <DemoHeader>
-                <Typography variant="h6" color="#6B46C1" fontWeight={600}>
-                  Historical Parish Records - Ready for Processing
-                </Typography>
-                <Button
-                  variant="contained"
-                  onClick={startProcessing}
-                  startIcon={<IconSparkles />}
-                  sx={{
-                    backgroundColor: '#F5B800',
-                    color: '#1a1a1a',
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    borderRadius: '8px',
-                    '&:hover': {
-                      backgroundColor: '#E6A600',
-                    },
-                  }}
-                >
-                  Process Records
-                </Button>
-              </DemoHeader>
-              
-              <Box sx={{ 
-                display: 'grid', 
-                gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, 
-                gap: 3,
-                mt: 3 
-              }}>
-                {/* Marriage Record Image */}
-                <Paper sx={{ 
-                  p: 2, 
-                  backgroundColor: '#fafafa',
-                  border: '2px solid #F5B800',
-                  borderRadius: '12px'
-                }}>
-                  <Typography variant="subtitle1" fontWeight={600} color="#6B46C1" gutterBottom>
-                    Marriage Records - 1971
-                  </Typography>
-                  <Box sx={{
-                    width: '100%',
-                    height: '300px',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    mb: 2,
-                    border: '2px solid #d4af37',
-                    position: 'relative',
-                    backgroundColor: '#f8f8f8',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: 'linear-gradient(45deg, transparent 30%, rgba(255,215,0,0.1) 50%, transparent 70%)',
-                      pointerEvents: 'none',
-                      zIndex: 1
-                    }
-                  }}>
-                    <img 
-                      src="/images/marriages.png"
-                      alt="Historical Marriage Register from 1971 with Orthodox formatting"
-                      style={{
-                        width: '100%',
-                        height: '300px',
-                        objectFit: 'cover',
-                        borderRadius: '8px'
-                      }}
-                    />
-                  </Box>
-                  <Typography variant="caption" color="#666">
-                    Historical marriage register with decorative religious icons, bilingual entries (English/Cyrillic), and detailed witness information
-                  </Typography>
-                </Paper>
-
-                {/* Death Record Image */}
-                <Paper sx={{ 
-                  p: 2, 
-                  backgroundColor: '#fafafa',
-                  border: '2px solid #F5B800',
-                  borderRadius: '12px'
-                }}>
-                  <Typography variant="subtitle1" fontWeight={600} color="#6B46C1" gutterBottom>
-                    Death Records - 1988
-                  </Typography>
-                  <Box sx={{
-                    width: '100%',
-                    height: '300px',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    mb: 2,
-                    border: '2px solid #d4af37',
-                    position: 'relative',
-                    backgroundColor: '#f8f8f8',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: 'linear-gradient(45deg, transparent 30%, rgba(255,215,0,0.1) 50%, transparent 70%)',
-                      pointerEvents: 'none',
-                      zIndex: 1
-                    }
-                  }}>
-                    <img 
-                      src="/images/funerals.png"
-                      alt="Historical Death Register from 1988 with Orthodox formatting"
-                      style={{
-                        width: '100%',
-                        height: '300px',
-                        objectFit: 'cover',
-                        borderRadius: '8px'
-                      }}
-                    />
-                  </Box>
-                  <Typography variant="caption" color="#666">
-                    Two-page death register with ornate religious symbols, bilingual headers, and detailed burial information including cemetery plots
-                  </Typography>
-                </Paper>
-
-                {/* Baptism Record Image */}
-                <Paper sx={{ 
-                  p: 2, 
-                  backgroundColor: '#fafafa',
-                  border: '2px solid #F5B800',
-                  borderRadius: '12px'
-                }}>
-                  <Typography variant="subtitle1" fontWeight={600} color="#6B46C1" gutterBottom>
-                    Baptism Records - 1972-1973
-                  </Typography>
-                  <Box sx={{
-                    width: '100%',
-                    height: '300px',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    mb: 2,
-                    border: '2px solid #d4af37',
-                    position: 'relative',
-                    backgroundColor: '#f8f8f8',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: 'linear-gradient(45deg, transparent 30%, rgba(255,215,0,0.1) 50%, transparent 70%)',
-                      pointerEvents: 'none',
-                      zIndex: 1
-                    }
-                  }}>
-                    <img 
-                      src="/images/baptisms.png"
-                      alt="Historical Birth/Baptism Register from 1972-1973"
-                      style={{
-                        width: '100%',
-                        height: '300px',
-                        objectFit: 'cover',
-                        borderRadius: '8px'
-                      }}
-                    />
-                  </Box>
-                  <Typography variant="caption" color="#666">
-                    Birth register with blue ink handwritten entries, bilingual column headers, and detailed genealogical information including sponsors
-                  </Typography>
-                </Paper>
+                Samples page
               </Box>
-            </DemoCard>
-          )}
-
-          {isProcessing && (
-            <DemoCard>
-              <DemoHeader>
-                <Typography variant="h6" color="#6B46C1" fontWeight={600}>
-                  AI Processing Engine
-                </Typography>
-              </DemoHeader>
-              
-              {/* VS Code Style Terminal */}
-              <Box sx={{
-                backgroundColor: '#1e1e1e',
-                borderRadius: '8px',
-                p: 3,
-                mt: 2,
-                fontFamily: '"Fira Code", "Consolas", monospace',
-                fontSize: '14px',
-                color: '#d4d4d4'
-              }}>
-                {/* Terminal Header */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  mb: 2,
-                  borderBottom: '1px solid #333',
-                  pb: 1 
-                }}>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#ff5f56' }} />
-                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#ffbd2e' }} />
-                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#27ca3f' }} />
-                  </Box>
-                  <Typography sx={{ ml: 2, color: '#888', fontSize: '12px' }}>
-                    OrthodoxMetrics OCR Terminal
-                  </Typography>
-                </Box>
-
-                {/* Processing Output */}
-                <Box sx={{ '& > div': { mb: 1 } }}>
-                  <Box sx={{ color: '#569cd6' }}>
-                    <Box component="span" sx={{ color: '#4fc1ff' }}>$</Box> orthodox-metrics process --batch
-                  </Box>
-                  <Box sx={{ color: '#d7ba7d', display: 'flex', alignItems: 'center', gap: 1 }}>
-                    📄 Recognizing document IMG_2024_10_22...
-                    <Box sx={{ 
-                      width: 8, 
-                      height: 8, 
-                      backgroundColor: '#d7ba7d', 
-                      animation: 'blink 1s infinite'
-                    }} />
-                  </Box>
-                  <Box sx={{ color: '#4ec9b0' }}>
-                    🔍 Matching format: MARRIAGE RECORD - 1971
-                  </Box>
-                  <Box sx={{ color: '#9cdcfe' }}>
-                    ✅ Extracted: Groom - George Oliver, Bride - Anna Max, Witnesses: Mr. & Mrs. George Grabania
-                  </Box>
-                  <Box sx={{ color: '#ce9178' }}>
-                    🌐 Language detected: English, Church Slavonic headers identified
-                  </Box>
-                  <Box sx={{ color: '#d7ba7d' }}>
-                    📄 Recognizing document IMG_2024_10_23...
-                  </Box>
-                  <Box sx={{ color: '#4ec9b0' }}>
-                    🔍 Matching format: DEATH RECORD - 1988
-                  </Box>
-                  <Box sx={{ color: '#9cdcfe' }}>
-                    ✅ Extracted: John Macinko, Anna Karel, John Suseck Sr., David James Riegler, Carolyn E. Frenther...
-                  </Box>
-                  <Box sx={{ color: '#ce9178' }}>
-                    🌐 Language detected: English, Cyrillic headers, burial plot details
-                  </Box>
-                  <Box sx={{ color: '#d7ba7d' }}>
-                    📄 Recognizing document IMG_2024_10_24...
-                  </Box>
-                  <Box sx={{ color: '#4ec9b0' }}>
-                    🔍 Matching format: BAPTISM RECORD - 1972-1973
-                  </Box>
-                  <Box sx={{ color: '#9cdcfe' }}>
-                    ✅ Extracted: Tamara Ann Stibitz, James Antony Allegretto, Brian Christopher Verrilli, Jeffrey Nicholas Gerhard
-                  </Box>
-                  <Box sx={{ color: '#ce9178' }}>
-                    🎯 Processing complete: 12 death records, 3 marriage records, 11 baptism records extracted
-                  </Box>
-                  <Box sx={{ color: '#569cd6' }}>
-                    📊 Accuracy: 98.7% | Ready for review and certificate generation
-                  </Box>
-                </Box>
-              </Box>
-            </DemoCard>
-          )}
-
-          {processingComplete && (
-            <DemoCard>
-              <DemoHeader>
-                <TabButtons>
-                  {['Baptism', 'Marriage', 'Funeral'].map((tab) => (
-                    <TabButton
-                      key={tab}
-                      label={tab}
-                      onClick={() => setActiveTab(tab)}
-                      active={activeTab === tab}
-                      clickable
-                    />
-                  ))}
-                </TabButtons>
-                
-                <Typography variant="h6" color="#6B46C1" fontWeight={600}>
-                  {getTableTitle()}
-                </Typography>
-              </DemoHeader>
-              
-              <TableContainer sx={{ maxHeight: 400 }}>
-                <Table stickyHeader>
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: '#6B46C1' }}>
-                      {getTableHeaders().map((header, index) => (
-                        <TableCell
-                          key={index}
-                          sx={{ backgroundColor: '#6B46C1', color: 'white', fontWeight: 600 }}
-                        >
-                          {header}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {activeTab === 'Baptism' && baptismRecords.map((record, index) => (
-                      <TableRow key={index} hover>
-                        <TableCell>{record.firstName}</TableCell>
-                        <TableCell>{record.lastName}</TableCell>
-                        <TableCell>{record.birthDate}</TableCell>
-                        <TableCell>{record.baptismDate}</TableCell>
-                        <TableCell>{record.baptismPlace}</TableCell>
-                        <TableCell>{record.clergy}</TableCell>
-                      </TableRow>
-                    ))}
-                    {activeTab === 'Marriage' && marriageRecords.map((record, index) => (
-                      <TableRow key={index} hover>
-                        <TableCell>{record.groomFirst}</TableCell>
-                        <TableCell>{record.groomLast}</TableCell>
-                        <TableCell>{record.brideFirst}</TableCell>
-                        <TableCell>{record.brideLast}</TableCell>
-                        <TableCell>{record.marriageDate}</TableCell>
-                        <TableCell>{record.clergy}</TableCell>
-                      </TableRow>
-                    ))}
-                    {activeTab === 'Funeral' && funeralRecords.map((record, index) => (
-                      <TableRow key={index} hover>
-                        <TableCell>{record.firstName}</TableCell>
-                        <TableCell>{record.lastName}</TableCell>
-                        <TableCell>{record.dateOfDeath}</TableCell>
-                        <TableCell>{record.funeralDate}</TableCell>
-                        <TableCell>{record.age}</TableCell>
-                        <TableCell>{record.burialLocation}</TableCell>
-                        <TableCell>{record.clergy}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              
-              <Box sx={{ backgroundColor: '#FFF9E6', padding: '1rem', textAlign: 'center' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-                  <Typography variant="body2" color="#8B5A00" component="span">
-                    Showing {getTotalRecords()}
-                  </Typography>
-                  <Button
-                    variant="text"
-                    sx={{ color: '#F5B800', textTransform: 'none' }}
-                  >
-                    + Live Data
-                  </Button>
-                </Box>
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    setShowOriginalImages(true);
-                    setIsProcessing(false);
-                    setProcessingComplete(false);
-                  }}
-                  sx={{
-                    mt: 2,
-                    borderColor: '#6B46C1',
-                    color: '#6B46C1',
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    '&:hover': {
-                      borderColor: '#5A2FC2',
-                      backgroundColor: 'rgba(107, 70, 193, 0.04)',
-                    },
-                  }}
-                >
-                  ↻ Restart Demo
-                </Button>
-              </Box>
-            </DemoCard>
-          )}
-        </Container>
-      </DemoSection>
-
-      {/* Why Orthodox Metrics Section */}
-      <Box sx={{ backgroundColor: '#fafafa', padding: '5rem 0' }}>
-        <Container maxWidth="lg">
-          <SectionTitle>
-            Why Orthodox Metrics?
-          </SectionTitle>
-          
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                md: 'repeat(3, 1fr)',
-              },
-              gap: 4,
-            }}
-          >
-            {/* Digitize Records */}
-            <FeatureCard>
-              <FeatureIcon>
-                <IconDatabase size={32} color="#F5B800" />
-              </FeatureIcon>
-              <Typography variant="h5" fontWeight={600} color="#1a1a1a" gutterBottom>
-                Digitize Records
-              </Typography>
-              <Typography variant="body1" color="#666666" lineHeight={1.6}>
-                Convert physical church records into searchable digital archives. 
-                Our OCR technology automatically extracts data from historical documents 
-                while maintaining accuracy and Orthodox formatting standards.
-              </Typography>
-            </FeatureCard>
-
-            {/* Multilingual Interface */}
-            <FeatureCard>
-              <FeatureIcon>
-                <IconWorld size={32} color="#F5B800" />
-              </FeatureIcon>
-              <Typography variant="h5" fontWeight={600} color="#1a1a1a" gutterBottom>
-                Multilingual Interface
-              </Typography>
-              <Typography variant="body1" color="#666666" lineHeight={1.6}>
-                Support for Greek, English, Romanian, Russian, and other Orthodox languages. 
-                Switch seamlessly between languages while maintaining proper liturgical 
-                terminology and cultural context.
-              </Typography>
-            </FeatureCard>
-
-            {/* Secure & Private */}
-            <FeatureCard>
-              <FeatureIcon>
-                <IconShield size={32} color="#F5B800" />
-              </FeatureIcon>
-              <Typography variant="h5" fontWeight={600} color="#1a1a1a" gutterBottom>
-                Secure & Private
-              </Typography>
-              <Typography variant="body1" color="#666666" lineHeight={1.6}>
-                Enterprise-grade security with encrypted data storage and role-based access. 
-                Your parish data remains private and accessible only to authorized clergy 
-                and administrators.
-              </Typography>
-            </FeatureCard>
+              {' '}to explore real examples of how records and analytics will look in your system.
+            </Typography>
           </Box>
         </Container>
       </Box>
 
-      {/* Custom Records Section */}
-      <CustomRecordsSection>
+      {/* Additional Orthodox Metrics Sections */}
+      <Box
+        sx={{
+          background: theme.palette.background.default,
+          padding: { xs: '3rem 0', sm: '4rem 0', md: '5rem 0' },
+          position: 'relative',
+        }}
+      >
         <Container maxWidth="lg">
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+              gap: { xs: 2, md: 3 },
+              maxWidth: '1200px',
+              mx: 'auto',
+            }}
+          >
+            {/* Church Metrics OCA Timeline */}
+            <Box
+              sx={{
+                textAlign: 'center',
+                padding: { xs: '2rem', sm: '2.5rem' },
+                borderRadius: '12px',
+                backgroundColor: theme.palette.mode === 'dark' 
+                  ? 'rgba(255, 255, 255, 0.05)' 
+                  : 'rgba(200, 162, 75, 0.08)',
+                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(200, 162, 75, 0.2)' : 'rgba(200, 162, 75, 0.3)'}`,
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: theme.palette.mode === 'dark'
+                    ? '0 8px 24px rgba(200, 162, 75, 0.2)'
+                    : '0 8px 24px rgba(200, 162, 75, 0.15)',
+                },
+              }}
+              onClick={() => navigate('/frontend-pages/oca-timeline')}
+            >
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{
+                  fontFamily: '"Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
+                  fontWeight: 700,
+                  color: theme.palette.mode === 'dark' ? '#ffffff' : '#2E0F46',
+                  mb: 2,
+                  fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+                }}
+              >
+                Church Metrics OCA Timeline
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666666',
+                  fontSize: { xs: '0.9rem', sm: '1rem' },
+                  lineHeight: 1.6,
+                }}
+              >
+                Explore the evolution of Orthodox Church record books from the Russian Mission era to the modern OCA metrical book.
+              </Typography>
+            </Box>
+
+            {/* Pricing */}
+            <Box
+              sx={{
+                textAlign: 'center',
+                padding: { xs: '2rem', sm: '2.5rem' },
+                borderRadius: '12px',
+                backgroundColor: theme.palette.mode === 'dark' 
+                  ? 'rgba(255, 255, 255, 0.05)' 
+                  : 'rgba(200, 162, 75, 0.08)',
+                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(200, 162, 75, 0.2)' : 'rgba(200, 162, 75, 0.3)'}`,
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: theme.palette.mode === 'dark'
+                    ? '0 8px 24px rgba(200, 162, 75, 0.2)'
+                    : '0 8px 24px rgba(200, 162, 75, 0.15)',
+                },
+              }}
+              onClick={() => navigate('/frontend-pages/pricing')}
+            >
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{
+                  fontFamily: '"Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
+                  fontWeight: 700,
+                  color: theme.palette.mode === 'dark' ? '#ffffff' : '#2E0F46',
+                  mb: 2,
+                  fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+                }}
+              >
+                Pricing
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666666',
+                  fontSize: { xs: '0.9rem', sm: '1rem' },
+                  lineHeight: 1.6,
+                }}
+              >
+                Discover our flexible pricing plans designed to support parishes of all sizes with modern record management solutions.
+              </Typography>
+            </Box>
+
+            {/* Contact Us */}
+            <Box
+              sx={{
+                textAlign: 'center',
+                padding: { xs: '2rem', sm: '2.5rem' },
+                borderRadius: '12px',
+                backgroundColor: theme.palette.mode === 'dark' 
+                  ? 'rgba(255, 255, 255, 0.05)' 
+                  : 'rgba(200, 162, 75, 0.08)',
+                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(200, 162, 75, 0.2)' : 'rgba(200, 162, 75, 0.3)'}`,
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: theme.palette.mode === 'dark'
+                    ? '0 8px 24px rgba(200, 162, 75, 0.2)'
+                    : '0 8px 24px rgba(200, 162, 75, 0.15)',
+                },
+              }}
+              onClick={() => navigate('/frontend-pages/contact')}
+            >
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{
+                  fontFamily: '"Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
+                  fontWeight: 700,
+                  color: theme.palette.mode === 'dark' ? '#ffffff' : '#2E0F46',
+                  mb: 2,
+                  fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+                }}
+              >
+                Contact Us
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666666',
+                  fontSize: { xs: '0.9rem', sm: '1rem' },
+                  lineHeight: 1.6,
+                }}
+              >
+                Get in touch with our team to learn more about how Orthodox Metrics can serve your parish's record management needs.
+              </Typography>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* Combined Section Header with Tabs - Hidden, replaced by LeftSideMenu */}
+      {/* This section is now hidden as the menu has been moved to the left side */}
+      {false && (
+      <Box
+        sx={{
+          background: theme.palette.background.default,
+          paddingTop: 0,
+          paddingBottom: 0,
+          display: 'none', // Hide the old menu bar
+        }}
+      >
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10, mb: 4 }}>
+          {!isHeaderCollapsed ? (
+            <>
+              <SectionHeaderBox>
+                <TabButton 
+                  active={activeSection === 'about-orthodox-christianity'}
+                  onClick={(e) => {
+                    setActiveSection('about-orthodox-christianity');
+                    handleAboutOrthodoxMenuOpen(e);
+                  }}
+                  onMouseEnter={handleAboutOrthodoxMenuOpen}
+                  sx={{ position: 'relative' }}
+                >
+                  About Orthodox Christianity
+                </TabButton>
+                <Menu
+                  anchorEl={aboutOrthodoxMenuAnchor}
+                  open={aboutOrthodoxMenuOpen}
+                  onClose={handleAboutOrthodoxMenuClose}
+                  MenuListProps={{
+                    onMouseLeave: handleAboutOrthodoxMenuClose,
+                  }}
+                  PaperProps={{
+                    sx: {
+                      mt: 1.5,
+                      minWidth: 320,
+                      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                      border: '1px solid rgba(212, 175, 55, 0.3)',
+                      borderRadius: '8px',
+                    },
+                  }}
+                >
+                  <MenuItem 
+                    onClick={() => handleAboutOrthodoxMenuItemClick('/about/history')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        History of Eastern Orthodox
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        The Ancient times
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <Divider sx={{ my: 0.5 }} />
+                  <MenuItem 
+                    onClick={() => handleAboutOrthodoxMenuItemClick('/about/church-records/history')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Church Records
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        History of church records importance
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleAboutOrthodoxMenuItemClick('/about/church-records/explore')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Explore Orthodox Church Records
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Explore Orthodox church records using any device that supports Java.
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                </Menu>
+                <TabButton 
+                  active={activeSection === 'custom-records'}
+                  onClick={() => setActiveSection('custom-records')}
+                >
+                  Custom Records
+                </TabButton>
+                <TabButton 
+                  active={activeSection === 'sample-data'}
+                  onClick={(e) => {
+                    setActiveSection('sample-data');
+                    handleSampleDataMenuOpen(e);
+                  }}
+                  onMouseEnter={handleSampleDataMenuOpen}
+                  sx={{ position: 'relative' }}
+                >
+                  Sample Data
+                </TabButton>
+                <Menu
+                  anchorEl={sampleDataMenuAnchor}
+                  open={sampleDataMenuOpen}
+                  onClose={handleSampleDataMenuClose}
+                  MenuListProps={{
+                    onMouseLeave: handleSampleDataMenuClose,
+                  }}
+                  PaperProps={{
+                    sx: {
+                      mt: 1.5,
+                      minWidth: 320,
+                      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                      border: '1px solid rgba(212, 175, 55, 0.3)',
+                      borderRadius: '8px',
+                    },
+                  }}
+                >
+                  <MenuItem 
+                    onClick={() => handleSampleDataMenuItemClick('/samples?type=baptism')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Baptism Records
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        English, Greek, Russian, Romanian, Georgian sample sets.
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleSampleDataMenuItemClick('/samples?type=marriage')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Marriage Records
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        All languages, downloadable JSON examples.
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleSampleDataMenuItemClick('/samples?type=funeral')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Funeral Records
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Full multilingual samples + clergy variations.
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <Divider sx={{ my: 0.5 }} />
+                  <MenuItem 
+                    onClick={() => handleSampleDataMenuItemClick('/samples?type=census')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Parish Census Samples
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Population counts, peak growth/decline snapshots.
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleSampleDataMenuItemClick('/samples?type=analytics')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Analytics & Graph Examples
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Preview of charts OM will generate—line, bar, heatmap, timelines.
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleSampleDataMenuItemClick('/samples?type=templates')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Multi-Language Templates
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Side-by-side record layouts (EN / GR / RU / RO / GE).
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleSampleDataMenuItemClick('/samples?type=clergy')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Clergy Tenure Samples
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Demo data for clergy timelines and tenure charts.
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleSampleDataMenuItemClick('/samples?type=spousal')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Spousal Survival Dataset
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Widow/widower survival lengths for analytics demo.
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleSampleDataMenuItemClick('/samples?type=trends')}
+                    sx={{ 
+                      py: 1.5,
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(212, 175, 55, 0.1)' }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                        Parish Growth & Decline Trends
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Synthetic example datasets showing 10–20 years of parish metrics.
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                </Menu>
+                <TabButton 
+                  active={activeSection === 'powerful-features'}
+                  onClick={() => setActiveSection('powerful-features')}
+                >
+                  Powerful Features
+                </TabButton>
+                <TabButton 
+                  active={activeSection === 'graphical-analysis'}
+                  onClick={() => setActiveSection('graphical-analysis')}
+                >
+                  Graphical Analysis
+                </TabButton>
+              </SectionHeaderBox>
+              {/* Arrow positioned outside the box on the right */}
+              <Box
+                onClick={handleArrowClick}
+                sx={{
+                  position: 'absolute',
+                  right: { xs: '-40px', sm: '-50px', md: '-60px' },
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  zIndex: 11,
+                  cursor: 'pointer',
+                  '&:hover': {
+                    opacity: 0.7,
+                  },
+                }}
+              >
+                <IconArrowLeft 
+                  size={32}
+                  style={{ 
+                    color: '#2E0F46',
+                  }} 
+                />
+              </Box>
+            </>
+          ) : (
+            <Box sx={{ position: 'relative' }}>
+              <Box
+                sx={{
+                  backgroundColor: '#faf8f4',
+                  borderRadius: '12px',
+                  border: '2px solid rgba(212, 175, 55, 0.4)',
+                  borderBottom: '3px solid rgba(212, 175, 55, 0.5)',
+                  boxShadow: '0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04)',
+                }}
+              >
+                <Tabs
+                  value={sectionToTabIndex[activeSection]}
+                  onChange={handleTabChange}
+                  sx={{
+                    '& .MuiTabs-indicator': {
+                      backgroundColor: '#C8A24B',
+                      height: 3,
+                    },
+                    '& .MuiTab-root': {
+                      fontFamily: '"Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
+                      fontSize: '18px',
+                      fontWeight: 500,
+                      color: '#666666',
+                      textTransform: 'none',
+                      minHeight: 70,
+                      '&.Mui-selected': {
+                        color: '#2E0F46',
+                        fontWeight: 700,
+                      },
+                      '&:hover': {
+                        color: '#2E0F46',
+                        backgroundColor: 'rgba(200, 162, 75, 0.1)',
+                      },
+                    },
+                  }}
+                >
+                  <Tab label="Custom Records" />
+                  <Tab label="Sample Data" />
+                  <Tab label="Powerful Features" />
+                  <Tab label="Graphical Analysis" />
+                </Tabs>
+              </Box>
+              {/* Expand button - right arrow to expand back */}
+              <Box
+                onClick={handleArrowClick}
+                sx={{
+                  position: 'absolute',
+                  right: { xs: '-40px', sm: '-50px', md: '-60px' },
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  zIndex: 11,
+                  cursor: 'pointer',
+                  '&:hover': {
+                    opacity: 0.7,
+                  },
+                }}
+              >
+                <IconArrowRight 
+                  size={32}
+                  style={{ 
+                    color: '#2E0F46',
+                  }} 
+                />
+              </Box>
+            </Box>
+          )}
+        </Container>
+      </Box>
+      )}
+
+      {/* FAQ Section - appears at top when header is collapsed */}
+      {isHeaderCollapsed && (
+        <Box sx={{ mt: 0 }}>
+          {renderFAQSection()}
+        </Box>
+      )}
+
+      {/* Sample Data Section Content */}
+      {activeSection === 'sample-data' && (
+      <Box
+        sx={{
+          background: theme.palette.background.default,
+          minHeight: '80vh',
+          paddingBottom: '5rem',
+          paddingTop: '2rem',
+          color: '#2f2300',
+          fontFamily: 'Inter, "Noto Sans", "Noto Sans Greek", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Gallery Header - Left-aligned like About Us */}
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10, pt: 2, mb: 4 }}>
+          <Box
+            sx={{
+              marginBottom: '30px',
+              textAlign: 'left',
+              position: 'relative',
+              padding: { xs: '12px 16px', sm: '14px 20px', md: '16px 24px' },
+              borderRadius: '20px',
+              minHeight: { xs: '60px', sm: '70px', md: '80px' },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: { xs: 2, sm: 3, md: 4 },
+              width: '100%',
+            }}
+          >
+          </Box>
+        </Container>
+
+        {/* 3D Orthodox Records Gallery - Side by Side Layout */}
+        <Container maxWidth="lg">
+          {activeSacrament && (
+            <>
+              {/* Language Selection with Flags - Only show when sacrament is selected */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  mb: { xs: 3, md: 4 },
+                  px: { xs: 2, md: 0 },
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 3,
+                    color: '#2E0F46',
+                    fontWeight: 600,
+                    fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+                  }}
+                >
+                  Select the language
+                </Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    gap: { xs: 1.5, sm: 2, md: 2.5 },
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {([
+                    { lang: 'English' as const, flag: 'en_flag.png' },
+                    { lang: 'Greek' as const, flag: 'gr_flag.png' },
+                    { lang: 'Russian' as const, flag: 'ru_flag.png' },
+                    { lang: 'Romanian' as const, flag: 'ro_flag.png' },
+                    { lang: 'Georgian' as const, flag: 'ge_flag.png' },
+                  ]).map(({ lang, flag }) => {
+                    return (
+                      <Box
+                        key={lang}
+                        onClick={() => {
+                          if (activeLanguage !== lang) {
+                            setIsLanguageChanging(true);
+                            setActiveLanguage(lang);
+                            setCurrentRotation(0);
+                            setSelectedCard(null);
+                            setFlippedCards(new Set());
+                            setTimeout(() => setIsLanguageChanging(false), 600);
+                          }
+                        }}
+                        sx={{
+                          cursor: 'pointer',
+                          padding: { xs: '8px', sm: '10px', md: '12px' },
+                          borderRadius: '12px',
+                          border: activeLanguage === lang ? '3px solid #2E0F46' : '3px solid transparent',
+                          backgroundColor: activeLanguage === lang ? 'rgba(46, 15, 70, 0.1)' : 'transparent',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'scale(1.1)',
+                            borderColor: '#2E0F46',
+                            backgroundColor: 'rgba(46, 15, 70, 0.15)',
+                          },
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={`/images/main/${flag}`}
+                          alt={lang}
+                          sx={{
+                            width: { xs: '60px', sm: '70px', md: '80px' },
+                            height: { xs: '40px', sm: '47px', md: '53px' },
+                            objectFit: 'contain',
+                            display: 'block',
+                          }}
+                        />
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </Box>
+
+              {/* Display cards when a sacrament is selected */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'flex-start',
+                  gap: { xs: 2, sm: 2.5, md: 3 },
+                  flexWrap: 'wrap',
+                  padding: { xs: '1rem 0', sm: '1.5rem 0', md: '2rem 0' },
+                  minHeight: { xs: '400px', sm: '500px', md: '600px' },
+                }}
+              >
+                {items.filter(item => {
+                  // Filter items based on selected sacrament
+                  const sacramentTitles: Record<string, string[]> = {
+                    'Baptism': ['Baptism Records', 'Βάπτιση', 'Крещение', 'Botez', 'ნათლობის ჩანაწერები'],
+                    'Marriage': ['Marriage Records', 'Γάμος', 'Брак', 'Căsătorie', 'ქორწინების ჩანაწერები'],
+                    'Funeral': ['Funeral Records', 'Κηδεία', 'Похороны', 'Înmormântare', 'დასაფლავების ჩანაწერები'],
+                  };
+                  return sacramentTitles[activeSacrament]?.includes(item.title);
+                }).map((item, i) => (
+              <Box
+                key={`${activeLanguage}-${i}-${item.title}`}
+                onClick={() => {
+                  if ((activeLanguage === 'English' && (item.title === 'Baptism Records' || item.title === 'Marriage Records' || item.title === 'Funeral Records')) || (activeLanguage === 'Greek' && (item.title === 'Βάπτιση' || item.title === 'Γάμος' || item.title === 'Κηδεία')) || (activeLanguage === 'Russian' && (item.title === 'Крещение' || item.title === 'Брак' || item.title === 'Похороны')) || (activeLanguage === 'Romanian' && (item.title === 'Botez' || item.title === 'Căsătorie' || item.title === 'Înmormântare')) || (activeLanguage === 'Georgian' && (item.title === 'ნათლობის ჩანაწერები' || item.title === 'ქორწინების ჩანაწერები' || item.title === 'დასაფლავების ჩანაწერები'))) {
+                    const cardKey = `${activeLanguage}-${item.title}`;
+                    setSelectedCard({ language: activeLanguage, title: item.title });
+                    setFlippedCards(prev => {
+                      const newSet = new Set(prev);
+                      if (newSet.has(cardKey)) {
+                        newSet.delete(cardKey);
+                      } else {
+                        newSet.add(cardKey);
+                      }
+                      return newSet;
+                    });
+                  }
+                }}
+                sx={{
+                  width: { xs: '100%', sm: '240px', md: '280px' },
+                  maxWidth: { xs: '320px', sm: '240px', md: '280px' },
+                  height: { xs: '350px', sm: '380px', md: '400px' },
+                  perspective: '1000px',
+                  transition: isLanguageChanging ? 'opacity 0.6s ease-out, transform 0.6s ease-out' : 'transform 0.3s ease',
+                  transform: isLanguageChanging ? 'scale(0.95)' : 'scale(1)',
+                  opacity: isLanguageChanging ? 0.7 : 1,
+                  cursor: ((activeLanguage === 'English' && (item.title === 'Baptism Records' || item.title === 'Marriage Records' || item.title === 'Funeral Records')) || (activeLanguage === 'Greek' && (item.title === 'Βάπτιση' || item.title === 'Γάμος' || item.title === 'Κηδεία')) || (activeLanguage === 'Russian' && (item.title === 'Крещение' || item.title === 'Брак' || item.title === 'Похороны')) || (activeLanguage === 'Romanian' && (item.title === 'Botez' || item.title === 'Căsătorie' || item.title === 'Înmormântare')) || (activeLanguage === 'Georgian' && (item.title === 'ნათლობის ჩანაწერები' || item.title === 'ქორწინების ჩანაწერები' || item.title === 'დასაფლავების ჩანაწერები'))) ? 'pointer' : 'default',
+                  '&:hover': {
+                    transform: (((activeLanguage === 'English' && (item.title === 'Baptism Records' || item.title === 'Marriage Records' || item.title === 'Funeral Records')) || (activeLanguage === 'Greek' && (item.title === 'Βάπτιση' || item.title === 'Γάμος' || item.title === 'Κηδεία')) || (activeLanguage === 'Russian' && (item.title === 'Крещение' || item.title === 'Брак' || item.title === 'Похороны')) || (activeLanguage === 'Romanian' && (item.title === 'Botez' || item.title === 'Căsătorie' || item.title === 'Înmormântare')) || (activeLanguage === 'Georgian' && (item.title === 'ნათლობის ჩანაწერები' || item.title === 'ქორწინების ჩანაწერები' || item.title === 'დასაფლავების ჩანაწერები'))) && ((selectedCard?.title === 'Baptism Records' && activeLanguage === 'English') || (selectedCard?.title === 'Marriage Records' && activeLanguage === 'English') || (selectedCard?.title === 'Funeral Records' && activeLanguage === 'English') || (selectedCard?.title === 'Βάπτιση' && activeLanguage === 'Greek') || (selectedCard?.title === 'Γάμος' && activeLanguage === 'Greek') || (selectedCard?.title === 'Κηδεία' && activeLanguage === 'Greek') || (selectedCard?.title === 'Крещение' && activeLanguage === 'Russian') || (selectedCard?.title === 'Брак' && activeLanguage === 'Russian') || (selectedCard?.title === 'Похороны' && activeLanguage === 'Russian') || (selectedCard?.title === 'Botez' && activeLanguage === 'Romanian') || (selectedCard?.title === 'Căsătorie' && activeLanguage === 'Romanian') || (selectedCard?.title === 'Înmormântare' && activeLanguage === 'Romanian') || (selectedCard?.title === 'ნათლობის ჩანაწერები' && activeLanguage === 'Georgian') || (selectedCard?.title === 'ქორწინების ჩანაწერები' && activeLanguage === 'Georgian') || (selectedCard?.title === 'დასაფლავების ჩანაწერები' && activeLanguage === 'Georgian'))) ? 'scale(1)' : 'scale(1.05) translateY(-10px)',
+                    zIndex: 10,
+                  },
+                }}
+              >
+                {/* Card Container with Flip */}
+                <Box
+                  sx={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                    transformStyle: 'preserve-3d',
+                    transition: 'transform 0.6s',
+                    transform: (() => {
+                      const cardKey = `${activeLanguage}-${item.title}`;
+                      const isThisCardFlipped = flippedCards.has(cardKey);
+                      const isClickable = (activeLanguage === 'English' && (item.title === 'Baptism Records' || item.title === 'Marriage Records' || item.title === 'Funeral Records')) || (activeLanguage === 'Greek' && (item.title === 'Βάπτιση' || item.title === 'Γάμος' || item.title === 'Κηδεία')) || (activeLanguage === 'Russian' && (item.title === 'Крещение' || item.title === 'Брак' || item.title === 'Похороны')) || (activeLanguage === 'Romanian' && (item.title === 'Botez' || item.title === 'Căsătorie' || item.title === 'Înmormântare')) || (activeLanguage === 'Georgian' && (item.title === 'ნათლობის ჩანაწერები' || item.title === 'ქორწინების ჩანაწერები' || item.title === 'დასაფლავების ჩანაწერები'));
+                      return isClickable && isThisCardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+                    })(),
+                  }}
+                >
+                  {/* Front of Card */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      backfaceVisibility: 'hidden',
+                      WebkitBackfaceVisibility: 'hidden',
+                      background: 'linear-gradient(180deg, rgba(20,30,55,.92), rgba(12,18,35,.92))',
+                      borderRadius: '18px',
+                      border: '1px solid rgba(255,255,255,.08)',
+                      boxShadow: '0 30px 60px rgba(0,0,0,.45), inset 0 0 0 1px rgba(175,200,255,.04)',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
+                      {/* Brand Top Bar */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          inset: '0 0 auto 0',
+                          height: '5px',
+                          background: 'linear-gradient(90deg, #C8A24B, #f0d890 60%, #C8A24B)',
+                          opacity: 0.9,
+                        }}
+                      />
+
+                      {/* Badge */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: '14px',
+                          right: '14px',
+                          width: '38px',
+                          height: '38px',
+                          borderRadius: '12px',
+                          background: 'radial-gradient(120% 120% at 0% 0%, #C8A24B, #f2deaa)',
+                          color: '#2f2300',
+                          display: 'grid',
+                          placeItems: 'center',
+                          fontWeight: 900,
+                          boxShadow: '0 8px 18px rgba(200,162,75,.35)',
+                          '&::before': {
+                            content: '"✝"',
+                            fontSize: '18px',
+                            transform: 'translateY(-1px)',
+                          },
+                        }}
+                      />
+
+                      {/* Flag Banner */}
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '12px 14px 8px 14px',
+                          borderBottom: '1px solid rgba(255,255,255,.06)',
+                          background: 'linear-gradient(180deg, rgba(20,34,60,.45), rgba(10,14,28,.0))',
+                        }}
+                      >
+                        {/* Flag SVG - All English cards show USA flag */}
+                        <Box sx={{ width: '64px', height: '42px' }}>
+                          {item.flag === 'USA' ? (
+                            // USA flag for all English cards
+                            <svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="64" height="42" fill="#B22234" />
+                              <g fill="#FFFFFF">
+                                <rect x="0" y="0" width="26" height="22" />
+                                <rect x="0" y="4" width="64" height="2" />
+                                <rect x="0" y="8" width="64" height="2" />
+                                <rect x="0" y="12" width="64" height="2" />
+                                <rect x="0" y="16" width="64" height="2" />
+                                <rect x="0" y="20" width="64" height="2" />
+                                <rect x="0" y="24" width="64" height="2" />
+                                <rect x="0" y="28" width="64" height="2" />
+                                <rect x="0" y="32" width="64" height="2" />
+                                <rect x="0" y="36" width="64" height="2" />
+                                <rect x="0" y="40" width="64" height="2" />
+                              </g>
+                              <g fill="#3C3B6E">
+                                <circle cx="3" cy="3" r="1" />
+                                <circle cx="7" cy="3" r="1" />
+                                <circle cx="11" cy="3" r="1" />
+                                <circle cx="15" cy="3" r="1" />
+                                <circle cx="19" cy="3" r="1" />
+                                <circle cx="23" cy="3" r="1" />
+                                <circle cx="3" cy="7" r="1" />
+                                <circle cx="7" cy="7" r="1" />
+                                <circle cx="11" cy="7" r="1" />
+                                <circle cx="15" cy="7" r="1" />
+                                <circle cx="19" cy="7" r="1" />
+                                <circle cx="23" cy="7" r="1" />
+                                <circle cx="3" cy="11" r="1" />
+                                <circle cx="7" cy="11" r="1" />
+                                <circle cx="11" cy="11" r="1" />
+                                <circle cx="15" cy="11" r="1" />
+                                <circle cx="19" cy="11" r="1" />
+                                <circle cx="23" cy="11" r="1" />
+                                <circle cx="3" cy="15" r="1" />
+                                <circle cx="7" cy="15" r="1" />
+                                <circle cx="11" cy="15" r="1" />
+                                <circle cx="15" cy="15" r="1" />
+                                <circle cx="19" cy="15" r="1" />
+                                <circle cx="23" cy="15" r="1" />
+                                <circle cx="3" cy="19" r="1" />
+                                <circle cx="7" cy="19" r="1" />
+                                <circle cx="11" cy="19" r="1" />
+                                <circle cx="15" cy="19" r="1" />
+                                <circle cx="19" cy="19" r="1" />
+                                <circle cx="23" cy="19" r="1" />
+                              </g>
+                            </svg>
+                          ) : item.flag === 'Greece' ? (
+                            // Greece flag
+                            <svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="64" height="42" fill="#0D5EAF" />
+                              <g fill="#FFFFFF">
+                                <rect x="0" y="16" width="64" height="6" />
+                                <rect x="0" y="28" width="64" height="6" />
+                                <rect x="0" y="4" width="64" height="6" />
+                                <rect x="0" y="40" width="64" height="2" />
+                              </g>
+                              <g>
+                                <rect x="0" y="0" width="28" height="24" fill="#0D5EAF" />
+                                <rect x="10" y="0" width="6" height="24" fill="#FFFFFF" />
+                                <rect x="0" y="9" width="28" height="6" fill="#FFFFFF" />
+                              </g>
+                            </svg>
+                          ) : item.flag === 'Russia' ? (
+                            // Russia flag
+                            <svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="64" height="14" y="0" fill="#FFFFFF" />
+                              <rect width="64" height="14" y="14" fill="#0D5EAF" />
+                              <rect width="64" height="14" y="28" fill="#CE1126" />
+                            </svg>
+                          ) : item.flag === 'Romania' ? (
+                            // Romania flag
+                            <svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="21.33" height="42" x="0" fill="#002B7F" />
+                              <rect width="21.33" height="42" x="21.33" fill="#FCD116" />
+                              <rect width="21.33" height="42" x="42.66" fill="#CE1126" />
+                            </svg>
+                          ) : (
+                            // Georgia flag
+                            <svg width="64" height="42" viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="64" height="42" fill="#FFFFFF" />
+                              <rect x="28" y="0" width="8" height="42" fill="#FF0000" />
+                              <rect x="0" y="17" width="64" height="8" fill="#FF0000" />
+                              <rect x="8" y="8" width="8" height="8" fill="#FF0000" />
+                              <rect x="48" y="8" width="8" height="8" fill="#FF0000" />
+                              <rect x="8" y="26" width="8" height="8" fill="#FF0000" />
+                              <rect x="48" y="26" width="8" height="8" fill="#FF0000" />
+                            </svg>
+                          )}
+                        </Box>
+
+                        {/* Flag Title */}
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography
+                            sx={{
+                              fontWeight: 900,
+                              letterSpacing: '.4px',
+                              color: '#eaf2ff',
+                              fontSize: '14px',
+                            }}
+                          >
+                            {item.label}
+                          </Typography>
+                          <Typography
+                            sx={{
+                              fontSize: '12px',
+                              color: '#cbd6ee',
+                            }}
+                          >
+                            {item.title}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Sample Data Snippet */}
+                      <Box
+                        sx={{
+                          background: 'rgba(255,255,255,.045)',
+                          border: '1px solid rgba(255,255,255,.07)',
+                          margin: '10px 14px 0',
+                          borderRadius: '12px',
+                          padding: '10px 12px',
+                          fontFamily: item.flag === 'USA' ? 'serif' : '"Fira Code","Consolas",monospace',
+                          color: '#f3f6ff',
+                          fontSize: item.flag === 'USA' ? '14px' : '12px',
+                          fontWeight: item.flag === 'USA' ? 600 : 400,
+                        }}
+                      >
+                        {item.sampleData.split('\n').map((line, idx) => {
+                          if (item.flag === 'USA') {
+                            // For USA card, just show the field label
+                            return (
+                              <Box key={idx} sx={{ marginBottom: '4px' }}>
+                                {line}
+                              </Box>
+                            );
+                          } else {
+                            // For other cards, show key-value pairs
+                            const parts = line.split(':');
+                            return (
+                              <Box key={idx}>
+                                <span style={{ color: '#9fd0ff' }}>{parts[0]}</span>: <span style={{ color: '#ffe49a' }}>{parts[1]}</span>
+                              </Box>
+                            );
+                          }
+                        })}
+                      </Box>
+
+                      {/* Title and Fields */}
+                      <Box sx={{ padding: '8px 16px 16px' }}>
+                        <Typography
+                          sx={{
+                            fontWeight: 900,
+                            fontSize: '20px',
+                            letterSpacing: '.3px',
+                            color: '#e8edff',
+                            margin: '12px 0 4px',
+                            textShadow: '0 1px 0 rgba(255,255,255,.08)',
+                          }}
+                        >
+                          {item.title}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            margin: '0 0 8px',
+                            fontSize: '12px',
+                            color: '#b7c2dc',
+                          }}
+                        >
+                          {item.fields}
+                        </Typography>
+                      </Box>
+
+                      {/* Shine Effect */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          inset: '-40% -40%',
+                          background: 'linear-gradient(130deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.22) 47%, rgba(255,255,255,0) 52%)',
+                          transform: 'translateX(-60%) rotate(10deg)',
+                          animation: 'shine 6s ease-in-out infinite',
+                          mixBlendMode: 'overlay',
+                          pointerEvents: 'none',
+                          '@keyframes shine': {
+                            '0%': { transform: 'translateX(-60%) rotate(10deg)' },
+                            '50%': { transform: 'translateX(60%) rotate(10deg)' },
+                            '100%': { transform: 'translateX(160%) rotate(10deg)' },
+                          },
+                        }}
+                      />
+                    </Box>
+                  {/* Back of Card */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      backfaceVisibility: 'hidden',
+                      WebkitBackfaceVisibility: 'hidden',
+                      transform: 'rotateY(180deg)',
+                      background: 'linear-gradient(180deg, rgba(20,30,55,.92), rgba(12,18,35,.92))',
+                      borderRadius: '18px',
+                      border: '1px solid rgba(255,255,255,.08)',
+                      boxShadow: '0 30px 60px rgba(0,0,0,.45), inset 0 0 0 1px rgba(175,200,255,.04)',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      padding: '20px',
+                    }}
+                  >
+                    {/* Content Wrapper */}
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                    {/* Back Header */}
+                    <Box sx={{ marginBottom: '20px', textAlign: 'center' }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 900,
+                          fontSize: '24px',
+                          letterSpacing: '.3px',
+                          color: '#e8edff',
+                          marginBottom: '8px',
+                          textShadow: '0 1px 0 rgba(255,255,255,.08)',
+                        }}
+                      >
+                        {item.title}
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontSize: '14px',
+                          color: '#b7c2dc',
+                        }}
+                      >
+                        {activeLanguage === 'Greek' ? 'Λεπτομερείς Πληροφορίες' : activeLanguage === 'Georgian' ? 'დეტალური ინფორმაცია' : 'Detailed Information'}
+                      </Typography>
+                    </Box>
+
+                    {/* Detailed Data */}
+                    {((activeLanguage === 'English' && item.title === 'Baptism Records' && selectedCard?.title === 'Baptism Records') || (activeLanguage === 'Greek' && item.title === 'Βάπτιση' && selectedCard?.title === 'Βάπτιση') || (activeLanguage === 'Georgian' && item.title === 'ნათლობის ჩანაწერები' && selectedCard?.title === 'ნათლობის ჩანაწერები')) ? (
+                      (() => {
+                        const baptismData = activeLanguage === 'Greek' ? greekBaptismData : activeLanguage === 'Georgian' ? georgianBaptismData : englishBaptismData;
+                        const labels = activeLanguage === 'Greek' ? {
+                          firstName: 'Όνομα:',
+                          lastName: 'Επώνυμο:',
+                          dateOfBirth: 'Ημερομηνία Γέννησης:',
+                          dateOfBaptism: 'Ημερομηνία Βάπτισης:',
+                          birthplace: 'Τόπος Γέννησης:',
+                          sponsors: 'Νονοί:',
+                          parentsNames: 'Γονείς:',
+                          clergyName: 'Κληρικός:',
+                        } : activeLanguage === 'Georgian' ? {
+                          firstName: 'სახელი:',
+                          lastName: 'გვარი:',
+                          dateOfBirth: 'დაბადების თარიღი:',
+                          dateOfBaptism: 'ნათლობის თარიღი:',
+                          birthplace: 'დაბადების ადგილი:',
+                          sponsors: 'ნათლიები:',
+                          parentsNames: 'მშობლების სახელები:',
+                          clergyName: 'მღვდლის სახელი:',
+                        } : {
+                          firstName: 'First Name:',
+                          lastName: 'Last Name:',
+                          dateOfBirth: 'Date of Birth:',
+                          dateOfBaptism: 'Date of Baptism:',
+                          birthplace: 'Birthplace:',
+                          sponsors: 'Sponsors:',
+                          parentsNames: 'Parents Names:',
+                          clergyName: 'Clergy Name:',
+                        };
+                        return (
+                          <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.firstName}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {baptismData.firstName}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.lastName}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {baptismData.lastName}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.dateOfBirth}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {baptismData.dateOfBirth}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.dateOfBaptism}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {baptismData.dateOfBaptism}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.birthplace}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {baptismData.birthplace}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.sponsors}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {baptismData.sponsors}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.parentsNames}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {baptismData.parentsNames}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.clergyName}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {baptismData.clergyName}
+                              </Box>
+                            </Box>
+                              </Box>
+                            );
+                      })()
+                    ) : ((activeLanguage === 'English' && item.title === 'Marriage Records' && selectedCard?.title === 'Marriage Records') || (activeLanguage === 'Georgian' && item.title === 'ქორწინების ჩანაწერები' && selectedCard?.title === 'ქორწინების ჩანაწერები')) ? (
+                      (() => {
+                        const marriageData = activeLanguage === 'Georgian' ? georgianMarriageData : englishMarriageData;
+                        const labels = activeLanguage === 'Georgian' ? {
+                          dateMarried: 'ქორწინების თარიღი:',
+                          groom: 'სიძე:',
+                          bride: 'პატარძალი:',
+                          groomsParents: 'სიძის მშობლები:',
+                          bridesParents: 'პატარძლის მშობლები:',
+                          witnesses: 'მოწმეები:',
+                          marriageLicense: 'ქორწინების მოწმობა:',
+                          clergyName: 'მღვდელი:',
+                        } : {
+                          dateMarried: 'Date Married:',
+                          groom: 'Groom:',
+                          bride: 'Bride:',
+                          groomsParents: 'Grooms Parents:',
+                          bridesParents: 'Brides Parents:',
+                          witnesses: 'Witnesses:',
+                          marriageLicense: 'Marriage License:',
+                          clergyName: 'Clergy Name:',
+                        };
+                        return (
+                          <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.dateMarried}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {marriageData.dateMarried}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.groom}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {marriageData.groom}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.bride}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {marriageData.bride}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.groomsParents}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {marriageData.groomsParents}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.bridesParents}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {marriageData.bridesParents}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.witnesses}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {marriageData.witnesses}
+                              </Box>
+                            </Box>
+                            {marriageData.marriageLicense && (
+                              <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                                <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.marriageLicense}</Typography>
+                                <Box sx={{ 
+                                  backgroundColor: theme.palette.background.paper, 
+                                  color: '#C8A24B', 
+                                  fontWeight: 'bold',
+                                  padding: '8px 12px',
+                                  borderRadius: '6px',
+                                  width: '100%',
+                                }}>
+                                  {marriageData.marriageLicense}
+                                </Box>
+                              </Box>
+                            )}
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.clergyName}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {marriageData.clergyName}
+                              </Box>
+                            </Box>
+                          </Box>
+                        );
+                      })()
+                    ) : ((activeLanguage === 'English' && item.title === 'Funeral Records' && selectedCard?.title === 'Funeral Records') || (activeLanguage === 'Georgian' && item.title === 'დასაფლავების ჩანაწერები' && selectedCard?.title === 'დასაფლავების ჩანაწერები')) ? (
+                      (() => {
+                        const funeralData = activeLanguage === 'Georgian' ? georgianFuneralData : englishFuneralData;
+                        const labels = activeLanguage === 'Georgian' ? {
+                          dateDeceased: 'გარდაცვალების თარიღი:',
+                          burialDate: 'დასაფლავების თარიღი:',
+                          age: 'ასაკი:',
+                          burialLocation: 'დასაფლავების ადგილი:',
+                          firstName: 'სახელი:',
+                          lastName: 'გვარი:',
+                          clergyName: 'მღვდელი:',
+                        } : {
+                          dateDeceased: 'Date Deceased:',
+                          burialDate: 'Burial Date:',
+                          age: 'Age:',
+                          burialLocation: 'Burial Location:',
+                          firstName: 'First Name:',
+                          lastName: 'Last Name:',
+                          clergyName: 'Clergy Name:',
+                        };
+                        return (
+                          <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.dateDeceased}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {funeralData.dateDeceased}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.burialDate}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {funeralData.burialDate}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.age}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {funeralData.age}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.burialLocation}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {funeralData.burialLocation}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.firstName}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {funeralData.firstName}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.lastName}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {funeralData.lastName}
+                              </Box>
+                            </Box>
+                            <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                              <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>{labels.clergyName}</Typography>
+                              <Box sx={{ 
+                                backgroundColor: theme.palette.background.paper, 
+                                color: '#C8A24B', 
+                                fontWeight: 'bold',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                width: '100%',
+                              }}>
+                                {funeralData.clergyName}
+                              </Box>
+                            </Box>
+                          </Box>
+                        );
+                      })()
+                    ) : (activeLanguage === 'Greek' && item.title === 'Γάμος' && selectedCard?.title === 'Γάμος') ? (
+                      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Ημερομηνία Γάμου:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekMarriageData.dateMarried}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Γαμπρός:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekMarriageData.groom}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Νύφη:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekMarriageData.bride}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Γονείς Γαμπρού:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekMarriageData.groomsParents}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Γονείς Νύφης:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekMarriageData.bridesParents}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Μάρτυρες:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekMarriageData.witnesses}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Άδεια Γάμου:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekMarriageData.marriageLicense}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Ιερέας:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekMarriageData.clergyName}
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (activeLanguage === 'Greek' && item.title === 'Κηδεία' && selectedCard?.title === 'Κηδεία') ? (
+                      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Ημερομηνία Θανάτου:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekFuneralData.dateDeceased}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Ημερομηνία Κηδείας:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekFuneralData.burialDate}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Ηλικία:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekFuneralData.age}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Τόπος Κηδείας:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekFuneralData.burialLocation}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Όνομα:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekFuneralData.firstName}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Επώνυμο:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekFuneralData.lastName}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Ιερέας:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {greekFuneralData.clergyName}
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (activeLanguage === 'Russian' && item.title === 'Крещение' && selectedCard?.title === 'Крещение') ? (
+                      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Имя:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianBaptismData.firstName}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Фамилия:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianBaptismData.lastName}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Дата рождения:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianBaptismData.dateOfBirth}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Дата крещения:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianBaptismData.dateOfBaptism}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Место рождения:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianBaptismData.birthplace}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Восприемники:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianBaptismData.sponsors}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Родители:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianBaptismData.parentsNames}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Священник:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianBaptismData.clergyName}
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (activeLanguage === 'Russian' && item.title === 'Брак' && selectedCard?.title === 'Брак') ? (
+                      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Дата брака:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianMarriageData.dateMarried}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Жених:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianMarriageData.groom}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Невеста:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianMarriageData.bride}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Родители жениха:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianMarriageData.groomsParents}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Родители невесты:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianMarriageData.bridesParents}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Свидетели:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianMarriageData.witnesses}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Свидетельство о браке:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianMarriageData.marriageLicense}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Священник:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianMarriageData.clergyName}
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (activeLanguage === 'Russian' && item.title === 'Похороны' && selectedCard?.title === 'Похороны') ? (
+                      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Дата смерти:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianFuneralData.dateDeceased}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Дата похорон:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianFuneralData.burialDate}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Возраст:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianFuneralData.age}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Место захоронения:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianFuneralData.burialLocation}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Имя:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianFuneralData.firstName}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Фамилия:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianFuneralData.lastName}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Священник:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {russianFuneralData.clergyName}
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (activeLanguage === 'Romanian' && item.title === 'Botez' && selectedCard?.title === 'Botez') ? (
+                      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Prenume:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianBaptismData.firstName}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Nume de familie:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianBaptismData.lastName}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Data nașterii:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianBaptismData.dateOfBirth}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Data botezului:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianBaptismData.dateOfBaptism}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Locul nașterii:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianBaptismData.birthplace}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Nași:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianBaptismData.sponsors}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Părinți:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianBaptismData.parentsNames}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Preot:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianBaptismData.clergyName}
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (activeLanguage === 'Romanian' && item.title === 'Căsătorie' && selectedCard?.title === 'Căsătorie') ? (
+                      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Data căsătoriei:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianMarriageData.dateMarried}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Mire:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianMarriageData.groom}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Mireasă:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianMarriageData.bride}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Părinții mirelui:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianMarriageData.groomsParents}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Părinții miresei:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianMarriageData.bridesParents}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Martori:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianMarriageData.witnesses}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Licență de căsătorie:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianMarriageData.marriageLicense}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Preot:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianMarriageData.clergyName}
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (activeLanguage === 'Romanian' && item.title === 'Înmormântare' && selectedCard?.title === 'Înmormântare') ? (
+                      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Data decesului:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianFuneralData.dateDeceased}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Data înmormântării:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianFuneralData.burialDate}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Vârsta:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianFuneralData.age}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Locul înmormântării:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianFuneralData.burialLocation}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Prenume:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianFuneralData.firstName}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Nume de familie:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianFuneralData.lastName}
+                          </Box>
+                        </Box>
+                        <Box sx={{ marginBottom: '15px', display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ color: '#f3f6ff', fontSize: '13px', marginBottom: '6px', fontWeight: 600 }}>Preot:</Typography>
+                          <Box sx={{ 
+                            backgroundColor: theme.palette.background.paper, 
+                            color: '#C8A24B', 
+                            fontWeight: 'bold',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            width: '100%',
+                          }}>
+                            {romanianFuneralData.clergyName}
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Box sx={{ flex: 1, overflowY: 'auto', color: '#f3f6ff', fontSize: '14px', lineHeight: '1.6' }}>
+                        {item.sampleData.split('\n').map((line, idx) => (
+                          <Box key={idx} sx={{ marginBottom: '8px' }}>
+                            {line}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+
+                    {/* Back Footer */}
+                    <Box sx={{ marginTop: 'auto', paddingTop: '15px', textAlign: 'center' }}>
+                        <Typography
+                          sx={{
+                            fontSize: '12px',
+                            color: '#b7c2dc',
+                          fontStyle: 'italic',
+                          }}
+                        >
+                        {activeLanguage === 'Greek' ? 'Κάντε κλικ για να γυρίσετε πίσω' : 'Click to flip back'}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+              ))}
+              </Box>
+            </>
+          )}
+        </Container>
+      </Box>
+      )}
+
+      {/* Custom Records Section */}
+      {activeSection === 'custom-records' && (
+        <CustomRecordsSection>
+          <Container maxWidth="lg" sx={{ pt: 4 }}>
           <Box textAlign="center" mb={6}>
             <Typography
-              variant="h3"
-              fontWeight={700}
-              color="#6B46C1"
-              gutterBottom
-              fontFamily='"Inter", sans-serif'
-            >
-              Custom Records — Built Around Your Parish
-            </Typography>
-            <Typography
               variant="h6"
-              color="#666666"
-              sx={{ maxWidth: 600, mx: 'auto', lineHeight: 1.6, mb: 4 }}
+              sx={{ 
+                color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666',
+                maxWidth: 600, 
+                mx: 'auto', 
+                lineHeight: 1.6, 
+                mb: 4 
+              }}
             >
               OrthodoxMetrics supports any record type your parish may need — 
               beyond baptisms, marriages, and funerals. Each community is 
@@ -1457,7 +3638,7 @@ const HomePage: React.FC = () => {
                 >
                   <IconFile size={32} color="white" />
                 </Box>
-                <Typography variant="body2" color="#666666">Documents</Typography>
+                <Typography variant="body2" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666' }}>Documents</Typography>
               </Box>
               
               <Box textAlign="center">
@@ -1476,7 +3657,7 @@ const HomePage: React.FC = () => {
                 >
                   <IconPlus size={32} color="white" />
                 </Box>
-                <Typography variant="body2" color="#666666">Add Records</Typography>
+                <Typography variant="body2" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666' }}>Add Records</Typography>
               </Box>
               
               <Box textAlign="center">
@@ -1495,7 +3676,7 @@ const HomePage: React.FC = () => {
                 >
                   <IconSettings size={32} color="white" />
                 </Box>
-                <Typography variant="body2" color="#666666">Customize</Typography>
+                <Typography variant="body2" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666' }}>Customize</Typography>
               </Box>
               
               <Box textAlign="center">
@@ -1514,11 +3695,11 @@ const HomePage: React.FC = () => {
                 >
                   <IconArchive size={32} color="white" />
                 </Box>
-                <Typography variant="body2" color="#666666">Archives</Typography>
+                <Typography variant="body2" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666' }}>Archives</Typography>
               </Box>
             </Stack>
             
-            <Typography variant="body1" color="#666666" sx={{ maxWidth: 700, mx: 'auto' }}>
+            <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', maxWidth: 700, mx: 'auto' }}>
               From confirmation records to special liturgical events, from community service 
               logs to educational certificates — we adapt to your parish's unique traditions 
               and needs.
@@ -1535,20 +3716,129 @@ const HomePage: React.FC = () => {
           </Box>
         </Container>
       </CustomRecordsSection>
+      )}
+
+      {/* Powerful Features Section */}
+      {activeSection === 'powerful-features' && (
+      <Box
+        sx={{
+          backgroundColor: '#fafafa',
+          padding: '2rem 0 5rem 0'
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box textAlign="center" mb={6}>
+            <Typography
+              variant="h6"
+              color="#666666"
+              sx={{ maxWidth: 600, mx: 'auto' }}
+            >
+              Everything you need to digitize, organize, and manage your Orthodox
+              parish records with confidence.
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                md: 'repeat(3, 1fr)',
+              },
+              gap: 4,
+            }}
+          >
+            {/* Row 1 */}
+            <FeatureCard>
+              <FeatureIcon sx={{ backgroundColor: '#FFF9E6' }}>
+                <IconFile size={32} color="#F5B800" />
+              </FeatureIcon>
+              <Typography variant="h5" fontWeight={700} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
+                OCR Done Right
+              </Typography>
+              <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
+                Advanced optical character recognition that reads
+                handwritten and printed text in multiple Orthodox
+                languages with exceptional accuracy.
+              </Typography>
+            </FeatureCard>
+
+            <FeatureCard>
+              <IconShield size={32} color="#6B46C1" style={{ marginBottom: '1.5rem' }} />
+              <Typography variant="h5" fontWeight={700} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
+                Enterprise Security
+              </Typography>
+              <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
+                Bank-level encryption, secure cloud storage, and
+                complete data ownership ensure your parish records
+                remain private and protected.
+              </Typography>
+            </FeatureCard>
+
+            <FeatureCard>
+              <IconWorld size={32} color="#6B46C1" style={{ marginBottom: '1.5rem' }} />
+              <Typography variant="h5" fontWeight={700} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
+                Multilingual Support
+              </Typography>
+              <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
+                Native support for English, Greek, Russian, and
+                Romanian with automatic language detection and
+                character recognition.
+              </Typography>
+            </FeatureCard>
+
+            {/* Row 2 */}
+            <FeatureCard>
+              <FeatureIcon sx={{ backgroundColor: '#FFF9E6' }}>
+                <IconSearch size={32} color="#F5B800" />
+              </FeatureIcon>
+              <Typography variant="h5" fontWeight={700} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
+                Instant Search
+              </Typography>
+              <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
+                Find any record in seconds with powerful search
+                capabilities across names, dates, locations, and custom
+                fields.
+              </Typography>
+            </FeatureCard>
+
+            <FeatureCard>
+              <IconUsers size={32} color="#6B46C1" style={{ marginBottom: '1.5rem' }} />
+              <Typography variant="h5" fontWeight={700} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
+                Role-Based Access
+              </Typography>
+              <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
+                Granular permissions system allowing different access
+                levels for clergy, staff, and volunteers while maintaining
+                security.
+              </Typography>
+            </FeatureCard>
+
+            <FeatureCard>
+              <IconHistory size={32} color="#6B46C1" style={{ marginBottom: '1.5rem' }} />
+              <Typography variant="h5" fontWeight={600} color="#1a1a1a" gutterBottom>
+                Audit Trail
+              </Typography>
+              <Typography variant="body1" color="#666666" lineHeight={1.6}>
+                Complete history of all changes and access to records,
+                ensuring accountability and maintaining historical
+                integrity.
+              </Typography>
+            </FeatureCard>
+          </Box>
+        </Container>
+      </Box>
+      )}
 
       {/* How It Works Section */}
       <Box sx={{ backgroundColor: '#fafafa', padding: '5rem 0' }}>
         <Container maxWidth="lg">
-          <Box textAlign="center" mb={6}>
-            <Typography
-              variant="h3"
-              fontWeight={700}
-              color="#6B46C1"
-              gutterBottom
-              fontFamily='"Inter", sans-serif'
-            >
+          <SectionHeaderBox sx={{ mb: 6 }}>
+            <SectionHeaderTitle component="h3">
               How It Works
-            </Typography>
+            </SectionHeaderTitle>
+          </SectionHeaderBox>
+          <Box textAlign="center" mb={6}>
             <Typography
               variant="h6"
               color="#666666"
@@ -1629,518 +3919,127 @@ const HomePage: React.FC = () => {
                   >
                     {item.icon}
                   </Box>
-                  <Typography variant="h6" fontWeight={600} color="#1a1a1a" gutterBottom>
+                  <Typography variant="h6" fontWeight={700} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
                     Step {item.step}
                   </Typography>
-                  <Typography variant="h6" fontWeight={600} color="#F5B800" gutterBottom>
+                  <Typography variant="h6" fontWeight={700} sx={{ color: '#F5B800' }} gutterBottom>
                     {item.title}
                   </Typography>
-                  <Typography variant="body2" color="#666666">
+                  <Typography variant="body2" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666' }}>
                     {item.description}
                   </Typography>
                 </Card>
               </Box>
             ))}
           </Box>
-          
-          <Box textAlign="center" mt={6}>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<IconSparkles />}
-              onClick={() => window.open('/demo', '_blank')}
-              sx={{
-                backgroundColor: '#F5B800',
-                color: '#1a1a1a',
-                textTransform: 'none',
-                fontWeight: 600,
-                padding: '1rem 2.5rem',
-                borderRadius: '12px',
-                fontSize: '1.1rem',
-                '&:hover': {
-                  backgroundColor: '#E6A600',
-                },
-              }}
-            >
-              Try Full Demo
-            </Button>
-            <Typography variant="body2" sx={{ mt: 2, opacity: 0.8 }}>
-              See how easy it is to manage thousands of records and thousands of automations.
-            </Typography>
-          </Box>
         </Container>
       </Box>
 
-      {/* Powerful Features Section */}
-      <Box sx={{ backgroundColor: '#fafafa', padding: '5rem 0' }}>
-        <Container maxWidth="lg">
-          <Box textAlign="center" mb={6}>
-            <Typography
-              variant="h3"
-              fontWeight={700}
-              color="#6B46C1"
-              gutterBottom
-              fontFamily='"Inter", sans-serif'
-            >
-              Powerful Features
-            </Typography>
-            <Typography
-              variant="h6"
-              color="#666666"
-              sx={{ maxWidth: 600, mx: 'auto' }}
-            >
-              Everything you need to digitize, organize, and manage your Orthodox 
-              parish records with confidence.
-            </Typography>
-          </Box>
-          
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                md: 'repeat(3, 1fr)',
-              },
-              gap: 4,
-            }}
-          >
-            {/* Row 1 */}
-            <FeatureCard>
-              <FeatureIcon sx={{ backgroundColor: '#FFF9E6' }}>
-                <IconFile size={32} color="#F5B800" />
-              </FeatureIcon>
-              <Typography variant="h5" fontWeight={600} color="#1a1a1a" gutterBottom>
-                AI-Powered OCR
-              </Typography>
-              <Typography variant="body1" color="#666666" lineHeight={1.6}>
-                Advanced optical character recognition that reads 
-                handwritten and printed text in multiple Orthodox 
-                languages with exceptional accuracy.
-              </Typography>
-            </FeatureCard>
-            
-            <FeatureCard>
-              <FeatureIcon sx={{ backgroundColor: '#F3E8FF' }}>
-                <IconShield size={32} color="#6B46C1" />
-              </FeatureIcon>
-              <Typography variant="h5" fontWeight={600} color="#1a1a1a" gutterBottom>
-                Enterprise Security
-              </Typography>
-              <Typography variant="body1" color="#666666" lineHeight={1.6}>
-                Bank-level encryption, secure cloud storage, and 
-                complete data ownership ensure your parish records 
-                remain private and protected.
-              </Typography>
-            </FeatureCard>
-            
-            <FeatureCard>
-              <FeatureIcon sx={{ backgroundColor: '#F3E8FF' }}>
-                <IconWorld size={32} color="#6B46C1" />
-              </FeatureIcon>
-              <Typography variant="h5" fontWeight={600} color="#1a1a1a" gutterBottom>
-                Multilingual Support
-              </Typography>
-              <Typography variant="body1" color="#666666" lineHeight={1.6}>
-                Native support for English, Greek, Russian, and 
-                Romanian with automatic language detection and 
-                character recognition.
-              </Typography>
-            </FeatureCard>
-            
-            {/* Row 2 */}
-            <FeatureCard>
-              <FeatureIcon sx={{ backgroundColor: '#FFF9E6' }}>
-                <IconSearch size={32} color="#F5B800" />
-              </FeatureIcon>
-              <Typography variant="h5" fontWeight={600} color="#1a1a1a" gutterBottom>
-                Instant Search
-              </Typography>
-              <Typography variant="body1" color="#666666" lineHeight={1.6}>
-                Find any record in seconds with powerful search 
-                capabilities across names, dates, locations, and custom 
-                fields.
-              </Typography>
-            </FeatureCard>
-            
-            <FeatureCard>
-              <FeatureIcon sx={{ backgroundColor: '#F3E8FF' }}>
-                <IconUsers size={32} color="#6B46C1" />
-              </FeatureIcon>
-              <Typography variant="h5" fontWeight={600} color="#1a1a1a" gutterBottom>
-                Role-Based Access
-              </Typography>
-              <Typography variant="body1" color="#666666" lineHeight={1.6}>
-                Granular permissions system allowing different access 
-                levels for clergy, staff, and volunteers while maintaining 
-                security.
-              </Typography>
-            </FeatureCard>
-            
-            <FeatureCard>
-              <FeatureIcon sx={{ backgroundColor: '#F3E8FF' }}>
-                <IconHistory size={32} color="#6B46C1" />
-              </FeatureIcon>
-              <Typography variant="h5" fontWeight={600} color="#1a1a1a" gutterBottom>
-                Audit Trail
-              </Typography>
-              <Typography variant="body1" color="#666666" lineHeight={1.6}>
-                Complete history of all changes and access to records, 
-                ensuring accountability and maintaining historical 
-                integrity.
-              </Typography>
-            </FeatureCard>
-          </Box>
-        </Container>
-      </Box>
+      {/* FAQ Section - appears at top when header is collapsed */}
+      {isHeaderCollapsed && (
+        <Box sx={{ mt: 0 }}>
+          {renderFAQSection()}
+        </Box>
+      )}
 
-      {/* FAQ Section */}
-      <Box sx={{ backgroundColor: 'white', padding: '5rem 0' }}>
-        <Container maxWidth="md">
-          <Box textAlign="center" mb={6}>
-            <Typography
-              variant="h3"
-              fontWeight={700}
-              color="#6B46C1"
-              gutterBottom
-              fontFamily='"Inter", sans-serif'
-            >
-              Frequently Asked Questions
-            </Typography>
-            <Typography
-              variant="h6"
-              color="#666666"
-            >
-              Common questions about OrthodoxMetrics and how it can help your parish.
-            </Typography>
-          </Box>
-          
-          <Box sx={{ maxWidth: '100%' }}>
-            {faqData.map((faq, index) => (
-              <Box
-                key={index}
-                sx={{
-                  marginBottom: '1rem',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    borderColor: '#F5B800',
-                    boxShadow: '0 4px 12px rgba(245, 184, 0, 0.1)',
-                  },
-                }}
-              >
-                <Box
-                  onClick={() => toggleFAQ(index)}
-                  sx={{
-                    padding: '1.5rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    backgroundColor: openFAQ === index ? '#FFF9E6' : 'white',
-                    transition: 'background-color 0.3s ease',
-                  }}
-                >
-                  <Typography 
-                    variant="h6" 
-                    color="#6B46C1" 
-                    fontWeight={600}
-                    sx={{ 
-                      fontSize: '1.1rem',
-                      flex: 1,
-                      marginRight: '1rem',
-                    }}
-                  >
-                    {faq.question}
-                  </Typography>
-                  <IconChevronDown 
-                    size={24} 
-                    color="#666666"
-                    style={{
-                      transform: openFAQ === index ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.3s ease',
-                    }}
-                  />
-                </Box>
-                {openFAQ === index && (
-                  <Box
-                    sx={{
-                      padding: '0 1.5rem 1.5rem 1.5rem',
-                      backgroundColor: '#FAFAFA',
-                      borderTop: '1px solid #e0e0e0',
-                      animation: 'fadeIn 0.3s ease',
-                      '@keyframes fadeIn': {
-                        from: { opacity: 0, transform: 'translateY(-10px)' },
-                        to: { opacity: 1, transform: 'translateY(0)' },
-                      },
-                    }}
-                  >
-                    <Typography 
-                      variant="body1" 
-                      color="#666666" 
-                      lineHeight={1.7}
-                      sx={{ fontSize: '1rem' }}
-                    >
-                      {faq.answer}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-            ))}
-          </Box>
-        </Container>
-      </Box>
-
-      {/* Final CTA Section */}
+      {/* Graphical Analysis Section */}
+      {activeSection === 'graphical-analysis' && (
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #2D1B69 0%, #1A1A2E 100%)',
-          padding: '5rem 0',
-          color: 'white',
-          position: 'relative',
-          overflow: 'hidden',
+          backgroundColor: theme.palette.background.default,
+          padding: '2rem 0 5rem 0'
         }}
       >
-        {/* Golden circles for decoration */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '10%',
-            left: '5%',
-            width: '100px',
-            height: '100px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, #F5B800 0%, transparent 70%)',
-            opacity: 0.3,
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: '20%',
-            right: '10%',
-            width: '150px',
-            height: '150px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, #F5B800 0%, transparent 70%)',
-            opacity: 0.2,
-          }}
-        />
-        
         <Container maxWidth="lg">
-          <Box textAlign="center">
-            <Typography
-              variant="h2"
-              fontWeight={700}
-              gutterBottom
-              fontFamily='"Inter", sans-serif'
-              sx={{ mb: 2 }}
-            >
-              Start today with your{' '}
-              <span style={{ color: '#F5B800' }}>parish</span>.
-              <br />
-              We'll handle the{' '}
-              <span style={{ color: '#F5B800' }}>records</span>.
-            </Typography>
-            
+          <Box textAlign="center" mb={6}>
             <Typography
               variant="h6"
-              sx={{ mb: 4, maxWidth: 600, mx: 'auto', opacity: 0.9 }}
+              sx={{ 
+                maxWidth: 600, 
+                mx: 'auto', 
+                lineHeight: 1.6, 
+                mb: 4,
+                color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666'
+              }}
             >
-              Join hundreds of Orthodox parishes who trust OrthodoxMetrics to preserve 
-              their sacred history for future generations.
-            </Typography>
-            
-            <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
-              <Button
-                variant="contained"
-                size="large"
-                sx={{
-                  backgroundColor: '#F5B800',
-                  color: '#1a1a1a',
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  padding: '1rem 2.5rem',
-                  borderRadius: '12px',
-                  fontSize: '1.1rem',
-                  '&:hover': {
-                    backgroundColor: '#E6A600',
-                  },
-                }}
-              >
-                Get Started Free
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                sx={{
-                  borderColor: '#F5B800',
-                  color: '#F5B800',
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  padding: '1rem 2.5rem',
-                  borderRadius: '12px',
-                  fontSize: '1.1rem',
-                  '&:hover': {
-                    borderColor: '#E6A600',
-                    backgroundColor: 'rgba(245, 184, 0, 0.1)',
-                  },
-                }}
-              >
-                Request Demo
-              </Button>
-            </Stack>
-            
-            <Typography variant="body2" sx={{ mt: 3, opacity: 0.7 }}>
-              30-day free trial • No credit card required • Setup in minutes
+              Visualize your parish data with interactive charts, graphs, and analytics. 
+              Gain insights into trends, patterns, and statistics across your records.
             </Typography>
           </Box>
-        </Container>
-      </Box>
 
-      {/* Footer */}
-      <FooterAnimationContainer
-        sx={{
-          backgroundColor: '#2D1B69',
-          color: 'white',
-          padding: '3rem 0 2rem',
-          position: 'relative',
-        }}
-      >
-        <FooterRayLayer>
-          <FooterSweepLayer1 />
-          <FooterSweepLayer2 />
-          <FooterShimmerLayer />
-          <FooterPulseLayer />
-          <FooterRadialLayer />
-        </FooterRayLayer>
-        <Container maxWidth="lg">
           <Box
             sx={{
               display: 'grid',
               gridTemplateColumns: {
                 xs: '1fr',
-                md: 'repeat(4, 1fr)',
+                md: 'repeat(2, 1fr)',
               },
               gap: 4,
             }}
           >
-            <Box>
-              <Box display="flex" alignItems="center" mb={2}>
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: '50%',
-                    backgroundColor: '#F5B800',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    mr: 2,
-                  }}
-                >
-                  <Typography variant="body1" fontWeight={700} color="#1a1a1a">
-                    OM
-                  </Typography>
-                </Box>
-                <Typography variant="h6" fontWeight={600}>
-                  OrthodoxMetrics
-                </Typography>
-              </Box>
-              <Typography variant="body2" color="rgba(255,255,255,0.7)" mb={2}>
-                Digitizing Orthodox records and empowering the 
-                Church with secure, multilingual record-keeping 
-                solutions.
+            <FeatureCard>
+              <FeatureIcon sx={{ backgroundColor: '#E3F2FD' }}>
+                <IconSparkles size={32} color="#6B46C1" />
+              </FeatureIcon>
+              <Typography variant="h5" fontWeight={600} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
+                Interactive Charts
               </Typography>
-              <Stack direction="row" spacing={1}>
-                <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                  <Typography variant="body2">𝕏</Typography>
-                </IconButton>
-                <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                  <Typography variant="body2">🐦</Typography>
-                </IconButton>
-                <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                  <Typography variant="body2">💼</Typography>
-                </IconButton>
-              </Stack>
-            </Box>
-            
-            <Box>
-              <Typography variant="h6" fontWeight={600} mb={2}>
-                About
+              <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
+                Create dynamic visualizations of your parish records with customizable 
+                charts and graphs that update in real-time.
               </Typography>
-              <Stack spacing={1}>
-                {['Our Mission', 'How It Works', 'Security', 'Careers'].map((link) => (
-                  <Typography
-                    key={link}
-                    variant="body2"
-                    color="rgba(255,255,255,0.7)"
-                    sx={{ cursor: 'pointer', '&:hover': { color: '#F5B800' } }}
-                  >
-                    {link}
-                  </Typography>
-                ))}
-              </Stack>
-            </Box>
-            
-            <Box>
-              <Typography variant="h6" fontWeight={600} mb={2}>
-                Support
+            </FeatureCard>
+
+            <FeatureCard>
+              <FeatureIcon sx={{ backgroundColor: '#FFF9E6' }}>
+                <IconDatabase size={32} color="#F5B800" />
+              </FeatureIcon>
+              <Typography variant="h5" fontWeight={600} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
+                Data Analytics
               </Typography>
-              <Stack spacing={1}>
-                {['Documentation', 'Help Center', 'Contact Us', 'System Status'].map((link) => (
-                  <Typography
-                    key={link}
-                    variant="body2"
-                    color="rgba(255,255,255,0.7)"
-                    sx={{ cursor: 'pointer', '&:hover': { color: '#F5B800' } }}
-                  >
-                    {link}
-                  </Typography>
-                ))}
-              </Stack>
-            </Box>
-            
-            <Box>
-              <Typography variant="h6" fontWeight={600} mb={2}>
-                Legal
+              <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
+                Analyze trends over time, compare years, and generate comprehensive 
+                reports on your parish's historical data.
               </Typography>
-              <Stack spacing={1}>
-                {['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'GDPR'].map((link) => (
-                  <Typography
-                    key={link}
-                    variant="body2"
-                    color="rgba(255,255,255,0.7)"
-                    sx={{ cursor: 'pointer', '&:hover': { color: '#F5B800' } }}
-                  >
-                    {link}
-                  </Typography>
-                ))}
-              </Stack>
-            </Box>
-          </Box>
-          
-          <Box
-            sx={{
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-              mt: 3,
-              pt: 2,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-            }}
-          >
-            <Typography variant="body2" color="rgba(255,255,255,0.7)">
-              © 2024 OrthodoxMetrics. All rights reserved.
-            </Typography>
-            <Typography variant="body2" color="rgba(255,255,255,0.7)">
-              Made with ❤️ for the Orthodox Community
-            </Typography>
+            </FeatureCard>
+
+            <FeatureCard>
+              <FeatureIcon sx={{ backgroundColor: '#E8F5E9' }}>
+                <IconHistory size={32} color="#4CAF50" />
+              </FeatureIcon>
+              <Typography variant="h5" fontWeight={600} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
+                Historical Trends
+              </Typography>
+              <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
+                Track changes and patterns across decades of parish records, 
+                identifying meaningful trends in your community.
+              </Typography>
+            </FeatureCard>
+
+            <FeatureCard>
+              <FeatureIcon sx={{ backgroundColor: '#FCE4EC' }}>
+                <IconEye size={32} color="#E91E63" />
+              </FeatureIcon>
+              <Typography variant="h5" fontWeight={600} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
+                Visual Reports
+              </Typography>
+              <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
+                Generate beautiful, exportable reports with charts and visualizations 
+                perfect for presentations and documentation.
+              </Typography>
+            </FeatureCard>
           </Box>
         </Container>
-      </FooterAnimationContainer>
+      </Box>
+      )}
+
+      {/* FAQ Section - original position when header is not collapsed */}
+      {!isHeaderCollapsed && renderFAQSection()}
+
+      <Footer />
+      
+      {/* Quick Contact Sidebar */}
+      <QuickContactSidebar />
     </Box>
   );
 };

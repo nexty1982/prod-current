@@ -3,7 +3,7 @@
  * Service layer for OCR job management and file processing
  */
 
-import { apiClient } from '../../../shared/lib/axiosInstance';
+import { apiClient } from '../../../../shared/lib/axiosInstance';
 
 export interface OCRJob {
   id: string;
@@ -104,6 +104,17 @@ export async function getJobResult(id: string): Promise<OCRResult | null> {
 
 export async function fetchSettings(churchId?: number): Promise<OCRSettings> {
   try {
+    // Try church-specific endpoint first, then fallback to global
+    if (churchId) {
+      try {
+        const { data } = await apiClient.get(`/api/church/${churchId}/ocr/settings`);
+        if (data) return data;
+      } catch (err) {
+        // Fall through to try global endpoint
+      }
+    }
+    
+    // Try global endpoint
     const params = churchId ? { churchId } : {};
     const { data } = await apiClient.get('/api/ocr/settings', { params });
     return data ?? {
@@ -117,6 +128,8 @@ export async function fetchSettings(churchId?: number): Promise<OCRSettings> {
       confidenceThreshold: 75
     };
   } catch (error) {
+    // Return defaults if endpoint doesn't exist
+    console.warn('OCR settings endpoint not available, using defaults');
     return {
       engine: 'tesseract',
       language: 'eng',
@@ -131,8 +144,27 @@ export async function fetchSettings(churchId?: number): Promise<OCRSettings> {
 }
 
 export async function updateSettings(settings: OCRSettings, churchId?: number): Promise<void> {
-  const payload = churchId ? { ...settings, churchId } : settings;
-  await apiClient.put('/api/ocr/settings', payload);
+  try {
+    // Try church-specific endpoint first
+    if (churchId) {
+      try {
+        await apiClient.put(`/api/church/${churchId}/ocr/settings`, settings);
+        return;
+      } catch (err) {
+        // Fall through to try global endpoint
+      }
+    }
+    
+    // Try global endpoint
+    const payload = churchId ? { ...settings, churchId } : settings;
+    await apiClient.put('/api/ocr/settings', payload);
+  } catch (error: any) {
+    // If endpoint doesn't exist, throw a more helpful error
+    if (error.response?.status === 404) {
+      throw new Error('OCR settings endpoint not implemented on backend. Settings are saved locally only.');
+    }
+    throw error;
+  }
 }
 
 export async function fetchChurches(): Promise<Array<{ id: number; name: string }>> {

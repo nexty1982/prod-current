@@ -2,16 +2,23 @@ import React from 'react';
 import { Box, Typography, Button, Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { IconShieldX } from '@tabler/icons-react';
+import { useAuth } from '../../../context/AuthContext';
 
 const Unauthorized: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleGoBack = () => {
     navigate(-1);
   };
 
   const handleGoHome = () => {
-    navigate('/');
+    // For non-superadmin users, redirect to their baptism records page
+    if (user && user.role !== 'super_admin' && user.church_id) {
+      navigate(`/apps/records/baptism?church_id=${user.church_id}`);
+    } else {
+      navigate('/');
+    }
   };
 
   return (

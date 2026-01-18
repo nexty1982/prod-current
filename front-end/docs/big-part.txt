@@ -1,0 +1,193 @@
+
+__________________________________________________________________________________________________________________________
+
+You are Cursor in the OrthodoxMetrics repo.
+
+TASK
+Implement Phase 1 backend-only transcription normalization and expose it via the existing OCR “get results” endpoint (or a new transcription endpoint if required by current architecture).
+
+CONSTRAINTS
+- No database schema changes.
+- Do not alter OCR provider calls.
+- Do not touch Fusion/Review/Mapping.
+- TypeScript strict, no `any`.
+- Add unit tests for normalization behavior.
+
+IMPLEMENT
+1) Create:
+- server/src/ocr/transcription/scriptDetect.ts
+- server/src/ocr/transcription/types.ts
+- server/src/ocr/transcription/clusterLines.ts
+- server/src/ocr/transcription/normalizeTranscription.ts
+- server/src/ocr/transcription/extractTokensFromVision.ts (or adapter from current OCR response shape)
+
+2) `normalizeTranscription(...)` must:
+- detect script (cyrillic/latin/unknown)
+- filter obvious garbage conservatively
+- reconstruct lines (if provider lines not present)
+- reconstruct paragraphs by vertical gaps + script boundaries
+- preserve hyphenated line joins
+- output `{ text, paragraphs, diagnostics }`
+
+3) Wire API:
+- Prefer: extend existing OCR result response with `transcription`
+- If risky: add GET /api/ocr/jobs/:jobId/transcription?page=1 (or per imageId) returning only transcription
+
+4) Tests:
+- Add fixtures that mimic the user’s “good” output characteristics:
+  - Cyrillic tokens remain Cyrillic
+  - Paragraph breaks occur
+  - Mixed English block remains intact
+- Tests must not depend on external OCR; they should feed `tokens` directly.
+
+DELIVERABLE
+- Working endpoint returning transcription text for an existing job/image.
+- Unit tests passing.
+
+OUTPUT FORMAT
+After implementation, report:
+- What changed
+- Files changed
+- How to test (curl + UI endpoint)
+Do not discuss UI.
+____________________________________________________________________________________________________________________________________________________________________________________________
+You are Cursor in the OrthodoxMetrics repo.
+
+TASK
+Update the OCR Inspection Panel / OCR result view so the default right panel shows a readable “Transcription” view using the backend’s `transcription.text`. Remove/disable the current unreadable token dump from the default experience.
+
+CONSTRAINTS
+- Do not change backend in this prompt.
+- No schema changes.
+- Do not refactor Fusion/Review/Mapping logic.
+- Preserve existing tabs, but make “Transcription” default and primary.
+
+IMPLEMENT
+1) Identify the current component rendering the OCR preview and replace its body with:
+- Header: “Transcription”
+- Buttons:
+  - Copy (copies transcription.text)
+- Scrollable container showing transcription.text with paragraph spacing preserved.
+
+2) Data fetching:
+- Use the existing API call that fetches OCR result and read `transcription.text`.
+- If the UI currently receives only raw OCR, add a small client call to the new transcription endpoint (already implemented in backend prompt).
+
+3) UX:
+- No bounding boxes or token lists by default.
+- Maintain existing left image viewer.
+- Handle loading/error states cleanly:
+  - Loading: “Extracting text…”
+  - Error: show a simple inline error (toast comes later).
+
+DELIVERABLE
+- When opening an OCR processed image/job, the user sees a clean transcription block.
+
+OUTPUT FORMAT
+- What changed
+- Files changed
+- How to test (UI path)
+
+
+______________________________________________________________________________________________________________________________________________________________________________________________
+Prompt 5 — Add “Document processing” settings under OCR Record Uploader (UI-only persistence)
+You are Cursor in the OrthodoxMetrics repo.
+
+TASK
+Add a professional “Document processing” settings section under the OCR Record Uploader header, matching the provided screenshots.
+
+CONSTRAINTS
+- UI-only persistence is acceptable (localStorage).
+- Backend may ignore settings for now.
+- Do not touch database schema.
+- Do not refactor OCR pipeline.
+
+IMPLEMENT
+1) Add a collapsible card directly under uploader header:
+- Title: “Document processing”
+- Badges: “Customize AI” and “Experimental”
+- Three Select dropdowns:
+  A) Spelling: “Fix spelling mistakes” (default) / “Transcribe exactly as written”
+  B) Scope: “Extract all text” (default) / “Extract handwritten text only”
+  C) Formatting: “Improving formatting for better readability” (default)
+
+2) Persistence:
+- Store in localStorage key: `om_ocr_doc_processing_settings`
+- Load defaults on mount
+- “Save changes” button writes localStorage and updates in-memory state.
+
+3) Wiring:
+- Ensure the current OCR request includes these options in its payload/query if a request body exists.
+- If no place to send, store anyway and leave a TODO-free commentless implementation (i.e., just persist + read).
+
+DELIVERABLE
+- Settings render and persist; UI matches screenshot pattern.
+
+OUTPUT FORMAT
+- What changed
+- Files changed
+- How to test
+_________________________________________________________________________________________________________________________________________________________________________
+Prompt 6 — Professional toast notifications (OCR uploader + inspection panel)
+
+You are Cursor in the OrthodoxMetrics repo.
+
+TASK
+Implement professional toast notifications for OCR uploader and OCR inspection panel actions.
+
+CONSTRAINTS
+- Reuse existing toast/snackbar system if present. Do NOT replatform the entire app.
+- If none exists, implement a minimal provider and hook used only by OCR pages.
+- Non-blocking, auto-dismiss, consistent styling.
+
+TOAST EVENTS
+- OCR started: “Extracting text…” (info)
+- OCR success: “OCR completed” (success)
+- OCR failure: “OCR processing failed” (error)
+- Copy success: “Copied to clipboard” (success)
+- Settings saved: “Settings saved” (success)
+- Optional warning if confidence low: “Low confidence detected (64%)” (warning)
+
+DELIVERABLE
+- Toasts fire on the above events across uploader + inspection panel.
+
+OUTPUT FORMAT
+- What changed
+- Files changed
+- How to test
+
+
+______________________________________________________________________________________________________________________________________________________________________________
+Prompt 7 — Polish pass: uploader landing page + status copy (match handwritingocr.com calm UI)
+text
+Copy code
+You are Cursor in the OrthodoxMetrics repo.
+
+TASK
+Polish the OCR Record Uploader landing page to feel like handwritingocr.com’s “landing” and “documents list” calm UX.
+
+CONSTRAINTS
+- No new features.
+- No schema changes.
+- Only improve layout, spacing, and status messaging.
+
+FIXES
+- Replace noisy/technical status text with human copy:
+  - “Ready to upload”
+  - “Uploading…”
+  - “Processing…”
+  - “Completed”
+  - “Failed”
+- Reduce percentage spam; only show % for upload progress, not for everything.
+- Ensure the upload queue and processed images sections have clear hierarchy.
+- Ensure the transcription preview shown in list rows is either:
+  - first N chars of transcription.text (clean), or
+  - “View transcription” link, but not garbage tokens.
+
+DELIVERABLE
+- The uploader page looks professional and calm.
+
+OUTPUT FORMAT
+- What changed
+- Files changed
+- How to test

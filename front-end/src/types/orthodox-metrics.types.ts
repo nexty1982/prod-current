@@ -43,6 +43,7 @@ export interface User {
   first_name: string;
   last_name: string;
   full_name?: string;                 // Generated full name from database
+  nick?: string;                      // Nick field from database (display_name)
   timezone?: string;
   is_active: boolean;
   last_login?: string;

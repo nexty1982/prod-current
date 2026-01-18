@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useWebSocket } from './WebSocketContext';
 
 // Types
 export interface NotificationType {
@@ -89,6 +90,7 @@ export const useNotifications = () => {
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { authenticated, user } = useAuth();
+    const { onNewNotification, isConnected } = useWebSocket();
     const [notifications, setNotifications] = useState<NotificationType[]>([]);
     const [counts, setCounts] = useState<NotificationCounts>({
         total: 0,
@@ -359,22 +361,50 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
     }, [authenticated, fetchNotifications, fetchCounts, fetchPreferences]);
 
-    // Set up real-time updates (you can implement WebSocket or Server-Sent Events here)
+    // Set up real-time updates via WebSocket
+    useEffect(() => {
+        if (!authenticated || !isConnected) return;
+
+        // Listen for new notifications via WebSocket
+        const unsubscribe = onNewNotification((notificationData: any) => {
+            console.log('📨 Received new notification via WebSocket:', notificationData);
+            
+            // Transform the notification data to match NotificationType
+            const notification: NotificationType = {
+                id: notificationData.id || 0,
+                user_id: notificationData.user_id || user?.id || 0,
+                notification_type_id: notificationData.notification_type_id || 0,
+                title: notificationData.title || 'Notification',
+                message: notificationData.message || '',
+                data: notificationData.data || {},
+                priority: notificationData.priority || 'normal',
+                is_read: notificationData.is_read || false,
+                is_dismissed: notificationData.is_dismissed || false,
+                read_at: notificationData.read_at,
+                dismissed_at: notificationData.dismissed_at,
+                expires_at: notificationData.expires_at,
+                action_url: notificationData.action_url,
+                action_text: notificationData.action_text,
+                icon: notificationData.icon,
+                image_url: notificationData.image_url,
+                created_at: notificationData.created_at || notificationData.timestamp || new Date().toISOString(),
+                updated_at: notificationData.updated_at || new Date().toISOString(),
+                type_name: notificationData.type_name || notificationData.type || 'admin_message',
+                category: notificationData.category || 'admin'
+            };
+
+            addNotification(notification);
+        });
+
+        return () => {
+            unsubscribe();
+        };
+    }, [authenticated, isConnected, onNewNotification, addNotification, user]);
+
+    // Polling fallback for counts (in case WebSocket is not available)
     useEffect(() => {
         if (!authenticated) return;
 
-        // Example: Set up Server-Sent Events for real-time notifications
-        // const eventSource = new EventSource('/api/notifications/stream');
-        // eventSource.onmessage = (event) => {
-        //     const notification = JSON.parse(event.data);
-        //     addNotification(notification);
-        // };
-        // 
-        // return () => {
-        //     eventSource.close();
-        // };
-
-        // For now, we'll use polling as a simple solution
         const interval = setInterval(() => {
             fetchCounts();
         }, 30000); // Check for new notifications every 30 seconds

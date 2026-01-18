@@ -39,7 +39,124 @@ class ApiClient {
           config.url = `/api${config.url}`;
         }
 
-        const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
+        // Handle FormData - remove Content-Type header to let browser set it with boundary
+        if (config.data instanceof FormData) {
+          // Delete Content-Type header so axios/browser can set it automatically with boundary
+          if (config.headers) {
+            delete config.headers['Content-Type'];
+          }
+        }
+
+        // Remove any invalid church_id headers for routes that don't need them
+        // Routes that should NOT have church_id headers:
+        // - /api/my/churches (user's own churches)
+        // - /api/churches (global list, admin only)
+        // - /api/auth/* (authentication endpoints)
+        const url = config.url || '';
+        const fullUrl = config.baseURL ? `${config.baseURL}${url}` : url;
+        const routesWithoutChurchId = [
+          '/api/my/churches',
+          '/api/churches',
+          '/api/auth/',
+          '/auth/',
+          'my/churches',
+          'churches', // Only match exact 'churches' not 'church/46/...'
+        ];
+        
+        // Check if this is a route that shouldn't have church_id
+        // Match both path-only and full URLs
+        const shouldSkipChurchId = routesWithoutChurchId.some(route => {
+          if (route === 'churches') {
+            // Exact match for 'churches' endpoint (not church/46/...)
+            return url === '/api/churches' || url === '/churches' || fullUrl.includes('/api/churches') || fullUrl.includes('/churches');
+          }
+          return url.includes(route) || fullUrl.includes(route);
+        });
+        
+        // Check for invalid church_id header values (empty, "none", "undefined") on ALL routes
+        // These invalid values can cause backend validation errors
+        if (config.headers) {
+          const headerKeys = Object.keys(config.headers);
+          const invalidValues = ['', 'none', 'undefined', 'null', 'nan'];
+          
+          headerKeys.forEach(key => {
+            const lowerKey = key.toLowerCase();
+            const headerValue = config.headers[key];
+            const valueStr = headerValue !== null && headerValue !== undefined ? String(headerValue).toLowerCase().trim() : '';
+            
+            // Remove church_id headers with invalid values OR if route should skip church_id
+            if (lowerKey.includes('church') && (lowerKey.includes('id') || lowerKey.includes('church-id'))) {
+              if (shouldSkipChurchId || invalidValues.includes(valueStr)) {
+                delete config.headers[key];
+                console.log(`🧹 Removed church_id header: ${key}="${headerValue}" from ${url} (skip: ${shouldSkipChurchId}, invalid: ${invalidValues.includes(valueStr)})`);
+              }
+            }
+          });
+          
+          // Also explicitly check and remove common variations
+          const commonChurchHeaders = [
+            'x-church-id', 'X-Church-Id', 'X-CHURCH-ID',
+            'church-id', 'Church-Id', 'CHURCH-ID',
+            'churchId', 'ChurchId', 'CHURCHID',
+            'x-churchid', 'X-ChurchId'
+          ];
+          
+          commonChurchHeaders.forEach(headerName => {
+            const value = config.headers[headerName];
+            if (value !== undefined && value !== null) {
+              const valueStr = String(value).toLowerCase().trim();
+              if (shouldSkipChurchId || invalidValues.includes(valueStr)) {
+                delete config.headers[headerName];
+                console.log(`🧹 Removed church_id header (explicit): ${headerName}="${value}" from ${url}`);
+              }
+            } else if (shouldSkipChurchId && value === null) {
+              // Remove null values for routes that should skip
+              delete config.headers[headerName];
+            }
+          });
+        }
+        
+        if (shouldSkipChurchId) {
+          // Final cleanup: ensure ALL church-related headers are removed for these routes
+          if (config.headers) {
+            const remainingChurchHeaders = Object.keys(config.headers).filter(k => {
+              const lowerKey = k.toLowerCase();
+              return lowerKey.includes('church') && (lowerKey.includes('id') || lowerKey.includes('church-id'));
+            });
+            
+            if (remainingChurchHeaders.length > 0) {
+              remainingChurchHeaders.forEach(key => {
+                delete config.headers[key];
+                console.log(`🧹 Force-removed remaining church_id header: ${key} from ${url}`);
+              });
+            }
+          }
+          
+          // Remove from commonHeaders if it exists
+          if ((config as any).commonHeaders) {
+            Object.keys((config as any).commonHeaders).forEach(key => {
+              const lowerKey = key.toLowerCase();
+              if (lowerKey.includes('church') && (lowerKey.includes('id') || lowerKey.includes('church-id'))) {
+                delete (config as any).commonHeaders[key];
+              }
+            });
+          }
+          
+          // Debug: Log final headers for problematic routes
+          if (config.headers) {
+            const churchHeaders = Object.keys(config.headers).filter(k => {
+              const lowerKey = k.toLowerCase();
+              return lowerKey.includes('church') && (lowerKey.includes('id') || lowerKey.includes('church-id'));
+            });
+            if (churchHeaders.length > 0) {
+              console.warn(`⚠️ Warning: Church headers still present for ${url}:`, churchHeaders);
+            } else {
+              console.log(`✅ Verified no church_id headers for ${url}`);
+            }
+          }
+        }
+
+        // fullUrl was already declared above, reuse it for logging
         console.log(`🌐 API Request: ${config.method?.toUpperCase()} ${fullUrl}`);
         console.log(`🔧 BaseURL: "${config.baseURL || 'none'}", URL: "${config.url}"`);
         return config;
@@ -74,6 +191,8 @@ class ApiClient {
         (enhancedError as any).code = error.code;
         (enhancedError as any).isNetworkError = !error.response;
         (enhancedError as any).originalError = error;
+        // Preserve the response object for easier access to response.data
+        (enhancedError as any).response = error.response;
 
         throw enhancedError;
       }

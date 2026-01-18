@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Книги Бракосочетаний – Православная Церковь</title>
+<style>
+  :root{
+    --crimson:#8B0000;
+    --crimson-700:#A31212;
+    --crimson-50:#FFF0F0;
+    --ink:#2a1b1b;
+    --muted:#6b5555;
+    --gold:#d9b650;
+    --border:#ecd7d7;
+  }
+  html,body{margin:0;padding:0;background:#ffffff;color:var(--ink);font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans', 'Noto Sans JP', 'Noto Sans Russian', Arial, sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 16px 60px}
+  .title{font-size:28px;font-weight:800;margin:6px 0 4px;color:var(--ink)}
+  .subtitle{margin:0 0 18px;color:var(--muted)}
+  .table-card{border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 34px rgba(139,0,0,.12);overflow:hidden}
+  .header{background:var(--crimson);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .header h2{font-size:18px;margin:0;font-weight:800}
+  .search{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .search input{height:36px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;padding:0 12px;outline:none;min-width:220px}
+  .search input::placeholder{color:rgba(255,255,255,.85)}
+  .table{width:100%;border-collapse:separate;border-spacing:0}
+  .table thead th{
+    position:sticky;top:0;background:linear-gradient(0deg, #ffd9d9, #fff4f4);
+    font-size:13px;color:#5b1f1f;text-align:left;padding:10px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none
+  }
+  .table tbody td{padding:10px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:top}
+  .table tbody tr:hover{background:var(--crimson-50)}
+  .sort-ind{font-size:11px;opacity:.75;margin-left:6px}
+  .actions-btn{background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+  .actions-btn:hover{border-color:var(--gold);box-shadow:0 2px 0 rgba(217,182,80,.3)}
+  .pagination{display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:10px 12px;background:#fff7f7;border-top:1px solid var(--border)}
+  .pg-btn{background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:999px;cursor:pointer}
+  .pg-btn[disabled]{opacity:.5;cursor:not-allowed}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;background:#fff6e1;color:#5a3e00;border:1px solid #ffe0a3}
+  .watermark{position:absolute;inset:auto 16px 16px auto;opacity:.06;font-size:120px;font-weight:900;line-height:1;pointer-events:none;color:var(--crimson)}
+  .table-wrap{position:relative}
+  /* Modal */
+  .modal{position:fixed;inset:0;background:rgba(32,0,0,.55);display:none;place-items:center;padding:16px;z-index:30}
+  .modal[open]{display:grid}
+  .dialog{background:#fff;border-radius:16px;max-width:720px;width:100%;box-shadow:0 22px 60px rgba(0,0,0,.3);border:1px solid var(--border);overflow:hidden}
+  .dialog-head{background:var(--crimson);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+  .dialog-body{padding:16px}
+  .dl{display:grid;grid-template-columns:220px 1fr;gap:10px 16px}
+  .dl dt{font-weight:700;color:#4b1919}
+  .dl dd{margin:0;color:#351818}
+  .close{background:#fff;border:1px solid rgba(255,255,255,.35);color:var(--crimson);border-radius:10px;padding:6px 10px;cursor:pointer}
+  .footer{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:34px;font-weight:900;color:var(--ink)">Книги Бракосочетаний – Православная Церковь</div>
+    </div>
+
+    <div class="table-card">
+      <div class="header">
+        <h2>Журнал записей о браке</h2>
+        <div class="search">
+          <input id="q" type="search" placeholder="Поиск…" aria-label="Поиск" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="watermark">✝︎</div>
+        <table class="table" aria-label="Книги бракосочетаний">
+          <thead>
+            <tr>
+              <th data-key="mdate">Дата брака <span class="sort-ind">↕</span></th>
+              <th data-key="fname_groom">Имя жениха <span class="sort-ind">↕</span></th>
+              <th data-key="lname_groom">Фамилия жениха <span class="sort-ind">↕</span></th>
+              <th data-key="parentsg">Родители жениха <span class="sort-ind">↕</span></th>
+              <th data-key="fname_bride">Имя невесты <span class="sort-ind">↕</span></th>
+              <th data-key="lname_bride">Фамилия невесты <span class="sort-ind">↕</span></th>
+              <th data-key="parentsb">Родители невесты <span class="sort-ind">↕</span></th>
+              <th data-key="witness">Свидетели <span class="sort-ind">↕</span></th>
+              <th data-key="mlicense">Свидетельство о браке <span class="sort-ind">↕</span></th>
+              <th data-key="clergy">Священник <span class="sort-ind">↕</span></th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button class="pg-btn" id="prev">Назад</button>
+        <div id="pageinfo" aria-live="polite">Страница 1 из 1</div>
+        <button class="pg-btn" id="next">Вперёд</button>
+      </div>
+    </div>
+
+    <div class="footer">Щёлкните по заголовку для сортировки • 10 записей на страницу • «Просмотр записи» для подробностей</div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div id="dialog-title">Просмотр записи</div>
+        <button class="close" id="close">Закрыть</button>
+      </div>
+      <div class="dialog-body">
+        <dl class="dl" id="detail"></dl>
+      </div>
+    </div>
+  </div>
+
+<script id="embedded-data" type="application/json">[{"mdate": "2011-08-24", "fname_groom": "Юрий", "lname_groom": "Васильев", "parentsg": "Константин & Татьяна Васильев", "fname_bride": "Юлия", "lname_bride": "Соколов", "parentsb": "Николай & Юлия Соколов", "witness": "Сергей Сафонов", "mlicense": "№ ПР-353537", "clergy": "Пр. Иоанн Никитин"}, {"mdate": "2011-08-11", "fname_groom": "Константин", "lname_groom": "Никитин", "parentsg": "Дмитрий & Анна Никитин", "fname_bride": "Юлия", "lname_bride": "Васильев", "parentsb": "Павел & Ксения Васильев", "witness": "Александр Егоров", "mlicense": "№ ЗС-336821", "clergy": "Пр. Афанасий Васильев"}, {"mdate": "2015-12-18", "fname_groom": "Александр", "lname_groom": "Васильев", "parentsg": "Иван & Виктория Васильев", "fname_bride": "Ольга", "lname_bride": "Попов", "parentsb": "Роман & Елена Попов", "witness": "Павел Волков, Полина Крылов", "mlicense": "№ ВМ-272923", "clergy": "Пр. Афанасий Ефимов"}, {"mdate": "2005-11-04", "fname_groom": "Андрей", "lname_groom": "Иванов", "parentsg": "Павел & Елена Иванов", "fname_bride": "Татьяна", "lname_bride": "Петров", "parentsb": "Михаил & Анастасия Петров", "witness": "Роман Волков, Ксения Сафонов", "mlicense": "№ ВЛ-691236", "clergy": "Пр. Константин Морозов"}, {"mdate": "2015-06-25", "fname_groom": "Николай", "lname_groom": "Петров", "parentsg": "Павел & Юлия Петров", "fname_bride": "Ксения", "lname_bride": "Смирнов", "parentsb": "Иван & Анна Смирнов", "witness": "Иван Степанов, Анастасия Никитин", "mlicense": "№ ЗС-834464", "clergy": "Пр. Николай Смирнов"}, {"mdate": "2012-09-29", "fname_groom": "Георгий", "lname_groom": "Новиков", "parentsg": "Павел & Ольга Новиков", "fname_bride": "Елена", "lname_bride": "Никитин", "parentsb": "Владимир & Елена Никитин", "witness": "Александр Константинов, Ольга Константинов", "mlicense": "№ ЗС-945110", "clergy": "Пр. Николай Кузнецов"}, {"mdate": "2021-08-31", "fname_groom": "Сергей", "lname_groom": "Васильев", "parentsg": "Константин & Светлана Васильев", "fname_bride": "Елена", "lname_bride": "Макаров", "parentsb": "Николай & Ольга Макаров", "witness": "Фёдор Фёдоров, Татьяна Никитин", "mlicense": "№ НН-499126", "clergy": "Пр. Георгий Никитин"}, {"mdate": "2018-04-22", "fname_groom": "Юрий", "lname_groom": "Иванов", "parentsg": "Николай & Юлия Иванов", "fname_bride": "Полина", "lname_bride": "Смирнов", "parentsb": "Андрей & Анна Смирнов", "witness": "Иван Фёдоров", "mlicense": "№ ЗС-536504", "clergy": "Пр. Иоанн Морозов"}, {"mdate": "2019-05-10", "fname_groom": "Владимир", "lname_groom": "Морозов", "parentsg": "Фёдор & Ксения Морозов", "fname_bride": "Екатерина", "lname_bride": "Новиков", "parentsb": "Михаил & Светлана Новиков", "witness": "Сергей Сафонов, Мария Сафонов", "mlicense": "№ СС-308587", "clergy": "Пр. Спиридон Кузнецов"}, {"mdate": "2015-09-26", "fname_groom": "Александр", "lname_groom": "Соколов", "parentsg": "Дмитрий & Юлия Соколов", "fname_bride": "Ирина", "lname_bride": "Смирнов", "parentsb": "Сергей & Дарья Смирнов", "witness": "Фёдор Фёдоров, Ирина Егоров", "mlicense": "№ МР-540535", "clergy": "Пр. Феодор Зайцев"}, {"mdate": "2015-06-09", "fname_groom": "Роман", "lname_groom": "Иванов", "parentsg": "Дмитрий & Виктория Иванов", "fname_bride": "Полина", "lname_bride": "Васильев", "parentsb": "Андрей & Елена Васильев", "witness": "Константин Фёдоров, Анастасия Беляев", "mlicense": "№ ЗС-583945", "clergy": "Пр. Феодор Петров"}, {"mdate": "2007-09-05", "fname_groom": "Павел", "lname_groom": "Петров", "parentsg": "Олег & Наталия Петров", "fname_bride": "Мария", "lname_bride": "Новиков", "parentsb": "Роман & Ольга Новиков", "witness": "Олег Беляев", "mlicense": "№ КМ-765011", "clergy": "Пр. Георгий Соколов"}, {"mdate": "2015-10-30", "fname_groom": "Константин", "lname_groom": "Соколов", "parentsg": "Юрий & Екатерина Соколов", "fname_bride": "Полина", "lname_bride": "Макаров", "parentsb": "Сергей & Виктория Макаров", "witness": "Иван Никитин, Светлана Константинов", "mlicense": "№ КМ-450579", "clergy": "Пр. Николай Новиков"}, {"mdate": "2007-05-23", "fname_groom": "Дмитрий", "lname_groom": "Макаров", "parentsg": "Дмитрий & Юлия Макаров", "fname_bride": "Светлана", "lname_bride": "Попов", "parentsb": "Георгий & Светлана Попов", "witness": "Михаил Константинов, Полина Никитин", "mlicense": "№ КМ-724354", "clergy": "Пр. Константин Романов"}, {"mdate": "2023-05-30", "fname_groom": "Юрий", "lname_groom": "Кузнецов", "parentsg": "Константин & Наталия Кузнецов", "fname_bride": "Дарья", "lname_bride": "Морозов", "parentsb": "Константин & Татьяна Морозов", "witness": "Георгий Константинов", "mlicense": "№ ВМ-331797", "clergy": "Пр. Феодор Кузнецов"}, {"mdate": "2011-03-05", "fname_groom": "Андрей", "lname_groom": "Ефимов", "parentsg": "Николай & Ольга Ефимов", "fname_bride": "Екатерина", "lname_bride": "Ефимов", "parentsb": "Михаил & Виктория Ефимов", "witness": "Иван Волков", "mlicense": "№ СС-862401", "clergy": "Пр. Иоанн Макаров"}, {"mdate": "2007-01-12", "fname_groom": "Иван", "lname_groom": "Попов", "parentsg": "Иван & Ольга Попов", "fname_bride": "Ольга", "lname_bride": "Орлов", "parentsb": "Юрий & Мария Орлов", "witness": "Сергей Крылов, Юлия Егоров", "mlicense": "№ ЕС-104469", "clergy": "Пр. Георгий Кузнецов"}, {"mdate": "2016-06-26", "fname_groom": "Дмитрий", "lname_groom": "Попов", "parentsg": "Юрий & Юлия Попов", "fname_bride": "Татьяна", "lname_bride": "Попов", "parentsb": "Александр & Ксения Попов", "witness": "Александр Крылов", "mlicense": "№ СС-544148", "clergy": "Пр. Константин Морозов"}, {"mdate": "2018-03-26", "fname_groom": "Владимир", "lname_groom": "Морозов", "parentsg": "Павел & Ирина Морозов", "fname_bride": "Мария", "lname_bride": "Попов", "parentsb": "Николай & Ксения Попов", "witness": "Сергей Беляев", "mlicense": "№ КМ-373424", "clergy": "Пр. Николай Макаров"}, {"mdate": "2014-01-25", "fname_groom": "Михаил", "lname_groom": "Романов", "parentsg": "Дмитрий & Виктория Романов", "fname_bride": "Полина", "lname_bride": "Зайцев", "parentsb": "Владимир & Татьяна Зайцев", "witness": "Константин Сафонов", "mlicense": "№ ВМ-771581", "clergy": "Пр. Спиридон Петров"}, {"mdate": "2010-03-31", "fname_groom": "Роман", "lname_groom": "Соколов", "parentsg": "Владимир & Светлана Соколов", "fname_bride": "Полина", "lname_bride": "Новиков", "parentsb": "Андрей & Ксения Новиков", "witness": "Николай Егоров, Татьяна Беляев", "mlicense": "№ СС-494498", "clergy": "Пр. Иоанн Ефимов"}, {"mdate": "2018-05-07", "fname_groom": "Георгий", "lname_groom": "Ефимов", "parentsg": "Олег & Елена Ефимов", "fname_bride": "Елена", "lname_bride": "Макаров", "parentsb": "Олег & Екатерина Макаров", "witness": "Роман Степанов", "mlicense": "№ ЕС-597843", "clergy": "Пр. Георгий Зайцев"}, {"mdate": "2007-09-06", "fname_groom": "Фёдор", "lname_groom": "Иванов", "parentsg": "Роман & Виктория Иванов", "fname_bride": "Светлана", "lname_bride": "Макаров", "parentsb": "Сергей & Дарья Макаров", "witness": "Фёдор Егоров", "mlicense": "№ ВМ-383028", "clergy": "Пр. Георгий Попов"}, {"mdate": "2021-11-12", "fname_groom": "Олег", "lname_groom": "Иванов", "parentsg": "Константин & Ирина Иванов", "fname_bride": "Ксения", "lname_bride": "Соколов", "parentsb": "Роман & Екатерина Соколов", "witness": "Иван Крылов, Татьяна Соколов", "mlicense": "№ ВМ-399448", "clergy": "Пр. Георгий Ефимов"}, {"mdate": "2016-12-08", "fname_groom": "Александр", "lname_groom": "Ефимов", "parentsg": "Андрей & Татьяна Ефимов", "fname_bride": "Юлия", "lname_bride": "Соколов", "parentsb": "Фёдор & Ирина Соколов", "witness": "Андрей Крылов, Полина Волков", "mlicense": "№ МР-545558", "clergy": "Пр. Афанасий Иванов"}, {"mdate": "2019-10-09", "fname_groom": "Олег", "lname_groom": "Иванов", "parentsg": "Фёдор & Светлана Иванов", "fname_bride": "Ольга", "lname_bride": "Морозов", "parentsb": "Михаил & Наталия Морозов", "witness": "Иван Крылов, Виктория Егоров", "mlicense": "№ ВМ-531595", "clergy": "Пр. Георгий Зайцев"}, {"mdate": "2021-08-08", "fname_groom": "Андрей", "lname_groom": "Романов", "parentsg": "Роман & Анастасия Романов", "fname_bride": "Анна", "lname_bride": "Орлов", "parentsb": "Дмитрий & Ирина Орлов", "witness": "Дмитрий Фёдоров", "mlicense": "№ ВЛ-342071", "clergy": "Пр. Николай Орлов"}, {"mdate": "2015-04-29", "fname_groom": "Константин", "lname_groom": "Соколов", "parentsg": "Олег & Виктория Соколов", "fname_bride": "Наталия", "lname_bride": "Попов", "parentsb": "Владимир & Светлана Попов", "witness": "Константин Сафонов, Виктория Степанов", "mlicense": "№ ПР-352258", "clergy": "Пр. Спиридон Иванов"}, {"mdate": "2010-06-28", "fname_groom": "Дмитрий", "lname_groom": "Новиков", "parentsg": "Роман & Елена Новиков", "fname_bride": "Елена", "lname_bride": "Никитин", "parentsb": "Олег & Виктория Никитин", "witness": "Олег Волков, Наталия Константинов", "mlicense": "№ ВЛ-569991", "clergy": "Пр. Николай Смирнов"}, {"mdate": "2022-04-29", "fname_groom": "Николай", "lname_groom": "Новиков", "parentsg": "Олег & Виктория Новиков", "fname_bride": "Наталия", "lname_bride": "Никитин", "parentsb": "Олег & Наталия Никитин", "witness": "Константин Константинов", "mlicense": "№ АБ-796614", "clergy": "Пр. Константин Иванов"}, {"mdate": "2021-12-06", "fname_groom": "Иван", "lname_groom": "Попов", "parentsg": "Дмитрий & Ольга Попов", "fname_bride": "Елена", "lname_bride": "Петров", "parentsb": "Роман & Ирина Петров", "witness": "Фёдор Фёдоров", "mlicense": "№ НН-909146", "clergy": "Пр. Спиридон Новиков"}, {"mdate": "2018-05-15", "fname_groom": "Иван", "lname_groom": "Морозов", "parentsg": "Олег & Ольга Морозов", "fname_bride": "Татьяна", "lname_bride": "Никитин", "parentsb": "Дмитрий & Виктория Никитин", "witness": "Андрей Сафонов, Мария Константинов", "mlicense": "№ ПР-912500", "clergy": "Пр. Дмитрий Макаров"}, {"mdate": "2013-09-24", "fname_groom": "Роман", "lname_groom": "Ефимов", "parentsg": "Андрей & Анастасия Ефимов", "fname_bride": "Анастасия", "lname_bride": "Орлов", "parentsb": "Андрей & Ольга Орлов", "witness": "Николай Никитин, Анастасия Степанов", "mlicense": "№ КМ-441521", "clergy": "Пр. Дмитрий Морозов"}, {"mdate": "2016-10-28", "fname_groom": "Олег", "lname_groom": "Новиков", "parentsg": "Дмитрий & Дарья Новиков", "fname_bride": "Виктория", "lname_bride": "Никитин", "parentsb": "Роман & Ксения Никитин", "witness": "Юрий Беляев, Наталия Волков", "mlicense": "№ ВЛ-884973", "clergy": "Пр. Константин Романов"}, {"mdate": "2007-07-07", "fname_groom": "Роман", "lname_groom": "Никитин", "parentsg": "Андрей & Полина Никитин", "fname_bride": "Ирина", "lname_bride": "Кузнецов", "parentsb": "Фёдор & Наталия Кузнецов", "witness": "Андрей Крылов, Ольга Сафонов", "mlicense": "№ ПР-964254", "clergy": "Пр. Дмитрий Орлов"}, {"mdate": "2020-09-06", "fname_groom": "Андрей", "lname_groom": "Романов", "parentsg": "Александр & Светлана Романов", "fname_bride": "Виктория", "lname_bride": "Морозов", "parentsb": "Юрий & Светлана Морозов", "witness": "Роман Егоров, Наталия Крылов", "mlicense": "№ ВМ-534281", "clergy": "Пр. Иоанн Орлов"}, {"mdate": "2020-02-21", "fname_groom": "Георгий", "lname_groom": "Зайцев", "parentsg": "Роман & Анна Зайцев", "fname_bride": "Ирина", "lname_bride": "Романов", "parentsb": "Андрей & Ксения Романов", "witness": "Роман Крылов, Дарья Степанов", "mlicense": "№ ЗС-876670", "clergy": "Пр. Дмитрий Петров"}, {"mdate": "2019-07-31", "fname_groom": "Юрий", "lname_groom": "Иванов", "parentsg": "Константин & Анастасия Иванов", "fname_bride": "Анастасия", "lname_bride": "Смирнов", "parentsb": "Роман & Светлана Смирнов", "witness": "Александр Никитин, Анна Беляев", "mlicense": "№ КМ-237157", "clergy": "Пр. Дмитрий Соколов"}, {"mdate": "2024-07-08", "fname_groom": "Иван", "lname_groom": "Романов", "parentsg": "Роман & Екатерина Романов", "fname_bride": "Светлана", "lname_bride": "Новиков", "parentsb": "Константин & Ольга Новиков", "witness": "Иван Сафонов, Юлия Беляев", "mlicense": "№ ВЛ-920336", "clergy": "Пр. Афанасий Попов"}, {"mdate": "2005-10-22", "fname_groom": "Павел", "lname_groom": "Орлов", "parentsg": "Николай & Виктория Орлов", "fname_bride": "Дарья", "lname_bride": "Иванов", "parentsb": "Олег & Наталия Иванов", "witness": "Иван Соколов, Наталия Фёдоров", "mlicense": "№ ЕС-835485", "clergy": "Пр. Спиридон Ефимов"}, {"mdate": "2021-11-05", "fname_groom": "Дмитрий", "lname_groom": "Орлов", "parentsg": "Александр & Анастасия Орлов", "fname_bride": "Анастасия", "lname_bride": "Орлов", "parentsb": "Владимир & Елена Орлов", "witness": "Николай Егоров, Ксения Беляев", "mlicense": "№ ЕС-121578", "clergy": "Пр. Афанасий Морозов"}, {"mdate": "2006-08-12", "fname_groom": "Георгий", "lname_groom": "Макаров", "parentsg": "Роман & Полина Макаров", "fname_bride": "Светлана", "lname_bride": "Попов", "parentsb": "Юрий & Дарья Попов", "witness": "Александр Сафонов", "mlicense": "№ НН-381955", "clergy": "Пр. Константин Кузнецов"}, {"mdate": "2013-01-17", "fname_groom": "Андрей", "lname_groom": "Васильев", "parentsg": "Михаил & Елена Васильев", "fname_bride": "Мария", "lname_bride": "Попов", "parentsb": "Павел & Наталия Попов", "witness": "Александр Волков", "mlicense": "№ СС-487575", "clergy": "Пр. Спиридон Никитин"}, {"mdate": "2020-06-30", "fname_groom": "Владимир", "lname_groom": "Морозов", "parentsg": "Михаил & Виктория Морозов", "fname_bride": "Наталия", "lname_bride": "Новиков", "parentsb": "Георгий & Елена Новиков", "witness": "Андрей Фёдоров, Екатерина Волков", "mlicense": "№ ВМ-674384", "clergy": "Пр. Николай Ефимов"}, {"mdate": "2013-10-27", "fname_groom": "Иван", "lname_groom": "Романов", "parentsg": "Иван & Екатерина Романов", "fname_bride": "Юлия", "lname_bride": "Васильев", "parentsb": "Сергей & Мария Васильев", "witness": "Андрей Константинов", "mlicense": "№ ВМ-916524", "clergy": "Пр. Иоанн Иванов"}, {"mdate": "2016-01-12", "fname_groom": "Фёдор", "lname_groom": "Васильев", "parentsg": "Олег & Анна Васильев", "fname_bride": "Татьяна", "lname_bride": "Морозов", "parentsb": "Роман & Анна Морозов", "witness": "Владимир Константинов, Екатерина Сафонов", "mlicense": "№ ЕС-658432", "clergy": "Пр. Спиридон Зайцев"}, {"mdate": "2005-07-01", "fname_groom": "Юрий", "lname_groom": "Кузнецов", "parentsg": "Андрей & Татьяна Кузнецов", "fname_bride": "Светлана", "lname_bride": "Попов", "parentsb": "Александр & Екатерина Попов", "witness": "Андрей Константинов, Ксения Сафонов", "mlicense": "№ НН-610375", "clergy": "Пр. Феодор Ефимов"}, {"mdate": "2019-08-05", "fname_groom": "Георгий", "lname_groom": "Петров", "parentsg": "Александр & Ксения Петров", "fname_bride": "Ирина", "lname_bride": "Никитин", "parentsb": "Константин & Наталия Никитин", "witness": "Владимир Соколов, Анна Соколов", "mlicense": "№ ВМ-711584", "clergy": "Пр. Георгий Никитин"}, {"mdate": "2021-12-16", "fname_groom": "Юрий", "lname_groom": "Смирнов", "parentsg": "Олег & Анастасия Смирнов", "fname_bride": "Ксения", "lname_bride": "Никитин", "parentsb": "Роман & Наталия Никитин", "witness": "Георгий Константинов, Полина Фёдоров", "mlicense": "№ ЕС-555081", "clergy": "Пр. Николай Петров"}, {"mdate": "2010-08-08", "fname_groom": "Константин", "lname_groom": "Петров", "parentsg": "Павел & Мария Петров", "fname_bride": "Наталия", "lname_bride": "Соколов", "parentsb": "Сергей & Мария Соколов", "witness": "Олег Константинов", "mlicense": "№ ВМ-202560", "clergy": "Пр. Иоанн Морозов"}]</script>
+
+<script>
+let DATA = [];
+// Load data from JSON file
+DATA = JSON.parse(document.getElementById('embedded-data').textContent);
+
+// --- State ---
+let state = {
+  sortKey: null,
+  sortDir: 1, // 1 asc, -1 desc
+  page: 1,
+  pageSize: 10,
+  q: ""
+};
+
+const rowsEl = document.getElementById('rows');
+const prevEl = document.getElementById('prev');
+const nextEl = document.getElementById('next');
+const pageinfoEl = document.getElementById('pageinfo');
+const qEl = document.getElementById('q');
+const modal = document.getElementById('modal');
+const detail = document.getElementById('detail');
+const closeBtn = document.getElementById('close');
+
+function normalize(s){ return (s||"").toString().toLowerCase(); }
+
+function filtered(){
+  const q = normalize(state.q);
+  if(!q) return DATA.slice();
+  return DATA.filter(r => {
+    return [r.fname_groom, r.lname_groom, r.fname_bride, r.lname_bride].some(v => normalize(v).includes(q));
+  });
+}
+
+function sorted(list){
+  if(!state.sortKey) return list;
+  const key = state.sortKey;
+  const dir = state.sortDir;
+  return list.slice().sort((a,b)=> (a[key] > b[key] ? 1 : a[key] < b[key] ? -1 : 0) * dir);
+}
+
+function paged(list){
+  const start = (state.page-1)*state.pageSize;
+  return list.slice(start, start+state.pageSize);
+}
+
+function render(){
+  const f = filtered();
+  const s = sorted(f);
+  const p = paged(s);
+  const totalPages = Math.max(1, Math.ceil(f.length / state.pageSize));
+
+  rowsEl.innerHTML = p.map((r,i)=> `
+    <tr>
+      <td>${r.mdate}</td>
+      <td>${r.fname_groom}</td>
+      <td>${r.lname_groom}</td>
+      <td>${r.parentsg}</td>
+      <td>${r.fname_bride}</td>
+      <td>${r.lname_bride}</td>
+      <td>${r.parentsb}</td>
+      <td>${r.witness}</td>
+      <td>${r.mlicense ? '<span class="badge">'+r.mlicense+'</span>' : '—'}</td>
+      <td>${r.clergy}</td>
+      <td><button class="actions-btn" data-view="${(state.page-1)*state.pageSize + i}">Просмотр записи</button></td>
+    </tr>
+  `).join('');
+
+  pageinfoEl.textContent = `Страница ${state.page} из ${totalPages}`;
+  prevEl.disabled = state.page <= 1;
+  nextEl.disabled = state.page >= totalPages;
+}
+
+function openModal(record){
+  detail.innerHTML = `
+    <dt>Дата брака</dt><dd>${record.mdate}</dd>
+    <dt>Имя жениха</dt><dd>${record.fname_groom}</dd>
+    <dt>Фамилия жениха</dt><dd>${record.lname_groom}</dd>
+    <dt>Родители жениха</dt><dd>${record.parentsg}</dd>
+    <dt>Имя невесты</dt><dd>${record.fname_bride}</dd>
+    <dt>Фамилия невесты</dt><dd>${record.lname_bride}</dd>
+    <dt>Родители невесты</dt><dd>${record.parentsb}</dd>
+    <dt>Свидетели</dt><dd>${record.witness || '—'}</dd>
+    <dt>Свидетельство о браке</dt><dd>${record.mlicense || '—'}</dd>
+    <dt>Священник</dt><dd>${record.clergy}</dd>
+  `;
+  modal.setAttribute('open','');
+}
+
+document.querySelectorAll('th[data-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const k = th.getAttribute('data-key');
+    if(state.sortKey === k){ state.sortDir *= -1; } else { state.sortKey = k; state.sortDir = 1; }
+    render();
+  });
+});
+
+rowsEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-view]');
+  if(!btn) return;
+  const idx = parseInt(btn.getAttribute('data-view'), 10);
+  const list = sorted(filtered());
+  const rec = list[idx];
+  openModal(rec);
+});
+
+prevEl.addEventListener('click', () => { state.page = Math.max(1, state.page-1); render(); });
+nextEl.addEventListener('click', () => {
+  const totalPages = Math.max(1, Math.ceil(filtered().length / state.pageSize));
+  state.page = Math.min(totalPages, state.page+1);
+  render();
+});
+
+qEl.addEventListener('input', () => { state.q = qEl.value; state.page = 1; render(); });
+closeBtn.addEventListener('click', () => modal.removeAttribute('open'));
+modal.addEventListener('click', (e) => { if(e.target === modal) modal.removeAttribute('open'); });
+
+render();
+</script>
+</body>
+</html>

@@ -6,6 +6,52 @@ import useSWR from 'swr';
 import { getFetcher, postFetcher } from '@/api/globalFetcher';
 import { useAuth } from '../AuthContext';
 
+/**
+ * Validates if a profile should be persisted to localStorage.
+ * Prevents persisting fallback "Unknown User" profiles.
+ */
+function isPersistableProfile(profile: profiledataType | Partial<profiledataType>): boolean {
+  if (!profile) return false;
+  
+  // Must have at least one identifier
+  const hasIdentifier = !!(profile as any).id || !!(profile as any).email || !!(profile as any).username;
+  if (!hasIdentifier) return false;
+  
+  // Name must be non-empty and not "Unknown User"
+  if (profile.name) {
+    const trimmedName = profile.name.trim();
+    if (trimmedName && trimmedName !== 'Unknown User') {
+      return true;
+    }
+  }
+  
+  // Allow empty name if email exists (can display email instead)
+  if ((profile as any).email && (profile as any).email.trim()) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Normalizes API profile data to handle both snake_case and camelCase fields.
+ */
+function normalizeApiProfile(apiProfile: any): {
+  firstName: string;
+  lastName: string;
+  username: string | null;
+  email: string | null;
+  id: number | string | null;
+} {
+  return {
+    firstName: apiProfile.first_name || apiProfile.firstName || '',
+    lastName: apiProfile.last_name || apiProfile.lastName || '',
+    username: apiProfile.username || null,
+    email: apiProfile.email || null,
+    id: apiProfile.id || null,
+  };
+}
+
 // Define context type
 type UserDataContextType = {
     posts: PostType[];
@@ -118,22 +164,50 @@ function UserDataProvider({ children }: { children: React.ReactNode }) {
             // Update profile data from API
             if (profileDataApi && profileDataApi.ok && profileDataApi.profile) {
                 const apiProfile = profileDataApi.profile;
-                const updatedProfile: profiledataType = {
-                    name: `${apiProfile.first_name || ''} ${apiProfile.last_name || ''}`.trim() || apiProfile.username || 'Unknown User',
+                const normalized = normalizeApiProfile(apiProfile);
+                
+                // Build name with proper fallbacks
+                const fullName = `${normalized.firstName || ''} ${normalized.lastName || ''}`.trim();
+                const displayName = fullName || normalized.username || normalized.email || 'Unknown User';
+                
+                const updatedProfile: profiledataType & { id?: number | string; email?: string; username?: string } = {
+                    name: displayName,
                     role: apiProfile.role || 'User',
                     avatar: apiProfile.avatarUrl || apiProfile.avatar_url || defaultProfile.avatar,
                     coverImage: apiProfile.bannerUrl || apiProfile.banner_url || defaultProfile.coverImage,
                     postsCount: defaultProfile.postsCount,
                     followersCount: defaultProfile.followersCount,
                     followingCount: defaultProfile.followingCount,
+                    // Include identifiers for validation
+                    id: normalized.id,
+                    email: normalized.email || undefined,
+                    username: normalized.username || undefined,
                 };
                 setProfileData(updatedProfile);
                 
-                // Save to localStorage
-                try {
-                    localStorage.setItem('orthodoxmetrics_profile_data', JSON.stringify(updatedProfile));
-                } catch (error) {
-                    console.error('Error saving profile to localStorage:', error);
+                // Save to localStorage only if profile is persistable
+                if (isPersistableProfile(updatedProfile)) {
+                    try {
+                        localStorage.setItem('orthodoxmetrics_profile_data', JSON.stringify(updatedProfile));
+                    } catch (error) {
+                        console.error('Error saving profile to localStorage:', error);
+                    }
+                } else {
+                    // Don't overwrite with invalid profile - keep last known good
+                    console.warn('Skipping localStorage save: profile is not persistable (fallback detected)');
+                    // If current stored profile is also invalid, remove it
+                    try {
+                        const stored = localStorage.getItem('orthodoxmetrics_profile_data');
+                        if (stored) {
+                            const parsed = JSON.parse(stored);
+                            if (!isPersistableProfile(parsed)) {
+                                localStorage.removeItem('orthodoxmetrics_profile_data');
+                                console.log('Removed invalid stored profile from localStorage');
+                            }
+                        }
+                    } catch (err) {
+                        // Ignore parse errors
+                    }
                 }
             }
             
@@ -238,11 +312,16 @@ function UserDataProvider({ children }: { children: React.ReactNode }) {
         const updatedProfile = { ...profileData, ...data };
         setProfileData(updatedProfile);
         
-        // Save to localStorage for persistence
-        try {
-            localStorage.setItem('orthodoxmetrics_profile_data', JSON.stringify(updatedProfile));
-        } catch (error) {
-            console.error('Error saving profile to localStorage:', error);
+        // Save to localStorage only if profile is persistable
+        if (isPersistableProfile(updatedProfile)) {
+            try {
+                localStorage.setItem('orthodoxmetrics_profile_data', JSON.stringify(updatedProfile));
+            } catch (error) {
+                console.error('Error saving profile to localStorage:', error);
+            }
+        } else {
+            console.warn('Skipping localStorage save: updated profile is not persistable (fallback detected)');
+            // Don't overwrite with invalid profile - keep last known good
         }
         
         // TODO: Add API call to save to backend

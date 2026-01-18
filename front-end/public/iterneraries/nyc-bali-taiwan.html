@@ -1,0 +1,406 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Trip Itinerary — List + Calendar</title>
+<style>
+  :root{
+    --bg:#0f1220; --bg2:#12162a; --card:#171a2b; --text:#e9ecff; --muted:#9aa3c7; --accent:#a78bfa; --accent2:#f0abfc;
+    --grid:#24284d; --pill:#0e1224; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  [data-theme="light"]{
+    --bg:#f2f4fb; --bg2:#eef1fa; --card:#ffffff; --text:#0b1020; --muted:#5b6382; --accent:#7c3aed; --accent2:#fb7185;
+    --grid:#e5e8f5; --pill:#f5f7ff; --shadow:0 6px 20px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,var(--bg) 0%, var(--bg2) 60%, var(--bg) 100%);color:var(--text)}
+  header{position:sticky;top:0;background:rgba(18,22,42,.08);backdrop-filter:blur(10px);padding:10px 20px;border-bottom:1px solid #23264520;z-index:5}
+  .header-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+  .left-tools,.right-tools{display:flex;gap:8px;align-items:center}
+  #tripTitle{margin:0;text-align:center;font-size:20px}
+  .title-input{background:transparent;border:none;border-bottom:2px dashed #2b2f5280;color:var(--text);font-size:20px;text-align:center;outline:none;width:100%}
+  .tab{background:var(--pill);border:1px solid #2b2f52;color:var(--text);padding:6px 10px;border-radius:999px;cursor:pointer}
+  .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:white;border-color:transparent}
+  .theme-toggle{background:var(--pill);border:1px solid #2b2f52;padding:6px 10px;border-radius:999px;cursor:pointer}
+  [data-theme="light"] .theme-toggle{border-color:#d6daf2}
+  main{max-width:1200px;margin:20px auto;padding:0 18px}
+  .card{background:var(--card);border:1px solid #23264540;border-radius:18px;box-shadow:var(--shadow)}
+
+  .toolbar{padding:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #23264540}
+  .toolbar input,.toolbar select{background:var(--pill);color:var(--text);border:1px solid #2b2f52;border-radius:12px;padding:10px 12px}
+  [data-theme="light"] .toolbar input,[data-theme="light"] .toolbar select{border-color:#d6daf2}
+  .toolbar button{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#fff;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
+  .toolbar .ghost{background:var(--pill);color:var(--text);border:1px solid #2b2f52}
+  .muted{color:var(--muted)}
+
+  .grid{max-height:70vh;overflow:auto;border-radius:0 0 18px 18px}
+  table{width:100%;border-collapse:separate;border-spacing:0}
+  th,td{padding:12px 10px;border-bottom:1px solid var(--grid);font-size:14px}
+  th{position:sticky;top:0;z-index:1;background:color-mix(in oklab, var(--card) 92%, black 0%);border-bottom:1px solid #2a2e5440;text-align:left}
+  tr:hover{background:color-mix(in oklab, var(--card) 85%, black 0%)}
+  .pill{padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid #2b2f52;background:var(--pill);color:#5161ff}
+  .type-Flight{border-color:#2563eb;color:#2563eb}
+  .type-Lodging{border-color:#22c55e;color:#16a34a}
+  .type-Activity{border-color:#f59e0b;color:#d97706}
+  .type-Note{border-color:#a78bfa;color:#7c3aed}
+
+  /* Calendar */
+  .calendar-wrap{padding:14px}
+  .cal-head{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:8px}
+  .cal-head .controls button{background:var(--pill);color:var(--text);border:1px solid #2b2f52;border-radius:10px;padding:8px 12px;cursor:pointer}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+  .cal-dow{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:6px 4px}
+  .cal-cell{border:1px solid var(--grid);border-radius:12px;min-height:110px;background:color-mix(in oklab, var(--card) 92%, black 0%);display:flex;flex-direction:column;padding:8px;gap:6px}
+  .cal-cell.out{opacity:.45}
+  .cal-date{font-size:12px;color:var(--muted)}
+  .cal-item{font-size:12px;line-height:1.25;border-left:3px solid #2b2f52;background:var(--pill);padding:6px;border-radius:8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cal-item.flight{border-color:#2563eb}
+  .cal-item.lodging{border-color:#22c55e}
+  .cal-item.activity{border-color:#f59e0b}
+  .cal-item.note{border-color:#a78bfa}
+  .add-small{margin-top:auto;display:flex;justify-content:flex-end}
+  .add-small button{background:var(--pill);border:1px dashed #2b2f52;color:var(--muted);padding:4px 8px;border-radius:8px;cursor:pointer}
+
+  /* dialog */
+  dialog{border:none;border-radius:18px;background:var(--card);color:var(--text);padding:0;box-shadow:var(--shadow);width:min(640px,96vw)}
+  dialog header{position:unset;border:0;border-bottom:1px solid #23264540;border-radius:18px 18px 0 0}
+  dialog form{padding:16px;display:grid;gap:10px}
+  dialog input, dialog textarea, dialog select{background:var(--pill);color:var(--text);border:1px solid #2b2f52;border-radius:12px;padding:10px 12px}
+  dialog .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  dialog footer{display:flex;gap:10px;justify-content:flex-end;padding:12px 16px;border-top:1px solid #23264540}
+</style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="left-tools">
+        <button class="tab active" id="tabList" onclick="switchView('list')">List View</button>
+        <button class="tab" id="tabCal" onclick="switchView('calendar')">Monthly Calendar</button>
+      </div>
+      <h1 id="tripTitle">James Parsells travel abroad</h1>
+      <div class="right-tools">
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark">🌙</button>
+      </div>
+      <div style="grid-column:1 / 4;padding:8px 0 0">
+        <input id="titleInput" class="title-input" placeholder="Type your trip title…" oninput="setTitle(this.value)">
+      </div>
+    </div>
+  </header>
+
+  <main class="card" id="listView">
+    <div class="toolbar">
+      <input id="search" placeholder="Search (city, airline, note, etc.)" oninput="renderList()"/>
+      <select id="typeFilter" onchange="renderList()">
+        <option value="">All types</option>
+        <option>Flight</option>
+        <option>Lodging</option>
+        <option>Activity</option>
+        <option>Note</option>
+      </select>
+      <button onclick="openEditor()">+ Add item</button>
+      <button class="ghost" onclick="exportCSV()">Export CSV</button>
+      <button class="ghost" onclick="exportICS()">Export ICS</button>
+      <button class="ghost" onclick="print()">Print</button>
+      <span class="muted" style="margin-left:auto">Auto-saves to your browser</span>
+    </div>
+    <div class="grid">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th style="min-width:180px">When</th>
+            <th style="min-width:110px">Type</th>
+            <th style="min-width:260px">Title</th>
+            <th style="min-width:260px">Details</th>
+            <th style="min-width:140px">People</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+
+  <main class="card" id="calendarView" style="display:none">
+    <div class="toolbar">
+      <div class="muted">Click a day to add an item, or click an item to edit.</div>
+      <span style="margin-left:auto" class="muted">Auto-saves locally</span>
+    </div>
+    <div class="calendar-wrap">
+      <div class="cal-head">
+        <div class="controls">
+          <button onclick="navMonth(-1)">← Prev</button>
+        </div>
+        <h2 id="calTitle" style="margin:0"></h2>
+        <div class="controls">
+          <button onclick="today()">Today</button>
+          <button onclick="navMonth(1)">Next →</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </main>
+
+  <!-- editor dialog -->
+  <dialog id="editor">
+    <header class="card"><h2 style="margin:0;font-size:18px">Itinerary Item</h2></header>
+    <form method="dialog" id="editorForm">
+      <div class="row">
+        <div>
+          <label>Date/time start</label>
+          <input type="datetime-local" id="start">
+        </div>
+        <div>
+          <label>Date/time end (optional)</label>
+          <input type="datetime-local" id="end">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Type</label>
+          <select id="itype">
+            <option>Flight</option>
+            <option>Lodging</option>
+            <option>Activity</option>
+            <option>Note</option>
+          </select>
+        </div>
+        <div>
+          <label>People</label>
+          <input id="people" placeholder="Names or count">
+        </div>
+      </div>
+      <label>Title</label>
+      <input id="title" placeholder="e.g., EWR → SIN (SQ21)">
+      <label>Details / Location</label>
+      <textarea id="details" rows="4" placeholder="e.g., Singapore Airlines, Terminal B."></textarea>
+      <footer>
+        <button value="cancel" class="ghost">Cancel</button>
+        <button id="deleteBtn" class="ghost" onclick="doDelete()" type="button" style="display:none">Delete</button>
+        <button value="default">Save</button>
+      </footer>
+    </form>
+  </dialog>
+
+<script>
+// -------- data & storage --------
+const key = "itinerary-v1";
+const THEME_KEY = "itinerary-theme";
+const TITLE_KEY = "itinerary-title";
+
+let items = JSON.parse(localStorage.getItem(key) || "null") || [
+  {start:"2026-02-19T09:35", end:"2026-02-20T17:45", type:"Flight", title:"EWR → SIN (SQ21)", details:"Singapore Airlines • Arrive Changi 17:45 (+1)", people:"Chu, Parsells"},
+  {start:"2026-02-20T21:30", end:"2026-02-21T00:20", type:"Flight", title:"SIN → DPS (SQ948)", details:"Singapore → Denpasar • Arr 00:20 (Feb 21)", people:"Chu, Parsells"},
+  {start:"2026-02-20T14:00", end:"2026-03-02T11:00", type:"Lodging", title:"Airbnb — Selemadeg Barat, Bali", details:"The Villas Balian Beach • Check-in 2:00 PM • Checkout 11:00 AM", people:"Chu, Parsells"},
+  {start:"2026-03-02T16:05", end:"2026-03-02T21:30", type:"Flight", title:"DPS → TPE (BR256)", details:"EVA Air • 5h25m", people:"Chu, Parsells"},
+  {start:"2026-03-02T22:30", end:"2026-03-10T08:00", type:"Lodging", title:"Stay in Taiwan", details:"Family time • Taiwan", people:"Chu, Parsells"},
+  {start:"2026-03-10T07:00", end:"2026-03-10T10:30", type:"Flight", title:"TPE → NRT (BR108)", details:"EVA Air to Tokyo Narita", people:"Chu, Parsells"},
+  {start:"2026-03-10T17:15", end:"2026-03-10T16:50", type:"Flight", title:"NRT → EWR (UA78)", details:"United Polaris • Arrive Newark 4:50 PM", people:"Chu, Parsells"},
+];
+
+// Theme setup
+function applyTheme(t){ document.body.setAttribute('data-theme', t); document.getElementById('themeToggle').textContent = (t==='dark'?'🌙':'☀️'); localStorage.setItem(THEME_KEY,t); }
+(function initTheme(){ const t = localStorage.getItem(THEME_KEY)||'dark'; applyTheme(t); })();
+document.getElementById('themeToggle').onclick = ()=> applyTheme(document.body.getAttribute('data-theme')==='dark'?'light':'dark');
+
+// Title setup
+function setTitle(v){ document.getElementById('tripTitle').textContent = v || 'NYC → Bali → Taiwan → NYC'; localStorage.setItem(TITLE_KEY, v); }
+(function initTitle(){ const v = localStorage.getItem(TITLE_KEY)||'NYC → Bali → Taiwan → NYC'; document.getElementById('titleInput').value = v; setTitle(v); })();
+
+function save(){ localStorage.setItem(key, JSON.stringify(items)); renderList(); renderCalendar(); }
+
+// -------- view switching --------
+function switchView(which){
+  document.getElementById('listView').style.display = (which==='list')?'block':'none';
+  document.getElementById('calendarView').style.display = (which==='calendar')?'block':'none';
+  document.getElementById('tabList').classList.toggle('active', which==='list');
+  document.getElementById('tabCal').classList.toggle('active', which==='calendar');
+}
+
+// -------- list rendering --------
+function fmt(s){ return new Date(s).toLocaleString([], {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function renderList(){
+  const q = (document.getElementById('search').value||"").toLowerCase();
+  const tf = document.getElementById('typeFilter').value;
+  const tbody = document.querySelector("#tbl tbody");
+  tbody.innerHTML = "";
+  const sorted = [...items].sort((a,b)=> new Date(a.start)-new Date(b.start));
+  for(const it of sorted){
+    if(tf && it.type!==tf) continue;
+    if(q && !(JSON.stringify(it).toLowerCase().includes(q))) continue;
+    const tr = document.createElement("tr");
+    tr.onclick = ()=> openEditor(items.indexOf(it));
+    tr.innerHTML = `
+      <td>${fmt(it.start)}${it.end?`<div class="muted">→ ${fmt(it.end)}</div>`:""}</td>
+      <td><span class="pill type-${it.type}">${it.type}</span></td>
+      <td>${it.title}</td>
+      <td class="muted">${it.details||""}</td>
+      <td>${it.people||""}</td>`;
+    tbody.appendChild(tr);
+  }
+  if(!tbody.children.length){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="5" class="muted">No items match your filters.</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// -------- calendar rendering --------
+let calDate = (()=>{
+  const first = items.length ? new Date(items[0].start) : new Date();
+  return new Date(first.getFullYear(), first.getMonth(), 1);
+})();
+function today(){ const d = new Date(); calDate = new Date(d.getFullYear(), d.getMonth(), 1); renderCalendar(); }
+function navMonth(delta){ calDate = new Date(calDate.getFullYear(), calDate.getMonth()+delta, 1); renderCalendar(); }
+function titleFor(date){ return date.toLocaleString([], {month:'long', year:'numeric'}); }
+
+function renderCalendar(){
+  const grid = document.getElementById("calGrid");
+  grid.innerHTML = "";
+  document.getElementById("calTitle").textContent = titleFor(calDate);
+
+  const dows = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  for(const d of dows){ const h = document.createElement('div'); h.textContent = d; h.className="cal-dow"; grid.appendChild(h); }
+
+  const year = calDate.getFullYear(), month = calDate.getMonth();
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const prevDays = new Date(year, month, 0).getDate();
+
+  function itemsOnDate(y,m,day){
+    const start = new Date(y, m, day, 0,0,0);
+    const end   = new Date(y, m, day, 23,59,59);
+    return items.filter(it=> {
+      const s = new Date(it.start);
+      const e = it.end ? new Date(it.end) : s;
+      return (s<=end && e>=start);
+    }).sort((a,b)=> new Date(a.start)-new Date(b.start));
+  }
+
+  for(let i=0;i<42;i++){
+    const cell = document.createElement('div');
+    cell.className = "cal-cell";
+    let dayNum, cellMonth = month, out=false;
+    if(i<firstDow){
+      dayNum = prevDays-firstDow+i+1;
+      cellMonth = month-1; out=true; cell.classList.add('out');
+    } else if(i>=firstDow+daysInMonth){
+      dayNum = i-(firstDow+daysInMonth)+1;
+      cellMonth = month+1; out=true; cell.classList.add('out');
+    } else {
+      dayNum = i-firstDow+1;
+    }
+    const y = new Date(year, cellMonth, 1).getFullYear();
+    const m = new Date(year, cellMonth, 1).getMonth();
+    const cellDate = new Date(y,m,dayNum);
+
+    const dateEl = document.createElement('div');
+    dateEl.className="cal-date";
+    dateEl.textContent = cellDate.toLocaleString([], {month:'short', day:'numeric'});
+    cell.appendChild(dateEl);
+
+    const todaysItems = itemsOnDate(y,m,dayNum);
+    for(const it of todaysItems){
+      const div = document.createElement('div');
+      const cls = it.type ? it.type.toLowerCase() : "note";
+      div.className = "cal-item " + cls;
+      const timePart = it.start ? new Date(it.start).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : "";
+      div.textContent = (timePart?timePart+" • ":"") + it.title;
+      div.onclick = (ev)=>{ ev.stopPropagation(); openEditor(items.indexOf(it)); };
+      cell.appendChild(div);
+    }
+
+    const add = document.createElement('div');
+    add.className = "add-small";
+    const btn = document.createElement('button');
+    btn.textContent = "+ Add";
+    btn.onclick = (ev)=>{ ev.stopPropagation(); openEditor(-1, cellDate); };
+    add.appendChild(btn);
+    cell.appendChild(add);
+
+    grid.appendChild(cell);
+  }
+}
+
+// -------- editor --------
+let editing = -1;
+function pad(n){ return (n<10?"0":"")+n; }
+function toInputDate(d){
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes());
+}
+function openEditor(index=-1, presetDate=null){
+  editing = index;
+  const dlg = document.getElementById("editor");
+  const E = id=> document.getElementById(id);
+  if(index>=0){
+    const it = items[index];
+    E("start").value = it.start || "";
+    E("end").value = it.end || "";
+    E("itype").value = it.type || "Note";
+    E("title").value = it.title || "";
+    E("details").value = it.details || "";
+    E("people").value = it.people || "";
+    document.getElementById("deleteBtn").style.display = "inline-block";
+  }else{
+    const base = presetDate ? new Date(presetDate) : new Date();
+    base.setHours(9,0,0,0);
+    E("start").value = toInputDate(base);
+    base.setHours(10,0,0,0);
+    E("end").value = toInputDate(base);
+    E("itype").value = "Note";
+    E("title").value = "";
+    E("details").value = "";
+    E("people").value = "";
+    document.getElementById("deleteBtn").style.display = "none";
+  }
+  dlg.showModal();
+  dlg.onclose = ()=>{
+    if(dlg.returnValue==="cancel") return;
+    const it = {
+      start: E("start").value, end: E("end").value,
+      type: E("itype").value, title: E("title").value.trim(),
+      details: E("details").value.trim(), people: E("people").value.trim()
+    };
+    if(!it.title){ alert("Title is required"); return; }
+    if(editing>=0) items[editing]=it; else items.push(it);
+    save();
+  };
+}
+function doDelete(){
+  if(editing>=0){ if(confirm("Delete this item?")){ items.splice(editing,1); save(); document.getElementById("editor").close(); } }
+}
+
+// -------- export --------
+function exportCSV(){
+  const heads = ["start","end","type","title","details","people"];
+  const rows = [heads.join(",")].concat(items.map(it=> heads.map(h=> `"${(it[h]||"").replace(/"/g,'""')}"`).join(",")));
+  const blob = new Blob([rows.join("\n")],{type:"text/csv"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "itinerary.csv"; a.click();
+}
+function exportICS(){
+  function pad(n){ return (n<10?"0":"")+n; }
+  function icsDate(s){
+    if(!s) return "";
+    const d = new Date(s);
+    return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  }
+  let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//OM Trip//Itinerary//EN\n";
+  for(const it of items){
+    ics += "BEGIN:VEVENT\n";
+    if(it.start) ics += "DTSTART:" + icsDate(it.start) + "\n";
+    if(it.end)   ics += "DTEND:" + icsDate(it.end) + "\n";
+    ics += "SUMMARY:" + (it.type?`[${it.type}] `:"") + it.title + "\n";
+    if(it.details) ics += "DESCRIPTION:" + it.details.replace(/\n/g," ") + "\n";
+    ics += "END:VEVENT\n";
+  }
+  ics += "END:VCALENDAR\n";
+  const blob = new Blob([ics],{type:"text/calendar"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "itinerary.ics"; a.click();
+}
+
+// init
+renderList();
+renderCalendar();
+</script>
+</body>
+</html>

@@ -53,7 +53,9 @@ const Customizer: FC = () => {
     setIsLayout,
     isBorderRadius,
     setIsBorderRadius,
-    setActiveTheme
+    setActiveTheme,
+    headerBackground,
+    setHeaderBackground
   } = useContext(CustomizerContext);
 
 
@@ -403,6 +405,76 @@ const Customizer: FC = () => {
               onChange={(event: any) => setIsBorderRadius(event.target.value)}
               valueLabelDisplay="auto"
             />
+            <Box pt={4} />
+            {/* ------------------------------------------- */}
+            {/* ------------ Header Background ------------- */}
+            {/* ------------------------------------------- */}
+            <Typography variant="h6" gutterBottom>
+              Header Background
+            </Typography>
+            <Grid2 container spacing={2} my={2}>
+              {[1, 2, 3, 4, 5, 6].map((num) => (
+                <Grid2 key={`header-bg-${num}`} size={4}>
+                  <StyledBox 
+                    onClick={() => setHeaderBackground(num)}
+                    sx={{
+                      position: 'relative',
+                      minHeight: '60px',
+                      backgroundColor: 'rgba(0,0,0,0.2)', // Fallback background
+                      backgroundImage: `url(/images/bgtiled${num}.png)`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'repeat',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        inset: 0,
+                        backgroundColor: 'rgba(0,0,0,0.1)',
+                        zIndex: 0,
+                      }
+                    }}
+                  >
+                    {headerBackground === num && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          backgroundColor: 'primary.main',
+                          borderRadius: '50%',
+                          width: 24,
+                          height: 24,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          zIndex: 2,
+                        }}
+                      >
+                        <IconCheck width={16} color="white" />
+                      </Box>
+                    )}
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        position: 'absolute',
+                        bottom: 4,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        color: 'white',
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        zIndex: 2,
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {num}
+                    </Typography>
+                  </StyledBox>
+                </Grid2>
+              ))}
+            </Grid2>
           </Box>
         </Scrollbar>
       </Drawer>

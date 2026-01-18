@@ -1,24 +1,33 @@
 module.exports = {
   apps: [
     {
-      name: 'orthodox-backend',
-      script: 'server/index.js',
-      cwd: process.env.PROJECT_ROOT || '/var/www/orthodoxmetrics/prod',
-      env: {
-        NODE_ENV: 'development'
-      },
-      env_production: {
-        NODE_ENV: 'production'
-      },
-      env_file: './server/.env.production',
+      name: "orthodox-backend",
+      cwd: "/var/www/orthodoxmetrics/prod/server",
+      script: "dist/index.js",
       instances: 1,
-      exec_mode: 'fork',
+      exec_mode: "fork",
       watch: false,
-      max_memory_restart: '1G',
-      error_file: './logs/err.log',
-      out_file: './logs/out.log',
-      log_file: './logs/combined.log',
-      time: true
+      max_memory_restart: "1G",
+      env: {
+        NODE_ENV: "production"
+      },
+      env_file: "/var/www/orthodoxmetrics/prod/server/.env"
+    },
+    {
+      name: "ocr-feeder-worker",
+      cwd: "/var/www/orthodoxmetrics/prod/server",
+      script: "dist/workers/ocrFeederWorker.js",
+      instances: 1,
+      exec_mode: "fork",
+      watch: false,
+      max_memory_restart: "512M",
+      env: {
+        NODE_ENV: "production"
+      },
+      env_file: "/var/www/orthodoxmetrics/prod/server/.env",
+      restart_delay: 5000,
+      max_restarts: 10,
+      min_uptime: "10s"
     }
   ]
 };

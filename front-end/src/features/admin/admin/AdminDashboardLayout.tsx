@@ -4,10 +4,9 @@
  */
 
 import React from 'react';
-import { Box, useTheme } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedLayout } from '@/components/Theme/ThemedLayout';
-import SuperAdminDashboard from './SuperAdminDashboard';
 import { Navigate } from 'react-router-dom';
 
 interface AdminDashboardLayoutProps {
@@ -95,7 +94,16 @@ export const AdminDashboardLayout: React.FC<AdminDashboardLayoutProps> = ({
           }
         }}
       >
-        {children || <SuperAdminDashboard />}
+        {children || (
+          <Box sx={{ p: 4, textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ mb: 2 }}>
+              Admin Dashboard
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Select an option from the menu to get started.
+            </Typography>
+          </Box>
+        )}
       </Box>
     </ThemedLayout>
   );

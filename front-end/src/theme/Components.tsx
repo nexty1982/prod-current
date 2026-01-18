@@ -12,14 +12,17 @@ const components: any = (theme: Theme) => {
         html: {
           height: '100%',
           width: '100%',
+          backgroundColor: theme.palette.background.default,
         },
         a: {
           textDecoration: 'none',
         },
         body: {
           height: '100%',
+          minHeight: '100%',
           margin: 0,
           padding: 0,
+          backgroundColor: theme.palette.background.default,
         },
         '.ql-container.ql-snow, .ql-toolbar.ql-snow': {
           border: '0 !important', borderRadius: '7px'
@@ -28,7 +31,9 @@ const components: any = (theme: Theme) => {
           fontFamiy: 'inherit !important'
         },
         '#root': {
+          minHeight: '100vh',
           height: '100%',
+          backgroundColor: theme.palette.background.default,
         },
         "*[dir='rtl'] .buyNowImg": {
           transform: 'scaleX(-1)',
@@ -337,6 +342,7 @@ const components: any = (theme: Theme) => {
           width: '100%',
           padding: '15px',
           backgroundImage: 'none',
+          backgroundColor: theme.palette.background.paper,
         },
       },
     },

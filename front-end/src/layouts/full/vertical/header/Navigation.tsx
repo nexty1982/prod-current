@@ -31,7 +31,7 @@ const AppDD = () => {
         aria-haspopup="true"
         sx={{
           bgcolor: anchorEl2 ? 'primary.light' : '',
-          color: anchorEl2 ? 'primary.main' : (theme) => theme.palette.text.secondary,
+          color: anchorEl2 ? 'primary.main' : '#FFFFFF', // Explicit white for header text
         }}
         onClick={handleClick2}
         endIcon={<IconChevronDown size="15" style={{ marginLeft: '-5px', marginTop: '2px' }} />}
@@ -111,17 +111,17 @@ const AppDD = () => {
       </Menu>
     </Box>
     {visibleMenus['header-chat'] && (
-      <Button color="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} variant="text" to="/apps/chats" component={Link}>
+      <Button color="inherit" sx={{ color: '#FFFFFF' }} variant="text" to="/apps/chats" component={Link}>
         Chat
       </Button>
     )}
     {visibleMenus['header-calendar'] && (
-      <Button color="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} variant="text" to="/apps/liturgical-calendar" component={Link}>
+      <Button color="inherit" sx={{ color: '#FFFFFF' }} variant="text" to="/apps/liturgical-calendar" component={Link}>
         Calendar
       </Button>
     )}
     {visibleMenus['header-email'] && (
-      <Button color="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} variant="text" to="/apps/email" component={Link}>
+      <Button color="inherit" sx={{ color: '#FFFFFF' }} variant="text" to="/apps/email" component={Link}>
         Email
       </Button>
     )}

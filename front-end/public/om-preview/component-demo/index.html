@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>OrthodoxMetrics — Component Demo</title>
+  <style>
+    :root{--navy:#0f1f3a;--bg:#0a1322;--gold:#C8A24B}
+    html,body{margin:0;height:100%;background:radial-gradient(140% 120% at 50% 0%, #0f1f3a 0%, #0a1322 55%, #070b12 100%);color:#eaf2ff;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{max-width:1120px;margin:32px auto;padding:0 16px}
+    .card{background:linear-gradient(180deg,rgba(20,30,55,.92),rgba(12,18,35,.92));border:1px solid rgba(255,255,255,.08);border-radius:18px;box-shadow:0 14px 38px rgba(0,0,0,.35);overflow:hidden}
+    .brand-top{height:6px;background:linear-gradient(90deg,var(--gold),#f0d890 60%,var(--gold))}
+    .title{font-weight:900;font-size:24px;margin:14px 18px 8px}
+    .sub{margin:0 18px 16px;color:#cbd6ee}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));padding:18px}
+    .mini{position:relative;border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;background:linear-gradient(180deg,rgba(20,30,55,.9),rgba(12,18,35,.9))}
+    .mini .bar{display:flex;gap:10px;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 12px}
+    .mini .flag{width:42px;height:28px;display:grid;place-items:center}
+    .mini .lbl{font-weight:800}
+    .mini .snip{font:12px/1.45 ui-monospace,Consolas,monospace;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);padding:10px 12px}
+    .mini .k{color:#9fd0ff}.mini .v{color:#ffe49a}
+    .mini .fields{display:grid;grid-template-columns:110px 1fr;gap:8px 10px;padding:10px 12px 14px}
+    .mini .fields dt{color:#c8d6ff;font-weight:700} .mini .fields dd{margin:0;color:#ecf2ff}
+    .badge{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:11px;background:radial-gradient(120% 120% at 0% 0%, var(--gold), #f2deaa);color:#2f2300;display:grid;place-items:center;font-weight:900;box-shadow:0 8px 18px rgba(200,162,75,.35)}
+    .footer{opacity:.8;text-align:center;margin-top:10px}
+    .btn{display:inline-block;margin:14px auto 10px;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);color:#eaf2ff;text-decoration:none}
+  </style>
+  <div class="wrap">
+    <div class="card">
+      <div class="brand-top"></div>
+      <div id="root"></div>
+    </div>
+    <div class="footer">
+      <a class="btn" href="./bundle.js" target="_blank" rel="noopener">View bundle.js</a>
+    </div>
+  </div>
+  <script src="./bundle.js"></script>
+  <script>window.OMPreview && window.OMPreview.mount('#root')</script>
+</html>
+

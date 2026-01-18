@@ -117,6 +117,8 @@ function AuthProvider({ children }: AuthProviderProps) {
       setUser(null);
       setError(null);
       localStorage.removeItem('auth_user');
+      // Clear profile data on logout
+      localStorage.removeItem('orthodoxmetrics_profile_data');
 
     } catch (err) {
       console.error('Error during logout:', err);
@@ -133,10 +135,14 @@ function AuthProvider({ children }: AuthProviderProps) {
         setUser(authCheck.user);
         localStorage.setItem('auth_user', JSON.stringify(authCheck.user));
       } else {
+        // Session expired - clear profile data
+        localStorage.removeItem('orthodoxmetrics_profile_data');
         await logout();
       }
     } catch (err) {
       console.error('Error refreshing auth:', err);
+      // Session expired - clear profile data
+      localStorage.removeItem('orthodoxmetrics_profile_data');
       await logout();
     }
   };

@@ -1,32 +1,5 @@
 /* Custom Advanced Grid Themes */
 
-/* Theme 1: Ocean Blue - Clean and Professional */
-.ag-theme-ocean-blue {
-  --ag-background-color: #ffffff;
-  --ag-header-background-color: #1e3a8a;
-  --ag-header-foreground-color: #ffffff;
-  --ag-row-hover-color: #dbeafe;
-  --ag-selected-row-background-color: #3b82f6;
-  --ag-selected-row-background-color-hover: #2563eb;
-  --ag-foreground-color: #1f2937;
-  --ag-border-color: #e5e7eb;
-  --ag-row-border-color: #f3f4f6;
-  --ag-header-column-separator-color: #ffffff;
-  --ag-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --ag-font-size: 14px;
-  --ag-header-height: 48px;
-  --ag-row-height: 40px;
-  --ag-cell-horizontal-border: solid #f3f4f6;
-  --ag-cell-horizontal-border-width: 1px;
-  --ag-header-column-resize-handle-color: #ffffff;
-  --ag-header-column-resize-handle-height: 30px;
-  --ag-header-column-resize-handle-width: 4px;
-  --ag-input-border-color: #d1d5db;
-  --ag-input-focus-border-color: #3b82f6;
-  --ag-range-selection-border-color: #3b82f6;
-  --ag-range-selection-background-color: rgba(59, 130, 246, 0.1);
-}
-
 /* Theme 2: Forest Green - Natural and Calming */
 .ag-theme-forest-green {
   --ag-background-color: #ffffff;

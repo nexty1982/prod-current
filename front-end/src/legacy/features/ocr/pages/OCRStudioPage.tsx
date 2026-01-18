@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ScanLine, Settings as SettingsIcon, RefreshCw, Church, ChevronDown } from 'lucide-react';
-import UploadZone from '../shared/ui/legacy/UploadZone';
-import JobList from '../shared/ui/legacy/JobList';
-import ConfigPanel from '../shared/ui/legacy/ConfigPanel';
-import OutputViewer from '../shared/ui/legacy/OutputViewer';
+import { Box, Typography, Button, Paper, useTheme, useMediaQuery } from '@mui/material';
+import UploadZone from '../components/UploadZone';
+import JobList from '../components/JobList';
+import ConfigPanel from '../components/ConfigPanel';
+import OutputViewer from '../components/OutputViewer';
 import { fetchChurches } from '../lib/ocrApi';
 
 const OCRStudioPage: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [selectedJobId, setSelectedJobId] = useState<string | undefined>();
   const [selectedChurchId, setSelectedChurchId] = useState<number | undefined>();
   const [churches, setChurches] = useState<Array<{ id: number; name: string }>>([]);
@@ -42,121 +45,173 @@ const OCRStudioPage: React.FC = () => {
   const selectedChurch = churches.find(c => c.id === selectedChurchId);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-xl">
-                  <ScanLine className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">OCR Studio</h1>
-                  <p className="text-sm text-gray-500">
+      <Paper elevation={1} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ maxWidth: 'xl', mx: 'auto', px: 3, py: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box
+                  sx={{
+                    p: 1,
+                    bgcolor: 'primary.light',
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'primary.main'
+                  }}
+                >
+                  <ScanLine size={24} />
+                </Box>
+                <Box>
+                  <Typography variant="h5" fontWeight="bold" color="text.primary">
+                    OCR Studio
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
                     Optical Character Recognition for Church Documents
-                  </p>
-                </div>
-              </div>
+                  </Typography>
+                </Box>
+              </Box>
 
               {/* Church Selector */}
               {churches.length > 0 && (
-                <div className="relative">
-                  <button
+                <Box sx={{ position: 'relative' }}>
+                  <Button
+                    variant="outlined"
                     onClick={() => setShowChurchSelector(!showChurchSelector)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors"
+                    startIcon={<Church size={16} />}
+                    endIcon={<ChevronDown size={16} />}
+                    sx={{ textTransform: 'none' }}
                   >
-                    <Church className="h-4 w-4 text-gray-600" />
-                    <span className="text-gray-700">
-                      {selectedChurch?.name || 'Select Church'}
-                    </span>
-                    <ChevronDown className="h-4 w-4 text-gray-500" />
-                  </button>
+                    {selectedChurch?.name || 'Select Church'}
+                  </Button>
 
                   {showChurchSelector && (
-                    <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-10">
-                      <div className="p-2">
-                        <div className="text-xs font-medium text-gray-500 px-3 py-2">
-                          Select Church Context
-                        </div>
-                        <button
-                          onClick={() => {
-                            setSelectedChurchId(undefined);
-                            setShowChurchSelector(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-gray-50 ${
-                            !selectedChurchId ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-                          }`}
-                        >
-                          All Churches
-                        </button>
-                        {churches.map((church) => (
-                          <button
-                            key={church.id}
+                    <>
+                      <Paper
+                        elevation={8}
+                        sx={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: 0,
+                          mt: 1,
+                          width: 256,
+                          zIndex: 10,
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <Box sx={{ p: 1 }}>
+                          <Typography variant="caption" fontWeight="medium" color="text.secondary" sx={{ px: 1.5, py: 1, display: 'block' }}>
+                            Select Church Context
+                          </Typography>
+                          <Button
+                            fullWidth
                             onClick={() => {
-                              setSelectedChurchId(church.id);
+                              setSelectedChurchId(undefined);
                               setShowChurchSelector(false);
                             }}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-gray-50 ${
-                              selectedChurchId === church.id ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-                            }`}
+                            sx={{
+                              justifyContent: 'flex-start',
+                              textTransform: 'none',
+                              bgcolor: !selectedChurchId ? 'primary.light' : 'transparent',
+                              color: !selectedChurchId ? 'primary.main' : 'text.primary',
+                              '&:hover': { bgcolor: !selectedChurchId ? 'primary.light' : 'action.hover' }
+                            }}
                           >
-                            {church.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                            All Churches
+                          </Button>
+                          {churches.map((church) => (
+                            <Button
+                              key={church.id}
+                              fullWidth
+                              onClick={() => {
+                                setSelectedChurchId(church.id);
+                                setShowChurchSelector(false);
+                              }}
+                              sx={{
+                                justifyContent: 'flex-start',
+                                textTransform: 'none',
+                                bgcolor: selectedChurchId === church.id ? 'primary.light' : 'transparent',
+                                color: selectedChurchId === church.id ? 'primary.main' : 'text.primary',
+                                '&:hover': { bgcolor: selectedChurchId === church.id ? 'primary.light' : 'action.hover' }
+                              }}
+                            >
+                              {church.name}
+                            </Button>
+                          ))}
+                        </Box>
+                      </Paper>
+                      <Box
+                        sx={{
+                          position: 'fixed',
+                          inset: 0,
+                          zIndex: 5
+                        }}
+                        onClick={() => setShowChurchSelector(false)}
+                      />
+                    </>
                   )}
-                </div>
+                </Box>
               )}
-            </div>
+            </Box>
 
             {/* Header Actions */}
-            <div className="flex items-center gap-3">
-              <button
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshCw size={16} />}
                 onClick={handleRefreshJobs}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                size="small"
               >
-                <RefreshCw className="h-4 w-4" />
                 Refresh
-              </button>
+              </Button>
 
               <ConfigPanel
                 trigger={
-                  <button className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors shadow-sm">
-                    <SettingsIcon className="h-4 w-4" />
+                  <Button
+                    variant="contained"
+                    startIcon={<SettingsIcon size={16} />}
+                    sx={{ textTransform: 'none' }}
+                  >
                     Settings
-                  </button>
+                  </Button>
                 }
                 churchId={selectedChurchId}
               />
-            </div>
-          </div>
+            </Box>
+          </Box>
 
           {/* Stats Bar */}
-          <div className="mt-4 flex items-center gap-6 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>Ready for Processing</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span>Multi-language Support</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span>Field Extraction</span>
-            </div>
-          </div>
-        </div>
-      </div>
+          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main' }} />
+              <Typography variant="caption" color="text.secondary">
+                Ready for Processing
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main' }} />
+              <Typography variant="caption" color="text.secondary">
+                Multi-language Support
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'secondary.main' }} />
+              <Typography variant="caption" color="text.secondary">
+                Field Extraction
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-12 gap-6">
+      <Box sx={{ maxWidth: 'xl', mx: 'auto', px: 3, py: 3 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', xl: '5fr 7fr' }, gap: 3 }}>
           {/* Left Panel - Upload & Jobs */}
-          <div className="col-span-12 xl:col-span-5 space-y-6">
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Upload Zone */}
             <UploadZone
               onUploaded={handleUploadSuccess}
@@ -170,23 +225,15 @@ const OCRStudioPage: React.FC = () => {
               churchId={selectedChurchId}
               refreshTrigger={refreshTrigger}
             />
-          </div>
+          </Box>
 
           {/* Right Panel - Results */}
-          <div className="col-span-12 xl:col-span-7">
+          <Box>
             <OutputViewer jobId={selectedJobId} />
-          </div>
-        </div>
-      </div>
-
-      {/* Background click handler for church selector */}
-      {showChurchSelector && (
-        <div
-          className="fixed inset-0 z-5"
-          onClick={() => setShowChurchSelector(false)}
-        />
-      )}
-    </div>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

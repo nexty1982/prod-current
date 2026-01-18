@@ -80,6 +80,14 @@ export async function apiFetch(path: string, opts: ApiOpts = {}): Promise<any> {
     ...opts.headers,
   };
 
+  // Add JWT token if available (for API authentication)
+  if (typeof window !== 'undefined') {
+    const accessToken = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    if (accessToken && !isAuthEndpoint) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+  }
+
   // Only add church ID header for non-auth endpoints
   if (!isAuthEndpoint && churchId !== undefined) {
     headers['X-OM-Church-ID'] = String(churchId);

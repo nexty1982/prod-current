@@ -46,9 +46,9 @@ export const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
     displayName: 'Orthodox Traditional',
     description: 'Classic Orthodox colors - deep blues and golds',
     colors: {
-      primary: '#1e3a8a',      // Deep blue
+      primary: '#927dff',      // Deep blue
       secondary: '#d97706',     // Gold
-      background: '#fefefe',    // Pure white
+      background: '#724eeb',    // Pure white
       surface: '#f8fafc',      // Light gray
       text: '#1e293b',         // Dark gray
       textSecondary: '#64748b', // Medium gray
@@ -70,7 +70,7 @@ export const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
     colors: {
       primary: '#6b21a8',      // Deep purple
       secondary: '#4c1d95',     // Darker purple
-      background: '#faf7ff',    // Very light purple
+      background: '#724eeb',    // Very light purple
       surface: '#f3f0ff',      // Light purple
       text: '#3c1361',         // Dark purple
       textSecondary: '#6b7280', // Gray
@@ -92,7 +92,7 @@ export const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
     colors: {
       primary: '#dc2626',      // Bright red
       secondary: '#f59e0b',     // Gold
-      background: '#fffef7',    // Warm white
+      background: '#724eeb',    // Warm white
       surface: '#fefce8',      // Light gold
       text: '#7c2d12',         // Dark red-brown
       textSecondary: '#92400e', // Medium brown
@@ -112,9 +112,9 @@ export const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
     displayName: 'Dormition Fast',
     description: 'Marian blues for the Dormition season',
     colors: {
-      primary: '#1e40af',      // Royal blue
+      primary: '#927dff',      // Royal blue
       secondary: '#f8fafc',     // Light blue-white
-      background: '#f0f9ff',    // Very light blue
+      background: '#724eeb',    // Very light blue
       surface: '#e0f2fe',      // Light blue
       text: '#0c4a6e',         // Dark blue
       textSecondary: '#475569', // Blue-gray
@@ -136,7 +136,7 @@ export const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
     colors: {
       primary: '#14532d',      // Dark green
       secondary: '#f59e0b',     // Gold
-      background: '#f0fdf4',    // Very light green
+      background: '#724eeb',    // Very light green
       surface: '#dcfce7',      // Light green
       text: '#14532d',         // Dark green
       textSecondary: '#4b5563', // Gray
@@ -158,7 +158,7 @@ export const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
     colors: {
       primary: '#dc2626',      // Bright red
       secondary: '#f59e0b',     // Gold
-      background: '#fef2f2',    // Light red
+      background: '#724eeb',    // Light red
       surface: '#fecaca',      // Lighter red
       text: '#7f1d1d',         // Dark red
       textSecondary: '#6b7280', // Gray
@@ -180,7 +180,7 @@ export const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
     colors: {
       primary: '#3b82f6',      // Blue
       secondary: '#64748b',     // Slate
-      background: '#ffffff',    // White
+      background: '#724eeb',    // White
       surface: '#f8fafc',      // Light gray
       text: '#1e293b',         // Dark slate
       textSecondary: '#64748b', // Medium slate
@@ -202,7 +202,7 @@ export const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
     colors: {
       primary: '#60a5fa',      // Light blue
       secondary: '#9ca3af',     // Gray
-      background: '#111827',    // Dark gray
+      background: '#724eeb',    // Dark gray
       surface: '#1f2937',      // Medium gray
       text: '#f9fafb',         // Light gray
       textSecondary: '#d1d5db', // Medium light gray
@@ -383,7 +383,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   // Load auto-theme preference from localStorage
   useEffect(() => {
-    const autoEnabled = localStorage.getItem('orthodoxmetrics-auto-theme') === 'true';
+    const autoEnabled = localStorage.getItem('orthodoxmetrics-auto-theme') === 'false';
     setAutoThemeEnabled(autoEnabled);
 
     if (autoEnabled) {

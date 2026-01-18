@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { fetchJobs, retryJob, deleteJob } from '../lib/ocrApi';
 import { Loader2, Play, Trash2, CheckCircle, AlertCircle, Clock, FileText } from 'lucide-react';
+import { Box, Typography, Paper, Chip, IconButton, Button, useTheme, Alert as MuiAlert } from '@mui/material';
 import type { OCRJob } from '../lib/ocrApi';
 
 interface JobListProps {
@@ -12,37 +13,60 @@ interface JobListProps {
 }
 
 const StatusIcon = ({ status }: { status: OCRJob['status'] }) => {
-  const iconClass = "h-4 w-4";
+  const getColor = () => {
+    switch (status) {
+      case 'completed': return 'success.main';
+      case 'failed': return 'error.main';
+      case 'processing': return 'info.main';
+      case 'pending': return 'warning.main';
+      default: return 'text.disabled';
+    }
+  };
+  
+  const IconWrapper = ({ children }: { children: React.ReactNode }) => (
+    <Box component="span" sx={{ color: getColor(), display: 'inline-flex' }}>
+      {children}
+    </Box>
+  );
   
   switch (status) {
     case 'completed':
-      return <CheckCircle className={`${iconClass} text-green-600`} />;
+      return <IconWrapper><CheckCircle size={16} /></IconWrapper>;
     case 'failed':
-      return <AlertCircle className={`${iconClass} text-red-600`} />;
+      return <IconWrapper><AlertCircle size={16} /></IconWrapper>;
     case 'processing':
-      return <Loader2 className={`${iconClass} text-blue-600 animate-spin`} />;
+      return <IconWrapper><Loader2 size={16} className="animate-spin" /></IconWrapper>;
     case 'pending':
-      return <Clock className={`${iconClass} text-yellow-600`} />;
+      return <IconWrapper><Clock size={16} /></IconWrapper>;
     default:
-      return <FileText className={`${iconClass} text-gray-400`} />;
+      return <IconWrapper><FileText size={16} /></IconWrapper>;
   }
 };
 
 const StatusBadge = ({ status }: { status: OCRJob['status'] }) => {
-  const baseClasses = "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium";
+  const theme = useTheme();
   
-  const statusStyles = {
-    completed: "bg-green-100 text-green-800",
-    failed: "bg-red-100 text-red-800",
-    processing: "bg-blue-100 text-blue-800",
-    pending: "bg-yellow-100 text-yellow-800",
-    cancelled: "bg-gray-100 text-gray-800"
+  const statusColors = {
+    completed: { bg: theme.palette.success.light, text: theme.palette.success.dark },
+    failed: { bg: theme.palette.error.light, text: theme.palette.error.dark },
+    processing: { bg: theme.palette.info.light, text: theme.palette.info.dark },
+    pending: { bg: theme.palette.warning.light, text: theme.palette.warning.dark },
+    cancelled: { bg: theme.palette.grey[200], text: theme.palette.text.secondary }
   };
   
+  const colors = statusColors[status] || statusColors.cancelled;
+  
   return (
-    <span className={`${baseClasses} ${statusStyles[status] || statusStyles.cancelled}`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
+    <Chip
+      label={status.charAt(0).toUpperCase() + status.slice(1)}
+      size="small"
+      sx={{
+        bgcolor: colors.bg,
+        color: colors.text,
+        height: 20,
+        fontSize: '0.7rem'
+      }}
+    />
   );
 };
 
@@ -53,6 +77,7 @@ const JobList: React.FC<JobListProps> = ({
   churchId,
   refreshTrigger = 0 
 }) => {
+  const theme = useTheme();
   const [jobs, setJobs] = useState<OCRJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -128,91 +153,121 @@ const JobList: React.FC<JobListProps> = ({
   };
 
   return (
-    <div className={`rounded-2xl border bg-white shadow-sm ${className}`}>
-      <div className="p-4 border-b flex items-center justify-between">
-        <h2 className="text-sm font-medium text-gray-900">Recent OCR Jobs</h2>
-        {loading && <Loader2 className="h-4 w-4 animate-spin text-gray-500" />}
-      </div>
+    <Paper elevation={1} sx={{ borderRadius: 2, overflow: 'hidden' }} className={className}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Typography variant="subtitle2" fontWeight="medium" color="text.primary">
+          Recent OCR Jobs
+        </Typography>
+        {loading && (
+          <Box component="span" sx={{ color: 'text.secondary', display: 'inline-flex' }}>
+            <Loader2 size={16} className="animate-spin" />
+          </Box>
+        )}
+      </Box>
       
-      <div className="divide-y">
+      <Box sx={{ '& > *:not(:last-child)': { borderBottom: 1, borderColor: 'divider' } }}>
         {jobs.length === 0 && !loading ? (
-          <div className="p-6 text-center text-gray-500">
-            <FileText className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-            <p className="text-sm">No OCR jobs yet</p>
-            <p className="text-xs text-gray-400 mt-1">Upload some documents to get started</p>
-          </div>
+          <Box sx={{ p: 3, textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1, color: 'text.disabled' }}>
+              <FileText size={32} />
+            </Box>
+            <Typography variant="body2" color="text.secondary">
+              No OCR jobs yet
+            </Typography>
+            <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block' }}>
+              Upload some documents to get started
+            </Typography>
+          </Box>
         ) : (
           jobs.map((job) => (
-            <div
+            <Box
               key={job.id}
-              className={`
-                p-4 cursor-pointer hover:bg-gray-50 transition-colors
-                ${selectedJobId === job.id ? 'bg-blue-50 border-r-4 border-blue-500' : ''}
-              `}
+              sx={{
+                p: 2,
+                cursor: 'pointer',
+                bgcolor: selectedJobId === job.id ? 'primary.light' : 'transparent',
+                borderRight: selectedJobId === job.id ? 4 : 0,
+                borderColor: 'primary.main',
+                '&:hover': { bgcolor: 'action.hover' },
+                transition: 'background-color 0.2s'
+              }}
               onClick={() => onSelect?.(job.id)}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1.5 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                     <StatusIcon status={job.status} />
-                    <h3 className="text-sm font-medium text-gray-900 truncate">
+                    <Typography variant="body2" fontWeight="medium" color="text.primary" noWrap>
                       {job.originalFilename || job.filename}
-                    </h3>
-                  </div>
+                    </Typography>
+                  </Box>
                   
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', mb: 0.5 }}>
                     <StatusBadge status={job.status} />
-                    {job.pages && <span>Pages: {job.pages}</span>}
-                    {job.fileSize && <span>{formatFileSize(job.fileSize)}</span>}
-                    {job.engine && <span className="capitalize">{job.engine}</span>}
-                  </div>
+                    {job.pages && (
+                      <Typography variant="caption" color="text.secondary">
+                        Pages: {job.pages}
+                      </Typography>
+                    )}
+                    {job.fileSize && (
+                      <Typography variant="caption" color="text.secondary">
+                        {formatFileSize(job.fileSize)}
+                      </Typography>
+                    )}
+                    {job.engine && (
+                      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+                        {job.engine}
+                      </Typography>
+                    )}
+                  </Box>
                   
-                  <div className="mt-1 text-xs text-gray-400">
+                  <Typography variant="caption" color="text.disabled">
                     Created: {formatDate(job.createdAt)}
-                  </div>
+                  </Typography>
                   
                   {job.error && (
-                    <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
-                      {job.error}
-                    </div>
+                    <MuiAlert severity="error" sx={{ mt: 1 }} icon={<AlertCircle size={16} />}>
+                      <Typography variant="caption">{job.error}</Typography>
+                    </MuiAlert>
                   )}
-                </div>
+                </Box>
                 
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
                   {job.status === 'failed' && (
-                    <button
+                    <IconButton
+                      size="small"
                       onClick={(e) => handleRetry(job.id, e)}
                       disabled={actionLoading === job.id}
-                      className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
                       title="Retry OCR processing"
                     >
                       {actionLoading === job.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 size={16} className="animate-spin" />
                       ) : (
-                        <Play className="h-4 w-4 text-gray-600" />
+                        <Play size={16} />
                       )}
-                    </button>
+                    </IconButton>
                   )}
                   
-                  <button
+                  <IconButton
+                    size="small"
                     onClick={(e) => handleDelete(job.id, e)}
                     disabled={actionLoading === job.id}
-                    className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 hover:border-red-300 disabled:opacity-50"
+                    color="error"
                     title="Delete job"
                   >
                     {actionLoading === job.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 size={16} className="animate-spin" />
                     ) : (
-                      <Trash2 className="h-4 w-4 text-gray-600 hover:text-red-600" />
+                      <Trash2 size={16} />
                     )}
-                  </button>
-                </div>
-              </div>
-            </div>
+                  </IconButton>
+                </Box>
+              </Box>
+            </Box>
           ))
         )}
-      </div>
-    </div>
+      </Box>
+    </Paper>
   );
 };
 

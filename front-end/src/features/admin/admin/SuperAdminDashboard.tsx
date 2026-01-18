@@ -282,23 +282,6 @@ export const SuperAdminDashboard: React.FC = () => {
       {/* Header */}
       <Box mb={8} textAlign="center">
         <Typography 
-          variant="h2" 
-          component="h1" 
-          gutterBottom
-          sx={{
-            fontWeight: 800,
-            background: 'linear-gradient(135deg, #1976d2, #673ab7)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            mb: 2,
-            fontSize: { xs: '2.5rem', md: '3.5rem' },
-            letterSpacing: '-0.02em'
-          }}
-        >
-          Super Admin Control Panel
-        </Typography>
-        <Typography 
           variant="h5" 
           color="text.secondary" 
           sx={{ 
@@ -315,13 +298,18 @@ export const SuperAdminDashboard: React.FC = () => {
         {/* Enhanced Statistics Dashboard */}
         <Card 
           sx={{ 
-            background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.08), rgba(103, 58, 183, 0.08))',
-            border: '1px solid rgba(25, 118, 210, 0.2)',
+            background: (theme) => theme.palette.mode === 'dark' 
+              ? 'linear-gradient(135deg, rgba(25, 118, 210, 0.15), rgba(103, 58, 183, 0.15))'
+              : 'linear-gradient(135deg, rgba(25, 118, 210, 0.08), rgba(103, 58, 183, 0.08))',
+            border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(25, 118, 210, 0.3)' : 'rgba(25, 118, 210, 0.2)'}`,
             backdropFilter: 'blur(20px)',
             borderRadius: 4,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+            boxShadow: (theme) => theme.palette.mode === 'dark' 
+              ? '0 8px 32px rgba(0,0,0,0.3)'
+              : '0 8px 32px rgba(0,0,0,0.12)',
             overflow: 'hidden',
             position: 'relative',
+            bgcolor: 'background.paper',
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -367,7 +355,7 @@ export const SuperAdminDashboard: React.FC = () => {
                     {categoryStats.all || 16}
                   </Typography>
                 </Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
                   Available Modules
                 </Typography>
                 <Typography variant="body2" color="text.secondary" fontWeight={500}>
@@ -391,7 +379,7 @@ export const SuperAdminDashboard: React.FC = () => {
                     {categoryStats.core || 3}
                   </Typography>
                 </Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
                   Core Systems
                 </Typography>
                 <Typography variant="body2" color="text.secondary" fontWeight={500}>
@@ -415,7 +403,7 @@ export const SuperAdminDashboard: React.FC = () => {
                     {categoryStats.management || 5}
                   </Typography>
                 </Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
                   Management Tools
                 </Typography>
                 <Typography variant="body2" color="text.secondary" fontWeight={500}>
@@ -469,10 +457,12 @@ export const SuperAdminDashboard: React.FC = () => {
         <Card sx={{ 
           p: 4, 
           borderRadius: 3, 
-          border: '1px solid rgba(0,0,0,0.12)',
-          background: 'rgba(255,255,255,0.8)',
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          bgcolor: 'background.paper',
           backdropFilter: 'blur(10px)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+          boxShadow: (theme) => theme.palette.mode === 'dark' 
+            ? '0 4px 20px rgba(0,0,0,0.3)'
+            : '0 4px 20px rgba(0,0,0,0.08)'
         }}>
           <Stack direction="row" spacing={4} alignItems="center">
             <TextField
@@ -490,12 +480,12 @@ export const SuperAdminDashboard: React.FC = () => {
                 minWidth: { xs: '100%', md: 400 },
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 3,
-                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  backgroundColor: 'background.default',
                   '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,1)',
+                    backgroundColor: 'background.default',
                   },
                   '&.Mui-focused': {
-                    backgroundColor: 'rgba(255,255,255,1)',
+                    backgroundColor: 'background.default',
                   }
                 }
               }}
@@ -606,10 +596,9 @@ export const SuperAdminDashboard: React.FC = () => {
                     textAlign: 'center', 
                     py: 12,
                     px: 6,
-                    border: '3px dashed rgba(0,0,0,0.12)',
-                    backgroundColor: 'transparent',
-                    borderRadius: 4,
-                    background: 'rgba(248,250,252,0.5)'
+                    border: (theme) => `3px dashed ${theme.palette.divider}`,
+                    bgcolor: 'background.default',
+                    borderRadius: 4
                   }}
                 >
                   <SearchIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 3 }} />

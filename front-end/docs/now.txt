@@ -1,0 +1,53 @@
+You are Cursor in the OrthodoxMetrics repo.
+
+TASK
+Do a full repo discovery specifically for the OCR Record Uploader + OCR Inspection Panel “result preview” and report exactly where to implement Phase 1 transcription normalization and UI display.
+
+REQUIREMENTS
+- Do NOT implement anything yet.
+- Output only facts you verify in code: paths, exported symbols, API routes, data shapes, and call chains.
+- Identify the exact component that renders the current unreadable OCR preview.
+- Identify the exact backend route that returns OCR results to the UI.
+- Identify how OCR raw response is stored (DB table/column OR filesystem) and how it is retrieved.
+
+DELIVERABLE
+Return a short report with these sections:
+
+1) Frontend entrypoints
+- OCR uploader page component path(s)
+- OCR inspection/detail page component path(s)
+- Any tab components related to Text/Structured/Fusion/Review
+- Where OCR “preview text” is computed/rendered
+
+2) Frontend API client calls
+- The exact fetch/axios client wrapper used
+- The exact endpoints called to:
+  - upload images
+  - start OCR processing
+  - fetch OCR job/image results
+- The TS types/interfaces for the OCR response if present
+
+3) Backend routes/services
+- Express route files defining OCR endpoints
+- Handler functions
+- Service layer functions used
+- Any existing “parseVisionResponse” / token parsing utilities
+
+4) Data model
+- Table(s) for ocr jobs/results/drafts
+- Key columns storing raw OCR response or derived data
+- How page indexing works for multi-page
+
+5) Minimal change plan
+- The best insertion point for:
+  - extractTokensFromVision adapter
+  - normalizeTranscription module
+  - returning `transcription: {text, paragraphs, diagnostics}` in API responses
+- Avoid schema changes.
+
+OUTPUT FORMAT
+- Bullet lists with file paths.
+- For each key file: list exported component/function names you found.
+- Do not include speculation.
+
+Start now.

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, startTransition } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -11,7 +11,12 @@ import {
   Toolbar,
   AppBar,
   Tabs,
-  Tab
+  Tab,
+  FormControl,
+  Select,
+  MenuItem,
+  Divider,
+  Chip
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -24,16 +29,24 @@ import { AgGridReact } from 'ag-grid-react';
 import { ColDef, GridReadyEvent, GridApi, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 
 // Register AG Grid modules
+// Note: ColumnMenuModule is from ag-grid-enterprise, but we'll register it if available
+// For community version, we only register AllCommunityModule
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// Import AG Grid legacy themes (CSS-based only, no theming API)
+// Import AG Grid base styles (required for legacy theme)
+// Using side-effect imports that Vite can handle properly
+// Note: This import is needed when using theme="legacy"
 import 'ag-grid-community/styles/ag-grid.css';
+
+// Import AG Grid alpine theme (used as fallback, custom themes are in advanced-grid-themes.css)
+// Note: Only importing alpine as it's the most commonly used base theme
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import 'ag-grid-community/styles/ag-theme-balham.css';
-import 'ag-grid-community/styles/ag-theme-material.css';
-import 'ag-grid-community/styles/ag-theme-quartz.css';
-// Import custom themes
+
+// Import custom themes (contains ag-theme-ocean-blue and other custom themes)
 import '../../styles/advanced-grid-themes.css';
+
+// Import enhanced table store for theme management
+import { enhancedTableStore, THEME_MAP, LiturgicalThemeKey } from '../../store/enhancedTableStore';
 
 // Removed unused interface definitions for cleaner code
 
@@ -44,7 +57,7 @@ interface AdvancedGridDialogProps {
   datasets?: GridDatasets;
   counts?: GridCounts;
   // Backward compatibility
-  records?: any[]; 
+  records?: any[];
   onRefresh?: () => void;
   recordType?: 'baptism' | 'marriage' | 'funeral';
   columnDefs?: ColDef[];
@@ -88,6 +101,31 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [selectedTheme, setSelectedTheme] = useState('ag-theme-ocean-blue');
   const [activeTab, setActiveTab] = useState<'baptism' | 'marriage' | 'funeral'>(recordType);
+  
+  // Enhanced table theming state
+  const [enhancedTableState, setEnhancedTableState] = useState(enhancedTableStore.getState());
+  
+  // Subscribe to enhanced table store changes
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    const unsubscribe = enhancedTableStore.subscribe(() => {
+      // Debounce store updates to prevent message handler violations
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      timeoutId = setTimeout(() => {
+        startTransition(() => {
+          setEnhancedTableState(enhancedTableStore.getState());
+        });
+      }, 0);
+    });
+    return () => {
+      unsubscribe();
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
 
   // Default sort per tab
   const DEFAULT_SORT: Record<'baptism' | 'marriage' | 'funeral', { field: string; dir: 'asc' | 'desc' }> = {
@@ -143,7 +181,7 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
   const handleTabChange = (event: React.SyntheticEvent, newValue: 'baptism' | 'marriage' | 'funeral') => {
     console.log(`🔄 Tab change from ${activeTab} to ${newValue}`);
     setActiveTab(newValue);
-    
+
     // Clear grid when switching tabs - use proper AG Grid API
     if (gridApi) {
       console.log('🔍 Grid API available, checking setRowData method...');
@@ -175,14 +213,17 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
 
   // Apply default sort when activeTab changes or when rowData changes
   React.useEffect(() => {
-    if (gridApi && typeof gridApi.setSortModel === 'function' && rowData.length > 0) {
+    if (gridApi && typeof gridApi.applyColumnState === 'function' && rowData.length > 0) {
       const defaultSort = DEFAULT_SORT[activeTab];
       console.log(`🔄 Applying default sort: ${defaultSort.field} ${defaultSort.dir}`);
-      
+
       // Force the sort to be applied
       setTimeout(() => {
-        if (gridApi && typeof gridApi.setSortModel === 'function') {
-          gridApi.setSortModel([{ colId: defaultSort.field, sort: defaultSort.dir }]);
+        if (gridApi && typeof gridApi.applyColumnState === 'function') {
+          gridApi.applyColumnState({
+            state: [{ colId: defaultSort.field, sort: defaultSort.dir }],
+            defaultState: { sort: null }
+          });
           // Also refresh the grid to ensure sorting is visible
           if (typeof gridApi.refreshCells === 'function') {
             gridApi.refreshCells();
@@ -232,10 +273,10 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
       }
 
       // Date fields
-      if (fieldName.includes('date') || fieldName.includes('Date') || 
-          fieldName === 'dateOfBaptism' || fieldName === 'marriageDate' || 
-          fieldName === 'funeralDate' || fieldName === 'deathDate' ||
-          fieldName === 'birthDate') {
+      if (fieldName.includes('date') || fieldName.includes('Date') ||
+        fieldName === 'dateOfBaptism' || fieldName === 'marriageDate' ||
+        fieldName === 'funeralDate' || fieldName === 'deathDate' ||
+        fieldName === 'birthDate') {
         config.filter = 'agDateColumnFilter';
         config.valueFormatter = (params) => {
           if (params.value) {
@@ -252,9 +293,9 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
 
       // Name fields - make them bold
       if (fieldName.includes('name') || fieldName.includes('Name') ||
-          fieldName === 'firstName' || fieldName === 'lastName' ||
-          fieldName === 'groomFirstName' || fieldName === 'groomLastName' ||
-          fieldName === 'brideFirstName' || fieldName === 'brideLastName') {
+        fieldName === 'firstName' || fieldName === 'lastName' ||
+        fieldName === 'groomFirstName' || fieldName === 'groomLastName' ||
+        fieldName === 'brideFirstName' || fieldName === 'brideLastName') {
         config.cellStyle = { fontWeight: 'bold' };
       }
 
@@ -264,7 +305,7 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
     // Define specific field order for each record type
     // Note: These are the actual field names from the backend (camelCase aliases)
     let orderedFields: string[] = [];
-    
+
     if (type === 'baptism') {
       orderedFields = ['id', 'firstName', 'lastName', 'birthDate', 'dateOfBaptism', 'birthplace', 'entryType', 'sponsors', 'parents', 'clergy'];
     } else if (type === 'marriage') {
@@ -281,7 +322,7 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
 
     // Build columns in the specified order, excluding system fields
     const systemFields = ['church_id', 'created_at', 'updated_at'];
-    
+
     // First, check which fields actually exist in the data
     const availableFields = orderedFields.filter(field => {
       const exists = field in tabRecords[0];
@@ -290,21 +331,21 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
       }
       return exists && !systemFields.includes(field);
     });
-    
+
     console.log(`🔍 [${type}] Available fields from ordered list:`, availableFields);
-    
+
     // Create columns in the exact order specified, only for fields that exist
     const columns = availableFields.map(field => {
       const config = getColumnConfig(field, tabRecords[0]?.[field]);
       console.log(`🔍 [${type}] Processing field '${field}':`, config);
-      
+
       // Ensure clergy column is always last
       if (field === 'clergy') {
         config.pinned = 'right';
         config.width = 150;
         config.flex = undefined;
       }
-      
+
       return config;
     }).filter(Boolean); // Remove any undefined columns
 
@@ -315,7 +356,7 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
   // Column definitions for AG Grid - use custom columns if provided, otherwise use record type specific columns
   const columnDefs: ColDef[] = useMemo(() => {
     const cols = customColumnDefs || getColumnDefinitions(activeTab);
-    
+
     // Ensure the default sort column is marked as sorted
     if (cols.length > 0) {
       const defaultSort = DEFAULT_SORT[activeTab];
@@ -325,7 +366,7 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
         sortCol.sortIndex = 0;
       }
     }
-    
+
     return cols;
   }, [customColumnDefs, activeTab, datasets, records]);
 
@@ -336,7 +377,9 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
     resizable: true,
     floatingFilter: true,
     suppressMovable: false,
-    hide: false // Ensure all columns are visible by default
+    hide: false, // Ensure all columns are visible by default
+    // Disable menuTabs to avoid ColumnMenuModule error (requires enterprise)
+    menuTabs: [] // Empty array disables menu tabs
   };
 
   // Grid ready event
@@ -344,19 +387,19 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
     setGridApi(params.api);
     console.log('✅ AG Grid ready with', params?.api?.getDisplayedRowCount(), 'rows');
     console.log('🔍 Grid API methods available:', Object.getOwnPropertyNames(Object.getPrototypeOf(params.api)));
-    
+
     // Get all column definitions
     const allColumnDefs = params?.api?.getColumnDefs();
     console.log('📋 All column definitions:', allColumnDefs?.map(col => (col as any).field || col.headerName));
-    
+
     // Ensure all columns are visible by default
     const allColumns = params?.api?.getAllDisplayedColumns?.() || [];
     console.log('📊 All displayed columns:', allColumns.map(col => col.getColId()));
-    
+
     // Get all columns (including hidden ones)
     const allGridColumns = params?.api?.getAllGridColumns?.() || [];
     console.log('🔍 All grid columns:', allGridColumns.map(col => col.getColId()));
-    
+
     // Ensure all columns are shown and expand them to show full content
     allColumns.forEach(column => {
       if (column.isVisible()) {
@@ -369,18 +412,18 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
         }
       }
     });
-    
+
     // Force refresh to ensure all columns are displayed
     if (typeof params?.api?.refreshCells === 'function') {
       params?.api?.refreshCells();
     }
-    
+
     // Apply default sort for the current tab
     const defaultSort = DEFAULT_SORT[activeTab];
     if (typeof params?.api?.setSortModel === 'function') {
       console.log(`🎯 Grid ready - applying default sort: ${defaultSort.field} ${defaultSort.dir}`);
       params?.api?.setSortModel([{ colId: defaultSort.field, sort: defaultSort.dir }]);
-      
+
       // Force refresh to ensure sorting is visible
       setTimeout(() => {
         if (typeof params?.api?.refreshCells === 'function') {
@@ -390,7 +433,7 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
     }
 
 
-    
+
     console.log('🎯 Final column count:', params?.api?.getAllDisplayedColumns?.() || [].length);
   };
 
@@ -426,7 +469,7 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
       maxWidth={false}
       fullWidth
       PaperProps={{
-        sx: { 
+        sx: {
           width: '95vw',
           height: '90vh',
           maxWidth: 'none',
@@ -439,44 +482,72 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
         <AppBar position="static" color="default" elevation={0}>
           <Toolbar sx={{ gap: 2 }}>
             <GridIcon sx={{ color: 'primary.main' }} />
-                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-               {getRecordTypeTitle(activeTab)} - Advanced Grid View
-             </Typography>
-            
-                         {/* Records Count - Hidden for cleaner UI */}
-             {/* <Chip 
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              {getRecordTypeTitle(activeTab)} - Advanced Grid View
+            </Typography>
+
+            {/* Records Count - Hidden for cleaner UI */}
+            {/* <Chip 
                label={`${rowData.length} Records`} 
                color="primary" 
                variant="outlined" 
              /> */}
-            
-                         {/* Theme Selector - Hidden for cleaner UI */}
-             {/* <FormControl size="small" sx={{ minWidth: 140 }}>
-               <InputLabel>Theme</InputLabel>
-               <Select
-                 value={selectedTheme}
-                 label="Theme"
-                 onChange={(e) => handleThemeChange(e.target.value)}
-               >
-                 {AG_GRID_THEMES.map((theme) => (
-                   <MenuItem key={theme.value} value={theme.value}>
-                     {theme.label}
-                   </MenuItem>
-                 ))}
-               </Select>
-             </FormControl> */}
-            
+
+            {/* Theme Selector */}
+            <FormControl size="small" sx={{ minWidth: 200 }}>
+              <Select
+                value={enhancedTableState.liturgicalTheme}
+                onChange={(e) => {
+                  const newTheme = e.target.value as LiturgicalThemeKey | string;
+                  enhancedTableStore.setLiturgicalTheme(newTheme);
+                }}
+                sx={{
+                  borderRadius: 2,
+                  backgroundColor: 'background.paper',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(76, 29, 149, 0.3)',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(76, 29, 149, 0.5)',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#4C1D95',
+                  },
+                }}
+              >
+                {/* Pre-defined Themes */}
+                <MenuItem value="orthodox_traditional">Orthodox Traditional</MenuItem>
+                <MenuItem value="great_lent">Great Lent</MenuItem>
+                <MenuItem value="pascha">Pascha</MenuItem>
+                <MenuItem value="nativity">Nativity</MenuItem>
+                <MenuItem value="palm_sunday">Palm Sunday</MenuItem>
+                <MenuItem value="theotokos_feasts">Theotokos Feasts</MenuItem>
+                
+                {/* Custom Themes */}
+                {enhancedTableState.customThemes && Object.keys(enhancedTableState.customThemes).length > 0 && (
+                  <>
+                    <Divider sx={{ my: 1 }} />
+                    {Object.entries(enhancedTableState.customThemes).map(([key, theme]) => (
+                      <MenuItem key={key} value={key}>
+                        {(theme as any).name || key}
+                      </MenuItem>
+                    ))}
+                  </>
+                )}
+              </Select>
+            </FormControl>
+
             {/* Action Buttons */}
-            <IconButton 
+            <IconButton
               onClick={handleRefresh}
               title="Refresh Data"
               color="inherit"
             >
               <RefreshIcon />
             </IconButton>
-            
-                         {/* Show All Columns button - Hidden for cleaner UI */}
-             {/* <IconButton 
+
+            {/* Show All Columns button - Hidden for cleaner UI */}
+            {/* <IconButton 
                onClick={() => {
                  if (gridApi && gridApi.getAllDisplayedColumns && gridApi.setColumnsVisible && gridApi.sizeColumnsToFit) {
                    // Show all columns
@@ -492,16 +563,16 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
              >
                <TableChartIcon />
              </IconButton> */}
-            
-            <IconButton 
+
+            <IconButton
               onClick={handleExport}
               title="Export to CSV"
               color="inherit"
             >
               <ExportIcon />
             </IconButton>
-            
-            <IconButton 
+
+            <IconButton
               onClick={onClose}
               title="Close Window"
               color="inherit"
@@ -512,63 +583,76 @@ export const AdvancedGridDialog: React.FC<AdvancedGridDialogProps> = ({
         </AppBar>
       </DialogTitle>
 
-             <DialogContent sx={{ p: 2, overflow: 'hidden' }}>
-         {/* Tabs for different record types */}
-         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-           <Tabs value={activeTab} onChange={handleTabChange} aria-label="record type tabs">
-             <Tab label={`Baptism Records (${getCountForTab('baptism')})`} value="baptism" />
-             <Tab label={`Marriage Records (${getCountForTab('marriage')})`} value="marriage" />
-             <Tab label={`Funeral Records (${getCountForTab('funeral')})`} value="funeral" />
-           </Tabs>
-         </Box>
-         
-                   <Box sx={{ height: 'calc(100% - 80px)', width: '100%' }}>
-            <div 
-              className={selectedTheme} 
-              style={{ 
-                height: '100%', 
-                width: '100%'
-              }}
-            >
-                                                                               <AgGridReact
-                 rowData={rowData}
-                 columnDefs={columnDefs}
-                 defaultColDef={defaultColDef}
-                 onGridReady={onGridReady}
-                                   pagination={false}
-                  animateRows={true}
-                  enableCellTextSelection={true}
-                  enableBrowserTooltips={true}
-                  theme="legacy"
-                  tooltipShowDelay={500}
-                  loadingOverlayComponent="agLoadingOverlay"
-                  noRowsOverlayComponent="agNoRowsOverlay"
-                  overlayNoRowsTemplate={`<span>No ${activeTab} records found</span>`}
-                  overlayLoadingTemplate={`<span>Loading ${activeTab} records...</span>`}
-                  rowHeight={40}
-                  headerHeight={45}
-                  maintainColumnOrder={true}
-                  suppressColumnVirtualisation={false}
-                  suppressRowVirtualisation={false}
-                  getRowId={(params) => params.data.id.toString()}
-                  suppressMenuHide={false}
-                  suppressMovableColumns={false}
-                  suppressRowClickSelection={true}
-                  // Ensure proper sorting
-                  defaultSortModel={[{ colId: DEFAULT_SORT[activeTab].field, sort: DEFAULT_SORT[activeTab].dir }]}
-                              />
-           </div>
-           
-                       
-         </Box>
-       </DialogContent>
+      <DialogContent sx={{ p: 2, overflow: 'hidden' }}>
+        {/* Tabs for different record types */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+          <Tabs value={activeTab} onChange={handleTabChange} aria-label="record type tabs">
+            <Tab label={`Baptism Records (${getCountForTab('baptism')})`} value="baptism" />
+            <Tab label={`Marriage Records (${getCountForTab('marriage')})`} value="marriage" />
+            <Tab label={`Funeral Records (${getCountForTab('funeral')})`} value="funeral" />
+          </Tabs>
+        </Box>
 
-             {/* Clean Footer */}
-       <DialogActions sx={{ justifyContent: 'flex-end', px: 3, py: 1 }}>
-         <Button onClick={onClose} variant="outlined">
-           Close
-         </Button>
-       </DialogActions>
+        <Box sx={{ height: 'calc(100% - 80px)', width: '100%' }}>
+          {/* Dynamic style tag to apply theme colors to AG Grid */}
+          <style id={`ag-grid-theme-advanced-${activeTab}`}>
+            {`#ag-grid-container-advanced-${activeTab}.ag-theme-alpine{--ag-header-background-color:${enhancedTableState.tokens.headerBg}!important;--ag-header-foreground-color:${enhancedTableState.tokens.headerText}!important;--ag-border-color:${enhancedTableState.tokens.border}!important;--ag-odd-row-background-color:${enhancedTableState.tokens.rowOddBg}!important;--ag-background-color:${enhancedTableState.tokens.rowEvenBg}!important;--ag-data-color:${enhancedTableState.tokens.cellText}!important;--ag-row-hover-color:${enhancedTableState.tokens.accent}15!important;--ag-selected-row-background-color:${enhancedTableState.tokens.accent}20!important;--ag-alpine-active-color:${enhancedTableState.tokens.accent}!important}#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-row,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-row>div,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-row>div>div{background-color:${enhancedTableState.tokens.headerBg}!important;color:${enhancedTableState.tokens.headerText}!important;border-color:${enhancedTableState.tokens.border}!important}#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-cell,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-cell>div,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-cell>div>div{background-color:${enhancedTableState.tokens.headerBg}!important;color:${enhancedTableState.tokens.headerText}!important;border-color:${enhancedTableState.tokens.border}!important;border-bottom-color:${enhancedTableState.tokens.border}!important}#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-cell-text,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-cell-label,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-cell-label span,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-cell-label .ag-header-cell-text,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-cell-label>span{color:${enhancedTableState.tokens.headerText}!important}#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-row-odd,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-row-odd .ag-cell{background-color:${enhancedTableState.tokens.rowOddBg}!important}#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-row-even,#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-row-even .ag-cell{background-color:${enhancedTableState.tokens.rowEvenBg}!important}#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-cell{color:${enhancedTableState.tokens.cellText}!important;border-color:${enhancedTableState.tokens.border}!important}#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-row:hover{background-color:${enhancedTableState.tokens.accent}15!important}#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-row-selected{background-color:${enhancedTableState.tokens.accent}20!important}#ag-grid-container-advanced-${activeTab}.ag-theme-alpine .ag-header-cell-resize{background-color:${enhancedTableState.tokens.headerBg}!important}`}
+          </style>
+          <div
+            id={`ag-grid-container-advanced-${activeTab}`}
+            className="ag-theme-alpine"
+            style={{
+              height: '100%',
+              width: '100%'
+            }}
+          >
+            <AgGridReact
+              key={`ag-grid-advanced-${activeTab}-${enhancedTableState.liturgicalTheme}-${enhancedTableState.tokens.headerBg}`}
+              theme="legacy"
+              rowData={rowData}
+              columnDefs={columnDefs}
+              defaultColDef={defaultColDef}
+              onGridReady={onGridReady}
+              pagination={false}
+              animateRows={true}
+              enableCellTextSelection={true}
+              enableBrowserTooltips={true}
+              tooltipShowDelay={500}
+              loadingOverlayComponent="agLoadingOverlay"
+              noRowsOverlayComponent="agNoRowsOverlay"
+              overlayNoRowsTemplate={`<span>No ${activeTab} records found</span>`}
+              overlayLoadingTemplate={`<span>Loading ${activeTab} records...</span>`}
+              rowHeight={40}
+              headerHeight={45}
+              maintainColumnOrder={true}
+              suppressColumnVirtualisation={false}
+              suppressRowVirtualisation={false}
+              getRowId={(params) => params.data.id.toString()}
+              suppressMenuHide={false}
+              suppressMovableColumns={false}
+              // Disable menuTabs at grid level to avoid ColumnMenuModule error
+              menuTabs={[]}
+              rowSelection={{ mode: 'multiple', enableClickSelection: false }}
+              getRowStyle={(params) => {
+                const rowIndex = params.node.rowIndex ?? 0;
+                return {
+                  backgroundColor: rowIndex % 2 === 0
+                    ? enhancedTableState.tokens.rowEvenBg
+                    : enhancedTableState.tokens.rowOddBg,
+                  color: enhancedTableState.tokens.cellText,
+                };
+              }}
+            />
+          </div>
+        </Box>
+      </DialogContent>
+
+      {/* Clean Footer */}
+      <DialogActions sx={{ justifyContent: 'flex-end', px: 3, py: 1 }}>
+        <Button onClick={onClose} variant="outlined">
+          Close
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };

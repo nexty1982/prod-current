@@ -1,5 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Settings, Save, RefreshCw } from 'lucide-react';
+import { 
+  Box, 
+  Typography, 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions, 
+  Button, 
+  TextField, 
+  Select, 
+  MenuItem, 
+  FormControl, 
+  InputLabel, 
+  FormControlLabel, 
+  Checkbox, 
+  Alert,
+  CircularProgress,
+  useTheme
+} from '@mui/material';
 import { fetchSettings, updateSettings, type OCRSettings } from '../lib/ocrApi';
 
 interface ConfigPanelProps {
@@ -9,6 +28,7 @@ interface ConfigPanelProps {
 }
 
 const ConfigPanel: React.FC<ConfigPanelProps> = ({ trigger, churchId, onSettingsChange }) => {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState<OCRSettings>({
     engine: 'tesseract',
@@ -22,14 +42,17 @@ const ConfigPanel: React.FC<ConfigPanelProps> = ({ trigger, churchId, onSettings
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadSettings = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await fetchSettings(churchId);
       setSettings(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load OCR settings:', error);
+      setError(error.message || 'Failed to load settings');
     } finally {
       setLoading(false);
     }
@@ -43,12 +66,14 @@ const ConfigPanel: React.FC<ConfigPanelProps> = ({ trigger, churchId, onSettings
 
   const handleSave = async () => {
     setSaving(true);
+    setError(null);
     try {
       await updateSettings(settings, churchId);
       onSettingsChange?.(settings);
       setOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save OCR settings:', error);
+      setError(error.message || 'Failed to save settings. The endpoint may not be implemented yet.');
     } finally {
       setSaving(false);
     }
@@ -67,230 +92,227 @@ const ConfigPanel: React.FC<ConfigPanelProps> = ({ trigger, churchId, onSettings
     });
   };
 
-  if (!open) {
-    return <span onClick={() => setOpen(true)}>{trigger}</span>;
-  }
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
-      <div 
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+    <>
+      <Box component="span" onClick={() => setOpen(true)} sx={{ cursor: 'pointer' }}>
+        {trigger}
+      </Box>
+      
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 2 }
+        }}
       >
-        {/* Header */}
-        <div className="p-6 border-b flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Settings className="h-5 w-5 text-gray-700" />
-            <h3 className="text-lg font-semibold text-gray-900">OCR Settings</h3>
-          </div>
-          <button
-            onClick={() => setOpen(false)}
-            className="p-1 rounded-lg hover:bg-gray-100"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-        </div>
+        <DialogTitle>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: 'text.primary' }}>
+              <Settings size={20} />
+              <Typography variant="h6" color="text.primary">
+                OCR Settings
+              </Typography>
+            </Box>
+            <Button
+              onClick={() => setOpen(false)}
+              sx={{ minWidth: 'auto', p: 0.5, color: 'text.secondary' }}
+            >
+              <X size={20} />
+            </Button>
+          </Box>
+        </DialogTitle>
 
-        {/* Content */}
-        <div className="p-6 space-y-6">
+        <DialogContent>
+          {error && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <RefreshCw className="h-6 w-6 animate-spin text-gray-500" />
-            </div>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={24} />
+            </Box>
           ) : (
-            <>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 1 }}>
               {/* Engine Selection */}
-              <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">
-                  OCR Engine
-                </label>
-                <select
+              <FormControl fullWidth>
+                <InputLabel>OCR Engine</InputLabel>
+                <Select
                   value={settings.engine}
+                  label="OCR Engine"
                   onChange={(e) => setSettings({ ...settings, engine: e.target.value as OCRSettings['engine'] })}
-                  className="w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
-                  <option value="tesseract">Tesseract (Open Source)</option>
-                  <option value="google-vision">Google Vision AI</option>
-                  <option value="azure-cognitive">Azure Cognitive Services</option>
-                </select>
-                <p className="text-xs text-gray-500">
+                  <MenuItem value="tesseract">Tesseract (Open Source)</MenuItem>
+                  <MenuItem value="google-vision">Google Vision AI</MenuItem>
+                  <MenuItem value="azure-cognitive">Azure Cognitive Services</MenuItem>
+                </Select>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
                   Different engines may provide varying accuracy for different document types
-                </p>
-              </div>
+                </Typography>
+              </FormControl>
 
               {/* Language Selection */}
-              <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">
-                  Primary Language
-                </label>
-                <select
+              <FormControl fullWidth>
+                <InputLabel>Primary Language</InputLabel>
+                <Select
                   value={settings.language}
+                  label="Primary Language"
                   onChange={(e) => setSettings({ ...settings, language: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
-                  <option value="eng">English</option>
-                  <option value="ell">Greek (Modern)</option>
-                  <option value="grc">Greek (Ancient)</option>
-                  <option value="rus">Russian</option>
-                  <option value="ron">Romanian</option>
-                  <option value="srp">Serbian</option>
-                  <option value="bul">Bulgarian</option>
-                  <option value="ukr">Ukrainian</option>
-                </select>
-                <p className="text-xs text-gray-500">
+                  <MenuItem value="eng">English</MenuItem>
+                  <MenuItem value="ell">Greek (Modern)</MenuItem>
+                  <MenuItem value="grc">Greek (Ancient)</MenuItem>
+                  <MenuItem value="rus">Russian</MenuItem>
+                  <MenuItem value="ron">Romanian</MenuItem>
+                  <MenuItem value="srp">Serbian</MenuItem>
+                  <MenuItem value="bul">Bulgarian</MenuItem>
+                  <MenuItem value="ukr">Ukrainian</MenuItem>
+                </Select>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
                   Choose the primary language of documents you'll be processing
-                </p>
-              </div>
+                </Typography>
+              </FormControl>
 
               {/* Image Processing Settings */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium text-gray-700">Image Processing</h4>
+              <Box>
+                <Typography variant="subtitle2" color="text.primary" sx={{ mb: 2 }}>
+                  Image Processing
+                </Typography>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-2">
-                      DPI (Dots Per Inch)
-                    </label>
-                    <input
-                      type="number"
-                      min="150"
-                      max="600"
-                      step="50"
-                      value={settings.dpi}
-                      onChange={(e) => setSettings({ ...settings, dpi: parseInt(e.target.value) || 300 })}
-                      className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    />
-                  </div>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mb: 2 }}>
+                  <TextField
+                    label="DPI (Dots Per Inch)"
+                    type="number"
+                    inputProps={{ min: 150, max: 600, step: 50 }}
+                    value={settings.dpi}
+                    onChange={(e) => setSettings({ ...settings, dpi: parseInt(e.target.value) || 300 })}
+                    fullWidth
+                    size="small"
+                  />
                   
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-2">
-                      Confidence Threshold (%)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={settings.confidenceThreshold}
-                      onChange={(e) => setSettings({ ...settings, confidenceThreshold: parseInt(e.target.value) || 75 })}
-                      className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
+                  <TextField
+                    label="Confidence Threshold (%)"
+                    type="number"
+                    inputProps={{ min: 0, max: 100 }}
+                    value={settings.confidenceThreshold}
+                    onChange={(e) => setSettings({ ...settings, confidenceThreshold: parseInt(e.target.value) || 75 })}
+                    fullWidth
+                    size="small"
+                  />
+                </Box>
 
-                <div className="space-y-3">
-                  <label className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={settings.deskew}
-                      onChange={(e) => setSettings({ ...settings, deskew: e.target.checked })}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Auto-deskew images</span>
-                  </label>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={settings.deskew}
+                        onChange={(e) => setSettings({ ...settings, deskew: e.target.checked })}
+                      />
+                    }
+                    label={<Typography variant="body2" color="text.primary">Auto-deskew images</Typography>}
+                  />
                   
-                  <label className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={settings.removeNoise}
-                      onChange={(e) => setSettings({ ...settings, removeNoise: e.target.checked })}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Remove image noise</span>
-                  </label>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={settings.removeNoise}
+                        onChange={(e) => setSettings({ ...settings, removeNoise: e.target.checked })}
+                      />
+                    }
+                    label={<Typography variant="body2" color="text.primary">Remove image noise</Typography>}
+                  />
                   
-                  <label className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={settings.preprocessImages}
-                      onChange={(e) => setSettings({ ...settings, preprocessImages: e.target.checked })}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Apply preprocessing filters</span>
-                  </label>
-                </div>
-              </div>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={settings.preprocessImages}
+                        onChange={(e) => setSettings({ ...settings, preprocessImages: e.target.checked })}
+                      />
+                    }
+                    label={<Typography variant="body2" color="text.primary">Apply preprocessing filters</Typography>}
+                  />
+                </Box>
+              </Box>
 
               {/* Output Format */}
-              <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">
-                  Output Format
-                </label>
-                <select
+              <FormControl fullWidth>
+                <InputLabel>Output Format</InputLabel>
+                <Select
                   value={settings.outputFormat}
+                  label="Output Format"
                   onChange={(e) => setSettings({ ...settings, outputFormat: e.target.value as OCRSettings['outputFormat'] })}
-                  className="w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
-                  <option value="json">JSON (Structured Data)</option>
-                  <option value="text">Plain Text</option>
-                  <option value="hocr">hOCR (HTML + Coordinates)</option>
-                  <option value="pdf">Searchable PDF</option>
-                </select>
-              </div>
+                  <MenuItem value="json">JSON (Structured Data)</MenuItem>
+                  <MenuItem value="text">Plain Text</MenuItem>
+                  <MenuItem value="hocr">hOCR (HTML + Coordinates)</MenuItem>
+                  <MenuItem value="pdf">Searchable PDF</MenuItem>
+                </Select>
+              </FormControl>
 
               {/* Engine-specific tips */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h5 className="text-sm font-medium text-blue-900 mb-2">Tips for {settings.engine}</h5>
-                <div className="text-xs text-blue-800 space-y-1">
+              <Alert severity="info" sx={{ bgcolor: 'info.light' }}>
+                <Typography variant="subtitle2" color="info.dark" sx={{ mb: 1 }}>
+                  Tips for {settings.engine}
+                </Typography>
+                <Box component="ul" sx={{ m: 0, pl: 2 }}>
                   {settings.engine === 'tesseract' && (
                     <>
-                      <p>• Works best with high-contrast, clean text</p>
-                      <p>• Consider higher DPI (300-400) for better accuracy</p>
-                      <p>• Free and works offline</p>
+                      <li><Typography variant="caption" color="info.dark">Works best with high-contrast, clean text</Typography></li>
+                      <li><Typography variant="caption" color="info.dark">Consider higher DPI (300-400) for better accuracy</Typography></li>
+                      <li><Typography variant="caption" color="info.dark">Free and works offline</Typography></li>
                     </>
                   )}
                   {settings.engine === 'google-vision' && (
                     <>
-                      <p>• Excellent for handwritten text and mixed languages</p>
-                      <p>• Requires internet connection</p>
-                      <p>• May have usage costs</p>
+                      <li><Typography variant="caption" color="info.dark">Excellent for handwritten text and mixed languages</Typography></li>
+                      <li><Typography variant="caption" color="info.dark">Requires internet connection</Typography></li>
+                      <li><Typography variant="caption" color="info.dark">May have usage costs</Typography></li>
                     </>
                   )}
                   {settings.engine === 'azure-cognitive' && (
                     <>
-                      <p>• Great for structured documents and forms</p>
-                      <p>• Supports custom models</p>
-                      <p>• Requires Azure subscription</p>
+                      <li><Typography variant="caption" color="info.dark">Great for structured documents and forms</Typography></li>
+                      <li><Typography variant="caption" color="info.dark">Supports custom models</Typography></li>
+                      <li><Typography variant="caption" color="info.dark">Requires Azure subscription</Typography></li>
                     </>
                   )}
-                </div>
-              </div>
-            </>
+                </Box>
+              </Alert>
+            </Box>
           )}
-        </div>
+        </DialogContent>
 
-        {/* Footer */}
-        <div className="p-6 border-t bg-gray-50 flex items-center justify-between rounded-b-2xl">
-          <button
+        <DialogActions sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
+          <Button
             onClick={handleReset}
-            className="inline-flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+            startIcon={<RefreshCw size={16} />}
+            variant="outlined"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
             Reset to Defaults
-          </button>
+          </Button>
           
-          <div className="flex gap-3">
-            <button
-              onClick={() => setOpen(false)}
-              className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="inline-flex items-center px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving ? (
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              Save Settings
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+          <Box sx={{ flex: 1 }} />
+          
+          <Button
+            onClick={() => setOpen(false)}
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            variant="contained"
+            startIcon={saving ? <CircularProgress size={16} /> : <Save size={16} />}
+          >
+            Save Settings
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

@@ -51,11 +51,37 @@ import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import BlankCard from '@/shared/ui/BlankCard';
 import { useAuth } from '@/context/AuthContext';
-import { adminAPI } from '@/api/admin.api';
+import * as adminApiModule from '@/api/admin.api';
+const adminAPI: any = (adminApiModule as any).default ?? (adminApiModule as any).adminAPI ?? (adminApiModule as any);
 import { logger } from '@/utils/logger';
 import type { Church } from '@/types/orthodox-metrics.types';
 import OrthodoxChurchIcon from '@/shared/ui/OrthodoxChurchIcon';
 import OrthodoxBanner from '@/shared/ui/OrthodoxBanner';
+
+
+function normalizeChurches(response: any): any[] {
+  const raw =
+    response?.churches ??
+    response?.data?.churches ??
+    response?.data ??
+    response ??
+    [];
+
+  if (!Array.isArray(raw)) return [];
+
+  return raw.map((it: any) => ({
+    id: it?.id ?? it?.church_id ?? it?._id ?? Math.random(),
+    name: it?.name ?? it?.church_name ?? 'Unnamed Church',
+    email: it?.email ?? '',
+    address: it?.address ?? [it?.city, it?.state_province ?? it?.state].filter(Boolean).join(', '),
+    city: it?.city ?? '',
+    state_province: it?.state_province ?? it?.state ?? '',
+    preferred_language: it?.preferred_language ?? 'en',
+    created_at: it?.created_at ?? it?.createdAt ?? null,
+    is_active: typeof it?.is_active === 'boolean' ? it?.is_active : it?.is_active === 1
+  }));
+}
+
 
 interface ChurchListProps { }
 
@@ -88,12 +114,15 @@ const ChurchList: React.FC<ChurchListProps> = () => {
           userAction: 'church_list_load_start'
         });
         
+        if (!adminAPI?.churches?.getAll) { throw new Error('adminAPI.churches.getAll not available'); }
         const response = await adminAPI.churches.getAll();
-        setChurches(response.churches || []);
+        if (response?.success === false) { const msg = response?.message || 'API returned success=false'; throw new Error(msg); }
+        const normalized = normalizeChurches(response);
+        setChurches(normalized);
         
         // Log successful load
         logger.info('Church Management', 'Churches list loaded successfully', {
-          count: response.churches?.length || 0,
+          count: response?.churches?.length || 0,
           userAction: 'church_list_load_success'
         });
       } catch (err) {
@@ -110,7 +139,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
       }
     };
 
-    if (hasRole(['admin', 'super_admin'])) {
+    if ( (hasRole('admin') || hasRole('super_admin')) ) {
       // Log successful access
       logger.info('Church Management', 'Church list access granted', {
         userAction: 'church_list_access_granted',
@@ -131,70 +160,65 @@ const ChurchList: React.FC<ChurchListProps> = () => {
     }
   }, [hasRole]);
 
-  // Refresh data when user returns to the page (e.g., from edit form)
   useEffect(() => {
+    let mounted = true;
+    const refreshChurches = async (silent = true) => {
+      try {
+        if (!adminAPI || !adminAPI.churches || typeof adminAPI.churches.getAll !== 'function') {
+          logger.error('Church Management', 'adminAPI.churches.getAll not available', { adminAPI });
+          return;
+        }
+        if (!adminAPI?.churches?.getAll) { throw new Error('adminAPI.churches.getAll not available'); }
+        const response = await adminAPI.churches.getAll();
+        if (!mounted) return;
+        if (response?.success === false) { const msg = response?.message || 'API returned success=false'; throw new Error(msg); }
+        const normalized = normalizeChurches(response);
+        setChurches(normalized);
+        if (!silent) {
+          logger.info('Church Management', 'Churches list refreshed successfully', {
+            count: response?.churches?.length || 0,
+            userAction: 'church_list_refresh_success'
+          });
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to refresh churches';
+        logger.error('Church Management', 'Failed to refresh churches list', {
+          error: errorMessage,
+          userAction: 'church_list_refresh'
+        });
+      }
+    };
+  
     const handleVisibilityChange = () => {
-      if (!document.hidden && hasRole(['admin', 'super_admin'])) {
-        // Page became visible, refresh the data
+      if (!document.hidden &&  (hasRole('admin') || hasRole('super_admin')) ) {
         logger.info('Church Management', 'Page became visible, refreshing churches list', {
           userAction: 'church_list_refresh_on_focus'
         });
-        
-        // Refetch churches without showing loading state
-        adminAPI.churches.getAll()
-          .then(response => {
-            setChurches(response.churches || []);
-            logger.info('Church Management', 'Churches list refreshed successfully', {
-              count: response.churches?.length || 0,
-              userAction: 'church_list_refresh_success'
-            });
-          })
-          .catch(err => {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to refresh churches';
-            logger.error('Church Management', 'Failed to refresh churches list', {
-              error: errorMessage,
-              userAction: 'church_list_refresh'
-            });
-          });
+        refreshChurches(true);
       }
     };
-
+  
     const handleFocus = () => {
-      if (hasRole(['admin', 'super_admin'])) {
-        // Window regained focus, refresh the data
+      if ( (hasRole('admin') || hasRole('super_admin')) ) {
         logger.info('Church Management', 'Window regained focus, refreshing churches list', {
           userAction: 'church_list_refresh_on_window_focus'
         });
-        
-        // Refetch churches without showing loading state
-        adminAPI.churches.getAll()
-          .then(response => {
-            setChurches(response.churches || []);
-            logger.info('Church Management', 'Churches list refreshed successfully', {
-              count: response.churches?.length || 0,
-              userAction: 'church_list_refresh_success'
-            });
-          })
-          .catch(err => {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to refresh churches';
-            logger.error('Church Management', 'Failed to refresh churches list', {
-              error: errorMessage,
-              userAction: 'church_list_refresh'
-            });
-          });
+        refreshChurches(true);
       }
     };
-
-    // Listen for page visibility changes and window focus
+  
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
-
+  
+    // Try one immediate refresh if api is ready
+    refreshChurches(false);
+  
     return () => {
+      mounted = false;
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [hasRole]);
-
+  }, [adminAPI, hasRole]);
   // Handle search query changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -327,7 +351,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
     return isActive ? 'Active' : 'Inactive';
   };
 
-  if (!hasRole(['admin', 'super_admin', 'manager'])) {
+  if (!(hasRole('admin') || hasRole('super_admin') || hasRole('manager'))) {
     // Log the access denied error
     logger.warn('Church Management', 'Access denied. Administrator privileges required to view church management.', {
       userAction: 'church_management_access_denied',
@@ -403,7 +427,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
 
                 <Grid item xs={12} md={3}>
                   <Stack direction="row" spacing={2} justifyContent="flex-end">
-                    {hasRole(['super_admin']) && (
+                    {hasRole('super_admin') && (
                       <Button
                         variant="outlined"
                         startIcon={<IconPlus />}
@@ -566,7 +590,7 @@ const ChurchList: React.FC<ChurchListProps> = () => {
                               <IconEdit size={18} />
                             </IconButton>
                             
-                            {hasRole(['super_admin']) && (
+                            {hasRole('super_admin') && (
                               <IconButton
                                 size="small"
                                 onClick={() => handleDeleteChurch(church)}

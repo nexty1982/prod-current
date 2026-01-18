@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef, GridReadyEvent, SortChangedEvent } from 'ag-grid-community';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
-import { listRecords, type TableKey, type SortDir } from "@/shared/lib/dynamicRecordsApi";
+import { listRecords, type TableKey, type SortDir } from "@/shared/lib/recordsApi";
 
 // Import AG Grid styles
 import 'ag-grid-community/styles/ag-grid.css';
@@ -29,213 +29,213 @@ export default function AdvancedGrid({ table, churchId, search }: AdvancedGridPr
   const columnDefs = useMemo((): ColDef[] => {
     if (table === 'baptism_records') {
       return [
-        { 
-          field: 'id', 
-          headerName: 'ID', 
-          width: 80, 
+        {
+          field: 'id',
+          headerName: 'ID',
+          width: 80,
           sortable: true,
           sort: 'desc' // Default sort by ID descending
         },
-        { 
-          field: 'first_name', 
-          headerName: 'Name', 
-          width: 150, 
+        {
+          field: 'first_name',
+          headerName: 'Name',
+          width: 150,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'last_name', 
-          headerName: 'Surname', 
-          width: 150, 
+        {
+          field: 'last_name',
+          headerName: 'Surname',
+          width: 150,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'birth_date', 
-          headerName: 'Date of Birth', 
-          width: 130, 
+        {
+          field: 'birth_date',
+          headerName: 'Date of Birth',
+          width: 130,
           sortable: true,
           filter: true,
           valueFormatter: (params) => formatDate(params.value)
         },
-        { 
-          field: 'reception_date', 
-          headerName: 'Date of Orthodox Reception', 
-          width: 180, 
+        {
+          field: 'reception_date',
+          headerName: 'Date of Orthodox Reception',
+          width: 180,
           sortable: true,
           filter: true,
           valueFormatter: (params) => formatDate(params.value),
           sort: 'desc' // Default sort by reception_date descending
         },
-        { 
-          field: 'birthplace', 
-          headerName: 'Birthplace', 
-          width: 150, 
+        {
+          field: 'birthplace',
+          headerName: 'Birthplace',
+          width: 150,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'sponsors', 
-          headerName: 'Sponsor(s)', 
-          width: 200, 
+        {
+          field: 'sponsors',
+          headerName: 'Sponsor(s)',
+          width: 200,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'clergy', 
-          headerName: 'Clergy', 
-          width: 150, 
+        {
+          field: 'clergy',
+          headerName: 'Clergy',
+          width: 150,
           sortable: true,
           filter: true
         }
       ];
     }
-    
+
     if (table === 'marriage_records') {
       return [
-        { 
-          field: 'id', 
-          headerName: 'ID', 
-          width: 80, 
+        {
+          field: 'id',
+          headerName: 'ID',
+          width: 80,
           sortable: true,
           sort: 'desc'
         },
-        { 
-          field: 'mdate', 
-          headerName: 'Date Married', 
-          width: 140, 
+        {
+          field: 'mdate',
+          headerName: 'Date Married',
+          width: 140,
           sortable: true,
           filter: true,
           valueFormatter: (params) => formatDate(params.value),
           sort: 'desc' // Default sort by mdate descending
         },
-        { 
-          field: 'fname_groom', 
-          headerName: 'Groom Name', 
-          width: 150, 
+        {
+          field: 'fname_groom',
+          headerName: 'Groom Name',
+          width: 150,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'lname_groom', 
-          headerName: 'Groom Surname', 
-          width: 150, 
+        {
+          field: 'lname_groom',
+          headerName: 'Groom Surname',
+          width: 150,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'parentsg', 
-          headerName: 'Groom Parents', 
-          width: 200, 
+        {
+          field: 'parentsg',
+          headerName: 'Groom Parents',
+          width: 200,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'fname_bride', 
-          headerName: 'Bride Name', 
-          width: 150, 
+        {
+          field: 'fname_bride',
+          headerName: 'Bride Name',
+          width: 150,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'lname_bride', 
-          headerName: 'Bride Surname', 
-          width: 150, 
+        {
+          field: 'lname_bride',
+          headerName: 'Bride Surname',
+          width: 150,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'parentsb', 
-          headerName: 'Brides Parents', 
-          width: 200, 
+        {
+          field: 'parentsb',
+          headerName: 'Brides Parents',
+          width: 200,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'witness', 
-          headerName: 'Witnesses', 
-          width: 200, 
+        {
+          field: 'witness',
+          headerName: 'Witnesses',
+          width: 200,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'mlicense', 
-          headerName: 'Marriage License', 
-          width: 150, 
+        {
+          field: 'mlicense',
+          headerName: 'Marriage License',
+          width: 150,
           sortable: true,
           filter: true
         },
-        { 
-          field: 'clergy', 
-          headerName: 'Clergy', 
-          width: 150, 
+        {
+          field: 'clergy',
+          headerName: 'Clergy',
+          width: 150,
           sortable: true,
           filter: true
         }
       ];
     }
-    
+
     // Funeral records
     return [
-      { 
-        field: 'id', 
-        headerName: 'ID', 
-        width: 80, 
-          sortable: true,
+      {
+        field: 'id',
+        headerName: 'ID',
+        width: 80,
+        sortable: true,
         sort: 'desc'
       },
-              { 
-          field: 'deceased_date', 
-          headerName: 'Date Deceased', 
-          width: 140, 
-          sortable: true,
-          filter: true,
-          valueFormatter: (params) => formatDate(params.value)
-        },
-        { 
-          field: 'burial_date', 
-          headerName: 'Date Buried', 
-          width: 140, 
-          sortable: true,
-          filter: true,
-          valueFormatter: (params) => formatDate(params.value),
-          sort: 'desc' // Default sort by burial_date descending
-        },
-        { 
-          field: 'name', 
-          headerName: 'Name', 
-          width: 150, 
-          sortable: true,
-          filter: true
-        },
-        { 
-          field: 'lastname', 
-          headerName: 'Surname', 
-          width: 150, 
-          sortable: true,
-          filter: true
-        },
-        { 
-          field: 'age', 
-          headerName: 'Age', 
-          width: 80, 
-          sortable: true,
-          filter: true
-        },
-        { 
-          field: 'burial_location', 
-          headerName: 'Burial Place', 
-          width: 200, 
-          sortable: true,
-          filter: true
-        },
-        { 
-          field: 'clergy', 
-          headerName: 'Clergy', 
-          width: 150, 
-          sortable: true,
-          filter: true
-        }
+      {
+        field: 'deceased_date',
+        headerName: 'Date Deceased',
+        width: 140,
+        sortable: true,
+        filter: true,
+        valueFormatter: (params) => formatDate(params.value)
+      },
+      {
+        field: 'burial_date',
+        headerName: 'Date Buried',
+        width: 140,
+        sortable: true,
+        filter: true,
+        valueFormatter: (params) => formatDate(params.value),
+        sort: 'desc' // Default sort by burial_date descending
+      },
+      {
+        field: 'name',
+        headerName: 'Name',
+        width: 150,
+        sortable: true,
+        filter: true
+      },
+      {
+        field: 'lastname',
+        headerName: 'Surname',
+        width: 150,
+        sortable: true,
+        filter: true
+      },
+      {
+        field: 'age',
+        headerName: 'Age',
+        width: 80,
+        sortable: true,
+        filter: true
+      },
+      {
+        field: 'burial_location',
+        headerName: 'Burial Place',
+        width: 200,
+        sortable: true,
+        filter: true
+      },
+      {
+        field: 'clergy',
+        headerName: 'Clergy',
+        width: 150,
+        sortable: true,
+        filter: true
+      }
     ];
   }, [table]);
 
@@ -244,22 +244,28 @@ export default function AdvancedGrid({ table, churchId, search }: AdvancedGridPr
     const loadRecords = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
-        // Determine the default sort field based on table type
-        let defaultSortField = 'id';
+        // Map table names to the format expected by recordsApi
+        let apiTable: 'baptism' | 'marriage' | 'funeral';
+        let defaultSortField: string;
         let defaultSortDirection: SortDir = 'desc';
-        
+
         if (table === 'baptism_records') {
-          defaultSortField = 'reception_date';
+          apiTable = 'baptism';
+          defaultSortField = 'baptismDate';
         } else if (table === 'marriage_records') {
-          defaultSortField = 'mdate';
+          apiTable = 'marriage';
+          defaultSortField = 'marriageDate';
         } else if (table === 'funeral_records') {
-          defaultSortField = 'burial_date';
+          apiTable = 'funeral';
+          defaultSortField = 'funeralDate';
+        } else {
+          throw new Error(`Unsupported table: ${table}`);
         }
-        
+
         console.log('🔍 AdvancedGrid fetching records:', {
-          table,
+          table: apiTable,
           churchId,
           page: 1,
           limit: 1000,
@@ -267,9 +273,9 @@ export default function AdvancedGrid({ table, churchId, search }: AdvancedGridPr
           sortField: defaultSortField,
           sortDirection: defaultSortDirection,
         });
-        
+
         const { rows, count } = await listRecords({
-          table,
+          table: apiTable,
           churchId,
           page: 1,
           limit: 1000, // Load all records for AG Grid
@@ -277,10 +283,10 @@ export default function AdvancedGrid({ table, churchId, search }: AdvancedGridPr
           sortField: defaultSortField,
           sortDirection: defaultSortDirection,
         });
-        
+
         console.log('📊 AdvancedGrid API Response:', { rows, count });
         console.log('📋 AdvancedGrid Rows:', rows);
-        
+
         setRows(rows);
       } catch (err: any) {
         setError(err.message || 'Failed to load records');
@@ -296,18 +302,25 @@ export default function AdvancedGrid({ table, churchId, search }: AdvancedGridPr
   // Handle grid ready
   const onGridReady = useCallback((params: GridReadyEvent) => {
     setGridApi(params.api);
-    
-    // Apply default sorting after grid is ready
-    if (table === 'baptism_records') {
-      params.api.setSortModel([{ colId: 'reception_date', sort: 'desc' }]);
-    } else if (table === 'marriage_records') {
-      params.api.setSortModel([{ colId: 'marriageDate', sort: 'desc' }]);
-    } else if (table === 'funeral_records') {
-      params.api.setSortModel([{ colId: 'dateOfFuneral', sort: 'desc' }]);
-    }
-  }, [table]);
 
-  // Handle sort changes
+    // Apply default sorting after grid is ready using v33+ API
+    if (table === 'baptism_records') {
+      params.api.applyColumnState({
+        state: [{ colId: 'reception_date', sort: 'desc' }],
+        defaultState: { sort: null }
+      });
+    } else if (table === 'marriage_records') {
+      params.api.applyColumnState({
+        state: [{ colId: 'mdate', sort: 'desc' }],
+        defaultState: { sort: null }
+      });
+    } else if (table === 'funeral_records') {
+      params.api.applyColumnState({
+        state: [{ colId: 'burial_date', sort: 'desc' }],
+        defaultState: { sort: null }
+      });
+    }
+  }, [table]);  // Handle sort changes
   const onSortChanged = useCallback((event: SortChangedEvent) => {
     const sortModel = event.api.getSortModel();
     if (sortModel.length > 0) {
@@ -342,7 +355,7 @@ export default function AdvancedGrid({ table, churchId, search }: AdvancedGridPr
     domLayout: 'autoHeight',
     animateRows: true,
     enableCellTextSelection: true,
-    suppressRowClickSelection: true,
+    rowSelection: 'single', // v33+ compatible row selection
     suppressCellFocus: true,
   };
 
@@ -369,11 +382,11 @@ export default function AdvancedGrid({ table, churchId, search }: AdvancedGridPr
         {table === 'marriage_records' && 'Marriage Records - Advanced Grid View'}
         {table === 'funeral_records' && 'Funeral Records - Advanced Grid View'}
       </Typography>
-      
-      <Box 
-        className="ag-theme-alpine" 
-        sx={{ 
-          width: '100%', 
+
+      <Box
+        className="ag-theme-alpine"
+        sx={{
+          width: '100%',
           height: '600px',
           '& .ag-header-cell': {
             backgroundColor: '#f5f5f5',
@@ -382,6 +395,7 @@ export default function AdvancedGrid({ table, churchId, search }: AdvancedGridPr
         }}
       >
         <AgGridReact
+          theme="legacy"
           {...gridOptions}
           onGridReady={onGridReady}
           onSortChanged={onSortChanged}

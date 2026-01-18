@@ -1,0 +1,411 @@
+[8:13:45 PM] 🛣️  ROUTE: /apps/records/baptism	
+[8:13:45 PM] 📦 FILE: GET /src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx → src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx
+[8:13:46 PM] 📝 SOURCE: Loading → src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx
+[8:13:46 PM] 📝 SOURCE: Loading → src/styles/advanced-grid-themes.css
+[8:13:46 PM] 📦 FILE: GET /src/store/useTableStyleStore.ts → src/store/useTableStyleStore.ts
+[8:13:46 PM] 📝 SOURCE: Loading → src/shared/lib/recordsApi.ts
+[8:13:46 PM] 📝 SOURCE: Loading → src/components/TableControlPanel.tsx
+[8:13:46 PM] 📝 SOURCE: Loading → src/api/admin.api.ts
+[8:13:46 PM] 📝 SOURCE: Loading → src/features/records-centralized/components/dynamic/index.ts
+[8:13:46 PM] 📝 SOURCE: Loading → src/store/enhancedTableStore.ts
+[8:13:46 PM] 📝 SOURCE: Loading → src/features/records-centralized/constants/index.ts
+[8:13:46 PM] 📝 SOURCE: Loading → src/store/useTableStyleStore.ts
+[8:13:46 PM] 📝 SOURCE: Loading → src/features/records/BrandButtons.tsx
+[8:13:46 PM] 📝 SOURCE: Loading → src/components/ColorPaletteSelector.tsx
+[8:13:46 PM] 📝 SOURCE: Loading → src/features/tables/AdvancedGridDialog.tsx
+[8:13:46 PM] 📦 FILE: GET /src/shared/lib/recordsApi.ts → src/shared/lib/recordsApi.ts
+[8:13:46 PM] 📦 FILE: GET /src/components/TableControlPanel.tsx → src/components/TableControlPanel.tsx
+[8:13:46 PM] 📦 FILE: GET /src/features/records-centralized/constants/index.ts → src/features/records-centralized/constants/index.ts
+[8:13:46 PM] 📦 FILE: GET /src/features/records-centralized/components/dynamic/index.ts → src/features/records-centralized/components/dynamic/index.ts
+[8:13:46 PM] 📦 FILE: GET /src/components/ColorPaletteSelector.tsx → src/components/ColorPaletteSelector.tsx
+[8:13:46 PM] 📦 FILE: GET /src/features/records/BrandButtons.tsx → src/features/records/BrandButtons.tsx
+[8:13:46 PM] 📦 FILE: GET /src/store/enhancedTableStore.ts → src/store/enhancedTableStore.ts
+[8:13:46 PM] 📦 FILE: GET /src/features/tables/AdvancedGridDialog.tsx → src/features/tables/AdvancedGridDialog.tsx
+[8:13:46 PM] 📦 FILE: GET /src/features/records-centralized/components/dynamic/DynamicRecordsDisplay.tsx → src/features/records-centralized/components/dynamic/DynamicRecordsDisplay.tsx
+[8:13:46 PM] 📦 FILE: GET /src/features/records-centralized/components/dynamic/DynamicRecordsInspector.tsx → src/features/records-centralized/components/dynamic/DynamicRecordsInspector.tsx
+[8:13:46 PM] 📦 FILE: GET /src/features/records-centralized/components/dynamic/columnMappers.ts → src/features/records-centralized/components/dynamic/columnMappers.ts
+[8:13:46 PM] 📦 FILE: GET /src/api/admin.api.ts → src/api/admin.api.ts
+[8:13:46 PM] 📦 FILE: GET /src/styles/advanced-grid-themes.css → src/styles/advanced-grid-themes.css
+[8:13:46 PM] 📝 SOURCE: Loading → src/features/records-centralized/components/dynamic/DynamicRecordsDisplay.tsx
+[8:13:46 PM] 📝 SOURCE: Loading → src/features/records-centralized/components/dynamic/columnMappers.ts
+[8:13:46 PM] 📝 SOURCE: Loading → src/features/records-centralized/components/dynamic/cellRenderers.tsx
+[8:13:46 PM] 📝 SOURCE: Loading → src/features/records-centralized/components/dynamic/DynamicRecordsInspector.tsx
+[8:13:46 PM] 📝 SOURCE: Loading → src/api/utils/axiosInstance.ts
+[8:13:46 PM] 📦 FILE: GET /src/features/records-centralized/components/dynamic/cellRenderers.tsx → src/features/records-centralized/components/dynamic/cellRenderers.tsx
+[8:13:46 PM] 📦 FILE: GET /src/api/utils/axiosInstance.ts → src/api/utils/axiosInstance.ts
+[8:13:46 PM] 📝 SOURCE: Loading → src/config/api.config.ts
+[8:13:46 PM] 📦 FILE: GET /src/config/api.config.ts → src/config/api.config.ts
+[8:13:46 PM] 🌐 SERVER REQ: GET /images/records/baptism.png
+🖼️  Proxying image request: GET /images/records/baptism.png → localhost:3001/images/records/baptism.png
+[8:13:46 PM] 🌐 SERVER REQ: GET /images/records/g1.png
+🖼️  Proxying image request: GET /images/records/g1.png → localhost:3001/images/records/g1.png
+[8:13:46 PM] 🌐 SERVER REQ: GET /images/records/gold-hor.png
+🖼️  Proxying image request: GET /images/records/gold-hor.png → localhost:3001/images/records/gold-hor.png
+[8:13:46 PM] 🌐 SERVER REQ: GET /images/records/gold-vertical.png
+🖼️  Proxying image request: GET /images/records/gold-vertical.png → localhost:3001/images/records/gold-vertical.png
+[8:13:46 PM] 🌐 SERVER REQ: GET /images/records/46-bg.png
+🖼️  Proxying image request: GET /images/records/46-bg.png → localhost:3001/images/records/46-bg.png
+[8:13:46 PM] 🔌 API: GET /api/admin/churches/46/record-settings
+[8:13:46 PM] 🌐 SERVER REQ: GET /api/admin/churches/46/record-settings
+🔌 Proxying request: GET /api/admin/churches/46/record-settings → localhost:3001/api/admin/churches/46/record-settings
+❌ Image proxy response: GET /images/records/baptism.png → 404
+[8:13:46 PM] 🌐 SERVER REQ: GET /api/churches/church-info
+🔌 Proxying request: GET /api/churches/church-info → localhost:3001/api/churches/church-info
+❌ Image proxy response: GET /images/records/g1.png → 404
+❌ Image proxy response: GET /images/records/gold-hor.png → 404
+❌ Image proxy response: GET /images/records/46-bg.png → 404
+[8:13:46 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:13:46 PM] 🌐 SERVER REQ: GET /api/admin/churches/46/tables/baptism_records/columns
+🔌 Proxying request: GET /api/admin/churches/46/tables/baptism_records/columns → localhost:3001/api/admin/churches/46/tables/baptism_records/columns
+❌ Proxy response: GET /api/churches/church-info → 401
+❌ Image proxy response: GET /images/records/gold-vertical.png → 404
+❌ Proxy response: GET /api/admin/churches/46/record-settings → 401
+[8:13:46 PM] 🔌 API: GET /api/churches/church-info
+[8:13:46 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:13:46 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:13:46 PM] 🔌 API: GET /api/admin/churches/46/tables/baptism_records/columns
+❌ Proxy response: GET /api/admin/churches/46/tables/baptism_records/columns → 401
+[8:13:46 PM] 📄 PAGE: GET /frontend-pages/homepage
+[8:13:46 PM] 🌐 SERVER REQ: GET /api/admin/churches/46/columns?table=baptism_records
+🔌 Proxying request: GET /api/admin/churches/46/columns?table=baptism_records → localhost:3001/api/admin/churches/46/columns?table=baptism_records
+[8:13:46 PM] 🔌 API: GET /api/admin/churches/46/columns?table=baptism_records
+✅ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 200
+❌ Proxy response: GET /api/admin/churches/46/columns?table=baptism_records → 401
+[8:13:46 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:13:46 PM] 📦 FILE: GET /src/main.tsx → src/main.tsx
+[8:13:46 PM] 📦 FILE: GET /src/context/CustomizerContext.tsx → src/context/CustomizerContext.tsx
+[8:13:46 PM] 📦 FILE: GET /src/theme/omTheme.ts → src/theme/omTheme.ts
+[8:13:46 PM] 📦 FILE: GET /src/App.tsx → src/App.tsx
+[8:13:46 PM] 📦 FILE: GET /src/shared/ui/Spinner.tsx → src/shared/ui/Spinner.tsx
+[8:13:46 PM] 📦 FILE: GET /src/utils/i18n.ts → src/utils/i18n.ts
+[8:13:46 PM] 📦 FILE: GET /src/index.css → src/index.css
+[8:13:46 PM] 📦 FILE: GET /src/shared/lib/globalErrorHandler.ts → src/shared/lib/globalErrorHandler.ts
+⚠️ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 304
+[8:13:46 PM] 📦 FILE: GET /src/shared/lib/debugLogger.ts → src/shared/lib/debugLogger.ts
+[8:13:46 PM] 📦 FILE: GET /src/context/config.ts → src/context/config.ts
+[8:13:46 PM] 📦 FILE: GET /src/layouts/full/shared/customizer/RTL.tsx → src/layouts/full/shared/customizer/RTL.tsx
+[8:13:46 PM] 📦 FILE: GET /src/theme/Theme.tsx → src/theme/Theme.tsx
+[8:13:46 PM] 📦 FILE: GET /src/routes/Router.tsx → src/routes/Router.tsx
+[8:13:46 PM] 📦 FILE: GET /src/context/ChurchRecordsContext.tsx → src/context/ChurchRecordsContext.tsx
+[8:13:46 PM] 📦 FILE: GET /src/context/AuthContext.tsx → src/context/AuthContext.tsx
+[8:13:46 PM] 📦 FILE: GET /src/context/MenuVisibilityContext.tsx → src/context/MenuVisibilityContext.tsx
+[8:13:46 PM] 📦 FILE: GET /src/context/NotificationContext.tsx → src/context/NotificationContext.tsx
+[8:13:46 PM] 📦 FILE: GET /src/context/WebSocketContext.tsx → src/context/WebSocketContext.tsx
+[8:13:46 PM] 📦 FILE: GET /src/components/ErrorBoundary/index.ts → src/components/ErrorBoundary/index.ts
+[8:13:46 PM] 📦 FILE: GET /src/components/ErrorBoundary/FilterErrorBoundary.tsx → src/components/ErrorBoundary/FilterErrorBoundary.tsx
+[8:13:46 PM] 📦 FILE: GET /src/utils/axiosInterceptor.ts → src/utils/axiosInterceptor.ts
+[8:13:46 PM] 📦 FILE: GET /src/components/AdminMessageNotification.tsx → src/components/AdminMessageNotification.tsx
+[8:13:46 PM] 📦 FILE: GET /src/App.css → src/App.css
+[8:13:46 PM] 📦 FILE: GET /src/components/auth/ProtectedRoute.tsx → src/components/auth/ProtectedRoute.tsx
+[8:13:46 PM] 📦 FILE: GET /src/components/ErrorBoundary/AdminErrorBoundary.tsx → src/components/ErrorBoundary/AdminErrorBoundary.tsx
+[8:13:46 PM] 📦 FILE: GET /src/components/headlines/HeadlineSourcePicker.tsx → src/components/headlines/HeadlineSourcePicker.tsx
+[8:13:46 PM] 📦 FILE: GET /src/components/routing/SmartRedirect.tsx → src/components/routing/SmartRedirect.tsx
+[8:13:46 PM] 📦 FILE: GET /src/shared/ui/AppErrorBoundary.tsx → src/shared/ui/AppErrorBoundary.tsx
+[8:13:46 PM] 📦 FILE: GET /src/layouts/full/shared/loadable/Loadable.tsx → src/layouts/full/shared/loadable/Loadable.tsx
+[8:13:46 PM] 📦 FILE: GET /src/tools/om-deps/OM-deps.tsx → src/tools/om-deps/OM-deps.tsx
+[8:13:46 PM] 📦 FILE: GET /src/theme/Components.tsx → src/theme/Components.tsx
+[8:13:46 PM] 📦 FILE: GET /src/theme/Typography.tsx → src/theme/Typography.tsx
+[8:13:46 PM] 📦 FILE: GET /src/theme/Shadows.tsx → src/theme/Shadows.tsx
+[8:13:46 PM] 📦 FILE: GET /src/theme/DarkThemeColors.tsx → src/theme/DarkThemeColors.tsx
+[8:13:46 PM] 📦 FILE: GET /src/theme/LightThemeColors.tsx → src/theme/LightThemeColors.tsx
+[8:13:46 PM] 📦 FILE: GET /src/theme/DefaultColors.tsx → src/theme/DefaultColors.tsx
+[8:13:46 PM] 📦 FILE: GET /src/shared/lib/authService.ts → src/shared/lib/authService.ts
+[8:13:46 PM] 📦 FILE: GET /src/utils/roles.ts → src/utils/roles.ts
+[8:13:46 PM] 📦 FILE: GET /src/components/ErrorBoundary/ErrorBoundary.tsx → src/components/ErrorBoundary/ErrorBoundary.tsx
+[8:13:46 PM] 📦 FILE: GET /src/utils/authErrorHandler.ts → src/utils/authErrorHandler.ts
+[8:13:46 PM] 📦 FILE: GET /src/auth/authClient.ts → src/auth/authClient.ts
+[8:13:46 PM] 📦 FILE: GET /src/components/compat/Grid2.tsx → src/components/compat/Grid2.tsx
+[8:13:46 PM] 📦 FILE: GET /src/shared/lib/apiClient.ts → src/shared/lib/apiClient.ts
+[8:13:47 PM] 🛣️  ROUTE: /frontend-pages/homepage
+[8:13:47 PM] 📦 FILE: GET /src/layouts/blank/BlankLayout.tsx → src/layouts/blank/BlankLayout.tsx
+[8:13:47 PM] 📝 SOURCE: Loading → src/layouts/blank/BlankLayout.tsx
+[8:13:47 PM] 📝 SOURCE: Loading → src/LoadingBar.tsx
+[8:13:47 PM] 🛣️  ROUTE: /frontend-pages/homepage
+[8:13:47 PM] 📦 FILE: GET /src/LoadingBar.tsx → src/LoadingBar.tsx
+[8:13:47 PM] 📦 FILE: GET /src/features/pages/frontend-pages/Homepage.tsx → src/features/pages/frontend-pages/Homepage.tsx
+[8:13:47 PM] 📝 SOURCE: Loading → src/features/pages/frontend-pages/Homepage.tsx
+[8:13:47 PM] 📦 FILE: GET /src/features/pages/frontend-pages/Header.tsx → src/features/pages/frontend-pages/Header.tsx
+[8:13:47 PM] 📦 FILE: GET /src/features/pages/frontend-pages/Footer.tsx → src/features/pages/frontend-pages/Footer.tsx
+[8:13:47 PM] 📦 FILE: GET /src/features/devel-tools/contactbar/QuickContactSidebar.tsx → src/features/devel-tools/contactbar/QuickContactSidebar.tsx
+[8:13:47 PM] 📦 FILE: GET /src/features/pages/frontend-pages/LeftSideMenu.tsx → src/features/pages/frontend-pages/LeftSideMenu.tsx
+[8:13:47 PM] 📝 SOURCE: Loading → src/features/pages/frontend-pages/Header.tsx
+[8:13:47 PM] 📝 SOURCE: Loading → src/features/pages/frontend-pages/Footer.tsx
+[8:13:47 PM] 📝 SOURCE: Loading → src/features/pages/frontend-pages/LeftSideMenu.tsx
+[8:13:47 PM] 📦 FILE: GET /src/layouts/full/vertical/header/Language.tsx → src/layouts/full/vertical/header/Language.tsx
+[8:13:47 PM] 📦 FILE: GET /src/layouts/full/vertical/header/Profile.tsx → src/layouts/full/vertical/header/Profile.tsx
+[8:13:47 PM] 📦 FILE: GET /src/layouts/full/vertical/header/LastLoggedIn.tsx → src/layouts/full/vertical/header/LastLoggedIn.tsx
+[8:13:47 PM] 📦 FILE: GET /src/shared/ui/OrthodoxThemeToggle.tsx → src/shared/ui/OrthodoxThemeToggle.tsx
+[8:13:47 PM] 📦 FILE: GET /src/layouts/full/vertical/header/Notification.tsx → src/layouts/full/vertical/header/Notification.tsx
+[8:13:47 PM] 📦 FILE: GET /src/features/pages/frontend-pages/SessionTimer.tsx → src/features/pages/frontend-pages/SessionTimer.tsx
+[8:13:47 PM] 📦 FILE: GET /src/features/pages/frontend-pages/CircularMenu.tsx → src/features/pages/frontend-pages/CircularMenu.tsx
+[8:13:47 PM] 📝 SOURCE: Loading → src/features/devel-tools/contactbar/QuickContactSidebar.tsx
+[8:13:47 PM] 📦 FILE: GET /src/layouts/full/vertical/header/data.ts → src/layouts/full/vertical/header/data.ts
+[8:13:47 PM] 📦 FILE: GET /src/context/UserDataContext/index.tsx → src/context/UserDataContext/index.tsx
+[8:13:47 PM] 📦 FILE: GET /src/components/notifications/NotificationBell.tsx → src/components/notifications/NotificationBell.tsx
+[8:13:47 PM] 📝 SOURCE: Loading → src/features/pages/frontend-pages/SessionTimer.tsx
+[8:13:47 PM] 📝 SOURCE: Loading → src/features/pages/frontend-pages/CircularMenu.tsx
+[8:13:47 PM] 📦 FILE: GET /src/api/globalFetcher.ts → src/api/globalFetcher.ts
+[8:13:47 PM] 🌐 SERVER REQ: GET /images/nimbus.png
+🖼️  Proxying image request: GET /images/nimbus.png → localhost:3001/images/nimbus.png
+[8:13:47 PM] 🌐 SERVER REQ: GET /images/header/1.mp4
+🖼️  Proxying image request: GET /images/header/1.mp4 → localhost:3001/images/header/1.mp4
+[8:13:47 PM] 📦 FILE: GET /src/assets/images/flag/icon-flag-us.svg → src/assets/images/flag/icon-flag-us.svg
+❌ Image proxy response: GET /images/nimbus.png → 404
+[8:13:47 PM] 🌐 SERVER REQ: GET /images/header/3.mp4
+🖼️  Proxying image request: GET /images/header/3.mp4 → localhost:3001/images/header/3.mp4
+❌ Image proxy response: GET /images/header/1.mp4 → 404
+[8:13:47 PM] 🌐 SERVER REQ: GET /images/header/2.mp4
+🖼️  Proxying image request: GET /images/header/2.mp4 → localhost:3001/images/header/2.mp4
+[8:13:47 PM] 🌐 SERVER REQ: GET /images/header/cross-gold.png
+🖼️  Proxying image request: GET /images/header/cross-gold.png → localhost:3001/images/header/cross-gold.png
+❌ Image proxy response: GET /images/header/3.mp4 → 404
+❌ Image proxy response: GET /images/header/2.mp4 → 404
+[8:13:47 PM] 🌐 SERVER REQ: GET /images/header/globe-footer.png
+🖼️  Proxying image request: GET /images/header/globe-footer.png → localhost:3001/images/header/globe-footer.png
+❌ Image proxy response: GET /images/header/cross-gold.png → 404
+❌ Image proxy response: GET /images/header/globe-footer.png → 404
+[8:13:47 PM] 📦 FILE: GET /src/assets/images/svgs/icon-account.svg → src/assets/images/svgs/icon-account.svg
+[8:13:47 PM] 📦 FILE: GET /src/assets/images/svgs/icon-inbox.svg → src/assets/images/svgs/icon-inbox.svg
+[8:13:47 PM] 📦 FILE: GET /src/assets/images/svgs/icon-tasks.svg → src/assets/images/svgs/icon-tasks.svg
+[8:13:47 PM] 🌐 SERVER REQ: GET /images/nimbus.png
+🖼️  Proxying image request: GET /images/nimbus.png → localhost:3001/images/nimbus.png
+[8:13:47 PM] 🌐 SERVER REQ: GET /images/bgtiled6.png
+🖼️  Proxying image request: GET /images/bgtiled6.png → localhost:3001/images/bgtiled6.png
+❌ Image proxy response: GET /images/nimbus.png → 404
+[8:13:47 PM] 🌐 SERVER REQ: GET /images/patterns/page-bg.png
+🖼️  Proxying image request: GET /images/patterns/page-bg.png → localhost:3001/images/patterns/page-bg.png
+❌ Image proxy response: GET /images/bgtiled6.png → 404
+❌ Image proxy response: GET /images/patterns/page-bg.png → 404
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[8:14:06 PM] 🛣️  ROUTE: /auth/login2
+[8:14:06 PM] 📦 FILE: GET /src/features/auth/authentication/auth2/Login2.tsx → src/features/auth/authentication/auth2/Login2.tsx
+[8:14:06 PM] 📝 SOURCE: Loading → src/features/auth/authentication/auth2/Login2.tsx
+[8:14:06 PM] 📦 FILE: GET /src/shared/ui/PageContainer.tsx → src/shared/ui/PageContainer.tsx
+[8:14:06 PM] 📝 SOURCE: Loading → src/shared/ui/PageContainer.tsx
+[8:14:06 PM] 📦 FILE: GET /src/features/auth/authentication/authForms/AuthLogin.tsx → src/features/auth/authentication/authForms/AuthLogin.tsx
+[8:14:06 PM] 📝 SOURCE: Loading → src/features/auth/authentication/authForms/AuthLogin.tsx
+[8:14:06 PM] 📦 FILE: GET /src/components/forms/theme-elements/CustomCheckbox.tsx → src/components/forms/theme-elements/CustomCheckbox.tsx
+[8:14:06 PM] 📦 FILE: GET /src/components/forms/theme-elements/CustomTextField.tsx → src/components/forms/theme-elements/CustomTextField.tsx
+[8:14:06 PM] 📦 FILE: GET /src/components/forms/theme-elements/CustomFormLabel.tsx → src/components/forms/theme-elements/CustomFormLabel.tsx
+[8:14:06 PM] 📝 SOURCE: Loading → src/components/forms/theme-elements/CustomFormLabel.tsx
+[8:14:06 PM] 📝 SOURCE: Loading → src/components/forms/theme-elements/CustomTextField.tsx
+[8:14:06 PM] 📝 SOURCE: Loading → src/components/forms/theme-elements/CustomCheckbox.tsx
+[8:14:06 PM] 🌐 SERVER REQ: GET /images/main/biz-logo.png
+🖼️  Proxying image request: GET /images/main/biz-logo.png → localhost:3001/images/main/biz-logo.png
+❌ Image proxy response: GET /images/main/biz-logo.png → 404
+[8:14:08 PM] 🌐 SERVER REQ: POST /api/auth/login
+🔌 Proxying request: POST /api/auth/login → localhost:3001/api/auth/login
+✅ Proxy response: POST /api/auth/login → 200
+[8:14:09 PM] 🛣️  ROUTE: /dashboards/super
+[8:14:09 PM] 🌐 SERVER REQ: GET /api/notifications?
+🔌 Proxying request: GET /api/notifications? → localhost:3001/api/notifications?
+[8:14:09 PM] 🌐 SERVER REQ: GET /api/notifications/preferences
+🔌 Proxying request: GET /api/notifications/preferences → localhost:3001/api/notifications/preferences
+[8:14:09 PM] 🌐 SERVER REQ: GET /api/notifications/counts
+🔌 Proxying request: GET /api/notifications/counts → localhost:3001/api/notifications/counts
+[8:14:09 PM] 🔌 API: GET /api/notifications?
+[8:14:09 PM] 🔌 API: GET /api/notifications/counts
+[8:14:09 PM] 🔌 API: GET /api/notifications/preferences
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/FullLayout.tsx → src/layouts/full/FullLayout.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/header/Header.tsx → src/layouts/full/vertical/header/Header.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/sidebar/Sidebar.tsx → src/layouts/full/vertical/sidebar/Sidebar.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/shared/customizer/Customizer.tsx → src/layouts/full/shared/customizer/Customizer.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/horizontal/navbar/Navigation.tsx → src/layouts/full/horizontal/navbar/Navigation.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/horizontal/header/Header.tsx → src/layouts/full/horizontal/header/Header.tsx
+[8:14:09 PM] 📦 FILE: GET /src/shared/ui/ScrollToTop.tsx → src/shared/ui/ScrollToTop.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/header/Navigation.tsx → src/layouts/full/vertical/header/Navigation.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/header/MobileRightSidebar.tsx → src/layouts/full/vertical/header/MobileRightSidebar.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/sidebar/SidebarItems.tsx → src/layouts/full/vertical/sidebar/SidebarItems.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/shared/logo/Logo.tsx → src/layouts/full/shared/logo/Logo.tsx
+[8:14:09 PM] 📦 FILE: GET /src/components/custom-scroll/Scrollbar.tsx → src/components/custom-scroll/Scrollbar.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/sidebar/SidebarProfile/Profile.tsx → src/layouts/full/vertical/sidebar/SidebarProfile/Profile.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/horizontal/navbar/NavListing/NavListing.tsx → src/layouts/full/horizontal/navbar/NavListing/NavListing.tsx
+✅ Proxy response: GET /api/notifications/counts → 200
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/header/Search.tsx → src/layouts/full/vertical/header/Search.tsx
+✅ Proxy response: GET /api/notifications? → 200
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/header/AppLinks.tsx → src/layouts/full/vertical/header/AppLinks.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/header/QuickLinks.tsx → src/layouts/full/vertical/header/QuickLinks.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/sidebar/NavItem/index.tsx → src/layouts/full/vertical/sidebar/NavItem/index.tsx
+⚠️ Proxy response: GET /api/notifications/preferences → 304
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/sidebar/NavCollapse/index.tsx → src/layouts/full/vertical/sidebar/NavCollapse/index.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/sidebar/NavGroup/NavGroup.tsx → src/layouts/full/vertical/sidebar/NavGroup/NavGroup.tsx
+[8:14:09 PM] 📦 FILE: GET /src/shared/lib/useFilteredMenuItems.ts → src/shared/lib/useFilteredMenuItems.ts
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/vertical/sidebar/MenuItems.ts → src/layouts/full/vertical/sidebar/MenuItems.ts
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/horizontal/navbar/Menudata.ts → src/layouts/full/horizontal/navbar/Menudata.ts
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/horizontal/navbar/NavItem/NavItem.tsx → src/layouts/full/horizontal/navbar/NavItem/NavItem.tsx
+[8:14:09 PM] 📦 FILE: GET /src/layouts/full/horizontal/navbar/NavCollapse/NavCollapse.tsx → src/layouts/full/horizontal/navbar/NavCollapse/NavCollapse.tsx
+[8:14:09 PM] 📦 FILE: GET /src/shared/ui/OrthodoxChurchIcon.tsx → src/shared/ui/OrthodoxChurchIcon.tsx
+[8:14:09 PM] 📦 FILE: GET /src/features/devel-tools/users-customized-landing/SuperDashboard.tsx → src/features/devel-tools/users-customized-landing/SuperDashboard.tsx
+[8:14:09 PM] 📦 FILE: GET /src/features/admin/admin/AdminTile.tsx → src/features/admin/admin/AdminTile.tsx
+[8:14:09 PM] 🌐 SERVER REQ: GET /images/bgtiled1.png
+🖼️  Proxying image request: GET /images/bgtiled1.png → localhost:3001/images/bgtiled1.png
+❌ Image proxy response: GET /images/bgtiled1.png → 404
+[8:14:09 PM] 📦 FILE: GET /src/assets/images/svgs/icon-dd-invoice.svg → src/assets/images/svgs/icon-dd-invoice.svg
+[8:14:09 PM] 📦 FILE: GET /src/assets/images/svgs/icon-dd-date.svg → src/assets/images/svgs/icon-dd-date.svg
+[8:14:09 PM] 📦 FILE: GET /src/assets/images/svgs/icon-dd-message-box.svg → src/assets/images/svgs/icon-dd-message-box.svg
+[8:14:09 PM] 📦 FILE: GET /src/assets/images/svgs/icon-dd-mobile.svg → src/assets/images/svgs/icon-dd-mobile.svg
+[8:14:09 PM] 📦 FILE: GET /src/assets/images/svgs/icon-dd-lifebuoy.svg → src/assets/images/svgs/icon-dd-lifebuoy.svg
+[8:14:09 PM] 📦 FILE: GET /src/assets/images/svgs/icon-dd-application.svg → src/assets/images/svgs/icon-dd-application.svg
+[8:14:09 PM] 📦 FILE: GET /src/assets/images/svgs/icon-account.svg → src/assets/images/svgs/icon-account.svg
+[8:14:09 PM] 📦 FILE: GET /src/assets/images/svgs/icon-inbox.svg → src/assets/images/svgs/icon-inbox.svg
+[8:14:09 PM] 📦 FILE: GET /src/assets/images/svgs/icon-tasks.svg → src/assets/images/svgs/icon-tasks.svg
+[8:14:13 PM] 🛣️  ROUTE: /apps/records/baptism
+[8:14:13 PM] 📦 FILE: GET /src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx → src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx
+[8:14:13 PM] 📦 FILE: GET /src/store/useTableStyleStore.ts → src/store/useTableStyleStore.ts
+[8:14:13 PM] 📦 FILE: GET /src/shared/lib/recordsApi.ts → src/shared/lib/recordsApi.ts
+[8:14:13 PM] 📦 FILE: GET /src/components/TableControlPanel.tsx → src/components/TableControlPanel.tsx
+[8:14:13 PM] 📦 FILE: GET /src/components/ColorPaletteSelector.tsx → src/components/ColorPaletteSelector.tsx
+[8:14:13 PM] 📦 FILE: GET /src/features/tables/AdvancedGridDialog.tsx → src/features/tables/AdvancedGridDialog.tsx
+[8:14:13 PM] 📦 FILE: GET /src/styles/advanced-grid-themes.css → src/styles/advanced-grid-themes.css
+[8:14:13 PM] 📦 FILE: GET /src/features/records-centralized/constants/index.ts → src/features/records-centralized/constants/index.ts
+[8:14:13 PM] 📦 FILE: GET /src/features/records-centralized/components/dynamic/index.ts → src/features/records-centralized/components/dynamic/index.ts
+[8:14:13 PM] 📦 FILE: GET /src/store/enhancedTableStore.ts → src/store/enhancedTableStore.ts
+[8:14:13 PM] 📦 FILE: GET /src/features/records/BrandButtons.tsx → src/features/records/BrandButtons.tsx
+[8:14:13 PM] 📦 FILE: GET /src/api/admin.api.ts → src/api/admin.api.ts
+[8:14:13 PM] 📦 FILE: GET /src/features/records-centralized/components/dynamic/DynamicRecordsDisplay.tsx → src/features/records-centralized/components/dynamic/DynamicRecordsDisplay.tsx
+[8:14:13 PM] 📦 FILE: GET /src/features/records-centralized/components/dynamic/DynamicRecordsInspector.tsx → src/features/records-centralized/components/dynamic/DynamicRecordsInspector.tsx
+[8:14:13 PM] 📦 FILE: GET /src/features/records-centralized/components/dynamic/columnMappers.ts → src/features/records-centralized/components/dynamic/columnMappers.ts
+[8:14:13 PM] 📦 FILE: GET /src/features/records-centralized/components/dynamic/cellRenderers.tsx → src/features/records-centralized/components/dynamic/cellRenderers.tsx
+[8:14:13 PM] 📦 FILE: GET /src/api/utils/axiosInstance.ts → src/api/utils/axiosInstance.ts
+[8:14:13 PM] 📦 FILE: GET /src/config/api.config.ts → src/config/api.config.ts
+[8:14:13 PM] 🌐 SERVER REQ: GET /images/records/baptism.png
+🖼️  Proxying image request: GET /images/records/baptism.png → localhost:3001/images/records/baptism.png
+❌ Image proxy response: GET /images/records/baptism.png → 404
+[8:14:13 PM] 🌐 SERVER REQ: GET /images/records/46-bg.png
+🖼️  Proxying image request: GET /images/records/46-bg.png → localhost:3001/images/records/46-bg.png
+[8:14:13 PM] 🌐 SERVER REQ: GET /images/records/g1.png
+🖼️  Proxying image request: GET /images/records/g1.png → localhost:3001/images/records/g1.png
+[8:14:13 PM] 🌐 SERVER REQ: GET /images/records/gold-hor.png
+🖼️  Proxying image request: GET /images/records/gold-hor.png → localhost:3001/images/records/gold-hor.png
+[8:14:13 PM] 🌐 SERVER REQ: GET /images/records/gold-vertical.png
+🖼️  Proxying image request: GET /images/records/gold-vertical.png → localhost:3001/images/records/gold-vertical.png
+[8:14:13 PM] 🔌 API: GET /api/admin/churches/46/record-settings
+[8:14:13 PM] 🌐 SERVER REQ: GET /api/admin/churches/46/record-settings
+🔌 Proxying request: GET /api/admin/churches/46/record-settings → localhost:3001/api/admin/churches/46/record-settings
+[8:14:13 PM] 🌐 SERVER REQ: GET /api/churches/church-info
+🔌 Proxying request: GET /api/churches/church-info → localhost:3001/api/churches/church-info
+❌ Image proxy response: GET /images/records/46-bg.png → 404
+❌ Image proxy response: GET /images/records/g1.png → 404
+❌ Image proxy response: GET /images/records/gold-hor.png → 404
+❌ Image proxy response: GET /images/records/gold-vertical.png → 404
+[8:14:13 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+✅ Proxy response: GET /api/admin/churches/46/record-settings → 200
+[8:14:13 PM] 🌐 SERVER REQ: GET /api/admin/churches/46/tables/baptism_records/columns
+🔌 Proxying request: GET /api/admin/churches/46/tables/baptism_records/columns → localhost:3001/api/admin/churches/46/tables/baptism_records/columns
+[8:14:13 PM] 🔌 API: GET /api/churches/church-info
+[8:14:13 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:14:13 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:14:13 PM] 🔌 API: GET /api/admin/churches/46/tables/baptism_records/columns
+✅ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 200
+⚠️ Proxy response: GET /api/admin/churches/46/tables/baptism_records/columns → 304
+[8:14:13 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:14:13 PM] 🔌 API: GET /api/admin/churches/46/field-mapper?table=baptism_records
+[8:14:13 PM] 🌐 SERVER REQ: GET /api/admin/churches/46/field-mapper?table=baptism_records
+🔌 Proxying request: GET /api/admin/churches/46/field-mapper?table=baptism_records → localhost:3001/api/admin/churches/46/field-mapper?table=baptism_records
+⚠️ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=1000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 304
+✅ Proxy response: GET /api/admin/churches/46/field-mapper?table=baptism_records → 200
+[8:14:19 PM] 🛣️  ROUTE: /apps/records/baptism?view=advanced
+[8:14:19 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+✅ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 200
+[8:14:19 PM] 🔌 API: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → localhost:3001/api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+✅ Proxy response: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → 200
+[8:14:19 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+✅ Proxy response: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → 200
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → localhost:3001/api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/baptism-records?table=baptism&church_id=46&page=1&limit=10000&sort_field=reception_date&sortField=reception_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → localhost:3001/api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🔌 API: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → localhost:3001/api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → localhost:3001/api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → localhost:3001/api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → localhost:3001/api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/marriage-records?table=marriage&church_id=46&page=1&limit=10000&sort_field=mdate&sortField=mdate&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🔌 API: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🔌 API: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+[8:14:19 PM] 🔌 API: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → 304
+[8:14:19 PM] 🌐 SERVER REQ: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+🔌 Proxying request: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → localhost:3001/api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc
+⚠️ Proxy response: GET /api/funeral-records?table=funeral&church_id=46&page=1&limit=10000&sort_field=burial_date&sortField=burial_date&sort_dir=desc&sortDirection=desc → 304

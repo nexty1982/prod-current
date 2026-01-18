@@ -108,7 +108,7 @@ const REACTION_EMOJIS = {
 };
 
 const SocialChat: React.FC = () => {
-  const { user } = useAuth();
+  const { user, authenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -140,14 +140,17 @@ const SocialChat: React.FC = () => {
   ];
 
   useEffect(() => {
-    fetchConversations();
-    
-    // Handle conversation ID from navigation state (from FriendsList)
-    const conversationId = location.state?.conversationId;
-    if (conversationId) {
-      selectConversationById(conversationId);
+    // Only fetch if authenticated
+    if (!authLoading && authenticated && user) {
+      fetchConversations();
+      
+      // Handle conversation ID from navigation state (from FriendsList)
+      const conversationId = location.state?.conversationId;
+      if (conversationId) {
+        selectConversationById(conversationId);
+      }
     }
-  }, [location.state]);
+  }, [location.state, authLoading, authenticated, user]);
 
   useEffect(() => {
     if (selectedConversation) {

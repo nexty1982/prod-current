@@ -42,7 +42,6 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import aiService from '@/shared/lib/aiService';
 import AIContentGenerator from './AIContentGenerator';
-import AIAnalyticsDashboard from './AIAnalyticsDashboard';
 import AITranslationAssistant from './AITranslationAssistant';
 import AIDeploymentAutomation from './AIDeploymentAutomation';
 import AILogAnalysis from './AILogAnalysis';
@@ -179,7 +178,6 @@ export const AIAdminPanel: React.FC = () => {
 
     const tabLabels = [
         { label: 'Overview', icon: <IconBrain size={16} /> },
-        { label: 'Analytics', icon: <IconChartBar size={16} /> },
         { label: 'Content Generator', icon: <IconRobot size={16} /> },
         { label: 'Translation', icon: <IconLanguage size={16} /> },
         { label: 'Deployment', icon: <IconServer size={16} /> },
@@ -424,9 +422,7 @@ export const AIAdminPanel: React.FC = () => {
                     </Grid>
                 )}
 
-                {activeTab === 1 && <AIAnalyticsDashboard />}
-
-                {activeTab === 2 && (
+                {activeTab === 1 && (
                     <Card>
                         <CardContent>
                             <Typography variant="h6" mb={3}>
@@ -441,7 +437,7 @@ export const AIAdminPanel: React.FC = () => {
                     </Card>
                 )}
 
-                {activeTab === 3 && (
+                {activeTab === 2 && (
                     <Card>
                         <CardContent>
                             <Typography variant="h6" mb={3}>
@@ -456,7 +452,7 @@ export const AIAdminPanel: React.FC = () => {
                     </Card>
                 )}
 
-                {activeTab === 4 && (
+                {activeTab === 3 && (
                     <Card>
                         <CardContent>
                             <Typography variant="h6" mb={3}>
@@ -471,7 +467,7 @@ export const AIAdminPanel: React.FC = () => {
                     </Card>
                 )}
 
-                {activeTab === 5 && (
+                {activeTab === 4 && (
                     <Card>
                         <CardContent>
                             <Typography variant="h6" mb={3}>

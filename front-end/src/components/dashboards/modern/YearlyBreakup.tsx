@@ -1,67 +1,15 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import React from 'react';
-import Chart from 'react-apexcharts';
 import { useTheme } from '@mui/material/styles';
-import { Grid, Stack, Typography, Avatar } from '@mui/material';
+import { Grid, Stack, Typography, Avatar, Box } from '@mui/material';
 import { IconArrowUpLeft } from '@tabler/icons-react';
 
 import DashboardCard from '../../shared/DashboardCard.tsx';
-import { Props } from 'react-apexcharts';
 
 const YearlyBreakup = () => {
-  // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
   const primarylight = theme.palette.primary.light;
   const successlight = theme.palette.success.light;
-
-  // chart
-  const optionscolumnchart: Props = {
-    chart: {
-      type: 'donut',
-      fontFamily: "'Plus Jakarta Sans', sans-serif;",
-      foreColor: '#adb0bb',
-      toolbar: {
-        show: false,
-      },
-      height: 155,
-    },
-    colors: [primary, primarylight, '#F9F9FD'],
-    plotOptions: {
-      pie: {
-        startAngle: 0,
-        endAngle: 360,
-        donut: {
-          size: '75%',
-          background: 'transparent',
-        },
-      },
-    },
-    tooltip: {
-      enabled: false,
-    },
-    stroke: {
-      show: false,
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    legend: {
-      show: false,
-    },
-    responsive: [
-      {
-        breakpoint: 991,
-        options: {
-          chart: {
-            width: 120,
-          },
-        },
-      },
-    ],
-  };
-  const seriescolumnchart = [38, 40, 25];
 
   return (
     (<DashboardCard title="Yearly Breakup">
@@ -111,12 +59,25 @@ const YearlyBreakup = () => {
             xs: 5,
             sm: 5
           }}>
-          <Chart
-            options={optionscolumnchart}
-            series={seriescolumnchart}
-            type="donut"
-            height="130px"
-          />
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '130px',
+              borderRadius: '50%',
+              border: `8px solid ${primary}`,
+              borderTopColor: primarylight,
+              borderRightColor: primarylight,
+              borderBottomColor: '#F9F9FD',
+              width: '130px',
+              margin: '0 auto',
+            }}
+          >
+            <Typography variant="h6" fontWeight="600">
+              38%
+            </Typography>
+          </Box>
         </Grid>
       </Grid>
     </DashboardCard>)

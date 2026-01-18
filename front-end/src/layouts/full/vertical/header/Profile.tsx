@@ -16,13 +16,35 @@ import * as dropdownData from './data';
 import { useAuth } from '../../../../context/AuthContext';
 import { UserDataContext } from '../../../../context/UserDataContext';
 
-import { IconMail } from '@tabler/icons-react';
+import { IconMail, IconUserOff } from '@tabler/icons-react';
 
 // Default profile image fallback (using Orthodox default)
 const defaultProfileImg = '/orthodox/avatars/default.svg';
 
+// Active session indicator component
+const ActiveSessionIndicator = () => (
+  <div style={{ display: 'flex', gap: '4px', marginLeft: '6px' }}>
+    <span
+      style={{
+        width: '10px',
+        height: '10px',
+        borderRadius: '50%',
+        backgroundColor: '#00C853',
+      }}
+    />
+    <span
+      style={{
+        width: '10px',
+        height: '10px',
+        borderRadius: '50%',
+        backgroundColor: '#00C853',
+      }}
+    />
+  </div>
+);
+
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, authenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorEl2, setAnchorEl2] = useState(null);
   
@@ -43,37 +65,64 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
+      handleClose2(); // Close the menu first
       await logout();
-      navigate('/auth/login');
+      // Clear any remaining auth state
+      localStorage.removeItem('auth_user');
+      sessionStorage.clear();
+      // Redirect to homepage after logout
+      window.location.href = 'https://orthodoxmetrics.com/frontend-pages/homepage';
     } catch (error) {
       console.error('Logout failed:', error);
+      // Even if logout fails, clear local state and redirect
+      localStorage.removeItem('auth_user');
+      sessionStorage.clear();
+      // Redirect to homepage after logout
+      window.location.href = 'https://orthodoxmetrics.com/frontend-pages/homepage';
     }
   };
 
   return (
     <Box>
-      <IconButton
-        size="large"
-        aria-label="show 11 new notifications"
-        color="inherit"
-        aria-controls="msgs-menu"
-        aria-haspopup="true"
-        sx={{
-          ...(typeof anchorEl2 === 'object' && {
-            color: 'primary.main',
-          }),
-        }}
-        onClick={handleClick2}
-      >
-        <Avatar
-          src={profileImage}
-          alt="Profile"
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <IconButton
+          size="large"
+          aria-label={authenticated ? "User profile" : "Not logged in"}
+          color="inherit"
+          aria-controls="msgs-menu"
+          aria-haspopup={authenticated ? "true" : "false"}
+          disabled={!authenticated}
           sx={{
-            width: 35,
-            height: 35,
+            ...(typeof anchorEl2 === 'object' && {
+              color: 'primary.main',
+            }),
+            ...(!authenticated && {
+              opacity: 0.6,
+            }),
           }}
-        />
-      </IconButton>
+          onClick={authenticated ? handleClick2 : undefined}
+        >
+          {authenticated ? (
+            <Avatar
+              src={profileImage}
+              alt="Profile"
+              sx={{
+                width: 35,
+                height: 35,
+              }}
+            />
+          ) : (
+            <IconUserOff 
+              size={35} 
+              style={{ 
+                color: 'rgba(255, 255, 255, 0.6)',
+                strokeWidth: 1.5
+              }} 
+            />
+          )}
+        </IconButton>
+        {authenticated && user && <ActiveSessionIndicator />}
+      </Box>
       {/* ------------------------------------------- */}
       {/* Message Dropdown */}
       {/* ------------------------------------------- */}
@@ -97,7 +146,8 @@ const Profile = () => {
           <Avatar src={profileImage} alt="Profile" sx={{ width: 95, height: 95 }} />
           <Box>
             <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
-              {profileData?.name || 
+              {user?.nick || 
+               profileData?.name || 
                (user?.first_name?.trim() && user?.last_name?.trim()
                 ? `${user.first_name} ${user.last_name}`
                 : 'User Profile')}
@@ -170,16 +220,18 @@ const Profile = () => {
             </Box>
           </Box>
         ))}
-        <Box mt={2}>
-          <Button
-            onClick={handleLogout}
-            variant="outlined"
-            color="primary"
-            fullWidth
-          >
-            Logout
-          </Button>
-        </Box>
+        {authenticated && user && (
+          <Box mt={2}>
+            <Button
+              onClick={handleLogout}
+              variant="outlined"
+              color="primary"
+              fullWidth
+            >
+              Logout
+            </Button>
+          </Box>
+        )}
       </Menu>
     </Box>
   );

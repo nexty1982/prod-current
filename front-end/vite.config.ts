@@ -7,6 +7,7 @@ import svgr from '@svgr/rollup';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
     base: '/', // Ensure assets are loaded from root
+    cacheDir: 'node_modules/.vite', // Enable build cache
     resolve: {
         alias: [
             { find: '@', replacement: resolve(__dirname, 'src') },
@@ -17,10 +18,41 @@ export default defineConfig(({ mode }) => ({
     esbuild: {
         loader: 'tsx',
         include: [/src\/.*\.tsx?$/],
-        exclude: [],
+        exclude: [
+            // Test files
+            /\.(test|spec)\.(ts|tsx|js|jsx)$/,
+            // Demo and example files
+            /\/demo\//,
+            /\/demos\//,
+            /\/examples\//,
+            /\/sample-page\//,
+            // Archive directories
+            /\/archive\//,
+            // Legacy code (if not used)
+            /\/legacy\//,
+            // Documentation
+            /\/docs\//,
+            /\.md$/,
+        ],
     },
     optimizeDeps: {
-        include: [],
+        include: [
+            // React ecosystem
+            'react',
+            'react-dom',
+            'react-router-dom',
+            // Drag and drop
+            '@hello-pangea/dnd',
+            // Common utilities (MUI removed - let it bundle naturally to avoid dependency issues)
+            'axios',
+            'lodash',
+            'date-fns',
+            'dayjs',
+        ],
+        exclude: [
+            // Exclude large unused packages from pre-bundling
+            '@faker-js/faker', // Only used in dev/mocks
+        ],
         force: false, // Don't force pre-bundling in dev
         esbuildOptions: {
             plugins: [
@@ -49,17 +81,31 @@ export default defineConfig(({ mode }) => ({
     plugins: [svgr(), react()],
     build: {
         minify: mode === 'production', // Only minify in production
-        sourcemap: true, // Enable source maps for debugging
+        sourcemap: true, // Enable sourcemaps for debugging circular dependencies
         target: mode === 'production' ? 'es2015' : 'esnext', // Use modern JS in dev
+        cssCodeSplit: true, // Enable CSS code splitting to handle AG Grid CSS properly
+        // Enable incremental builds - only rebuild changed files
+        emptyOutDir: false, // Don't empty dist on each build (allows incremental)
         commonjsOptions: {
             include: [/node_modules/],
+            transformMixedEsModules: true,
         },
         rollupOptions: {
             external: [],
             output: {
+                // Use simpler, safer chunking strategy
+                // Only split React - let Vite handle the rest automatically
+                // This prevents breaking MUI's internal dependencies
                 manualChunks: mode === 'production' ? {
-                    vendor: ['react', 'react-dom'],
+                    'vendor-react': ['react', 'react-dom', 'react-router-dom'],
                 } : undefined, // No chunking in dev for faster builds
+                // Ensure CSS files are handled correctly
+                assetFileNames: (assetInfo) => {
+                    if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+                        return 'assets/[name]-[hash][extname]';
+                    }
+                    return 'assets/[name]-[hash][extname]';
+                },
             },
         },
     }, server: {

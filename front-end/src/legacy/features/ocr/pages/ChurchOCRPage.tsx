@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ScanLine, Settings as SettingsIcon, RefreshCw, ArrowLeft, Church } from 'lucide-react';
-import UploadZone from '../shared/ui/legacy/UploadZone';
-import JobList from '../shared/ui/legacy/JobList';
-import ConfigPanel from '../shared/ui/legacy/ConfigPanel';
-import OutputViewer from '../shared/ui/legacy/OutputViewer';
+import { Box, Typography, Button, Paper, useTheme, CircularProgress, Alert } from '@mui/material';
+import UploadZone from '../components/UploadZone';
+import JobList from '../components/JobList';
+import ConfigPanel from '../components/ConfigPanel';
+import OutputViewer from '../components/OutputViewer';
 import { fetchChurches } from '../lib/ocrApi';
 
 const ChurchOCRPage: React.FC = () => {
+  const theme = useTheme();
   const { churchId } = useParams<{ churchId: string }>();
   const navigate = useNavigate();
   const [selectedJobId, setSelectedJobId] = useState<string | undefined>();
@@ -62,115 +64,131 @@ const ChurchOCRPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading church information...</p>
-        </div>
-      </div>
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress sx={{ mb: 2 }} />
+          <Typography variant="body2" color="text.secondary">
+            Loading church information...
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
   if (!church) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">Church not found or access denied.</p>
-          <button
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            Church not found or access denied.
+          </Alert>
+          <Button
+            variant="contained"
             onClick={handleBackToStudio}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Return to OCR Studio
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+      <Paper elevation={1} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ maxWidth: 'xl', mx: 'auto', px: 3, py: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
               {/* Back Button */}
-              <button
+              <Button
                 onClick={handleBackToStudio}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                startIcon={<ArrowLeft size={20} />}
+                variant="outlined"
+                size="small"
                 title="Back to OCR Studio"
               >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
-              </button>
+                Back
+              </Button>
 
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-xl">
-                  <ScanLine className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ p: 1, bgcolor: 'primary.light', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'primary.main' }}>
+                  <ScanLine size={24} />
+                </Box>
+                <Box>
+                  <Typography variant="h5" fontWeight="bold" color="text.primary">
                     OCR for {church.name}
-                  </h1>
-                  <p className="text-sm text-gray-500">
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
                     Document processing for church records
-                  </p>
-                </div>
-              </div>
+                  </Typography>
+                </Box>
+              </Box>
 
               {/* Church Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg">
-                <Church className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700">
+              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, bgcolor: 'primary.light', border: 1, borderColor: 'primary.main', borderRadius: 1, color: 'primary.main' }}>
+                <Church size={16} />
+                <Typography variant="caption" fontWeight="medium" color="primary.main">
                   Church ID: {church.id}
-                </span>
-              </div>
-            </div>
+                </Typography>
+              </Box>
+            </Box>
 
             {/* Header Actions */}
-            <div className="flex items-center gap-3">
-              <button
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshCw size={16} />}
                 onClick={handleRefreshJobs}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                size="small"
               >
-                <RefreshCw className="h-4 w-4" />
                 Refresh
-              </button>
+              </Button>
 
               <ConfigPanel
                 trigger={
-                  <button className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors shadow-sm">
-                    <SettingsIcon className="h-4 w-4" />
+                  <Button
+                    variant="contained"
+                    startIcon={<SettingsIcon size={16} />}
+                    sx={{ textTransform: 'none' }}
+                  >
                     Settings
-                  </button>
+                  </Button>
                 }
                 churchId={numericChurchId}
               />
-            </div>
-          </div>
+            </Box>
+          </Box>
 
           {/* Church-specific Stats Bar */}
-          <div className="mt-4 flex items-center gap-6 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>Church-specific Processing</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span>Liturgical Document Recognition</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span>Records Management Integration</span>
-            </div>
-          </div>
-        </div>
-      </div>
+          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main' }} />
+              <Typography variant="caption" color="text.secondary">
+                Church-specific Processing
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main' }} />
+              <Typography variant="caption" color="text.secondary">
+                Liturgical Document Recognition
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'secondary.main' }} />
+              <Typography variant="caption" color="text.secondary">
+                Records Management Integration
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-12 gap-6">
+      <Box sx={{ maxWidth: 'xl', mx: 'auto', px: 3, py: 3 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', xl: '5fr 7fr' }, gap: 3 }}>
           {/* Left Panel - Upload & Jobs */}
-          <div className="col-span-12 xl:col-span-5 space-y-6">
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Church-specific Upload Zone */}
             <UploadZone
               onUploaded={handleUploadSuccess}
@@ -184,51 +202,57 @@ const ChurchOCRPage: React.FC = () => {
               churchId={numericChurchId}
               refreshTrigger={refreshTrigger}
             />
-          </div>
+          </Box>
 
           {/* Right Panel - Results */}
-          <div className="col-span-12 xl:col-span-7">
+          <Box>
             <OutputViewer jobId={selectedJobId} />
-          </div>
-        </div>
+          </Box>
+        </Box>
 
         {/* Church-specific Footer Info */}
-        <div className="mt-8 bg-white border border-gray-200 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <Paper sx={{ mt: 3, p: 3, borderRadius: 2 }}>
+          <Typography variant="h6" fontWeight="semibold" color="text.primary" sx={{ mb: 2 }}>
             Church OCR Features
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="space-y-2">
-              <h4 className="font-medium text-gray-700">Document Types</h4>
-              <ul className="text-gray-600 space-y-1">
-                <li>• Baptism Certificates</li>
-                <li>• Marriage Records</li>
-                <li>• Funeral Documents</li>
-                <li>• Membership Records</li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <h4 className="font-medium text-gray-700">Language Support</h4>
-              <ul className="text-gray-600 space-y-1">
-                <li>• English</li>
-                <li>• Greek (Modern & Ancient)</li>
-                <li>• Church Slavonic</li>
-                <li>• Romanian, Russian</li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <h4 className="font-medium text-gray-700">Integration</h4>
-              <ul className="text-gray-600 space-y-1">
-                <li>• Auto-populate records</li>
-                <li>• Field mapping</li>
-                <li>• Quality validation</li>
-                <li>• Audit trails</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          </Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+            <Box>
+              <Typography variant="subtitle2" fontWeight="medium" color="text.primary" sx={{ mb: 1 }}>
+                Document Types
+              </Typography>
+              <Box component="ul" sx={{ m: 0, pl: 2, '& li': { mb: 0.5 } }}>
+                <li><Typography variant="caption" color="text.secondary">Baptism Certificates</Typography></li>
+                <li><Typography variant="caption" color="text.secondary">Marriage Records</Typography></li>
+                <li><Typography variant="caption" color="text.secondary">Funeral Documents</Typography></li>
+                <li><Typography variant="caption" color="text.secondary">Membership Records</Typography></li>
+              </Box>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" fontWeight="medium" color="text.primary" sx={{ mb: 1 }}>
+                Language Support
+              </Typography>
+              <Box component="ul" sx={{ m: 0, pl: 2, '& li': { mb: 0.5 } }}>
+                <li><Typography variant="caption" color="text.secondary">English</Typography></li>
+                <li><Typography variant="caption" color="text.secondary">Greek (Modern & Ancient)</Typography></li>
+                <li><Typography variant="caption" color="text.secondary">Church Slavonic</Typography></li>
+                <li><Typography variant="caption" color="text.secondary">Romanian, Russian</Typography></li>
+              </Box>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" fontWeight="medium" color="text.primary" sx={{ mb: 1 }}>
+                Integration
+              </Typography>
+              <Box component="ul" sx={{ m: 0, pl: 2, '& li': { mb: 0.5 } }}>
+                <li><Typography variant="caption" color="text.secondary">Auto-populate records</Typography></li>
+                <li><Typography variant="caption" color="text.secondary">Field mapping</Typography></li>
+                <li><Typography variant="caption" color="text.secondary">Quality validation</Typography></li>
+                <li><Typography variant="caption" color="text.secondary">Audit trails</Typography></li>
+              </Box>
+            </Box>
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
   );
 };
 

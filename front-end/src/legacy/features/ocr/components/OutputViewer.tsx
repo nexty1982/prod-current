@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { getJobResult } from '../lib/ocrApi';
 import { Eye, FileText, Loader2, AlertCircle, Download, Copy } from 'lucide-react';
-import OcrScanPreview from '../OcrScanPreview';
+import { Box, Typography, Paper, Button, Tabs, Tab, useTheme, IconButton, Alert, CircularProgress } from '@mui/material';
+import OcrScanPreview from '../../../../features/ocr/OcrScanPreview';
 import type { OCRResult } from '../lib/ocrApi';
 
 interface OutputViewerProps {
@@ -10,6 +11,7 @@ interface OutputViewerProps {
 }
 
 const OutputViewer: React.FC<OutputViewerProps> = ({ jobId, className = '' }) => {
+  const theme = useTheme();
   const [result, setResult] = useState<OCRResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,91 +66,68 @@ const OutputViewer: React.FC<OutputViewerProps> = ({ jobId, className = '' }) =>
     URL.revokeObjectURL(url);
   }, [result]);
 
-  const renderViewModeButtons = () => (
-    <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-      <button
-        onClick={() => setViewMode('preview')}
-        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-          viewMode === 'preview' 
-            ? 'bg-white text-gray-900 shadow-sm' 
-            : 'text-gray-600 hover:text-gray-900'
-        }`}
-      >
-        <Eye className="h-3 w-3 inline mr-1" />
-        Preview
-      </button>
-      <button
-        onClick={() => setViewMode('text')}
-        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-          viewMode === 'text' 
-            ? 'bg-white text-gray-900 shadow-sm' 
-            : 'text-gray-600 hover:text-gray-900'
-        }`}
-      >
-        <FileText className="h-3 w-3 inline mr-1" />
-        Text
-      </button>
-      <button
-        onClick={() => setViewMode('json')}
-        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-          viewMode === 'json' 
-            ? 'bg-white text-gray-900 shadow-sm' 
-            : 'text-gray-600 hover:text-gray-900'
-        }`}
-      >
-        JSON
-      </button>
-    </div>
-  );
-
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">Loading OCR result...</p>
-          </div>
-        </div>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256 }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <CircularProgress size={32} sx={{ mb: 1 }} />
+            <Typography variant="body2" color="text.secondary">
+              Loading OCR result...
+            </Typography>
+          </Box>
+        </Box>
       );
     }
 
     if (error) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        </div>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256 }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1, color: 'error.main' }}>
+              <AlertCircle size={32} />
+            </Box>
+            <Typography variant="body2" color="error">
+              {error}
+            </Typography>
+          </Box>
+        </Box>
       );
     }
 
     if (!jobId) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center text-gray-500">
-            <FileText className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-            <p className="text-sm">Select a completed OCR job to view results</p>
-            <p className="text-xs text-gray-400 mt-1">
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256 }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1, color: 'text.disabled' }}>
+              <FileText size={32} />
+            </Box>
+            <Typography variant="body2" color="text.secondary">
+              Select a completed OCR job to view results
+            </Typography>
+            <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block' }}>
               Extracted text and field data will appear here
-            </p>
-          </div>
-        </div>
+            </Typography>
+          </Box>
+        </Box>
       );
     }
 
     if (!result) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center text-gray-500">
-            <AlertCircle className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-            <p className="text-sm">No result available</p>
-            <p className="text-xs text-gray-400 mt-1">
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256 }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1, color: 'text.disabled' }}>
+              <AlertCircle size={32} />
+            </Box>
+            <Typography variant="body2" color="text.secondary">
+              No result available
+            </Typography>
+            <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block' }}>
               This job may still be processing or failed
-            </p>
-          </div>
-        </div>
+            </Typography>
+          </Box>
+        </Box>
       );
     }
 
@@ -181,56 +160,103 @@ const OutputViewer: React.FC<OutputViewerProps> = ({ jobId, className = '' }) =>
         
       case 'text':
         return (
-          <div className="p-4 space-y-4">
+          <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {result.metadata && (
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <h4 className="text-xs font-medium text-gray-700 mb-2">Processing Info</h4>
-                <div className="grid grid-cols-2 gap-4 text-xs text-gray-600">
-                  <div>Engine: <span className="font-medium">{result.metadata.engine}</span></div>
-                  <div>Language: <span className="font-medium">{result.metadata.language}</span></div>
-                  <div>Pages: <span className="font-medium">{result.metadata.totalPages}</span></div>
-                  <div>Time: <span className="font-medium">{result.metadata.processingTime}ms</span></div>
-                </div>
-              </div>
+              <Paper sx={{ p: 1.5, bgcolor: 'background.default' }}>
+                <Typography variant="caption" fontWeight="medium" color="text.primary" sx={{ mb: 1, display: 'block' }}>
+                  Processing Info
+                </Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Engine: <Typography component="span" variant="caption" fontWeight="medium">{result.metadata.engine}</Typography>
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Language: <Typography component="span" variant="caption" fontWeight="medium">{result.metadata.language}</Typography>
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Pages: <Typography component="span" variant="caption" fontWeight="medium">{result.metadata.totalPages}</Typography>
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Time: <Typography component="span" variant="caption" fontWeight="medium">{result.metadata.processingTime}ms</Typography>
+                  </Typography>
+                </Box>
+              </Paper>
             )}
             
-            <div className="relative">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-xs font-medium text-gray-700">Extracted Text</h4>
-                <button
+            <Box sx={{ position: 'relative' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="caption" fontWeight="medium" color="text.primary">
+                  Extracted Text
+                </Typography>
+                <Button
+                  size="small"
+                  startIcon={<Copy size={12} />}
                   onClick={handleCopyText}
-                  className="inline-flex items-center px-2 py-1 text-xs border rounded hover:bg-gray-50"
+                  variant="outlined"
+                  sx={{ minWidth: 'auto', px: 1 }}
                 >
-                  <Copy className="h-3 w-3 mr-1" />
                   Copy
-                </button>
-              </div>
-              <textarea
+                </Button>
+              </Box>
+              <Box
+                component="textarea"
                 value={result.extractedText || 'No text extracted'}
                 readOnly
-                className="w-full h-64 p-3 text-xs font-mono border rounded-lg bg-gray-50 resize-none"
+                sx={{
+                  width: '100%',
+                  height: 256,
+                  p: 1.5,
+                  fontSize: '0.75rem',
+                  fontFamily: 'monospace',
+                  border: 1,
+                  borderColor: 'divider',
+                  borderRadius: 1,
+                  bgcolor: 'background.default',
+                  resize: 'none',
+                  color: 'text.primary',
+                  '&:focus': { outline: 'none' }
+                }}
               />
-            </div>
-          </div>
+            </Box>
+          </Box>
         );
 
       case 'json':
         return (
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-xs font-medium text-gray-700">Raw JSON Data</h4>
-              <button
+          <Box sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="caption" fontWeight="medium" color="text.primary">
+                Raw JSON Data
+              </Typography>
+              <Button
+                size="small"
+                startIcon={<Download size={12} />}
                 onClick={handleDownload}
-                className="inline-flex items-center px-2 py-1 text-xs border rounded hover:bg-gray-50"
+                variant="outlined"
+                sx={{ minWidth: 'auto', px: 1 }}
               >
-                <Download className="h-3 w-3 mr-1" />
                 Download
-              </button>
-            </div>
-            <pre className="text-xs overflow-auto whitespace-pre-wrap bg-gray-50 p-3 rounded-lg h-64 border">
+              </Button>
+            </Box>
+            <Box
+              component="pre"
+              sx={{
+                fontSize: '0.75rem',
+                overflow: 'auto',
+                whiteSpace: 'pre-wrap',
+                bgcolor: 'background.default',
+                p: 1.5,
+                borderRadius: 1,
+                height: 256,
+                border: 1,
+                borderColor: 'divider',
+                color: 'text.primary',
+                m: 0
+              }}
+            >
               {JSON.stringify(result, null, 2)}
-            </pre>
-          </div>
+            </Box>
+          </Box>
         );
 
       default:
@@ -239,16 +265,44 @@ const OutputViewer: React.FC<OutputViewerProps> = ({ jobId, className = '' }) =>
   };
 
   return (
-    <div className={`rounded-2xl border bg-white shadow-sm h-full min-h-[24rem] flex flex-col ${className}`}>
-      <div className="p-4 border-b flex items-center justify-between">
-        <h2 className="text-sm font-medium text-gray-900">OCR Result</h2>
-        {result && renderViewModeButtons()}
-      </div>
+    <Paper elevation={1} sx={{ borderRadius: 2, height: '100%', minHeight: 384, display: 'flex', flexDirection: 'column' }} className={className}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Typography variant="subtitle2" fontWeight="medium" color="text.primary">
+          OCR Result
+        </Typography>
+        {result && (
+          <Tabs
+            value={viewMode}
+            onChange={(_, newValue) => setViewMode(newValue)}
+            sx={{ minHeight: 'auto' }}
+          >
+            <Tab 
+              icon={<Eye size={12} />} 
+              iconPosition="start"
+              label="Preview" 
+              value="preview"
+              sx={{ minHeight: 'auto', py: 0.5, fontSize: '0.75rem' }}
+            />
+            <Tab 
+              icon={<FileText size={12} />} 
+              iconPosition="start"
+              label="Text" 
+              value="text"
+              sx={{ minHeight: 'auto', py: 0.5, fontSize: '0.75rem' }}
+            />
+            <Tab 
+              label="JSON" 
+              value="json"
+              sx={{ minHeight: 'auto', py: 0.5, fontSize: '0.75rem' }}
+            />
+          </Tabs>
+        )}
+      </Box>
       
-      <div className="flex-1 overflow-hidden">
+      <Box sx={{ flex: 1, overflow: 'hidden' }}>
         {renderContent()}
-      </div>
-    </div>
+      </Box>
+    </Paper>
   );
 };
 

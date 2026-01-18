@@ -1,0 +1,1813 @@
+{
+  "generated_at": "2026-01-17T19:50:32.636165",
+  "source_file": "data\\church_discovery\\canonical\\churches_us_canonical.json",
+  "total_churches": 1568,
+  "counts_by_state": {
+    "MA": 60,
+    "RI": 7,
+    "NH": 15,
+    "ME": 9,
+    "VT": 4,
+    "CT": 44,
+    "NJ": 74,
+    "NY": 168,
+    "PA": 148,
+    "DE": 4,
+    "DC": 4,
+    "VA": 32,
+    "MD": 24,
+    "WV": 11,
+    "NC": 28,
+    "SC": 16,
+    "GA": 23,
+    "FL": 78,
+    "AL": 11,
+    "TN": 18,
+    "MS": 6,
+    "KY": 3,
+    "OH": 71,
+    "IN": 27,
+    "MI": 53,
+    "IA": 11,
+    "WI": 26,
+    "MN": 17,
+    "SD": 1,
+    "MT": 6,
+    "IL": 73,
+    "MO": 13,
+    "KS": 5,
+    "NE": 7,
+    "LA": 11,
+    "AR": 7,
+    "OK": 8,
+    "TX": 48,
+    "CO": 20,
+    "WY": 5,
+    "ID": 3,
+    "UT": 6,
+    "AZ": 15,
+    "NM": 11,
+    "NV": 10,
+    "CA": 134,
+    "HI": 6,
+    "OR": 17,
+    "WA": 22,
+    "AK": 95,
+    "Unknown": 49,
+    "ND": 4
+  },
+  "counts_by_jurisdiction": {
+    "Greek Orthodox Archdiocese of America": 558,
+    "Orthodox Church in America": 633,
+    "Russian Orthodox Church Outside of Russia": 251,
+    "Romanian Orthodox Metropolia of the Americas": 33,
+    "Ukrainian OC of the US": 91,
+    "Albanian Orthodox Diocese of America": 2
+  },
+  "missing_field_counts": {
+    "phone": 565,
+    "website": 343,
+    "street": 102,
+    "state": 49,
+    "zip": 72,
+    "geo_coordinates": 4
+  },
+  "duplicate_candidates": [
+    {
+      "church_id_1": "47edc761fc3cce54",
+      "church_name_1": "Saint Nicholas Church",
+      "church_id_2": "2e257a8955249711",
+      "church_name_2": "Saint Nicholas Orthodox Church",
+      "reason": "same_name_city_state",
+      "confidence": 0.95
+    },
+    {
+      "church_id_1": "b7f4e81987567890",
+      "church_name_1": "Saint Nicholas Greek Orthodox Church",
+      "church_id_2": "67349f675b6608f9",
+      "church_name_2": "Saint Nicholas Church",
+      "reason": "same_name_city_state",
+      "confidence": 0.95
+    },
+    {
+      "church_id_1": "94ec80dfd15cda5a",
+      "church_name_1": "Saint Nicholas Greek Orthodox Church",
+      "church_id_2": "18ff7dcd6009cdc9",
+      "church_name_2": "Saint Nicholas Church",
+      "reason": "same_name_city_state",
+      "confidence": 0.95
+    },
+    {
+      "church_id_1": "67a75d2cb2acf71c",
+      "church_name_1": "Saint Mary's Greek Orthodox Church",
+      "church_id_2": "34d361f176c2a376",
+      "church_name_2": "Saint Mary's Cathedral",
+      "reason": "same_name_city_state",
+      "confidence": 0.95
+    },
+    {
+      "church_id_1": "804e7ba2fd8d6c67",
+      "church_name_1": "Saint George Church",
+      "church_id_2": "926ddaa06129326b",
+      "church_name_2": "Saint George Cathedral",
+      "reason": "same_name_city_state",
+      "confidence": 0.95
+    },
+    {
+      "church_id_1": "92c445485a4e59fa",
+      "church_name_1": "Holy Trinity Church",
+      "church_id_2": "49b6a520c55cfb4f",
+      "church_name_2": "Holy Trinity Cathedral",
+      "reason": "same_name_city_state",
+      "confidence": 0.95
+    },
+    {
+      "church_id_1": "19370d1e2fcaf147",
+      "church_name_1": "Holy Trinity Church",
+      "church_id_2": "0d3362032f2e7896",
+      "church_name_2": "Holy Trinity Cathedral",
+      "reason": "same_name_city_state",
+      "confidence": 0.95
+    },
+    {
+      "church_id_1": "9b480721a37518c8",
+      "church_name_1": "Chapel of Saint Philip the Apostle",
+      "church_id_2": "e871d9967dc98bca",
+      "church_name_2": "Three Hierarchs Church",
+      "reason": "same_phone_city",
+      "confidence": 0.85
+    },
+    {
+      "church_id_1": "a75aea8cd20497cd",
+      "church_name_1": "Saint Demetrios Cathedral",
+      "church_id_2": "0d6577c3d7eb09b6",
+      "church_name_2": "Saint Catherine- Saint George Church",
+      "reason": "same_website",
+      "confidence": 0.9
+    },
+    {
+      "church_id_1": "e871d9967dc98bca",
+      "church_name_1": "Three Hierarchs Church",
+      "church_id_2": "ca59bbcdf8f689cb",
+      "church_name_2": "Chapel of Saint Barbara",
+      "reason": "same_website",
+      "confidence": 0.9
+    },
+    {
+      "church_id_1": "b68247c2b20a61e7",
+      "church_name_1": "Holy Trinity Cathedral",
+      "church_id_2": "d387f647d981ff51",
+      "church_name_2": "Prophet Elias",
+      "reason": "same_website",
+      "confidence": 0.9
+    },
+    {
+      "church_id_1": "a46494f4de11fb18",
+      "church_name_1": "Monks of New Skete",
+      "church_id_2": "411247a55eb2b99a",
+      "church_name_2": "Nuns of New Skete",
+      "reason": "same_website",
+      "confidence": 0.9
+    },
+    {
+      "church_id_1": "3ae0123e005f3460",
+      "church_name_1": "Holy Ascension Church",
+      "church_id_2": "9da6abc815021876",
+      "church_name_2": "SS. Peter and Paul Church",
+      "reason": "same_website",
+      "confidence": 0.9
+    }
+  ],
+  "state_coverage": [
+    {
+      "state": "AL",
+      "count": 11,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "AK",
+      "count": 95,
+      "expected_minimum": 15,
+      "status": "ok"
+    },
+    {
+      "state": "AZ",
+      "count": 15,
+      "expected_minimum": 20,
+      "status": "ok"
+    },
+    {
+      "state": "AR",
+      "count": 7,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "CA",
+      "count": 134,
+      "expected_minimum": 100,
+      "status": "ok"
+    },
+    {
+      "state": "CO",
+      "count": 20,
+      "expected_minimum": 15,
+      "status": "ok"
+    },
+    {
+      "state": "CT",
+      "count": 44,
+      "expected_minimum": 25,
+      "status": "ok"
+    },
+    {
+      "state": "DE",
+      "count": 4,
+      "expected_minimum": 2,
+      "status": "ok"
+    },
+    {
+      "state": "DC",
+      "count": 4,
+      "expected_minimum": 5,
+      "status": "ok"
+    },
+    {
+      "state": "FL",
+      "count": 78,
+      "expected_minimum": 75,
+      "status": "ok"
+    },
+    {
+      "state": "GA",
+      "count": 23,
+      "expected_minimum": 25,
+      "status": "ok"
+    },
+    {
+      "state": "HI",
+      "count": 6,
+      "expected_minimum": 3,
+      "status": "ok"
+    },
+    {
+      "state": "ID",
+      "count": 3,
+      "expected_minimum": 3,
+      "status": "ok"
+    },
+    {
+      "state": "IL",
+      "count": 73,
+      "expected_minimum": 50,
+      "status": "ok"
+    },
+    {
+      "state": "IN",
+      "count": 27,
+      "expected_minimum": 15,
+      "status": "ok"
+    },
+    {
+      "state": "IA",
+      "count": 11,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "KS",
+      "count": 5,
+      "expected_minimum": 3,
+      "status": "ok"
+    },
+    {
+      "state": "KY",
+      "count": 3,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "LA",
+      "count": 11,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "ME",
+      "count": 9,
+      "expected_minimum": 3,
+      "status": "ok"
+    },
+    {
+      "state": "MD",
+      "count": 24,
+      "expected_minimum": 25,
+      "status": "ok"
+    },
+    {
+      "state": "MA",
+      "count": 60,
+      "expected_minimum": 40,
+      "status": "ok"
+    },
+    {
+      "state": "MI",
+      "count": 53,
+      "expected_minimum": 40,
+      "status": "ok"
+    },
+    {
+      "state": "MN",
+      "count": 17,
+      "expected_minimum": 15,
+      "status": "ok"
+    },
+    {
+      "state": "MS",
+      "count": 6,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "MO",
+      "count": 13,
+      "expected_minimum": 15,
+      "status": "ok"
+    },
+    {
+      "state": "MT",
+      "count": 6,
+      "expected_minimum": 2,
+      "status": "ok"
+    },
+    {
+      "state": "NE",
+      "count": 7,
+      "expected_minimum": 2,
+      "status": "ok"
+    },
+    {
+      "state": "NV",
+      "count": 10,
+      "expected_minimum": 5,
+      "status": "ok"
+    },
+    {
+      "state": "NH",
+      "count": 15,
+      "expected_minimum": 3,
+      "status": "ok"
+    },
+    {
+      "state": "NJ",
+      "count": 74,
+      "expected_minimum": 50,
+      "status": "ok"
+    },
+    {
+      "state": "NM",
+      "count": 11,
+      "expected_minimum": 3,
+      "status": "ok"
+    },
+    {
+      "state": "NY",
+      "count": 168,
+      "expected_minimum": 150,
+      "status": "ok"
+    },
+    {
+      "state": "NC",
+      "count": 28,
+      "expected_minimum": 20,
+      "status": "ok"
+    },
+    {
+      "state": "ND",
+      "count": 4,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "OH",
+      "count": 71,
+      "expected_minimum": 50,
+      "status": "ok"
+    },
+    {
+      "state": "OK",
+      "count": 8,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "OR",
+      "count": 17,
+      "expected_minimum": 15,
+      "status": "ok"
+    },
+    {
+      "state": "PA",
+      "count": 148,
+      "expected_minimum": 75,
+      "status": "ok"
+    },
+    {
+      "state": "RI",
+      "count": 7,
+      "expected_minimum": 5,
+      "status": "ok"
+    },
+    {
+      "state": "SC",
+      "count": 16,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "SD",
+      "count": 1,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "TN",
+      "count": 18,
+      "expected_minimum": 10,
+      "status": "ok"
+    },
+    {
+      "state": "TX",
+      "count": 48,
+      "expected_minimum": 50,
+      "status": "ok"
+    },
+    {
+      "state": "UT",
+      "count": 6,
+      "expected_minimum": 1,
+      "status": "ok"
+    },
+    {
+      "state": "VT",
+      "count": 4,
+      "expected_minimum": 2,
+      "status": "ok"
+    },
+    {
+      "state": "VA",
+      "count": 32,
+      "expected_minimum": 25,
+      "status": "ok"
+    },
+    {
+      "state": "WA",
+      "count": 22,
+      "expected_minimum": 25,
+      "status": "ok"
+    },
+    {
+      "state": "WV",
+      "count": 11,
+      "expected_minimum": 3,
+      "status": "ok"
+    },
+    {
+      "state": "WI",
+      "count": 26,
+      "expected_minimum": 15,
+      "status": "ok"
+    },
+    {
+      "state": "WY",
+      "count": 5,
+      "expected_minimum": 1,
+      "status": "ok"
+    }
+  ],
+  "sample_records": [
+    {
+      "id": "ae8c45b940122dc9",
+      "name": "Church of the Resurrection",
+      "jurisdiction": "Greek Orthodox Archdiocese of America",
+      "jurisdiction_code": "goa",
+      "address": {
+        "street": "20104 Center Street",
+        "city": "Castro Valley",
+        "state": "CA",
+        "zip": "94546"
+      },
+      "contact": {
+        "phone": "(510) 581-8950",
+        "fax": null,
+        "website": "http://www.cvresurrection.org"
+      },
+      "geo": {
+        "lat": 37.6971501,
+        "lng": -122.0606179,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=goa&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:17.933055",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Church of the Resurrection</span>\n<p class=\"parish_jurisdiction\">Greek Orthodox Archdiocese of America</p>\n<p class=\"parish_jurcode\">goa</p>\n<p class=\"parish_address\">20104 Center Street</p>\n<p><span class=\"parish_city\">Castro Valley</span>, <span class=\"parish_state\">CA</span> <span class=\"parish_zip\">94546</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">37.6971501</span></p>"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:17.933055",
+        "last_verified_at": "2026-01-17T19:50:17.933055"
+      }
+    },
+    {
+      "id": "d171e2af69b11bcc",
+      "name": "Saint Stephen Romanian Orthodox Church",
+      "jurisdiction": "Romanian Orthodox Metropolia of the Americas",
+      "jurisdiction_code": "rom",
+      "address": {
+        "street": "P.O. Box 453, 350 5th Avenue N",
+        "city": "South Saint Paul",
+        "state": "MN",
+        "zip": "55075-0453"
+      },
+      "contact": {
+        "phone": "(651) 451-3462",
+        "fax": null,
+        "website": "http://www.sfantulstefan.org"
+      },
+      "geo": {
+        "lat": 44.8957011,
+        "lng": -93.0393525,
+        "accuracy": "approx"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=rom&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:27.423993",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">St. Stephen Romanian Orthodox Church</span>\n<p class=\"parish_jurisdiction\">Romanian Orthodox Metropolia of the Americas</p>\n<p class=\"parish_jurcode\">rom</p>\n<p class=\"parish_address\">P.O. Box 453, 350 5th Avenue N</p>\n<p><span class=\"parish_city\">South Saint Paul</span>, <span class=\"parish_state\">MN</span> <span class=\"parish_zip\">55075-0453</span></p>\n<p><span class=\"parish_geocode geo_info\">approx</span></p>\n<p><span class=\"parish_lat"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:27.423993",
+        "last_verified_at": "2026-01-17T19:50:27.423993"
+      }
+    },
+    {
+      "id": "83967b9c237a0f0f",
+      "name": "Saint Catherine Church",
+      "jurisdiction": "Greek Orthodox Archdiocese of America",
+      "jurisdiction_code": "goa",
+      "address": {
+        "street": "119 Common Street",
+        "city": "Braintree",
+        "state": "MA",
+        "zip": "02184"
+      },
+      "contact": {
+        "phone": "(781) 843-0047",
+        "fax": null,
+        "website": "http://www.stcatherinebraintree.org"
+      },
+      "geo": {
+        "lat": 42.2264695,
+        "lng": -71.0100783,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=goa&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:17.667111",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">St. Catherine Church</span>\n<p class=\"parish_jurisdiction\">Greek Orthodox Archdiocese of America</p>\n<p class=\"parish_jurcode\">goa</p>\n<p class=\"parish_address\">119 Common Street</p>\n<p><span class=\"parish_city\">Braintree</span>, <span class=\"parish_state\">MA</span> <span class=\"parish_zip\">02184</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">42.2264695</span></p>\n<p><span cl"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:17.667111",
+        "last_verified_at": "2026-01-17T19:50:17.667111"
+      }
+    },
+    {
+      "id": "41404f212a58b42b",
+      "name": "Holy Trinity Church",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": "523 1st St",
+        "city": "Clayton",
+        "state": "WI",
+        "zip": "54004"
+      },
+      "contact": {
+        "phone": "(715) 948-2203",
+        "fax": null,
+        "website": "http://www.htocclayton.org"
+      },
+      "geo": {
+        "lat": 45.285048,
+        "lng": -92.1360194,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:20.061912",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Holy Trinity Church</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p class=\"parish_address\">523 1st St</p>\n<p><span class=\"parish_city\">Clayton</span>, <span class=\"parish_state\">WI</span> <span class=\"parish_zip\">54004</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">45.285048</span></p>\n<p><span class=\"parish_longitude "
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:20.061912",
+        "last_verified_at": "2026-01-17T19:50:20.061912"
+      }
+    },
+    {
+      "id": "bee8b9bf5e2e8392",
+      "name": "Holy Lady of Vladimir Mission Station",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": null,
+        "city": "St John'S, Nl",
+        "state": null,
+        "zip": null
+      },
+      "contact": {
+        "phone": null,
+        "fax": null,
+        "website": "http://www.stjohns-orthodox.org"
+      },
+      "geo": {
+        "lat": 47.5615096,
+        "lng": -52.7125768,
+        "accuracy": "approx"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:19.888250",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Holy Lady of Vladimir Mission Station</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p><span class=\"parish_city\">St John's</span>, <span class=\"parish_state\">NL</span> <span class=\"parish_zip\"></span></p>\n<p><span class=\"parish_geocode geo_info\">approx</span></p>\n<p><span class=\"parish_latitude geo_info\">47.5615096</span></p>\n<p><span class=\"parish_longitude geo_info\">-52.7125768</s"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:19.888250",
+        "last_verified_at": "2026-01-17T19:50:19.888250"
+      }
+    },
+    {
+      "id": "6990b0d780ac5900",
+      "name": "Holy Cross Church",
+      "jurisdiction": "Greek Orthodox Archdiocese of America",
+      "jurisdiction_code": "goa",
+      "address": {
+        "street": "8401 Ridge Blvd.",
+        "city": "Brooklyn",
+        "state": "NY",
+        "zip": "11209"
+      },
+      "contact": {
+        "phone": "(718) 836-3510",
+        "fax": null,
+        "website": "http://www.holycrossbrooklyn.com"
+      },
+      "geo": {
+        "lat": 40.6253022,
+        "lng": -74.032742,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=goa&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:17.718220",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Holy Cross Church</span>\n<p class=\"parish_jurisdiction\">Greek Orthodox Archdiocese of America</p>\n<p class=\"parish_jurcode\">goa</p>\n<p class=\"parish_address\">8401 Ridge Blvd.</p>\n<p><span class=\"parish_city\">Brooklyn</span>, <span class=\"parish_state\">NY</span> <span class=\"parish_zip\">11209</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">40.6253022</span></p>\n<p><span class=\""
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:17.718220",
+        "last_verified_at": "2026-01-17T19:50:17.718220"
+      }
+    },
+    {
+      "id": "0837e80de207355f",
+      "name": "Saint George Chapel",
+      "jurisdiction": "Greek Orthodox Archdiocese of America",
+      "jurisdiction_code": "goa",
+      "address": {
+        "street": "401 Newcastle Street",
+        "city": "Brunswick",
+        "state": "GA",
+        "zip": "31520"
+      },
+      "contact": {
+        "phone": "(912) 236-8256",
+        "fax": null,
+        "website": "http://stpaulsgreekorthodox.org/st-georges-chapel-"
+      },
+      "geo": {
+        "lat": 31.1341504,
+        "lng": -81.4902178,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=goa&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:17.788847",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">St. George Chapel</span>\n<p class=\"parish_jurisdiction\">Greek Orthodox Archdiocese of America</p>\n<p class=\"parish_jurcode\">goa</p>\n<p class=\"parish_address\">401 Newcastle Street</p>\n<p><span class=\"parish_city\">Brunswick</span>, <span class=\"parish_state\">GA</span> <span class=\"parish_zip\">31520</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">31.1341504</span></p>\n<p><span cl"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:17.788847",
+        "last_verified_at": "2026-01-17T19:50:17.788847"
+      }
+    },
+    {
+      "id": "44fcf76c8f4b212f",
+      "name": "Saint Michael the Archangel Cathedral",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": "240 Lincoln St",
+        "city": "Sitka",
+        "state": "AK",
+        "zip": "99835-0697"
+      },
+      "contact": {
+        "phone": "(907) 747-8120",
+        "fax": null,
+        "website": null
+      },
+      "geo": {
+        "lat": 57.050056,
+        "lng": -135.3351233,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:20.184217",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">St. Michael the Archangel Cathedral</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p class=\"parish_address\">240 Lincoln St</p>\n<p><span class=\"parish_city\">Sitka</span>, <span class=\"parish_state\">AK</span> <span class=\"parish_zip\">99835-0697</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">57.050056</span></p>\n<p><span c"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:20.184217",
+        "last_verified_at": "2026-01-17T19:50:20.184217"
+      }
+    },
+    {
+      "id": "9434f17a77aa3855",
+      "name": "Annunciation Mission",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": "8535 Baymeadows Rd Ste 45",
+        "city": "Jacksonville",
+        "state": "FL",
+        "zip": "32256"
+      },
+      "contact": {
+        "phone": "(904) 361-3445",
+        "fax": null,
+        "website": "http://www.annunciationjax.org"
+      },
+      "geo": {
+        "lat": 30.2212996,
+        "lng": -81.5803354,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:20.007024",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Annunciation Mission</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p class=\"parish_address\">8535 Baymeadows Rd Ste 45</p>\n<p><span class=\"parish_city\">Jacksonville</span>, <span class=\"parish_state\">FL</span> <span class=\"parish_zip\">32256</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">30.2212996</span></p>\n<p><span cl"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:20.007024",
+        "last_verified_at": "2026-01-17T19:50:20.007024"
+      }
+    },
+    {
+      "id": "d8f3920fccc2e30d",
+      "name": "Annunciation Cathedral",
+      "jurisdiction": "Greek Orthodox Archdiocese of America",
+      "jurisdiction_code": "goa",
+      "address": {
+        "street": "1017 N. La Salle Drive",
+        "city": "Chicago",
+        "state": "IL",
+        "zip": "60610"
+      },
+      "contact": {
+        "phone": "(312) 664-5485",
+        "fax": null,
+        "website": "http://www.annunciationcathedralchicago.org"
+      },
+      "geo": {
+        "lat": 41.9011529,
+        "lng": -87.63234589999999,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=goa&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:17.866641",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Annunciation Cathedral</span>\n<p class=\"parish_jurisdiction\">Greek Orthodox Archdiocese of America</p>\n<p class=\"parish_jurcode\">goa</p>\n<p class=\"parish_address\">1017 N. La Salle Drive</p>\n<p><span class=\"parish_city\">Chicago</span>, <span class=\"parish_state\">IL</span> <span class=\"parish_zip\">60610</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">41.9011529</span></p>\n<p><sp"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:17.866641",
+        "last_verified_at": "2026-01-17T19:50:17.866641"
+      }
+    },
+    {
+      "id": "814b28d5102804e0",
+      "name": "New Saint George Romanian Orthodox Church",
+      "jurisdiction": "Romanian Orthodox Metropolia of the Americas",
+      "jurisdiction_code": "rom",
+      "address": {
+        "street": "17601 Wentworth Avenue",
+        "city": "Lansing",
+        "state": "IL",
+        "zip": "60438-2074"
+      },
+      "contact": {
+        "phone": "(708) 889-9764",
+        "fax": null,
+        "website": null
+      },
+      "geo": {
+        "lat": 41.5755148,
+        "lng": -87.52895719999998,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=rom&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:27.425017",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">New St. George Romanian Orthodox Church</span>\n<p class=\"parish_jurisdiction\">Romanian Orthodox Metropolia of the Americas</p>\n<p class=\"parish_jurcode\">rom</p>\n<p class=\"parish_address\">17601 Wentworth Avenue</p>\n<p><span class=\"parish_city\">Lansing</span>, <span class=\"parish_state\">IL</span> <span class=\"parish_zip\">60438-2074</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\""
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:27.425017",
+        "last_verified_at": "2026-01-17T19:50:27.425017"
+      }
+    },
+    {
+      "id": "f1acc4ef8c44a7b2",
+      "name": "Holy Protection of the Mother of God Mission",
+      "jurisdiction": "Romanian Orthodox Metropolia of the Americas",
+      "jurisdiction_code": "rom",
+      "address": {
+        "street": "2802 Lafayette St.",
+        "city": "Houston",
+        "state": "TX",
+        "zip": "77005"
+      },
+      "contact": {
+        "phone": "(830) 743-2693",
+        "fax": null,
+        "website": "http://www.holyprotectionchurch.org"
+      },
+      "geo": {
+        "lat": 29.7189869,
+        "lng": -95.42262929999998,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=rom&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:27.426040",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Holy Protection of the Mother of God Mission</span>\n<p class=\"parish_jurisdiction\">Romanian Orthodox Metropolia of the Americas</p>\n<p class=\"parish_jurcode\">rom</p>\n<p class=\"parish_address\">2802 Lafayette St.</p>\n<p><span class=\"parish_city\">Houston</span>, <span class=\"parish_state\">TX</span> <span class=\"parish_zip\">77005</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">29."
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:27.426040",
+        "last_verified_at": "2026-01-17T19:50:27.426040"
+      }
+    },
+    {
+      "id": "d5fa120882df7969",
+      "name": "Representation Church of Saint Catherine the Great Martyr",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": "Bolshaya Ordynka 60/2",
+        "city": "Moscow, 1",
+        "state": null,
+        "zip": "19017"
+      },
+      "contact": {
+        "phone": "7-495-959-1296",
+        "fax": null,
+        "website": "http://ocapodvorie.org/en"
+      },
+      "geo": {
+        "lat": 55.7328822,
+        "lng": 37.6240526,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:19.932842",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Representation Church of St. Catherine the Great Martyr</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p class=\"parish_address\">Bolshaya Ordynka 60/2</p>\n<p><span class=\"parish_city\">Moscow</span><span class=\"parish_state\"></span> <span class=\"parish_zip\">119017</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">55.7328822<"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:19.932842",
+        "last_verified_at": "2026-01-17T19:50:19.932842"
+      }
+    },
+    {
+      "id": "ec8e35358737f412",
+      "name": "Holy Cross Church",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": "1401 S White Rd",
+        "city": "San Jose",
+        "state": "CA",
+        "zip": "95127"
+      },
+      "contact": {
+        "phone": null,
+        "fax": null,
+        "website": "http://www.sjholycross.org"
+      },
+      "geo": {
+        "lat": 37.3507601,
+        "lng": -121.8146901,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:20.124566",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Holy Cross Church</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p class=\"parish_address\">1401 S White Rd</p>\n<p><span class=\"parish_city\">San Jose</span>, <span class=\"parish_state\">CA</span> <span class=\"parish_zip\">95127</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">37.3507601</span></p>\n<p><span class=\"parish_longi"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:20.124566",
+        "last_verified_at": "2026-01-17T19:50:20.124566"
+      }
+    },
+    {
+      "id": "cda15ea7051e9d6b",
+      "name": "SS. Mary & Martha Monastery",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": "65 Spinner Ln",
+        "city": "Wagener",
+        "state": "SC",
+        "zip": "29164"
+      },
+      "contact": {
+        "phone": "(803) 564-6894",
+        "fax": null,
+        "website": "http://www.saintsmaryandmarthaorthodoxmonastery.org"
+      },
+      "geo": {
+        "lat": 33.6950656,
+        "lng": -81.36462159999999,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:19.998598",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">SS. Mary &amp; Martha Monastery</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p class=\"parish_address\">65 Spinner Ln</p>\n<p><span class=\"parish_city\">Wagener</span>, <span class=\"parish_state\">SC</span> <span class=\"parish_zip\">29164</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">33.6950656</span></p>\n<p><span class=\"p"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:19.998598",
+        "last_verified_at": "2026-01-17T19:50:19.998598"
+      }
+    },
+    {
+      "id": "a30547a50efabf21",
+      "name": "Saint Paisios the Athonite Mission Station",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": "903 North Street",
+        "city": "Nacogdoches",
+        "state": "TX",
+        "zip": "75961-4479"
+      },
+      "contact": {
+        "phone": "(936) 622-0622",
+        "fax": null,
+        "website": "http://stpaisiosetx.org"
+      },
+      "geo": {
+        "lat": 31.61119,
+        "lng": -94.6545,
+        "accuracy": "approx"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:20.093431",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">St. Paisios the Athonite Mission Station</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p class=\"parish_address\">903 North Street</p>\n<p><span class=\"parish_city\">Nacogdoches</span>, <span class=\"parish_state\">TX</span> <span class=\"parish_zip\">75961-4479</span></p>\n<p><span class=\"parish_geocode geo_info\">approx</span></p>\n<p><span class=\"parish_latitude geo_info\">31.61119</span></"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:20.093431",
+        "last_verified_at": "2026-01-17T19:50:20.093431"
+      }
+    },
+    {
+      "id": "7e8192bdb8d792ef",
+      "name": "Holy Trinity & Saint John The Theologian",
+      "jurisdiction": "Greek Orthodox Archdiocese of America",
+      "jurisdiction_code": "goa",
+      "address": {
+        "street": "5725 Pear Orchard Road",
+        "city": "Jackson",
+        "state": "MS",
+        "zip": "39211"
+      },
+      "contact": {
+        "phone": "(601) 355-6325",
+        "fax": null,
+        "website": "http://www.holytrinitysaintjohnjackson.org"
+      },
+      "geo": {
+        "lat": 32.3855784,
+        "lng": -90.1178046,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=goa&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:17.813780",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Holy Trinity &amp; St. John The Theologian</span>\n<p class=\"parish_jurisdiction\">Greek Orthodox Archdiocese of America</p>\n<p class=\"parish_jurcode\">goa</p>\n<p class=\"parish_address\">5725 Pear Orchard Road</p>\n<p><span class=\"parish_city\">Jackson</span>, <span class=\"parish_state\">MS</span> <span class=\"parish_zip\">39211</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">32.38557"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:17.813780",
+        "last_verified_at": "2026-01-17T19:50:17.813780"
+      }
+    },
+    {
+      "id": "403483a0bbee9b42",
+      "name": "Greek Orthodox Mission Church of Salem",
+      "jurisdiction": "Greek Orthodox Archdiocese of America",
+      "jurisdiction_code": "goa",
+      "address": {
+        "street": "P.O. Box 3623",
+        "city": "Salem",
+        "state": "OR",
+        "zip": "97302"
+      },
+      "contact": {
+        "phone": "(503) 391-6707",
+        "fax": null,
+        "website": "http://www.salemorthodoxchurch.org"
+      },
+      "geo": {
+        "lat": 44.9046074,
+        "lng": -123.0826335,
+        "accuracy": "approx"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=goa&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:17.944757",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Greek Orthodox Mission Church of Salem</span>\n<p class=\"parish_jurisdiction\">Greek Orthodox Archdiocese of America</p>\n<p class=\"parish_jurcode\">goa</p>\n<p class=\"parish_address\">P.O. Box 3623</p>\n<p><span class=\"parish_city\">Salem</span>, <span class=\"parish_state\">OR</span> <span class=\"parish_zip\">97302</span></p>\n<p><span class=\"parish_geocode geo_info\">approx</span></p>\n<p><span class=\"parish_latitude geo_info\">44.9046074</span></p>\n"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:17.944757",
+        "last_verified_at": "2026-01-17T19:50:17.944757"
+      }
+    },
+    {
+      "id": "4f33f3a7cfc76a49",
+      "name": "Transfiguration Of Our Lord Church",
+      "jurisdiction": "Greek Orthodox Archdiocese of America",
+      "jurisdiction_code": "goa",
+      "address": {
+        "street": "1311 2nd Street S.W.",
+        "city": "Mason City",
+        "state": "IA",
+        "zip": "50401"
+      },
+      "contact": {
+        "phone": "(641) 423-6238",
+        "fax": null,
+        "website": "http://holytransfiguration.ia.goarch.org"
+      },
+      "geo": {
+        "lat": 43.1498931,
+        "lng": -93.2214846,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=goa&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:17.845969",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Transfiguration Of Our Lord Church</span>\n<p class=\"parish_jurisdiction\">Greek Orthodox Archdiocese of America</p>\n<p class=\"parish_jurcode\">goa</p>\n<p class=\"parish_address\">1311 2nd Street S.W.</p>\n<p><span class=\"parish_city\">Mason City</span>, <span class=\"parish_state\">IA</span> <span class=\"parish_zip\">50401</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">43.1498931</spa"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:17.845969",
+        "last_verified_at": "2026-01-17T19:50:17.845969"
+      }
+    },
+    {
+      "id": "c80003ca8c72435e",
+      "name": "Saint Moses the Strong Mission",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": "1601 North Benton Ave",
+        "city": "Helena",
+        "state": "MT",
+        "zip": "59625"
+      },
+      "contact": {
+        "phone": "(406) 443-2947",
+        "fax": null,
+        "website": "http://www.helenaorthodox.org"
+      },
+      "geo": {
+        "lat": 46.6013247,
+        "lng": -112.0388419,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:20.070350",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">St. Moses the Strong Mission</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p class=\"parish_address\">1601 North Benton Ave</p>\n<p><span class=\"parish_city\">Helena</span>, <span class=\"parish_state\">MT</span> <span class=\"parish_zip\">59625</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">46.6013247</span></p>\n<p><span clas"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:20.070350",
+        "last_verified_at": "2026-01-17T19:50:20.070350"
+      }
+    },
+    {
+      "id": "b74d2464e8ca42c0",
+      "name": "Saint John the Theologian Orthodox Mission",
+      "jurisdiction": "Russian Orthodox Church Outside of Russia",
+      "jurisdiction_code": "roc",
+      "address": {
+        "street": "11437 Old Laurel Hill rd",
+        "city": "St. Francisville",
+        "state": "LA",
+        "zip": "70775"
+      },
+      "contact": {
+        "phone": null,
+        "fax": null,
+        "website": "http://saintjohnmission.org"
+      },
+      "geo": {
+        "lat": 30.957844,
+        "lng": -91.341813,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=roc&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:22.866504",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">St. John the Theologian Orthodox Mission</span>\n<p class=\"parish_jurisdiction\">Russian Orthodox Church Outside of Russia</p>\n<p class=\"parish_jurcode\">roc</p>\n<p class=\"parish_address\">11437 Old Laurel Hill rd</p>\n<p><span class=\"parish_city\">St. Francisville</span>, <span class=\"parish_state\">LA</span> <span class=\"parish_zip\">70775</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_i"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:22.866504",
+        "last_verified_at": "2026-01-17T19:50:22.866504"
+      }
+    },
+    {
+      "id": "00c46789e1eeb7fe",
+      "name": "Holy Trinity Church",
+      "jurisdiction": "Russian Orthodox Church Outside of Russia",
+      "jurisdiction_code": "roc",
+      "address": {
+        "street": "630 American Street",
+        "city": "California",
+        "state": "PA",
+        "zip": "15419-1402"
+      },
+      "contact": {
+        "phone": null,
+        "fax": null,
+        "website": null
+      },
+      "geo": {
+        "lat": 40.0615694,
+        "lng": -79.8853543,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=roc&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:22.809315",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Holy Trinity Church</span>\n<p class=\"parish_jurisdiction\">Russian Orthodox Church Outside of Russia</p>\n<p class=\"parish_jurcode\">roc</p>\n<p class=\"parish_address\">630 American Street</p>\n<p><span class=\"parish_city\">California</span>, <span class=\"parish_state\">PA</span> <span class=\"parish_zip\">15419-1402</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">40.0615694</span></p>\n"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:22.809315",
+        "last_verified_at": "2026-01-17T19:50:22.809315"
+      }
+    },
+    {
+      "id": "4a48b5ef856b2afc",
+      "name": "SS. Cyril and Methodius Church",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": "520 Scott Ave",
+        "city": "Jeannette",
+        "state": "PA",
+        "zip": "15644"
+      },
+      "contact": {
+        "phone": "(724) 523-3628",
+        "fax": null,
+        "website": "http://https://www.sscyrilandmethodiusorthodoxchurch.com/"
+      },
+      "geo": {
+        "lat": 40.3305381,
+        "lng": -79.61731499999999,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:19.954686",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">SS. Cyril and Methodius Church</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p class=\"parish_address\">520 Scott Ave</p>\n<p><span class=\"parish_city\">Jeannette</span>, <span class=\"parish_state\">PA</span> <span class=\"parish_zip\">15644</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">40.3305381</span></p>\n<p><span class=\""
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:19.954686",
+        "last_verified_at": "2026-01-17T19:50:19.954686"
+      }
+    },
+    {
+      "id": "b249b67fa8957613",
+      "name": "Saint Mary of Egypt Church",
+      "jurisdiction": "Orthodox Church in America",
+      "jurisdiction_code": "oca",
+      "address": {
+        "street": "925 Beaver Ruin Rd",
+        "city": "Norcross",
+        "state": "GA",
+        "zip": "30093"
+      },
+      "contact": {
+        "phone": "(770) 923-7790",
+        "fax": null,
+        "website": "http://www.stmaryofegypt.com"
+      },
+      "geo": {
+        "lat": 33.9147246,
+        "lng": -84.1374329,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=oca&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:20.003591",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">St. Mary of Egypt Church</span>\n<p class=\"parish_jurisdiction\">Orthodox Church in America</p>\n<p class=\"parish_jurcode\">oca</p>\n<p class=\"parish_address\">925 Beaver Ruin Rd</p>\n<p><span class=\"parish_city\">Norcross</span>, <span class=\"parish_state\">GA</span> <span class=\"parish_zip\">30093</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">33.9147246</span></p>\n<p><span class=\"pa"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:20.003591",
+        "last_verified_at": "2026-01-17T19:50:20.003591"
+      }
+    },
+    {
+      "id": "92c998d7fad7e07e",
+      "name": "Protection of Theotokos Parish",
+      "jurisdiction": "Ukrainian OC of the US",
+      "jurisdiction_code": "ukr",
+      "address": {
+        "street": "3820 Moores Lake Rd",
+        "city": "Dover",
+        "state": "FL",
+        "zip": "33527"
+      },
+      "contact": {
+        "phone": "(813) 659-0123",
+        "fax": null,
+        "website": "http://www.holyorthodox.org"
+      },
+      "geo": {
+        "lat": 28.0055655,
+        "lng": -82.22345829999999,
+        "accuracy": "exact"
+      },
+      "clergy": [],
+      "flags": {
+        "has_metrical_data": null,
+        "is_om_client": null
+      },
+      "source_meta": [
+        {
+          "source": "assembly_of_bishops",
+          "source_id_or_url": "https://www.assemblyofbishops.org/directories/parishes/?jur=ukr&searchType=jurisdiction",
+          "fetched_at": "2026-01-17T19:50:28.691192",
+          "raw_html_snippet": "<div class=\"output_parish\">\n<p><span class=\"parish_title\">Protection of Theotokos Parish</span>\n<p class=\"parish_jurisdiction\">Ukrainian OC of the US</p>\n<p class=\"parish_jurcode\">ukr</p>\n<p class=\"parish_address\">3820 Moores Lake Rd</p>\n<p><span class=\"parish_city\">Dover</span>, <span class=\"parish_state\">FL</span> <span class=\"parish_zip\">33527</span></p>\n<p><span class=\"parish_geocode geo_info\">exact</span></p>\n<p><span class=\"parish_latitude geo_info\">28.0055655</span></p>\n<p><span class=\"pa"
+        }
+      ],
+      "timestamps": {
+        "discovered_at": "2026-01-17T19:50:28.691192",
+        "last_verified_at": "2026-01-17T19:50:28.691192"
+      }
+    }
+  ],
+  "issues": [
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Andrew the First-Called Mission",
+      "church_id": "d23298bf86d3a08d",
+      "church_name": "Saint Andrew the First-Called Mission"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Nicholas Church",
+      "church_id": "8e52c61ab0f6bbe2",
+      "church_name": "Saint Nicholas Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Elias Cemetery -- Rhein",
+      "church_id": "6924b5224220594c",
+      "church_name": "Saint Elias Cemetery -- Rhein"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Assumption Chapel & Cemetery",
+      "church_id": "582a91eb79f0ff5f",
+      "church_name": "Holy Assumption Chapel & Cemetery"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Assumption Chapel and Cemetery",
+      "church_id": "c53f73685124fdf6",
+      "church_name": "Holy Assumption Chapel and Cemetery"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Verbitsky Cemetery -- Canora",
+      "church_id": "4363fdb718e62c51",
+      "church_name": "Verbitsky Cemetery -- Canora"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint John the Baptist Chapel & Cemetery",
+      "church_id": "6207e52e97ba5ed6",
+      "church_name": "Saint John the Baptist Chapel & Cemetery"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Ascension Cemetery & Chapel - Hubbard/Goodeve",
+      "church_id": "c13f99ad2f7b4c11",
+      "church_name": "Holy Ascension Cemetery & Chapel - Hubbard/Goodeve"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Trinity Church",
+      "church_id": "3e11a927937f7e0f",
+      "church_name": "Holy Trinity Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Trinity Chapel and Cemetery",
+      "church_id": "d07bb608457b5a16",
+      "church_name": "Holy Trinity Chapel and Cemetery"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Romanian Orthodox Deanery Centre of Canada",
+      "church_id": "2961595a25671b79",
+      "church_name": "Romanian Orthodox Deanery Centre of Canada"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint John the Baptist Church",
+      "church_id": "ac0f484d2657e722",
+      "church_name": "Saint John the Baptist Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: SS. Peter and Paul Church",
+      "church_id": "1532ddf491771d4c",
+      "church_name": "SS. Peter and Paul Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Nikolai Bishop of Zhitsa Mission",
+      "church_id": "f0a156b03c217912",
+      "church_name": "Saint Nikolai Bishop of Zhitsa Mission"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: SS. Peter and Paul Chapel and Cemetery",
+      "church_id": "e5f9e8b8219390c8",
+      "church_name": "SS. Peter and Paul Chapel and Cemetery"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Protection of the Holy Mother of God Church",
+      "church_id": "501d3fee9b040bd9",
+      "church_name": "Protection of the Holy Mother of God Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Christ the Saviour Mission Station",
+      "church_id": "6f9229d49794ef6d",
+      "church_name": "Christ the Saviour Mission Station"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Nicholas Memorial Cemetary",
+      "church_id": "4488404a8ca7fbf9",
+      "church_name": "Saint Nicholas Memorial Cemetary"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Sergius Mission",
+      "church_id": "78f759109a9b7fa4",
+      "church_name": "Saint Sergius Mission"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Lady of Vladimir Mission Station",
+      "church_id": "bee8b9bf5e2e8392",
+      "church_name": "Holy Lady of Vladimir Mission Station"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Representation Church of Saint Catherine the Great Martyr",
+      "church_id": "d5fa120882df7969",
+      "church_name": "Representation Church of Saint Catherine the Great Martyr"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Hermitage of the Annunciation",
+      "church_id": "b48d7e72ea071255",
+      "church_name": "Hermitage of the Annunciation"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Vladimir, Prince of Kiev Church",
+      "church_id": "d8add21fdded0892",
+      "church_name": "Saint Vladimir, Prince of Kiev Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Nicholas Church",
+      "church_id": "2522bb6ce31ca45e",
+      "church_name": "Saint Nicholas Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint George Church",
+      "church_id": "a401f417082994cf",
+      "church_name": "Saint George Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Trinity Sobor",
+      "church_id": "60f3cb59d33f6df1",
+      "church_name": "Holy Trinity Sobor"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Basil Chapel & Cemetery",
+      "church_id": "2dee3174d7bd484e",
+      "church_name": "Saint Basil Chapel & Cemetery"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Demetrius Chapel and Cemetery",
+      "church_id": "03568b65189fd867",
+      "church_name": "Saint Demetrius Chapel and Cemetery"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Ascension Cemetery - Rhein",
+      "church_id": "8bb0d1f7753f68be",
+      "church_name": "Holy Ascension Cemetery - Rhein"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Trinity Cemetery - Greenleaf",
+      "church_id": "ce877779b47e29f9",
+      "church_name": "Holy Trinity Cemetery - Greenleaf"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Michael Chapel & Cemetery",
+      "church_id": "e623eeb349fdeef9",
+      "church_name": "Saint Michael Chapel & Cemetery"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Nicholas Church",
+      "church_id": "908b5bc1371fac7a",
+      "church_name": "Saint Nicholas Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint George Cathedral",
+      "church_id": "85c6c01c346b6163",
+      "church_name": "Saint George Cathedral"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Trinity Church",
+      "church_id": "b451a56366748a44",
+      "church_name": "Holy Trinity Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: All Saints Church",
+      "church_id": "8d05633dd5597a72",
+      "church_name": "All Saints Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint James the Just Orthodox Church",
+      "church_id": "4c73e9bfbef12f73",
+      "church_name": "Saint James the Just Orthodox Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint John the Wonderworker Western-Rite Stavropegial Orthodox Church",
+      "church_id": "5edf8f4dff61ed51",
+      "church_name": "Saint John the Wonderworker Western-Rite Stavropegial Orthodox Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: \u0420\u0430r\u043e\u0456sse N\u043etre D\u0430me de l\u0430 N\u0430t\u0456v\u0456te",
+      "church_id": "f2003ede7c755155",
+      "church_name": "\u0420\u0430r\u043e\u0456sse N\u043etre D\u0430me de l\u0430 N\u0430t\u0456v\u0456te"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Paroisse Saint Augustin",
+      "church_id": "954e84ce82f6a34b",
+      "church_name": "Paroisse Saint Augustin"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: \u0420\u0430r\u043e\u0456sse Saints Pierre et Paul",
+      "church_id": "d02929ed3a953f68",
+      "church_name": "\u0420\u0430r\u043e\u0456sse Saints Pierre et Paul"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: \u0420\u0430r\u043e\u0456sse Saint Nicolas",
+      "church_id": "f3a3d96ec7a7bf4a",
+      "church_name": "\u0420\u0430r\u043e\u0456sse Saint Nicolas"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Paroisse Saint Jean de Shanghai et de San Francisco",
+      "church_id": "c5402f8fe5e2fd91",
+      "church_name": "Paroisse Saint Jean de Shanghai et de San Francisco"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Paroisse Saint Irenee de Lyons",
+      "church_id": "da3612219906c65f",
+      "church_name": "Paroisse Saint Irenee de Lyons"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: San Juan Climacos Orthodox Mission",
+      "church_id": "4165793473bd1d4f",
+      "church_name": "San Juan Climacos Orthodox Mission"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Sacrosanto Monasterio de la Santisima Trinidad",
+      "church_id": "5de0ec96ac4927a6",
+      "church_name": "Sacrosanto Monasterio de la Santisima Trinidad"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Church of the Mother of God of Vladimir",
+      "church_id": "f06d9d9327f6476c",
+      "church_name": "Church of the Mother of God of Vladimir"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Holy Resurrection Church",
+      "church_id": "9473510900d0e19c",
+      "church_name": "Holy Resurrection Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Demetrios Romanian Orthodox Church",
+      "church_id": "86a16b334ef21dcc",
+      "church_name": "Saint Demetrios Romanian Orthodox Church"
+    },
+    {
+      "severity": "warning",
+      "field": "state",
+      "message": "Missing state: Saint Mary and Saints Peter and Paul Romanian Orthodox Church",
+      "church_id": "1b67ae2d1982d0b3",
+      "church_name": "Saint Mary and Saints Peter and Paul Romanian Orthodox Church"
+    }
+  ],
+  "scrape_errors": [],
+  "success": true
+}

@@ -40,11 +40,16 @@ import ServiceManagement from '@/features/misc-legacy/settings/ServiceManagement
 import NotificationManagement from '@/components/admin/NotificationManagement';
 import OMBigBook from '@/components/admin/OMBigBook';
 import ComponentManager from './components/ComponentManager';
-import OMAITaskAssignmentWidget from '@/components/admin/OMAITaskAssignmentWidget';
 import OmaiSpinSettings from './OmaiSpinSettings';
 import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
-import getSystemInfo from '@/shared/lib/adminService';
+import getSystemInfo, { 
+    formatMemory, 
+    getMemoryUsagePercentage, 
+    formatPlatform, 
+    formatArchitecture, 
+    getEnvironmentDisplayName 
+} from '@/shared/lib/adminService';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -209,16 +214,10 @@ const AdminSettings: React.FC = () => {
                                 aria-controls="admin-settings-tabpanel-7"
                             />
                             <Tab
-                                icon={<IconMail />}
-                                label="OMAI Tasks"
-                                id="admin-settings-tab-8"
-                                aria-controls="admin-settings-tabpanel-8"
-                            />
-                            <Tab
                                 icon={<IconCopy />}
                                 label="OMAI Spin"
-                                id="admin-settings-tab-9"
-                                aria-controls="admin-settings-tabpanel-9"
+                                id="admin-settings-tab-8"
+                                aria-controls="admin-settings-tabpanel-8"
                             />
                         </Tabs>
                     </Box>
@@ -506,12 +505,6 @@ const AdminSettings: React.FC = () => {
                     </TabPanel>
 
                     <TabPanel value={tabValue} index={8}>
-                      <Box sx={{ minHeight: '80vh' }}>
-                        <OMAITaskAssignmentWidget />
-                      </Box>
-                    </TabPanel>
-
-                    <TabPanel value={tabValue} index={9}>
                         <OmaiSpinSettings />
                     </TabPanel>
                 </Card>

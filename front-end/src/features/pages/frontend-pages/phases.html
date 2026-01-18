@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5 Phases of Digitizing Parish Records | OrthodoxMetrics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           RESET & BASE STYLES
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --purple-royal: #2D1B69;
+            --purple-dark: #1a0f3d;
+            --gold: #F5B800;
+            --gold-light: #FFD700;
+            --white: #FFFFFF;
+            --gray-light: #F5F5F5;
+            --gray-text: #666666;
+            --shadow-sm: 0 2px 8px rgba(45, 27, 105, 0.1);
+            --shadow-md: 0 4px 16px rgba(45, 27, 105, 0.15);
+            --shadow-lg: 0 8px 32px rgba(45, 27, 105, 0.2);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--white);
+            color: var(--purple-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 60px 0;
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        .hero {
+            background: linear-gradient(135deg, var(--purple-royal) 0%, var(--purple-dark) 100%);
+            color: var(--white);
+            padding: 80px 0 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(245, 184, 0, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(245, 184, 0, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .logo {
+            display: inline-block;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo img {
+            height: 80px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .logo img {
+                height: 100px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .logo img {
+                height: 120px;
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero p {
+            font-size: clamp(16px, 2vw, 20px);
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           TIMELINE STEPPER (STICKY)
+           ============================================ */
+        .timeline-wrapper {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            background: var(--white);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            margin: -40px auto 40px;
+            max-width: 900px;
+        }
+
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            padding: 0 20px;
+        }
+
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: 60px;
+            right: 60px;
+            height: 3px;
+            background: var(--gray-light);
+            z-index: 0;
+            transition: var(--transition);
+        }
+
+        .timeline-progress {
+            position: absolute;
+            top: 50%;
+            left: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--purple-royal), var(--gold));
+            z-index: 1;
+            transition: width 0.6s ease;
+            width: 0%;
+        }
+
+        .timeline-step {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .timeline-step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 3px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--gray-text);
+            transition: var(--transition);
+        }
+
+        .timeline-step.active .timeline-step-number {
+            background: var(--purple-royal);
+            border-color: var(--gold);
+            color: var(--white);
+            box-shadow: 0 0 0 4px rgba(245, 184, 0, 0.2);
+            transform: scale(1.1);
+        }
+
+        .timeline-step-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gray-text);
+            text-align: center;
+            max-width: 80px;
+            transition: var(--transition);
+        }
+
+        .timeline-step.active .timeline-step-label {
+            color: var(--purple-royal);
+            font-weight: 700;
+        }
+
+        /* ============================================
+           PHASE CARDS
+           ============================================ */
+        .phases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+
+        .phase-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow-sm);
+            border: 2px solid transparent;
+            transition: var(--transition);
+            opacity: 0.5;
+            transform: translateY(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phase-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--purple-royal), var(--gold));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .phase-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .phase-card.active {
+            opacity: 1;
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--gold);
+        }
+
+        .phase-card.active::before {
+            transform: scaleX(1);
+        }
+
+        .phase-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--purple-royal);
+        }
+
+        .phase-card.active:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .phase-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            stroke: var(--purple-royal);
+            fill: none;
+            stroke-width: 2;
+            transition: var(--transition);
+        }
+
+        .phase-card.active .phase-icon {
+            stroke: var(--gold);
+            filter: drop-shadow(0 0 8px rgba(245, 184, 0, 0.4));
+        }
+
+        .phase-number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: var(--gray-light);
+            color: var(--purple-royal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+
+        .phase-card.active .phase-number {
+            background: var(--purple-royal);
+            color: var(--white);
+        }
+
+        .phase-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--purple-royal);
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .phase-subtitle {
+            font-size: 15px;
+            color: var(--gray-text);
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .phase-card.animating {
+            animation: fadeInUp 0.6s ease-out, pulse 0.6s ease-out 0.3s;
+        }
+
+        /* ============================================
+           CONTROLS
+           ============================================ */
+        .controls {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--purple-royal);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--purple-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--purple-royal);
+            border: 2px solid var(--purple-royal);
+        }
+
+        .btn-secondary:hover {
+            background: var(--purple-royal);
+            color: var(--white);
+        }
+
+        .btn-gold {
+            background: var(--gold);
+            color: var(--purple-dark);
+        }
+
+        .btn-gold:hover {
+            background: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ============================================
+           CTA SECTION
+           ============================================ */
+        .cta-section {
+            background: linear-gradient(135deg, var(--purple-royal) 0%, var(--purple-dark) 100%);
+            color: var(--white);
+            text-align: center;
+            padding: 80px 20px;
+            border-radius: 24px;
+            margin: 60px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(245, 184, 0, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .cta-section h2 {
+            font-size: clamp(28px, 4vw, 36px);
+            font-weight: 700;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            .phases-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .timeline-wrapper {
+                margin: -20px 10px 30px;
+                padding: 15px;
+            }
+
+            .timeline {
+                padding: 0 10px;
+            }
+
+            .timeline-step-label {
+                font-size: 9px;
+                max-width: 60px;
+            }
+
+            .timeline-step-number {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .timeline-line,
+            .timeline-progress {
+                left: 50px;
+                right: 50px;
+            }
+
+            section {
+                padding: 40px 0;
+            }
+
+            .hero {
+                padding: 60px 0 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .timeline-step-label {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container">
+            <div class="logo">
+                <img src="/images/header/new-logo.png" alt="Orthodox Metrics Logo">
+            </div>
+            <h1>5 Phases of Digitizing Parish Records</h1>
+            <p>Discover how we transform your historical records into a modern, searchable digital archive</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <!-- Timeline Stepper -->
+            <div class="timeline-wrapper">
+                <div class="timeline">
+                    <div class="timeline-line"></div>
+                    <div class="timeline-progress" id="timelineProgress"></div>
+                    <div class="timeline-step" data-phase="1">
+                        <div class="timeline-step-number">1</div>
+                        <div class="timeline-step-label">Gathering</div>
+                    </div>
+                    <div class="timeline-step" data-phase="2">
+                        <div class="timeline-step-number">2</div>
+                        <div class="timeline-step-label">Assessment</div>
+                    </div>
+                    <div class="timeline-step" data-phase="3">
+                        <div class="timeline-step-number">3</div>
+                        <div class="timeline-step-label">Translation</div>
+                    </div>
+                    <div class="timeline-step" data-phase="4">
+                        <div class="timeline-step-number">4</div>
+                        <div class="timeline-step-label">Processing</div>
+                    </div>
+                    <div class="timeline-step" data-phase="5">
+                        <div class="timeline-step-number">5</div>
+                        <div class="timeline-step-label">Delivery</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase Cards -->
+            <section class="phases-section">
+                <div class="phases-grid" id="phasesGrid">
+                    <!-- Phase cards will be generated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="btn btn-secondary" id="replayBtn">Replay Animation</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- CTA Section -->
+    <div class="container">
+        <section class="cta-section">
+            <h2>Ready to begin digitizing your parish records?</h2>
+            <p>Join hundreds of Orthodox parishes preserving their sacred history</p>
+            <button class="btn btn-gold" id="scheduleBtn">Schedule a Demo</button>
+        </section>
+    </div>
+
+    <script>
+        // ============================================
+        // PHASE DATA CONFIGURATION
+        // ============================================
+        const phasesData = [
+            {
+                number: 1,
+                title: 'Mode of Gathering Information',
+                subtitle: 'Upload records to our servers using secure and efficient scanning methods.',
+                icon: 'scanner'
+            },
+            {
+                number: 2,
+                title: 'Quality Assessment of Church Records',
+                subtitle: 'Enhance records and determine their viability.',
+                icon: 'assessment'
+            },
+            {
+                number: 3,
+                title: 'Translation & Data Structuring',
+                subtitle: 'Organize translated records into structured formats.',
+                icon: 'translation'
+            },
+            {
+                number: 4,
+                title: 'Processing, Translation & Delivery Coordination',
+                subtitle: 'Complete translation and keep you informed on progress.',
+                icon: 'coordination'
+            },
+            {
+                number: 5,
+                title: 'Delivery, Archival & Ongoing Access',
+                subtitle: 'Implement and maintain access to digitized records.',
+                icon: 'delivery'
+            }
+        ];
+
+        // ============================================
+        // SVG ICONS
+        // ============================================
+        const icons = {
+            scanner: `<svg class="phase-icon" viewBox="0 0 24 24">
+                <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" fill="none"/>
+                <line x1="6" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.5"/>
+                <line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="18" cy="13" r="2" stroke="currentColor" fill="none"/>
+            </svg>`,
+            assessment: `<svg class="phase-icon" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" fill="none"/>
+                <path d="M9 9h6M9 13h6M9 17h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="18" cy="6" r="3" stroke="currentColor" fill="none"/>
+                <path d="M17 6l1 1 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>`,
+            translation: `<svg class="phase-icon" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" fill="none"/>
+                <line x1="7" y1="8" x2="17" y2="8" stroke="currentColor" stroke-width="1.5"/>
+                <line x1="7" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="1.5"/>
+                <line x1="7" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M19 8l2 2-2 2M17 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>`,
+            coordination: `<svg class="phase-icon" viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" fill="none"/>
+                <path d="M8 9h8M8 13h6M8 17h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M19 9l2 2-2 2M17 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="6" cy="9" r="1.5" fill="currentColor"/>
+            </svg>`,
+            delivery: `<svg class="phase-icon" viewBox="0 0 24 24">
+                <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" fill="none"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" fill="none"/>
+                <path d="M12 9v6M9 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M6 6l2 2M18 6l-2 2M6 18l2-2M18 18l-2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>`
+        };
+
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+        let currentActivePhase = 0;
+        let isAnimating = false;
+        let autoplayTimeout = null;
+
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+        const phasesGrid = document.getElementById('phasesGrid');
+        const timelineSteps = document.querySelectorAll('.timeline-step');
+        const timelineProgress = document.getElementById('timelineProgress');
+        const replayBtn = document.getElementById('replayBtn');
+        const scheduleBtn = document.getElementById('scheduleBtn');
+
+        // ============================================
+        // RENDER PHASE CARDS
+        // ============================================
+        function renderPhases() {
+            phasesGrid.innerHTML = phasesData.map((phase, index) => `
+                <div class="phase-card" data-phase="${phase.number}" data-index="${index}">
+                    ${icons[phase.icon]}
+                    <div class="phase-number">${phase.number}</div>
+                    <h3 class="phase-title">${phase.title}</h3>
+                    <p class="phase-subtitle">${phase.subtitle}</p>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            document.querySelectorAll('.phase-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const phaseNum = parseInt(card.dataset.phase);
+                    setActivePhase(phaseNum - 1, false);
+                });
+            });
+        }
+
+        // ============================================
+        // SET ACTIVE PHASE
+        // ============================================
+        function setActivePhase(index, animate = true) {
+            if (isAnimating && animate) return;
+            
+            // Clear autoplay
+            if (autoplayTimeout) {
+                clearTimeout(autoplayTimeout);
+                autoplayTimeout = null;
+            }
+
+            currentActivePhase = index;
+
+            // Update cards
+            document.querySelectorAll('.phase-card').forEach((card, i) => {
+                card.classList.remove('active', 'animating');
+                if (i === index) {
+                    card.classList.add('active');
+                    if (animate) {
+                        card.classList.add('animating');
+                        setTimeout(() => card.classList.remove('animating'), 600);
+                    }
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+
+            // Update timeline
+            timelineSteps.forEach((step, i) => {
+                step.classList.toggle('active', i === index);
+            });
+
+            // Update progress line
+            const progressPercent = (index / (phasesData.length - 1)) * 100;
+            timelineProgress.style.width = `${progressPercent}%`;
+
+            // Scroll into view on mobile
+            if (window.innerWidth < 768) {
+                const activeCard = document.querySelector(`.phase-card[data-index="${index}"]`);
+                if (activeCard) {
+                    activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        // ============================================
+        // AUTOPLAY ANIMATION SEQUENCE
+        // ============================================
+        function startAutoplay() {
+            isAnimating = true;
+            let phaseIndex = 0;
+
+            // Reset all
+            document.querySelectorAll('.phase-card').forEach(card => {
+                card.classList.remove('active', 'visible');
+            });
+            timelineSteps.forEach(step => step.classList.remove('active'));
+            timelineProgress.style.width = '0%';
+
+            function showNextPhase() {
+                if (phaseIndex >= phasesData.length) {
+                    isAnimating = false;
+                    return;
+                }
+
+                // Make card visible first
+                const card = document.querySelector(`.phase-card[data-index="${phaseIndex}"]`);
+                if (card) {
+                    card.classList.add('visible');
+                }
+
+                // Set active after short delay
+                setTimeout(() => {
+                    setActivePhase(phaseIndex, true);
+                    phaseIndex++;
+                    
+                    if (phaseIndex < phasesData.length) {
+                        autoplayTimeout = setTimeout(showNextPhase, 2000); // 2 second delay between phases
+                    } else {
+                        isAnimating = false;
+                    }
+                }, 300);
+            }
+
+            showNextPhase();
+        }
+
+        // ============================================
+        // INTERSECTION OBSERVER (Scroll animations)
+        // ============================================
+        function setupScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !isAnimating) {
+                        entry.target.classList.add('visible');
+                        const index = parseInt(entry.target.dataset.index);
+                        if (index !== currentActivePhase) {
+                            setActivePhase(index, false);
+                        }
+                    }
+                });
+            }, {
+                threshold: 0.3,
+                rootMargin: '-50px 0px'
+            });
+
+            document.querySelectorAll('.phase-card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        // ============================================
+        // TIMELINE CLICK HANDLERS
+        // ============================================
+        timelineSteps.forEach((step, index) => {
+            step.addEventListener('click', () => {
+                setActivePhase(index, false);
+            });
+        });
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        replayBtn.addEventListener('click', () => {
+            startAutoplay();
+        });
+
+        scheduleBtn.addEventListener('click', () => {
+            alert('Thank you for your interest! A demo scheduling feature will be available soon.');
+        });
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            renderPhases();
+            setupScrollAnimations();
+            
+            // Start autoplay after a short delay
+            setTimeout(() => {
+                startAutoplay();
+            }, 500);
+        }
+
+        // Run on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
+

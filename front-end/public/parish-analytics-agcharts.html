@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OrthodoxMetrics – Parish Analytics Demo (AG Charts)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- AG Charts Community (AG Grid charts) -->
+  <script src="https://cdn.jsdelivr.net/npm/ag-charts-community/dist/umd/ag-charts-community.min.js"></script>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #0b1020;
+      color: #f5f5ff;
+    }
+    header {
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: radial-gradient(circle at top left, #3f2b96, #0b1020);
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 1.6rem;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    main {
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .controls {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    select {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.17);
+      background: #161b30;
+      color: #f5f5ff;
+      font-size: 0.9rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.92);
+      border-radius: 16px;
+      padding: 16px 16px 20px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at top, rgba(129, 140, 248, 0.18), transparent 55%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .card-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .card-subtitle {
+      font-size: 0.75rem;
+      opacity: 0.78;
+    }
+    .chart-container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 260px;
+    }
+    .pill {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 250, 252, 0.35);
+      background: rgba(15,23,42,0.9);
+      margin-left: 6px;
+      white-space: nowrap;
+    }
+    footer {
+      padding: 10px 24px 20px;
+      font-size: 0.8rem;
+      text-align: center;
+      opacity: 0.65;
+    }
+    @media (max-width: 600px) {
+      header { padding: 12px 16px; }
+      main { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>OrthodoxMetrics – Parish Analytics Demo (AG Charts)</h1>
+    <div class="subtitle">
+      Sample analytics with dummy data for English-language OCA parishes<br />
+      Interactive AG Charts for population, baptisms, marriages, seasonal patterns, and sacrament activity.
+    </div>
+  </header>
+
+  <main>
+    <div class="controls">
+      <div>
+        <label for="parishSelect">Parish:</label>
+        <select id="parishSelect">
+          <option value="stNicholas">St Nicholas Orthodox Church (OCA – English)</option>
+          <option value="holyTrinity">Holy Trinity Orthodox Cathedral (OCA – English)</option>
+          <option value="stGeorge">St George Orthodox Mission (OCA – English)</option>
+        </select>
+      </div>
+      <div>
+        <label for="timeRangeSelect">Time Range:</label>
+        <select id="timeRangeSelect">
+          <option value="10">Last 10 Years</option>
+          <option value="5">Last 5 Years</option>
+          <option value="20">Last 20 Years</option>
+          <option value="ytd">Year-to-Date (YTD)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Population over time -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Parish Population Over Time</div>
+            <div class="card-subtitle">Derived from baptisms, funerals, and net migration</div>
+          </div>
+          <div class="pill">Parish-Level</div>
+        </div>
+        <div id="populationChart" class="chart-container"></div>
+      </div>
+
+      <!-- Baptisms by gender -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Baptisms by Gender (Per Year)</div>
+            <div class="card-subtitle">Male vs Female baptism counts</div>
+          </div>
+          <div class="pill">Baptism Analytics</div>
+        </div>
+        <div id="baptismGenderChart" class="chart-container"></div>
+      </div>
+
+      <!-- Marriage type breakdown -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Marriage Type Breakdown</div>
+            <div class="card-subtitle">Orthodox–Orthodox vs Mixed Christian vs Non-Christian</div>
+          </div>
+          <div class="pill">Marriage Canonical View</div>
+        </div>
+        <div id="marriageTypeChart" class="chart-container"></div>
+      </div>
+
+      <!-- Monthly sacrament activity -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Monthly Sacrament Activity</div>
+            <div class="card-subtitle">Baptisms, marriages, funerals by month</div>
+          </div>
+          <div class="pill">Seasonal Trends</div>
+        </div>
+        <div id="sacramentMonthlyChart" class="chart-container"></div>
+      </div>
+
+      <!-- Lenten vs Non-Lenten breakdown -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Lenten vs Non-Lenten Sacrament Totals</div>
+            <div class="card-subtitle">Baptisms, marriages, funerals in Great Lent vs rest of year</div>
+          </div>
+          <div class="pill">Liturgical Season View</div>
+        </div>
+        <div id="lentenSeasonChart" class="chart-container"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Demo only – all data is fictional and for visual/UX purposes.<br />
+    Designed for parish-level OrthodoxMetrics analytics (OCA / English focus).
+  </footer>
+
+  <script>
+    const { AgChart } = agCharts; // global from UMD
+
+    // --------- Dummy data for 20 years (2006–2025) ----------
+    const baseYears = Array.from({ length: 20 }, (_, i) => 2006 + i);
+
+    const parishData = {
+      stNicholas: {
+        label: "St Nicholas Orthodox Church (OCA – English)",
+        population: [
+          140,145,150,155,160,165,170,176,182,188,
+          195,203,212,222,233,245,258,272,287,303
+        ],
+        baptismsMale: [
+          3,3,4,4,5,5,6,6,7,7,
+          7,8,8,9,9,9,10,10,11,11
+        ],
+        baptismsFemale: [
+          2,3,3,4,4,5,5,6,6,6,
+          7,7,8,8,8,9,9,10,10,11
+        ],
+        marriageTypes: { oo: 32, oc: 10, on: 3 },
+        sacramentsMonthly: {
+          baptisms: [3,2,4,3,5,4,6,5,4,3,2,3],
+          marriages:[1,0,1,2,3,4,5,4,3,2,1,1],
+          funerals: [2,3,2,2,3,2,2,3,4,3,3,4]
+        }
+      },
+      holyTrinity: {
+        label: "Holy Trinity Orthodox Cathedral (OCA – English)",
+        population: [
+          300,305,310,318,326,335,345,356,368,380,
+          395,410,426,443,461,480,500,521,543,566
+        ],
+        baptismsMale: [
+          6,6,7,7,8,8,9,9,10,10,
+          11,11,12,12,13,13,14,14,15,15
+        ],
+        baptismsFemale: [
+          5,5,6,6,7,7,8,8,9,9,
+          10,10,11,11,12,12,13,13,14,14
+        ],
+        marriageTypes: { oo: 70, oc: 25, on: 5 },
+        sacramentsMonthly: {
+          baptisms: [5,4,6,5,7,6,8,7,6,5,4,5],
+          marriages:[1,1,2,3,4,5,7,6,5,3,2,2],
+          funerals: [3,4,3,4,5,4,3,4,5,5,4,5]
+        }
+      },
+      stGeorge: {
+        label: "St George Orthodox Mission (OCA – English)",
+        population: [
+          20,22,24,27,30,34,38,43,48,54,
+          60,67,75,84,94,105,117,130,144,159
+        ],
+        baptismsMale: [
+          1,1,1,1,2,2,2,2,3,3,
+          3,3,4,4,4,4,5,5,5,5
+        ],
+        baptismsFemale: [
+          0,1,1,1,1,1,2,2,2,2,
+          3,3,3,3,4,4,4,4,5,5
+        ],
+        marriageTypes: { oo: 10, oc: 7, on: 2 },
+        sacramentsMonthly: {
+          baptisms: [1,1,1,2,2,3,3,3,2,2,1,1],
+          marriages:[0,0,1,1,1,2,2,2,1,1,0,0],
+          funerals: [0,1,1,1,1,1,1,1,2,1,1,2]
+        }
+      }
+    };
+
+    const monthLabels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const lentenMonthIndexes = [2, 3]; // March & April (0-based) for demo
+
+    // Chart instances
+    let populationChart = null;
+    let baptismGenderChart = null;
+    let marriageTypeChart = null;
+    let sacramentMonthlyChart = null;
+    let lentenSeasonChart = null;
+
+    function getYearsToShow(rangeValue) {
+      if (rangeValue === "ytd") {
+        return 1; // last year only
+      }
+      return parseInt(rangeValue, 10);
+    }
+
+    function updatePopulationChart(parishKey, rangeValue) {
+      const parish = parishData[parishKey];
+      const yearsToShow = getYearsToShow(rangeValue);
+      const startIdx = baseYears.length - yearsToShow;
+      const data = baseYears.slice(startIdx).map((year, idx) => ({
+        year,
+        population: parish.population[startIdx + idx],
+      }));
+
+      const options = {
+        container: document.getElementById("populationChart"),
+        data,
+        title: {
+          text: "",
+          enabled: false
+        },
+        series: [
+          {
+            type: "line",
+            xKey: "year",
+            yKey: "population",
+            yName: "Estimated Parish Population",
+          }
+        ],
+        axes: [
+          {
+            type: "number",
+            position: "left",
+            label: { color: "#e5e7eb" },
+            gridStyle: [{ stroke: "rgba(55,65,81,0.5)" }]
+          },
+          {
+            type: "number",
+            position: "bottom", // we'll override label.format for "year" style
+            label: {
+              color: "#e5e7eb",
+              formatter: (p) => String(p.value)
+            },
+            gridStyle: [{ stroke: "rgba(55,65,81,0.4)" }]
+          }
+        ],
+        legend: { enabled: false },
+        background: { visible: false }
+      };
+
+      if (populationChart) {
+        AgChart.update(populationChart, options);
+      } else {
+        populationChart = AgChart.create(options);
+      }
+    }
+
+    function updateBaptismGenderChart(parishKey, rangeValue) {
+      const parish = parishData[parishKey];
+      const yearsToShow = getYearsToShow(rangeValue);
+      const startIdx = baseYears.length - yearsToShow;
+      const data = baseYears.slice(startIdx).map((year, idx) => ({
+        year,
+        male: parish.baptismsMale[startIdx + idx],
+        female: parish.baptismsFemale[startIdx + idx],
+      }));
+
+      const options = {
+        container: document.getElementById("baptismGenderChart"),
+        data,
+        series: [
+          {
+            type: "column",
+            xKey: "year",
+            yKey: "male",
+            yName: "Male",
+            stacked: true,
+          },
+          {
+            type: "column",
+            xKey: "year",
+            yKey: "female",
+            yName: "Female",
+            stacked: true,
+          }
+        ],
+        legend: {
+          enabled: true,
+          item: { label: { color: "#e5e7eb" } }
+        },
+        axes: [
+          {
+            type: "number",
+            position: "left",
+            label: { color: "#e5e7eb" },
+            gridStyle: [{ stroke: "rgba(55,65,81,0.5)" }]
+          },
+          {
+            type: "category",
+            position: "bottom",
+            label: { color: "#e5e7eb" },
+            gridStyle: [{ stroke: "rgba(55,65,81,0.4)" }]
+          }
+        ],
+        background: { visible: false },
+        tooltip: {
+          enabled: true,
+          renderer: (params) => {
+            const year = params.datum.year;
+            const male = params.datum.male ?? 0;
+            const female = params.datum.female ?? 0;
+            const total = male + female;
+            return {
+              title: String(year),
+              content: `Male: ${male}\nFemale: ${female}\nTotal: ${total}`
+            };
+          }
+        }
+      };
+
+      if (baptismGenderChart) {
+        AgChart.update(baptismGenderChart, options);
+      } else {
+        baptismGenderChart = AgChart.create(options);
+      }
+    }
+
+    function updateMarriageTypeChart(parishKey) {
+      const parish = parishData[parishKey];
+      const m = parish.marriageTypes;
+      const total = m.oo + m.oc + m.on;
+
+      const data = [
+        { type: "Orthodox–Orthodox", count: m.oo },
+        { type: "Orthodox–Other Christian", count: m.oc },
+        { type: "Orthodox–Non-Christian (Bishop blessing)", count: m.on }
+      ];
+
+      const options = {
+        container: document.getElementById("marriageTypeChart"),
+        data,
+        series: [
+          {
+            type: "pie",
+            angleKey: "count",
+            labelKey: "type",
+            label: {
+              enabled: true,
+              color: "#e5e7eb"
+            },
+            calloutLabelKey: "type"
+          }
+        ],
+        legend: {
+          enabled: true,
+          item: { label: { color: "#e5e7eb" } },
+          position: "bottom"
+        },
+        background: { visible: false },
+        tooltip: {
+          enabled: true,
+          renderer: (params) => {
+            const val = params.datum.count;
+            const pct = total ? ((val / total) * 100).toFixed(1) : 0;
+            return {
+              title: params.datum.type,
+              content: `${val} (${pct}%)`
+            };
+          }
+        }
+      };
+
+      if (marriageTypeChart) {
+        AgChart.update(marriageTypeChart, options);
+      } else {
+        marriageTypeChart = AgChart.create(options);
+      }
+    }
+
+    function updateSacramentMonthlyChart(parishKey) {
+      const parish = parishData[parishKey];
+      const sm = parish.sacramentsMonthly;
+      const data = monthLabels.map((month, idx) => ({
+        month,
+        baptisms: sm.baptisms[idx],
+        marriages: sm.marriages[idx],
+        funerals: sm.funerals[idx],
+      }));
+
+      const options = {
+        container: document.getElementById("sacramentMonthlyChart"),
+        data,
+        series: [
+          { type: "column", xKey: "month", yKey: "baptisms", yName: "Baptisms" },
+          { type: "column", xKey: "month", yKey: "marriages", yName: "Marriages" },
+          { type: "column", xKey: "month", yKey: "funerals", yName: "Funerals" }
+        ],
+        axes: [
+          {
+            type: "number",
+            position: "left",
+            label: { color: "#e5e7eb" },
+            gridStyle: [{ stroke: "rgba(55,65,81,0.5)" }]
+          },
+          {
+            type: "category",
+            position: "bottom",
+            label: { color: "#e5e7eb" },
+            gridStyle: [{ stroke: "rgba(55,65,81,0.4)" }]
+          }
+        ],
+        legend: {
+          enabled: true,
+          item: { label: { color: "#e5e7eb" } }
+        },
+        background: { visible: false }
+      };
+
+      if (sacramentMonthlyChart) {
+        AgChart.update(sacramentMonthlyChart, options);
+      } else {
+        sacramentMonthlyChart = AgChart.create(options);
+      }
+    }
+
+    function updateLentenSeasonChart(parishKey) {
+      const parish = parishData[parishKey];
+      const sm = parish.sacramentsMonthly;
+
+      let bapLent = 0, bapNon = 0;
+      let marLent = 0, marNon = 0;
+      let funLent = 0, funNon = 0;
+
+      sm.baptisms.forEach((val, idx) => {
+        if (lentenMonthIndexes.includes(idx)) bapLent += val;
+        else bapNon += val;
+      });
+      sm.marriages.forEach((val, idx) => {
+        if (lentenMonthIndexes.includes(idx)) marLent += val;
+        else marNon += val;
+      });
+      sm.funerals.forEach((val, idx) => {
+        if (lentenMonthIndexes.includes(idx)) funLent += val;
+        else funNon += val;
+      });
+
+      const data = [
+        { type: "Baptisms", lenten: bapLent, nonLenten: bapNon },
+        { type: "Marriages", lenten: marLent, nonLenten: marNon },
+        { type: "Funerals", lenten: funLent, nonLenten: funNon }
+      ];
+
+      const options = {
+        container: document.getElementById("lentenSeasonChart"),
+        data,
+        series: [
+          {
+            type: "column",
+            xKey: "type",
+            yKey: "lenten",
+            yName: "Lenten Season (Mar–Apr)"
+          },
+          {
+            type: "column",
+            xKey: "type",
+            yKey: "nonLenten",
+            yName: "Non-Lenten"
+          }
+        ],
+        axes: [
+          {
+            type: "number",
+            position: "left",
+            label: { color: "#e5e7eb" },
+            gridStyle: [{ stroke: "rgba(55,65,81,0.5)" }]
+          },
+          {
+            type: "category",
+            position: "bottom",
+            label: { color: "#e5e7eb" },
+            gridStyle: [{ stroke: "rgba(55,65,81,0.4)" }]
+          }
+        ],
+        legend: {
+          enabled: true,
+          item: { label: { color: "#e5e7eb" } }
+        },
+        background: { visible: false },
+        tooltip: {
+          enabled: true,
+          renderer: (params) => {
+            const d = params.datum;
+            const total = (d.lenten ?? 0) + (d.nonLenten ?? 0);
+            return {
+              title: d.type,
+              content: `Lenten: ${d.lenten}\nNon-Lenten: ${d.nonLenten}\nTotal: ${total}`
+            };
+          }
+        }
+      };
+
+      if (lentenSeasonChart) {
+        AgChart.update(lentenSeasonChart, options);
+      } else {
+        lentenSeasonChart = AgChart.create(options);
+      }
+    }
+
+    function createOrUpdateAllCharts(parishKey, rangeValue) {
+      updatePopulationChart(parishKey, rangeValue);
+      updateBaptismGenderChart(parishKey, rangeValue);
+      updateMarriageTypeChart(parishKey);
+      updateSacramentMonthlyChart(parishKey);
+      updateLentenSeasonChart(parishKey);
+    }
+
+    const parishSelect = document.getElementById("parishSelect");
+    const timeRangeSelect = document.getElementById("timeRangeSelect");
+
+    parishSelect.addEventListener("change", () => {
+      createOrUpdateAllCharts(parishSelect.value, timeRangeSelect.value);
+    });
+
+    timeRangeSelect.addEventListener("change", () => {
+      createOrUpdateAllCharts(parishSelect.value, timeRangeSelect.value);
+    });
+
+    // Initial render
+    createOrUpdateAllCharts("stNicholas", "10");
+  </script>
+</body>
+</html>

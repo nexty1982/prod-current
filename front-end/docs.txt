@@ -1,0 +1,524 @@
+docs/
+├── 12-20-Junie.md
+├── analytics-intelligence
+│   ├── configuration
+│   ├── documentation
+│   ├── guides
+│   │   └── analytics-implementation-plan-2025-12-02.md
+│   ├── README.md
+│   └── reference
+├── data-structuring-accuracy
+│   ├── configuration
+│   ├── documentation
+│   │   └── field-mapper-page.md
+│   ├── guides
+│   ├── README.md
+│   └── reference
+├── ingestion-digitization
+│   ├── configuration
+│   ├── documentation
+│   │   ├── enhanced-ocr-uploader.md
+│   │   ├── multi-tenant-ocr-system.md
+│   │   ├── ocr-buckets-implementation-plan.md
+│   │   ├── ocr-discovery-phase1.md
+│   │   ├── ocr-enhanced-uploader-workflow.md
+│   │   ├── ocr-field-mapping-enhancements.md
+│   │   ├── ocr-implementation-phase3.md
+│   │   ├── ocr-implementation-phase3-updated.md
+│   │   ├── ocr-menu-fixes.md
+│   │   ├── ocr-record-uploader-implementation.md
+│   │   ├── ocr-scan-preview.md
+│   │   ├── record-images-upload-troubleshooting.md
+│   │   └── secure-ocr-system.md
+│   ├── guides
+│   │   └── test-gallery-endpoint.md
+│   ├── README.md
+│   └── reference
+│       ├── ocr-fixes-summary.md
+│       ├── ocr-implementation-status.md
+│       ├── ocr-system-status.md
+│       ├── saints-records-1.png
+│       ├── saints-records-2.png
+│       └── saints-records-3.png
+├── platform-infrastructure
+│   ├── configuration
+│   │   └── auth-audit.json
+│   ├── documentation
+│   │   ├── application-startup-diagram.md
+│   │   ├── css-build-process.md
+│   │   └── user-files-api-implementation.md
+│   ├── guides
+│   │   └── backend-api-docs-routes-instructions.md
+│   ├── README.md
+│   └── reference
+│       ├── all-databases-2025-07-19.sql
+│       ├── backend-api-docs-routes.js
+│       ├── backend-api-images-list-routes.js
+│       ├── important-notes-2025-12-08.txt
+│       ├── legacy-entire
+│       │   ├── 139-OMAI.md
+│       │   ├── 142_extract_components.md
+│       │   ├── 144_mobile_components_refactor.md
+│       │   ├── 146-mobile_responsiveness.md
+│       │   ├── 156-liturgical-calendar-redesign.md
+│       │   ├── 156-liturgical-calendar-redesign.zip
+│       │   ├── 2015-01-30.md
+│       │   ├── 500_ERROR_FIX_SUMMARY.md
+│       │   ├── ACCOUNT_SETTINGS_IMPLEMENTATION_GUIDE.md
+│       │   ├── action-executor.md
+│       │   ├── ACTION_PLAN_NEXT_STEPS.md
+│       │   ├── ADMIN_ACCOUNTS.md
+│       │   ├── ADMIN_CLEANUP_PLAN.md
+│       │   ├── ADMINISTRATION_GUIDE.md
+│       │   ├── ADMIN_MONOLITH_BREAKDOWN_SUMMARY.md
+│       │   ├── ADMIN_PANEL_FEATURES.md
+│       │   ├── ADMIN_PANEL_IMPLEMENTATION_COMPLETE.md
+│       │   ├── agent-ingest-protocol.md
+│       │   ├── AI_BACKEND_CONNECTION_SUMMARY.md
+│       │   ├── AI_ENTITY_EXTRACTION_SYSTEM.md
+│       │   ├── ai-grep-core.md
+│       │   ├── ai-response-formatter.md
+│       │   ├── ai-validation-layer.md
+│       │   ├── API_AUDIT_GUIDE.md
+│       │   ├── API_CALLS_NOT_IN_ORTHODOX_METRICS_API.md
+│       │   ├── API_DOCUMENTATION.md
+│       │   ├── API_ENDPOINTS_REFERENCE.md
+│       │   ├── API.md
+│       │   ├── API_REFACTOR_COMPLETE.md
+│       │   ├── API_REFERENCE.md
+│       │   ├── api-route-frontend.md
+│       │   ├── API_TESTING_RESULTS_2025-07-11.md
+│       │   ├── API_V2_REFACTOR_SUMMARY.md
+│       │   ├── APK-Generation-Instructions.md
+│       │   ├── associateExample.md
+│       │   ├── AUTHENTICATION_DEBUGGING_GUIDE.md
+│       │   ├── AUTHENTICATION_FLOWS.md
+│       │   ├── AUTHENTICATION_REBRANDING_COMPLETE.md
+│       │   ├── AUTHENTICATION_TROUBLESHOOTING.md
+│       │   ├── AUTOMATED_CLIENT_CREATION_SYSTEM.md
+│       │   ├── AUTO-UPDATER.md
+│       │   ├── AUTO-UPDATER-TEST-PLAN.md
+│       │   ├── BACKEND_ARCHITECTURE.md
+│       │   ├── BACKEND_AUDIT_REPORT.md
+│       │   ├── BACKUP_DIAGNOSTIC_MANUAL.md
+│       │   ├── BACKUP_DISASTER_RECOVERY.md
+│       │   ├── BIG_BOOK_CENTRALIZED_INGESTION_SYSTEM.md
+│       │   ├── BIGBOOK_COMPREHENSIVE_FILE_SUPPORT.md
+│       │   ├── bigbook-storage-structure.md
+│       │   ├── BIGBOOK_SYSTEM_SUMMARY.md
+│       │   ├── bindExample.md
+│       │   ├── BROWSER_ERRORS_FIXED.md
+│       │   ├── BUILD_CONSOLE_COMPREHENSIVE_FIXES.md
+│       │   ├── BUILD-CONSOLE-ENHANCEMENT.md
+│       │   ├── BUILD_SYSTEM_SUMMARY.md
+│       │   ├── caching_sha2_password.md
+│       │   ├── camelcase.md
+│       │   ├── catalog-manager.md
+│       │   ├── CHANGELOG.md
+│       │   ├── CHURCH_ADMIN_PANEL_IMPLEMENTATION_7-10-25.md
+│       │   ├── CHURCH_MANAGEMENT_URGENT_STATUS.md
+│       │   ├── CHURCH_PROVISIONING_SUMMARY.md
+│       │   ├── CHURCH_RECORDS_ISSUE_DIAGNOSIS.md
+│       │   ├── CHURCH_RECORDS_UI_IMPLEMENTATION.md
+│       │   ├── CHURCH_SETUP_WIZARD_ENHANCEMENTS.md
+│       │   ├── CHURCH_SETUP_WIZARD_INTEGRATION.md
+│       │   ├── ci_cd_pipeline_plan.md
+│       │   ├── class_diagram.md
+│       │   ├── CLEANUP_COMPLETE_SUMMARY.md
+│       │   ├── CODE_CHANGES_MADE.md
+│       │   ├── CODE_OF_CONDUCT.md
+│       │   ├── command-parser.md
+│       │   ├── COMPLETE_DEPLOYMENT_GUIDE.md
+│       │   ├── COMPLETE_FIXES_SUMMARY.md
+│       │   ├── COMPLETE_MIGRATION_GUIDE.md
+│       │   ├── component-analysis-report.md
+│       │   ├── COMPONENT_DISCOVERY_IMPLEMENTATION.md
+│       │   ├── COMPONENT_LOGGING_INTEGRATION.md
+│       │   ├── components-api.md
+│       │   ├── COMPREHENSIVE_TASK_LIST.md
+│       │   ├── config.md
+│       │   ├── connectExample.md
+│       │   ├── CONSOLIDATION_COMPLETE.md
+│       │   ├── content_moderation_system.md
+│       │   ├── CONTRIBUTING.md
+│       │   ├── CONTRIBUTORS.md
+│       │   ├── COPILOT_HANDOFF_2025-07-12.md
+│       │   ├── CRITICAL_FIXES_IMPLEMENTATION_SUMMARY.md
+│       │   ├── CRITICAL_FIXES.md
+│       │   ├── CURRENT_ERROR_ANALYSIS.md
+│       │   ├── CURRENT_STATUS_SUMMARY.md
+│       │   ├── CURSOR_AI_INTEGRATION_COMPLETE.md
+│       │   ├── cursor_task_site_survey.md
+│       │   ├── DATABASE_ARCHITECTURE_REFACTOR.md
+│       │   ├── DATABASE_MIGRATION_LOG_2025-07-11.md
+│       │   ├── DATABASE_SCHEMA.md
+│       │   ├── DATABASE_SETUP_GUIDE.md
+│       │   ├── dependency-selectors.md
+│       │   ├── DEPLOYMENT_GUIDE.md
+│       │   ├── desktop.ini
+│       │   ├── developers.md
+│       │   ├── DEVELOPMENT_ENVIRONMENT.md
+│       │   ├── DEVELOPMENT_GUIDE.md
+│       │   ├── DEVELOPMENT_LOG_07-09-25.md
+│       │   ├── DEVELOPMENT_ROADMAP.md
+│       │   ├── DEVELOPMENT_SESSION_SUMMARY_2025-07-11.md
+│       │   ├── DEVELOPMENT_SETUP_COMPLETE.md
+│       │   ├── DEVELOPMENT_SETUP.md
+│       │   ├── DEV-SETUP.md
+│       │   ├── diagnosis-report.md
+│       │   ├── DIAGNOSTIC_TOOLKIT_DOCUMENTATION.md
+│       │   ├── DISABLE_ROOT_SOCKET_ACCESS.md
+│       │   ├── DOCUMENTATION_CONSOLIDATION_PLAN.md
+│       │   ├── dragdrop-runner-ui.md
+│       │   ├── DUPLICATE_ROUTES_ANALYSIS.md
+│       │   ├── ENCRYPTED_STORAGE_IMPLEMENTATION_SUMMARY.md
+│       │   ├── ENHANCED_BIGBOOK_CONSOLE_SUMMARY.md
+│       │   ├── ENHANCED_CHAT_SYSTEM_SUMMARY.md
+│       │   ├── ENHANCED_CHURCH_SETUP_WITH_TEMPLATES.md
+│       │   ├── ERROR_FIXES_PROGRESS.md
+│       │   ├── ERROR_FIXES_SUMMARY.md
+│       │   ├── error-handling-test.md
+│       │   ├── feedback-on-ingest.md
+│       │   ├── FINAL_FIX_SUMMARY.md
+│       │   ├── FINAL_IMPLEMENTATION_SUMMARY.md
+│       │   ├── FINAL_UI_BUILD_CHECKLIST.md
+│       │   ├── first_login_setup_wizard.md
+│       │   ├── FIX_LOG.md
+│       │   ├── folders.md
+│       │   ├── FRONTEND_ARCHITECTURE.md
+│       │   ├── FRONTEND_BACKEND_CONNECTION.md
+│       │   ├── FRONTEND_CONFIG_UPDATE.md
+│       │   ├── frontend-nodejs-integration-doc.md
+│       │   ├── GLOBAL_OMAI_IMPLEMENTATION.md
+│       │   ├── GOVERNANCE.md
+│       │   ├── Guidelines.md
+│       │   ├── GypVsCMake.md
+│       │   ├── Hacking.md
+│       │   ├── HEADLINES_WEB_COMPONENT_GUIDE.md
+│       │   ├── HISTORY.md
+│       │   ├── IMPLEMENTATION_COMPLETE.md
+│       │   ├── IMPLEMENTATION_COMPLETE_SUMMARY.md
+│       │   ├── IMPLEMENTATION_PRIORITY_GUIDE.md
+│       │   ├── IMPLEMENTATION_STATUS.md
+│       │   ├── IMPLEMENTATION-SUMMARY.md
+│       │   ├── IMPORT_BUTTON_IMPLEMENTATION.md
+│       │   ├── IMPORT_RECORDS_GUIDE.md
+│       │   ├── index.md
+│       │   ├── InputFormatReference.md
+│       │   ├── install.md
+│       │   ├── INTEGRATION_GUIDE.md
+│       │   ├── INTERACTIVE_TSX_QUESTIONNAIRE_SUMMARY.md
+│       │   ├── issue_template.md
+│       │   ├── Java-Setup-Instructions.md
+│       │   ├── JIT_TERMINAL_CONFIG.md
+│       │   ├── LanguageSpecification.md
+│       │   ├── learn-task-parser.md
+│       │   ├── LICENSE.md
+│       │   ├── LINK_PERMISSION_CHECKER_GUIDE.md
+│       │   ├── LINK_PERMISSION_ISSUES_RESOLUTION.md
+│       │   ├── logger-dashboard-failure.md
+│       │   ├── LOGGING_CENTRALIZATION_SUMMARY.md
+│       │   ├── logging.md
+│       │   ├── LOGGING_SYSTEM_COMPLETE.md
+│       │   ├── login-troubleshooting.md
+│       │   ├── LOGS_PANEL_COMPLETE.md
+│       │   ├── MANUAL_PASSWORD_RECOVERY.md
+│       │   ├── mariadb_common_commands.md
+│       │   ├── MARIADB_TROUBLESHOOTING_GUIDE.md
+│       │   ├── markdown-ingestion-core.md
+│       │   ├── memory-log-generator.md
+│       │   ├── MENU_CONFIGURATION_GUIDE.md
+│       │   ├── MENU_CONFIGURATION_IMPLEMENTATION_SUMMARY.md
+│       │   ├── MENU_ITEMS_INTEGRATION_GUIDE.md
+│       │   ├── metadata-indexer.md
+│       │   ├── migratingFromV1.md
+│       │   ├── MIGRATION_LOG.md
+│       │   ├── MIGRATION_PLAN.md
+│       │   ├── MISSION_ACCOMPLISHED.md
+│       │   ├── MOBILE_AUDIT_LOG.md
+│       │   ├── MONITORING_GUIDE.md
+│       │   ├── MULTI_CLIENT_IMPLEMENTATION_PLAN.md
+│       │   ├── MULTI_CLIENT_TEMPLATE_SYSTEM.md
+│       │   ├── MULTI_TENANT_CLIENT_MANAGEMENT_GUIDE.md
+│       │   ├── MULTI_TENANT_OCR_SYSTEM_DOCUMENTATION.md
+│       │   ├── Multi-Tenant-Provisioning.md
+│       │   ├── MULTI_TENANT_TEMPLATE_SYSTEM_COMPLETE.md
+│       │   ├── MVP_CLIENT_CREATION_SYSTEM.md
+│       │   ├── NGINX_CONFIGURATION_GUIDE.md
+│       │   ├── nginx-configuration.md
+│       │   ├── NGINX_UPDATE_SUMMARY.md
+│       │   ├── NOTICE.md
+│       │   ├── NOTIFICATION_ROUTES_FIX.md
+│       │   ├── NOTIFICATION_SYSTEM_COMPLETE.md
+│       │   ├── npm-access.md
+│       │   ├── npm-adduser.md
+│       │   ├── npm-audit.md
+│       │   ├── npm-bugs.md
+│       │   ├── npm-cache.md
+│       │   ├── npm-ci.md
+│       │   ├── npm-completion.md
+│       │   ├── npm-config.md
+│       │   ├── npm-dedupe.md
+│       │   ├── npm-deprecate.md
+│       │   ├── npm-diff.md
+│       │   ├── npm-dist-tag.md
+│       │   ├── npm-docs.md
+│       │   ├── npm-doctor.md
+│       │   ├── npm-edit.md
+│       │   ├── npm-exec.md
+│       │   ├── npm-explain.md
+│       │   ├── npm-explore.md
+│       │   ├── npm-find-dupes.md
+│       │   ├── npm-fund.md
+│       │   ├── npm-help.md
+│       │   ├── npm-help-search.md
+│       │   ├── npm-hook.md
+│       │   ├── npm-init.md
+│       │   ├── npm-install-ci-test.md
+│       │   ├── npm-install.md
+│       │   ├── npm-install-test.md
+│       │   ├── npm-link.md
+│       │   ├── npm-login.md
+│       │   ├── npm-logout.md
+│       │   ├── npm-ls.md
+│       │   ├── npm.md
+│       │   ├── npm-org.md
+│       │   ├── npm-outdated.md
+│       │   ├── npm-owner.md
+│       │   ├── npm-pack.md
+│       │   ├── npm-ping.md
+│       │   ├── npm-pkg.md
+│       │   ├── npm-prefix.md
+│       │   ├── npm-profile.md
+│       │   ├── npm-prune.md
+│       │   ├── npm-publish.md
+│       │   ├── npm-query.md
+│       │   ├── npmrc.md
+│       │   ├── npm-rebuild.md
+│       │   ├── npm-repo.md
+│       │   ├── npm-restart.md
+│       │   ├── npm-root.md
+│       │   ├── npm-run-script.md
+│       │   ├── npm-sbom.md
+│       │   ├── npm-search.md
+│       │   ├── npm-shrinkwrap-json.md
+│       │   ├── npm-shrinkwrap.md
+│       │   ├── npm-star.md
+│       │   ├── npm-stars.md
+│       │   ├── npm-start.md
+│       │   ├── npm-stop.md
+│       │   ├── npm-team.md
+│       │   ├── npm-test.md
+│       │   ├── npm-token.md
+│       │   ├── npm-uninstall.md
+│       │   ├── npm-unpublish.md
+│       │   ├── npm-unstar.md
+│       │   ├── npm-update.md
+│       │   ├── npm-version.md
+│       │   ├── npm-view.md
+│       │   ├── npm-whoami.md
+│       │   ├── npx.md
+│       │   ├── OCR_FIELD_MAPPING_ENHANCEMENTS.md
+│       │   ├── OCR_IMPLEMENTATION_STATUS.md
+│       │   ├── OcrScanPreview.md
+│       │   ├── OCR_SYSTEM_STATUS.md
+│       │   ├── OMAI_AGENT_WEBHOOK_GUIDE.md
+│       │   ├── OMAI-Android-Implementation-Summary.md
+│       │   ├── OMAI-Android-Installation-Readiness.md
+│       │   ├── OMAI-Android-Interface-Plan.md
+│       │   ├── OMAI_BIBLE.md
+│       │   ├── OMAI-Build-Script-Fix.md
+│       │   ├── OMAI-Build-Setup-Guide.md
+│       │   ├── OMAI-Galaxy-Z-Fold-6-Installation-Guide.md
+│       │   ├── OMAI_INTELLIGENCE_UPGRADE_GUIDE.md
+│       │   ├── OMAI_LOGGER_ADVANCED_FEATURES.md
+│       │   ├── OMAI_LOGGER_COMPLETE_IMPLEMENTATION.md
+│       │   ├── omai-logger-design-system.md
+│       │   ├── OMAI_LOGGER_FIX_SUMMARY.md
+│       │   ├── OMAI_LOGGER_IMPLEMENTATION_SUMMARY.md
+│       │   ├── OMAI_LOGGER_INTEGRATION.md
+│       │   ├── OMAI_LOGGER_REDESIGN_COMPLETE.md
+│       │   ├── OMAI_LOGGER_SUCCESS_DEBUG_QA.md
+│       │   ├── omai_md_ingestion_spec.md
+│       │   ├── OMAI-MEMORY-MANAGEMENT.md
+│       │   ├── OMAI-NEXT-STEPS.md
+│       │   ├── OMAI_OPERATORS_MANUAL.md
+│       │   ├── OMAI_PATH_DISCOVERY_IMPLEMENTATION_SUMMARY.md
+│       │   ├── OMAI_PHASE2_EMBEDDING_ENGINE.md
+│       │   ├── OMAI_PHASE4_BIGBOOK_SYNC.md
+│       │   ├── OMAI_PHASE5_LIVE_CODE_GENERATION.md
+│       │   ├── OMAI_PHASE6_AGENT_COLLABORATION.md
+│       │   ├── OMAI_PHASE7_PROJECT_GENERATION.md
+│       │   ├── OMAI_SERVICE_SETUP_GUIDE.md
+│       │   ├── OMAI-SITE-MASTERY.md
+│       │   ├── OMAI-TRAINING-BLUEPRINT.md
+│       │   ├── OMAI-TRAINING-QUICK-REFERENCE.md
+│       │   ├── OMB_PHASE3_VISUAL_EDITOR.md
+│       │   ├── OMLEARN-ETHICS-INTEGRATION.md
+│       │   ├── om_schema_governance_implementation_guide_v_1.md
+│       │   ├── OPERATIONS_GUIDE.md
+│       │   ├── orgs.md
+│       │   ├── ORTHODMETRICS_IMPLEMENTATION_COMPLETE.md
+│       │   ├── orthodmetrics-task-list.md
+│       │   ├── ORTHODOX_AVATAR_EXTRACTION_GUIDE.md
+│       │   ├── ORTHODOX_AVATAR_SETUP.md
+│       │   ├── ORTHODOX_CALENDAR_REDESIGN.md
+│       │   ├── ORTHODOX_CHURCH_DIRECTORY_COMPLETE.md
+│       │   ├── ORTHODOX_HEADLINES_COMPLETE_INTEGRATION.md
+│       │   ├── ORTHODOX_HEADLINES_IMPLEMENTATION_COMPLETE.md
+│       │   ├── ORTHODOX_METRICS_ADMIN_ERROR_FIX.md
+│       │   ├── ORTHODOX_METRICS_ADMIN_INTERFACE.md
+│       │   ├── ORTHODOX_METRICS_CALENDAR_SYSTEM.md
+│       │   ├── ORTHODOX_METRICS_COMPREHENSIVE_DOCUMENTATION.md
+│       │   ├── orthodoxmetrics-js-arsenal.md
+│       │   ├── ORTHODOX_STYLING_GUIDE.md
+│       │   ├── package-json.md
+│       │   ├── package-lock-json.md
+│       │   ├── package-spec.md
+│       │   ├── PAGEEDITOR_IMPLEMENTATION_COMPLETE.md
+│       │   ├── PERFORMANCE_OPTIMIZATION.md
+│       │   ├── PHASE_13_SITE_EDITOR_IMPLEMENTATION.md
+│       │   ├── PHASE_14_AUTONOMOUS_FIXES_IMPLEMENTATION.md
+│       │   ├── PHASE_15_GITOPS_IMPLEMENTATION.md
+│       │   ├── PHASE_15_SUMMARY.md
+│       │   ├── PHASE_16_VRT_IMPLEMENTATION.md
+│       │   ├── PHASE_17_OMAI_BACKEND_COMPLETION.md
+│       │   ├── PHASE_17_SITE_EDITOR_COMPLETION.md
+│       │   ├── PHASE3_COMPLETION_SUMMARY.md
+│       │   ├── PHASE4_PROGRESS_SUMMARY.md
+│       │   ├── PHASE5_PROGRESS_SUMMARY.md
+│       │   ├── Porting-Buffer.md
+│       │   ├── PROFILE_PAGE_FIXES.md
+│       │   ├── PROJECT_SUMMARY.md
+│       │   ├── PUBLIC_TASK_ASSIGNMENT_API.md
+│       │   ├── QUICK_START_GUIDE.md
+│       │   ├── QUICK_START.md
+│       │   ├── QUICK_START_SDLC_BACKUP.md
+│       │   ├── QUICK_TROUBLESHOOTING.md
+│       │   ├── README-BACKUP-SYSTEM.md
+│       │   ├── README-CHURCH-LINKAGE-FIX.md
+│       │   ├── README-es.md
+│       │   ├── README-FIRST.md
+│       │   ├── README-Headlines-Deployment.md
+│       │   ├── README.md
+│       │   ├── README-NFS-BACKUP.md
+│       │   ├── README-scripts.md
+│       │   ├── README-SECOND.md
+│       │   ├── README-server.md
+│       │   ├── README_SITE_ADMIN.md
+│       │   ├── README.solution.md
+│       │   ├── RECORD_TEMPLATE_MANAGER_COMPLETE.md
+│       │   ├── RECORD_TEMPLATE_MANAGER_STATUS.md
+│       │   ├── REFACTOR_SUMMARY.md
+│       │   ├── REFERENCE_ANALYSIS_SUMMARY.md
+│       │   ├── registry.md
+│       │   ├── reinstall_mariadb_nginx_node_samba.md
+│       │   ├── release.md
+│       │   ├── release-notes.md
+│       │   ├── removal.md
+│       │   ├── report_studio_plan.md
+│       │   ├── RESTORE_MENU_MANAGEMENT_GUIDE.md
+│       │   ├── ROADMAP.md
+│       │   ├── ROLE_MIGRATION_READY.md
+│       │   ├── role-refactor-summary.md
+│       │   ├── ROLE_SIMPLIFICATION_IMPLEMENTATION.md
+│       │   ├── ROLE_SIMPLIFICATION_UPDATE_SUMMARY.md
+│       │   ├── ROLES_REFERENCE.md
+│       │   ├── ROUTE_AUDIT_TABLE.md
+│       │   ├── RouteManagerFeature.md
+│       │   ├── scope.md
+│       │   ├── scripts.md
+│       │   ├── SDLC_BACKUP_SETUP_GUIDE.md
+│       │   ├── SDLC_BACKUP_SYSTEM_COMPLETE.md
+│       │   ├── search-ui.md
+│       │   ├── secure_church_archive_plan.md
+│       │   ├── SECURE_OCR_SYSTEM.md
+│       │   ├── SECURITY_GUIDE.md
+│       │   ├── SECURITY.md
+│       │   ├── semantic-search-embedding.md
+│       │   ├── SERVER_CONFIGURATION_GUIDE.md
+│       │   ├── SERVER_MIGRATION_GUIDE.md
+│       │   ├── server-route-analysis.md
+│       │   ├── SERVER_SETUP_GUIDE_192.168.1.239.md
+│       │   ├── server_setup_overezit_local.md
+│       │   ├── SESSION_ARCHITECTURE.md
+│       │   ├── SESSION_AUTH_TROUBLESHOOTING_LOG.md
+│       │   ├── SESSION_SECURITY.md
+│       │   ├── SHOWCASE_TEMPLATE_ANALYSIS.md
+│       │   ├── SITE_AUDIT.md
+│       │   ├── SITE_EDITOR_GUIDE.md
+│       │   ├── SOCIAL_MODULE_DOCUMENTATION.md
+│       │   ├── SYSTEM_ARCHITECTURE.md
+│       │   ├── task_012_omai_icon_generation.md
+│       │   ├── task_013_omai_global_presence.md
+│       │   ├── task_014_refactor_records_page.md
+│       │   ├── task_10_omai_big_book_librarian.md
+│       │   ├── task_11_big_book_kanban_sync.md
+│       │   ├── task_11_omai_watchdog.md
+│       │   ├── Task-132-Blog-System-Complete.md
+│       │   ├── TASK_144_COMPLETION_SUMMARY.md
+│       │   ├── task1.md
+│       │   ├── task2.md
+│       │   ├── task3.md
+│       │   ├── task4.md
+│       │   ├── task5.md
+│       │   ├── task_7_reassign_dev_ops_omai.md
+│       │   ├── task_8_omai_big_book_path_setup.md
+│       │   ├── task_9_maintenance_mode.md
+│       │   ├── TEMPLATE_SYSTEM_DEVELOPER_GUIDE.md
+│       │   ├── TEMPLATE_SYSTEM_QUICK_REFERENCE.md
+│       │   ├── tenant_plan.md
+│       │   ├── termux_clipboard_git_sync.md
+│       │   ├── TEST_CHURCH_FEATURE_COMPLETE.md
+│       │   ├── TESTING_GUIDE.md
+│       │   ├── Testing.md
+│       │   ├── test-nfs-button.md
+│       │   ├── THIRD-PARTY-NOTICES.md
+│       │   ├── todo 7-22.md
+│       │   ├── todo.md
+│       │   ├── TRANSLATION_COST_CONTROL.md
+│       │   ├── TROUBLESHOOTING_500_ERRORS.md
+│       │   ├── TROUBLESHOOTING.md
+│       │   ├── ui_experience_upgrade_plan.md
+│       │   ├── UserDocumentation.md
+│       │   ├── USER_MANAGEMENT_ARCHITECTURE.md
+│       │   ├── USER_MANAGEMENT_README.md
+│       │   ├── USER_MANAGEMENT_TOGGLE_FIX.md
+│       │   ├── USER_PROFILE_API_GUIDE.md
+│       │   ├── VALIDATION_SYSTEM.md
+│       │   ├── VRT_E2E_TEST_SCRIPT.md
+│       │   ├── watcher-task.md
+│       │   ├── workspaces.md
+│       │   └── WORK_SUMMARY_AND_STATUS.md
+│       ├── missing-backend-routes-summary.md
+│       ├── om-load.txt
+│       ├── orthodox-ssppoc2-only.sql
+│       ├── removable-files-analysis.md
+│       ├── summary-2025-12-10.md
+│       ├── task2-now-2025-12-08.txt
+│       ├── task-history
+│       │   ├── 2025
+│       │   │   └── 12-2025
+│       │   │       └── 12-25-tasks.md
+│       │   └── README.md
+│       ├── task-now-2025-12-08.md
+│       ├── trace-data
+│       │   ├── dashboards_modern.csv
+│       │   └── dashboards_modern.json
+│       └── urgent-task-2025-12-09.md
+├── task-viewing.docx
+├── task-viewing.md
+└── workflow-user-experience
+    ├── configuration
+    ├── documentation
+    │   ├── baptism-records-page.md
+    │   ├── legacy-records-display.md
+    │   └── records-centralized.md
+    ├── guides
+    ├── README.md
+    └── reference
+        ├── dynamic-inspector-references.md
+        ├── menu-important.xlsx
+        └── ui-header-blue-color-analysis.md
+
+30 directories, 491 files

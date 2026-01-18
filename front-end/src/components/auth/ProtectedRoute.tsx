@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRole,
   requiredPermission,
 }) => {
-  const { authenticated, loading, hasRole, hasPermission } = useAuth();
+  const { authenticated, loading, hasRole, hasPermission, user } = useAuth();
 
   if (loading) {
     return (
@@ -31,16 +31,34 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!authenticated) {
-    return <Navigate to="/frontend-pages/homepage" replace />;
+    return <Navigate to="/auth/login2" replace />;
   }
+
+  // Helper function to get redirect path for non-superadmin users
+  const getNonSuperAdminRedirect = (): string | null => {
+    if (user && user.role !== 'super_admin' && user.church_id) {
+      return `/apps/records/baptism?church_id=${user.church_id}`;
+    }
+    return null;
+  };
 
   // Check role requirements
   if (requiredRole && !hasRole(requiredRole)) {
+    // For non-superadmin users, redirect to their baptism records page instead of unauthorized
+    const redirectPath = getNonSuperAdminRedirect();
+    if (redirectPath) {
+      return <Navigate to={redirectPath} replace />;
+    }
     return <Navigate to="/auth/unauthorized" replace />;
   }
 
   // Check permission requirements
   if (requiredPermission && !hasPermission(requiredPermission)) {
+    // For non-superadmin users, redirect to their baptism records page instead of unauthorized
+    const redirectPath = getNonSuperAdminRedirect();
+    if (redirectPath) {
+      return <Navigate to={redirectPath} replace />;
+    }
     return <Navigate to="/auth/unauthorized" replace />;
   }
 

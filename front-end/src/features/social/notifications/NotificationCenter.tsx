@@ -135,7 +135,7 @@ const NOTIFICATION_COLORS = {
 };
 
 const NotificationCenter: React.FC = () => {
-  const { user } = useAuth();
+  const { user, authenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
   const [tabValue, setTabValue] = useState(0);
@@ -160,9 +160,12 @@ const NotificationCenter: React.FC = () => {
   ];
 
   useEffect(() => {
-    fetchNotifications();
-    fetchSettings();
-  }, [tabValue]);
+    // Only fetch if authenticated
+    if (!authLoading && authenticated && user) {
+      fetchNotifications();
+      fetchSettings();
+    }
+  }, [tabValue, authLoading, authenticated, user]);
 
   const fetchNotifications = async () => {
     try {

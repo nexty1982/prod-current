@@ -1,6 +1,6 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { ThemeSettings } from './theme/Theme';
 import RTL from './layouts/full/shared/customizer/RTL';
+import { ThemeSettings } from './theme/Theme';
 import { RouterProvider } from 'react-router-dom';
 import router from './routes/Router';
 import { CustomizerContext } from './context/CustomizerContext';
@@ -15,6 +15,7 @@ import { useContext, useEffect } from 'react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import FilterErrorBoundary from './components/ErrorBoundary/FilterErrorBoundary';
 import { setupAxiosInterceptors } from './utils/axiosInterceptor';
+import AdminMessageNotification from './components/AdminMessageNotification';
 import './App.css'; // Import Tailwind CSS
 
 // Import Orthodox Theme System
@@ -60,10 +61,16 @@ function App() {
                     <div 
                       className="orthodox-app" 
                       data-theme={activeMode}
-                      style={{ minHeight: '100vh' }}
+                      style={{ 
+                        minHeight: '100vh',
+                        backgroundColor: theme.palette.background.default,
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
                     >
                       <ErrorBoundary>
                         <FilterErrorBoundary>
+                          <AdminMessageNotification />
                           <RouterProvider router={router} />
                         </FilterErrorBoundary>
                       </ErrorBoundary>

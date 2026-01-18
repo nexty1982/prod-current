@@ -1,0 +1,34 @@
+❌ [FRONTEND] Failed (28.78s):
+Command failed: npm run build
+x Build failed in 27.61s
+error during build:
+Could not resolve "../../utils/textNormalizer" from "src/features/devel-tools/om-ocr/components/TranscriptionPanel.tsx"
+file: /var/www/orthodoxmetrics/prod/front-end/src/features/devel-tools/om-ocr/components/TranscriptionPanel.tsx
+    at getRollupError (file:///var/www/orthodoxmetrics/prod/front-end/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///var/www/orthodoxmetrics/prod/front-end/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at ModuleLoader.handleInvalidResolvedId (file:///var/www/orthodoxmetrics/prod/front-end/node_modules/rollup/dist/es/shared/node-entry.js:21490:24)
+    at file:///var/www/orthodoxmetrics/prod/front-end/node_modules/rollup/dist/es/shared/node-entry.js:21450:26
+
+STDOUT:
+> orthodoxmetrics@1.0.0 build
+> NODE_OPTIONS="--max-old-space-size=4096" vite build --mode production && node scripts/verify-build.js
+
+vite v5.4.19 building for production...
+transforming...
+✓ 20962 modules transformed.
+
+STDERR: x Build failed in 27.61s
+error during build:
+Could not resolve "../../utils/textNormalizer" from "src/features/devel-tools/om-ocr/components/TranscriptionPanel.tsx"
+file: /var/www/orthodoxmetrics/prod/front-end/src/features/devel-tools/om-ocr/components/TranscriptionPanel.tsx
+    at getRollupError (file:///var/www/orthodoxmetrics/prod/front-end/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///var/www/orthodoxmetrics/prod/front-end/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at ModuleLoader.handleInvalidResolvedId (file:///var/www/orthodoxmetrics/prod/front-end/node_modules/rollup/dist/es/shared/node-entry.js:21490:24)
+    at file:///var/www/orthodoxmetrics/prod/front-end/node_modules/rollup/dist/es/shared/node-entry.js:21450:26
+
+
+═══════════════════════════════════════════════════════════
+  ❌ Build & Deploy Failed! (29.10s)
+═══════════════════════════════════════════════════════════
+
+Error: undefined

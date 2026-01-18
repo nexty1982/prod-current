@@ -49,7 +49,7 @@ export interface TableStyleState {
 }
 
 const orthodoxTheme: TableTheme = {
-  headerColor: '#2c5aa0',
+  headerColor: '#bd56fa',
   headerTextColor: '#ffffff',
   cellColor: '#ffffff',
   cellTextColor: '#333333',
@@ -67,7 +67,7 @@ const orthodoxTheme: TableTheme = {
 
 export const liturgicalThemes = {
   'Orthodox Traditional': {
-    colors: ['#2c5aa0', '#ffffff', '#f9f9f9', '#e3f2fd', '#1976d2'],
+    colors: ['#bd56fa', '#ffffff', '#f9f9f9', '#e3f2fd', '#1976d2'],
     description: 'Traditional Orthodox blue and white theme'
   },
   'Lent Season': {

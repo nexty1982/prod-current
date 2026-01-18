@@ -1,0 +1,92 @@
+GOAL
+Create professional “record entry” form cards for Baptism, Marriage, and Funeral that visually match the attached screenshots: icon-strip header, parchment gradient background, ornamental border, centered title, and a clean two-column grid of inputs.
+
+STACK / CONSTRAINTS
+- React + TypeScript (TSX) in the existing OrthodoxMetrics frontend.
+- Use the project’s existing UI system (Modernize/MUI if present). Do NOT introduce a new component library.
+- Components must be production-quality: responsive, accessible, consistent spacing, and reusable.
+- Do not hardcode church-specific text. Support dynamic titles and optional header artwork.
+- No placeholder junk data. Use realistic field names and structure.
+
+DELIVERABLES
+1) A reusable styled shell component:
+   - src/components/records/RecordEntryCard.tsx
+   Props:
+     - title: string
+     - subtitle?: string
+     - headerImageSrc?: string (icon-strip image)
+     - frameImageSrc?: string (optional border frame image)
+     - children: ReactNode
+   Visual requirements:
+     - Full-width card with maxWidth ~1100px and centered
+     - Parchment gradient background with subtle texture overlay (CSS)
+     - Ornamental frame border (prefer CSS border-image if frameImageSrc provided; fallback to elegant thin border)
+     - Header area with image strip across top (like screenshot), with soft shadow or separator
+     - Title centered, letterspaced, medium weight
+     - Inside padding consistent (24–32px)
+     - Inputs sit on white “field plates” (TextField defaults ok), with consistent height
+
+2) A generic grid wrapper:
+   - src/components/records/RecordEntryGrid.tsx
+   - Exposes a responsive two-column layout (desktop 2 cols, mobile 1 col).
+   - Use MUI Grid or existing layout system; keep spacing consistent.
+
+3) Three form components using the shell:
+   - src/features/records/baptism/BaptismRecordForm.tsx
+   - src/features/records/marriage/MarriageRecordForm.tsx
+   - src/features/records/funeral/FuneralRecordForm.tsx
+
+Each form must:
+- Use RecordEntryCard + RecordEntryGrid
+- Include a sensible field set (not exhaustive, but strong baseline) and match the screenshot layout vibe:
+  Baptism baseline fields:
+    - date_of_birth (date)
+    - date_of_baptism (date)
+    - record_type (select, e.g. Baptism/Chrismation if needed)
+    - child_first_name, child_last_name
+    - father_name, mother_name
+    - godparents
+    - officiating_priest (autocomplete/select)
+    - church (autocomplete/select)
+    - register_number
+    - notes (multiline)
+  Marriage baseline fields:
+    - groom_first_name, groom_last_name
+    - bride_first_name, bride_last_name
+    - marriage_date (date)
+    - marriage_license (text)
+    - groom_parents (text)
+    - bride_parents (text)
+    - officiating_priest (autocomplete/select)
+    - witnesses (text)
+    - notes (multiline)
+  Funeral baseline fields:
+    - deceased_first_name, deceased_last_name
+    - date_of_death (date)
+    - burial_date (date)
+    - age (number)
+    - cause_of_death (text)
+    - place_of_burial (text)
+    - officiating_priest (autocomplete/select)
+    - next_of_kin (text)
+    - notes (multiline)
+
+4) Styling details
+- Create a CSS module or MUI sx style object shared by the shell.
+- Implement the parchment look using layered gradients (no external deps).
+- Add a subtle watermark motif via CSS background-image with low opacity.
+- Ensure inputs have consistent vertical rhythm and label styling.
+
+5) Integration (only if routes/pages exist in this repo pattern)
+- If there is a records entry route area, add demo pages:
+  - /apps/records/baptism/new
+  - /apps/records/marriage/new
+  - /apps/records/funeral/new
+- IMPORTANT: Add any new routes to Router.tsx.
+- IMPORTANT: Add any new menu items to MenuItems.ts under the **Devel Tools** section.
+
+OUTPUT REQUIREMENTS
+- Provide the exact file list changed/created.
+- Keep code clean, typed, and ready to merge.
+- No TODOs left in critical paths.
+- If images aren’t available in repo, use props + safe fallbacks and document where to place assets (e.g. src/assets/records/).

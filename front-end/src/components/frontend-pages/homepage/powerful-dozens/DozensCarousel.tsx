@@ -1,6 +1,5 @@
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
-import './carousel.css';
 import { Box } from '@mui/material';
 
 import Demo1 from '@/assets/images/landingpage/demos/demo-main.jpg';

@@ -332,6 +332,7 @@ const EnhancedRecordsGrid: React.FC<EnhancedRecordsGridProps> = ({ defaultChurch
         <Paper sx={{ height: 600, width: '100%', overflow: 'hidden' }}>
           <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
             <AgGridReact
+              theme="legacy"
               rowData={recordsData}
               columnDefs={columnDefs}
               onGridReady={onGridReady}

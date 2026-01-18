@@ -15,6 +15,16 @@ function devAccessLogger(): Plugin {
     try { fs.appendFileSync(logPath, line) } catch {}
   }
 
+  const logToConsole = (message: string, filePath?: string) => {
+    const timestamp = new Date().toLocaleTimeString()
+    if (filePath) {
+      const relativePath = path.relative(process.cwd(), filePath)
+      console.log(`[${timestamp}] ${message} → ${relativePath}`)
+    } else {
+      console.log(`[${timestamp}] ${message}`)
+    }
+  }
+
   return {
     name: 'dev-access-logger',
     apply: 'serve',
@@ -69,7 +79,9 @@ function devAccessLogger(): Plugin {
         if (accept.includes('text/html')) {
           seen.clear()
           const url = req.url || '/'
-          append(`\n=== PAGE ${req.method} ${url} @ ${new Date().toISOString()} ===\n`)
+          const logMsg = `\n=== PAGE ${req.method} ${url} @ ${new Date().toISOString()} ===\n`
+          append(logMsg)
+          logToConsole(`📄 PAGE: ${req.method} ${url}`)
         }
         next()
       })
@@ -83,8 +95,10 @@ function devAccessLogger(): Plugin {
             const body = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}')
             if (body && body.type === 'route' && body.url) {
               append(`ROUTE  ${body.url}\n`)
+              logToConsole(`🛣️  ROUTE: ${body.url}`)
             } else if (body && body.type === 'api' && body.url) {
               append(`API    ${body.method || 'GET'} ${body.url}\n`)
+              logToConsole(`🔌 API: ${body.method || 'GET'} ${body.url}`)
             }
           } catch {}
           res.statusCode = 204
@@ -97,6 +111,26 @@ function devAccessLogger(): Plugin {
         const url = req.url || ''
         if (url.startsWith('/api') || url.startsWith('/images')) {
           append(`SRVREQ ${req.method} ${url}\n`)
+          logToConsole(`🌐 SERVER REQ: ${req.method} ${url}`)
+        }
+        next()
+      })
+
+      // Log file requests (JS, CSS, TS, TSX, etc.)
+      server.middlewares.use((req, res, next) => {
+        const url = req.url || ''
+        // Skip API, images, and HMR requests
+        if (!url.startsWith('/api') && !url.startsWith('/images') && 
+            !url.startsWith('/@vite') && !url.startsWith('/__devlog') &&
+            !url.startsWith('/node_modules') && url !== '/') {
+          const ext = path.extname(url)
+          if (['.js', '.ts', '.tsx', '.jsx', '.css', '.json', '.svg'].includes(ext) || 
+              url.includes('/src/') || url.startsWith('/src/')) {
+            const filePath = path.resolve(process.cwd(), url.startsWith('/') ? url.slice(1) : url)
+            if (fs.existsSync(filePath)) {
+              logToConsole(`📦 FILE: ${req.method} ${url}`, filePath)
+            }
+          }
         }
         next()
       })
@@ -112,6 +146,7 @@ function devAccessLogger(): Plugin {
       if (!isNodeMod && !isVirtual && looksSource && inSrc && !seen.has(cleanId)) {
         const abs = path.isAbsolute(cleanId) ? cleanId : path.resolve(process.cwd(), cleanId)
         append(abs + '\n')
+        logToConsole(`📝 SOURCE: Loading`, abs)
         seen.add(cleanId)
       }
       return null
@@ -121,6 +156,7 @@ function devAccessLogger(): Plugin {
 
 export default defineConfig(({ mode }) => ({
   base: '/',
+  cacheDir: 'node_modules/.vite', // Enable build cache
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -166,6 +202,7 @@ export default defineConfig(({ mode }) => ({
     minify: mode === 'production',
     sourcemap: true,
     target: mode === 'production' ? 'es2015' : 'esnext',
+    emptyOutDir: false, // Don't empty dist on each build (allows incremental)
     commonjsOptions: { include: [/node_modules/] },
     rollupOptions: {
       external: [],
@@ -187,9 +224,16 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         secure: false,
         configure: (proxy) => {
-          proxy.on('error', (err) => console.log('Proxy error:', err))
+          proxy.on('error', (err) => console.log('❌ Proxy error:', err))
           proxy.on('proxyReq', (proxyReq, req) => {
-            console.log('Proxying request:', req.method, req.url, '→', proxyReq.getHeader('host'))
+            const target = proxyReq.getHeader('host') || 'localhost:3001'
+            const fullUrl = `${target}${req.url || ''}`
+            console.log(`🔌 Proxying request: ${req.method} ${req.url} → ${fullUrl}`)
+          })
+          proxy.on('proxyRes', (proxyRes, req) => {
+            const status = proxyRes.statusCode || 0
+            const statusEmoji = status >= 200 && status < 300 ? '✅' : status >= 400 ? '❌' : '⚠️'
+            console.log(`${statusEmoji} Proxy response: ${req.method} ${req.url} → ${status}`)
           })
         },
       },
@@ -198,9 +242,16 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         secure: false,
         configure: (proxy) => {
-          proxy.on('error', (err) => console.log('Proxy error:', err))
+          proxy.on('error', (err) => console.log('❌ Proxy error:', err))
           proxy.on('proxyReq', (proxyReq, req) => {
-            console.log('Proxying image request:', req.method, req.url, '→', proxyReq.getHeader('host'))
+            const target = proxyReq.getHeader('host') || 'localhost:3001'
+            const fullUrl = `${target}${req.url || ''}`
+            console.log(`🖼️  Proxying image request: ${req.method} ${req.url} → ${fullUrl}`)
+          })
+          proxy.on('proxyRes', (proxyRes, req) => {
+            const status = proxyRes.statusCode || 0
+            const statusEmoji = status >= 200 && status < 300 ? '✅' : status >= 400 ? '❌' : '⚠️'
+            console.log(`${statusEmoji} Image proxy response: ${req.method} ${req.url} → ${status}`)
           })
         },
       },

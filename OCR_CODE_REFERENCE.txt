@@ -1,0 +1,183 @@
+================================================================================
+OCR ENDPOINTS - COMPLETE SOURCE CODE REFERENCE
+================================================================================
+
+All code is in: server/src/index.ts
+
+================================================================================
+1. GET /api/church/:churchId/ocr/jobs
+   Lines: ~653-825
+================================================================================
+
+Purpose: List all OCR jobs for a church
+Database: Checks church DB first, falls back to main DB
+Returns: { jobs: [...] }
+
+Key Logic:
+- Queries church-specific database (e.g., om_church_46)
+- Falls back to main database if no jobs found
+- Logs which database jobs come from
+
+================================================================================
+2. GET /api/church/:churchId/ocr/jobs/:jobId/fusion/drafts
+   Lines: ~1565-1768
+================================================================================
+
+Purpose: Get fusion drafts for a specific OCR job
+Database: Church-specific database
+Returns: { drafts: [...] }
+
+KEY ISSUES TO FIX:
+- Checks if job exists in church DB vs main DB
+- Filters by church_id = ? OR church_id IS NULL (for legacy drafts)
+- Supports workflow_status column (preferred) or status column (fallback)
+- Has extensive logging for debugging
+
+Query Structure:
+  SELECT ... FROM ocr_fused_drafts 
+  WHERE ocr_job_id = ? 
+    AND (church_id = ? OR church_id IS NULL)  -- Handles legacy drafts
+  ORDER BY entry_index ASC
+
+================================================================================
+3. POST /api/church/:churchId/ocr/jobs/:jobId/fusion/drafts
+   Lines: ~1770-1896
+================================================================================
+
+Purpose: Save/upsert fusion drafts
+Database: Church-specific database
+Body: { entries: [{ entry_index, record_type, record_number, payload_json, bbox_json }] }
+
+KEY FIXES APPLIED:
+- Includes church_id when creating drafts (if column exists)
+- Includes workflow_status = 'draft' when creating (if column exists)
+- Uses dynamic column detection
+
+INSERT Structure:
+  INSERT INTO ocr_fused_drafts 
+    (ocr_job_id, entry_index, record_type, record_number, payload_json, bbox_json, 
+     status, created_by, church_id, workflow_status)
+  VALUES (?, ?, ?, ?, ?, ?, 'draft', ?, ?, 'draft')
+  ON DUPLICATE KEY UPDATE ...
+
+================================================================================
+4. POST /api/church/:churchId/ocr/jobs/:jobId/fusion/ready-for-review
+   Lines: ~2236-2357
+================================================================================
+
+Purpose: Mark drafts ready for review (set workflow_status = 'in_review')
+Database: Church-specific database
+
+KEY FIXES APPLIED:
+- Detects if status column is ENUM (doesn't support 'in_review')
+- Only updates workflow_status if status is ENUM
+- Updates both workflow_status and status if status is NOT ENUM
+- Returns clear error if status is ENUM and workflow_status doesn't exist
+
+UPDATE Logic:
+  IF workflow_status column exists:
+    UPDATE ... SET workflow_status = 'in_review' ...
+    IF status is NOT ENUM:
+      ALSO SET status = 'in_review'
+  ELSE IF status is NOT ENUM:
+    UPDATE ... SET status = 'in_review' ...
+  ELSE:
+    RETURN ERROR (can't set ENUM status to 'in_review')
+
+================================================================================
+5. POST /api/church/:churchId/ocr/jobs/:jobId/review/finalize
+   Lines: ~2359-2440
+================================================================================
+
+Purpose: Finalize drafts (create history snapshot)
+Database: Church-specific database
+
+================================================================================
+6. POST /api/church/:churchId/ocr/jobs/:jobId/review/commit
+   Lines: ~2442-2527
+================================================================================
+
+Purpose: Commit finalized drafts to record tables (baptism_records, etc.)
+Database: Church-specific database
+
+================================================================================
+FILE UPLOAD PATHS
+================================================================================
+
+OCR Image Uploads:
+  - Location: server/uploads/om_church_46/processed/
+  - NOT: prod/uploads/om_church_46/
+  - Processed files stored here after OCR processing
+
+================================================================================
+DATABASE SCHEMA REFERENCE
+================================================================================
+
+OCR_JOBS Table (in church DB):
+  - id INT PRIMARY KEY
+  - church_id INT NOT NULL
+  - filename VARCHAR(255)
+  - original_filename VARCHAR(255)
+  - status ENUM('pending','processing','complete','error','cancelled')
+  - record_type ENUM('baptism','marriage','funeral','custom')
+  - confidence_score DECIMAL(5,2)
+  - created_at, updated_at TIMESTAMP
+
+OCR_FUSED_DRAFTS Table (in church DB):
+  - id BIGINT PRIMARY KEY
+  - ocr_job_id BIGINT NOT NULL
+  - entry_index INT NOT NULL
+  - record_type ENUM('baptism', 'marriage', 'funeral')
+  - record_number VARCHAR(16)
+  - payload_json LONGTEXT
+  - bbox_json LONGTEXT
+  - status ENUM('draft', 'committed')  -- DOES NOT SUPPORT 'in_review'
+  - workflow_status ENUM('draft','in_review','finalized','committed')  -- USE THIS
+  - church_id INT NULL  -- May not exist in older schemas
+  - committed_record_id BIGINT NULL
+  - created_by VARCHAR(255)
+  - created_at, updated_at TIMESTAMP
+  - UNIQUE KEY (ocr_job_id, entry_index)
+
+================================================================================
+COMMON ISSUES & SOLUTIONS
+================================================================================
+
+ISSUE: Drafts not showing in Review & Finalize
+SOLUTION: 
+  1. Check if drafts exist: SELECT * FROM ocr_fused_drafts WHERE ocr_job_id = ?
+  2. Check church_id: SELECT church_id, COUNT(*) FROM ocr_fused_drafts WHERE ocr_job_id = ? GROUP BY church_id
+  3. Check if job exists in correct database
+  4. Verify query filters aren't too restrictive
+
+ISSUE: "Data truncated for column 'status'"
+SOLUTION: status column is ENUM('draft','committed') - use workflow_status for 'in_review'
+
+ISSUE: Jobs show in frontend but not in database
+SOLUTION: Jobs might be in main DB (fallback) - check both databases
+
+ISSUE: church_id mismatch
+SOLUTION: Query uses "church_id = ? OR church_id IS NULL" to handle legacy drafts
+
+ISSUE: File path confusion
+SOLUTION: OCR files are stored in server/uploads/om_church_46/processed/
+  - NOT prod/uploads/om_church_46/
+  - Code uses: path.join(__dirname, '..', 'uploads', `om_church_${churchId}`, 'processed')
+  - This resolves to: server/uploads/om_church_46/processed/
+
+================================================================================
+TEST ENDPOINT
+================================================================================
+
+POST /api/church/:churchId/ocr/test/create-test-job
+- Creates test OCR job
+- Creates 2 test fusion drafts
+- Adds missing columns (workflow_status, church_id)
+- Use to generate test data
+
+Example:
+  POST /api/church/46/ocr/test/create-test-job
+  Body: { "jobId": 999, "filename": "test.jpg" }
+
+================================================================================
+

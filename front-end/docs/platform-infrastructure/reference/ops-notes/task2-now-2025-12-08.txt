@@ -1,0 +1,252 @@
+1. Multiple upload roots for OCR
+A. Decide on buckets, not arbitrary paths
+
+Don’t let clients send raw filesystem paths. Define a small set of whitelisted buckets, each mapped to a directory on disk:
+
+records → real record uploads (your current behavior)
+
+test → ad-hoc test images
+
+benchmark → curated dataset for accuracy testing
+
+Example .env additions on the server:
+
+OCR_UPLOAD_ROOT=/var/www/orthodoxmetrics/ocr_uploads
+OCR_BUCKETS=records,test,benchmark
+
+
+Directory layout on disk:
+
+/var/www/orthodoxmetrics/ocr_uploads/
+  records/
+  test/
+  benchmark/
+
+
+You can create these once:
+
+mkdir -p /var/www/orthodoxmetrics/ocr_uploads/{records,test,benchmark}
+chown -R www-data:www-data /var/www/orthodoxmetrics/ocr_uploads
+
+B. Update the Node upload middleware to support bucket
+
+In your OCR upload route (the one currently doing multer & job creation), change the storage destination to use a bucket query/field.
+
+Pseudo-code (TypeScript-ish):
+
+// config
+const UPLOAD_ROOT = process.env.OCR_UPLOAD_ROOT || '/var/www/orthodoxmetrics/ocr_uploads';
+const ALLOWED_BUCKETS = (process.env.OCR_BUCKETS || 'records')
+  .split(',')
+  .map(b => b.trim())
+  .filter(Boolean);
+
+function resolveBucket(req: Request): string {
+  const bucket = (req.query.bucket || req.body.bucket || 'records') as string;
+  if (!ALLOWED_BUCKETS.includes(bucket)) return 'records';
+  return bucket;
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const bucket = resolveBucket(req);
+    const dir = path.join(UPLOAD_ROOT, bucket);
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname) || '.jpg';
+    cb(null, `${unique}${ext}`);
+  },
+});
+
+const upload = multer({ storage });
+
+
+Then in your existing OCR upload endpoint:
+
+router.post(
+  '/church/:churchId/ocr/upload',
+  upload.single('file'),
+  async (req, res) => {
+    const bucket = resolveBucket(req);
+    const filePath = req.file?.path;
+
+    // When you insert into ocr_jobs, store the bucket and path:
+    const job = await createOcrJob({
+      churchId: req.params.churchId,
+      bucket,
+      filePath,
+      // ...existing fields
+    });
+
+    res.json({ jobId: job.id, bucket });
+  }
+);
+
+
+Also extend your ocr_jobs table with a bucket column if it doesn’t exist:
+
+ALTER TABLE ocr_jobs ADD COLUMN bucket VARCHAR(32) NOT NULL DEFAULT 'records';
+
+
+And allow filtering by bucket on listing jobs:
+
+router.get('/church/:churchId/ocr/jobs', async (req, res) => {
+  const bucket = (req.query.bucket as string) || undefined;
+  const jobs = await listOcrJobs(req.params.churchId, bucket);
+  res.json(jobs);
+});
+
+2. Front-end: let the user choose where their uploads go
+
+In OCRStudioPage/OcrUploader:
+
+Add a simple select or radio group:
+
+const [bucket, setBucket] = useState<'records' | 'test' | 'benchmark'>('records');
+
+// In the UI:
+<Select
+  size="small"
+  value={bucket}
+  onChange={e => setBucket(e.target.value as any)}
+>
+  <MenuItem value="records">Production Records</MenuItem>
+  <MenuItem value="test">Test Images</MenuItem>
+  <MenuItem value="benchmark">Benchmark Set</MenuItem>
+</Select>
+
+
+When calling the upload endpoint, append bucket:
+
+const formData = new FormData();
+formData.append('file', file);
+
+await api.post(
+  `/api/church/${churchId}/ocr/upload?bucket=${bucket}`,
+  formData,
+  { headers: { 'Content-Type': 'multipart/form-data' } }
+);
+
+
+For job listing in the UI, pass the same bucket so your “Jobs” panel only shows jobs from the current dataset:
+
+const { data: jobs } = useOcrJobs({ churchId, bucket });
+
+
+(Adjust your hook implementation to append ?bucket=....)
+
+This gives you clean separation between production record jobs and test/baseline jobs.
+
+3. Batch “accuracy tests” on folders of images
+
+You want to point at a directory of images and run measurable tests. Treat this as a separate benchmark runner that talks to your existing OCR service.
+
+A. Define a simple benchmark format
+
+For true accuracy (not just “did it return some text?”), you need ground truth. Use this pattern:
+
+/var/www/orthodoxmetrics/ocr_benchmarks/baptism_1/
+  img001.jpg
+  img001.txt      # expected plain text, or
+  img001.json     # structured expected fields
+  img002.jpg
+  img002.txt
+  ...
+
+
+If a .txt/.json is missing, the runner can still log OCR output and mark accuracy as null.
+
+B. Create a Node script: server/scripts/runOcrBenchmark.ts
+
+High-level logic:
+
+// Pseudocode
+const dir = process.argv[2]; // path to folder
+for each image in dir:
+  - call internal OCR function or HTTP endpoint (e.g. /api/test-ocr or a local service function)
+  - read expected .txt/.json if present
+  - compute:
+      * char-level Levenshtein distance
+      * word accuracy %
+      * maybe field accuracy if JSON
+  - write one JSON record per file
+aggregate:
+  - average accuracy
+  - count failed OCRs, timeouts, etc.
+output:
+  - benchmark_results.json
+  - benchmark_results.html (table + summary)
+
+
+You already have the pattern from your image-quality report; this is the same idea but for OCR text instead of pixel metrics.
+
+You can run it like:
+
+cd /var/www/orthodoxmetrics/prod/server
+node dist/scripts/runOcrBenchmark.js /var/www/orthodoxmetrics/ocr_benchmarks/baptism_1
+
+
+or if you keep it in TS + ts-node for dev.
+
+C. Minimal HTML report structure
+
+Exactly like the image quality report:
+
+Summary:
+
+number of images
+
+avg character accuracy
+
+avg word accuracy
+
+count of “no ground truth” files
+
+Table: per file:
+
+filename
+
+bucket / dataset
+
+OCR status (ok / error)
+
+char accuracy %
+
+word accuracy %
+
+link to raw OCR output
+
+This gives you a repeatable benchmark harness you can run anytime on any bucket/folder.
+
+4. How this fits your workflow
+
+Typical dev/prod workflow with these additions:
+
+Upload new test set
+
+Go to /devel/ocr-studio
+
+Select bucket: test or benchmark
+
+Upload 500 images → they land in /ocr_uploads/test etc., and jobs are tagged.
+
+Run OCR (either auto via queue, or manually via your existing job processor).
+
+Run accuracy benchmark
+
+Put ground truth .txt/.json in the benchmark folder.
+
+Run runOcrBenchmark against that folder.
+
+Open the HTML report.
+
+Production uploads still use bucket=records and stay completely separate.
+
+If you want next, I can:
+
+Write the exact Node script for runOcrBenchmark.ts that hits your existing OCR route, and
+
+Give you the SQL ALTER and TypeScript changes for ocr_jobs to add bucket + filtering in a way that matches your current code style.

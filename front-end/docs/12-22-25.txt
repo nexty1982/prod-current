@@ -1,0 +1,210 @@
+
+You are Cursor working in the OrthodoxMetrics repo.
+
+MISSION (PHASE 1 — MUST SHIP NOW)
+Implement “Transcription-first OCR” so OrthodoxMetrics produces a clean, readable transcription like handwritingocr.com (screenshots 7/8) instead of raw token garbage. This is NOT about extractors, tables, or schema. This is strictly: OCR → normalize → paragraph reconstruction → display.
+
+HARD REQUIREMENTS
+- Production-grade. No hacks. No TODOs.
+- TypeScript, strict typing, no `any`.
+- Do NOT change database schema.
+- Do NOT refactor Fusion/Mapping/Review steps.
+- Only implement a new transcription normalization pipeline and wire it into the existing OCR uploader + inspection panel.
+- Replace the current “OCR Result Preview” (unreadable token dump) with a single readable transcription block.
+- Add professional toast messages for success/error/warn actions in the OCR uploader and inspection panel.
+- Add a “Document processing” settings section under the OCR Record Uploader (UI-only persistence is fine; backend can ignore settings beyond what’s used for normalization).
+- Add new UI routes/components to Router.tsx and MenuItems.ts under **Devel Tools** ONLY if you create new pages. If you only modify existing uploader pages, do not add routes.
+
+INPUT ARTIFACTS
+- The user provided compare outputs:
+  - handwritingocr.com output is readable (Cyrillic + English preserved)
+  - OrthodoxMetrics output is junk. Your job is to match readability, NOT necessarily exact text.
+- The screenshots show the desired UX patterns:
+  - Transcription is default
+  - Clean right panel with readable text
+  - Minimal UI noise
+  - Professional toasts
+
+DEFINITION OF DONE (ACCEPTANCE TESTS)
+1) Upload an OCR image → run OCR → user sees ONE clean transcription text block (paragraphs, line breaks, readable).
+2) Cyrillic stays Cyrillic. No random Latin garbage. Mixed-language content remains separated and readable.
+3) No token lists shown by default anywhere in the uploader/inspection UI.
+4) Toasts appear on: upload success, OCR processing started, OCR success, OCR failure, copy success.
+5) Settings section exists under uploader and persists selections on the page (localStorage ok).
+
+========================================================
+STEP 1 — REPO DISCOVERY (DO THIS FIRST)
+========================================================
+Find and list the exact files involved in:
+A) OCR Record Uploader page (upload + process UI)
+B) OCR Inspection Panel (image left, tabs or output right)
+C) API route(s) that return OCR results for an image/job
+D) Where OCR “result preview” is currently generated
+
+Output only:
+- file paths
+- brief role of each file
+- which component renders the current unreadable preview
+Then proceed.
+
+========================================================
+STEP 2 — CREATE A TRANSCRIPTION NORMALIZATION MODULE (SERVER)
+========================================================
+Create a new module (server-side) that converts the existing OCR response into a readable transcription.
+
+Create: server/src/ocr/transcription/normalizeTranscription.ts
+
+Types:
+- Define `OcrToken` and `OcrLine` types explicitly.
+- Prefer normalized image coords for bbox: { x0,y0,x1,y1 } in [0..1].
+- Token: { text: string; confidence?: number; bbox?: BBox; langHint?: 'latin'|'cyrillic'|'mixed'|'unknown' }
+
+Function signature:
+- `normalizeTranscription(input: { tokens: OcrToken[]; lines?: OcrLine[]; }): { text: string; paragraphs: string[]; diagnostics: {...} }`
+
+RULES (MUST IMPLEMENT)
+A) Script detection (critical)
+- Implement a fast script classifier:
+  - If a string contains any Cyrillic unicode range: script='cyrillic'
+  - Else if contains A-Z/a-z: script='latin'
+  - Else 'unknown'
+- Never “correct” Cyrillic into Latin-like junk.
+- Do not merge tokens of different scripts into the same word unless they are clearly numeric/punctuation.
+
+B) Token cleanup
+- Trim, collapse whitespace.
+- Drop tokens that are:
+  - length=1 and not a letter/number (punct-only)
+  - OR confidence < threshold (default 0.35) AND length <= 2
+  - OR match common OCR garbage regex (e.g., repeated random consonants) — keep this conservative.
+
+C) Line reconstruction
+- If the OCR provider already gives lines: use them.
+- If not, reconstruct lines by clustering tokens by Y:
+  - Sort tokens by y-center
+  - Group into “line bands” where y-centers differ less than an adaptive threshold (based on median token height).
+  - Within each line, sort by x0 and join with spaces.
+- Preserve hyphenated line breaks:
+  - If line ends with '-' and next line starts with a letter: join without space and remove '-'.
+
+D) Paragraph reconstruction
+- Split paragraphs by vertical gaps:
+  - Compute y-gap between adjacent lines.
+  - If gap > (median line height * 1.2) start a new paragraph.
+- Also start a new paragraph when script changes (latin<->cyrillic) and the line begins with a capitalized label-like token or a short header.
+
+E) Readability formatting
+- Output text should be paragraphs separated by a blank line.
+- Within paragraphs keep line breaks only if they look intentional (e.g., header blocks); otherwise wrap lines into a single paragraph line.
+
+Diagnostics
+Return:
+- droppedTokenCount
+- lineCount
+- paragraphCount
+- scriptsPresent
+- warnings (e.g., “low_confidence_overall”)
+
+========================================================
+STEP 3 — ADAPTER: CONVERT EXISTING OCR RESPONSE TO TOKENS/LINES
+========================================================
+Create: server/src/ocr/transcription/extractTokensFromVision.ts (or adapt existing parse function)
+Goal: take the current OCR response object you already store/return and produce:
+- tokens[]
+- lines[] if available
+
+DO NOT change the OCR provider.
+DO NOT change DB.
+DO NOT change stored raw response format.
+Just build an adapter from whatever you currently return.
+
+If you already have a function like `parseVisionResponse` or similar, reuse it; otherwise create a minimal adapter.
+
+========================================================
+STEP 4 — API: RETURN NORMALIZED TRANSCRIPTION
+========================================================
+Modify the existing OCR “get result” endpoint (whatever the UI calls) so it returns both:
+- raw OCR metadata (unchanged)
+- a new field:
+  - `transcription: { text: string; paragraphs: string[]; diagnostics: ... }`
+
+OR add a dedicated endpoint if needed:
+- GET /api/ocr/jobs/:jobId/transcription?page=1
+Return: transcription object
+
+This must be fast and deterministic.
+
+========================================================
+STEP 5 — FRONTEND: REPLACE “OCR RESULT PREVIEW” WITH TRANSCRIPTION PANEL
+========================================================
+In the OCR Inspection Panel / Uploader detail view:
+- Make “Transcription” the default tab.
+- The right panel shows:
+  - Title: “Transcription”
+  - Buttons: Copy (copies transcription.text), optional Download disabled for now
+  - Scrollable container with the text rendered as <pre> or styled typography preserving paragraph spacing
+- Remove/hide any token dumps and noisy lists from the default view.
+- Keep other tabs if they exist, but they must not be default.
+
+Formatting:
+- Use readable font-size and line-height.
+- Preserve blank lines between paragraphs.
+
+========================================================
+STEP 6 — SETTINGS SECTION UNDER OCR RECORD UPLOADER (UI)
+========================================================
+Add a new collapsible “Document processing” card under the uploader header (like screenshot).
+Controls:
+1) “Customize AI” badge + “Experimental” badge
+2) Select: “Fix spelling mistakes” (default) vs “Transcribe exactly as written”
+3) Select: “Extract all text” (default) vs “Extract handwritten text only”
+4) Select: “Improving formatting for better readability” (default)
+
+Persistence:
+- Store in localStorage (key: `om_ocr_doc_processing_settings`)
+- Apply:
+  - spelling mode affects normalization minimally:
+    - For v1, implement only: if “exactly as written”, do NOT do any spell correction (we are not adding spell-check anyway). Just store and pass along.
+  - scope affects filtering:
+    - If “handwritten only” and OCR response has a way to distinguish handwriting vs printed, filter printed tokens; otherwise ignore and show a warning toast “Handwritten-only not supported for this engine yet.”
+
+========================================================
+STEP 7 — PROFESSIONAL TOASTS (REQUIRED)
+========================================================
+Replace any alerts/snackbars with a consistent toast system.
+
+Toasts needed:
+- On OCR start: “Extracting text…” (info)
+- On OCR success: “OCR completed” (success)
+- On OCR fail: “OCR processing failed” (error, include short reason)
+- On copy: “Copied to clipboard” (success)
+- On settings save: “Settings saved” (success)
+
+Placement: top-right or bottom-right.
+Auto dismiss: ~3–5s.
+Non-blocking.
+
+Reuse existing toast infra if present; otherwise add a minimal provider used by OCR pages only (do not replatform entire app).
+
+========================================================
+STEP 8 — QA CHECKLIST (YOU MUST PROVIDE)
+========================================================
+Add a short markdown doc at:
+docs/OCR_TRANSCRIPTION_PHASE1.md
+
+Include:
+- How to test locally
+- Which endpoints to hit
+- Before/after expectation
+- Known limitations (e.g., handwritten-only filtering may not work until provider supports it)
+
+========================================================
+OUTPUT RULES (HOW YOU REPORT BACK)
+After each major step, output ONLY:
+- What changed (bullet list)
+- Files changed (paths)
+- How to test (commands + UI path)
+
+DO NOT talk about future extractors/tables. Ship Phase 1.
+
+Now start with Step 1 repo discovery and proceed through Step 8.

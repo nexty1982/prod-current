@@ -206,9 +206,9 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: 'Super Admin Console',
-    icon: IconShield,
-    href: '/admin/dashboard',
+    title: 'Super Dashboard',
+    icon: IconLayoutDashboard,
+    href: '/dashboards/super',
   },
 
   // SITE CONFIG SECTION
@@ -224,22 +224,9 @@ const Menuitems: MenuitemsType[] = [
     children: [
       {
         id: uniqueId(),
-        title: 'Menu Settings',
-        icon: IconEdit,
-        href: '/settings/menu',
-      },
-
-      {
-        id: uniqueId(),
         title: 'User Management',
         icon: IconUsers,
         href: '/admin/users',
-      },
-      {
-        id: uniqueId(),
-        title: 'Role Management',
-        icon: IconUserPlus,
-        href: '/admin/roles',
       },
       {
         id: uniqueId(),
@@ -258,27 +245,21 @@ const Menuitems: MenuitemsType[] = [
     children: [
       {
         id: uniqueId(),
-        title: 'Orthodox Headlines',
-        icon: IconNews,
-        href: '/orthodox-headlines',
-      },
-      {
-        id: uniqueId(),
         title: 'Blog Management',
         icon: IconWriting,
         href: '/admin/blog-admin',
       },
       {
         id: uniqueId(),
-        title: 'Social Blog',
-        icon: IconWriting,
-        href: '/social/blog',
-      },
-      {
-        id: uniqueId(),
         title: 'Notes',
         icon: IconNotes,
         href: '/apps/notes',
+      },
+      {
+        id: uniqueId(),
+        title: 'Welcome Message',
+        icon: IconMessage,
+        href: '/frontend-pages/welcome-message',
       },
     ],
   },
@@ -288,6 +269,12 @@ const Menuitems: MenuitemsType[] = [
     icon: IconMessage,
     href: '#',
     children: [
+      {
+        id: uniqueId(),
+        title: 'Email',
+        icon: IconMessage,
+        href: '/apps/email',
+      },
       {
         id: uniqueId(),
         title: 'Friends',
@@ -361,30 +348,66 @@ const Menuitems: MenuitemsType[] = [
     icon: IconFileDescription,
     href: '#',
     children: [
-      // Modern Systems
       {
         id: uniqueId(),
-        title: 'Modern Records Grid',
-        icon: IconRocket,
-        href: '/apps/records',
-        chip: 'ICON',
-        chipColor: 'primary',
+        title: 'Church Metric Records',
+        icon: IconDatabase,
+        href: '/apps/records/baptism',
       },
       {
         id: uniqueId(),
-        title: 'Records UI Professional',
-        icon: IconDatabase,
-        href: '/apps/records-ui',
-        chip: 'PRO',
-        chipColor: 'success',
+        title: 'OCR Enhanced Uploader',
+        icon: IconFileDescription,
+        href: '/devel/enhanced-ocr-uploader',
       },
     ],
   },
-
+  {
+    id: uniqueId(),
+    title: 'Image AI',
+    icon: IconPalette,
+    href: '/apps/image-ai',
+  },
+  {
+    id: uniqueId(),
+    title: 'Gallery',
+    icon: IconPalette,
+    href: '/apps/gallery',
+  },
+  {
+    id: uniqueId(),
+    title: 'OM-Spec',
+    icon: IconFileDescription,
+    href: '/church/om-spec',
+  },
+  {
+    id: uniqueId(),
+    title: 'OM Tasks',
+    icon: IconEdit,
+    href: '/devel-tools/om-tasks',
+  },
+  {
+    id: uniqueId(),
+    title: 'Build Console',
+    icon: IconRocket,
+    href: '/admin/build',
+  },
+  {
+    id: uniqueId(),
+    title: 'OMAI Ultimate Logger',
+    icon: IconBug,
+    href: '/church/omai-logger',
+  },
   // DEVELOPER TOOLS SECTION
   {
     navlabel: true,
     subheader: '🛠️ Developer Tools',
+  },
+  {
+    id: uniqueId(),
+    title: 'OM Spec / Tasks',
+    icon: IconFileDescription,
+    href: '/church/om-spec',
   },
   {
     id: uniqueId(),
@@ -407,12 +430,6 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
-        title: 'OM API Dashboard',
-        icon: IconDatabase,
-        href: '/admin/om-api-dashboard',
-      },
-      {
-        id: uniqueId(),
         title: 'Site Structure Visualizer',
         icon: IconSitemap,
         href: '/tools/site-structure',
@@ -425,9 +442,33 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
-        title: 'Tree Inspector',
-        icon: IconTree,
-        href: '/devel-tools/tree-inspector',
+        title: 'Live Table Builder',
+        icon: IconBorderAll,
+        href: '/devel-tools/live-table-builder',
+      },
+      {
+        id: uniqueId(),
+        title: 'OCR Studio',
+        icon: IconFileDescription,
+        href: '/devel/ocr-studio',
+      },
+      {
+        id: uniqueId(),
+        title: 'Enhanced OCR Uploader',
+        icon: IconFileDescription,
+        href: '/devel/enhanced-ocr-uploader',
+      },
+      {
+        id: uniqueId(),
+        title: 'OCR Settings',
+        icon: IconFileDescription,
+        href: '/devel/ocr-settings',
+      },
+      {
+        id: uniqueId(),
+        title: 'OM Permission Center',
+        icon: IconShield,
+        href: '/devel-tools/om-permission-center',
       },
       {
         id: uniqueId(),
@@ -489,12 +530,6 @@ const Menuitems: MenuitemsType[] = [
         icon: IconBug,
         href: '/admin/tools/survey',
       },
-      {
-        id: uniqueId(),
-        title: 'Error Monitoring',
-        icon: IconBug,
-        href: '/admin/errors',
-      },
     ],
   },
 
@@ -523,27 +558,15 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
-        title: 'OMAI Ultimate Logger',
-        icon: IconActivity,
-        href: '/admin/omai-logger',
-      },
-      {
-        id: uniqueId(),
-        title: 'Permissions Management',
+        title: 'OM Permission Center',
         icon: IconShield,
-        href: '/admin/permissions',
+        href: '/devel-tools/om-permission-center',
       },
       {
         id: uniqueId(),
         title: 'Admin Settings',
         icon: IconSettings,
         href: '/admin/settings',
-      },
-      {
-        id: uniqueId(),
-        title: 'Church OCR',
-        icon: IconPoint,
-        href: '/admin/church/:id/ocr',
       },
       {
         id: uniqueId(),
@@ -662,11 +685,9 @@ export const getMenuItems = (user: any) => {
         },
         {
           id: uniqueId(),
-          title: 'Records UI Professional',
-          icon: IconDatabase,
-          href: '/apps/records-ui',
-          chip: 'PRO',
-          chipColor: 'success',
+          title: 'OCR Uploads',
+          icon: IconFileDescription,
+          href: `/devel/enhanced-ocr-uploader?church_id=${churchId}`,
         },
       ],
     },
@@ -676,9 +697,9 @@ export const getMenuItems = (user: any) => {
     },
     {
       id: uniqueId(),
-      title: 'Blog',
-      icon: IconWriting,
-      href: '/social/blog',
+      title: 'Email',
+      icon: IconMessage,
+      href: '/apps/email',
     },
     {
       id: uniqueId(),

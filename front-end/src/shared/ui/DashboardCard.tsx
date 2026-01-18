@@ -33,7 +33,9 @@ const DashboardCard = ({
 
 
   const theme = useTheme();
-  const borderColor = theme.palette.grey[100];
+  const borderColor = theme.palette.mode === 'dark' 
+    ? theme.palette.grey[700] 
+    : theme.palette.grey[100];
 
   return (
     <Card

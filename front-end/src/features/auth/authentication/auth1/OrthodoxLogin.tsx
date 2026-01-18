@@ -245,14 +245,33 @@ const globalStyles = `
 `;
 
 const OrthodoxLogin: React.FC = () => {
-    const { login } = useAuth();
+    const { user, authenticated, loading: authLoading, login } = useAuth();
+    
+    // Get display name for welcome message
+    const displayName = user?.full_name || (user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : null);
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [alreadyLoggedIn, setAlreadyLoggedIn] = useState(false);
     const [floatingTexts, setFloatingTexts] = useState<Array<{ id: number, text: string, style: any }>>([]);
+
+    // Check if user is already logged in and redirect
+    useEffect(() => {
+        if (!authLoading && authenticated && user) {
+            setAlreadyLoggedIn(true);
+            // Redirect priests to baptism records, others to Super Dashboard
+            setTimeout(() => {
+                if (user.role === 'priest' && user.church_id) {
+                    navigate(`/apps/records/baptism?church_id=${user.church_id}`);
+                } else {
+                    navigate('/dashboards/super');
+                }
+            }, 2000); // Show message for 2 seconds before redirect
+        }
+    }, [authenticated, user, authLoading, navigate]);
 
     // Orthodox phrases for floating text
     const phrases = [
@@ -340,6 +359,18 @@ const OrthodoxLogin: React.FC = () => {
             console.log('🔑 User email:', email);
             console.log('🔑 Redirect URL:', result.redirectUrl);
 
+            // Get the user from localStorage (set by AuthService.login)
+            const storedUserStr = localStorage.getItem('auth_user');
+            const currentUser = storedUserStr ? JSON.parse(storedUserStr) : null;
+
+            // Check if user is a priest and redirect to baptism records
+            if (currentUser?.role === 'priest' && currentUser?.church_id) {
+                const redirectPath = `/apps/records/baptism?church_id=${currentUser.church_id}`;
+                console.log('🔑 Priest user detected, redirecting to:', redirectPath);
+                navigate(redirectPath);
+                return;
+            }
+
             // Use the redirect URL from the server response if provided
             if (result.redirectUrl) {
                 console.log('🔑 Redirecting to:', result.redirectUrl);
@@ -382,21 +413,41 @@ const OrthodoxLogin: React.FC = () => {
                         <Box className="lower-bar" />
                     </OrthodoxCross>
 
-                    <BrandTitle>Orthodox Metrics</BrandTitle>
+                    <BrandTitle>Orthodox Metrics LLC.</BrandTitle>
                     <BrandSubtitle>Recording the Saints Among Us</BrandSubtitle>
 
                     <BrandDescription>
-                        AI-powered digitization of handwritten Orthodox records in Greek, Russian, Romanian,
-                        and more. Preserving our sacred heritage for future generations through cutting-edge technology.
+                        Google vision powered OCR with intelligent text recognition and data extraction, topped off with versatile digital reporting and analytics. Preserving our sacred heritage for future generations through cutting-edge technology. digitization of handwritten Orthodox records in Greek, Russian, Romanian,
+                        and more.
                     </BrandDescription>
                 </LeftSection>
 
                 <RightSection className="right-section">
                     <LoginFormContainer>
-                        <LoginTitle>Welcome Back</LoginTitle>
-                        <LoginSubtitle>Sign in to your dashboard</LoginSubtitle>
+                        {alreadyLoggedIn ? (
+                            <>
+                                <LoginTitle>
+                                    Already Logged In
+                                </LoginTitle>
+                                <LoginSubtitle>
+                                    {user?.church_id 
+                                        ? 'Redirecting to Records UI...' 
+                                        : 'Redirecting to dashboard...'}
+                                </LoginSubtitle>
+                                <Box sx={{ mt: 3, textAlign: 'center' }}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {displayName ? `Welcome back, ${displayName}` : 'Welcome back'}
+                                    </Typography>
+                                </Box>
+                            </>
+                        ) : (
+                            <>
+                                <LoginTitle>
+                                    {displayName ? `Welcome back, ${displayName}` : 'Welcome'}
+                                </LoginTitle>
+                                <LoginSubtitle>Sign in to your dashboard</LoginSubtitle>
 
-                        <form onSubmit={handleSubmit}>
+                                <form onSubmit={handleSubmit}>
                             <StyledTextField
                                 fullWidth
                                 type="email"
@@ -467,6 +518,8 @@ const OrthodoxLogin: React.FC = () => {
                         <CreateAccount>
                             Don't have an account? <a href="#">Create one here</a>
                         </CreateAccount>
+                            </>
+                        )}
                     </LoginFormContainer>
                 </RightSection>
             </MainContainer>

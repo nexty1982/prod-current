@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Registre de Înmormântări – Biserica Ortodoxă</title>
+<style>
+  :root{
+    --ro-blue:#002B7F;
+    --ro-yellow:#FCD116;
+    --ro-red:#CE1126;
+    --ink:#1f2432;
+    --muted:#5c6475;
+    --border:#e3e7ef;
+    --bg:#ffffff;
+  }
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans', 'Noto Sans Romanian', Arial, sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 16px 60px}
+
+  /* Flag header bar */
+  .flagbar{height:8px;display:grid;grid-template-columns:1fr 1fr 1fr}
+  .flagbar > div:nth-child(1){background:var(--ro-blue)}
+  .flagbar > div:nth-child(2){background:var(--ro-yellow)}
+  .flagbar > div:nth-child(3){background:var(--ro-red)}
+
+  .title{font-size:28px;font-weight:800;margin:12px 0 4px;color:var(--ink);text-align:center}
+  .subtitle{margin:0 0 18px;color:var(--muted);text-align:center}
+
+  .table-card{border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 34px rgba(0,0,0,.08);overflow:hidden}
+  .header{
+    background:
+      linear-gradient(90deg, var(--ro-blue) 0 33.33%, var(--ro-yellow) 33.33% 66.66%, var(--ro-red) 66.66% 100%);
+    color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap
+  }
+  .header h2{font-size:18px;margin:0;font-weight:900;text-shadow:0 1px 0 rgba(0,0,0,.2)}
+  .search{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .search input{height:36px;border-radius:999px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.14);color:#fff;padding:0 12px;outline:none;min-width:220px}
+  .search input::placeholder{color:rgba(255,255,255,.9)}
+
+  .table{width:100%;border-collapse:separate;border-spacing:0}
+  .table thead th{
+    position:sticky;top:0;
+    background:linear-gradient(0deg, #fff6d6, #ffffff);
+    font-size:13px;color:#1d2a44;text-align:left;padding:10px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none
+  }
+  .table tbody td{padding:10px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:top}
+  .table tbody tr:hover{background:#f7fbff}
+  .sort-ind{font-size:11px;opacity:.75;margin-left:6px}
+
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid #e7e7e7;background:#fff}
+  .actions-btn{background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+  .actions-btn:hover{border-color:var(--ro-yellow);box-shadow:0 2px 0 rgba(252,209,22,.35)}
+
+  .pagination{display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:10px 12px;background:#f9fbff;border-top:1px solid var(--border)}
+  .pg-btn{background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:999px;cursor:pointer}
+  .pg-btn[disabled]{opacity:.5;cursor:not-allowed}
+
+  .table-wrap{position:relative}
+  .watermark{position:absolute;inset:auto 16px 16px auto;opacity:.06;font-size:120px;font-weight:900;line-height:1;pointer-events:none;color:#001c52}
+
+  /* Modal */
+  .modal{position:fixed;inset:0;background:rgba(15,22,35,.55);display:none;place-items:center;padding:16px;z-index:30}
+  .modal[open]{display:grid}
+  .dialog{background:#fff;border-radius:16px;max-width:720px;width:100%;box-shadow:0 22px 60px rgba(0,0,0,.3);border:1px solid var(--border);overflow:hidden}
+  .dialog-head{
+    background:linear-gradient(90deg, var(--ro-blue), var(--ro-yellow), var(--ro-red));
+    color:#000;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-weight:800
+  }
+  .dialog-body{padding:16px}
+  .dl{display:grid;grid-template-columns:220px 1fr;gap:10px 16px}
+  .dl dt{font-weight:700;color:#1d2a44}
+  .dl dd{margin:0;color:#2a3550}
+  .close{background:#fff;border:1px solid rgba(0,0,0,.15);color:#1d2a44;border-radius:10px;padding:6px 10px;cursor:pointer}
+  .footer{font-size:12px;color:var(--muted);margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+  <div class="flagbar"><div></div><div></div><div></div></div>
+
+  <div class="wrap">
+    <div style="text-align:center;margin-bottom:16px">
+      <div class="title">Registre de Înmormântări – Biserica Ortodoxă</div>
+    </div>
+
+    <div class="table-card">
+      <div class="header">
+        <h2>Registru Înmormântări</h2>
+        <div class="search">
+          <input id="q" type="search" placeholder="Căutare…" aria-label="Căutare" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="watermark">✝︎</div>
+        <table class="table" aria-label="Registre de Înmormântări">
+          <thead>
+            <tr>
+              <th data-key="deceased_date">Data decesului <span class="sort-ind">↕</span></th>
+              <th data-key="burial_date">Data înmormântării <span class="sort-ind">↕</span></th>
+              <th data-key="name">Prenume <span class="sort-ind">↕</span></th>
+              <th data-key="lastname">Nume de familie <span class="sort-ind">↕</span></th>
+              <th data-key="age">Vârstă <span class="sort-ind">↕</span></th>
+              <th data-key="clergy">Preot <span class="sort-ind">↕</span></th>
+              <th data-key="burial_location">Locul înmormântării <span class="sort-ind">↕</span></th>
+              <th>Acțiuni</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button class="pg-btn" id="prev">Înapoi</button>
+        <div id="pageinfo" aria-live="polite">Pagina 1 din 1</div>
+        <button class="pg-btn" id="next">Înainte</button>
+      </div>
+    </div>
+
+    <div class="footer">Faceți clic pe antet pentru sortare • 10 înregistrări pe pagină • „Vizualizați înregistrarea” pentru detalii complete</div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div id="dialog-title">Vizualizați înregistrarea</div>
+        <button class="close" id="close">Închideți</button>
+      </div>
+      <div class="dialog-body">
+        <dl class="dl" id="detail"></dl>
+      </div>
+    </div>
+  </div>
+
+<script id="embedded-data" type="application/json">[{"deceased_date": "2024-01-05", "burial_date": "2024-01-14", "name": "Bianca", "lastname": "Enache", "age": 25, "clergy": "Pr. Mihail Radu", "burial_location": "Cimitirul Ortodox, Timișoara"}, {"deceased_date": "2009-12-22", "burial_date": "2010-01-01", "name": "Maria", "lastname": "Iliescu", "age": 62, "clergy": "Pr. Dan Petrescu", "burial_location": "Cimitirul Bellu, București"}, {"deceased_date": "2024-05-10", "burial_date": "2024-05-20", "name": "Tatiana", "lastname": "Enache", "age": 28, "clergy": "Pr. Teodor Iliescu", "burial_location": "Cimitirul Ortodox, Timișoara"}, {"deceased_date": "1988-12-21", "burial_date": "1988-12-29", "name": "Maria", "lastname": "Dumitru", "age": 49, "clergy": "Pr. Ioan Pop", "burial_location": "Cimitirul Sf. Gheorghe, Craiova"}, {"deceased_date": "1991-05-11", "burial_date": "1991-05-18", "name": "Adela", "lastname": "Vasile", "age": 48, "clergy": "Pr. Teodor Iliescu", "burial_location": "Cimitirul Eternitatea, Iași"}, {"deceased_date": "2018-08-06", "burial_date": "2018-08-15", "name": "Dan", "lastname": "Rusu", "age": 47, "clergy": "Pr. Alexandru Vasile", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "2013-06-19", "burial_date": "2013-06-29", "name": "Tatiana", "lastname": "Stan", "age": 73, "clergy": "Pr. Ioan Pop", "burial_location": "Cimitirul Central, București"}, {"deceased_date": "2018-01-18", "burial_date": "2018-01-22", "name": "Carmen", "lastname": "Ionescu", "age": 70, "clergy": "Pr. Dan Petrescu", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "2019-09-06", "burial_date": "2019-09-09", "name": "Alexandru", "lastname": "Ionescu", "age": 97, "clergy": "Pr. Ioan Pop", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "2015-07-08", "burial_date": "2015-07-16", "name": "Andrei", "lastname": "Petrescu", "age": 41, "clergy": "Pr. Alexandru Vasile", "burial_location": "Cimitirul Central, București"}, {"deceased_date": "1979-04-11", "burial_date": "1979-04-21", "name": "Irina", "lastname": "Stancu", "age": 60, "clergy": "Pr. Mihail Radu", "burial_location": "Cimitirul Bellu, București"}, {"deceased_date": "2024-01-24", "burial_date": "2024-01-30", "name": "Lidia", "lastname": "Stancu", "age": 41, "clergy": "Pr. Florin Stancu", "burial_location": "Cimitirul Ortodox, Brașov"}, {"deceased_date": "2024-06-19", "burial_date": "2024-06-29", "name": "Carmen", "lastname": "Popescu", "age": 43, "clergy": "Pr. Florin Stancu", "burial_location": "Cimitirul Eternitatea, Iași"}, {"deceased_date": "2024-09-13", "burial_date": "2024-09-22", "name": "Gheorghe", "lastname": "Petrescu", "age": 40, "clergy": "Pr. Ioan Pop", "burial_location": "Cimitirul Eternitatea, Galați"}, {"deceased_date": "1999-05-26", "burial_date": "1999-05-29", "name": "Maria", "lastname": "Georgescu", "age": 64, "clergy": "Pr. Nicolae Ionescu", "burial_location": "Cimitirul Sf. Gheorghe, Craiova"}, {"deceased_date": "2012-08-03", "burial_date": "2012-08-07", "name": "Irina", "lastname": "Georgescu", "age": 62, "clergy": "Pr. Ștefan Iacob", "burial_location": "Cimitirul Eternitatea, Galați"}, {"deceased_date": "2024-01-09", "burial_date": "2024-01-12", "name": "Gheorghe", "lastname": "Stan", "age": 21, "clergy": "Pr. Florin Stancu", "burial_location": "Cimitirul Bellu, București"}, {"deceased_date": "2024-01-07", "burial_date": "2024-01-17", "name": "Vasile", "lastname": "Dumitru", "age": 26, "clergy": "Pr. Nicolae Ionescu", "burial_location": "Cimitirul Eternitatea, Galați"}, {"deceased_date": "2024-02-12", "burial_date": "2024-02-20", "name": "Ioan", "lastname": "Petrescu", "age": 31, "clergy": "Pr. Dan Petrescu", "burial_location": "Cimitirul Sf. Gheorghe, Craiova"}, {"deceased_date": "2003-10-09", "burial_date": "2003-10-12", "name": "Constantin", "lastname": "Enache", "age": 72, "clergy": "Pr. Teodor Iliescu", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "2024-03-04", "burial_date": "2024-03-11", "name": "Gheorghe", "lastname": "Marinescu", "age": 39, "clergy": "Pr. Teodor Iliescu", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "2009-02-07", "burial_date": "2009-02-16", "name": "Doina", "lastname": "Rusu", "age": 67, "clergy": "Pr. Andrei Dumitrescu", "burial_location": "Cimitirul Central, Oradea"}, {"deceased_date": "2003-07-02", "burial_date": "2003-07-08", "name": "Carmen", "lastname": "Vasile", "age": 51, "clergy": "Pr. Andrei Dumitrescu", "burial_location": "Cimitirul Sf. Gheorghe, Craiova"}, {"deceased_date": "2024-08-24", "burial_date": "2024-08-30", "name": "Mihai", "lastname": "Marinescu", "age": 24, "clergy": "Pr. Nicolae Ionescu", "burial_location": "Cimitirul Central, București"}, {"deceased_date": "1992-12-13", "burial_date": "1992-12-22", "name": "Ion", "lastname": "Marinescu", "age": 52, "clergy": "Pr. Alexandru Vasile", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "2016-04-29", "burial_date": "2016-05-07", "name": "Raluca", "lastname": "Iliescu", "age": 44, "clergy": "Pr. Florin Stancu", "burial_location": "Cimitirul Sf. Parascheva, Ploiești"}, {"deceased_date": "2024-02-07", "burial_date": "2024-02-14", "name": "Irina", "lastname": "Popescu", "age": 38, "clergy": "Pr. Ștefan Iacob", "burial_location": "Cimitirul Bellu, București"}, {"deceased_date": "2024-05-26", "burial_date": "2024-06-05", "name": "Dan", "lastname": "Dumitru", "age": 25, "clergy": "Pr. Ioan Pop", "burial_location": "Cimitirul Central, Oradea"}, {"deceased_date": "2000-09-11", "burial_date": "2000-09-21", "name": "Tatiana", "lastname": "Toma", "age": 62, "clergy": "Pr. Mihail Radu", "burial_location": "Cimitirul Central, București"}, {"deceased_date": "2024-06-29", "burial_date": "2024-07-04", "name": "Gheorghe", "lastname": "Vasile", "age": 34, "clergy": "Pr. Ștefan Iacob", "burial_location": "Cimitirul Sf. Gheorghe, Craiova"}, {"deceased_date": "2024-08-02", "burial_date": "2024-08-11", "name": "Raluca", "lastname": "Stan", "age": 37, "clergy": "Pr. Ștefan Iacob", "burial_location": "Cimitirul Central, Oradea"}, {"deceased_date": "2024-01-31", "burial_date": "2024-02-06", "name": "Nicolae", "lastname": "Munteanu", "age": 20, "clergy": "Pr. Nicolae Ionescu", "burial_location": "Cimitirul Bellu, București"}, {"deceased_date": "2021-10-13", "burial_date": "2021-10-17", "name": "Radu", "lastname": "Enache", "age": 93, "clergy": "Pr. Dan Petrescu", "burial_location": "Cimitirul Bellu, București"}, {"deceased_date": "2009-09-13", "burial_date": "2009-09-21", "name": "Ștefan", "lastname": "Vasile", "age": 73, "clergy": "Pr. Nicolae Ionescu", "burial_location": "Cimitirul Eternitatea, Galați"}, {"deceased_date": "1995-01-23", "burial_date": "1995-01-27", "name": "Irina", "lastname": "Vasile", "age": 64, "clergy": "Pr. Ioan Pop", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "2019-03-11", "burial_date": "2019-03-17", "name": "Vasile", "lastname": "Petrescu", "age": 44, "clergy": "Pr. Ștefan Iacob", "burial_location": "Cimitirul Ortodox, Timișoara"}, {"deceased_date": "2024-07-22", "burial_date": "2024-07-27", "name": "Simona", "lastname": "Stancu", "age": 36, "clergy": "Pr. Nicolae Ionescu", "burial_location": "Cimitirul Central, București"}, {"deceased_date": "1981-06-16", "burial_date": "1981-06-19", "name": "Doina", "lastname": "Iliescu", "age": 43, "clergy": "Pr. Florin Stancu", "burial_location": "Cimitirul Eternitatea, Galați"}, {"deceased_date": "1995-10-23", "burial_date": "1995-11-01", "name": "Dan", "lastname": "Iliescu", "age": 48, "clergy": "Pr. Teodor Iliescu", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "2003-12-24", "burial_date": "2003-12-29", "name": "Dan", "lastname": "Dumitru", "age": 40, "clergy": "Pr. Constantin Marinescu", "burial_location": "Cimitirul Sf. Parascheva, Ploiești"}, {"deceased_date": "2024-08-21", "burial_date": "2024-08-25", "name": "Florin", "lastname": "Ionescu", "age": 35, "clergy": "Pr. Constantin Marinescu", "burial_location": "Cimitirul Ortodox, Brașov"}, {"deceased_date": "2009-08-18", "burial_date": "2009-08-24", "name": "Carmen", "lastname": "Petrescu", "age": 84, "clergy": "Pr. Ioan Pop", "burial_location": "Cimitirul Sf. Gheorghe, Craiova"}, {"deceased_date": "2015-06-20", "burial_date": "2015-06-23", "name": "Ana", "lastname": "Ionescu", "age": 97, "clergy": "Pr. Teodor Iliescu", "burial_location": "Cimitirul Ortodox, Brașov"}, {"deceased_date": "2020-05-21", "burial_date": "2020-05-29", "name": "Andrei", "lastname": "Rusu", "age": 54, "clergy": "Pr. Nicolae Ionescu", "burial_location": "Cimitirul Central, Oradea"}, {"deceased_date": "2012-06-23", "burial_date": "2012-06-27", "name": "Maria", "lastname": "Rusu", "age": 59, "clergy": "Pr. Alexandru Vasile", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "2013-01-23", "burial_date": "2013-01-30", "name": "Petre", "lastname": "Rusu", "age": 57, "clergy": "Pr. Alexandru Vasile", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "2022-03-01", "burial_date": "2022-03-06", "name": "Ana", "lastname": "Georgescu", "age": 48, "clergy": "Pr. Nicolae Ionescu", "burial_location": "Cimitirul Municipal, Cluj-Napoca"}, {"deceased_date": "1982-09-26", "burial_date": "1982-10-03", "name": "Radu", "lastname": "Dumitru", "age": 49, "clergy": "Pr. Florin Stancu", "burial_location": "Cimitirul Central, Oradea"}, {"deceased_date": "2024-08-25", "burial_date": "2024-09-01", "name": "Maria", "lastname": "Enache", "age": 27, "clergy": "Pr. Alexandru Vasile", "burial_location": "Cimitirul Sf. Parascheva, Ploiești"}, {"deceased_date": "2017-05-22", "burial_date": "2017-06-01", "name": "Oana", "lastname": "Vasile", "age": 69, "clergy": "Pr. Ioan Pop", "burial_location": "Cimitirul Central, București"}]</script>
+
+<script>
+let DATA = [];
+// Load data from JSON file
+DATA = JSON.parse(document.getElementById('embedded-data').textContent);
+
+// --- State ---
+let state = {
+  sortKey: null,
+  sortDir: 1, // 1 asc, -1 desc
+  page: 1,
+  pageSize: 10,
+  q: ""
+};
+
+const rowsEl = document.getElementById('rows');
+const prevEl = document.getElementById('prev');
+const nextEl = document.getElementById('next');
+const pageinfoEl = document.getElementById('pageinfo');
+const qEl = document.getElementById('q');
+const modal = document.getElementById('modal');
+const detail = document.getElementById('detail');
+const closeBtn = document.getElementById('close');
+
+function normalize(s){ return (s||"").toString().toLowerCase(); }
+
+function filtered(){
+  const q = normalize(state.q);
+  if(!q) return DATA.slice();
+  return DATA.filter(r => {
+    return [r.name, r.lastname, r.burial_location].some(v => normalize(v).includes(q));
+  });
+}
+
+function sorted(list){
+  if(!state.sortKey) return list;
+  const key = state.sortKey;
+  const dir = state.sortDir;
+  return list.slice().sort((a,b)=> (a[key] > b[key] ? 1 : a[key] < b[key] ? -1 : 0) * dir);
+}
+
+function paged(list){
+  const start = (state.page-1)*state.pageSize;
+  return list.slice(start, start+state.pageSize);
+}
+
+function render(){
+  const f = filtered();
+  const s = sorted(f);
+  const p = paged(s);
+  const totalPages = Math.max(1, Math.ceil(f.length / state.pageSize));
+
+  rowsEl.innerHTML = p.map((r,i)=> `
+    <tr>
+      <td>${r.deceased_date}</td>
+      <td>${r.burial_date}</td>
+      <td>${r.name}</td>
+      <td>${r.lastname}</td>
+      <td>${r.age}</td>
+      <td>${r.clergy}</td>
+      <td>${r.burial_location}</td>
+      <td><button class="actions-btn" data-view="${(state.page-1)*state.pageSize + i}">Vizualizați înregistrarea</button></td>
+    </tr>
+  `).join('');
+
+  pageinfoEl.textContent = `Pagina ${state.page} din ${totalPages}`;
+  prevEl.disabled = state.page <= 1;
+  nextEl.disabled = state.page >= totalPages;
+}
+
+function openModal(record){
+  detail.innerHTML = `
+    <dt>Data decesului</dt><dd>${record.deceased_date}</dd>
+    <dt>Data înmormântării</dt><dd>${record.burial_date}</dd>
+    <dt>Prenume</dt><dd>${record.name}</dd>
+    <dt>Nume de familie</dt><dd>${record.lastname}</dd>
+    <dt>Vârstă</dt><dd>${record.age}</dd>
+    <dt>Preot</dt><dd>${record.clergy}</dd>
+    <dt>Locul înmormântării</dt><dd>${record.burial_location}</dd>
+  `;
+  modal.setAttribute('open','');
+}
+
+document.querySelectorAll('th[data-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const k = th.getAttribute('data-key');
+    if(state.sortKey === k){ state.sortDir *= -1; } else { state.sortKey = k; state.sortDir = 1; }
+    render();
+  });
+});
+
+rowsEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-view]');
+  if(!btn) return;
+  const idx = parseInt(btn.getAttribute('data-view'), 10);
+  const list = sorted(filtered());
+  const rec = list[idx];
+  openModal(rec);
+});
+
+prevEl.addEventListener('click', () => { state.page = Math.max(1, state.page-1); render(); });
+nextEl.addEventListener('click', () => {
+  const totalPages = Math.max(1, Math.ceil(filtered().length / state.pageSize));
+  state.page = Math.min(totalPages, state.page+1);
+  render();
+});
+
+qEl.addEventListener('input', () => { state.q = qEl.value; state.page = 1; render(); });
+closeBtn.addEventListener('click', () => modal.removeAttribute('open'));
+modal.addEventListener('click', (e) => { if(e.target === modal) modal.removeAttribute('open'); });
+
+render();
+</script>
+</body>
+</html>

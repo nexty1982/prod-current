@@ -1,0 +1,677 @@
+[
+  {
+    "date_of_death": "2023-01-12",
+    "date_of_burial": "2023-01-14",
+    "age": 77,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Sophia",
+    "last_name": "Rodriguez",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2020-04-23",
+    "date_of_burial": "2020-05-02",
+    "age": 23,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Victoria",
+    "last_name": "Young",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2020-02-01",
+    "date_of_burial": "2020-02-09",
+    "age": 80,
+    "burial_location": "Greenwood Cemetery",
+    "first_name": "Sophia",
+    "last_name": "Walker",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2022-06-26",
+    "date_of_burial": "2022-07-05",
+    "age": 58,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Emma",
+    "last_name": "Garcia",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2022-07-25",
+    "date_of_burial": "2022-07-31",
+    "age": 52,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "James",
+    "last_name": "King",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2023-07-15",
+    "date_of_burial": "2023-07-21",
+    "age": 48,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Hannah",
+    "last_name": "Anderson",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2021-09-08",
+    "date_of_burial": "2021-09-11",
+    "age": 11,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Natalie",
+    "last_name": "Thomas",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2022-02-15",
+    "date_of_burial": "2022-02-16",
+    "age": 76,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Emily",
+    "last_name": "Lewis",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2020-05-01",
+    "date_of_burial": "2020-05-11",
+    "age": 29,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Matthew",
+    "last_name": "Johnson",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2022-06-20",
+    "date_of_burial": "2022-06-29",
+    "age": 2,
+    "burial_location": "Evergreen Rest",
+    "first_name": "James",
+    "last_name": "Garcia",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2024-08-01",
+    "date_of_burial": "2024-08-07",
+    "age": 30,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Hannah",
+    "last_name": "Taylor",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2023-05-11",
+    "date_of_burial": "2023-05-13",
+    "age": 62,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Joseph",
+    "last_name": "Lewis",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2021-05-14",
+    "date_of_burial": "2021-05-23",
+    "age": 91,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Robert",
+    "last_name": "Smith",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2024-04-18",
+    "date_of_burial": "2024-04-21",
+    "age": 69,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Olivia",
+    "last_name": "Walker",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2022-01-01",
+    "date_of_burial": "2022-01-06",
+    "age": 77,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Emma",
+    "last_name": "King",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2023-07-16",
+    "date_of_burial": "2023-07-26",
+    "age": 83,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Emily",
+    "last_name": "Rodriguez",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2023-11-17",
+    "date_of_burial": "2023-11-27",
+    "age": 12,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Hannah",
+    "last_name": "Miller",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2020-09-13",
+    "date_of_burial": "2020-09-22",
+    "age": 46,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "James",
+    "last_name": "Martinez",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2022-09-07",
+    "date_of_burial": "2022-09-08",
+    "age": 83,
+    "burial_location": "Evergreen Rest",
+    "first_name": "James",
+    "last_name": "Smith",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2023-08-13",
+    "date_of_burial": "2023-08-22",
+    "age": 4,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Joseph",
+    "last_name": "Rodriguez",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2022-11-29",
+    "date_of_burial": "2022-12-03",
+    "age": 98,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Jonathan",
+    "last_name": "King",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2020-05-12",
+    "date_of_burial": "2020-05-17",
+    "age": 57,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Sophia",
+    "last_name": "Williams",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2024-02-01",
+    "date_of_burial": "2024-02-04",
+    "age": 83,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Jonathan",
+    "last_name": "King",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2024-08-08",
+    "date_of_burial": "2024-08-16",
+    "age": 66,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Joseph",
+    "last_name": "Allen",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2021-06-26",
+    "date_of_burial": "2021-07-01",
+    "age": 65,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Robert",
+    "last_name": "Johnson",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2024-02-23",
+    "date_of_burial": "2024-02-29",
+    "age": 56,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Emily",
+    "last_name": "Smith",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2020-01-04",
+    "date_of_burial": "2020-01-12",
+    "age": 49,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Isabella",
+    "last_name": "Anderson",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2023-12-13",
+    "date_of_burial": "2023-12-15",
+    "age": 23,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Michael",
+    "last_name": "Garcia",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2023-03-14",
+    "date_of_burial": "2023-03-23",
+    "age": 42,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Daniel",
+    "last_name": "Walker",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2021-10-07",
+    "date_of_burial": "2021-10-10",
+    "age": 85,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Grace",
+    "last_name": "Young",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2024-05-10",
+    "date_of_burial": "2024-05-16",
+    "age": 33,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Isabella",
+    "last_name": "Clark",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2021-01-29",
+    "date_of_burial": "2021-01-31",
+    "age": 97,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Hannah",
+    "last_name": "Brown",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2022-10-01",
+    "date_of_burial": "2022-10-04",
+    "age": 41,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Emily",
+    "last_name": "Young",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2024-09-27",
+    "date_of_burial": "2024-09-28",
+    "age": 86,
+    "burial_location": "Greenwood Cemetery",
+    "first_name": "James",
+    "last_name": "Lewis",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2021-08-12",
+    "date_of_burial": "2021-08-19",
+    "age": 68,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Jonathan",
+    "last_name": "Young",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2022-07-31",
+    "date_of_burial": "2022-08-01",
+    "age": 43,
+    "burial_location": "Greenwood Cemetery",
+    "first_name": "Christopher",
+    "last_name": "Miller",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2024-10-06",
+    "date_of_burial": "2024-10-13",
+    "age": 16,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Sophia",
+    "last_name": "Martinez",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2023-07-26",
+    "date_of_burial": "2023-07-29",
+    "age": 90,
+    "burial_location": "Evergreen Rest",
+    "first_name": "David",
+    "last_name": "Martinez",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2022-12-14",
+    "date_of_burial": "2022-12-15",
+    "age": 83,
+    "burial_location": "Greenwood Cemetery",
+    "first_name": "Olivia",
+    "last_name": "Garcia",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2024-04-04",
+    "date_of_burial": "2024-04-13",
+    "age": 46,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Joseph",
+    "last_name": "Allen",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2023-07-31",
+    "date_of_burial": "2023-08-03",
+    "age": 52,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Andrew",
+    "last_name": "Thomas",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2023-07-18",
+    "date_of_burial": "2023-07-25",
+    "age": 26,
+    "burial_location": "Greenwood Cemetery",
+    "first_name": "David",
+    "last_name": "Lewis",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2022-01-07",
+    "date_of_burial": "2022-01-14",
+    "age": 63,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Natalie",
+    "last_name": "Walker",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2024-06-01",
+    "date_of_burial": "2024-06-08",
+    "age": 82,
+    "burial_location": "Greenwood Cemetery",
+    "first_name": "Olivia",
+    "last_name": "Walker",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2022-10-10",
+    "date_of_burial": "2022-10-11",
+    "age": 48,
+    "burial_location": "Evergreen Rest",
+    "first_name": "David",
+    "last_name": "Jones",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2023-10-15",
+    "date_of_burial": "2023-10-22",
+    "age": 52,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Andrew",
+    "last_name": "Anderson",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2024-06-17",
+    "date_of_burial": "2024-06-22",
+    "age": 36,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Robert",
+    "last_name": "Martinez",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2024-09-08",
+    "date_of_burial": "2024-09-18",
+    "age": 51,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Andrew",
+    "last_name": "Clark",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2020-05-07",
+    "date_of_burial": "2020-05-08",
+    "age": 21,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Natalie",
+    "last_name": "Smith",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2023-11-19",
+    "date_of_burial": "2023-11-22",
+    "age": 5,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Robert",
+    "last_name": "Brown",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2020-07-07",
+    "date_of_burial": "2020-07-11",
+    "age": 10,
+    "burial_location": "Greenwood Cemetery",
+    "first_name": "Grace",
+    "last_name": "Garcia",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2024-05-06",
+    "date_of_burial": "2024-05-13",
+    "age": 47,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Daniel",
+    "last_name": "Brown",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2024-01-14",
+    "date_of_burial": "2024-01-17",
+    "age": 99,
+    "burial_location": "Evergreen Rest",
+    "first_name": "James",
+    "last_name": "Davis",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2023-05-23",
+    "date_of_burial": "2023-05-25",
+    "age": 56,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Isabella",
+    "last_name": "Miller",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2020-06-08",
+    "date_of_burial": "2020-06-14",
+    "age": 1,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Jonathan",
+    "last_name": "Jones",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2021-03-28",
+    "date_of_burial": "2021-03-29",
+    "age": 13,
+    "burial_location": "Greenwood Cemetery",
+    "first_name": "Victoria",
+    "last_name": "Brown",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2022-02-23",
+    "date_of_burial": "2022-02-28",
+    "age": 55,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Matthew",
+    "last_name": "Anderson",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2024-01-07",
+    "date_of_burial": "2024-01-09",
+    "age": 92,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Christopher",
+    "last_name": "Smith",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2024-09-22",
+    "date_of_burial": "2024-09-28",
+    "age": 94,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Daniel",
+    "last_name": "Clark",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2021-02-24",
+    "date_of_burial": "2021-03-05",
+    "age": 12,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Matthew",
+    "last_name": "Martinez",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2022-06-19",
+    "date_of_burial": "2022-06-22",
+    "age": 14,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Emma",
+    "last_name": "Davis",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2024-01-06",
+    "date_of_burial": "2024-01-15",
+    "age": 39,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "Joseph",
+    "last_name": "Allen",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2023-03-22",
+    "date_of_burial": "2023-03-31",
+    "age": 56,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Matthew",
+    "last_name": "Anderson",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2024-09-03",
+    "date_of_burial": "2024-09-13",
+    "age": 36,
+    "burial_location": "St. Mark Cemetery",
+    "first_name": "James",
+    "last_name": "Garcia",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2021-11-24",
+    "date_of_burial": "2021-11-27",
+    "age": 88,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Daniel",
+    "last_name": "Davis",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2023-07-05",
+    "date_of_burial": "2023-07-14",
+    "age": 24,
+    "burial_location": "Greenwood Cemetery",
+    "first_name": "Emma",
+    "last_name": "Thomas",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2020-09-25",
+    "date_of_burial": "2020-10-01",
+    "age": 52,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Hannah",
+    "last_name": "Miller",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2022-01-28",
+    "date_of_burial": "2022-02-03",
+    "age": 79,
+    "burial_location": "Greenwood Cemetery",
+    "first_name": "Michael",
+    "last_name": "Walker",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2023-02-22",
+    "date_of_burial": "2023-03-02",
+    "age": 25,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "James",
+    "last_name": "Lewis",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2024-05-17",
+    "date_of_burial": "2024-05-20",
+    "age": 58,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Joseph",
+    "last_name": "Williams",
+    "clergy": "Fr. George Stefan"
+  },
+  {
+    "date_of_death": "2023-08-24",
+    "date_of_burial": "2023-08-31",
+    "age": 36,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "Emily",
+    "last_name": "Anderson",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  },
+  {
+    "date_of_death": "2023-07-11",
+    "date_of_burial": "2023-07-21",
+    "age": 39,
+    "burial_location": "Evergreen Rest",
+    "first_name": "Robert",
+    "last_name": "Smith",
+    "clergy": "Fr. Stephen Callas"
+  },
+  {
+    "date_of_death": "2022-01-30",
+    "date_of_burial": "2022-02-03",
+    "age": 38,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Christopher",
+    "last_name": "Martinez",
+    "clergy": "Fr. Nicholas Andrews"
+  },
+  {
+    "date_of_death": "2024-03-03",
+    "date_of_burial": "2024-03-10",
+    "age": 12,
+    "burial_location": "Riverside Memorial Park",
+    "first_name": "James",
+    "last_name": "Smith",
+    "clergy": "Fr. Dimitri Georgiou"
+  },
+  {
+    "date_of_death": "2022-07-01",
+    "date_of_burial": "2022-07-03",
+    "age": 55,
+    "burial_location": "Holy Cross Burial Grounds",
+    "first_name": "Sarah",
+    "last_name": "Thomas",
+    "clergy": "Fr. Ioannis Papadopoulos"
+  }
+]
