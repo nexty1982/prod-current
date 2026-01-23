@@ -1,0 +1,965 @@
+# Images Actively Used in Production
+
+Generated: 2026-01-23T19:19:28.149Z
+Total Images: 358
+Checked Images: 200
+Used Images: 97
+
+## Used Images (97)
+
+1. **bgtiled1.png**
+   - Path: /images/backgrounds/bgtiled1.png
+   - Size: 8145.61 KB
+   - Type: PNG
+   - Modified: 12/5/2025, 8:22:38 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Header.tsx
+
+2. **bgtiled2.png**
+   - Path: /images/backgrounds/bgtiled2.png
+   - Size: 2961.75 KB
+   - Type: PNG
+   - Modified: 12/5/2025, 10:02:46 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Header.tsx
+
+3. **bgtiled3.png**
+   - Path: /images/backgrounds/bgtiled3.png
+   - Size: 63.30 KB
+   - Type: PNG
+   - Modified: 11/16/2025, 3:57:26 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Header.tsx
+
+4. **bgtiled6.png**
+   - Path: /images/backgrounds/bgtiled6.png
+   - Size: 273.19 KB
+   - Type: PNG
+   - Modified: 12/11/2025, 7:54:06 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Header.tsx
+
+5. **buttons_bg.png**
+   - Path: /images/backgrounds/buttons_bg.png
+   - Size: 664.54 KB
+   - Type: PNG
+   - Modified: 11/30/2025, 11:42:17 AM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Header.tsx
+
+6. **page-bg.png**
+   - Path: /images/backgrounds/page-bg.png
+   - Size: 63.30 KB
+   - Type: PNG
+   - Modified: 11/16/2025, 3:57:26 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Footer.tsx
+
+7. **profilebg.png**
+   - Path: /images/banner/profilebg.png
+   - Size: 674.83 KB
+   - Type: PNG
+   - Modified: 1/21/2026, 5:30:30 PM
+   - Referenced in:
+     - src/components/apps/userprofile/profile/ProfileBanner.tsx
+
+8. **EN-baptism-record-entry.png**
+   - Path: /images/buttons/EN-baptism-record-entry.png
+   - Size: 386.06 KB
+   - Type: PNG
+   - Modified: 1/2/2026, 12:32:06 AM
+   - Referenced in:
+     - src/features/records/BrandButtons.tsx
+
+9. **EN-funeral-record-entry.png**
+   - Path: /images/buttons/EN-funeral-record-entry.png
+   - Size: 1786.27 KB
+   - Type: PNG
+   - Modified: 12/30/2025, 3:42:54 PM
+   - Referenced in:
+     - src/features/records/BrandButtons.tsx
+
+10. **EN-marriage-record-entry.png**
+   - Path: /images/buttons/EN-marriage-record-entry.png
+   - Size: 1595.96 KB
+   - Type: PNG
+   - Modified: 12/30/2025, 3:17:07 PM
+   - Referenced in:
+     - src/features/records/BrandButtons.tsx
+
+11. **cross-gold.png**
+   - Path: /images/header/cross-gold.png
+   - Size: 1494.72 KB
+   - Type: PNG
+   - Modified: 11/18/2025, 2:38:29 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/CircularMenu.tsx
+
+12. **baptism.png**
+   - Path: /images/icons/baptism.png
+   - Size: 1167.07 KB
+   - Type: PNG
+   - Modified: 12/23/2025, 7:21:49 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+     - src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx
+
+13. **default.png**
+   - Path: /images/icons/default.png
+   - Size: 1167.07 KB
+   - Type: PNG
+   - Modified: 12/23/2025, 7:21:49 PM
+   - Referenced in:
+     - src/features/misc-legacy/pages/account-setting/AccountTab.tsx
+     - src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx
+     - src/legacy/components/pages/account-setting/AccountTab.tsx
+     - src/legacy/features/misc-legacy/pages/account-setting/AccountTab.tsx
+
+14. **funeral.png**
+   - Path: /images/icons/funeral.png
+   - Size: 200.00 KB
+   - Type: PNG
+   - Modified: 12/23/2025, 6:58:39 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+     - src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx
+
+15. **marriage.png**
+   - Path: /images/icons/marriage.png
+   - Size: 367.99 KB
+   - Type: PNG
+   - Modified: 12/23/2025, 7:04:47 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+     - src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx
+
+16. **biz-logo.png**
+   - Path: /images/logos/biz-logo.png
+   - Size: 488.49 KB
+   - Type: PNG
+   - Modified: 12/9/2025, 10:04:08 PM
+   - Referenced in:
+     - src/features/auth/authentication/auth2/Login2.tsx
+
+17. **orthodox-metrics-logo.svg**
+   - Path: /images/logos/orthodox-metrics-logo.svg
+   - Size: 3.17 KB
+   - Type: SVG
+   - Modified: 10/4/2025, 3:36:02 PM
+   - Referenced in:
+     - src/components/shared/OrthodoxBanner.tsx
+     - src/legacy/components/shared/OrthodoxBanner.tsx
+     - src/legacy/shared/ui/OrthodoxBanner.tsx
+     - src/shared/ui/OrthodoxBanner.tsx
+
+18. **biz-logo.png**
+   - Path: /images/main/biz-logo.png
+   - Size: 488.49 KB
+   - Type: PNG
+   - Modified: 12/9/2025, 10:04:08 PM
+   - Referenced in:
+     - src/features/auth/authentication/auth2/Login2.tsx
+
+19. **1.jpg**
+   - Path: /images/misc/1.jpg
+   - Size: 55.19 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 3:57:43 PM
+   - Referenced in:
+     - src/app/api/image-ai/dropdowndata.ts
+     - src/app/api/image-ai/route.ts
+     - src/components/apps/chat-ai/ChatWindow.tsx
+     - src/components/apps/chats/ChatListing.tsx
+     - src/components/apps/contacts/ContactAdd.tsx
+
+20. **1.png**
+   - Path: /images/misc/1.png
+   - Size: 118.16 KB
+   - Type: PNG
+   - Modified: 12/6/2025, 7:17:15 PM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/components/frontend-pages/contact/form/Address.tsx
+     - src/components/frontend-pages/homepage/features/Features.tsx
+     - src/features/church/RecordHeaderBanner.tsx
+     - src/features/church/RecordHeaderPreview.tsx
+
+21. **10.jpg**
+   - Path: /images/misc/10.jpg
+   - Size: 300.20 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 4:04:50 PM
+   - Referenced in:
+     - src/components/apps/userprofile/profile/PhotosCard.tsx
+     - src/eCommerce/ProductsData.ts
+     - src/features/records-centralized/components/records/ProductsData.ts
+     - src/features/records-centralized/components/records/blogData.ts
+     - src/legacy/blog/blogData.ts
+
+22. **11.jpg**
+   - Path: /images/misc/11.jpg
+   - Size: 282.23 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 4:05:18 PM
+   - Referenced in:
+     - src/app/api/image-ai/dropdowndata.ts
+     - src/components/widgets/cards/EcommerceCard.tsx
+     - src/components/widgets/cards/code/EcommerceCardCode.tsx
+     - src/eCommerce/ProductsData.ts
+     - src/features/misc-legacy/widgets/cards/EcommerceCard.tsx
+
+23. **12.jpg**
+   - Path: /images/misc/12.jpg
+   - Size: 303.40 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 4:05:35 PM
+   - Referenced in:
+     - src/app/api/image-ai/dropdowndata.ts
+     - src/eCommerce/ProductsData.ts
+     - src/features/records-centralized/components/records/ProductsData.ts
+     - src/legacy/eCommerce/ProductsData.ts
+     - src/legacy/features/records-centralized/components/records/ProductsData.ts
+
+24. **2.jpg**
+   - Path: /images/misc/2.jpg
+   - Size: 58.56 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 3:58:00 PM
+   - Referenced in:
+     - src/app/api/image-ai/dropdowndata.ts
+     - src/app/api/image-ai/route.ts
+     - src/components/apps/ecommerce/productDetail/SliderData.ts
+     - src/components/apps/ecommerce/productEdit/CustomersReviews.tsx
+     - src/components/apps/userprofile/profile/PhotosCard.tsx
+
+25. **2.png**
+   - Path: /images/misc/2.png
+   - Size: 945.73 KB
+   - Type: PNG
+   - Modified: 12/18/2025, 3:38:02 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/components/dashboards/ecommerce/WelcomeCard.tsx
+     - src/components/dashboards/orthodoxmetrics/AdminWelcomeCard.tsx
+     - src/features/admin/dashboards/ecommerce/WelcomeCard.tsx
+     - src/features/admin/dashboards/orthodoxmetrics/AdminWelcomeCard.tsx
+
+26. **3.jpg**
+   - Path: /images/misc/3.jpg
+   - Size: 62.66 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 3:58:13 PM
+   - Referenced in:
+     - src/app/api/image-ai/dropdowndata.ts
+     - src/app/api/image-ai/route.ts
+     - src/components/apps/ecommerce/productDetail/SliderData.ts
+     - src/components/apps/ecommerce/productEdit/CustomersReviews.tsx
+     - src/components/apps/userprofile/profile/PhotosCard.tsx
+
+27. **3.png**
+   - Path: /images/misc/3.png
+   - Size: 1345.00 KB
+   - Type: PNG
+   - Modified: 12/18/2025, 3:39:44 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/features/pages/frontend-pages/Header.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+
+28. **4.jpg**
+   - Path: /images/misc/4.jpg
+   - Size: 111.55 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 3:58:55 PM
+   - Referenced in:
+     - src/app/api/image-ai/route.ts
+     - src/components/apps/ecommerce/productDetail/SliderData.ts
+     - src/components/apps/ecommerce/productEdit/CustomersReviews.tsx
+     - src/components/apps/userprofile/profile/PhotosCard.tsx
+     - src/components/dashboards/ecommerce/ProductPerformances.tsx
+
+29. **4.png**
+   - Path: /images/misc/4.png
+   - Size: 615.66 KB
+   - Type: PNG
+   - Modified: 12/18/2025, 3:42:09 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/features/misc-legacy/pages/NotFound404.tsx
+     - src/features/pages/frontend-pages/Header.tsx
+
+30. **5.jpg**
+   - Path: /images/misc/5.jpg
+   - Size: 251.60 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 3:59:43 PM
+   - Referenced in:
+     - src/app/api/image-ai/dropdowndata.ts
+     - src/components/apps/ecommerce/productDetail/SliderData.ts
+     - src/components/apps/ecommerce/productEdit/CustomersReviews.tsx
+     - src/components/frontend-pages/shared/leadership/LeaderShipCarousel.tsx
+     - src/components/frontend-pages/shared/reviews/ReviewCarousel.tsx
+
+31. **5.png**
+   - Path: /images/misc/5.png
+   - Size: 1007.56 KB
+   - Type: PNG
+   - Modified: 12/18/2025, 3:43:43 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/features/pages/frontend-pages/Header.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+
+32. **6.jpg**
+   - Path: /images/misc/6.jpg
+   - Size: 191.56 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 4:00:14 PM
+   - Referenced in:
+     - src/app/api/image-ai/dropdowndata.ts
+     - src/components/apps/ecommerce/productDetail/SliderData.ts
+     - src/components/apps/ecommerce/productEdit/CustomersReviews.tsx
+     - src/components/apps/userprofile/profile/PhotosCard.tsx
+     - src/components/dashboards/ecommerce/ProductPerformances.tsx
+
+33. **6.png**
+   - Path: /images/misc/6.png
+   - Size: 908.34 KB
+   - Type: PNG
+   - Modified: 12/18/2025, 3:45:22 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/features/pages/frontend-pages/Header.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+
+34. **7.jpg**
+   - Path: /images/misc/7.jpg
+   - Size: 394.49 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 4:00:47 PM
+   - Referenced in:
+     - src/app/api/image-ai/dropdowndata.ts
+     - src/components/apps/ecommerce/productDetail/SliderData.ts
+     - src/components/apps/ecommerce/productEdit/CustomersReviews.tsx
+     - src/components/apps/userprofile/profile/PhotosCard.tsx
+     - src/components/dashboards/ecommerce/ProductPerformances.tsx
+
+35. **7.png**
+   - Path: /images/misc/7.png
+   - Size: 821.15 KB
+   - Type: PNG
+   - Modified: 12/18/2025, 3:46:25 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/components/apps/userprofile/profile/ProfileBanner.tsx
+
+36. **8.jpg**
+   - Path: /images/misc/8.jpg
+   - Size: 342.00 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 4:03:48 PM
+   - Referenced in:
+     - src/app/api/image-ai/dropdowndata.ts
+     - src/components/apps/ecommerce/productEdit/CustomersReviews.tsx
+     - src/components/apps/userprofile/profile/PhotosCard.tsx
+     - src/eCommerce/ProductsData.ts
+     - src/features/misc-legacy/apps/ecommerce/productEdit/CustomersReviews.tsx
+
+37. **8.png**
+   - Path: /images/misc/8.png
+   - Size: 519.02 KB
+   - Type: PNG
+   - Modified: 12/18/2025, 3:47:37 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/components/apps/userprofile/profile/ProfileBanner.tsx
+
+38. **9.jpg**
+   - Path: /images/misc/9.jpg
+   - Size: 210.49 KB
+   - Type: JPG
+   - Modified: 12/22/2025, 4:04:11 PM
+   - Referenced in:
+     - src/app/api/image-ai/dropdowndata.ts
+     - src/components/apps/userprofile/profile/PhotosCard.tsx
+     - src/components/dashboards/ecommerce/ProductPerformances.tsx
+     - src/eCommerce/ProductsData.ts
+     - src/features/admin/dashboards/ecommerce/ProductPerformances.tsx
+
+39. **9.png**
+   - Path: /images/misc/9.png
+   - Size: 839.12 KB
+   - Type: PNG
+   - Modified: 12/18/2025, 3:48:25 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/components/apps/userprofile/profile/ProfileBanner.tsx
+
+40. **GE-baptism.png**
+   - Path: /images/misc/GE-baptism.png
+   - Size: 358.86 KB
+   - Type: PNG
+   - Modified: 12/20/2025, 10:16:20 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+41. **GE-funeral.png**
+   - Path: /images/misc/GE-funeral.png
+   - Size: 402.31 KB
+   - Type: PNG
+   - Modified: 12/20/2025, 10:15:39 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+42. **GE-marriage.png**
+   - Path: /images/misc/GE-marriage.png
+   - Size: 535.09 KB
+   - Type: PNG
+   - Modified: 12/20/2025, 10:14:02 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+43. **GR-light-blue.png**
+   - Path: /images/misc/GR-light-blue.png
+   - Size: 820.75 KB
+   - Type: PNG
+   - Modified: 12/21/2025, 6:32:51 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+44. **RO-baptism.png**
+   - Path: /images/misc/RO-baptism.png
+   - Size: 394.88 KB
+   - Type: PNG
+   - Modified: 12/20/2025, 10:19:20 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+45. **RO-funeral.png**
+   - Path: /images/misc/RO-funeral.png
+   - Size: 420.92 KB
+   - Type: PNG
+   - Modified: 12/20/2025, 10:28:32 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+46. **RO-marriage.png**
+   - Path: /images/misc/RO-marriage.png
+   - Size: 566.05 KB
+   - Type: PNG
+   - Modified: 12/20/2025, 10:14:26 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+47. **baptism.png**
+   - Path: /images/misc/baptism.png
+   - Size: 5454.12 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 11:17:19 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+     - src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx
+
+48. **baptisms.png**
+   - Path: /images/misc/baptisms.png
+   - Size: 1401.18 KB
+   - Type: PNG
+   - Modified: 10/4/2025, 3:36:02 PM
+   - Referenced in:
+     - src/features/misc-legacy/pages/frontend-pages/Homepage.tsx
+     - src/legacy/features/misc-legacy/pages/frontend-pages/Homepage.tsx
+
+49. **cross-gold.png**
+   - Path: /images/misc/cross-gold.png
+   - Size: 1494.72 KB
+   - Type: PNG
+   - Modified: 11/18/2025, 2:38:29 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/CircularMenu.tsx
+
+50. **default.jpg**
+   - Path: /images/misc/default.jpg
+   - Size: 2504.76 KB
+   - Type: JPG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/layouts/full/shared/breadcrumb/Breadcrumb.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+
+51. **default.svg**
+   - Path: /images/misc/default.svg
+   - Size: 0.89 KB
+   - Type: SVG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/context/UserDataContext/index.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/PhotosCard.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+
+52. **IMG_2024_10_22_11_27_57S.jpg**
+   - Path: /images/misc/demo/IMG_2024_10_22_11_27_57S.jpg
+   - Size: 497.16 KB
+   - Type: JPG
+   - Modified: 1/21/2026, 5:51:11 PM
+   - Referenced in:
+     - src/features/devel-tools/om-ocr/EnhancedOCRUploader.tsx
+
+53. **IMG_2024_10_22_11_29_28S.jpg**
+   - Path: /images/misc/demo/IMG_2024_10_22_11_29_28S.jpg
+   - Size: 435.77 KB
+   - Type: JPG
+   - Modified: 1/21/2026, 5:51:16 PM
+   - Referenced in:
+     - src/features/devel-tools/om-ocr/EnhancedOCRUploader.tsx
+
+54. **IMG_2024_10_22_11_39_09S.jpg**
+   - Path: /images/misc/demo/IMG_2024_10_22_11_39_09S.jpg
+   - Size: 462.19 KB
+   - Type: JPG
+   - Modified: 1/21/2026, 5:51:26 PM
+   - Referenced in:
+     - src/features/devel-tools/om-ocr/EnhancedOCRUploader.tsx
+
+55. **IMG_2024_10_25_12_28_25S.jpg**
+   - Path: /images/misc/demo/IMG_2024_10_25_12_28_25S.jpg
+   - Size: 566.01 KB
+   - Type: JPG
+   - Modified: 1/21/2026, 5:51:30 PM
+   - Referenced in:
+     - src/features/devel-tools/om-ocr/EnhancedOCRUploader.tsx
+
+56. **IMG_2024_10_25_12_32_04S.jpg**
+   - Path: /images/misc/demo/IMG_2024_10_25_12_32_04S.jpg
+   - Size: 637.75 KB
+   - Type: JPG
+   - Modified: 1/21/2026, 5:51:00 PM
+   - Referenced in:
+     - src/features/devel-tools/om-ocr/EnhancedOCRUploader.tsx
+
+57. **IMG_2025_03_05_10_44_50S.jpg**
+   - Path: /images/misc/demo/IMG_2025_03_05_10_44_50S.jpg
+   - Size: 440.83 KB
+   - Type: JPG
+   - Modified: 1/21/2026, 5:50:30 PM
+   - Referenced in:
+     - src/features/devel-tools/om-ocr/EnhancedOCRUploader.tsx
+
+58. **IMG_2025_03_05_11_04_55S.jpg**
+   - Path: /images/misc/demo/IMG_2025_03_05_11_04_55S.jpg
+   - Size: 654.56 KB
+   - Type: JPG
+   - Modified: 1/21/2026, 5:51:06 PM
+   - Referenced in:
+     - src/features/devel-tools/om-ocr/EnhancedOCRUploader.tsx
+
+59. **IMG_2025_03_12_12_48_44S.jpg**
+   - Path: /images/misc/demo/IMG_2025_03_12_12_48_44S.jpg
+   - Size: 533.76 KB
+   - Type: JPG
+   - Modified: 1/21/2026, 5:51:20 PM
+   - Referenced in:
+     - src/features/devel-tools/om-ocr/EnhancedOCRUploader.tsx
+
+60. **dune-crosses.png**
+   - Path: /images/misc/dune-crosses.png
+   - Size: 131.92 KB
+   - Type: PNG
+   - Modified: 11/29/2025, 2:51:46 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Homepage.tsx
+
+61. **en_flag.png**
+   - Path: /images/misc/en_flag.png
+   - Size: 2967.09 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 11:28:10 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Homepage.tsx
+
+62. **funeral.png**
+   - Path: /images/misc/funeral.png
+   - Size: 4808.25 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 11:19:03 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+     - src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx
+
+63. **funerals.png**
+   - Path: /images/misc/funerals.png
+   - Size: 1154.12 KB
+   - Type: PNG
+   - Modified: 10/4/2025, 3:36:02 PM
+   - Referenced in:
+     - src/features/misc-legacy/pages/frontend-pages/Homepage.tsx
+     - src/legacy/features/misc-legacy/pages/frontend-pages/Homepage.tsx
+
+64. **ge_flag.png**
+   - Path: /images/misc/ge_flag.png
+   - Size: 2751.28 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 11:32:48 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Homepage.tsx
+
+65. **globe-footer.png**
+   - Path: /images/misc/globe-footer.png
+   - Size: 350.68 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 8:06:14 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Footer.tsx
+
+66. **gold.png**
+   - Path: /images/misc/gold.png
+   - Size: 4099.65 KB
+   - Type: PNG
+   - Modified: 12/5/2025, 3:07:32 AM
+   - Referenced in:
+     - src/components/widgets/banners/Banner2.tsx
+     - src/components/widgets/banners/code/NotificationCode.tsx
+     - src/features/misc-legacy/pages/pricing/Pricing.tsx
+     - src/features/misc-legacy/widgets/banners/Banner2.tsx
+     - src/features/misc-legacy/widgets/banners/code/NotificationCode.tsx
+
+67. **gr_baptism.png**
+   - Path: /images/misc/gr_baptism.png
+   - Size: 4503.45 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 11:59:27 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+68. **gr_flag.png**
+   - Path: /images/misc/gr_flag.png
+   - Size: 2674.03 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 11:31:32 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Homepage.tsx
+
+69. **gr_funeral.png**
+   - Path: /images/misc/gr_funeral.png
+   - Size: 4314.07 KB
+   - Type: PNG
+   - Modified: 12/5/2025, 12:00:01 AM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+70. **gr_marriage.png**
+   - Path: /images/misc/gr_marriage.png
+   - Size: 4396.21 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 11:59:45 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+71. **marriage.png**
+   - Path: /images/misc/marriage.png
+   - Size: 5312.78 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 11:18:23 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+     - src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx
+
+72. **marriages.png**
+   - Path: /images/misc/marriages.png
+   - Size: 1520.37 KB
+   - Type: PNG
+   - Modified: 10/4/2025, 3:36:02 PM
+   - Referenced in:
+     - src/features/misc-legacy/pages/frontend-pages/Homepage.tsx
+     - src/features/pages/frontend-pages/legacy/upload-demo.tsx
+     - src/legacy/features/misc-legacy/pages/frontend-pages/Homepage.tsx
+
+73. **nimbus.png**
+   - Path: /images/misc/nimbus.png
+   - Size: 1421.32 KB
+   - Type: PNG
+   - Modified: 12/5/2025, 2:13:22 AM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Header.tsx
+
+74. **om-archives.png**
+   - Path: /images/misc/om-archives.png
+   - Size: 1301.56 KB
+   - Type: PNG
+   - Modified: 12/11/2025, 2:57:40 PM
+   - Referenced in:
+     - src/features/devel-tools/system-documentation/om-spec/OMSpecDocumentation.tsx
+
+75. **placeholder.png**
+   - Path: /images/misc/placeholder.png
+   - Size: 1235.33 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 2:31:16 PM
+   - Referenced in:
+     - src/features/devel-tools/om-gallery/Gallery.tsx
+
+76. **profile_1753057691760.png**
+   - Path: /images/misc/profile_1753057691760.png
+   - Size: 56.39 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+77. **profile_1753057691761.png**
+   - Path: /images/misc/profile_1753057691761.png
+   - Size: 57.90 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+78. **profile_1753057691763.png**
+   - Path: /images/misc/profile_1753057691763.png
+   - Size: 55.84 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+79. **profile_1753057691765.png**
+   - Path: /images/misc/profile_1753057691765.png
+   - Size: 58.70 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+80. **profile_1753057691766.png**
+   - Path: /images/misc/profile_1753057691766.png
+   - Size: 58.24 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+81. **profile_1753057691767.png**
+   - Path: /images/misc/profile_1753057691767.png
+   - Size: 58.23 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+82. **profile_1753057691769.png**
+   - Path: /images/misc/profile_1753057691769.png
+   - Size: 57.13 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+83. **profile_1753057691770.png**
+   - Path: /images/misc/profile_1753057691770.png
+   - Size: 59.45 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+84. **profile_1753057691771.png**
+   - Path: /images/misc/profile_1753057691771.png
+   - Size: 61.24 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+85. **profile_1754130459091.png**
+   - Path: /images/misc/profile_1754130459091.png
+   - Size: 55.44 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+86. **profile_1754130459093.png**
+   - Path: /images/misc/profile_1754130459093.png
+   - Size: 57.08 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+87. **profile_1754130459094.png**
+   - Path: /images/misc/profile_1754130459094.png
+   - Size: 57.86 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+88. **profile_1754130459096.png**
+   - Path: /images/misc/profile_1754130459096.png
+   - Size: 47.69 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+89. **profile_1754130459098.png**
+   - Path: /images/misc/profile_1754130459098.png
+   - Size: 59.75 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+90. **profile_1754130459099.png**
+   - Path: /images/misc/profile_1754130459099.png
+   - Size: 55.95 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+91. **profile_1754130459101.png**
+   - Path: /images/misc/profile_1754130459101.png
+   - Size: 50.51 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+92. **profile_1754130459102.png**
+   - Path: /images/misc/profile_1754130459102.png
+   - Size: 55.30 KB
+   - Type: PNG
+   - Modified: 10/12/2025, 12:58:10 AM
+   - Referenced in:
+     - src/components/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/account-settings/AccountTab.tsx
+     - src/features/misc-legacy/apps/userprofile/profile/ProfileBanner.tsx
+     - src/legacy/components/apps/account-settings/AccountTab.tsx
+     - src/legacy/features/misc-legacy/apps/account-settings/AccountTab.tsx
+
+93. **ro_flag.png**
+   - Path: /images/misc/ro_flag.png
+   - Size: 2687.23 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 11:32:00 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Homepage.tsx
+
+94. **ru_baptism.png**
+   - Path: /images/misc/ru_baptism.png
+   - Size: 5737.28 KB
+   - Type: PNG
+   - Modified: 12/5/2025, 12:08:41 AM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+95. **ru_flag.png**
+   - Path: /images/misc/ru_flag.png
+   - Size: 2593.54 KB
+   - Type: PNG
+   - Modified: 12/4/2025, 11:31:48 PM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Homepage.tsx
+
+96. **ru_funeral.png**
+   - Path: /images/misc/ru_funeral.png
+   - Size: 5462.53 KB
+   - Type: PNG
+   - Modified: 12/5/2025, 12:09:14 AM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+
+97. **ru_marriage.png**
+   - Path: /images/misc/ru_marriage.png
+   - Size: 6368.88 KB
+   - Type: PNG
+   - Modified: 12/5/2025, 12:08:59 AM
+   - Referenced in:
+     - src/features/pages/frontend-pages/Samples.tsx
+

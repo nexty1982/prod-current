@@ -1,0 +1,21 @@
+#!/bin/bash
+# OM-Recovery Suite Launcher
+# This script launches the Python backup tool with proper environment setup
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_SCRIPT="${SCRIPT_DIR}/om_recovery.py"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+    echo "Error: This script must be run as root or via sudo"
+    exit 1
+fi
+
+# Check if Python 3 is available
+if ! command -v python3 &> /dev/null; then
+    echo "Error: python3 is not installed or not in PATH"
+    exit 1
+fi
+
+# Run the Python script with all arguments passed through
+exec python3 "$PYTHON_SCRIPT" "$@"

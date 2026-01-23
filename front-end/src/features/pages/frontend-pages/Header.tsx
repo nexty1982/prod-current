@@ -36,7 +36,7 @@ const processionSweep = keyframes`
 
 // Purple button with geometric pattern background, white icons and text - matching screenshot
 const GradientButton = styled(Button)(({ theme }) => ({
-  backgroundImage: 'url(/images/patterns/buttons_bg.png)',
+  backgroundImage: 'url(/images/incode/buttons_bg.png)',
   backgroundRepeat: 'repeat',
   backgroundPosition: 'center',
   backgroundSize: 'auto',
@@ -403,12 +403,12 @@ const Header: React.FC = () => {
   });
   
   const headerBackgrounds = [
-    '/images/bgtiled1.png',
-    '/images/bgtiled2.png',
-    '/images/bgtiled3.png',
+    '/images/incode/bgtiled1.png',
+    '/images/incode/bgtiled2.png',
+    '/images/incode/bgtiled3.png',
     '/images/bgtiled4.png',
     '/images/bgtiled5.png',
-    '/images/bgtiled6.png',
+    '/images/incode/bgtiled6.png',
   ];
   
   const handleBackgroundChange = (index: number) => {
@@ -682,7 +682,7 @@ const Header: React.FC = () => {
             {/* Nimbus border - wraps around the video circle as a decorative border */}
             <Box
               component="img"
-              src="/images/nimbus.png"
+              src="/images/incode/nimbus.png"
               alt="Nimbus"
               onClick={handleNimbusClick}
               sx={{

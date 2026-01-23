@@ -806,7 +806,7 @@ const OMSpecDocumentation: React.FC = () => {
             <>
               <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
                 <img
-                  src="/images/random/om-archives.png"
+                  src="/images/incode/om-archives.png"
                   alt="OM Archives"
                   style={{
                     maxWidth: '100%',

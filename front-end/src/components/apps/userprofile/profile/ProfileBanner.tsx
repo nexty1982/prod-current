@@ -39,7 +39,7 @@ import { useAuth } from 'src/context/AuthContext';
 import { useProfileSync } from '../../../../lib/useProfileSync';
 
 // Default images
-const profilecover = '/images/banner/profilebg.png';
+const profilecover = '/images/incode/profilebg.png';
 import userimg from 'src/assets/images/profile/user-1.jpg';
 
 // Import Orthodox avatars

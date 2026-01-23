@@ -407,6 +407,12 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
+        title: 'OM-Ops Reports Hub',
+        icon: IconFileDescription,
+        href: '/admin/ops',
+      },
+      {
+        id: uniqueId(),
         title: 'Dynamic Records Inspector',
         icon: IconDatabase,
         href: '/devel/dynamic-records',

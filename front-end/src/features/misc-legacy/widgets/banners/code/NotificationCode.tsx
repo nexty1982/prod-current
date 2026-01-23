@@ -16,7 +16,7 @@ const Banner2 = () => {
           Level Up
         </Typography>
         <Box textAlign="center">
-          <img src={"/images/backgrounds/gold.png"} alt="star" width={150} />
+          <img src={"/images/incode/gold.png"} alt="star" width={150} />
 
           <Typography variant="h5">You reach all Notifications</Typography>
           <Typography variant="subtitle1" color="textSecondary" mt={1} mb={2}>Congratulations,<br/> Tap to continue next task.</Typography>

@@ -1,0 +1,14 @@
+services:
+  whoami:
+    image: traefik/whoami:latest
+    container_name: compose-sanity-whoami
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18080:80"
+
+  nginx:
+    image: nginx:alpine
+    container_name: compose-sanity-nginx
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18081:80"

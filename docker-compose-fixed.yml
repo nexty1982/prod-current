@@ -1,0 +1,83 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: zammad-postgres
+    restart: unless-stopped
+    env_file:
+      - .secrets.env
+    environment:
+      POSTGRES_DB: zammad
+      POSTGRES_USER: zammad
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - zammad-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zammad"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: zammad-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - zammad-elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: zammad-redis
+    restart: unless-stopped
+    volumes:
+      - zammad-redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  zammad:
+    image: zammad/zammad:6.5.0-1
+    container_name: zammad-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3030:3000"
+    env_file:
+      - .secrets.env
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: zammad
+      POSTGRES_DB: zammad
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_SSL_VERIFY: "false"
+      REDIS_URL: redis://redis:6379
+    command: ["rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+    volumes:
+      - zammad-data:/opt/zammad
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/v1/health_check || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  zammad-postgres-data:
+  zammad-elasticsearch-data:
+  zammad-redis-data:
+  zammad-data:

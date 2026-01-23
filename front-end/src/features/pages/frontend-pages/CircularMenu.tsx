@@ -123,7 +123,7 @@ const GlowingCross = forwardRef<HTMLDivElement, { isExpanded: boolean; isDraggin
       {...props}
     >
       <img 
-        src="/images/header/cross-gold.png" 
+        src="/images/incode/cross-gold.png" 
         alt="Cross menu" 
         draggable="false"
       />

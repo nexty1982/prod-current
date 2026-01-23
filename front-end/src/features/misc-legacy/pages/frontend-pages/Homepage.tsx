@@ -1032,7 +1032,7 @@ const HomePage: React.FC = () => {
                     }
                   }}>
                     <img 
-                      src="/images/marriages.png"
+                      src="/images/incode/marriages.png"
                       alt="Historical Marriage Register from 1971 with Orthodox formatting"
                       style={{
                         width: '100%',
@@ -1080,7 +1080,7 @@ const HomePage: React.FC = () => {
                     }
                   }}>
                     <img 
-                      src="/images/funerals.png"
+                      src="/images/incode/funerals.png"
                       alt="Historical Death Register from 1988 with Orthodox formatting"
                       style={{
                         width: '100%',
@@ -1128,7 +1128,7 @@ const HomePage: React.FC = () => {
                     }
                   }}>
                     <img 
-                      src="/images/baptisms.png"
+                      src="/images/incode/baptisms.png"
                       alt="Historical Birth/Baptism Register from 1972-1973"
                       style={{
                         width: '100%',

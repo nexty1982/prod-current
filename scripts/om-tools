@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+# OM-Tools Wrapper Script
+# Allows running om_recovery.py from any directory
+#
+# Installation:
+#   sudo cp scripts/om-tools /usr/local/bin/om-tools
+#   sudo chmod +x /usr/local/bin/om-tools
+#
+# Usage:
+#   om-tools [arguments]
+#
+
+# Use hardcoded production path (most reliable)
+REPO_ROOT="/var/www/orthodoxmetrics/prod"
+
+# Try to find repo root relative to this script if hardcoded path doesn't exist
+# (useful for development/testing)
+if [ ! -d "$REPO_ROOT" ]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    REPO_ROOT="${SCRIPT_DIR}/.."
+    REPO_ROOT="$(cd "$REPO_ROOT" && pwd)"
+fi
+
+# Path to the Python script
+OM_RECOVERY_SCRIPT="${REPO_ROOT}/tools/om_recovery/om_recovery.py"
+
+# Check if script exists
+if [ ! -f "$OM_RECOVERY_SCRIPT" ]; then
+    echo "❌ Error: Cannot find om_recovery.py" >&2
+    echo "   Expected location: $OM_RECOVERY_SCRIPT" >&2
+    echo "   Current directory: $(pwd)" >&2
+    if [ -n "$SCRIPT_DIR" ]; then
+        echo "   Script directory: $SCRIPT_DIR" >&2
+    fi
+    exit 1
+fi
+
+# Change to repo root to ensure relative paths work correctly
+cd "$REPO_ROOT" || {
+    echo "❌ Error: Cannot change to repo root: $REPO_ROOT" >&2
+    exit 1
+}
+
+# Execute the Python script with all passed arguments
+exec python3 "$OM_RECOVERY_SCRIPT" "$@"

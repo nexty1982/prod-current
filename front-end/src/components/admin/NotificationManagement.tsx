@@ -67,13 +67,20 @@ interface NotificationType {
     is_active: boolean;
 }
 
+interface SystemRole {
+    id: number;
+    name: string;
+    description: string;
+    is_system: number;
+}
+
 interface CustomNotification {
     id?: number;
     title: string;
     message: string;
     priority: 'low' | 'normal' | 'high' | 'urgent';
     scheduled_at: Date | null;
-    target_audience: 'all' | 'admins' | 'users' | 'church_specific';
+    target_audience: 'all' | 'admins' | 'users' | 'church_specific' | string; // string for role:roleName format
     church_id?: number;
     icon?: string;
     action_url?: string;
@@ -86,17 +93,25 @@ interface NotificationQueue {
     title: string;
     message: string;
     priority: string;
+    notification_type?: string;
+    category?: string;
     scheduled_at: string;
-    target_audience: string;
-    status: 'pending' | 'sent' | 'failed';
     created_at: string;
-    user_count: number;
+    target_audience: string;
+    status: 'pending' | 'sent' | 'failed' | 'draft';
+    total_sent?: number;
+    read_count?: number;
+    dismissed_count?: number;
+    target_user_count: number;
+    created_by?: string | null;
+    is_custom?: boolean;
 }
 
 const NotificationManagement: React.FC = () => {
     const [tabValue, setTabValue] = useState(0);
     const [notificationTypes, setNotificationTypes] = useState<NotificationType[]>([]);
     const [customNotifications, setCustomNotifications] = useState<NotificationQueue[]>([]);
+    const [systemRoles, setSystemRoles] = useState<SystemRole[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -104,6 +119,7 @@ const NotificationManagement: React.FC = () => {
     // Dialog states
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [viewQueueDialogOpen, setViewQueueDialogOpen] = useState(false);
+    const [selectedNotification, setSelectedNotification] = useState<NotificationQueue | null>(null);
     const [newNotification, setNewNotification] = useState<CustomNotification>({
         title: '',
         message: '',
@@ -119,7 +135,22 @@ const NotificationManagement: React.FC = () => {
     useEffect(() => {
         fetchNotificationTypes();
         fetchNotificationQueue();
+        fetchSystemRoles();
     }, []);
+
+    const fetchSystemRoles = async () => {
+        try {
+            const response = await fetch('/api/admin/roles', {
+                credentials: 'include'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setSystemRoles(data.roles || []);
+            }
+        } catch (err) {
+            console.error('Failed to load system roles:', err);
+        }
+    };
 
     const fetchNotificationTypes = async () => {
         try {
@@ -391,7 +422,7 @@ const NotificationManagement: React.FC = () => {
                                             <Typography variant="h6">Admin Alert</Typography>
                                         </Box>
                                         <Typography variant="body2" color="text.secondary" mb={2}>
-                                            Send important notifications to administrators only.
+                                            Send important notifications to administrators only (admin + super_admin).
                                         </Typography>
                                         <Button
                                             variant="outlined"
@@ -466,61 +497,104 @@ const NotificationManagement: React.FC = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {customNotifications.map((notification) => (
-                                        <TableRow key={notification.id}>
-                                            <TableCell>
-                                                <Typography variant="subtitle2">
-                                                    {notification.title}
-                                                </Typography>
+                                    {customNotifications.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                                                 <Typography variant="body2" color="text.secondary">
-                                                    {notification.message.slice(0, 50)}...
+                                                    No notifications in queue
                                                 </Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    label={notification.target_audience}
-                                                    size="small"
-                                                    variant="outlined"
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    label={notification.priority}
-                                                    size="small"
-                                                    color={getPriorityColor(notification.priority) as any}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                {new Date(notification.scheduled_at).toLocaleString()}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    label={notification.status}
-                                                    size="small"
-                                                    color={notification.status === 'sent' ? 'success' : notification.status === 'failed' ? 'error' : 'default'}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge badgeContent={notification.user_count} color="primary">
-                                                    <IconUsers size={20} />
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Tooltip title="View Details">
-                                                    <IconButton size="small">
-                                                        <IconEye />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                {notification.status === 'pending' && (
-                                                    <Tooltip title="Cancel">
-                                                        <IconButton size="small" color="error">
-                                                            <IconX />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                )}
                                             </TableCell>
                                         </TableRow>
-                                    ))}
+                                    ) : (
+                                        customNotifications.map((notification) => (
+                                            <TableRow key={notification.id}>
+                                                <TableCell>
+                                                    <Typography variant="subtitle2">
+                                                        {notification.title}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {notification.message && notification.message.length > 50 
+                                                            ? notification.message.slice(0, 50) + '...'
+                                                            : notification.message || 'No message'}
+                                                    </Typography>
+                                                    {notification.created_by && (
+                                                        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                                            by {notification.created_by}
+                                                        </Typography>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Chip
+                                                        label={
+                                                            notification.target_audience?.startsWith('role:')
+                                                                ? (systemRoles && systemRoles.length > 0 
+                                                                    ? systemRoles.find(r => r.name === notification.target_audience.replace('role:', ''))?.description || notification.target_audience
+                                                                    : notification.target_audience)
+                                                                : notification.target_audience === 'admins'
+                                                                ? 'Administrators'
+                                                                : notification.target_audience === 'users'
+                                                                ? 'Regular Users'
+                                                                : notification.target_audience === 'all'
+                                                                ? 'All Users'
+                                                                : notification.target_audience
+                                                        }
+                                                        size="small"
+                                                        variant="outlined"
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Chip
+                                                        label={notification.priority}
+                                                        size="small"
+                                                        color={getPriorityColor(notification.priority) as any}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    {notification.scheduled_at 
+                                                        ? new Date(notification.scheduled_at).toLocaleString()
+                                                        : notification.created_at
+                                                            ? new Date(notification.created_at).toLocaleString()
+                                                            : 'N/A'}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Chip
+                                                        label={notification.status}
+                                                        size="small"
+                                                        color={
+                                                            notification.status === 'sent' ? 'success' 
+                                                            : notification.status === 'failed' ? 'error'
+                                                            : notification.status === 'draft' ? 'warning'
+                                                            : 'default'
+                                                        }
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Tooltip title={`Sent: ${notification.total_sent || notification.target_user_count || 0} | Read: ${notification.read_count || 0} | Dismissed: ${notification.dismissed_count || 0}`}>
+                                                        <Badge 
+                                                            badgeContent={notification.total_sent || notification.target_user_count || 0} 
+                                                            color="primary"
+                                                        >
+                                                            <IconUsers size={20} />
+                                                        </Badge>
+                                                    </Tooltip>
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <Tooltip title="View Details">
+                                                        <IconButton size="small">
+                                                            <IconEye />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    {notification.status === 'pending' && (
+                                                        <Tooltip title="Cancel">
+                                                            <IconButton size="small" color="error">
+                                                                <IconX />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
                                 </TableBody>
                             </Table>
                         </TableContainer>
@@ -575,8 +649,16 @@ const NotificationManagement: React.FC = () => {
                                             onChange={(e) => setNewNotification(prev => ({ ...prev, target_audience: e.target.value as any }))}
                                         >
                                             <MenuItem value="all">All Users</MenuItem>
-                                            <MenuItem value="admins">Administrators Only</MenuItem>
-                                            <MenuItem value="users">Regular Users Only</MenuItem>
+                                            <MenuItem value="admins">Administrators (admin + super_admin)</MenuItem>
+                                            <MenuItem value="users">Regular Users (non-admin)</MenuItem>
+                                            <MenuItem disabled>
+                                                <em>--- By Role ---</em>
+                                            </MenuItem>
+                                            {systemRoles.map((role) => (
+                                                <MenuItem key={role.id} value={`role:${role.name}`}>
+                                                    {role.description} ({role.name})
+                                                </MenuItem>
+                                            ))}
                                             <MenuItem value="church_specific">Specific Church</MenuItem>
                                         </Select>
                                     </FormControl>
@@ -650,6 +732,124 @@ const NotificationManagement: React.FC = () => {
                         >
                             {newNotification.scheduled_at ? 'Schedule' : 'Send Now'}
                         </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* View Notification Details Dialog */}
+                <Dialog open={viewQueueDialogOpen} onClose={() => setViewQueueDialogOpen(false)} maxWidth="md" fullWidth>
+                    <DialogTitle>
+                        Notification Details
+                    </DialogTitle>
+                    <DialogContent>
+                        {selectedNotification ? (
+                            <Stack spacing={2} sx={{ mt: 1 }}>
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">Title</Typography>
+                                    <Typography variant="h6">{selectedNotification.title}</Typography>
+                                </Box>
+                                
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">Message</Typography>
+                                    <Typography variant="body1">{selectedNotification.message}</Typography>
+                                </Box>
+
+                                <Grid container spacing={2}>
+                                    <Grid item xs={6}>
+                                        <Typography variant="subtitle2" color="text.secondary">Priority</Typography>
+                                        <Chip
+                                            label={selectedNotification.priority}
+                                            size="small"
+                                            color={getPriorityColor(selectedNotification.priority) as any}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="subtitle2" color="text.secondary">Status</Typography>
+                                        <Chip
+                                            label={selectedNotification.status}
+                                            size="small"
+                                            color={
+                                                selectedNotification.status === 'sent' ? 'success' 
+                                                : selectedNotification.status === 'failed' ? 'error'
+                                                : selectedNotification.status === 'draft' ? 'warning'
+                                                : 'default'
+                                            }
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="subtitle2" color="text.secondary">Target Audience</Typography>
+                                        <Chip
+                                            label={
+                                                selectedNotification.target_audience?.startsWith('role:')
+                                                    ? (systemRoles && systemRoles.length > 0 
+                                                        ? systemRoles.find(r => r.name === selectedNotification.target_audience.replace('role:', ''))?.description || selectedNotification.target_audience
+                                                        : selectedNotification.target_audience)
+                                                    : selectedNotification.target_audience === 'admins'
+                                                    ? 'Administrators'
+                                                    : selectedNotification.target_audience === 'users'
+                                                    ? 'Regular Users'
+                                                    : selectedNotification.target_audience === 'all'
+                                                    ? 'All Users'
+                                                    : selectedNotification.target_audience
+                                            }
+                                            size="small"
+                                            variant="outlined"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="subtitle2" color="text.secondary">Notification Type</Typography>
+                                        <Typography variant="body2">
+                                            {selectedNotification.notification_type || 'N/A'}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+
+                                <Divider />
+
+                                <Grid container spacing={2}>
+                                    <Grid item xs={6}>
+                                        <Typography variant="subtitle2" color="text.secondary">Total Sent</Typography>
+                                        <Typography variant="h6">{selectedNotification.total_sent || selectedNotification.target_user_count || 0}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="subtitle2" color="text.secondary">Read Count</Typography>
+                                        <Typography variant="h6">{selectedNotification.read_count || 0}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="subtitle2" color="text.secondary">Dismissed Count</Typography>
+                                        <Typography variant="h6">{selectedNotification.dismissed_count || 0}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="subtitle2" color="text.secondary">Created By</Typography>
+                                        <Typography variant="body2">{selectedNotification.created_by || 'System'}</Typography>
+                                    </Grid>
+                                </Grid>
+
+                                <Divider />
+
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">Created At</Typography>
+                                    <Typography variant="body2">
+                                        {selectedNotification.created_at 
+                                            ? new Date(selectedNotification.created_at).toLocaleString()
+                                            : 'N/A'}
+                                    </Typography>
+                                </Box>
+
+                                {selectedNotification.scheduled_at && (
+                                    <Box>
+                                        <Typography variant="subtitle2" color="text.secondary">Scheduled At</Typography>
+                                        <Typography variant="body2">
+                                            {new Date(selectedNotification.scheduled_at).toLocaleString()}
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </Stack>
+                        ) : (
+                            <Typography>No notification selected</Typography>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setViewQueueDialogOpen(false)}>Close</Button>
                     </DialogActions>
                 </Dialog>
             </Box>

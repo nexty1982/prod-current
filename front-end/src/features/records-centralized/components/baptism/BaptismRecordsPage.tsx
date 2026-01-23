@@ -3764,13 +3764,13 @@ const BaptismRecordsPage: React.FC = () => {
                       const recordTypes = getAllRecordTypes();
                       
                       const imageMap: Record<string, string> = {
-                        baptism: '/images/records/baptism.png',
-                        marriage: '/images/records/marriage.png',
-                        funeral: '/images/records/funeral.png',
+                        baptism: '/images/incode/baptism.png',
+                        marriage: '/images/incode/marriage.png',
+                        funeral: '/images/incode/funeral.png',
                       };
                       
                       // Fallback image for missing assets - use default icon
-                      const fallbackImage = '/images/icons/default.png';
+                      const fallbackImage = '/images/incode/default.png';
                       
                       // Idempotent image error handler - prevents infinite loops
                       const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {

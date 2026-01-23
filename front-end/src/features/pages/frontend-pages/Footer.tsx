@@ -8,7 +8,7 @@ const FooterBanner = styled(Box)(({ theme }) => ({
   overflow: 'visible',
   width: '100%',
   display: 'block',
-  backgroundImage: 'url(/images/patterns/page-bg.png)',
+  backgroundImage: 'url(/images/incode/page-bg.png)',
   backgroundRepeat: 'repeat',
   backgroundPosition: 'top left',
   backgroundSize: 'auto',
@@ -85,7 +85,7 @@ const Footer: React.FC = () => {
           {/* Globe Image */}
           <Box
             component="img"
-            src="/images/header/globe-footer.png"
+            src="/images/incode/globe-footer.png"
             alt="Globe"
             sx={{
               width: { xs: '120px', sm: '150px', md: '180px', lg: '200px' },

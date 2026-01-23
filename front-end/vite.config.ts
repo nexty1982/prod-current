@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
   
   return {
     base: '/', // Ensure assets are loaded from root
+    publicDir: 'public', // Explicitly set public directory for static assets (default, but explicit is clearer)
     cacheDir: 'node_modules/.vite', // Enable build cache
     resolve: {
         alias: [

@@ -57,11 +57,11 @@ export function AddRecordButton(props: ButtonProps & { recordType?: 'baptism' | 
   const getImageSrc = () => {
     switch (recordType) {
       case 'baptism':
-        return '/images/buttons/EN-baptism-record-entry.png';
+        return '/images/incode/EN-baptism-record-entry.png';
       case 'marriage':
-        return '/images/buttons/EN-marriage-record-entry.png';
+        return '/images/incode/EN-marriage-record-entry.png';
       case 'funeral':
-        return '/images/buttons/EN-funeral-record-entry.png';
+        return '/images/incode/EN-funeral-record-entry.png';
       default:
         return null;
     }

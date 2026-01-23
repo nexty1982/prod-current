@@ -130,6 +130,7 @@ const EnhancedOCRUploader = Loadable(lazy(() => import('../features/devel-tools/
 const OCRSettingsPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OCRSettingsPage')));
 const OMTasksPage = Loadable(lazy(() => import('../features/devel-tools/om-tasks/OMTasksPage')));
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
+const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-operations/GitOperations')));
 
 // Removed: JITTerminal from misc-legacy
 const JITTerminalConsole = Loadable(lazy(() => import('../features/admin/admin/JITTerminalConsole')));
@@ -145,6 +146,7 @@ const BigBookDynamicRoute = Loadable(lazy(() => import('../features/admin/admin/
 
 // OMAI Mobile
 const OMAIDiscoveryPanelMobile = Loadable(lazy(() => import('../features/admin/admin/OMAIDiscoveryPanelMobile')));
+const OpsReportsPage = Loadable(lazy(() => import('../pages/admin/OpsReportsPage')));
 
 // Component Registry for Dynamic Addons
 // Removed: DynamicAddonRoute from misc-legacy
@@ -729,6 +731,16 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin']}>
             <AdminPageFallback />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/ops',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <OpsReportsPage />
+            </AdminErrorBoundary>
           </ProtectedRoute>
         )
       },

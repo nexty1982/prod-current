@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Container } from '@mui/material';
+import { Box, Typography, Container, useTheme } from '@mui/material';
 
 // Language data
 const languages = [
@@ -30,6 +30,7 @@ const OrthodoxBanner: React.FC<OrthodoxBannerProps> = ({
   autoRotate = true,
   initialLanguage = 'en'
 }) => {
+  const theme = useTheme();
   const [currentIndex, setCurrentIndex] = useState(
     languages.findIndex(lang => lang.code === initialLanguage) || 0
   );
@@ -54,16 +55,24 @@ const OrthodoxBanner: React.FC<OrthodoxBannerProps> = ({
 
   const currentLanguage = languages[currentIndex];
 
+  const isDark = theme.palette.mode === 'dark';
+  
   return (
     <Box
       sx={{
-        background: showGradient 
-          ? 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
-          : '#f8f9fa',
+        background: isDark
+          ? (showGradient 
+              ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`
+              : theme.palette.background.default)
+          : (showGradient 
+              ? 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
+              : '#f8f9fa'),
         py: 4,
         mb: 4,
         borderRadius: '0 0 20px 20px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+        boxShadow: isDark 
+          ? '0 8px 32px rgba(0,0,0,0.3)'
+          : '0 8px 32px rgba(0,0,0,0.1)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -79,9 +88,11 @@ const OrthodoxBanner: React.FC<OrthodoxBannerProps> = ({
             flexDirection: 'row',
             textAlign: 'center',
             p: 4,
-            bgcolor: 'white',
+            bgcolor: isDark ? theme.palette.background.paper : 'white',
             borderRadius: 2,
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+            boxShadow: isDark 
+              ? '0 4px 20px rgba(0, 0, 0, 0.3)'
+              : '0 4px 20px rgba(0, 0, 0, 0.1)',
           }}
         >
           {/* Orthodox Metrics LLC Complete Logo */}
@@ -98,7 +109,7 @@ const OrthodoxBanner: React.FC<OrthodoxBannerProps> = ({
           >
             <Box
               component="img"
-              src="/images/orthodox-metrics-logo.svg"
+              src="/images/incode/orthodox-metrics-logo.svg"
               alt="Orthodox Metrics LLC"
               sx={{
                 width: '100%',
@@ -209,7 +220,7 @@ const OrthodoxBanner: React.FC<OrthodoxBannerProps> = ({
                     sx={{
                       fontFamily: '"Noto Serif", "Times New Roman", serif',
                       fontWeight: 600,
-                      color: '#4C1D95', // Royal purple from branding
+                      color: isDark ? theme.palette.primary.main : '#4C1D95', // Royal purple from branding
                       fontSize: '1.8rem',
                       lineHeight: 1.3,
                       whiteSpace: 'pre-line',
@@ -217,7 +228,9 @@ const OrthodoxBanner: React.FC<OrthodoxBannerProps> = ({
                       width: '100%',
                       opacity: index === currentIndex ? 1 : 0,
                       transition: 'opacity 1s ease-in-out',
-                      textShadow: '0 2px 4px rgba(76, 29, 149, 0.2)',
+                      textShadow: isDark 
+                        ? '0 2px 4px rgba(0, 0, 0, 0.5)'
+                        : '0 2px 4px rgba(76, 29, 149, 0.2)',
                     }}
                   >
                     {lang.title}
@@ -241,13 +254,15 @@ const OrthodoxBanner: React.FC<OrthodoxBannerProps> = ({
                     sx={{
                       fontFamily: '"Noto Serif", "Times New Roman", serif',
                       fontStyle: 'italic',
-                      color: '#F6C90E', // Gold from branding
+                      color: isDark ? theme.palette.secondary.main : '#F6C90E', // Gold from branding
                       fontSize: '1.4rem',
                       position: 'absolute',
                       width: '100%',
                       opacity: index === currentIndex ? 1 : 0,
                       transition: 'opacity 1s ease-in-out',
-                      textShadow: '0 2px 4px rgba(246, 201, 14, 0.3)',
+                      textShadow: isDark 
+                        ? '0 2px 4px rgba(0, 0, 0, 0.5)'
+                        : '0 2px 4px rgba(246, 201, 14, 0.3)',
                     }}
                   >
                     {lang.tagline}

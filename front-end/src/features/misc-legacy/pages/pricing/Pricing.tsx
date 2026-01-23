@@ -25,7 +25,7 @@ import BlankCard from '@/shared/ui/BlankCard';
 
 import pck1 from '@/assets/images/backgrounds/silver.png';
 import pck2 from '@/assets/images/backgrounds/bronze.png';
-import pck3 from '@/assets/images/backgrounds/gold.png';
+import pck3 from '@/assets/images/incode/gold.png';
 
 const BCrumb = [
   {

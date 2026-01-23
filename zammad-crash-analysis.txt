@@ -1,0 +1,56 @@
+═══════════════════════════════════════════════════════════
+  Zammad Crash Analysis
+═══════════════════════════════════════════════════════════
+
+=== Container Status ===
+Status: restarting
+Started: 2026-01-23T12:08:05.562613782Z
+Finished: 2026-01-23T12:08:08.971219193Z
+Exit Code: 0
+Restart Count: 14
+Health: {"Status":"unhealthy","FailingStreak":0,"Log":[]}
+
+=== Recent Logs (last 300 lines) ===
+
+=== Error Patterns ===
+
+=== Startup Sequence ===
+
+=== Environment Variables ===
+POSTGRES_DB=zammad
+ELASTICSEARCH_URL=http://elasticsearch:9200
+POSTGRES_PASSWORD=&KzAfUfFibsk08%RVd!35fNqU%ao&jpX
+ELASTICSEARCH_SSL_VERIFY=false
+POSTGRES_HOST=postgres
+POSTGRES_USER=zammad
+RAILS_ENV=production
+RAILS_LOG_TO_STDOUT=true
+ZAMMAD_DIR=/opt/zammad
+
+=== Port Configuration ===
+
+=== Docker Compose Configuration ===
+  zammad:
+    image: zammad/zammad:latest
+    container_name: zammad-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3030:3000"
+    env_file:
+      - .secrets.env
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: zammad
+      POSTGRES_DB: zammad
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_SSL_VERIFY: "false"
+    volumes:
+      - zammad-data:/opt/zammad
+    healthcheck:
+
+=== Full logs saved to: /tmp/zammad-full-logs.txt ===

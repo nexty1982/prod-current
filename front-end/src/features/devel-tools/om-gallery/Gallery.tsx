@@ -48,6 +48,13 @@ import {
 import { styled } from '@mui/material/styles';
 import { DataGrid, GridColDef, GridRowSelectionModel, GridRenderCellParams } from '@mui/x-data-grid';
 import { OMLoading } from '@/components/common/OMLoading';
+import { 
+  CANONICAL_IMAGE_DIRECTORIES, 
+  isCanonicalDirectory, 
+  buildImageUrl, 
+  extractDirectoryFromPath,
+  IMAGES_BASE_PATH 
+} from '../system-documentation/gallery.config';
 
 const GalleryContainer = styled(Container)(({ theme }) => ({
   paddingTop: theme.spacing(4),
@@ -562,11 +569,28 @@ const Gallery: React.FC = () => {
             fileCreated = (file.created && file.created !== '') ? file.created : null;
           }
           
+          // Resolve image URL with proper fallback
+          // Priority: file.url > file.path > derive from path > fallback
+          let imageUrl = file.url;
+          if (!imageUrl && file.path) {
+            imageUrl = file.path.startsWith('/') ? file.path : `${IMAGES_BASE_PATH}/${file.path}`;
+          }
+          if (!imageUrl && file.name) {
+            // Try to extract directory from path if available
+            const directory = file.path ? extractDirectoryFromPath(file.path) : null;
+            if (directory) {
+              imageUrl = buildImageUrl(directory, file.name);
+            } else {
+              // Last resort: use first canonical directory (should rarely happen)
+              imageUrl = `${IMAGES_BASE_PATH}/${CANONICAL_IMAGE_DIRECTORIES[0]}/${file.name}`;
+            }
+          }
+          
           return {
             id: `img-${index}-${file.name}`,
             name: file.name || 'Unknown',
             path: file.path || file.url || file.name,
-            url: file.url || file.path || `/images/gallery/${file.name}`,
+            url: imageUrl || '/images/incode/placeholder.png',
             created: fileCreated,
             modified: fileModified,
             size: fileSize,
@@ -703,7 +727,7 @@ const Gallery: React.FC = () => {
                 ${image.created ? `<p><strong>Created:</strong> ${new Date(image.created).toLocaleString()}</p>` : ''}
               </div>
               <div class="image-container">
-                <img src="${image.url}" alt="${image.name}" onerror="this.src='/images/placeholder.png'" />
+                <img src="${image.url}" alt="${image.name}" onerror="this.src='/images/incode/placeholder.png'" />
               </div>
               <div class="actions">
                 <button class="btn btn-delete" onclick="deleteImage()">Delete Image</button>
@@ -1404,7 +1428,7 @@ const Gallery: React.FC = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1 }}>
             <Box
               component="img"
-              src={image.url || '/images/placeholder.png'}
+              src={image.url || '/images/incode/placeholder.png'}
               alt={image.name || 'Unknown'}
               sx={{
                 width: 40,
@@ -1416,7 +1440,7 @@ const Gallery: React.FC = () => {
                 cursor: 'pointer',
               }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/images/placeholder.png';
+                (e.target as HTMLImageElement).src = '/images/incode/placeholder.png';
               }}
               onClick={() => handleImageClick(image)}
             />
@@ -1861,12 +1885,12 @@ const Gallery: React.FC = () => {
   // Get first 8 images for thumbnail display - use activeImages to respect filters
   const thumbnailImages = activeImages.slice(0, 8);
 
-  // Default directories that should stand out visually
-  const DEFAULT_DIRECTORIES = ['logos', 'backgrounds', 'icons', 'ui', 'records', 'misc'];
+  // Use canonical directories from shared config (single source of truth)
+  const DEFAULT_DIRECTORIES = CANONICAL_IMAGE_DIRECTORIES;
 
-  // Check if directory is a default directory
+  // Check if directory is a canonical directory
   const isDefaultDirectory = (dirName: string): boolean => {
-    return DEFAULT_DIRECTORIES.includes(dirName.toLowerCase());
+    return isCanonicalDirectory(dirName);
   };
 
   // Clean up empty directories
@@ -1894,39 +1918,79 @@ const Gallery: React.FC = () => {
 
   // Render directory tree recursively
   const renderDirectoryTree = (dirs: any[], level: number = 0) => {
-    return dirs.map((dir) => {
-      const isDefault = isDefaultDirectory(dir.name);
+    // Get existing directory names for comparison
+    const existingDirNames = new Set(dirs.map(d => d.name.toLowerCase()));
+    
+    // Ensure canonical directories are always shown, even if empty
+    const canonicalDirsToShow = CANONICAL_IMAGE_DIRECTORIES.map(dirName => {
+      const existing = dirs.find(d => d.name.toLowerCase() === dirName.toLowerCase());
+      if (existing) {
+        return existing;
+      }
+      // Return placeholder for missing canonical directory
+      return {
+        name: dirName,
+        path: dirName,
+        childrenCount: 0,
+        isEmpty: true, // Mark as empty so we can show it differently
+      };
+    });
+    
+    // Combine canonical directories (with placeholders) and other directories
+    const otherDirs = dirs.filter(d => !isCanonicalDirectory(d.name));
+    const allDirs = [...canonicalDirsToShow, ...otherDirs];
+    
+    return allDirs.map((dir) => {
+      const isDefault = isCanonicalDirectory(dir.name);
+      const isEmpty = dir.isEmpty === true;
+      
       return (
         <Box key={dir.path} sx={{ pl: level * 2 }}>
           <Button
             fullWidth
             startIcon={<IconFolder size={16} />}
-            onClick={() => setSelectedDirectory(dir.path)}
+            onClick={() => !isEmpty && setSelectedDirectory(dir.path)}
+            disabled={isEmpty}
             sx={{
               justifyContent: 'flex-start',
               textTransform: 'none',
-              color: selectedDirectory === dir.path ? '#C8A24B' : (isDefault ? '#1976d2' : 'inherit'),
+              color: isEmpty 
+                ? 'text.disabled' 
+                : selectedDirectory === dir.path 
+                  ? '#C8A24B' 
+                  : (isDefault ? '#1976d2' : 'inherit'),
               fontWeight: selectedDirectory === dir.path ? 'bold' : (isDefault ? '600' : 'normal'),
-              backgroundColor: isDefault && selectedDirectory !== dir.path ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
+              backgroundColor: isEmpty 
+                ? 'rgba(0, 0, 0, 0.02)' 
+                : isDefault && selectedDirectory !== dir.path 
+                  ? 'rgba(25, 118, 210, 0.08)' 
+                  : 'transparent',
               border: isDefault ? '1px solid rgba(25, 118, 210, 0.2)' : 'none',
               borderRadius: isDefault ? 1 : 0,
               mb: isDefault ? 0.5 : 0,
+              opacity: isEmpty ? 0.6 : 1,
               '&:hover': {
-                backgroundColor: isDefault ? 'rgba(25, 118, 210, 0.12)' : 'rgba(0, 0, 0, 0.04)',
+                backgroundColor: isEmpty 
+                  ? 'rgba(0, 0, 0, 0.02)' 
+                  : isDefault 
+                    ? 'rgba(25, 118, 210, 0.12)' 
+                    : 'rgba(0, 0, 0, 0.04)',
               },
             }}
           >
-            {dir.name} ({dir.childrenCount})
+            {dir.name} {isEmpty ? '(empty)' : `(${dir.childrenCount})`}
             {isDefault && (
               <Chip 
-                label="Default" 
+                label={isEmpty ? "Empty" : "Default"} 
                 size="small" 
                 sx={{ 
                   ml: 1, 
                   height: 18, 
                   fontSize: '0.65rem',
-                  backgroundColor: 'rgba(25, 118, 210, 0.1)',
-                  color: '#1976d2',
+                  backgroundColor: isEmpty 
+                    ? 'rgba(0, 0, 0, 0.05)' 
+                    : 'rgba(25, 118, 210, 0.1)',
+                  color: isEmpty ? 'text.disabled' : '#1976d2',
                 }} 
               />
             )}
@@ -2103,7 +2167,7 @@ const Gallery: React.FC = () => {
                     imageOrientation: 'from-image', // Respect EXIF orientation
                   }}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/placeholder.png';
+                    (e.target as HTMLImageElement).src = '/images/incode/placeholder.png';
                   }}
                 />
               )}
@@ -2156,7 +2220,7 @@ const Gallery: React.FC = () => {
                     image={image.url}
                     alt={image.name}
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/placeholder.png';
+                      (e.target as HTMLImageElement).src = '/images/incode/placeholder.png';
                     }}
                   />
                 </ImageCard>
@@ -2574,7 +2638,7 @@ const Gallery: React.FC = () => {
                     borderRadius: '8px',
                   }}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/placeholder.png';
+                    (e.target as HTMLImageElement).src = '/images/incode/placeholder.png';
                   }}
                 />
               </Box>

@@ -98,7 +98,7 @@ const OrthodoxBanner: React.FC<OrthodoxBannerProps> = ({
           >
             <Box
               component="img"
-              src="/images/orthodox-metrics-logo.svg"
+              src="/images/incode/orthodox-metrics-logo.svg"
               alt="Orthodox Metrics LLC"
               sx={{
                 width: '100%',

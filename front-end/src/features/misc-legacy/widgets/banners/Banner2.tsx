@@ -2,7 +2,7 @@
 // @ts-ignore
 import React from 'react';
 import { CardContent, Typography, Button, Box } from '@mui/material';
-import starBg from '@/assets/images/backgrounds/gold.png';
+import starBg from '@/assets/images/incode/gold.png';
 import ParentCard from '@/shared/ui/ParentCard';
 
 import NotificationCode from './code/NotificationCode';

@@ -733,25 +733,25 @@ const HomePage: React.FC = () => {
     {
       title: 'About Us',
       image: '/images/sections/about.png',
-      crossesImage: '/images/sections/dune-crosses.png',
+      crossesImage: '/images/incode/dune-crosses.png',
       content: 'Orthodox Metrics LLC. is an Orthodox-grown solution built to serve communities across the world with full multilingual support. Our platform seamlessly adapts to English, Greek, Russian, Church Slavonic, Georgian, Romanian, Latin, and Chinese, ensuring that every record, interface, and report can be read and managed in the language of your church\'s tradition. Whether you are a large parish or a small mission, Orthodox Metrics was built with care to honor the unique heritage of every Orthodox community.'
     },
     {
       title: 'What We Offer',
       image: '/images/sections/what-we-offer.png',
-      crossesImage: '/images/sections/dune-crosses.png',
+      crossesImage: '/images/incode/dune-crosses.png',
       content: 'At Orthodox Metrics, we provide a complete ecosystem designed to modernize and simplify how churches manage their records, communications, and digital presence. From baptism, marriage, and funeral records to parish directories, donation management, and multilingual reports, our platform brings clarity and organization to the most essential areas of church life. We also assist with website integration, secure data hosting, and tailored solutions for each jurisdiction and language — all while maintaining the reverence and integrity of Orthodox tradition.'
     },
     {
       title: 'Why Orthodox Metrics?',
       image: '/images/sections/why-orthodox-metrics.png',
-      crossesImage: '/images/sections/dune-crosses.png',
+      crossesImage: '/images/incode/dune-crosses.png',
       content: 'Our mission is simple: to help Orthodox parishes thrive in the modern age without losing their timeless roots. Unlike generic church management tools, Orthodox Metrics was created by Orthodox Christians for Orthodox Christians — with an understanding of how cultural, linguistic, and liturgical nuances shape parish life. We believe that technology should strengthen the bonds of faith and community, not complicate them. Every feature we build is guided by that principle, ensuring reliability, privacy, and ease of use for clergy, staff, and faithful alike.'
     },
     {
       title: 'Looking Forward to Speaking With You',
       image: '/images/sections/looking-forward.png',
-      crossesImage: '/images/sections/dune-crosses.png',
+      crossesImage: '/images/incode/dune-crosses.png',
       content: 'We are located in Phillipsburg, New Jersey, and are humbled to serve the growing needs of Orthodox Churches both locally and around the world. Having recently launched, we are eager to connect with parishes, monasteries, and missions seeking to bring their administrative and archival work into a unified, beautiful, and spiritually mindful digital space. We warmly invite our brothers and sisters in Christ to reach out — whether you are just beginning your digital journey or ready to expand your existing systems — and let us walk alongside you in building a stronger, more connected Orthodox future.'
     }
   ];

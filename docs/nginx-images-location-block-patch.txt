@@ -1,0 +1,37 @@
+# Nginx Configuration Patch: Add /images/ Location Block
+# 
+# This patch adds a location block to serve /images/* directly from the dist directory,
+# bypassing the backend to ensure proper content-types and caching headers.
+#
+# INSERT THIS BLOCK AFTER LINE 21 (after the maintenance.html location block)
+# AND BEFORE LINE 23 (before the "# ---------- SPA entry ----------" comment)
+#
+# Location in file: docs/orthodoxmetrics.com
+# Insert after:     location = /maintenance.html { ... }
+# Insert before:    # ---------- SPA entry ----------
+
+    # ---------- Images: Serve directly from dist (bypass backend) ----------
+    # This ensures images are served with correct content-types and caching headers
+    # and prevents backend catch-all routes from intercepting image requests
+    # The ^~ prefix ensures this matches before regex-based location blocks
+    location ^~ /images/ {
+        alias /var/www/orthodoxmetrics/prod/front-end/dist/images/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        
+        # Ensure correct content types
+        types {
+            image/png png;
+            image/jpeg jpg jpeg;
+            image/svg+xml svg;
+            image/webp webp;
+            image/gif gif;
+        }
+        default_type image/png;
+        
+        # Security: prevent directory listing
+        autoindex off;
+        
+        # Logging (optional, can remove in production)
+        access_log off;
+    }

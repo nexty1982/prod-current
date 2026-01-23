@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OM-Ops Reports Hub</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #1976d2;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .filters {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #555;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #1976d2;
+    }
+    
+    .artifacts-list {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .artifact-item {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .artifact-item:hover {
+      background: #f9f9f9;
+    }
+    
+    .artifact-item:last-child {
+      border-bottom: none;
+    }
+    
+    .artifact-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+    
+    .artifact-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    
+    .artifact-meta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .artifact-type {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #1976d2;
+      color: white;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .artifact-date {
+      color: #666;
+      font-size: 13px;
+    }
+    
+    .artifact-summary {
+      color: #666;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    
+    .artifact-files {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    
+    .file-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #555;
+    }
+    
+    .file-badge:hover {
+      background: #e0e0e0;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+    
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+    
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 1000px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-close:hover {
+      color: #333;
+    }
+    
+    .modal-tabs {
+      display: flex;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .modal-tab {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: #666;
+      border-bottom: 2px solid transparent;
+    }
+    
+    .modal-tab.active {
+      color: #1976d2;
+      border-bottom-color: #1976d2;
+    }
+    
+    .modal-body {
+      flex: 1;
+      overflow: auto;
+      padding: 20px;
+    }
+    
+    .modal-iframe {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .modal-pre {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    
+    .modal-actions {
+      padding: 15px 20px;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .btn-primary {
+      background: #1976d2;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1565c0;
+    }
+    
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>OM-Ops Reports Hub</h1>
+      <div class="subtitle">Browse and view OM-Ops artifacts, reports, and analysis outputs</div>
+    </header>
+    
+    <div class="filters">
+      <div class="filter-group">
+        <label for="search">Search</label>
+        <input type="text" id="search" placeholder="Search artifacts...">
+      </div>
+      <div class="filter-group">
+        <label for="type">Type</label>
+        <select id="type">
+          <option value="">All Types</option>
+          <option value="analysis">Analysis</option>
+          <option value="changelog">Changelog</option>
+          <option value="system">System Summary</option>
+          <option value="motivation">Motivation</option>
+          <option value="roadmap">Roadmap</option>
+        </select>
+      </div>
+    </div>
+    
+    <div id="error" class="error" style="display: none;"></div>
+    
+    <div class="artifacts-list" id="artifacts-list">
+      <div class="loading">Loading artifacts...</div>
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title"></div>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-tabs" id="modal-tabs"></div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="openInNewTab()">Open in New Tab</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let currentArtifact = null;
+    let currentFile = null;
+    
+    // Load artifacts on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadArtifacts();
+      
+      // Filter handlers
+      document.getElementById('search').addEventListener('input', debounce(loadArtifacts, 300));
+      document.getElementById('type').addEventListener('change', loadArtifacts);
+    });
+    
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+    
+    async function loadArtifacts() {
+      const search = document.getElementById('search').value;
+      const type = document.getElementById('type').value;
+      const listEl = document.getElementById('artifacts-list');
+      const errorEl = document.getElementById('error');
+      
+      errorEl.style.display = 'none';
+      listEl.innerHTML = '<div class="loading">Loading artifacts...</div>';
+      
+      try {
+        const params = new URLSearchParams();
+        if (type) params.set('type', type);
+        if (search) params.set('q', search);
+        
+        const response = await fetch(`/api/artifacts?${params.toString()}`, {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.artifacts.length === 0) {
+          listEl.innerHTML = '<div class="empty">No artifacts found</div>';
+          return;
+        }
+        
+        listEl.innerHTML = data.artifacts.map(artifact => `
+          <div class="artifact-item" onclick="viewArtifact('${artifact.id}')">
+            <div class="artifact-header">
+              <div>
+                <div class="artifact-title">${escapeHtml(artifact.title)}</div>
+                <div class="artifact-meta">
+                  <span class="artifact-type">${escapeHtml(artifact.type)}</span>
+                  <span class="artifact-date">${formatDate(artifact.createdAt)}</span>
+                </div>
+              </div>
+            </div>
+            ${artifact.summary ? `<div class="artifact-summary">${escapeHtml(artifact.summary)}</div>` : ''}
+            <div class="artifact-files">
+              ${artifact.files.map(file => `
+                <span class="file-badge" onclick="event.stopPropagation(); viewFile('${artifact.id}', '${file.name}')">
+                  ${file.name} (${formatSize(file.size)})
+                </span>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        errorEl.textContent = `Error: ${error.message}`;
+        errorEl.style.display = 'block';
+        listEl.innerHTML = '<div class="empty">Failed to load artifacts</div>';
+      }
+    }
+    
+    async function viewArtifact(artifactId) {
+      try {
+        const response = await fetch(`/api/artifacts/${artifactId}`, {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (data.artifact.files.length > 0) {
+          viewFile(artifactId, data.artifact.files[0].name);
+        }
+      } catch (error) {
+        alert(`Error loading artifact: ${error.message}`);
+      }
+    }
+    
+    async function viewFile(artifactId, filename) {
+      currentArtifact = artifactId;
+      currentFile = filename;
+      
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalTabs = document.getElementById('modal-tabs');
+      const modalBody = document.getElementById('modal-body');
+      
+      modalTitle.textContent = filename;
+      modal.classList.add('active');
+      
+      const ext = filename.split('.').pop().toLowerCase();
+      const isHtml = ext === 'html';
+      
+      // Set up tabs
+      if (isHtml) {
+        modalTabs.innerHTML = `
+          <button class="modal-tab active" onclick="showTab('preview')">Preview</button>
+          <button class="modal-tab" onclick="showTab('source')">Source</button>
+        `;
+        showTab('preview');
+      } else {
+        modalTabs.innerHTML = '';
+        showTab('source');
+      }
+    }
+    
+    function showTab(tab) {
+      const modalBody = document.getElementById('modal-body');
+      const tabs = document.querySelectorAll('.modal-tab');
+      
+      tabs.forEach(t => t.classList.remove('active'));
+      event?.target?.classList.add('active');
+      
+      if (tab === 'preview') {
+        modalBody.innerHTML = `
+          <iframe class="modal-iframe" src="/api/artifacts/${currentArtifact}/file/${currentFile}" sandbox="allow-same-origin allow-scripts"></iframe>
+        `;
+      } else {
+        fetch(`/api/artifacts/${currentArtifact}/file/${currentFile}`, {
+          credentials: 'include'
+        })
+        .then(r => r.text())
+        .then(text => {
+          modalBody.innerHTML = `<pre class="modal-pre">${escapeHtml(text)}</pre>`;
+        })
+        .catch(err => {
+          modalBody.innerHTML = `<div class="error">Error loading file: ${err.message}</div>`;
+        });
+      }
+    }
+    
+    function openInNewTab() {
+      if (currentArtifact && currentFile) {
+        window.open(`/api/artifacts/${currentArtifact}/file/${currentFile}`, '_blank');
+      }
+    }
+    
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+      currentArtifact = null;
+      currentFile = null;
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function formatDate(dateStr) {
+      try {
+        return new Date(dateStr).toLocaleString();
+      } catch {
+        return dateStr;
+      }
+    }
+    
+    function formatSize(bytes) {
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+    
+    // Close modal on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1826,20 +1826,20 @@ const Samples: React.FC = () => {
     {
       id: 'baptism',
       title: 'Baptism Records',
-      leftImage: 'url(/images/main/baptism.png)',
-      rightImage: 'url(/images/main/baptism.png)',
+      leftImage: 'url(/images/incode/baptism.png)',
+      rightImage: 'url(/images/incode/baptism.png)',
     },
     {
       id: 'marriage',
       title: 'Marriage Records',
-      leftImage: 'url(/images/main/marriage.png)',
-      rightImage: 'url(/images/main/marriage.png)',
+      leftImage: 'url(/images/incode/marriage.png)',
+      rightImage: 'url(/images/incode/marriage.png)',
     },
     {
       id: 'funeral',
       title: 'Funeral Records',
-      leftImage: 'url(/images/main/funeral.png)',
-      rightImage: 'url(/images/main/funeral.png)',
+      leftImage: 'url(/images/incode/funeral.png)',
+      rightImage: 'url(/images/incode/funeral.png)',
     },
   ];
 
@@ -2153,29 +2153,29 @@ const Samples: React.FC = () => {
               const getImage = () => {
                 if (activeLanguageTab === 0) {
                   // English
-                  if (record.id === 'baptism') return 'url(/images/main/baptism.png)';
-                  if (record.id === 'marriage') return 'url(/images/main/marriage.png)';
-                  if (record.id === 'funeral') return 'url(/images/main/funeral.png)';
+                  if (record.id === 'baptism') return 'url(/images/incode/baptism.png)';
+                  if (record.id === 'marriage') return 'url(/images/incode/marriage.png)';
+                  if (record.id === 'funeral') return 'url(/images/incode/funeral.png)';
                 } else if (activeLanguageTab === 1) {
                   // Greek
-                  if (record.id === 'baptism') return 'url(/images/main/gr_baptism.png)';
-                  if (record.id === 'marriage') return 'url(/images/main/gr_marriage.png)';
-                  if (record.id === 'funeral') return 'url(/images/main/gr_funeral.png)';
+                  if (record.id === 'baptism') return 'url(/images/incode/baptism.png)';
+                  if (record.id === 'marriage') return 'url(/images/incode/marriage.png)';
+                  if (record.id === 'funeral') return 'url(/images/incode/funeral.png)';
                 } else if (activeLanguageTab === 2) {
                   // Russian
-                  if (record.id === 'baptism') return 'url(/images/main/ru_baptism.png)';
-                  if (record.id === 'marriage') return 'url(/images/main/ru_marriage.png)';
-                  if (record.id === 'funeral') return 'url(/images/main/ru_funeral.png)';
+                  if (record.id === 'baptism') return 'url(/images/incode/baptism.png)';
+                  if (record.id === 'marriage') return 'url(/images/incode/marriage.png)';
+                  if (record.id === 'funeral') return 'url(/images/incode/funeral.png)';
                 } else if (activeLanguageTab === 3) {
                   // Romanian
-                  if (record.id === 'baptism') return 'url(/images/main/RO-baptism.png)';
-                  if (record.id === 'marriage') return 'url(/images/main/RO-marriage.png)';
-                  if (record.id === 'funeral') return 'url(/images/main/RO-funeral.png)';
+                  if (record.id === 'baptism') return 'url(/images/incode/baptism.png)';
+                  if (record.id === 'marriage') return 'url(/images/incode/marriage.png)';
+                  if (record.id === 'funeral') return 'url(/images/incode/funeral.png)';
                 } else if (activeLanguageTab === 4) {
                   // Georgian
-                  if (record.id === 'baptism') return 'url(/images/main/GE-baptism.png)';
-                  if (record.id === 'marriage') return 'url(/images/main/GE-marriage.png)';
-                  if (record.id === 'funeral') return 'url(/images/main/GE-funeral.png)';
+                  if (record.id === 'baptism') return 'url(/images/incode/baptism.png)';
+                  if (record.id === 'marriage') return 'url(/images/incode/marriage.png)';
+                  if (record.id === 'funeral') return 'url(/images/incode/funeral.png)';
                 }
                 return record.leftImage;
               };
@@ -2333,7 +2333,7 @@ const Samples: React.FC = () => {
                     color: 'white',
                     textTransform: 'none',
                     backgroundImage: activeLanguageTab === 1 
-                      ? 'url(/images/buttons/GR-light-blue.png)' 
+                      ? 'url(/images/incode/GR-light-blue.png)' 
                       : activeLanguageTab === 2 
                       ? 'url(/images/buttons/RU-buttons-1.png)' 
                       : activeLanguageTab === 3
@@ -2368,7 +2368,7 @@ const Samples: React.FC = () => {
                     color: 'white',
                     textTransform: 'none',
                     backgroundImage: activeLanguageTab === 1 
-                      ? 'url(/images/buttons/GR-light-blue.png)' 
+                      ? 'url(/images/incode/GR-light-blue.png)' 
                       : activeLanguageTab === 2 
                       ? 'url(/images/buttons/RU-buttons-1.png)' 
                       : activeLanguageTab === 3
@@ -2403,7 +2403,7 @@ const Samples: React.FC = () => {
                     color: 'white',
                     textTransform: 'none',
                     backgroundImage: activeLanguageTab === 1 
-                      ? 'url(/images/buttons/GR-light-blue.png)' 
+                      ? 'url(/images/incode/GR-light-blue.png)' 
                       : activeLanguageTab === 2 
                       ? 'url(/images/buttons/RU-buttons-1.png)' 
                       : activeLanguageTab === 3
@@ -2816,29 +2816,29 @@ const Samples: React.FC = () => {
               const getImage = () => {
                 if (activeLanguageTab === 0) {
                   // English
-                  if (record.id === 'baptism') return 'url(/images/main/baptism.png)';
-                  if (record.id === 'marriage') return 'url(/images/main/marriage.png)';
-                  if (record.id === 'funeral') return 'url(/images/main/funeral.png)';
+                  if (record.id === 'baptism') return 'url(/images/incode/baptism.png)';
+                  if (record.id === 'marriage') return 'url(/images/incode/marriage.png)';
+                  if (record.id === 'funeral') return 'url(/images/incode/funeral.png)';
                 } else if (activeLanguageTab === 1) {
                   // Greek
-                  if (record.id === 'baptism') return 'url(/images/main/gr_baptism.png)';
-                  if (record.id === 'marriage') return 'url(/images/main/gr_marriage.png)';
-                  if (record.id === 'funeral') return 'url(/images/main/gr_funeral.png)';
+                  if (record.id === 'baptism') return 'url(/images/incode/baptism.png)';
+                  if (record.id === 'marriage') return 'url(/images/incode/marriage.png)';
+                  if (record.id === 'funeral') return 'url(/images/incode/funeral.png)';
                 } else if (activeLanguageTab === 2) {
                   // Russian
-                  if (record.id === 'baptism') return 'url(/images/main/ru_baptism.png)';
-                  if (record.id === 'marriage') return 'url(/images/main/ru_marriage.png)';
-                  if (record.id === 'funeral') return 'url(/images/main/ru_funeral.png)';
+                  if (record.id === 'baptism') return 'url(/images/incode/baptism.png)';
+                  if (record.id === 'marriage') return 'url(/images/incode/marriage.png)';
+                  if (record.id === 'funeral') return 'url(/images/incode/funeral.png)';
                 } else if (activeLanguageTab === 3) {
                   // Romanian
-                  if (record.id === 'baptism') return 'url(/images/main/RO-baptism.png)';
-                  if (record.id === 'marriage') return 'url(/images/main/RO-marriage.png)';
-                  if (record.id === 'funeral') return 'url(/images/main/RO-funeral.png)';
+                  if (record.id === 'baptism') return 'url(/images/incode/baptism.png)';
+                  if (record.id === 'marriage') return 'url(/images/incode/marriage.png)';
+                  if (record.id === 'funeral') return 'url(/images/incode/funeral.png)';
                 } else if (activeLanguageTab === 4) {
                   // Georgian
-                  if (record.id === 'baptism') return 'url(/images/main/GE-baptism.png)';
-                  if (record.id === 'marriage') return 'url(/images/main/GE-marriage.png)';
-                  if (record.id === 'funeral') return 'url(/images/main/GE-funeral.png)';
+                  if (record.id === 'baptism') return 'url(/images/incode/baptism.png)';
+                  if (record.id === 'marriage') return 'url(/images/incode/marriage.png)';
+                  if (record.id === 'funeral') return 'url(/images/incode/funeral.png)';
                 }
                 return record.leftImage;
               };

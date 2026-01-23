@@ -15,7 +15,8 @@ import {
   Alert,
   Stack,
   Paper,
-  Divider
+  Divider,
+  useTheme
 } from '@mui/material';
 import {
   Settings as SettingsIcon,
@@ -33,6 +34,7 @@ import OrthodoxBanner from '@/shared/ui/OrthodoxBanner';
 const AdminPageFallback: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const theme = useTheme();
 
   const adminModules = [
     {
@@ -74,7 +76,12 @@ const AdminPageFallback: React.FC = () => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+    <Box sx={{ 
+      minHeight: '100vh', 
+      backgroundColor: theme.palette.mode === 'dark' 
+        ? theme.palette.background.default 
+        : theme.palette.grey[100]
+    }}>
       {/* Orthodox Banner */}
       <OrthodoxBanner 
         title="Orthodox Metrics"
@@ -86,7 +93,16 @@ const AdminPageFallback: React.FC = () => {
       
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
-        <Paper elevation={1} sx={{ p: 3, mb: 4 }}>
+        <Paper 
+          elevation={theme.palette.mode === 'dark' ? 0 : 1} 
+          sx={{ 
+            p: 3, 
+            mb: 4,
+            backgroundColor: theme.palette.mode === 'dark' 
+              ? theme.palette.background.paper 
+              : undefined
+          }}
+        >
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Box>
               <Typography variant="h4" component="h1" gutterBottom>
@@ -177,7 +193,16 @@ const AdminPageFallback: React.FC = () => {
           </Box>
 
         {/* Quick Actions */}
-        <Paper elevation={1} sx={{ p: 3, mt: 4 }}>
+        <Paper 
+          elevation={theme.palette.mode === 'dark' ? 0 : 1} 
+          sx={{ 
+            p: 3, 
+            mt: 4,
+            backgroundColor: theme.palette.mode === 'dark' 
+              ? theme.palette.background.paper 
+              : undefined
+          }}
+        >
           <Typography variant="h6" gutterBottom>
             Quick Actions
           </Typography>

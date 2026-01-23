@@ -67,7 +67,7 @@ const Login2 = () => {
               <Box display="flex" alignItems="center" justifyContent="center">
                 <Box
                   component="img"
-                  src="/images/main/biz-logo.png"
+                  src="/images/incode/biz-logo.png"
                   alt="Orthodox Metrics"
                   sx={{
                     maxWidth: '200px',
