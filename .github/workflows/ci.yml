@@ -19,6 +19,7 @@ jobs:
           cache: npm
           cache-dependency-path: |
             package-lock.json
+            prod/package-lock.json
             server/package-lock.json
             front-end/package-lock.json
 
@@ -28,11 +29,23 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          if [ -f "server/package.json" ]; then
-          backend_dir="server"
+          echo "Top-level:"
+          ls -la
+          echo "Dirs:"
+          ls -la prod || true
+          ls -la server || true
+          ls -la front-end || true
+
+          backend_dir=""
+          if [ -f "prod/package.json" ]; then
+            backend_dir="prod"
+          elif [ -f "server/package.json" ]; then
+            backend_dir="server"
+          elif [ -f "package.json" ]; then
+            backend_dir="."
           else
-          echo "Backend must live in ./server; package.json not found there." >&2
-          exit 1
+            echo "ERROR: No backend package.json found in ./prod, ./server, or repo root." >&2
+            exit 1
           fi
 
           frontend_dir=""
@@ -47,7 +60,7 @@ jobs:
           if [ -n "$frontend_dir" ]; then
             echo "Detected frontend_dir=$frontend_dir"
           else
-            echo "No front-end/ found; frontend build will be skipped."
+            echo "No front-end detected; skipping frontend build."
           fi
 
       - name: Install backend deps
@@ -67,3 +80,4 @@ jobs:
         if: ${{ steps.detect.outputs.frontend_dir != '' }}
         working-directory: ${{ steps.detect.outputs.frontend_dir }}
         run: npm run build
+
