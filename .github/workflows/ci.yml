@@ -28,14 +28,11 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          backend_dir=""
           if [ -f "server/package.json" ]; then
-            backend_dir="server"
-          elif [ -f "package.json" ]; then
-            backend_dir="."
+          backend_dir="server"
           else
-            echo "Could not find backend package.json in ./server or repo root." >&2
-            exit 1
+          echo "Backend must live in ./server; package.json not found there." >&2
+          exit 1
           fi
 
           frontend_dir=""
