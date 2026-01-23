@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "check": "npm -v && node -v",
     "tsc": "tsc",
     "build": "tsc --build",
     "prepare": "husky"
