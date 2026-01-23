@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protecting Parish Records: Books vs OrthodoxMetrics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #5e3d99;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #5e3d99;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        select, button {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        select:hover, select:focus {
+            border-color: #5e3d99;
+            outline: none;
+        }
+
+        button {
+            background: #5e3d99;
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #4a2e7a;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        @media (min-width: 1024px) {
+            .panels {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .panel {
+            background: #fafbfc;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .panel h2 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 8px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #5e3d99;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #5e3d99;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .readout {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .readout-item {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            border-radius: 6px;
+            border: 2px solid;
+        }
+
+        .readout-item.books {
+            border-color: #e74c3c;
+            background: #fef5f5;
+        }
+
+        .readout-item.om {
+            border-color: #27ae60;
+            background: #f0f9f4;
+        }
+
+        .readout-item .value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .readout-item.books .value {
+            color: #e74c3c;
+        }
+
+        .readout-item.om .value {
+            color: #27ae60;
+        }
+
+        .readout-item .label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .explanation {
+            background: #fff9e6;
+            border-left: 4px solid #d4af37;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .toggle-view {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .toggle-view button {
+            background: #ecf0f1;
+            color: #2c3e50;
+            margin: 0 5px;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        .toggle-view button.active {
+            background: #5e3d99;
+            color: white;
+        }
+
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .dimension-item {
+            padding: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dimension-item:hover {
+            border-color: #5e3d99;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dimension-item .name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+
+        .workload-bars {
+            margin: 20px 0;
+        }
+
+        .workload-item {
+            margin-bottom: 20px;
+        }
+
+        .workload-item .task-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .bar-comparison {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .bar-wrapper {
+            flex: 1;
+        }
+
+        .bar-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .bar {
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: width 0.5s;
+        }
+
+        .bar.books {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .bar.om {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+
+        .savings {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .savings .amount {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 5px;
+        }
+
+        .savings .label {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .disclaimer {
+            font-size: 0.85rem;
+            color: #999;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            color: #5e3d99;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .modal-content .example {
+            background: #f8f9fa;
+            border-left: 3px solid #d4af37;
+            padding: 12px;
+            margin: 10px 0;
+        }
+
+        .modal-content .example strong {
+            color: #5e3d99;
+        }
+
+        .close-modal {
+            background: #95a5a6;
+            margin-top: 15px;
+        }
+
+        .close-modal:hover {
+            background: #7f8c8d;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .controls, button, .toggle-view, .modal {
+                display: none !important;
+            }
+
+            .panels {
+                grid-template-columns: 1fr;
+                page-break-inside: avoid;
+            }
+
+            .panel {
+                page-break-inside: avoid;
+                margin-bottom: 30px;
+                box-shadow: none;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .controls {
+                gap: 15px;
+            }
+
+            .readout {
+                flex-direction: column;
+            }
+        }
+
+        .cdn-fallback {
+            display: none;
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .cdn-fallback.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Protecting Parish Records: Books vs OrthodoxMetrics</h1>
+            <p class="subtitle">A 20-year view of risk, workload, and continuity</p>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="scenario">Scenario</label>
+                    <select id="scenario" aria-label="Select scenario">
+                        <option value="normal">Normal Operations</option>
+                        <option value="turnover">Staff Turnover</option>
+                        <option value="disaster">Disaster Event</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="parishSize">Parish Size</label>
+                    <select id="parishSize" aria-label="Select parish size">
+                        <option value="small">Small</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <button onclick="window.print()" aria-label="Print or save as PDF">Print / Save PDF</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="cdn-fallback" id="cdnFallback">
+            <strong>Note:</strong> Chart library could not be loaded. Charts will not display, but comparison data is available below.
+        </div>
+
+        <div class="panels">
+            <!-- Panel A: Risk Over Time -->
+            <div class="panel">
+                <h2>Risk Over Time</h2>
+                
+                <div class="slider-container">
+                    <label for="yearSlider">View at Year: <span id="yearValue">10</span></label>
+                    <input type="range" id="yearSlider" min="0" max="20" value="10" step="1" aria-label="Select year to view">
+                </div>
+
+                <div class="readout">
+                    <div class="readout-item books">
+                        <div class="value" id="booksRisk">65</div>
+                        <div class="label">Books Risk Level</div>
+                    </div>
+                    <div class="readout-item om">
+                        <div class="value" id="omRisk">20</div>
+                        <div class="label">OrthodoxMetrics Risk</div>
+                    </div>
+                </div>
+
+                <div class="explanation" id="riskExplanation">
+                    At year 10, traditional books face mounting risks from aging materials and staff changes. OrthodoxMetrics provides consistent protection through redundant backups and institutional knowledge.
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Panel B: What We're Protecting -->
+            <div class="panel">
+                <h2>What We're Protecting</h2>
+                
+                <div class="toggle-view">
+                    <button class="active" onclick="switchView('radar')" id="radarBtn">Radar View</button>
+                    <button onclick="switchView('bar')" id="barBtn">Bar View</button>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="protectionChart"></canvas>
+                </div>
+
+                <div class="dimension-grid" id="dimensionGrid" style="display:none;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Panel C: Workload & Time -->
+            <div class="panel">
+                <h2>Workload & Time</h2>
+                
+                <div class="workload-bars" id="workloadBars">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="savings">
+                    <div class="amount" id="savingsAmount">12.5</div>
+                    <div class="label">Hours saved per month (estimated)</div>
+                </div>
+
+                <div class="disclaimer">
+                    Illustrative estimates; actual time varies by parish size and volume.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for dimension explanations -->
+    <div class="modal" id="dimensionModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Dimension Title</h3>
+            <p id="modalDescription">Description goes here.</p>
+            <div class="example" id="modalExample">
+                <strong>Real-world example:</strong> <span id="exampleText"></span>
+            </div>
+            <button class="close-modal" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Check if Chart.js loaded
+        if (typeof Chart === 'undefined') {
+            document.getElementById('cdnFallback').classList.add('active');
+        }
+
+        // Data structure
+        const data = {
+            scenarios: {
+                normal: {
+                    name: "Normal Operations",
+                    riskData: {
+                        years: [0, 5, 10, 15, 20],
+                        books: [30, 45, 65, 80, 90],
+                        om: [35, 25, 20, 15, 12]
+                    },
+                    explanations: {
+                        0: "At the start, both approaches have similar setup requirements. Books need physical infrastructure; OrthodoxMetrics needs initial digitization.",
+                        5: "By year 5, books begin showing wear and require careful handling. OrthodoxMetrics has settled into reliable automated routines.",
+                        10: "At year 10, traditional books face mounting risks from aging materials and staff changes. OrthodoxMetrics provides consistent protection through redundant backups.",
+                        15: "By year 15, books may need restoration and depend heavily on individual knowledge. OrthodoxMetrics maintains stable, searchable access.",
+                        20: "At year 20, books face significant preservation challenges and institutional knowledge gaps. OrthodoxMetrics offers predictable, secure continuity."
+                    },
+                    protection: {
+                        disaster: { books: 20, om: 95 },
+                        continuity: { books: 30, om: 90 },
+                        speed: { books: 25, om: 95 },
+                        audit: { books: 40, om: 90 },
+                        cost: { books: 50, om: 85 },
+                        search: { books: 15, om: 98 }
+                    }
+                },
+                turnover: {
+                    name: "Staff Turnover",
+                    riskData: {
+                        years: [0, 5, 10, 15, 20],
+                        books: [30, 55, 75, 88, 95],
+                        om: [35, 22, 18, 14, 12]
+                    },
+                    explanations: {
+                        0: "Both systems start with similar knowledge transfer needs during implementation and training phases.",
+                        5: "With staff changes, books lose accumulated expertise about locations and quirks. OrthodoxMetrics maintains consistent access for new staff.",
+                        10: "At year 10, frequent turnover severely impacts book-based systems as institutional knowledge walks out the door. OrthodoxMetrics preserves searchable institutional memory.",
+                        15: "By year 15, multiple staff generations create knowledge gaps in physical systems. Digital records remain consistently accessible.",
+                        20: "At year 20, the original staff are long gone, and books depend entirely on passed-down knowledge. OrthodoxMetrics eliminates this dependency."
+                    },
+                    protection: {
+                        disaster: { books: 20, om: 95 },
+                        continuity: { books: 15, om: 95 },
+                        speed: { books: 20, om: 95 },
+                        audit: { books: 30, om: 92 },
+                        cost: { books: 45, om: 88 },
+                        search: { books: 12, om: 98 }
+                    }
+                },
+                disaster: {
+                    name: "Disaster Event",
+                    riskData: {
+                        years: [0, 5, 10, 15, 20],
+                        books: [30, 50, 70, 85, 95],
+                        om: [35, 20, 15, 12, 10]
+                    },
+                    explanations: {
+                        0: "Both systems require initial protection measures—secure storage for books, cloud backup for OrthodoxMetrics.",
+                        5: "Books accumulate in one location, creating single-point vulnerability. OrthodoxMetrics distributes copies across redundant systems.",
+                        10: "At year 10, a fire, flood, or theft could destroy decades of irreplaceable records stored in books. OrthodoxMetrics maintains multiple secure backups.",
+                        15: "By year 15, aging books become increasingly fragile and irreplaceable. Digital records remain protected regardless of local events.",
+                        20: "At year 20, losing physical books means losing 20 years of parish history. OrthodoxMetrics ensures records survive any disaster."
+                    },
+                    protection: {
+                        disaster: { books: 10, om: 98 },
+                        continuity: { books: 25, om: 92 },
+                        speed: { books: 20, om: 95 },
+                        audit: { books: 35, om: 92 },
+                        cost: { books: 40, om: 85 },
+                        search: { books: 15, om: 98 }
+                    }
+                }
+            },
+            parishSizes: {
+                small: {
+                    tasks: {
+                        find: { books: 15, om: 2 },
+                        certificate: { books: 25, om: 5 },
+                        correct: { books: 20, om: 3 },
+                        audit: { books: 120, om: 15 }
+                    }
+                },
+                medium: {
+                    tasks: {
+                        find: { books: 25, om: 2 },
+                        certificate: { books: 35, om: 5 },
+                        correct: { books: 30, om: 4 },
+                        audit: { books: 240, om: 20 }
+                    }
+                },
+                large: {
+                    tasks: {
+                        find: { books: 40, om: 2 },
+                        certificate: { books: 50, om: 6 },
+                        correct: { books: 45, om: 5 },
+                        audit: { books: 480, om: 30 }
+                    }
+                }
+            },
+            dimensions: {
+                disaster: {
+                    name: "Disaster Protection",
+                    description: "How well does each approach protect records from fire, flood, theft, or other catastrophic events?",
+                    example: "A parish experienced a basement flood that damaged 30 years of baptismal records in storage. Digital backups would have preserved everything."
+                },
+                continuity: {
+                    name: "Staff Turnover Continuity",
+                    description: "What happens when experienced staff leave and new people need to find records quickly?",
+                    example: "A new parish secretary spent her first month learning where different records were kept and how to read various handwriting styles. A searchable database eliminates this learning curve."
+                },
+                speed: {
+                    name: "Certificate Turnaround",
+                    description: "How quickly can we provide certificates for baptisms, marriages, and other sacraments?",
+                    example: "A couple needed their marriage certificate for a visa application with a 48-hour deadline. Searching through years of books took too long; a database search would take seconds."
+                },
+                audit: {
+                    name: "Audit Readiness",
+                    description: "How easily can we prepare comprehensive reports for diocesan audits or reviews?",
+                    example: "Annual diocesan reporting requires counting all sacraments by type and date. Manually tallying from books takes days; automated reports take minutes."
+                },
+                cost: {
+                    name: "Long-term Cost Predictability",
+                    description: "Can we predict and budget for record-keeping costs over decades?",
+                    example: "Book restoration and specialized storage costs are unpredictable and rising. Monthly subscription fees make budgeting straightforward."
+                },
+                search: {
+                    name: "Searchability",
+                    description: "How easily can we find specific records among thousands of entries?",
+                    example: "Finding all records for a family across baptisms, marriages, and funerals requires checking multiple books and indexes. Database search finds everything instantly."
+                }
+            }
+        };
+
+        // State
+        let currentScenario = 'normal';
+        let currentSize = 'medium';
+        let currentYear = 10;
+        let currentView = 'radar';
+        let charts = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Chart !== 'undefined') {
+                initCharts();
+                updateAllDisplays();
+            }
+            
+            // Event listeners
+            document.getElementById('scenario').addEventListener('change', (e) => {
+                currentScenario = e.target.value;
+                updateAllDisplays();
+            });
+            
+            document.getElementById('parishSize').addEventListener('change', (e) => {
+                currentSize = e.target.value;
+                updateWorkload();
+            });
+            
+            document.getElementById('yearSlider').addEventListener('input', (e) => {
+                currentYear = parseInt(e.target.value);
+                document.getElementById('yearValue').textContent = currentYear;
+                updateRiskReadout();
+            });
+        });
+
+        function initCharts() {
+            // Risk Chart
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            charts.risk = new Chart(riskCtx, {
+                type: 'line',
+                data: {
+                    labels: [0, 5, 10, 15, 20],
+                    datasets: [
+                        {
+                            label: 'Traditional Books',
+                            data: [30, 45, 65, 80, 90],
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        },
+                        {
+                            label: 'OrthodoxMetrics',
+                            data: [35, 25, 20, 15, 12],
+                            borderColor: '#27ae60',
+                            backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': Risk Level ' + context.parsed.y;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Operational Risk (0-100)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Years'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Protection Chart (Radar)
+            const protectionCtx = document.getElementById('protectionChart').getContext('2d');
+            charts.protection = new Chart(protectionCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Disaster Protection', 'Staff Continuity', 'Certificate Speed', 'Audit Ready', 'Cost Predict.', 'Searchability'],
+                    datasets: [
+                        {
+                            label: 'Traditional Books',
+                            data: [20, 30, 25, 40, 50, 15],
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'OrthodoxMetrics',
+                            data: [95, 90, 95, 90, 85, 98],
+                            borderColor: '#27ae60',
+                            backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 25
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateAllDisplays() {
+            updateRiskChart();
+            updateRiskReadout();
+            updateProtectionChart();
+        }
+
+        function updateRiskChart() {
+            if (!charts.risk) return;
+            
+            const scenario = data.scenarios[currentScenario];
+            charts.risk.data.datasets[0].data = scenario.riskData.books;
+            charts.risk.data.datasets[1].data = scenario.riskData.om;
+            charts.risk.update();
+        }
+
+        function updateRiskReadout() {
+            const scenario = data.scenarios[currentScenario];
+            const years = scenario.riskData.years;
+            const booksData = scenario.riskData.books;
+            const omData = scenario.riskData.om;
+            
+            // Find closest year index
+            let index = years.indexOf(currentYear);
+            if (index === -1) {
+                // Interpolate
+                for (let i = 0; i < years.length - 1; i++) {
+                    if (currentYear >= years[i] && currentYear <= years[i + 1]) {
+                        const ratio = (currentYear - years[i]) / (years[i + 1] - years[i]);
+                        const booksValue = Math.round(booksData[i] + (booksData[i + 1] - booksData[i]) * ratio);
+                        const omValue = Math.round(omData[i] + (omData[i + 1] - omData[i]) * ratio);
+                        
+                        document.getElementById('booksRisk').textContent = booksValue;
+                        document.getElementById('omRisk').textContent = omValue;
+                        break;
+                    }
+                }
+            } else {
+                document.getElementById('booksRisk').textContent = booksData[index];
+                document.getElementById('omRisk').textContent = omData[index];
+            }
+            
+            // Update explanation
+            const closestYear = years.reduce((prev, curr) => 
+                Math.abs(curr - currentYear) < Math.abs(prev - currentYear) ? curr : prev
+            );
+            document.getElementById('riskExplanation').textContent = scenario.explanations[closestYear];
+        }
+
+        function updateProtectionChart() {
+            if (!charts.protection) return;
+            
+            const scenario = data.scenarios[currentScenario];
+            const prot = scenario.protection;
+            
+            charts.protection.data.datasets[0].data = [
+                prot.disaster.books,
+                prot.continuity.books,
+                prot.speed.books,
+                prot.audit.books,
+                prot.cost.books,
+                prot.search.books
+            ];
+            
+            charts.protection.data.datasets[1].data = [
+                prot.disaster.om,
+                prot.continuity.om,
+                prot.speed.om,
+                prot.audit.om,
+                prot.cost.om,
+                prot.search.om
+            ];
+            
+            charts.protection.update();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            
+            document.getElementById('radarBtn').classList.toggle('active', view === 'radar');
+            document.getElementById('barBtn').classList.toggle('active', view === 'bar');
+            
+            if (view === 'radar') {
+                document.querySelector('#protectionChart').parentElement.style.display = 'block';
+                document.getElementById('dimensionGrid').style.display = 'none';
+                
+                if (charts.protection) {
+                    charts.protection.destroy();
+                }
+                
+                const protectionCtx = document.getElementById('protectionChart').getContext('2d');
+                const scenario = data.scenarios[currentScenario];
+                const prot = scenario.protection;
+                
+                charts.protection = new Chart(protectionCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Disaster Protection', 'Staff Continuity', 'Certificate Speed', 'Audit Ready', 'Cost Predict.', 'Searchability'],
+                        datasets: [
+                            {
+                                label: 'Traditional Books',
+                                data: [prot.disaster.books, prot.continuity.books, prot.speed.books, prot.audit.books, prot.cost.books, prot.search.books],
+                                borderColor: '#e74c3c',
+                                backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                                borderWidth: 2
+                            },
+                            {
+                                label: 'OrthodoxMetrics',
+                                data: [prot.disaster.om, prot.continuity.om, prot.speed.om, prot.audit.om, prot.cost.om, prot.search.om],
+                                borderColor: '#27ae60',
+                                backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: true, position: 'bottom' } },
+                        scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 25 } } }
+                    }
+                });
+            } else {
+                document.querySelector('#protectionChart').parentElement.style.display = 'none';
+                document.getElementById('dimensionGrid').style.display = 'grid';
+                renderDimensionGrid();
+            }
+        }
+
+        function renderDimensionGrid() {
+            const grid = document.getElementById('dimensionGrid');
+            const scenario = data.scenarios[currentScenario];
+            const prot = scenario.protection;
+            
+            const dims = [
+                { key: 'disaster', data: prot.disaster },
+                { key: 'continuity', data: prot.continuity },
+                { key: 'speed', data: prot.speed },
+                { key: 'audit', data: prot.audit },
+                { key: 'cost', data: prot.cost },
+                { key: 'search', data: prot.search }
+            ];
+            
+            grid.innerHTML = dims.map(dim => {
+                const info = data.dimensions[dim.key];
+                return `
+                    <div class="dimension-item" onclick="showDimensionModal('${dim.key}')" tabindex="0" role="button" aria-label="Learn more about ${info.name}">
+                        <div class="name">${info.name}</div>
+                        <div style="display:flex; gap:10px; margin-top:5px;">
+                            <div style="flex:1;">
+                                <div style="font-size:0.8rem; color:#999;">Books: ${dim.data.books}</div>
+                                <div style="background:#e74c3c; height:6px; border-radius:3px; width:${dim.data.books}%;"></div>
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-size:0.8rem; color:#999;">OM: ${dim.data.om}</div>
+                                <div style="background:#27ae60; height:6px; border-radius:3px; width:${dim.data.om}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showDimensionModal(key) {
+            const info = data.dimensions[key];
+            document.getElementById('modalTitle').textContent = info.name;
+            document.getElementById('modalDescription').textContent = info.description;
+            document.getElementById('exampleText').textContent = info.example;
+            document.getElementById('dimensionModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('dimensionModal').classList.remove('active');
+        }
+
+        // Close modal on background click
+        document.getElementById('dimensionModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        function updateWorkload() {
+            const sizeData = data.parishSizes[currentSize];
+            const tasks = [
+                { key: 'find', name: 'Find a record' },
+                { key: 'certificate', name: 'Generate a certificate' },
+                { key: 'correct', name: 'Correct an error' },
+                { key: 'audit', name: 'Prepare for audit' }
+            ];
+            
+            const html = tasks.map(task => {
+                const taskData = sizeData.tasks[task.key];
+                const maxMinutes = Math.max(taskData.books, taskData.om);
+                
+                return `
+                    <div class="workload-item">
+                        <div class="task-name">${task.name}</div>
+                        <div class="bar-comparison">
+                            <div class="bar-wrapper">
+                                <div class="bar-label">Books: ${taskData.books} min</div>
+                                <div class="bar books" style="width: ${(taskData.books / maxMinutes) * 100}%;">
+                                    ${taskData.books} min
+                                </div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-label">OrthodoxMetrics: ${taskData.om} min</div>
+                                <div class="bar om" style="width: ${(taskData.om / maxMinutes) * 100}%;">
+                                    ${taskData.om} min
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('workloadBars').innerHTML = html;
+            
+            // Calculate savings (assuming 20 records found, 10 certificates, 5 corrections, 1 audit per month)
+            const finds = (sizeData.tasks.find.books - sizeData.tasks.find.om) * 20;
+            const certs = (sizeData.tasks.certificate.books - sizeData.tasks.certificate.om) * 10;
+            const corrections = (sizeData.tasks.correct.books - sizeData.tasks.correct.om) * 5;
+            const audits = (sizeData.tasks.audit.books - sizeData.tasks.audit.om) * 1;
+            
+            const totalMinutes = finds + certs + corrections + audits;
+            const hours = (totalMinutes / 60).toFixed(1);
+            
+            document.getElementById('savingsAmount').textContent = hours;
+        }
+
+        // Initial workload render
+        if (typeof Chart !== 'undefined') {
+            updateWorkload();
+        }
+    </script>
+</body>
+</html>

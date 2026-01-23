@@ -1,0 +1,5 @@
+look at the 5th screenshot, the landing page is great.
+so look through the screenshot again and let's fix orthodoxmetrics ocr uploader.
+on this other ocr site they even can extract tables and custom data and transcription is the default ocr method that provides great results as seen in screenshot 7 and 8,
+then finally look back at screenshot 9 and 10 and youll see the current implementation on orthodoxmetrics.com (which is terrible), I just (for now) want to write out all the information just like they did in screenshots 7 and 8. 
+

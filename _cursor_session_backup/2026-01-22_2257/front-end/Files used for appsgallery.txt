@@ -1,0 +1,26 @@
+Files used for /apps/gallery:
+Frontend Files:
+front-end/src/routes/Router.tsx
+Defines the route: path: '/apps/gallery'
+Imports and renders the Gallery component
+front-end/src/features/devel-tools/om-gallery/Gallery.tsx
+Main component (1647 lines)
+Handles image display, upload, filtering, sorting, usage checking
+front-end/src/features/devel-tools/om-gallery/index.ts
+Barrel export: export { default as Gallery } from './Gallery';
+Backend Files:
+server/src/index.ts (or server/index.js)
+Mounts the gallery router at /api/gallery
+Line 464: const galleryRouter = require('./routes/gallery');
+Line 466: app.use('/api/gallery', galleryRouter);
+server/routes/gallery.js
+API routes for gallery functionality:
+GET /api/gallery/images - List all images
+POST /api/gallery/upload - Upload images
+POST /api/gallery/check-usage - Check if images are used in codebase
+GET /api/gallery/used-images - Get list of used images
+DELETE /api/gallery/:filename - Delete an image
+Summary:
+Total: 5 files
+3 frontend files (Router, Gallery component, index export)
+2 backend files (server entry point, gallery routes)

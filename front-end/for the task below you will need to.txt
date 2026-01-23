@@ -1,0 +1,28 @@
+for the task below you will need to first ssh next@192.168.1.239 if it prompts for password use Summerof1982@!
+navigate to /var/www/orthodoxmetrics/prod
+create a git branch for the changes below and switch to that branch, then start working on the changes described below
+
+We now understand how Record Table Configuration and church provisioning work.
+
+Phase 1 task:
+Introduce DB-backed record templates as a first-class concept WITHOUT changing existing church provisioning yet.
+
+Requirements:
+1. Use existing table orthodoxmetrics_db.templates as the canonical storage for record templates.
+2. Implement backend CRUD endpoints for templates:
+   - GET /api/admin/templates
+   - GET /api/admin/templates/:slug
+   - POST /api/admin/templates
+   - PUT /api/admin/templates/:slug
+   - DELETE /api/admin/templates/:slug
+3. Do NOT modify createChurchDatabaseSchema() yet.
+4. Do NOT change onboarding logic yet.
+5. Add validation for template.fields JSON (must include column definitions).
+6. Add admin-only access control consistent with existing admin routes.
+7. Add a simple dev-only UI page (or reuse live-table-builder) to save templates into this table.
+
+Deliverables:
+- Endpoints implemented and tested
+- Clear JSON schema for templates.fields (versioned)
+- Confirmation that templates can be created, read, updated, deleted
+- No change to existing church databases

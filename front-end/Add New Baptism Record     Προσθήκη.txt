@@ -1,0 +1,21 @@
+Add New Baptism Record     Προσθήκη Νέας Εγγραφής Βαπτίσεως
+First Name *	Όνομα *
+Last Name *	Επώνυμο *
+Date of Birth	Ημερομηνία Γεννήσεως
+Date of Baptism *	Ημερομηνία Βαπτίσεως *
+Entry Type *	Τύπος Εγγραφής *
+Baptism	Βάπτιση
+Place of Birth	Τόπος Γεννήσεως
+Father’s Name	Όνομα Πατρός
+Mother’s Name	Όνομα Μητρός
+Godparent Names	Ονόματα Αναδόχων
+Priest	Ιερέας
+Registry Number	Αριθμός Μητρώου
+Church	Ναός
+Notes	Σημειώσεις
+Cancel	Ακύρωση
+Save	Αποθήκευση
+Save & Add Another	Αποθήκευση & Προσθήκη Άλλης
+________________________________________
+Add New Marriage Record
+Προσθήκη Νέας Εγγραφής Γάμου

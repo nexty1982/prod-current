@@ -1,0 +1,1 @@
+i want to add functionality that allows me to view church ocr image uploads easily with a one click process / re-process image (i want to be able to select multiple images), also want to sort the ocr images for a church 

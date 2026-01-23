@@ -2339,6 +2339,84 @@ router.get('/:id/dynamic-records-config', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/admin/churches/wizard/template-profiles
+ * Get available template profiles for wizard (not church-based)
+ */
+router.get('/wizard/template-profiles', async (req, res) => {
+  try {
+    // Get global templates from orthodoxmetrics_db.templates
+    const [templates] = await getAppPool().query(`
+      SELECT slug, name, record_type, description, fields, is_global
+      FROM \`${APP_DB}\`.templates
+      WHERE is_global = 1
+      ORDER BY record_type, name
+    `);
+
+    // Parse JSON fields
+    const parsedTemplates = templates.map(t => ({
+      ...t,
+      fields: typeof t.fields === 'string' ? JSON.parse(t.fields) : t.fields
+    }));
+
+    // Build template profiles
+    const profiles = [
+      {
+        id: 'start_from_scratch',
+        name: 'Start from Scratch',
+        description: 'Create a new church without using any template',
+        templates: {}
+      },
+      {
+        id: 'standard_en',
+        name: 'Standard English (Default)',
+        description: 'Creates baptism/marriage/funeral record tables from global English templates',
+        templates: {
+          baptism: parsedTemplates.find(t => t.record_type === 'baptism' && t.slug.includes('en'))?.slug || 'en_baptism_records',
+          marriage: parsedTemplates.find(t => t.record_type === 'marriage' && t.slug.includes('en'))?.slug || 'en_marriage_records',
+          funeral: parsedTemplates.find(t => t.record_type === 'funeral' && t.slug.includes('en'))?.slug || 'en_funeral_records'
+        }
+      }
+    ];
+
+    // Optionally add other language profiles if templates exist
+    const languages = ['gr', 'ru', 'ro', 'sr'];
+    for (const lang of languages) {
+      const langTemplates = {
+        baptism: parsedTemplates.find(t => t.record_type === 'baptism' && t.slug.includes(lang))?.slug,
+        marriage: parsedTemplates.find(t => t.record_type === 'marriage' && t.slug.includes(lang))?.slug,
+        funeral: parsedTemplates.find(t => t.record_type === 'funeral' && t.slug.includes(lang))?.slug
+      };
+      
+      if (langTemplates.baptism || langTemplates.marriage || langTemplates.funeral) {
+        profiles.push({
+          id: `standard_${lang}`,
+          name: `Standard ${lang.toUpperCase()}`,
+          description: `Creates record tables from global ${lang.toUpperCase()} templates`,
+          templates: langTemplates
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      profiles,
+      available_templates: parsedTemplates.map(t => ({
+        slug: t.slug,
+        name: t.name,
+        record_type: t.record_type
+      }))
+    });
+  } catch (error) {
+    console.error('❌ Error fetching template profiles:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch template profiles',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // POST /api/admin/churches/wizard - Create church via wizard interface
 router.post('/wizard', upload.single('logo'), async (req, res) => {
   const requestId = Math.random().toString(36).substring(7);
@@ -2367,7 +2445,10 @@ router.post('/wizard', upload.single('logo'), async (req, res) => {
       auto_setup_standard = false,
       generate_components = false,
       record_types = ['baptism', 'marriage', 'funeral'],
-      template_style = 'orthodox_traditional'
+      template_style = 'orthodox_traditional',
+      // New: Template profile selection (replaces template_church_id)
+      template_profile_id = null,
+      selected_templates = null // Object: { baptism: 'en_baptism_records', marriage: 'en_marriage_records', funeral: 'en_funeral_records' }
     } = req.body;
 
     const finalChurchName = church_name || name;
@@ -2441,6 +2522,25 @@ router.post('/wizard', upload.single('logo'), async (req, res) => {
     };
 
     // Prepare template options
+    // If template_profile_id is provided, expand it to selected_templates
+    let finalSelectedTemplates = selected_templates;
+    if (template_profile_id && !selected_templates) {
+      if (template_profile_id === 'standard_en') {
+        finalSelectedTemplates = {
+          baptism: 'en_baptism_records',
+          marriage: 'en_marriage_records',
+          funeral: 'en_funeral_records'
+        };
+      } else if (template_profile_id.startsWith('standard_')) {
+        const lang = template_profile_id.replace('standard_', '');
+        finalSelectedTemplates = {
+          baptism: `${lang}_baptism_records`,
+          marriage: `${lang}_marriage_records`,
+          funeral: `${lang}_funeral_records`
+        };
+      }
+    }
+
     const templateOptions = {
       setupTemplates: setup_templates,
       autoSetupStandard: auto_setup_standard,
@@ -2448,7 +2548,8 @@ router.post('/wizard', upload.single('logo'), async (req, res) => {
       recordTypes: record_types,
       templateStyle: template_style,
       includeGlobalTemplates: true,
-      createCustomTemplates: false
+      createCustomTemplates: false,
+      selectedTemplates: finalSelectedTemplates // Pass template slugs for table provisioning
     };
 
     // Use enhanced church setup service
@@ -2485,5 +2586,307 @@ router.post('/wizard', upload.single('logo'), async (req, res) => {
     });
   }
 });
+
+/**
+ * Export table schema and field mapper config to global template
+ * POST /api/admin/churches/:id/export-template
+ */
+router.post('/:id/export-template', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+    const { table, language = 'en', template_slug, template_name, overwrite = false } = req.body;
+
+    if (!table) {
+      return res.status(400).json({
+        success: false,
+        error: 'Table name is required'
+      });
+    }
+
+    // Validate church exists and user has access
+    const [churches] = await getAppPool().query(
+      'SELECT id, church_name, database_name, preferred_language FROM churches WHERE id = ?',
+      [churchId]
+    );
+
+    if (churches.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Church not found'
+      });
+    }
+
+    const church = churches[0];
+    if (!church.database_name) {
+      return res.status(400).json({
+        success: false,
+        error: 'Church database not configured'
+      });
+    }
+
+    // Determine record type from table name
+    let recordType = 'custom';
+    if (table === 'baptism_records') recordType = 'baptism';
+    else if (table === 'marriage_records') recordType = 'marriage';
+    else if (table === 'funeral_records') recordType = 'funeral';
+
+    // Generate slug if not provided
+    const slug = template_slug || `${language}_${table}`;
+    const name = template_name || `${language.charAt(0).toUpperCase() + language.slice(1)} ${recordType.charAt(0).toUpperCase() + recordType.slice(1)} Records`;
+
+    // Get church database connection
+    const churchDb = await getChurchDbConnection(church.database_name);
+    const connection = await churchDb.getConnection();
+
+    try {
+      // 1. Fetch table schema from INFORMATION_SCHEMA
+      const [columns] = await connection.execute(`
+        SELECT 
+          COLUMN_NAME as column_name,
+          DATA_TYPE as data_type,
+          COLUMN_TYPE as column_type,
+          IS_NULLABLE as is_nullable,
+          COLUMN_DEFAULT as column_default,
+          COLUMN_KEY as column_key,
+          EXTRA as extra,
+          ORDINAL_POSITION as ordinal_position
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = ?
+          AND TABLE_NAME = ?
+        ORDER BY ORDINAL_POSITION
+      `, [church.database_name, table]);
+
+      if (columns.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: `Table ${table} not found in church database`
+        });
+      }
+
+      // 2. Fetch field mapper config from orthodoxmetrics_db
+      let mappings = {};
+      let fieldSettings = {
+        visibility: {},
+        sortable: {},
+        default_sort_field: null,
+        default_sort_direction: 'asc'
+      };
+
+      try {
+        const [mappingRows] = await getAppPool().query(`
+          SELECT mapping_json, field_settings_json
+          FROM church_field_mappings
+          WHERE church_id = ? AND table_name = ?
+        `, [churchId, table]);
+
+        if (mappingRows.length > 0) {
+          const row = mappingRows[0];
+          if (row.mapping_json) {
+            mappings = typeof row.mapping_json === 'string' 
+              ? JSON.parse(row.mapping_json) 
+              : row.mapping_json;
+          }
+          if (row.field_settings_json) {
+            fieldSettings = typeof row.field_settings_json === 'string'
+              ? JSON.parse(row.field_settings_json)
+              : row.field_settings_json;
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Could not fetch field mapper config:', err.message);
+        // Continue with defaults
+      }
+
+      // 3. Build template fields JSON (versioned schema)
+      const templateFields = {
+        version: 1,
+        source: {
+          church_id: churchId,
+          table: table,
+          exported_at: new Date().toISOString()
+        },
+        columns: columns
+          .filter(col => col.column_name !== 'id' && col.column_name !== 'church_id') // Skip auto-generated fields
+          .map(col => {
+            // Map SQL types to template field types
+            let sqlType = col.column_type || col.data_type;
+            let nullable = col.is_nullable === 'YES';
+            
+            // Infer field type from column name/type
+            let type = 'string';
+            const colName = col.column_name.toLowerCase();
+            if (colName.includes('date') || colName.includes('time')) {
+              type = 'date';
+            } else if (colName.includes('id') || colName.includes('count') || colName.includes('number')) {
+              type = 'number';
+            } else if (sqlType && (sqlType.includes('INT') || sqlType.includes('DECIMAL') || sqlType.includes('FLOAT'))) {
+              type = 'number';
+            } else if (sqlType && sqlType.includes('TEXT')) {
+              type = 'text';
+            } else if (sqlType && sqlType.includes('BOOLEAN') || sqlType.includes('TINYINT(1)')) {
+              type = 'boolean';
+            }
+
+            return {
+              name: col.column_name,
+              label: mappings[col.column_name] || col.column_name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              sqlType: sqlType,
+              nullable: nullable,
+              sqlTypeInferred: false, // We have actual schema
+              type: type,
+              required: !nullable,
+              default: col.column_default || null
+            };
+          }),
+        ui: {
+          visibility: fieldSettings.visibility || {},
+          sortable: fieldSettings.sortable || {},
+          default_sort_field: fieldSettings.default_sort_field || null,
+          default_sort_direction: fieldSettings.default_sort_direction || 'asc'
+        }
+      };
+
+      // 4. Check if template already exists
+      const [existing] = await getAppPool().query(
+        'SELECT slug FROM templates WHERE slug = ?',
+        [slug]
+      );
+
+      if (existing.length > 0 && !overwrite) {
+        return res.status(409).json({
+          success: false,
+          error: 'Template already exists',
+          slug: slug,
+          message: 'Set overwrite=true to update existing template'
+        });
+      }
+
+      // 5. Convert columns to Live Table Builder format (flat array)
+      // Live Table Builder expects fields to be an array of { column, label, type, required }
+      const fieldsArray = templateFields.columns.map((col, index) => ({
+        column: col.name || `col_${index}`, // Use column name as stable ID
+        label: col.label || col.name,
+        type: col.type || 'string',
+        required: col.required || false
+      }));
+
+      // Store both formats:
+      // - fields: flat array for Live Table Builder compatibility
+      // - templateFields: full versioned structure for provisioning (store in description or separate field)
+      // For now, store the flat array as fields (Live Table Builder format)
+      // The full versioned structure can be reconstructed from fields if needed
+
+      // 6. Upsert template
+      const templateData = {
+        name: name,
+        slug: slug,
+        record_type: recordType,
+        description: `Exported from church ${churchId} (${church.church_name}) table ${table}. Full schema: ${JSON.stringify(templateFields)}`,
+        fields: JSON.stringify(fieldsArray), // Store as flat array for Live Table Builder
+        grid_type: 'aggrid',
+        layout_type: 'table',
+        theme: null,
+        is_global: 1,
+        church_id: null,
+        is_editable: true
+      };
+
+      if (existing.length > 0) {
+        // Update existing
+        await getAppPool().query(`
+          UPDATE templates
+          SET name = ?, record_type = ?, description = ?, fields = ?, updated_at = NOW()
+          WHERE slug = ?
+        `, [templateData.name, templateData.record_type, templateData.description, templateData.fields, slug]);
+      } else {
+        // Insert new
+        await getAppPool().query(`
+          INSERT INTO templates (name, slug, record_type, description, fields, grid_type, layout_type, theme, is_global, church_id, is_editable, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        `, [
+          templateData.name,
+          templateData.slug,
+          templateData.record_type,
+          templateData.description,
+          templateData.fields,
+          templateData.grid_type,
+          templateData.layout_type,
+          templateData.theme,
+          templateData.is_global,
+          templateData.church_id,
+          templateData.is_editable
+        ]);
+      }
+
+      console.log(`✅ Exported template: ${slug} with ${fieldsArray.length} fields`);
+
+      console.log(`✅ Exported template: ${slug} from church ${churchId} table ${table}`);
+
+      res.json({
+        success: true,
+        slug: slug,
+        template: {
+          name: name,
+          slug: slug,
+          record_type: recordType,
+          fields_count: fieldsArray.length
+        },
+        message: existing.length > 0 ? 'Template updated' : 'Template created'
+      });
+
+    } finally {
+      connection.release();
+    }
+
+  } catch (error) {
+    console.error('❌ Error exporting template:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to export template',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+/**
+ * Verify history tables exist for all record tables
+ * GET /api/admin/churches/:id/verify-history-tables
+ */
+router.get('/:id/verify-history-tables', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+
+    // Validate church exists
+    const [churches] = await getAppPool().query(
+      'SELECT id, database_name FROM churches WHERE id = ?',
+      [churchId]
+    );
+
+    if (churches.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Church not found'
+      });
+    }
+
+    const { verifyHistoryTables } = require('../services/recordHistoryLogger');
+    const results = await verifyHistoryTables(churchId);
+
+    res.json({
+      success: true,
+      ...results,
+      all_present: results.missing.length === 0
+    });
+
+  } catch (error) {
+    console.error('❌ Error verifying history tables:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to verify history tables',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 module.exports = router;
 

@@ -1,0 +1,220 @@
+You are working in the OrthodoxMetrics repo. Upgrade the existing Live Table Builder page at route /devel-tools/live-table-builder.
+
+Non-negotiables
+
+Keep it developer/admin tool quality, not an end-user parish feature.
+
+Keep the core model simple: headers + rows (no formulas, no styling system, no collaboration).
+
+All changes must be TypeScript-safe, lint/build clean, and consistent with existing UI patterns.
+
+Ensure route is registered in Router.tsx and menu entry is in MenuItems.ts under Devel Tools.
+
+Remove dead code, unused imports, and unused state.
+
+Create a new git branch and commit at the end of every phase with a clear message.
+
+Git Workflow Requirements (Strict)
+
+Create a new branch off the current base branch:
+
+Branch name format:
+
+feat/live-table-builder-upgrades-YYYYMMDD-HHMM
+
+After completing each phase:
+
+Run format/lint/tests/build (whatever is available and realistic in this repo).
+
+Stage only relevant files.
+
+Commit with the specified message format.
+
+Commits must be incremental and self-contained (each phase should leave app working).
+
+Commit message format:
+
+feat(live-table-builder): phase N - <short summary>
+or for cleanup:
+
+chore(live-table-builder): phase N - <short summary>
+
+Phase 0 — Locate, Audit, and Stabilize (Commit)
+
+Locate the Live Table Builder implementation:
+
+Route component for /devel-tools/live-table-builder
+
+Related utilities, especially parseClipboardData()
+
+localStorage keys and TableState schema/type
+
+Remove:
+
+Unused imports (e.g., CopyIcon, SaveIcon, RotateIcon if unused)
+
+Unused state (e.g., editingCell if unused)
+
+Dead handlers and unreachable code
+
+Replace alert() usage (if any) with the app’s toast/snackbar pattern.
+
+Add baseline guardrails:
+
+Defensive null checks on table state
+
+Try/catch around import/export with helpful error toasts
+
+Acceptance criteria:
+
+Page loads with no console errors.
+
+Build passes.
+
+No unused imports/state remain.
+
+Commit:
+
+chore(live-table-builder): phase 0 - cleanup and stabilize
+
+Phase 1 — Inline Column Header Editing (Commit)
+
+Replace prompt()-based header editing with inline editing via AG Grid header customization.
+
+Requirements:
+
+Click edit icon OR double-click header to edit.
+
+Inline MUI input in header.
+
+Save: Enter / blur. Cancel: Escape.
+
+Disallow empty headers: revert to prior value.
+
+Update both columnDefs and TableState.headers.
+
+Commit:
+
+feat(live-table-builder): phase 1 - inline header editing
+
+Phase 2 — CSV Export (Commit)
+
+Add Export CSV button.
+
+Requirements:
+
+Correct CSV escaping:
+
+Quote fields with commas/quotes/newlines
+
+Double quotes escape
+
+Use \r\n newlines.
+
+Filename: live-table-builder_<YYYY-MM-DD_HHMM>.csv.
+
+Commit:
+
+feat(live-table-builder): phase 2 - csv export
+
+Phase 3 — CSV Import (Commit)
+
+Implement CSV/TSV import via existing Import/Upload UI (or add minimal dialog).
+
+Requirements:
+
+Delimiter detection: use existing parser or implement heuristic.
+
+Default: first row is headers (toggle available).
+
+Normalize ragged rows (pad empties; or extend headers with Column N—choose one and document).
+
+Toast: “Imported X rows, Y columns”.
+
+Commit:
+
+feat(live-table-builder): phase 3 - csv import
+
+Phase 4 — Clipboard Pipeline Integration (Commit)
+
+Wire paste handling through parseClipboardData() (make it canonical).
+
+Requirements:
+
+Paste fills starting at selected cell.
+
+Auto-expand rows/cols to fit paste block.
+
+Works for single cell and multi-row blocks.
+
+Commit:
+
+feat(live-table-builder): phase 4 - smarter paste handling
+
+Phase 5 — Undo/Redo + Shortcuts (Commit)
+
+Implement bounded history (prefer snapshot history) for:
+
+Cell edits, paste, add/remove rows/cols, transpose, header rename, import, reset.
+
+Requirements:
+
+History limit ~50 states.
+
+Ctrl/Cmd+Z undo
+
+Ctrl/Cmd+Y and Ctrl/Cmd+Shift+Z redo
+
+Add Undo/Redo buttons with disabled states.
+
+Commit:
+
+feat(live-table-builder): phase 5 - undo redo and shortcuts
+
+Phase 6 — UX Polish (Commit)
+
+Remove any remaining raw dialogs.
+
+Add “Quick Tips” tooltip/collapsible help.
+
+Ensure buttons alignment and responsiveness.
+
+Improve toasts for key actions (import/export/transpose/reset).
+
+Commit:
+
+chore(live-table-builder): phase 6 - ux polish
+
+Phase 7 — Integration Hygiene (Commit)
+
+Confirm route in Router.tsx and menu entry in MenuItems.ts under Devel Tools.
+
+Ensure correct page title, breadcrumbs (if applicable).
+
+Commit:
+
+chore(live-table-builder): phase 7 - routing and menu wiring
+
+Deliverables
+
+After completing all phases, output:
+
+Branch name created
+
+Commit list (hash + message)
+
+Files changed/added
+
+Notes on any deviations or constraints encountered
+
+Notes
+If repo has a standard command set, run the closest equivalent after each phase (for example):
+
+npm run lint
+
+npm run typecheck
+
+npm run build
+Use what exists; do not invent scripts.
+
+Make sure the app remains working after every commit.

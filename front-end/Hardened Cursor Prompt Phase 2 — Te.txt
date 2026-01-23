@@ -1,0 +1,237 @@
+Hardened Cursor Prompt: Phase 2 — Template-Driven Church Provisioning (with Safe Fallback)
+
+Implement template-driven provisioning so that when a church is onboarded (wizard) and templates are selected, the corresponding MySQL tables are created inside om_church_## using orthodoxmetrics_db.templates as the source of truth. Preserve current hardcoded provisioning as a fallback if templates are missing/invalid.
+
+Non-negotiables
+
+Do not break existing onboarding.
+
+A full rebuild of backend + frontend must succeed.
+
+If template-driven provisioning fails, fall back to the existing hardcoded path and return a clear warning in logs + response.
+
+Record Table Configuration (Field Mapper) must remain church-specific and stored in orthodoxmetrics_db.church_field_mappings (do not change that). 
+
+BACKEND_FIELD_MAPPER_PROVISIONI…
+
+All schema changes apply only to the target om_church_## database.
+
+Critical constraint: resolve route implementation ambiguity first
+
+Before implementing anything, identify exactly which wizard endpoint is mounted in production:
+
+Confirm in server bootstrap (server/index.js or equivalent) whether onboarding uses:
+
+server/routes/admin/churches.js wizard route, OR
+
+server/src/api/admin.js wizard route, OR
+
+another route file.
+Implement changes only in the actually-mounted path, and remove/avoid duplicating logic in dead/legacy routes. The repo currently contains multiple competing implementations. 
+
+BACKEND_FIELD_MAPPER_PROVISIONI…
+
+Part A — Data Model: store which templates each church selected
+
+Create a table in orthodoxmetrics_db if missing:
+
+church_record_templates
+
+id (PK)
+
+church_id (INT, indexed)
+
+record_type ENUM('baptism','marriage','funeral','custom')
+
+template_slug VARCHAR(100)
+
+language VARCHAR(10) NULL (optional)
+
+is_active TINYINT(1) default 1
+
+created_at / updated_at
+
+UNIQUE(church_id, record_type)
+
+This table is the permanent source of truth for what a church uses.
+
+Part B — Templates.fields JSON contract (minimum viable)
+
+Templates are stored in orthodoxmetrics_db.templates.fields (JSON in LONGTEXT). Provisioning must validate:
+
+Required:
+
+version: number
+
+columns: Array<{ name: string, sqlType: string, nullable?: boolean, default?: any, primaryKey?: boolean, autoIncrement?: boolean }>
+
+Optional:
+
+indexes: Array<{ name: string, columns: string[], unique?: boolean }>
+
+engine?: string
+
+charset?: string
+
+Rules:
+
+name must be safe identifier (snake_case, letters/numbers/_)
+
+sqlType must be from an allowlist (VARCHAR/INT/DATE/DATETIME/TEXT/LONGTEXT/JSON/TINYINT/DECIMAL/etc.)
+
+Reject templates missing required fields.
+
+Part C — Backend: provisioning implementation
+1) Add TemplateProvisioning service
+
+Create:
+
+server/services/templateProvisioningService.js
+
+Responsibilities:
+
+Load template by slug from orthodoxmetrics_db.templates
+
+Parse & validate fields JSON
+
+Generate CREATE TABLE IF NOT EXISTS SQL for the church DB table:
+
+baptism → baptism_records
+
+marriage → marriage_records
+
+funeral → funeral_records
+
+Execute SQL via getChurchDbConnection(database_name) (do not use getAppPool for church DB writes) 
+
+BACKEND_FIELD_MAPPER_PROVISIONI…
+
+Apply indexes
+
+Return structured result: created tables, warnings, errors
+
+2) ensureRecordTablesFromTemplates(churchId, database_name, selection)
+
+Inputs:
+
+churchId
+
+database_name
+
+selection: { baptism?: slug, marriage?: slug, funeral?: slug }
+
+Behavior:
+
+For each record_type in selection:
+
+Load template by slug
+
+Create the corresponding *_records table
+
+If table exists: do not drop, do not alter (Phase 2 is create-only)
+
+If invalid template or SQL failure: mark failed
+
+Fallback:
+
+For any failed record_type(s), call existing hardcoded schema creation ONLY for those missing tables (do not recreate successful tables).
+The existing hardcoded schema function exists today (createChurchDatabaseSchema) and must remain as fallback. 
+
+BACKEND_FIELD_MAPPER_PROVISIONI…
+
+Important: Do not use the template database cloning approach (record_template1 / SHOW CREATE TABLE). We are standardizing on orthodoxmetrics_db.templates as the source of truth. 
+
+BACKEND_FIELD_MAPPER_PROVISIONI…
+
+Part D — Wire into onboarding wizard
+
+Update the active wizard endpoint to accept:
+
+{
+  "setup_templates": true,
+  "selected_templates": {
+    "baptism": "en_baptism_records",
+    "marriage": "en_marriage_records",
+    "funeral": "en_funeral_records"
+  }
+}
+
+
+Flow:
+
+Create church record + database (existing behavior)
+
+If setup_templates=true:
+
+Upsert into orthodoxmetrics_db.church_record_templates for (church_id, record_type)
+
+Call ensureRecordTablesFromTemplates(...)
+
+If fallback used, log warning + include in response payload
+
+Response additions:
+
+templatesApplied
+
+tablesCreated
+
+fallbackUsed
+
+warnings[]
+
+Part E — Admin endpoint to adjust templates post-onboarding
+
+Add:
+
+POST /api/admin/churches/:id/templates
+Body:
+
+{ selected_templates: { baptism, marriage, funeral }, applySchema?: boolean }
+
+Behavior:
+
+Upsert selections into church_record_templates
+
+If applySchema=true, run create-only provisioning for missing tables (no drop/alter)
+
+Part F — Frontend minimal hookup
+
+In onboarding UI:
+
+Fetch templates from Phase 1 endpoints
+
+Allow selecting template slug per record type
+
+Default selections based on chosen language (en/gr/ru…)
+
+Safety & Verification
+
+Log only table name + column count (avoid dumping SQL unless debug)
+
+Confirm:
+
+onboarding works with no selected_templates (falls back to hardcoded)
+
+onboarding works with selected_templates (creates tables from template)
+
+Field Mapper continues to work unchanged
+
+Run the repo’s actual build scripts for backend and frontend.
+
+Deliverables:
+
+files changed
+
+example wizard request/response
+
+example generated CREATE TABLE SQL for one template
+
+commands run and results
+
+Why this matters
+
+This hardened version forces Cursor to:
+
+implement in the active route path (not a dead duplicate), and
+
+stop relying on the legacy template DB cloning mechanism.

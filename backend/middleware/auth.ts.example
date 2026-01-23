@@ -1,0 +1,30 @@
+/**
+ * Authentication Middleware Example
+ * 
+ * This is an example file showing what the auth middleware should export.
+ * Replace the imports in interactiveReports.ts if your auth middleware is located elsewhere
+ * or has different function names.
+ */
+
+import { Request, Response, NextFunction } from 'express';
+
+/**
+ * Authenticate token middleware
+ * Should extract and verify JWT token from Authorization header
+ */
+export function authenticateToken(req: Request, res: Response, next: NextFunction) {
+  // Your authentication logic here
+  // Should set req.user with user info
+  next();
+}
+
+/**
+ * Require role middleware
+ * Should check if user has one of the required roles
+ */
+export function requireRole(roles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Your role checking logic here
+    next();
+  };
+}

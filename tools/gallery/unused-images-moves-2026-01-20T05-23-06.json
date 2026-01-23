@@ -1,0 +1,1178 @@
+{
+  "timestamp": "2026-01-20T05:23:06.412Z",
+  "total_moves": 195,
+  "successful": 195,
+  "failed": 0,
+  "moves": [
+    {
+      "source": "backgrounds/46-bg.png",
+      "target": "unused/46-bg.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.381Z"
+    },
+    {
+      "source": "backgrounds/baptism-header.png",
+      "target": "unused/baptism-header.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "backgrounds/bg-new.png",
+      "target": "unused/bg-new.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "backgrounds/cross-header.jpg",
+      "target": "unused/cross-header.jpg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "backgrounds/funeral-header.png",
+      "target": "unused/funeral-header.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "backgrounds/gr-header.png",
+      "target": "unused/gr-header.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "backgrounds/marriage-header.png",
+      "target": "unused/marriage-header.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "backgrounds/purple-bg.png",
+      "target": "unused/purple-bg.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "backgrounds/purple2-bg.png",
+      "target": "unused/purple2-bg.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "backgrounds/ru-header.png",
+      "target": "unused/ru-header.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "backgrounds/ssppoc-full-header.png",
+      "target": "unused/ssppoc-full-header.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "backgrounds/ssppoc-header.png",
+      "target": "unused/ssppoc-header.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "icons/empty-icon.png",
+      "target": "unused/empty-icon.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "icons/en-baptism-icon__e2fa3297.png",
+      "target": "unused/en-baptism-icon__e2fa3297.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "icons/en-funeral-icon__df11ddd6.png",
+      "target": "unused/en-funeral-icon__df11ddd6.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "icons/en-marriage-icon__7cc5377d.png",
+      "target": "unused/en-marriage-icon__7cc5377d.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "icons/home-om.svg",
+      "target": "unused/home-om.svg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "icons/orthodox-cross-icon.svg",
+      "target": "unused/orthodox-cross-icon.svg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "icons/orthodox_metrics_invoice_english_svg.svg",
+      "target": "unused/orthodox_metrics_invoice_english_svg.svg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "icons/orthodox_metrics_invoice_greek.svg",
+      "target": "unused/orthodox_metrics_invoice_greek.svg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "icons/orthodox_metrics_invoice_romanian.svg",
+      "target": "unused/orthodox_metrics_invoice_romanian.svg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "icons/orthodox_metrics_invoice_russian.svg",
+      "target": "unused/orthodox_metrics_invoice_russian.svg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/46-logo.png",
+      "target": "unused/46-logo.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/fallback-ag-logo-bg.png",
+      "target": "unused/fallback-ag-logo-bg.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/logo-19-26.png",
+      "target": "unused/logo-19-26.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/logo-about.png",
+      "target": "unused/logo-about.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/logo-addons.png",
+      "target": "unused/logo-addons.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/logo-main.png",
+      "target": "unused/logo-main.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/logo-why.png",
+      "target": "unused/logo-why.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/logo0.png",
+      "target": "unused/logo0.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/logo1.png",
+      "target": "unused/logo1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/logo2.png",
+      "target": "unused/logo2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/logo3.png",
+      "target": "unused/logo3.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/new-logo10.png",
+      "target": "unused/new-logo10.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/new-logo4.png",
+      "target": "unused/new-logo4.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/scircle-logo.png",
+      "target": "unused/scircle-logo.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "logos/ssppoc-logo.png",
+      "target": "unused/ssppoc-logo.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "misc/12-2025.png",
+      "target": "unused/12-2025.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "misc/16-addition.png",
+      "target": "unused/16-addition.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "misc/3-day.png",
+      "target": "unused/3-day.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "misc/404-orthodox.png",
+      "target": "unused/404-orthodox.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "misc/46-parish-left.png",
+      "target": "unused/46-parish-left.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "misc/46-parish-right.png",
+      "target": "unused/46-parish-right.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "misc/46-sample1.png",
+      "target": "unused/46-sample1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "misc/administration1.png",
+      "target": "unused/administration1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "misc/analysis-thumb.png",
+      "target": "unused/analysis-thumb.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.409Z"
+    },
+    {
+      "source": "misc/annual_reports1.png",
+      "target": "unused/annual_reports1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/bap-defaults.png",
+      "target": "unused/bap-defaults.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/beach1.png",
+      "target": "unused/beach1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/beach2.png",
+      "target": "unused/beach2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/beach3.png",
+      "target": "unused/beach3.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/border-gold-black.png",
+      "target": "unused/border-gold-black.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/border-gold-white.png",
+      "target": "unused/border-gold-white.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/border-gold.png",
+      "target": "unused/border-gold.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/border-gold2.png",
+      "target": "unused/border-gold2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/calendar1.png",
+      "target": "unused/calendar1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/cemetery-cross.png",
+      "target": "unused/cemetery-cross.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/chatgpt-image-aug-2-2025-06_25_00-am.png",
+      "target": "unused/chatgpt-image-aug-2-2025-06_25_00-am.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/church-login.png",
+      "target": "unused/church-login.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/church-s1.png",
+      "target": "unused/church-s1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/circ-graphic.png",
+      "target": "unused/circ-graphic.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/cross-transparent.png",
+      "target": "unused/cross-transparent.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/dashboard1.png",
+      "target": "unused/dashboard1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_all.png",
+      "target": "unused/en_all.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_bap1.png",
+      "target": "unused/en_bap1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_cross.png",
+      "target": "unused/en_cross.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_fun1.png",
+      "target": "unused/en_fun1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_gr_b1.png",
+      "target": "unused/en_gr_b1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_gr_f1.png",
+      "target": "unused/en_gr_f1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_gr_m1.png",
+      "target": "unused/en_gr_m1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_mar1.png",
+      "target": "unused/en_mar1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_ro_b1.png",
+      "target": "unused/en_ro_b1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_ro_f1.png",
+      "target": "unused/en_ro_f1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_ro_m1.png",
+      "target": "unused/en_ro_m1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_ru_b1.png",
+      "target": "unused/en_ru_b1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_ru_f1.png",
+      "target": "unused/en_ru_f1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/en_ru_w1.png",
+      "target": "unused/en_ru_w1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/full-bar.png",
+      "target": "unused/full-bar.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/fun-defaults.png",
+      "target": "unused/fun-defaults.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/ge_church1.png",
+      "target": "unused/ge_church1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/ge_map1.png",
+      "target": "unused/ge_map1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/giorgi-saba.png",
+      "target": "unused/giorgi-saba.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/gr-church-s1.png",
+      "target": "unused/gr-church-s1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/gr-map1.png",
+      "target": "unused/gr-map1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/gr_church1.png",
+      "target": "unused/gr_church1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/gr_cross.png",
+      "target": "unused/gr_cross.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/greece.png",
+      "target": "unused/greece.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/greek-blue-stone.png",
+      "target": "unused/greek-blue-stone.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/image-blacked.png",
+      "target": "unused/image-blacked.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/inventory1.png",
+      "target": "unused/inventory1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/library1.png",
+      "target": "unused/library1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/license-james-parsells.png",
+      "target": "unused/license-james-parsells.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/linux-terminal.png",
+      "target": "unused/linux-terminal.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/liturgical-red.png",
+      "target": "unused/liturgical-red.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/login1.png",
+      "target": "unused/login1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/lord-1.jpg",
+      "target": "unused/lord-1.jpg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/mar-defaults.png",
+      "target": "unused/mar-defaults.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/menu-thumb.png",
+      "target": "unused/menu-thumb.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/mtathos.png",
+      "target": "unused/mtathos.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/new-head.png",
+      "target": "unused/new-head.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/nj_map1.png",
+      "target": "unused/nj_map1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/notes1.png",
+      "target": "unused/notes1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/om_church_wiz.png",
+      "target": "unused/om_church_wiz.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/om_hq.png",
+      "target": "unused/om_hq.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/orthodox-colors.png",
+      "target": "unused/orthodox-colors.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/orthodox-globe.png",
+      "target": "unused/orthodox-globe.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/prayer-rope.png",
+      "target": "unused/prayer-rope.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/profile_15.png",
+      "target": "unused/profile_15.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/quick_menu.png",
+      "target": "unused/quick_menu.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/red-vestment2.png",
+      "target": "unused/red-vestment2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/ro-church-s1.png",
+      "target": "unused/ro-church-s1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/ro-church1.png",
+      "target": "unused/ro-church1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.410Z"
+    },
+    {
+      "source": "misc/ro_cross.png",
+      "target": "unused/ro_cross.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ro_map1.png",
+      "target": "unused/ro_map1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ru-church2.png",
+      "target": "unused/ru-church2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ru_church1.png",
+      "target": "unused/ru_church1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ru_cross.png",
+      "target": "unused/ru_cross.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ru_map1.png",
+      "target": "unused/ru_map1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/sample-image-2.png",
+      "target": "unused/sample-image-2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/sample4.png",
+      "target": "unused/sample4.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/sand-dune.png",
+      "target": "unused/sand-dune.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/sand-dune1.png",
+      "target": "unused/sand-dune1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/sand-engraved.png",
+      "target": "unused/sand-engraved.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/screenshot-2026-01-17-211044.png",
+      "target": "unused/screenshot-2026-01-17-211044.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/screenshot_2025-12-06_215016.png",
+      "target": "unused/screenshot_2025-12-06_215016.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/settings-2.png",
+      "target": "unused/settings-2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/settings-3.png",
+      "target": "unused/settings-3.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/silv-purp-about.png",
+      "target": "unused/silv-purp-about.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ss-sspp-sand.png",
+      "target": "unused/ss-sspp-sand.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/sspeter.png",
+      "target": "unused/sspeter.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/sspp-sand.png",
+      "target": "unused/sspp-sand.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ssppoc-alt1.png",
+      "target": "unused/ssppoc-alt1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ssppoc-alt2.png",
+      "target": "unused/ssppoc-alt2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ssppoc-h1.png",
+      "target": "unused/ssppoc-h1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ssppoc-h2.png",
+      "target": "unused/ssppoc-h2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ssppoc-p1.png",
+      "target": "unused/ssppoc-p1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ssppoc-small.png",
+      "target": "unused/ssppoc-small.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/ssppoc_church.png",
+      "target": "unused/ssppoc_church.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/st-paul-1-big.png",
+      "target": "unused/st-paul-1-big.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/st-peter-1-big.png",
+      "target": "unused/st-peter-1-big.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/st-peter.png",
+      "target": "unused/st-peter.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/storefront1.png",
+      "target": "unused/storefront1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/stpaul.png",
+      "target": "unused/stpaul.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/suite_2_om.png",
+      "target": "unused/suite_2_om.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/table_grid_view1.png",
+      "target": "unused/table_grid_view1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/table_list1.png",
+      "target": "unused/table_list1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/table_view1.png",
+      "target": "unused/table_view1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/tmp1.png",
+      "target": "unused/tmp1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/tmp2.png",
+      "target": "unused/tmp2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/venerable-patappius-thebes.png",
+      "target": "unused/venerable-patappius-thebes.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "misc/venerable-patappius-thebes2.png",
+      "target": "unused/venerable-patappius-thebes2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/add-record-base.png",
+      "target": "unused/add-record-base.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/add-record-en.png",
+      "target": "unused/add-record-en.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/b_records.png",
+      "target": "unused/b_records.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/baptism2.png",
+      "target": "unused/baptism2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/baptism_form.png",
+      "target": "unused/baptism_form.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/baptisms-post.png",
+      "target": "unused/baptisms-post.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/baptisms-pre.png",
+      "target": "unused/baptisms-pre.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/en-bap-records__368f9cbb.png",
+      "target": "unused/en-bap-records__368f9cbb.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/en-baptism-certificate-1.png",
+      "target": "unused/en-baptism-certificate-1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/en-form.png",
+      "target": "unused/en-form.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/en-funeral-records__0932473a.png",
+      "target": "unused/en-funeral-records__0932473a.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/en-marr-records__d4e800a5.png",
+      "target": "unused/en-marr-records__d4e800a5.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/en_marriage_s1.png",
+      "target": "unused/en_marriage_s1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/enhanced-ocr-uploader-1.jpg",
+      "target": "unused/enhanced-ocr-uploader-1.jpg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/enhanced-ocr-uploader-2.jpg",
+      "target": "unused/enhanced-ocr-uploader-2.jpg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/enhanced-ocr-uploader-3.jpg",
+      "target": "unused/enhanced-ocr-uploader-3.jpg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/enhanced-ocr-uploader-4.jpg",
+      "target": "unused/enhanced-ocr-uploader-4.jpg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.411Z"
+    },
+    {
+      "source": "records/enhanced-ocr-uploader-5.jpg",
+      "target": "unused/enhanced-ocr-uploader-5.jpg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/enhanced-ocr-uploader-6.jpg",
+      "target": "unused/enhanced-ocr-uploader-6.jpg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/enhanced-ocr-uploader-7.jpg",
+      "target": "unused/enhanced-ocr-uploader-7.jpg",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/f_records.png",
+      "target": "unused/f_records.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/five-phases-of-church-record-digitization.png",
+      "target": "unused/five-phases-of-church-record-digitization.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/funeral-add-record-en.png",
+      "target": "unused/funeral-add-record-en.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/funeral2.png",
+      "target": "unused/funeral2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/funeralt1.png",
+      "target": "unused/funeralt1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/generic-baptism.png",
+      "target": "unused/generic-baptism.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/gr-add-record.png",
+      "target": "unused/gr-add-record.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/gr-add-record1.png",
+      "target": "unused/gr-add-record1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/gr_baptim_sample.png",
+      "target": "unused/gr_baptim_sample.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/marriage2.png",
+      "target": "unused/marriage2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/marriages-1.png",
+      "target": "unused/marriages-1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/record-add-engilsh.png",
+      "target": "unused/record-add-engilsh.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/ro_baptism.png",
+      "target": "unused/ro_baptism.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/ro_funeral.png",
+      "target": "unused/ro_funeral.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/ro_marriage.png",
+      "target": "unused/ro_marriage.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/sample-marriage-1.png",
+      "target": "unused/sample-marriage-1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/template-om.png",
+      "target": "unused/template-om.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "records/test-records.png",
+      "target": "unused/test-records.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "ui/46-button1.png",
+      "target": "unused/46-button1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "ui/4buttons.png",
+      "target": "unused/4buttons.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "ui/cross-buttons.png",
+      "target": "unused/cross-buttons.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "ui/ru-buttons-2.png",
+      "target": "unused/ru-buttons-2.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "ui/support-card-1.png",
+      "target": "unused/support-card-1.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    },
+    {
+      "source": "ui/toast-message.png",
+      "target": "unused/toast-message.png",
+      "success": true,
+      "timestamp": "2026-01-20T05:23:06.412Z"
+    }
+  ]
+}

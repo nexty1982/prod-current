@@ -1,0 +1,233 @@
+Cursor Prompt: Phase 2 — Template-Driven Church Provisioning (with Safe Fallback)
+
+Implement template-driven provisioning so that when a church is onboarded (wizard) and templates are selected, the corresponding MySQL tables are created inside om_church_## using orthodoxmetrics_db.templates as the source of truth. Preserve current hardcoded provisioning as a fallback if templates are missing/invalid.
+
+Non-negotiables
+
+Do not break existing onboarding.
+
+A full rebuild of backend + frontend must succeed.
+
+If template-driven provisioning fails, fall back to the existing hardcoded path and return a clear warning in logs + response.
+
+Record Table Configuration (Field Mapper) must remain church-specific and stored in orthodoxmetrics_db.church_field_mappings (do not change that).
+
+All schema changes apply only to the target om_church_## database.
+
+Part A — Data Model: store which templates each church selected
+1) Add central mapping table (if it doesn’t exist)
+
+Create a table in orthodoxmetrics_db:
+
+church_record_templates
+
+id (PK)
+
+church_id (INT, indexed)
+
+record_type ENUM('baptism','marriage','funeral','custom')
+
+template_slug VARCHAR(100)
+
+language VARCHAR(10) NULL (optional)
+
+is_active TINYINT(1) default 1
+
+created_at / updated_at
+
+UNIQUE(church_id, record_type)
+
+This table is the permanent source of truth for what a church uses.
+
+Part B — Templates.fields JSON contract (minimum viable)
+
+Assume Phase 1 stored template definitions in templates.fields as JSON. Define/validate a minimum required schema for schema generation:
+
+Required fields:
+
+version: number
+
+columns: Array<{ name: string, sqlType: string, nullable?: boolean, default?: any, primaryKey?: boolean, autoIncrement?: boolean }>
+Optional:
+
+indexes: Array<{ name: string, columns: string[], unique?: boolean }>
+
+engine?: string
+
+charset?: string
+
+Rules:
+
+name must be safe identifier (snake_case, letters/numbers/_)
+
+sqlType must be a safe allowlist (VARCHAR, INT, DATE, DATETIME, TEXT, LONGTEXT, JSON, TINYINT, DECIMAL, etc.)
+
+Reject templates missing required fields.
+
+Part C — Backend: provisioning implementation
+1) Create a TemplateProvisioning service
+
+New file suggested:
+
+server/services/templateProvisioningService.js (or TS if the repo is TS)
+
+Responsibilities:
+
+Load template by slug from orthodoxmetrics_db.templates
+
+Parse fields JSON
+
+Generate CREATE TABLE IF NOT EXISTS SQL for the church DB
+
+Execute SQL via getChurchDbConnection(database_name)
+
+Apply indexes after table creation
+
+Return a structured result: created tables, warnings, errors
+
+2) Create helper: ensureRecordTablesFromTemplates(churchId, database_name, selection)
+
+Inputs:
+
+churchId
+
+database_name (e.g., om_church_46)
+
+selection: { baptism: slug, marriage: slug, funeral: slug } (some may be null/undefined)
+
+Behavior:
+
+For each record_type in selection:
+
+Load template by slug
+
+Create table named:
+
+baptism_records / marriage_records / funeral_records (keep existing table naming)
+
+If table exists, do NOT drop; only create if missing
+
+If template invalid, mark that record_type as failed
+
+If ANY required record_type fails and the wizard requested setup_templates=true, fallback to existing hardcoded createChurchDatabaseSchema() for those missing tables only (do not re-create tables that succeeded).
+
+3) Wire into onboarding wizard
+
+Find the wizard flow (report indicates):
+
+POST /api/admin/churches/wizard
+
+churchSetupService.setupNewChurch()
+
+Update onboarding so it can accept template selection:
+Request body additions:
+
+selected_templates: object mapping record_type to template_slug
+Example:
+
+{
+  "selected_templates": {
+    "baptism": "en_baptism_records",
+    "marriage": "en_marriage_records",
+    "funeral": "en_funeral_records"
+  }
+}
+
+
+Flow:
+
+Create church row + database first (existing behavior).
+
+If setup_templates=true:
+
+Write selections into church_record_templates (upsert per church_id + record_type)
+
+Call ensureRecordTablesFromTemplates(...)
+
+If fallback triggered, log a warning and include it in the response payload (non-fatal).
+
+Response should include:
+
+templatesApplied: which slugs applied
+
+tablesCreated: list
+
+fallbackUsed: boolean
+
+warnings: string[]
+
+4) Add an admin endpoint to set/replace a church’s template selection post-onboarding
+
+New endpoint:
+
+POST /api/admin/churches/:id/templates
+Body:
+
+{ selected_templates: { baptism, marriage, funeral }, applySchema?: boolean }
+
+Behavior:
+
+Upsert into church_record_templates
+
+If applySchema=true, run provisioning in that church DB (create missing tables only)
+
+Never drop or destructively alter existing tables in this phase
+
+Part D — Frontend: onboarding UI selection (minimum)
+
+In the onboarding wizard UI, add template selection:
+
+Fetch available templates: GET /api/admin/templates?record_type=baptism&language=en (or filter client-side)
+
+Allow choosing template slug for each record type (baptism/marriage/funeral)
+
+Default selection can be computed from chosen language:
+
+en → en_baptism_records, etc.
+
+Submit selected_templates in wizard payload.
+
+Part E — Safety, logging, tests
+
+Add server logs for:
+
+template loaded
+
+SQL generated (log table name + column count, not full SQL unless debug)
+
+fallback triggers
+
+Add basic unit tests if test infra exists; otherwise add a small “dry run” function that returns SQL strings and test that.
+
+Acceptance Criteria:
+
+Onboarding a new church with selected templates creates correct tables in om_church_##.
+
+If templates missing/invalid, onboarding still succeeds and creates tables via fallback.
+
+Existing Field Mapper continues to read columns from INFORMATION_SCHEMA and store mappings in church_field_mappings.
+
+No destructive DB changes (no DROP TABLE).
+
+Full build passes (backend + frontend).
+
+Deliverables:
+
+Files changed
+
+Example request/response for wizard
+
+Example generated CREATE TABLE SQL for one template
+
+Confirmation of build commands run
+
+Any known limitations (e.g., schema migrations not handled yet)
+
+
+---
+
+## What this gets you immediately
+- You can create `en_*`, `gr_*`, `ru_*` templates (already Phase 1)
+- On onboarding, you select them
+- Tables are created inside each church DB from those templates
+- Field Mapper edits remain per church (stored centrally, already proven)

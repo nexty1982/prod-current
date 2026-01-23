@@ -1,0 +1,5 @@
+Testing process
+
+login from https://orthodoxmetrics.com/auth/login
+
+first link hit superadmindashboard /admin/dashboard

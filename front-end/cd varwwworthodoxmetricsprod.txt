@@ -1,0 +1,10 @@
+cd /var/www/orthodoxmetrics/prod
+git checkout -b feat/db-backed-templates-phase1-$(date +%Y%m%d-%H%M)
+git add .
+git commit -m "feat: Phase 1 - DB-backed record templates CRUD endpoints
+
+- Add templates CRUD API endpoints (/api/admin/templates)
+- Add admin-only access control
+- Add fields JSON validation
+- Add Live Table Builder integration for saving templates
+- No changes to church provisioning logic"
