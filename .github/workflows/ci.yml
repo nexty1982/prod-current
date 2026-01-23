@@ -15,19 +15,18 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
           cache: npm
           cache-dependency-path: |
-            package-lock.json
-            prod/package-lock.json
             server/package-lock.json
             front-end/package-lock.json
+            package-lock.json
 
-      - name: Detect project layout
-        id: detect
+      - name: Verify project layout
         shell: bash
         run: |
           set -Eeuo pipefail
+<<<<<<< Updated upstream
 
           echo "Top-level:"
           ls -la
@@ -59,25 +58,54 @@ jobs:
           echo "Detected backend_dir=$backend_dir"
           if [ -n "$frontend_dir" ]; then
             echo "Detected frontend_dir=$frontend_dir"
+=======
+          test -f server/package.json || { echo "ERROR: backend expected at ./server/package.json"; exit 1; }
+          if test -f front-end/package.json; then
+            echo "Frontend detected at ./front-end"
+>>>>>>> Stashed changes
           else
-            echo "No front-end detected; skipping frontend build."
+            echo "No ./front-end/package.json found; frontend build will be skipped."
           fi
 
       - name: Install backend deps
+<<<<<<< Updated upstream
         working-directory: ${{ steps.detect.outputs.backend_dir }}
         run: npm ci
+=======
+        working-directory: server
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+>>>>>>> Stashed changes
 
       - name: Build backend
-        working-directory: ${{ steps.detect.outputs.backend_dir }}
+        working-directory: server
         run: npm run build
 
       - name: Install frontend deps
+<<<<<<< Updated upstream
         if: ${{ steps.detect.outputs.frontend_dir != '' }}
         working-directory: ${{ steps.detect.outputs.frontend_dir }}
         run: npm ci
+=======
+        if: ${{ hashFiles('front-end/package.json') != '' }}
+        working-directory: front-end
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+>>>>>>> Stashed changes
 
       - name: Build frontend
-        if: ${{ steps.detect.outputs.frontend_dir != '' }}
-        working-directory: ${{ steps.detect.outputs.frontend_dir }}
+        if: ${{ hashFiles('front-end/package.json') != '' }}
+        working-directory: front-end
         run: npm run build
-
