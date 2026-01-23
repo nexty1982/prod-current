@@ -3,8 +3,6 @@ name: CI
 on:
   pull_request:
     branches: [ main, prod ]
-  push:
-    branches: [ main ]
 
 jobs:
   build:
@@ -19,20 +17,56 @@ jobs:
         with:
           node-version: 18
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
+            front-end/package-lock.json
+
+      - name: Detect project layout
+        id: detect
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          backend_dir=""
+          if [ -f "server/package.json" ]; then
+            backend_dir="server"
+          elif [ -f "package.json" ]; then
+            backend_dir="."
+          else
+            echo "Could not find backend package.json in ./server or repo root." >&2
+            exit 1
+          fi
+
+          frontend_dir=""
+          if [ -f "front-end/package.json" ]; then
+            frontend_dir="front-end"
+          fi
+
+          echo "backend_dir=$backend_dir" >> "$GITHUB_OUTPUT"
+          echo "frontend_dir=$frontend_dir" >> "$GITHUB_OUTPUT"
+
+          echo "Detected backend_dir=$backend_dir"
+          if [ -n "$frontend_dir" ]; then
+            echo "Detected frontend_dir=$frontend_dir"
+          else
+            echo "No front-end/ found; frontend build will be skipped."
+          fi
 
       - name: Install backend deps
-        working-directory: server
+        working-directory: ${{ steps.detect.outputs.backend_dir }}
         run: npm ci
 
       - name: Build backend
-        working-directory: server
+        working-directory: ${{ steps.detect.outputs.backend_dir }}
         run: npm run build
 
       - name: Install frontend deps
-        working-directory: front-end
+        if: ${{ steps.detect.outputs.frontend_dir != '' }}
+        working-directory: ${{ steps.detect.outputs.frontend_dir }}
         run: npm ci
 
       - name: Build frontend
-        working-directory: front-end
+        if: ${{ steps.detect.outputs.frontend_dir != '' }}
+        working-directory: ${{ steps.detect.outputs.frontend_dir }}
         run: npm run build
-
