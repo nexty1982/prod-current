@@ -1,0 +1,71 @@
+# System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+**/logs/
+*.out
+
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build artifacts
+dist/
+**/dist/
+build/
+**/build/
+.vite/
+
+# Compiled output
+*.tsbuildinfo
+*.d.ts
+
+# Coverage and reports
+coverage/
+**/coverage/
+*.lcov
+*.lcov.info
+
+# OS/IDE/editor files
+.idea/
+.vscode/
+*.sublime*
+*.code-workspace
+
+# Temp files
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+
+# Environment and secrets
+.env
+.env.local
+.env.*
+.secret
+secrets.json
+config.json
+*.pem
+*.key
+
+# Cache
+.cache/
+**/.cache/
+npm-cache/
+**/npm-cache/
+.pnpm-debug.log
+yarn-error.log
+
+# Custom dirs seen in list
+prod/misc/omai/logs/
+
+# removed to keep repo light
+prod/misc/

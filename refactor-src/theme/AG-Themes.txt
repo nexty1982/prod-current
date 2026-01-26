@@ -1,0 +1,144 @@
+.ag-theme-pentecost .ag-header {
+  background: linear-gradient(to right, #2e8b57, #3cb371); /* deep to bright green */
+  color: #f0fff0;
+}
+
+.ag-theme-pentecost .ag-header-cell-label {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #f0fff0;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.ag-theme-pentecost .ag-cell {
+  background: #f6fff6;
+  color: #2e4d2e;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 13px;
+}
+
+.ag-theme-pentecost .ag-row-hover {
+  background-color: #e0ffe0 !important;
+}
+
+
+.ag-theme-holyweek .ag-header {
+  background: linear-gradient(to right, #330000, #660000);
+  color: #f8f8f8;
+}
+
+.ag-theme-holyweek .ag-header-cell-label {
+  font-family: 'Georgia', serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #f8f8f8;
+}
+
+.ag-theme-holyweek .ag-cell {
+  background: #fff5f5;
+  color: #333;
+}
+
+.ag-theme-theophany .ag-header {
+  background: linear-gradient(to right, #00c2cb, #a0e9f0);
+  color: #003333;
+}
+
+.ag-theme-theophany .ag-header-cell-label {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #003333;
+}
+
+.ag-theme-theophany .ag-cell {
+  background: #f0fcff;
+  color: #222;
+}
+
+.ag-theme-dormition .ag-header {
+  background: linear-gradient(to right, #cce6ff, #e6f2ff);
+  color: #003366;
+}
+
+.ag-theme-dormition .ag-header-cell-label {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #003366;
+}
+
+.ag-theme-dormition .ag-cell {
+  background: #ffffff;
+  color: #333;
+}
+
+.ag-theme-nativity .ag-header {
+  background: linear-gradient(to right, #001f4d, #003366);
+  color: #ffd700;
+}
+
+.ag-theme-nativity .ag-header-cell-label {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #ffd700;
+}
+
+.ag-theme-nativity .ag-cell {
+  background: #fefefe;
+  color: #222;
+}
+
+.ag-theme-pentecost .ag-header {
+  background: linear-gradient(to right, #ff6b6b, #ffa94d);
+  color: white;
+}
+
+.ag-theme-pentecost .ag-header-cell-label {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: white;
+}
+
+.ag-theme-pentecost .ag-cell {
+  background: #fff8f0;
+  color: #333;
+}
+
+.ag-theme-lent .ag-header {
+  background: linear-gradient(to right, #4b0082, #6a0dad);
+  color: #f0f0f0;
+}
+
+.ag-theme-lent .ag-header-cell-label {
+  font-family: 'Georgia', serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #f0f0f0;
+}
+
+.ag-theme-lent .ag-cell {
+  background: #f8f6ff;
+  color: #444;
+}
+
+.ag-theme-pascha .ag-header {
+  background: linear-gradient(to right, #fff5cc, #ffe680);
+  color: #5e2eff;
+  border-bottom: none;
+}
+
+.ag-theme-pascha .ag-header-cell-label {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #5e2eff;
+}
+
+.ag-theme-pascha .ag-cell {
+  background: #fffdf5;
+  color: #333;
+}

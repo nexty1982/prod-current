@@ -1,0 +1,364 @@
+import React, { useState, useContext } from 'react';
+import {
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Avatar,
+  Box,
+  Stack,
+  Switch,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CardActionArea,
+  CardMedia,
+  Tabs,
+  Tab,
+  Paper
+} from '@mui/material';
+import {
+  IconCamera,
+  IconUser,
+  IconShield,
+  IconBell,
+  IconCreditCard,
+  IconDeviceFloppy,
+  IconCheck,
+  IconLogout
+} from '@tabler/icons-react';
+import { UserDataContext } from '../../../context/UserDataContext';
+import { useAuth } from '../../../context/AuthContext.tsx';
+
+const SECTIONS = [
+  { key: "general", label: "General", icon: IconUser },
+  { key: "security", label: "Security", icon: IconShield },
+  { key: "notifications", label: "Notifications", icon: IconBell },
+  { key: "billing", label: "Billing", icon: IconCreditCard },
+] as const;
+
+type SectionKey = (typeof SECTIONS)[number]["key"];
+
+const AccountTab = ({ 
+  profile = {}, 
+  settings = {}, 
+  onProfileUpdate = () => {}, 
+  onSettingsUpdate = () => {}, 
+  onPasswordChange = () => {}, 
+  onImageUpload = () => {} 
+}: any) => {
+  const context = useContext(UserDataContext);
+  const profileData = context?.profileData;
+  const { user } = useAuth();
+  
+  const [section, setSection] = useState<SectionKey>("general");
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+  
+  const avatarOptions = [
+    '/orthodox/avatars/default.svg',
+    '/orthodox/avatars/default.jpg',
+    '/orthodox/avatars/profile_1753057691760.png',
+    '/orthodox/avatars/profile_1753057691761.png',
+    '/orthodox/avatars/profile_1753057691763.png',
+    '/orthodox/avatars/profile_1753057691765.png',
+    '/orthodox/avatars/profile_1753057691766.png',
+    '/orthodox/avatars/profile_1753057691767.png',
+    '/orthodox/avatars/profile_1753057691769.png',
+    '/orthodox/avatars/profile_1753057691770.png',
+    '/orthodox/avatars/profile_1753057691771.png',
+    '/orthodox/avatars/profile_1754130459091.png',
+    '/orthodox/avatars/profile_1754130459093.png',
+    '/orthodox/avatars/profile_1754130459094.png',
+    '/orthodox/avatars/profile_1754130459096.png',
+    '/orthodox/avatars/profile_1754130459098.png',
+    '/orthodox/avatars/profile_1754130459099.png',
+    '/orthodox/avatars/profile_1754130459101.png',
+    '/orthodox/avatars/profile_1754130459102.png',
+  ];
+
+  const [profileForm, setProfileForm] = useState({
+    display_name: profileData?.name || profile?.display_name || '',
+    bio: profileData?.introduction || profile?.bio || '',
+    location: profileData?.location || profile?.location || '',
+    website: profileData?.website || profile?.website || '',
+    phone: profile?.phone || '',
+    job_title: profileData?.role || profile?.job_title || '',
+    company: profileData?.workplace || profile?.company || '',
+    email: profile?.email || ''
+  });
+
+  const handleAvatarSelect = async (avatarPath: string) => {
+    try {
+      // Update the context immediately for UI responsiveness
+      if (context?.updateProfileData) {
+        context.updateProfileData({ avatar: avatarPath });
+      }
+      
+      // Update the backend if user is authenticated
+      if (user?.id) {
+        const response = await fetch('/api/account/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', // Include session cookies
+          body: JSON.stringify({
+            user_id: user.id,
+            avatar_url: avatarPath
+          }),
+        });
+        
+        const result = await response.json();
+        if (!result.ok) {
+          console.error('Failed to update avatar on backend:', result.error);
+          // Optionally show error message to user
+        }
+      }
+      
+      setAvatarDialogOpen(false);
+    } catch (error) {
+      console.error('Error updating avatar:', error);
+      // Optionally show error message to user
+    }
+  };
+
+  const handleProfileSubmit = async () => {
+    try {
+      if (context?.updateProfileData) {
+        context.updateProfileData({
+          name: profileForm.display_name,
+          introduction: profileForm.bio,
+          location: profileForm.location,
+          website: profileForm.website,
+          role: profileForm.job_title,
+          workplace: profileForm.company
+        });
+      }
+      await onProfileUpdate(profileForm);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    }
+  };
+
+  return (
+    <Box sx={{ maxWidth: '1200px', mx: 'auto', p: { xs: 2, md: 3 } }}>
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" component="h1" gutterBottom>Account Settings</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Manage your profile, security, notifications, and billing
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button variant="outlined">Discard</Button>
+          <Button variant="contained" startIcon={<IconDeviceFloppy />} onClick={handleProfileSubmit}>
+            Save Changes
+          </Button>
+        </Box>
+      </Box>
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '250px 1fr' }, gap: 3 }}>
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Paper sx={{ position: 'sticky', top: 24, p: 1 }}>
+            <Stack spacing={1}>
+              {SECTIONS.map(({ key, label, icon: Icon }) => (
+                <Button
+                  key={key}
+                  variant={section === key ? "contained" : "text"}
+                  startIcon={<Icon size={18} />}
+                  onClick={() => setSection(key)}
+                  sx={{ justifyContent: 'flex-start', textTransform: 'none', fontWeight: 500 }}
+                  fullWidth
+                >
+                  {label}
+                </Button>
+              ))}
+            </Stack>
+          </Paper>
+        </Box>
+
+        <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 2 }}>
+          <Tabs value={section} onChange={(_, newValue) => setSection(newValue)} variant="scrollable" scrollButtons="auto">
+            {SECTIONS.map(({ key, label }) => (
+              <Tab key={key} label={label} value={key} />
+            ))}
+          </Tabs>
+        </Box>
+
+        <Box sx={{ minHeight: 400 }}>
+          {section === "general" && (
+            <Stack spacing={3}>
+              <Card>
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>Profile</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Update your avatar and basic information
+                  </Typography>
+                  
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="center" sx={{ mb: 3 }}>
+                    <Avatar src={profileData?.avatar || '/orthodox/avatars/default.svg'} sx={{ width: 80, height: 80 }}>
+                      {profileData?.name?.charAt(0) || 'U'}
+                    </Avatar>
+                    <Button variant="outlined" startIcon={<IconCamera />} onClick={() => setAvatarDialogOpen(true)}>
+                      Choose Avatar
+                    </Button>
+                    <Typography variant="caption" color="text.secondary">
+                      Select from Orthodox-themed avatars
+                    </Typography>
+                  </Stack>
+
+                  <Divider sx={{ my: 3 }} />
+
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
+                    <TextField
+                      label="Display Name"
+                      value={profileForm.display_name}
+                      onChange={(e) => setProfileForm({ ...profileForm, display_name: e.target.value })}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Location"
+                      value={profileForm.location}
+                      onChange={(e) => setProfileForm({ ...profileForm, location: e.target.value })}
+                      placeholder="City, Country"
+                      fullWidth
+                    />
+                    <TextField
+                      label="Job Title"
+                      value={profileForm.job_title}
+                      onChange={(e) => setProfileForm({ ...profileForm, job_title: e.target.value })}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Company"
+                      value={profileForm.company}
+                      onChange={(e) => setProfileForm({ ...profileForm, company: e.target.value })}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Website"
+                      value={profileForm.website}
+                      onChange={(e) => setProfileForm({ ...profileForm, website: e.target.value })}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Phone"
+                      value={profileForm.phone}
+                      onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                      placeholder="+1 (555) 555-1234"
+                      fullWidth
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Stack>
+          )}
+          
+          {section === "security" && (
+            <Stack spacing={3}>
+              <Card>
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>Change Password</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Use a strong, unique password
+                  </Typography>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
+                    <TextField label="Current Password" type="password" fullWidth />
+                    <Box />
+                    <TextField label="New Password" type="password" fullWidth />
+                    <TextField label="Confirm New Password" type="password" fullWidth />
+                    <Box sx={{ gridColumn: { sm: 'span 2' } }}>
+                      <Button variant="contained">Update Password</Button>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Stack>
+          )}
+          
+          {section === "notifications" && (
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>Email Alerts</Typography>
+                <Stack spacing={2}>
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Typography variant="subtitle2">Security alerts</Typography>
+                        <Typography variant="body2" color="text.secondary">New login, password changes</Typography>
+                      </Box>
+                      <Switch defaultChecked />
+                    </Stack>
+                  </Paper>
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
+          
+          {section === "billing" && (
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>Plan</Typography>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ flexWrap: 'wrap', gap: 2 }}>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">OrthodoxMetrics</Typography>
+                    <Typography variant="h5" fontWeight="bold">Pro — $29/mo</Typography>
+                  </Box>
+                  <Button variant="contained">Manage Subscription</Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
+        </Box>
+      </Box>
+
+      <Dialog open={avatarDialogOpen} onClose={() => setAvatarDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Select Orthodox Avatar</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2, mt: 1 }}>
+            {avatarOptions.map((avatarPath, index) => (
+              <CardActionArea key={index} onClick={() => handleAvatarSelect(avatarPath)}>
+                <Card sx={{ position: 'relative' }}>
+                  <CardMedia
+                    component="img"
+                    height="100"
+                    image={avatarPath}
+                    alt={`Orthodox Avatar ${index + 1}`}
+                    sx={{ objectFit: 'cover' }}
+                  />
+                  {profileData?.avatar === avatarPath && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: 24,
+                        height: 24,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <IconCheck size={16} />
+                    </Box>
+                  )}
+                </Card>
+              </CardActionArea>
+            ))}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAvatarDialogOpen(false)}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+};
+
+export default AccountTab;

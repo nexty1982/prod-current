@@ -1,0 +1,97 @@
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+misc/
+ops/
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+.env
+.env.*
+*.env
+**/*credentials*
+**/*secret*
+**/*password*
+**/*key*
+**/*cert*
+**/dumps/**
+
+# --- Local OS / IDE ---
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# --- Local caches / agent artifacts ---
+.cache/
+_cursor_session_backup/
+.trash_dedupe/
+.trash_dedupe_conflicts/
+
+# --- Logs / archives / large artifacts ---
+logs/
+*.zip
+
+# --- Runtime uploads / generated OCR artifacts (must not be in git) ---
+uploads/
+server/uploads/
+server/scripts/backups/
+
+# --- OS / Editor ---
+.DS_Store
+*.swp
+*.swo
+*.bak
+*.old
+*~
+*.tmp
+
+# --- IDE / tooling ---
+.idea/
+.vscode/
+
+# --- Local caches / agent artifacts ---
+.cache/
+_cursor_session_backup/
+.trash_dedupe/
+.trash_dedupe_conflicts/
+
+# --- Python virtualenvs (should never be inside front-end) ---
+.venv/
+venv/
+**/.venv*
+front-end/.venv_image/
+
+# --- Logs / archives ---
+logs/
+*.zip
+
+# --- Runtime / uploaded content (never version control) ---
+uploads/
+server/uploads/
+
+# --- Local analysis artifacts ---
+git-status.txt
+identify_conflicts.md
+om_structure_tree.txt
+*.prod-backup
+
+# Docs are tracked under repo-root /docs (canonical).
+# Do NOT ignore /docs; enforce doc placement via CI checks instead.
+
+# --- Local backups / scratch ---
+.gitignore.bak.*
+.github/.commit-templates/
+ORTHODOXMETRICS_CHANGE_LOG.md
+
+# --- Non-canonical docs folders (keep only README pointers) ---
+front-end/docs/**
+!front-end/docs/README.md
+front-end/public/docs/**
+!front-end/public/docs/README.md
+server/docs/**
+!server/docs/README.md

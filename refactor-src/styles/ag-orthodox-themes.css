@@ -1,0 +1,62 @@
+/* Base: extend Quartz so we get modern look/feel */
+.ag-theme-orthodox {
+	  --ag-foreground-color: #1b1b1b;
+	    --ag-border-color: rgba(0,0,0,.08);
+	      --ag-row-border-style: solid;
+	        --ag-font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+		  --ag-header-foreground-color: #111;
+		    --ag-header-font-weight: 700;
+		      --ag-row-hover-color: rgba(0,0,0,.03);
+		        --ag-selected-row-background-color: rgba(0,0,0,.05);
+			  --ag-odd-row-background-color: #fff;
+			    --ag-even-row-background-color: #fafafa;
+			      --ag-font-size: 13px;
+			        --ag-grid-size: 6px;
+				  --ag-border-radius: 12px;
+			  }
+
+			  /* Gold (Pascha/feast) */
+			  .ag-theme-orthodox-gold {
+				    composes: ag-theme-orthodox;
+				      --ag-background-color: #fffaf0;
+				        --ag-header-background-color: #ffefbf;
+					  --ag-accent-color: #caa400;
+					    --ag-checkbox-unchecked-color: #8a6d00;
+					      --ag-input-focus-border-color: #caa400;
+					        --ag-row-hover-color: #fff3cc;
+						  --ag-selected-row-background-color: #ffe89a;
+						    --ag-range-selection-border-color: #d3ad00;
+					    }
+
+					    /* Purple (Lent) */
+					    .ag-theme-orthodox-purple {
+						      composes: ag-theme-orthodox;
+						        --ag-background-color: #fbf7ff;
+							  --ag-header-background-color: #e9ddff;
+							    --ag-accent-color: #5a3fd3;
+							      --ag-checkbox-unchecked-color: #3d2aa0;
+							        --ag-input-focus-border-color: #5a3fd3;
+								  --ag-row-hover-color: #f1e9ff;
+								    --ag-selected-row-background-color: #e1d4ff;
+								      --ag-range-selection-border-color: #5a3fd3;
+							      }
+
+							      /* Green (Pentecost/Ordinary) */
+							      .ag-theme-orthodox-green {
+								        composes: ag-theme-orthodox;
+									  --ag-background-color: #f7fff9;
+									    --ag-header-background-color: #d6f5de;
+									      --ag-accent-color: #168b44;
+									        --ag-checkbox-unchecked-color: #116d36;
+										  --ag-input-focus-border-color: #168b44;
+										    --ag-row-hover-color: #ebffee;
+										      --ag-selected-row-background-color: #c9f0d3;
+										        --ag-range-selection-border-color: #168b44;
+										}
+
+										/* Small header polish */
+										.ag-theme-orthodox-gold .ag-header-cell-label,
+										.ag-theme-orthodox-purple .ag-header-cell-label,
+										.ag-theme-orthodox-green .ag-header-cell-label {
+											  letter-spacing: .2px;
+										  }

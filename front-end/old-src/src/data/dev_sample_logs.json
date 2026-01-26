@@ -1,0 +1,323 @@
+[
+  {
+    "id": 1,
+    "timestamp": "2024-01-01T10:30:00.000Z",
+    "level": "INFO",
+    "source": "Authentication",
+    "message": "User login successful",
+    "meta": {
+      "userId": 123,
+      "loginMethod": "email",
+      "browserInfo": "Chrome 120.0.0.0"
+    },
+    "user_email": "john.doe@church.org",
+    "service": "auth-service",
+    "session_id": "sess_abc123",
+    "request_id": "req_xyz789",
+    "ip_address": "192.168.1.100",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0"
+  },
+  {
+    "id": 2,
+    "timestamp": "2024-01-01T10:32:15.000Z",
+    "level": "ERROR",
+    "source": "Database",
+    "message": "Connection timeout during user lookup",
+    "meta": {
+      "query": "SELECT * FROM users WHERE email = ?",
+      "timeout": 5000,
+      "retryCount": 3,
+      "errorCode": "ETIMEDOUT"
+    },
+    "service": "database",
+    "request_id": "req_abc456",
+    "ip_address": "192.168.1.50"
+  },
+  {
+    "id": 3,
+    "timestamp": "2024-01-01T10:33:00.000Z",
+    "level": "WARN",
+    "source": "API Server",
+    "message": "Rate limit approaching for user",
+    "meta": {
+      "currentRequests": 95,
+      "rateLimit": 100,
+      "windowStart": "2024-01-01T10:30:00.000Z",
+      "userId": 456
+    },
+    "user_email": "admin@church.org",
+    "service": "api-gateway",
+    "session_id": "sess_def456",
+    "request_id": "req_def123",
+    "ip_address": "10.0.0.5"
+  },
+  {
+    "id": 4,
+    "timestamp": "2024-01-01T10:35:30.000Z",
+    "level": "SUCCESS",
+    "source": "Email Service",
+    "message": "Welcome email sent successfully",
+    "meta": {
+      "emailId": "email_789",
+      "recipient": "newuser@church.org",
+      "template": "welcome",
+      "deliveryTime": 1250
+    },
+    "service": "email-service",
+    "request_id": "req_email_001"
+  },
+  {
+    "id": 5,
+    "timestamp": "2024-01-01T10:36:45.000Z",
+    "level": "DEBUG",
+    "source": "BigBookKanbanSync",
+    "message": "Processing task synchronization batch",
+    "meta": {
+      "batchId": "batch_001",
+      "taskCount": 15,
+      "syncDirection": "bidirectional",
+      "processingTime": 850
+    },
+    "service": "bigbook-kanban-sync"
+  },
+  {
+    "id": 6,
+    "timestamp": "2024-01-01T10:38:00.000Z",
+    "level": "ERROR",
+    "source": "File Upload",
+    "message": "File size exceeds maximum allowed limit",
+    "meta": {
+      "fileName": "large_document.pdf",
+      "fileSize": 52428800,
+      "maxSize": 10485760,
+      "userId": 789
+    },
+    "user_email": "user@church.org",
+    "service": "file-upload",
+    "session_id": "sess_upload_123",
+    "request_id": "req_upload_456",
+    "ip_address": "192.168.1.200"
+  },
+  {
+    "id": 7,
+    "timestamp": "2024-01-01T10:40:15.000Z",
+    "level": "INFO",
+    "source": "ChurchProvisioner",
+    "message": "New church database created successfully",
+    "meta": {
+      "churchName": "St. John Orthodox Church",
+      "databaseName": "st_john_orthodox_church_db",
+      "templateVersion": "2.1.0",
+      "provisioningTime": 45000
+    },
+    "service": "church-provisioner",
+    "user_email": "superadmin@orthodoxmetrics.com"
+  },
+  {
+    "id": 8,
+    "timestamp": "2024-01-01T10:42:30.000Z",
+    "level": "WARN",
+    "source": "OMAI Service",
+    "message": "Memory usage threshold exceeded",
+    "meta": {
+      "currentMemory": "2.5GB",
+      "threshold": "2GB",
+      "processId": 1234,
+      "uptime": 86400
+    },
+    "service": "omai-service"
+  },
+  {
+    "id": 9,
+    "timestamp": "2024-01-01T10:45:00.000Z",
+    "level": "INFO",
+    "source": "API Request",
+    "message": "GET /api/logs/database - 200 (45ms)",
+    "meta": {
+      "method": "GET",
+      "url": "/api/logs/database",
+      "statusCode": 200,
+      "duration": "45ms",
+      "query": {
+        "level": "ERROR",
+        "limit": 50
+      }
+    },
+    "user_email": "admin@church.org",
+    "service": "express-api",
+    "session_id": "sess_api_789",
+    "request_id": "req_api_012",
+    "ip_address": "192.168.1.150",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/537.36"
+  },
+  {
+    "id": 10,
+    "timestamp": "2024-01-01T10:47:20.000Z",
+    "level": "ERROR",
+    "source": "Payment Processor",
+    "message": "Payment gateway connection failed",
+    "meta": {
+      "gateway": "stripe",
+      "errorCode": "connection_timeout",
+      "orderId": "order_12345",
+      "retryCount": 2,
+      "lastError": "Request timeout after 30s"
+    },
+    "service": "payment-processor",
+    "request_id": "req_payment_789"
+  },
+  {
+    "id": 11,
+    "timestamp": "2024-01-01T10:50:00.000Z",
+    "level": "SUCCESS",
+    "source": "Backup Service",
+    "message": "Daily database backup completed",
+    "meta": {
+      "backupId": "backup_20240101",
+      "fileSize": "1.2GB",
+      "compressionRatio": 0.35,
+      "duration": 1800,
+      "storageLocation": "s3://orthodoxmetrics-backups/daily/"
+    },
+    "service": "backup-service"
+  },
+  {
+    "id": 12,
+    "timestamp": "2024-01-01T10:52:30.000Z",
+    "level": "DEBUG",
+    "source": "Cache Manager",
+    "message": "Cache invalidation triggered for user data",
+    "meta": {
+      "cacheKey": "user:123:profile",
+      "invalidationReason": "profile_update",
+      "cacheHitRate": 0.89,
+      "evictedEntries": 15
+    },
+    "service": "cache-manager"
+  },
+  {
+    "id": 13,
+    "timestamp": "2024-01-01T10:55:00.000Z",
+    "level": "WARN",
+    "source": "Security Monitor",
+    "message": "Multiple failed login attempts detected",
+    "meta": {
+      "ipAddress": "203.0.113.45",
+      "attemptCount": 5,
+      "timeWindow": "5 minutes",
+      "targetEmail": "admin@church.org",
+      "action": "ip_temporary_block"
+    },
+    "service": "security-monitor",
+    "ip_address": "203.0.113.45"
+  },
+  {
+    "id": 14,
+    "timestamp": "2024-01-01T10:57:15.000Z",
+    "level": "INFO",
+    "source": "Report Generator",
+    "message": "Monthly attendance report generated",
+    "meta": {
+      "reportId": "report_202401",
+      "reportType": "attendance",
+      "period": "2024-01",
+      "recordCount": 1250,
+      "generationTime": 3500
+    },
+    "service": "report-generator",
+    "user_email": "secretary@church.org"
+  },
+  {
+    "id": 15,
+    "timestamp": "2024-01-01T11:00:00.000Z",
+    "level": "ERROR",
+    "source": "WebSocket Manager",
+    "message": "Client connection lost unexpectedly",
+    "meta": {
+      "clientId": "client_abc123",
+      "connectionDuration": 3600,
+      "lastMessage": "2024-01-01T10:59:55.000Z",
+      "errorReason": "network_timeout"
+    },
+    "service": "websocket-manager"
+  },
+  {
+    "id": 16,
+    "timestamp": "2024-01-01T11:02:30.000Z",
+    "level": "INFO",
+    "source": "Task Scheduler",
+    "message": "Scheduled task execution completed",
+    "meta": {
+      "taskName": "cleanup_old_sessions",
+      "executionTime": 2500,
+      "itemsProcessed": 150,
+      "nextExecution": "2024-01-02T11:00:00.000Z"
+    },
+    "service": "task-scheduler"
+  },
+  {
+    "id": 17,
+    "timestamp": "2024-01-01T11:05:00.000Z",
+    "level": "SUCCESS",
+    "source": "Migration Service",
+    "message": "Log migration to database completed",
+    "meta": {
+      "migratedLogs": 5000,
+      "migrationTime": 120000,
+      "sourceFiles": 25,
+      "errorCount": 0
+    },
+    "service": "migration-service",
+    "user_email": "admin@orthodoxmetrics.com"
+  },
+  {
+    "id": 18,
+    "timestamp": "2024-01-01T11:07:45.000Z",
+    "level": "WARN",
+    "source": "Health Monitor",
+    "message": "Service response time degradation detected",
+    "meta": {
+      "serviceName": "database",
+      "averageResponseTime": 850,
+      "threshold": 500,
+      "measurementWindow": "5 minutes",
+      "affectedQueries": 23
+    },
+    "service": "health-monitor"
+  },
+  {
+    "id": 19,
+    "timestamp": "2024-01-01T11:10:00.000Z",
+    "level": "DEBUG",
+    "source": "API Response",
+    "message": "POST /api/logs/database/cleanup - 200 (1250ms)",
+    "meta": {
+      "method": "POST",
+      "url": "/api/logs/database/cleanup",
+      "statusCode": 200,
+      "duration": "1250ms",
+      "deletedCount": 500
+    },
+    "user_email": "superadmin@orthodoxmetrics.com",
+    "service": "express-api",
+    "session_id": "sess_cleanup_456",
+    "request_id": "req_cleanup_789",
+    "ip_address": "192.168.1.10"
+  },
+  {
+    "id": 20,
+    "timestamp": "2024-01-01T11:12:30.000Z",
+    "level": "INFO",
+    "source": "LogsAPI",
+    "message": "Log cleanup executed",
+    "meta": {
+      "deletedCount": 500,
+      "cutoffDate": "2023-12-02T11:10:00.000Z",
+      "daysKept": 30,
+      "executedBy": "superadmin@orthodoxmetrics.com",
+      "requestId": "req_cleanup_789"
+    },
+    "user_email": "superadmin@orthodoxmetrics.com",
+    "service": "logs-api"
+  }
+]

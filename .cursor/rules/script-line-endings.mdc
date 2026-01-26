@@ -1,0 +1,124 @@
+---
+description: All scripts must use Unix LF line endings, never Windows CRLF. Scripts run on Linux server.
+alwaysApply: true
+globs: **/*.sh
+---
+
+# Script Line Endings Standards
+
+## Critical: Unix Line Endings Only
+
+**ALL scripts MUST use Unix LF (`\n`) line endings, NEVER Windows CRLF (`\r\n`).**
+
+Scripts are created on Windows (via Samba share) but **run on Linux server**. Windows CRLF line endings cause errors like:
+```
+-bash: ./script.sh: /bin/bash^M: bad interpreter: No such file or directory
+```
+
+## Required Line Endings
+
+### ✅ CORRECT: Unix LF (`\n`)
+- Use LF (`\n`) line endings for ALL scripts
+- This is the standard on Linux/Unix systems
+- Required for shebang lines (`#!/bin/bash`) to work correctly
+
+### ❌ INCORRECT: Windows CRLF (`\r\n`)
+- NEVER use CRLF (`\r\n`) line endings
+- Causes "bad interpreter" errors on Linux
+- The `^M` character is the carriage return (`\r`) that breaks scripts
+
+## File Types Affected
+
+This applies to ALL script files:
+- **Shell scripts**: `.sh`, `.bash`
+- **Python scripts**: `.py` (with shebang)
+- **Node.js scripts**: `.js` (with shebang)
+- **Any executable script**: Files starting with `#!/`
+
+## When Creating Scripts
+
+**ALWAYS** ensure scripts use LF line endings:
+
+1. **In Cursor/Editor**: Configure editor to use LF line endings for script files
+2. **After creation**: Verify line endings are correct
+3. **Before committing**: Check that scripts work on Linux
+
+## Fixing Existing Scripts
+
+If a script has CRLF line endings, convert to LF:
+
+### On Linux:
+```bash
+# Convert CRLF to LF
+dos2unix script.sh
+# or
+sed -i 's/\r$//' script.sh
+```
+
+### On Windows (PowerShell):
+```powershell
+# Read file and rewrite with LF endings
+$content = Get-Content script.sh -Raw
+$content = $content -replace "`r`n", "`n"
+[System.IO.File]::WriteAllText("script.sh", $content, [System.Text.UTF8Encoding]::new($false))
+```
+
+### Using Git:
+```bash
+# Configure Git to use LF for .sh files
+git config core.autocrlf false
+git add --renormalize .
+```
+
+## Verification
+
+Check line endings:
+
+### On Linux:
+```bash
+# Check for CRLF (should return nothing if correct)
+file script.sh | grep CRLF
+# or
+cat -A script.sh | grep '\^M'
+```
+
+### In Cursor/Editor:
+- Check bottom-right corner for line ending indicator
+- Should show "LF" not "CRLF" for script files
+- Change to LF if it shows CRLF
+
+## Editor Configuration
+
+Configure your editor to use LF for scripts:
+
+### Cursor/VSCode Settings:
+Add to `.vscode/settings.json` or user settings:
+```json
+{
+  "files.eol": "\n",
+  "[shellscript]": {
+    "files.eol": "\n"
+  },
+  "[python]": {
+    "files.eol": "\n"
+  }
+}
+```
+
+## Enforcement
+
+- **Always apply this rule** - it applies to every AI agent session
+- **Check line endings** before creating any script file
+- **Use LF** - no exceptions for scripts that run on Linux
+- **Verify after creation** - ensure scripts work on Linux server
+
+## Common Errors
+
+If you see these errors, the script has CRLF line endings:
+
+```
+-bash: ./script.sh: /bin/bash^M: bad interpreter: No such file or directory
+/bin/bash^M: bad interpreter: No such file or directory
+```
+
+**Fix**: Convert the script to LF line endings using `dos2unix` or `sed`.

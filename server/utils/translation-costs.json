@@ -1,0 +1,20 @@
+[
+  {
+    "timestamp": "2025-07-11T13:00:36.691Z",
+    "jobId": "8b26fad3-2fb4-40dc-87b5-681242661763",
+    "characterCount": 1139,
+    "cost": 0,
+    "sourceLanguage": "ka",
+    "targetLanguage": "en",
+    "date": "2025-07-11"
+  },
+  {
+    "timestamp": "2025-07-14T04:46:30.150Z",
+    "jobId": "43c41e88-c5f5-4884-aaf6-4e3dec9bc3c1",
+    "characterCount": 621,
+    "cost": 0,
+    "sourceLanguage": "ru",
+    "targetLanguage": "en",
+    "date": "2025-07-14"
+  }
+]

@@ -1,0 +1,441 @@
+/**
+ * Mobile Responsiveness Enhancements for OrthodoxMetrics
+ * Comprehensive mobile-first improvements for better touch experience
+ */
+
+/* ==========================================================================
+   1. RESPONSIVE TYPOGRAPHY SCALING
+   ========================================================================== */
+
+/* Base font size scaling for better mobile readability */
+html {
+  font-size: clamp(14px, 2.5vw, 16px);
+}
+
+/* Responsive typography scale */
+.MuiTypography-h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem) !important;
+  line-height: 1.2 !important;
+}
+
+.MuiTypography-h2 {
+  font-size: clamp(1.5rem, 3.5vw, 2rem) !important;
+  line-height: 1.2 !important;
+}
+
+.MuiTypography-h3 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem) !important;
+  line-height: 1.3 !important;
+}
+
+.MuiTypography-h4 {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem) !important;
+  line-height: 1.3 !important;
+}
+
+.MuiTypography-h5 {
+  font-size: clamp(1rem, 2vw, 1.25rem) !important;
+  line-height: 1.4 !important;
+}
+
+.MuiTypography-h6 {
+  font-size: clamp(0.875rem, 1.8vw, 1.125rem) !important;
+  line-height: 1.4 !important;
+}
+
+/* Body text responsiveness */
+.MuiTypography-body1 {
+  font-size: clamp(0.875rem, 1.6vw, 1rem) !important;
+  line-height: 1.5 !important;
+}
+
+.MuiTypography-body2 {
+  font-size: clamp(0.75rem, 1.4vw, 0.875rem) !important;
+  line-height: 1.5 !important;
+}
+
+/* ==========================================================================
+   2. TOUCH-FRIENDLY TARGETS (Minimum 48x48px)
+   ========================================================================== */
+
+/* Ensure all interactive elements meet touch target guidelines */
+.MuiIconButton-root {
+  min-width: 48px !important;
+  min-height: 48px !important;
+  padding: 12px !important;
+}
+
+.MuiButton-root {
+  min-height: 48px !important;
+  padding: 12px 16px !important;
+}
+
+.MuiChip-root {
+  min-height: 32px !important;
+  margin: 4px !important;
+}
+
+/* Tab buttons touch targets */
+.MuiTab-root {
+  min-height: 48px !important;
+  padding: 12px 16px !important;
+}
+
+/* ==========================================================================
+   3. MOBILE LAYOUT OPTIMIZATIONS
+   ========================================================================== */
+
+/* Prevent horizontal scrolling */
+body, html {
+  overflow-x: hidden !important;
+  width: 100% !important;
+}
+
+/* Container responsiveness */
+.MuiContainer-root {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+@media (min-width: 600px) {
+  .MuiContainer-root {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* Card spacing on mobile */
+.MuiCard-root {
+  margin-bottom: 8px !important;
+}
+
+@media (min-width: 600px) {
+  .MuiCard-root {
+    margin-bottom: 16px !important;
+  }
+}
+
+/* ==========================================================================
+   4. RESPONSIVE SPACING SYSTEM
+   ========================================================================== */
+
+/* Mobile-first spacing utility classes */
+.mobile-padding-sm {
+  padding: 8px !important;
+}
+
+.mobile-padding-md {
+  padding: 16px !important;
+}
+
+.mobile-padding-lg {
+  padding: 24px !important;
+}
+
+.mobile-margin-sm {
+  margin: 8px !important;
+}
+
+.mobile-margin-md {
+  margin: 16px !important;
+}
+
+.mobile-margin-lg {
+  margin: 24px !important;
+}
+
+/* Responsive padding for different screen sizes */
+@media (max-width: 599px) {
+  .responsive-padding {
+    padding: 8px !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 959px) {
+  .responsive-padding {
+    padding: 16px !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .responsive-padding {
+    padding: 24px !important;
+  }
+}
+
+/* ==========================================================================
+   5. MOBILE FORM OPTIMIZATIONS
+   ========================================================================== */
+
+/* Form field spacing and sizing */
+.MuiTextField-root {
+  margin-bottom: 16px !important;
+}
+
+.MuiFormControl-root {
+  margin-bottom: 16px !important;
+}
+
+/* Input field touch targets */
+.MuiInputBase-input {
+  min-height: 24px !important;
+  padding: 12px 14px !important;
+}
+
+/* Select dropdown improvements */
+.MuiSelect-select {
+  min-height: 24px !important;
+  padding: 12px 14px !important;
+}
+
+/* ==========================================================================
+   6. MODAL AND DIALOG RESPONSIVENESS
+   ========================================================================== */
+
+/* Mobile dialog sizing */
+.MuiDialog-paper {
+  margin: 8px !important;
+  width: calc(100% - 16px) !important;
+  max-height: calc(100% - 16px) !important;
+}
+
+@media (min-width: 600px) {
+  .MuiDialog-paper {
+    margin: 32px !important;
+    width: calc(100% - 64px) !important;
+    max-height: calc(100% - 64px) !important;
+  }
+}
+
+/* Dialog content padding */
+.MuiDialogContent-root {
+  padding: 16px !important;
+}
+
+@media (min-width: 600px) {
+  .MuiDialogContent-root {
+    padding: 24px !important;
+  }
+}
+
+/* ==========================================================================
+   7. TABLE AND GRID RESPONSIVENESS
+   ========================================================================== */
+
+/* Horizontal scroll for tables on mobile */
+.mobile-table-container {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.mobile-table-container table {
+  min-width: 600px !important;
+}
+
+/* Grid responsive improvements */
+.MuiGrid-container {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.MuiGrid-item {
+  padding: 8px !important;
+}
+
+@media (min-width: 600px) {
+  .MuiGrid-item {
+    padding: 12px !important;
+  }
+}
+
+/* ==========================================================================
+   8. SIDEBAR AND NAVIGATION MOBILE FIXES
+   ========================================================================== */
+
+/* Mobile sidebar improvements */
+@media (max-width: 1199px) {
+  .mobile-sidebar-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    z-index: 1200 !important;
+  }
+}
+
+/* Header responsive improvements */
+.mobile-header {
+  padding: 8px 16px !important;
+}
+
+@media (min-width: 600px) {
+  .mobile-header {
+    padding: 12px 24px !important;
+  }
+}
+
+/* ==========================================================================
+   9. CALENDAR MOBILE OPTIMIZATIONS
+   ========================================================================== */
+
+/* Calendar container responsiveness */
+.mobile-calendar-container {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.mobile-calendar-container .MuiGrid-container {
+  min-width: 320px !important;
+}
+
+/* Calendar day cards mobile sizing */
+.calendar-day-card {
+  min-height: 120px !important;
+  margin-bottom: 8px !important;
+}
+
+@media (min-width: 600px) {
+  .calendar-day-card {
+    min-height: 150px !important;
+    margin-bottom: 16px !important;
+  }
+}
+
+/* Calendar header responsive */
+.calendar-header-controls {
+  flex-direction: column !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+}
+
+@media (min-width: 600px) {
+  .calendar-header-controls {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+}
+
+/* ==========================================================================
+   10. COMPONENT LIBRARY MOBILE FIXES
+   ========================================================================== */
+
+/* Component preview cards */
+.component-preview-card {
+  padding: 12px !important;
+  margin-bottom: 8px !important;
+}
+
+@media (min-width: 600px) {
+  .component-preview-card {
+    padding: 20px !important;
+    margin-bottom: 16px !important;
+  }
+}
+
+/* Tab navigation mobile */
+.component-tabs {
+  min-height: 48px !important;
+}
+
+.component-tabs .MuiTab-root {
+  min-width: 0 !important;
+  flex: 1 !important;
+  font-size: 0.75rem !important;
+}
+
+@media (min-width: 600px) {
+  .component-tabs .MuiTab-root {
+    font-size: 0.875rem !important;
+  }
+}
+
+/* ==========================================================================
+   11. UTILITY CLASSES FOR MOBILE
+   ========================================================================== */
+
+/* Hide on mobile */
+.hide-mobile {
+  display: none !important;
+}
+
+@media (min-width: 600px) {
+  .hide-mobile {
+    display: inherit !important;
+  }
+}
+
+/* Show only on mobile */
+.show-mobile {
+  display: inherit !important;
+}
+
+@media (min-width: 600px) {
+  .show-mobile {
+    display: none !important;
+  }
+}
+
+/* Full width on mobile */
+.mobile-full-width {
+  width: 100% !important;
+}
+
+/* Center content on mobile */
+.mobile-center {
+  text-align: center !important;
+}
+
+@media (min-width: 600px) {
+  .mobile-center {
+    text-align: left !important;
+  }
+}
+
+/* ==========================================================================
+   12. ACCESSIBILITY IMPROVEMENTS
+   ========================================================================== */
+
+/* Focus visible improvements */
+.MuiButton-root:focus-visible,
+.MuiIconButton-root:focus-visible,
+.MuiTab-root:focus-visible {
+  outline: 2px solid #1976d2 !important;
+  outline-offset: 2px !important;
+}
+
+/* Ensure text contrast in dark mode */
+@media (prefers-color-scheme: dark) {
+  .MuiTypography-root {
+    color: #ffffff !important;
+  }
+}
+
+/* ==========================================================================
+   13. SCROLL BEHAVIOR
+   ========================================================================== */
+
+/* Smooth scrolling for mobile */
+html {
+  scroll-behavior: smooth !important;
+}
+
+/* Custom scrollbar for mobile */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1 !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1 !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1 !important;
+}

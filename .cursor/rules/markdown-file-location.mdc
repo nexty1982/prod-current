@@ -1,0 +1,137 @@
+---
+description: All markdown (.md) files must be located under docs/ directory. Code runs on Linux server.
+alwaysApply: true
+globs: **/*.md
+---
+
+# Markdown File Location Standards
+
+## Critical: All .md Files Must Be Under `docs/`
+
+**NEVER create markdown files (`.md`) outside of the `docs/` directory.**
+
+All documentation files must be organized under `Z:\docs\` (which maps to `/var/www/orthodoxmetrics/prod/docs/` on the Linux server).
+
+## Required Location
+
+### ✅ CORRECT Location:
+
+All `.md` files must be under:
+- `docs/` - Root documentation directory
+- `docs/{category}/` - Organized by category (e.g., `docs/dev/`, `docs/ocr/`, `docs/records/`)
+
+### ❌ INCORRECT Locations (DO NOT CREATE):
+
+- Root directory (`Z:\*.md`) → Move to `docs/`
+- `backend/*.md` → Move to `docs/backend/` or `docs/dev/backend/`
+- `front-end/*.md` → Move to `docs/dev/front-end/` or appropriate category
+- `server/*.md` → Move to `docs/server/` or `docs/dev/server/`
+- Any other location outside `docs/` → Move to appropriate `docs/` subdirectory
+
+## Exceptions (Package Boundaries)
+
+The following are acceptable exceptions per project documentation standards:
+
+1. **Root README**: `README.md` at repository root ✅ **ALLOWED**
+
+2. **Package Boundary READMEs** ✅ **ALLOWED**:
+   - `server/README.md` - Server package documentation
+   - `front-end/README.md` - Frontend package documentation
+   - `ops-hub/README.md` - Ops hub package documentation
+   - `tools/*/README.md` - Tool-specific documentation
+   - `scripts/*/README.md` - Script-specific documentation
+
+3. **Component-level READMEs** (consider moving to `docs/` if general documentation):
+   - `front-end/src/components/*/README.md` - Component documentation
+   - `backend/routes/README.md` - Route documentation
+   - These can stay with code but prefer `docs/` for general documentation
+
+4. **Legacy/archive files**:
+   - Files in `front-end/old-src/` or `front-end/archive/` - Legacy, can remain
+   - Files in `docs/ARCHIVE/` - Already in correct location
+
+## Directory Structure Guidelines
+
+Organize documentation under `docs/` by category (per project standards):
+
+```
+docs/
+├── FEATURES/          # Feature documentation
+├── REFERENCE/         # Reference documentation
+│   ├── server/        # Server-specific reference docs
+│   └── front-end/     # Frontend-specific reference docs
+├── OPERATIONS/        # Operations guides
+├── ARCHIVE/           # Archived/dated documentation
+│   └── YYYY-MM-DD-*   # Dated docs with date prefix
+├── DEVELOPMENT/       # Development guidelines
+├── dev/               # Development documentation (legacy structure)
+│   ├── backend/       # Backend-specific docs
+│   ├── front-end/     # Frontend-specific docs
+│   └── installation/  # Setup/installation guides
+├── ocr/               # OCR feature documentation
+├── records/           # Records feature documentation
+├── auth/              # Authentication documentation
+├── CHANGELOG/         # Change logs
+├── assets/            # Documentation assets (images, etc.)
+└── README.md          # Documentation index
+```
+
+**Note**: See `docs/DEVELOPMENT/documentation_rules.md` for complete documentation standards.
+
+## Pre-Creation Checklist
+
+Before creating ANY `.md` file:
+
+1. ✅ **Verify location** - Must be under `docs/` directory
+2. ✅ **Choose appropriate subdirectory** - Organize by category/topic
+3. ✅ **Check for existing similar docs** - Avoid duplicates
+4. ✅ **Use descriptive names** - Clear, searchable filenames
+5. ❌ **NEVER create** `.md` files in root, `backend/`, `front-end/`, `server/`, etc.
+
+## Migration of Existing Files
+
+If you encounter `.md` files outside `docs/`:
+
+1. **Check if it's an allowed exception** (root README, package boundary README)
+2. **Identify the appropriate `docs/` subdirectory**:
+   - Dated/archived docs → `docs/ARCHIVE/YYYY-MM-DD-description.md`
+   - Feature docs → `docs/FEATURES/feature-name.md`
+   - Reference docs → `docs/REFERENCE/category/reference-name.md`
+   - Operations docs → `docs/OPERATIONS/operation-name.md`
+   - Development docs → `docs/DEVELOPMENT/` or `docs/dev/`
+3. **Move the file** to the appropriate location
+4. **Update any references** to the file (links, imports, etc.)
+5. **Run the pre-commit hook** (`scripts/check-docs-location.sh`) to verify
+
+**Note**: A pre-commit hook automatically checks for violations. See `docs/DEVELOPMENT/documentation_rules.md` for details.
+
+## Examples
+
+### ✅ GOOD: Documentation in docs/
+```bash
+docs/dev/backend/INTEGRATION_GUIDE.md
+docs/ocr/QUICK_START.md
+docs/records/README.md
+```
+
+### ❌ BAD: Documentation outside docs/
+```bash
+backend/INTEGRATION_GUIDE.md          # WRONG - Move to docs/dev/backend/
+front-end/MIGRATION_LOG.md            # WRONG - Move to docs/dev/front-end/
+Z:\OCR_SETUP_WIZARD_SUMMARY.md        # WRONG - Move to docs/ocr/
+```
+
+## Why This Matters
+
+- **Organization**: Centralized documentation is easier to find and maintain
+- **Consistency**: All docs in one location follows standard project structure
+- **Linux server**: Maps to `/var/www/orthodoxmetrics/prod/docs/` on production
+- **Documentation site**: Easier to generate documentation sites from a single directory
+- **Searchability**: Easier to search and index when organized
+
+## Enforcement
+
+- **Always apply this rule** - it applies to every AI agent session
+- **Applies to `.md` files** - Specifically targets markdown file creation
+- **Check location** before creating any `.md` file
+- **When in doubt, use `docs/`** - Default to `docs/` if unsure of category

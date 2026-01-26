@@ -1,0 +1,61 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import React from 'react';
+import { Box, Card, Typography } from '@mui/material';
+import Grid2 from '@mui/material/Grid2';
+
+import Logo from '@/layouts/full/shared/logo/Logo';
+import PageContainer from '@/shared/ui/PageContainer';
+
+import AuthForgotPassword from '@/features/auth/authentication/authForms/AuthForgotPassword';
+
+const ForgotPassword2 = () => (
+  <PageContainer title="Forgot Password" description="this is Forgot Password page">
+    <Box
+      sx={{
+        position: 'relative',
+        '&:before': {
+          content: '""',
+          background: 'radial-gradient(#d2f1df, #d3d7fa, #bad8f4)',
+          backgroundSize: '400% 400%',
+          animation: 'gradient 15s ease infinite',
+          position: 'absolute',
+          height: '100%',
+          width: '100%',
+          opacity: '0.3',
+        },
+      }}
+    >
+      <Grid2 container spacing={0} justifyContent="center" sx={{ height: '100vh' }}>
+        <Grid2
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          size={{
+            xs: 12,
+            sm: 12,
+            lg: 4,
+            xl: 3
+          }}>
+          <Card elevation={9} sx={{ p: 4, zIndex: 1, width: '100%', maxWidth: '500px' }}>
+            <Box display="flex" alignItems="center" justifyContent="center">
+              <Logo />
+            </Box>
+            <Typography
+              color="textSecondary"
+              textAlign="center"
+              variant="subtitle2"
+              fontWeight="400"
+            >
+              Please enter the email address associated with your account and We will email you a
+              link to reset your password.
+            </Typography>
+            <AuthForgotPassword />
+          </Card>
+        </Grid2>
+      </Grid2>
+    </Box>
+  </PageContainer>
+);
+
+export default ForgotPassword2;

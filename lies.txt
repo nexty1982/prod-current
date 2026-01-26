@@ -1,0 +1,24 @@
+Not all 213 files need to be restored
+Breakdown:
+Infrastructure: 38 files (CRITICAL — restore first)
+Business Features: 45 files (HIGH — restore after infrastructure)
+Template/Demo UI: 78 files (SKIP — not production code)
+Tests/Examples: 12 files (OPTIONAL)
+Mock/Test Data: 40 files (SKIP — test data)
+Total to restore: 83 files (39% of missing files)
+Top 10 highest value components
+API Services Layer (foundation)
+React Hooks (data fetching)
+Context/State Management (shared state)
+TypeScript Types (type safety)
+AG Grid Tables (advanced tables)
+Import System (user feature)
+Certificate Generation (user feature)
+Bulk Operations (user feature)
+Dynamic Records Manager (extensibility)
+Unified Records System (consolidation)
+Recovery sequence (4 phases)
+Phase 1 (Week 1): Infrastructure — 30 files
+Phase 2 (Week 2): Core Business Features — 22 files
+Phase 3 (Week 3): User-Facing Features — 6-7 files
+Phase 4 (Week 4, Optional): Advanced Systems — 12 files

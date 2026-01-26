@@ -1,0 +1,375 @@
+import { uniqueId } from 'lodash';
+import { useAuth } from 'src/context/AuthContext';
+
+interface MenuitemsType {
+  [x: string]: any;
+  id?: string;
+  navlabel?: boolean;
+  subheader?: string;
+  title?: string;
+  icon?: any;
+  href?: string;
+  children?: MenuitemsType[];
+  chip?: string;
+  chipColor?: string;
+  variant?: string;
+  external?: boolean;
+}
+import {
+  IconAperture,
+  IconNotes,
+  IconCalendar,
+  IconMail,
+  IconFileDescription,
+  IconNotebook,
+  IconFileCheck,
+  IconPoint,
+  IconEdit,
+  IconSettings,
+  IconUserCircle,
+  IconBuildingChurch,
+  IconUsers,
+  IconLock,
+  IconBrain,
+  IconBorderAll,
+  IconFiles,
+  IconChartHistogram,
+  IconMessage,
+  IconUserPlus,
+  IconWriting,
+  IconBell,
+  IconHeart,
+  IconNews,
+  IconWorldWww,
+  IconShield,
+  IconHome,
+  IconTerminal,
+  IconCode,
+  IconBug,
+} from '@tabler/icons-react';
+import OrthodoxChurchIcon from 'src/components/shared/OrthodoxChurchIcon';
+
+const Menuitems: MenuitemsType[] = [
+  {
+    navlabel: true,
+    subheader: '🔧 System Administration',
+  },
+  {
+    id: uniqueId(),
+    title: 'Admin Dashboard',
+    icon: IconShield,
+    href: '/dashboards/orthodoxmetrics',
+  },
+  {
+    id: uniqueId(),
+    title: 'Enhanced Modern Dashboard',
+    icon: IconHome,
+    href: '/dashboards/modern',
+  },
+  {
+    id: uniqueId(),
+    title: 'Orthodox Metrics',
+    icon: IconBuildingChurch,
+    href: '/admin/orthodox-metrics',
+  },
+  {
+    id: uniqueId(),
+    title: 'AI Administration',
+    icon: IconBrain,
+    href: '/admin/ai',
+  },
+  {
+    id: uniqueId(),
+    title: 'Headlines Configuration',
+    icon: IconNews,
+    href: '/admin/headlines-config',
+  },
+  {
+    id: uniqueId(),
+    title: 'Settings',
+    icon: IconSettings,
+    href: '/admin/settings',
+  },
+  {
+    id: uniqueId(),
+    title: '🛠 Site Editor',
+    icon: IconCode,
+    href: '/admin/site-editor',
+  },
+  {
+    id: uniqueId(),
+    title: '💻 JIT Terminal',
+    icon: IconTerminal,
+    href: '/admin/jit-terminal',
+  },
+
+  {
+    navlabel: true,
+    subheader: '🔒 Access Control',
+  },
+  {
+    id: uniqueId(),
+    title: 'User & Access Management',
+    icon: IconUsers,
+    href: '/admin/users',
+  },
+  {
+    id: uniqueId(),
+    title: 'Session Management',
+    icon: IconLock,
+    href: '/admin/sessions',
+  },
+  {
+    id: uniqueId(),
+    title: 'Activity Logs',
+    icon: IconFileDescription,
+    href: '/admin/activity-logs',
+  },
+  {
+    id: uniqueId(),
+    title: 'Menu Management',
+    icon: IconBorderAll,
+    href: '/admin/menu-management',
+  },
+  {
+    id: uniqueId(),
+    title: 'JIT Terminal Access',
+    icon: IconTerminal,
+    href: '/settings/jit-terminal',
+  },
+
+  {
+    navlabel: true,
+    subheader: '🌍 Explore',
+  },
+  {
+    id: uniqueId(),
+    title: 'Orthodox Headlines',
+    icon: IconNews,
+    href: '/orthodox-headlines',
+  },
+
+  {
+    navlabel: true,
+    subheader: '💬 Social Experience',
+  },
+  {
+    id: uniqueId(),
+    title: 'Blog',
+    icon: IconWriting,
+    href: '/social/blog',
+  },
+  {
+    id: uniqueId(),
+    title: 'Friends',
+    icon: IconUserPlus,
+    href: '/social/friends',
+  },
+  {
+    id: uniqueId(),
+    title: 'Chat',
+    icon: IconMessage,
+    href: '/social/chat',
+  },
+  {
+    id: uniqueId(),
+    title: 'Notifications',
+    icon: IconBell,
+    href: '/social/notifications',
+  },
+
+  {
+    navlabel: true,
+    subheader: '🕍 Church Tools',
+  },
+  {
+    id: uniqueId(),
+    title: 'Church Management',
+    icon: OrthodoxChurchIcon,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'All Churches',
+        icon: IconPoint,
+        href: '/apps/church-management',
+      },
+      {
+        id: uniqueId(),
+        title: 'Add Church',
+        icon: IconPoint,
+        href: '/apps/church-management/create',
+      },
+      {
+        id: uniqueId(),
+        title: 'Church Setup Wizard',
+        icon: IconPoint,
+        href: '/apps/church-management/wizard',
+      },
+      {
+        id: uniqueId(),
+        title: 'Church Setup',
+        icon: IconPoint,
+        href: '/apps/client-management/church-setup',
+      },
+      {
+        id: uniqueId(),
+        title: 'Church OCR',
+        icon: IconPoint,
+        href: '/admin/church/:id/ocr',
+      },
+      {
+        id: uniqueId(),
+        title: 'Legacy Profile',
+        icon: IconPoint,
+        href: '/user-profile',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Records Management',
+    icon: IconFileDescription,
+    href: '/records', // This will redirect to the user's church records
+  },
+  {
+    id: uniqueId(),
+    title: 'Analytics',
+    icon: IconChartHistogram,
+    href: '/analytics',
+  },
+  {
+    id: uniqueId(),
+    title: 'Calendar',
+    icon: IconCalendar,
+    href: '/apps/liturgical-calendar',
+  },
+
+  {
+    navlabel: true,
+    subheader: '🎨 Content Management',
+  },
+  {
+    id: uniqueId(),
+    title: 'CMS',
+    icon: IconEdit,
+    href: '/apps/cms/page-editor',
+  },
+  {
+    id: uniqueId(),
+    title: 'Site Clone',
+    icon: IconFiles,
+    href: '/apps/site-clone',
+  },
+  {
+    id: uniqueId(),
+    title: 'Template Manager',
+    icon: IconBorderAll,
+    href: '/apps/client-management/template-manager',
+  },
+  {
+    id: uniqueId(),
+    title: 'Logs',
+    icon: IconFileDescription,
+    href: '/admin/activity-logs',
+  },
+           {
+           id: uniqueId(),
+           title: 'Site Editor Demo',
+           icon: IconEdit,
+           href: '/demos/site-editor',
+         },
+                 {
+          id: uniqueId(),
+          title: 'Auto-Fix Demo',
+          icon: IconEdit,
+          href: '/demos/auto-fix',
+        },
+        {
+          id: uniqueId(),
+          title: 'GitOps Demo',
+          icon: IconEdit,
+          href: '/demos/gitops',
+        },
+        {
+          id: uniqueId(),
+          title: '🐞 VRT Demo',
+          icon: IconBug,
+          href: '/demos/vrt',
+        },
+];
+
+export const getMenuItems = (user: any) => {
+  if (user && (user.role === 'super_admin' || user.role === 'admin')) {
+    return Menuitems;
+  }
+  // For non-admin users, show only Notes App and Liturgical Calendar under Apps, and Users Guide under Quick Links
+  return [
+    {
+      navlabel: true,
+      subheader: 'Dashboard',
+    },
+    {
+      id: uniqueId(),
+      title: 'Enhanced Modern Dashboard',
+      icon: IconHome,
+      href: '/dashboards/modern',
+    },
+    {
+      navlabel: true,
+      subheader: 'Apps',
+    },
+    {
+      id: uniqueId(),
+      title: 'Notes',
+      icon: IconNotes,
+      href: '/apps/notes',
+    },
+    {
+      id: uniqueId(),
+      title: 'Liturgical Calendar',
+      icon: IconCalendar,
+      href: '/apps/liturgical-calendar',
+    },
+    {
+      navlabel: true,
+      subheader: '💬 Social',
+    },
+    {
+      id: uniqueId(),
+      title: 'Blog',
+      icon: IconWriting,
+      href: '/social/blog',
+    },
+    {
+      id: uniqueId(),
+      title: 'Friends',
+      icon: IconUserPlus,
+      href: '/social/friends',
+    },
+    {
+      id: uniqueId(),
+      title: 'Chat',
+      icon: IconMessage,
+      href: '/social/chat',
+    },
+    {
+      id: uniqueId(),
+      title: 'Notifications',
+      icon: IconBell,
+      href: '/social/notifications',
+    },
+    {
+      navlabel: true,
+      subheader: 'Quick Links',
+    },
+    {
+      id: uniqueId(),
+      title: 'Users Guide',
+      icon: IconFileDescription,
+      href: '/frontend-pages/coming-soon',
+    },
+  ];
+};
+
+export default Menuitems;
