@@ -15,6 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { notifyBuildCompleted, notifyBuildFailed } = require('./superAdminNotifications');
 
 const FRONT_END_PATH = path.join(__dirname, '../../../front-end');
 const DIST_PATH = path.join(FRONT_END_PATH, 'dist');
@@ -183,10 +184,25 @@ async function atomicBuild() {
     console.log('\n✅ Atomic build completed successfully in ' + duration + 's');
     console.log('   Zero-downtime deployment achieved! 🎉\n');
     
+    // Notify super admins
+    try {
+      await notifyBuildCompleted(duration, 'production');
+    } catch (notifyErr) {
+      console.warn('Failed to send build notification:', notifyErr.message);
+    }
+    
     return true;
   } catch (err) {
     console.error('\n❌ Atomic build failed:', err.message);
     console.error('   The live dist folder remains unchanged.\n');
+    
+    // Notify super admins of failure
+    try {
+      await notifyBuildFailed(err.message, 'production');
+    } catch (notifyErr) {
+      console.warn('Failed to send build failure notification:', notifyErr.message);
+    }
+    
     return false;
   } finally {
     // Always clear maintenance flag
