@@ -1,15 +1,216 @@
-import { RefactorScan } from '@/types/refactorConsole';
+import { 
+  RefactorScan, 
+  Snapshot, 
+  SourceType,
+  PreviewRestoreResponse,
+  RestoreHistoryResponse,
+  RestoreHistoryEntry,
+  RestoreHistoryStats
+} from '@/types/refactorConsole';
+
+// ============================================================================
+// Path Configuration Interface
+// ============================================================================
+export interface PathConfig {
+  sourcePath: string;
+  destinationPath: string;
+  backupPath?: string;
+  sourceType?: SourceType;
+  snapshotId?: string;
+}
+
+// Default paths
+export const DEFAULT_PATH_CONFIG: PathConfig = {
+  sourcePath: '/var/www/orthodoxmetrics/prod/refactor-src/',
+  destinationPath: '/var/www/orthodoxmetrics/prod/front-end/src/',
+  backupPath: '/var/www/orthodoxmetrics/backup'
+};
+
+// LocalStorage key for path configuration
+const PATHS_STORAGE_KEY = 'refactor-console-paths';
 
 class RefactorConsoleClient {
   private baseUrl = '/api/refactor-console';
 
+  // ============================================================================
+  // Path Configuration Management
+  // ============================================================================
+  
+  /**
+   * Get saved path configuration from localStorage
+   */
+  getSavedPaths(): PathConfig {
+    try {
+      const saved = localStorage.getItem(PATHS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          sourcePath: parsed.sourcePath || DEFAULT_PATH_CONFIG.sourcePath,
+          destinationPath: parsed.destinationPath || DEFAULT_PATH_CONFIG.destinationPath,
+          backupPath: parsed.backupPath || DEFAULT_PATH_CONFIG.backupPath
+        };
+      }
+    } catch (e) {
+      console.warn('Failed to parse saved path config:', e);
+    }
+    return { ...DEFAULT_PATH_CONFIG };
+  }
+
+  /**
+   * Save path configuration to localStorage
+   */
+  savePaths(config: Partial<PathConfig>): void {
+    try {
+      const current = this.getSavedPaths();
+      const updated = {
+        ...current,
+        ...config
+      };
+      localStorage.setItem(PATHS_STORAGE_KEY, JSON.stringify(updated));
+      console.log('[RefactorConsole] Paths saved:', updated);
+    } catch (e) {
+      console.error('Failed to save path config:', e);
+    }
+  }
+
+  /**
+   * Clear saved path configuration (reset to defaults)
+   */
+  clearSavedPaths(): void {
+    localStorage.removeItem(PATHS_STORAGE_KEY);
+    console.log('[RefactorConsole] Paths reset to defaults');
+  }
+
+  /**
+   * Get default path configuration from server
+   */
+  async getDefaultPaths(): Promise<{
+    ok: boolean;
+    defaults: PathConfig & { projectRoot: string };
+    allowedBasePath: string;
+  }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/config/paths`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to get default paths:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Validate paths on the server
+   */
+  async validatePaths(config: Partial<PathConfig>): Promise<{
+    ok: boolean;
+    validations: Record<string, {
+      input: string;
+      isValid: boolean;
+      sanitized: string;
+      error?: string;
+      exists: boolean;
+    }>;
+  }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/config/validate-paths`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(config),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to validate paths:', error);
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // Snapshot Discovery
+  // ============================================================================
+  
+  /**
+   * Fetch available snapshots from the source directory
+   * @param sourceType - Type of source ('local' or 'remote')
+   * @param sourcePath - Optional custom source path
+   * @returns Promise containing list of available snapshots
+   */
+  async fetchSnapshots(
+    sourceType: SourceType = 'local',
+    sourcePath?: string
+  ): Promise<{
+    ok: boolean;
+    sourceType: SourceType;
+    basePath: string;
+    snapshots: Snapshot[];
+    defaultSnapshot: Snapshot | null;
+    stats: {
+      total: number;
+      valid: number;
+      invalid: number;
+      oldest: Snapshot | null;
+      newest: Snapshot | null;
+      yearCounts: Record<number, number>;
+    };
+  }> {
+    try {
+      const params = new URLSearchParams();
+      params.append('sourceType', sourceType);
+      if (sourcePath) {
+        params.append('sourcePath', sourcePath);
+      }
+
+      const response = await fetch(`${this.baseUrl}/snapshots?${params}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await this.safeParseResponse(response);
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch snapshots:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to fetch snapshots');
+    }
+  }
+
+  // ============================================================================
+  // Scan Endpoint (with dynamic path support)
+  // ============================================================================
+  
   /**
    * Scan the codebase for refactoring analysis
    * @param rebuild - Whether to force a rebuild of the scan (ignore cache)
-   * @param compareWithBackup - Whether to perform gap analysis with September 2025 backup
+   * @param compareWithBackup - Whether to perform gap analysis with backup
+   * @param pathConfig - Optional custom path configuration
+   * @param sourceType - Source type ('local' or 'remote')
+   * @param snapshotId - Optional snapshot ID (e.g., '09-2025')
    * @returns Promise containing the scan results
    */
-  async scan(rebuild: boolean = false, compareWithBackup: boolean = false): Promise<RefactorScan> {
+  async scan(
+    rebuild: boolean = false, 
+    compareWithBackup: boolean = false,
+    pathConfig?: Partial<PathConfig>,
+    sourceType?: SourceType,
+    snapshotId?: string
+  ): Promise<RefactorScan> {
     try {
       const params = new URLSearchParams();
       if (rebuild) {
@@ -17,6 +218,28 @@ class RefactorConsoleClient {
       }
       if (compareWithBackup) {
         params.append('compareWithBackup', '1');
+      }
+      
+      // Use saved paths if no custom config provided
+      const paths = pathConfig || this.getSavedPaths();
+      
+      // Add sourceType and snapshotId
+      const actualSourceType = sourceType || paths.sourceType || 'local';
+      const actualSnapshotId = snapshotId || paths.snapshotId;
+      
+      params.append('sourceType', actualSourceType);
+      if (actualSnapshotId) {
+        params.append('snapshotId', actualSnapshotId);
+      }
+      
+      if (paths.sourcePath) {
+        params.append('sourcePath', paths.sourcePath);
+      }
+      if (paths.destinationPath) {
+        params.append('destinationPath', paths.destinationPath);
+      }
+      if (paths.backupPath) {
+        params.append('backupPath', paths.backupPath);
       }
 
       const response = await fetch(`${this.baseUrl}/scan?${params}`, {
@@ -28,10 +251,11 @@ class RefactorConsoleClient {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await this.safeParseResponse(response);
       return data;
     } catch (error) {
       console.error('Failed to fetch refactor scan:', error);
@@ -40,27 +264,105 @@ class RefactorConsoleClient {
   }
 
   /**
-   * Restore a file from the September 2025 backup
+   * Preview restore (dry run) - get diff and dependency check before restoring
+   * @param relPath - Relative path of the file to preview
+   * @param pathConfig - Optional custom path configuration
+   * @param sourceType - Source type ('local' or 'remote')
+   * @param snapshotId - Optional snapshot ID (e.g., '09-2025')
+   * @returns Promise containing preview with diff and dependencies
+   */
+  async previewRestore(
+    relPath: string,
+    pathConfig?: Partial<PathConfig>,
+    sourceType?: SourceType,
+    snapshotId?: string
+  ): Promise<PreviewRestoreResponse> {
+    try {
+      // Use saved paths if no custom config provided
+      const paths = pathConfig || this.getSavedPaths();
+      
+      // Use provided sourceType/snapshotId or fall back to saved values
+      const actualSourceType = sourceType || paths.sourceType || 'local';
+      const actualSnapshotId = snapshotId || paths.snapshotId;
+      
+      const response = await fetch(`${this.baseUrl}/preview-restore`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          relPath,
+          sourcePath: paths.sourcePath || paths.backupPath,
+          destinationPath: paths.destinationPath,
+          sourceType: actualSourceType,
+          snapshotId: actualSnapshotId
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await this.safeParseResponse(response);
+      return data;
+    } catch (error) {
+      console.error('Failed to preview restore:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to preview restore');
+    }
+  }
+
+  /**
+   * Restore a file from the source to destination
    * @param relPath - Relative path of the file to restore
+   * @param pathConfig - Optional custom path configuration
+   * @param sourceType - Source type ('local' or 'remote')
+   * @param snapshotId - Optional snapshot ID (e.g., '09-2025')
    * @returns Promise containing restore result
    */
-  async restore(relPath: string): Promise<{ success: boolean; message: string; restoredPath: string }> {
+  async restore(
+    relPath: string,
+    pathConfig?: Partial<PathConfig>,
+    sourceType?: SourceType,
+    snapshotId?: string
+  ): Promise<{ 
+    success: boolean; 
+    message: string; 
+    sourcePath: string; 
+    restoredPath: string;
+    sourceType?: SourceType;
+    snapshotId?: string | null;
+  }> {
     try {
+      // Use saved paths if no custom config provided
+      const paths = pathConfig || this.getSavedPaths();
+      
+      // Use provided sourceType/snapshotId or fall back to saved values
+      const actualSourceType = sourceType || paths.sourceType || 'local';
+      const actualSnapshotId = snapshotId || paths.snapshotId;
+      
       const response = await fetch(`${this.baseUrl}/restore`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ relPath }),
+        body: JSON.stringify({ 
+          relPath,
+          sourcePath: paths.sourcePath || paths.backupPath,
+          destinationPath: paths.destinationPath,
+          sourceType: actualSourceType,
+          snapshotId: actualSnapshotId
+        }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await this.safeParseResponse(response);
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await this.safeParseResponse(response);
       return data;
     } catch (error) {
       console.error('Failed to restore file:', error);
@@ -268,6 +570,129 @@ class RefactorConsoleClient {
       };
     } catch (error) {
       return { exists: false, age: -1 };
+    }
+  }
+
+  // ============================================================================
+  // Restore History Endpoints
+  // ============================================================================
+  
+  /**
+   * Get restore history with pagination
+   * @param limit - Number of entries to return
+   * @param offset - Offset for pagination
+   * @returns Promise containing restore history
+   */
+  async getRestoreHistory(
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<RestoreHistoryResponse> {
+    try {
+      const params = new URLSearchParams();
+      params.append('limit', limit.toString());
+      params.append('offset', offset.toString());
+
+      const response = await fetch(`${this.baseUrl}/restore-history?${params}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await this.safeParseResponse(response);
+      return data;
+    } catch (error) {
+      console.error('Failed to get restore history:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to get restore history');
+    }
+  }
+
+  /**
+   * Get restore history for a specific file
+   * @param relPath - Relative path of the file
+   * @returns Promise containing file restore history
+   */
+  async getFileRestoreHistory(relPath: string): Promise<{
+    ok: boolean;
+    relPath: string;
+    count: number;
+    entries: RestoreHistoryEntry[];
+  }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/restore-history/file/${relPath}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await this.safeParseResponse(response);
+      return data;
+    } catch (error) {
+      console.error('Failed to get file restore history:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to get file restore history');
+    }
+  }
+
+  /**
+   * Get restore statistics
+   * @returns Promise containing restore statistics
+   */
+  async getRestoreHistoryStats(): Promise<{
+    ok: boolean;
+    stats: RestoreHistoryStats;
+  }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/restore-history/stats`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await this.safeParseResponse(response);
+      return data;
+    } catch (error) {
+      console.error('Failed to get restore history stats:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to get restore history stats');
+    }
+  }
+
+  /**
+   * Export restore history to CSV
+   * @param limit - Number of entries to export
+   * @returns Promise that triggers CSV download
+   */
+  async exportRestoreHistory(limit: number = 1000): Promise<void> {
+    try {
+      const params = new URLSearchParams();
+      params.append('limit', limit.toString());
+
+      const url = `${this.baseUrl}/restore-history/export?${params}`;
+      
+      // Trigger download by opening in new window/tab
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Failed to export restore history:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to export restore history');
     }
   }
 }

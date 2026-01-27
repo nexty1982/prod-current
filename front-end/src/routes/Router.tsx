@@ -108,6 +108,7 @@ const MenuPermissions = Loadable(lazy(() => import('../features/admin/admin/Menu
 const MenuManagement = Loadable(lazy(() => import('../features/admin/admin/MenuManagement')));
 const ChurchPublishingGuide = Loadable(lazy(() => import('../features/admin/components/ChurchPublishingGuide')));
 const InteractiveReportReview = Loadable(lazy(() => import('../features/records-centralized/components/interactiveReport/InteractiveReportReview')));
+const CertificateGeneratorPage = Loadable(lazy(() => import('../features/certificates/CertificateGeneratorPage')));
 const RecipientSubmissionPage = Loadable(lazy(() => import('../features/records-centralized/components/interactiveReport/RecipientSubmissionPage')));
 const InteractiveReportJobsPage = Loadable(lazy(() => import('../features/devel-tools/interactive-reports/InteractiveReportJobsPage')));
 const BuildInfoPage = Loadable(lazy(() => import('../features/devel-tools/build-info/BuildInfoPage')));
@@ -1232,6 +1233,15 @@ const Router = [
           </ProtectedRoute>
         )
       },
+      // Certificate Generation Page
+      {
+        path: '/apps/certificates/generate',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <CertificateGeneratorPage />
+          </ProtectedRoute>
+        )
+      },
      {
        path: '/apps/records/centralized',
        element: (
@@ -1309,6 +1319,7 @@ const Router = [
       ...(isInteractiveReportRecipientsEnabled() ? [
         { path: '/r/interactive/:token', element: <RecipientSubmissionPage /> },
       ] : []),
+      
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },

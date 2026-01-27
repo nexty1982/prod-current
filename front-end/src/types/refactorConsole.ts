@@ -4,6 +4,19 @@ export type Classification = 'green' | 'orange' | 'yellow' | 'red';
 
 export type RecoveryStatus = 'missing_in_prod' | 'modified_since_backup' | 'new_file' | 'unchanged';
 
+export type SourceType = 'local' | 'remote';
+
+export interface Snapshot {
+  id: string;           // e.g., "09-2025"
+  label: string;        // e.g., "September 2025"
+  path: string;         // Full path to the snapshot/prod directory
+  date: string;         // ISO date string
+  month: number;        // Month number (1-12)
+  year: number;         // Full year
+  exists: boolean;      // Whether the prod subdirectory exists
+  isValid: boolean;     // Whether this is a valid snapshot
+}
+
 export interface UsageData {
   importRefs: number;
   serverRefs: number;
@@ -57,6 +70,17 @@ export interface RefactorScan {
   // Gap Analysis metadata
   backupPath?: string;
   gapAnalysisEnabled?: boolean;
+  // Multi-source metadata
+  sourceType?: SourceType;
+  snapshotId?: string;
+  pathConfig?: {
+    sourceType?: SourceType;
+    snapshotId?: string;
+    sourcePath?: string;
+    destinationPath?: string;
+    backupPath?: string;
+    validationWarnings?: string[];
+  };
 }
 
 export interface FilterState {
@@ -168,4 +192,88 @@ export interface RestoreBundleRequest {
   routePath?: string;
   menuLabel?: string;
   menuIcon?: string;
+}
+
+// ============================================================================
+// File Preview/Diff Types
+// ============================================================================
+export interface FilePreview {
+  relPath: string;
+  sourcePath: string;
+  targetPath: string;
+  sourceContent: string;
+  targetContent: string | null;
+  sourceExists: boolean;
+  targetExists: boolean;
+  sourceSize: number;
+  targetSize: number;
+  sourceModified: number;
+  targetModified: number | null;
+  diffStats: {
+    sourceLines: number;
+    targetLines: number;
+    linesAdded: number;
+    identical: boolean;
+  };
+}
+
+export interface ImportDependency {
+  importPath: string;
+  resolvedPath: string | null;
+  exists: boolean;
+  lineNumber: number;
+  importType: 'relative' | 'absolute' | 'package';
+}
+
+export interface DependencyCheckResult {
+  hasImports: boolean;
+  totalImports: number;
+  missingImports: ImportDependency[];
+  missingCount: number;
+  allDependenciesExist: boolean;
+  imports: ImportDependency[];
+}
+
+export interface PreviewRestoreResponse {
+  success: boolean;
+  preview: FilePreview;
+  dependencies: DependencyCheckResult;
+  warnings: string[];
+}
+
+// ============================================================================
+// Restore History Types
+// ============================================================================
+export interface RestoreHistoryEntry {
+  id: string;
+  timestamp: string;
+  user: string | null;
+  userEmail: string | null;
+  relPath: string;
+  sourcePath: string;
+  targetPath: string;
+  sourceType: 'local' | 'remote';
+  snapshotId: string | null;
+  fileSize: number;
+  success: boolean;
+  error: string | null;
+}
+
+export interface RestoreHistoryResponse {
+  ok: boolean;
+  total: number;
+  limit: number;
+  offset: number;
+  entries: RestoreHistoryEntry[];
+}
+
+export interface RestoreHistoryStats {
+  totalRestores: number;
+  successfulRestores: number;
+  failedRestores: number;
+  uniqueFiles: number;
+  uniqueUsers: number;
+  lastRestore: RestoreHistoryEntry | null;
+  restoresBySourceType: { local: number; remote: number };
+  restoresBySnapshot: Record<string, number>;
 }

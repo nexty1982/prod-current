@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
   AlertCircle,
   RefreshCw,
@@ -9,21 +9,45 @@ import {
   ExternalLink,
   Eye,
   Archive,
-  FileSearch
+  FileSearch,
+  Settings,
+  FolderOpen,
+  Check,
+  X as XIcon,
+  History
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import { useTheme, alpha } from '@mui/material/styles';
-import { Box, Paper, Button } from '@mui/material';
+import { 
+  Box, 
+  Paper, 
+  Button, 
+  TextField, 
+  IconButton, 
+  Collapse, 
+  Tooltip,
+  Chip,
+  CircularProgress
+} from '@mui/material';
 
 import Tree from './components/Tree';
 import Legend from './components/Legend';
 import Toolbar from './components/Toolbar';
 import RequirementPreviewModal from './components/RequirementPreviewModal';
 import RestoreBundleButton from './components/RestoreBundleButton';
+import DiffViewModal from './components/DiffViewModal';
+import RestoreHistoryViewer from './components/RestoreHistoryViewer';
 import { useRefactorScan } from './hooks/useRefactorScan';
-import { SortOption, Classification, Phase1Report, FileAnalysis } from '@/types/refactorConsole';
-import refactorConsoleClient from './api/refactorConsoleClient';
+import { 
+  SortOption, 
+  Classification, 
+  Phase1Report, 
+  FileAnalysis, 
+  Snapshot,
+  PreviewRestoreResponse
+} from '@/types/refactorConsole';
+import refactorConsoleClient, { PathConfig, DEFAULT_PATH_CONFIG } from './api/refactorConsoleClient';
 
 const RefactorConsole: React.FC = () => {
   // Get theme context for dark mode
@@ -55,6 +79,7 @@ const RefactorConsole: React.FC = () => {
     treeItems,
     expandedPaths,
     setExpandedPaths,
+    loadScanData,
     refreshScan,
     toggleExpanded,
     expandAll,
@@ -88,6 +113,81 @@ const RefactorConsole: React.FC = () => {
   const [healthStatus, setHealthStatus] = useState<'checking' | 'ok' | 'error'>('checking');
   const [healthError, setHealthError] = useState<string | null>(null);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  
+  // ========================================================================
+  // Path Configuration State
+  // ========================================================================
+  const [showPathConfig, setShowPathConfig] = useState(false);
+  const [pathConfig, setPathConfig] = useState<PathConfig>(() => refactorConsoleClient.getSavedPaths());
+  const [pathValidation, setPathValidation] = useState<{
+    sourcePath?: { isValid: boolean; exists: boolean; error?: string };
+    destinationPath?: { isValid: boolean; exists: boolean; error?: string };
+    backupPath?: { isValid: boolean; exists: boolean; error?: string };
+  }>({});
+  const [isValidatingPaths, setIsValidatingPaths] = useState(false);
+  
+  // ========================================================================
+  // Multi-Source & Snapshot State
+  // ========================================================================
+  const [sourceType, setSourceType] = useState<'local' | 'remote'>('local');
+  const [selectedSnapshot, setSelectedSnapshot] = useState<string | null>(null);
+  const [availableSnapshots, setAvailableSnapshots] = useState<any[]>([]);
+  const [isLoadingSnapshots, setIsLoadingSnapshots] = useState(false);
+  const [snapshotError, setSnapshotError] = useState<string | null>(null);
+  
+  // ========================================================================
+  // Diff Preview & Restore State
+  // ========================================================================
+  const [showDiffModal, setShowDiffModal] = useState(false);
+  const [previewData, setPreviewData] = useState<PreviewRestoreResponse | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [pendingRestorePath, setPendingRestorePath] = useState<string | null>(null);
+  
+  // ========================================================================
+  // Restore History State
+  // ========================================================================
+  const [showHistoryViewer, setShowHistoryViewer] = useState(false);
+  
+  // Validate paths on the server
+  const validatePaths = useCallback(async (config: PathConfig) => {
+    setIsValidatingPaths(true);
+    try {
+      const result = await refactorConsoleClient.validatePaths(config);
+      setPathValidation({
+        sourcePath: result.validations.sourcePath,
+        destinationPath: result.validations.destinationPath,
+        backupPath: result.validations.backupPath
+      });
+      return result.ok;
+    } catch (error) {
+      console.error('Path validation error:', error);
+      toast.error('Failed to validate paths');
+      return false;
+    } finally {
+      setIsValidatingPaths(false);
+    }
+  }, []);
+  
+  // Save path configuration
+  const handleSavePaths = useCallback(async () => {
+    const isValid = await validatePaths(pathConfig);
+    if (isValid) {
+      refactorConsoleClient.savePaths(pathConfig);
+      toast.success('Path configuration saved');
+      setShowPathConfig(false);
+    } else {
+      toast.warning('Some paths are invalid. Please check the validation messages.');
+    }
+  }, [pathConfig, validatePaths]);
+  
+  // Reset paths to defaults
+  const handleResetPaths = useCallback(() => {
+    setPathConfig({ ...DEFAULT_PATH_CONFIG });
+    setPathValidation({});
+    refactorConsoleClient.clearSavedPaths();
+    toast.info('Paths reset to defaults');
+  }, []);
   
   // Sync phase1Report from hook
   useEffect(() => {
@@ -127,6 +227,48 @@ const RefactorConsole: React.FC = () => {
     verifyConnection();
   }, []);
 
+  // Initialize sourceType and snapshotId from saved config on mount
+  useEffect(() => {
+    const savedConfig = refactorConsoleClient.getSavedPaths();
+    if (savedConfig.sourceType) {
+      setSourceType(savedConfig.sourceType);
+    }
+    if (savedConfig.snapshotId) {
+      setSelectedSnapshot(savedConfig.snapshotId);
+    }
+  }, []);
+
+  // Load available snapshots when sourceType changes
+  useEffect(() => {
+    const loadSnapshots = async () => {
+      setIsLoadingSnapshots(true);
+      setSnapshotError(null);
+      try {
+        const result = await refactorConsoleClient.fetchSnapshots(sourceType);
+        setAvailableSnapshots(result.snapshots);
+        
+        // Auto-select most recent snapshot if available and no snapshot is currently selected
+        if (result.defaultSnapshot && !selectedSnapshot) {
+          setSelectedSnapshot(result.defaultSnapshot.id);
+          toast.info(`Auto-selected most recent snapshot: ${result.defaultSnapshot.label}`);
+        }
+      } catch (error) {
+        console.error('Failed to load snapshots:', error);
+        setSnapshotError(error instanceof Error ? error.message : 'Failed to load snapshots');
+        setAvailableSnapshots([]);
+        
+        // If it's a Samba mount error for remote, show warning
+        if (sourceType === 'remote' && error instanceof Error && error.message.includes('mount')) {
+          toast.warning('Remote Samba share is not mounted. Please ensure /mnt/refactor-remote is accessible.');
+        }
+      } finally {
+        setIsLoadingSnapshots(false);
+      }
+    };
+
+    loadSnapshots();
+  }, [sourceType]);
+
   // Sort options configuration
   const sortOptions: SortOption[] = [
     { key: 'score', direction: 'desc', label: 'Usage Score (High to Low)' },
@@ -157,7 +299,16 @@ const RefactorConsole: React.FC = () => {
 
   const handleRefresh = async () => {
     try {
-      await refreshScan();
+      // Save sourceType and snapshotId to pathConfig for persistence
+      const updatedPathConfig = {
+        ...pathConfig,
+        sourceType,
+        snapshotId: selectedSnapshot || undefined
+      };
+      refactorConsoleClient.savePaths(updatedPathConfig);
+      
+      // Call loadScanData directly with sourceType and snapshotId
+      await loadScanData(true, compareWithBackup, sourceType, selectedSnapshot || undefined);
       toast.success('Scan data refreshed');
     } catch (error) {
       toast.error('Failed to refresh scan data');
@@ -382,24 +533,9 @@ const RefactorConsole: React.FC = () => {
         break;
         
       case 'restore':
+        // Show preview/diff modal before restoring
         if (node.recoveryStatus === 'missing_in_prod' && node.backupPath) {
-          try {
-            const confirmed = window.confirm(
-              `Restore file from backup?\n\n` +
-              `File: ${node.relPath}\n` +
-              `Backup: ${node.backupPath}\n\n` +
-              `This will copy the file from the September 2025 backup to production.`
-            );
-            
-            if (confirmed) {
-              await refactorConsoleClient.restore(node.relPath);
-              toast.success(`File restored: ${node.relPath}`);
-              // Refresh scan to update status
-              await refreshScan();
-            }
-          } catch (error) {
-            toast.error(`Failed to restore file: ${error instanceof Error ? error.message : 'Unknown error'}`);
-          }
+          handlePreviewRestore(node.relPath);
         }
         break;
         
@@ -435,6 +571,67 @@ const RefactorConsole: React.FC = () => {
 
   const handleToggleExpanded = (path: string) => {
     toggleExpanded(path);
+  };
+
+  // Handle preview restore (dry run with diff)
+  const handlePreviewRestore = async (relPath: string) => {
+    setIsLoadingPreview(true);
+    setPendingRestorePath(relPath);
+    
+    try {
+      const preview = await refactorConsoleClient.previewRestore(
+        relPath,
+        undefined,
+        sourceType,
+        selectedSnapshot || undefined
+      );
+      
+      setPreviewData(preview);
+      setShowDiffModal(true);
+    } catch (error) {
+      console.error('Preview failed:', error);
+      toast.error(`Failed to preview file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
+  // Handle confirmed restore after preview
+  const handleConfirmRestore = async () => {
+    if (!pendingRestorePath) return;
+    
+    setIsRestoring(true);
+    
+    try {
+      await refactorConsoleClient.restore(
+        pendingRestorePath,
+        undefined,
+        sourceType,
+        selectedSnapshot || undefined
+      );
+      
+      toast.success(`File restored: ${pendingRestorePath}`);
+      
+      // Close modal
+      setShowDiffModal(false);
+      setPreviewData(null);
+      setPendingRestorePath(null);
+      
+      // Refresh scan to update status
+      await loadScanData(true, compareWithBackup, sourceType, selectedSnapshot || undefined);
+    } catch (error) {
+      console.error('Restore failed:', error);
+      toast.error(`Failed to restore file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsRestoring(false);
+    }
+  };
+
+  // Handle cancel diff modal
+  const handleCancelDiff = () => {
+    setShowDiffModal(false);
+    setPreviewData(null);
+    setPendingRestorePath(null);
   };
 
   // Modal component for showing details
@@ -669,9 +866,40 @@ const RefactorConsole: React.FC = () => {
                   )}
                 </Box>
               </Box>
-              <p style={{ marginTop: '0.25rem', color: theme.palette.text.secondary }}>
-                Analyze your codebase for duplicates, usage patterns, and refactoring opportunities
-              </p>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
+                <p style={{ color: theme.palette.text.secondary, margin: 0 }}>
+                  Analyze your codebase for duplicates, usage patterns, and refactoring opportunities
+                </p>
+                <Tooltip title="Configure source and destination paths">
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setShowPathConfig(!showPathConfig)}
+                    sx={{ 
+                      color: showPathConfig ? theme.palette.primary.main : theme.palette.text.secondary,
+                      bgcolor: showPathConfig ? alpha(theme.palette.primary.main, 0.1) : 'transparent'
+                    }}
+                  >
+                    <Settings className="w-4 h-4" />
+                  </IconButton>
+                </Tooltip>
+                {/* Source Type & Snapshot Indicator */}
+                <Box sx={{ display: 'flex', gap: 0.5, ml: 1 }}>
+                  <Chip 
+                    label={sourceType === 'local' ? 'Local' : 'Remote'} 
+                    size="small" 
+                    color={sourceType === 'remote' ? 'secondary' : 'default'}
+                    sx={{ height: 20, fontSize: '0.7rem' }}
+                  />
+                  {selectedSnapshot && (
+                    <Chip 
+                      label={`📅 ${selectedSnapshot}`} 
+                      size="small" 
+                      color="primary"
+                      sx={{ height: 20, fontSize: '0.7rem' }}
+                    />
+                  )}
+                </Box>
+              </Box>
               {healthStatus === 'error' && healthError && (
                 <p style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: theme.palette.error.main }}>
                   ⚠️ {healthError}
@@ -689,54 +917,68 @@ const RefactorConsole: React.FC = () => {
                 </Box>
               )}
               
-              {/* Phase 1 Analysis Button */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
+              {/* Action Buttons */}
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                {/* Restore History Button */}
                 <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handlePhase1Analysis}
-                  disabled={phase1State === 'running' || phase1State === 'starting' || healthStatus !== 'ok'}
-                  startIcon={<Archive className={`w-4 h-4 ${(phase1State === 'running' || phase1State === 'starting') ? 'animate-spin' : ''}`} />}
+                  variant="outlined"
+                  onClick={() => setShowHistoryViewer(true)}
+                  startIcon={<History className="w-4 h-4" />}
                   sx={{ textTransform: 'none' }}
-                  title={
-                    healthStatus !== 'ok' 
-                      ? 'Please wait for API health check to complete' 
-                      : phase1State === 'running' || phase1State === 'starting'
-                      ? 'Phase 1 analysis in progress'
-                      : 'Phase 1: Discovery & Gap Analysis'
-                  }
+                  title="View restore history"
                 >
-                  Phase 1 Analysis
+                  History
                 </Button>
-                {(phase1State === 'running' || phase1State === 'starting') && (
-                  <Box sx={{ fontSize: '0.75rem', color: 'text.secondary', width: '100%' }}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span>{phase1CurrentStep || 'Processing...'}</span>
-                      <span>{phase1Progress}%</span>
-                    </div>
-                    <Box sx={{ 
-                      width: '100%',
-                      bgcolor: 'action.hover',
-                      borderRadius: '9999px',
-                      height: 6
-                    }}>
-                      <Box 
-                        sx={{
-                          bgcolor: theme.palette.secondary.main,
-                          height: 6,
-                          borderRadius: '9999px',
-                          transition: 'width 0.3s'
-                        }}
-                        style={{ width: `${phase1Progress}%` }}
-                      />
+                
+                {/* Phase 1 Analysis Button */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handlePhase1Analysis}
+                    disabled={phase1State === 'running' || phase1State === 'starting' || healthStatus !== 'ok'}
+                    startIcon={<Archive className={`w-4 h-4 ${(phase1State === 'running' || phase1State === 'starting') ? 'animate-spin' : ''}`} />}
+                    sx={{ textTransform: 'none' }}
+                    title={
+                      healthStatus !== 'ok' 
+                        ? 'Please wait for API health check to complete' 
+                        : phase1State === 'running' || phase1State === 'starting'
+                        ? 'Phase 1 analysis in progress'
+                        : 'Phase 1: Discovery & Gap Analysis'
+                    }
+                  >
+                    Phase 1 Analysis
+                  </Button>
+                  {(phase1State === 'running' || phase1State === 'starting') && (
+                    <Box sx={{ fontSize: '0.75rem', color: 'text.secondary', width: '100%' }}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span>{phase1CurrentStep || 'Processing...'}</span>
+                        <span>{phase1Progress}%</span>
+                      </div>
+                      <Box sx={{ 
+                        width: '100%',
+                        bgcolor: 'action.hover',
+                        borderRadius: '9999px',
+                        height: 6
+                      }}>
+                        <Box 
+                          sx={{
+                            bgcolor: theme.palette.secondary.main,
+                            height: 6,
+                            borderRadius: '9999px',
+                            transition: 'width 0.3s'
+                          }}
+                          style={{ width: `${phase1Progress}%` }}
+                        />
+                      </Box>
                     </Box>
-                  </Box>
-                )}
-                {phase1State === 'error' && phase1Error && (
-                  <Box sx={{ fontSize: '0.75rem', color: 'error.main', width: '100%' }}>
-                    Error: {phase1Error}
-                  </Box>
-                )}
+                  )}
+                  {phase1State === 'error' && phase1Error && (
+                    <Box sx={{ fontSize: '0.75rem', color: 'error.main', width: '100%' }}>
+                      Error: {phase1Error}
+                    </Box>
+                  )}
+                </Box>
               </Box>
               
               <Button
@@ -758,6 +1000,221 @@ const RefactorConsole: React.FC = () => {
           </Box>
         </Box>
       </Box>
+
+      {/* Path Configuration Panel */}
+      <Collapse in={showPathConfig}>
+        <Paper 
+          elevation={0}
+          sx={{ 
+            mx: 3, 
+            mt: 2,
+            p: 2, 
+            bgcolor: alpha(theme.palette.primary.main, 0.05),
+            border: 1,
+            borderColor: alpha(theme.palette.primary.main, 0.2),
+            borderRadius: 1
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <FolderOpen className="w-5 h-5" style={{ color: theme.palette.primary.main }} />
+              <h3 style={{ fontWeight: 600, color: theme.palette.text.primary, margin: 0 }}>
+                Path Configuration
+              </h3>
+              <Chip 
+                label="Persisted in localStorage" 
+                size="small" 
+                sx={{ fontSize: '0.7rem', height: 20 }}
+              />
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleResetPaths}
+                sx={{ textTransform: 'none' }}
+              >
+                Reset to Defaults
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleSavePaths}
+                disabled={isValidatingPaths}
+                startIcon={isValidatingPaths ? <CircularProgress size={14} /> : <Check className="w-4 h-4" />}
+                sx={{ textTransform: 'none' }}
+              >
+                {isValidatingPaths ? 'Validating...' : 'Save & Validate'}
+              </Button>
+            </Box>
+          </Box>
+          
+          {/* Source Type & Snapshot Selection */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2, mb: 2 }}>
+            {/* Source Type Toggle */}
+            <Box>
+              <label style={{ 
+                display: 'block', 
+                fontSize: '0.875rem', 
+                fontWeight: 500, 
+                color: theme.palette.text.primary, 
+                marginBottom: '0.5rem' 
+              }}>
+                Source Type
+              </label>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant={sourceType === 'local' ? 'contained' : 'outlined'}
+                  size="small"
+                  onClick={() => setSourceType('local')}
+                  sx={{ flex: 1, textTransform: 'none' }}
+                >
+                  Local File System
+                </Button>
+                <Button
+                  variant={sourceType === 'remote' ? 'contained' : 'outlined'}
+                  size="small"
+                  onClick={() => setSourceType('remote')}
+                  sx={{ flex: 1, textTransform: 'none' }}
+                  color="secondary"
+                >
+                  Remote Samba
+                </Button>
+              </Box>
+              <Box sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.5 }}>
+                {sourceType === 'local' ? 'Using local production files' : 'Using remote Samba mount (192.168.1.221)'}
+              </Box>
+            </Box>
+            
+            {/* Snapshot Selection */}
+            <Box>
+              <label style={{ 
+                display: 'block', 
+                fontSize: '0.875rem', 
+                fontWeight: 500, 
+                color: theme.palette.text.primary, 
+                marginBottom: '0.5rem' 
+              }}>
+                Snapshot (MM-YYYY)
+              </label>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                value={selectedSnapshot || ''}
+                onChange={(e) => setSelectedSnapshot(e.target.value || null)}
+                disabled={isLoadingSnapshots || availableSnapshots.length === 0}
+                helperText={
+                  isLoadingSnapshots ? 'Loading snapshots...' :
+                  snapshotError ? `Error: ${snapshotError}` :
+                  availableSnapshots.length === 0 ? 'No snapshots available' :
+                  selectedSnapshot ? `Selected: ${availableSnapshots.find(s => s.id === selectedSnapshot)?.label || selectedSnapshot}` :
+                  'Select a snapshot to scan'
+                }
+                error={!!snapshotError}
+                SelectProps={{
+                  displayEmpty: true
+                }}
+              >
+                <option value="">Current / Latest</option>
+                {availableSnapshots.map((snapshot) => (
+                  <option key={snapshot.id} value={snapshot.id}>
+                    {snapshot.label} ({snapshot.id})
+                  </option>
+                ))}
+              </TextField>
+            </Box>
+          </Box>
+          
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+            {/* Source Path */}
+            <Box>
+              <TextField
+                fullWidth
+                size="small"
+                label="Source Directory"
+                placeholder="/var/www/orthodoxmetrics/prod/refactor-src/"
+                value={pathConfig.sourcePath}
+                onChange={(e) => setPathConfig(prev => ({ ...prev, sourcePath: e.target.value }))}
+                helperText={
+                  pathValidation.sourcePath?.error || 
+                  (pathValidation.sourcePath?.isValid 
+                    ? (pathValidation.sourcePath.exists ? '✓ Valid & exists' : '⚠ Valid but does not exist')
+                    : 'Directory containing files to restore from')
+                }
+                error={pathValidation.sourcePath?.isValid === false}
+                InputProps={{
+                  sx: { fontFamily: 'monospace', fontSize: '0.85rem' },
+                  endAdornment: pathValidation.sourcePath?.isValid && (
+                    <Check className="w-4 h-4" style={{ color: theme.palette.success.main }} />
+                  )
+                }}
+              />
+            </Box>
+            
+            {/* Destination Path */}
+            <Box>
+              <TextField
+                fullWidth
+                size="small"
+                label="Destination Directory"
+                placeholder="/var/www/orthodoxmetrics/prod/front-end/src/"
+                value={pathConfig.destinationPath}
+                onChange={(e) => setPathConfig(prev => ({ ...prev, destinationPath: e.target.value }))}
+                helperText={
+                  pathValidation.destinationPath?.error || 
+                  (pathValidation.destinationPath?.isValid 
+                    ? (pathValidation.destinationPath.exists ? '✓ Valid & exists' : '⚠ Valid but does not exist')
+                    : 'Directory where files will be restored to')
+                }
+                error={pathValidation.destinationPath?.isValid === false}
+                InputProps={{
+                  sx: { fontFamily: 'monospace', fontSize: '0.85rem' },
+                  endAdornment: pathValidation.destinationPath?.isValid && (
+                    <Check className="w-4 h-4" style={{ color: theme.palette.success.main }} />
+                  )
+                }}
+              />
+            </Box>
+            
+            {/* Backup Path */}
+            <Box>
+              <TextField
+                fullWidth
+                size="small"
+                label="Backup Directory (for Gap Analysis)"
+                placeholder="/var/www/orthodoxmetrics/backup"
+                value={pathConfig.backupPath || ''}
+                onChange={(e) => setPathConfig(prev => ({ ...prev, backupPath: e.target.value }))}
+                helperText={
+                  pathValidation.backupPath?.error || 
+                  (pathValidation.backupPath?.isValid 
+                    ? (pathValidation.backupPath.exists ? '✓ Valid & exists' : '⚠ Valid but does not exist')
+                    : 'September 2025 backup location for recovery')
+                }
+                error={pathValidation.backupPath?.isValid === false}
+                InputProps={{
+                  sx: { fontFamily: 'monospace', fontSize: '0.85rem' },
+                  endAdornment: pathValidation.backupPath?.isValid && (
+                    <Check className="w-4 h-4" style={{ color: theme.palette.success.main }} />
+                  )
+                }}
+              />
+            </Box>
+          </Box>
+          
+          <Box sx={{ mt: 2, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider' }}>
+            <p style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, margin: 0 }}>
+              <strong>Security:</strong> All paths must be within <code style={{ 
+                backgroundColor: alpha(theme.palette.primary.main, 0.1), 
+                padding: '0 4px', 
+                borderRadius: 2 
+              }}>/var/www/orthodoxmetrics/</code>. 
+              Path traversal and shell injection are blocked.
+            </p>
+          </Box>
+        </Paper>
+      </Collapse>
 
       {/* Main Content */}
       <Box sx={{ px: 3, py: 3 }}>
@@ -1126,6 +1583,22 @@ const RefactorConsole: React.FC = () => {
           onClose={() => setShowModal(null)}
         />
       )}
+      
+      {/* Diff View Modal */}
+      <DiffViewModal
+        open={showDiffModal}
+        onClose={handleCancelDiff}
+        onConfirmRestore={handleConfirmRestore}
+        preview={previewData?.preview || null}
+        dependencies={previewData?.dependencies || null}
+        isRestoring={isRestoring}
+      />
+      
+      {/* Restore History Viewer */}
+      <RestoreHistoryViewer
+        open={showHistoryViewer}
+        onClose={() => setShowHistoryViewer(false)}
+      />
     </Box>
   );
 };

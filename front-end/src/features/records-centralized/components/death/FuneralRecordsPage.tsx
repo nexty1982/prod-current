@@ -31,7 +31,7 @@ import {
   Chip,
   Stack
 } from '@mui/material';
-import { IconSearch, IconEdit, IconEye, IconTrash, IconRefresh } from '@tabler/icons-react';
+import { IconSearch, IconEdit, IconEye, IconTrash, IconRefresh, IconReport } from '@tabler/icons-react';
 import { useAuth } from '../../../../context/AuthContext';
 import { formatRecordDate } from '../../../../utils/formatDate';
 
@@ -339,6 +339,14 @@ const FuneralRecordsPage: React.FC = () => {
             onClick={() => navigate(`/apps/records/funeral/new?church_id=${churchId}`)}
           >
             New Record
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<IconReport size={18} />}
+            onClick={() => navigate(`/apps/interactive-reports/create?recordType=funeral&churchId=${churchId}`)}
+            sx={{ ml: 1 }}
+          >
+            Generate Report
           </Button>
         </Stack>
       </Paper>

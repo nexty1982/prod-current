@@ -25,7 +25,7 @@ interface UseRefactorScanReturn {
   setExpandedPaths: React.Dispatch<React.SetStateAction<Set<string>>>;
   
   // Actions
-  loadScanData: (rebuild?: boolean, compareWithBackup?: boolean) => Promise<void>;
+  loadScanData: (rebuild?: boolean, compareWithBackup?: boolean, sourceType?: 'local' | 'remote', snapshotId?: string) => Promise<void>;
   refreshScan: () => Promise<void>;
   
   // Utilities
@@ -87,12 +87,17 @@ export const useRefactorScan = (): UseRefactorScanReturn => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
 
   // Load scan data
-  const loadScanData = useCallback(async (rebuild: boolean = false, compareWithBackup: boolean = false) => {
+  const loadScanData = useCallback(async (
+    rebuild: boolean = false, 
+    compareWithBackup: boolean = false,
+    sourceType?: 'local' | 'remote',
+    snapshotId?: string
+  ) => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const data = await refactorConsoleClient.scan(rebuild, compareWithBackup);
+      const data = await refactorConsoleClient.scan(rebuild, compareWithBackup, undefined, sourceType, snapshotId);
       setScanData(data);
       
       // Auto-expand first level directories

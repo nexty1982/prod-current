@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-01-26T21:14:44.886Z",
+  "generatedAt": "2026-01-27T00:56:59.970Z",
   "root": "/var/www/orthodoxmetrics/prod",
   "summary": {
-    "totalFiles": 3073,
-    "totalDirs": 747,
+    "totalFiles": 3078,
+    "totalDirs": 749,
     "duplicates": 361,
     "likelyInProd": 1,
-    "highRisk": 1171,
-    "inDevelopment": 2025,
+    "highRisk": 1173,
+    "inDevelopment": 2030,
     "legacyOrDupes": 623
   },
   "nodes": [
@@ -605,7 +605,7 @@
       "relPath": "front-end/src/context",
       "type": "dir",
       "size": 4096,
-      "mtimeMs": 1769286951832.1963,
+      "mtimeMs": 1769469023416.7395,
       "classification": "yellow",
       "reasons": [
         "Low usage score",
@@ -979,8 +979,8 @@
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/App.tsx",
       "relPath": "front-end/src/App.tsx",
       "type": "file",
-      "size": 4086,
-      "mtimeMs": 1769290923976.754,
+      "size": 4234,
+      "mtimeMs": 1769469074003.3618,
       "classification": "red",
       "reasons": [
         "Near-duplicate detected"
@@ -1003,7 +1003,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "3f26647c88cecf48a1e4d19a77c19a83"
+      "hash": "4e693ed7611331d834572318049f9a6e"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/App.css",
@@ -1258,17 +1258,16 @@
       "type": "file",
       "size": 3113,
       "mtimeMs": 1769286870781.604,
-      "classification": "yellow",
+      "classification": "orange",
       "reasons": [
-        "Low usage score",
-        "Recently modified"
+        "High usage score"
       ],
       "usage": {
-        "importRefs": 0,
+        "importRefs": 2,
         "serverRefs": 0,
         "routeRefs": 0,
         "runtimeHints": 0,
-        "score": 0
+        "score": 8
       },
       "featurePathMatch": false,
       "inDevelTree": false,
@@ -2062,8 +2061,8 @@
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/routes/Router.tsx",
       "relPath": "front-end/src/routes/Router.tsx",
       "type": "file",
-      "size": 49409,
-      "mtimeMs": 1769426563578.026,
+      "size": 51185,
+      "mtimeMs": 1769469157759.1802,
       "classification": "orange",
       "reasons": [
         "High usage score"
@@ -2077,7 +2076,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "1192f5487220558cab1c50286c182621"
+      "hash": "9348a194ad0ba3295b73eca1fdfdfc88"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/pages/devel",
@@ -3914,6 +3913,27 @@
       "hash": "2bc562287de7bd3ab3142fb489116fcc"
     },
     {
+      "path": "/var/www/orthodoxmetrics/prod/front-end/src/context/EnvironmentContext.tsx",
+      "relPath": "front-end/src/context/EnvironmentContext.tsx",
+      "type": "file",
+      "size": 6200,
+      "mtimeMs": 1769469023504.2192,
+      "classification": "orange",
+      "reasons": [
+        "High usage score"
+      ],
+      "usage": {
+        "importRefs": 3,
+        "serverRefs": 0,
+        "routeRefs": 0,
+        "runtimeHints": 0,
+        "score": 12
+      },
+      "featurePathMatch": false,
+      "inDevelTree": false,
+      "hash": "137d54b7b824ed6d839715f87855678a"
+    },
+    {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/context/EmailContext",
       "relPath": "front-end/src/context/EmailContext",
       "type": "dir",
@@ -4114,11 +4134,11 @@
         "High usage score"
       ],
       "usage": {
-        "importRefs": 51,
+        "importRefs": 53,
         "serverRefs": 0,
         "routeRefs": 0,
         "runtimeHints": 0,
-        "score": 204
+        "score": 212
       },
       "featurePathMatch": false,
       "inDevelTree": false,
@@ -4172,22 +4192,22 @@
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/config/featureFlags.ts",
       "relPath": "front-end/src/config/featureFlags.ts",
       "type": "file",
-      "size": 1087,
-      "mtimeMs": 1769286950899.3696,
+      "size": 2652,
+      "mtimeMs": 1769469090200.7583,
       "classification": "orange",
       "reasons": [
-        "Unclassified - manual review needed"
+        "High usage score"
       ],
       "usage": {
-        "importRefs": 1,
+        "importRefs": 2,
         "serverRefs": 0,
         "routeRefs": 0,
         "runtimeHints": 0,
-        "score": 4
+        "score": 8
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "7ec3c58ad903a3de3d8a06d7d2544b79"
+      "hash": "ddf2e461b2b3c64df228b0cad08de9a4"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/config/components.registry.ts",
@@ -4488,7 +4508,7 @@
       "relPath": "front-end/src/components/routing",
       "type": "dir",
       "size": 4096,
-      "mtimeMs": 1769286947668.2017,
+      "mtimeMs": 1769469122672.6455,
       "classification": "yellow",
       "reasons": [
         "Low usage score",
@@ -8810,11 +8830,12 @@
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/shared/lib/churchService.ts",
       "relPath": "front-end/src/shared/lib/churchService.ts",
       "type": "file",
-      "size": 833,
-      "mtimeMs": 1759224634000,
-      "classification": "orange",
+      "size": 6057,
+      "mtimeMs": 1769465556997.1023,
+      "classification": "yellow",
       "reasons": [
-        "Unclassified - manual review needed"
+        "Low usage score",
+        "Recently modified"
       ],
       "usage": {
         "importRefs": 0,
@@ -8825,7 +8846,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "4a3bd1936026c6cad16937296878de1e"
+      "hash": "fc530000c01f8054d2f3c9338413c85b"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/shared/lib/buildInfo.ts",
@@ -15499,6 +15520,48 @@
       "featurePathMatch": false,
       "inDevelTree": false,
       "hash": "8544325b6fd74bc3f8a147a3e62be34f"
+    },
+    {
+      "path": "/var/www/orthodoxmetrics/prod/front-end/src/components/routing/RoleGatedFeature.tsx",
+      "relPath": "front-end/src/components/routing/RoleGatedFeature.tsx",
+      "type": "file",
+      "size": 6436,
+      "mtimeMs": 1769469051068.9753,
+      "classification": "orange",
+      "reasons": [
+        "Unclassified - manual review needed"
+      ],
+      "usage": {
+        "importRefs": 1,
+        "serverRefs": 0,
+        "routeRefs": 0,
+        "runtimeHints": 0,
+        "score": 4
+      },
+      "featurePathMatch": false,
+      "inDevelTree": false,
+      "hash": "19a1f18424fbacd05a12bfa3c6c3d1ca"
+    },
+    {
+      "path": "/var/www/orthodoxmetrics/prod/front-end/src/components/routing/EnvironmentAwarePage.tsx",
+      "relPath": "front-end/src/components/routing/EnvironmentAwarePage.tsx",
+      "type": "file",
+      "size": 4028,
+      "mtimeMs": 1769469122768.646,
+      "classification": "orange",
+      "reasons": [
+        "Unclassified - manual review needed"
+      ],
+      "usage": {
+        "importRefs": 1,
+        "serverRefs": 0,
+        "routeRefs": 0,
+        "runtimeHints": 0,
+        "score": 4
+      },
+      "featurePathMatch": false,
+      "inDevelTree": false,
+      "hash": "408904106e7690c9a7323180a9ec2f85"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/components/routing/BerryRedirect.tsx",
@@ -22493,11 +22556,12 @@
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/records-centralized/constants/index.ts",
       "relPath": "front-end/src/features/records-centralized/constants/index.ts",
       "type": "file",
-      "size": 967,
-      "mtimeMs": 1759224634000,
-      "classification": "orange",
+      "size": 7279,
+      "mtimeMs": 1769468138559.322,
+      "classification": "yellow",
       "reasons": [
-        "Unclassified - manual review needed"
+        "Low usage score",
+        "Recently modified"
       ],
       "usage": {
         "importRefs": 0,
@@ -22508,7 +22572,7 @@
       },
       "featurePathMatch": true,
       "inDevelTree": false,
-      "hash": "71c8fda50cd64f5ea6a696ec7840a32a"
+      "hash": "b50ccbb866ce07a18bc02807540b4dc2"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/records-centralized/components/schemas.ts",
@@ -25771,8 +25835,8 @@
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/devel-tools/refactor-console/RefactorConsole.tsx",
       "relPath": "front-end/src/features/devel-tools/refactor-console/RefactorConsole.tsx",
       "type": "file",
-      "size": 52751,
-      "mtimeMs": 1769426015962.239,
+      "size": 61971,
+      "mtimeMs": 1769473252140.2615,
       "classification": "yellow",
       "reasons": [
         "In development tree",
@@ -25788,7 +25852,7 @@
       },
       "featurePathMatch": true,
       "inDevelTree": true,
-      "hash": "e5b3cc0abedbb7213b0081cbc2af23b0"
+      "hash": "b21c1f63893568da70a945a23efe10d5"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/devel-tools/refactor-console/README.md",
@@ -45603,8 +45667,8 @@
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/records-centralized/components/marriage/MarriageRecordsPage.tsx",
       "relPath": "front-end/src/features/records-centralized/components/marriage/MarriageRecordsPage.tsx",
       "type": "file",
-      "size": 16507,
-      "mtimeMs": 1769396171112.3064,
+      "size": 18810,
+      "mtimeMs": 1769463102671.374,
       "classification": "orange",
       "reasons": [
         "Unclassified - manual review needed"
@@ -45618,7 +45682,7 @@
       },
       "featurePathMatch": true,
       "inDevelTree": false,
-      "hash": "22674b59491debe0a878824316bd5901"
+      "hash": "beb529cd00719968cda63e5e1f4494a6"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/records-centralized/components/marriage/MarriageRecords.tsx",
@@ -46617,8 +46681,8 @@
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/records-centralized/components/death/FuneralRecordsPage.tsx",
       "relPath": "front-end/src/features/records-centralized/components/death/FuneralRecordsPage.tsx",
       "type": "file",
-      "size": 16038,
-      "mtimeMs": 1769396171405.78,
+      "size": 17482,
+      "mtimeMs": 1769463119968.7505,
       "classification": "orange",
       "reasons": [
         "Unclassified - manual review needed"
@@ -46632,7 +46696,7 @@
       },
       "featurePathMatch": true,
       "inDevelTree": false,
-      "hash": "26cf038773668ed55eb7735301d3e03c"
+      "hash": "098b26b192a05ce508d7413179d96b14"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/records-centralized/components/confirmation/index.ts",
@@ -46743,8 +46807,8 @@
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx",
       "relPath": "front-end/src/features/records-centralized/components/baptism/BaptismRecordsPage.tsx",
       "type": "file",
-      "size": 70778,
-      "mtimeMs": 1759224634000,
+      "size": 80680,
+      "mtimeMs": 1769468571253.77,
       "classification": "orange",
       "reasons": [
         "Unclassified - manual review needed"
@@ -46758,7 +46822,7 @@
       },
       "featurePathMatch": true,
       "inDevelTree": false,
-      "hash": "e3a9e698da922df58e9300caa5d47f5d"
+      "hash": "7844acff353f1bc71a3ade1d9e7061bd"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/records-centralized/components/baptism/BaptismRecordsComponent.tsx",
@@ -48266,8 +48330,8 @@
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/devel-tools/refactor-console/api/refactorConsoleClient.ts",
       "relPath": "front-end/src/features/devel-tools/refactor-console/api/refactorConsoleClient.ts",
       "type": "file",
-      "size": 8955,
-      "mtimeMs": 1769424093965.3723,
+      "size": 13771,
+      "mtimeMs": 1769473176175.2832,
       "classification": "yellow",
       "reasons": [
         "In development tree",
@@ -48282,7 +48346,7 @@
       },
       "featurePathMatch": true,
       "inDevelTree": true,
-      "hash": "6a7a6d8ce9fb405e630963036177eff0"
+      "hash": "d0e4a105de0999ef1dc7185a6d6c6639"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/front-end/src/features/devel-tools/om-tasks/components/OMAITaskAssignmentWidget.tsx",
@@ -65573,7 +65637,7 @@
       "relPath": "server",
       "type": "dir",
       "size": 4096,
-      "mtimeMs": 1769427474899.2341,
+      "mtimeMs": 1769472889571.4216,
       "classification": "yellow",
       "reasons": [
         "Low usage score",
@@ -65595,6 +65659,27 @@
       "type": "dir",
       "size": 4096,
       "mtimeMs": 1769411653752.294,
+      "classification": "yellow",
+      "reasons": [
+        "Low usage score",
+        "Recently modified"
+      ],
+      "usage": {
+        "importRefs": 0,
+        "serverRefs": 0,
+        "routeRefs": 0,
+        "runtimeHints": 0,
+        "score": 0
+      },
+      "featurePathMatch": false,
+      "inDevelTree": false
+    },
+    {
+      "path": "/var/www/orthodoxmetrics/prod/server/webhooks",
+      "relPath": "server/webhooks",
+      "type": "dir",
+      "size": 4096,
+      "mtimeMs": 1769472889571.4216,
       "classification": "yellow",
       "reasons": [
         "Low usage score",
@@ -66132,6 +66217,27 @@
       "inDevelTree": false
     },
     {
+      "path": "/var/www/orthodoxmetrics/prod/server/integrations",
+      "relPath": "server/integrations",
+      "type": "dir",
+      "size": 4096,
+      "mtimeMs": 1769472889571.4216,
+      "classification": "yellow",
+      "reasons": [
+        "Low usage score",
+        "Recently modified"
+      ],
+      "usage": {
+        "importRefs": 0,
+        "serverRefs": 0,
+        "routeRefs": 0,
+        "runtimeHints": 0,
+        "score": 0
+      },
+      "featurePathMatch": false,
+      "inDevelTree": false
+    },
+    {
       "path": "/var/www/orthodoxmetrics/prod/server/index.js",
       "relPath": "server/index.js",
       "type": "file",
@@ -66365,7 +66471,7 @@
       "relPath": "server/config",
       "type": "dir",
       "size": 4096,
-      "mtimeMs": 1769411655972.2993,
+      "mtimeMs": 1769468989936.775,
       "classification": "orange",
       "reasons": [
         "High usage score"
@@ -66426,8 +66532,8 @@
       "path": "/var/www/orthodoxmetrics/prod/server/build-history.json",
       "relPath": "server/build-history.json",
       "type": "file",
-      "size": 226762,
-      "mtimeMs": 1769426114609.7747,
+      "size": 275585,
+      "mtimeMs": 1769469491144.3982,
       "classification": "yellow",
       "reasons": [
         "Low usage score",
@@ -66442,7 +66548,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "9832f5c611a510c7a9510600b136df7d"
+      "hash": "5bbf8651086e2555d7b57d4f1a17cb48"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/server/baptismCertificates.js",
@@ -70212,8 +70318,8 @@
       "path": "/var/www/orthodoxmetrics/prod/server/scripts/build-smart.js",
       "relPath": "server/scripts/build-smart.js",
       "type": "file",
-      "size": 18032,
-      "mtimeMs": 1769411656164.2998,
+      "size": 25563,
+      "mtimeMs": 1769466082432.3438,
       "classification": "yellow",
       "reasons": [
         "Low usage score",
@@ -70228,7 +70334,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "ffcca8453148b24d302547b5cf665c2e"
+      "hash": "1f77b84751dbd24e2d8483a8f849e41c"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/server/scripts/build-progress.js",
@@ -73958,7 +74064,7 @@
       "relPath": "server/database/migrations",
       "type": "dir",
       "size": 4096,
-      "mtimeMs": 1769390825692.597,
+      "mtimeMs": 1769463754845.4146,
       "classification": "yellow",
       "reasons": [
         "Low usage score",
@@ -75778,6 +75884,28 @@
       "hash": "7c6c22498c1b53872419e41474398d59"
     },
     {
+      "path": "/var/www/orthodoxmetrics/prod/server/config/nginx-latest-environment.conf",
+      "relPath": "server/config/nginx-latest-environment.conf",
+      "type": "file",
+      "size": 4938,
+      "mtimeMs": 1769468990435.6653,
+      "classification": "yellow",
+      "reasons": [
+        "Low usage score",
+        "Recently modified"
+      ],
+      "usage": {
+        "importRefs": 0,
+        "serverRefs": 0,
+        "routeRefs": 0,
+        "runtimeHints": 0,
+        "score": 0
+      },
+      "featurePathMatch": false,
+      "inDevelTree": false,
+      "hash": "55ade4cdf6296900aeaae75c11553b6d"
+    },
+    {
       "path": "/var/www/orthodoxmetrics/prod/server/config/db.js.bak",
       "relPath": "server/config/db.js.bak",
       "type": "file",
@@ -77033,8 +77161,8 @@
       "path": "/var/www/orthodoxmetrics/prod/server/src/utils/dateFormatter.js",
       "relPath": "server/src/utils/dateFormatter.js",
       "type": "file",
-      "size": 11337,
-      "mtimeMs": 1769411654532.296,
+      "size": 13089,
+      "mtimeMs": 1769468112454.963,
       "classification": "yellow",
       "reasons": [
         "Low usage score",
@@ -77049,7 +77177,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "dc0a9f1b77eb3ffacdab63a7569f4697"
+      "hash": "78f52b714c381edde3a7fb8e4396c918"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/server/src/utils/createReactSite.js",
@@ -78069,8 +78197,8 @@
       "path": "/var/www/orthodoxmetrics/prod/server/src/routes/refactorConsole.ts",
       "relPath": "server/src/routes/refactorConsole.ts",
       "type": "file",
-      "size": 37678,
-      "mtimeMs": 1769425880197.1812,
+      "size": 47184,
+      "mtimeMs": 1769473126411.2688,
       "classification": "orange",
       "reasons": [
         "High usage score"
@@ -78084,7 +78212,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "f5b78791857f6a9071e9eba9478e4ef3"
+      "hash": "5827886cb4ee4beeb7b6c8a41ef57a7c"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/server/src/routes/records",
@@ -78131,8 +78259,8 @@
       "path": "/var/www/orthodoxmetrics/prod/server/src/routes/interactiveReports.js",
       "relPath": "server/src/routes/interactiveReports.js",
       "type": "file",
-      "size": 37079,
-      "mtimeMs": 1769091194096.291,
+      "size": 37390,
+      "mtimeMs": 1769464026602.5876,
       "classification": "orange",
       "reasons": [
         "High usage score"
@@ -78146,7 +78274,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "65f33b238a38b4556e36758fe80bd954"
+      "hash": "7998b06ab55b0b21b5ff38d2c9cac8be"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/server/src/routes/clientApi.js",
@@ -78236,8 +78364,8 @@
       "path": "/var/www/orthodoxmetrics/prod/server/src/routes/auth.ts",
       "relPath": "server/src/routes/auth.ts",
       "type": "file",
-      "size": 3552,
-      "mtimeMs": 1758667549267.5266,
+      "size": 6402,
+      "mtimeMs": 1769469194082.9897,
       "classification": "orange",
       "reasons": [
         "High usage score"
@@ -78251,7 +78379,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "6f3187652fd18e5d1929fee807f7abd0"
+      "hash": "2a775b8457f917ebb71e15235fdb91d1"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/server/src/routes/admin",
@@ -78614,8 +78742,8 @@
       "path": "/var/www/orthodoxmetrics/prod/server/src/middlewares/auth.js",
       "relPath": "server/src/middlewares/auth.js",
       "type": "file",
-      "size": 5008,
-      "mtimeMs": 1758668805913.644,
+      "size": 5715,
+      "mtimeMs": 1769469000233.6924,
       "classification": "orange",
       "reasons": [
         "High usage score"
@@ -78629,7 +78757,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "65745dfc96f1708f94213f49fc869be6"
+      "hash": "ec8b881504df6b56c144a9a997b2a9f8"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/server/src/middlewares/auditLogger.js",
@@ -80815,8 +80943,8 @@
       "path": "/var/www/orthodoxmetrics/prod/server/src/api/churches.js",
       "relPath": "server/src/api/churches.js",
       "type": "file",
-      "size": 27151,
-      "mtimeMs": 1769411655336.2979,
+      "size": 29629,
+      "mtimeMs": 1769465544130.2097,
       "classification": "yellow",
       "reasons": [
         "Low usage score",
@@ -80831,7 +80959,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "7b4ae6069fd5a9a4332a59f7f784364f"
+      "hash": "a2aa09569b121cc4775b055eba9a4d72"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/server/src/api/churchSetupWizard.js",
@@ -81056,7 +81184,7 @@
       "relPath": "server/src/api/baptism.js",
       "type": "file",
       "size": 34480,
-      "mtimeMs": 1769411655508.298,
+      "mtimeMs": 1769464040605.5415,
       "classification": "yellow",
       "reasons": [
         "Low usage score",
@@ -81071,7 +81199,7 @@
       },
       "featurePathMatch": false,
       "inDevelTree": false,
-      "hash": "805c058cfc9e66d07df0bf71323db752"
+      "hash": "a036bc14779a61f5a414509b8e6485f7"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/server/src/api/backend_diagnostics.js",
@@ -82468,9 +82596,49 @@
         "runtimeHints": 0,
         "score": 0
       },
+      "similarity": {
+        "duplicates": [],
+        "nearMatches": [
+          {
+            "target": "/var/www/orthodoxmetrics/prod/server/database/migrations/create_interactive_report_jobs_table.sql",
+            "similarity": 0.8611111111111112
+          }
+        ]
+      },
       "featurePathMatch": false,
       "inDevelTree": false,
       "hash": "56970c14476a5e3d52cdbe56cb2d9751"
+    },
+    {
+      "path": "/var/www/orthodoxmetrics/prod/server/database/migrations/create_interactive_report_jobs_table.sql",
+      "relPath": "server/database/migrations/create_interactive_report_jobs_table.sql",
+      "type": "file",
+      "size": 1470,
+      "mtimeMs": 1769463754911.1877,
+      "classification": "yellow",
+      "reasons": [
+        "Low usage score",
+        "Recently modified"
+      ],
+      "usage": {
+        "importRefs": 0,
+        "serverRefs": 0,
+        "routeRefs": 0,
+        "runtimeHints": 0,
+        "score": 0
+      },
+      "similarity": {
+        "duplicates": [],
+        "nearMatches": [
+          {
+            "target": "/var/www/orthodoxmetrics/prod/server/database/migrations/create_interactive_reports_tables.sql",
+            "similarity": 0.8611111111111112
+          }
+        ]
+      },
+      "featurePathMatch": false,
+      "inDevelTree": false,
+      "hash": "78085d6dd51966377ac0c6c55540ef38"
     },
     {
       "path": "/var/www/orthodoxmetrics/prod/server/database/migrations/create_error_events_table.sql",

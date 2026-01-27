@@ -42,6 +42,7 @@ import {
   Search as SearchIcon,
   FilterList as FilterIcon,
   GetApp as ExportIcon,
+  Assessment as ReportIcon,
   Visibility as ViewIcon,
   Palette as PaletteIcon,
   Settings as SettingsIcon,
@@ -50,6 +51,8 @@ import {
   TableChart as TableChartIcon,
   ViewList as ViewListIcon,
   ExpandLess as IconChevronUp,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import { useTableStyleStore } from '@/store/useTableStyleStore';
 import churchService, { Church } from '@/shared/lib/churchService';
@@ -62,6 +65,9 @@ import ImportRecordsButton from '@/components/ImportRecordsButton';
 import AdvancedGridDialog from '@/features/tables/AdvancedGridDialog';
 import { FIELD_DEFINITIONS, RECORD_TYPES } from '@/features/records-centralized/constants';
 import { formatRecordDate } from '@/utils/formatDate';
+import { enhancedTableStore, THEME_MAP, LiturgicalThemeKey } from '@/store/enhancedTableStore';
+import { AddRecordButton, AdvancedGridButton } from '@/components/records/BrandButtons';
+import adminAPI from '@/api/admin.api';
 
 // Helper to safely parse JSON fields (godparents, witnesses)
 const parseJsonField = (value: any): string[] => {
@@ -452,6 +458,11 @@ const BaptismRecordsPage: React.FC = () => {
   // Advanced Grid Modal State
   const [advancedGridOpen, setAdvancedGridOpen] = useState(false);
 
+  // View Details Dialog state
+  const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
+  const [viewingRecord, setViewingRecord] = useState<BaptismRecord | null>(null);
+  const [viewingRecordIndex, setViewingRecordIndex] = useState<number>(-1);
+
   // Collapsible Panel State
   const [isFiltersCollapsed, setIsFiltersCollapsed] = useState<boolean>(false);
 
@@ -838,19 +849,74 @@ const BaptismRecordsPage: React.FC = () => {
   };
 
   const handleViewRecord = (record: BaptismRecord) => {
-    // TODO: Implement view modal or navigation to detailed view
-    console.log('Viewing record:', record);
-    
-    let recordName = '';
-    if (selectedRecordType === 'marriage') {
-      const groomName = `${record.fname_groom || ''} ${record.lname_groom || ''}`.trim();
-      const brideName = `${record.fname_bride || ''} ${record.lname_bride || ''}`.trim();
-      recordName = `${groomName} & ${brideName}`;
-    } else {
-      recordName = `${record.firstName} ${record.lastName}`;
+    // Find the index of the record in the filtered list for navigation
+    const index = filteredAndSortedRecords.findIndex(r => r.id === record.id);
+    setViewingRecord(record);
+    setViewingRecordIndex(index);
+    setViewDialogOpen(true);
+  };
+
+  // Navigate to previous record in View Details dialog
+  const handlePreviousRecord = () => {
+    if (viewingRecordIndex > 0) {
+      const prevIndex = viewingRecordIndex - 1;
+      setViewingRecord(filteredAndSortedRecords[prevIndex]);
+      setViewingRecordIndex(prevIndex);
     }
+  };
+
+  // Navigate to next record in View Details dialog
+  const handleNextRecord = () => {
+    if (viewingRecordIndex < filteredAndSortedRecords.length - 1) {
+      const nextIndex = viewingRecordIndex + 1;
+      setViewingRecord(filteredAndSortedRecords[nextIndex]);
+      setViewingRecordIndex(nextIndex);
+    }
+  };
+
+  // Close View Details dialog
+  const handleCloseViewDialog = () => {
+    setViewDialogOpen(false);
+    setViewingRecord(null);
+    setViewingRecordIndex(-1);
+  };
+
+  // Edit from View Details dialog
+  const handleEditFromView = () => {
+    if (viewingRecord) {
+      handleCloseViewDialog();
+      handleEditRecord(viewingRecord);
+    }
+  };
+
+  // Generate Certificate (for baptism and marriage records)
+  const handleGenerateCertificate = () => {
+    if (!viewingRecord) return;
     
-    showToast(`Viewing record for ${recordName}`, 'info');
+    // Navigate to certificate generation page with record data
+    // Use churchId from record, selectedChurch, or first available church
+    let churchId = viewingRecord.church_id || selectedChurch;
+    if (!churchId || churchId === 0) {
+      // Fallback to first available church from the churches list
+      churchId = churches.length > 0 ? churches[0].id : 46;
+    }
+    const certUrl = `/apps/certificates/generate?recordType=${selectedRecordType}&recordId=${viewingRecord.id}&churchId=${churchId}`;
+    window.open(certUrl, '_blank');
+  };
+
+  // Get record display name for View Details title
+  const getRecordDisplayName = (record: BaptismRecord | null): string => {
+    if (!record) return '';
+    
+    if (selectedRecordType === 'marriage') {
+      const groomName = `${record.fname_groom || record.groom_first || ''} ${record.lname_groom || record.groom_last || ''}`.trim();
+      const brideName = `${record.fname_bride || record.bride_first || ''} ${record.lname_bride || record.bride_last || ''}`.trim();
+      return `${groomName} & ${brideName}`;
+    } else if (selectedRecordType === 'funeral') {
+      return `${record.deceased_first || record.firstName || ''} ${record.deceased_last || record.lastName || ''}`.trim();
+    } else {
+      return `${record.person_first || record.firstName || ''} ${record.person_last || record.lastName || ''}`.trim();
+    }
   };
 
   const handleDeleteRecord = async (recordId: string) => {
@@ -922,6 +988,12 @@ const BaptismRecordsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Navigate to Interactive Reports with pre-selected record type
+  const handleGenerateReport = () => {
+    const reportUrl = `/apps/interactive-reports/create?recordType=${selectedRecordType}&churchId=${selectedChurch?.id || ""}`;
+    window.location.href = reportUrl;
   };
 
   const handleExport = () => {
@@ -1207,6 +1279,24 @@ const BaptismRecordsPage: React.FC = () => {
                       >
                         Export
                       </Button>
+                      
+                      <Button
+                        variant="contained"
+                        startIcon={<ReportIcon />}
+                        onClick={handleGenerateReport}
+                        disabled={loading || !selectedRecordType}
+                        sx={{ 
+                          background: 'linear-gradient(45deg, #1565C0 30%, #1976D2 90%)',
+                          boxShadow: '0 3px 5px 2px rgba(21, 101, 192, .3)',
+                          '&:hover': {
+                            background: 'linear-gradient(45deg, #0D47A1 30%, #1565C0 90%)',
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 4px 8px 2px rgba(21, 101, 192, .4)',
+                          }
+                        }}
+                      >
+                        Generate Report
+                      </Button>
                     </Stack>
                   </Stack>
                 )}
@@ -1374,17 +1464,17 @@ const BaptismRecordsPage: React.FC = () => {
                             <TableCell sx={getTableCellStyle('body')} align="center">
                               <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }} className="record-actions">
                                 <Tooltip title="View Details">
-                                  <IconButton size="small" onClick={() => handleViewRecord(record)}>
+                                  <IconButton size="small" onClick={() => handleViewRecord(record)} sx={{ color: '#1976d2' }}>
                                     <ViewIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Edit Record">
-                                  <IconButton size="small" onClick={() => handleEditRecord(record)}>
+                                  <IconButton size="small" onClick={() => handleEditRecord(record)} sx={{ color: '#ed6c02' }}>
                                     <EditIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Delete Record">
-                                  <IconButton size="small" onClick={() => handleDeleteRecord(record.id)}>
+                                  <IconButton size="small" onClick={() => handleDeleteRecord(record.id)} sx={{ color: '#d32f2f' }}>
                                     <DeleteIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
@@ -1772,6 +1862,235 @@ const BaptismRecordsPage: React.FC = () => {
                 >
                   {loading ? <CircularProgress size={20} /> : 'Save'}
                 </Button>
+              </DialogActions>
+            </Dialog>
+
+            {/* View Details Dialog */}
+            <Dialog
+              open={viewDialogOpen}
+              onClose={handleCloseViewDialog}
+              maxWidth="md"
+              fullWidth
+              PaperProps={{
+                sx: {
+                  minHeight: '60vh',
+                  maxHeight: '90vh',
+                }
+              }}
+            >
+              <DialogTitle sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                pb: 2
+              }}>
+                <Box>
+                  <Typography variant="h6" component="span">
+                    {selectedRecordType.charAt(0).toUpperCase() + selectedRecordType.slice(1)} Record Details
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    {getRecordDisplayName(viewingRecord)}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {viewingRecordIndex + 1} of {filteredAndSortedRecords.length}
+                  </Typography>
+                  <IconButton 
+                    onClick={handlePreviousRecord} 
+                    disabled={viewingRecordIndex <= 0}
+                    size="small"
+                    sx={{ border: '1px solid', borderColor: 'divider' }}
+                  >
+                    <ChevronLeftIcon />
+                  </IconButton>
+                  <IconButton 
+                    onClick={handleNextRecord} 
+                    disabled={viewingRecordIndex >= filteredAndSortedRecords.length - 1}
+                    size="small"
+                    sx={{ border: '1px solid', borderColor: 'divider' }}
+                  >
+                    <ChevronRightIcon />
+                  </IconButton>
+                </Box>
+              </DialogTitle>
+              <DialogContent sx={{ pt: 3 }}>
+                {viewingRecord && (
+                  <Grid container spacing={3}>
+                    {/* Record ID and Registry Info */}
+                    <Grid item xs={12}>
+                      <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
+                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                          Registry Information
+                        </Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6} sm={3}>
+                            <Typography variant="caption" color="text.secondary">Record ID</Typography>
+                            <Typography variant="body2" fontWeight="medium">{viewingRecord.id}</Typography>
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <Typography variant="caption" color="text.secondary">Book No.</Typography>
+                            <Typography variant="body2">{viewingRecord.book_no || viewingRecord.bookNumber || '—'}</Typography>
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <Typography variant="caption" color="text.secondary">Page No.</Typography>
+                            <Typography variant="body2">{viewingRecord.page_no || viewingRecord.pageNumber || '—'}</Typography>
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <Typography variant="caption" color="text.secondary">Entry No.</Typography>
+                            <Typography variant="body2">{viewingRecord.entry_no || viewingRecord.entryNumber || '—'}</Typography>
+                          </Grid>
+                        </Grid>
+                      </Paper>
+                    </Grid>
+
+                    {/* Person/Couple Information */}
+                    <Grid item xs={12} md={6}>
+                      <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
+                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                          {selectedRecordType === 'marriage' ? 'Couple Information' : 'Person Information'}
+                        </Typography>
+                        {selectedRecordType === 'marriage' ? (
+                          <>
+                            <Box sx={{ mb: 2 }}>
+                              <Typography variant="caption" color="text.secondary">Groom</Typography>
+                              <Typography variant="body1" fontWeight="medium">
+                                {`${viewingRecord.fname_groom || viewingRecord.groom_first || ''} ${viewingRecord.lname_groom || viewingRecord.groom_last || ''}`.trim() || '—'}
+                              </Typography>
+                            </Box>
+                            <Box>
+                              <Typography variant="caption" color="text.secondary">Bride</Typography>
+                              <Typography variant="body1" fontWeight="medium">
+                                {`${viewingRecord.fname_bride || viewingRecord.bride_first || ''} ${viewingRecord.lname_bride || viewingRecord.bride_last || ''}`.trim() || '—'}
+                              </Typography>
+                            </Box>
+                          </>
+                        ) : selectedRecordType === 'funeral' ? (
+                          <>
+                            <Box sx={{ mb: 2 }}>
+                              <Typography variant="caption" color="text.secondary">Deceased</Typography>
+                              <Typography variant="body1" fontWeight="medium">
+                                {`${viewingRecord.deceased_first || viewingRecord.firstName || ''} ${viewingRecord.deceased_last || viewingRecord.lastName || ''}`.trim() || '—'}
+                              </Typography>
+                            </Box>
+                            <Box>
+                              <Typography variant="caption" color="text.secondary">Date of Death</Typography>
+                              <Typography variant="body1">{formatRecordDate(viewingRecord.death_date || viewingRecord.deathDate) || '—'}</Typography>
+                            </Box>
+                          </>
+                        ) : (
+                          <>
+                            <Box sx={{ mb: 2 }}>
+                              <Typography variant="caption" color="text.secondary">Name</Typography>
+                              <Typography variant="body1" fontWeight="medium">
+                                {`${viewingRecord.person_first || viewingRecord.firstName || ''} ${viewingRecord.person_middle || viewingRecord.middleName || ''} ${viewingRecord.person_last || viewingRecord.lastName || ''}`.trim() || '—'}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ mb: 2 }}>
+                              <Typography variant="caption" color="text.secondary">Date of Birth</Typography>
+                              <Typography variant="body1">{formatRecordDate(viewingRecord.birth_date || viewingRecord.dateOfBirth) || '—'}</Typography>
+                            </Box>
+                            <Box>
+                              <Typography variant="caption" color="text.secondary">Date of Baptism</Typography>
+                              <Typography variant="body1">{formatRecordDate(viewingRecord.baptism_date || viewingRecord.dateOfBaptism) || '—'}</Typography>
+                            </Box>
+                          </>
+                        )}
+                      </Paper>
+                    </Grid>
+
+                    {/* Ceremony Details */}
+                    <Grid item xs={12} md={6}>
+                      <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
+                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                          Ceremony Details
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {selectedRecordType === 'marriage' ? 'Marriage Date' : selectedRecordType === 'funeral' ? 'Funeral Date' : 'Baptism Date'}
+                          </Typography>
+                          <Typography variant="body1">
+                            {formatRecordDate(
+                              selectedRecordType === 'marriage' ? (viewingRecord.marriage_date || viewingRecord.marriageDate) :
+                              selectedRecordType === 'funeral' ? (viewingRecord.funeral_date || viewingRecord.funeralDate) :
+                              (viewingRecord.baptism_date || viewingRecord.dateOfBaptism)
+                            ) || '—'}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="caption" color="text.secondary">Officiant / Clergy</Typography>
+                          <Typography variant="body1">{viewingRecord.officiant_name || viewingRecord.priest || viewingRecord.clergy || '—'}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">Location</Typography>
+                          <Typography variant="body1">{viewingRecord.place_name || viewingRecord.location || viewingRecord.churchName || '—'}</Typography>
+                        </Box>
+                      </Paper>
+                    </Grid>
+
+                    {/* Sponsors/Witnesses/Godparents */}
+                    {(selectedRecordType === 'baptism' || selectedRecordType === 'marriage') && (
+                      <Grid item xs={12}>
+                        <Paper variant="outlined" sx={{ p: 2 }}>
+                          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                            {selectedRecordType === 'marriage' ? 'Witnesses' : 'Godparents / Sponsors'}
+                          </Typography>
+                          <Typography variant="body1">
+                            {selectedRecordType === 'marriage' 
+                              ? (displayJsonField(viewingRecord.witnesses) || '—')
+                              : (displayJsonField(viewingRecord.godparents) || viewingRecord.godfather || viewingRecord.godmother || '—')
+                            }
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    )}
+
+                    {/* Notes */}
+                    {viewingRecord.notes && (
+                      <Grid item xs={12}>
+                        <Paper variant="outlined" sx={{ p: 2 }}>
+                          <Typography variant="subtitle2" color="text.secondary" gutterBottom>Notes</Typography>
+                          <Typography variant="body1">{viewingRecord.notes}</Typography>
+                        </Paper>
+                      </Grid>
+                    )}
+                  </Grid>
+                )}
+              </DialogContent>
+              <DialogActions sx={{ 
+                borderTop: '1px solid', 
+                borderColor: 'divider', 
+                px: 3, 
+                py: 2,
+                justifyContent: 'space-between'
+              }}>
+                <Box>
+                  {(selectedRecordType === 'baptism' || selectedRecordType === 'marriage') && (
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={handleGenerateCertificate}
+                      startIcon={<ExportIcon />}
+                    >
+                      Generate Certificate
+                    </Button>
+                  )}
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button onClick={handleCloseViewDialog}>
+                    Close
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleEditFromView}
+                    startIcon={<EditIcon />}
+                  >
+                    Edit Record
+                  </Button>
+                </Box>
               </DialogActions>
             </Dialog>
 
