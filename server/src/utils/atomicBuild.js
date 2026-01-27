@@ -98,11 +98,11 @@ function buildToDistNew() {
 }
 
 /**
- * Perform atomic directory swap
+ * Perform atomic symlink swap (zero-downtime deployment)
  */
 function atomicSwap() {
   try {
-    console.log('🔄 Performing atomic directory swap...');
+    console.log('🔄 Performing atomic symlink swap...');
     
     // Verify dist-new exists and has content
     if (!fs.existsSync(DIST_NEW_PATH)) {
@@ -116,40 +116,60 @@ function atomicSwap() {
     
     console.log('   Found ' + distNewFiles.length + ' items in dist-new');
     
-    // Atomic swap: dist → dist-old, dist-new → dist
-    const commands = [];
+    const DIST_ACTIVE_LINK = path.join(FRONT_END_PATH, 'dist-active');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const DIST_VERSIONED = path.join(FRONT_END_PATH, 'dist-' + timestamp);
     
-    if (fs.existsSync(DIST_PATH)) {
-      commands.push('mv "' + DIST_PATH + '" "' + DIST_OLD_PATH + '"');
+    // Rename dist-new to versioned directory
+    execSync('mv "' + DIST_NEW_PATH + '" "' + DIST_VERSIONED + '"', { 
+      cwd: FRONT_END_PATH, 
+      stdio: 'inherit' 
+    });
+    
+    // Create or update symlink atomically
+    const DIST_ACTIVE_TMP = DIST_ACTIVE_LINK + '.tmp';
+    
+    // Create temporary symlink
+    if (fs.existsSync(DIST_ACTIVE_TMP)) {
+      fs.unlinkSync(DIST_ACTIVE_TMP);
+    }
+    fs.symlinkSync(DIST_VERSIONED, DIST_ACTIVE_TMP);
+    
+    // Atomic rename of symlink (this is the zero-downtime moment)
+    fs.renameSync(DIST_ACTIVE_TMP, DIST_ACTIVE_LINK);
+    
+    console.log('✅ Symlink updated: dist-active → ' + path.basename(DIST_VERSIONED));
+    
+    // Clean up old dist directories (keep last 3)
+    try {
+      const distDirs = fs.readdirSync(FRONT_END_PATH)
+        .filter(name => name.startsWith('dist-') && name !== 'dist-active')
+        .map(name => ({
+          name,
+          path: path.join(FRONT_END_PATH, name),
+          mtime: fs.statSync(path.join(FRONT_END_PATH, name)).mtime
+        }))
+        .sort((a, b) => b.mtime - a.mtime);
+      
+      // Keep last 3, remove the rest
+      const toRemove = distDirs.slice(3);
+      for (const dir of toRemove) {
+        console.log('🧹 Removing old deployment: ' + dir.name);
+        execSync('rm -rf "' + dir.path + '"', { stdio: 'inherit' });
+      }
+    } catch (cleanupErr) {
+      console.warn('⚠️  Cleanup warning:', cleanupErr.message);
     }
     
-    commands.push('mv "' + DIST_NEW_PATH + '" "' + DIST_PATH + '"');
-    
-    if (fs.existsSync(DIST_OLD_PATH)) {
-      commands.push('rm -rf "' + DIST_OLD_PATH + '"');
-    }
-    
-    // Execute all commands in one shell to ensure atomicity
-    const fullCommand = commands.join(' && ');
-    execSync(fullCommand, { cwd: FRONT_END_PATH, stdio: 'inherit' });
-    
-    console.log('✅ Atomic swap completed');
-    return true;
+    // Return symlink info for notification
+    return {
+      success: true,
+      symlinkId: path.basename(DIST_VERSIONED),
+      timestamp: timestamp
+    };
   } catch (err) {
     console.error('❌ Atomic swap failed:', err.message);
-    
-    // Attempt rollback if dist-old exists
-    if (fs.existsSync(DIST_OLD_PATH) && !fs.existsSync(DIST_PATH)) {
-      console.log('🔙 Attempting rollback...');
-      try {
-        execSync('mv "' + DIST_OLD_PATH + '" "' + DIST_PATH + '"', { stdio: 'inherit' });
-        console.log('✅ Rollback successful');
-      } catch (rollbackErr) {
-        console.error('❌ Rollback failed:', rollbackErr.message);
-      }
-    }
-    
-    return false;
+    return { success: false, error: err.message };
   }
 }
 
@@ -175,18 +195,18 @@ async function atomicBuild() {
     }
     
     // Perform atomic swap
-    const swapSuccess = atomicSwap();
-    if (!swapSuccess) {
-      throw new Error('Atomic swap failed');
+    const swapResult = atomicSwap();
+    if (!swapResult.success) {
+      throw new Error('Atomic swap failed: ' + (swapResult.error || 'Unknown error'));
     }
     
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log('\n✅ Atomic build completed successfully in ' + duration + 's');
     console.log('   Zero-downtime deployment achieved! 🎉\n');
     
-    // Notify super admins
+    // Notify super admins with deployment info
     try {
-      await notifyBuildCompleted(duration, 'production');
+      await notifyBuildCompleted(duration, 'production', swapResult.symlinkId);
     } catch (notifyErr) {
       console.warn('Failed to send build notification:', notifyErr.message);
     }

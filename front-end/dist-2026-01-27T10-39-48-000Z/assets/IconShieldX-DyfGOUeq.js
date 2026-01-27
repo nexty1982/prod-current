@@ -1,0 +1,7 @@
+import{c as e}from"./index-CNFXvQ6i.js";/**
+ * @license @tabler/icons-react v3.34.1 - MIT
+ *
+ * This source code is licensed under the MIT license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const a=[["path",{d:"M13.252 20.601c-.408 .155 -.826 .288 -1.252 .399a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.19 7.357",key:"svg-0"}],["path",{d:"M22 22l-5 -5",key:"svg-1"}],["path",{d:"M17 22l5 -5",key:"svg-2"}]],t=e("outline","shield-x","ShieldX",a);export{t as I};
+//# sourceMappingURL=IconShieldX-DyfGOUeq.js.map
