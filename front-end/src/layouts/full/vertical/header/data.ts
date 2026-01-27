@@ -6,6 +6,7 @@ import img4 from '@/assets/images/profile/user-4.jpg';
 import icon1 from '@/assets/images/svgs/icon-account.svg';
 import icon2 from '@/assets/images/svgs/icon-inbox.svg';
 import icon3 from '@/assets/images/svgs/icon-tasks.svg';
+import iconRelax from '@/assets/images/svgs/icon-briefcase.svg';
 
 import ddIcon1 from '@/assets/images/svgs/icon-dd-chat.svg';
 import ddIcon2 from '@/assets/images/svgs/icon-dd-cart.svg';
@@ -135,6 +136,12 @@ const profile: ProfileType[] = [
     title: 'My Tasks',
     subtitle: 'To-do and Daily Tasks',
     icon: icon3,
+  },
+  {
+    href: '#relax',
+    title: 'RELAX',
+    subtitle: 'Complete Shift & Commit',
+    icon: iconRelax,
   },
 ];
 
