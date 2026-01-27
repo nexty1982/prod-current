@@ -292,6 +292,9 @@ app.get('/__debug/session', (req, res) => {
   });
 });
 
+const maintenanceRouter = require('./src/routes/maintenance');
+app.use('/api/maintenance', maintenanceRouter);
+
 // Public routes first (no authentication required)
 app.use('/api/churches', churchesRouter);
 
