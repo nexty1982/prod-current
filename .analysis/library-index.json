@@ -1,0 +1,2950 @@
+{
+  "2026-01-27_task-142-catalog-manager": {
+    "id": "2026-01-27_task-142-catalog-manager",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/catalog-manager.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-142-catalog-manager.md",
+    "filename": "2026-01-27_task-142-catalog-manager.md",
+    "title": "Task 142: Catalog Manager",
+    "category": "technical",
+    "size": 435,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "Create a UI interface to explore all cataloged markdown entries."
+  },
+  "2026-01-27_classdiagram": {
+    "id": "2026-01-27_classdiagram",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/class_diagram.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_classdiagram.md",
+    "filename": "2026-01-27_classdiagram.md",
+    "title": "class_diagram",
+    "category": "technical",
+    "size": 5789,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-07-29T18:55:29.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "database",
+      "error",
+      "admin",
+      "auth"
+    ],
+    "firstParagraph": "```mermaid"
+  },
+  "2026-01-27_cicdpipelineplan": {
+    "id": "2026-01-27_cicdpipelineplan",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/ci_cd_pipeline_plan.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_cicdpipelineplan.md",
+    "filename": "2026-01-27_cicdpipelineplan.md",
+    "title": "ci_cd_pipeline_plan",
+    "category": "technical",
+    "size": 2333,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "frontend",
+      "database",
+      "error",
+      "deployment",
+      "integration",
+      "admin",
+      "security"
+    ],
+    "firstParagraph": "Establish a secure, testable, and controlled deployment workflow for the OrthodoxMetrics production environment using Jenkins."
+  },
+  "2026-01-27_task-152-command-parser": {
+    "id": "2026-01-27_task-152-command-parser",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/command-parser.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-152-command-parser.md",
+    "filename": "2026-01-27_task-152-command-parser.md",
+    "title": "Task 152: Command Parser",
+    "category": "technical",
+    "size": 445,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin",
+      "security"
+    ],
+    "firstParagraph": "Parse actionable shell/script blocks inside markdown with security tagging."
+  },
+  "2026-01-27_component-analysis-report": {
+    "id": "2026-01-27_component-analysis-report",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/component-analysis-report.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_component-analysis-report.md",
+    "filename": "2026-01-27_component-analysis-report.md",
+    "title": "component-analysis-report",
+    "category": "technical",
+    "size": 7389,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-06T19:52:11.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "setup",
+      "config",
+      "error",
+      "integration",
+      "records",
+      "admin",
+      "auth",
+      "performance"
+    ],
+    "firstParagraph": "This report analyzes all components used in `Router.tsx` and menu configuration files (`MenuItems.ts`, `Menudata.ts`), grouped by frequency of use and highlighting reusable components with well-define..."
+  },
+  "2026-01-27_components-api": {
+    "id": "2026-01-27_components-api",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/components-api.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_components-api.md",
+    "filename": "2026-01-27_components-api.md",
+    "title": "components-api",
+    "category": "technical",
+    "size": 4678,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-15T18:40:24.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "database",
+      "config",
+      "error",
+      "integration",
+      "ocr",
+      "admin",
+      "auth",
+      "security"
+    ],
+    "firstParagraph": "The Components Management API provides endpoints for monitoring and controlling system components in the OrthodoxMetrics application. This system allows administrators to view component status, toggle..."
+  },
+  "2026-01-27_connectexample": {
+    "id": "2026-01-27_connectexample",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/connectExample.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_connectexample.md",
+    "filename": "2026-01-27_connectexample.md",
+    "title": "connectExample",
+    "category": "technical",
+    "size": 7824,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-06-02T18:27:42.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "error"
+    ],
+    "firstParagraph": "The connect command is the most common use-case for a SOCKS proxy. This establishes a direct connection to a destination host through a proxy server. The destination host only has knowledge of the pro..."
+  },
+  "2026-01-27_contentmoderationsystem": {
+    "id": "2026-01-27_contentmoderationsystem",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/content_moderation_system.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_contentmoderationsystem.md",
+    "filename": "2026-01-27_contentmoderationsystem.md",
+    "title": "content_moderation_system",
+    "category": "technical",
+    "size": 2467,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "ocr",
+      "admin"
+    ],
+    "firstParagraph": "To maintain a safe, respectful, and Orthodox-aligned environment on OrthodoxMetrics by detecting, rating, and rejecting inappropriate media uploads, including images, videos, documents, and text conte..."
+  },
+  "2026-01-27_config": {
+    "id": "2026-01-27_config",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/config.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_config.md",
+    "filename": "2026-01-27_config.md",
+    "title": "config",
+    "category": "technical",
+    "size": 48462,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "setup",
+      "config",
+      "error",
+      "auth",
+      "performance"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_task-155-dragdrop-runner-ui": {
+    "id": "2026-01-27_task-155-dragdrop-runner-ui",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/dragdrop-runner-ui.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-155-dragdrop-runner-ui.md",
+    "filename": "2026-01-27_task-155-dragdrop-runner-ui.md",
+    "title": "Task 155: Dragdrop Runner Ui",
+    "category": "technical",
+    "size": 443,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "Allow drag/drop upload and route execution decisions via Big Book UI."
+  },
+  "2026-01-27_cursor-task-orthodoxmetrics-prod-site-survey-and-cleanup-plan": {
+    "id": "2026-01-27_cursor-task-orthodoxmetrics-prod-site-survey-and-cleanup-plan",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/cursor_task_site_survey.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_cursor-task-orthodoxmetrics-prod-site-survey-and-cleanup-plan.md",
+    "filename": "2026-01-27_cursor-task-orthodoxmetrics-prod-site-survey-and-cleanup-plan.md",
+    "title": "Cursor Task — OrthodoxMetrics PROD Site Survey & Cleanup Plan",
+    "category": "technical",
+    "size": 8288,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-15T18:40:17.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "implementation",
+      "config",
+      "error",
+      "auth"
+    ],
+    "firstParagraph": "You are operating on the server **/var/www/orthodoxmetrics/prod**. Produce a **read-only inventory first**, then a **surgical cleanup plan**, plus **optional automation scripts**. Do **not** delete or..."
+  },
+  "2026-01-27_developers": {
+    "id": "2026-01-27_developers",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/developers.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_developers.md",
+    "filename": "2026-01-27_developers.md",
+    "title": "developers",
+    "category": "technical",
+    "size": 8071,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "guide",
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_task-150-feedback-on-ingest": {
+    "id": "2026-01-27_task-150-feedback-on-ingest",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/feedback-on-ingest.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-150-feedback-on-ingest.md",
+    "filename": "2026-01-27_task-150-feedback-on-ingest.md",
+    "title": "Task 150: Feedback On Ingest",
+    "category": "technical",
+    "size": 446,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "Provide a backend summary report of what's learned from markdown ingest."
+  },
+  "2026-01-27_diagnosis-report": {
+    "id": "2026-01-27_diagnosis-report",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/diagnosis-report.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_diagnosis-report.md",
+    "filename": "2026-01-27_diagnosis-report.md",
+    "title": "diagnosis-report",
+    "category": "technical",
+    "size": 8967,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-15T18:41:04.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "frontend",
+      "database",
+      "fix",
+      "implementation",
+      "error",
+      "integration",
+      "ocr",
+      "records",
+      "admin",
+      "performance"
+    ],
+    "firstParagraph": "**Issue**: Linkage failure between `orthodoxmetrics_db.churches` (global church registry) and individual church databases (e.g., `ssppoc_records_db`)."
+  },
+  "2026-01-27_dependency-selectors": {
+    "id": "2026-01-27_dependency-selectors",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/dependency-selectors.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_dependency-selectors.md",
+    "filename": "2026-01-27_dependency-selectors.md",
+    "title": "dependency-selectors",
+    "category": "technical",
+    "size": 12367,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_error-handling-test": {
+    "id": "2026-01-27_error-handling-test",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/error-handling-test.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_error-handling-test.md",
+    "filename": "2026-01-27_error-handling-test.md",
+    "title": "error-handling-test",
+    "category": "technical",
+    "size": 3419,
+    "created": "2026-01-27T11:02:09.884Z",
+    "modified": "2025-08-15T18:40:31.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "implementation",
+      "guide",
+      "error",
+      "auth"
+    ],
+    "firstParagraph": "This document describes how to test the new user-friendly error handling in the login system."
+  },
+  "2026-01-27_firstloginsetupwizard": {
+    "id": "2026-01-27_firstloginsetupwizard",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/first_login_setup_wizard.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_firstloginsetupwizard.md",
+    "filename": "2026-01-27_firstloginsetupwizard.md",
+    "title": "first_login_setup_wizard",
+    "category": "technical",
+    "size": 2507,
+    "created": "2026-01-27T11:02:10.140Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "guide",
+      "setup",
+      "config",
+      "records",
+      "admin"
+    ],
+    "firstParagraph": "Provide clergy and admins with a peaceful, intuitive, and fully guided first-login experience. This 5-minute setup flow ensures the user configures their environment with intention, without being over..."
+  },
+  "2026-01-27_project-overview": {
+    "id": "2026-01-27_project-overview",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/frontend-nodejs-integration-doc.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_project-overview.md",
+    "filename": "2026-01-27_project-overview.md",
+    "title": "Project Overview",
+    "category": "technical",
+    "size": 7582,
+    "created": "2026-01-27T11:02:10.157Z",
+    "modified": "2025-06-11T02:24:57.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "database",
+      "setup",
+      "config",
+      "deployment",
+      "integration",
+      "auth"
+    ],
+    "firstParagraph": "This React + Vite template is a fully client-side front-end that uses Material-UI (MUI), React Router, Context API, MSW (Mock Service Worker), and a custom theme. There is no built-in backend; all API..."
+  },
+  "2026-01-27_index": {
+    "id": "2026-01-27_index",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/index.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_index.md",
+    "filename": "2026-01-27_index.md",
+    "title": "index",
+    "category": "technical",
+    "size": 133,
+    "created": "2026-01-27T11:02:10.157Z",
+    "modified": "2025-06-02T18:27:42.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api"
+    ],
+    "firstParagraph": "- [API Reference](https://github.com/JoshGlazebrook/socks#api-reference)"
+  },
+  "2026-01-27_install": {
+    "id": "2026-01-27_install",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/install.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_install.md",
+    "filename": "2026-01-27_install.md",
+    "title": "install",
+    "category": "technical",
+    "size": 2888,
+    "created": "2026-01-27T11:02:10.157Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_task-148-learn-task-parser": {
+    "id": "2026-01-27_task-148-learn-task-parser",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/learn-task-parser.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-148-learn-task-parser.md",
+    "filename": "2026-01-27_task-148-learn-task-parser.md",
+    "title": "Task 148: Learn Task Parser",
+    "category": "technical",
+    "size": 439,
+    "created": "2026-01-27T11:02:10.170Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_task-142-catalog-manager",
+      "2026-01-27_task-152-command-parser",
+      "2026-01-27_task-155-dragdrop-runner-ui",
+      "2026-01-27_cursor-task-orthodoxmetrics-prod-site-survey-and-cleanup-plan",
+      "2026-01-27_task-150-feedback-on-ingest"
+    ],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "Parse markdown-based tasks and learn their structure semantically."
+  },
+  "2026-01-27_issuetemplate": {
+    "id": "2026-01-27_issuetemplate",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/issue_template.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_issuetemplate.md",
+    "filename": "2026-01-27_issuetemplate.md",
+    "title": "issue_template",
+    "category": "technical",
+    "size": 259,
+    "created": "2026-01-27T11:02:10.179Z",
+    "modified": "2025-05-22T07:32:27.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "guide"
+    ],
+    "firstParagraph": "<!-- Thanks for submitting an issue! All bug reports and problem issues require a **reduced test case**. Create one forking the CodePen linked below. See the guidelines link above for more details. --..."
+  },
+  "2026-01-27_folders": {
+    "id": "2026-01-27_folders",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/folders.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_folders.md",
+    "filename": "2026-01-27_folders.md",
+    "title": "folders",
+    "category": "technical",
+    "size": 8358,
+    "created": "2026-01-27T11:02:10.179Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_logging": {
+    "id": "2026-01-27_logging",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/logging.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_logging.md",
+    "filename": "2026-01-27_logging.md",
+    "title": "logging",
+    "category": "technical",
+    "size": 3992,
+    "created": "2026-01-27T11:02:10.179Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "error",
+      "auth",
+      "performance"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_logger-dashboard-failure": {
+    "id": "2026-01-27_logger-dashboard-failure",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/logger-dashboard-failure.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_logger-dashboard-failure.md",
+    "filename": "2026-01-27_logger-dashboard-failure.md",
+    "title": "logger-dashboard-failure",
+    "category": "technical",
+    "size": 7010,
+    "created": "2026-01-27T11:02:10.179Z",
+    "modified": "2025-08-15T18:40:32.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "database",
+      "fix",
+      "guide",
+      "setup",
+      "config",
+      "error",
+      "integration",
+      "admin"
+    ],
+    "firstParagraph": "**Date:** August 6, 2025"
+  },
+  "2026-01-27_mariadb-common-commands": {
+    "id": "2026-01-27_mariadb-common-commands",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/mariadb_common_commands.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_mariadb-common-commands.md",
+    "filename": "2026-01-27_mariadb-common-commands.md",
+    "title": "MariaDB Common Commands",
+    "category": "technical",
+    "size": 1740,
+    "created": "2026-01-27T11:02:10.179Z",
+    "modified": "2025-06-10T12:15:48.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "database"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_login-troubleshooting": {
+    "id": "2026-01-27_login-troubleshooting",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/login-troubleshooting.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_login-troubleshooting.md",
+    "filename": "2026-01-27_login-troubleshooting.md",
+    "title": "login-troubleshooting",
+    "category": "technical",
+    "size": 4192,
+    "created": "2026-01-27T11:02:10.179Z",
+    "modified": "2025-08-10T00:53:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "frontend",
+      "database",
+      "guide",
+      "config",
+      "error",
+      "auth"
+    ],
+    "firstParagraph": "```bash"
+  },
+  "2026-01-27_task-140-markdown-ingestion-core": {
+    "id": "2026-01-27_task-140-markdown-ingestion-core",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/markdown-ingestion-core.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-140-markdown-ingestion-core.md",
+    "filename": "2026-01-27_task-140-markdown-ingestion-core.md",
+    "title": "Task 140: Markdown Ingestion Core",
+    "category": "technical",
+    "size": 453,
+    "created": "2026-01-27T11:02:10.179Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "Develop a backend service to ingest .md files and queue them for indexing."
+  },
+  "2026-01-27_task-151-memory-log-generator": {
+    "id": "2026-01-27_task-151-memory-log-generator",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/memory-log-generator.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-151-memory-log-generator.md",
+    "filename": "2026-01-27_task-151-memory-log-generator.md",
+    "title": "Task 151: Memory Log Generator",
+    "category": "technical",
+    "size": 434,
+    "created": "2026-01-27T11:02:10.179Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "Create a persistent memory timeline of markdown learnings."
+  },
+  "2026-01-27_task-141-metadata-indexer": {
+    "id": "2026-01-27_task-141-metadata-indexer",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/metadata-indexer.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-141-metadata-indexer.md",
+    "filename": "2026-01-27_task-141-metadata-indexer.md",
+    "title": "Task 141: Metadata Indexer",
+    "category": "technical",
+    "size": 445,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "Implement logic to extract titles, headings, tags, and optional metadata."
+  },
+  "2026-01-27_migratingfromv1": {
+    "id": "2026-01-27_migratingfromv1",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/migratingFromV1.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_migratingfromv1.md",
+    "filename": "2026-01-27_migratingfromv1.md",
+    "title": "migratingFromV1",
+    "category": "technical",
+    "size": 2714,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:42.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [],
+    "firstParagraph": "For the most part, migrating from v1 takes minimal effort as v2 still supports factory creation of proxy connections with callback support."
+  },
+  "2026-01-27_npm-adduser": {
+    "id": "2026-01-27_npm-adduser",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-adduser.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-adduser.md",
+    "filename": "2026-01-27_npm-adduser.md",
+    "title": "npm-adduser",
+    "category": "technical",
+    "size": 1933,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-access": {
+    "id": "2026-01-27_npm-access",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-access.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-access.md",
+    "filename": "2026-01-27_npm-access.md",
+    "title": "npm-access",
+    "category": "technical",
+    "size": 3787,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-bugs": {
+    "id": "2026-01-27_npm-bugs",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-bugs.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-bugs.md",
+    "filename": "2026-01-27_npm-bugs.md",
+    "title": "npm-bugs",
+    "category": "technical",
+    "size": 3105,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-audit": {
+    "id": "2026-01-27_npm-audit",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-audit.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-audit.md",
+    "filename": "2026-01-27_npm-audit.md",
+    "title": "npm-audit",
+    "category": "technical",
+    "size": 16134,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "error",
+      "security",
+      "performance"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-config": {
+    "id": "2026-01-27_npm-config",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-config.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-config.md",
+    "filename": "2026-01-27_npm-config.md",
+    "title": "npm-config",
+    "category": "technical",
+    "size": 4275,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_main-api-proxy-handles-api-requests": {
+    "id": "2026-01-27_main-api-proxy-handles-api-requests",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/nginx-configuration.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_main-api-proxy-handles-api-requests.md",
+    "filename": "2026-01-27_main-api-proxy-handles-api-requests.md",
+    "title": "Main API proxy - handles /api/* requests",
+    "category": "technical",
+    "size": 8276,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-08-10T00:53:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "frontend",
+      "fix",
+      "config",
+      "error",
+      "records",
+      "admin",
+      "auth",
+      "security"
+    ],
+    "firstParagraph": "NGINX configuration for proxy server and site server"
+  },
+  "2026-01-27_npm-ci": {
+    "id": "2026-01-27_npm-ci",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-ci.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-ci.md",
+    "filename": "2026-01-27_npm-ci.md",
+    "title": "npm-ci",
+    "category": "technical",
+    "size": 9443,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "error",
+      "deployment",
+      "integration"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-cache": {
+    "id": "2026-01-27_npm-cache",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-cache.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-cache.md",
+    "filename": "2026-01-27_npm-cache.md",
+    "title": "npm-cache",
+    "category": "technical",
+    "size": 3056,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-completion": {
+    "id": "2026-01-27_npm-completion",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-completion.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-completion.md",
+    "filename": "2026-01-27_npm-completion.md",
+    "title": "npm-completion",
+    "category": "technical",
+    "size": 950,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-deprecate": {
+    "id": "2026-01-27_npm-deprecate",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-deprecate.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-deprecate.md",
+    "filename": "2026-01-27_npm-deprecate.md",
+    "title": "npm-deprecate",
+    "category": "technical",
+    "size": 1814,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-diff": {
+    "id": "2026-01-27_npm-diff",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-diff.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-diff.md",
+    "filename": "2026-01-27_npm-diff.md",
+    "title": "npm-diff",
+    "category": "technical",
+    "size": 9428,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-dedupe": {
+    "id": "2026-01-27_npm-dedupe",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-dedupe.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-dedupe.md",
+    "filename": "2026-01-27_npm-dedupe.md",
+    "title": "npm-dedupe",
+    "category": "technical",
+    "size": 9215,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-docs": {
+    "id": "2026-01-27_npm-docs",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-docs.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-docs.md",
+    "filename": "2026-01-27_npm-docs.md",
+    "title": "npm-docs",
+    "category": "technical",
+    "size": 3082,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-dist-tag": {
+    "id": "2026-01-27_npm-dist-tag",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-dist-tag.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-dist-tag.md",
+    "filename": "2026-01-27_npm-dist-tag.md",
+    "title": "npm-dist-tag",
+    "category": "technical",
+    "size": 5335,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-edit": {
+    "id": "2026-01-27_npm-edit",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-edit.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-edit.md",
+    "filename": "2026-01-27_npm-edit.md",
+    "title": "npm-edit",
+    "category": "technical",
+    "size": 1137,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-exec": {
+    "id": "2026-01-27_npm-exec",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-exec.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-exec.md",
+    "filename": "2026-01-27_npm-exec.md",
+    "title": "npm-exec",
+    "category": "technical",
+    "size": 11767,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "error",
+      "security"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-doctor": {
+    "id": "2026-01-27_npm-doctor",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-doctor.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-doctor.md",
+    "filename": "2026-01-27_npm-doctor.md",
+    "title": "npm-doctor",
+    "category": "technical",
+    "size": 5180,
+    "created": "2026-01-27T11:02:10.347Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "fix",
+      "config",
+      "security"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-explain": {
+    "id": "2026-01-27_npm-explain",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-explain.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-explain.md",
+    "filename": "2026-01-27_npm-explain.md",
+    "title": "npm-explain",
+    "category": "technical",
+    "size": 2900,
+    "created": "2026-01-27T11:02:10.603Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-find-dupes": {
+    "id": "2026-01-27_npm-find-dupes",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-find-dupes.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-find-dupes.md",
+    "filename": "2026-01-27_npm-find-dupes.md",
+    "title": "npm-find-dupes",
+    "category": "technical",
+    "size": 7043,
+    "created": "2026-01-27T11:02:10.603Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-explore": {
+    "id": "2026-01-27_npm-explore",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-explore.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-explore.md",
+    "filename": "2026-01-27_npm-explore.md",
+    "title": "npm-explore",
+    "category": "technical",
+    "size": 1055,
+    "created": "2026-01-27T11:02:10.603Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-help-search": {
+    "id": "2026-01-27_npm-help-search",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-help-search.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-help-search.md",
+    "filename": "2026-01-27_npm-help-search.md",
+    "title": "npm-help-search",
+    "category": "technical",
+    "size": 796,
+    "created": "2026-01-27T11:02:10.603Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-hook": {
+    "id": "2026-01-27_npm-hook",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-hook.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-hook.md",
+    "filename": "2026-01-27_npm-hook.md",
+    "title": "npm-hook",
+    "category": "technical",
+    "size": 2506,
+    "created": "2026-01-27T11:02:10.603Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-fund": {
+    "id": "2026-01-27_npm-fund",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-fund.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-fund.md",
+    "filename": "2026-01-27_npm-fund.md",
+    "title": "npm-fund",
+    "category": "technical",
+    "size": 3818,
+    "created": "2026-01-27T11:02:10.603Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-help": {
+    "id": "2026-01-27_npm-help",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-help.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-help.md",
+    "filename": "2026-01-27_npm-help.md",
+    "title": "npm-help",
+    "category": "technical",
+    "size": 1050,
+    "created": "2026-01-27T11:02:10.603Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-init": {
+    "id": "2026-01-27_npm-init",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-init.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-init.md",
+    "filename": "2026-01-27_npm-init.md",
+    "title": "npm-init",
+    "category": "technical",
+    "size": 10204,
+    "created": "2026-01-27T11:02:10.603Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "auth",
+      "performance"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-install-ci-test": {
+    "id": "2026-01-27_npm-install-ci-test",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-install-ci-test.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-install-ci-test.md",
+    "filename": "2026-01-27_npm-install-ci-test.md",
+    "title": "npm-install-ci-test",
+    "category": "technical",
+    "size": 7699,
+    "created": "2026-01-27T11:02:10.603Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-install": {
+    "id": "2026-01-27_npm-install",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-install.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-install.md",
+    "filename": "2026-01-27_npm-install.md",
+    "title": "npm-install",
+    "category": "technical",
+    "size": 25790,
+    "created": "2026-01-27T11:02:10.603Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-install-test": {
+    "id": "2026-01-27_npm-install-test",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-install-test.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-install-test.md",
+    "filename": "2026-01-27_npm-install-test.md",
+    "title": "npm-install-test",
+    "category": "technical",
+    "size": 10186,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_npm-install-ci-test"
+    ],
+    "keywords": [
+      "fix",
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-login": {
+    "id": "2026-01-27_npm-login",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-login.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-login.md",
+    "filename": "2026-01-27_npm-login.md",
+    "title": "npm-login",
+    "category": "technical",
+    "size": 2264,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-owner": {
+    "id": "2026-01-27_npm-owner",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-owner.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-owner.md",
+    "filename": "2026-01-27_npm-owner.md",
+    "title": "npm-owner",
+    "category": "technical",
+    "size": 3199,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-logout": {
+    "id": "2026-01-27_npm-logout",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-logout.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-logout.md",
+    "filename": "2026-01-27_npm-logout.md",
+    "title": "npm-logout",
+    "category": "technical",
+    "size": 1824,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-link": {
+    "id": "2026-01-27_npm-link",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-link.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-link.md",
+    "filename": "2026-01-27_npm-link.md",
+    "title": "npm-link",
+    "category": "technical",
+    "size": 12138,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-pack": {
+    "id": "2026-01-27_npm-pack",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-pack.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-pack.md",
+    "filename": "2026-01-27_npm-pack.md",
+    "title": "npm-pack",
+    "category": "technical",
+    "size": 3574,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-outdated": {
+    "id": "2026-01-27_npm-outdated",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-outdated.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-outdated.md",
+    "filename": "2026-01-27_npm-outdated.md",
+    "title": "npm-outdated",
+    "category": "technical",
+    "size": 5957,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-prefix": {
+    "id": "2026-01-27_npm-prefix",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-prefix.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-prefix.md",
+    "filename": "2026-01-27_npm-prefix.md",
+    "title": "npm-prefix",
+    "category": "technical",
+    "size": 1270,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-pkg": {
+    "id": "2026-01-27_npm-pkg",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-pkg.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-pkg.md",
+    "filename": "2026-01-27_npm-pkg.md",
+    "title": "npm-pkg",
+    "category": "technical",
+    "size": 8401,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "error",
+      "performance"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-org": {
+    "id": "2026-01-27_npm-org",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-org.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-org.md",
+    "filename": "2026-01-27_npm-org.md",
+    "title": "npm-org",
+    "category": "technical",
+    "size": 2089,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "admin",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-ping": {
+    "id": "2026-01-27_npm-ping",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-ping.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-ping.md",
+    "filename": "2026-01-27_npm-ping.md",
+    "title": "npm-ping",
+    "category": "technical",
+    "size": 815,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "error",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-query": {
+    "id": "2026-01-27_npm-query",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-query.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-query.md",
+    "filename": "2026-01-27_npm-query.md",
+    "title": "npm-query",
+    "category": "technical",
+    "size": 7230,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "setup",
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-publish": {
+    "id": "2026-01-27_npm-publish",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-publish.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-publish.md",
+    "filename": "2026-01-27_npm-publish.md",
+    "title": "npm-publish",
+    "category": "technical",
+    "size": 7860,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-prune": {
+    "id": "2026-01-27_npm-prune",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-prune.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-prune.md",
+    "filename": "2026-01-27_npm-prune.md",
+    "title": "npm-prune",
+    "category": "technical",
+    "size": 5942,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-repo": {
+    "id": "2026-01-27_npm-repo",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-repo.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-repo.md",
+    "filename": "2026-01-27_npm-repo.md",
+    "title": "npm-repo",
+    "category": "technical",
+    "size": 2856,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-restart": {
+    "id": "2026-01-27_npm-restart",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-restart.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-restart.md",
+    "filename": "2026-01-27_npm-restart.md",
+    "title": "npm-restart",
+    "category": "technical",
+    "size": 1543,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-ls": {
+    "id": "2026-01-27_npm-ls",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-ls.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-ls.md",
+    "filename": "2026-01-27_npm-ls.md",
+    "title": "npm-ls",
+    "category": "technical",
+    "size": 8841,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-root": {
+    "id": "2026-01-27_npm-root",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-root.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-root.md",
+    "filename": "2026-01-27_npm-root.md",
+    "title": "npm-root",
+    "category": "technical",
+    "size": 1148,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-run-script": {
+    "id": "2026-01-27_npm-run-script",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-run-script.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-run-script.md",
+    "filename": "2026-01-27_npm-run-script.md",
+    "title": "npm-run-script",
+    "category": "technical",
+    "size": 7815,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "setup",
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-profile": {
+    "id": "2026-01-27_npm-profile",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-profile.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-profile.md",
+    "filename": "2026-01-27_npm-profile.md",
+    "title": "npm-profile",
+    "category": "technical",
+    "size": 3222,
+    "created": "2026-01-27T11:02:10.604Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "implementation",
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-sbom": {
+    "id": "2026-01-27_npm-sbom",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-sbom.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-sbom.md",
+    "filename": "2026-01-27_npm-sbom.md",
+    "title": "npm-sbom",
+    "category": "technical",
+    "size": 8655,
+    "created": "2026-01-27T11:02:10.605Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-rebuild": {
+    "id": "2026-01-27_npm-rebuild",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-rebuild.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-rebuild.md",
+    "filename": "2026-01-27_npm-rebuild.md",
+    "title": "npm-rebuild",
+    "category": "technical",
+    "size": 5170,
+    "created": "2026-01-27T11:02:10.605Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-search": {
+    "id": "2026-01-27_npm-search",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-search.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-search.md",
+    "filename": "2026-01-27_npm-search.md",
+    "title": "npm-search",
+    "category": "technical",
+    "size": 3624,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-shrinkwrap-json": {
+    "id": "2026-01-27_npm-shrinkwrap-json",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-shrinkwrap-json.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-shrinkwrap-json.md",
+    "filename": "2026-01-27_npm-shrinkwrap-json.md",
+    "title": "npm-shrinkwrap-json",
+    "category": "technical",
+    "size": 1285,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-shrinkwrap": {
+    "id": "2026-01-27_npm-shrinkwrap",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-shrinkwrap.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-shrinkwrap.md",
+    "filename": "2026-01-27_npm-shrinkwrap.md",
+    "title": "npm-shrinkwrap",
+    "category": "technical",
+    "size": 955,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-star": {
+    "id": "2026-01-27_npm-star",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-star.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-star.md",
+    "filename": "2026-01-27_npm-star.md",
+    "title": "npm-star",
+    "category": "technical",
+    "size": 1791,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-team": {
+    "id": "2026-01-27_npm-team",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-team.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-team.md",
+    "filename": "2026-01-27_npm-team.md",
+    "title": "npm-team",
+    "category": "technical",
+    "size": 4245,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "admin",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-stop": {
+    "id": "2026-01-27_npm-stop",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-stop.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-stop.md",
+    "filename": "2026-01-27_npm-stop.md",
+    "title": "npm-stop",
+    "category": "technical",
+    "size": 1414,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-test": {
+    "id": "2026-01-27_npm-test",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-test.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-test.md",
+    "filename": "2026-01-27_npm-test.md",
+    "title": "npm-test",
+    "category": "technical",
+    "size": 1304,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-token": {
+    "id": "2026-01-27_npm-token",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-token.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-token.md",
+    "filename": "2026-01-27_npm-token.md",
+    "title": "npm-token",
+    "category": "technical",
+    "size": 3005,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-start": {
+    "id": "2026-01-27_npm-start",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-start.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-start.md",
+    "filename": "2026-01-27_npm-start.md",
+    "title": "npm-start",
+    "category": "technical",
+    "size": 1747,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-uninstall": {
+    "id": "2026-01-27_npm-uninstall",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-uninstall.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-uninstall.md",
+    "filename": "2026-01-27_npm-uninstall.md",
+    "title": "npm-uninstall",
+    "category": "technical",
+    "size": 4606,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-unpublish": {
+    "id": "2026-01-27_npm-unpublish",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-unpublish.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-unpublish.md",
+    "filename": "2026-01-27_npm-unpublish.md",
+    "title": "npm-unpublish",
+    "category": "technical",
+    "size": 4627,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "error",
+      "performance"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-unstar": {
+    "id": "2026-01-27_npm-unstar",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-unstar.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-unstar.md",
+    "filename": "2026-01-27_npm-unstar.md",
+    "title": "npm-unstar",
+    "category": "technical",
+    "size": 1648,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-version": {
+    "id": "2026-01-27_npm-version",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-version.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-version.md",
+    "filename": "2026-01-27_npm-version.md",
+    "title": "npm-version",
+    "category": "technical",
+    "size": 7137,
+    "created": "2026-01-27T11:02:10.911Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-update": {
+    "id": "2026-01-27_npm-update",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-update.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-update.md",
+    "filename": "2026-01-27_npm-update.md",
+    "title": "npm-update",
+    "category": "technical",
+    "size": 12317,
+    "created": "2026-01-27T11:02:10.920Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-view": {
+    "id": "2026-01-27_npm-view",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-view.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-view.md",
+    "filename": "2026-01-27_npm-view.md",
+    "title": "npm-view",
+    "category": "technical",
+    "size": 5812,
+    "created": "2026-01-27T11:02:10.920Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-stars": {
+    "id": "2026-01-27_npm-stars",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-stars.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-stars.md",
+    "filename": "2026-01-27_npm-stars.md",
+    "title": "npm-stars",
+    "category": "technical",
+    "size": 783,
+    "created": "2026-01-27T11:02:10.929Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm-whoami": {
+    "id": "2026-01-27_npm-whoami",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm-whoami.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm-whoami.md",
+    "filename": "2026-01-27_npm-whoami.md",
+    "title": "npm-whoami",
+    "category": "technical",
+    "size": 841,
+    "created": "2026-01-27T11:02:11.275Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npmrc": {
+    "id": "2026-01-27_npmrc",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npmrc.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npmrc.md",
+    "filename": "2026-01-27_npmrc.md",
+    "title": "npmrc",
+    "category": "technical",
+    "size": 4221,
+    "created": "2026-01-27T11:02:11.275Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npx": {
+    "id": "2026-01-27_npx",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npx.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npx.md",
+    "filename": "2026-01-27_npx.md",
+    "title": "npx",
+    "category": "technical",
+    "size": 6063,
+    "created": "2026-01-27T11:02:11.275Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "config",
+      "error",
+      "security"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_npm": {
+    "id": "2026-01-27_npm",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/npm.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_npm.md",
+    "filename": "2026-01-27_npm.md",
+    "title": "npm",
+    "category": "technical",
+    "size": 5845,
+    "created": "2026-01-27T11:02:11.275Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "guide",
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_orthodoxmetrics-schema-governance-and-implementation-guide-v10": {
+    "id": "2026-01-27_orthodoxmetrics-schema-governance-and-implementation-guide-v10",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/om_schema_governance_implementation_guide_v_1.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_orthodoxmetrics-schema-governance-and-implementation-guide-v10.md",
+    "filename": "2026-01-27_orthodoxmetrics-schema-governance-and-implementation-guide-v10.md",
+    "title": "OrthodoxMetrics — Schema Governance & Implementation Guide (v1.0)",
+    "category": "technical",
+    "size": 8284,
+    "created": "2026-01-27T11:02:11.275Z",
+    "modified": "2025-08-19T07:13:34.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "database",
+      "implementation",
+      "guide",
+      "setup",
+      "error",
+      "ocr",
+      "records",
+      "admin",
+      "auth",
+      "security"
+    ],
+    "firstParagraph": "**Date:** 2025-08-19"
+  },
+  "2026-01-27_omai-ultimate-logger-design-system-documentation": {
+    "id": "2026-01-27_omai-ultimate-logger-design-system-documentation",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/omai-logger-design-system.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_omai-ultimate-logger-design-system-documentation.md",
+    "filename": "2026-01-27_omai-ultimate-logger-design-system-documentation.md",
+    "title": "OMAI Ultimate Logger - Design System Documentation",
+    "category": "technical",
+    "size": 12756,
+    "created": "2026-01-27T11:02:11.275Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "config",
+      "error",
+      "security",
+      "performance"
+    ],
+    "firstParagraph": "```css"
+  },
+  "2026-01-27_orgs": {
+    "id": "2026-01-27_orgs",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/orgs.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_orgs.md",
+    "filename": "2026-01-27_orgs.md",
+    "title": "orgs",
+    "category": "technical",
+    "size": 2339,
+    "created": "2026-01-27T11:02:11.275Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "admin"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_phase-1-omai-markdown-ingestion-and-ai-grep-engine": {
+    "id": "2026-01-27_phase-1-omai-markdown-ingestion-and-ai-grep-engine",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/omai_md_ingestion_spec.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_phase-1-omai-markdown-ingestion-and-ai-grep-engine.md",
+    "filename": "2026-01-27_phase-1-omai-markdown-ingestion-and-ai-grep-engine.md",
+    "title": "Phase 1: OMAI Markdown Ingestion and AI-Grep Engine",
+    "category": "technical",
+    "size": 2864,
+    "created": "2026-01-27T11:02:11.275Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_task-140-markdown-ingestion-core"
+    ],
+    "keywords": [
+      "frontend",
+      "database",
+      "guide",
+      "setup",
+      "integration",
+      "admin"
+    ],
+    "firstParagraph": "Enable OMAI to intelligently ingest, parse, catalog, and search `.md` files as its foundational learning and referencing mechanism."
+  },
+  "2026-01-27_orthodoxmetricscom-task-list": {
+    "id": "2026-01-27_orthodoxmetricscom-task-list",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/orthodmetrics-task-list.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_orthodoxmetricscom-task-list.md",
+    "filename": "2026-01-27_orthodoxmetricscom-task-list.md",
+    "title": "OrthodoxMetrics.com Task List",
+    "category": "technical",
+    "size": 2035,
+    "created": "2026-01-27T11:02:11.275Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "frontend",
+      "fix",
+      "implementation",
+      "config",
+      "error",
+      "admin",
+      "auth"
+    ],
+    "firstParagraph": "1. **🧩 Identify Orphaned Components in Router**"
+  },
+  "2026-01-27_orthodoxmetrics-js-arsenal": {
+    "id": "2026-01-27_orthodoxmetrics-js-arsenal",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/orthodoxmetrics-js-arsenal.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_orthodoxmetrics-js-arsenal.md",
+    "filename": "2026-01-27_orthodoxmetrics-js-arsenal.md",
+    "title": "orthodoxmetrics-js-arsenal",
+    "category": "technical",
+    "size": 35313,
+    "created": "2026-01-27T11:02:11.387Z",
+    "modified": "2025-08-15T18:40:19.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "frontend",
+      "database",
+      "fix",
+      "guide",
+      "setup",
+      "config",
+      "error",
+      "deployment",
+      "ocr",
+      "admin",
+      "auth",
+      "security",
+      "performance"
+    ],
+    "firstParagraph": "- [1. Consolidated Server Scripts](#1-consolidated-server-scripts)"
+  },
+  "2026-01-27_package-lock-json": {
+    "id": "2026-01-27_package-lock-json",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/package-lock-json.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_package-lock-json.md",
+    "filename": "2026-01-27_package-lock-json.md",
+    "title": "package-lock-json",
+    "category": "technical",
+    "size": 10452,
+    "created": "2026-01-27T11:02:11.387Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config",
+      "deployment",
+      "integration",
+      "performance"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_package-json": {
+    "id": "2026-01-27_package-json",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/package-json.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_package-json.md",
+    "filename": "2026-01-27_package-json.md",
+    "title": "package-json",
+    "category": "technical",
+    "size": 35755,
+    "created": "2026-01-27T11:02:11.387Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_package-lock-json"
+    ],
+    "keywords": [
+      "api",
+      "fix",
+      "config",
+      "error",
+      "auth",
+      "security"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_package-spec": {
+    "id": "2026-01-27_package-spec",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/package-spec.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_package-spec.md",
+    "filename": "2026-01-27_package-spec.md",
+    "title": "package-spec",
+    "category": "technical",
+    "size": 2990,
+    "created": "2026-01-27T11:02:11.387Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_reinstall-mariadb-nginx-nodejs-and-samba-on-ubuntu": {
+    "id": "2026-01-27_reinstall-mariadb-nginx-nodejs-and-samba-on-ubuntu",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/reinstall_mariadb_nginx_node_samba.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_reinstall-mariadb-nginx-nodejs-and-samba-on-ubuntu.md",
+    "filename": "2026-01-27_reinstall-mariadb-nginx-nodejs-and-samba-on-ubuntu.md",
+    "title": "Reinstall MariaDB, Nginx, Node.js, and Samba on Ubuntu",
+    "category": "technical",
+    "size": 2092,
+    "created": "2026-01-27T11:02:11.387Z",
+    "modified": "2025-06-10T12:05:55.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "setup",
+      "config"
+    ],
+    "firstParagraph": "```bash"
+  },
+  "2026-01-27_release-notes": {
+    "id": "2026-01-27_release-notes",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/release-notes.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_release-notes.md",
+    "filename": "2026-01-27_release-notes.md",
+    "title": "release-notes",
+    "category": "technical",
+    "size": 19149,
+    "created": "2026-01-27T11:02:11.387Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "fix",
+      "implementation",
+      "error",
+      "performance"
+    ],
+    "firstParagraph": "[Commits](https://github.com/kpdecker/jsdiff/compare/v5.1.0...master)"
+  },
+  "2026-01-27_registry": {
+    "id": "2026-01-27_registry",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/registry.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_registry.md",
+    "filename": "2026-01-27_registry.md",
+    "title": "registry",
+    "category": "technical",
+    "size": 3720,
+    "created": "2026-01-27T11:02:11.426Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "database",
+      "implementation",
+      "config",
+      "integration",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_release": {
+    "id": "2026-01-27_release",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/release.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_release.md",
+    "filename": "2026-01-27_release.md",
+    "title": "release",
+    "category": "technical",
+    "size": 2035,
+    "created": "2026-01-27T11:02:11.620Z",
+    "modified": "2025-05-22T07:32:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [],
+    "firstParagraph": "npm run build"
+  },
+  "2026-01-27_role-refactor-summary": {
+    "id": "2026-01-27_role-refactor-summary",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/role-refactor-summary.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_role-refactor-summary.md",
+    "filename": "2026-01-27_role-refactor-summary.md",
+    "title": "role-refactor-summary",
+    "category": "technical",
+    "size": 7413,
+    "created": "2026-01-27T11:02:11.620Z",
+    "modified": "2025-08-15T18:40:19.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "frontend",
+      "implementation",
+      "config",
+      "error",
+      "ocr",
+      "records",
+      "admin",
+      "auth",
+      "security",
+      "performance"
+    ],
+    "firstParagraph": "**Project:** OrthodoxMetrics"
+  },
+  "2026-01-27_scope": {
+    "id": "2026-01-27_scope",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/scope.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_scope.md",
+    "filename": "2026-01-27_scope.md",
+    "title": "scope",
+    "category": "technical",
+    "size": 5300,
+    "created": "2026-01-27T11:02:11.620Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_scripts": {
+    "id": "2026-01-27_scripts",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/scripts.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_scripts.md",
+    "filename": "2026-01-27_scripts.md",
+    "title": "scripts",
+    "category": "technical",
+    "size": 12624,
+    "created": "2026-01-27T11:02:11.620Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "setup",
+      "config",
+      "error"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_reportstudioplan": {
+    "id": "2026-01-27_reportstudioplan",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/report_studio_plan.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_reportstudioplan.md",
+    "filename": "2026-01-27_reportstudioplan.md",
+    "title": "report_studio_plan",
+    "category": "technical",
+    "size": 2378,
+    "created": "2026-01-27T11:02:11.620Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "records",
+      "admin"
+    ],
+    "firstParagraph": "Empower churches to generate clean, printable, and professionally formatted reports and documents from their raw data or record history. Replace clunky Excel files with easy-to-use, AI-assisted output..."
+  },
+  "2026-01-27_securechurcharchiveplan": {
+    "id": "2026-01-27_securechurcharchiveplan",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/secure_church_archive_plan.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_securechurcharchiveplan.md",
+    "filename": "2026-01-27_securechurcharchiveplan.md",
+    "title": "secure_church_archive_plan",
+    "category": "technical",
+    "size": 2006,
+    "created": "2026-01-27T11:02:11.620Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "integration",
+      "ocr",
+      "records",
+      "admin"
+    ],
+    "firstParagraph": "Provide clergy and church admins with a permanent, encrypted, and organized vault for scanning, uploading, and preserving fragile historical records before they degrade or are lost."
+  },
+  "2026-01-27_removal": {
+    "id": "2026-01-27_removal",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/removal.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_removal.md",
+    "filename": "2026-01-27_removal.md",
+    "title": "removal",
+    "category": "technical",
+    "size": 1711,
+    "created": "2026-01-27T11:02:11.620Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_task-146-search-ui": {
+    "id": "2026-01-27_task-146-search-ui",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/search-ui.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-146-search-ui.md",
+    "filename": "2026-01-27_task-146-search-ui.md",
+    "title": "Task 146: Search Ui",
+    "category": "technical",
+    "size": 431,
+    "created": "2026-01-27T11:02:11.620Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "Create an advanced UI for semantic and filterable markdown search."
+  },
+  "2026-01-27_task-145-semantic-search-embedding": {
+    "id": "2026-01-27_task-145-semantic-search-embedding",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/semantic-search-embedding.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-145-semantic-search-embedding.md",
+    "filename": "2026-01-27_task-145-semantic-search-embedding.md",
+    "title": "Task 145: Semantic Search Embedding",
+    "category": "technical",
+    "size": 457,
+    "created": "2026-01-27T11:02:11.620Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_task-146-search-ui"
+    ],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "Implement embedding generation and fuzzy topic matching on markdown content."
+  },
+  "2026-01-27_server-route-analysis": {
+    "id": "2026-01-27_server-route-analysis",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/server-route-analysis.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_server-route-analysis.md",
+    "filename": "2026-01-27_server-route-analysis.md",
+    "title": "server-route-analysis",
+    "category": "technical",
+    "size": 7845,
+    "created": "2026-01-27T11:02:11.620Z",
+    "modified": "2025-08-15T18:40:19.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "database",
+      "fix",
+      "implementation",
+      "config",
+      "integration",
+      "ocr",
+      "records",
+      "admin",
+      "auth"
+    ],
+    "firstParagraph": "✅ **CLEANUP COMPLETED**: The server codebase now has a single main entry point:"
+  },
+  "2026-01-27_task2": {
+    "id": "2026-01-27_task2",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task2.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task2.md",
+    "filename": "2026-01-27_task2.md",
+    "title": "task2",
+    "category": "technical",
+    "size": 7636,
+    "created": "2026-01-27T11:02:11.629Z",
+    "modified": "2025-08-15T18:40:17.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "fix",
+      "config",
+      "auth"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_server-configuration-ssh-keys-sudo-permissions-ntp-and-bind-for-overezitlocal": {
+    "id": "2026-01-27_server-configuration-ssh-keys-sudo-permissions-ntp-and-bind-for-overezitlocal",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/server_setup_overezit_local.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_server-configuration-ssh-keys-sudo-permissions-ntp-and-bind-for-overezitlocal.md",
+    "filename": "2026-01-27_server-configuration-ssh-keys-sudo-permissions-ntp-and-bind-for-overezitlocal.md",
+    "title": "Server Configuration: SSH Keys, Sudo, Permissions, NTP, and BIND for `overezit.local`",
+    "category": "technical",
+    "size": 2502,
+    "created": "2026-01-27T11:02:11.629Z",
+    "modified": "2025-06-10T12:11:34.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "config",
+      "admin"
+    ],
+    "firstParagraph": "---"
+  },
+  "2026-01-27_task1": {
+    "id": "2026-01-27_task1",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task1.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task1.md",
+    "filename": "2026-01-27_task1.md",
+    "title": "task1",
+    "category": "technical",
+    "size": 1326,
+    "created": "2026-01-27T11:02:11.629Z",
+    "modified": "2025-08-15T18:40:17.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "config",
+      "error",
+      "auth"
+    ],
+    "firstParagraph": "You are working in `/var/www/orthodoxmetrics/prod`."
+  },
+  "2026-01-27_task3": {
+    "id": "2026-01-27_task3",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task3.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task3.md",
+    "filename": "2026-01-27_task3.md",
+    "title": "task3",
+    "category": "technical",
+    "size": 6275,
+    "created": "2026-01-27T11:02:11.629Z",
+    "modified": "2025-08-15T18:40:17.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "frontend",
+      "database",
+      "fix",
+      "config",
+      "admin",
+      "auth"
+    ],
+    "firstParagraph": "**Mode:** Precise/Code • **Temp:** 0.1 • **Long context:** ON"
+  },
+  "2026-01-27_task5": {
+    "id": "2026-01-27_task5",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task5.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task5.md",
+    "filename": "2026-01-27_task5.md",
+    "title": "task5",
+    "category": "technical",
+    "size": 9277,
+    "created": "2026-01-27T11:02:11.629Z",
+    "modified": "2025-08-15T18:40:18.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "frontend",
+      "fix",
+      "error",
+      "records",
+      "admin",
+      "auth"
+    ],
+    "firstParagraph": "Here’s Phase 5 in the same style—paste this into a GPT-4.1 Opus Precise/Code tab in Cursor."
+  },
+  "2026-01-27_task4": {
+    "id": "2026-01-27_task4",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task4.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task4.md",
+    "filename": "2026-01-27_task4.md",
+    "title": "task4",
+    "category": "technical",
+    "size": 7449,
+    "created": "2026-01-27T11:02:11.638Z",
+    "modified": "2025-08-15T18:40:17.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "database",
+      "admin"
+    ],
+    "firstParagraph": "**Model:** GPT-4.1 Opus • **Mode:** Precise/Code • **Temp:** 0.1 • **Long context:** ON"
+  },
+  "2026-01-27_task-012-omai-orthodox-icon-generator-integration": {
+    "id": "2026-01-27_task-012-omai-orthodox-icon-generator-integration",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task_012_omai_icon_generation.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-012-omai-orthodox-icon-generator-integration.md",
+    "filename": "2026-01-27_task-012-omai-orthodox-icon-generator-integration.md",
+    "title": "Task 012: OMAI Orthodox Icon Generator Integration",
+    "category": "technical",
+    "size": 2645,
+    "created": "2026-01-27T11:02:11.792Z",
+    "modified": "2025-08-15T18:40:23.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_task-151-memory-log-generator"
+    ],
+    "keywords": [
+      "api",
+      "frontend",
+      "integration",
+      "ocr",
+      "records",
+      "admin",
+      "security"
+    ],
+    "firstParagraph": "Implement Orthodox-themed image generation in OMAI using OpenAI's DALL·E 3. This enables OMAI to produce Eastern Orthodox icons and related imagery on demand, either via CLI or web interface."
+  },
+  "2026-01-27_task014refactorrecordspage": {
+    "id": "2026-01-27_task014refactorrecordspage",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task_014_refactor_records_page.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task014refactorrecordspage.md",
+    "filename": "2026-01-27_task014refactorrecordspage.md",
+    "title": "task_014_refactor_records_page",
+    "category": "technical",
+    "size": 6181,
+    "created": "2026-01-27T11:02:11.792Z",
+    "modified": "2025-08-15T18:40:23.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "database",
+      "implementation",
+      "integration",
+      "ocr",
+      "records",
+      "admin",
+      "auth",
+      "security"
+    ],
+    "firstParagraph": "Refactor the existing **Records Management** page to utilize the layout and interactive UI from the **E-commerce Shop** page."
+  },
+  "2026-01-27_task-013-global-omai-presence-across-orthodoxmetricscom": {
+    "id": "2026-01-27_task-013-global-omai-presence-across-orthodoxmetricscom",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task_013_omai_global_presence.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-013-global-omai-presence-across-orthodoxmetricscom.md",
+    "filename": "2026-01-27_task-013-global-omai-presence-across-orthodoxmetricscom.md",
+    "title": "Task #013 – Global OMAI Presence Across OrthodoxMetrics.com",
+    "category": "technical",
+    "size": 3053,
+    "created": "2026-01-27T11:02:11.792Z",
+    "modified": "2025-08-15T18:40:23.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_orthodoxmetricscom-task-list",
+      "2026-01-27_task-012-omai-orthodox-icon-generator-integration"
+    ],
+    "keywords": [
+      "api",
+      "backend",
+      "database",
+      "admin",
+      "security"
+    ],
+    "firstParagraph": "Enable the OMAI assistant to appear on **every page** of the OrthodoxMetrics site **for superadmins only**, providing context-aware AI assistance, command execution, and full-page interaction."
+  },
+  "2026-01-27_task-11-big-book-kanban-board-task-sync": {
+    "id": "2026-01-27_task-11-big-book-kanban-board-task-sync",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task_11_big_book_kanban_sync.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-11-big-book-kanban-board-task-sync.md",
+    "filename": "2026-01-27_task-11-big-book-kanban-board-task-sync.md",
+    "title": "Task #11 – Big Book ⇄ Kanban Board Task Sync",
+    "category": "technical",
+    "size": 2255,
+    "created": "2026-01-27T11:02:11.792Z",
+    "modified": "2025-08-15T18:40:23.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_task-142-catalog-manager",
+      "2026-01-27_task-152-command-parser",
+      "2026-01-27_task-155-dragdrop-runner-ui",
+      "2026-01-27_cursor-task-orthodoxmetrics-prod-site-survey-and-cleanup-plan",
+      "2026-01-27_task-150-feedback-on-ingest",
+      "2026-01-27_task-148-learn-task-parser",
+      "2026-01-27_task-140-markdown-ingestion-core",
+      "2026-01-27_task-151-memory-log-generator",
+      "2026-01-27_task-141-metadata-indexer",
+      "2026-01-27_orthodoxmetricscom-task-list",
+      "2026-01-27_task-146-search-ui",
+      "2026-01-27_task-145-semantic-search-embedding",
+      "2026-01-27_task-012-omai-orthodox-icon-generator-integration",
+      "2026-01-27_task-013-global-omai-presence-across-orthodoxmetricscom"
+    ],
+    "keywords": [
+      "api",
+      "integration",
+      "admin"
+    ],
+    "firstParagraph": "Enable full synchronization between `task_*.md` files in the Big Book and the `dev` Kanban board, ensuring all tasks are indexed, tracked, and updateable across both systems."
+  },
+  "2026-01-27_task-11-omai-as-watchdog-and-secretary": {
+    "id": "2026-01-27_task-11-omai-as-watchdog-and-secretary",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task_11_omai_watchdog.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-11-omai-as-watchdog-and-secretary.md",
+    "filename": "2026-01-27_task-11-omai-as-watchdog-and-secretary.md",
+    "title": "Task #11 – OMAI as Watchdog & Secretary",
+    "category": "technical",
+    "size": 2695,
+    "created": "2026-01-27T11:02:11.792Z",
+    "modified": "2025-08-15T18:40:23.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_task-012-omai-orthodox-icon-generator-integration",
+      "2026-01-27_task-013-global-omai-presence-across-orthodoxmetricscom"
+    ],
+    "keywords": [
+      "backend",
+      "fix",
+      "setup",
+      "error",
+      "ocr",
+      "admin",
+      "auth",
+      "performance"
+    ],
+    "firstParagraph": "Elevate OMAI's responsibility to serve as an **active server watchdog** and **personal communication assistant**, monitoring log files and system state across both the **orthodoxmetrics.com stack** an..."
+  },
+  "2026-01-27_task-7-reassigned-devops-testing-automation": {
+    "id": "2026-01-27_task-7-reassigned-devops-testing-automation",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task_7_reassign_dev_ops_omai.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-7-reassigned-devops-testing-automation.md",
+    "filename": "2026-01-27_task-7-reassigned-devops-testing-automation.md",
+    "title": "Task #7 – Reassigned: DevOps Testing Automation",
+    "category": "technical",
+    "size": 2756,
+    "created": "2026-01-27T11:02:11.792Z",
+    "modified": "2025-08-15T18:40:23.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "backend",
+      "frontend",
+      "database",
+      "implementation",
+      "config",
+      "error",
+      "deployment",
+      "admin"
+    ],
+    "firstParagraph": "The responsibility for OrthodoxMetrics DevOps testing automation has been reassigned from *Ninja* to **OMAI**. This decision follows reliability concerns and aligns with the vision for an intelligent,..."
+  },
+  "2026-01-27_task-10-omai-command-hooks-for-big-book-management": {
+    "id": "2026-01-27_task-10-omai-command-hooks-for-big-book-management",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task_10_omai_big_book_librarian.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-10-omai-command-hooks-for-big-book-management.md",
+    "filename": "2026-01-27_task-10-omai-command-hooks-for-big-book-management.md",
+    "title": "Task #10 – OMAI Command Hooks for Big Book Management",
+    "category": "technical",
+    "size": 2175,
+    "created": "2026-01-27T11:02:11.793Z",
+    "modified": "2025-08-15T18:40:23.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_task-152-command-parser",
+      "2026-01-27_task-012-omai-orthodox-icon-generator-integration",
+      "2026-01-27_task-013-global-omai-presence-across-orthodoxmetricscom",
+      "2026-01-27_task-11-big-book-kanban-board-task-sync",
+      "2026-01-27_task-11-omai-as-watchdog-and-secretary"
+    ],
+    "keywords": [
+      "error",
+      "records",
+      "admin"
+    ],
+    "firstParagraph": "Allow OMAI to recognize and execute custom admin-taught commands such as:"
+  },
+  "2026-01-27_task-9-maintenance-mode-activation-via-omai": {
+    "id": "2026-01-27_task-9-maintenance-mode-activation-via-omai",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task_9_maintenance_mode.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-9-maintenance-mode-activation-via-omai.md",
+    "filename": "2026-01-27_task-9-maintenance-mode-activation-via-omai.md",
+    "title": "Task #9 – Maintenance Mode Activation via OMAI",
+    "category": "technical",
+    "size": 2236,
+    "created": "2026-01-27T11:02:11.793Z",
+    "modified": "2025-08-15T18:40:23.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_task-012-omai-orthodox-icon-generator-integration",
+      "2026-01-27_task-013-global-omai-presence-across-orthodoxmetricscom",
+      "2026-01-27_task-11-omai-as-watchdog-and-secretary",
+      "2026-01-27_task-10-omai-command-hooks-for-big-book-management"
+    ],
+    "keywords": [
+      "api",
+      "backend",
+      "database",
+      "implementation",
+      "admin",
+      "auth",
+      "security"
+    ],
+    "firstParagraph": "Allow **OMAI** to programmatically toggle OrthodoxMetrics.com into a controlled **Maintenance Mode**, with optional user messaging and recovery triggers."
+  },
+  "2026-01-27_task-8-big-book-path-initialization-for-omai": {
+    "id": "2026-01-27_task-8-big-book-path-initialization-for-omai",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/task_8_omai_big_book_path_setup.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-8-big-book-path-initialization-for-omai.md",
+    "filename": "2026-01-27_task-8-big-book-path-initialization-for-omai.md",
+    "title": "Task #8 – Big Book Path Initialization for OMAI",
+    "category": "technical",
+    "size": 2591,
+    "created": "2026-01-27T11:02:11.793Z",
+    "modified": "2025-08-15T18:40:23.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_task-012-omai-orthodox-icon-generator-integration",
+      "2026-01-27_task-013-global-omai-presence-across-orthodoxmetricscom",
+      "2026-01-27_task-11-big-book-kanban-board-task-sync",
+      "2026-01-27_task-11-omai-as-watchdog-and-secretary",
+      "2026-01-27_task-10-omai-command-hooks-for-big-book-management",
+      "2026-01-27_task-9-maintenance-mode-activation-via-omai"
+    ],
+    "keywords": [
+      "implementation",
+      "setup",
+      "deployment",
+      "security"
+    ],
+    "firstParagraph": "Enable OMAI to traverse and analyze the full project directory for **orthodoxmetrics.com** and begin managing relevant files inside the Big Book. This includes identifying and registering:"
+  },
+  "2026-01-27_multi-tenant-migration-plan": {
+    "id": "2026-01-27_multi-tenant-migration-plan",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/tenant_plan.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_multi-tenant-migration-plan.md",
+    "filename": "2026-01-27_multi-tenant-migration-plan.md",
+    "title": "Multi-Tenant Migration Plan",
+    "category": "technical",
+    "size": 13130,
+    "created": "2026-01-27T11:02:11.802Z",
+    "modified": "2025-08-15T18:40:31.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "database",
+      "config",
+      "error",
+      "ocr",
+      "records",
+      "admin"
+    ],
+    "firstParagraph": "Generated: 2025-08-13T01:20:35.568Z"
+  },
+  "2026-01-27_android-clipboard-git-sync-via-termux": {
+    "id": "2026-01-27_android-clipboard-git-sync-via-termux",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/termux_clipboard_git_sync.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_android-clipboard-git-sync-via-termux.md",
+    "filename": "2026-01-27_android-clipboard-git-sync-via-termux.md",
+    "title": "Android Clipboard Git Sync via Termux",
+    "category": "technical",
+    "size": 2980,
+    "created": "2026-01-27T11:02:11.802Z",
+    "modified": "2025-06-18T07:22:31.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "guide",
+      "setup",
+      "auth"
+    ],
+    "firstParagraph": "This guide outlines how to automatically capture copied text from the ChatGPT app on Android, append it to a Markdown file, and commit/push it to GitHub directly using Git inside Termux."
+  },
+  "2026-01-27_test-nfs-button": {
+    "id": "2026-01-27_test-nfs-button",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/test-nfs-button.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_test-nfs-button.md",
+    "filename": "2026-01-27_test-nfs-button.md",
+    "title": "test-nfs-button",
+    "category": "technical",
+    "size": 4471,
+    "created": "2026-01-27T11:02:11.802Z",
+    "modified": "2025-08-15T18:40:23.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "backend",
+      "frontend",
+      "fix",
+      "guide",
+      "config",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "The NFS test button performs the following steps:"
+  },
+  "2026-01-27_todo-7-22": {
+    "id": "2026-01-27_todo-7-22",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/todo 7-22.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_todo-7-22.md",
+    "filename": "2026-01-27_todo-7-22.md",
+    "title": "todo 7-22",
+    "category": "technical",
+    "size": 2731,
+    "created": "2026-01-27T11:02:11.802Z",
+    "modified": "2025-08-15T18:40:18.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "frontend",
+      "implementation",
+      "integration",
+      "auth"
+    ],
+    "firstParagraph": "todo 7-22"
+  },
+  "2026-01-27_todo": {
+    "id": "2026-01-27_todo",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/todo.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_todo.md",
+    "filename": "2026-01-27_todo.md",
+    "title": "todo",
+    "category": "technical",
+    "size": 4782,
+    "created": "2026-01-27T11:02:11.802Z",
+    "modified": "2025-08-10T00:53:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "frontend",
+      "fix",
+      "error",
+      "ocr",
+      "records",
+      "admin",
+      "auth"
+    ],
+    "firstParagraph": "Assist in resolving active bugs and implementing development tasks on the OrthodoxMetrics portal. This file outlines specific prompts for Copilot to address. Prioritize high-severity tasks first and r..."
+  },
+  "2026-01-27_uiexperienceupgradeplan": {
+    "id": "2026-01-27_uiexperienceupgradeplan",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/ui_experience_upgrade_plan.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_uiexperienceupgradeplan.md",
+    "filename": "2026-01-27_uiexperienceupgradeplan.md",
+    "title": "ui_experience_upgrade_plan",
+    "category": "technical",
+    "size": 3215,
+    "created": "2026-01-27T11:02:11.802Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "guide",
+      "setup",
+      "records",
+      "admin"
+    ],
+    "firstParagraph": "Make OrthodoxMetrics.com the most intuitive, beautifully designed, and clergy-friendly software platform ever built for the Orthodox Church. The interface must feel sacred, calm, efficient, and deeply..."
+  },
+  "2026-01-27_task-143-watcher-task": {
+    "id": "2026-01-27_task-143-watcher-task",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/watcher-task.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_task-143-watcher-task.md",
+    "filename": "2026-01-27_task-143-watcher-task.md",
+    "title": "Task 143: Watcher Task",
+    "category": "technical",
+    "size": 437,
+    "created": "2026-01-27T11:02:11.802Z",
+    "modified": "2025-08-15T18:40:30.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [
+      "2026-01-27_task-142-catalog-manager",
+      "2026-01-27_task-152-command-parser",
+      "2026-01-27_task-155-dragdrop-runner-ui",
+      "2026-01-27_cursor-task-orthodoxmetrics-prod-site-survey-and-cleanup-plan",
+      "2026-01-27_task-150-feedback-on-ingest",
+      "2026-01-27_task-148-learn-task-parser",
+      "2026-01-27_task-140-markdown-ingestion-core",
+      "2026-01-27_task-151-memory-log-generator",
+      "2026-01-27_task-141-metadata-indexer",
+      "2026-01-27_orthodoxmetricscom-task-list",
+      "2026-01-27_task-146-search-ui",
+      "2026-01-27_task-145-semantic-search-embedding",
+      "2026-01-27_task-012-omai-orthodox-icon-generator-integration",
+      "2026-01-27_task-013-global-omai-presence-across-orthodoxmetricscom",
+      "2026-01-27_task-11-big-book-kanban-board-task-sync",
+      "2026-01-27_task-11-omai-as-watchdog-and-secretary",
+      "2026-01-27_task-7-reassigned-devops-testing-automation",
+      "2026-01-27_task-10-omai-command-hooks-for-big-book-management",
+      "2026-01-27_task-9-maintenance-mode-activation-via-omai",
+      "2026-01-27_task-8-big-book-path-initialization-for-omai"
+    ],
+    "keywords": [
+      "backend",
+      "frontend",
+      "implementation",
+      "error",
+      "admin"
+    ],
+    "firstParagraph": "Implement a real-time file watcher to auto-index changes in markdown."
+  },
+  "2026-01-27_workspaces": {
+    "id": "2026-01-27_workspaces",
+    "originalPath": "/var/www/orthodoxmetrics/prod/docs/ARCHIVE/sprawl/front-end-docs/platform-infrastructure/reference/legacy-entire/workspaces.md",
+    "libraryPath": "/var/www/orthodoxmetrics/prod/front-end/public/docs/library/technical/2026-01-27_workspaces.md",
+    "filename": "2026-01-27_workspaces.md",
+    "title": "workspaces",
+    "category": "technical",
+    "size": 6341,
+    "created": "2026-01-27T11:02:11.941Z",
+    "modified": "2025-06-02T18:27:41.000Z",
+    "sourceFolder": "legacy-entire",
+    "relatedFiles": [],
+    "keywords": [
+      "api",
+      "fix",
+      "config"
+    ],
+    "firstParagraph": "---"
+  }
+}
