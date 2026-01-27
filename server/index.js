@@ -311,7 +311,10 @@ app.use('/api/admin/system', adminSystemRouter);
 app.use('/api/admin/churches', churchesManagementRouter);
 app.use('/api/admin/sessions', sessionsRouter);
 app.use('/api/admin/messages', messagesRouter);
-app.use('/api/admin/users', usersRouter); // 🎯 CRITICAL: This route was being intercepted
+app.use('/api/admin/users', usersRouter);
+const relaxRouter = require('./src/routes/admin/relax');
+app.use('/api/admin/relax', relaxRouter);
+ // 🎯 CRITICAL: This route was being intercepted
 app.use('/api/backup', require('./src/modules/backup/backup.routes'));
 // Removed duplicate mounting - users are managed through /api/admin/users
 app.use('/api/admin/activity-logs', activityLogsRouter);
