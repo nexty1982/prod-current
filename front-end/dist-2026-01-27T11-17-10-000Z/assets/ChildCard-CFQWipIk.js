@@ -1,0 +1,2 @@
+import{j as r,U as i,D as o,Q as n}from"./index-CQJq875H.js";import{C as t}from"./CardHeader-Bz31CluR.js";const j=({title:a,children:s,codeModel:d})=>r.jsxs(i,{sx:{padding:0,borderColor:e=>e.palette.divider},variant:"outlined",children:[a?r.jsxs(r.Fragment,{children:[r.jsx(t,{title:a,action:d}),r.jsx(o,{})]}):null,r.jsx(n,{children:s})]});export{j as C};
+//# sourceMappingURL=ChildCard-CFQWipIk.js.map

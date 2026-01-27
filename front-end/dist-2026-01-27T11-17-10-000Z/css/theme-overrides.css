@@ -1,0 +1,19 @@
+/*
+ * This file overrides the theme-orthodox-traditional class
+ * to ensure it doesn't affect the styling of the admin pages
+ */
+
+.theme-orthodox-traditional {
+  /* Reset any specific styling applied by this class */
+  all: unset !important;
+  /* Ensure this class doesn't apply any specific theming */
+  background: inherit !important;
+  color: inherit !important;
+  font-family: inherit !important;
+}
+
+/* If there are specific elements targeted with this theme class, reset them too */
+.theme-orthodox-traditional * {
+  font-family: inherit !important;
+  color: inherit !important;
+}

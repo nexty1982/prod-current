@@ -123,7 +123,7 @@ const RouterMenuStudio = Loadable(lazy(() => import('../features/devel-tools/Rou
 const DynamicRecordsInspector = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsInspector')));
 const RefactorConsole = Loadable(lazy(() => import('../features/devel-tools/refactor-console/RefactorConsole')));
 const ButtonShowcase = Loadable(lazy(() => import('../features/devel-tools/button-showcase/ButtonShowcase')));
-const OMSpecDocumentation = Loadable(lazy(() => import('../features/devel-tools/system-documentation/om-spec/OMSpecDocumentation')));
+const OMLibrary = Loadable(lazy(() => import('../features/devel-tools/system-documentation/om-library/OMLibrary')));
 const OMMagicImage = Loadable(lazy(() => import('../features/devel-tools/om-magic-image/om-magic-image')));
 const OCRStudioPage = Loadable(lazy(() => import('../features/ocr/pages/OCRStudioPage')));
 const OcrUploader = Loadable(lazy(() => import('../features/ocr/OcrUploader')));
@@ -537,7 +537,7 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin']}>
             <AdminErrorBoundary>
-              <OMSpecDocumentation />
+              <OMLibrary />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
