@@ -99,7 +99,6 @@ const clientApiRouter = require('./routes/clientApi');
 // Import admin system management router
 const adminSystemRouter = require('./routes/adminSystem');
 // Import library routes for OM-Library system
-const libraryRouter = require('./routes/library');
 // Import church admin management router for multi-database support
 const churchAdminRouter = require('./routes/admin/church');
 // Import churches management router for church provisioning
@@ -390,6 +389,9 @@ app.use('/api/kanban', kanbanRouter);
 
 
 // Notification routes (authenticated)
+const libraryRouter = require('./routes/library');
+app.use('/api/library', libraryRouter);
+console.log('✅ /api/library routes registered');
 app.use('/api', notificationRouter);
 
 // Social module routes
@@ -449,8 +451,6 @@ app.use('/api/docs', docsRouter);
 console.log('✅ /api/docs routes registered');
 
 // Library Routes (OM-Library system)
-app.use('/api/library', libraryRouter);
-console.log('✅ /api/library routes registered');
 
 // OCR Routes
 const ocrRouter = require('./routes/ocr');
