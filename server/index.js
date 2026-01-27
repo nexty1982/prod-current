@@ -98,6 +98,8 @@ const scriptRunnerRouter = require('./routes/runScript'); // Secure script runne
 const clientApiRouter = require('./routes/clientApi');
 // Import admin system management router
 const adminSystemRouter = require('./routes/adminSystem');
+// Import library routes for OM-Library system
+const libraryRouter = require('./routes/library');
 // Import church admin management router for multi-database support
 const churchAdminRouter = require('./routes/admin/church');
 // Import churches management router for church provisioning
@@ -439,6 +441,10 @@ const docsRouter = require('./routes/docs');
 console.log('📚 Registering /api/docs routes');
 app.use('/api/docs', docsRouter);
 console.log('✅ /api/docs routes registered');
+
+// Library Routes (OM-Library system)
+app.use('/api/library', libraryRouter);
+console.log('✅ /api/library routes registered');
 
 // OCR Routes
 const ocrRouter = require('./routes/ocr');

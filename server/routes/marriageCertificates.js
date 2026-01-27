@@ -1,15 +1,20 @@
-// Bridge route to api/marriageCertificates.js
-// TEMPORARY: Returns stub router due to canvas native module compatibility issue
+/**
+ * Marriage Certificates Route
+ * Routes to the church-specific certificate API for marriage certificates
+ */
 const express = require('express');
 const router = express.Router();
 
-router.use((req, res) => {
-    res.status(503).json({
-        success: false,
-        error: 'Service temporarily unavailable',
-        message: 'Marriage certificates module unavailable. Canvas native module needs rebuilding.',
-        fix: 'Run: cd /var/www/orthodoxmetrics/prod/server && npm rebuild canvas'
-    });
-});
+// Import the actual certificate API (correct path for dist)
+const churchCertificates = require('../api/churchCertificates');
+
+// Mount for marriage-specific routes
+router.use('/', (req, res, next) => {
+  const churchId = req.query.churchId || req.body?.churchId || req.params.churchId;
+  if (churchId) {
+    req.params.churchId = churchId;
+  }
+  next();
+}, churchCertificates);
 
 module.exports = router;

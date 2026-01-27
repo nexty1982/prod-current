@@ -9,21 +9,59 @@ const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const { createCanvas, loadImage } = require('canvas');
 const fs = require('fs');
 const path = require('path');
-const { getChurchPool } = require('../db/pool');
+const { getChurchPool, mainPool } = require('../db/pool');
+
+/**
+ * Get church name from the churches table in orthodoxmetrics_db
+ * Falls back to users.company field if church not found
+ */
+const getChurchName = async (churchId) => {
+  try {
+    const appPool = mainPool;
+    
+    // First try to get from churches table
+    const [churchRows] = await appPool.query(
+      'SELECT church_name, name FROM churches WHERE id = ?',
+      [churchId]
+    );
+    
+    if (churchRows.length > 0) {
+      return churchRows[0].church_name || churchRows[0].name || 'Orthodox Church';
+    }
+    
+    // Fallback: try to get from users.company field for the church admin
+    const [userRows] = await appPool.query(
+      'SELECT company FROM users WHERE church_id = ? AND company IS NOT NULL LIMIT 1',
+      [churchId]
+    );
+    
+    if (userRows.length > 0 && userRows[0].company) {
+      return userRows[0].company;
+    }
+    
+    return 'Orthodox Church';
+  } catch (err) {
+    console.error('Error fetching church name:', err);
+    return 'Orthodox Church';
+  }
+};
 
 // Template paths
-const BAPTISM_TEMPLATE_PATH = path.join(__dirname, '../templates/baptism_certificate_template.png');
-const MARRIAGE_TEMPLATE_PATH = path.join(__dirname, '../templates/marriage_certificate_template.png');
+// Certificate template paths - using 2026 templates
+const BAPTISM_TEMPLATE_PATH = path.join(__dirname, '../../certificates/2026/adult-baptism.png');
+const BAPTISM_CHILD_TEMPLATE_PATH = path.join(__dirname, '../../certificates/2026/adult-baptism.png');
+const MARRIAGE_TEMPLATE_PATH = path.join(__dirname, '../../certificates/2026/marriage.png');
 
 // Default field positions for baptism certificate
 const BAPTISM_POSITIONS = {
   fullName: { x: 383, y: 574 },
   birthplace: { x: 400, y: 600 },
   birthDate: { x: 444, y: 626 },
-  clergy: { x: 410, y: 698 },
+  clergyBy: { x: 410, y: 698 },       // BY field (clergy who performed baptism)
   church: { x: 514, y: 724 },
   baptismDate: { x: 424, y: 754 },
-  sponsors: { x: 400, y: 784 }
+  sponsors: { x: 400, y: 784 },
+  clergyRector: { x: 500, y: 850 }    // Rector field (signing clergy)
 };
 
 // Default field positions for marriage certificate
@@ -94,12 +132,16 @@ const generateBaptismPreview = async (record, fieldOffsets = {}, hiddenFields = 
   ctx.fillStyle = '#000000';
   ctx.textAlign = 'center';
 
+  // Use provided positions directly if they have x/y values, otherwise use defaults
   const positions = {};
   Object.keys(BAPTISM_POSITIONS).forEach(key => {
-    positions[key] = {
-      x: BAPTISM_POSITIONS[key].x + (fieldOffsets[key]?.x || 0),
-      y: BAPTISM_POSITIONS[key].y + (fieldOffsets[key]?.y || 0)
-    };
+    if (fieldOffsets[key] && typeof fieldOffsets[key].x === 'number' && typeof fieldOffsets[key].y === 'number') {
+      // Use provided absolute positions
+      positions[key] = { x: fieldOffsets[key].x, y: fieldOffsets[key].y };
+    } else {
+      // Fall back to defaults
+      positions[key] = { x: BAPTISM_POSITIONS[key].x, y: BAPTISM_POSITIONS[key].y };
+    }
   });
 
   // For template-less version, use different positions
@@ -179,12 +221,18 @@ const generateBaptismPreview = async (record, fieldOffsets = {}, hiddenFields = 
       ctx.fillText(birthDate, positions.birthDate.x, positions.birthDate.y);
     }
     
-    if (record.clergy && !hiddenFields.includes('clergy')) {
-      ctx.fillText(record.clergy, positions.clergy.x, positions.clergy.y);
+    // Clergy BY field (who performed the baptism)
+    if (record.clergy && !hiddenFields.includes('clergyBy')) {
+      ctx.fillText(record.clergy, positions.clergyBy.x, positions.clergyBy.y);
+    }
+    
+    // Clergy Rector field (signing clergy)
+    if (record.clergy && !hiddenFields.includes('clergyRector')) {
+      ctx.fillText(record.clergy, positions.clergyRector.x, positions.clergyRector.y);
     }
     
     if (!hiddenFields.includes('church')) {
-      ctx.fillText('Orthodox Church in America', positions.church.x, positions.church.y);
+      ctx.fillText(record.churchName || 'Orthodox Church', positions.church.x, positions.church.y);
     }
     
     if (record.reception_date && !hiddenFields.includes('baptismDate')) {
@@ -325,203 +373,170 @@ const generateMarriagePreview = async (record, fieldOffsets = {}, hiddenFields =
 /**
  * Generate baptism certificate PDF using pdf-lib
  */
-const generateBaptismPDF = async (record) => {
+const generateBaptismPDF = async (record, fieldPositions = null, hiddenFields = []) => {
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([612, 792]); // Letter size
-  const { width, height } = page.getSize();
-
-  const titleFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
-  const textFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-  const italicFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic);
-
-  const darkBlue = rgb(0.1, 0.2, 0.4);
-  const black = rgb(0, 0, 0);
-  const gold = rgb(0.79, 0.63, 0.15);
-
-  // Decorative border
-  page.drawRectangle({
-    x: 30,
-    y: 30,
-    width: width - 60,
-    height: height - 60,
-    borderColor: gold,
-    borderWidth: 3,
-  });
-
-  page.drawRectangle({
-    x: 40,
-    y: 40,
-    width: width - 80,
-    height: height - 80,
-    borderColor: gold,
-    borderWidth: 1,
-  });
-
-  // Title
-  const title = 'CERTIFICATE OF BAPTISM';
-  const titleWidth = titleFont.widthOfTextAtSize(title, 28);
-  page.drawText(title, {
-    x: (width - titleWidth) / 2,
-    y: height - 100,
-    size: 28,
-    font: titleFont,
-    color: darkBlue,
-  });
-
-  // Decorative line under title
-  page.drawLine({
-    start: { x: width / 2 - 150, y: height - 115 },
-    end: { x: width / 2 + 150, y: height - 115 },
-    thickness: 2,
-    color: gold,
-  });
-
-  let yPosition = height - 180;
-  const leftMargin = 80;
-
-  // Certificate text
-  page.drawText('This is to certify that', {
-    x: leftMargin,
-    y: yPosition,
-    size: 14,
-    font: textFont,
-    color: black,
-  });
-
-  yPosition -= 40;
-
-  // Full name
-  const fullName = `${record.first_name || ''} ${record.last_name || ''}`.trim() || '[Name]';
-  const nameWidth = titleFont.widthOfTextAtSize(fullName, 22);
-  page.drawText(fullName, {
-    x: (width - nameWidth) / 2,
-    y: yPosition,
-    size: 22,
-    font: titleFont,
-    color: darkBlue,
-  });
-
-  yPosition -= 50;
-
-  // Birth details
-  const birthDate = record.birth_date ? new Date(record.birth_date).toLocaleDateString() : '[Birth Date]';
-  page.drawText(`Born: ${birthDate}`, {
-    x: leftMargin,
-    y: yPosition,
-    size: 12,
-    font: textFont,
-    color: black,
-  });
-
-  yPosition -= 25;
-
-  const birthplace = record.birthplace || '[Birthplace]';
-  page.drawText(`Place of Birth: ${birthplace}`, {
-    x: leftMargin,
-    y: yPosition,
-    size: 12,
-    font: textFont,
-    color: black,
-  });
-
-  yPosition -= 40;
-
-  page.drawText('was received into the Holy Orthodox Church through', {
-    x: leftMargin,
-    y: yPosition,
-    size: 12,
-    font: textFont,
-    color: black,
-  });
-
-  yPosition -= 30;
-
-  const holyBaptismWidth = titleFont.widthOfTextAtSize('HOLY BAPTISM', 18);
-  page.drawText('HOLY BAPTISM', {
-    x: (width - holyBaptismWidth) / 2,
-    y: yPosition,
-    size: 18,
-    font: titleFont,
-    color: darkBlue,
-  });
-
-  yPosition -= 35;
-
-  const receptionDate = record.reception_date ? new Date(record.reception_date).toLocaleDateString() : '[Baptism Date]';
-  page.drawText(`on ${receptionDate}`, {
-    x: leftMargin,
-    y: yPosition,
-    size: 12,
-    font: textFont,
-    color: black,
-  });
-
-  yPosition -= 40;
-
-  // Parents
-  const parents = record.parents || '[Parents]';
-  page.drawText(`Parents: ${parents}`, {
-    x: leftMargin,
-    y: yPosition,
-    size: 12,
-    font: textFont,
-    color: black,
-  });
-
-  yPosition -= 25;
-
-  // Sponsors
-  const sponsors = record.sponsors || '[Sponsors/Godparents]';
-  page.drawText(`Sponsors: ${sponsors}`, {
-    x: leftMargin,
-    y: yPosition,
-    size: 12,
-    font: textFont,
-    color: black,
-  });
-
-  yPosition -= 40;
-
-  // Clergy
-  const clergy = record.clergy || '[Clergy]';
-  page.drawText(`Officiated by: ${clergy}`, {
-    x: leftMargin,
-    y: yPosition,
-    size: 12,
-    font: textFont,
-    color: black,
-  });
-
-  // Signature area
-  page.drawLine({
-    start: { x: width - 250, y: 120 },
-    end: { x: width - 50, y: 120 },
-    thickness: 1,
-    color: black,
-  });
-
-  page.drawText('Priest Signature', {
-    x: width - 200,
-    y: 100,
-    size: 10,
-    font: italicFont,
-    color: black,
-  });
-
-  page.drawText('Church Seal', {
-    x: width - 200,
-    y: 60,
-    size: 10,
-    font: italicFont,
-    color: black,
-  });
+  
+  // Check if template exists
+  if (fs.existsSync(BAPTISM_TEMPLATE_PATH)) {
+    // Load the template image
+    const templateBytes = fs.readFileSync(BAPTISM_TEMPLATE_PATH);
+    const templateImage = await pdfDoc.embedPng(templateBytes);
+    
+    // Get template dimensions
+    const { width: imgWidth, height: imgHeight } = templateImage.scale(1);
+    
+    // Create page with template dimensions (or scale to fit letter size)
+    const pageWidth = 612; // Letter width
+    const pageHeight = (imgHeight / imgWidth) * pageWidth;
+    const page = pdfDoc.addPage([pageWidth, pageHeight]);
+    
+    // Draw template as background
+    page.drawImage(templateImage, {
+      x: 0,
+      y: 0,
+      width: pageWidth,
+      height: pageHeight,
+    });
+    
+    // Embed font for text overlay
+    const textFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+    const black = rgb(0, 0, 0);
+    
+    // Use provided positions or defaults
+    const positions = fieldPositions || BAPTISM_POSITIONS;
+    
+    // Scale factor from template coordinates to PDF coordinates
+    const scaleX = pageWidth / imgWidth;
+    const scaleY = pageHeight / imgHeight;
+    
+    // Helper to draw text at position (converting from top-left to bottom-left origin)
+    const drawField = (fieldName, text, fontSize = 12) => {
+      if (!text || hiddenFields.includes(fieldName)) return;
+      const pos = positions[fieldName];
+      if (!pos) return;
+      
+      // Convert Y coordinate (canvas is top-down, PDF is bottom-up)
+      const pdfX = pos.x * scaleX;
+      const pdfY = pageHeight - (pos.y * scaleY);
+      
+      page.drawText(String(text), {
+        x: pdfX,
+        y: pdfY,
+        size: fontSize,
+        font: textFont,
+        color: black,
+      });
+    };
+    
+    // Draw all fields
+    const fullName = `${record.first_name || ''} ${record.last_name || ''}`.trim();
+    drawField('fullName', fullName, 14);
+    
+    if (record.birth_date) {
+      drawField('birthDate', new Date(record.birth_date).toLocaleDateString());
+    }
+    
+    drawField('birthplace', record.birthplace);
+    
+    if (record.reception_date) {
+      drawField('baptismDate', new Date(record.reception_date).toLocaleDateString());
+    }
+    
+    drawField('sponsors', record.sponsors);
+    drawField('clergyBy', record.clergy);
+    drawField('clergyRector', record.clergy);
+    drawField('church', record.churchName);
+    
+  } else {
+    // Fallback: Generate simple certificate without template
+    const page = pdfDoc.addPage([612, 792]);
+    const { width, height } = page.getSize();
+    
+    const titleFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+    const textFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+    
+    const darkBlue = rgb(0.1, 0.2, 0.4);
+    const black = rgb(0, 0, 0);
+    const gold = rgb(0.79, 0.63, 0.15);
+    
+    // Border
+    page.drawRectangle({
+      x: 30, y: 30, width: width - 60, height: height - 60,
+      borderColor: gold, borderWidth: 3,
+    });
+    
+    // Title
+    const title = 'CERTIFICATE OF BAPTISM';
+    const titleWidth = titleFont.widthOfTextAtSize(title, 28);
+    page.drawText(title, {
+      x: (width - titleWidth) / 2, y: height - 100,
+      size: 28, font: titleFont, color: darkBlue,
+    });
+    
+    let yPos = height - 180;
+    const leftMargin = 80;
+    
+    page.drawText('This is to certify that', {
+      x: leftMargin, y: yPos, size: 14, font: textFont, color: black,
+    });
+    
+    yPos -= 40;
+    const fullName = `${record.first_name || ''} ${record.last_name || ''}`.trim() || '[Name]';
+    const nameWidth = titleFont.widthOfTextAtSize(fullName, 22);
+    page.drawText(fullName, {
+      x: (width - nameWidth) / 2, y: yPos, size: 22, font: titleFont, color: darkBlue,
+    });
+    
+    yPos -= 50;
+    if (record.birth_date) {
+      page.drawText(`Born: ${new Date(record.birth_date).toLocaleDateString()}`, {
+        x: leftMargin, y: yPos, size: 12, font: textFont, color: black,
+      });
+      yPos -= 25;
+    }
+    
+    if (record.birthplace) {
+      page.drawText(`Place of Birth: ${record.birthplace}`, {
+        x: leftMargin, y: yPos, size: 12, font: textFont, color: black,
+      });
+      yPos -= 40;
+    }
+    
+    page.drawText('was received into the Holy Orthodox Church through', {
+      x: leftMargin, y: yPos, size: 12, font: textFont, color: black,
+    });
+    yPos -= 30;
+    
+    page.drawText('HOLY BAPTISM', {
+      x: (width - titleFont.widthOfTextAtSize('HOLY BAPTISM', 18)) / 2, y: yPos,
+      size: 18, font: titleFont, color: darkBlue,
+    });
+    yPos -= 40;
+    
+    if (record.reception_date) {
+      page.drawText(`on ${new Date(record.reception_date).toLocaleDateString()}`, {
+        x: leftMargin, y: yPos, size: 12, font: textFont, color: black,
+      });
+      yPos -= 40;
+    }
+    
+    if (record.sponsors) {
+      page.drawText(`Sponsors: ${record.sponsors}`, {
+        x: leftMargin, y: yPos, size: 12, font: textFont, color: black,
+      });
+      yPos -= 25;
+    }
+    
+    if (record.clergy) {
+      page.drawText(`Officiated by: ${record.clergy}`, {
+        x: leftMargin, y: yPos, size: 12, font: textFont, color: black,
+      });
+    }
+  }
 
   return pdfDoc.save();
 };
 
-/**
- * Generate marriage certificate PDF using pdf-lib
- */
 const generateMarriagePDF = async (record) => {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([612, 792]);
@@ -720,6 +735,53 @@ const generateMarriagePDF = async (record) => {
 // ROUTES
 // ============================================
 
+
+/**
+ * GET /api/church/:churchId/certificate/baptism/template
+ * Get blank baptism certificate template (no text rendered)
+ */
+router.get('/baptism/template', async (req, res) => {
+  try {
+    if (!fs.existsSync(BAPTISM_TEMPLATE_PATH)) {
+      return res.status(404).json({ success: false, error: 'Template not found' });
+    }
+    
+    const templateBuffer = fs.readFileSync(BAPTISM_TEMPLATE_PATH);
+    const base64Image = templateBuffer.toString('base64');
+    
+    res.json({
+      success: true,
+      template: `data:image/png;base64,${base64Image}`,
+    });
+  } catch (err) {
+    console.error('Template error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/church/:churchId/certificate/marriage/template
+ * Get blank marriage certificate template (no text rendered)
+ */
+router.get('/marriage/template', async (req, res) => {
+  try {
+    if (!fs.existsSync(MARRIAGE_TEMPLATE_PATH)) {
+      return res.status(404).json({ success: false, error: 'Template not found' });
+    }
+    
+    const templateBuffer = fs.readFileSync(MARRIAGE_TEMPLATE_PATH);
+    const base64Image = templateBuffer.toString('base64');
+    
+    res.json({
+      success: true,
+      template: `data:image/png;base64,${base64Image}`,
+    });
+  } catch (err) {
+    console.error('Template error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 /**
  * POST /api/church/:churchId/certificate/baptism/:id/preview
  * Generate baptism certificate preview (PNG via canvas)
@@ -744,6 +806,11 @@ router.post('/baptism/:id/preview', async (req, res) => {
     }
 
     const record = rows[0];
+    
+    // Get church name from database
+    const churchName = await getChurchName(churchId);
+    record.churchName = churchName;
+    
     const fieldOffsets = req.body.fieldOffsets || {};
     const hiddenFields = req.body.hiddenFields || [];
 
@@ -759,6 +826,14 @@ router.post('/baptism/:id/preview', async (req, res) => {
         id: record.id,
         first_name: record.first_name,
         last_name: record.last_name,
+        birth_date: record.birth_date,
+        birthplace: record.birthplace,
+        reception_date: record.reception_date,
+        baptism_date: record.baptism_date,
+        sponsors: record.sponsors,
+        godparents: record.godparents,
+        clergy: record.clergy,
+        churchName: record.churchName,
       }
     });
 
@@ -784,6 +859,26 @@ router.get('/baptism/:id/download', async (req, res) => {
   }
 
   try {
+    // Parse field positions and hidden fields from query params
+    let fieldPositions = null;
+    let hiddenFields = [];
+    
+    if (req.query.positions) {
+      try {
+        fieldPositions = JSON.parse(decodeURIComponent(req.query.positions));
+      } catch (e) {
+        console.warn('Could not parse positions:', e);
+      }
+    }
+    
+    if (req.query.hidden) {
+      try {
+        hiddenFields = JSON.parse(decodeURIComponent(req.query.hidden));
+      } catch (e) {
+        console.warn('Could not parse hidden fields:', e);
+      }
+    }
+    
     const pool = getChurchPool(churchId);
     const [rows] = await pool.query('SELECT * FROM baptism_records WHERE id = ?', [id]);
     
@@ -792,7 +887,12 @@ router.get('/baptism/:id/download', async (req, res) => {
     }
 
     const record = rows[0];
-    const pdfBytes = await generateBaptismPDF(record);
+    
+    // Get church name from database
+    const churchName = await getChurchName(churchId);
+    record.churchName = churchName;
+    
+    const pdfBytes = await generateBaptismPDF(record, fieldPositions, hiddenFields);
 
     const filename = `baptism_certificate_${record.first_name || 'unknown'}_${record.last_name || 'unknown'}_${id}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
@@ -829,6 +929,11 @@ router.post('/marriage/:id/preview', async (req, res) => {
     }
 
     const record = rows[0];
+    
+    // Get church name from database
+    const churchName = await getChurchName(churchId);
+    record.churchName = churchName;
+    
     const fieldOffsets = req.body.fieldOffsets || {};
     const hiddenFields = req.body.hiddenFields || [];
 
@@ -877,6 +982,11 @@ router.get('/marriage/:id/download', async (req, res) => {
     }
 
     const record = rows[0];
+    
+    // Get church name from database
+    const churchName = await getChurchName(churchId);
+    record.churchName = churchName;
+    
     const pdfBytes = await generateMarriagePDF(record);
 
     const groomName = `${record.fname_groom || 'unknown'}_${record.lname_groom || ''}`.trim();
@@ -890,6 +1000,204 @@ router.get('/marriage/:id/download', async (req, res) => {
   } catch (err) {
     console.error('Marriage certificate download error:', err);
     res.status(500).send('Error generating certificate');
+  }
+});
+
+
+
+/**
+ * GET /api/church/:churchId/certificate/baptism/search
+ * Search baptism records with multiple criteria
+ */
+router.get('/baptism/search', async (req, res) => {
+  const { churchId } = req.params;
+  
+  try {
+    const pool = getChurchPool(churchId);
+    
+    // Build WHERE clause from query params
+    const conditions = [];
+    const values = [];
+    
+    const searchableFields = ['first_name', 'last_name', 'birth_date', 'reception_date', 'birthplace', 'sponsors', 'clergy'];
+    
+    for (const field of searchableFields) {
+      if (req.query[field]) {
+        if (field.includes('date')) {
+          conditions.push(`${field} = ?`);
+          values.push(req.query[field]);
+        } else {
+          conditions.push(`${field} LIKE ?`);
+          values.push(`%${req.query[field]}%`);
+        }
+      }
+    }
+    
+    if (conditions.length === 0) {
+      return res.status(400).json({ success: false, error: 'At least one search criteria is required' });
+    }
+    
+    const query = `SELECT * FROM baptism_records WHERE ${conditions.join(' AND ')} ORDER BY id DESC LIMIT 100`;
+    const [rows] = await pool.query(query, values);
+    
+    res.json({ success: true, records: rows });
+  } catch (err) {
+    console.error('Search error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/church/:churchId/certificate/marriage/search
+ * Search marriage records with multiple criteria
+ */
+router.get('/marriage/search', async (req, res) => {
+  const { churchId } = req.params;
+  
+  try {
+    const pool = getChurchPool(churchId);
+    
+    const conditions = [];
+    const values = [];
+    
+    const fieldMappings = {
+      'groom_first': ['fname_groom', 'groom_first'],
+      'groom_last': ['lname_groom', 'groom_last'],
+      'bride_first': ['fname_bride', 'bride_first'],
+      'bride_last': ['lname_bride', 'bride_last'],
+      'marriage_date': ['marriage_date'],
+      'clergy': ['clergy']
+    };
+    
+    for (const [queryField, dbFields] of Object.entries(fieldMappings)) {
+      if (req.query[queryField]) {
+        const fieldConditions = dbFields.map(f => {
+          if (f.includes('date')) {
+            values.push(req.query[queryField]);
+            return `${f} = ?`;
+          } else {
+            values.push(`%${req.query[queryField]}%`);
+            return `${f} LIKE ?`;
+          }
+        });
+        conditions.push(`(${fieldConditions.join(' OR ')})`);
+      }
+    }
+    
+    if (conditions.length === 0) {
+      return res.status(400).json({ success: false, error: 'At least one search criteria is required' });
+    }
+    
+    const query = `SELECT * FROM marriage_records WHERE ${conditions.join(' AND ')} ORDER BY id DESC LIMIT 100`;
+    const [rows] = await pool.query(query, values);
+    
+    res.json({ success: true, records: rows });
+  } catch (err) {
+    console.error('Search error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/church/:churchId/certificate/positions/:type
+ * Load saved field positions for a church
+ */
+router.get('/positions/:type', async (req, res) => {
+  const { churchId } = req.params;
+  const certType = req.params.type; // 'baptism' or 'marriage'
+  
+  try {
+    const appPool = mainPool;
+    
+    // Check if table exists, create if not
+    await appPool.query(`
+      CREATE TABLE IF NOT EXISTS certificate_positions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        church_id INT NOT NULL,
+        cert_type VARCHAR(50) NOT NULL,
+        positions JSON NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_church_cert (church_id, cert_type)
+      )
+    `);
+    
+    const [rows] = await appPool.query(
+      'SELECT positions FROM certificate_positions WHERE church_id = ? AND cert_type = ?',
+      [churchId, certType]
+    );
+    
+    if (rows.length > 0) {
+      // Parse positions if stored as string
+      let positions = rows[0].positions;
+      if (typeof positions === 'string') {
+        try {
+          positions = JSON.parse(positions);
+        } catch (e) {
+          console.warn('Could not parse positions:', e);
+        }
+      }
+      res.json({
+        success: true,
+        positions: positions,
+      });
+    } else {
+      // Return default positions
+      const defaults = certType === 'marriage' ? MARRIAGE_POSITIONS : BAPTISM_POSITIONS;
+      res.json({
+        success: true,
+        positions: defaults,
+        isDefault: true,
+      });
+    }
+  } catch (err) {
+    console.error('Load positions error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/church/:churchId/certificate/positions/:type
+ * Save field positions for a church
+ */
+router.post('/positions/:type', async (req, res) => {
+  const { churchId } = req.params;
+  const certType = req.params.type;
+  const { positions } = req.body;
+  
+  if (!positions) {
+    return res.status(400).json({ success: false, error: 'Positions are required' });
+  }
+  
+  try {
+    const appPool = mainPool;
+    
+    // Ensure table exists
+    await appPool.query(`
+      CREATE TABLE IF NOT EXISTS certificate_positions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        church_id INT NOT NULL,
+        cert_type VARCHAR(50) NOT NULL,
+        positions JSON NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_church_cert (church_id, cert_type)
+      )
+    `);
+    
+    // Upsert positions - ensure positions is properly formatted
+    const positionsStr = typeof positions === 'string' ? positions : JSON.stringify(positions);
+    
+    await appPool.query(`
+      INSERT INTO certificate_positions (church_id, cert_type, positions)
+      VALUES (?, ?, ?)
+      ON DUPLICATE KEY UPDATE positions = VALUES(positions)
+    `, [churchId, certType, positionsStr]);
+    
+    res.json({ success: true, message: 'Positions saved' });
+  } catch (err) {
+    console.error('Save positions error:', err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

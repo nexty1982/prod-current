@@ -1,292 +1,6 @@
 {
   "builds": [
     {
-      "id": "build-1769384291634",
-      "timestamp": "2026-01-25T23:38:11.634Z",
-      "type": "full",
-      "success": true,
-      "buildTime": 55.874,
-      "files": {
-        "changed": [],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 0,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769385069660",
-      "timestamp": "2026-01-25T23:51:09.660Z",
-      "type": "backend",
-      "success": true,
-      "buildTime": 4.651,
-      "files": {
-        "changed": [],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 0,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769385118239",
-      "timestamp": "2026-01-25T23:51:58.239Z",
-      "type": "frontend",
-      "success": true,
-      "buildTime": 53.136,
-      "files": {
-        "changed": [],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 0,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769385121703",
-      "timestamp": "2026-01-25T23:52:01.703Z",
-      "type": "full",
-      "success": true,
-      "buildTime": 56.615,
-      "files": {
-        "changed": [],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 0,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769387690584",
-      "timestamp": "2026-01-26T00:34:50.584Z",
-      "type": "backend",
-      "success": true,
-      "buildTime": 4.504,
-      "files": {
-        "changed": [
-          "index.ts",
-          "routes/churchOcrRoutes.ts"
-        ],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 2,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769387739212",
-      "timestamp": "2026-01-26T00:35:39.212Z",
-      "type": "frontend",
-      "success": true,
-      "buildTime": 53.01,
-      "files": {
-        "changed": [],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 0,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769387742625",
-      "timestamp": "2026-01-26T00:35:42.625Z",
-      "type": "full",
-      "success": true,
-      "buildTime": 56.497,
-      "files": {
-        "changed": [],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 0,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769391213267",
-      "timestamp": "2026-01-26T01:33:33.267Z",
-      "type": "backend",
-      "success": true,
-      "buildTime": 5.329,
-      "files": {
-        "changed": [
-          "admin/index.js",
-          "admin/messages.js",
-          "admin/sessions.js",
-          "baptism.js",
-          "funeral.js",
-          "gallery.js",
-          "marriage.js",
-          "ocr.js",
-          "user-files.js",
-          "websocket/logs.js",
-          "config/db.ts",
-          "index.ts",
-          "routes/admin/users.js"
-        ],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 13,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769391263482",
-      "timestamp": "2026-01-26T01:34:23.482Z",
-      "type": "frontend",
-      "success": true,
-      "buildTime": 55.399,
-      "files": {
-        "changed": [
-          "features/devel-tools/om-ocr/EnhancedOCRUploader.tsx",
-          "layouts/full/vertical/sidebar/MenuItems.ts",
-          "routes/Router.tsx"
-        ],
-        "added": [
-          "features/devel-tools/om-ocr/components/OcrSetupGate.tsx",
-          "features/devel-tools/om-ocr/pages/OcrSetupWizardPage.tsx",
-          "features/devel-tools/om-ocr/services/ocrSetupNotifications.ts"
-        ],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 3,
-        "added": 3,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769391266932",
-      "timestamp": "2026-01-26T01:34:26.932Z",
-      "type": "full",
-      "success": true,
-      "buildTime": 58.934,
-      "files": {
-        "changed": [],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 0,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769391412658",
-      "timestamp": "2026-01-26T01:36:52.658Z",
-      "type": "backend",
-      "success": true,
-      "buildTime": 4.915,
-      "files": {
-        "changed": [],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 0,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769391462255",
-      "timestamp": "2026-01-26T01:37:42.255Z",
-      "type": "frontend",
-      "success": true,
-      "buildTime": 54.419,
-      "files": {
-        "changed": [
-          "features/records-centralized/components/baptism/BaptismRecordsPage.tsx",
-          "features/records-centralized/components/death/FuneralRecordsPage.tsx",
-          "features/records-centralized/components/marriage/MarriageRecordsPage.tsx"
-        ],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 3,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769391465672",
-      "timestamp": "2026-01-26T01:37:45.672Z",
-      "type": "full",
-      "success": true,
-      "buildTime": 57.869,
-      "files": {
-        "changed": [],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 0,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769392307669",
-      "timestamp": "2026-01-26T01:51:47.669Z",
-      "type": "backend",
-      "success": true,
-      "buildTime": 4.796,
-      "files": {
-        "changed": [
-          "index.ts"
-        ],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 1,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
-      "id": "build-1769392355836",
-      "timestamp": "2026-01-26T01:52:35.836Z",
-      "type": "frontend",
-      "success": true,
-      "buildTime": 52.862,
-      "files": {
-        "changed": [],
-        "added": [],
-        "removed": []
-      },
-      "totalFiles": {
-        "changed": 0,
-        "added": 0,
-        "removed": 0
-      }
-    },
-    {
       "id": "build-1769392359333",
       "timestamp": "2026-01-26T01:52:39.333Z",
       "type": "full",
@@ -2443,6 +2157,305 @@
         "added": 0,
         "removed": 0
       }
+    },
+    {
+      "id": "build-1769481594862",
+      "timestamp": "2026-01-27T02:39:54.861Z",
+      "type": "backend",
+      "success": true,
+      "buildTime": 4.537,
+      "files": {
+        "changed": [
+          "routes/refactorConsole.ts"
+        ],
+        "added": [
+          "utils/pathResolver.ts",
+          "utils/snapshotScanner.ts"
+        ],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 1,
+        "added": 2,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769481643629",
+      "timestamp": "2026-01-27T02:40:43.629Z",
+      "type": "frontend",
+      "success": true,
+      "buildTime": 53.197,
+      "files": {
+        "changed": [
+          "features/devel-tools/refactor-console/RefactorConsole.tsx",
+          "features/devel-tools/refactor-console/api/refactorConsoleClient.ts",
+          "features/devel-tools/refactor-console/hooks/useRefactorScan.ts",
+          "features/records-centralized/components/baptism/BaptismRecordsPage.tsx",
+          "features/records-centralized/components/death/FuneralRecordsPage.tsx",
+          "features/records-centralized/components/marriage/MarriageRecordsPage.tsx",
+          "types/refactorConsole.ts"
+        ],
+        "added": [
+          "features/records-centralized/components/dynamic/DynamicRecordsDisplay.tsx",
+          "features/records-centralized/components/dynamic/cellRenderers.tsx",
+          "features/records-centralized/components/dynamic/columnMappers.ts",
+          "features/records-centralized/components/dynamic/index.ts"
+        ],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 7,
+        "added": 4,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769481646045",
+      "timestamp": "2026-01-27T02:40:46.045Z",
+      "type": "full",
+      "success": true,
+      "buildTime": 55.772,
+      "files": {
+        "changed": [],
+        "added": [
+          "utils/dependencyChecker.ts"
+        ],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 0,
+        "added": 1,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769482160837",
+      "timestamp": "2026-01-27T02:49:20.837Z",
+      "type": "backend",
+      "success": true,
+      "buildTime": 3.9659999999999997,
+      "files": {
+        "changed": [
+          "routes/refactorConsole.ts"
+        ],
+        "added": [
+          "utils/dependencyChecker.ts",
+          "utils/restoreHistory.ts"
+        ],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 1,
+        "added": 2,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769482212644",
+      "timestamp": "2026-01-27T02:50:12.644Z",
+      "type": "frontend",
+      "success": true,
+      "buildTime": 55.667,
+      "files": {
+        "changed": [
+          "features/devel-tools/refactor-console/RefactorConsole.tsx",
+          "features/devel-tools/refactor-console/api/refactorConsoleClient.ts",
+          "features/records-centralized/components/baptism/BaptismRecordsPage.tsx",
+          "types/refactorConsole.ts"
+        ],
+        "added": [
+          "features/devel-tools/refactor-console/components/DiffViewModal.tsx",
+          "features/devel-tools/refactor-console/components/RestoreHistoryViewer.tsx"
+        ],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 4,
+        "added": 2,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769482284639",
+      "timestamp": "2026-01-27T02:51:24.638Z",
+      "type": "backend",
+      "success": true,
+      "buildTime": 3.024,
+      "files": {
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769482333715",
+      "timestamp": "2026-01-27T02:52:13.715Z",
+      "type": "frontend",
+      "success": true,
+      "buildTime": 51.997,
+      "files": {
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769482336127",
+      "timestamp": "2026-01-27T02:52:16.127Z",
+      "type": "full",
+      "success": true,
+      "buildTime": 54.697,
+      "files": {
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769483531218",
+      "timestamp": "2026-01-27T03:12:11.218Z",
+      "type": "frontend",
+      "success": true,
+      "buildTime": 52.591,
+      "files": {
+        "changed": [
+          "features/records-centralized/components/baptism/BaptismRecordsPage.tsx"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769484491757",
+      "timestamp": "2026-01-27T03:28:11.757Z",
+      "type": "backend",
+      "success": true,
+      "buildTime": 3.2350000000000003,
+      "files": {
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769484540585",
+      "timestamp": "2026-01-27T03:29:00.585Z",
+      "type": "frontend",
+      "success": true,
+      "buildTime": 51.95,
+      "files": {
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769484543004",
+      "timestamp": "2026-01-27T03:29:03.004Z",
+      "type": "full",
+      "success": true,
+      "buildTime": 54.548,
+      "files": {
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769489821400",
+      "timestamp": "2026-01-27T04:57:01.399Z",
+      "type": "backend",
+      "success": true,
+      "buildTime": 3.585,
+      "files": {
+        "changed": [
+          "baptismCertificates.js",
+          "certificates.js",
+          "marriageCertificates.js",
+          "api/churchCertificates.js"
+        ],
+        "added": [],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 4,
+        "added": 0,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769489871668",
+      "timestamp": "2026-01-27T04:57:51.668Z",
+      "type": "frontend",
+      "success": true,
+      "buildTime": 53.741,
+      "files": {
+        "changed": [
+          "routes/Router.tsx"
+        ],
+        "added": [
+          "features/certificates/CertificateGeneratorPage.tsx"
+        ],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 1,
+        "added": 1,
+        "removed": 0
+      }
+    },
+    {
+      "id": "build-1769489874081",
+      "timestamp": "2026-01-27T04:57:54.081Z",
+      "type": "full",
+      "success": true,
+      "buildTime": 56.318,
+      "files": {
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      "totalFiles": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0
+      }
     }
   ],
   "lastState": {
@@ -2475,13 +2488,13 @@
       "backend_diagnostics.js": "329a6231ade39d615854158fddcd61cf",
       "backup.js": "c35129ee8662e251df568a661b39df9c",
       "baptism.js": "24eeb828f7cc13279b29d6baa9e5fbf9",
-      "baptismCertificates.js": "679669f0346bf73cabf09ce830f27aa9",
+      "baptismCertificates.js": "82bb83a98ab7c8d99cf7253d760bd502",
       "bigbook.js": "9b8b46ab212082f11d66a34b0e497fd0",
       "billing.js": "bf5c91d231213f672fe9461028366397",
       "blogs.js": "35377357053aaa23aed53d0669f8a5a2",
       "build.js": "5e6ee81c375e1d4a49185ff2fc244d8c",
       "calendar.js": "4d4dfa18f02b496faed7a3464d6640fc",
-      "certificates.js": "23f7450fd6fe3baf55aa58f33e9427b8",
+      "certificates.js": "e910e65cd6f46c4313ebffefaa83f2a7",
       "churches.js": "4bd117164d26fe631042d7c68ba7184a",
       "clientApi.js": "83302abd3736c853db047c7d906ad2ac",
       "dashboard.js": "e4d14db7d45baecceec4cc0717931e6d",
@@ -2514,7 +2527,7 @@
       "logger.js": "90aa485220d2a177fb5e69e36d610dd7",
       "logs.js": "3d50bd43385145378e761ffa7043ccef",
       "marriage.js": "278c86a883600a414ad8ccd3600801bc",
-      "marriageCertificates.js": "4511994d68e475ca8bf28cae035dcb3c",
+      "marriageCertificates.js": "185527ed245da79fd5add442269fecac",
       "menuManagement.js": "31991e9239da4231f563e09f05ae3dbc",
       "menuPermissions.js": "230071fc56c4794542745439a39695d2",
       "menuPermissionsApi.js": "6904b9929c1aedba5c7989507a34b2ab",
@@ -2569,7 +2582,7 @@
       "api/buildEvents.js": "49f2d1bc632cb5f9f0127d2c79af66be",
       "api/calendar.js": "2aee839023da8cec172bee4d242c7033",
       "api/certificates.js": "2b5fe8ab5e8e797ddb3b8313866c0838",
-      "api/churchCertificates.js": "d80815b651f5c44b37dbcc637fcc9092",
+      "api/churchCertificates.js": "672ef2d5741e7b9e7d73519b8be52de3",
       "api/churchSetupWizard.js": "6c8d1741e8aa118902e827053f8f9fda",
       "api/churches.js": "a2aa09569b121cc4775b055eba9a4d72",
       "api/clientApi.js": "5b559fd8f53b3b99728b0a233c22357e",
@@ -2707,7 +2720,7 @@
       "routes/records/browse.ts": "c360adaaec02c802dcfe7653dc297ae8",
       "routes/records/dashboard.ts": "0dc345fc383d722081dfb01a94e368d4",
       "routes/records/import.ts": "1634104a458bf58ab12441d0f73ae2fa",
-      "routes/refactorConsole.ts": "f5b78791857f6a9071e9eba9478e4ef3",
+      "routes/refactorConsole.ts": "c94815333dab45b63210032150d07cd3",
       "services/bigBookKanbanSync.js": "58c738c2d017275c05c1513e82136df8",
       "services/bigBookWatchdogIntegration.js": "bec162dc2efcb06a71a3a087d80333e6",
       "services/bundleRestoreService.ts": "e53f5f887c4da62ca1a5e8d929123e85",
@@ -2753,6 +2766,7 @@
       "utils/dbLogger.js": "1eb2dce06b0d10e3a4a2de903e1a3a51",
       "utils/dbSwitcher.js": "0a6bed130a69a8d0ee432327e1a5595b",
       "utils/debug-auth.js": "79d21befafdc1011bed95b7bf0b48032",
+      "utils/dependencyChecker.ts": "c6208f1c032c1b4406ae6431b88960e7",
       "utils/emailSender.js": "b261aba355116171ca1b07d31d238199",
       "utils/emailService.js": "2c4d4c57b8d9b38c381496c1ccd5b944",
       "utils/encryptedStorage.js": "67d015da90d11c7ffbbadb24dd3d4c2f",
@@ -2770,11 +2784,14 @@
       "utils/omaiCommandExecutor.js": "8948b70eeed7a2ada3ec61bc0936647c",
       "utils/omaiMaintenanceInterface.js": "cbc50c7e361533144c17a501de450fac",
       "utils/pageRegistrar.js": "79fb4003d715a9b0e9afd992d921d106",
+      "utils/pathResolver.ts": "2b26cc3601c954055cd8d5e503490800",
       "utils/preprocessImage.js": "0c046bb3e5f2dd6d153134646cbc1a21",
       "utils/questionnaireParser.js": "0d28bb0b02a0bc33589575536466ae16",
+      "utils/restoreHistory.ts": "e5430d526a8e4a96c0957695efaaf2e2",
       "utils/roles.js": "4ccdce401217a5b8ea7245c18eb0ded1",
       "utils/sendProvisionEmail.js": "ed8e4f4b89f398085216fb921ada8aad",
       "utils/setup-database.js": "bb2571a166f64b9864f74f68fe23e746",
+      "utils/snapshotScanner.ts": "4702601a89e781b3b76d8bc4b102d0f5",
       "utils/test-auth.js": "b72bf8d47913a1d78b1a6881c379ac7a",
       "utils/test-church-creation.js": "78b04369a73c97beb408bb13283decca",
       "utils/test-db.js": "f79bfccc625c0faf49fdafc23da6da02",
@@ -3833,6 +3850,7 @@
       "features/authentication/authForms/AuthSocialButtons.tsx": "d3d7acfc680acc6a25290f775fe68a1d",
       "features/authentication/authForms/AuthTwoSteps.tsx": "d3cd727bfc9b5b5c8240f916c27266c0",
       "features/authentication/authForms/SharedAuthLogin.tsx": "e19e839cbfd19a607d71ca047dbc74cc",
+      "features/certificates/CertificateGeneratorPage.tsx": "a8ac74a11203163c5df955e47eb4fbda",
       "features/charts/AreaChart.tsx": "447575175dd761faf876dc630f1fa807",
       "features/charts/CandlestickChart.tsx": "c85463a7371f3cf6ccd79da255f2c91d",
       "features/charts/ColumnChart.tsx": "51505bb069f11c015ca56f669d901312",
@@ -3991,15 +4009,17 @@
       "features/devel-tools/om-ultimatelogger/types.ts": "ec3d36994764803a74b214f4d925da6c",
       "features/devel-tools/om-ultimatelogger/utils.ts": "bd27c4bd78a4b86c36391359cd524f9b",
       "features/devel-tools/recordbook/ocarecord_book_timeline.tsx": "af311bd6fd8f9cfbc03a5c652e342957",
-      "features/devel-tools/refactor-console/RefactorConsole.tsx": "e5b3cc0abedbb7213b0081cbc2af23b0",
-      "features/devel-tools/refactor-console/api/refactorConsoleClient.ts": "6a7a6d8ce9fb405e630963036177eff0",
+      "features/devel-tools/refactor-console/RefactorConsole.tsx": "6509f7144baeff55be818ba382cf585c",
+      "features/devel-tools/refactor-console/api/refactorConsoleClient.ts": "2a6b36dbc5426f2f84bd096e9849e98b",
+      "features/devel-tools/refactor-console/components/DiffViewModal.tsx": "0632481151d7166fa2853229d4a5cf2f",
       "features/devel-tools/refactor-console/components/Legend.tsx": "b17564d0f5bea5e19bc27ce40145516d",
       "features/devel-tools/refactor-console/components/RequirementPreviewModal.tsx": "0672d3426c7ee576cfe33537223d6e55",
       "features/devel-tools/refactor-console/components/RestorationStatusBadge.tsx": "4d8794fc90f3116e3af6eee00adb3377",
       "features/devel-tools/refactor-console/components/RestoreBundleButton.tsx": "797d28b818571e4ce572df6ce5aa8ff1",
+      "features/devel-tools/refactor-console/components/RestoreHistoryViewer.tsx": "a1f1fb6c9f822869bf2c3a86ce119d38",
       "features/devel-tools/refactor-console/components/Toolbar.tsx": "9104e4d36ef6834ed9e363aedcc29e3b",
       "features/devel-tools/refactor-console/components/Tree.tsx": "f5ccb9cc7489dd7b93f86cb4e052ee41",
-      "features/devel-tools/refactor-console/hooks/useRefactorScan.ts": "65f9b6e1c8fe691ce348ac71103ce9f2",
+      "features/devel-tools/refactor-console/hooks/useRefactorScan.ts": "a32c5fea2a0c38dd0c4dac03bbf63307",
       "features/devel-tools/refactor-console/utils/bundleResolver.ts": "cc3d1eda70af7bb984a635a131e532c0",
       "features/devel-tools/refactor-console/utils/themeHelpers.ts": "d095e1ac997d1297974948320e3c02f5",
       "features/devel-tools/system-documentation/gallery.config.ts": "be5d1f8bd0f3b929a031552034138a45",
@@ -4229,7 +4249,7 @@
       "features/records-centralized/components/baptism/BaptismRecordViewerMagnifier.tsx": "a901090269a99c49fefe729fcd074060",
       "features/records-centralized/components/baptism/BaptismRecords.tsx": "c6238e53a788161f296c6b89f6171454",
       "features/records-centralized/components/baptism/BaptismRecordsComponent.tsx": "e634a4c18fc70ecad84b16ca4f899fa8",
-      "features/records-centralized/components/baptism/BaptismRecordsPage.tsx": "7844acff353f1bc71a3ade1d9e7061bd",
+      "features/records-centralized/components/baptism/BaptismRecordsPage.tsx": "d3680bba1f60ff6bdd2c20285fe3fdb2",
       "features/records-centralized/components/baptism/index.ts": "b62c14e488db04c16b46b60b1ef3221e",
       "features/records-centralized/components/census/index.ts": "ea4af2f6f3a44237b4b7b5e06a76b0c4",
       "features/records-centralized/components/client.ts": "618f9af094dc521cd6a5a3eb72633f0e",
@@ -4237,9 +4257,13 @@
       "features/records-centralized/components/confirmation/DeleteConfirmationModal.tsx": "31c81dfe1f11560ff06afb530d605835",
       "features/records-centralized/components/confirmation/index.ts": "7c72dd932ac36239c808074c8a8450f5",
       "features/records-centralized/components/constants.ts": "f8a94dfc3b72501a6c22c782094de14d",
-      "features/records-centralized/components/death/FuneralRecordsPage.tsx": "098b26b192a05ce508d7413179d96b14",
+      "features/records-centralized/components/death/FuneralRecordsPage.tsx": "d290b02681f6ee6a3209732ad641e8aa",
       "features/records-centralized/components/death/index.ts": "7b956fcecc7826c99333f18ff0aafe94",
+      "features/records-centralized/components/dynamic/DynamicRecordsDisplay.tsx": "a190a1d535bc85ae404d5ab13adcc0e0",
       "features/records-centralized/components/dynamic/DynamicRecordsInspector.tsx": "d41755fc1b5c948c4b8eb02a8c3fb997",
+      "features/records-centralized/components/dynamic/cellRenderers.tsx": "12df0b5c67b94cda63c95f1f06394f4d",
+      "features/records-centralized/components/dynamic/columnMappers.ts": "88dbe488a3a9b57b28bc65c5716f1887",
+      "features/records-centralized/components/dynamic/index.ts": "e884642ac5eddb85f038d4cef2e796b3",
       "features/records-centralized/components/endpoints.ts": "6345f3b2d0598854607e153444364a02",
       "features/records-centralized/components/entries/index.ts": "a83d0ed91dbd538985636aa20e872ed4",
       "features/records-centralized/components/forms/ChurchForm.tsx": "404d2fb71b78074a945df18443e49346",
@@ -4286,7 +4310,7 @@
       "features/records-centralized/components/interactiveReport/InteractiveReportReview.tsx": "70d21e7bc0b9e9f2f1893c1db0d0874a",
       "features/records-centralized/components/interactiveReport/RecipientSubmissionPage.tsx": "276321e9056105a7ed32acd02d172f7c",
       "features/records-centralized/components/marriage/MarriageRecords.tsx": "03ece428554e41121dc14effdba7e458",
-      "features/records-centralized/components/marriage/MarriageRecordsPage.tsx": "beb529cd00719968cda63e5e1f4494a6",
+      "features/records-centralized/components/marriage/MarriageRecordsPage.tsx": "e5154c225a07fb92aa9dc9a3e840e57a",
       "features/records-centralized/components/marriage/index.ts": "7129fc68d8426e8bd142d568be3966d6",
       "features/records-centralized/components/members/index.ts": "a5c81ca0d5342d71f20dee57ee6c67d2",
       "features/records-centralized/components/queries.ts": "0beb5f1c29c41de8c07b38c17969e2b8",
@@ -4555,7 +4579,7 @@
       "pages/OcrSetupWizardPage.tsx": "0e570a899fcfd21576af990d63795d81",
       "pages/admin/OpsReportsPage.tsx": "469e776f93b180206b04a7a06bf95d2f",
       "pages/devel/LoadingDemo.tsx": "4eb2aae7ac64edbf44f6fa32eb2b1dc0",
-      "routes/Router.tsx": "9348a194ad0ba3295b73eca1fdfdfc88",
+      "routes/Router.tsx": "6ca410e0b06181bb9331fbe579a98b8e",
       "sandbox/field-mapper/api/client.ts": "854e113cab14de38a1d49be8f59ddf41",
       "sandbox/field-mapper/api/endpoints.ts": "70c40d275cad78a23429130256ca27e8",
       "sandbox/field-mapper/api/queries.ts": "c274f9a7539d943e97de8838ee430b95",
@@ -4706,7 +4730,7 @@
       "types/logging.ts": "9b150af35843fdbc957e7f9fdffb19e2",
       "types/orthodox-calendar.types.ts": "38a0076b39fcb7130917869553479734",
       "types/orthodox-metrics.types.ts": "a57b6964d87ac020c814a547e203e5bf",
-      "types/refactorConsole.ts": "110af2e259f52ddd413f00427ba0e65f",
+      "types/refactorConsole.ts": "9a38a49535ea0235a68662bc21b2ebf5",
       "ui/components/base/RecordsModal.tsx": "e4eb6171e940d545c83d1b240c47a49f",
       "ui/components/base/RecordsSearch.tsx": "8c8ec81f270ad1bf98a6b5bb59a3bfbb",
       "ui/components/index.ts": "6caf499403098ae68a2071195f73a032",

@@ -30,6 +30,12 @@ if (typeof glob !== 'function') {
   throw new Error(`glob import failed: expected function, got ${typeof glob}. Module keys: ${Object.keys(globModule).join(', ')}`);
 }
 
+// Import path resolver and snapshot scanner
+import * as pathResolver from '../utils/pathResolver';
+import * as snapshotScanner from '../utils/snapshotScanner';
+import * as dependencyChecker from '../utils/dependencyChecker';
+import * as restoreHistory from '../utils/restoreHistory';
+
 const router = Router();
 
 // Log router creation for debugging
@@ -113,14 +119,128 @@ interface RefactorScan {
   gapAnalysisEnabled?: boolean;
 }
 
-const PROJECT_ROOT = '/var/www/orthodoxmetrics/prod';
-// September 2025 backup location - update this path if your backup is stored elsewhere
-const BACKUP_ROOT = '/var/www/orthodoxmetrics/backup';
+// ============================================================================
+// Dynamic Path Configuration
+// ============================================================================
+// Default paths - can be overridden via API parameters
+const DEFAULT_PROJECT_ROOT = '/var/www/orthodoxmetrics/prod';
+const DEFAULT_SOURCE_PATH = '/var/www/orthodoxmetrics/prod/refactor-src/';
+const DEFAULT_DESTINATION_PATH = '/var/www/orthodoxmetrics/prod/front-end/src/';
+// September 2025 backup location
+const DEFAULT_BACKUP_ROOT = '/var/www/orthodoxmetrics/backup';
+
+// For backward compatibility
+const PROJECT_ROOT = DEFAULT_PROJECT_ROOT;
+const BACKUP_ROOT = DEFAULT_BACKUP_ROOT;
+
 const CACHE_FILE = path.join(PROJECT_ROOT, '.analysis', 'refactor-scan.json');
 const ANALYSIS_DIR = path.join(PROJECT_ROOT, '.analysis');
 
 // Ensure .analysis directory exists
 fs.ensureDirSync(ANALYSIS_DIR);
+
+// ============================================================================
+// Path Safety Guard
+// ============================================================================
+// Ensures provided paths are subdirectories of /var/www/orthodoxmetrics/
+// to prevent unauthorized file access
+const ALLOWED_BASE_PATHS = [
+  '/var/www/orthodoxmetrics/',
+  '/var/www/orthodoxmetrics'
+];
+
+/**
+ * Validates that a path is within the allowed base directories
+ * @param inputPath - The path to validate
+ * @returns Object with isValid flag and sanitized path
+ */
+function validateAndSanitizePath(inputPath: string): { isValid: boolean; sanitizedPath: string; error?: string } {
+  if (!inputPath || typeof inputPath !== 'string') {
+    return { isValid: false, sanitizedPath: '', error: 'Path is required and must be a string' };
+  }
+
+  // Normalize the path to resolve any ../ or ./ segments
+  const normalizedPath = path.resolve(inputPath);
+  
+  // Check if the path starts with any allowed base path
+  const isAllowed = ALLOWED_BASE_PATHS.some(basePath => 
+    normalizedPath.startsWith(basePath) || normalizedPath === basePath.replace(/\/$/, '')
+  );
+  
+  if (!isAllowed) {
+    console.warn(`[Security] Blocked path access attempt: ${inputPath} (normalized: ${normalizedPath})`);
+    return { 
+      isValid: false, 
+      sanitizedPath: '', 
+      error: `Path must be within /var/www/orthodoxmetrics/. Provided: ${inputPath}` 
+    };
+  }
+
+  // Ensure the path doesn't contain dangerous patterns
+  const dangerousPatterns = [
+    /\.\.\//,     // Directory traversal
+    /\/\.\./,     // Directory traversal
+    /^~\//,       // Home directory expansion
+    /\$\(/,       // Command substitution
+    /`/,          // Backtick command substitution
+    /\|/,         // Pipe
+    /;/,          // Command separator
+    /&/,          // Background/AND
+    />/,          // Redirect
+    /</,          // Redirect
+  ];
+
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(inputPath)) {
+      console.warn(`[Security] Blocked dangerous path pattern: ${inputPath}`);
+      return { 
+        isValid: false, 
+        sanitizedPath: '', 
+        error: `Path contains forbidden characters: ${inputPath}` 
+      };
+    }
+  }
+
+  return { isValid: true, sanitizedPath: normalizedPath };
+}
+
+/**
+ * Get validated paths from request, falling back to defaults
+ */
+function getValidatedPaths(req: Request): {
+  sourcePath: string;
+  destinationPath: string;
+  backupPath: string;
+  errors: string[];
+} {
+  const errors: string[] = [];
+  
+  // Get source path from query or body
+  const rawSourcePath = (req.query.sourcePath as string) || (req.body?.sourcePath as string) || DEFAULT_SOURCE_PATH;
+  const sourceValidation = validateAndSanitizePath(rawSourcePath);
+  const sourcePath = sourceValidation.isValid ? sourceValidation.sanitizedPath : DEFAULT_SOURCE_PATH;
+  if (!sourceValidation.isValid && rawSourcePath !== DEFAULT_SOURCE_PATH) {
+    errors.push(`Source path invalid: ${sourceValidation.error}`);
+  }
+  
+  // Get destination path from query or body
+  const rawDestPath = (req.query.destinationPath as string) || (req.body?.destinationPath as string) || DEFAULT_DESTINATION_PATH;
+  const destValidation = validateAndSanitizePath(rawDestPath);
+  const destinationPath = destValidation.isValid ? destValidation.sanitizedPath : DEFAULT_DESTINATION_PATH;
+  if (!destValidation.isValid && rawDestPath !== DEFAULT_DESTINATION_PATH) {
+    errors.push(`Destination path invalid: ${destValidation.error}`);
+  }
+  
+  // Get backup path from query or body
+  const rawBackupPath = (req.query.backupPath as string) || (req.body?.backupPath as string) || DEFAULT_BACKUP_ROOT;
+  const backupValidation = validateAndSanitizePath(rawBackupPath);
+  const backupPath = backupValidation.isValid ? backupValidation.sanitizedPath : DEFAULT_BACKUP_ROOT;
+  if (!backupValidation.isValid && rawBackupPath !== DEFAULT_BACKUP_ROOT) {
+    errors.push(`Backup path invalid: ${backupValidation.error}`);
+  }
+
+  return { sourcePath, destinationPath, backupPath, errors };
+}
 
 // Helper function to get file hash (for duplicate detection)
 function getFileHash(filePath: string): string {
@@ -564,15 +684,23 @@ function classifyFile(
   return { classification, reasons };
 }
 
-// Main scanning function
-async function performScan(rebuild: boolean = false, compareWithBackup: boolean = false): Promise<RefactorScan> {
+// Main scanning function (with dynamic backup path support and dynamic source path)
+async function performScan(
+  rebuild: boolean = false, 
+  compareWithBackup: boolean = false,
+  backupDirPath: string = BACKUP_ROOT,
+  sourcePath?: string
+): Promise<RefactorScan & { pathConfig?: any }> {
   // Defensive validation: ensure glob is a function at scan entry point
   if (typeof glob !== 'function') {
     throw new Error('glob import failed: expected function');
   }
   
-  // Check cache first
-  if (!rebuild && fs.existsSync(CACHE_FILE)) {
+  // Use provided sourcePath or default
+  const scanRoot = sourcePath || DEFAULT_SOURCE_PATH;
+  
+  // Check cache first (only if using default path and not rebuilding)
+  if (!rebuild && !sourcePath && fs.existsSync(CACHE_FILE)) {
     const stats = fs.statSync(CACHE_FILE);
     const ageMs = Date.now() - stats.mtimeMs;
     
@@ -583,12 +711,24 @@ async function performScan(rebuild: boolean = false, compareWithBackup: boolean 
     }
   }
 
-  console.log('Performing fresh scan...');
+  console.log(`Performing fresh scan from: ${scanRoot}`);
 
+  // Build dynamic include patterns based on scan root
   const includePatterns = [
-    '/var/www/orthodoxmetrics/prod/front-end/src/**',
-    '/var/www/orthodoxmetrics/prod/server/**'
+    path.join(scanRoot, '**')
   ];
+  
+  // If scanning a specific snapshot, we already have the full path
+  // If scanning default prod, we need to look in typical locations
+  if (!sourcePath || sourcePath.includes('/refactor-src/')) {
+    // Keep current pattern - we're at the root already
+  } else {
+    // Fallback to original patterns for backward compatibility
+    includePatterns.push(
+      '/var/www/orthodoxmetrics/prod/front-end/src/**',
+      '/var/www/orthodoxmetrics/prod/server/**'
+    );
+  }
 
   const excludePatterns = [
     '**/node_modules/**',
@@ -632,11 +772,17 @@ async function performScan(rebuild: boolean = false, compareWithBackup: boolean 
   // Build file nodes
   console.log('Building file tree...');
   const nodes: FileNode[] = [];
+  
+  // Use scanRoot for relative path calculation
+  const basePathForRelative = scanRoot.endsWith('/') ? scanRoot : scanRoot + '/';
 
   for (const filePath of allFiles) {
     try {
       const stats = fs.statSync(filePath);
-      const relPath = filePath.replace(PROJECT_ROOT + '/', '');
+      // Calculate relative path from scan root
+      const relPath = filePath.startsWith(basePathForRelative) 
+        ? filePath.substring(basePathForRelative.length)
+        : filePath.replace(PROJECT_ROOT + '/', '');
       const usage = usageMap.get(filePath) || {
         importRefs: 0, serverRefs: 0, routeRefs: 0, runtimeHints: 0, score: 0
       };
@@ -700,26 +846,233 @@ async function performScan(rebuild: boolean = false, compareWithBackup: boolean 
 
   const scanResult: RefactorScan = {
     generatedAt: new Date().toISOString(),
-    root: PROJECT_ROOT,
+    root: scanRoot, // Use dynamic scan root
     summary,
     nodes: finalNodes,
     backupPath: compareWithBackup ? BACKUP_ROOT : undefined,
     gapAnalysisEnabled: compareWithBackup
   };
 
-  // Cache the result
-  fs.writeJsonSync(CACHE_FILE, scanResult, { spaces: 2 });
-  console.log(`Analysis complete. Cached to ${CACHE_FILE}`);
+  // Cache the result (only if using default path)
+  if (!sourcePath) {
+    fs.writeJsonSync(CACHE_FILE, scanResult, { spaces: 2 });
+    console.log(`Analysis complete. Cached to ${CACHE_FILE}`);
+  } else {
+    console.log(`Analysis complete. (Not cached - custom source path: ${scanRoot})`);
+  }
 
   return scanResult;
 }
 
-// API endpoint
+// ============================================================================
+// Path Configuration Endpoint
+// ============================================================================
+// GET /api/refactor-console/config/paths - Get current/default path configuration
+router.get('/config/paths', (req: Request, res: Response) => {
+  res.json({
+    ok: true,
+    defaults: {
+      sourcePath: DEFAULT_SOURCE_PATH,
+      destinationPath: DEFAULT_DESTINATION_PATH,
+      backupPath: DEFAULT_BACKUP_ROOT,
+      projectRoot: DEFAULT_PROJECT_ROOT
+    },
+    allowedBasePath: '/var/www/orthodoxmetrics/',
+    message: 'Use these paths as parameters in scan/restore endpoints'
+  });
+});
+
+// POST /api/refactor-console/config/validate-paths - Validate custom paths
+router.post('/config/validate-paths', (req: Request, res: Response) => {
+  const { sourcePath, destinationPath, backupPath } = req.body;
+  
+  const results: any = { ok: true, validations: {} };
+  
+  if (sourcePath) {
+    const validation = validateAndSanitizePath(sourcePath);
+    results.validations.sourcePath = {
+      input: sourcePath,
+      isValid: validation.isValid,
+      sanitized: validation.sanitizedPath,
+      error: validation.error,
+      exists: validation.isValid ? fs.existsSync(validation.sanitizedPath) : false
+    };
+    if (!validation.isValid) results.ok = false;
+  }
+  
+  if (destinationPath) {
+    const validation = validateAndSanitizePath(destinationPath);
+    results.validations.destinationPath = {
+      input: destinationPath,
+      isValid: validation.isValid,
+      sanitized: validation.sanitizedPath,
+      error: validation.error,
+      exists: validation.isValid ? fs.existsSync(validation.sanitizedPath) : false
+    };
+    if (!validation.isValid) results.ok = false;
+  }
+  
+  if (backupPath) {
+    const validation = validateAndSanitizePath(backupPath);
+    results.validations.backupPath = {
+      input: backupPath,
+      isValid: validation.isValid,
+      sanitized: validation.sanitizedPath,
+      error: validation.error,
+      exists: validation.isValid ? fs.existsSync(validation.sanitizedPath) : false
+    };
+    if (!validation.isValid) results.ok = false;
+  }
+  
+  res.json(results);
+});
+
+// ============================================================================
+// Snapshot Discovery Endpoint
+// ============================================================================
+// GET /api/refactor-console/snapshots - Discover available MM-YYYY/prod snapshots
+router.get('/snapshots', async (req: Request, res: Response) => {
+  try {
+    const sourceType = (req.query.sourceType as string) || 'local';
+    const customPath = req.query.sourcePath as string;
+    
+    // Determine base path
+    let basePath: string;
+    if (customPath) {
+      const validation = validateAndSanitizePath(customPath);
+      if (!validation.isValid) {
+        return res.status(400).json({ 
+          error: 'Invalid source path', 
+          message: validation.error 
+        });
+      }
+      basePath = validation.sanitizedPath;
+    } else {
+      basePath = pathResolver.getBaseSourcePath(sourceType as 'local' | 'remote');
+    }
+    
+    // If remote, verify Samba is mounted
+    if (sourceType === 'remote') {
+      const mountCheck = await pathResolver.verifySambaMount();
+      if (!mountCheck.ok) {
+        return res.status(503).json({ 
+          error: 'Samba mount not available', 
+          message: mountCheck.error,
+          mountInfo: await pathResolver.getMountInfo()
+        });
+      }
+    }
+    
+    // Scan for snapshots
+    const snapshots = await snapshotScanner.scanForSnapshots(basePath);
+    
+    // Get the most recent snapshot as default
+    const defaultSnapshot = snapshots.find(s => s.isValid) || null;
+    
+    // Get statistics
+    const stats = await snapshotScanner.getSnapshotStats(basePath);
+    
+    res.json({
+      ok: true,
+      sourceType,
+      basePath,
+      snapshots: snapshots.filter(s => s.isValid), // Only return valid snapshots
+      defaultSnapshot,
+      stats
+    });
+  } catch (error) {
+    console.error('[Snapshots] Error:', error);
+    res.status(500).json({ 
+      error: 'Failed to scan for snapshots', 
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// ============================================================================
+// Scan API Endpoint (with dynamic path support)
+// ============================================================================
 router.get('/scan', async (req: Request, res: Response) => {
   try {
     const rebuild = req.query.rebuild === '1';
     const compareWithBackup = req.query.compareWithBackup === '1';
-    const scanResult = await performScan(rebuild, compareWithBackup);
+    const sourceType = (req.query.sourceType as string) || 'local';
+    const snapshotId = req.query.snapshotId as string;
+    
+    // Get validated paths from request
+    const { sourcePath, destinationPath, backupPath, errors } = getValidatedPaths(req);
+    
+    // Determine actual source path to use
+    let actualSourcePath = sourcePath;
+    
+    // If sourceType is remote, verify Samba mount
+    if (sourceType === 'remote') {
+      const mountCheck = await pathResolver.verifySambaMount();
+      if (!mountCheck.ok) {
+        return res.status(503).json({ 
+          error: 'Samba mount not available', 
+          message: mountCheck.error,
+          mountInfo: await pathResolver.getMountInfo()
+        });
+      }
+      
+      // Use mount point as base
+      actualSourcePath = pathResolver.getBaseSourcePath('remote');
+    }
+    
+    // If snapshotId is provided, resolve to snapshot path
+    if (snapshotId) {
+      if (!snapshotScanner.isValidSnapshotId(snapshotId)) {
+        return res.status(400).json({ 
+          error: 'Invalid snapshot ID format',
+          message: `Snapshot ID must be in MM-YYYY format, got: ${snapshotId}`
+        });
+      }
+      
+      // Build snapshot path
+      actualSourcePath = pathResolver.buildSnapshotPath(actualSourcePath, snapshotId);
+      
+      // Verify snapshot exists
+      const snapshot = await snapshotScanner.getSnapshotById(
+        pathResolver.getBaseSourcePath(sourceType as 'local' | 'remote'),
+        snapshotId
+      );
+      
+      if (!snapshot || !snapshot.isValid) {
+        return res.status(404).json({ 
+          error: 'Snapshot not found',
+          message: `Snapshot ${snapshotId} does not exist or is invalid`,
+          snapshotId
+        });
+      }
+      
+      // Use validated snapshot path
+      actualSourcePath = snapshot.path;
+    }
+    
+    // Log path configuration
+    console.log('[Scan] Using paths:', { 
+      sourceType,
+      snapshotId,
+      actualSourcePath, 
+      destinationPath, 
+      backupPath 
+    });
+    if (errors.length > 0) {
+      console.warn('[Scan] Path validation warnings (using defaults):', errors);
+    }
+    
+    const scanResult = await performScan(rebuild, compareWithBackup, backupPath, actualSourcePath);
+    
+    // Add path configuration to response
+    scanResult.pathConfig = {
+      sourceType,
+      snapshotId,
+      sourcePath: actualSourcePath,
+      destinationPath,
+      backupPath,
+      validationWarnings: errors.length > 0 ? errors : undefined
+    };
     
     res.json(scanResult);
   } catch (error) {
@@ -731,37 +1084,319 @@ router.get('/scan', async (req: Request, res: Response) => {
   }
 });
 
-// Restore file from backup endpoint
-router.post('/restore', async (req: Request, res: Response) => {
+// ============================================================================
+// File Preview/Diff Endpoint (Dry Run)
+// ============================================================================
+router.post('/preview-restore', async (req: Request, res: Response) => {
   try {
-    const { relPath } = req.body;
+    const { relPath, sourcePath, destinationPath, sourceType, snapshotId } = req.body;
     
     if (!relPath) {
       return res.status(400).json({ error: 'relPath is required' });
     }
 
-    const backupFilePath = path.join(BACKUP_ROOT, relPath);
-    const prodFilePath = path.join(PROJECT_ROOT, relPath);
+    // Determine actual source path
+    let actualSourcePath = sourcePath || DEFAULT_BACKUP_ROOT;
+    
+    // If sourceType is remote, verify Samba mount and adjust path
+    if (sourceType === 'remote') {
+      const mountCheck = await pathResolver.verifySambaMount();
+      if (!mountCheck.ok) {
+        return res.status(503).json({ 
+          error: 'Samba mount not available', 
+          message: mountCheck.error,
+          mountInfo: await pathResolver.getMountInfo()
+        });
+      }
+      
+      actualSourcePath = pathResolver.getBaseSourcePath('remote');
+    }
+    
+    // If snapshotId is provided, resolve to snapshot path
+    if (snapshotId) {
+      if (!snapshotScanner.isValidSnapshotId(snapshotId)) {
+        return res.status(400).json({ 
+          error: 'Invalid snapshot ID format',
+          message: `Snapshot ID must be in MM-YYYY format, got: ${snapshotId}`
+        });
+      }
+      
+      // Verify snapshot exists
+      const snapshot = await snapshotScanner.getSnapshotById(
+        actualSourcePath,
+        snapshotId
+      );
+      
+      if (!snapshot || !snapshot.isValid) {
+        return res.status(404).json({ 
+          error: 'Snapshot not found',
+          message: `Snapshot ${snapshotId} does not exist or is invalid`,
+          snapshotId
+        });
+      }
+      
+      // Use validated snapshot path
+      actualSourcePath = snapshot.path;
+    }
 
-    // Verify backup file exists
-    if (!fs.existsSync(backupFilePath)) {
-      return res.status(404).json({ error: 'Backup file not found' });
+    // Get validated paths
+    const validatedSource = validateAndSanitizePath(actualSourcePath);
+    const validatedDest = validateAndSanitizePath(destinationPath || PROJECT_ROOT);
+    
+    if (!validatedSource.isValid) {
+      return res.status(400).json({ error: `Invalid source path: ${validatedSource.error}` });
+    }
+    if (!validatedDest.isValid) {
+      return res.status(400).json({ error: `Invalid destination path: ${validatedDest.error}` });
+    }
+
+    const sourceFilePath = path.join(validatedSource.sanitizedPath, relPath);
+    const destFilePath = path.join(validatedDest.sanitizedPath, relPath);
+
+    // Re-validate the full paths
+    const fullSourceValidation = validateAndSanitizePath(sourceFilePath);
+    const fullDestValidation = validateAndSanitizePath(destFilePath);
+    
+    if (!fullSourceValidation.isValid) {
+      return res.status(400).json({ error: `Invalid resolved source path: ${fullSourceValidation.error}` });
+    }
+    if (!fullDestValidation.isValid) {
+      return res.status(400).json({ error: `Invalid resolved destination path: ${fullDestValidation.error}` });
+    }
+
+    // Verify source file exists
+    if (!fs.existsSync(fullSourceValidation.sanitizedPath)) {
+      return res.status(404).json({ 
+        error: 'Source file not found',
+        sourcePath: fullSourceValidation.sanitizedPath
+      });
+    }
+
+    // Read source file content
+    const sourceContent = await fs.readFile(fullSourceValidation.sanitizedPath, 'utf8');
+    const sourceStats = await fs.stat(fullSourceValidation.sanitizedPath);
+    
+    // Read target file content (if exists)
+    let targetContent: string | null = null;
+    let targetExists = false;
+    let targetStats: any = null;
+    
+    if (fs.existsSync(fullDestValidation.sanitizedPath)) {
+      targetExists = true;
+      targetContent = await fs.readFile(fullDestValidation.sanitizedPath, 'utf8');
+      targetStats = await fs.stat(fullDestValidation.sanitizedPath);
+    }
+    
+    // Check dependencies
+    const targetBasePath = validatedDest.sanitizedPath;
+    const dependencyCheck = await dependencyChecker.checkDependencies(
+      fullSourceValidation.sanitizedPath,
+      targetBasePath
+    );
+    
+    // Calculate diff statistics
+    const sourceLines = sourceContent.split('\n');
+    const targetLines = targetContent ? targetContent.split('\n') : [];
+    
+    const diffStats = {
+      sourceLines: sourceLines.length,
+      targetLines: targetLines.length,
+      linesAdded: sourceLines.length - targetLines.length,
+      identical: sourceContent === targetContent
+    };
+
+    console.log(`[Preview] File: ${relPath}`);
+    console.log(`[Preview]   Source: ${fullSourceValidation.sanitizedPath} (${sourceStats.size} bytes)`);
+    console.log(`[Preview]   Target: ${fullDestValidation.sanitizedPath} (${targetExists ? targetStats.size + ' bytes' : 'does not exist'})`);
+    console.log(`[Preview]   Dependencies: ${dependencyCheck.imports.length} imports, ${dependencyCheck.missingCount} missing`);
+
+    res.json({ 
+      success: true,
+      preview: {
+        relPath,
+        sourcePath: fullSourceValidation.sanitizedPath,
+        targetPath: fullDestValidation.sanitizedPath,
+        sourceContent,
+        targetContent,
+        sourceExists: true,
+        targetExists,
+        sourceSize: sourceStats.size,
+        targetSize: targetExists ? targetStats.size : 0,
+        sourceModified: sourceStats.mtimeMs,
+        targetModified: targetExists ? targetStats.mtimeMs : null,
+        diffStats
+      },
+      dependencies: {
+        hasImports: dependencyCheck.hasImports,
+        totalImports: dependencyCheck.imports.length,
+        missingImports: dependencyCheck.missingImports,
+        missingCount: dependencyCheck.missingCount,
+        allDependenciesExist: dependencyCheck.allDependenciesExist,
+        imports: dependencyCheck.imports
+      },
+      warnings: []
+    });
+  } catch (error) {
+    console.error('Preview error:', error);
+    res.status(500).json({ 
+      error: 'Preview failed', 
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// ============================================================================
+// Restore File Endpoint (with dynamic path support and history logging)
+// ============================================================================
+router.post('/restore', async (req: Request, res: Response) => {
+  try {
+    const { relPath, sourcePath, destinationPath, sourceType, snapshotId } = req.body;
+    
+    if (!relPath) {
+      return res.status(400).json({ error: 'relPath is required' });
+    }
+
+    // Determine actual source path
+    let actualSourcePath = sourcePath || DEFAULT_BACKUP_ROOT;
+    
+    // If sourceType is remote, verify Samba mount and adjust path
+    if (sourceType === 'remote') {
+      const mountCheck = await pathResolver.verifySambaMount();
+      if (!mountCheck.ok) {
+        return res.status(503).json({ 
+          error: 'Samba mount not available', 
+          message: mountCheck.error,
+          mountInfo: await pathResolver.getMountInfo()
+        });
+      }
+      
+      actualSourcePath = pathResolver.getBaseSourcePath('remote');
+    }
+    
+    // If snapshotId is provided, resolve to snapshot path
+    if (snapshotId) {
+      if (!snapshotScanner.isValidSnapshotId(snapshotId)) {
+        return res.status(400).json({ 
+          error: 'Invalid snapshot ID format',
+          message: `Snapshot ID must be in MM-YYYY format, got: ${snapshotId}`
+        });
+      }
+      
+      // Verify snapshot exists
+      const snapshot = await snapshotScanner.getSnapshotById(
+        actualSourcePath,
+        snapshotId
+      );
+      
+      if (!snapshot || !snapshot.isValid) {
+        return res.status(404).json({ 
+          error: 'Snapshot not found',
+          message: `Snapshot ${snapshotId} does not exist or is invalid`,
+          snapshotId
+        });
+      }
+      
+      // Use validated snapshot path
+      actualSourcePath = snapshot.path;
+    }
+
+    // Get validated paths
+    const validatedSource = validateAndSanitizePath(actualSourcePath);
+    const validatedDest = validateAndSanitizePath(destinationPath || PROJECT_ROOT);
+    
+    if (!validatedSource.isValid) {
+      return res.status(400).json({ error: `Invalid source path: ${validatedSource.error}` });
+    }
+    if (!validatedDest.isValid) {
+      return res.status(400).json({ error: `Invalid destination path: ${validatedDest.error}` });
+    }
+
+    const sourceFilePath = path.join(validatedSource.sanitizedPath, relPath);
+    const destFilePath = path.join(validatedDest.sanitizedPath, relPath);
+
+    // Re-validate the full paths
+    const fullSourceValidation = validateAndSanitizePath(sourceFilePath);
+    const fullDestValidation = validateAndSanitizePath(destFilePath);
+    
+    if (!fullSourceValidation.isValid) {
+      return res.status(400).json({ error: `Invalid resolved source path: ${fullSourceValidation.error}` });
+    }
+    if (!fullDestValidation.isValid) {
+      return res.status(400).json({ error: `Invalid resolved destination path: ${fullDestValidation.error}` });
+    }
+
+    // Verify source file exists
+    if (!fs.existsSync(fullSourceValidation.sanitizedPath)) {
+      return res.status(404).json({ 
+        error: 'Source file not found',
+        sourcePath: fullSourceValidation.sanitizedPath
+      });
     }
 
     // Ensure target directory exists
-    const targetDir = path.dirname(prodFilePath);
+    const targetDir = path.dirname(fullDestValidation.sanitizedPath);
     fs.ensureDirSync(targetDir);
 
-    // Copy file from backup to prod
-    fs.copySync(backupFilePath, prodFilePath);
+    // Get file size for logging
+    const sourceStats = await fs.stat(fullSourceValidation.sanitizedPath);
+    
+    // Copy file from source to destination
+    fs.copySync(fullSourceValidation.sanitizedPath, fullDestValidation.sanitizedPath);
+
+    console.log(`[Restore] File restored: ${relPath}`);
+    console.log(`[Restore]   Source type: ${sourceType || 'local'}`);
+    console.log(`[Restore]   Snapshot: ${snapshotId || 'none'}`);
+    console.log(`[Restore]   From: ${fullSourceValidation.sanitizedPath}`);
+    console.log(`[Restore]   To: ${fullDestValidation.sanitizedPath}`);
+
+    // Log restore to history
+    try {
+      await restoreHistory.logRestore({
+        user: (req as any).user?.username || null,
+        userEmail: (req as any).user?.email || null,
+        relPath,
+        sourcePath: fullSourceValidation.sanitizedPath,
+        targetPath: fullDestValidation.sanitizedPath,
+        sourceType: (sourceType as 'local' | 'remote') || 'local',
+        snapshotId: snapshotId || null,
+        fileSize: sourceStats.size,
+        success: true,
+        error: null
+      });
+    } catch (logError) {
+      console.error('[Restore] Failed to log history:', logError);
+      // Don't fail the restore if logging fails
+    }
 
     res.json({ 
       success: true, 
       message: `File restored: ${relPath}`,
-      restoredPath: prodFilePath
+      sourceType: sourceType || 'local',
+      snapshotId: snapshotId || null,
+      sourcePath: fullSourceValidation.sanitizedPath,
+      restoredPath: fullDestValidation.sanitizedPath
     });
   } catch (error) {
     console.error('Restore error:', error);
+    
+    // Log failed restore - use req.body directly since destructured vars may not exist
+    try {
+      await restoreHistory.logRestore({
+        user: (req as any).user?.username || null,
+        userEmail: (req as any).user?.email || null,
+        relPath: req.body?.relPath || 'unknown',
+        sourcePath: '',
+        targetPath: '',
+        sourceType: (req.body?.sourceType as 'local' | 'remote') || 'local',
+        snapshotId: req.body?.snapshotId || null,
+        fileSize: 0,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    } catch (logError) {
+      console.error('[Restore] Failed to log error history:', logError);
+    }
+    
     res.status(500).json({ 
       error: 'Restore failed', 
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -1072,6 +1707,95 @@ router.get('/phase1-analysis', async (req: Request, res: Response) => {
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
+  }
+});
+
+// ============================================================================
+// Restore History Endpoints
+// ============================================================================
+// GET /api/refactor-console/restore-history - Get restore history
+router.get('/restore-history', async (req: Request, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    
+    const result = await restoreHistory.getHistory(limit, offset);
+    
+    res.json({
+      ok: true,
+      ...result
+    });
+  } catch (error) {
+    console.error('[RestoreHistory] Error fetching history:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch restore history', 
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// GET /api/refactor-console/restore-history/file/:relPath - Get history for specific file
+router.get('/restore-history/file/*', async (req: Request, res: Response) => {
+  try {
+    // Get relPath from params (everything after /file/)
+    const relPath = req.params[0];
+    
+    if (!relPath) {
+      return res.status(400).json({ error: 'relPath is required' });
+    }
+    
+    const entries = await restoreHistory.getFileHistory(relPath);
+    
+    res.json({
+      ok: true,
+      relPath,
+      count: entries.length,
+      entries
+    });
+  } catch (error) {
+    console.error('[RestoreHistory] Error fetching file history:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch file history', 
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// GET /api/refactor-console/restore-history/stats - Get statistics
+router.get('/restore-history/stats', async (req: Request, res: Response) => {
+  try {
+    const stats = await restoreHistory.getStatistics();
+    
+    res.json({
+      ok: true,
+      stats
+    });
+  } catch (error) {
+    console.error('[RestoreHistory] Error fetching stats:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch restore statistics', 
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// GET /api/refactor-console/restore-history/export - Export to CSV
+router.get('/restore-history/export', async (req: Request, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 1000;
+    const result = await restoreHistory.getHistory(limit, 0);
+    
+    const csv = restoreHistory.exportToCSV(result.entries);
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="restore-history-${new Date().toISOString().split('T')[0]}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    console.error('[RestoreHistory] Error exporting history:', error);
+    res.status(500).json({ 
+      error: 'Failed to export restore history', 
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 
