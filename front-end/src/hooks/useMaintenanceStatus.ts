@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 interface MaintenanceStatus {
   maintenance: boolean;
-  status?: string;
+  status?: 'production' | 'updating' | 'frontend_only' | string;
   startTime?: string;
   message?: string;
 }
@@ -11,6 +11,7 @@ export const useMaintenanceStatus = () => {
   const [isInMaintenance, setIsInMaintenance] = useState(false);
   const [maintenanceInfo, setMaintenanceInfo] = useState<MaintenanceStatus | null>(null);
   const [isChecking, setIsChecking] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
 
   const checkMaintenanceStatus = useCallback(async () => {
     if (isChecking) return;
@@ -38,6 +39,28 @@ export const useMaintenanceStatus = () => {
     }
   }, [isChecking]);
 
+  const toggleMaintenanceMode = useCallback(async (enable: boolean) => {
+    if (isToggling) return;
+    
+    setIsToggling(true);
+    try {
+      const response = await fetch('/api/maintenance/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ maintenance: enable }),
+      });
+
+      if (response.ok) {
+        setIsInMaintenance(enable);
+        await checkMaintenanceStatus();
+      }
+    } catch (error) {
+      console.error('Failed to toggle maintenance mode:', error);
+    } finally {
+      setIsToggling(false);
+    }
+  }, [isToggling, checkMaintenanceStatus]);
+
   useEffect(() => {
     checkMaintenanceStatus();
     const interval = setInterval(checkMaintenanceStatus, 5000);
@@ -48,5 +71,8 @@ export const useMaintenanceStatus = () => {
     isInMaintenance,
     maintenanceInfo,
     checkMaintenanceStatus,
+    toggleMaintenanceMode,
+    isToggling,
   };
 };
+

@@ -1,9 +1,10 @@
-import { IconButton, Box, AppBar, useMediaQuery, Toolbar, styled, Stack } from '@mui/material';
+import { IconButton, Box, AppBar, useMediaQuery, Toolbar, styled, Stack, Tooltip } from '@mui/material';
 
 import config from '@/context/config'
 import { useContext } from "react";
 
 import { IconMenu2 } from '@tabler/icons-react';
+import { Wrench } from 'lucide-react';
 import Notifications from './Notification';
 import Profile from './Profile';
 import LastLoggedIn from './LastLoggedIn';
@@ -13,11 +14,13 @@ import MobileRightSidebar from './MobileRightSidebar';
 import OrthodoxThemeToggle from '@/shared/ui/OrthodoxThemeToggle';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import { useAuth } from '@/context/AuthContext';
+import { useMaintenanceStatus } from '@/hooks/useMaintenanceStatus';
 
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
-  const { authenticated } = useAuth();
+  const { authenticated, isSuperAdmin } = useAuth();
+  const { isInMaintenance, toggleMaintenanceMode, isToggling } = useMaintenanceStatus();
 
   const TopbarHeight = config.topbarHeight;
 
@@ -91,6 +94,35 @@ const Header = () => {
 
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
+          {/* ------------------------------------------- */}
+          {/* Maintenance Mode Toggle - Super Admin Only */}
+          {/* ------------------------------------------- */}
+          {authenticated && isSuperAdmin() && (
+            <Tooltip title={isInMaintenance ? "Maintenance Mode ON - Click to disable" : "Maintenance Mode OFF - Click to enable"}>
+              <IconButton
+                size="large"
+                color="inherit"
+                onClick={() => toggleMaintenanceMode(!isInMaintenance)}
+                disabled={isToggling}
+                sx={{
+                  backgroundColor: isInMaintenance ? 'rgba(251, 146, 60, 0.2)' : 'rgba(34, 197, 94, 0.2)',
+                  border: isInMaintenance ? '2px solid #f97316' : '2px solid #22c55e',
+                  '&:hover': {
+                    backgroundColor: isInMaintenance ? 'rgba(251, 146, 60, 0.3)' : 'rgba(34, 197, 94, 0.3)',
+                  },
+                  transition: 'all 0.2s ease-in-out',
+                }}
+              >
+                <Wrench 
+                  size={20} 
+                  className={isToggling ? 'animate-spin' : ''}
+                  style={{ 
+                    color: isInMaintenance ? '#f97316' : '#22c55e',
+                  }} 
+                />
+              </IconButton>
+            </Tooltip>
+          )}
           <LastLoggedIn />
           <Language />
           {/* ------------------------------------------- */}
@@ -110,3 +142,4 @@ const Header = () => {
 };
 
 export default Header;
+
