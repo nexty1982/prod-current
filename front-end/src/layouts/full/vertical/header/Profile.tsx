@@ -168,7 +168,7 @@ const Profile = () => {
           </Box>
         </Stack>
         <Divider />
-        {dropdownData.profile.map((profile) => (
+        {dropdownData.profile.filter((item) => !item.roleRestriction || item.roleRestriction.includes(user?.role)).map((profile) => (
           <Box key={profile.title}>
             <Box sx={{ py: 2, px: 0 }} className="hover-text-primary">
               <Link to={profile.href}>
