@@ -19,7 +19,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # The "Canonical Truth" Instruction Set
           instructions: >
-            1. Fix CORS: Add 'http://192.168.1.239:5174' to the allowed origins in the server's CORS middleware. 
+            1. Fix CORS: Ensure development origins are configured via environment or config (not hard-coded IPs) and added to the server's CORS middleware.
                Ensure it handles unauthorized origins gracefully (callback(null, false)) to prevent 500 errors.
             2. Canonical Health: Consolidate 'server/src/routes/systemRoutes.js'. 
                It must return the Node version reported by process.version (Node 20.x expected) and use 'SELECT 1' to verify MariaDB for the 3rd status dot.
