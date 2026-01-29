@@ -7,6 +7,10 @@ on:
 jobs:
   qodo-refactor:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -14,6 +18,7 @@ jobs:
           fetch-depth: 0 # Qodo needs full history for context
 
       - name: Qodo AI Refactor Agent
+        # TODO: Pin to immutable commit SHA once action repository is available
         uses: qodo-ai/qodo-refactor-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
