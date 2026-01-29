@@ -22,6 +22,6 @@ jobs:
             1. Fix CORS: Add 'http://192.168.1.239:5174' to the allowed origins in the server's CORS middleware. 
                Ensure it handles unauthorized origins gracefully (callback(null, false)) to prevent 500 errors.
             2. Canonical Health: Consolidate 'server/src/routes/systemRoutes.js'. 
-               It must return Node version 'v20.19.3' and use 'SELECT 1' to verify MariaDB for the 3rd status dot.
+               It must return the Node version reported by process.version (Node 20.x expected) and use 'SELECT 1' to verify MariaDB for the 3rd status dot.
             3. Header Sync: Ensure only 'front-end/src/layouts/full/vertical/header/Header.tsx' is updated with the 3-dot polling logic.
             4. Cleanup: Identify and flag duplicate 'Header.tsx' files in 'refactor-src' for deletion.
