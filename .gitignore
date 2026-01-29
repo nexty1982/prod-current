@@ -95,3 +95,26 @@ front-end/public/docs/**
 !front-end/public/docs/README.md
 server/docs/**
 !server/docs/README.md
+
+# --- Build & Distribution Artifacts ---
+front-end/dist-latest/
+front-end/dist-stable/
+front-end/dupes/
+
+# --- Server Backups & Temp Storage ---
+server/temp-backups/
+server/webhooks/
+server/integrations/
+legacy_audit/
+*.backup
+*.prod-backup
+test-config.js
+
+# --- Project Specific Artifacts ---
+front-end/notification.txt
+omai-ecosystem.config.js
+orthodoxmetrics-external.com
+orthodoxmetrics-internal.com
+
+# --- Documentation & Tools ---
+tools/audit.js

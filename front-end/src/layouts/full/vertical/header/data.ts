@@ -142,6 +142,7 @@ const profile: ProfileType[] = [
     title: 'RELAX',
     subtitle: 'Complete Shift & Commit',
     icon: iconRelax,
+    roleRestriction: ['super_admin'],
   },
 ];
 

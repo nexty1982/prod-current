@@ -1,10 +1,10 @@
 import { IconButton, Box, AppBar, useMediaQuery, Toolbar, styled, Stack, Tooltip } from '@mui/material';
-
-import config from '@/context/config'
-import { useContext } from "react";
-
+import React, { useState, useEffect, useContext } from 'react';
+import config from '@/context/config';
 import { IconMenu2 } from '@tabler/icons-react';
 import { Wrench } from 'lucide-react';
+
+// Components
 import Notifications from './Notification';
 import Profile from './Profile';
 import LastLoggedIn from './LastLoggedIn';
@@ -12,6 +12,8 @@ import Language from './Language';
 import Navigation from './Navigation';
 import MobileRightSidebar from './MobileRightSidebar';
 import OrthodoxThemeToggle from '@/shared/ui/OrthodoxThemeToggle';
+
+// Contexts & Hooks
 import { CustomizerContext } from '@/context/CustomizerContext';
 import { useAuth } from '@/context/AuthContext';
 import { useMaintenanceStatus } from '@/hooks/useMaintenanceStatus';
@@ -21,30 +23,38 @@ const Header = () => {
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
   const { authenticated, isSuperAdmin } = useAuth();
   const { isInMaintenance, toggleMaintenanceMode, isToggling } = useMaintenanceStatus();
+  
+  // 3-Dot Health Status State
+  const [systemStatus, setSystemStatus] = useState<'production' | 'updating' | 'frontend_only'>('production');
+
+  // Polling for System Health
+  useEffect(() => {
+    const fetchHealth = async () => {
+      try {
+        const response = await fetch('/api/system/health');
+        const data = await response.json();
+        setSystemStatus(data.status);
+      } catch (error) {
+        setSystemStatus('frontend_only'); // Fail-safe to 1 green dot
+      }
+    };
+
+    const interval = setInterval(fetchHealth, 30000);
+    fetchHealth();
+    return () => clearInterval(interval);
+  }, []);
 
   const TopbarHeight = config.topbarHeight;
-
-  // drawer
   const { setIsCollapse, isCollapse, isMobileSidebar, setIsMobileSidebar, headerBackground } = useContext(CustomizerContext);
 
-  // Default background for authenticated users is bgtiled.png
-  // Uses CSS fallback mechanism - if image fails to load, gradient is used
   const getBackground = () => {
     const fallbackGradient = 'linear-gradient(135deg, #1a0d2e 0%, #2d1b4e 50%, #3d1f5d 100%)';
-    
     if (headerBackground) {
-      // Check if file exists in backgrounds folder, otherwise fallback to gradient
-      // Files are at /images/backgrounds/bgtiled{number}.png
-      // CSS will fallback to gradient if image doesn't exist
       return `linear-gradient(135deg, #1a0d2e 0%, #2d1b4e 50%, #3d1f5d 100%), url(/images/backgrounds/bgtiled${headerBackground}.png) repeat`;
     }
-    // For authenticated users, default to bgtiled.png (if exists) or gradient
     if (authenticated) {
-      // Try default bgtiled.png, but fallback to gradient if not found
-      // CSS will fallback to gradient if image doesn't exist
       return `linear-gradient(135deg, #1a0d2e 0%, #2d1b4e 50%, #3d1f5d 100%), url(/images/backgrounds/bgtiled.png) repeat`;
     }
-    // For unauthenticated users, use gradient
     return fallbackGradient;
   };
 
@@ -58,27 +68,22 @@ const Header = () => {
       minHeight: TopbarHeight,
     },
   }));
+
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: '100%',
-    color: '#FFFFFF', // Explicit white color for header text to override theme inheritance
+    color: '#FFFFFF',
   }));
 
   return (
     <AppBarStyled position="sticky" color="default">
       <ToolbarStyled>
-        {/* ------------------------------------------- */}
-        {/* Toggle Button Sidebar */}
-        {/* ------------------------------------------- */}
         <IconButton
           color="inherit"
           aria-label="menu"
           onClick={() => {
-            // Toggle sidebar on both mobile and desktop based on screen size
             if (lgUp) {
-              // For large screens, toggle between full-sidebar and mini-sidebar
               isCollapse === "full-sidebar" ? setIsCollapse("mini-sidebar") : setIsCollapse("full-sidebar");
             } else {
-              // For smaller screens, toggle mobile sidebar
               setIsMobileSidebar(!isMobileSidebar);
             }
           }}
@@ -86,54 +91,67 @@ const Header = () => {
           <IconMenu2 size="20" />
         </IconButton>
 
-        {lgUp ? (
-          <>
-            <Navigation />
-          </>
-        ) : null}
+        {lgUp ? <Navigation /> : null}
 
         <Box flexGrow={1} />
-        <Stack spacing={1} direction="row" alignItems="center">
+        
+        <Stack spacing={2} direction="row" alignItems="center">
           {/* ------------------------------------------- */}
           {/* Maintenance Mode Toggle - Super Admin Only */}
           {/* ------------------------------------------- */}
           {authenticated && isSuperAdmin() && (
-            <Tooltip title={isInMaintenance ? "Maintenance Mode ON - Click to disable" : "Maintenance Mode OFF - Click to enable"}>
-              <IconButton
-                size="large"
-                color="inherit"
+            <Tooltip title={isInMaintenance ? "Disable Maintenance Mode" : "Enable Maintenance Mode"}>
+              <button 
                 onClick={() => toggleMaintenanceMode(!isInMaintenance)}
                 disabled={isToggling}
-                sx={{
-                  backgroundColor: isInMaintenance ? 'rgba(251, 146, 60, 0.2)' : 'rgba(34, 197, 94, 0.2)',
-                  border: isInMaintenance ? '2px solid #f97316' : '2px solid #22c55e',
-                  '&:hover': {
-                    backgroundColor: isInMaintenance ? 'rgba(251, 146, 60, 0.3)' : 'rgba(34, 197, 94, 0.3)',
-                  },
-                  transition: 'all 0.2s ease-in-out',
+                style={{
+                  padding: '5px 14px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  cursor: isToggling ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.3s ease',
+                  backgroundColor: isInMaintenance ? '#f97316' : 'transparent',
+                  color: isInMaintenance ? '#ffffff' : '#22c55e',
+                  border: `1px solid ${isInMaintenance ? '#f97316' : '#22c55e'}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}
               >
-                <Wrench 
-                  size={20} 
-                  className={isToggling ? 'animate-spin' : ''}
-                  style={{ 
-                    color: isInMaintenance ? '#f97316' : '#22c55e',
-                  }} 
-                />
-              </IconButton>
+                <Wrench size={14} className={(isToggling || isInMaintenance) ? 'animate-spin' : ''} />
+                {isInMaintenance ? 'MAINTENANCE ON' : 'MAINTENANCE OFF'}
+              </button>
             </Tooltip>
           )}
+
           <LastLoggedIn />
           <Language />
-          {/* ------------------------------------------- */}
-          {/* Orthodox Theme Toggle */}
-          {/* ------------------------------------------- */}
           <OrthodoxThemeToggle variant="icon" />
           <Notifications />
-          {/* ------------------------------------------- */}
-          {/* Toggle Right Sidebar for mobile */}
-          {/* ------------------------------------------- */}
+          
           {lgDown ? <MobileRightSidebar /> : null}
+
+          {/* ------------------------------------------- */}
+          {/* 3-Dot Health Indicator */}
+          {/* ------------------------------------------- */}
+          <Box sx={{ display: 'flex', gap: '5px', px: 1, alignItems: 'center', borderLeft: '1px solid rgba(255,255,255,0.1)', ml: 1 }}>
+            {/* Dot 1: Frontend - Always Green */}
+            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#22c55e', boxShadow: '0 0 6px #22c55e' }} />
+            
+            {/* Dot 2: API/Backend - Green if production or updating */}
+            <Box sx={{ 
+              width: 8, height: 8, borderRadius: '50%', 
+              bgcolor: systemStatus !== 'frontend_only' ? '#22c55e' : '#64748b' 
+            }} />
+            
+            {/* Dot 3: Database Sync - Green ONLY if production */}
+            <Box sx={{ 
+              width: 8, height: 8, borderRadius: '50%', 
+              bgcolor: systemStatus === 'production' ? '#22c55e' : '#64748b' 
+            }} />
+          </Box>
+
           <Profile />
         </Stack>
       </ToolbarStyled>
@@ -142,4 +160,3 @@ const Header = () => {
 };
 
 export default Header;
-
