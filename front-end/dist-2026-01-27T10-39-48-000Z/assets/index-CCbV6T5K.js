@@ -1,2 +1,0 @@
-import{t as u}from"./index-B8Cm0CAq.js";import{r as s,t as i}from"./index-B9SIr0Qh.js";function m(r,t){s(2,arguments);var a=i(r),e=u(t);return isNaN(e)?new Date(NaN):(e&&a.setDate(a.getDate()+e),a)}function n(r){s(1,arguments);var t=i(r);return t.setHours(0,0,0,0),t}function g(r,t){s(2,arguments);var a=n(r),e=n(t);return a.getTime()===e.getTime()}export{m as a,g as i,n as s};
-//# sourceMappingURL=index-CCbV6T5K.js.map

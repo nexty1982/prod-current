@@ -5,7 +5,7 @@ const logger = require('../utils/logger');
 
 class OMAIPathDiscoveryStandalone {
   constructor() {
-    this.productionRoot = '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod';
+    this.productionRoot = '/var/www/orthodoxmetrics/prod';
     this.bigBookRoot = path.join(this.productionRoot, 'bigbook');
     this.indexPath = path.join(this.bigBookRoot, 'bigbook-index.json');
     

@@ -16,7 +16,6 @@ const DIST = path.join(ROOT, 'dist');
 const CRITICAL_FILES = [
   { src: 'routes/gallery.js', dist: 'routes/gallery.js', description: 'Gallery routes' },
   { src: 'routes/docs.js', dist: 'routes/docs.js', description: 'Documentation routes' },
-  { src: 'index.js', dist: 'index.js', description: 'Main server entry' },
   { src: 'config/db.js', dist: 'config/db.js', description: 'Database config' },
   { src: 'config/session.js', dist: 'config/session.js', description: 'Session config' },
 ];

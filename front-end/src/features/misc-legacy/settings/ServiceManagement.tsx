@@ -224,7 +224,7 @@ const ServiceManagement: React.FC = () => {
                 />
                 <Button
                   variant="outlined"
-                  startIcon={<RefreshIcon />}
+                  startIcon={<IconRefresh />}
                   onClick={loadServices}
                   disabled={loading}
                   size="small"

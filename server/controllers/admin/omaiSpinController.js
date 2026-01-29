@@ -97,7 +97,7 @@ class OmaiSpinController {
     async startOperation(req, res) {
         try {
             const {
-                prodPath = '/var/www/orthodox-church-mgmt/orthodoxmetrics_db/prod',
+                prodPath = '/var/www/orthodoxmetrics_db/prod',
                 devPath = '/var/www/orthodoxmetrics_db/dev',
                 dryRun = false,
                 skipDatabase = false,

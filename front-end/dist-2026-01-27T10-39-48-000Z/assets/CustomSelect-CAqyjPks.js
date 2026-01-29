@@ -1,2 +1,0 @@
-var r=Object.defineProperty;var o=Object.getOwnPropertySymbols;var x=Object.prototype.hasOwnProperty,c=Object.prototype.propertyIsEnumerable;var a=(e,s,t)=>s in e?r(e,s,{enumerable:!0,configurable:!0,writable:!0,value:t}):e[s]=t,m=(e,s)=>{for(var t in s||(s={}))x.call(s,t)&&a(e,t,s[t]);if(o)for(var t of o(s))c.call(s,t)&&a(e,t,s[t]);return e};import{s as j,j as l,a2 as p}from"./index-CNFXvQ6i.js";const u=j(e=>l.jsx(p,m({},e)))(({})=>({}));export{u as C};
-//# sourceMappingURL=CustomSelect-CAqyjPks.js.map

@@ -5,7 +5,7 @@ const { formatTimestamp, formatTimestampUser } = require('./formatTimestamp');
 
 class Logger {
   constructor() {
-    this.logDir = '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/logs';
+    this.logDir = '/var/www/orthodoxmetrics/prod/bigbook/logs';
     this.ensureLogDir();
   }
 

@@ -5,7 +5,7 @@ const logger = require('../utils/logger');
 
 class TaskDiscoveryService {
   constructor() {
-    this.projectRoot = '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod';
+    this.projectRoot = '/var/www/orthodoxmetrics/prod';
     this.bigBookPath = '/mnt/bigbook_secure';
     this.taskPattern = /^task_.*\.md$/i;
     this.kanbanMetadata = {

@@ -69,7 +69,7 @@ const OmaiSpinSettings: React.FC = () => {
     // Operation state
     const [showStartDialog, setShowStartDialog] = useState(false);
     const [operationConfig, setOperationConfig] = useState({
-        prodPath: '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod',
+        prodPath: '/var/www/orthodoxmetrics/prod',
         devPath: '/var/www/orthodmetrics/dev',
         dryRun: false,
         skipDatabase: false,

@@ -357,7 +357,7 @@ async function startBuild(handsOnMode) {
   }
   
   try {
-    execSync('cd /var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end && npm run build', { 
+    execSync('cd /var/www/orthodoxmetrics/prod/front-end && npm run build', { 
       encoding: 'utf8',
       timeout: 60000 // 1 minute timeout
     });

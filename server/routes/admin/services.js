@@ -37,7 +37,7 @@ const SERVICES = {
         category: 'core',
         restartable: true,
         checkCommand: 'pm2 jlist',
-        startCommand: `cd ${process.env.PROJECT_ROOT || '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod'} && if [ -f "ecosystem.config.js" ]; then pm2 start ecosystem.config.js --env production; else pm2 start server/index.js --name orthodox-backend --env-file .env.production --env production; fi`,
+        startCommand: `cd ${process.env.PROJECT_ROOT || '/var/www/orthodoxmetrics/prod'} && if [ -f "ecosystem.config.js" ]; then pm2 start ecosystem.config.js --env production; else pm2 start server/index.js --name orthodox-backend --env-file .env.production --env production; fi`,
         stopCommand: 'pm2 stop orthodox-backend',
         restartCommand: 'pm2 restart orthodox-backend',
         reloadCommand: 'pm2 reload orthodox-backend',
@@ -315,7 +315,7 @@ router.post('/frontend/rebuild', requireSuperAdmin, async (req, res) => {
         console.log('🔨 Starting frontend rebuild with proper build flags...');
         
         // Use configurable paths for frontend build
-        const frontendPath = process.env.FRONTEND_PATH || '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/front-end';
+        const frontendPath = process.env.FRONTEND_PATH || '/var/www/orthodoxmetrics/prod/front-end';
         const rebuildCommand = `cd ${frontendPath} && NODE_OPTIONS="--max-old-space-size=4096" npm run build`;
         
         console.log('Executing build command:', rebuildCommand);

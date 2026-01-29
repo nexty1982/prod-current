@@ -160,7 +160,7 @@ export interface NotificationResponse {
 
 // Social API class
 export class SocialAPI {
-  private baseUrl = '/api/social';
+  private baseUrl = '/social';
 
   // Blog Posts
   /**

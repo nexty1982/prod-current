@@ -1,7 +1,7 @@
 const { getAppPool } = require('../../config/db-compat');
 // server/routes/admin.js
 const express = require('express');
-const { promisePool } = require('../../config/db-compat');
+const { pool: promisePool } = require('../../config/db-compat');
 const bcrypt = require('bcrypt');
 const { 
     canManageUser, 

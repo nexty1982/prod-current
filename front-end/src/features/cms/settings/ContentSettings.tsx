@@ -43,7 +43,6 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import ImageGridExtractor from '@/features/tables/settings/ImageGridExtractor';
 import { adminAPI } from '@/api/admin.api';
-import { Tabs, Tab } from '@mui/material';
 
 export type ContentType = 'avatar' | 'banner' | 'profile' | 'gif' | 'emoji' | 'all';
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Box,
     Typography,
@@ -267,13 +267,15 @@ const NotificationManagement: React.FC = () => {
         }
     };
 
-    const groupedNotificationTypes = notificationTypes.reduce((acc, type) => {
-        if (!acc[type.category]) {
-            acc[type.category] = [];
-        }
-        acc[type.category].push(type);
-        return acc;
-    }, {} as Record<string, NotificationType[]>);
+    const groupedNotificationTypes = useMemo(() => {
+        return notificationTypes.reduce((acc, type) => {
+            if (!acc[type.category]) {
+                acc[type.category] = [];
+            }
+            acc[type.category].push(type);
+            return acc;
+        }, {} as Record<string, NotificationType[]>);
+    }, [notificationTypes]);
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -857,4 +859,5 @@ const NotificationManagement: React.FC = () => {
     );
 };
 
-export default NotificationManagement; 
+
+export default NotificationManagement;

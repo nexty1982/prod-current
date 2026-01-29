@@ -10,7 +10,7 @@ const QuestionnaireParser = require('../utils/questionnaireParser');
 const OMAIPathDiscovery = require('../services/omaiPathDiscovery');
 
 // Big Book configuration
-const BIGBOOK_ROOT = '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook';
+const BIGBOOK_ROOT = '/var/www/orthodoxmetrics/prod/bigbook';
 const TEMP_DIR = path.join(BIGBOOK_ROOT, 'storage/cache');
 const LOG_DIR = path.join(BIGBOOK_ROOT, 'logs');
 
@@ -1363,7 +1363,7 @@ router.get('/omai/status', async (req, res) => {
  */
 router.get('/omai/index', async (req, res) => {
   try {
-    const indexPath = path.join('/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook', 'bigbook-index.json');
+    const indexPath = path.join('/var/www/orthodoxmetrics/prod/bigbook', 'bigbook-index.json');
     
     try {
       const indexContent = await fs.readFile(indexPath, 'utf8');
@@ -1402,7 +1402,7 @@ router.get('/omai/index', async (req, res) => {
 router.get('/omai/category/:category', async (req, res) => {
   try {
     const { category } = req.params;
-    const indexPath = path.join('/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook', 'bigbook-index.json');
+    const indexPath = path.join('/var/www/orthodoxmetrics/prod/bigbook', 'bigbook-index.json');
     
     const indexContent = await fs.readFile(indexPath, 'utf8');
     const index = JSON.parse(indexContent);
@@ -1444,7 +1444,7 @@ router.get('/omai/category/:category', async (req, res) => {
 router.get('/omai/file/:fileId', async (req, res) => {
   try {
     const { fileId } = req.params;
-    const metadataPath = path.join('/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata', `${fileId}.json`);
+    const metadataPath = path.join('/var/www/orthodoxmetrics/prod/bigbook/metadata', `${fileId}.json`);
     
     const metadataContent = await fs.readFile(metadataPath, 'utf8');
     const metadata = JSON.parse(metadataContent);
@@ -1477,7 +1477,7 @@ router.get('/omai/file/:fileId', async (req, res) => {
 router.get('/omai/file/:fileId/content', async (req, res) => {
   try {
     const { fileId } = req.params;
-    const metadataPath = path.join('/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook/metadata', `${fileId}.json`);
+    const metadataPath = path.join('/var/www/orthodoxmetrics/prod/bigbook/metadata', `${fileId}.json`);
     
     // Get file metadata
     const metadataContent = await fs.readFile(metadataPath, 'utf8');
@@ -1552,7 +1552,7 @@ router.post('/omai/schedule', async (req, res) => {
  */
 router.get('/omai/summary', async (req, res) => {
   try {
-    const summaryPath = path.join('/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook', 'discovery-summary.json');
+    const summaryPath = path.join('/var/www/orthodoxmetrics/prod/bigbook', 'discovery-summary.json');
     
     try {
       const summaryContent = await fs.readFile(summaryPath, 'utf8');
@@ -1700,7 +1700,7 @@ router.post('/upload-parish-map', authenticate, authorize(['super_admin']), uplo
     
     // Update addons configuration (flexible paths for dev/prod)
     const configsBaseDir = process.env.NODE_ENV === 'production' 
-      ? '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/configs' 
+      ? '/var/www/orthodoxmetrics/prod/configs' 
       : path.join(__dirname, '../../configs');
     
     const addonsConfigPath = path.join(configsBaseDir, 'addons.json');
@@ -1723,7 +1723,7 @@ router.post('/upload-parish-map', authenticate, authorize(['super_admin']), uplo
     
     // Update Big Book Components Index (flexible paths for dev/prod)
     const bigbookBaseDir = process.env.NODE_ENV === 'production' 
-      ? '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/bigbook' 
+      ? '/var/www/orthodoxmetrics/prod/bigbook' 
       : path.join(__dirname, '../../bigbook');
     
     const indexPath = path.join(bigbookBaseDir, 'BIG_BOOK_COMPONENTS_INDEX.md');
@@ -1950,7 +1950,7 @@ This file contains links to all installed components and addons.
  */
 router.get('/addons', authenticate, authorize(['admin', 'super_admin']), async (req, res) => {
   try {
-    const addonsConfigPath = '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/configs/addons.json';
+    const addonsConfigPath = '/var/www/orthodoxmetrics/prod/configs/addons.json';
     
     try {
       const configContent = await fs.readFile(addonsConfigPath, 'utf8');
@@ -1994,7 +1994,7 @@ router.delete('/addons/:addonId', authenticate, authorize(['super_admin']), asyn
     await logToFile('parish-map.log', `Addon uninstall requested: ${addonId} by ${req.user?.username || 'unknown'}`);
     
     // Read current addons config
-    const addonsConfigPath = '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/configs/addons.json';
+    const addonsConfigPath = '/var/www/orthodoxmetrics/prod/configs/addons.json';
     const configContent = await fs.readFile(addonsConfigPath, 'utf8');
     const addonsConfig = JSON.parse(configContent);
     
@@ -2067,7 +2067,7 @@ class FileRegistryManager {
   
   getRegistryPath(filename) {
     const configsBaseDir = process.env.NODE_ENV === 'production' 
-      ? '/var/www/orthodox-church-mgmt/orthodoxmetrics/prod/configs' 
+      ? '/var/www/orthodoxmetrics/prod/configs' 
       : path.join(__dirname, '../../configs');
     return path.join(configsBaseDir, filename);
   }

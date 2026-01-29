@@ -1,2 +1,0 @@
-import{r as s,t as a}from"./index-B9SIr0Qh.js";function f(r,e){s(2,arguments);var n=a(r),i=a(e),t=n.getTime()-i.getTime();return t<0?-1:t>0?1:t}function o(r,e){if(r==null)throw new TypeError("assign requires that input parameter not be null or undefined");for(var n in e)Object.prototype.hasOwnProperty.call(e,n)&&(r[n]=e[n]);return r}export{o as a,f as c};
-//# sourceMappingURL=index-DmKFFksY.js.map
