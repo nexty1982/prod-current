@@ -27,6 +27,8 @@ try {
           'https://localhost:5173',
           'http://localhost:5174',
           'https://localhost:5174',
+          'http://192.168.1.239:5174',
+          'http://192.168.1.239:5173',
         ];
     serverConfig = {
       server: {

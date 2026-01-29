@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface MaintenanceStatus {
   maintenance: boolean;
@@ -7,37 +7,79 @@ interface MaintenanceStatus {
   message?: string;
 }
 
-export const useMaintenanceStatus = () => {
-  const [isInMaintenance, setIsInMaintenance] = useState(false);
-  const [maintenanceInfo, setMaintenanceInfo] = useState<MaintenanceStatus | null>(null);
-  const [isChecking, setIsChecking] = useState(false);
-  const [isToggling, setIsToggling] = useState(false);
+// Poll every 60 seconds to reduce server load
+const POLL_INTERVAL = 60000;
 
-  const checkMaintenanceStatus = useCallback(async () => {
-    if (isChecking) return;
-    
-    setIsChecking(true);
+// Singleton to prevent multiple polling instances
+let globalPollingStarted = false;
+let globalMaintenanceState: MaintenanceStatus | null = null;
+let globalListeners: Set<(state: MaintenanceStatus | null) => void> = new Set();
+
+const notifyListeners = () => {
+  globalListeners.forEach(listener => listener(globalMaintenanceState));
+};
+
+const startGlobalPolling = async () => {
+  if (globalPollingStarted) return;
+  globalPollingStarted = true;
+  
+  const poll = async () => {
     try {
       const response = await fetch('/api/maintenance/status', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-
       if (response.ok) {
-        const data: MaintenanceStatus = await response.json();
-        setMaintenanceInfo(data);
-        setIsInMaintenance(data.maintenance || false);
+        globalMaintenanceState = await response.json();
       } else {
-        setIsInMaintenance(false);
-        setMaintenanceInfo(null);
+        globalMaintenanceState = null;
       }
-    } catch (error) {
-      setIsInMaintenance(false);
-      setMaintenanceInfo(null);
-    } finally {
-      setIsChecking(false);
+    } catch {
+      globalMaintenanceState = null;
     }
-  }, [isChecking]);
+    notifyListeners();
+  };
+  
+  // Initial poll
+  await poll();
+  
+  // Set up interval
+  setInterval(poll, POLL_INTERVAL);
+};
+
+export const useMaintenanceStatus = () => {
+  const [maintenanceInfo, setMaintenanceInfo] = useState<MaintenanceStatus | null>(globalMaintenanceState);
+  const [isToggling, setIsToggling] = useState(false);
+
+  useEffect(() => {
+    // Subscribe to updates
+    const listener = (state: MaintenanceStatus | null) => setMaintenanceInfo(state);
+    globalListeners.add(listener);
+    
+    // Start global polling (only happens once)
+    startGlobalPolling();
+    
+    return () => {
+      globalListeners.delete(listener);
+    };
+  }, []);
+
+  const checkMaintenanceStatus = useCallback(async () => {
+    // Manual refresh - just trigger a poll
+    try {
+      const response = await fetch('/api/maintenance/status', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        globalMaintenanceState = data;
+        notifyListeners();
+      }
+    } catch {
+      // Ignore errors on manual refresh
+    }
+  }, []);
 
   const toggleMaintenanceMode = useCallback(async (enable: boolean) => {
     if (isToggling) return;
@@ -51,7 +93,6 @@ export const useMaintenanceStatus = () => {
       });
 
       if (response.ok) {
-        setIsInMaintenance(enable);
         await checkMaintenanceStatus();
       }
     } catch (error) {
@@ -61,18 +102,11 @@ export const useMaintenanceStatus = () => {
     }
   }, [isToggling, checkMaintenanceStatus]);
 
-  useEffect(() => {
-    checkMaintenanceStatus();
-    const interval = setInterval(checkMaintenanceStatus, 5000);
-    return () => clearInterval(interval);
-  }, [checkMaintenanceStatus]);
-
   return {
-    isInMaintenance,
+    isInMaintenance: maintenanceInfo?.maintenance || false,
     maintenanceInfo,
     checkMaintenanceStatus,
     toggleMaintenanceMode,
     isToggling,
   };
 };
-

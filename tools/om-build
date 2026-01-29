@@ -1,0 +1,358 @@
+#!/bin/bash
+#
+# om-build - Display OrthodoxMetrics build information
+# Usage: ./om-build [--history] [--register] [--schema]
+#
+
+# Colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+# Paths
+FRONTEND_PATH="/var/www/orthodoxmetrics/prod/front-end"
+BACKEND_PATH="/var/www/orthodoxmetrics/prod/server"
+REPO_PATH="/var/www/orthodoxmetrics/prod"
+
+# Database credentials
+DB_USER="orthodoxapps"
+DB_PASS="Summerof1982@!"
+DB_NAME="orthodoxmetrics_db"
+
+# Schema tracking table name
+SCHEMA_TABLE="db_migrations"
+
+db_query() {
+    mysql -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -N -e "$1" 2>/dev/null
+}
+
+db_query_db() {
+    local db="$1"
+    local query="$2"
+    mysql -u "$DB_USER" -p"$DB_PASS" "$db" -N -e "$query" 2>/dev/null
+}
+
+# Get all church databases
+get_church_databases() {
+    mysql -u "$DB_USER" -p"$DB_PASS" -N -e "SHOW DATABASES LIKE 'om_church_%'" 2>/dev/null
+}
+
+# Get count of church databases
+get_tenant_count() {
+    get_church_databases | wc -l
+}
+
+# Get required schema version from main db
+get_required_schema() {
+    db_query "SELECT migration_name FROM $SCHEMA_TABLE ORDER BY id DESC LIMIT 1"
+}
+
+# Check if a table has a specific column
+check_column_exists() {
+    local db="$1"
+    local table="$2"
+    local column="$3"
+    local result=$(db_query_db "$db" "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='$db' AND TABLE_NAME='$table' AND COLUMN_NAME='$column'")
+    [ "$result" = "1" ] && echo "yes" || echo "no"
+}
+
+# Check if table exists in database
+check_table_exists() {
+    local db="$1"
+    local table="$2"
+    local result=$(db_query_db "$db" "SHOW TABLES LIKE '$table'" 2>/dev/null)
+    [ -n "$result" ] && echo "yes" || echo "no"
+}
+
+# Get sample/first church database for schema checks
+get_sample_tenant() {
+    get_church_databases | head -1
+}
+
+# Tenant Health Check
+show_tenant_health() {
+    echo ""
+    echo -e "${CYAN}🏛️  Tenant Health${NC}"
+    
+    CHURCH_DBS=$(get_church_databases)
+    TENANT_COUNT=$(echo "$CHURCH_DBS" | grep -c .)
+    
+    echo -e "   Total Tenants:    ${GREEN}$TENANT_COUNT${NC}"
+    
+    if [ "$TENANT_COUNT" -eq 0 ]; then
+        echo -e "   ${YELLOW}No tenant databases found${NC}"
+        return
+    fi
+    
+    # Check sample tenant for ocr_confidence column
+    SAMPLE_DB=$(get_sample_tenant)
+    if [ -n "$SAMPLE_DB" ]; then
+        OCR_COL=$(check_column_exists "$SAMPLE_DB" "baptism_records" "ocr_confidence")
+        if [ "$OCR_COL" = "yes" ]; then
+            echo -e "   OCR Confidence:   ${GREEN}✓ Present${NC} (checked: $SAMPLE_DB)"
+        else
+            echo -e "   OCR Confidence:   ${YELLOW}✗ Missing${NC} (checked: $SAMPLE_DB)"
+        fi
+    fi
+    
+    # Count databases with/without schema tracking
+    WITH_SCHEMA=0
+    WITHOUT_SCHEMA=0
+    OUT_OF_DATE=0
+    REQUIRED_SCHEMA=$(get_required_schema)
+    
+    for db in $CHURCH_DBS; do
+        HAS_TABLE=$(check_table_exists "$db" "$SCHEMA_TABLE")
+        if [ "$HAS_TABLE" = "yes" ]; then
+            WITH_SCHEMA=$((WITH_SCHEMA + 1))
+            # Check if schema matches
+            DB_SCHEMA=$(db_query_db "$db" "SELECT migration_name FROM $SCHEMA_TABLE ORDER BY id DESC LIMIT 1")
+            if [ "$DB_SCHEMA" != "$REQUIRED_SCHEMA" ]; then
+                OUT_OF_DATE=$((OUT_OF_DATE + 1))
+            fi
+        else
+            WITHOUT_SCHEMA=$((WITHOUT_SCHEMA + 1))
+        fi
+    done
+    
+    echo -e "   Schema Tracked:   ${GREEN}$WITH_SCHEMA${NC}"
+    echo -e "   No Schema Table:  ${RED}$WITHOUT_SCHEMA${NC} (Out of Date)"
+    if [ "$OUT_OF_DATE" -gt 0 ]; then
+        echo -e "   Version Mismatch: ${YELLOW}$OUT_OF_DATE${NC}"
+    fi
+    echo ""
+}
+
+# Schema status display
+show_schema_status() {
+    echo ""
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}                Church Database Schema Status                   ${NC}"
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    
+    REQUIRED_SCHEMA=$(get_required_schema)
+    if [ -z "$REQUIRED_SCHEMA" ]; then
+        REQUIRED_SCHEMA="(none)"
+    fi
+    echo -e "${CYAN}Required Schema Version:${NC} ${YELLOW}$REQUIRED_SCHEMA${NC}"
+    echo ""
+    
+    # Check sample for ocr_confidence
+    SAMPLE_DB=$(get_sample_tenant)
+    if [ -n "$SAMPLE_DB" ]; then
+        echo -e "${CYAN}Sample Tenant Check (${SAMPLE_DB}):${NC}"
+        OCR_COL=$(check_column_exists "$SAMPLE_DB" "baptism_records" "ocr_confidence")
+        if [ "$OCR_COL" = "yes" ]; then
+            echo -e "   baptism_records.ocr_confidence: ${GREEN}✓ Present${NC}"
+        else
+            echo -e "   baptism_records.ocr_confidence: ${RED}✗ Missing${NC}"
+        fi
+        echo ""
+    fi
+    
+    CHURCH_DBS=$(get_church_databases)
+    
+    if [ -z "$CHURCH_DBS" ]; then
+        echo -e "${YELLOW}No church databases found (om_church_*)${NC}"
+        echo ""
+        return
+    fi
+    
+    printf "  %-25s %-30s %-15s\n" "DATABASE" "SCHEMA VERSION" "STATUS"
+    echo "  ─────────────────────────────────────────────────────────────────────"
+    
+    TOTAL=0
+    MATCHED=0
+    MISMATCHED=0
+    NO_TABLE=0
+    
+    for db in $CHURCH_DBS; do
+        TOTAL=$((TOTAL + 1))
+        
+        HAS_TABLE=$(check_table_exists "$db" "$SCHEMA_TABLE")
+        
+        if [ "$HAS_TABLE" = "no" ]; then
+            printf "  %-25s %-30s ${RED}%-15s${NC}\n" "$db" "(no schema table)" "OUT OF DATE"
+            NO_TABLE=$((NO_TABLE + 1))
+        else
+            DB_SCHEMA=$(db_query_db "$db" "SELECT migration_name FROM $SCHEMA_TABLE ORDER BY id DESC LIMIT 1")
+            
+            if [ -z "$DB_SCHEMA" ]; then
+                DB_SCHEMA="(empty)"
+            fi
+            
+            if [ "$DB_SCHEMA" = "$REQUIRED_SCHEMA" ]; then
+                printf "  %-25s %-30s ${GREEN}%-15s${NC}\n" "$db" "$DB_SCHEMA" "✓ OK"
+                MATCHED=$((MATCHED + 1))
+            else
+                printf "  %-25s %-30s ${YELLOW}%-15s${NC}\n" "$db" "$DB_SCHEMA" "NEEDS UPDATE"
+                MISMATCHED=$((MISMATCHED + 1))
+            fi
+        fi
+    done
+    
+    echo ""
+    echo -e "${CYAN}Summary:${NC}"
+    echo -e "  Total:        $TOTAL"
+    echo -e "  Up to Date:   ${GREEN}$MATCHED${NC}"
+    echo -e "  Needs Update: ${YELLOW}$MISMATCHED${NC}"
+    echo -e "  Out of Date:  ${RED}$NO_TABLE${NC} (missing schema table)"
+    echo ""
+}
+
+show_history() {
+    echo ""
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}                    Build History (Database)                    ${NC}"
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    
+    # Tenant Health section
+    show_tenant_health
+    
+    echo -e "${CYAN}📋 Recent Build Runs:${NC}"
+    echo ""
+    printf "  %-6s %-8s %-8s %-18s %-10s %-10s\n" "ID" "ENV" "ORIGIN" "STARTED" "STATUS" "TENANTS"
+    echo "  ─────────────────────────────────────────────────────────────────────────────"
+    
+    db_query "SELECT id, env, origin, DATE_FORMAT(started_at, '%Y-%m-%d %H:%i'), status, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(meta_json, '\$.tenant_count')), '-') FROM build_runs ORDER BY started_at DESC LIMIT 10" | while read -r id env origin started status tenants; do
+        case "$status" in
+            success) status_color="${GREEN}" ;;
+            failed)  status_color="${RED}" ;;
+            running) status_color="${YELLOW}" ;;
+            *)       status_color="${NC}" ;;
+        esac
+        printf "  %-6s %-8s %-8s %-18s ${status_color}%-10s${NC} %-10s\n" "$id" "$env" "$origin" "$started" "$status" "$tenants"
+    done
+    
+    echo ""
+    echo -e "${CYAN}📊 Build Statistics:${NC}"
+    TOTAL=$(db_query "SELECT COUNT(*) FROM build_runs")
+    SUCCESS=$(db_query "SELECT COUNT(*) FROM build_runs WHERE status='success'")
+    FAILED=$(db_query "SELECT COUNT(*) FROM build_runs WHERE status='failed'")
+    echo "  Total:   $TOTAL"
+    echo -e "  Success: ${GREEN}$SUCCESS${NC}"
+    echo -e "  Failed:  ${RED}$FAILED${NC}"
+    echo ""
+}
+
+register_build() {
+    local env="${1:-prod}"
+    local origin="${2:-server}"
+    
+    cd "$REPO_PATH" 2>/dev/null
+    local git_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    local git_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+    local hostname=$(hostname)
+    local run_id=$(uuidgen)
+    
+    local fe_version=$(grep '"version"' "$FRONTEND_PATH/package.json" 2>/dev/null | head -1 | sed 's/.*"version": *"\([^"]*\)".*/\1/')
+    local be_version=$(grep '"version"' "$BACKEND_PATH/package.json" 2>/dev/null | head -1 | sed 's/.*"version": *"\([^"]*\)".*/\1/')
+    
+    # Get tenant count
+    local tenant_count=$(get_tenant_count)
+    
+    # Get required schema
+    local schema_version=$(get_required_schema)
+    
+    local meta_json="{\"repo\":\"orthodoxmetrics\",\"branch\":\"$git_branch\",\"commit\":\"$git_commit\",\"frontend_version\":\"$fe_version\",\"backend_version\":\"$be_version\",\"tenant_count\":$tenant_count,\"schema_version\":\"$schema_version\"}"
+    
+    db_query "INSERT INTO build_runs (run_id, env, origin, command, host, pid, status, meta_json) VALUES ('$run_id', '$env', '$origin', 'om-build --register', '$hostname', $$, 'success', '$meta_json')"
+    
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ Build registered successfully${NC}"
+        echo "  Run ID:       $run_id"
+        echo "  Commit:       $git_commit"
+        echo "  Branch:       $git_branch"
+        echo "  FE Version:   $fe_version"
+        echo "  BE Version:   $be_version"
+        echo "  Tenant Count: $tenant_count"
+    else
+        echo -e "${RED}✗ Failed to register build${NC}"
+    fi
+}
+
+show_current() {
+    echo ""
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}              OrthodoxMetrics Build Information                 ${NC}"
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+
+    cd "$REPO_PATH" 2>/dev/null
+    GIT_SHA_SHORT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    GIT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    GIT_COMMIT_DATE=$(git log -1 --format=%ci 2>/dev/null || echo "unknown")
+
+    echo -e "${CYAN}📦 Git Repository${NC}"
+    echo -e "   Branch:      ${YELLOW}$GIT_BRANCH${NC}"
+    echo -e "   Commit:      ${YELLOW}$GIT_SHA_SHORT${NC}"
+    echo -e "   Date:        $GIT_COMMIT_DATE"
+    echo ""
+
+    echo -e "${BLUE}🖥️  Frontend${NC}"
+    if [ -f "$FRONTEND_PATH/package.json" ]; then
+        FE_VERSION=$(grep '"version"' "$FRONTEND_PATH/package.json" | head -1 | sed 's/.*"version": *"\([^"]*\)".*/\1/')
+        echo -e "   Version:     ${GREEN}$FE_VERSION${NC}"
+    fi
+    if [ -d "$FRONTEND_PATH/dist" ]; then
+        FE_BUILD_TIME=$(stat -c %y "$FRONTEND_PATH/dist/index.html" 2>/dev/null | cut -d'.' -f1)
+        echo -e "   Built:       $FE_BUILD_TIME"
+    fi
+    echo ""
+
+    echo -e "${GREEN}⚙️  Backend${NC}"
+    if [ -f "$BACKEND_PATH/package.json" ]; then
+        BE_VERSION=$(grep '"version"' "$BACKEND_PATH/package.json" | head -1 | sed 's/.*"version": *"\([^"]*\)".*/\1/')
+        echo -e "   Version:     ${GREEN}$BE_VERSION${NC}"
+    fi
+    if [ -d "$BACKEND_PATH/dist" ]; then
+        BE_BUILD_TIME=$(stat -c %y "$BACKEND_PATH/dist/index.js" 2>/dev/null | cut -d'.' -f1)
+        echo -e "   Built:       $BE_BUILD_TIME"
+    fi
+    if command -v pm2 &> /dev/null; then
+        PM2_STATUS=$(pm2 jlist 2>/dev/null | jq -r '.[] | select(.name=="orthodox-backend") | .pm2_env.status' 2>/dev/null || echo "unknown")
+        echo -e "   PM2 Status:  ${GREEN}$PM2_STATUS${NC}"
+    fi
+    echo ""
+
+    # Tenant summary
+    TENANT_COUNT=$(get_tenant_count)
+    echo -e "${CYAN}🏛️  Tenants${NC}"
+    echo -e "   Active DBs:  ${GREEN}$TENANT_COUNT${NC}"
+    echo ""
+
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo -e "  ${YELLOW}--history${NC}  Build history  ${YELLOW}--schema${NC}  DB status  ${YELLOW}--register${NC}  Log build"
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+}
+
+case "$1" in
+    --history|-h)
+        show_history
+        ;;
+    --register|-r)
+        register_build "${2:-prod}" "${3:-server}"
+        ;;
+    --schema|-s)
+        show_schema_status
+        ;;
+    --help)
+        echo "Usage: om-build [OPTIONS]"
+        echo ""
+        echo "Options:"
+        echo "  (none)      Show current build information"
+        echo "  --history   Show build history + tenant health"
+        echo "  --schema    Show church database schema status"
+        echo "  --register  Register current build in database"
+        ;;
+    *)
+        show_current
+        ;;
+esac
