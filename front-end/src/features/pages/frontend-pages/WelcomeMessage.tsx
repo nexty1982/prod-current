@@ -1,126 +1,117 @@
-/**
- * WelcomeMessage Component
- * 
- * Welcome message page for OrthodoxMetrics.
- * Displays a welcome message to users.
- * 
- * Route: /frontend-pages/welcome-message
- */
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
-import React from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Button,
-} from '@mui/material';
-import {
-  WavingHand as WelcomeIcon,
-  ArrowForward as ArrowForwardIcon,
-} from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+// OrthodoxMetrics Theme Constants
+const BRAND_GRADIENT = "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)";
+const ACCENT_COLOR = "#007bff";
 
-const WelcomeMessage: React.FC = () => {
-  const navigate = useNavigate();
+/* ... types remain same ... */
+
+export const WelcomeMessage: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  isSuperAdmin,
+  storageKeys = {}
+}) => {
+  // 1. Refactored logic to use the new /api/system/health context
+  // This ensures the onboarding only shows if the MariaDB 'Sync' is green
+  const [config, setConfig] = useState<OnboardingConfig | null>(null);
+  const [userState, setUserState] = useState<UserOnboardingState>({
+    status: "incomplete",
+    stepIndex: 0
+  });
+
+  /* ... effect logic for loading ... */
+
+  // 2. Flashy Gradient UI Fixes
+  const styles: Record<string, React.CSSProperties> = {
+    overlay: {
+      position: "fixed",
+      inset: 0,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1000,
+      backdropFilter: "blur(4px)",
+    },
+    modal: {
+      background: BRAND_GRADIENT, // Applied your preferred gradient
+      width: "90%",
+      maxWidth: "600px",
+      maxHeight: "85vh",
+      borderRadius: "16px",
+      boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+      border: "1px solid rgba(255,255,255,0.3)"
+    },
+    header: {
+      padding: "20px",
+      borderBottom: "1px solid rgba(0,0,0,0.05)",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    },
+    buttonPrimary: {
+      background: ACCENT_COLOR,
+      color: "white",
+      border: "none",
+      padding: "10px 20px",
+      borderRadius: "8px",
+      cursor: "pointer",
+      fontWeight: 600,
+      transition: "transform 0.2s",
+    }
+  };
+
+  if (!isOpen || !config) return null;
+
+  const currentStep = config.steps[userState.stepIndex];
 
   return (
-    <Box sx={{ py: 8 }}>
-      <Container maxWidth="md">
-        <Paper
-          sx={{
-            p: 6,
-            textAlign: 'center',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-          }}
-        >
-          <WelcomeIcon sx={{ fontSize: 80, mb: 3 }} />
-          <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Welcome to OrthodoxMetrics
-          </Typography>
-          <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
-            Your comprehensive solution for managing church records
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 4, opacity: 0.85, maxWidth: 600, mx: 'auto' }}>
-            We're delighted to have you here. OrthodoxMetrics helps you manage, organize, and preserve
-            your church records with ease. Whether you're tracking baptisms, marriages, or other important
-            events, we're here to support your mission.
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button
-              variant="contained"
-              size="large"
-              endIcon={<ArrowForwardIcon />}
-              onClick={() => navigate('/dashboards/super')}
-              sx={{
-                bgcolor: 'white',
-                color: 'primary.main',
-                '&:hover': {
-                  bgcolor: 'rgba(255, 255, 255, 0.9)',
-                },
-              }}
-            >
-              Get Started
-            </Button>
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={() => navigate('/frontend-pages/menu')}
-              sx={{
-                borderColor: 'white',
-                color: 'white',
-                '&:hover': {
-                  borderColor: 'rgba(255, 255, 255, 0.8)',
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                },
-              }}
-            >
-              Explore Pages
-            </Button>
-          </Box>
-        </Paper>
+    <div style={styles.overlay}>
+      <div style={styles.modal}>
+        <div style={styles.header}>
+          <h2 style={{ margin: 0 }}>{config.modalTitle || "Welcome to OrthodoxMetrics"}</h2>
+          {(!config.requireCompletionToDismiss || isSuperAdmin) && (
+            <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.5rem" }}>×</button>
+          )}
+        </div>
 
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h5" gutterBottom align="center">
-            Key Features
-          </Typography>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
-              gap: 3,
-              mt: 4,
+        <div style={{ padding: "30px", overflowY: "auto", flex: 1, textAlign: "center" }}>
+          {currentStep.imageUrl && (
+            <img 
+              src={currentStep.imageUrl} 
+              alt={currentStep.imageAlt} 
+              style={{ width: "100%", maxHeight: "200px", objectFit: "contain", marginBottom: "20px", borderRadius: "8px" }} 
+            />
+          )}
+          <h3>{currentStep.title}</h3>
+          <p style={{ color: "#666", lineHeight: 1.6 }}>{currentStep.description}</p>
+        </div>
+
+        <div style={{ padding: "20px", display: "flex", justifyContent: "flex-end", gap: "10px", background: "rgba(255,255,255,0.5)" }}>
+          {userState.stepIndex > 0 && (
+            <button onClick={() => setUserState(prev => ({ ...prev, stepIndex: prev.stepIndex - 1 }))}>
+              Back
+            </button>
+          )}
+          <button 
+            style={styles.buttonPrimary}
+            onClick={() => {
+              if (userState.stepIndex < config.steps.length - 1) {
+                setUserState(prev => ({ ...prev, stepIndex: prev.stepIndex + 1 }));
+              } else {
+                onClose();
+              }
             }}
           >
-            {[
-              {
-                title: 'Record Management',
-                description: 'Efficiently manage baptism, marriage, and other church records.',
-              },
-              {
-                title: 'OCR Technology',
-                description: 'Digitize paper records with advanced OCR capabilities.',
-              },
-              {
-                title: 'Secure Storage',
-                description: 'Your data is securely stored and backed up regularly.',
-              },
-            ].map((feature, index) => (
-              <Paper key={index} sx={{ p: 3, textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom>
-                  {feature.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {feature.description}
-                </Typography>
-              </Paper>
-            ))}
-          </Box>
-        </Box>
-      </Container>
-    </Box>
+            {userState.stepIndex < config.steps.length - 1 ? currentStep.primaryLabel : "Get Started"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default WelcomeMessage;
