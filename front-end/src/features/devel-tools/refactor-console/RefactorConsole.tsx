@@ -48,6 +48,7 @@ import {
   PreviewRestoreResponse
 } from '@/types/refactorConsole';
 import refactorConsoleClient, { PathConfig, DEFAULT_PATH_CONFIG } from './api/refactorConsoleClient';
+import SessionPulse from '@/components/admin/SessionPulse';
 
 const RefactorConsole: React.FC = () => {
   // Get theme context for dark mode
@@ -999,6 +1000,11 @@ const RefactorConsole: React.FC = () => {
             </Box>
           </Box>
         </Box>
+      </Box>
+
+      {/* Session Pulse Dashboard */}
+      <Box sx={{ px: 3, pt: 2 }}>
+        <SessionPulse refreshInterval={10000} />
       </Box>
 
       {/* Path Configuration Panel */}

@@ -39,7 +39,13 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
             setIsLoading(true);
             setError(null);
 
-            const response = await fetch('/api/user/profile', {
+            const userId = user?.id;
+            if (!userId) {
+                console.log('📸 No user ID available, skipping profile load');
+                return null;
+            }
+            
+            const response = await fetch(`/api/om/profile/${userId}`, {
                 credentials: 'include'
             });
 
@@ -70,7 +76,7 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [user?.id]);
 
     // Update profile image
     const updateProfileImage = useCallback(async (imageUrl: string) => {
@@ -79,7 +85,12 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
             setError(null);
 
             // Save to database
-            const response = await fetch('/api/user/profile/images', {
+            const userId = user?.id;
+            if (!userId) {
+                throw new Error('No user ID available');
+            }
+            
+            const response = await fetch(`/api/om/profile/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -119,7 +130,7 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
         } finally {
             setIsLoading(false);
         }
-    }, [refreshAuth]);
+    }, [user?.id, refreshAuth]);
 
     // Update profile data
     const updateProfile = useCallback(async (updates: Partial<ProfileData>) => {
@@ -127,7 +138,12 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
             setIsLoading(true);
             setError(null);
 
-            const response = await fetch('/api/user/profile', {
+            const userId = user?.id;
+            if (!userId) {
+                throw new Error('No user ID available');
+            }
+            
+            const response = await fetch(`/api/om/profile/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

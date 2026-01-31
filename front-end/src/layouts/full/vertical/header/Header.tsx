@@ -12,6 +12,8 @@ import Language from './Language';
 import Navigation from './Navigation';
 import MobileRightSidebar from './MobileRightSidebar';
 import OrthodoxThemeToggle from '@/shared/ui/OrthodoxThemeToggle';
+import ChurchHeader from '../../../../components/layout/ChurchHeader';
+import SessionPulseIndicator from '../../../../components/layout/SessionPulseIndicator';
 
 // Contexts & Hooks
 import { CustomizerContext } from '@/context/CustomizerContext';
@@ -93,9 +95,14 @@ const Header = () => {
 
         {lgUp ? <Navigation /> : null}
 
+        {/* Church Header with Switch Dropdown */}
+        {authenticated && <ChurchHeader />}
+
         <Box flexGrow={1} />
         
         <Stack spacing={2} direction="row" alignItems="center">
+          {/* Session Pulse Indicator - Red if session leak detected */}
+          {authenticated && isSuperAdmin() && <SessionPulseIndicator />}
           {/* ------------------------------------------- */}
           {/* Maintenance Mode Toggle - Super Admin Only */}
           {/* ------------------------------------------- */}
@@ -131,26 +138,6 @@ const Header = () => {
           <Notifications />
           
           {lgDown ? <MobileRightSidebar /> : null}
-
-          {/* ------------------------------------------- */}
-          {/* 3-Dot Health Indicator */}
-          {/* ------------------------------------------- */}
-          <Box sx={{ display: 'flex', gap: '5px', px: 1, alignItems: 'center', borderLeft: '1px solid rgba(255,255,255,0.1)', ml: 1 }}>
-            {/* Dot 1: Frontend - Always Green */}
-            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#22c55e', boxShadow: '0 0 6px #22c55e' }} />
-            
-            {/* Dot 2: API/Backend - Green if production or updating */}
-            <Box sx={{ 
-              width: 8, height: 8, borderRadius: '50%', 
-              bgcolor: systemStatus !== 'frontend_only' ? '#22c55e' : '#64748b' 
-            }} />
-            
-            {/* Dot 3: Database Sync - Green ONLY if production */}
-            <Box sx={{ 
-              width: 8, height: 8, borderRadius: '50%', 
-              bgcolor: systemStatus === 'production' ? '#22c55e' : '#64748b' 
-            }} />
-          </Box>
 
           <Profile />
         </Stack>

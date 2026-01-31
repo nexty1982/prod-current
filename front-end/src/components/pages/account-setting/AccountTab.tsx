@@ -75,14 +75,23 @@ const timezones: locationType[] = [
 const AccountTab = () => {
   const { user, refreshAuth } = useAuth();
 
-  // Form state
+  // Form state - extended with profile fields
   const [formData, setFormData] = useState({
-    first_name: user?.first_name || '',
-    last_name: user?.last_name || '',
+    firstName: user?.first_name || '',
+    lastName: user?.last_name || '',
     email: user?.email || '',
-    preferred_language: user?.preferred_language || 'en',
+    phone: '',
+    location: '',
+    website: '',
+    bio: '',
+    introduction: '',
+    jobTitle: '',
+    company: '',
+    language: user?.preferred_language || 'en',
     timezone: user?.timezone || 'UTC'
   });
+  
+  const [loading, setLoading] = useState(true);
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -96,18 +105,48 @@ const AccountTab = () => {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-  // Update form when user data changes
+  // Fetch profile settings on mount
   React.useEffect(() => {
-    if (user) {
-      setFormData({
-        first_name: user.first_name || '',
-        last_name: user.last_name || '',
-        email: user.email || '',
-        preferred_language: user.preferred_language || 'en',
-        timezone: user.timezone || 'UTC'
-      });
-    }
-  }, [user]);
+    const fetchSettings = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/om/profile/${user.id}/settings`, {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.settings) {
+            const s = data.settings;
+            setFormData({
+              firstName: s.firstName || '',
+              lastName: s.lastName || '',
+              email: s.email || '',
+              phone: s.phone || '',
+              location: s.location || '',
+              website: s.website || '',
+              bio: s.bio || '',
+              introduction: s.introduction || '',
+              jobTitle: s.jobTitle || '',
+              company: s.company || '',
+              language: s.language || s.preferredLanguage || 'en',
+              timezone: s.timezone || 'UTC'
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching profile settings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSettings();
+  }, [user?.id]);
 
   const handleInputChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -124,11 +163,13 @@ const AccountTab = () => {
   };
 
   const handleSave = async () => {
+    if (!user?.id) return;
+    
     setIsLoading(true);
     setMessage(null);
 
     try {
-      const response = await fetch('/api/auth/profile', {
+      const response = await fetch(`/api/om/profile/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +185,7 @@ const AccountTab = () => {
         // Refresh user data in context
         await refreshAuth();
       } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to update profile. Please try again.' });
+        setMessage({ type: 'error', text: data.message || data.error || 'Failed to update profile. Please try again.' });
       }
     } catch (error) {
       console.error('Profile update error:', error);
@@ -363,8 +404,8 @@ const AccountTab = () => {
                   </CustomFormLabel>
                   <CustomTextField
                     id="text-first-name"
-                    value={formData.first_name}
-                    onChange={handleInputChange('first_name')}
+                    value={formData.firstName}
+                    onChange={handleInputChange('firstName')}
                     variant="outlined"
                     fullWidth
                     placeholder="Enter your first name"
@@ -386,8 +427,8 @@ const AccountTab = () => {
                   </CustomFormLabel>
                   <CustomTextField
                     id="text-last-name"
-                    value={formData.last_name}
-                    onChange={handleInputChange('last_name')}
+                    value={formData.lastName}
+                    onChange={handleInputChange('lastName')}
                     variant="outlined"
                     fullWidth
                     placeholder="Enter your last name"
@@ -411,8 +452,8 @@ const AccountTab = () => {
                     fullWidth
                     id="text-language"
                     variant="outlined"
-                    value={formData.preferred_language}
-                    onChange={handleInputChange('preferred_language')}
+                    value={formData.language}
+                    onChange={handleInputChange('language')}
                   >
                     {languages.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
@@ -493,10 +534,17 @@ const AccountTab = () => {
             color="error"
             onClick={() => {
               setFormData({
-                first_name: user?.first_name || '',
-                last_name: user?.last_name || '',
+                firstName: user?.first_name || '',
+                lastName: user?.last_name || '',
                 email: user?.email || '',
-                preferred_language: user?.preferred_language || 'en',
+                phone: '',
+                location: '',
+                website: '',
+                bio: '',
+                introduction: '',
+                jobTitle: '',
+                company: '',
+                language: user?.preferred_language || 'en',
                 timezone: user?.timezone || 'UTC'
               });
               setMessage(null);

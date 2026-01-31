@@ -7,6 +7,7 @@ import NavItem from './NavItem';
 import NavCollapse from './NavCollapse';
 import NavGroup from './NavGroup/NavGroup';
 import { useFilteredMenuItems } from '@/shared/lib/useFilteredMenuItems';
+import { useAuth } from '@/context/AuthContext';
 
 import { CustomizerContext } from '@/context/CustomizerContext';
 
@@ -15,6 +16,7 @@ const SidebarItems = () => {
   const pathDirect = pathname;
   const pathWithoutLastPart = pathname.slice(0, pathname.lastIndexOf('/'));
   const { isSidebarHover, isCollapse, isMobileSidebar, setIsMobileSidebar } = useContext(CustomizerContext);
+  const { user } = useAuth();
   const menuItems = useFilteredMenuItems();
 
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));

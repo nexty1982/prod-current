@@ -4,14 +4,19 @@
   "version": "5.0.0",
   "type": "module",
   "scripts": {
-    "i": "npm install --legacy-peer-deps",
     "dev": "vite --mode development --host 0.0.0.0 --port 5174",
     "dev:host": "vite --mode development --host 0.0.0.0 --port 5174",
     "dev:test": "vite --mode development --port 5177",
-    "build": "rm -rf dist && NODE_OPTIONS=\"--max-old-space-size=4096\" vite build --mode production",
+    "clean": "rm -rf dist",
+    "clean:all": "rm -rf node_modules dist package-lock.json && npm install --legacy-peer-deps --loglevel=error",
+    "prebuild": "npm run clean",
+    "build": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview --port 5175 --host 0.0.0.0",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "deploy:latest": "npm run build && cp -rv dist/* dist-latest/",
+    "deploy:stable": "npm run build && cp -rv dist/* dist-stable/",
+    "deploy:both": "npm run build && cp -rv dist/* dist-latest/ && cp -rv dist/* dist-stable/"
   },
   "dependencies": {
     "@casl/ability": "^6.7.3",

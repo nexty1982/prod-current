@@ -148,11 +148,11 @@ function UserDataProvider({ children }: { children: React.ReactNode }) {
         setProfileData(newProfile);
     }, [user?.id]); // Re-run when user ID changes
 
-    // OrthodoxMetrics API endpoints
-    const profKey = `/api/om/profile/${userId}`;
-    const postsKey = `/api/om/profile/${userId}/posts?page=1&limit=50`;
-    const galleryKey = `/api/om/profile/${userId}/gallery`;
-    const follKey = `/api/om/profile/${userId}/followers`;
+    // OrthodoxMetrics API endpoints (without /api prefix - apiClient adds it)
+    const profKey = `/om/profile/${userId}`;
+    const postsKey = `/om/profile/${userId}/posts?page=1&limit=50`;
+    const galleryKey = `/om/profile/${userId}/gallery`;
+    const follKey = `/om/profile/${userId}/followers`;
 
     const { data: profileDataApi, isLoading: isProfileLoading, error: profileError } = useSWR(profKey, getFetcher);
     const { data: postsData, isLoading: isPostsLoading, error: postsError, mutate } = useSWR(postsKey, getFetcher);
@@ -307,8 +307,8 @@ function UserDataProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    // Function to update profile data
-    const updateProfileData = (data: Partial<profiledataType>) => {
+    // Function to update profile data - now persists to backend
+    const updateProfileData = async (data: Partial<profiledataType>) => {
         const updatedProfile = { ...profileData, ...data };
         setProfileData(updatedProfile);
         
@@ -321,11 +321,32 @@ function UserDataProvider({ children }: { children: React.ReactNode }) {
             }
         } else {
             console.warn('Skipping localStorage save: updated profile is not persistable (fallback detected)');
-            // Don't overwrite with invalid profile - keep last known good
         }
         
-        // TODO: Add API call to save to backend
-        console.log('Updating profile data:', data);
+        // Call backend API to persist changes
+        try {
+            const response = await fetch(`/api/om/profile/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(data),
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Failed to save profile to backend:', errorData);
+                throw new Error(errorData.error || 'Failed to save profile');
+            }
+            
+            const result = await response.json();
+            console.log('Profile saved to backend:', result);
+            return result;
+        } catch (error) {
+            console.error('Error saving profile to backend:', error);
+            throw error;
+        }
     };
 
     return (

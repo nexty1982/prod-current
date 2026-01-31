@@ -140,6 +140,7 @@ export async function apiJson<T = any>(
     const response = await fetchWithTimeout(url, {
       ...fetchOptions,
       headers: requestHeaders,
+      credentials: 'include',
     });
 
     return await handleResponse<T>(response);

@@ -651,7 +651,7 @@ const BaptismRecordsPage: React.FC = () => {
     godparentNames: '',
     priest: '',
     registryNumber: '',
-    churchId: selectedChurch === 0 ? '1' : selectedChurch.toString(),
+    churchId: selectedChurch === 0 ? (new URLSearchParams(window.location.search).get('church_id') || '46') : selectedChurch.toString(),
     notes: '',
     customPriest: false,
   });
@@ -835,7 +835,7 @@ const BaptismRecordsPage: React.FC = () => {
       godparentNames: '',
       priest: '',
       registryNumber: '',
-      churchId: selectedChurch === 0 ? '1' : selectedChurch.toString(),
+      churchId: selectedChurch === 0 ? (new URLSearchParams(window.location.search).get('church_id') || '46') : selectedChurch.toString(),
       notes: '',
       customPriest: false,
     });
@@ -964,18 +964,46 @@ const BaptismRecordsPage: React.FC = () => {
         setRecords(prev => prev.map(r => r.id === editingRecord.id ? updatedRecord : r));
         showToast('Record updated successfully', 'success');
       } else {
-        // Create new record
+        // Create new record - map form fields to API fields
+        const churchIdNum = parseInt(formData.churchId) || selectedChurch;
+        const apiPayload = {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          birth_date: formData.dateOfBirth || null,
+          reception_date: formData.dateOfBaptism || null,
+          birthplace: formData.placeOfBirth || null,
+          entry_type: 'Baptism',
+          sponsors: formData.godparentNames || null,
+          parents: [formData.fatherName, formData.motherName].filter(Boolean).join(' & ') || null,
+          clergy: formData.priest || formData.clergy || null,
+          church_id: churchIdNum,
+        };
+
+        // Make actual API call to save record
+        const apiResponse = await fetch(`/api/baptism-records?church_id=${churchIdNum}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(apiPayload),
+        });
+
+        if (!apiResponse.ok) {
+          const errData = await apiResponse.json().catch(() => ({}));
+          throw new Error(errData.error || `Failed to save: ${apiResponse.status}`);
+        }
+
+        const savedData = await apiResponse.json();
+        console.log('Record saved:', savedData);
+
+        // Update local state
         const newRecord: BaptismRecord = {
           ...formData,
-          id: Date.now().toString(),
+          id: savedData.record?.id?.toString() || savedData.id?.toString() || Date.now().toString(),
           churchName,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          createdBy: 'current-user@church.org', // TODO: Get from auth context
+          createdBy: 'system',
         } as BaptismRecord;
-        
-        // TODO: Implement actual API call
-        // await recordService.createRecord('baptism', newRecord);
         
         setRecords(prev => [...prev, newRecord]);
         showToast('Record created successfully', 'success');

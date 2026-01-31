@@ -1,0 +1,2 @@
+import{n as a,m as n,j as i,V as m}from"./index-Dgvcv9SG.js";import{r as d}from"./vendor-Dkfty7_r.js";const C=({children:o,className:t,sx:r})=>{const{isCardShadow:e}=d.useContext(a),s=n().palette.grey[200];return i.jsx(m,{sx:{p:0,border:e?"none":`1px solid ${s}`,position:"relative",sx:r},className:t,elevation:e?9:0,variant:e?void 0:"outlined",children:o})};export{C as B};
+//# sourceMappingURL=BlankCard-CvkN3_SZ.js.map

@@ -7,20 +7,126 @@
  * Route: /frontend-pages/homepage
  */
 
-import React from 'react';
-import { Box, Container, Typography, Button, Grid, Card, CardContent } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { 
+  Box, 
+  Container, 
+  Typography, 
+  Button, 
+  Grid, 
+  Card, 
+  CardContent,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Menu,
+  MenuItem,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import { Menu as MenuIcon } from '@mui/icons-material';
+import { useNavigate, Link } from 'react-router-dom';
+
+interface NavItem {
+  label: string;
+  path: string;
+}
+
+const navItems: NavItem[] = [
+  { label: 'About', path: '/frontend-pages/about' },
+  { label: 'Contact', path: '/frontend-pages/contact' },
+  { label: 'Pricing', path: '/frontend-pages/pricing' },
+  { label: 'Tour', path: '/frontend-pages/tour' },
+  { label: 'Timeline', path: '/frontend-pages/oca-timeline' },
+  { label: 'Samples', path: '/frontend-pages/samples' },
+  { label: 'Tasks', path: '/frontend-pages/tasks' },
+];
 
 const Homepage: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleNavClick = (path: string) => {
+    navigate(path);
+    handleMenuClose();
+  };
 
   return (
     <Box>
+      {/* Header Navigation */}
+      <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'primary.main' }}>
+        <Container maxWidth="lg">
+          <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
+            <Typography
+              variant="h6"
+              component={Link}
+              to="/frontend-pages/homepage"
+              sx={{ 
+                color: 'white', 
+                textDecoration: 'none',
+                fontWeight: 'bold',
+              }}
+            >
+              OrthodoxMetrics
+            </Typography>
+
+            {isMobile ? (
+              <>
+                <IconButton color="inherit" onClick={handleMenuOpen} sx={{ color: 'white' }}>
+                  <MenuIcon />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  {navItems.map((item) => (
+                    <MenuItem key={item.path} onClick={() => handleNavClick(item.path)}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                  <MenuItem onClick={() => handleNavClick('/auth/login')}>Sign In</MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {navItems.map((item) => (
+                  <Button
+                    key={item.path}
+                    onClick={() => navigate(item.path)}
+                    sx={{ color: 'white' }}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate('/auth/login')}
+                  sx={{ color: 'white', borderColor: 'white', ml: 2 }}
+                >
+                  Sign In
+                </Button>
+              </Box>
+            )}
+          </Toolbar>
+        </Container>
+      </AppBar>
+
       {/* Hero Section */}
       <Box
         sx={{
           bgcolor: 'primary.light',
-          py: { xs: 8, md: 12 },
+          py: { xs: 6, md: 10 },
           textAlign: 'center',
         }}
       >

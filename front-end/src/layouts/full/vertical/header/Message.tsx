@@ -67,7 +67,6 @@ const Message = () => {
           <Box>
             <Typography variant="h5">Messages</Typography>
             <Typography variant="subtitle2" color="textSecondary">
-              You have 3 unread messages
             </Typography>
           </Box>
           <IconChecks width={20} height={20} />

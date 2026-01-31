@@ -17,31 +17,10 @@ import { useAuth } from '../../../../context/AuthContext';
 import { UserDataContext } from '../../../../context/UserDataContext';
 
 import { IconMail, IconUserOff } from '@tabler/icons-react';
+import ActiveSessionIndicator from '../../../../components/admin/ActiveSessionIndicator';
 
 // Default profile image fallback (using Orthodox default)
 const defaultProfileImg = '/orthodox/avatars/default.svg';
-
-// Active session indicator component
-const ActiveSessionIndicator = () => (
-  <div style={{ display: 'flex', gap: '4px', marginLeft: '6px' }}>
-    <span
-      style={{
-        width: '10px',
-        height: '10px',
-        borderRadius: '50%',
-        backgroundColor: '#00C853',
-      }}
-    />
-    <span
-      style={{
-        width: '10px',
-        height: '10px',
-        borderRadius: '50%',
-        backgroundColor: '#00C853',
-      }}
-    />
-  </div>
-);
 
 const Profile = () => {
   const { user, authenticated, logout } = useAuth();

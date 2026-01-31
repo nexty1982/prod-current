@@ -1,0 +1,15 @@
+5|orthodox-backend  |   path: '/api/upload/profile',
+5|orthodox-backend  |   originalUrl: '/api/upload/profile',
+5|orthodox-backend  |   url: '/api/upload/profile',
+5|orthodox-backend  |   contentType: 'multipart/form-data; boundary=----WebKitFormBoundary5zDrAud0oUFpBhrX',
+5|orthodox-backend  |   contentLength: '74421',
+5|orthodox-backend  |   hasBody: true,
+5|orthodox-backend  |   bodyKeys: [],
+5|orthodox-backend  |   sessionID: '4zXANPFphW3wxpTx2ojvALTH6Q-rz-kG',
+5|orthodox-backend  |   sessionUser: 'frjames@ssppoc.org'
+5|orthodox-backend  | }
+5|orthodox-backend  | POST /api/upload/profile 404 1.732 ms - 21
+5|orthodox-backend  | [2026-01-31T03:44:48.490Z] INFO [API Request] POST /api/upload/profile
+5|orthodox-backend  |   Meta: {"method":"POST","url":"/api/upload/profile","query":{},"params":{}}
+5|orthodox-backend  | [2026-01-31T03:44:48.491Z] WARN [API Response] POST /api/upload/profile - 404 (1ms)
+5|orthodox-backend  |   Meta: {"statusCode":404,"duration":"1ms","dataType":"json","data":{"error":"Not found"}}

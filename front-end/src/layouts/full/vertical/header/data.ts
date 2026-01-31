@@ -137,13 +137,6 @@ const profile: ProfileType[] = [
     subtitle: 'To-do and Daily Tasks',
     icon: icon3,
   },
-  {
-    href: '#relax',
-    title: 'RELAX',
-    subtitle: 'Complete Shift & Commit',
-    icon: iconRelax,
-    roleRestriction: ['super_admin'],
-  },
 ];
 
 // apps dropdown

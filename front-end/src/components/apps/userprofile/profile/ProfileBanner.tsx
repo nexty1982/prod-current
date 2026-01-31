@@ -79,6 +79,7 @@ const ProfileBanner = () => {
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
   const [globalImages, setGlobalImages] = useState<any[]>([]);
   const [showGlobalImages, setShowGlobalImages] = useState(false);
   const [profileImages, setProfileImages] = useState<string[]>([]);
@@ -192,11 +193,13 @@ const ProfileBanner = () => {
       await updateProfile(editedProfile);
       setIsEditing(false);
       setSnackbarMessage('Profile updated successfully!');
+      setSnackbarSeverity('success');
       setSnackbarOpen(true);
       console.log('📸 Profile saved using sync hook');
     } catch (error) {
       console.error('Failed to save profile:', error);
       setSnackbarMessage('Failed to update profile. Please try again.');
+      setSnackbarSeverity('error');
       setSnackbarOpen(true);
     }
   };
@@ -1065,7 +1068,7 @@ const ProfileBanner = () => {
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity="success"
+          severity={snackbarSeverity}
           sx={{ width: '100%' }}
         >
           {snackbarMessage}

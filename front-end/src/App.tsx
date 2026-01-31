@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router-dom';
 import router from './routes/Router';
 import { CustomizerContext } from './context/CustomizerContext';
 import { ChurchRecordsProvider } from './context/ChurchRecordsContext';
+import { ChurchProvider } from './context/ChurchContext';
 import { AuthProvider } from './context/AuthContext';
 import { MenuVisibilityProvider } from './context/MenuVisibilityContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -54,51 +55,53 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <EnvironmentProvider>
-          <WebSocketProvider>
-            <ChurchRecordsProvider>
-              <MenuVisibilityProvider>
-                <NotificationProvider>
-                <ThemeProvider theme={theme}>
-                  <RTL direction={activeDir}>
-                    <CssBaseline />
-                    <div 
-                      className="orthodox-app" 
-                      data-theme={activeMode}
-                      style={{ 
-                        minHeight: '100vh',
-                        backgroundColor: theme.palette.background.default,
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <ErrorBoundary>
-                        <FilterErrorBoundary>
-                          <AdminMessageNotification />
-                          <RouterProvider router={router} />
-                          <ToastContainer
-                            position="top-right"
-                            autoClose={3000}
-                            hideProgressBar={false}
-                            newestOnTop={false}
-                            closeOnClick
-                            rtl={false}
-                            pauseOnFocusLoss
-                            draggable
-                            pauseOnHover
-                            theme="light"
-                          />
-                        </FilterErrorBoundary>
-                      </ErrorBoundary>
-                    </div>
-                    <ReactQueryDevtools initialIsOpen={false} />
-                  </RTL>
-                </ThemeProvider>
-                </NotificationProvider>
-              </MenuVisibilityProvider>
-            </ChurchRecordsProvider>
-          </WebSocketProvider>
-        </EnvironmentProvider>
+        <ChurchProvider>
+          <EnvironmentProvider>
+            <WebSocketProvider>
+              <ChurchRecordsProvider>
+                <MenuVisibilityProvider>
+                  <NotificationProvider>
+                  <ThemeProvider theme={theme}>
+                    <RTL direction={activeDir}>
+                      <CssBaseline />
+                      <div 
+                        className="orthodox-app" 
+                        data-theme={activeMode}
+                        style={{ 
+                          minHeight: '100vh',
+                          backgroundColor: theme.palette.background.default,
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        <ErrorBoundary>
+                          <FilterErrorBoundary>
+                            <AdminMessageNotification />
+                            <RouterProvider router={router} />
+                            <ToastContainer
+                              position="top-right"
+                              autoClose={3000}
+                              hideProgressBar={false}
+                              newestOnTop={false}
+                              closeOnClick
+                              rtl={false}
+                              pauseOnFocusLoss
+                              draggable
+                              pauseOnHover
+                              theme="light"
+                            />
+                          </FilterErrorBoundary>
+                        </ErrorBoundary>
+                      </div>
+                      <ReactQueryDevtools initialIsOpen={false} />
+                    </RTL>
+                  </ThemeProvider>
+                  </NotificationProvider>
+                </MenuVisibilityProvider>
+              </ChurchRecordsProvider>
+            </WebSocketProvider>
+          </EnvironmentProvider>
+        </ChurchProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
