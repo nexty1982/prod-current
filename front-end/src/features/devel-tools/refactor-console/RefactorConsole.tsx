@@ -48,7 +48,7 @@ import {
   PreviewRestoreResponse
 } from '@/types/refactorConsole';
 import refactorConsoleClient, { PathConfig, DEFAULT_PATH_CONFIG } from './api/refactorConsoleClient';
-import SessionPulse from '@/components/admin/SessionPulse';
+import SessionPulse from '@/features/admin/components/SessionPulse';
 
 const RefactorConsole: React.FC = () => {
   // Get theme context for dark mode
