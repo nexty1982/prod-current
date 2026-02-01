@@ -53,7 +53,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 import VisualRegressionDashboard from '@/features/admin/VisualRegressionDashboard';
-import VRTSettingsPanel from '@/features/misc-legacy/VRTSettingsPanel';
+import VRTSettingsPanel from './VRTSettingsPanel';
 
 interface VisualTestDemoProps {}
 
