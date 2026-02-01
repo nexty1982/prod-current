@@ -923,14 +923,20 @@ const BaptismRecordsPage: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this record?')) {
       try {
         setLoading(true);
-        // TODO: Implement actual API call
-        // await recordService.deleteRecord('baptism', recordId);
-        
+        const selectedType = recordTypes.find(rt => rt.value === selectedRecordType);
+        const endpoint = selectedType?.apiEndpoint || 'baptism';
+        const response = await fetch(`/api/${endpoint}-records/${recordId}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to delete record');
+        }
         setRecords(prev => prev.filter(r => r.id !== recordId));
         showToast('Record deleted successfully', 'success');
       } catch (err) {
         console.error('Delete error:', err);
-        showToast('Failed to delete record', 'error');
+        showToast(err instanceof Error ? err.message : 'Failed to delete record', 'error');
       } finally {
         setLoading(false);
       }
