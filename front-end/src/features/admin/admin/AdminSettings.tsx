@@ -36,9 +36,9 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import BackupSettings from '@/features/system/settings/BackupSettings';
 import ContentSettings from '@/features/cms/settings/ContentSettings';
-import ServiceManagement from '@/features/misc-legacy/settings/ServiceManagement';
-import NotificationManagement from '@/components/admin/NotificationManagement';
-import OMBigBook from '@/components/admin/OMBigBook';
+import ServiceManagement from '@/features/system/settings/ServiceManagement';
+import NotificationManagement from '@/features/admin/components/NotificationManagement';
+import OMBigBook from '@/features/admin/admin/OMBigBook';
 import ComponentManager from './components/ComponentManager';
 import OmaiSpinSettings from './OmaiSpinSettings';
 import PageContainer from '@/shared/ui/PageContainer';

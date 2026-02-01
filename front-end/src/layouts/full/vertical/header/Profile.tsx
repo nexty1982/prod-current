@@ -17,7 +17,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import { UserDataContext } from '../../../../context/UserDataContext';
 
 import { IconMail, IconUserOff } from '@tabler/icons-react';
-import ActiveSessionIndicator from '../../../../components/admin/ActiveSessionIndicator';
+import ActiveSessionIndicator from '../../../../features/admin/components/ActiveSessionIndicator';
 
 // Default profile image fallback (using Orthodox default)
 const defaultProfileImg = '/orthodox/avatars/default.svg';
