@@ -33,18 +33,24 @@ const startGlobalPolling = async () => {
         globalMaintenanceState = await response.json();
       } else {
         globalMaintenanceState = null;
+        // Endpoint doesn't exist (404) — stop polling to avoid log spam
+        return false;
       }
     } catch {
       globalMaintenanceState = null;
+      return false;
     }
     notifyListeners();
+    return true;
   };
-  
-  // Initial poll
-  await poll();
-  
-  // Set up interval
-  setInterval(poll, POLL_INTERVAL);
+
+  // Initial poll — only start interval if the endpoint actually exists
+  const endpointExists = await poll();
+  notifyListeners();
+
+  if (endpointExists) {
+    setInterval(poll, POLL_INTERVAL);
+  }
 };
 
 export const useMaintenanceStatus = () => {

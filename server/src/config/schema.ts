@@ -31,7 +31,7 @@ const serverConfigSchema = z.object({
  * Session configuration schema
  */
 const sessionConfigSchema = z.object({
-  secret: z.string().min(8).default('dev-secret-change-in-production'),
+  secret: z.string().min(8),
   cookieName: z.string().default('orthodoxmetrics.sid'),
   cookieDomain: z.string().optional(),
   secure: z.coerce.boolean().default(false),

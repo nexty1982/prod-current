@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, Tooltip } from '@mui/material';
 import { Activity } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface SessionStats {
   totalSessions: number;
@@ -18,8 +19,17 @@ const SessionPulseIndicator: React.FC = () => {
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { logout } = useAuth();
 
   const LEAK_THRESHOLD = 1.1; // Session leak indicator threshold
+
+  const stopPolling = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     const fetchSessionStats = async () => {
@@ -28,15 +38,30 @@ const SessionPulseIndicator: React.FC = () => {
           credentials: 'include'
         });
 
+        if (response.status === 401) {
+          // Session expired - stop polling to prevent 401 spam
+          stopPolling();
+          setError(true);
+          setLoading(false);
+          logout();
+          return;
+        }
+
         if (!response.ok) {
-          // Not authorized or endpoint unavailable - hide indicator
           setError(true);
           return;
         }
 
-        const data = await response.json();
+        const text = await response.text();
+        let data: any;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          setError(true);
+          return;
+        }
         const totalSessions = data.stats?.totalSessions || 0;
-        const uniqueUsers = data.stats?.uniqueUsers || 1; // Avoid division by zero
+        const uniqueUsers = data.stats?.uniqueUsers || 1;
         const ratio = uniqueUsers > 0 ? totalSessions / uniqueUsers : 0;
 
         setStats({
@@ -55,10 +80,10 @@ const SessionPulseIndicator: React.FC = () => {
     };
 
     fetchSessionStats();
-    const interval = setInterval(fetchSessionStats, 10000); // Poll every 10 seconds
+    intervalRef.current = setInterval(fetchSessionStats, 30000);
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => stopPolling();
+  }, [stopPolling, logout]);
 
   // Don't render if loading, error, or no stats
   if (loading || error || !stats) {
