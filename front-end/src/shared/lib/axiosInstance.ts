@@ -5,6 +5,7 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { API_CONFIG } from '@/config/api.config';
+import { handle401Error } from '@/utils/authErrorHandler';
 
 // ===== API CLIENT CONFIGURATION =====
 // Use centralized configuration
@@ -59,12 +60,10 @@ class ApiClient {
       (error) => {
         console.error('❌ Response Error:', error.response?.status, error.response?.data);
 
-        // Handle specific error cases
+        // Handle 401 via centralized auth error handler
         if (error.response?.status === 401) {
-          // Only redirect if not already on homepage to prevent infinite loops
-          if (!window.location.pathname.includes('/frontend-pages/homepage')) {
-            localStorage.removeItem('auth_user');
-            window.location.href = '/frontend-pages/homepage';
+          if (!window.location.pathname.includes('/auth/sign-in')) {
+            handle401Error(error, 'shared_axiosInstance');
           }
         }
 
