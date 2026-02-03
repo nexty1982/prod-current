@@ -175,11 +175,42 @@ for pkg in "$PROD_DIR/package.json" "$SERVER_DIR/package.json" "$FRONTEND_DIR/pa
   echo -e "${GREEN}✓${RESET}"
 done
 
+# Update version ledger
+LEDGER="$PROD_DIR/docs/VERSION_LEDGER.md"
+DATE=$(date +%Y-%m-%d)
+GIT_SHA=$(git -C "$PROD_DIR" rev-parse --short HEAD)
+
+echo -n "  docs/VERSION_LEDGER.md... "
+
+# Check if ledger exists, if not, create header
+if [ ! -f "$LEDGER" ]; then
+  mkdir -p "$(dirname "$LEDGER")"
+  echo "# Orthodox Metrics Version Ledger" > "$LEDGER"
+  echo "" >> "$LEDGER"
+  echo "Historical record of all version releases." >> "$LEDGER"
+  echo "" >> "$LEDGER"
+  echo "| Version | Date | Git SHA | Milestone Goal | Notes |" >> "$LEDGER"
+  echo "|:--------|:-----|:--------|:---------------|:------|" >> "$LEDGER"
+fi
+
+# Append the new version
+echo "| $NEW_VERSION | $DATE | \`$GIT_SHA\` | Milestone Release | Updated via bump-version.sh |" >> "$LEDGER"
+echo -e "${GREEN}✓${RESET}"
+
+# Stage the changes
+echo ""
+echo -e "${CYAN}Staging changes...${RESET}"
+git -C "$PROD_DIR" add \
+  package.json \
+  server/package.json \
+  front-end/package.json \
+  docs/VERSION_LEDGER.md
+
 echo ""
 echo -e "${GREEN}${BOLD}Version bumped to $NEW_VERSION${RESET}"
 echo ""
 echo "Next steps:"
-echo -e "  1. ${CYAN}git add -A && git commit -m \"chore: bump version to $NEW_VERSION\"${RESET}"
+echo -e "  1. ${CYAN}git commit -m \"chore: release v$NEW_VERSION\"${RESET}"
 echo -e "  2. ${CYAN}git tag v$NEW_VERSION${RESET}"
 echo -e "  3. ${CYAN}git push origin --tags${RESET}"
 echo ""
