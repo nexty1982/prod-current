@@ -85,8 +85,8 @@ jobs:
       working-directory: server
       env:
         CI: true
-        E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-        E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+        E2E_USERNAME: nickeypain@gmail.com
+        E2E_PASSWORD: ${{ secrets.OMSVC }}
 
     - name: Upload Playwright report
       if: ${{ !cancelled() }}
