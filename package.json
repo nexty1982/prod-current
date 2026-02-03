@@ -1,4 +1,6 @@
 {
+  "name": "orthodoxmetrics",
+  "version": "1.0.0",
   "scripts": {
     "check": "npm -v && node -v",
     "build": "echo 'Use npm run build in server/ or front-end/ directories'",
