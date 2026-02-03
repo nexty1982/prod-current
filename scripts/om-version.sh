@@ -8,12 +8,23 @@ PROD_DIR="/var/www/orthodoxmetrics/prod"
 SERVER_DIR="$PROD_DIR/server"
 FRONTEND_DIR="$PROD_DIR/front-end"
 FRONTEND_DIST="$FRONTEND_DIR/dist"
-PORT="${PORT:-3001}"
 
-# Database credentials (can be overridden via environment)
-DB_USER="${DB_USER:-orthodoxapps}"
-DB_PASS="${DB_PASS:-}"
-DB_NAME="${DB_NAME:-orthodoxmetrics_db}"
+# Source credentials from .env files (if they exist)
+# Priority: server/.env > prod/.env > ~/.env
+for envfile in "$SERVER_DIR/.env" "$PROD_DIR/.env" "$HOME/.env"; do
+  if [ -f "$envfile" ]; then
+    set -a
+    source "$envfile" 2>/dev/null || true
+    set +a
+    break
+  fi
+done
+
+# Also check for DB_ prefixed vars commonly used in Node apps
+DB_USER="${DB_USER:-${DB_USERNAME:-orthodoxapps}}"
+DB_PASS="${DB_PASS:-${DB_PASSWORD:-}}"
+DB_NAME="${DB_NAME:-${DB_DATABASE:-orthodoxmetrics_db}}"
+PORT="${PORT:-3001}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
