@@ -50,7 +50,7 @@ jobs:
         cache-dependency-path: front-end/package-lock.json
 
     - name: Install frontend dependencies
-      run: npm ci
+      run: npm ci --legacy-peer-deps
       working-directory: front-end
 
     - name: Build frontend
