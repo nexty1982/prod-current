@@ -1,8 +1,7 @@
 {
   "scripts": {
     "check": "npm -v && node -v",
-    "tsc": "tsc",
-    "build": "tsc --build",
+    "build": "echo 'Use npm run build in server/ or front-end/ directories'",
     "prepare": "husky"
   },
   "dependencies": {

@@ -79,6 +79,7 @@ git-status.txt
 identify_conflicts.md
 om_structure_tree.txt
 *.prod-backup
+.analysis/library-index.json
 
 # Docs are tracked under repo-root /docs (canonical).
 # Do NOT ignore /docs; enforce doc placement via CI checks instead.
@@ -99,6 +100,7 @@ server/docs/**
 # --- Build & Distribution Artifacts ---
 front-end/dist-latest/
 front-end/dist-stable/
+front-end/dist-backup/
 front-end/dupes/
 
 # --- Server Backups & Temp Storage ---
