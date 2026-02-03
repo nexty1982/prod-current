@@ -1,37 +1,32 @@
 name: Qodo Nightly Refactor
-
 on:
   schedule:
-    - cron: '0 7 * * *' # 2:00 AM EST
-  workflow_dispatch:   # Manual trigger
+    - cron: '0 7 * * *' # Runs daily at 07:00 UTC (GitHub Actions schedules use UTC; local time may shift with DST)
+  workflow_dispatch: # Allows you to trigger it manually for a "dry run"
 
 jobs:
   qodo-refactor:
     runs-on: ubuntu-latest
-    # Added permissions to fix the "Access Blocked" issues from your screenshots
     permissions:
-      contents: write       
-      pull-requests: write  
-      issues: write        
-
+      contents: write
+      pull-requests: write
+      issues: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Essential for Qodo to understand your code history
+          fetch-depth: 0 # Qodo needs full history for context
 
       - name: Qodo AI Refactor Agent
         uses: qodo-ai/qodo-refactor-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           project-type: "typescript"
-          # Merged your specific business logic instructions
+          # The "Canonical Truth" Instruction Set
           instructions: >
-            1. Fix CORS: Add 'http://192.168.1.239:5174' to allowed origins in server middleware.
-               Handle unauthorized origins gracefully (callback(null, false)).
-            2. Canonical Health: Consolidate 'server/src/routes/systemRoutes.js'. 
-               Must return Node 'v20.19.3' and use 'SELECT 1' for MariaDB status.
-            3. Header Sync: Update only 'front-end/src/layouts/full/vertical/header/Header.tsx' 
-               with 3-dot polling logic.
+            1. Fix CORS: Ensure development origins are configured via environment or config (not hard-coded IPs) and added to the server's CORS middleware.
+               Ensure it handles unauthorized origins gracefully (callback(null, false)) to prevent 500 errors.
+            2. Canonical Health: Consolidate 'server/src/routes/systemRoutes.js'.
+               It must return the Node version reported by process.version (Node 20.x expected) and use 'SELECT 1' to verify MariaDB for the 3rd status dot.
+            3. Header Sync: Ensure only 'front-end/src/layouts/full/vertical/header/Header.tsx' is updated with the 3-dot polling logic.
             4. Cleanup: Identify and flag duplicate 'Header.tsx' files in 'refactor-src' for deletion.
-
