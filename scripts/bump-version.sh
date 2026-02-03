@@ -150,6 +150,19 @@ echo -e "  Current: ${YELLOW}$CURRENT_VERSION${RESET}"
 echo -e "  New:     ${GREEN}$NEW_VERSION${RESET}"
 echo ""
 
+# TypeScript Integrity Guard
+TYPE_DIR="$FRONTEND_DIR/src/types"
+if [ -d "$TYPE_DIR" ]; then
+  echo -n "  Checking TypeScript integrity... "
+  if [[ $(git -C "$PROD_DIR" status --short "$TYPE_DIR") ]]; then
+    echo -e "${RED}FAILED${RESET}"
+    echo -e "${YELLOW}Error: Uncommitted changes detected in $TYPE_DIR.${RESET}"
+    echo "Please commit your type changes before bumping the version to ensure sync."
+    exit 1
+  fi
+  echo -e "${GREEN}✓${RESET}"
+fi
+
 # Confirm
 read -p "Proceed with version bump? [y/N] " -n 1 -r
 echo ""
@@ -159,12 +172,19 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo ""
-echo -e "${CYAN}Updating versions...${RESET}"
+echo -e "${CYAN}Updating system state...${RESET}"
 
-# Update database
-echo -n "  Database (system_info)... "
+# Update database with Metadata and Build Status
+CURRENT_SHA=$(git -C "$PROD_DIR" rev-parse --short HEAD)
+
+echo -n "  Syncing MariaDB (Metadata & Version)... "
 mariadb -u "$DB_USER" -p"$DB_PASS" -e \
-  "UPDATE system_info SET version_string='$NEW_VERSION' WHERE id=1;" "$DB_NAME"
+  "UPDATE system_info SET
+    version_string='$NEW_VERSION',
+    build_status='IN_PROGRESS',
+    last_git_sha='$CURRENT_SHA',
+    last_build_time=NOW()
+   WHERE id=1;" "$DB_NAME"
 echo -e "${GREEN}✓${RESET}"
 
 # Update package.json files
@@ -195,6 +215,12 @@ fi
 
 # Append the new version
 echo "| $NEW_VERSION | $DATE | \`$GIT_SHA\` | Milestone Release | Updated via bump-version.sh |" >> "$LEDGER"
+echo -e "${GREEN}✓${RESET}"
+
+# Finalize Build Status
+echo -n "  Setting Build Status to COMPLETE... "
+mariadb -u "$DB_USER" -p"$DB_PASS" -e \
+  "UPDATE system_info SET build_status='COMPLETE' WHERE id=1;" "$DB_NAME"
 echo -e "${GREEN}✓${RESET}"
 
 # Stage the changes
