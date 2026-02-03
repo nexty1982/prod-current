@@ -17,57 +17,23 @@
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 
-// Valid roles in the system (mapped to database role IDs)
-const VALID_ROLES = {
-  'superadmin': 1,
-  'church_admin': 2,
-  'editor': 3,
-  'viewer': 4,
-  'auditor': 5
-};
-
-const ROLE_NAMES = {
-  1: 'superadmin',
-  2: 'church_admin', 
-  3: 'editor',
-  4: 'viewer',
-  5: 'auditor'
-};
-
 class DirectUserManager {
   constructor() {
     this.connection = null;
+    this.roles = {};      // id -> name
+    this.roleIds = {};    // name -> id
   }
 
   async connect() {
     // Try multiple database configurations
     const configs = [
-      {
-        host: 'localhost',
-        user: 'orthodoxapps',
-        password: 'Summerof1982@!',
-        database: 'orthodoxmetrics_db',
-        name: 'orthodoxmetrics_db'
-      },
-      {
-        host: 'localhost',
-        user: 'orthodoxapps', 
-        password: 'Summerof1982@!',
-        database: 'orthodoxmetrics_db',
-        name: 'orthodoxmetrics_db'
-      },
-      {
-        host: 'localhost',
-        user: 'orthodoxapps',
-        password: 'Summerof1982@!',
-        database: 'omai_db',
-        name: 'omai_db'
-      }
+      { host: 'localhost', user: 'orthodoxapps', password: 'Summerof1982@!', database: 'orthodoxmetrics_db' },
+      { host: 'localhost', user: 'orthodoxapps', password: 'Summerof1982@!', database: 'omai_db' }
     ];
 
     for (const config of configs) {
       try {
-        console.log(`🔄 Trying to connect to ${config.name}...`);
+        console.log(`🔄 Trying to connect to ${config.database}...`);
         this.connection = await mysql.createConnection(config);
         
         // Test the connection and check for users table
@@ -80,15 +46,18 @@ class DirectUserManager {
         if (tables[0].count > 0) {
           const [dbResult] = await this.connection.query('SELECT DATABASE() as db');
           console.log(`✅ Connected to database: ${dbResult[0].db}`);
+
+          // Load roles from database
+          await this.loadRoles();
           return true;
         } else {
-          console.log(`❌ No users table found in ${config.name}`);
+          console.log(`❌ No users table found in ${config.database}`);
           await this.connection.end();
           this.connection = null;
         }
         
       } catch (error) {
-        console.log(`❌ Failed to connect to ${config.name}: ${error.message}`);
+        console.log(`❌ Failed to connect to ${config.database}: ${error.message}`);
         if (this.connection) {
           try {
             await this.connection.end();
@@ -101,18 +70,48 @@ class DirectUserManager {
     throw new Error('Could not connect to any database with users table');
   }
 
+  async loadRoles() {
+    try {
+      const [rows] = await this.connection.query('SELECT id, name FROM roles ORDER BY id');
+      this.roles = {};
+      this.roleIds = {};
+      for (const row of rows) {
+        this.roles[row.id] = row.name;
+        this.roleIds[row.name.toLowerCase()] = row.id;
+      }
+      console.log(`📋 Loaded ${rows.length} roles from database`);
+    } catch (error) {
+      console.log(`⚠️  Could not load roles table: ${error.message}`);
+      // Fallback to hardcoded defaults if roles table doesn't exist
+      this.roles = { 1: 'superadmin', 2: 'church_admin', 3: 'editor', 4: 'viewer', 5: 'auditor' };
+      this.roleIds = { 'superadmin': 1, 'church_admin': 2, 'editor': 3, 'viewer': 4, 'auditor': 5 };
+    }
+  }
+
+  async listRoles() {
+    console.log('\n📋 Available Roles (from database)');
+    console.log('=' .repeat(50));
+    for (const [id, name] of Object.entries(this.roles)) {
+      console.log(`  ID: ${id} - ${name}`);
+    }
+  }
+
   async validateRole(role) {
-    if (!VALID_ROLES[role]) {
-      throw new Error(`Invalid role. Valid roles are: ${Object.keys(VALID_ROLES).join(', ')}`);
+    const roleLower = role.toLowerCase();
+    if (!this.roleIds[roleLower]) {
+      throw new Error(`Invalid role "${role}". Valid roles are: ${Object.keys(this.roleIds).join(', ')}`);
     }
   }
 
   getRoleId(roleName) {
-    return VALID_ROLES[roleName];
+    return this.roleIds[roleName.toLowerCase()];
   }
 
   getRoleName(roleId) {
-    return ROLE_NAMES[roleId] || 'unknown';
+    if (roleId === null || roleId === undefined) {
+      return '(no role assigned)';
+    }
+    return this.roles[roleId] || `unknown (ID: ${roleId})`;
   }
 
   async hashPassword(password) {
@@ -143,12 +142,13 @@ class DirectUserManager {
         const lastLogin = user.last_login ? new Date(user.last_login).toLocaleString() : 'Never';
         const fullName = user.full_name || 'N/A';
         const roleName = user.role_name || this.getRoleName(user.role_id);
-        
+        const roleDisplay = user.role_id ? `${roleName} (ID: ${user.role_id})` : '⚠️  NO ROLE ASSIGNED';
+
         console.log(`
 ID: ${user.id}
 Email: ${user.email}
 Name: ${fullName}
-Role: ${roleName} (ID: ${user.role_id})
+Role: ${roleDisplay}
 Status: ${status}
 Church ID: ${user.church_id || 'N/A'}
 Created: ${new Date(user.created_at).toLocaleString()}
@@ -280,13 +280,14 @@ ${'-'.repeat(40)}`);
       const fullName = user.full_name || 'N/A';
       const updated = user.updated_at ? new Date(user.updated_at).toLocaleString() : 'Never';
       const roleName = user.role_name || this.getRoleName(user.role_id);
+      const roleDisplay = user.role_id ? `${roleName} (ID: ${user.role_id})` : '⚠️  NO ROLE ASSIGNED - use set-role to fix';
 
       console.log('\n👤 User Details');
       console.log('=' .repeat(50));
       console.log(`ID: ${user.id}`);
       console.log(`Email: ${user.email}`);
       console.log(`Name: ${fullName}`);
-      console.log(`Role: ${roleName} (ID: ${user.role_id})`);
+      console.log(`Role: ${roleDisplay}`);
       console.log(`Status: ${status}`);
       console.log(`Church ID: ${user.church_id || 'N/A'}`);
       console.log(`Created: ${new Date(user.created_at).toLocaleString()}`);
@@ -365,6 +366,10 @@ async function main() {
         await userManager.listUsers();
         break;
 
+      case 'roles':
+        await userManager.listRoles();
+        break;
+
       case 'add':
         if (args.length < 4) {
           console.log('❌ Usage: add <email> <password> <role> [full_name]');
@@ -435,6 +440,7 @@ Usage:
 
 Commands:
   list                                    - List all users
+  roles                                   - List available roles from database
   add <email> <password> <role> [name]    - Add new user
   set-password <email> <new_password>     - Change user password
   set-role <email> <new_role>             - Change user role
@@ -454,12 +460,15 @@ Examples:
 
 function showRoles() {
   console.log(`
-📋 Available Roles:
-  - superadmin    (Full access to all churches and system-wide settings)
-  - church_admin  (Admin for a specific church, can manage users and records)
-  - editor        (Can add and edit records for their church)
+📋 Common Roles (run 'roles' command for full list from database):
+  - super_admin   (Full access to all churches and system-wide settings)
+  - admin         (Admin access)
+  - church_admin  (Admin for a specific church)
+  - priest        (Priest role)
+  - editor        (Can add and edit records)
   - viewer        (Read-only access to records)
-  - auditor       (Can view logs and historical records, no editing allowed)
+  - member        (Church member)
+  - guest         (Guest access)
 `);
 }
 
