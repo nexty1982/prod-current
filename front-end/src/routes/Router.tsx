@@ -5,12 +5,12 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Box, Typography, Button } from '@mui/material';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
-import HeadlineSourcePicker from '../components/headlines/HeadlineSourcePicker';
+import HeadlineSourcePicker from '../features/admin/headlines/HeadlineSourcePicker';
 import SmartRedirect from '../components/routing/SmartRedirect';
 import AppErrorBoundary from '@/shared/ui/AppErrorBoundary';
 import { RecordsRouteErrorBoundary } from '@/shared/ui/RecordsRouteErrorBoundary';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
-import OMDeps from '../tools/om-deps/OM-deps';
+import OMDeps from '../features/devel-tools/om-deps/OM-deps';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -29,15 +29,18 @@ const Tickets = Loadable(lazy(() => import('../features/apps/tickets/Tickets')))
 const ImageAI = Loadable(lazy(() => import('../features/apps/image-ai/ImageAI')));
 
 /* ****Developer Tools***** */
-const SiteStructureVisualizer = Loadable(lazy(() => import('../tools/SiteStructureVisualizer')));
-const LoadingDemo = Loadable(lazy(() => import('../pages/devel/LoadingDemo')));
-const OmtraceConsole = Loadable(lazy(() => import('../components/ui-tools/omtrace/OmtraceConsole')));
+const SiteStructureVisualizer = Loadable(lazy(() => import('../features/devel-tools/site-structure/SiteStructureVisualizer')));
+const LoadingDemo = Loadable(lazy(() => import('../features/devel-tools/loading-demo/LoadingDemo')));
+const OmtraceConsole = Loadable(lazy(() => import('../features/devel-tools/omtrace/OmtraceConsole')));
 const Kanban = Loadable(lazy(() => import('../features/apps/kanban/Kanban')));
 const InvoiceList = Loadable(lazy(() => import('../features/apps/invoice/List')));
 const InvoiceCreate = Loadable(lazy(() => import('../features/apps/invoice/Create')));
 const InvoiceDetail = Loadable(lazy(() => import('../features/apps/invoice/Detail')));
 const InvoiceEdit = Loadable(lazy(() => import('../features/apps/invoice/Edit')));
-// Removed: LiturgicalCalendarPage, SiteClone from misc-legacy
+const LiturgicalCalendarPage = Loadable(lazy(() => import('../features/apps/liturgical-calendar/LiturgicalCalendarPage')));
+const OrthodoxLiturgicalCalendar = Loadable(lazy(() => import('../features/apps/liturgical-calendar/OrthodoxLiturgicalCalendar')));
+const DynamicRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsPage')));
+const AnalyticsDashboard = Loadable(lazy(() => import('../features/admin/AnalyticsDashboard')));
 const Logs = Loadable(lazy(() => import('../features/system/apps/logs/Logs')));
 const UserProfile = Loadable(lazy(() => import('../features/apps/user-profile/UserProfile')));
 const Followers = Loadable(lazy(() => import('../features/apps/user-profile/Followers')));
@@ -57,7 +60,8 @@ const SocialFriends = Loadable(lazy(() => import('../features/social/friends/Fri
 // Removed: AssignTaskPage from misc-legacy
 
 // 404 Page
-// Removed: NotFound404 from misc-legacy - redirects to Super Dashboard
+const NotFound404 = Loadable(lazy(() => import('../features/auth/authentication/NotFound404')));
+const ComingSoon = Loadable(lazy(() => import('../features/auth/authentication/ComingSoon')));
 
 // Church Management
 const ChurchList = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchList')));
@@ -149,13 +153,13 @@ const BigBookDynamicRoute = Loadable(lazy(() => import('../features/admin/admin/
 
 // OMAI Mobile
 const OMAIDiscoveryPanelMobile = Loadable(lazy(() => import('../features/admin/admin/OMAIDiscoveryPanelMobile')));
-const OpsReportsPage = Loadable(lazy(() => import('../pages/admin/OpsReportsPage')));
+const OpsReportsPage = Loadable(lazy(() => import('../features/admin/ops/OpsReportsPage')));
 
 // Component Registry for Dynamic Addons
 // Removed: DynamicAddonRoute from misc-legacy
 
 // OMLearn Module (unchanged in phase3 map)
-const OMLearn = Loadable(lazy(() => import('../modules/OMLearn/OMLearn')));
+const OMLearn = Loadable(lazy(() => import('../features/omlearn/OMLearn')));
 
 // Build System
 const BuildConsole = Loadable(lazy(() => import('../features/devel-tools/om-build-console/BuildConsole')));
@@ -260,6 +264,7 @@ const PublicTasksListPage = Loadable(lazy(() => import('../features/pages/fronte
 const PublicTaskDetailPage = Loadable(lazy(() => import('../features/pages/frontend-pages/PublicTaskDetailPage')));
 const WelcomeMessage = Loadable(lazy(() => import('../features/pages/frontend-pages/WelcomeMessage')));
 const Tour = Loadable(lazy(() => import('../features/pages/frontend-pages/Tour')));
+const Faq = Loadable(lazy(() => import('../features/pages/frontend-pages/Faq')));
 
 const Router = [
   {
@@ -1081,7 +1086,38 @@ const Router = [
         )
       },
       // Removed: /notifications, /settings/notifications routes (misc-legacy)
-      // Removed: /apps/liturgical-calendar route (misc-legacy)
+      {
+        path: '/apps/liturgical-calendar',
+        element: (
+          <ProtectedRoute>
+            <LiturgicalCalendarPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/orthodox-calendar',
+        element: (
+          <ProtectedRoute>
+            <OrthodoxLiturgicalCalendar />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/records/dynamic',
+        element: (
+          <ProtectedRoute>
+            <DynamicRecordsPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/dashboards/analytics',
+        element: (
+          <ProtectedRoute requiredPermission="view_dashboard">
+            <AnalyticsDashboard />
+          </ProtectedRoute>
+        )
+      },
       {
         path: '/apps/logs',
         element: (
@@ -1275,7 +1311,8 @@ const Router = [
     path: '/',
     element: <BlankLayout />,
     children: [
-      { path: '/auth/404', element: <Navigate to="/dashboards/super" replace /> },
+      { path: '/auth/404', element: <NotFound404 /> },
+      { path: '/auth/coming-soon', element: <ComingSoon /> },
       { path: '/auth/unauthorized', element: <Unauthorized /> },
       { path: '/auth/login', element: <Navigate to="/auth/login2" replace /> },
       { path: '/login', element: <Navigate to="/auth/login2" replace /> },
@@ -1289,7 +1326,8 @@ const Router = [
       { path: '/auth/maintenance', element: <Maintenance /> },
       { path: '/landingpage', element: <Navigate to="/dashboards/super" replace /> },
       { path: '/pages/pricing', element: <Navigate to="/dashboards/super" replace /> },
-      { path: '/pages/faq', element: <Navigate to="/dashboards/super" replace /> },
+      { path: '/pages/faq', element: <Faq /> },
+      { path: '/frontend-pages/faq', element: <Faq /> },
       { path: '/frontend-pages/homepage', element: <Homepage /> },
       // Removed: /frontend-pages/homepage1 route - old homepage no longer used
       { path: '/frontend-pages/menu', element: <PagesMenu /> },

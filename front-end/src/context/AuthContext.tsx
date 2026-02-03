@@ -59,7 +59,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(false); // Start with false to render immediately
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize auth state from localStorage ONLY - no API calls
+  // Initialize auth state from localStorage, then validate with server
   useEffect(() => {
     try {
       const storedUser = AuthService.getStoredUser();
@@ -67,6 +67,27 @@ function AuthProvider({ children }: AuthProviderProps) {
       if (storedUser) {
         console.log('🔍 AuthContext: Found stored user data:', storedUser.email);
         setUser(storedUser);
+
+        // Validate session with the server to prevent stale localStorage auth
+        AuthService.checkAuth()
+          .then((authCheck) => {
+            if (authCheck.authenticated && authCheck.user) {
+              console.log('🔍 AuthContext: Session validated for:', authCheck.user.email);
+              setUser(authCheck.user);
+              localStorage.setItem('auth_user', JSON.stringify(authCheck.user));
+            } else {
+              console.log('🔍 AuthContext: Stored session is stale, clearing auth');
+              setUser(null);
+              localStorage.removeItem('auth_user');
+              localStorage.removeItem('orthodoxmetrics_profile_data');
+            }
+          })
+          .catch(() => {
+            console.log('🔍 AuthContext: Session validation failed, clearing auth');
+            setUser(null);
+            localStorage.removeItem('auth_user');
+            localStorage.removeItem('orthodoxmetrics_profile_data');
+          });
       } else {
         console.log('🔍 AuthContext: No stored user data found');
       }
