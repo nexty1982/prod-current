@@ -21,10 +21,10 @@ export interface BuildInfo {
 export function getBuildInfo(): BuildInfo {
   // Try to get version from package.json via import.meta.env
   // In Vite, you can inject this via define in vite.config.ts
-  const version = 
+  const version =
     import.meta.env.VITE_APP_VERSION ||
     import.meta.env.APP_VERSION ||
-    '5.0.0'; // Fallback to package.json version
+    '1.0.0-unknown'; // Fallback if not injected at build time
 
   // Git SHA - typically injected during build
   const gitSha = 

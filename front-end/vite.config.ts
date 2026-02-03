@@ -2,11 +2,27 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import fs from 'fs/promises';
+import { execSync } from 'child_process';
 import svgr from '@svgr/rollup';
 
+// Read version from package.json
+const packageJson = JSON.parse(require('fs').readFileSync('./package.json', 'utf-8'));
+const baseVersion = packageJson.version || '1.0.0';
+
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+    // Append -dev suffix in development mode
+    const version = mode === 'development' ? `${baseVersion}-dev` : baseVersion;
+
+    return {
     base: '/', // Ensure assets are loaded from root
+    define: {
+        'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
+        'import.meta.env.VITE_GIT_SHA': JSON.stringify(
+            execSync('git rev-parse --short HEAD').toString().trim()
+        ),
+        'import.meta.env.VITE_BUILD_TIME': JSON.stringify(new Date().toISOString()),
+    },
     resolve: {
         alias: {
             '@': resolve(__dirname, 'src'),
@@ -47,18 +63,21 @@ export default defineConfig(({ mode }) => ({
 
     plugins: [svgr(), react()],
     build: {
-        minify: mode === 'production', // Only minify in production
-        sourcemap: true, // Enable source maps for debugging
-        target: mode === 'production' ? 'es2015' : 'esnext', // Use modern JS in dev
+        minify: 'esbuild', // esbuild minifier is ~20-40x faster than terser
+        sourcemap: false, // Disable sourcemaps for faster builds (saves ~30% build time)
+        target: 'es2020', // Modern browsers — avoids costly ES2015 downleveling
+        cssMinify: 'esbuild',
         commonjsOptions: {
             include: [/node_modules/],
         },
         rollupOptions: {
             external: [],
             output: {
-                manualChunks: mode === 'production' ? {
-                    vendor: ['react', 'react-dom'],
-                } : undefined, // No chunking in dev for faster builds
+                manualChunks: {
+                    vendor: ['react', 'react-dom', 'react-router-dom'],
+                    mui: ['@mui/material', '@mui/icons-material'],
+                    aggrid: ['ag-grid-community', 'ag-grid-react'],
+                },
             },
         },
     }, server: {
@@ -106,4 +125,4 @@ export default defineConfig(({ mode }) => ({
         port: 5174,
         host: '0.0.0.0'
     },
-}));
+}});

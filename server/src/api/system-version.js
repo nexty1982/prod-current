@@ -4,16 +4,20 @@ const path = require('path');
 const fs = require('fs');
 
 // Read version from package.json
-let packageVersion = '1.0.0';
+let baseVersion = '1.0.0';
 try {
   const packagePath = path.join(__dirname, '../../package.json');
   if (fs.existsSync(packagePath)) {
     const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-    packageVersion = pkg.version || '1.0.0';
+    baseVersion = pkg.version || '1.0.0';
   }
 } catch (e) {
   console.error('Failed to read package.json version:', e.message);
 }
+
+// Append -dev suffix in non-production environments
+const environment = process.env.NODE_ENV || 'development';
+const packageVersion = environment === 'production' ? baseVersion : `${baseVersion}-dev`;
 
 /**
  * GET /api/system/version
