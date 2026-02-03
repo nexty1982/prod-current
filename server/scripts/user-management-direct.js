@@ -122,7 +122,7 @@ class DirectUserManager {
   async listUsers() {
     try {
       const [users] = await this.connection.query(`
-        SELECT u.id, u.email, u.full_name, u.role_id, u.is_active, 
+        SELECT u.id, u.email, u.full_name, u.role_id, u.role as role_string, u.is_active,
                u.created_at, u.last_login, u.church_id, r.name as role_name
         FROM users u
         LEFT JOIN roles r ON u.role_id = r.id
@@ -141,8 +141,10 @@ class DirectUserManager {
         const status = user.is_active ? '✅ Active' : '❌ Inactive';
         const lastLogin = user.last_login ? new Date(user.last_login).toLocaleString() : 'Never';
         const fullName = user.full_name || 'N/A';
-        const roleName = user.role_name || this.getRoleName(user.role_id);
-        const roleDisplay = user.role_id ? `${roleName} (ID: ${user.role_id})` : '⚠️  NO ROLE ASSIGNED';
+        const roleName = user.role_name || user.role_string || this.getRoleName(user.role_id);
+        const roleDisplay = (user.role_id || user.role_string)
+          ? `${roleName}${user.role_id ? ` (ID: ${user.role_id})` : ' (legacy string)'}`
+          : '⚠️  NO ROLE ASSIGNED';
 
         console.log(`
 ID: ${user.id}
@@ -262,7 +264,7 @@ ${'-'.repeat(40)}`);
   async viewUser(email) {
     try {
       const [users] = await this.connection.query(`
-        SELECT u.id, u.email, u.full_name, u.role_id, u.is_active, 
+        SELECT u.id, u.email, u.full_name, u.role_id, u.role as role_string, u.is_active,
                u.created_at, u.updated_at, u.last_login, u.church_id, r.name as role_name
         FROM users u
         LEFT JOIN roles r ON u.role_id = r.id
@@ -279,8 +281,10 @@ ${'-'.repeat(40)}`);
       const lastLogin = user.last_login ? new Date(user.last_login).toLocaleString() : 'Never';
       const fullName = user.full_name || 'N/A';
       const updated = user.updated_at ? new Date(user.updated_at).toLocaleString() : 'Never';
-      const roleName = user.role_name || this.getRoleName(user.role_id);
-      const roleDisplay = user.role_id ? `${roleName} (ID: ${user.role_id})` : '⚠️  NO ROLE ASSIGNED - use set-role to fix';
+      const roleName = user.role_name || user.role_string || this.getRoleName(user.role_id);
+      const roleDisplay = (user.role_id || user.role_string)
+        ? `${roleName}${user.role_id ? ` (ID: ${user.role_id})` : ' (legacy string)'}`
+        : '⚠️  NO ROLE ASSIGNED - use set-role to fix';
 
       console.log('\n👤 User Details');
       console.log('=' .repeat(50));
