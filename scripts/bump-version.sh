@@ -232,6 +232,13 @@ git -C "$PROD_DIR" add \
   front-end/package.json \
   docs/VERSION_LEDGER.md
 
+# Sync tasks to Google Sheets (if script exists)
+if [ -f "$SERVER_DIR/scripts/sync-tasks.ts" ] || [ -f "$SERVER_DIR/dist/scripts/sync-tasks.js" ]; then
+  echo ""
+  echo -e "${CYAN}Syncing tasks...${RESET}"
+  cd "$SERVER_DIR" && npm run sync-tasks 2>/dev/null || echo -e "${YELLOW}  (sync-tasks not configured)${RESET}"
+fi
+
 echo ""
 echo -e "${GREEN}${BOLD}Version bumped to $NEW_VERSION${RESET}"
 echo ""
