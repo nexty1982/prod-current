@@ -2,9 +2,9 @@ name: OrthodoxMetrics CI
 
 on:
   push:
-    branches: [ "main", "prod-current", "dev-*" ]
+    branches: [ "dev", "prod-current", "dev-*" ]
   pull_request:
-    branches: [ "main", "prod-current" ]
+    branches: [ "dev", "prod-current" ]
 
 jobs:
   build-server:

@@ -4,7 +4,7 @@ How developers and AI agents work together on this codebase.
 
 ## Branching Strategy
 
-**All work happens on feature branches off `main`.**
+**All work happens on feature branches off `dev`.**
 
 ### Branch Naming
 ```
@@ -20,12 +20,12 @@ Examples:
 - `chore/upgrade-react-19`
 
 ### Workflow
-1. Create branch from `main`
+1. Create branch from `dev`
 2. Make changes, commit often
 3. Push and open PR
 4. CI must pass
 5. Get review (see Review Rules below)
-6. Squash merge to `main`
+6. Squash merge to `dev`
 
 ---
 
@@ -114,7 +114,7 @@ All PRs must pass:
 ## AI Agent Guidelines
 
 ### Before Starting Work
-1. Pull latest `main`
+1. Pull latest `dev`
 2. Check `.claims/active.json` for conflicts
 3. Create feature branch
 4. Add your file claims
@@ -164,7 +164,7 @@ While anyone can work anywhere, these are suggested domains to minimize conflict
 
 ```bash
 # Start new work
-git checkout main && git pull
+git checkout dev && git pull
 git checkout -b feature/my-feature
 
 # Check for claim conflicts
