@@ -20,7 +20,7 @@ export const API_CONFIG = {
   IS_PROD: import.meta.env.PROD,
   
   // App version
-  VERSION: import.meta.env.VITE_APP_VERSION || '5.0.0',
+  VERSION: import.meta.env.VITE_APP_VERSION || '1.0.0',
   
   // Environment name
   ENV: import.meta.env.VITE_APP_ENV || 'development'
