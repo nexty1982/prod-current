@@ -120,3 +120,6 @@ orthodoxmetrics-internal.com
 
 # --- Documentation & Tools ---
 tools/audit.js
+# Local backups and scratch
+backups/
+copies/

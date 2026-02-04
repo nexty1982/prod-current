@@ -3,7 +3,7 @@ const router = express.Router();
 const mysql = require('mysql2/promise');
 const { body, validationResult, param } = require('express-validator');
 const { requireAuth, requireRole } = require('../middleware/auth');
-const { getAppPool } = require('../../config/db');
+const { getAppPool } = require('../config/db');
 
 // Database connection (fallback for direct connections)
 const dbConfig = {

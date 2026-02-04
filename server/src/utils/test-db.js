@@ -1,6 +1,6 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // Direct database test from server perspective
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 
 async function testDatabase() {
   console.log('Testing database connection...');

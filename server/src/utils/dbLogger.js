@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // Centralized Database Logger
 // Replaces filesystem-based Winston and custom file logging
 const mysql = require('mysql2/promise');

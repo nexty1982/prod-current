@@ -1,10 +1,10 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { createCanvas, loadImage } = require('canvas');
-const { promisePool } = require('../../config/db-compat'); // Use promisePool instead of db
+const { promisePool } = require('../config/db-compat'); // Use promisePool instead of db
 
 // Certificate output path
 const OUTPUT_DIR = path.join(__dirname, '../certificates');

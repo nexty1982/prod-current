@@ -1,9 +1,9 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 const express = require('express');
 const router = express.Router();
 const mysql = require('mysql2/promise');
 const { requireAuth, requireRole } = require('../middleware/auth');
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 
 // Email service (you might want to use nodemailer or another service)
 const nodemailer = require('nodemailer');

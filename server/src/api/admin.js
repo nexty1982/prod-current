@@ -1,138 +1,58 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/admin.js
 const express = require('express');
-const { pool: promisePool } = require('../../config/db-compat');
+const { pool: promisePool } = require('../config/db-compat');
 const bcrypt = require('bcrypt');
-const { 
-    canManageUser, 
-    canPerformDestructiveOperation, 
+const {
+    canManageUser,
+    canPerformDestructiveOperation,
     canChangeRole,
     isRootSuperAdmin,
     logUnauthorizedAttempt,
     ROOT_SUPERADMIN_EMAIL
 } = require('../middleware/userAuthorization');
+const { requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Middleware to check if user is admin or super_admin
-const requireAdmin = async (req, res, next) => {
-    console.log('🔒 requireAdmin middleware - checking session...');
-    console.log('   Session ID:', req.sessionID);
-    console.log('   Session exists:', !!req.session);
-    console.log('   Session user exists:', !!req.session?.user);
-    console.log('   Session user:', req.session?.user);
-    console.log('   Request headers (cookie):', req.headers.cookie);
-    console.log('   User Agent:', req.headers['user-agent']);
-
-    // 🔧 ENHANCED DEBUG: Check session store directly
-    if (req.sessionID && req.sessionStore) {
-        try {
-            const sessionData = await new Promise((resolve, reject) => {
-                req.sessionStore.get(req.sessionID, (err, session) => {
-                    if (err) reject(err);
-                    else resolve(session);
-                });
-            });
-            console.log('   Session from store:', sessionData);
-        } catch (storeErr) {
-            console.log('   Session store error:', storeErr.message);
-        }
-    }
-
-    if (!req.session || !req.session.user) {
-        console.log('❌ No authenticated user found');
-        return res.status(401).json({
-            success: false,
-            message: 'Authentication required',
-            debug: {
-                sessionExists: !!req.session,
-                sessionId: req.sessionID,
-                hasCookie: !!req.headers.cookie,
-                timestamp: new Date().toISOString()
-            }
-        });
-    }
-
-    const userRole = req.session.user.role;
-    console.log('   User role:', userRole);
-
-    if (userRole !== 'admin' && userRole !== 'super_admin') {
-        console.log('❌ Insufficient privileges');
-        return res.status(403).json({
-            success: false,
-            message: 'Administrative privileges required'
-        });
-    }
-
-    console.log('✅ Admin access granted');
-    next();
-};
-
-// Middleware to check if user is super_admin only
-const requireSuperAdmin = async (req, res, next) => {
-    if (!req.session.user) {
-        console.log('❌ No authenticated user found in super admin middleware');
-        return res.status(401).json({
-            success: false,
-            message: 'Authentication required'
-        });
-    }
-
-    const userRole = req.session.user.role;
-    if (userRole !== 'super_admin') {
-        return res.status(403).json({
-            success: false,
-            message: 'Super administrator privileges required'
-        });
-    }
-
-    next();
-};
+// Use centralized auth middleware (supports both session and JWT fallback)
+const requireAdmin = requireRole(['admin', 'super_admin']);
+const requireSuperAdmin = requireRole(['super_admin']);
 
 // Middleware to check if user can create/edit users with specific roles
 const requireRolePermission = async (req, res, next) => {
-    if (!req.session.user) {
-        console.log('❌ No authenticated user found in role permission middleware');
+    const userRole = req.session?.user?.role || req.user?.role;
+    const targetRole = req.body.role;
+
+    if (!userRole) {
         return res.status(401).json({
             success: false,
             message: 'Authentication required'
         });
     }
-
-    const userRole = req.session.user.role;
-    const targetRole = req.body.role;
-
-    console.log('🔍 Role permission check:');
-    console.log('  User role:', userRole);
-    console.log('  Target role:', targetRole);
 
     // Super admin can create/edit any role except super_admin
     if (userRole === 'super_admin') {
         if (targetRole === 'super_admin') {
-            console.log('❌ Super admin cannot create super_admin users');
             return res.status(403).json({
                 success: false,
                 message: 'Cannot create or modify super_admin users'
             });
         }
-        console.log('✅ Super admin can create', targetRole, 'users');
         return next();
     }
 
     // Regular admin can only create/edit non-admin roles
     if (userRole === 'admin') {
         if (targetRole === 'admin' || targetRole === 'super_admin') {
-            console.log('❌ Regular admin cannot create admin/super_admin users');
             return res.status(403).json({
                 success: false,
                 message: 'Cannot create or modify admin or super_admin users'
             });
         }
-        console.log('✅ Regular admin can create', targetRole, 'users');
         return next();
     }
 
-    console.log('❌ No permission for role:', userRole);
     return res.status(403).json({
         success: false,
         message: 'Insufficient privileges'
@@ -227,7 +147,7 @@ router.get('/users', requireAdmin, async (req, res) => {
 router.post('/users', requireAdmin, requireRolePermission, async (req, res) => {
     try {
         const { email, first_name, last_name, role, church_id, phone, preferred_language, password } = req.body;
-        const currentUser = req.session.user;
+        const currentUser = req.user || req.session?.user;
 
         // Validate required fields
         if (!email || !first_name || !last_name || !role) {
@@ -315,7 +235,7 @@ router.put('/users/:id', requireAdmin, async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
         const { email, first_name, last_name, role, church_id, preferred_language, is_active } = req.body;
-        const currentUser = req.session.user;
+        const currentUser = req.user || req.session?.user;
 
         // Don't allow updating self's role to lower privilege
         if (userId === currentUser.id && role && role !== currentUser.role) {
@@ -483,7 +403,7 @@ router.put('/users/:id', requireAdmin, async (req, res) => {
 router.delete('/users/:id', requireAdmin, async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const currentUser = req.session.user;
+        const currentUser = req.user || req.session?.user;
 
         // Don't allow deleting self
         if (userId === currentUser.id) {
@@ -562,7 +482,7 @@ router.delete('/users/:id', requireAdmin, async (req, res) => {
 router.put('/users/:id/toggle-status', requireAdmin, async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const currentUser = req.session.user;
+        const currentUser = req.user || req.session?.user;
 
         // Get current user status
         const [userRows] = await getAppPool().query(
@@ -629,13 +549,31 @@ router.put('/users/:id/toggle-status', requireAdmin, async (req, res) => {
     }
 });
 
-// GET /admin/churches - Get all churches (for admin panel)
+// GET /api/admin/churches - Get all churches (for admin panel / ChurchHeader.tsx)
+router.get('/churches', requireAdmin, async (req, res) => {
+    try {
+        const [churches] = await getAppPool().query(
+            `SELECT id, name, church_name, is_active 
+             FROM churches 
+             WHERE is_active = 1 
+             ORDER BY name ASC`
+        );
+        
+        res.json({
+            success: true,
+            data: churches
+        });
+    } catch (err) {
+        console.error('❌ Error fetching church list:', err);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
 
-// GET /admin/churches/:id - Get individual church by ID (admin only)
+// GET /api/admin/churches/:id - Get individual church by ID (admin only)
 router.get('/churches/:id', requireAdmin, async (req, res) => {
     try {
         const churchId = parseInt(req.params.id);
-        console.log('🔍 Admin request for church ID:', churchId, 'from:', req.session.user?.email);
+        console.log('🔍 Admin request for church ID:', churchId, 'from:', req.user?.email);
 
         if (isNaN(churchId)) {
             return res.status(400).json({
@@ -1366,7 +1304,7 @@ router.delete('/churches/:id', requireSuperAdmin, async (req, res) => {
         // Delete church
         await getAppPool().query('DELETE FROM churches WHERE id = ?', [churchId]);
 
-        console.log(`✅ Church deleted successfully: ${churchRows[0].name} by admin ${req.session.user.email}`);
+        console.log(`✅ Church deleted successfully: ${churchRows[0].name} by admin ${req.user?.email}`);
 
         res.json({
             success: true,
@@ -1390,7 +1328,7 @@ router.post('/users/:id/reset-password', requireAdmin, async (req, res) => {
         const userId = parseInt(req.params.id);
 
         // Don't allow reset of current user's password
-        if (userId === req.session.user.id) {
+        if (userId === (req.user?.id || req.session?.user?.id)) {
             return res.status(400).json({
                 success: false,
                 message: 'You cannot reset your own password'
@@ -1411,7 +1349,7 @@ router.post('/users/:id/reset-password', requireAdmin, async (req, res) => {
         }
 
         const targetUserRole = userRows[0].role;
-        const currentUserRole = req.session.user.role;
+        const currentUserRole = req.user?.role || req.session?.user?.role;
 
         // Super admin can reset any role except super_admin
         if (currentUserRole === 'super_admin') {
@@ -1446,7 +1384,7 @@ router.post('/users/:id/reset-password', requireAdmin, async (req, res) => {
             [passwordHash, userId]
         );
 
-        console.log(`✅ Password reset for user: ${userRows[0].email} by admin ${req.session.user.email}`);
+        console.log(`✅ Password reset for user: ${userRows[0].email} by admin ${req.user?.email}`);
         console.log(`🔐 New temporary password for ${userRows[0].email}: ${tempPassword}`);
 
         // TODO: Send password via secure email instead of returning in response
@@ -1469,7 +1407,7 @@ router.patch('/users/:id/reset-password', requireAdmin, async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
         const { new_password } = req.body;
-        const currentUser = req.session.user;
+        const currentUser = req.user || req.session?.user;
 
 
 
@@ -1553,7 +1491,7 @@ router.patch('/users/:id/status', requireAdmin, async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
         const { is_active } = req.body;
-        const currentUser = req.session.user;
+        const currentUser = req.user || req.session?.user;
 
         // Don't allow deactivation of the current user
         if (userId === currentUser.id && !is_active) {

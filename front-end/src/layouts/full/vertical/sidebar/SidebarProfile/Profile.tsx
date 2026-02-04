@@ -7,6 +7,7 @@ import { CustomizerContext } from '@/context/CustomizerContext';
 import { UserDataContext } from '@/context/UserDataContext';
 import { useContext } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { getBuildVersionString } from '@/shared/lib/buildInfo';
 
 // Default profile image fallback (using Orthodox default)
 const defaultImg = '/orthodox/avatars/default.svg';
@@ -31,6 +32,7 @@ export const Profile = () => {
   }
 
   return (
+    <>
     <Box
       display={'flex'}
       alignItems="center"
@@ -70,5 +72,11 @@ export const Profile = () => {
         ''
       )}
     </Box>
+    {!hideMenu && (
+      <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', opacity: 0.5, pb: 1 }}>
+        v{getBuildVersionString()}
+      </Typography>
+    )}
+    </>
   );
 };

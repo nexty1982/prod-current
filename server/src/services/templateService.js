@@ -1,8 +1,8 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/services/templateService.js
 const fs = require('fs');
 const path = require('path');
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 
 /**
  * Service for managing record templates

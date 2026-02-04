@@ -7,7 +7,7 @@ import Grid from '@/components/compat/Grid2';
 import PageContainer from '@/shared/ui/PageContainer';
 import img1 from '@/assets/images/backgrounds/login-bg.svg';
 import Logo from '@/layouts/full/shared/logo/Logo';
-import SharedAuthLogin from '@/features/auth/authentication/authForms/SharedAuthLogin';
+import AuthLogin from '@/features/auth/authentication/authForms/AuthLogin';
 
 const Login = () => (
   <PageContainer title="Login" description="this is Login page">
@@ -69,7 +69,7 @@ const Login = () => (
           xl: 4
         }}>
         <Box p={4}>
-          <SharedAuthLogin
+          <AuthLogin
             title="Welcome to Modernize"
             subtext={
               <Typography variant="subtitle1" color="textSecondary" mb={1}>

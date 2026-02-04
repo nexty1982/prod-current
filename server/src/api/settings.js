@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/settings.js
 // System Settings API Routes
 // Handles email configuration and other system settings
@@ -6,7 +6,7 @@ const { getAppPool } = require('../../config/db-compat');
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const { authMiddleware } = require('../middleware/auth');
 
 // Middleware to require authentication for all settings endpoints

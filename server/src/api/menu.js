@@ -1,8 +1,8 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/menu.js
 const express = require('express');
 const router = express.Router();
-const db = require('../../config/db-compat');           // your mysql2 pool/connection
+const db = require('../config/db-compat');           // your mysql2 pool/connection
 // Import the auth middleware
 const { requireAuth } = require('../middleware/auth');
 

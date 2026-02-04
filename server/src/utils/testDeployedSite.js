@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // Site Testing Utility using Puppeteer
 // Performs automated testing on deployed church sites
 
@@ -450,7 +450,7 @@ async function testAccessibility(page) {
 // Run comprehensive tests for all church sites
 async function testAllChurchSites() {
   try {
-    const db = require('../../config/db-compat');
+    const db = require('../config/db-compat');
     
     const [sites] = await getAppPool().query(`
       SELECT site_slug, site_url, language_preference, church_name

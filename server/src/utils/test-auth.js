@@ -1,9 +1,9 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // Test script to check database connection and user authentication
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env.development') });
 
-const db = require('../../config/db-compat');
+const db = require('../config/db-compat');
 const bcrypt = require('bcrypt');
 
 async function testAuth() {

@@ -56,13 +56,15 @@ config.db.auth: {
 config.session: {
   secret: string,            // Min 8 chars, default: 'dev-secret-change-in-production'
   cookieName: string,        // Default: 'orthodoxmetrics.sid'
-  cookieDomain?: string,     // Optional
-  secure: boolean,           // Default: false
+  cookieDomain?: string,     // Optional — DO NOT SET (see warning below)
+  secure: boolean,           // Default: false — DO NOT SET TO TRUE (see warning below)
   sameSite: 'strict' | 'lax' | 'none',  // Default: 'lax'
   maxAgeMs: number,          // Default: 86400000 (24 hours)
   store: 'memory' | 'mysql', // Default: 'mysql'
 }
 ```
+
+> **DO NOT CHANGE THESE SESSION DEFAULTS. READ THE WARNING SECTION BELOW.**
 
 ### CORS Configuration
 
@@ -396,15 +398,120 @@ If you see actual passwords/secrets in logs:
 1. Check `server/src/config/redact.ts` - ensure field names are in `SECRET_FIELDS`
 2. Verify redaction is working: check startup logs for `***N chars***` patterns
 
+### Sessions Break After Login (401 on every request)
+
+This was a critical production outage on 2026-02-02. If sessions stop persisting after login, check these three things **in this order**:
+
+#### 1. `cookieParser` MUST have the session secret
+
+In `server/src/index.ts`:
+```javascript
+// CORRECT — secret must match the session secret
+app.use(cookieParser(serverConfig.session.secret));
+
+// WRONG — breaks express-session signed cookie parsing
+app.use(cookieParser());
+```
+
+**Why:** `express-session` uses signed cookies (`s:SESSION_ID.SIGNATURE`). If `cookieParser()` runs without the same secret, it mangles the signed cookie value before express-session can read it. Express-session then can't verify the signature, discards the cookie, and creates a new empty session on every single request. Login appears to work (200 response) but the session cookie is never recognized on subsequent requests.
+
+#### 2. `cookie.secure` MUST be `false`
+
+In `server/src/config/session.js` and `.env`:
+```javascript
+cookie: {
+  secure: false,  // MUST be false — nginx handles SSL, backend sees HTTP
+}
+```
+
+**Why:** Nginx terminates SSL and proxies to `127.0.0.1:3001` over plain HTTP. If `secure: true`, the browser marks the cookie as HTTPS-only, but the backend connection is HTTP. Even with `trust proxy` and `X-Forwarded-Proto`, this creates unreliable behavior where the `Set-Cookie` header may be silently ignored by the browser.
+
+**DO NOT** set `SESSION_SECURE=true` in `.env` or `.env.production`. The schema default is `false` for this reason.
+
+#### 3. `cookie.domain` MUST be `undefined`
+
+In `server/src/config/session.js` and `.env`:
+```javascript
+cookie: {
+  domain: undefined,  // Let the browser handle domain matching
+}
+```
+
+**Why:** Setting `domain: 'orthodoxmetrics.com'` explicitly can cause cookie domain mismatches depending on whether the browser sees `orthodoxmetrics.com` vs `www.orthodoxmetrics.com`. Leaving it `undefined` lets the browser auto-set the domain from the request origin, which always works.
+
+**DO NOT** set `SESSION_COOKIE_DOMAIN` in `.env` or `.env.production`. The schema makes this field optional for this reason.
+
+#### Diagnostic checklist
+
+If sessions break, check startup logs for the `🔑 Session config check` line:
+```
+🔑 Session config check: {
+  name: 'orthodoxmetrics.sid',
+  secretLength: 32,            ← must be > 0
+  secretPrefix: 'orthodox',    ← must match cookieParser secret prefix
+  secure: false,               ← MUST be false
+  domain: undefined,           ← MUST be undefined
+  sameSite: 'lax',
+  path: '/',
+  maxAge: 86400000
+}
+🔑 cookieParser secret check: { length: 32, prefix: 'orthodox' }
+```
+
+Verify:
+- Both `secretLength` values match
+- Both `secretPrefix` values match
+- `secure` is `false`
+- `domain` is `undefined`
+
+If the session ID changes on every request (visible in auth middleware logs), the cookie is not being parsed correctly. The three rules above will fix it.
+
+#### Correct .env session block
+
+```env
+# Session Configuration
+SESSION_SECRET=orthodox-metrics-dev-secret-2025
+SESSION_SECURE=false
+SESSION_SAME_SITE=lax
+# SESSION_COOKIE_DOMAIN — intentionally NOT set, leave undefined
+```
+
+#### Correct middleware order in index.ts
+
+```
+1. express.json()           — parse request bodies
+2. express.urlencoded()     — parse form data
+3. cookieParser(SECRET)     — parse cookies WITH the session secret
+4. sessionMiddleware        — express-session (reads parsed cookies)
+5. databaseRouter           — multi-tenant DB routing
+6. auth-protected routes    — require session to be established
+```
+
+---
+
+## Critical Rules for AI Agents
+
+**Any AI agent (Claude, Copilot, or otherwise) modifying this server MUST follow these rules:**
+
+1. **NEVER** add `SESSION_SECURE=true` to any `.env` file. The backend runs behind nginx over HTTP.
+2. **NEVER** add `SESSION_COOKIE_DOMAIN` to any `.env` file. Let the browser handle it.
+3. **NEVER** call `cookieParser()` without passing the session secret as the first argument.
+4. **NEVER** change the middleware order in `index.ts` — `cookieParser` must come before `sessionMiddleware`.
+5. **NEVER** change `cookie.secure` or `cookie.domain` in `session.js` without reading this document first.
+6. If sessions break after a change, check the three rules above before investigating anything else.
+
 ---
 
 ## Files
 
 - `server/src/config/schema.ts` - Zod schema definitions
 - `server/src/config/index.ts` - Main config loader
+- `server/src/config/session.js` - Session middleware configuration (express-session + MySQL store)
 - `server/src/config/redact.ts` - Secret redaction helper
+- `server/src/middleware/auth.js` - Authentication middleware (session + JWT)
+- `server/src/routes/auth.js` - Auth routes (login, logout, refresh, check, validate-session)
 - `server/CONFIG.md` - This documentation
 
 ---
 
-**Last Updated:** 2025-01-XX
+**Last Updated:** 2026-02-02

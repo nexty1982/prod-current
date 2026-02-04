@@ -1,5 +1,5 @@
 import mysql from 'mysql2/promise';
-import type { RouteRecord, MenuNode, RoutesListQuery, MenusListQuery, ReorderMenusInput } from './types.js';
+import type { RouteRecord, MenuNode, RoutesListQuery, MenusListQuery, ReorderMenusInput } from './types';
 
 let connection: mysql.Connection;
 

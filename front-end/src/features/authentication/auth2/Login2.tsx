@@ -10,7 +10,7 @@ import Grid from '@/components/compat/Grid2';
 // components
 import PageContainer from '@/shared/ui/PageContainer';
 import Logo from '@/layouts/full/shared/logo/Logo';
-import SharedAuthLogin from '@/features/auth/authentication/authForms/SharedAuthLogin';
+import AuthLogin from '@/features/auth/authentication/authForms/AuthLogin';
 
 const Login2 = () => {
 
@@ -46,7 +46,7 @@ const Login2 = () => {
               <Box display="flex" alignItems="center" justifyContent="center">
                 <Logo />
               </Box>
-              <SharedAuthLogin
+              <AuthLogin
                 subtitle={
                   <Stack direction="row" spacing={1} justifyContent="center" mt={3}>
                     <Typography color="textSecondary" variant="h6" fontWeight="500">

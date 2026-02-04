@@ -18,7 +18,7 @@ interface ChurchData {
     email: string;
     databaseName: string;
     isActive: boolean;
-  
+    totalOcrJobs?: number;
 }
 
 const ChurchAdminPanelWorking: React.FC = () => {

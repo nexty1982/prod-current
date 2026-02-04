@@ -1,8 +1,7 @@
-import Grid2 from '@/components/compat/Grid2';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
-import { Grid, Box, Card, Typography } from '@mui/material';
+import { Box, Card, Grid, Typography } from '@mui/material';
 
 import Logo from '@/layouts/full/shared/logo/Logo';
 import PageContainer from '@/shared/ui/PageContainer';
@@ -26,17 +25,16 @@ const TwoSteps2 = () => (
         },
       }}
     >
-      <Grid2 container spacing={0} justifyContent="center" sx={{ height: '100vh' }}>
-        <Grid2
+      <Grid container spacing={0} justifyContent="center" sx={{ height: '100vh' }}>
+        <Grid
+          item
+          xs={12}
+          sm={12}
+          lg={5}
+          xl={4}
           display="flex"
           justifyContent="center"
-          alignItems="center"
-          size={{
-            xs: 12,
-            sm: 12,
-            lg: 5,
-            xl: 4
-          }}>
+          alignItems="center">
           <Card elevation={9} sx={{ p: 4, zIndex: 1, width: '100%', maxWidth: '450px' }}>
             <Box display="flex" alignItems="center" justifyContent="center">
               <Logo />
@@ -50,8 +48,8 @@ const TwoSteps2 = () => (
             </Typography>
             <AuthTwoSteps />
           </Card>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   </PageContainer>
 );

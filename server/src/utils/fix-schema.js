@@ -1,7 +1,7 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 #!/usr/bin/env node
 // Database schema fix script
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const fs = require('fs');
 const path = require('path');
 

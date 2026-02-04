@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 /**
  * Cross-Database Connection Utilities for OCR System
  * Handles connections between orthodoxmetrics_db ↔ ssppoc_records_db ↔ orthodoxmetrics_ocr_db
@@ -6,7 +6,7 @@ const { getAppPool } = require('../../config/db-compat');
  */
 
 const mysql = require('mysql2/promise');
-const { promisePool: centralPool } = require('../../config/db-compat');
+const { promisePool: centralPool } = require('../config/db-compat');
 
 // Database Configuration
 const DB_CONFIG = {

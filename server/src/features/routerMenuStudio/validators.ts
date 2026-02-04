@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { RoutesListQuery, MenusListQuery, ReorderMenusInput } from './types.js';
+import type { RoutesListQuery, MenusListQuery, ReorderMenusInput } from './types';
 
 export const RoutesListSchema = z.object({
   q: z.string().optional(),

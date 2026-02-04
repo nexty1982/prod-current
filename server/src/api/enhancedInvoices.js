@@ -1,11 +1,11 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/enhancedInvoices.js
 // Enhanced multilingual invoice system with full CRUD operations
 const express = require('express');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs').promises;
 const path = require('path');
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const { cleanRecords, cleanRecord, formatDate, formatDateTime } = require('../utils/dateFormatter');
 
 const router = express.Router();

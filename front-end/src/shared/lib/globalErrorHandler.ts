@@ -53,42 +53,35 @@ export const setupGlobalErrorHandlers = () => {
   window.fetch = async (...args) => {
     try {
       const response = await originalFetch(...args);
-      
-      // Check for HTTP error status codes
-      if (!response.ok) {
-        const errorDetails: ErrorDetails = {
-          message: `API Error: ${response.status} ${response.statusText}`,
-          type: 'js_error', // Using js_error type for API errors
-          severity: response.status >= 500 ? 'high' : 'medium'
-        };
+
+      // Only dispatch error events for server errors (5xx)
+      // Skip 401/403 (handled by auth layer) and 404 (often expected)
+      if (response.status >= 500) {
+        const url = args[0]?.toString() || '';
 
         window.dispatchEvent(new CustomEvent('omai-error', {
           detail: {
-            ...errorDetails,
+            message: `API Error: ${response.status} ${response.statusText}`,
             type: 'api_error',
+            severity: 'high',
             context: {
-              url: args[0]?.toString(),
+              url,
               status: response.status,
               statusText: response.statusText
             }
           }
         }));
       }
-      
+
       return response;
     } catch (error) {
       // Handle network errors
-      const errorDetails: ErrorDetails = {
-        message: `Network Error: ${error instanceof Error ? error.message : 'Unknown network error'}`,
-        stack: error instanceof Error ? error.stack : undefined,
-        type: 'js_error',
-        severity: 'high'
-      };
-
       window.dispatchEvent(new CustomEvent('omai-error', {
         detail: {
-          ...errorDetails,
+          message: `Network Error: ${error instanceof Error ? error.message : 'Unknown network error'}`,
+          stack: error instanceof Error ? error.stack : undefined,
           type: 'api_error',
+          severity: 'high',
           context: {
             url: args[0]?.toString(),
             networkError: true

@@ -1,5 +1,5 @@
 import { Box, Stack, Typography, Grid, Container } from '@mui/material';
-import FeatureTitle from './FeatureTitle.tsx';
+import FeatureTitle from './FeatureTitle';
 
 import icon1 from '@/assets/images/svgs/icon-briefcase.svg';
 import FeatureApp from '@/assets/images/frontend-pages/homepage/feature-apps.png';
@@ -10,17 +10,17 @@ import IconFav from '@/assets/images/svgs/icon-favorites.svg';
 
 const Features = () => {
   return (
-    (<Box pt={10} pb={10}>
+    <Box pt={10} pb={10}>
       <Container maxWidth="lg">
         <FeatureTitle />
 
-        <Grid container spacing={3} mt={3}>
+        <Grid container spacing={3} sx={{ mt: 3 }}>
           <Grid
-            size={{
-              xs: "grow",
-              sm: 6,
-              lg: "grow"
-            }}>
+            item
+            xs={12}
+            sm={6}
+            lg
+          >
             <Box mb={3} bgcolor="warning.light" borderRadius="24px">
               <Box px={4} py="65px">
                 <Stack direction="column" spacing={2} textAlign="center">
@@ -54,16 +54,16 @@ const Features = () => {
             </Box>
           </Grid>
           <Grid
+            item
+            xs={12}
+            lg={5}
             sx={{
               order: {
                 xs: 3,
                 lg: 2,
               },
             }}
-            size={{
-              xs: 12,
-              lg: 5
-            }}>
+          >
             <Box textAlign="center" mb={3} bgcolor="primary.light" borderRadius="24px">
               <Box pt="65px" pb="40px" px={5}>
                 <img src={LogoIcon} alt="logo" height="50" width="50" />
@@ -99,17 +99,17 @@ const Features = () => {
             </Box>
           </Grid>
           <Grid
+            item
+            xs={12}
+            sm={6}
+            lg
             sx={{
               order: {
                 xs: 2,
                 lg: 3,
               },
             }}
-            size={{
-              xs: "grow",
-              sm: 6,
-              lg: "grow"
-            }}>
+          >
             <Box textAlign="center" mb={3} bgcolor="success.light" borderRadius="24px">
               <Box px={4} py="65px">
                 <Stack direction="column" spacing={2} textAlign="center">
@@ -145,7 +145,7 @@ const Features = () => {
           </Grid>
         </Grid>
       </Container>
-    </Box>)
+    </Box>
   );
 };
 

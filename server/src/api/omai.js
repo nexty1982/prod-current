@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 const express = require('express');
 const router = express.Router();
 const fs = require('fs').promises;
@@ -659,7 +659,7 @@ router.post('/ingest-agent-output', async (req, res) => {
     console.log(`[OMAI] Agent ingestion from ${agent}: ${output.substring(0, 100)}...`);
 
     // Import database connection
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
     
     // Enhanced context type detection for agent output
     const detectedType = detectContextType(output);
@@ -739,7 +739,7 @@ router.post('/consume', async (req, res) => {
     console.log(`[OMAI] Consuming memory: ${text.substring(0, 100)}...`);
 
     // Import database connection
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
     
     // Enhanced context type detection
     const detectedType = detectContextType(text);
@@ -781,7 +781,7 @@ router.get('/memories', async (req, res) => {
       ingestion_method = null
     } = req.query;
 
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
     
     let query = 'SELECT * FROM omai_memories WHERE 1=1';
     const params = [];
@@ -900,7 +900,7 @@ router.get('/memories', async (req, res) => {
 router.delete('/memories/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
     
     await getAppPool().query('DELETE FROM omai_memories WHERE id = ?', [id]);
     
@@ -1631,7 +1631,7 @@ router.post('/md-ingest', upload.single('mdFile'), async (req, res) => {
     };
 
     // Store in database
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
     
     await getAppPool().query(`
       INSERT INTO omai_md_catalog (
@@ -1773,7 +1773,7 @@ router.post('/md-ingest-text', async (req, res) => {
     };
 
     // Store in database
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
     
     await getAppPool().query(`
       INSERT INTO omai_md_catalog (
@@ -1873,7 +1873,7 @@ router.get('/md-catalog', async (req, res) => {
       status = null 
     } = req.query;
 
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
     
     let query = 'SELECT * FROM omai_md_catalog WHERE 1=1';
     const params = [];
@@ -1953,7 +1953,7 @@ router.post('/md-parse', async (req, res) => {
 
     console.log(`[OMAI] Parsing markdown for ingestion: ${ingestion_id}`);
 
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
     
     // Get the markdown document
     const [catalogResult] = await getAppPool().query(
@@ -2055,7 +2055,7 @@ router.get('/md-structure/:ingestionId', async (req, res) => {
     const { ingestionId } = req.params;
     const { structure_type = null, level = null } = req.query;
 
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
     
     // Get catalog entry
     const [catalogResult] = await getAppPool().query(
@@ -2337,7 +2337,7 @@ router.get('/search', async (req, res) => {
     console.log(`[OMAI] AI-Grep search: "${query}" (type: ${search_type})`);
 
     const searchStartTime = Date.now();
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
 
     // Log search query
     await getAppPool().query(`
@@ -2520,7 +2520,7 @@ router.post('/search-index', async (req, res) => {
 
     console.log(`[OMAI] Building search index${ingestion_id ? ` for ${ingestion_id}` : ' for all documents'}`);
 
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
     const indexStartTime = Date.now();
 
     let documentsToIndex = [];
@@ -2771,7 +2771,7 @@ router.post('/grep', async (req, res) => {
     console.log(`[OMAI] Grep command: "${command || '@omai grep'} ${query}"`);
 
     const grepStartTime = Date.now();
-    const { promisePool: db } = require('../../config/db-compat');
+    const { promisePool: db } = require('../config/db-compat');
 
     // Parse grep-style command if provided
     let searchQuery = query;
@@ -3153,7 +3153,7 @@ function extractAgentContext(content, agent) {
 // =====================================================
 
 // Import database and utilities
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const OMAIRequest = require('../utils/OMAIRequest');
 const { sendTaskAssignmentEmail, sendTaskSubmissionEmail } = require('../utils/emailService');
 

@@ -14,9 +14,8 @@ const routerFile = path.join(__dirname, '../dist/routes/churchOcrRoutes.js');
 console.log('Fixing router exports in:', routerFile);
 
 if (!fs.existsSync(routerFile)) {
-  console.error('❌ Router file not found:', routerFile);
-  console.log('   Run npm run build:ts first');
-  process.exit(1);
+  console.log('⏭️  Router file not found (removed during refactor), skipping');
+  process.exit(0);
 }
 
 let content = fs.readFileSync(routerFile, 'utf8');

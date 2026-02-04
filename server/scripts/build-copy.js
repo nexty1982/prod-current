@@ -49,73 +49,54 @@ async function main() {
   // Ensure dist exists
   await fse.ensureDir(DIST);
 
-  // Copy runtime JS that lives outside src (or not emitted by tsc)
-  // Note: src/routes is copied AFTER routes to ensure src/routes takes precedence
-  await copyDir('routes', 'routes');
-  await copyDir('middleware', 'middleware');
-  await copyDir('controllers', 'controllers');
-  await copyDir('dal', 'dal');
+  // All source code now lives under src/. TypeScript files are compiled by tsc,
+  // but plain .js files need to be copied into dist/ since allowJs may be off.
+  // The dist/ layout mirrors src/ but without the src/ prefix:
+  //   src/routes/    -> dist/routes/
+  //   src/api/       -> dist/api/
+  //   src/middleware/ -> dist/middleware/
+  //   etc.
+
+  // Core JS modules from src/
+  await copyDir('src/api', 'api');
+  await copyDir('src/routes', 'routes');
+  await copyDir('src/middleware', 'middleware');
+  await copyDir('src/controllers', 'controllers');
+  await copyDir('src/services', 'services');
+  await copyDir('src/utils', 'utils');
+  await copyDir('src/config', 'config');
+  await copyDir('src/models', 'models');
+  await copyDir('src/dal', 'dal');
+  await copyDir('src/integrations', 'integrations');
+  await copyDir('src/webhooks', 'webhooks');
+  await copyDir('src/websockets', 'websockets');
+  await copyDir('src/certificates', 'certificates');
+  await copyDir('src/modules', 'modules');
+  await copyDir('src/ocr', 'ocr');
+  await copyDir('src/workers', 'workers');
+  await copyDir('src/features', 'features');
+  await copyDir('src/logs', 'logs');
+  await copyDir('src/agents', 'agents');
+  await copyDir('src/db', 'db');
+
+  // Database schemas/migrations (not in src/, stays at root)
   await copyDir('database', 'database');
 
-  // Copy specific config files (avoid overwriting tsc outputs inadvertently)
-  // IMPORTANT: Copy these AFTER TypeScript compilation to ensure they overwrite any compiled versions
-  // CRITICAL: config/session.js must be copied from root to overwrite the bridge file from src/config/session.js
-  // The bridge file requires '../config/session' which doesn't work from dist/config/
-  await copyFile('config/session.js', 'config/session.js', { required: true });
-  // Verify the file was copied
+  // Verify critical files in dist/
   const sessionFile = path.join(DIST, 'config/session.js');
   if (!exists(sessionFile)) {
-    console.error('[build-copy] ❌ ERROR: Failed to copy config/session.js to dist/config/session.js');
-    throw new Error('Failed to copy config/session.js - file does not exist after copy');
+    console.error('[build-copy] ❌ ERROR: dist/config/session.js not found after copy');
   } else {
     console.log('[build-copy] ✅ Verified dist/config/session.js exists');
   }
-  await copyFile('config/db-compat.js', 'config/db-compat.js');
-  // CRITICAL: config/db.js must be copied from root to overwrite any compiled TypeScript version
-  // This ensures getAppPool() and getAuthPool() functions are available
-  // The compiled src/config/db.ts creates dist/config/db.js with only default export,
-  // but we need the root config/db.js which has named exports (getAppPool, getAuthPool)
-  await copyFile('config/db.js', 'config/db.js');
-  
-  // Verify the copied file has getAppPool export
+
   const dbFile = path.join(DIST, 'config/db.js');
   if (exists(dbFile)) {
     const dbContent = fs.readFileSync(dbFile, 'utf8');
-    if (!dbContent.includes('function getAppPool') && !dbContent.includes('getAppPool')) {
+    if (!dbContent.includes('getAppPool')) {
       console.warn('[build-copy] ⚠️  WARNING: dist/config/db.js may not have getAppPool export');
     } else {
       console.log('[build-copy] ✅ Verified dist/config/db.js has getAppPool export');
-    }
-  }
-  
-  // Copy src/config directory (TypeScript files will be compiled by tsc, but we ensure structure exists)
-  // Note: tsc will compile .ts files to .js in dist/src/config/
-  // We don't need to copy them here, but we ensure the directory structure is ready
-
-  // Copy JS modules kept under src but not emitted (because allowJs is off)
-  await copyDir('src/api', 'api');
-  await copyDir('src/utils', 'utils');
-  // Copy utils/ files that aren't in src/utils (like safeRequire.js)
-  await copyDir('utils', 'utils');
-  await copyDir('src/services', 'services');
-  // Copy src/routes AFTER routes so src/routes files take precedence
-  await copyDir('src/routes', 'routes', {
-    filter: (srcPath) => {
-      // Copy only .js files from src/routes (exclude .ts files which are compiled by tsc)
-      return !srcPath.endsWith('.ts') && !srcPath.endsWith('.tsx');
-    }
-  });
-  
-  // Verify critical route files have correct imports
-  const usersRouteFile = path.join(DIST, 'routes/admin/users.js');
-  if (exists(usersRouteFile)) {
-    const usersContent = fs.readFileSync(usersRouteFile, 'utf8');
-    if (usersContent.includes("require('../../src/services/databaseService')")) {
-      console.warn('[build-copy] ⚠️  WARNING: dist/routes/admin/users.js has incorrect import path');
-      console.warn('[build-copy]    Expected: require("../../services/databaseService")');
-      console.warn('[build-copy]    Found: require("../../src/services/databaseService")');
-    } else if (usersContent.includes("require('../../services/databaseService')")) {
-      console.log('[build-copy] ✅ Verified dist/routes/admin/users.js has correct import path');
     }
   }
 

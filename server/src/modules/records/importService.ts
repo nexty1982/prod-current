@@ -9,7 +9,7 @@ import * as crypto from 'crypto';
 import { parse } from 'fast-csv';
 import * as xml2js from 'xml2js';
 import { RowDataPacket } from 'mysql2';
-import { getAppPool } from '../../../config/db';
+import { getAppPool } from '../../config/db';
 
 export type ImportFormat = 'csv' | 'json' | 'sql' | 'xml';
 export type RecordType = 'baptisms' | 'marriages' | 'funerals';

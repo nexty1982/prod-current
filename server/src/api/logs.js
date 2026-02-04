@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 const express = require('express');
 const router = express.Router();
 const winston = require('winston');
@@ -329,7 +329,7 @@ router.get('/database/critical', async (req, res) => {
 // GET /api/logs/database/stats - Get log statistics
 router.get('/database/stats', async (req, res) => {
     try {
-        const { promisePool } = require('../../config/db-compat');
+        const { promisePool } = require('../config/db-compat');
         
         // Get basic statistics
         const [levelStats] = await getAppPool().query(`
@@ -423,7 +423,7 @@ router.post('/database/cleanup', async (req, res) => {
         }
 
         // Execute cleanup
-        const { promisePool } = require('../../config/db-compat');
+        const { promisePool } = require('../config/db-compat');
         const [result] = await getAppPool().query(
             'DELETE FROM system_logs WHERE timestamp < ?',
             [cutoffDate]

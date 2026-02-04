@@ -1,0 +1,69 @@
+Cookie attributes differ in Prod
+
+Most common: Dev is http://localhost or same-origin-ish, so cookies “just work.” Prod introduces HTTPS + cross-site rules.
+
+Prod breaks when:
+
+You set SameSite=None without Secure (Chrome will drop it)
+
+You need SameSite=None; Secure (cross-site), but you’re sending Lax/Strict
+
+Cookie domain is wrong (e.g., set to orthodoxmetrics.com but browsing orthodmetrics.com)
+
+Missing app.set('trust proxy', 1) behind a proxy → Express thinks it’s HTTP and won’t set Secure cookies correctly
+
+Immediate check: in Prod, does the cookie appear after login? If it appears then vanishes or never stores, it’s this.
+
+2) CORS + credentials mismatch in Prod
+
+In Dev you may be proxying through Vite, so no CORS. In Prod you hit the API directly.
+
+Prod breaks when:
+
+Frontend fetch/axios doesn’t use credentials: 'include'
+
+Backend uses Access-Control-Allow-Origin: * (invalid with credentials)
+
+Backend doesn’t send Access-Control-Allow-Credentials: true
+
+Tell: login call succeeds, but subsequent API calls act unauthenticated because cookie never gets sent.
+
+3) Different domain / subdomain situation in Prod
+
+You literally have two domains now (orthodoxmetrics.com and orthodmetrics.com). If your auth cookie is scoped to one, it won’t persist on the other.
+
+Tell: login works on one domain, but navigating to the other “logs you out.”
+
+4) Proxy / load balancer / multiple instances
+
+If Prod is behind a proxy or multiple node instances and you’re using server sessions in memory, you’ll get “random logouts.”
+
+Tell: it works sometimes, fails after refresh, or changes depending on which instance answers.
+
+The shortest path to a definitive answer
+
+Do this in Prod (2 minutes):
+
+Open browser DevTools → Application → Cookies
+
+Login.
+
+Refresh page.
+
+Check:
+
+Is the auth cookie still there?
+
+What are Domain, Path, SameSite, Secure, HttpOnly?
+
+Then in Network tab, click a failing API call and look at Request Headers:
+
+Do you see Cookie: ... being sent?
+
+How to interpret
+
+Cookie missing or not sent ⇒ cookie/CORS/domain/proxy config issue (most likely)
+
+Cookie sent but 401 ⇒ backend token/session validation/expiry issue
+
+If you tell me which Prod URL you were on when it breaks (exact host: orthodoxmetrics.com vs orthodmetrics.com, and whether API is same host or :3001), I’ll tell you the exact fix path.

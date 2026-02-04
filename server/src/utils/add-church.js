@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 #!/usr/bin/env node
 
 // Add Real Church to Database Script

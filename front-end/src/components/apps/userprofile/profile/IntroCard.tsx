@@ -47,21 +47,21 @@ const IntroCard = () => {
       }
       
       try {
-        const response = await fetch(`/api/om/profile/${user.id}/settings`, {
+        const response = await fetch('/api/user/profile', {
           credentials: 'include'
         });
-        
+
         if (response.ok) {
           const data = await response.json();
-          if (data.success && data.settings) {
-            const settings = data.settings;
+          if (data.success && data.profile) {
+            const profile = data.profile;
             const newData: IntroData = {
-              introduction: settings.introduction || settings.bio || '',
-              jobTitle: settings.jobTitle || '',
-              company: settings.company || '',
-              email: settings.email || user.email || '',
-              website: settings.website || '',
-              location: settings.location || ''
+              introduction: profile.bio || '',
+              jobTitle: profile.job_title || '',
+              company: profile.company || '',
+              email: profile.email || user.email || '',
+              website: profile.website || '',
+              location: profile.location || ''
             };
             setIntroData(newData);
             setEditData(newData);
@@ -92,15 +92,15 @@ const IntroCard = () => {
     
     setSaving(true);
     try {
-      const response = await fetch(`/api/om/profile/${user.id}`, {
+      const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
         body: JSON.stringify({
-          introduction: editData.introduction,
-          jobTitle: editData.jobTitle,
+          bio: editData.introduction,
+          job_title: editData.jobTitle,
           company: editData.company,
           website: editData.website,
           location: editData.location

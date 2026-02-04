@@ -1,7 +1,7 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/invoices.js
 const express = require('express');
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const { requireAuth } = require('../middleware/auth');
 const { requireChurchBilling } = require('../middleware/churchSecurity');
 const router = express.Router();

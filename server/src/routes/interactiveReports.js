@@ -14,15 +14,15 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 
 // In src: ../../utils/tokenUtils -> server/utils/tokenUtils
 // In dist: ../../utils/tokenUtils -> dist/utils/tokenUtils (copied from server/utils)
-const { generateToken, hashToken, verifyToken } = require('../../utils/tokenUtils');
+const { generateToken, hashToken, verifyToken } = require('../utils/tokenUtils');
 
 // In src: ../../utils/emailService -> server/utils/emailService
 // In dist: ../../utils/emailService -> dist/utils/emailService (copied from server/utils)
-const { sendRecipientInvite, sendPriestSummary } = require('../../utils/emailService');
+const { sendRecipientInvite, sendPriestSummary } = require('../utils/emailService');
 
 // In src: ../../middleware/rateLimiter -> server/middleware/rateLimiter
 // In dist: ../../middleware/rateLimiter -> dist/middleware/rateLimiter (copied from server/middleware)
-const { recipientGetLimiter, recipientSubmitLimiter } = require('../../middleware/rateLimiter');
+const { recipientGetLimiter, recipientSubmitLimiter } = require('../middleware/rateLimiter');
 
 // In src: ../config/db -> src/config/db (bridge to ../../config/db)
 // In dist: ../config/db -> dist/config/db (copied from server/config)

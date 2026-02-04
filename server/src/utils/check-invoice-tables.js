@@ -1,6 +1,6 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // Check invoice tables
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 
 async function checkInvoiceTables() {
   console.log('🔍 Checking invoice tables...');

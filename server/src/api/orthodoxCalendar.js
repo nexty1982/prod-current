@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/liturgicalCalendar.js - Simplified Orthodox Calendar
 const express = require('express');
 const axios = require('axios');
@@ -287,7 +287,7 @@ router.get('/month/:year/:month', async (req, res) => {
 });
 
 // Helper functions for database operations
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 
 async function getUserPreferences(userId) {
   try {

@@ -42,7 +42,6 @@ import {
   Search as SearchIcon,
   FilterList as FilterIcon,
   GetApp as ExportIcon,
-  Assessment as ReportIcon,
   Visibility as ViewIcon,
   Palette as PaletteIcon,
   Settings as SettingsIcon,
@@ -51,118 +50,53 @@ import {
   TableChart as TableChartIcon,
   ViewList as ViewListIcon,
   ExpandLess as IconChevronUp,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import { useTableStyleStore } from '@/store/useTableStyleStore';
 import churchService, { Church } from '@/shared/lib/churchService';
 import recordService from '@/shared/lib/recordService';
 import TableControlPanel from '@/components/TableControlPanel';
 import ColorPaletteSelector from '@/components/ColorPaletteSelector';
-import { AGGridViewOnly } from '@/components/AGGridViewOnly/AGGridViewOnly';
 import { ChurchRecord, RecordType as ChurchRecordType } from '@/types/church-records-advanced.types';
 import ImportRecordsButton from '@/components/ImportRecordsButton';
-import AdvancedGridDialog from '@/features/tables/AdvancedGridDialog';
-import { FIELD_DEFINITIONS, RECORD_TYPES } from '@/features/records-centralized/constants';
-import { formatRecordDate } from '@/utils/formatDate';
-import { enhancedTableStore, THEME_MAP, LiturgicalThemeKey } from '@/store/enhancedTableStore';
-import { AddRecordButton, AdvancedGridButton } from '@/components/records/BrandButtons';
-import adminAPI from '@/api/admin.api';
+import { AdvancedGridDialog } from '@/features/tables/AdvancedGridDialog';
+import { FIELD_DEFINITIONS, RECORD_TYPES } from '@/features/records-centralized/components/constants';
+import { AgGridReact } from 'ag-grid-react';
+import { ColDef, ICellRendererParams } from 'ag-grid-community';
+import { registerAgGridModulesOnce } from '@/agGridModules';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 
-// Helper to safely parse JSON fields (godparents, witnesses)
-const parseJsonField = (value: any): string[] => {
-  if (!value) return [];
-  if (Array.isArray(value)) return value;
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [value];
-    } catch {
-      // If not valid JSON, return as single item array
-      return value.trim() ? [value] : [];
-    }
-  }
-  return [];
-};
+registerAgGridModulesOnce();
 
-// Helper to display JSON array fields as comma-separated string
-const displayJsonField = (value: any): string => {
-  const arr = parseJsonField(value);
-  return arr.length > 0 ? arr.join(', ') : '';
-};
 
-// Types - Updated to match production schema (05_sacrament_tables.sql)
+// Types
 interface BaptismRecord {
   id: string;
-  // Production schema fields (person_*)
-  person_first?: string;
-  person_middle?: string;
-  person_last?: string;
-  person_full?: string;
-  // Legacy field names for backwards compatibility
-  firstName?: string;
-  lastName?: string;
-  first_name?: string;
-  last_name?: string;
-  // Date fields
-  birth_date?: string;
-  baptism_date?: string;
-  dateOfBirth?: string;
-  dateOfBaptism?: string;
-  reception_date?: string;
-  // Location fields
-  place_name?: string;
-  placeOfBirth?: string;
-  placeOfBaptism?: string;
-  birthplace?: string;
-  // Parent fields
-  father_name?: string;
-  mother_name?: string;
-  fatherName?: string;
-  motherName?: string;
-  // Godparents - JSON in production, string in legacy
-  godparents?: string | string[];
-  godparentNames?: string;
-  sponsors?: string;
-  // Officiant field
-  officiant_name?: string;
-  priest?: string;
-  clergy?: string;
-  // Registry fields
-  certificate_no?: string;
-  book_no?: string;
-  page_no?: string;
-  entry_no?: string;
-  registryNumber?: string;
-  // Metadata fields (production schema)
-  source_system?: string;
-  source_row_id?: string;
-  source_hash?: string;
-  // Church fields
-  churchId?: string;
-  church_id?: number;
-  churchName?: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  dateOfBaptism: string;
+  placeOfBirth: string;
+  placeOfBaptism: string;
+  fatherName: string;
+  motherName: string;
+  godparentNames: string;
+  priest: string;
+  registryNumber: string;
+  churchId: string;
+  churchName: string;
   notes?: string;
   // Marriage record fields
-  groom_first?: string;
-  groom_middle?: string;
-  groom_last?: string;
-  groom_full?: string;
   fname_groom?: string;
   lname_groom?: string;
-  bride_first?: string;
-  bride_middle?: string;
-  bride_last?: string;
-  bride_full?: string;
   fname_bride?: string;
   lname_bride?: string;
-  marriage_date?: string;
   mdate?: string;
   parentsg?: string;
   parentsb?: string;
   witness?: string;
-  witnesses?: string | string[];
   mlicense?: string;
+  clergy?: string;
   // Additional marriage fields for form
   groomFirstName?: string;
   groomLastName?: string;
@@ -172,29 +106,15 @@ interface BaptismRecord {
   marriageLocation?: string;
   witness1?: string;
   witness2?: string;
-  // Funeral record fields (production: deceased_*)
-  deceased_first?: string;
-  deceased_middle?: string;
-  deceased_last?: string;
-  deceased_full?: string;
-  death_date?: string;
-  funeral_date?: string;
-  burial_place?: string;
-  cause_of_death?: string;
+  // Funeral record fields
   dateOfDeath?: string;
   burialDate?: string;
-  burial_date?: string;
   age?: string;
   burialLocation?: string;
-  burial_location?: string;
-  name?: string;
-  lastname?: string;
-  // Timestamps
-  createdAt?: string;
-  updatedAt?: string;
-  created_at?: string;
-  updated_at?: string;
-  createdBy?: string;
+  // Optional legacy fields for compatibility
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
 }
 
 interface RecordType {
@@ -244,8 +164,12 @@ const getSortFields = (recordType: string) => {
 };
 
 // Function to get cell value based on column field and record type
-// Updated to support production schema (05_sacrament_tables.sql) with formatRecordDate
 const getCellValue = (record: any, column: any) => {
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+  
   if (column.valueGetter) {
     try {
       return column.valueGetter({ data: record });
@@ -255,176 +179,68 @@ const getCellValue = (record: any, column: any) => {
     }
   }
   
-  // Handle all field mappings with fallbacks - support both production and legacy schemas
+  // Handle all field mappings with fallbacks - don't check original field first
   switch (column.field) {
-    // ═══════════════════════════════════════════════════════════════
-    // BAPTISM RECORD MAPPINGS (Saints Peter & Paul schema)
-    // first_name, last_name, birth_date, reception_date, birthplace,
-    // entry_type, sponsors, parents, clergy
-    // ═══════════════════════════════════════════════════════════════
+    // Baptism record mappings
     case 'first_name':
-    case 'person_first':
-      return record.person_first || record.first_name || record.firstName || '';
-    case 'middle_name':
-    case 'person_middle':
-      return record.person_middle || record.middle_name || '';
+      return record.first_name || record.firstName || 'N/A';
     case 'last_name':
-    case 'person_last':
-      return record.person_last || record.last_name || record.lastName || '';
-    case 'person_full':
-      // Generated column in production, compute if not present
-      if (record.person_full) return record.person_full;
-      const bapFirst = record.person_first || record.first_name || record.firstName || '';
-      const bapMiddle = record.person_middle || '';
-      const bapLast = record.person_last || record.last_name || record.lastName || '';
-      return [bapFirst, bapMiddle, bapLast].filter(Boolean).join(' ').trim() || '';
+      return record.last_name || record.lastName || 'N/A';
     case 'clergy':
-    case 'officiant_name':
-      return record.officiant_name || record.clergy || record.priest || '';
+      return record.clergy || record.priest || 'N/A';
     case 'reception_date':
-    case 'baptism_date':
-      return formatRecordDate(record.baptism_date || record.reception_date || record.dateOfBaptism) || '';
+      return formatDate(record.reception_date || record.dateOfBaptism);
     case 'birth_date':
-      return formatRecordDate(record.birth_date || record.dateOfBirth) || '';
+      return formatDate(record.birth_date || record.dateOfBirth);
     case 'birthplace':
-    case 'place_name':
-      return record.place_name || record.birthplace || record.placeOfBirth || record.placeOfBaptism || '';
+      return record.birthplace || record.placeOfBirth || 'N/A';
     case 'sponsors':
-    case 'godparents':
-      // Handle JSON godparents array from production or string from legacy
-      return displayJsonField(record.godparents) || record.sponsors || record.godparentNames || '';
-    case 'entry_type':
-      // Check all possible field names: snake_case, camelCase, and _originalRecord
-      return record.entry_type || record.entryType || record._originalRecord?.entry_type || record.originalRecord?.entry_type || '';
-    case 'parents':
-      // Combined parents field - may be stored as single field or computed from father/mother
-      if (record.parents) return record.parents;
-      const father = record.father_name || record.fatherName || '';
-      const mother = record.mother_name || record.motherName || '';
-      if (father && mother) return `${father} & ${mother}`;
-      return father || mother || '';
-    case 'father_name':
-      return record.father_name || record.fatherName || '';
-    case 'mother_name':
-      return record.mother_name || record.motherName || '';
+      return record.sponsors || record.godparentNames || 'N/A';
     
-    // ═══════════════════════════════════════════════════════════════
-    // MARRIAGE RECORD MAPPINGS (Saints Peter & Paul schema)
-    // fname_groom, lname_groom, fname_bride, lname_bride, mdate,
-    // parentsg, parentsb, witness, mlicense, clergy
-    // ═══════════════════════════════════════════════════════════════
+    // Marriage record mappings
     case 'fname_groom':
-    case 'groom_first':
-      return record.fname_groom || record.groom_first || record.groomFirstName || '';
-    case 'groom_middle':
-      return record.groom_middle || '';
+      return record.fname_groom || record.groomFirstName || 'N/A';
     case 'lname_groom':
-    case 'groom_last':
-      return record.lname_groom || record.groom_last || record.groomLastName || '';
-    case 'groom_full':
-      if (record.groom_full) return record.groom_full;
-      const gFirst = record.fname_groom || record.groom_first || record.groomFirstName || '';
-      const gMiddle = record.groom_middle || '';
-      const gLast = record.lname_groom || record.groom_last || record.groomLastName || '';
-      return [gFirst, gMiddle, gLast].filter(Boolean).join(' ').trim() || '';
+      return record.lname_groom || record.groomLastName || 'N/A';
     case 'fname_bride':
-    case 'bride_first':
-      return record.fname_bride || record.bride_first || record.brideFirstName || '';
-    case 'bride_middle':
-      return record.bride_middle || '';
+      return record.fname_bride || record.brideFirstName || 'N/A';
     case 'lname_bride':
-    case 'bride_last':
-      return record.lname_bride || record.bride_last || record.brideLastName || '';
-    case 'bride_full':
-      if (record.bride_full) return record.bride_full;
-      const bFirst = record.fname_bride || record.bride_first || record.brideFirstName || '';
-      const bMiddle = record.bride_middle || '';
-      const bLast = record.lname_bride || record.bride_last || record.brideLastName || '';
-      return [bFirst, bMiddle, bLast].filter(Boolean).join(' ').trim() || '';
+      return record.lname_bride || record.brideLastName || 'N/A';
     case 'mdate':
-    case 'marriage_date':
-      return formatRecordDate(record.mdate || record.marriage_date || record.marriageDate) || '';
-    case 'marriage_place':
-      return record.place_name || record.marriage_place || record.marriageLocation || '';
+      return formatDate(record.mdate || record.marriageDate || record.marriage_date);
     case 'parentsg':
-      return record.parentsg || record.groomParents || '';
+      return record.parentsg || record.groomParents || 'N/A';
     case 'parentsb':
-      return record.parentsb || record.brideParents || '';
+      return record.parentsb || record.brideParents || 'N/A';
     case 'witness':
-    case 'witnesses':
-      // Handle JSON witnesses array from production or string from legacy
-      return displayJsonField(record.witnesses) || record.witness || '';
+      return record.witness || record.witnesses || 'N/A';
     case 'mlicense':
-      return record.mlicense || record.marriageLicense || '';
+      return record.mlicense || record.marriageLicense || 'N/A';
     
-    // ═══════════════════════════════════════════════════════════════
-    // FUNERAL RECORD MAPPINGS (Saints Peter & Paul - actual MySQL columns)
-    // Table columns: name, lastname, deceased_date, burial_date, 
-    //                age, clergy, burial_location
-    // ═══════════════════════════════════════════════════════════════
+    // Funeral record mappings
     case 'name':
-      // For funeral records, 'name' is the deceased's first name
-      return record.name || record.firstName || record.first_name || '';
+      return record.name || record.firstName || record.first_name || 'N/A';
     case 'lastname':
-      return record.lastname || record.lastName || record.last_name || '';
+      return record.lastname || record.lastName || record.last_name || 'N/A';
     case 'deceased_date':
-      return formatRecordDate(record.deceased_date || record.date_of_death || record.dateOfDeath) || '';
+      return formatDate(record.deceased_date || record.deathDate || record.dateOfDeath || record.death_date);
     case 'burial_date':
-      // Check all possible field names: snake_case, camelCase, and _originalRecord
-      return formatRecordDate(
-        record.burial_date || 
-        record.burialDate || 
-        record.dateOfFuneral ||  // Backend transformer uses this name
-        record._originalRecord?.burial_date ||
-        record.originalRecord?.burial_date
-      ) || '';
+      return formatDate(record.burial_date || record.burialDate || record.date_of_burial || record.burial_date_raw);
     case 'age':
-      return record.age || '';
+      return record.age || 'N/A';
     case 'burial_location':
-      return record.burial_location || record.burialLocation || record.cemetery || '';
-    // Legacy field support
-    case 'deceased_full':
-      if (record.deceased_full) return record.deceased_full;
-      const dFirst = record.name || record.firstName || record.first_name || '';
-      const dLast = record.lastname || record.lastName || record.last_name || '';
-      return [dFirst, dLast].filter(Boolean).join(' ').trim() || '';
-    case 'notes':
-      return record.notes || record.note || '';
-    
-    // ═══════════════════════════════════════════════════════════════
-    // METADATA FIELDS (production schema)
-    // ═══════════════════════════════════════════════════════════════
-    case 'source_system':
-      return record.source_system || '';
-    case 'source_hash':
-      return record.source_hash || '';
-    case 'source_row_id':
-      return record.source_row_id || '';
-    case 'certificate_no':
-      return record.certificate_no || record.registryNumber || '';
-    case 'book_no':
-      return record.book_no || '';
-    case 'page_no':
-      return record.page_no || '';
-    case 'entry_no':
-      return record.entry_no || '';
+      return record.burial_location || record.burialLocation || 'N/A';
     
     default:
-      // For any other fields not explicitly mapped
-      // Check if it's a date field by name pattern
-      const isDateField = column.field && (
-        column.field.includes('date') || 
-        column.field.includes('Date') ||
-        column.field.includes('_date')
-      );
-      if (isDateField || column.cellRenderer === 'dateRenderer') {
-        return formatRecordDate(record[column.field]) || '';
+      // For any other fields not explicitly mapped, try original field first
+      if (column.cellRenderer === 'dateRenderer') {
+        return formatDate(record[column.field]);
       }
       const value = record[column.field];
       if (value !== undefined && value !== null && value !== '') {
         return value;
       }
-      return '';
+      return 'N/A';
   }
 };
 
@@ -457,11 +273,6 @@ const BaptismRecordsPage: React.FC = () => {
   
   // Advanced Grid Modal State
   const [advancedGridOpen, setAdvancedGridOpen] = useState(false);
-
-  // View Details Dialog state
-  const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
-  const [viewingRecord, setViewingRecord] = useState<BaptismRecord | null>(null);
-  const [viewingRecordIndex, setViewingRecordIndex] = useState<number>(-1);
 
   // Collapsible Panel State
   const [isFiltersCollapsed, setIsFiltersCollapsed] = useState<boolean>(false);
@@ -536,7 +347,14 @@ const BaptismRecordsPage: React.FC = () => {
         });
       } else {
         // Fetch all records across all churches using the direct API
-        const response = await fetch(`/api/${selectedType.apiEndpoint}-records?limit=1000&search=${encodeURIComponent(searchTerm)}`);
+        const response = await fetch(`/api/${selectedType.apiEndpoint}-records?limit=1000&search=${encodeURIComponent(searchTerm)}`, {
+          credentials: 'include',
+        });
+        if (response.status === 401) {
+          localStorage.removeItem('auth_user');
+          window.location.href = `/auth/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`;
+          return;
+        }
         const data = await response.json();
         
         if (data && data.records) {
@@ -558,27 +376,6 @@ const BaptismRecordsPage: React.FC = () => {
       if (recordData.records && recordData.records.length > 0) {
         console.log(`📄 Sample ${recordType} record structure:`, recordData.records[0]);
         console.log(`📄 Record fields:`, Object.keys(recordData.records[0]));
-        
-        // DEV-ONLY: Verify critical fields are present in API response
-        if (process.env.NODE_ENV === 'development') {
-          const sampleRecord = recordData.records[0];
-          const criticalFields: Record<string, string[]> = {
-            baptism: ['entry_type', 'first_name', 'last_name', 'birth_date', 'reception_date'],
-            funeral: ['burial_date', 'deceased_date', 'name', 'lastname', 'age'],
-            marriage: ['mdate', 'fname_groom', 'lname_groom', 'fname_bride', 'lname_bride'],
-          };
-          
-          const expectedFields = criticalFields[recordType] || [];
-          const missingFields = expectedFields.filter(field => 
-            sampleRecord[field] === undefined && 
-            sampleRecord.originalRecord?.[field] === undefined
-          );
-          
-          if (missingFields.length > 0) {
-            console.warn(`⚠️ [DEV] Missing expected fields in ${recordType} records:`, missingFields);
-            console.warn(`⚠️ [DEV] If adding DB columns, update FIELD_DEFINITIONS in constants/index.ts`);
-          }
-        }
       }
       
       const recordCount = recordData.records?.length || 0;
@@ -606,7 +403,14 @@ const BaptismRecordsPage: React.FC = () => {
       
       console.log(`🔍 Fetching priest options from ${tableName}...`);
       
-      const response = await fetch(`/api/${selectedType.apiEndpoint}-records/dropdown-options/clergy?table=${tableName}`);
+      const response = await fetch(`/api/${selectedType.apiEndpoint}-records/dropdown-options/clergy?table=${tableName}`, {
+        credentials: 'include',
+      });
+      if (response.status === 401) {
+        localStorage.removeItem('auth_user');
+        window.location.href = `/auth/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`;
+        return;
+      }
       const data = await response.json();
       
       if (data && data.values) {
@@ -651,7 +455,7 @@ const BaptismRecordsPage: React.FC = () => {
     godparentNames: '',
     priest: '',
     registryNumber: '',
-    churchId: selectedChurch === 0 ? (new URLSearchParams(window.location.search).get('church_id') || '46') : selectedChurch.toString(),
+    churchId: selectedChurch === 0 ? '1' : selectedChurch.toString(),
     notes: '',
     customPriest: false,
   });
@@ -835,7 +639,7 @@ const BaptismRecordsPage: React.FC = () => {
       godparentNames: '',
       priest: '',
       registryNumber: '',
-      churchId: selectedChurch === 0 ? (new URLSearchParams(window.location.search).get('church_id') || '46') : selectedChurch.toString(),
+      churchId: selectedChurch === 0 ? '1' : selectedChurch.toString(),
       notes: '',
       customPriest: false,
     });
@@ -849,94 +653,33 @@ const BaptismRecordsPage: React.FC = () => {
   };
 
   const handleViewRecord = (record: BaptismRecord) => {
-    // Find the index of the record in the filtered list for navigation
-    const index = filteredAndSortedRecords.findIndex(r => r.id === record.id);
-    setViewingRecord(record);
-    setViewingRecordIndex(index);
-    setViewDialogOpen(true);
-  };
-
-  // Navigate to previous record in View Details dialog
-  const handlePreviousRecord = () => {
-    if (viewingRecordIndex > 0) {
-      const prevIndex = viewingRecordIndex - 1;
-      setViewingRecord(filteredAndSortedRecords[prevIndex]);
-      setViewingRecordIndex(prevIndex);
-    }
-  };
-
-  // Navigate to next record in View Details dialog
-  const handleNextRecord = () => {
-    if (viewingRecordIndex < filteredAndSortedRecords.length - 1) {
-      const nextIndex = viewingRecordIndex + 1;
-      setViewingRecord(filteredAndSortedRecords[nextIndex]);
-      setViewingRecordIndex(nextIndex);
-    }
-  };
-
-  // Close View Details dialog
-  const handleCloseViewDialog = () => {
-    setViewDialogOpen(false);
-    setViewingRecord(null);
-    setViewingRecordIndex(-1);
-  };
-
-  // Edit from View Details dialog
-  const handleEditFromView = () => {
-    if (viewingRecord) {
-      handleCloseViewDialog();
-      handleEditRecord(viewingRecord);
-    }
-  };
-
-  // Generate Certificate (for baptism and marriage records)
-  const handleGenerateCertificate = () => {
-    if (!viewingRecord) return;
+    // TODO: Implement view modal or navigation to detailed view
+    console.log('Viewing record:', record);
     
-    // Navigate to certificate generation page with record data
-    // Use churchId from record, selectedChurch, or first available church
-    let churchId = viewingRecord.church_id || selectedChurch;
-    if (!churchId || churchId === 0) {
-      // Fallback to first available church from the churches list
-      churchId = churches.length > 0 ? churches[0].id : 46;
-    }
-    const certUrl = `/apps/certificates/generate?recordType=${selectedRecordType}&recordId=${viewingRecord.id}&churchId=${churchId}`;
-    window.open(certUrl, '_blank');
-  };
-
-  // Get record display name for View Details title
-  const getRecordDisplayName = (record: BaptismRecord | null): string => {
-    if (!record) return '';
-    
+    let recordName = '';
     if (selectedRecordType === 'marriage') {
-      const groomName = `${record.fname_groom || record.groom_first || ''} ${record.lname_groom || record.groom_last || ''}`.trim();
-      const brideName = `${record.fname_bride || record.bride_first || ''} ${record.lname_bride || record.bride_last || ''}`.trim();
-      return `${groomName} & ${brideName}`;
-    } else if (selectedRecordType === 'funeral') {
-      return `${record.deceased_first || record.firstName || ''} ${record.deceased_last || record.lastName || ''}`.trim();
+      const groomName = `${record.fname_groom || ''} ${record.lname_groom || ''}`.trim();
+      const brideName = `${record.fname_bride || ''} ${record.lname_bride || ''}`.trim();
+      recordName = `${groomName} & ${brideName}`;
     } else {
-      return `${record.person_first || record.firstName || ''} ${record.person_last || record.lastName || ''}`.trim();
+      recordName = `${record.firstName} ${record.lastName}`;
     }
+    
+    showToast(`Viewing record for ${recordName}`, 'info');
   };
 
   const handleDeleteRecord = async (recordId: string) => {
     if (window.confirm('Are you sure you want to delete this record?')) {
       try {
         setLoading(true);
-        const selectedType = recordTypes.find(rt => rt.value === selectedRecordType);
-        const endpoint = selectedType?.apiEndpoint || 'baptism';
-        const response = await fetch(`/api/${endpoint}-records/${recordId}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Failed to delete record');
-        }
+        // TODO: Implement actual API call
+        // await recordService.deleteRecord('baptism', recordId);
+        
         setRecords(prev => prev.filter(r => r.id !== recordId));
         showToast('Record deleted successfully', 'success');
       } catch (err) {
         console.error('Delete error:', err);
-        showToast(err instanceof Error ? err.message : 'Failed to delete record', 'error');
+        showToast('Failed to delete record', 'error');
       } finally {
         setLoading(false);
       }
@@ -970,46 +713,18 @@ const BaptismRecordsPage: React.FC = () => {
         setRecords(prev => prev.map(r => r.id === editingRecord.id ? updatedRecord : r));
         showToast('Record updated successfully', 'success');
       } else {
-        // Create new record - map form fields to API fields
-        const churchIdNum = parseInt(formData.churchId) || selectedChurch;
-        const apiPayload = {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          birth_date: formData.dateOfBirth || null,
-          reception_date: formData.dateOfBaptism || null,
-          birthplace: formData.placeOfBirth || null,
-          entry_type: 'Baptism',
-          sponsors: formData.godparentNames || null,
-          parents: [formData.fatherName, formData.motherName].filter(Boolean).join(' & ') || null,
-          clergy: formData.priest || formData.clergy || null,
-          church_id: churchIdNum,
-        };
-
-        // Make actual API call to save record
-        const apiResponse = await fetch(`/api/baptism-records?church_id=${churchIdNum}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(apiPayload),
-        });
-
-        if (!apiResponse.ok) {
-          const errData = await apiResponse.json().catch(() => ({}));
-          throw new Error(errData.error || `Failed to save: ${apiResponse.status}`);
-        }
-
-        const savedData = await apiResponse.json();
-        console.log('Record saved:', savedData);
-
-        // Update local state
+        // Create new record
         const newRecord: BaptismRecord = {
           ...formData,
-          id: savedData.record?.id?.toString() || savedData.id?.toString() || Date.now().toString(),
+          id: Date.now().toString(),
           churchName,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          createdBy: 'system',
+          createdBy: 'current-user@church.org', // TODO: Get from auth context
         } as BaptismRecord;
+        
+        // TODO: Implement actual API call
+        // await recordService.createRecord('baptism', newRecord);
         
         setRecords(prev => [...prev, newRecord]);
         showToast('Record created successfully', 'success');
@@ -1022,12 +737,6 @@ const BaptismRecordsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Navigate to Interactive Reports with pre-selected record type
-  const handleGenerateReport = () => {
-    const reportUrl = `/apps/interactive-reports/create?recordType=${selectedRecordType}&churchId=${selectedChurch?.id || ""}`;
-    window.location.href = reportUrl;
   };
 
   const handleExport = () => {
@@ -1293,7 +1002,7 @@ const BaptismRecordsPage: React.FC = () => {
                           }
                         }}
                       >
-                        {useAgGrid ? 'Standard View' : 'Standard View'}
+                        {useAgGrid ? 'Standard View' : 'AG Grid View'}
                       </Button>
                       
                       <Button
@@ -1312,24 +1021,6 @@ const BaptismRecordsPage: React.FC = () => {
                         }}
                       >
                         Export
-                      </Button>
-                      
-                      <Button
-                        variant="contained"
-                        startIcon={<ReportIcon />}
-                        onClick={handleGenerateReport}
-                        disabled={loading || !selectedRecordType}
-                        sx={{ 
-                          background: 'linear-gradient(45deg, #1565C0 30%, #1976D2 90%)',
-                          boxShadow: '0 3px 5px 2px rgba(21, 101, 192, .3)',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #0D47A1 30%, #1565C0 90%)',
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 8px 2px rgba(21, 101, 192, .4)',
-                          }
-                        }}
-                      >
-                        Generate Report
                       </Button>
                     </Stack>
                   </Stack>
@@ -1400,23 +1091,67 @@ const BaptismRecordsPage: React.FC = () => {
                 {/* Conditional Table Rendering */}
                 {useAgGrid ? (
                   // AG Grid View
-                  <Box sx={{ height: 600, width: '100%' }}>
-                    <Typography variant="h6" sx={{ p: 2 }}>
-                      AG Grid Temporarily Disabled
-                    </Typography>
-                    <Typography variant="body2" sx={{ px: 2, pb: 2 }}>
-                      AG Grid is experiencing lexical scoping conflicts. Please use the Standard View (unlock icon) for now.
-                      Click the unlock icon in the toolbar above to switch to the Material-UI table.
-                    </Typography>
-                    <Box sx={{ p: 2 }}>
-                      <Button 
-                        variant="contained" 
-                        onClick={() => setUseAgGrid(false)}
-                        startIcon={<LockOpenIcon />}
-                      >
-                        Switch to Standard View
-                      </Button>
-                    </Box>
+                  <Box sx={{ height: 600, width: '100%' }} className="ag-theme-alpine">
+                    <AgGridReact
+                      rowData={filteredAndSortedRecords}
+                      columnDefs={(() => {
+                        const cols: ColDef[] = getColumnDefinitions(selectedRecordType).map((col: any) => ({
+                          field: col.field,
+                          headerName: col.headerName,
+                          flex: 1,
+                          minWidth: 120,
+                          sortable: true,
+                          filter: true,
+                          floatingFilter: true,
+                          valueGetter: (params: any) => getCellValue(params.data, col),
+                        }));
+                        cols.push({
+                          headerName: 'Actions',
+                          field: 'id',
+                          minWidth: 150,
+                          maxWidth: 160,
+                          sortable: false,
+                          filter: false,
+                          cellRenderer: (params: ICellRendererParams) => {
+                            const record = params.data;
+                            if (!record) return null;
+                            return (
+                              <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', height: '100%' }}>
+                                <Tooltip title="View">
+                                  <IconButton size="small" onClick={() => handleViewRecord(record)}>
+                                    <ViewIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Edit">
+                                  <IconButton size="small" onClick={() => handleEditRecord(record)}>
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Delete">
+                                  <IconButton size="small" onClick={() => handleDeleteRecord(record.id)}>
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
+                            );
+                          },
+                        });
+                        return cols;
+                      })()}
+                      defaultColDef={{
+                        resizable: true,
+                        sortable: true,
+                        filter: true,
+                      }}
+                      pagination={true}
+                      paginationPageSize={25}
+                      paginationPageSizeSelector={[10, 25, 50, 100]}
+                      animateRows={true}
+                      domLayout="normal"
+                      suppressMovableColumns={false}
+                      rowSelection="multiple"
+                      getRowId={(params) => String(params.data.id)}
+                    />
                   </Box>
                 ) : (
                   // Standard Material-UI Table View
@@ -1498,17 +1233,17 @@ const BaptismRecordsPage: React.FC = () => {
                             <TableCell sx={getTableCellStyle('body')} align="center">
                               <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }} className="record-actions">
                                 <Tooltip title="View Details">
-                                  <IconButton size="small" onClick={() => handleViewRecord(record)} sx={{ color: '#1976d2' }}>
+                                  <IconButton size="small" onClick={() => handleViewRecord(record)}>
                                     <ViewIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Edit Record">
-                                  <IconButton size="small" onClick={() => handleEditRecord(record)} sx={{ color: '#ed6c02' }}>
+                                  <IconButton size="small" onClick={() => handleEditRecord(record)}>
                                     <EditIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Delete Record">
-                                  <IconButton size="small" onClick={() => handleDeleteRecord(record.id)} sx={{ color: '#d32f2f' }}>
+                                  <IconButton size="small" onClick={() => handleDeleteRecord(record.id)}>
                                     <DeleteIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
@@ -1896,235 +1631,6 @@ const BaptismRecordsPage: React.FC = () => {
                 >
                   {loading ? <CircularProgress size={20} /> : 'Save'}
                 </Button>
-              </DialogActions>
-            </Dialog>
-
-            {/* View Details Dialog */}
-            <Dialog
-              open={viewDialogOpen}
-              onClose={handleCloseViewDialog}
-              maxWidth="md"
-              fullWidth
-              PaperProps={{
-                sx: {
-                  minHeight: '60vh',
-                  maxHeight: '90vh',
-                }
-              }}
-            >
-              <DialogTitle sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                pb: 2
-              }}>
-                <Box>
-                  <Typography variant="h6" component="span">
-                    {selectedRecordType.charAt(0).toUpperCase() + selectedRecordType.slice(1)} Record Details
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    {getRecordDisplayName(viewingRecord)}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    {viewingRecordIndex + 1} of {filteredAndSortedRecords.length}
-                  </Typography>
-                  <IconButton 
-                    onClick={handlePreviousRecord} 
-                    disabled={viewingRecordIndex <= 0}
-                    size="small"
-                    sx={{ border: '1px solid', borderColor: 'divider' }}
-                  >
-                    <ChevronLeftIcon />
-                  </IconButton>
-                  <IconButton 
-                    onClick={handleNextRecord} 
-                    disabled={viewingRecordIndex >= filteredAndSortedRecords.length - 1}
-                    size="small"
-                    sx={{ border: '1px solid', borderColor: 'divider' }}
-                  >
-                    <ChevronRightIcon />
-                  </IconButton>
-                </Box>
-              </DialogTitle>
-              <DialogContent sx={{ pt: 3 }}>
-                {viewingRecord && (
-                  <Grid container spacing={3}>
-                    {/* Record ID and Registry Info */}
-                    <Grid item xs={12}>
-                      <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
-                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                          Registry Information
-                        </Typography>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6} sm={3}>
-                            <Typography variant="caption" color="text.secondary">Record ID</Typography>
-                            <Typography variant="body2" fontWeight="medium">{viewingRecord.id}</Typography>
-                          </Grid>
-                          <Grid item xs={6} sm={3}>
-                            <Typography variant="caption" color="text.secondary">Book No.</Typography>
-                            <Typography variant="body2">{viewingRecord.book_no || viewingRecord.bookNumber || '—'}</Typography>
-                          </Grid>
-                          <Grid item xs={6} sm={3}>
-                            <Typography variant="caption" color="text.secondary">Page No.</Typography>
-                            <Typography variant="body2">{viewingRecord.page_no || viewingRecord.pageNumber || '—'}</Typography>
-                          </Grid>
-                          <Grid item xs={6} sm={3}>
-                            <Typography variant="caption" color="text.secondary">Entry No.</Typography>
-                            <Typography variant="body2">{viewingRecord.entry_no || viewingRecord.entryNumber || '—'}</Typography>
-                          </Grid>
-                        </Grid>
-                      </Paper>
-                    </Grid>
-
-                    {/* Person/Couple Information */}
-                    <Grid item xs={12} md={6}>
-                      <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
-                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                          {selectedRecordType === 'marriage' ? 'Couple Information' : 'Person Information'}
-                        </Typography>
-                        {selectedRecordType === 'marriage' ? (
-                          <>
-                            <Box sx={{ mb: 2 }}>
-                              <Typography variant="caption" color="text.secondary">Groom</Typography>
-                              <Typography variant="body1" fontWeight="medium">
-                                {`${viewingRecord.fname_groom || viewingRecord.groom_first || ''} ${viewingRecord.lname_groom || viewingRecord.groom_last || ''}`.trim() || '—'}
-                              </Typography>
-                            </Box>
-                            <Box>
-                              <Typography variant="caption" color="text.secondary">Bride</Typography>
-                              <Typography variant="body1" fontWeight="medium">
-                                {`${viewingRecord.fname_bride || viewingRecord.bride_first || ''} ${viewingRecord.lname_bride || viewingRecord.bride_last || ''}`.trim() || '—'}
-                              </Typography>
-                            </Box>
-                          </>
-                        ) : selectedRecordType === 'funeral' ? (
-                          <>
-                            <Box sx={{ mb: 2 }}>
-                              <Typography variant="caption" color="text.secondary">Deceased</Typography>
-                              <Typography variant="body1" fontWeight="medium">
-                                {`${viewingRecord.deceased_first || viewingRecord.firstName || ''} ${viewingRecord.deceased_last || viewingRecord.lastName || ''}`.trim() || '—'}
-                              </Typography>
-                            </Box>
-                            <Box>
-                              <Typography variant="caption" color="text.secondary">Date of Death</Typography>
-                              <Typography variant="body1">{formatRecordDate(viewingRecord.death_date || viewingRecord.deathDate) || '—'}</Typography>
-                            </Box>
-                          </>
-                        ) : (
-                          <>
-                            <Box sx={{ mb: 2 }}>
-                              <Typography variant="caption" color="text.secondary">Name</Typography>
-                              <Typography variant="body1" fontWeight="medium">
-                                {`${viewingRecord.person_first || viewingRecord.firstName || ''} ${viewingRecord.person_middle || viewingRecord.middleName || ''} ${viewingRecord.person_last || viewingRecord.lastName || ''}`.trim() || '—'}
-                              </Typography>
-                            </Box>
-                            <Box sx={{ mb: 2 }}>
-                              <Typography variant="caption" color="text.secondary">Date of Birth</Typography>
-                              <Typography variant="body1">{formatRecordDate(viewingRecord.birth_date || viewingRecord.dateOfBirth) || '—'}</Typography>
-                            </Box>
-                            <Box>
-                              <Typography variant="caption" color="text.secondary">Date of Baptism</Typography>
-                              <Typography variant="body1">{formatRecordDate(viewingRecord.baptism_date || viewingRecord.dateOfBaptism) || '—'}</Typography>
-                            </Box>
-                          </>
-                        )}
-                      </Paper>
-                    </Grid>
-
-                    {/* Ceremony Details */}
-                    <Grid item xs={12} md={6}>
-                      <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
-                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                          Ceremony Details
-                        </Typography>
-                        <Box sx={{ mb: 2 }}>
-                          <Typography variant="caption" color="text.secondary">
-                            {selectedRecordType === 'marriage' ? 'Marriage Date' : selectedRecordType === 'funeral' ? 'Funeral Date' : 'Baptism Date'}
-                          </Typography>
-                          <Typography variant="body1">
-                            {formatRecordDate(
-                              selectedRecordType === 'marriage' ? (viewingRecord.marriage_date || viewingRecord.marriageDate) :
-                              selectedRecordType === 'funeral' ? (viewingRecord.funeral_date || viewingRecord.funeralDate) :
-                              (viewingRecord.baptism_date || viewingRecord.dateOfBaptism)
-                            ) || '—'}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ mb: 2 }}>
-                          <Typography variant="caption" color="text.secondary">Officiant / Clergy</Typography>
-                          <Typography variant="body1">{viewingRecord.officiant_name || viewingRecord.priest || viewingRecord.clergy || '—'}</Typography>
-                        </Box>
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">Location</Typography>
-                          <Typography variant="body1">{viewingRecord.place_name || viewingRecord.location || viewingRecord.churchName || '—'}</Typography>
-                        </Box>
-                      </Paper>
-                    </Grid>
-
-                    {/* Sponsors/Witnesses/Godparents */}
-                    {(selectedRecordType === 'baptism' || selectedRecordType === 'marriage') && (
-                      <Grid item xs={12}>
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                            {selectedRecordType === 'marriage' ? 'Witnesses' : 'Godparents / Sponsors'}
-                          </Typography>
-                          <Typography variant="body1">
-                            {selectedRecordType === 'marriage' 
-                              ? (displayJsonField(viewingRecord.witnesses) || '—')
-                              : (displayJsonField(viewingRecord.godparents) || viewingRecord.godfather || viewingRecord.godmother || '—')
-                            }
-                          </Typography>
-                        </Paper>
-                      </Grid>
-                    )}
-
-                    {/* Notes */}
-                    {viewingRecord.notes && (
-                      <Grid item xs={12}>
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                          <Typography variant="subtitle2" color="text.secondary" gutterBottom>Notes</Typography>
-                          <Typography variant="body1">{viewingRecord.notes}</Typography>
-                        </Paper>
-                      </Grid>
-                    )}
-                  </Grid>
-                )}
-              </DialogContent>
-              <DialogActions sx={{ 
-                borderTop: '1px solid', 
-                borderColor: 'divider', 
-                px: 3, 
-                py: 2,
-                justifyContent: 'space-between'
-              }}>
-                <Box>
-                  {(selectedRecordType === 'baptism' || selectedRecordType === 'marriage') && (
-                    <Button
-                      variant="outlined"
-                      color="secondary"
-                      onClick={handleGenerateCertificate}
-                      startIcon={<ExportIcon />}
-                    >
-                      Generate Certificate
-                    </Button>
-                  )}
-                </Box>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button onClick={handleCloseViewDialog}>
-                    Close
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleEditFromView}
-                    startIcon={<EditIcon />}
-                  >
-                    Edit Record
-                  </Button>
-                </Box>
               </DialogActions>
             </Dialog>
 

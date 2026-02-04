@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 import { resolve } from 'path';
-import fs from 'fs/promises';
 import { execSync } from 'child_process';
-import svgr from '@svgr/rollup';
+import fs from 'fs';
 
 // Read version from package.json
-const packageJson = JSON.parse(require('fs').readFileSync('./package.json', 'utf-8'));
+const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 const baseVersion = packageJson.version || '1.0.0';
 
 // https://vitejs.dev/config/
@@ -57,11 +57,16 @@ export default defineConfig(({ mode }) => {
 
 
 
-    // plugins: [react(),svgr({
-    //   exportAsDefault: true
-    // })],
-
-    plugins: [svgr(), react()],
+    plugins: [
+        svgr({
+            svgrOptions: {
+                exportType: 'named',
+                namedExport: 'ReactComponent',
+            },
+            // Only transform SVGs with ?react suffix, let plain imports return URLs
+        }),
+        react(),
+    ],
     build: {
         minify: 'esbuild', // esbuild minifier is ~20-40x faster than terser
         sourcemap: false, // Disable sourcemaps for faster builds (saves ~30% build time)

@@ -87,6 +87,8 @@ export interface Church {
   has_baptism_records?: boolean;
   has_marriage_records?: boolean;
   has_funeral_records?: boolean;
+  enable_ag_grid?: boolean;
+  ag_grid_record_types?: string[];
   setup_complete?: boolean;
   database_name?: string;
 }
@@ -125,6 +127,8 @@ export interface CreateChurchData {
   has_baptism_records?: boolean;
   has_marriage_records?: boolean;
   has_funeral_records?: boolean;
+  enable_ag_grid?: boolean;
+  ag_grid_record_types?: string[];
   setup_complete?: boolean;
   database_name?: string;
 }

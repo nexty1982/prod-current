@@ -1,10 +1,10 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 /**
  * Comprehensive JSON-to-Database Migration Utility
  * Migrates all JSON/file-based systems to database tables
  */
 
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const fs = require('fs').promises;
 const path = require('path');
 

@@ -1,6 +1,6 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 const express = require('express');
-const db = require('../../config/db-compat');
+const db = require('../config/db-compat');
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // Debug session endpoint
 const express = require('express');
 const router = express.Router();
@@ -224,7 +224,7 @@ router.get('/session-status', async (req, res) => {
     console.log('======================================');
     
     try {
-        const { promisePool } = require('../../config/db-compat');
+        const { promisePool } = require('../config/db-compat');
         
         // Get session information
         const sessionInfo = {

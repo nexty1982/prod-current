@@ -1,10 +1,10 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 /**
  * OMAI Command Service - Database Implementation
  * Replaces omai-commands.json with database queries
  */
 
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 
 class OmaiCommandService {
   constructor() {

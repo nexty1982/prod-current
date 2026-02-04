@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { validate, RoutesListSchema, MenusListSchema, CreateRouteSchema, UpdateRouteSchema, CreateMenuSchema, UpdateMenuSchema, ReorderMenusSchema } from './validators.js';
-import { RoutesService, MenusService } from './service.js';
-import { ah } from './asyncHandler.js';
+import { validate, RoutesListSchema, MenusListSchema, CreateRouteSchema, UpdateRouteSchema, CreateMenuSchema, UpdateMenuSchema, ReorderMenusSchema } from './validators';
+import { RoutesService, MenusService } from './service';
+import { ah } from './asyncHandler';
 
 const router = Router();
 

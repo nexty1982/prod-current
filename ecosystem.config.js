@@ -1,58 +1,59 @@
-/**
- * PM2 Ecosystem Configuration
- *
- * Manages multiple services including the main backend and OM-Librarian agent
- * 
- * Usage:
- *   pm2 start ecosystem.config.js                    # Start all apps
- *   pm2 start ecosystem.config.js --only orthodox-backend  # Start only backend
- *   pm2 start ecosystem.config.js --only om-librarian      # Start only librarian
- */
-
 module.exports = {
   apps: [
-    // Main Orthodox Metrics Backend Server
     {
-      name: 'orthodox-backend',
-      script: 'dist/index.js',
-      cwd: '/var/www/orthodoxmetrics/prod/server',
+      name: "orthodox-backend",
+      cwd: "/var/www/orthodoxmetrics/prod/server",
+      script: "dist/index.js",
       instances: 1,
-      exec_mode: 'fork',
+      exec_mode: "fork",
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',
+      max_memory_restart: "900M",
+      time: true,
       env: {
-        NODE_ENV: 'production',
+        NODE_ENV: "production",
+        PORT: "3001",
+        HOST: "0.0.0.0"
       },
-      env_file: '/var/www/orthodoxmetrics/prod/server/.env',
-      error_file: '/var/www/orthodoxmetrics/prod/logs/orthodox-backend-error.log',
-      out_file: '/var/www/orthodoxmetrics/prod/logs/orthodox-backend-out.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      merge_logs: true,
-      min_uptime: '10s',
-      max_restarts: 10,
-      restart_delay: 4000,
+      out_file: "/var/www/orthodoxmetrics/prod/server/logs/orthodox-backend-out.log",
+      error_file: "/var/www/orthodoxmetrics/prod/server/logs/orthodox-backend-err.log",
+      log_file: "/var/www/orthodoxmetrics/prod/server/logs/orthodox-backend-combined.log"
     },
-    // OM-Librarian Agent
     {
-      name: 'om-librarian',
-      script: './server/src/agents/omLibrarian.js',
-      cwd: '/var/www/orthodoxmetrics/prod',
+      name: "omai-background",
+      cwd: "/var/www/orthodoxmetrics/prod",
+      script: "server/src/services/omaiBackgroundService.js",
       instances: 1,
-      exec_mode: 'fork',
+      exec_mode: "fork",
       autorestart: true,
       watch: false,
-      max_memory_restart: '500M',
+      max_memory_restart: "700M",
+      time: true,
       env: {
-        NODE_ENV: 'production',
+        NODE_ENV: "production",
+        OMAI_LOG_LEVEL: "info"
       },
-      error_file: '/var/www/orthodoxmetrics/prod/logs/om-librarian-error.log',
-      out_file: '/var/www/orthodoxmetrics/prod/logs/om-librarian-out.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      merge_logs: true,
-      min_uptime: '10s',
-      max_restarts: 10,
-      restart_delay: 4000,
+      out_file: "/var/www/orthodoxmetrics/prod/logs/omai-background-out.log",
+      error_file: "/var/www/orthodoxmetrics/prod/logs/omai-background-err.log",
+      log_file: "/var/www/orthodoxmetrics/prod/logs/omai-background-combined.log"
     },
-  ],
+    {
+      name: "om-librarian",
+      cwd: "/var/www/orthodoxmetrics/prod",
+      script: "server/src/agents/omLibrarian.js",
+      instances: 1,
+      exec_mode: "fork",
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "600M",
+      time: true,
+      env: {
+        NODE_ENV: "production",
+        OML_LOG_LEVEL: "info"
+      },
+      out_file: "/var/www/orthodoxmetrics/prod/logs/om-librarian-out.log",
+      error_file: "/var/www/orthodoxmetrics/prod/logs/om-librarian-err.log",
+      log_file: "/var/www/orthodoxmetrics/prod/logs/om-librarian-combined.log"
+    }
+  ]
 };

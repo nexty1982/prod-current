@@ -1,7 +1,7 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // Notes API Routes for Orthodox Metrics
 const express = require('express');
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const router = express.Router();
 
 // Middleware to check if user is authenticated

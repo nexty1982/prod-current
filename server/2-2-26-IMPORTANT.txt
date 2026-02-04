@@ -1,0 +1,214 @@
+root@orthodoxmetrics:/var/www/orthodoxmetrics/prod/server# NODE_ENV=production npm start
+> orthodoxmetrics-backend@1.0.0 start
+> NODE_ENV=production node dist/index.js
+✅  Loaded server configuration:
+{
+  "server": {
+    "env": "production",
+    "port": 3001,
+    "host": "0.0.0.0",
+    "trustProxy": true
+  },
+  "db": {
+    "app": {
+      "host": "localhost",
+      "user": "orthodoxapps",
+      "password": "***14 chars***",
+      "database": "orthodoxmetrics_db",
+      "port": 3306
+    },
+    "auth": "***"
+  },
+  "session": {
+    "secret": "***32 chars***",
+    "cookieName": "orthodoxmetrics.sid",
+    "cookieDomain": "orthodoxmetrics.com",
+    "secure": true,
+    "sameSite": "lax",
+    "maxAgeMs": 86400000,
+    "store": "mysql"
+  },
+  "cors": {
+    "allowedOrigins": [
+      "https://orthodoxmetrics.com",
+      "http://orthodoxmetrics.com",
+      "https://www.orthodoxmetrics.com",
+      "http://www.orthodoxmetrics.com",
+      "http://localhost:3000",
+      "https://localhost:3000",
+      "http://localhost:5173",
+      "https://localhost:5173",
+      "http://localhost:5174",
+      "https://localhost:5174",
+      "http://192.168.1.239:5174",
+      "https://192.168.1.239:5174"
+    ],
+    "credentials": "***"
+  },
+  "paths": {},
+  "features": {
+    "interactiveReports": true,
+    "notifications": true,
+    "ocr": true,
+    "certificates": true,
+    "invoices": true
+  }
+}
+BOOT_SIGNATURE_OCR /var/www/orthodoxmetrics/prod/server/dist/index.js 2026-02-02T15:41:28.834Z
+✅  MySQL session store initialized
+⚠️  Centralized config not available, using process.env fallback
+⚠️  Centralized config not available, using process.env fallback
+[Server] Loading Refactor Console router...
+[RefactorConsole] Router created, type: function
+[RefactorConsole] Router has use method: true
+[RefactorConsole] Exporting router, type: function
+[RefactorConsole] Router stack length: 18
+[Server] Refactor Console router loaded, type: function
+[Server] Router has use method: true
+[Server] Router stack length: 18
+⚠️  [SafeRequire] Module not found: ../utils/writeSacramentHistory
+- using fallback stub
+⚠️  [Server] Failed to load baptismCertificates router: The module
+'/var/www/orthodoxmetrics/prod/server/node_modules/canvas/build/Release/canvas.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 115. This version of Node.js requires
+NODE_MODULE_VERSION 127. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+   Creating stub router. Certificate routes will return 503.
+⚠️  [Server] Failed to load marriageCertificates router: The module '/var/www/orthodoxmetrics/prod/server/node_modules/canvas/build/Release/canvas.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 115. This version of Node.js requires
+NODE_MODULE_VERSION 127. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+⚠️  [Server] Failed to load churchCertificates router: The module '/var/www/orthodoxmetrics/prod/server/node_modules/canvas/build/Release/canvas.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 115. This version of Node.js requires
+NODE_MODULE_VERSION 127. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+⚠️  [Server] Failed to load certificates router: The module '/var/www/orthodoxmetrics/prod/server/node_modules/canvas/build/Release/canvas.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 115. This version of Node.js requires
+NODE_MODULE_VERSION 127. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+[DB QUERY]
+        SELECT command_key, category, patterns, description, action, safety,
+               context_aware, requires_hands_on, requires_confirmation,
+               requires_parameters, allowed_roles
+        FROM omai_commands
+        WHERE is_active = TRUE
+        ORDER BY category, command_key
+✅  [Templates Router] Loading templates router for /api/admin/templates
+✅  [Templates Router] Router exported successfully
+✅  [Server] Admin templates router loaded successfully
+⚠️ TypeScript import routes not compiled, using fallback implementation
+✅  [Server] Client API router loaded successfully
+[DB QUERY]
+            CREATE TABLE IF NOT EXISTS service_actions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                service VARCHAR(50) NOT NULL,
+                action VARCHAR(20) NOT NULL,
+                timestamp DATETIME NOT NULL,
+                success BOOLEAN NOT NULL,
+                message TEXT NULL,
+                user_email VARCHAR(255) NULL,
+                INDEX idx_timestamp (timestamp),
+                INDEX idx_service (service)
+            )
+[OMAI] Memory core temporarily disabled - using fallback only
+[OMAI] Intelligence pipeline initialized
+✅  Found npm at: /root/.nvm/versions/node/v22.16.0/bin/npm
+📦 Initial npm path: /root/.nvm/versions/node/v22.16.0/bin/npm
+🔧 Setting up middleware in correct order...
+🍪 Applying session middleware...
+🛤️  Setting up routes in correct order...
+✅  [Server] Mounted /api/internal/build-events route
+✅  [Server] Mounted /api/admin/templates route
+✅  [Server] Mounted /api/admin/build-status route
+✅  [Server] Mounted /api/admin/auth/check route (for Nginx auth_request)
+✅  [Server] Mounted /api/ops route (includes Git Operations)
+✅  [Server] Mounted /api/library routes
+✅  Admin routes mounted at /api/admin from /var/www/orthodoxmetrics/prod/server/dist/api/admin.js
+✅  Using production images root: /var/www/orthodoxmetrics/prod/front-end/public/images
+⚠️ Gallery directory does not exist: /var/www/orthodoxmetrics/prod/front-end/public/images/gallery (will be created on first upload)
+🖼️ Registering /api/gallery routes
+✅  /api/gallery routes registered
+Docs directory ensured: /var/www/orthodoxmetrics/prod/front-end/public/docs
+📚 Registering /api/docs routes
+✅  /api/docs routes registered
+👤 Registering /api/user-files routes
+✅  /api/user-files routes registered
+🚫 [OCR] Legacy /api/ocr routes disabled (use /api/church/:churchId/ocr/* instead)
+✅  [OCR] Church OCR routes: hardwired (DB source of truth)
+✅  [OCR Jobs Routes] Registering hardwired OCR jobs endpoints (authoritative)...
+✅  [OCR Jobs Routes] All 5 hardwired OCR jobs endpoints registered
+successfully
+✅  [OCR] Church OCR routing complete - using hardwired routes (DB source of truth)
+✅  [Server] Interactive reports router loaded successfully
+[Server] ✅  Mounting Refactor Console router at /api/refactor-console
+[Server] Refactor Console routes: GET /health, GET /test, GET /config/paths, POST /config/validate-paths, GET /snapshots, GET /scan, POST /preview-restore, POST /restore, POST /phase1/start, GET /jobs/:jobId, GET /jobs/:jobId/result, GET /phase1-status, GET /phase1-analysis, GET /restore-history, GET /restore-history/file/*, GET /restore-history/stats, GET /restore-history/export, POST /restore-bundle
+[DEBUG] Checking images paths:
+  distImagesPath: /var/www/orthodoxmetrics/prod/front-end/dist/images (exists: true)
+  publicImagesPath: /var/www/orthodoxmetrics/prod/front-end/public/images (exists: true)
+✅  [Server] Serving /images/* from: /var/www/orthodoxmetrics/prod/front-end/dist/images (dist)
+✅  [Server] /images/* middleware mounted
+Email queue processor started (runs every 5 minutes)
+innerError Error: Cannot find module '../build/Debug/pty.node'
+Require stack:
+- /var/www/orthodoxmetrics/prod/server/node_modules/node-pty/lib/unixTerminal.js
+- /var/www/orthodoxmetrics/prod/server/node_modules/node-pty/lib/index.js
+- /var/www/orthodoxmetrics/prod/server/dist/services/terminalManager.js
+- /var/www/orthodoxmetrics/prod/server/dist/api/jit-terminal.js
+- /var/www/orthodoxmetrics/prod/server/dist/routes/jit-terminal.js
+- /var/www/orthodoxmetrics/prod/server/dist/index.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (/var/www/orthodoxmetrics/prod/server/node_modules/node-pty/lib/unixTerminal.js:34:15)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14) {  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/var/www/orthodoxmetrics/prod/server/node_modules/node-pty/lib/unixTerminal.js',
+    '/var/www/orthodoxmetrics/prod/server/node_modules/node-pty/lib/index.js',
+    '/var/www/orthodoxmetrics/prod/server/dist/services/terminalManager.js',
+    '/var/www/orthodoxmetrics/prod/server/dist/api/jit-terminal.js',
+    '/var/www/orthodoxmetrics/prod/server/dist/routes/jit-terminal.js',
+    '/var/www/orthodoxmetrics/prod/server/dist/index.js'
+  ]
+}
+⚠️  [jit-terminal] Module failed to load: The module '/var/www/orthodoxmetrics/prod/server/node_modules/node-pty/build/Release/pty.node'
+was compiled against a different Node.js version using
+⚠️  [jit-terminal] WebSocket setup skipped - module not available
+🔌 JIT Terminal WebSocket initialized
+🔌 OMAI Logger WebSocket initialized on /ws/omai-logger
+═══════════════════════════════════════════════════════════
+🚀 Starting OrthodoxMetrics Backend Server
+═══════════════════════════════════════════════════════════
+📋 Process ID: 1130631
+🔢 Instance ID: unknown
+⚙️  Execution Mode: standalone
+🌐 Environment: PRODUCTION
+🔌 Attempting to bind: 0.0.0.0:3001
+═══════════════════════════════════════════════════════════
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3001
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at node:net:2205:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on WebSocketServer instance at:
+    at Server.emit (node:events:530:35)
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3001
+}
+Node.js v22.16.0

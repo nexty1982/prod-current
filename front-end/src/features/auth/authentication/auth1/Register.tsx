@@ -1,9 +1,8 @@
-import Grid2 from '@/components/compat/Grid2';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Box, Typography, Stack } from '@mui/material';
+import { Box, Grid, Typography, Stack } from '@mui/material';
 
 import PageContainer from '@/shared/ui/PageContainer';
 import img1 from '@/assets/images/backgrounds/login-bg.svg';
@@ -13,8 +12,13 @@ import AuthRegister from '@/features/auth/authentication/authForms/AuthRegister'
 
 const Register = () => (
   <PageContainer title="Register" description="this is Register page">
-    <Grid2 container spacing={0} justifyContent="center" sx={{ overflowX: 'hidden' }}>
-      <Grid2
+    <Grid container spacing={0} justifyContent="center" sx={{ overflowX: 'hidden' }}>
+      <Grid
+        item
+        xs={12}
+        sm={12}
+        lg={7}
+        xl={8}
         sx={{
           position: 'relative',
           '&:before': {
@@ -27,12 +31,6 @@ const Register = () => (
             width: '100%',
             opacity: '0.3',
           },
-        }}
-        size={{
-          xs: 12,
-          sm: 12,
-          lg: 7,
-          xl: 8
         }}>
         <Box position="relative">
           <Box px={3}>
@@ -59,20 +57,19 @@ const Register = () => (
             />
           </Box>
         </Box>
-      </Grid2>
-      <Grid2
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        sm={12}
+        lg={5}
+        xl={4}
         display="flex"
         justifyContent="center"
-        alignItems="center"
-        size={{
-          xs: 12,
-          sm: 12,
-          lg: 5,
-          xl: 4
-        }}>
+        alignItems="center">
         <Box p={4}>
           <AuthRegister
-            title="Welcome to Orthodox Metrics"
+            title="Welcome to Modernize"
             subtext={
               <Typography variant="subtitle1" color="textSecondary" mb={1}>
                 Your Admin Dashboard
@@ -98,8 +95,8 @@ const Register = () => (
             }
           />
         </Box>
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   </PageContainer>
 );
 

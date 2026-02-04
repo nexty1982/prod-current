@@ -1,7 +1,7 @@
 import { Express, Router } from 'express';
-const { requireAuth } = require('../../../middleware/auth');
-import { requireSuperAdmin } from './superAdminGuard.js';
-import { router as buildRouter } from './router.js';
+const { requireAuth } = require('../../middleware/auth');
+import { requireSuperAdmin } from './superAdminGuard';
+import { router as buildRouter } from './router';
 
 function jsonNotFound(_req: any, res: any) {
   res.status(404).json({ error: { code: 'not_found', message: 'Not Found' } });

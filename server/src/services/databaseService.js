@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 /**
  * Database Service Layer - Proper Architecture Separation
  * 

@@ -45,7 +45,7 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
                 return null;
             }
             
-            const response = await fetch(`/api/om/profile/${userId}`, {
+            const response = await fetch('/api/user/profile', {
                 credentials: 'include'
             });
 
@@ -90,7 +90,7 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
                 throw new Error('No user ID available');
             }
             
-            const response = await fetch(`/api/om/profile/${userId}`, {
+            const response = await fetch('/api/user/profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
                 throw new Error('No user ID available');
             }
             
-            const response = await fetch(`/api/om/profile/${userId}`, {
+            const response = await fetch('/api/user/profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

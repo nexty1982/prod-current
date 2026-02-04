@@ -35,7 +35,7 @@ import {
 } from '@mui/icons-material';
 import dayjs, { Dayjs } from 'dayjs';
 
-import { orthodoxCalendarService } from '../../../services/orthodoxCalendarService';
+import { orthodoxCalendarService } from '@/shared/lib/orthodoxCalendarService';
 import {
   OrthodoxCalendarDay,
   CalendarLanguage,

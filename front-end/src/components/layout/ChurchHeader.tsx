@@ -79,6 +79,12 @@ const ChurchHeader: React.FC<ChurchHeaderProps> = ({ onChurchChange, currentChur
           }
         });
 
+        if (response.status === 401) {
+          // Session expired — clear auth and redirect to login
+          localStorage.removeItem('auth_user');
+          window.location.href = `/auth/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`;
+          return;
+        }
         if (!response.ok) {
           throw new Error('Failed to fetch churches');
         }

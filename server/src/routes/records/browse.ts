@@ -3,7 +3,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { getAppPool } from '../../../config/db';
+import { getAppPool } from '../../config/db';
 import { RowDataPacket } from 'mysql2';
 
 const router = Router();

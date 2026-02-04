@@ -1,6 +1,6 @@
-import { RouterMenuStudioApiError } from './types.js';
-import { RoutesRepo, MenusRepo } from './repo.js';
-import type { RouteRecord, MenuNode, RoutesListQuery, MenusListQuery, ReorderMenusInput } from './types.js';
+import { RouterMenuStudioApiError } from './types';
+import { RoutesRepo, MenusRepo } from './repo';
+import type { RouteRecord, MenuNode, RoutesListQuery, MenusListQuery, ReorderMenusInput } from './types';
 
 export class RoutesService {
   constructor(private readonly repo = new RoutesRepo()) {}

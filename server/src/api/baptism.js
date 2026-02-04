@@ -1,10 +1,10 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/baptism.js
 const express = require('express');
 const { getChurchDbConnection } = require('../utils/dbSwitcher');
 const { cleanRecords, cleanRecord, transformBaptismRecords, transformBaptismRecord } = require('../utils/dateFormatter');
-const { promisePool } = require('../../config/db-compat');
-const { safeRequire } = require('../../utils/safeRequire');
+const { promisePool } = require('../config/db-compat');
+const { safeRequire } = require('../utils/safeRequire');
 const { requireAuth } = require('../middleware/auth');
 
 // Safe require for writeSacramentHistory - handles missing module gracefully
@@ -689,10 +689,26 @@ router.post('/batch', async (req, res) => {
 router.delete('/:id', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
-        
-        // Get church_id from request (body or query)
-        const church_id = req.body.church_id || req.query.church_id || null;
-        
+
+        // Get church_id from request (body, query, or session)
+        let church_id = req.body.church_id || req.query.church_id || req.session?.church_id || null;
+
+        // If church_id is not provided, try to find the record first to get its church_id
+        if (!church_id || church_id === '0' || church_id === 'null') {
+            console.log('🔍 church_id not provided for baptism delete, searching for record in default database...');
+            try {
+                const defaultDatabaseName = await getChurchDatabaseName(null);
+                const defaultPool = await getChurchDbConnection(defaultDatabaseName);
+                const [recordRows] = await defaultPool.query('SELECT church_id FROM baptism_records WHERE id = ?', [id]);
+                if (recordRows.length > 0) {
+                    church_id = recordRows[0].church_id;
+                    console.log(`✅ Found church_id ${church_id} for baptism record ${id}`);
+                }
+            } catch (queryErr) {
+                console.error('❌ Error querying default database for baptism record:', queryErr);
+            }
+        }
+
         // Get church info (both churchId and databaseName)
         const churchInfo = await getChurchInfo(church_id);
         console.log(`🏛️ Using database: ${churchInfo.databaseName} for church_id: ${churchInfo.churchId}`);

@@ -1,8 +1,8 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 const express = require('express');
 const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 
 // GET /api/user/church - Get user's assigned church
 router.get('/church', requireAuth, async (req, res) => {

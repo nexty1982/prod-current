@@ -9,7 +9,7 @@ try {
 } catch (error: any) {
   // Fallback: try alternative path (for dist environment)
   try {
-    serverConfig = require('./src/config');
+    serverConfig = require('./config');
   } catch (e) {
     console.error('❌ Failed to load centralized config:', error.message);
     console.error('   Falling back to process.env (backward compatibility)');
@@ -400,7 +400,14 @@ app.use(morgan('dev'));
 // So they won't interfere with multer file uploads
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(cookieParser());
+// !! CRITICAL — cookieParser MUST receive the session secret — SEE server/CONFIG.md !!
+// Without the secret, express-session's signed cookies break and every request gets a new session.
+// This caused a production outage on 2026-02-02. NEVER call cookieParser() without the secret.
+console.log('🔑 cookieParser secret check:', {
+  length: serverConfig.session.secret?.length || 0,
+  prefix: serverConfig.session.secret?.substring(0, 8) || 'MISSING',
+});
+app.use(cookieParser(serverConfig.session.secret));
 
 // Multer setup for file uploads (must be after body parsers)
 const multer = require('multer');
@@ -620,6 +627,10 @@ app.use('/api/kanban', kanbanRouter);
 const userProfileRouter = require('./routes/user-profile');
 app.use('/api/user/profile', userProfileRouter);
 
+// Profile image upload routes (avatar + banner)
+const profileUploadRouter = require('./routes/upload');
+app.use('/api/upload', profileUploadRouter);
+
 // Notification routes (authenticated)
 app.use('/api', notificationRouter);
 
@@ -738,7 +749,7 @@ app.get('/api/church/:churchId/ocr/settings', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -871,7 +882,7 @@ app.put('/api/church/:churchId/ocr/settings', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -1072,7 +1083,7 @@ app.get('/api/church/:churchId/ocr/setup-state', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -1162,7 +1173,7 @@ app.put('/api/church/:churchId/ocr/setup-state', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -1237,7 +1248,7 @@ app.post('/api/church/:churchId/ocr/setup-validate', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -1344,7 +1355,7 @@ app.get('/api/church/:churchId/ocr/setup-inventory', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -1480,7 +1491,7 @@ app.get('/api/church/:churchId/ocr/jobs', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(dbName);
@@ -1787,7 +1798,7 @@ app.post('/api/ocr/jobs/upload', upload.array('files', 10), async (req, res) => 
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(dbName);
@@ -1919,7 +1930,7 @@ app.get('/api/church/:churchId/ocr/jobs/:jobId', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -2042,7 +2053,7 @@ app.post('/api/church/:churchId/ocr/jobs/:jobId/normalize', async (req, res) => 
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -2193,7 +2204,7 @@ app.get('/api/church/:churchId/ocr/jobs/:jobId/image', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -2273,7 +2284,7 @@ app.post('/api/church/:churchId/ocr/jobs/:jobId/mapping', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -2342,7 +2353,7 @@ app.get('/api/church/:churchId/ocr/jobs/:jobId/mapping', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -2398,7 +2409,7 @@ app.patch('/api/church/:churchId/ocr/jobs/:jobId', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -2445,7 +2456,7 @@ app.post('/api/church/:churchId/ocr/jobs/:jobId/retry', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -2513,7 +2524,7 @@ app.delete('/api/church/:churchId/ocr/jobs', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -2584,7 +2595,7 @@ app.post('/api/church/:churchId/ocr/test/create-test-job', async (req, res) => {
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -2762,7 +2773,7 @@ app.get('/api/church/:churchId/ocr/jobs/:jobId/fusion/drafts', async (req, res) 
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -2980,7 +2991,7 @@ app.post('/api/church/:churchId/ocr/jobs/:jobId/fusion/validate', async (req, re
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -3096,7 +3107,7 @@ app.post('/api/church/:churchId/ocr/jobs/:jobId/fusion/commit', async (req, res)
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -3273,7 +3284,7 @@ app.put('/api/church/:churchId/ocr/jobs/:jobId/fusion/drafts/:entryIndex', async
 
     let dbSwitcherModule;
     try { dbSwitcherModule = require('./utils/dbSwitcher'); } 
-    catch (e) { dbSwitcherModule = require('../utils/dbSwitcher'); }
+    catch (e) { dbSwitcherModule = require('./utils/dbSwitcher'); }
     const db = await dbSwitcherModule.getChurchDbConnection(churchRows[0].database_name);
 
     // Ensure columns exist
@@ -3398,7 +3409,7 @@ app.patch('/api/church/:churchId/ocr/jobs/:jobId/fusion/drafts/:draftId/entry-bb
     try {
       dbSwitcherModule = require('./utils/dbSwitcher');
     } catch (e) {
-      dbSwitcherModule = require('../utils/dbSwitcher');
+      dbSwitcherModule = require('./utils/dbSwitcher');
     }
     const { getChurchDbConnection } = dbSwitcherModule;
     const db = await getChurchDbConnection(churchRows[0].database_name);
@@ -3486,7 +3497,7 @@ app.post('/api/church/:churchId/ocr/jobs/:jobId/fusion/ready-for-review', async 
 
     let dbSwitcherModule;
     try { dbSwitcherModule = require('./utils/dbSwitcher'); } 
-    catch (e) { dbSwitcherModule = require('../utils/dbSwitcher'); }
+    catch (e) { dbSwitcherModule = require('./utils/dbSwitcher'); }
     const db = await dbSwitcherModule.getChurchDbConnection(churchRows[0].database_name);
 
     // After migration, workflow_status column should exist - use it directly
@@ -3532,7 +3543,7 @@ app.post('/api/church/:churchId/ocr/jobs/:jobId/review/finalize', async (req, re
     
     let dbSwitcherModule;
     try { dbSwitcherModule = require('./utils/dbSwitcher'); } 
-    catch (e) { dbSwitcherModule = require('../utils/dbSwitcher'); }
+    catch (e) { dbSwitcherModule = require('./utils/dbSwitcher'); }
     const db = await dbSwitcherModule.getChurchDbConnection(churchRows[0].database_name);
     
     let query = `
@@ -3699,7 +3710,7 @@ app.post('/api/church/:churchId/ocr/jobs/:jobId/review/commit', async (req, res)
     
     let dbSwitcherModule;
     try { dbSwitcherModule = require('./utils/dbSwitcher'); } 
-    catch (e) { dbSwitcherModule = require('../utils/dbSwitcher'); }
+    catch (e) { dbSwitcherModule = require('./utils/dbSwitcher'); }
     const db = await dbSwitcherModule.getChurchDbConnection(churchRows[0].database_name);
     
     let query = `
@@ -3881,7 +3892,7 @@ app.get('/api/church/:churchId/ocr/finalize-history', async (req, res) => {
 
     let dbSwitcherModule;
     try { dbSwitcherModule = require('./utils/dbSwitcher'); } 
-    catch (e) { dbSwitcherModule = require('../utils/dbSwitcher'); }
+    catch (e) { dbSwitcherModule = require('./utils/dbSwitcher'); }
     const db = await dbSwitcherModule.getChurchDbConnection(churchRows[0].database_name);
 
     let query = `
@@ -4003,6 +4014,61 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// --- FRONTEND COMPATIBILITY ALIASES ---------------------------------
+
+// /api/system/version -> server + frontend build info
+app.get('/api/system/version', (req, res) => {
+  // Auto-detect GIT_SHA from git if not in env
+  let gitSha = process.env.GIT_SHA || 'unknown';
+  if (gitSha === 'unknown') {
+    try {
+      const { execSync } = require('child_process');
+      gitSha = execSync('git rev-parse --short=7 HEAD', { cwd: path.resolve(__dirname, '..'), timeout: 3000 }).toString().trim();
+    } catch (_) { /* git not available or not a repo */ }
+  }
+
+  let packageVersion = '1.0.0';
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf8'));
+    packageVersion = pkg.version || '1.0.0';
+  } catch (_) {}
+
+  res.json({
+    success: true,
+    server: {
+      version: packageVersion,
+      gitSha: gitSha.length > 7 ? gitSha.substring(0, 7) : gitSha,
+      gitShaFull: gitSha,
+      buildTime: process.env.BUILD_TIME || null,
+      nodeVersion: process.version,
+      environment: process.env.NODE_ENV || 'development',
+      uptime: process.uptime(),
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// /api/system/health -> same as /api/health
+app.get('/api/system/health', async (req, res) => {
+  try {
+    const dbStatus = await db.testConnection();
+    res.json({
+      status: dbStatus.success ? 'ok' : 'error',
+      user: req.session.user || null,
+      database: dbStatus
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+// /api/admin/session-stats -> same router as /api/admin/sessions
+app.use('/api/admin/session-stats', (req, res, next) => {
+  // Rewrite to /stats so the sessions router handles it
+  req.url = '/stats' + req.url;
+  sessionsRouter(req, res, next);
+});
+
 // --- OMAI FRONTEND COMPATIBILITY ENDPOINTS --------------------------
 // These endpoints are for frontend compatibility with the OMAI system
 
@@ -4077,10 +4143,10 @@ app.get('/api/refactor-console/phase1-analysis', async (req: any, res: any) => {
       phase1Service = require('./services/phase1RecoveryAnalysis');
     } catch (e1) {
       try {
-        phase1Service = require('../services/phase1RecoveryAnalysis');
+        phase1Service = require('./services/phase1RecoveryAnalysis');
       } catch (e2) {
         try {
-          phase1Service = require('./src/services/phase1RecoveryAnalysis');
+          phase1Service = require('./services/phase1RecoveryAnalysis');
         } catch (e3) {
           return res.status(500).json({ 
             ok: false,

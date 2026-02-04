@@ -1,10 +1,10 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // routes/clientApi.js
 // Client-specific API endpoints that work with individual client databases
 
 const express = require('express');
 const mysql = require('mysql2/promise');
-const { promisePool } = require('../../config/db-compat'); // For platform database access
+const { promisePool } = require('../config/db-compat'); // For platform database access
 
 const router = express.Router();
 

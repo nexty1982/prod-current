@@ -1,7 +1,8 @@
-﻿/**
+/**
  * Orthodox Metrics - Table Style Store
- * Simple React hook-based store for managing table theme state
+ * React hook-based store for managing table theme state with localStorage persistence
  */
+import { useState, useEffect, useCallback } from 'react';
 
 export interface TableTheme {
   headerColor: string;
@@ -100,72 +101,185 @@ export const liturgicalThemes = {
   }
 };
 
+const STORAGE_KEY = 'om.tableTheme';
+const SAVED_THEMES_KEY = 'om.tableTheme.saved';
+
+function loadFromStorage<T>(key: string, fallback: T): T {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export const useTableStyleStore = (): TableStyleState => {
-  return {
-    tableTheme: orthodoxTheme,
-    savedThemes: {},
-    currentTheme: 'Orthodox Traditional',
-    isLiturgicalMode: false,
-    setHeaderColor: () => {},
-    setHeaderTextColor: () => {},
-    setCellColor: () => {},
-    setCellTextColor: () => {},
-    setRowColor: () => {},
-    setRowAlternateColor: () => {},
-    setBorderStyle: () => {},
-    setHoverColor: () => {},
-    setSelectedColor: () => {},
-    setShadowStyle: () => {},
-    setFontSettings: () => {},
-    resetTheme: () => {},
-    saveTheme: () => {},
-    loadTheme: () => {},
-    deleteTheme: () => {},
-    exportTheme: () => orthodoxTheme,
-    importTheme: () => {},
-    applyThemeToElement: () => ({}),
-    getTableHeaderStyle: () => ({
-      backgroundColor: orthodoxTheme.headerColor,
-      color: orthodoxTheme.headerTextColor,
-      borderColor: orthodoxTheme.borderColor,
-      borderWidth: `${orthodoxTheme.borderWidth}px`,
-      borderRadius: `${orthodoxTheme.borderRadius}px`,
-      fontFamily: orthodoxTheme.fontFamily,
-      fontSize: `${orthodoxTheme.fontSize}px`,
-      boxShadow: orthodoxTheme.shadowStyle,
-      fontWeight: 'bold',
-    }),
-    getTableRowStyle: (type: 'even' | 'odd') => ({
-      backgroundColor: type === 'even' ? orthodoxTheme.rowColor : orthodoxTheme.rowAlternateColor,
-      borderColor: orthodoxTheme.borderColor,
-      borderWidth: `${orthodoxTheme.borderWidth}px`,
-      '&:hover': {
-        backgroundColor: orthodoxTheme.hoverColor,
-      },
-    }),
-    getTableCellStyle: (type: 'header' | 'body') => {
-      if (type === 'header') {
-        return {
-          backgroundColor: orthodoxTheme.headerColor,
-          color: orthodoxTheme.headerTextColor,
-          borderColor: orthodoxTheme.borderColor,
-          borderWidth: `${orthodoxTheme.borderWidth}px`,
-          fontFamily: orthodoxTheme.fontFamily,
-          fontSize: `${orthodoxTheme.fontSize}px`,
-          fontWeight: 'bold',
-          padding: '16px',
-        };
-      } else {
-        return {
-          backgroundColor: orthodoxTheme.cellColor,
-          color: orthodoxTheme.cellTextColor,
-          borderColor: orthodoxTheme.borderColor,
-          borderWidth: `${orthodoxTheme.borderWidth}px`,
-          fontFamily: orthodoxTheme.fontFamily,
-          fontSize: `${orthodoxTheme.fontSize}px`,
-          padding: '16px',
-        };
-      }
+  const [tableTheme, setTableTheme] = useState<TableTheme>(() => loadFromStorage(STORAGE_KEY, orthodoxTheme));
+  const [savedThemes, setSavedThemes] = useState<Record<string, TableTheme>>(() => loadFromStorage(SAVED_THEMES_KEY, {}));
+  const [currentTheme, setCurrentTheme] = useState('Orthodox Traditional');
+  const [isLiturgicalMode, setIsLiturgicalMode] = useState(false);
+
+  // Persist theme to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tableTheme));
+  }, [tableTheme]);
+
+  useEffect(() => {
+    localStorage.setItem(SAVED_THEMES_KEY, JSON.stringify(savedThemes));
+  }, [savedThemes]);
+
+  // Individual property setters
+  const setHeaderColor = useCallback((color: string) => {
+    setTableTheme(prev => ({ ...prev, headerColor: color }));
+  }, []);
+
+  const setHeaderTextColor = useCallback((color: string) => {
+    setTableTheme(prev => ({ ...prev, headerTextColor: color }));
+  }, []);
+
+  const setCellColor = useCallback((color: string) => {
+    setTableTheme(prev => ({ ...prev, cellColor: color }));
+  }, []);
+
+  const setCellTextColor = useCallback((color: string) => {
+    setTableTheme(prev => ({ ...prev, cellTextColor: color }));
+  }, []);
+
+  const setRowColor = useCallback((color: string) => {
+    setTableTheme(prev => ({ ...prev, rowColor: color }));
+  }, []);
+
+  const setRowAlternateColor = useCallback((color: string) => {
+    setTableTheme(prev => ({ ...prev, rowAlternateColor: color }));
+  }, []);
+
+  const setBorderStyle = useCallback((color: string, width: number, radius: number) => {
+    setTableTheme(prev => ({ ...prev, borderColor: color, borderWidth: width, borderRadius: radius }));
+  }, []);
+
+  const setHoverColor = useCallback((color: string) => {
+    setTableTheme(prev => ({ ...prev, hoverColor: color }));
+  }, []);
+
+  const setSelectedColor = useCallback((color: string) => {
+    setTableTheme(prev => ({ ...prev, selectedColor: color }));
+  }, []);
+
+  const setShadowStyle = useCallback((shadow: string) => {
+    setTableTheme(prev => ({ ...prev, shadowStyle: shadow }));
+  }, []);
+
+  const setFontSettings = useCallback((family: string, size: number) => {
+    setTableTheme(prev => ({ ...prev, fontFamily: family, fontSize: size }));
+  }, []);
+
+  const resetTheme = useCallback(() => {
+    setTableTheme(orthodoxTheme);
+    setCurrentTheme('Orthodox Traditional');
+  }, []);
+
+  const saveTheme = useCallback((name: string) => {
+    setSavedThemes(prev => ({ ...prev, [name]: { ...tableTheme } }));
+  }, [tableTheme]);
+
+  const loadTheme = useCallback((name: string) => {
+    const theme = savedThemes[name];
+    if (theme) {
+      setTableTheme(theme);
+      setCurrentTheme(name);
     }
+  }, [savedThemes]);
+
+  const deleteTheme = useCallback((name: string) => {
+    setSavedThemes(prev => {
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+  }, []);
+
+  const exportTheme = useCallback(() => {
+    return { ...tableTheme };
+  }, [tableTheme]);
+
+  const importTheme = useCallback((theme: TableTheme) => {
+    setTableTheme(theme);
+  }, []);
+
+  const applyThemeToElement = useCallback((_element: string) => {
+    return {};
+  }, []);
+
+  const getTableHeaderStyle = useCallback(() => ({
+    backgroundColor: tableTheme.headerColor,
+    color: tableTheme.headerTextColor,
+    borderColor: tableTheme.borderColor,
+    borderWidth: `${tableTheme.borderWidth}px`,
+    borderRadius: `${tableTheme.borderRadius}px`,
+    fontFamily: tableTheme.fontFamily,
+    fontSize: `${tableTheme.fontSize}px`,
+    boxShadow: tableTheme.shadowStyle,
+    fontWeight: 'bold',
+  }), [tableTheme]);
+
+  const getTableRowStyle = useCallback((type: 'even' | 'odd') => ({
+    backgroundColor: type === 'even' ? tableTheme.rowColor : tableTheme.rowAlternateColor,
+    borderColor: tableTheme.borderColor,
+    borderWidth: `${tableTheme.borderWidth}px`,
+    '&:hover': {
+      backgroundColor: tableTheme.hoverColor,
+    },
+  }), [tableTheme]);
+
+  const getTableCellStyle = useCallback((type: 'header' | 'body') => {
+    if (type === 'header') {
+      return {
+        backgroundColor: tableTheme.headerColor,
+        color: tableTheme.headerTextColor,
+        borderColor: tableTheme.borderColor,
+        borderWidth: `${tableTheme.borderWidth}px`,
+        fontFamily: tableTheme.fontFamily,
+        fontSize: `${tableTheme.fontSize}px`,
+        fontWeight: 'bold',
+        padding: '16px',
+      };
+    }
+    return {
+      backgroundColor: tableTheme.cellColor,
+      color: tableTheme.cellTextColor,
+      borderColor: tableTheme.borderColor,
+      borderWidth: `${tableTheme.borderWidth}px`,
+      fontFamily: tableTheme.fontFamily,
+      fontSize: `${tableTheme.fontSize}px`,
+      padding: '16px',
+    };
+  }, [tableTheme]);
+
+  return {
+    tableTheme,
+    savedThemes,
+    currentTheme,
+    isLiturgicalMode,
+    setHeaderColor,
+    setHeaderTextColor,
+    setCellColor,
+    setCellTextColor,
+    setRowColor,
+    setRowAlternateColor,
+    setBorderStyle,
+    setHoverColor,
+    setSelectedColor,
+    setShadowStyle,
+    setFontSettings,
+    resetTheme,
+    saveTheme,
+    loadTheme,
+    deleteTheme,
+    exportTheme,
+    importTheme,
+    applyThemeToElement,
+    getTableHeaderStyle,
+    getTableRowStyle,
+    getTableCellStyle,
   };
 };

@@ -1,6 +1,6 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 const { Server } = require('socket.io');
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const session = require('express-session');
 
 class WebSocketService {

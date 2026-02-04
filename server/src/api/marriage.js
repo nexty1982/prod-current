@@ -1,10 +1,10 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/marriage.js
 const express = require('express');
 const { getChurchDbConnection } = require('../utils/dbSwitcher');
 const { cleanRecords, cleanRecord, transformMarriageRecords, transformMarriageRecord } = require('../utils/dateFormatter');
-const { promisePool } = require('../../config/db-compat');
-const { safeRequire } = require('../../utils/safeRequire');
+const { promisePool } = require('../config/db-compat');
+const { safeRequire } = require('../utils/safeRequire');
 const { requireAuth } = require('../middleware/auth');
 
 // Safe require for writeSacramentHistory - handles missing module gracefully

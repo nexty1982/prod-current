@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -55,16 +55,33 @@ const SessionPulse: React.FC<SessionPulseProps> = ({
   );
   const isTrackedUserOnline = !!trackedUserSession;
 
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
   const fetchStats = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/session-stats', {
         credentials: 'include'
       });
-      
+
+      if (response.status === 401) {
+        // Session expired - stop polling to prevent 401 spam
+        stopPolling();
+        setError('Session expired');
+        setLoading(false);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      
+
       const data = await response.json();
       if (data.success) {
         setStats(data.stats);
@@ -78,13 +95,13 @@ const SessionPulse: React.FC<SessionPulseProps> = ({
       setLoading(false);
       setLastRefresh(new Date());
     }
-  }, []);
+  }, [stopPolling]);
 
   useEffect(() => {
     fetchStats();
-    const interval = setInterval(fetchStats, refreshInterval);
-    return () => clearInterval(interval);
-  }, [fetchStats, refreshInterval]);
+    intervalRef.current = setInterval(fetchStats, refreshInterval);
+    return () => stopPolling();
+  }, [fetchStats, refreshInterval, stopPolling]);
 
   const gaugePercentage = stats 
     ? Math.min((stats.totalSessions / Math.max(stats.uniqueUsers, 1)) * 100, 100)

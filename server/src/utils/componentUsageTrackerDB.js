@@ -1,10 +1,10 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 /**
  * Database-based Component Usage Tracker
  * Replaces the JSON file approach to prevent race conditions and corruption
  */
 
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const { formatTimestamp, formatTimestampUser } = require('./formatTimestamp');
 
 class ComponentUsageTrackerDB {

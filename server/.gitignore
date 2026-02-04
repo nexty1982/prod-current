@@ -30,6 +30,9 @@ Thumbs.db
 
 # Testing
 coverage/
+e2e/.auth/
+playwright-report/
+test-results/
 
 # Temporary files
 *.tmp

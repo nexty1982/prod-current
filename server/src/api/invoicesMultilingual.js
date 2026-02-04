@@ -1,8 +1,8 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/invoices.js
 const express = require('express');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 
 const router = express.Router();
 

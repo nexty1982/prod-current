@@ -1,9 +1,8 @@
-import Grid2 from '@/components/compat/Grid2';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Box, Stack, Typography } from '@mui/material';
+import { Box, Grid, Stack, Typography } from '@mui/material';
 import PageContainer from '@/shared/ui/PageContainer';
 import img1 from '@/assets/images/backgrounds/login-bg.svg';
 import Logo from '@/layouts/full/shared/logo/Logo';
@@ -11,8 +10,13 @@ import AuthLogin from '@/features/auth/authentication/authForms/AuthLogin';
 
 const Login = () => (
   <PageContainer title="Login" description="this is Login page">
-    <Grid2 container spacing={0} sx={{ overflowX: 'hidden' }}>
-      <Grid2
+    <Grid container spacing={0} sx={{ overflowX: 'hidden' }}>
+      <Grid
+        item
+        xs={12}
+        sm={12}
+        lg={7}
+        xl={8}
         sx={{
           position: 'relative',
           '&:before': {
@@ -25,12 +29,6 @@ const Login = () => (
             width: '100%',
             opacity: '0.3',
           },
-        }}
-        size={{
-          xs: 12,
-          sm: 12,
-          lg: 7,
-          xl: 8
         }}>
         <Box position="relative">
           <Box px={3}>
@@ -57,20 +55,19 @@ const Login = () => (
             />
           </Box>
         </Box>
-      </Grid2>
-      <Grid2
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        sm={12}
+        lg={5}
+        xl={4}
         display="flex"
         justifyContent="center"
-        alignItems="center"
-        size={{
-          xs: 12,
-          sm: 12,
-          lg: 5,
-          xl: 4
-        }}>
+        alignItems="center">
         <Box p={4}>
           <AuthLogin
-            title="Welcome to Orthodox Metrics"
+            title="Welcome to Modernize"
             subtext={
               <Typography variant="subtitle1" color="textSecondary" mb={1}>
                 Your Admin Dashboard
@@ -79,7 +76,7 @@ const Login = () => (
             subtitle={
               <Stack direction="row" spacing={1} mt={3}>
                 <Typography color="textSecondary" variant="h6" fontWeight="500">
-                  New to Orthodox Metrics?
+                  New to Modernize?
                 </Typography>
                 <Typography
                   component={Link}
@@ -96,8 +93,8 @@ const Login = () => (
             }
           />
         </Box>
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   </PageContainer>
 );
 

@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 /**
  * Calendar Routes for OrthodoxMetrics AI Task Coordination
  * Handles AI task management, Kanban synchronization, and real-time updates
@@ -6,7 +6,7 @@ const { getAppPool } = require('../../config/db-compat');
 
 const express = require('express');
 const router = express.Router();
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const { requireAuth } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { v4: uuidv4 } = require('uuid');

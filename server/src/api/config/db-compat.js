@@ -1,4 +1,4 @@
-const { getAppPool, getAuthPool } = require('../../../config/db');
+const { getAppPool, getAuthPool } = require('../../config/db');
 module.exports = {
   getAppPool, getAuthPool,
   pool: {

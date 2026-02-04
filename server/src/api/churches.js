@@ -1,7 +1,7 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/churches.js - REFACTORED for API v2 consistency
 const express = require('express');
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const { cleanRecords, cleanRecord } = require('../utils/dateFormatter');
 const { validateChurchData, sanitizeChurchData, generateChurchId } = require('../utils/churchValidation');
@@ -802,7 +802,7 @@ router.get('/:id/field-mapper', requireAuth, requireChurchAccess, async (req, re
     }
 
     const databaseName = churches[0].database_name || `orthodoxmetrics_ch_${churchId}`;
-    const { getChurchDbConnection } = require('../../config/db-compat');
+    const { getChurchDbConnection } = require('../config/db-compat');
     const churchDbPool = await getChurchDbConnection(databaseName);
 
     // Get table columns

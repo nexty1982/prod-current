@@ -50,7 +50,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 
-import { orthodoxCalendarService } from '../../../services/orthodoxCalendarService';
+import { orthodoxCalendarService } from '@/shared/lib/orthodoxCalendarService';
 import {
   OrthodoxCalendarDay,
   CalendarLanguage,

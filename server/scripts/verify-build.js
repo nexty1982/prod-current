@@ -13,11 +13,12 @@ const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 
 // Files to verify (source -> dist mapping)
+// All source code lives under src/
 const CRITICAL_FILES = [
-  { src: 'routes/gallery.js', dist: 'routes/gallery.js', description: 'Gallery routes' },
-  { src: 'routes/docs.js', dist: 'routes/docs.js', description: 'Documentation routes' },
-  { src: 'config/db.js', dist: 'config/db.js', description: 'Database config' },
-  { src: 'config/session.js', dist: 'config/session.js', description: 'Session config' },
+  { src: 'src/routes/gallery.js', dist: 'routes/gallery.js', description: 'Gallery routes' },
+  { src: 'src/routes/docs.js', dist: 'routes/docs.js', description: 'Documentation routes' },
+  { src: 'src/config/db.js', dist: 'config/db.js', description: 'Database config' },
+  { src: 'src/config/session.js', dist: 'config/session.js', description: 'Session config' },
 ];
 
 // Directories to verify exist
@@ -130,7 +131,7 @@ function main() {
   
   // Check for recently modified files that might not be in dist
   console.log('\n🔎 Checking for recently modified source files...');
-  const routesDir = path.join(ROOT, 'routes');
+  const routesDir = path.join(ROOT, 'src', 'routes');
   if (fs.existsSync(routesDir)) {
     // Recursively find all .js files in routes directory
     function findJsFiles(dir, baseDir = dir) {

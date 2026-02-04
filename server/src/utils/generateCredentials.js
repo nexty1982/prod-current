@@ -1,10 +1,10 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // Credentials Generation Utility
 // Generates secure admin and test user credentials for provisioned churches
 
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const db = require('../../config/db-compat');
+const db = require('../config/db-compat');
 const logger = require('./logger');
 
 const SALT_ROUNDS = 12;

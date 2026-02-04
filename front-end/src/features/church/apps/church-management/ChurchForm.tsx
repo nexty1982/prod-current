@@ -1,10 +1,10 @@
 /**
  * Orthodox Metrics - Church Management Create/Edit Form
- * Form for creating and editing church information
+ * Comprehensive form with user management, database config, and full validation.
  */
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { fetchWithChurchContext } from '@/shared/lib/fetchWithChurchContext';
 import {
   Box,
@@ -25,11 +25,6 @@ import {
   CardHeader,
   IconButton,
   CircularProgress,
-  Collapse,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   Chip,
   Table,
   TableBody,
@@ -46,6 +41,10 @@ import {
   AccordionSummary,
   AccordionDetails,
   Stack,
+  Snackbar,
+  Tabs,
+  Tab,
+  Tooltip,
 } from '@mui/material';
 import {
   IconArrowLeft,
@@ -56,7 +55,24 @@ import {
   IconMapPin,
   IconSettings,
   IconDatabase,
+  IconUsers,
+  IconUserPlus,
+  IconEdit,
+  IconRefresh,
 } from '@tabler/icons-react';
+import {
+  Save as SaveIcon,
+  ArrowBack as ArrowBackIcon,
+  ExpandMore as ExpandMoreIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  People as PeopleIcon,
+  Settings as SettingsIcon,
+  Storage as StorageIcon,
+  VpnKey as VpnKeyIcon,
+} from '@mui/icons-material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import PageContainer from '@/shared/ui/PageContainer';
@@ -66,31 +82,12 @@ import { useAuth } from '@/context/AuthContext';
 import { adminAPI } from '@/api/admin.api';
 import { logger } from '@/utils/logger';
 import type { SupportedLanguage } from '@/types/orthodox-metrics.types';
-import {
-  Save as SaveIcon,
-  Cancel as CancelIcon,
-  ArrowBack as ArrowBackIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  People as PeopleIcon,
-  Settings as SettingsIcon,
-  Storage as StorageIcon,
-  ExpandMore as ExpandMoreIcon,
-  Edit as EditIcon,
-  Lock as LockIcon,
-  LockOpen as LockOpenIcon,
-  VpnKey as VpnKeyIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Refresh as RefreshIcon,
-  Schedule as ScheduleIcon,
-  History as HistoryIcon,
-} from '@mui/icons-material';
 import UserManagementDialog from './UserManagementDialog';
 
 const validationSchema = Yup.object({
   name: Yup.string().required('Church name is required').min(2, 'Name must be at least 2 characters'),
   email: Yup.string().email('Invalid email format').required('Email is required'),
+  phone: Yup.string().matches(/^[+]?[\d\s()-]*$/, 'Invalid phone format').nullable(),
   city: Yup.string(),
   state_province: Yup.string(),
   postal_code: Yup.string(),
@@ -99,331 +96,184 @@ const validationSchema = Yup.object({
   timezone: Yup.string().required('Timezone is required'),
   currency: Yup.string(),
   tax_id: Yup.string(),
-  church_id: Yup.number()
-    .positive('Church ID must be a positive number')
-    .integer('Church ID must be an integer')
-    .nullable(),
+  website: Yup.string().url('Must be a valid URL').nullable(),
 });
 
-interface ChurchFormProps { }
-
-const ChurchForm: React.FC<ChurchFormProps> = () => {
+const ChurchForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, hasRole } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [templateChurches, setTemplateChurches] = useState<any[]>([]);
-  const [loadingTemplateChurches, setLoadingTemplateChurches] = useState(false);
-  const [isFieldModified, setIsFieldModified] = useState<Record<string, boolean>>({});
-  
-  // Collapsible sections state
-  const [expandedSections, setExpandedSections] = useState({
-    users: false,
-    advanced: false,
-    database: false
-  });
-  
-  // Church management data
+  const [activeTab, setActiveTab] = useState(0);
+
+  // User management
   const [churchUsers, setChurchUsers] = useState<any[]>([]);
-  const [recordCounts, setRecordCounts] = useState<Record<string, number>>({});
-  
-  // Database update functionality
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [userDialogOpen, setUserDialogOpen] = useState(false);
+  const [userDialogAction, setUserDialogAction] = useState<'add' | 'edit'>('add');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+
+  // Database management
+  const [databaseInfo, setDatabaseInfo] = useState<any>(null);
+  const [loadingDatabase, setLoadingDatabase] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [updatingDatabase, setUpdatingDatabase] = useState(false);
-  const [databaseUpdateResult, setDatabaseUpdateResult] = useState<{success: boolean, message: string} | null>(null);
-  const [databaseInfo, setDatabaseInfo] = useState<any>(null);
-  const [databaseLogs, setDatabaseLogs] = useState<any[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
-  const [loadingRecords, setLoadingRecords] = useState(false);
-  const [loadingDatabase, setLoadingDatabase] = useState(false);
-  
-  // User management dialogs
-  const [userDialog, setUserDialog] = useState({ open: false, user: null, action: '' });
-  const [passwordResetDialog, setPasswordResetDialog] = useState({ open: false, user: null });
+  const [databaseUpdateResult, setDatabaseUpdateResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  // Snackbar
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({ open: false, message: '', severity: 'info' });
 
   const isEdit = Boolean(id);
 
-  // Handle form field changes with logging
-  const handleFieldChange = (fieldName: string, value: any) => {
-    setIsFieldModified(prev => ({ ...prev, [fieldName]: true }));
-    
-    // Log field change for important fields
-    if (['name', 'email', 'preferred_language', 'timezone', 'is_active'].includes(fieldName)) {
-      logger.info('Church Management', `Church form field updated: ${fieldName}`, {
-        field: fieldName,
-        value: typeof value === 'string' ? value : JSON.stringify(value),
-        isEdit: isEdit,
-        churchId: id,
-        userAction: 'church_form_field_change'
-      });
+  // Open users tab if navigated with state
+  useEffect(() => {
+    if ((location.state as any)?.openUsers) {
+      setActiveTab(1);
+      if (id) loadChurchUsers(id);
     }
-  };
+  }, [location.state, id]);
 
-  // Load church users
   const loadChurchUsers = async (churchId: string) => {
     try {
       setLoadingUsers(true);
-      const response = await fetch(`/api/admin/churches/${churchId}/users`, {
-        credentials: 'include'
-      });
+      const response = await fetch(`/api/admin/churches/${churchId}/users`, { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         setChurchUsers(data.users || []);
       }
-    } catch (error) {
-      console.error('Error loading church users:', error);
+    } catch (err) {
+      console.error('Error loading church users:', err);
     } finally {
       setLoadingUsers(false);
     }
   };
 
-  // Load record counts
-  const loadRecordCounts = async (churchId: string) => {
-    try {
-      setLoadingRecords(true);
-      const response = await fetchWithChurchContext(`/api/admin/churches/${churchId}/record-counts`, {
-        churchId,
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setRecordCounts(data.counts || {});
-      }
-    } catch (error) {
-      console.error('Error loading record counts:', error);
-    } finally {
-      setLoadingRecords(false);
-    }
-  };
-
-  // Load database information
   const loadDatabaseInfo = async (churchId: string) => {
     try {
       setLoadingDatabase(true);
-      console.log('🔍 Loading database info for church ID:', churchId);
-      
       const response = await fetchWithChurchContext(`/api/admin/churches/${churchId}/database-info`, {
         churchId,
-        credentials: 'include'
+        credentials: 'include',
       });
-      
-      console.log('🔍 Database info response status:', response.status);
-      
       if (response.ok) {
         const data = await response.json();
-        console.log('🔍 Database info response data:', data);
-        console.log('🔍 Database object:', data.database);
-        console.log('🔍 Database name:', data.database?.name);
-        
         setDatabaseInfo(data.database || null);
-        setDatabaseLogs(data.logs || []);
-      } else {
-        const errorText = await response.text();
-        console.error('🔍 Database info API error:', response.status, errorText);
-        setError(`Failed to load database info: ${response.status} ${errorText}`);
       }
-    } catch (error) {
-      console.error('🔍 Error loading database info:', error);
-      setError(`Error loading database info: ${error.message}`);
+    } catch (err) {
+      console.error('Error loading database info:', err);
     } finally {
       setLoadingDatabase(false);
     }
   };
 
-  // Test database connection
   const testDatabaseConnection = async (churchId: string) => {
     try {
       setLoadingDatabase(true);
-      setError(null); // Clear any previous errors
-      setSuccess(null); // Clear any previous success messages
-      
-      console.log('🔍 Testing database connection for church ID:', churchId);
-      
       const response = await fetch(`/api/admin/churches/${churchId}/test-connection`, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' },
       });
-
-      console.log('🔍 Test connection response status:', response.status);
-
       if (response.ok) {
         const data = await response.json();
-        console.log('🔍 Test connection response data:', data);
-        
         if (data.success && data.data?.connection) {
-          const connection = data.data.connection;
-          setSuccess(`Database connection successful! Connection time: ${connection.connection_time_ms}ms`);
-          // Refresh database info after successful test
+          setSnackbar({ open: true, message: `Connection OK (${data.data.connection.connection_time_ms}ms)`, severity: 'success' });
           await loadDatabaseInfo(churchId);
         } else {
-          setError(`Database connection failed: ${data.error || 'Unknown error'}`);
+          setSnackbar({ open: true, message: `Connection failed: ${data.error || 'Unknown'}`, severity: 'error' });
         }
-      } else {
-        const errorText = await response.text();
-        console.error('🔍 Test connection API error:', response.status, errorText);
-        setError(`Failed to test database connection: ${response.status} ${errorText}`);
       }
-    } catch (error) {
-      console.error('🔍 Error testing database connection:', error);
-      setError(`Error testing database connection: ${error.message}`);
+    } catch (err: any) {
+      setSnackbar({ open: true, message: `Connection error: ${err.message}`, severity: 'error' });
     } finally {
       setLoadingDatabase(false);
     }
   };
 
-  // Handle section expansion
-  const handleSectionToggle = (section: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-
-    // Load data when section is expanded for the first time
-    if (!expandedSections[section] && isEdit && id) {
-      switch (section) {
-        case 'users':
-          loadChurchUsers(id);
-          break;
-        case 'advanced':
-          loadRecordCounts(id);
-          break;
-        case 'database':
-          loadDatabaseInfo(id);
-          break;
-      }
-    }
-  };
-
-  // User management functions
-  const handleUserAction = async (user: any, action: string) => {
-    try {
-      const response = await fetch(`/api/admin/churches/${id}/users/${user.id}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        setSuccess(`User ${action} successful`);
-        loadChurchUsers(id!);
-      } else {
-        throw new Error(`Failed to ${action} user`);
-      }
-    } catch (error) {
-      setError(`Error: ${error.message}`);
-    }
-  };
-
-  const handlePasswordReset = async (user: any) => {
-    try {
-      const response = await fetch(`/api/admin/churches/${id}/users/${user.id}/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSuccess(`Password reset for ${user.email}. New password: ${data.newPassword}`);
-      } else {
-        throw new Error('Failed to reset password');
-      }
-    } catch (error) {
-      setError(`Error resetting password: ${error.message}`);
-    }
-  };
-
-  // Handle user save (add/edit)
   const handleUserSave = async (userData: any) => {
     try {
-      const endpoint = userDialog.action === 'add' 
+      const endpoint = userDialogAction === 'add'
         ? `/api/admin/churches/${id}/users`
-        : `/api/admin/churches/${id}/users/${userDialog.user?.id}`;
-      
-      const method = userDialog.action === 'add' ? 'POST' : 'PUT';
+        : `/api/admin/churches/${id}/users/${selectedUser?.id}`;
 
       const response = await fetch(endpoint, {
-        method: method,
+        method: userDialogAction === 'add' ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(userData)
+        body: JSON.stringify(userData),
       });
 
       if (response.ok) {
-        setSuccess(`User ${userDialog.action === 'add' ? 'added' : 'updated'} successfully`);
-        // Refresh the users list if we're in edit mode
-        if (expandedSections.users && id) {
-          loadChurchUsers(id);
-        }
+        setSnackbar({ open: true, message: `User ${userDialogAction === 'add' ? 'added' : 'updated'} successfully`, severity: 'success' });
+        setUserDialogOpen(false);
+        setSelectedUser(null);
+        if (id) loadChurchUsers(id);
       } else {
         const data = await response.json();
-        throw new Error(data.message || `Failed to ${userDialog.action} user`);
+        setSnackbar({ open: true, message: data.message || 'Failed to save user', severity: 'error' });
       }
-    } catch (error) {
-      setError(`Error ${userDialog.action === 'add' ? 'adding' : 'updating'} user: ${error.message}`);
+    } catch (err: any) {
+      setSnackbar({ open: true, message: err.message, severity: 'error' });
     }
   };
 
-  // Handle back button click
-  const handleBackClick = () => {
-    logger.info('Church Management', 'Church form back button clicked', {
-      isEdit: isEdit,
-      churchId: id,
-      formChanged: formik.dirty,
-      userAction: 'church_form_back'
-    });
-    
-    navigate('/apps/church-management');
-  };
-
-  // Handle form reset
-  const handleFormReset = () => {
-    formik.resetForm();
-    
-    logger.info('Church Management', 'Church form reset', {
-      isEdit: isEdit,
-      churchId: id,
-      userAction: 'church_form_reset'
-    });
-  };
-
-  const BCrumb = [
-    { to: '/', title: 'Home' },
-    { to: '/apps/church-management', title: 'Church Management' },
-    { title: isEdit ? 'Edit Church' : 'Create Church' },
-  ];
-
-  // Load English churches for template selection
-  useEffect(() => {
-    const fetchEnglishChurches = async () => {
-      if (!isEdit) { // Only fetch for new churches
-        try {
-          setLoadingTemplateChurches(true);
-          const response = await fetch('/api/admin/churches?preferred_language=en', {
-            credentials: 'include'
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch template churches');
-          }
-
-          const data = await response.json();
-          setTemplateChurches(data.churches || []);
-        } catch (err) {
-          console.error('Error fetching template churches:', err);
-        } finally {
-          setLoadingTemplateChurches(false);
-        }
+  const handleUserAction = async (userId: number, action: string) => {
+    try {
+      const response = await fetch(`/api/admin/churches/${id}/users/${userId}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      if (response.ok) {
+        setSnackbar({ open: true, message: `User ${action} successful`, severity: 'success' });
+        if (id) loadChurchUsers(id);
       }
-    };
+    } catch (err: any) {
+      setSnackbar({ open: true, message: err.message, severity: 'error' });
+    }
+  };
 
-    fetchEnglishChurches();
-  }, [isEdit]);
+  const handlePasswordReset = async (userId: number, email: string) => {
+    try {
+      const response = await fetch(`/api/admin/churches/${id}/users/${userId}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSnackbar({ open: true, message: `Password reset for ${email}. New: ${data.newPassword}`, severity: 'success' });
+      }
+    } catch (err: any) {
+      setSnackbar({ open: true, message: err.message, severity: 'error' });
+    }
+  };
+
+  const handleUpdateDatabase = async () => {
+    if (!selectedTemplate || !id) return;
+    try {
+      setUpdatingDatabase(true);
+      setDatabaseUpdateResult(null);
+      const response = await fetch(`/api/admin/churches/${id}/update-database`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ template: selectedTemplate }),
+      });
+      const result = await response.json();
+      setDatabaseUpdateResult({
+        success: response.ok,
+        message: response.ok ? (result.message || 'Database updated') : (result.error || 'Update failed'),
+      });
+    } catch (err: any) {
+      setDatabaseUpdateResult({ success: false, message: err.message });
+    } finally {
+      setUpdatingDatabase(false);
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -436,7 +286,7 @@ const ChurchForm: React.FC<ChurchFormProps> = () => {
       postal_code: '',
       country: '',
       preferred_language: 'en',
-      timezone: 'UTC',
+      timezone: 'America/New_York',
       currency: 'USD',
       tax_id: '',
       website: '',
@@ -447,144 +297,48 @@ const ChurchForm: React.FC<ChurchFormProps> = () => {
       has_baptism_records: true,
       has_marriage_records: true,
       has_funeral_records: true,
+      enable_ag_grid: false,
+      ag_grid_record_types: [] as string[],
       setup_complete: false,
-      template_church_id: null, // New template field
-      default_landing_page: 'church_records', // Default to church records
-      church_id: null, // Church ID for linkage with records
+      template_church_id: null as number | null,
+      default_landing_page: 'church_records',
+      church_id: null as number | null,
+      enable_multilingual: false,
+      enable_notifications: true,
+      public_calendar: false,
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log('Submitting form with values:', values);
       try {
         setLoading(true);
         setError(null);
         setSuccess(null);
 
-        // Log form submission start
-        logger.info('Church Management', `Church form submission started: ${isEdit ? 'update' : 'create'}`, {
-          churchName: values.name,
-          churchEmail: values.email,
-          isEdit: isEdit,
-          churchId: id,
-          userAction: isEdit ? 'church_update_submit' : 'church_create_submit'
-        });
-
         const churchData = {
           ...values,
           preferred_language: values.preferred_language as SupportedLanguage,
-          description_multilang: values.description_multilang,
-          settings: values.settings,
-          database_name: values.database_name,
-          has_baptism_records: values.has_baptism_records,
-          has_marriage_records: values.has_marriage_records,
-          has_funeral_records: values.has_funeral_records,
-          setup_complete: values.setup_complete,
-          template_church_id: values.template_church_id, // Include template selection
-          church_id: values.church_id, // Include church_id for database linkage
         };
 
         if (isEdit && id) {
           await adminAPI.churches.update(parseInt(id), churchData);
           setSuccess('Church updated successfully!');
-          logger.info('Church Management', 'Church updated successfully', {
-            churchId: id,
-            churchName: formik.values.name,
-            userAction: 'church_update'
-          });
+          logger.info('Church Management', 'Church updated', { churchId: id, churchName: values.name });
         } else {
           await adminAPI.churches.create(churchData);
           setSuccess('Church created successfully!');
-          logger.info('Church Management', 'Church created successfully', {
-            churchName: formik.values.name,
-            userAction: 'church_create'
-          });
+          logger.info('Church Management', 'Church created', { churchName: values.name });
         }
 
-        // Log successful redirect
-        logger.info('Church Management', 'Redirecting to church list after successful operation', {
-          operation: isEdit ? 'update' : 'create',
-          churchName: values.name,
-          userAction: 'church_form_redirect'
-        });
-
-        // Redirect after success
-        setTimeout(() => {
-          navigate('/apps/church-management');
-        }, 2000);
+        setTimeout(() => navigate('/apps/church-management'), 2000);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-        setError(errorMessage);
-        
-        // Log the error to the logging system
-        logger.error('Church Management', `Church ${isEdit ? 'update' : 'creation'} failed`, {
-          error: errorMessage,
-          churchName: formik.values.name,
-          churchEmail: formik.values.email,
-          isEdit: isEdit,
-          churchId: id,
-          userAction: isEdit ? 'church_update' : 'church_create',
-          formValues: formik.values
-        });
+        const msg = err instanceof Error ? err.message : 'An error occurred';
+        setError(msg);
+        logger.error('Church Management', `Church ${isEdit ? 'update' : 'creation'} failed`, { error: msg });
       } finally {
         setLoading(false);
       }
     },
-    validateOnBlur: true,
-    validateOnChange: true,
-    validate: (values) => {
-      const errors = {};
-      const validation = validationSchema.validateSync(values, { abortEarly: false });
-      if (validation && validation.inner && validation.inner.length > 0) {
-        validation.inner.forEach((err) => {
-          errors[err.path] = err.message;
-        });
-        console.log('Formik validation errors:', errors);
-      }
-      return errors;
-    },
   });
-
-  // Database update handler
-  const handleUpdateDatabase = async () => {
-    if (!selectedTemplate || !id) return;
-    
-    try {
-      setUpdatingDatabase(true);
-      setDatabaseUpdateResult(null);
-      
-      const response = await fetch(`/api/admin/churches/${id}/update-database`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          template: selectedTemplate
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (response.ok) {
-        setDatabaseUpdateResult({
-          success: true,
-          message: result.message || 'Database updated successfully!'
-        });
-      } else {
-        setDatabaseUpdateResult({
-          success: false,
-          message: result.error || 'Failed to update database'
-        });
-      }
-    } catch (error) {
-      setDatabaseUpdateResult({
-        success: false,
-        message: 'Error updating database: ' + (error instanceof Error ? error.message : 'Unknown error')
-      });
-    } finally {
-      setUpdatingDatabase(false);
-    }
-  };
 
   // Load church data for editing
   useEffect(() => {
@@ -592,24 +346,10 @@ const ChurchForm: React.FC<ChurchFormProps> = () => {
       const loadChurch = async () => {
         try {
           setLoading(true);
-          
-          // Log the start of church loading for edit
-          logger.info('Church Management', 'Loading church data for editing', {
-            churchId: id,
-            userAction: 'church_load_for_edit_start'
-          });
-          
           const church = await adminAPI.churches.getById(parseInt(id));
-          
-          // Add null safety check
-          if (!church) {
-            throw new Error('Church data not found or invalid response from server');
-          }
-          
-          console.log('📋 Loaded church data for editing:', church);
-          
-          // Set all form values with null safety and fallback defaults
-          const churchValues = {
+          if (!church) throw new Error('Church data not found');
+
+          formik.setValues({
             name: church?.name || '',
             email: church?.email || '',
             phone: church?.phone || '',
@@ -619,7 +359,7 @@ const ChurchForm: React.FC<ChurchFormProps> = () => {
             postal_code: church?.postal_code || '',
             country: church?.country || '',
             preferred_language: church?.preferred_language || 'en',
-            timezone: church?.timezone || 'UTC',
+            timezone: church?.timezone || 'America/New_York',
             currency: church?.currency || 'USD',
             tax_id: church?.tax_id || '',
             website: church?.website || '',
@@ -630,445 +370,521 @@ const ChurchForm: React.FC<ChurchFormProps> = () => {
             has_baptism_records: church?.has_baptism_records ?? true,
             has_marriage_records: church?.has_marriage_records ?? true,
             has_funeral_records: church?.has_funeral_records ?? true,
+            enable_ag_grid: church?.enable_ag_grid ?? false,
+            ag_grid_record_types: church?.ag_grid_record_types || [],
             setup_complete: church?.setup_complete ?? false,
             template_church_id: church?.template_church_id || null,
             default_landing_page: church?.default_landing_page || 'church_records',
-            church_id: church?.id || church?.church_id || null, // Include church_id for database linkage
-          };
+            church_id: church?.id || church?.church_id || null,
+            enable_multilingual: church?.enable_multilingual ?? false,
+            enable_notifications: church?.enable_notifications ?? true,
+            public_calendar: church?.public_calendar ?? false,
+          });
 
-          // Ensure all required fields have fallback values
-          if (!churchValues.name && church?.church_name) {
-            churchValues.name = church.church_name;
-          }
-          
-          console.log('📝 Setting form values:', churchValues);
-          
-          // Use setValues to populate the form
-          formik.setValues(churchValues);
-          
-          // Also set individual fields as a fallback
-          Object.keys(churchValues).forEach(key => {
-            formik.setFieldValue(key, churchValues[key]);
-          });
-          
-          console.log('✅ Form values set, current formik values:', formik.values);
-          
-          // Log successful load
-          logger.info('Church Management', 'Church data loaded successfully for editing', {
-            churchId: id,
-            churchName: church?.name || 'Unknown',
-            userAction: 'church_load_for_edit_success'
-          });
+          // Load users and database info
+          loadChurchUsers(id);
+          loadDatabaseInfo(id);
         } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Failed to load church data';
-          console.error('Error loading church for edit:', err);
-          
-          // Check if it's a 404 error (church not found)
-          if (errorMessage.includes('404') || errorMessage.includes('not found')) {
-            setError(`Church with ID ${id} not found. Please check the URL or navigate back to the church list.`);
-            
-            // Navigate back to church list after a delay
-            setTimeout(() => {
-              navigate('/apps/church-management');
-            }, 3000);
-          } else {
-            // For other errors, provide a user-friendly message with fallback
-            setError(`Unable to load church data: ${errorMessage}. You can still create a new church with the form below.`);
+          const msg = err instanceof Error ? err.message : 'Failed to load church';
+          setError(msg);
+          if (msg.includes('404') || msg.includes('not found')) {
+            setTimeout(() => navigate('/apps/church-management'), 3000);
           }
-          
-          // Log the error to the logging system
-          logger.error('Church Management', 'Failed to load church data for editing', {
-            error: errorMessage,
-            churchId: id,
-            userAction: 'church_load_for_edit',
-            errorType: errorMessage.includes('404') ? 'not_found' : 'server_error'
-          });
         } finally {
           setLoading(false);
         }
       };
-
       loadChurch();
-    } else if (!isEdit) {
-      // Log form opening for new church creation
-      logger.info('Church Management', 'New church form opened', {
-        userAction: 'church_form_open_create'
-      });
     }
   }, [id, isEdit]);
 
   if (!hasRole('admin') && !hasRole('super_admin') && !hasRole('supervisor')) {
-    // Log the access denied error
-    logger.warn('Church Management', 'Access denied. Administrator privileges required to edit/create churches.', {
-      userAction: 'church_form_access_denied',
-      requiredRoles: ['admin', 'super_admin', 'supervisor'],
-      path: window.location.pathname,
-      isEdit: isEdit
-    });
-    
     return (
       <PageContainer title="Church Management" description="Church management system">
-        <Alert severity="error">
-          Access denied. Administrator privileges required.
-        </Alert>
+        <Alert severity="error">Access denied. Administrator privileges required.</Alert>
       </PageContainer>
     );
   }
 
   return (
-    <PageContainer 
-      title={isEdit ? "Edit Church" : "Add Church"} 
-      description={isEdit ? "Edit church information" : "Create a new church"}
+    <PageContainer
+      title={isEdit ? 'Edit Church' : 'Add Church'}
+      description={isEdit ? 'Edit church information' : 'Create a new church'}
     >
-      <Breadcrumb 
-        title={isEdit ? "Edit Church" : "Add Church"} 
+      <Breadcrumb
+        title={isEdit ? 'Edit Church' : 'Add Church'}
         items={[
           { to: '/', title: 'Home' },
           { to: '/apps/church-management', title: 'Church Management' },
-          { title: isEdit ? 'Edit Church' : 'Add Church' }
-        ]} 
+          { title: isEdit ? 'Edit Church' : 'Add Church' },
+        ]}
       />
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
-      {success && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          {success}
-        </Alert>
-      )}
-
-      {loading && isEdit && (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <CircularProgress size={20} />
-            <Typography>Loading church data...</Typography>
+      {loading && isEdit ? (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+          <Stack spacing={3} alignItems="center">
+            <CircularProgress size={60} />
+            <Typography variant="h6">Loading church data...</Typography>
           </Stack>
-        </Alert>
-      )}
-
-            <form onSubmit={formik.handleSubmit}>
-        {loading && isEdit ? (
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-            <Stack spacing={3} alignItems="center">
-              <CircularProgress size={60} />
-              <Typography variant="h6">Loading church data...</Typography>
-              <Typography color="textSecondary">Please wait while we fetch the church information.</Typography>
-            </Stack>
-          </Box>
-        ) : (
-          <Grid container spacing={3}>
-            {/* Church Identity & Contact Information */}
-            <Grid item xs={12} lg={6}>
-            <BlankCard>
-              <CardContent>
-                <Typography variant="h5" mb={1}>
-                  <IconBuilding size={24} style={{ marginRight: 8, verticalAlign: 'middle' }} />
-                  Church Identity & Contact
-                </Typography>
-                <Typography color="textSecondary" mb={3}>
-                  Basic church information and contact details
-                </Typography>
-
-                <Stack spacing={3}>
-                  <TextField
-                    fullWidth
-                    label="Church Name"
-                    name="name"
-                    value={formik.values.name}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
-                    required
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Email Address"
-                    name="email"
-                    type="email"
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.email && Boolean(formik.errors.email)}
-                    helperText={formik.touched.email && formik.errors.email}
-                    InputProps={{
-                      startAdornment: <IconMail size={20} style={{ marginRight: 8, opacity: 0.7 }} />
-                    }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Phone Number"
-                    name="phone"
-                    value={formik.values.phone}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.phone && Boolean(formik.errors.phone)}
-                    helperText={formik.touched.phone && formik.errors.phone}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Address"
-                    name="address"
-                    multiline
-                    rows={3}
-                    value={formik.values.address}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.address && Boolean(formik.errors.address)}
-                    helperText={formik.touched.address && formik.errors.address}
-                    InputProps={{
-                      startAdornment: <IconMapPin size={20} style={{ marginRight: 8, opacity: 0.7, alignSelf: 'flex-start', marginTop: 12 }} />
-                    }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Website URL"
-                    name="website"
-                    value={formik.values.website}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.website && Boolean(formik.errors.website)}
-                    helperText={formik.touched.website && formik.errors.website}
-                    placeholder="https://example.com"
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Description"
-                    name="description_multilang"
-                    multiline
-                    rows={4}
-                    value={formik.values.description_multilang}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.description_multilang && Boolean(formik.errors.description_multilang)}
-                    helperText={formik.touched.description_multilang && formik.errors.description_multilang}
-                    placeholder="Brief description of the church..."
-                  />
-                </Stack>
-              </CardContent>
-            </BlankCard>
-          </Grid>
-
-          {/* Status, Configuration & Settings */}
-          <Grid item xs={12} lg={6}>
-            <BlankCard>
-              <CardContent>
-                <Typography variant="h5" mb={1}>
-                  <IconSettings size={24} style={{ marginRight: 8, verticalAlign: 'middle' }} />
-                  Status & Configuration
-                </Typography>
-                <Typography color="textSecondary" mb={3}>
-                  Church status, timezone, and system settings
-                </Typography>
-
-                <Stack spacing={3}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={formik.values.is_active}
-                        onChange={(e) => formik.setFieldValue('is_active', e.target.checked)}
-                        name="is_active"
-                      />
-                    }
-                    label="Church Active Status"
-                  />
-
-                  <FormControl fullWidth>
-                    <InputLabel>Preferred Language</InputLabel>
-                    <Select
-                      name="preferred_language"
-                      value={formik.values.preferred_language}
-                      onChange={formik.handleChange}
-                      label="Preferred Language"
-                    >
-                      <MenuItem value="en">English</MenuItem>
-                      <MenuItem value="el">Greek</MenuItem>
-                      <MenuItem value="ru">Russian</MenuItem>
-                      <MenuItem value="serbian">Serbian</MenuItem>
-                      <MenuItem value="ro">Romanian</MenuItem>
-                      <MenuItem value="bulgarian">Bulgarian</MenuItem>
-                      <MenuItem value="arabic">Arabic</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth>
-                    <InputLabel>Timezone</InputLabel>
-                    <Select
-                      name="timezone"
-                      value={formik.values.timezone}
-                      onChange={formik.handleChange}
-                      label="Timezone"
-                    >
-                      <MenuItem value="America/New_York">Eastern Time (ET)</MenuItem>
-                      <MenuItem value="America/Chicago">Central Time (CT)</MenuItem>
-                      <MenuItem value="America/Denver">Mountain Time (MT)</MenuItem>
-                      <MenuItem value="America/Los_Angeles">Pacific Time (PT)</MenuItem>
-                      <MenuItem value="Europe/London">Greenwich Mean Time (GMT)</MenuItem>
-                      <MenuItem value="Europe/Athens">Eastern European Time (EET)</MenuItem>
-                      <MenuItem value="Europe/Moscow">Moscow Time (MSK)</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <TextField
-                    fullWidth
-                    label="Database Name"
-                    name="database_name"
-                    value={formik.values.database_name}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.database_name && Boolean(formik.errors.database_name)}
-                    helperText={formik.touched.database_name && formik.errors.database_name || "Unique identifier for church database"}
-                    InputProps={{
-                      startAdornment: <IconDatabase size={20} style={{ marginRight: 8, opacity: 0.7 }} />
-                    }}
-                  />
-
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={formik.values.enable_multilingual}
-                        onChange={(e) => formik.setFieldValue('enable_multilingual', e.target.checked)}
-                        name="enable_multilingual"
-                      />
-                    }
-                    label="Enable Multilingual Support"
-                  />
-
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={formik.values.enable_notifications}
-                        onChange={(e) => formik.setFieldValue('enable_notifications', e.target.checked)}
-                        name="enable_notifications"
-                      />
-                    }
-                    label="Enable Email Notifications"
-                  />
-
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={formik.values.public_calendar}
-                        onChange={(e) => formik.setFieldValue('public_calendar', e.target.checked)}
-                        name="public_calendar"
-                      />
-                    }
-                    label="Public Calendar Access"
-                  />
-                </Stack>
-              </CardContent>
-            </BlankCard>
-          </Grid>
-
-          {/* Action Buttons */}
-          {/* Database Update Section - Only show for existing churches */}
+        </Box>
+      ) : (
+        <>
+          {/* Tabs for Edit mode */}
           {isEdit && (
-            <Grid item xs={12}>
-              <BlankCard>
-                <CardHeader title="Database Management" />
-                <CardContent>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                    Update the church database by adding missing tables from a template.
-                  </Typography>
-                  
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth>
-                        <InputLabel>Select Template</InputLabel>
-                        <Select
-                          value={selectedTemplate}
-                          onChange={(e) => setSelectedTemplate(e.target.value)}
-                          label="Select Template"
-                        >
-                          <MenuItem value="record_template1">record_template1</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    
-                    <Grid item xs={12} md={6}>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={handleUpdateDatabase}
-                        disabled={!selectedTemplate || updatingDatabase}
-                        startIcon={updatingDatabase ? <CircularProgress size={16} /> : null}
-                        fullWidth
-                      >
-                        {updatingDatabase ? 'Updating Database...' : 'Update Database'}
-                      </Button>
-                    </Grid>
-                  </Grid>
-                  
-                  {databaseUpdateResult && (
-                    <Alert severity={databaseUpdateResult.success ? 'success' : 'error'} sx={{ mt: 2 }}>
-                      {databaseUpdateResult.message}
-                    </Alert>
-                  )}
-                </CardContent>
-              </BlankCard>
-            </Grid>
+            <BlankCard sx={{ mb: 3 }}>
+              <Tabs
+                value={activeTab}
+                onChange={(_, val) => {
+                  setActiveTab(val);
+                  if (val === 1 && id && churchUsers.length === 0) loadChurchUsers(id);
+                  if (val === 2 && id && !databaseInfo) loadDatabaseInfo(id);
+                }}
+                variant="scrollable"
+                scrollButtons="auto"
+              >
+                <Tab icon={<IconBuilding size={18} />} iconPosition="start" label="Church Info" />
+                <Tab icon={<IconUsers size={18} />} iconPosition="start" label={`Users (${churchUsers.length})`} />
+                <Tab icon={<IconDatabase size={18} />} iconPosition="start" label="Database" />
+              </Tabs>
+            </BlankCard>
           )}
 
-          <Grid item xs={12}>
+          {/* Tab 0: Church Info Form */}
+          {(activeTab === 0 || !isEdit) && (
+            <form onSubmit={formik.handleSubmit}>
+              <Grid container spacing={3}>
+                {/* Church Identity */}
+                <Grid item xs={12} lg={6}>
+                  <BlankCard>
+                    <CardContent>
+                      <Typography variant="h5" mb={1}>
+                        <IconBuilding size={22} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+                        Church Identity & Contact
+                      </Typography>
+                      <Typography color="textSecondary" mb={3}>Basic church information</Typography>
+
+                      <Stack spacing={2.5}>
+                        <TextField
+                          fullWidth label="Church Name" name="name" required
+                          value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur}
+                          error={formik.touched.name && Boolean(formik.errors.name)}
+                          helperText={formik.touched.name && formik.errors.name}
+                        />
+                        <TextField
+                          fullWidth label="Email Address" name="email" type="email" required
+                          value={formik.values.email} onChange={formik.handleChange} onBlur={formik.handleBlur}
+                          error={formik.touched.email && Boolean(formik.errors.email)}
+                          helperText={formik.touched.email && formik.errors.email}
+                        />
+                        <TextField
+                          fullWidth label="Phone Number" name="phone"
+                          value={formik.values.phone} onChange={formik.handleChange} onBlur={formik.handleBlur}
+                          error={formik.touched.phone && Boolean(formik.errors.phone)}
+                          helperText={formik.touched.phone && formik.errors.phone}
+                        />
+                        <TextField
+                          fullWidth label="Website" name="website" placeholder="https://example.com"
+                          value={formik.values.website} onChange={formik.handleChange} onBlur={formik.handleBlur}
+                          error={formik.touched.website && Boolean(formik.errors.website)}
+                          helperText={formik.touched.website && formik.errors.website}
+                        />
+                        <TextField
+                          fullWidth label="Address" name="address" multiline rows={2}
+                          value={formik.values.address} onChange={formik.handleChange}
+                        />
+                        {/* Location Row */}
+                        <Grid container spacing={2}>
+                          <Grid item xs={6} sm={3}>
+                            <TextField fullWidth label="City" name="city" size="small"
+                              value={formik.values.city} onChange={formik.handleChange} />
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <TextField fullWidth label="State/Province" name="state_province" size="small"
+                              value={formik.values.state_province} onChange={formik.handleChange} />
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <TextField fullWidth label="Postal Code" name="postal_code" size="small"
+                              value={formik.values.postal_code} onChange={formik.handleChange} />
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <FormControl fullWidth size="small">
+                              <InputLabel>Country</InputLabel>
+                              <Select name="country" value={formik.values.country} onChange={formik.handleChange} label="Country">
+                                <MenuItem value="United States">United States</MenuItem>
+                                <MenuItem value="Canada">Canada</MenuItem>
+                                <MenuItem value="Greece">Greece</MenuItem>
+                                <MenuItem value="Romania">Romania</MenuItem>
+                                <MenuItem value="Russia">Russia</MenuItem>
+                                <MenuItem value="Serbia">Serbia</MenuItem>
+                                <MenuItem value="Bulgaria">Bulgaria</MenuItem>
+                                <MenuItem value="Other">Other</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        </Grid>
+                        <TextField
+                          fullWidth label="Description" name="description_multilang" multiline rows={3}
+                          value={formik.values.description_multilang} onChange={formik.handleChange}
+                          placeholder="Brief description of the church..."
+                        />
+                      </Stack>
+                    </CardContent>
+                  </BlankCard>
+                </Grid>
+
+                {/* Configuration */}
+                <Grid item xs={12} lg={6}>
+                  <BlankCard>
+                    <CardContent>
+                      <Typography variant="h5" mb={1}>
+                        <IconSettings size={22} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+                        Configuration
+                      </Typography>
+                      <Typography color="textSecondary" mb={3}>Settings and preferences</Typography>
+
+                      <Stack spacing={2.5}>
+                        <FormControlLabel
+                          control={<Switch checked={formik.values.is_active} onChange={(e) => formik.setFieldValue('is_active', e.target.checked)} />}
+                          label={<Stack direction="row" spacing={1} alignItems="center"><Typography>Church Active</Typography><Chip label={formik.values.is_active ? 'Active' : 'Inactive'} color={formik.values.is_active ? 'success' : 'default'} size="small" /></Stack>}
+                        />
+
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <FormControl fullWidth size="small">
+                              <InputLabel>Language</InputLabel>
+                              <Select name="preferred_language" value={formik.values.preferred_language} onChange={formik.handleChange} label="Language">
+                                <MenuItem value="en">English</MenuItem>
+                                <MenuItem value="el">Greek</MenuItem>
+                                <MenuItem value="ru">Russian</MenuItem>
+                                <MenuItem value="ro">Romanian</MenuItem>
+                                <MenuItem value="serbian">Serbian</MenuItem>
+                                <MenuItem value="bulgarian">Bulgarian</MenuItem>
+                                <MenuItem value="arabic">Arabic</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <FormControl fullWidth size="small">
+                              <InputLabel>Timezone</InputLabel>
+                              <Select name="timezone" value={formik.values.timezone} onChange={formik.handleChange} label="Timezone">
+                                <MenuItem value="America/New_York">Eastern (ET)</MenuItem>
+                                <MenuItem value="America/Chicago">Central (CT)</MenuItem>
+                                <MenuItem value="America/Denver">Mountain (MT)</MenuItem>
+                                <MenuItem value="America/Los_Angeles">Pacific (PT)</MenuItem>
+                                <MenuItem value="Europe/London">GMT</MenuItem>
+                                <MenuItem value="Europe/Athens">Eastern European (EET)</MenuItem>
+                                <MenuItem value="Europe/Moscow">Moscow (MSK)</MenuItem>
+                                <MenuItem value="UTC">UTC</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <FormControl fullWidth size="small">
+                              <InputLabel>Currency</InputLabel>
+                              <Select name="currency" value={formik.values.currency} onChange={formik.handleChange} label="Currency">
+                                <MenuItem value="USD">USD ($)</MenuItem>
+                                <MenuItem value="EUR">EUR</MenuItem>
+                                <MenuItem value="GBP">GBP</MenuItem>
+                                <MenuItem value="CAD">CAD</MenuItem>
+                                <MenuItem value="RON">RON</MenuItem>
+                                <MenuItem value="RUB">RUB</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField fullWidth label="Tax ID" name="tax_id" size="small"
+                              value={formik.values.tax_id} onChange={formik.handleChange} />
+                          </Grid>
+                        </Grid>
+
+                        <TextField fullWidth label="Database Name" name="database_name" size="small"
+                          value={formik.values.database_name} onChange={formik.handleChange}
+                          helperText="Unique identifier for church database"
+                          InputProps={{ startAdornment: <IconDatabase size={18} style={{ marginRight: 8, opacity: 0.5 }} /> }}
+                        />
+
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Default Landing Page</InputLabel>
+                          <Select name="default_landing_page" value={formik.values.default_landing_page} onChange={formik.handleChange} label="Default Landing Page">
+                            <MenuItem value="church_records">Church Records</MenuItem>
+                            <MenuItem value="liturgical_calendar">Liturgical Calendar</MenuItem>
+                            <MenuItem value="notes_app">Notes App</MenuItem>
+                            <MenuItem value="dashboard">Dashboard</MenuItem>
+                          </Select>
+                        </FormControl>
+
+                        <Divider />
+                        <Typography variant="subtitle2" color="textSecondary">Record Types</Typography>
+                        <Stack direction="row" spacing={2} flexWrap="wrap">
+                          <FormControlLabel control={<Switch checked={formik.values.has_baptism_records} onChange={(e) => formik.setFieldValue('has_baptism_records', e.target.checked)} size="small" />} label="Baptism" />
+                          <FormControlLabel control={<Switch checked={formik.values.has_marriage_records} onChange={(e) => formik.setFieldValue('has_marriage_records', e.target.checked)} size="small" />} label="Marriage" />
+                          <FormControlLabel control={<Switch checked={formik.values.has_funeral_records} onChange={(e) => formik.setFieldValue('has_funeral_records', e.target.checked)} size="small" />} label="Funeral" />
+                        </Stack>
+
+                        <Divider />
+                        <Typography variant="subtitle2" color="textSecondary">Feature Flags</Typography>
+                        <FormControlLabel control={<Switch checked={formik.values.enable_multilingual} onChange={(e) => formik.setFieldValue('enable_multilingual', e.target.checked)} size="small" />} label="Multilingual Support" />
+                        <FormControlLabel control={<Switch checked={formik.values.enable_notifications} onChange={(e) => formik.setFieldValue('enable_notifications', e.target.checked)} size="small" />} label="Email Notifications" />
+                        <FormControlLabel control={<Switch checked={formik.values.public_calendar} onChange={(e) => formik.setFieldValue('public_calendar', e.target.checked)} size="small" />} label="Public Calendar Access" />
+                        <FormControlLabel control={<Switch checked={formik.values.setup_complete} onChange={(e) => formik.setFieldValue('setup_complete', e.target.checked)} size="small" />} label="Setup Complete" />
+
+                        <Divider />
+                        <Typography variant="subtitle2" color="textSecondary">AG Grid</Typography>
+                        <FormControlLabel
+                          control={<Switch checked={formik.values.enable_ag_grid} onChange={(e) => {
+                            formik.setFieldValue('enable_ag_grid', e.target.checked);
+                            if (!e.target.checked) formik.setFieldValue('ag_grid_record_types', []);
+                          }} size="small" />}
+                          label={<Stack direction="row" spacing={1} alignItems="center"><Typography>Enable AG Grid</Typography><Chip label={formik.values.enable_ag_grid ? 'Enabled' : 'Disabled'} color={formik.values.enable_ag_grid ? 'primary' : 'default'} size="small" /></Stack>}
+                        />
+                        {formik.values.enable_ag_grid && (
+                          <Stack direction="row" spacing={2} flexWrap="wrap" sx={{ pl: 2 }}>
+                            {['baptism', 'marriage', 'funeral'].map((type) => (
+                              <FormControlLabel
+                                key={type}
+                                control={
+                                  <Switch
+                                    checked={formik.values.ag_grid_record_types.includes(type)}
+                                    onChange={(e) => {
+                                      const current = formik.values.ag_grid_record_types || [];
+                                      if (e.target.checked) {
+                                        formik.setFieldValue('ag_grid_record_types', [...current, type]);
+                                      } else {
+                                        formik.setFieldValue('ag_grid_record_types', current.filter((t: string) => t !== type));
+                                      }
+                                    }}
+                                    size="small"
+                                  />
+                                }
+                                label={type.charAt(0).toUpperCase() + type.slice(1)}
+                              />
+                            ))}
+                          </Stack>
+                        )}
+                      </Stack>
+                    </CardContent>
+                  </BlankCard>
+                </Grid>
+
+                {/* Action Buttons */}
+                <Grid item xs={12}>
+                  <BlankCard>
+                    <CardContent>
+                      <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
+                        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/apps/church-management')}>
+                          Back to Churches
+                        </Button>
+                        <Stack direction="row" spacing={2}>
+                          {isEdit && (
+                            <Button variant="outlined" onClick={() => window.open(`/apps/church-management/${id}/field-mapper`, '_blank')}>
+                              DB Table Mapping
+                            </Button>
+                          )}
+                          <Button variant="outlined" onClick={() => formik.resetForm()}>Reset</Button>
+                          <Button
+                            type="submit" variant="contained"
+                            startIcon={loading ? <CircularProgress size={16} /> : <SaveIcon />}
+                            disabled={loading || !formik.isValid}
+                          >
+                            {loading ? 'Saving...' : isEdit ? 'Update Church' : 'Create Church'}
+                          </Button>
+                        </Stack>
+                      </Stack>
+                    </CardContent>
+                  </BlankCard>
+                </Grid>
+              </Grid>
+            </form>
+          )}
+
+          {/* Tab 1: User Management */}
+          {activeTab === 1 && isEdit && (
             <BlankCard>
               <CardContent>
-                <Stack 
-                  direction="row" 
-                  spacing={2} 
-                  justifyContent="space-between" 
-                  alignItems="center"
-                >
-                  <Button
-                    variant="outlined"
-                    startIcon={<ArrowBackIcon />}
-                    onClick={() => navigate('/apps/church-management')}
-                  >
-                    Back to Churches
-                  </Button>
-
-                  <Stack direction="row" spacing={2}>
-                    {isEdit && (
-                      <Button
-                        variant="outlined"
-                        onClick={() => window.open(`/apps/church-management/${id}/field-mapper`, "_blank", "noopener,noreferrer,width=1200,height=800")}
-                        sx={{ borderRadius: '16px' }}
-                      >
-                        DB → Table Mapping
-                      </Button>
-                    )}
-                    
-                    <Button
-                      variant="outlined"
-                      onClick={() => formik.resetForm()}
-                    >
-                      Reset
+                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                  <Box>
+                    <Typography variant="h5">
+                      <IconUsers size={22} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+                      User Management
+                    </Typography>
+                    <Typography color="textSecondary">Manage users assigned to this church (ID: {id})</Typography>
+                  </Box>
+                  <Stack direction="row" spacing={1}>
+                    <Button startIcon={<RefreshIcon />} onClick={() => id && loadChurchUsers(id)} disabled={loadingUsers}>
+                      Refresh
                     </Button>
-                    
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      startIcon={loading ? <CircularProgress size={16} /> : <SaveIcon />}
-                      disabled={loading || !formik.isValid}
-                    >
-                      {loading ? 'Saving...' : (isEdit ? 'Update Church' : 'Create Church')}
+                    <Button variant="contained" startIcon={<AddIcon />} onClick={() => { setUserDialogAction('add'); setSelectedUser(null); setUserDialogOpen(true); }}>
+                      Add User
                     </Button>
                   </Stack>
                 </Stack>
+
+                {loadingUsers ? (
+                  <Box display="flex" justifyContent="center" py={4}><CircularProgress /></Box>
+                ) : churchUsers.length === 0 ? (
+                  <Alert severity="info">
+                    No users assigned to this church. Click "Add User" to create one.
+                  </Alert>
+                ) : (
+                  <TableContainer component={Paper} variant="outlined">
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Name</TableCell>
+                          <TableCell>Email</TableCell>
+                          <TableCell>Role</TableCell>
+                          <TableCell>Status</TableCell>
+                          <TableCell align="right">Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {churchUsers.map((u: any) => (
+                          <TableRow key={u.id} hover>
+                            <TableCell>
+                              <Typography variant="subtitle2">{u.first_name} {u.last_name}</Typography>
+                            </TableCell>
+                            <TableCell>{u.email}</TableCell>
+                            <TableCell>
+                              <Chip label={u.role} size="small" variant="outlined" />
+                            </TableCell>
+                            <TableCell>
+                              <Chip label={u.is_active ? 'Active' : 'Inactive'} color={u.is_active ? 'success' : 'default'} size="small" />
+                            </TableCell>
+                            <TableCell align="right">
+                              <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                                <Tooltip title="Edit">
+                                  <IconButton size="small" onClick={() => { setUserDialogAction('edit'); setSelectedUser(u); setUserDialogOpen(true); }}>
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Reset Password">
+                                  <IconButton size="small" onClick={() => handlePasswordReset(u.id, u.email)}>
+                                    <VpnKeyIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title={u.is_active ? 'Deactivate' : 'Activate'}>
+                                  <IconButton size="small" onClick={() => handleUserAction(u.id, u.is_active ? 'deactivate' : 'activate')} sx={{ color: u.is_active ? 'warning.main' : 'success.main' }}>
+                                    {u.is_active ? <IconTrash size={16} /> : <IconRefresh size={16} />}
+                                  </IconButton>
+                                </Tooltip>
+                              </Stack>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
               </CardContent>
             </BlankCard>
-          </Grid>
-        </Grid>
-        )}
-      </form>
+          )}
+
+          {/* Tab 2: Database Management */}
+          {activeTab === 2 && isEdit && (
+            <BlankCard>
+              <CardContent>
+                <Typography variant="h5" mb={1}>
+                  <IconDatabase size={22} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+                  Database Management
+                </Typography>
+                <Typography color="textSecondary" mb={3}>Database info and template updates</Typography>
+
+                {databaseInfo && (
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={12} sm={4}>
+                      <Paper variant="outlined" sx={{ p: 2 }}>
+                        <Typography variant="subtitle2" color="textSecondary">Database Name</Typography>
+                        <Typography variant="body1" fontFamily="monospace">{databaseInfo.name || formik.values.database_name || 'N/A'}</Typography>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <Paper variant="outlined" sx={{ p: 2 }}>
+                        <Typography variant="subtitle2" color="textSecondary">Size</Typography>
+                        <Typography variant="body1">{databaseInfo.size || 'N/A'}</Typography>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <Paper variant="outlined" sx={{ p: 2 }}>
+                        <Typography variant="subtitle2" color="textSecondary">Tables</Typography>
+                        <Typography variant="body1">{databaseInfo.table_count ?? 'N/A'}</Typography>
+                      </Paper>
+                    </Grid>
+                  </Grid>
+                )}
+
+                <Stack direction="row" spacing={2} mb={3}>
+                  <Button variant="outlined" startIcon={loadingDatabase ? <CircularProgress size={16} /> : <RefreshIcon />} onClick={() => id && loadDatabaseInfo(id)} disabled={loadingDatabase}>
+                    Refresh Info
+                  </Button>
+                  <Button variant="outlined" color="secondary" onClick={() => id && testDatabaseConnection(id)} disabled={loadingDatabase}>
+                    Test Connection
+                  </Button>
+                </Stack>
+
+                <Divider sx={{ my: 3 }} />
+
+                <Typography variant="h6" mb={2}>Update Database from Template</Typography>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Select Template</InputLabel>
+                      <Select value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)} label="Select Template">
+                        <MenuItem value="record_template1">record_template1</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Button
+                      variant="contained" color="secondary" fullWidth
+                      onClick={handleUpdateDatabase}
+                      disabled={!selectedTemplate || updatingDatabase}
+                      startIcon={updatingDatabase ? <CircularProgress size={16} /> : null}
+                    >
+                      {updatingDatabase ? 'Updating...' : 'Update Database'}
+                    </Button>
+                  </Grid>
+                </Grid>
+                {databaseUpdateResult && (
+                  <Alert severity={databaseUpdateResult.success ? 'success' : 'error'} sx={{ mt: 2 }}>
+                    {databaseUpdateResult.message}
+                  </Alert>
+                )}
+              </CardContent>
+            </BlankCard>
+          )}
+        </>
+      )}
+
+      {/* User Management Dialog */}
+      <Dialog open={userDialogOpen} onClose={() => setUserDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          {userDialogAction === 'add' ? 'Add New User' : 'Edit User'}
+        </DialogTitle>
+        <DialogContent>
+          <UserManagementDialog
+            user={selectedUser}
+            action={userDialogAction}
+            churchId={id || '0'}
+            onSave={handleUserSave}
+            onCancel={() => setUserDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </PageContainer>
   );
 };

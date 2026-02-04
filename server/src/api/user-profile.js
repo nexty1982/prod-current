@@ -1,7 +1,7 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 const express = require('express');
 const router = express.Router();
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const { requireAuth } = require('../middleware/auth');
 
 // Get user profile data (root route for /api/user/profile)
@@ -44,6 +44,9 @@ router.get('/', requireAuth, async (req, res) => {
                 last_seen: profile.last_seen,
                 privacy_settings: profile.privacy_settings,
                 social_links: profile.social_links,
+                job_title: profile.job_title,
+                company: profile.company,
+                phone: profile.phone,
                 // User basic info
                 first_name: profile.first_name,
                 last_name: profile.last_name,
@@ -99,7 +102,10 @@ router.put('/', requireAuth, async (req, res) => {
             cover_image_url,
             privacy_settings,
             social_links,
-            church_affiliation
+            church_affiliation,
+            job_title,
+            company,
+            phone
         } = req.body;
 
         // Check if profile exists
@@ -109,45 +115,86 @@ router.put('/', requireAuth, async (req, res) => {
         );
 
         if (existingProfiles.length > 0) {
-            // Update existing profile
-            await getAppPool().query(`
-                UPDATE user_profiles SET
-                    display_name = ?,
-                    bio = ?,
-                    location = ?,
-                    website = ?,
-                    birthday = ?,
-                    status_message = ?,
-                    profile_theme = ?,
-                    profile_image_url = ?,
-                    cover_image_url = ?,
-                    privacy_settings = ?,
-                    social_links = ?,
-                    church_affiliation = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE user_id = ?
-            `, [
+            // Build dynamic update - only update fields that were provided
+            const updateFields = [];
+            const updateValues = [];
+            const fieldMap = {
                 display_name, bio, location, website, birthday, status_message,
                 profile_theme, profile_image_url, cover_image_url,
-                JSON.stringify(privacy_settings), JSON.stringify(social_links), church_affiliation, userId
-            ]);
+                church_affiliation, job_title, company, phone
+            };
+
+            for (const [key, value] of Object.entries(fieldMap)) {
+                if (value !== undefined) {
+                    updateFields.push(`${key} = ?`);
+                    updateValues.push(value);
+                }
+            }
+
+            // Handle JSON fields separately
+            if (privacy_settings !== undefined) {
+                updateFields.push('privacy_settings = ?');
+                updateValues.push(JSON.stringify(privacy_settings));
+            }
+            if (social_links !== undefined) {
+                updateFields.push('social_links = ?');
+                updateValues.push(JSON.stringify(social_links));
+            }
+
+            if (updateFields.length > 0) {
+                updateFields.push('updated_at = CURRENT_TIMESTAMP');
+                updateValues.push(userId);
+                await getAppPool().query(`
+                    UPDATE user_profiles SET ${updateFields.join(', ')}
+                    WHERE user_id = ?
+                `, updateValues);
+            }
 
             console.log(`📸 User profile updated for user ${userId}`);
         } else {
-            // Create new profile
-            await getAppPool().query(`
-                INSERT INTO user_profiles (
-                    user_id, display_name, bio, location, website, birthday,
-                    status_message, profile_theme, profile_image_url, cover_image_url,
-                    privacy_settings, social_links, church_affiliation, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            `, [
-                userId, display_name, bio, location, website, birthday, status_message,
+            // user_profiles is a view on users, so update users table directly
+            const updateFields = [];
+            const updateValues = [];
+            const fieldMap = {
+                display_name, bio, location, website, birthday, status_message,
                 profile_theme, profile_image_url, cover_image_url,
-                JSON.stringify(privacy_settings), JSON.stringify(social_links), church_affiliation
-            ]);
+                church_affiliation, job_title, company, phone
+            };
 
-            console.log(`📸 User profile created for user ${userId}`);
+            // Map view column names to users table column names
+            const columnMap = {
+                profile_theme: 'ui_theme',
+                profile_image_url: 'avatar_url',
+                cover_image_url: 'banner_url'
+            };
+
+            for (const [key, value] of Object.entries(fieldMap)) {
+                if (value !== undefined) {
+                    const col = columnMap[key] || key;
+                    updateFields.push(`${col} = ?`);
+                    updateValues.push(value);
+                }
+            }
+
+            if (privacy_settings !== undefined) {
+                updateFields.push('privacy_settings = ?');
+                updateValues.push(JSON.stringify(privacy_settings));
+            }
+            if (social_links !== undefined) {
+                updateFields.push('social_links = ?');
+                updateValues.push(JSON.stringify(social_links));
+            }
+
+            if (updateFields.length > 0) {
+                updateFields.push('updated_at = CURRENT_TIMESTAMP');
+                updateValues.push(userId);
+                await getAppPool().query(`
+                    UPDATE orthodoxmetrics_db.users SET ${updateFields.join(', ')}
+                    WHERE id = ?
+                `, updateValues);
+            }
+
+            console.log(`📸 User profile created/updated for user ${userId}`);
         }
 
         res.json({

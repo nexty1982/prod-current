@@ -26,6 +26,8 @@ export let churchesList: Church[] = [
             public_directory: true
         }),
         is_active: true,
+        enable_ag_grid: true,
+        ag_grid_record_types: ['baptism', 'marriage', 'funeral'],
         created_at: '2020-01-15T10:30:00.000Z',
         updated_at: '2024-12-01T15:45:00.000Z',
     },

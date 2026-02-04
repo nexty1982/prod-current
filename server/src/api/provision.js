@@ -1,4 +1,4 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // Church Provisioning API
 // Handles the automated church provisioning pipeline
 
@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs').promises;
 const router = express.Router();
-const db = require('../../config/db-compat');
+const db = require('../config/db-compat');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const { createReactSite } = require('../utils/createReactSite');
 const { sendProvisionEmail } = require('../utils/sendProvisionEmail');

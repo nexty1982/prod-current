@@ -1,10 +1,10 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 /**
  * Component Registry Service - Database Implementation
  * Replaces auto-discovered-components.json with database queries
  */
 
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 
 class ComponentRegistryService {
   constructor() {

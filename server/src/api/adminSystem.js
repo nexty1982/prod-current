@@ -1,31 +1,15 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/admin.js - Extended admin routes for Orthodox Metrics mana    const productionHos    // If we're on orthodoxmetrics_db.com or production server, assume productionnames = ['prod', 'production', 'live', 'orthodoxmetrics_db'];ement
 const express = require('express');
 const router = express.Router();
-const { promisePool } = require('../../config/db-compat');
-const { requireAuth } = require('../middleware/auth');
+const { promisePool } = require('../config/db-compat');
+const { requireRole } = require('../middleware/auth');
 const os = require('os');
 const fs = require('fs').promises;
 const path = require('path');
 
-// Authentication middleware for all admin system routes
-router.use(requireAuth);
-
-// Role-based middleware for super admin only
-const requireSuperAdmin = (req, res, next) => {
-    if (!req.user) {
-        return res.status(401).json({ error: 'Authentication required' });
-    }
-    
-    if (req.user.role !== 'super_admin') {
-        return res.status(403).json({ error: 'Super admin access required' });
-    }
-    
-    next();
-};
-
-// Apply super admin middleware to all routes
-router.use(requireSuperAdmin);
+// Authentication + super_admin role check for all routes (supports session + JWT)
+router.use(requireRole(['super_admin']));
 
 /**
  * Determine environment with IP-based detection logic

@@ -1,6 +1,6 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // services/churchRecordEntityExtractor.js
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 const { getChurchDbConnection } = require('../utils/dbSwitcher');
 
 /**

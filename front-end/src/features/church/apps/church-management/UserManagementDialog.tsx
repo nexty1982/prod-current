@@ -13,6 +13,9 @@ import {
   Switch,
   FormControlLabel,
   DialogActions,
+  Chip,
+  Stack,
+  Divider,
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -26,6 +29,7 @@ interface User {
   is_active: boolean;
   phone?: string;
   landing_page?: string;
+  church_id?: number | null;
 }
 
 interface UserManagementDialogProps {
@@ -36,12 +40,32 @@ interface UserManagementDialogProps {
   onCancel: () => void;
 }
 
-const validationSchema = Yup.object({
-  email: Yup.string().email('Invalid email').required('Email is required'),
-  first_name: Yup.string().required('First name is required'),
-  last_name: Yup.string().required('Last name is required'),
+const baseValidation = Yup.object({
+  email: Yup.string().email('Invalid email address').required('Email is required'),
+  first_name: Yup.string().required('First name is required').min(2, 'Must be at least 2 characters'),
+  last_name: Yup.string().required('Last name is required').min(2, 'Must be at least 2 characters'),
   role: Yup.string().required('Role is required'),
+  phone: Yup.string().matches(/^[+]?[\d\s()-]*$/, 'Invalid phone number format').nullable(),
 });
+
+const roleOptions = [
+  { value: 'church_admin', label: 'Church Administrator', description: 'Full access to all church functions and settings' },
+  { value: 'priest', label: 'Priest', description: 'Full clergy privileges and record lifecycle authority' },
+  { value: 'deacon', label: 'Deacon', description: 'Partial clergy privileges, can assist with records' },
+  { value: 'editor', label: 'Editor', description: 'Can add and edit records, no admin access' },
+  { value: 'viewer', label: 'Viewer', description: 'View-only access to records and reports' },
+  { value: 'manager', label: 'Manager', description: 'Manage church operations and users' },
+  { value: 'admin', label: 'System Admin', description: 'System-level admin privileges' },
+  { value: 'user', label: 'Basic User', description: 'Standard user with limited access' },
+];
+
+const landingPageOptions = [
+  { value: '/dashboards/modern', label: 'Dashboard' },
+  { value: '/records', label: 'Records Management' },
+  { value: '/apps/liturgical-calendar', label: 'Orthodox Liturgical Calendar' },
+  { value: '/apps/notes', label: 'Notes App' },
+  { value: '/apps/church-management', label: 'Church Management' },
+];
 
 const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
   user,
@@ -61,18 +85,20 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
       is_active: user?.is_active !== false,
       phone: user?.phone || '',
       landing_page: user?.landing_page || '/dashboards/modern',
-      password: '', // Only for new users
+      password: '',
+      church_id: user?.church_id ?? (churchId ? parseInt(churchId) : null),
     },
-    validationSchema: action === 'add' ? validationSchema.shape({
-      password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required')
-    }) : validationSchema,
+    validationSchema: action === 'add'
+      ? baseValidation.shape({
+          password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required for new users'),
+        })
+      : baseValidation,
     onSubmit: async (values) => {
       setLoading(true);
       try {
-        const userData = { ...values };
-        // Remove password field for edit actions if it's empty
+        const userData = { ...values, church_id: values.church_id ?? parseInt(churchId) };
         if (action === 'edit' && !values.password) {
-          delete userData.password;
+          delete (userData as any).password;
         }
         onSave(userData);
       } catch (error) {
@@ -83,7 +109,6 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
     },
   });
 
-  // Reset form when user prop changes
   useEffect(() => {
     if (user) {
       formik.setValues({
@@ -95,22 +120,12 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
         phone: user.phone || '',
         landing_page: user.landing_page || '/dashboards/modern',
         password: '',
+        church_id: user.church_id ?? (churchId ? parseInt(churchId) : null),
       });
     }
   }, [user]);
 
-  const roleOptions = [
-    { value: 'user', label: 'User' },
-    { value: 'manager', label: 'Manager' },
-    { value: 'admin', label: 'Admin' },
-  ];
-
-  const landingPageOptions = [
-    { value: '/dashboards/modern', label: 'Dashboard' },
-    { value: '/records', label: 'Records Management' },
-                { value: '/apps/liturgical-calendar', label: 'Orthodox Liturgical Calendar' },
-    { value: '/apps/notes', label: 'Notes App' },
-  ];
+  const selectedRole = roleOptions.find(r => r.value === formik.values.role);
 
   return (
     <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 2 }}>
@@ -121,39 +136,12 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
           </Typography>
           {action === 'add' && (
             <Alert severity="info" sx={{ mb: 2 }}>
-              A new user will be created and assigned to this church. An email invitation will be sent.
+              A new user will be created and assigned to this church (ID: {churchId}). An email invitation will be sent.
             </Alert>
           )}
         </Grid>
 
         {/* Personal Information */}
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Email Address"
-            name="email"
-            type="email"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.email && Boolean(formik.errors.email)}
-            helperText={formik.touched.email && formik.errors.email}
-            disabled={loading}
-          />
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Phone (Optional)"
-            name="phone"
-            value={formik.values.phone}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            disabled={loading}
-          />
-        </Grid>
-
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
@@ -165,6 +153,7 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
             error={formik.touched.first_name && Boolean(formik.errors.first_name)}
             helperText={formik.touched.first_name && formik.errors.first_name}
             disabled={loading}
+            required
           />
         </Grid>
 
@@ -179,44 +168,68 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
             error={formik.touched.last_name && Boolean(formik.errors.last_name)}
             helperText={formik.touched.last_name && formik.errors.last_name}
             disabled={loading}
+            required
           />
         </Grid>
 
-        {/* Password (for new users only) */}
-        {action === 'add' && (
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type="password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.password && Boolean(formik.errors.password)}
-              helperText={formik.touched.password && formik.errors.password}
-              disabled={loading}
-            />
-          </Grid>
-        )}
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Email Address"
+            name="email"
+            type="email"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
+            disabled={loading}
+            required
+          />
+        </Grid>
 
-        {action === 'edit' && (
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="New Password (Leave blank to keep current)"
-              name="password"
-              type="password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              disabled={loading}
-              helperText="Only enter a password if you want to change it"
-            />
-          </Grid>
-        )}
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Phone (Optional)"
+            name="phone"
+            value={formik.values.phone}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.phone && Boolean(formik.errors.phone)}
+            helperText={formik.touched.phone && formik.errors.phone}
+            disabled={loading}
+          />
+        </Grid>
 
-        {/* Role and Permissions */}
+        {/* Password */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label={action === 'add' ? 'Password' : 'New Password (leave blank to keep current)'}
+            name="password"
+            type="password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={
+              (formik.touched.password && formik.errors.password) ||
+              (action === 'edit' ? 'Only enter a password if you want to change it' : 'Minimum 8 characters')
+            }
+            disabled={loading}
+            required={action === 'add'}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Divider sx={{ my: 1 }} />
+          <Typography variant="subtitle2" color="textSecondary" sx={{ mt: 1, mb: 2 }}>
+            Role & Permissions
+          </Typography>
+        </Grid>
+
+        {/* Role */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
             <InputLabel>Role</InputLabel>
@@ -231,13 +244,25 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
             >
               {roleOptions.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
-                  {option.label}
+                  <Stack>
+                    <Typography variant="body2" fontWeight={600}>{option.label}</Typography>
+                    <Typography variant="caption" color="textSecondary">{option.description}</Typography>
+                  </Stack>
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
+          {selectedRole && (
+            <Box sx={{ mt: 1, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Chip label={selectedRole.label} size="small" color="primary" variant="outlined" />
+                <Typography variant="caption" color="textSecondary">{selectedRole.description}</Typography>
+              </Stack>
+            </Box>
+          )}
         </Grid>
 
+        {/* Landing Page */}
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
             <InputLabel>Default Landing Page</InputLabel>
@@ -257,8 +282,23 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
           </FormControl>
         </Grid>
 
+        {/* Church ID */}
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Church ID"
+            name="church_id"
+            type="number"
+            value={formik.values.church_id ?? ''}
+            onChange={(e) => formik.setFieldValue('church_id', e.target.value ? parseInt(e.target.value) : null)}
+            disabled={loading}
+            helperText="The church this user is assigned to"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+
         {/* Account Status */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <FormControlLabel
             control={
               <Switch
@@ -270,7 +310,7 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
             }
             label="Account Active"
           />
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" display="block">
             Inactive users cannot log in to the system
           </Typography>
         </Grid>
@@ -283,7 +323,7 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
         <Button
           type="submit"
           variant="contained"
-          disabled={loading || !formik.isValid}
+          disabled={loading || !formik.isValid || !formik.dirty}
         >
           {loading ? 'Saving...' : action === 'add' ? 'Add User' : 'Update User'}
         </Button>
@@ -292,4 +332,4 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
   );
 };
 
-export default UserManagementDialog; 
+export default UserManagementDialog;

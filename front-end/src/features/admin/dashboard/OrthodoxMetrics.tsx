@@ -50,6 +50,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageContainer from '@/shared/ui/PageContainer';
 import { useAuth } from '@/context/AuthContext';
+import ChurchToolsPanel from './OrthodoxMetrics/ChurchToolsPanel';
 
 // Tab Components
 
@@ -620,21 +621,7 @@ const OrthodMetrics = () => {
         {
             label: 'Church Tools',
             icon: <IconBuilding size={18} />,
-            component: (
-                <Box p={3}>
-                    <Typography variant="h5" gutterBottom>⛪ Church Tools</Typography>
-                    <Typography sx={{ 
-                        color: 'text.primary', 
-                        opacity: 0.8,
-                        '@media (max-width: 768px)': {
-                            opacity: 1,
-                            color: 'text.primary'
-                        }
-                    }}>
-                        Coming soon: Church Management, OCR Processing, Calendar System, Records
-                    </Typography>
-                </Box>
-            )
+            component: <ChurchToolsPanel />
         },
         {
             label: 'Content Management',

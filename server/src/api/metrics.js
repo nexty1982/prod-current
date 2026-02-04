@@ -1,10 +1,10 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // server/routes/metrics.js
 // SaaS metrics API endpoints for Orthodox Metrics platform
 
 const express = require('express');
 const router = express.Router();
-const { promisePool } = require('../../config/db-compat');
+const { promisePool } = require('../config/db-compat');
 
 // Middleware to check if user is authenticated
 const requireAuth = (req, res, next) => {

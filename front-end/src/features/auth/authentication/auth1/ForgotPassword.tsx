@@ -1,8 +1,7 @@
-import Grid2 from '@/components/compat/Grid2';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
-import { Grid, Box, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 
 import Logo from '@/layouts/full/shared/logo/Logo';
 import PageContainer from '@/shared/ui/PageContainer';
@@ -13,8 +12,13 @@ import AuthForgotPassword from '@/features/auth/authentication/authForms/AuthFor
 
 const ForgotPassword = () => (
   <PageContainer title="Forgot Password" description="this is Forgot Password page">
-    <Grid2 container justifyContent="center" spacing={0} sx={{ overflowX: 'hidden' }}>
-      <Grid2
+    <Grid container justifyContent="center" spacing={0} sx={{ overflowX: 'hidden' }}>
+      <Grid
+        item
+        xs={12}
+        sm={12}
+        lg={8}
+        xl={9}
         sx={{
           position: 'relative',
           '&:before': {
@@ -27,12 +31,6 @@ const ForgotPassword = () => (
             width: '100%',
             opacity: '0.3',
           },
-        }}
-        size={{
-          xs: 12,
-          sm: 12,
-          lg: 8,
-          xl: 9
         }}>
         <Box position="relative">
           <Box px={3}>
@@ -59,17 +57,16 @@ const ForgotPassword = () => (
             />
           </Box>
         </Box>
-      </Grid2>
-      <Grid2
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        sm={12}
+        lg={4}
+        xl={3}
         display="flex"
         justifyContent="center"
-        alignItems="center"
-        size={{
-          xs: 12,
-          sm: 12,
-          lg: 4,
-          xl: 3
-        }}>
+        alignItems="center">
         <Box p={4}>
           <Typography variant="h4" fontWeight="700">
             Forgot your password?
@@ -81,8 +78,8 @@ const ForgotPassword = () => (
           </Typography>
           <AuthForgotPassword />
         </Box>
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   </PageContainer>
 );
 

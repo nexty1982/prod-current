@@ -1,9 +1,9 @@
-const { getAppPool } = require('../../config/db-compat');
+const { getAppPool } = require('../config/db-compat');
 // Email Notification Utility for Church Provisioning
 // Sends multilingual emails during the provisioning process
 
 const nodemailer = require('nodemailer');
-const db = require('../../config/db-compat');
+const db = require('../config/db-compat');
 const logger = require('./logger');
 
 // Email configuration
