@@ -320,16 +320,18 @@ const FieldMapperPage: React.FC = () => {
       
       if (response.ok) {
         const data = await response.json();
-        if (data.themes) {
+        // Handle both ApiResponse-wrapped ({ data: { themes } }) and direct ({ themes }) formats
+        const themesPayload = data.data?.themes || data.themes;
+        if (themesPayload && typeof themesPayload === 'object' && Object.keys(themesPayload).length > 0) {
           setThemeStudio(prev => ({
             ...prev,
-            themes: data.themes,
+            themes: themesPayload,
             isGlobal: isGlobal,
           }));
           
           // Sync church-specific themes to enhancedTableStore so they appear in dropdown
           if (!isGlobal) {
-            enhancedTableStore.setCustomThemes(data.themes);
+            enhancedTableStore.setCustomThemes(themesPayload);
           }
         } else {
           // Initialize with empty themes
@@ -388,16 +390,13 @@ const FieldMapperPage: React.FC = () => {
         ? '/api/admin/churches/themes/global'
         : `/api/admin/churches/${churchId}/themes`;
 
-      // Convert themes object/map to array for API
-      // themeStudio.themes is Record<string, ThemeTokens> - convert to Theme[]
-      const themesArray = Object.values(themeStudio.themes || {}).filter(theme => theme && theme.name);
-      
+      // Send themes as object (Record<string, ThemeTokens>) to match what loadThemes() expects
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          themes: themesArray,
+          themes: themeStudio.themes || {},
         }),
       });
 
@@ -453,7 +452,7 @@ const FieldMapperPage: React.FC = () => {
         let loadedChurchName = '';
         if (churchResponse.ok) {
           const churchData = await churchResponse.json();
-          loadedChurchName = churchData.church?.church_name || churchData.church?.name || '';
+          loadedChurchName = churchData.church?.church_name || churchData.church?.name || churchData.data?.church_name || churchData.data?.name || churchData.church_name || churchData.name || '';
           setChurchName(loadedChurchName);
         }
 
@@ -559,7 +558,9 @@ const FieldMapperPage: React.FC = () => {
         try {
           const res = await fetchWithChurchContext(url, { churchId, credentials: 'include' });
           if (res.ok) {
-            mappingData = await res.json();
+            const raw = await res.json();
+            // Handle both ApiResponse-wrapped ({ data: { columns, mappings, ... } }) and direct formats
+            mappingData = raw.data ?? raw;
             break;
           }
         } catch {
@@ -682,7 +683,7 @@ const FieldMapperPage: React.FC = () => {
 
       const body = JSON.stringify({
         table: tableName,
-        mapping,
+        mappings: mapping,
         field_settings: {
           visibility,
           sortable,
@@ -1125,27 +1126,28 @@ const FieldMapperPage: React.FC = () => {
             if (response.ok) {
               const data = await response.json();
               if (data.settings) {
+                const safeObj = (val: any) => (val && typeof val === 'object' && !Array.isArray(val)) ? val : {};
                 setRecordSettings(prev => ({
                   ...prev,
-                  ...data.settings,
+                  ...safeObj(data.settings),
                   logo: {
                     ...prev.logo,
-                    ...(data.settings.logo || {}),
+                    ...safeObj(data.settings.logo),
                   },
                   calendar: {
                     ...prev.calendar,
-                    ...(data.settings.calendar || {}),
+                    ...safeObj(data.settings.calendar),
                   },
                   omLogo: {
                     ...prev.omLogo,
-                    ...(data.settings.omLogo || {}),
+                    ...safeObj(data.settings.omLogo),
                   },
                   headerText: {
                     fontFamily: 'Arial, sans-serif',
                     fontSize: 16,
                     fontWeight: 700,
                     color: '#4C1D95',
-                    ...(data.settings.headerText || {}),
+                    ...safeObj(data.settings.headerText),
                     column: data.settings.headerText?.column ?? 1,
                   },
                   recordImages: {
@@ -1235,21 +1237,24 @@ const FieldMapperPage: React.FC = () => {
         if (response.ok) {
           const data = await response.json();
           if (data.settings) {
+            // Helper: only spread objects, not strings (guards against legacy corrupt data)
+            const safeObj = (val: any) => (val && typeof val === 'object' && !Array.isArray(val)) ? val : {};
+
             // Merge loaded settings with defaults to ensure all properties exist
             setRecordSettings(prev => ({
               ...prev,
-              ...data.settings,
+              ...safeObj(data.settings),
               logo: {
                 ...prev.logo,
-                ...(data.settings.logo || {}),
+                ...safeObj(data.settings.logo),
               },
               calendar: {
                 ...prev.calendar,
-                ...(data.settings.calendar || {}),
+                ...safeObj(data.settings.calendar),
               },
               omLogo: {
                 ...prev.omLogo,
-                ...(data.settings.omLogo || {}),
+                ...safeObj(data.settings.omLogo),
               },
               headerText: {
                 fontFamily: 'Arial, sans-serif',
@@ -1258,7 +1263,7 @@ const FieldMapperPage: React.FC = () => {
                 color: '#4C1D95',
                 x: 0,
                 y: 0,
-                ...(data.settings.headerText || {}),
+                ...safeObj(data.settings.headerText),
                 column: data.settings.headerText?.column ?? 1,
               },
               recordImages: {
@@ -1274,14 +1279,14 @@ const FieldMapperPage: React.FC = () => {
                 column: 0,
                 images: [],
                 currentIndex: 0,
-                ...(data.settings.backgroundImage || {}),
+                ...safeObj(data.settings.backgroundImage),
               },
               g1Image: {
                 enabled: true,
                 column: 0,
                 images: [],
                 currentIndex: 0,
-                ...(data.settings.g1Image || {}),
+                ...safeObj(data.settings.g1Image),
               },
               imageLibrary: {
                 logo: [],
@@ -1291,7 +1296,7 @@ const FieldMapperPage: React.FC = () => {
                 funeral: [],
                 bg: [],
                 g1: [],
-                ...(data.settings.imageLibrary || {}),
+                ...safeObj(data.settings.imageLibrary),
               },
               currentImageIndex: {
                 logo: 0,
@@ -1301,7 +1306,7 @@ const FieldMapperPage: React.FC = () => {
                 funeral: 0,
                 bg: 0,
                 g1: 0,
-                ...(data.settings.currentImageIndex || {}),
+                ...safeObj(data.settings.currentImageIndex),
               },
             }));
           }
@@ -3104,11 +3109,40 @@ const FieldMapperPage: React.FC = () => {
                       color="error"
                       startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
                       onClick={async () => {
-                        setSaving(true);
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                        setSuccess('UI Theme saved successfully!');
-                        setTimeout(() => setSuccess(null), 3000);
-                        setSaving(false);
+                        if (!churchId) {
+                          setError('Invalid church ID. Cannot save UI theme.');
+                          return;
+                        }
+                        try {
+                          setSaving(true);
+                          setError(null);
+                          setSuccess(null);
+                          const storeState = enhancedTableStore.exportConfig();
+                          const response = await fetch(`/api/admin/churches/${churchId}/dynamic-records-config`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({
+                              config: {
+                                branding: dynamicConfig.branding,
+                                liturgicalTheme: dynamicConfig.liturgicalTheme,
+                                fieldRules: dynamicConfig.fieldRules,
+                                actionButtonConfigs: storeState.actionButtonConfigs,
+                              },
+                            }),
+                          });
+                          if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(errorData.message || errorData.error || 'Failed to save UI theme');
+                          }
+                          setSuccess('UI Theme saved successfully!');
+                          setTimeout(() => setSuccess(null), 3000);
+                        } catch (err: any) {
+                          console.error('Error saving UI theme:', err);
+                          setError(err?.message || 'Failed to save UI theme');
+                        } finally {
+                          setSaving(false);
+                        }
                       }}
                       disabled={saving}
                       sx={{ textTransform: 'none' }}

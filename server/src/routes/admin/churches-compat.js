@@ -663,9 +663,14 @@ router.post('/:id/record-settings', requireAuth, requireChurchAccess, async (req
         settings = s ? (typeof s === 'string' ? JSON.parse(s) : s) : rest;
       }
 
-      // If a logo file was uploaded, store its path
+      // If a logo file was uploaded, merge the path into the logo settings object
       if (req.file) {
-        settings.logo = `/uploads/record-settings/${req.file.filename}`;
+        const logoPath = `/uploads/record-settings/${req.file.filename}`;
+        if (settings.logo && typeof settings.logo === 'object') {
+          settings.logo.url = logoPath;
+        } else {
+          settings.logo = { url: logoPath };
+        }
       }
 
       // Ensure table exists
@@ -739,7 +744,7 @@ router.post('/:id/record-images', requireAuth, requireChurchAccess, async (req, 
 
 /**
  * GET /api/admin/churches/:id/dynamic-records-config
- * Returns dynamic records configuration for a church
+ * Returns dynamic records configuration for a church (branding, themes, field rules, button configs)
  */
 router.get('/:id/dynamic-records-config', requireAuth, requireChurchAccess, async (req, res) => {
   try {
@@ -748,11 +753,167 @@ router.get('/:id/dynamic-records-config', requireAuth, requireChurchAccess, asyn
     if (!access.allowed) {
       return res.status(403).json(ApiResponse(false, null, { message: 'Access denied', code: 'INSUFFICIENT_PERMISSIONS' }));
     }
-    // Return empty config - this endpoint is a stub for future dynamic record type configuration
-    res.json({ success: true, config: {}, church_id: churchId });
+
+    // Ensure table exists
+    await getAppPool().query(`
+      CREATE TABLE IF NOT EXISTS orthodoxmetrics_db.church_dynamic_records_config (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        church_id INT NOT NULL,
+        config JSON,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_church (church_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    const [rows] = await getAppPool().query(
+      'SELECT config FROM orthodoxmetrics_db.church_dynamic_records_config WHERE church_id = ?',
+      [churchId]
+    );
+
+    const config = rows.length > 0 && rows[0].config ? JSON.parse(rows[0].config) : {};
+    res.json({ success: true, config, church_id: churchId });
   } catch (error) {
     console.error('❌ Error fetching dynamic-records-config:', error);
     res.status(500).json(ApiResponse(false, null, { message: 'Failed to fetch config', code: 'DATABASE_ERROR' }));
+  }
+});
+
+/**
+ * POST /api/admin/churches/:id/dynamic-records-config
+ * Save dynamic records configuration for a church (branding, themes, field rules, button configs)
+ */
+router.post('/:id/dynamic-records-config', requireAuth, requireChurchAccess, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+    const access = validateChurchAccess(req.user, churchId);
+    if (!access.allowed) {
+      return res.status(403).json(ApiResponse(false, null, { message: 'Access denied', code: 'INSUFFICIENT_PERMISSIONS' }));
+    }
+
+    const { config } = req.body;
+    if (!config || typeof config !== 'object') {
+      return res.status(400).json(ApiResponse(false, null, { message: 'Config object required', code: 'MISSING_PARAMETER' }));
+    }
+
+    // Ensure table exists
+    await getAppPool().query(`
+      CREATE TABLE IF NOT EXISTS orthodoxmetrics_db.church_dynamic_records_config (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        church_id INT NOT NULL,
+        config JSON,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_church (church_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await getAppPool().query(`
+      INSERT INTO orthodoxmetrics_db.church_dynamic_records_config (church_id, config)
+      VALUES (?, ?)
+      ON DUPLICATE KEY UPDATE config = VALUES(config), updated_at = CURRENT_TIMESTAMP
+    `, [churchId, JSON.stringify(config)]);
+
+    console.log(`✅ Dynamic records config saved for church ${churchId}`);
+    res.json(ApiResponse(true, { message: 'Dynamic records config saved successfully', church_id: churchId }));
+  } catch (error) {
+    console.error('❌ Error saving dynamic-records-config:', error);
+    res.status(500).json(ApiResponse(false, null, { message: 'Failed to save config', code: 'DATABASE_ERROR' }));
+  }
+});
+
+/**
+ * POST /api/admin/churches/:id/export-template
+ * Export current field mapper configuration as a global template
+ */
+router.post('/:id/export-template', requireAuth, requireChurchAccess, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+    const access = validateChurchAccess(req.user, churchId);
+    if (!access.allowed) {
+      return res.status(403).json(ApiResponse(false, null, { message: 'Access denied', code: 'INSUFFICIENT_PERMISSIONS' }));
+    }
+
+    const { table, language, template_slug, template_name, overwrite } = req.body;
+    if (!table || !template_slug) {
+      return res.status(400).json(ApiResponse(false, null, { message: 'table and template_slug are required', code: 'MISSING_PARAMETER' }));
+    }
+
+    // Get the record type from table name
+    const recordType = table.replace('_records', '') || 'custom';
+
+    // Get existing field mapper settings for this church+table
+    const [settings] = await getAppPool().query(
+      'SELECT mappings, field_settings FROM orthodoxmetrics_db.field_mapper_settings WHERE church_id = ? AND table_name = ?',
+      [churchId, table]
+    );
+
+    const mappings = settings.length > 0 && settings[0].mappings ? JSON.parse(settings[0].mappings) : {};
+    const fieldSettings = settings.length > 0 && settings[0].field_settings ? JSON.parse(settings[0].field_settings) : {};
+
+    // Build template fields from mappings
+    const fields = Object.entries(mappings).map(([columnName, displayName]) => ({
+      column_name: columnName,
+      display_name: displayName,
+      visible: fieldSettings.visibility ? fieldSettings.visibility[columnName] !== false : true,
+      sortable: fieldSettings.sortable ? fieldSettings.sortable[columnName] !== false : true,
+    }));
+
+    // Ensure templates table exists
+    await getAppPool().query(`
+      CREATE TABLE IF NOT EXISTS orthodoxmetrics_db.record_templates (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        slug VARCHAR(255) NOT NULL UNIQUE,
+        name VARCHAR(255) NOT NULL,
+        record_type VARCHAR(50) NOT NULL DEFAULT 'custom',
+        description TEXT,
+        fields JSON,
+        grid_type VARCHAR(50) DEFAULT 'standard',
+        theme VARCHAR(100),
+        layout_type VARCHAR(50) DEFAULT 'default',
+        language_support JSON,
+        is_editable BOOLEAN DEFAULT TRUE,
+        church_id INT DEFAULT NULL,
+        is_global BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // Check if template already exists
+    const [existing] = await getAppPool().query(
+      'SELECT id FROM orthodoxmetrics_db.record_templates WHERE slug = ?',
+      [template_slug]
+    );
+
+    if (existing.length > 0 && !overwrite) {
+      return res.status(409).json(ApiResponse(false, null, {
+        message: `Template "${template_slug}" already exists. Enable overwrite to update it.`,
+        code: 'TEMPLATE_EXISTS'
+      }));
+    }
+
+    if (existing.length > 0 && overwrite) {
+      await getAppPool().query(`
+        UPDATE orthodoxmetrics_db.record_templates 
+        SET name = ?, record_type = ?, fields = ?, language_support = ?, is_global = TRUE, updated_at = CURRENT_TIMESTAMP
+        WHERE slug = ?
+      `, [template_name || template_slug, recordType, JSON.stringify(fields), JSON.stringify({ primary: language || 'en' }), template_slug]);
+    } else {
+      await getAppPool().query(`
+        INSERT INTO orthodoxmetrics_db.record_templates (slug, name, record_type, fields, language_support, is_global)
+        VALUES (?, ?, ?, ?, ?, TRUE)
+      `, [template_slug, template_name || template_slug, recordType, JSON.stringify(fields), JSON.stringify({ primary: language || 'en' })]);
+    }
+
+    console.log(`✅ Template exported: ${template_slug} for church ${churchId}`);
+    res.json(ApiResponse(true, {
+      message: overwrite && existing.length > 0 ? 'Template updated successfully' : 'Template created successfully',
+      slug: template_slug,
+    }));
+  } catch (error) {
+    console.error('❌ Error exporting template:', error);
+    res.status(500).json(ApiResponse(false, null, { message: 'Failed to export template', code: 'DATABASE_ERROR' }));
   }
 });
 
