@@ -2,7 +2,7 @@ import Grid2 from '@/components/compat/Grid2';
 import CustomSelect from '@/components/forms/theme-elements/CustomSelect';
 import CustomTextField from '@/components/forms/theme-elements/CustomTextField';
 import Address from '@/features/records-centralized/components/Address';
-import CustomFormLabel from '@/features/records-centralized/components/forms/CustomFormLabel';
+import CustomFormLabel from '@/components/forms/theme-elements/CustomFormLabel';
 import { Alert, Box, Button, CircularProgress, Container, MenuItem } from '@mui/material';
 import axios from 'axios';
 import React, { useState } from 'react';

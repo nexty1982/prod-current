@@ -58,14 +58,6 @@
 [LIVE] front-end/src/features/devel-tools/omtrace/types.ts
 [NOT_LIVE] front-end/src/tools/omtrace/core/types.ts
 
-==== admin.api.ts (2) ====
-[LIVE] front-end/src/admin.api.ts
-[LIVE] front-end/src/api/admin.api.ts
-
-==== AdvancedGridDialog.tsx (2) ====
-[LIVE] front-end/src/components/AdvancedGridDialog.tsx
-[LIVE] front-end/src/features/tables/AdvancedGridDialog.tsx
-
 ==== auth.ts (2) ====
 [NOT_LIVE] front-end/src/tools/omtrace/lib/auth.ts
 [LIVE] front-end/src/types/auth/auth.ts
@@ -77,10 +69,6 @@
 ==== Banner.tsx (2) ====
 [LIVE] front-end/src/components/frontend-pages/portfolio/Banner.tsx
 [LIVE] front-end/src/features/landingpage/banner/Banner.tsx
-
-==== BlankCard.tsx (2) ====
-[LIVE] front-end/src/components/shared/BlankCard.tsx
-[LIVE] front-end/src/shared/ui/BlankCard.tsx
 
 ==== client.ts (2) ====
 [LIVE] front-end/src/features/records-centralized/components/client.ts
@@ -98,14 +86,6 @@
 [LIVE] front-end/src/components/frontend-pages/about/key-metric/ContentArea.tsx
 [LIVE] front-end/src/components/frontend-pages/shared/reviews/ContentArea.tsx
 
-==== CustomFormLabel.tsx (2) ====
-[LIVE] front-end/src/components/forms/theme-elements/CustomFormLabel.tsx
-[LIVE] front-end/src/features/records-centralized/components/forms/CustomFormLabel.tsx
-
-==== DashboardCard.tsx (2) ====
-[LIVE] front-end/src/components/shared/DashboardCard.tsx
-[LIVE] front-end/src/shared/ui/DashboardCard.tsx
-
 ==== Footer.tsx (2) ====
 [LIVE] front-end/src/features/logs/Footer.tsx
 [LIVE] front-end/src/features/pages/frontend-pages/Footer.tsx
@@ -113,10 +93,6 @@
 ==== Gallery.tsx (2) ====
 [LIVE] front-end/src/features/apps/user-profile/Gallery.tsx
 [LIVE] front-end/src/features/devel-tools/om-gallery/Gallery.tsx
-
-==== Grid2.tsx (2) ====
-[LIVE] front-end/src/components/compat/Grid2.tsx
-[LIVE] front-end/src/mui/Grid2.tsx
 
 ==== Header.tsx (2) ====
 [LIVE] front-end/src/layouts/full/horizontal/header/Header.tsx
@@ -133,10 +109,6 @@
 ==== Navigation.tsx (2) ====
 [LIVE] front-end/src/layouts/full/horizontal/navbar/Navigation.tsx
 [LIVE] front-end/src/layouts/full/vertical/header/Navigation.tsx
-
-==== PageContainer.tsx (2) ====
-[LIVE] front-end/src/components/container/PageContainer.tsx
-[LIVE] front-end/src/shared/ui/PageContainer.tsx
 
 ==== Profile.tsx (2) ====
 [LIVE] front-end/src/layouts/full/vertical/header/Profile.tsx

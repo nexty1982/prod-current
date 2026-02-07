@@ -14,7 +14,7 @@ import Grid2 from '@/components/compat/Grid2';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { useContext, useEffect } from 'react';
-import BlankCard from '@/components/shared/BlankCard';
+import BlankCard from '@/shared/ui/BlankCard';
 import { UserDataContext } from "@/context/UserDataContext";
 import { IconMapPin, IconSearch } from '@tabler/icons-react';
 

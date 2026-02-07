@@ -8,7 +8,7 @@ import '@/features/records-centralized/common/recordsHighlighting.css';
 import { usePersistedRowSelection } from '@/features/records-centralized/common/usePersistedRowSelection';
 import { createRecordsApiService } from '@/features/records-centralized/components/records/RecordsApiService';
 import { FIELD_DEFINITIONS, RECORD_TYPES } from '@/features/records-centralized/constants';
-import AdvancedGridDialog from '@/features/tables/AdvancedGridDialog';
+import AdvancedGridDialog from '@/components/AdvancedGridDialog';
 import { getPersistedChurchId, useRecordsPersistence } from '@/hooks/useRecordsPersistence';
 import churchService, { Church } from '@/shared/lib/churchService';
 import { useTableStyleStore } from '@/store/useTableStyleStore';
