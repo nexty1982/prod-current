@@ -41,7 +41,7 @@
 [LIVE] front-end/src/features/tables/react-tables/sorting/page.tsx
 [LIVE] front-end/src/features/tables/react-tables/sticky/page.tsx
 
-==== index.ts (10) ====
+==== index.ts (11) ====
 [NOT_LIVE] front-end/src/@om/components/features/auth/index.ts
 [NOT_LIVE] front-end/src/@om/components/features/index.ts
 [NOT_LIVE] front-end/src/@om/components/index.ts
@@ -49,6 +49,7 @@
 [NOT_LIVE] front-end/src/@om/components/ui/index.ts
 [NOT_LIVE] front-end/src/@om/components/ui/theme/index.ts
 [LIVE] front-end/src/components/ColorPickerPopover/index.ts
+[LIVE] front-end/src/components/ErrorBoundary/index.ts
 [LIVE] front-end/src/components/FieldRenderer/index.ts
 [LIVE] front-end/src/components/RecordPreviewPane/index.ts
 [LIVE] front-end/src/features/records-centralized/constants/index.ts
