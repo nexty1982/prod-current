@@ -119,6 +119,10 @@
 [LIVE] front-end/src/components/dashboards/ecommerce/RevenueUpdates.tsx
 [LIVE] front-end/src/features/admin/dashboards/modern/RevenueUpdates.tsx
 
+==== useProfileSync.ts (2) ====
+[NOT_LIVE] front-end/src/hooks/useProfileSync.ts
+[LIVE] front-end/src/lib/useProfileSync.ts
+
 ==== UserFormModal.tsx (2) ====
 [NOT_LIVE] front-end/src/@om/components/features/auth/UserFormModal.tsx
 [LIVE] front-end/src/components/UserFormModal.tsx
