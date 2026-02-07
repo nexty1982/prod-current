@@ -3,7 +3,7 @@
 import React from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Stack, Typography, Avatar, Box, Button } from '@mui/material';
-import DashboardCard from '../../shared/DashboardCard.tsx';
+import DashboardCard from '@/shared/ui/DashboardCard';
 
 import icon1Img from "@/assets/images/svgs/icon-paypal.svg"
 import icon2Img from "@/assets/images/svgs/icon-office-bag.svg"

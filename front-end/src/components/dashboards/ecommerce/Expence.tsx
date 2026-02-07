@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material/styles';
 import { Typography } from '@mui/material';
 import { Props } from 'react-apexcharts';
 
-import DashboardCard from '../../shared/DashboardCard.tsx';
+import DashboardCard from '@/shared/ui/DashboardCard';
 
 const Expence = () => {
   // chart color

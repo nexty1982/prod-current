@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { Grid, Stack, Typography, Avatar, Box } from '@mui/material';
 import { IconArrowUpLeft } from '@tabler/icons-react';
 
-import DashboardCard from '../../shared/DashboardCard.tsx';
+import DashboardCard from '@/shared/ui/DashboardCard';
 
 const YearlyBreakup = () => {
   const theme = useTheme();

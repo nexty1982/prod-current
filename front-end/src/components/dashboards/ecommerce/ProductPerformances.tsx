@@ -3,7 +3,7 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
 import { useTheme } from '@mui/material/styles';
-import DashboardCard from '../../shared/DashboardCard.tsx';
+import DashboardCard from '@/shared/ui/DashboardCard';
 import CustomSelect from '../../forms/theme-elements/CustomSelect.tsx';
 import { Props } from 'react-apexcharts';
 import {

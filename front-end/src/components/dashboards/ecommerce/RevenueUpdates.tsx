@@ -4,7 +4,7 @@ import React from 'react';
 import Chart from 'react-apexcharts';
 import { useTheme } from '@mui/material/styles';
 import { Stack, Typography, Avatar, Box } from '@mui/material';
-import DashboardCard from '../../shared/DashboardCard.tsx';
+import DashboardCard from '@/shared/ui/DashboardCard';
 import { Props } from 'react-apexcharts';
 
 const RevenueUpdates: React.FC = () => {

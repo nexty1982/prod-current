@@ -7,7 +7,7 @@ import { Stack, Typography, Box } from '@mui/material';
 import { IconGridDots } from '@tabler/icons-react';
 import { Props } from 'react-apexcharts';
 
-import DashboardCard from '../../shared/DashboardCard.tsx';
+import DashboardCard from '@/shared/ui/DashboardCard';
 
 const SalesOverview = () => {
   // chart color
