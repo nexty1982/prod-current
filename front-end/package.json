@@ -7,16 +7,15 @@
     "dev": "vite --mode development --host 0.0.0.0 --port 5174",
     "dev:host": "vite --mode development --host 0.0.0.0 --port 5174",
     "dev:test": "vite --mode development --port 5177",
+    "dev:fast": "vite --mode development --host 0.0.0.0 --port 5174 --force",
     "clean": "rm -rf dist",
+    "clean:cache": "rm -rf node_modules/.vite dist .vite",
     "clean:all": "rm -rf node_modules dist package-lock.json && npm install --legacy-peer-deps --loglevel=error",
     "prebuild": "npm run clean",
     "build": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview --port 5175 --host 0.0.0.0",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "deploy:latest": "npm run build && cp -rv dist/* dist-latest/",
-    "deploy:stable": "npm run build && cp -rv dist/* dist-stable/",
-    "deploy:both": "npm run build && cp -rv dist/* dist-latest/ && cp -rv dist/* dist-stable/"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@casl/ability": "^6.7.3",
@@ -141,7 +140,7 @@
     "simplebar": "^6.3.2",
     "simplebar-react": "^3.3.2",
     "slick-carousel": "^1.8.1",
-    "socket.io-client": "^4.8.1",
+    "socket.io-client": "^4.8.3",
     "stylis": "^4.3.0",
     "stylis-plugin-rtl": "^2.1.1",
     "swr": "^2.2.4",

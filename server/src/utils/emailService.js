@@ -760,6 +760,153 @@ const sendTaskCreationEmail = async (task, createdByEmail) => {
   }
 };
 
+// Send backup completion/failure notification email
+const sendBackupNotification = async (notificationEmail, jobInfo) => {
+  try {
+    if (!notificationEmail) {
+      return { success: false, reason: 'No notification email configured' };
+    }
+
+    const transporter = await createTransporter();
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'Orthodox Metrics System';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
+    if (!senderEmail) {
+      return { success: false, reason: 'No sender email configured. Configure email in OM Tasks settings.' };
+    }
+
+    const { jobId, kind, status, durationMs, error: jobError } = jobInfo;
+    const isSuccess = status === 'success';
+    const kindLabel = kind === 'borg' ? 'Borg' : kind === 'both' ? 'Full' : kind === 'db' ? 'Database' : 'Files';
+    const statusEmoji = isSuccess ? '✅' : '❌';
+    const durationStr = durationMs ? `${(durationMs / 1000).toFixed(1)}s` : 'N/A';
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: notificationEmail,
+      subject: `${statusEmoji} Backup ${isSuccess ? 'Completed' : 'Failed'} - ${kindLabel} (#${jobId})`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .header { background: ${isSuccess ? '#4caf50' : '#f44336'}; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; }
+                .detail-card { background: #f9f9f9; border-left: 4px solid ${isSuccess ? '#4caf50' : '#f44336'}; padding: 15px; margin: 10px 0; }
+                .footer { background: #f1f1f1; padding: 10px; text-align: center; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>${statusEmoji} Backup ${isSuccess ? 'Completed Successfully' : 'Failed'}</h1>
+                <p>Orthodox Metrics Backup System</p>
+            </div>
+            <div class="content">
+                <div class="detail-card">
+                    <h3>Backup Details</h3>
+                    <p><strong>Job ID:</strong> #${jobId}</p>
+                    <p><strong>Type:</strong> ${kindLabel}</p>
+                    <p><strong>Status:</strong> ${isSuccess ? 'Success' : 'Failed'}</p>
+                    <p><strong>Duration:</strong> ${durationStr}</p>
+                    <p><strong>Completed:</strong> ${new Date().toLocaleString()}</p>
+                    ${jobError ? `<p><strong>Error:</strong> <span style="color: red;">${jobError}</span></p>` : ''}
+                </div>
+                ${!isSuccess ? '<p>Please check the backup logs and Job History in Admin Settings for more details.</p>' : '<p>Your data is safely backed up.</p>'}
+            </div>
+            <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} Orthodox Metrics System</p>
+            </div>
+        </body>
+        </html>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Backup notification sent to ${notificationEmail} for job #${jobId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Failed to send backup notification email:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+// Send Contact Us form email to info@orthodoxmetrics.com
+const sendContactEmail = async ({ firstName, lastName, phone, email, enquiryType, message }) => {
+  try {
+    const transporter = await createTransporter();
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'Orthodox Metrics';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
+    const enquiryLabels = {
+      general: 'General Enquiry',
+      parish_registration: 'Parish Registration',
+      records: 'Records & Certificates',
+      technical: 'Technical Support',
+      billing: 'Billing & Pricing',
+      other: 'Other',
+    };
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { background: #5d87ff; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .detail-card { background: #f9f9f9; border-left: 4px solid #5d87ff; padding: 15px; margin: 10px 0; }
+        .footer { background: #f1f1f1; padding: 10px; text-align: center; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>New Contact Form Submission</h1>
+        <p>Orthodox Metrics Website</p>
+    </div>
+    <div class="content">
+        <div class="detail-card">
+            <h3>Contact Details</h3>
+            <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Enquiry Type:</strong> ${enquiryLabels[enquiryType] || enquiryType}</p>
+        </div>
+        <div class="detail-card">
+            <h3>Message</h3>
+            <p>${message.replace(/\n/g, '<br>')}</p>
+        </div>
+        <p><em>Submitted on ${new Date().toLocaleString()}</em></p>
+    </div>
+    <div class="footer">
+        <p>&copy; ${new Date().getFullYear()} Orthodox Metrics</p>
+    </div>
+</body>
+</html>
+    `;
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: 'info@orthodoxmetrics.com',
+      replyTo: email,
+      subject: `Contact Form: ${enquiryLabels[enquiryType] || enquiryType} from ${firstName} ${lastName}`,
+      html: htmlContent,
+      text: `New contact form submission\n\nName: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}\nEnquiry: ${enquiryLabels[enquiryType] || enquiryType}\n\nMessage:\n${message}`,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Contact form email sent:', { messageId: info.messageId, from: email });
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Failed to send contact form email:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   sendOCRReceipt,
   sendSessionVerification,
@@ -767,5 +914,7 @@ module.exports = {
   testEmailConfig,
   sendTaskAssignmentEmail,
   sendTaskSubmissionEmail,
-  sendTaskCreationEmail
+  sendTaskCreationEmail,
+  sendBackupNotification,
+  sendContactEmail
 };

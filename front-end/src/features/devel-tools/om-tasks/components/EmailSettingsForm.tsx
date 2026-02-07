@@ -465,9 +465,14 @@ const EmailSettingsForm: React.FC = () => {
               <strong>Provider Setup Tips:</strong>
               <br />
               • <strong>GoDaddy:</strong> Use your cPanel email or workspace email with an app password
-              • <strong>Outlook 365:</strong> Enable SMTP AUTH and use an app password if 2FA is enabled
-              • <strong>Gmail:</strong> Use an app password instead of your regular password
+              • <strong>Outlook 365:</strong> <strong>REQUIRES App Password!</strong> Get from Microsoft Account Security → Advanced security options → App passwords
+              • <strong>Gmail:</strong> Use an app password instead of your regular password (enable 2FA first)
               • <strong>Custom:</strong> Contact your email provider for SMTP settings
+              <br /><br />
+              <strong>⚠️ Microsoft Outlook Email via GoDaddy:</strong>
+              <br />
+              If you purchased email from GoDaddy but it's Microsoft 365/Outlook, use the <strong>Outlook365</strong> provider (NOT GoDaddy).
+              You MUST generate an app password from <a href="https://account.microsoft.com/security" target="_blank" rel="noopener noreferrer" style={{ color: '#8c249d', textDecoration: 'underline' }}>Microsoft Account Security</a>.
             </Typography>
           </Alert>
         </CardContent>

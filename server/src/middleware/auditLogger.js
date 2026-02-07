@@ -101,7 +101,7 @@ const logAuditAction = async (req, res, action, responseData) => {
     console.log(`[AUDIT] ${action} by user ${userId} (${userRole}) - Status: ${res.statusCode}`);
     
   } catch (error) {
-    console.error('Audit logging error:', error);
+    // Silently skip — audit table may not exist yet
     // Don't throw error - audit logging should not break the main flow
   } finally {
     if (connection) {

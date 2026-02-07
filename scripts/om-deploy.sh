@@ -26,30 +26,60 @@ echo "=== OM Deploy [$TARGET]: $(date -Is) ==="
 
 # --- Backend ---
 if [[ "$TARGET" == "backend" || "$TARGET" == "all" ]]; then
-  echo "--- Backend: Building with fresh modules ---"
+  echo "--- Backend: Building (matching npm run build) ---"
   cd "$SERVER"
-  npm run build:clean 2>&1 || true
+  
+  # Install dependencies
+  echo "  → Installing dependencies..."
   npm install --legacy-peer-deps 2>&1
-  npm run build 2>&1
+  
+  # Execute build steps (matching package.json "build" script)
+  echo "  → Running build:clean..."
+  npm run build:clean 2>&1
+  
+  echo "  → Running build:ts (TypeScript compilation + router fix)..."
+  npm run build:ts 2>&1
+  
+  echo "  → Running build:copy (copying non-TS files)..."
+  npm run build:copy 2>&1
+  
+  echo "  → Running build:post-library..."
+  npm run build:post-library 2>&1
+  
+  echo "  → Running build:verify..."
+  npm run build:verify 2>&1
+  
+  echo "  → Running build:verify:imports..."
+  npm run build:verify:imports 2>&1
+  
+  echo "  → Running build:flush-sessions..."
+  npm run build:flush-sessions 2>&1
+  
+  echo "✅ Backend build complete"
 fi
 
 # --- Frontend ---
 if [[ "$TARGET" == "frontend" || "$TARGET" == "all" ]]; then
-  echo "--- Frontend: Building with Memory Fix ---"
+  echo "--- Frontend: Building (matching npm run build) ---"
   cd "$FRONT"
-  npm run clean:all 2>&1 || true
+  
+  # Install dependencies
+  echo "  → Installing dependencies..."
   if ! npm install --legacy-peer-deps 2>&1; then
     echo "⚠️  npm install failed — removing node_modules and retrying..."
     rm -rf node_modules package-lock.json
     npm install --legacy-peer-deps 2>&1
   fi
-
-  NODE_OPTIONS="--max-old-space-size=4096" npm run build 2>&1
-
-  echo "--- Syncing Dynamic Nginx Roots ---"
-  cp -r dist/* "$FRONT/dist-latest/" 2>&1
-  cp -r dist/* "$FRONT/dist-stable/" 2>&1
-  echo "✅ Synced dist to dist-latest and dist-stable"
+  
+  # Execute prebuild (clean)
+  echo "  → Running prebuild (clean)..."
+  npm run clean 2>&1
+  
+  # Execute build with memory fix (matching package.json "build" script)
+  echo "  → Running Vite build with 8GB memory..."
+  node --max-old-space-size=8096 node_modules/vite/bin/vite.js build 2>&1
+  
+  echo "✅ Frontend build complete (output: front-end/dist)"
 fi
 
 # --- Restart Services ---

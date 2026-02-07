@@ -17,7 +17,6 @@ import { useAuth } from '../../../../context/AuthContext';
 import { UserDataContext } from '../../../../context/UserDataContext';
 
 import { IconMail, IconUserOff } from '@tabler/icons-react';
-import ActiveSessionIndicator from '../../../../features/admin/components/ActiveSessionIndicator';
 
 // Default profile image fallback (using Orthodox default)
 const defaultProfileImg = '/orthodox/avatars/default.svg';
@@ -82,14 +81,19 @@ const Profile = () => {
           onClick={authenticated ? handleClick2 : undefined}
         >
           {authenticated ? (
-            <Avatar
-              src={profileImage}
-              alt="Profile"
-              sx={{
-                width: 35,
-                height: 35,
-              }}
-            />
+            <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Avatar
+                src={profileImage}
+                alt="Profile"
+                sx={{
+                  width: 35,
+                  height: 35,
+                  border: '2.5px solid #22c55e',
+                  boxShadow: '0 0 0 2px rgba(34, 197, 94, 0.2)',
+                  transition: 'all 0.3s ease',
+                }}
+              />
+            </Box>
           ) : (
             <IconUserOff 
               size={35} 
@@ -100,7 +104,6 @@ const Profile = () => {
             />
           )}
         </IconButton>
-        {authenticated && user && <ActiveSessionIndicator />}
       </Box>
       {/* ------------------------------------------- */}
       {/* Message Dropdown */}

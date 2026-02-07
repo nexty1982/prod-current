@@ -1,517 +1,387 @@
 /**
  * Orthodox Metrics - Records Controller
- * Business logic for church records CRUD operations
+ * CRUD operations for church records (baptism, marriage, funeral)
+ *
+ * Queries the correct church-specific database (e.g., om_church_46)
+ * using database-qualified table names.
  */
 
 const { promisePool } = require('../config/db');
-const { v4: uuidv4 } = require('uuid');
 
-// Helper function to get table name based on record type
-const getTableName = (recordType) => {
-  const tableMap = {
-    'baptism': 'baptism_records',
-    'marriage': 'marriage_records', 
-    'funeral': 'funeral_records'
-  };
-  return tableMap[recordType];
-};
-
-// Helper function to log audit trail
-const logAuditTrail = async (action, recordType, recordId, userId, changes = null) => {
-  const auditSql = `
-    INSERT INTO record_audit_log (
-      id, record_type, record_id, user_id, action, changes, 
-      created_at, ip_address
-    ) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)
-  `;
-  
-  const auditId = uuidv4();
-  const changesJson = changes ? JSON.stringify(changes) : null;
-  
-  await promisePool.execute(auditSql, [
-    auditId, recordType, recordId, userId, action, changesJson, null
-  ]);
-};
+// Cache: churchId -> database_name
+const churchDbCache = new Map();
 
 /**
- * List all records of a specific type
+ * Resolve the church database name from the request.
  */
+const resolveChurchDb = async (req) => {
+  const churchId = req.params.churchId || req.user?.church_id;
+  if (!churchId) {
+    throw new Error('No church context: churchId missing from URL and user session');
+  }
+  const key = String(churchId);
+  if (churchDbCache.has(key)) return churchDbCache.get(key);
+
+  const [rows] = await promisePool.execute(
+    'SELECT database_name FROM churches WHERE id = ?', [churchId]
+  );
+  if (rows.length === 0 || !rows[0].database_name) {
+    throw new Error(`No database configured for church ID: ${churchId}`);
+  }
+  churchDbCache.set(key, rows[0].database_name);
+  return rows[0].database_name;
+};
+
+const getTableName = (recordType) => {
+  const map = { baptism: 'baptism_records', marriage: 'marriage_records', funeral: 'funeral_records' };
+  return map[recordType];
+};
+
+const qt = (dbName, tableName) => `\`${dbName}\`.\`${tableName}\``;
+
+// ============================================================================
+// Field mappings: frontend field name → DB column name
+// Supports both camelCase (inline dialog) and snake_case (FIELD_DEFINITIONS)
+// ============================================================================
+const FIELD_MAP = {
+  baptism: {
+    // camelCase (inline dialog / Path A)
+    firstName: 'first_name',
+    lastName: 'last_name',
+    dateOfBirth: 'birth_date',
+    dateOfBaptism: 'reception_date',
+    placeOfBirth: 'birthplace',
+    godparentNames: 'sponsors',
+    priest: 'clergy',
+    registryNumber: 'source_scan_id',
+    // snake_case (FIELD_DEFINITIONS / Path B) — pass through
+    first_name: 'first_name',
+    last_name: 'last_name',
+    birth_date: 'birth_date',
+    reception_date: 'reception_date',
+    birthplace: 'birthplace',
+    entry_type: 'entry_type',
+    sponsors: 'sponsors',
+    parents: 'parents',
+    clergy: 'clergy',
+    source_scan_id: 'source_scan_id',
+    ocr_confidence: 'ocr_confidence',
+  },
+  marriage: {
+    // camelCase
+    groomFirstName: 'fname_groom',
+    groomLastName: 'lname_groom',
+    brideFirstName: 'fname_bride',
+    brideLastName: 'lname_bride',
+    marriageDate: 'mdate',
+    marriageLocation: 'mlicense',
+    priest: 'clergy',
+    // snake_case
+    fname_groom: 'fname_groom',
+    lname_groom: 'lname_groom',
+    parentsg: 'parentsg',
+    fname_bride: 'fname_bride',
+    lname_bride: 'lname_bride',
+    parentsb: 'parentsb',
+    mdate: 'mdate',
+    witness: 'witness',
+    mlicense: 'mlicense',
+    clergy: 'clergy',
+  },
+  funeral: {
+    // camelCase
+    firstName: 'name',
+    lastName: 'lastname',
+    dateOfDeath: 'deceased_date',
+    burialDate: 'burial_date',
+    burialLocation: 'burial_location',
+    priest: 'clergy',
+    // snake_case
+    name: 'name',
+    lastname: 'lastname',
+    deceased_date: 'deceased_date',
+    burial_date: 'burial_date',
+    age: 'age',
+    clergy: 'clergy',
+    burial_location: 'burial_location',
+  },
+};
+
+// Fields to ignore (UI-only, not DB columns)
+const IGNORE_FIELDS = new Set([
+  'customPriest', 'churchName', 'createdAt', 'updatedAt', 'notes',
+  'id', 'churchId', 'church_id', 'recordType', 'record_type',
+]);
+
+/**
+ * Map incoming request body to { column: value } pairs for the DB.
+ */
+const mapFields = (recordType, body, churchId) => {
+  const mapping = FIELD_MAP[recordType] || {};
+  const cols = {};
+
+  // Handle combined parents field for baptism (fatherName + motherName)
+  if (recordType === 'baptism' && (body.fatherName || body.motherName)) {
+    const parts = [body.fatherName, body.motherName].filter(Boolean);
+    if (parts.length) cols.parents = parts.join(', ');
+  }
+
+  // Handle combined witness field for marriage (witness1 + witness2)
+  if (recordType === 'marriage' && (body.witness1 || body.witness2)) {
+    const parts = [body.witness1, body.witness2].filter(Boolean);
+    if (parts.length) cols.witness = parts.join(', ');
+  }
+
+  for (const [key, value] of Object.entries(body)) {
+    if (IGNORE_FIELDS.has(key)) continue;
+    if (key === 'fatherName' || key === 'motherName') continue; // handled above
+    if (key === 'witness1' || key === 'witness2') continue; // handled above
+    const dbCol = mapping[key];
+    if (dbCol && value !== undefined && value !== null && value !== '') {
+      cols[dbCol] = value;
+    }
+  }
+
+  // Always set church_id
+  cols.church_id = parseInt(churchId, 10);
+
+  return cols;
+};
+
+// ============================================================================
+// CRUD Handlers
+// ============================================================================
+
 const listRecords = async (req, res) => {
   try {
+    const dbName = await resolveChurchDb(req);
     const { recordType } = req;
-    const tableName = getTableName(recordType);
-    
-    // Query parameters for pagination and filtering
+    const table = qt(dbName, getTableName(recordType));
+
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
-    const status = req.query.status || '';
-    
-    // Build WHERE clause
+
     let whereClause = 'WHERE 1=1';
-    const queryParams = [];
-    
+    const params = [];
+
     if (search) {
-      whereClause += ' AND (JSON_EXTRACT(fields, "$.*.value") LIKE ? OR id LIKE ?)';
-      queryParams.push(`%${search}%`, `%${search}%`);
+      // Search across common text columns
+      if (recordType === 'baptism') {
+        whereClause += ' AND (first_name LIKE ? OR last_name LIKE ?)';
+      } else if (recordType === 'marriage') {
+        whereClause += ' AND (fname_groom LIKE ? OR lname_groom LIKE ?)';
+      } else if (recordType === 'funeral') {
+        whereClause += ' AND (name LIKE ? OR lastname LIKE ?)';
+      }
+      params.push(`%${search}%`, `%${search}%`);
     }
-    
-    if (status) {
-      whereClause += ' AND status = ?';
-      queryParams.push(status);
-    }
-    
-    // Get total count
-    const countSql = `SELECT COUNT(*) as total FROM ${tableName} ${whereClause}`;
-    const [countRows] = await promisePool.execute(countSql, queryParams);
-    const total = countRows[0].total;
-    
-    // Get records with pagination
-    const sql = `
-      SELECT id, record_type, fields, metadata, color_overrides, tags, 
-             created_at, updated_at, status
-      FROM ${tableName} 
-      ${whereClause}
-      ORDER BY updated_at DESC 
-      LIMIT ? OFFSET ?
-    `;
-    
-    const [rows] = await promisePool.execute(sql, [...queryParams, limit, offset]);
-    
-    // Parse JSON fields
-    const records = rows.map(row => ({
-      ...row,
-      fields: JSON.parse(row.fields || '[]'),
-      metadata: JSON.parse(row.metadata || '{}'),
-      colorOverrides: JSON.parse(row.color_overrides || '{}'),
-      tags: JSON.parse(row.tags || '[]')
-    }));
-    
+
+    const [countRows] = await promisePool.execute(
+      `SELECT COUNT(*) as total FROM ${table} ${whereClause}`, params
+    );
+
+    const [rows] = await promisePool.execute(
+      `SELECT * FROM ${table} ${whereClause} ORDER BY id DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    );
+
     res.json({
       success: true,
       data: {
-        records,
+        records: rows,
         pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit)
+          page, limit,
+          total: countRows[0].total,
+          totalPages: Math.ceil(countRows[0].total / limit)
         }
       }
     });
-    
   } catch (error) {
     console.error('Error listing records:', error);
-    res.status(500).json({
-      error: 'Database error',
-      message: 'Failed to retrieve records',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ error: 'Database error', message: 'Failed to retrieve records' });
   }
 };
 
-/**
- * Get a single record by ID
- */
 const getRecordById = async (req, res) => {
   try {
+    const dbName = await resolveChurchDb(req);
     const { recordType } = req;
     const { id } = req.params;
-    const tableName = getTableName(recordType);
-    
-    const sql = `
-      SELECT id, record_type, fields, metadata, color_overrides, tags,
-             created_at, updated_at, status
-      FROM ${tableName} 
-      WHERE id = ?
-    `;
-    
-    const [rows] = await promisePool.execute(sql, [id]);
-    
+    const table = qt(dbName, getTableName(recordType));
+
+    const [rows] = await promisePool.execute(`SELECT * FROM ${table} WHERE id = ?`, [id]);
+
     if (rows.length === 0) {
-      return res.status(404).json({
-        error: 'Record not found',
-        message: `No ${recordType} record found with ID: ${id}`
-      });
+      return res.status(404).json({ error: 'Record not found' });
     }
-    
-    const record = {
-      ...rows[0],
-      fields: JSON.parse(rows[0].fields || '[]'),
-      metadata: JSON.parse(rows[0].metadata || '{}'),
-      colorOverrides: JSON.parse(rows[0].color_overrides || '{}'),
-      tags: JSON.parse(rows[0].tags || '[]')
-    };
-    
-    res.json({
-      success: true,
-      data: record
-    });
-    
+
+    res.json({ success: true, data: rows[0] });
   } catch (error) {
     console.error('Error fetching record:', error);
-    res.status(500).json({
-      error: 'Database error',
-      message: 'Failed to retrieve record',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ error: 'Database error', message: 'Failed to retrieve record' });
   }
 };
 
-/**
- * Create a new record
- */
 const createRecord = async (req, res) => {
   try {
+    const dbName = await resolveChurchDb(req);
     const { recordType } = req;
-    const { fields, metadata, colorOverrides, tags } = req.body;
-    const tableName = getTableName(recordType);
-    
-    const recordId = uuidv4();
-    const userId = req.user.id;
-    
-    const sql = `
-      INSERT INTO ${tableName} (
-        id, record_type, fields, metadata, color_overrides, tags,
-        created_at, updated_at, created_by, updated_by, status
-      ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(), ?, ?, 'active')
-    `;
-    
-    const values = [
-      recordId,
-      recordType,
-      JSON.stringify(fields || []),
-      JSON.stringify({
-        churchId: req.user.church_id || 1,
-        createdBy: userId,
-        createdAt: new Date().toISOString(),
-        version: 1,
-        ...metadata
-      }),
-      JSON.stringify(colorOverrides || {}),
-      JSON.stringify(tags || []),
-      userId,
-      userId
-    ];
-    
-    await promisePool.execute(sql, values);
-    
-    // Log audit trail
-    await logAuditTrail('CREATE', recordType, recordId, userId, {
-      fields: fields,
-      metadata: metadata
-    });
-    
+    const churchId = req.params.churchId || req.user?.church_id;
+    const table = qt(dbName, getTableName(recordType));
+
+    const cols = mapFields(recordType, req.body, churchId);
+
+    // Set entry_type default for baptism
+    if (recordType === 'baptism' && !cols.entry_type) {
+      cols.entry_type = 'Baptism';
+    }
+
+    const colNames = Object.keys(cols);
+    const placeholders = colNames.map(() => '?').join(', ');
+    const values = colNames.map(c => cols[c]);
+
+    const sql = `INSERT INTO ${table} (${colNames.join(', ')}) VALUES (${placeholders})`;
+    const [result] = await promisePool.execute(sql, values);
+
     res.status(201).json({
       success: true,
       data: {
-        id: recordId,
+        id: result.insertId,
         recordType,
         message: `${recordType} record created successfully`
       }
     });
-    
   } catch (error) {
     console.error('Error creating record:', error);
-    res.status(500).json({
-      error: 'Database error',
-      message: 'Failed to create record',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ error: 'Database error', message: 'Failed to create record' });
   }
 };
 
-/**
- * Update an existing record
- */
 const updateRecord = async (req, res) => {
   try {
+    const dbName = await resolveChurchDb(req);
     const { recordType } = req;
     const { id } = req.params;
-    const { fields, metadata, colorOverrides, tags } = req.body;
-    const tableName = getTableName(recordType);
-    const userId = req.user.id;
-    
-    // First, get the existing record for audit trail
-    const [existingRows] = await promisePool.execute(
-      `SELECT fields, metadata, color_overrides, tags FROM ${tableName} WHERE id = ?`,
-      [id]
-    );
-    
-    if (existingRows.length === 0) {
-      return res.status(404).json({
-        error: 'Record not found',
-        message: `No ${recordType} record found with ID: ${id}`
-      });
+    const churchId = req.params.churchId || req.user?.church_id;
+    const table = qt(dbName, getTableName(recordType));
+
+    // Verify record exists
+    const [existing] = await promisePool.execute(`SELECT id FROM ${table} WHERE id = ?`, [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Record not found' });
     }
-    
-    const existingRecord = existingRows[0];
-    
-    const sql = `
-      UPDATE ${tableName} 
-      SET fields = ?, metadata = ?, color_overrides = ?, tags = ?,
-          updated_at = NOW(), updated_by = ?
-      WHERE id = ?
-    `;
-    
-    const updatedMetadata = {
-      ...JSON.parse(existingRecord.metadata || '{}'),
-      ...metadata,
-      updatedBy: userId,
-      updatedAt: new Date().toISOString(),
-      version: (JSON.parse(existingRecord.metadata || '{}').version || 1) + 1
-    };
-    
-    const values = [
-      JSON.stringify(fields || []),
-      JSON.stringify(updatedMetadata),
-      JSON.stringify(colorOverrides || {}),
-      JSON.stringify(tags || []),
-      userId,
-      id
-    ];
-    
-    const [result] = await promisePool.execute(sql, values);
-    
-    if (result.affectedRows === 0) {
-      return res.status(404).json({
-        error: 'Record not found',
-        message: `No ${recordType} record found with ID: ${id}`
-      });
+
+    const cols = mapFields(recordType, req.body, churchId);
+    // Don't update church_id on update
+    delete cols.church_id;
+
+    const setClause = Object.keys(cols).map(c => `${c} = ?`).join(', ');
+    const values = [...Object.values(cols), id];
+
+    if (!setClause) {
+      return res.status(400).json({ error: 'No valid fields to update' });
     }
-    
-    // Log audit trail with changes
-    const changes = {
-      before: {
-        fields: JSON.parse(existingRecord.fields || '[]'),
-        metadata: JSON.parse(existingRecord.metadata || '{}')
-      },
-      after: {
-        fields: fields,
-        metadata: updatedMetadata
-      }
-    };
-    
-    await logAuditTrail('UPDATE', recordType, id, userId, changes);
-    
+
+    await promisePool.execute(`UPDATE ${table} SET ${setClause} WHERE id = ?`, values);
+
     res.json({
       success: true,
-      data: {
-        id,
-        recordType,
-        message: `${recordType} record updated successfully`,
-        version: updatedMetadata.version
-      }
+      data: { id, recordType, message: `${recordType} record updated successfully` }
     });
-    
   } catch (error) {
     console.error('Error updating record:', error);
-    res.status(500).json({
-      error: 'Database error', 
-      message: 'Failed to update record',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ error: 'Database error', message: 'Failed to update record' });
   }
 };
 
-/**
- * Delete a record
- */
 const deleteRecord = async (req, res) => {
   try {
+    const dbName = await resolveChurchDb(req);
     const { recordType } = req;
     const { id } = req.params;
-    const tableName = getTableName(recordType);
-    const userId = req.user.id;
-    
-    // Get record before deletion for audit trail
-    const [existingRows] = await promisePool.execute(
-      `SELECT * FROM ${tableName} WHERE id = ?`,
-      [id]
-    );
-    
-    if (existingRows.length === 0) {
-      return res.status(404).json({
-        error: 'Record not found',
-        message: `No ${recordType} record found with ID: ${id}`
-      });
+    const table = qt(dbName, getTableName(recordType));
+
+    const [existing] = await promisePool.execute(`SELECT id FROM ${table} WHERE id = ?`, [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Record not found' });
     }
-    
-    const existingRecord = existingRows[0];
-    
-    // Soft delete by updating status
-    const sql = `
-      UPDATE ${tableName} 
-      SET status = 'deleted', updated_at = NOW(), updated_by = ?
-      WHERE id = ?
-    `;
-    
-    await promisePool.execute(sql, [userId, id]);
-    
-    // Log audit trail
-    await logAuditTrail('DELETE', recordType, id, userId, {
-      deletedRecord: {
-        fields: JSON.parse(existingRecord.fields || '[]'),
-        metadata: JSON.parse(existingRecord.metadata || '{}')
-      }
-    });
-    
+
+    await promisePool.execute(`DELETE FROM ${table} WHERE id = ?`, [id]);
+
     res.json({
       success: true,
-      data: {
-        id,
-        recordType,
-        message: `${recordType} record deleted successfully`
-      }
+      data: { id, recordType, message: `${recordType} record deleted successfully` }
     });
-    
   } catch (error) {
     console.error('Error deleting record:', error);
-    res.status(500).json({
-      error: 'Database error',
-      message: 'Failed to delete record', 
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ error: 'Database error', message: 'Failed to delete record' });
   }
 };
 
-/**
- * Get record audit history
- */
 const getRecordHistory = async (req, res) => {
   try {
+    const dbName = await resolveChurchDb(req);
     const { recordType } = req;
     const { id } = req.params;
-    
-    const sql = `
-      SELECT ral.*, u.username, u.role
-      FROM record_audit_log ral
-      LEFT JOIN orthodoxmetrics_db.users u ON ral.user_id = u.id
-      WHERE ral.record_type = ? AND ral.record_id = ?
-      ORDER BY ral.created_at DESC
-    `;
-    
-    const [rows] = await promisePool.execute(sql, [recordType, id]);
-    
-    const history = rows.map(row => ({
-      ...row,
-      changes: row.changes ? JSON.parse(row.changes) : null
-    }));
-    
-    res.json({
-      success: true,
-      data: history
-    });
-    
+
+    // Try church DB first, fall back to empty if table doesn't exist
+    try {
+      const auditTable = qt(dbName, 'record_audit_log');
+      const [rows] = await promisePool.execute(
+        `SELECT * FROM ${auditTable} WHERE record_type = ? AND record_id = ? ORDER BY created_at DESC`,
+        [recordType, id]
+      );
+      res.json({ success: true, data: rows });
+    } catch (e) {
+      // Table may not exist — return empty
+      res.json({ success: true, data: [] });
+    }
   } catch (error) {
     console.error('Error fetching record history:', error);
-    res.status(500).json({
-      error: 'Database error',
-      message: 'Failed to retrieve record history',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ error: 'Database error', message: 'Failed to retrieve record history' });
   }
 };
 
-/**
- * Validate record data
- */
 const validateRecord = async (req, res) => {
   try {
     const { recordType } = req;
-    const { fields } = req.body;
-    
-    // Basic validation rules based on record type
-    const validationRules = {
-      baptism: ['person_name', 'baptism_date', 'church'],
-      marriage: ['spouse1_name', 'spouse2_name', 'marriage_date', 'church'],
-      funeral: ['person_name', 'death_date', 'funeral_date', 'church']
-    };
-    
-    const requiredFields = validationRules[recordType] || [];
+    const body = req.body;
     const errors = [];
-    
-    // Check required fields
-    requiredFields.forEach(fieldKey => {
-      const field = fields.find(f => f.key === fieldKey);
-      if (!field || !field.value) {
-        errors.push({
-          field: fieldKey,
-          message: `${fieldKey.replace('_', ' ')} is required`
-        });
-      }
-    });
-    
-    // Validate dates
-    fields.forEach(field => {
-      if (field.type === 'date' && field.value) {
-        const date = new Date(field.value);
-        if (isNaN(date.getTime())) {
-          errors.push({
-            field: field.key,
-            message: `${field.label} must be a valid date`
-          });
-        }
-      }
-    });
-    
-    res.json({
-      success: true,
-      data: {
-        isValid: errors.length === 0,
-        errors
-      }
-    });
-    
+
+    if (recordType === 'baptism') {
+      if (!body.firstName && !body.first_name) errors.push({ field: 'firstName', message: 'First name is required' });
+      if (!body.lastName && !body.last_name) errors.push({ field: 'lastName', message: 'Last name is required' });
+    } else if (recordType === 'marriage') {
+      if (!body.groomFirstName && !body.fname_groom) errors.push({ field: 'groomFirstName', message: 'Groom first name is required' });
+      if (!body.brideFirstName && !body.fname_bride) errors.push({ field: 'brideFirstName', message: 'Bride first name is required' });
+    } else if (recordType === 'funeral') {
+      if (!body.lastName && !body.lastname) errors.push({ field: 'lastName', message: 'Last name is required' });
+    }
+
+    res.json({ success: true, data: { isValid: errors.length === 0, errors } });
   } catch (error) {
     console.error('Error validating record:', error);
-    res.status(500).json({
-      error: 'Validation error',
-      message: 'Failed to validate record'
-    });
+    res.status(500).json({ error: 'Validation error', message: 'Failed to validate record' });
   }
 };
 
-/**
- * Get records statistics
- */
 const getRecordStats = async (req, res) => {
   try {
-    
+    const dbName = await resolveChurchDb(req);
     const stats = {};
-    const recordTypes = ['baptism', 'marriage', 'funeral'];
-    
-    for (const recordType of recordTypes) {
-      const tableName = getTableName(recordType);
-      
-      const [totalRows] = await promisePool.execute(
-        `SELECT COUNT(*) as total FROM ${tableName} WHERE status = 'active'`
-      );
-      
-      const [recentRows] = await promisePool.execute(
-        `SELECT COUNT(*) as recent FROM ${tableName} 
-         WHERE status = 'active' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`
-      );
-      
-      stats[recordType] = {
-        total: totalRows[0].total,
-        recent: recentRows[0].recent
-      };
+
+    for (const recordType of ['baptism', 'marriage', 'funeral']) {
+      const table = qt(dbName, getTableName(recordType));
+      const [totalRows] = await promisePool.execute(`SELECT COUNT(*) as total FROM ${table}`);
+      stats[recordType] = { total: totalRows[0].total };
     }
-    
-    res.json({
-      success: true,
-      data: stats
-    });
-    
+
+    res.json({ success: true, data: stats });
   } catch (error) {
     console.error('Error fetching record stats:', error);
-    res.status(500).json({
-      error: 'Database error',
-      message: 'Failed to retrieve statistics',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ error: 'Database error', message: 'Failed to retrieve statistics' });
   }
 };
 

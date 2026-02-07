@@ -180,7 +180,7 @@ const pageLinks: LinkType[] = [
     title: 'Users Guide',
   },
   {
-    href: '/auth/login2',
+    href: '/auth/login',
     title: 'Church Portal',
   },
 ];

@@ -1,0 +1,151 @@
+==== index.tsx (27) ====
+[LIVE] front-end/src/components/apps/image-ai/index.tsx
+[LIVE] front-end/src/components/apps/invoice/Add-invoice/index.tsx
+[LIVE] front-end/src/components/apps/invoice/Edit-invoice/index.tsx
+[LIVE] front-end/src/components/apps/invoice/Invoice-detail/index.tsx
+[LIVE] front-end/src/components/apps/invoice/Invoice-list/index.tsx
+[LIVE] front-end/src/components/frontend-pages/about/banner/index.tsx
+[LIVE] front-end/src/components/frontend-pages/about/key-metric/index.tsx
+[LIVE] front-end/src/components/frontend-pages/about/process/index.tsx
+[LIVE] front-end/src/components/frontend-pages/blog/banner/index.tsx
+[LIVE] front-end/src/components/frontend-pages/homepage/faq/index.tsx
+[LIVE] front-end/src/components/frontend-pages/shared/c2a/index.tsx
+[LIVE] front-end/src/components/frontend-pages/shared/footer/index.tsx
+[LIVE] front-end/src/components/frontend-pages/shared/leadership/index.tsx
+[LIVE] front-end/src/components/frontend-pages/shared/pricing/index.tsx
+[LIVE] front-end/src/components/frontend-pages/shared/reviews/index.tsx
+[LIVE] front-end/src/components/frontend-pages/shared/scroll-to-top/index.tsx
+[LIVE] front-end/src/context/BlogContext/index.tsx
+[LIVE] front-end/src/context/ConatactContext/index.tsx
+[LIVE] front-end/src/context/EmailContext/index.tsx
+[LIVE] front-end/src/context/InvoiceContext/index.tsx
+[LIVE] front-end/src/context/NotesContext/index.tsx
+[LIVE] front-end/src/context/TicketContext/index.tsx
+[LIVE] front-end/src/context/UserDataContext/index.tsx
+[LIVE] front-end/src/context/kanbancontext/index.tsx
+[LIVE] front-end/src/features/records-centralized/apps/records-ui/index.tsx
+[LIVE] front-end/src/layouts/full/vertical/sidebar/NavCollapse/index.tsx
+[LIVE] front-end/src/layouts/full/vertical/sidebar/NavItem/index.tsx
+
+==== page.tsx (12) ====
+[LIVE] front-end/src/features/tables/react-tables/basic/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/columnvisibility/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/dense/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/drag-drop/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/editable/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/empty/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/expanding/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/filtering/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/pagination/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/row-selection/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/sorting/page.tsx
+[LIVE] front-end/src/features/tables/react-tables/sticky/page.tsx
+
+==== index.ts (10) ====
+[NOT_LIVE] front-end/src/@om/components/features/auth/index.ts
+[NOT_LIVE] front-end/src/@om/components/features/index.ts
+[NOT_LIVE] front-end/src/@om/components/index.ts
+[NOT_LIVE] front-end/src/@om/components/ui/forms/index.ts
+[NOT_LIVE] front-end/src/@om/components/ui/index.ts
+[NOT_LIVE] front-end/src/@om/components/ui/theme/index.ts
+[LIVE] front-end/src/components/ColorPickerPopover/index.ts
+[LIVE] front-end/src/components/FieldRenderer/index.ts
+[LIVE] front-end/src/components/RecordPreviewPane/index.ts
+[LIVE] front-end/src/features/records-centralized/constants/index.ts
+
+==== types.ts (3) ====
+[LIVE] front-end/src/features/devel-tools/live-table-builder/types.ts
+[LIVE] front-end/src/features/devel-tools/omtrace/types.ts
+[NOT_LIVE] front-end/src/tools/omtrace/core/types.ts
+
+==== admin.api.ts (2) ====
+[LIVE] front-end/src/admin.api.ts
+[LIVE] front-end/src/api/admin.api.ts
+
+==== AdvancedGridDialog.tsx (2) ====
+[LIVE] front-end/src/components/AdvancedGridDialog.tsx
+[LIVE] front-end/src/features/tables/AdvancedGridDialog.tsx
+
+==== auth.ts (2) ====
+[NOT_LIVE] front-end/src/tools/omtrace/lib/auth.ts
+[LIVE] front-end/src/types/auth/auth.ts
+
+==== axiosInstance.ts (2) ====
+[LIVE] front-end/src/api/utils/axiosInstance.ts
+[LIVE] front-end/src/shared/lib/axiosInstance.ts
+
+==== Banner.tsx (2) ====
+[LIVE] front-end/src/components/frontend-pages/portfolio/Banner.tsx
+[LIVE] front-end/src/features/landingpage/banner/Banner.tsx
+
+==== BlankCard.tsx (2) ====
+[LIVE] front-end/src/components/shared/BlankCard.tsx
+[LIVE] front-end/src/shared/ui/BlankCard.tsx
+
+==== client.ts (2) ====
+[LIVE] front-end/src/features/records-centralized/components/client.ts
+[LIVE] front-end/src/sandbox/field-mapper/api/client.ts
+
+==== config.ts (2) ====
+[LIVE] front-end/src/context/config.ts
+[NOT_LIVE] front-end/src/tools/omtrace/lib/config.ts
+
+==== Contact.tsx (2) ====
+[LIVE] front-end/src/components/frontend-pages/shared/leadership/Contact.tsx
+[LIVE] front-end/src/features/pages/frontend-pages/Contact.tsx
+
+==== ContentArea.tsx (2) ====
+[LIVE] front-end/src/components/frontend-pages/about/key-metric/ContentArea.tsx
+[LIVE] front-end/src/components/frontend-pages/shared/reviews/ContentArea.tsx
+
+==== CustomFormLabel.tsx (2) ====
+[LIVE] front-end/src/components/forms/theme-elements/CustomFormLabel.tsx
+[LIVE] front-end/src/features/records-centralized/components/forms/CustomFormLabel.tsx
+
+==== DashboardCard.tsx (2) ====
+[LIVE] front-end/src/components/shared/DashboardCard.tsx
+[LIVE] front-end/src/shared/ui/DashboardCard.tsx
+
+==== Footer.tsx (2) ====
+[LIVE] front-end/src/features/logs/Footer.tsx
+[LIVE] front-end/src/features/pages/frontend-pages/Footer.tsx
+
+==== Gallery.tsx (2) ====
+[LIVE] front-end/src/features/apps/user-profile/Gallery.tsx
+[LIVE] front-end/src/features/devel-tools/om-gallery/Gallery.tsx
+
+==== Grid2.tsx (2) ====
+[LIVE] front-end/src/components/compat/Grid2.tsx
+[LIVE] front-end/src/mui/Grid2.tsx
+
+==== Header.tsx (2) ====
+[LIVE] front-end/src/layouts/full/horizontal/header/Header.tsx
+[LIVE] front-end/src/layouts/full/vertical/header/Header.tsx
+
+==== logger.ts (2) ====
+[NOT_LIVE] front-end/src/tools/omtrace/core/logger.ts
+[LIVE] front-end/src/utils/logger.ts
+
+==== MonthlyEarnings.tsx (2) ====
+[LIVE] front-end/src/components/dashboards/ecommerce/MonthlyEarnings.tsx
+[LIVE] front-end/src/features/admin/dashboards/modern/MonthlyEarnings.tsx
+
+==== Navigation.tsx (2) ====
+[LIVE] front-end/src/layouts/full/horizontal/navbar/Navigation.tsx
+[LIVE] front-end/src/layouts/full/vertical/header/Navigation.tsx
+
+==== PageContainer.tsx (2) ====
+[LIVE] front-end/src/components/container/PageContainer.tsx
+[LIVE] front-end/src/shared/ui/PageContainer.tsx
+
+==== Profile.tsx (2) ====
+[LIVE] front-end/src/layouts/full/vertical/header/Profile.tsx
+[LIVE] front-end/src/layouts/full/vertical/sidebar/SidebarProfile/Profile.tsx
+
+==== RevenueUpdates.tsx (2) ====
+[LIVE] front-end/src/components/dashboards/ecommerce/RevenueUpdates.tsx
+[LIVE] front-end/src/features/admin/dashboards/modern/RevenueUpdates.tsx
+
+==== UserFormModal.tsx (2) ====
+[NOT_LIVE] front-end/src/@om/components/features/auth/UserFormModal.tsx
+[LIVE] front-end/src/components/UserFormModal.tsx

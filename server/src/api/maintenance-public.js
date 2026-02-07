@@ -4,7 +4,24 @@ const fs = require('fs');
 
 const MAINTENANCE_FILE = '/var/www/orthodoxmetrics/maintenance.on';
 
-// GET /api/maintenance/status - Public endpoint
+// ============================================================================
+// PUBLIC MAINTENANCE STATUS ENDPOINT - NO AUTHENTICATION REQUIRED
+// ============================================================================
+// This endpoint is intentionally public and bypassed in auth middleware
+// (see server/src/middleware/auth.js PUBLIC_SYSTEM_ROUTES allowlist).
+//
+// Used by:
+// - Frontend to show maintenance page
+// - External status pages
+// - Monitoring systems
+//
+// Returns: Maintenance mode status (boolean, status, startTime)
+// Auth: NONE - Bypassed via auth middleware allowlist
+// Security: Safe - Only checks for maintenance file, no sensitive data
+//
+// DO NOT add auth middleware to this endpoint!
+// DO NOT remove from auth middleware allowlist!
+// ============================================================================
 router.get('/status', (req, res) => {
   try {
     const exists = fs.existsSync(MAINTENANCE_FILE);
@@ -22,10 +39,13 @@ router.get('/status', (req, res) => {
       message: exists ? 'System is currently under maintenance' : null
     });
   } catch (error) {
+    // NEVER throw - always return a valid response
+    console.error('[MAINTENANCE] Error checking maintenance status:', error);
     res.json({
       maintenance: false,
       status: 'production',
-      message: null
+      message: null,
+      error: 'Failed to check maintenance file'
     });
   }
 });

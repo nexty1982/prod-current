@@ -3,7 +3,7 @@
  * Consolidates all record-related API calls with consistent error handling and loading states
  */
 
-import { apiJson, FieldMapperApiError } from '@/../sandbox/field-mapper/api/client';
+import { apiJson, FieldMapperApiError } from '../client';
 
 // Types
 export interface RecordApiResponse<T> {

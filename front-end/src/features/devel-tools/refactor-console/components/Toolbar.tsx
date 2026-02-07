@@ -13,7 +13,8 @@ import {
   Save,
   Settings,
   Archive,
-  RotateCcw
+  RotateCcw,
+  Shield
 } from 'lucide-react';
 import { useTheme, alpha } from '@mui/material/styles';
 import { Paper, Box, TextField, Select, MenuItem, FormControl, InputLabel, Chip, Button } from '@mui/material';
@@ -40,7 +41,11 @@ interface ToolbarProps {
   // Gap Analysis / Recovery Mode
   compareWithBackup?: boolean;
   onToggleRecoveryMode?: () => void;
-  
+
+  // Whitelist
+  whitelistCount?: number;
+  onClearWhitelist?: () => void;
+
   className?: string;
 }
 
@@ -59,6 +64,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
   totalCount,
   compareWithBackup = false,
   onToggleRecoveryMode,
+  whitelistCount = 0,
+  onClearWhitelist,
   className = ''
 }) => {
   const theme = useTheme();
@@ -108,15 +115,19 @@ const Toolbar: React.FC<ToolbarProps> = ({
       fileType: '',
       modifiedDays: 0,
       showDuplicates: false,
+      showWhitelistedOnly: false,
+      hideWhitelisted: false,
     });
   };
 
-  const hasActiveFilters = 
+  const hasActiveFilters =
     filterState.searchQuery.trim() !== '' ||
     filterState.fileType !== '' ||
     filterState.modifiedDays > 0 ||
     filterState.showDuplicates ||
-    filterState.classifications.length < 4;
+    filterState.classifications.length < 4 ||
+    filterState.showWhitelistedOnly ||
+    filterState.hideWhitelisted;
 
   return (
     <Paper 
@@ -435,6 +446,62 @@ const Toolbar: React.FC<ToolbarProps> = ({
                 </Box>
               </>
             )}
+
+            {/* Whitelist Filters */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Shield className="w-4 h-4" style={{ color: theme.palette.info.main }} />
+                <label style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary }}>
+                  Whitelist ({whitelistCount} files)
+                </label>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Chip
+                  label="Show Protected Only"
+                  onClick={() => onFilterChange({
+                    showWhitelistedOnly: !filterState.showWhitelistedOnly,
+                    hideWhitelisted: false
+                  })}
+                  color={filterState.showWhitelistedOnly ? "info" : "default"}
+                  size="small"
+                  icon={<Shield className="w-3 h-3" />}
+                  sx={{
+                    bgcolor: filterState.showWhitelistedOnly
+                      ? alpha(theme.palette.info.main, 0.1)
+                      : undefined,
+                    color: filterState.showWhitelistedOnly
+                      ? 'info.main'
+                      : undefined
+                  }}
+                />
+                <Chip
+                  label="Hide Protected"
+                  onClick={() => onFilterChange({
+                    hideWhitelisted: !filterState.hideWhitelisted,
+                    showWhitelistedOnly: false
+                  })}
+                  color={filterState.hideWhitelisted ? "warning" : "default"}
+                  size="small"
+                  sx={{
+                    bgcolor: filterState.hideWhitelisted
+                      ? alpha(theme.palette.warning.main, 0.1)
+                      : undefined,
+                    color: filterState.hideWhitelisted
+                      ? 'warning.main'
+                      : undefined
+                  }}
+                />
+                {whitelistCount > 0 && onClearWhitelist && (
+                  <Chip
+                    label="Clear All"
+                    onClick={onClearWhitelist}
+                    color="error"
+                    size="small"
+                    variant="outlined"
+                  />
+                )}
+              </Box>
+            </Box>
 
             {/* Quick Filter Badges */}
             <Box>

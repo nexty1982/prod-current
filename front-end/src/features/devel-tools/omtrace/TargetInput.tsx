@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Play, RotateCcw, X } from 'lucide-react';
+import { Box, Button, Checkbox, Chip, FormControlLabel, TextField } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { Play, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { OmtraceRunFlags } from './types.ts';
 
 interface TargetInputProps {
@@ -8,6 +10,7 @@ interface TargetInputProps {
 }
 
 export const TargetInput: React.FC<TargetInputProps> = ({ onAnalyze, isLoading = false }) => {
+  const theme = useTheme();
   const [targets, setTargets] = useState<string[]>([]);
   const [currentTarget, setCurrentTarget] = useState('');
   const [flags, setFlags] = useState<OmtraceRunFlags>({
@@ -75,204 +78,148 @@ export const TargetInput: React.FC<TargetInputProps> = ({ onAnalyze, isLoading =
   };
 
   return (
-    <div className="space-y-4">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {/* Target Input */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <Box>
+        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, marginBottom: '0.5rem' }}>
           Component Targets
         </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <TextField
+            fullWidth
+            size="small"
             value={currentTarget}
             onChange={(e) => setCurrentTarget(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Enter component name or path (e.g., ChurchSetupWizard, src/components/...)"
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <button
+          <Button
+            variant="contained"
             onClick={handleAddTarget}
             disabled={!currentTarget.trim()}
-            className={`px-4 py-2 rounded-md font-semibold shadow-md transition-all ${
-              !currentTarget.trim()
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800 transform hover:scale-105'
-            }`}
+            sx={{ textTransform: 'none', minWidth: '80px' }}
           >
             Add
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Box>
+      </Box>
 
       {/* Target Chips */}
       {targets.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-medium text-gray-700">Targets:</span>
-            <button
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary }}>Targets:</span>
+            <Button
+              size="small"
               onClick={handleClearAll}
-              className="text-sm text-red-600 hover:text-red-800 font-medium"
+              sx={{ textTransform: 'none', color: 'error.main', minWidth: 'auto', fontSize: '0.875rem' }}
             >
               Clear All
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
+            </Button>
+          </Box>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {targets.map((target, index) => (
-              <div
+              <Chip
                 key={index}
-                className="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-              >
-                <span>{target}</span>
-                <button
-                  onClick={() => handleRemoveTarget(target)}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  <X size={14} />
-                </button>
-              </div>
+                label={target}
+                onDelete={() => handleRemoveTarget(target)}
+                color="primary"
+                size="small"
+                deleteIcon={<X size={14} />}
+              />
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
       )}
 
       {/* Analysis Flags */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-800 mb-3">
+      <Box>
+        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: '0.75rem' }}>
           Analysis Options
         </label>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <label className="flex items-center cursor-pointer hover:bg-purple-50 p-3 rounded-lg border border-transparent hover:border-purple-200 transition-all">
-            <input
-              type="checkbox"
-              checked={flags.reverse}
-              onChange={() => toggleFlag('reverse')}
-              className="mr-3 w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-            />
-            <span className="text-sm font-medium text-gray-700">Reverse Dependencies</span>
-          </label>
-          
-          <label className="flex items-center cursor-pointer hover:bg-purple-50 p-3 rounded-lg border border-transparent hover:border-purple-200 transition-all">
-            <input
-              type="checkbox"
-              checked={flags.deep}
-              onChange={() => toggleFlag('deep')}
-              className="mr-3 w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-            />
-            <span className="text-sm font-medium text-gray-700">Deep Analysis</span>
-          </label>
-          
-          <label className="flex items-center cursor-pointer hover:bg-purple-50 p-3 rounded-lg border border-transparent hover:border-purple-200 transition-all">
-            <input
-              type="checkbox"
-              checked={flags.buildIndex}
-              onChange={() => toggleFlag('buildIndex')}
-              className="mr-3 w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-            />
-            <span className="text-sm font-medium text-gray-700">Build Index</span>
-          </label>
-          
-          <label className="flex items-center cursor-pointer hover:bg-purple-50 p-3 rounded-lg border border-transparent hover:border-purple-200 transition-all">
-            <input
-              type="checkbox"
-              checked={flags.json}
-              onChange={() => toggleFlag('json')}
-              className="mr-3 w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-            />
-            <span className="text-sm font-medium text-gray-700">JSON Output</span>
-          </label>
-          
-          <label className="flex items-center cursor-pointer hover:bg-purple-50 p-3 rounded-lg border border-transparent hover:border-purple-200 transition-all">
-            <input
-              type="checkbox"
-              checked={flags.exact}
-              onChange={() => toggleFlag('exact')}
-              className="mr-3 w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-            />
-            <span className="text-sm font-medium text-gray-700">Exact Match</span>
-          </label>
-          
-          <label className="flex items-center cursor-pointer hover:bg-purple-50 p-3 rounded-lg border border-transparent hover:border-purple-200 transition-all">
-            <input
-              type="checkbox"
-              checked={flags.listCandidates}
-              onChange={() => toggleFlag('listCandidates')}
-              className="mr-3 w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-            />
-            <span className="text-sm font-medium text-gray-700">List Candidates</span>
-          </label>
-        </div>
-      </div>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 2 }}>
+          <FormControlLabel
+            control={<Checkbox checked={flags.reverse} onChange={() => toggleFlag('reverse')} />}
+            label="Reverse Dependencies"
+            sx={{ m: 0 }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={flags.deep} onChange={() => toggleFlag('deep')} />}
+            label="Deep Analysis"
+            sx={{ m: 0 }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={flags.buildIndex} onChange={() => toggleFlag('buildIndex')} />}
+            label="Build Index"
+            sx={{ m: 0 }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={flags.json} onChange={() => toggleFlag('json')} />}
+            label="JSON Output"
+            sx={{ m: 0 }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={flags.exact} onChange={() => toggleFlag('exact')} />}
+            label="Exact Match"
+            sx={{ m: 0 }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={flags.listCandidates} onChange={() => toggleFlag('listCandidates')} />}
+            label="List Candidates"
+            sx={{ m: 0 }}
+          />
+        </Box>
+      </Box>
 
       {/* Refactor Flags */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-800 mb-3">
+      <Box>
+        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: theme.palette.text.primary, marginBottom: '0.75rem' }}>
           Refactor Options
         </label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <label className="flex items-center cursor-pointer hover:bg-amber-50 p-3 rounded-lg border border-transparent hover:border-amber-200 transition-all">
-            <input
-              type="checkbox"
-              checked={flags.refactor}
-              onChange={() => toggleFlag('refactor')}
-              className="mr-3 w-5 h-5 text-amber-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-            />
-            <span className="text-sm font-medium text-gray-700">Refactor Mode</span>
-          </label>
-          
-          <label className="flex items-center cursor-pointer hover:bg-amber-50 p-3 rounded-lg border border-transparent hover:border-amber-200 transition-all">
-            <input
-              type="checkbox"
-              checked={flags.yes}
-              onChange={() => toggleFlag('yes')}
-              className="mr-3 w-5 h-5 text-amber-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-            />
-            <span className="text-sm font-medium text-gray-700">Execute Refactor</span>
-          </label>
-          
-          <label className="flex items-center cursor-pointer hover:bg-amber-50 p-3 rounded-lg border border-transparent hover:border-amber-200 transition-all">
-            <input
-              type="checkbox"
-              checked={flags.dryRun}
-              onChange={() => toggleFlag('dryRun')}
-              className="mr-3 w-5 h-5 text-amber-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-            />
-            <span className="text-sm font-medium text-gray-700">Dry Run</span>
-          </label>
-          
-          <label className="flex items-center cursor-pointer hover:bg-amber-50 p-3 rounded-lg border border-transparent hover:border-amber-200 transition-all">
-            <input
-              type="checkbox"
-              checked={flags.force}
-              onChange={() => toggleFlag('force')}
-              className="mr-3 w-5 h-5 text-amber-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-            />
-            <span className="text-sm font-medium text-gray-700">Force</span>
-          </label>
-        </div>
-      </div>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+          <FormControlLabel
+            control={<Checkbox checked={flags.refactor} onChange={() => toggleFlag('refactor')} color="warning" />}
+            label="Refactor Mode"
+            sx={{ m: 0 }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={flags.yes} onChange={() => toggleFlag('yes')} color="warning" />}
+            label="Execute Refactor"
+            sx={{ m: 0 }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={flags.dryRun} onChange={() => toggleFlag('dryRun')} color="warning" />}
+            label="Dry Run"
+            sx={{ m: 0 }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={flags.force} onChange={() => toggleFlag('force')} color="warning" />}
+            label="Force"
+            sx={{ m: 0 }}
+          />
+        </Box>
+      </Box>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 pt-4">
-        <button
+      <Box sx={{ display: 'flex', gap: 1.5, pt: 2 }}>
+        <Button
+          variant="contained"
           onClick={handleAnalyze}
           disabled={targets.length === 0 || isLoading}
-          className={`flex items-center gap-2 px-6 py-3 rounded-md font-semibold shadow-md transition-all ${
-            targets.length === 0 || isLoading
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800 transform hover:scale-105'
-          }`}
+          startIcon={<Play size={18} />}
+          sx={{ textTransform: 'none', px: 3, py: 1.5 }}
         >
-          <Play size={18} />
           {flags.refactor ? 'Analyze & Refactor' : 'Analyze'}
-        </button>
+        </Button>
         
-        <button
+        <Button
+          variant="outlined"
           onClick={handleClearAll}
-          className="px-6 py-3 text-gray-700 bg-white border-2 border-gray-300 rounded-md hover:bg-gray-50 hover:border-gray-400 font-semibold shadow-md transition-all transform hover:scale-105"
+          sx={{ textTransform: 'none', px: 3, py: 1.5 }}
         >
           Clear
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Box>
+    </Box>
   );
 };

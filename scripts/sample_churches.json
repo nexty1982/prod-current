@@ -1,0 +1,23 @@
+[
+  {
+    "name": "St. Nicholas Orthodox Church",
+    "email": "admin@stnicholas.org",
+    "country": "United States",
+    "adminName": "Fr. Nicholas Porter",
+    "adminPassword": "SecurePassword789!"
+  },
+  {
+    "name": "Annunciation Greek Orthodox",
+    "email": "office@annunciation.gr",
+    "country": "United States",
+    "adminName": "Presvytera Eleni",
+    "adminPassword": "GracePassword456!"
+  },
+  {
+    "name": "Protection of the Virgin Mary",
+    "email": "contact@protectionchurch.ru",
+    "country": "United States",
+    "adminName": "Fr. Seraphim",
+    "adminPassword": "VigilPassword123!"
+  }
+]

@@ -1,6 +1,6 @@
-import { FC, useContext } from 'react';
+import { FC, useContext, useEffect } from 'react';
 import { styled, Container, Box, useTheme } from '@mui/material';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from './vertical/header/Header';
 import Sidebar from './vertical/sidebar/Sidebar';
 import Customizer from './shared/customizer/Customizer';
@@ -12,6 +12,9 @@ import ScrollToTop from '../../shared/ui/ScrollToTop';
 // import LoadingBar from '../../LoadingBar';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import config from '@/context/config';
+import { useAuth } from '@/context/AuthContext';
+import AdminFloatingHUD from '../../components/AdminFloatingHUD';
+import { getPageTitle } from '../../config/pageTitles';
 // import SiteEditorOverlay from '../../components/SiteEditorOverlay';
 // import GlobalOMAI from '../../components/global/GlobalOMAI';
 // import ErrorNotificationToast from '../../components/global/ErrorNotificationToast';
@@ -36,7 +39,15 @@ const PageWrapper = styled('div')(({ theme }) => ({
 const FullLayout: FC = () => {
   const { activeLayout, isLayout, activeMode, isCollapse } = useContext(CustomizerContext);
   const theme = useTheme();
+  const { isSuperAdmin } = useAuth();
+  const location = useLocation();
   const MiniSidebarWidth = config.miniSidebarWidth;
+
+  // Update page title based on current route
+  useEffect(() => {
+    const title = getPageTitle(location.pathname);
+    document.title = `${title} | OrthodoxMetrics`;
+  }, [location.pathname]);
 
   return (
     <>
@@ -99,6 +110,11 @@ const FullLayout: FC = () => {
       {/* <SuperadminSourcePathOverlay /> TEMPORARILY DISABLED */}
       {/* <VersionSwitcher /> TEMPORARILY DISABLED */}
       {/* <ErrorNotificationToast /> */}
+      
+      {/* ------------------------------------------- */}
+      {/* Admin Floating HUD - Super Admin Only */}
+      {/* ------------------------------------------- */}
+      {isSuperAdmin() && <AdminFloatingHUD />}
     </>
   );
 };

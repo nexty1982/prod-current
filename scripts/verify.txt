@@ -1,0 +1,8 @@
+# Check for any imports of the non-canonical RecordsPageWrapper
+grep -rn "records-centralized/apps/church-management/RecordsPageWrapper" front-end/src/ --include="*.ts" --include="*.tsx"
+
+# Check for any imports of the non-canonical EnhancedRecordsGrid
+grep -rn "records-centralized/EnhancedRecordsGrid" front-end/src/ --include="*.ts" --include="*.tsx"
+
+# Check for any imports of the chat FriendsList
+grep -rn "components/apps/chat/FriendsList" front-end/src/ --include="*.ts" --include="*.tsx"

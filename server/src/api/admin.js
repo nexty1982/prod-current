@@ -15,6 +15,10 @@ const { requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Mount admin menu management routes
+const menusRouter = require('../routes/admin/menus');
+router.use('/menus', menusRouter);
+
 // Use centralized auth middleware (supports both session and JWT fallback)
 const requireAdmin = requireRole(['admin', 'super_admin']);
 const requireSuperAdmin = requireRole(['super_admin']);
@@ -1268,7 +1272,117 @@ router.post('/churches/wizard', requireSuperAdmin, async (req, res) => {
     }
 });
 
-// PUT /admin/churches/:id - Update church (super_admin only)
+// PUT /admin/churches/:id - Update church (admin for own, super_admin for any)
+router.put('/churches/:id', requireAdmin, async (req, res) => {
+    try {
+        const churchId = parseInt(req.params.id);
+        const currentUser = req.user || req.session?.user;
+
+        console.log(`🔧 Updating church ${churchId} by user ${currentUser?.email}`);
+
+        if (isNaN(churchId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid church ID format'
+            });
+        }
+
+        // Check if church exists
+        const [existingChurch] = await getAppPool().query(
+            'SELECT id, name FROM churches WHERE id = ?',
+            [churchId]
+        );
+
+        if (existingChurch.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Church not found'
+            });
+        }
+
+        // Extract updatable fields from request body
+        const {
+            name, email, phone, address, city, state_province, postal_code,
+            country, website, preferred_language, timezone, currency, tax_id,
+            description_multilang, settings, is_active, database_name,
+            has_baptism_records, has_marriage_records, has_funeral_records,
+            setup_complete
+            // Note: template_church_id, default_landing_page, enable_ag_grid, ag_grid_record_types, 
+            // enable_multilingual, enable_notifications, public_calendar removed - columns don't exist in DB
+        } = req.body;
+
+        // Build update query dynamically
+        const updates = [];
+        const values = [];
+
+        if (name !== undefined) { updates.push('name = ?'); values.push(name); }
+        if (email !== undefined) { updates.push('email = ?'); values.push(email); }
+        if (phone !== undefined) { updates.push('phone = ?'); values.push(phone || null); }
+        if (address !== undefined) { updates.push('address = ?'); values.push(address || null); }
+        if (city !== undefined) { updates.push('city = ?'); values.push(city || null); }
+        if (state_province !== undefined) { updates.push('state_province = ?'); values.push(state_province || null); }
+        if (postal_code !== undefined) { updates.push('postal_code = ?'); values.push(postal_code || null); }
+        if (country !== undefined) { updates.push('country = ?'); values.push(country || null); }
+        if (website !== undefined) { updates.push('website = ?'); values.push(website || null); }
+        if (preferred_language !== undefined) { updates.push('preferred_language = ?'); values.push(preferred_language); }
+        if (timezone !== undefined) { updates.push('timezone = ?'); values.push(timezone); }
+        if (currency !== undefined) { updates.push('currency = ?'); values.push(currency || null); }
+        if (tax_id !== undefined) { updates.push('tax_id = ?'); values.push(tax_id || null); }
+        if (description_multilang !== undefined) { updates.push('description_multilang = ?'); values.push(description_multilang || null); }
+        if (settings !== undefined) { updates.push('settings = ?'); values.push(typeof settings === 'string' ? settings : JSON.stringify(settings || {})); }
+        if (is_active !== undefined) { updates.push('is_active = ?'); values.push(is_active ? 1 : 0); }
+        if (database_name !== undefined) { updates.push('database_name = ?'); values.push(database_name || null); }
+        if (has_baptism_records !== undefined) { updates.push('has_baptism_records = ?'); values.push(has_baptism_records ? 1 : 0); }
+        if (has_marriage_records !== undefined) { updates.push('has_marriage_records = ?'); values.push(has_marriage_records ? 1 : 0); }
+        if (has_funeral_records !== undefined) { updates.push('has_funeral_records = ?'); values.push(has_funeral_records ? 1 : 0); }
+        if (setup_complete !== undefined) { updates.push('setup_complete = ?'); values.push(setup_complete ? 1 : 0); }
+        // Removed: template_church_id, default_landing_page, enable_ag_grid, ag_grid_record_types, 
+        // enable_multilingual, enable_notifications, public_calendar (these columns don't exist in the churches table)
+
+        if (updates.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'No fields to update'
+            });
+        }
+
+        updates.push('updated_at = CURRENT_TIMESTAMP');
+        values.push(churchId);
+
+        await getAppPool().query(
+            `UPDATE churches SET ${updates.join(', ')} WHERE id = ?`,
+            values
+        );
+
+        console.log(`✅ Church ${churchId} updated successfully by ${currentUser?.email}`);
+
+        // Fetch and return updated church
+        const [updatedChurch] = await getAppPool().query(
+            `SELECT
+                id, name, email, phone, address, city, state_province, postal_code,
+                country, website, preferred_language, timezone, currency, tax_id,
+                description_multilang, settings, is_active, database_name,
+                has_baptism_records, has_marriage_records, has_funeral_records,
+                setup_complete, created_at, updated_at
+            FROM churches WHERE id = ?`,
+            [churchId]
+        );
+
+        res.json({
+            success: true,
+            message: 'Church updated successfully',
+            church: updatedChurch[0]
+        });
+
+    } catch (error) {
+        console.error('❌ Error updating church:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update church',
+            error: error.message
+        });
+    }
+});
 
 // DELETE /admin/churches/:id - Delete church (super_admin only)
 router.delete('/churches/:id', requireSuperAdmin, async (req, res) => {

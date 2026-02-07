@@ -1,14 +1,13 @@
 // Orthodox Calendar API Service - Enhanced for GOarch-style functionality
 import type {
-  OrthodoxCalendarDay,
-  OrthodoxCalendarResponse,
-  CalendarFilters,
-  CalendarLanguage,
-  CalendarType,
-  Saint,
-  Feast,
-  LiturgicalReadings,
-  ParishEvent,
+    CalendarLanguage,
+    CalendarType,
+    Feast,
+    LiturgicalReadings,
+    OrthodoxCalendarDay,
+    OrthodoxCalendarResponse,
+    ParishEvent,
+    Saint
 } from '@/types/orthodox-calendar.types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
@@ -27,7 +26,7 @@ class OrthodoxCalendarService {
     if (!response.ok) {
       if (response.status === 401) {
         localStorage.removeItem('auth_user');
-        window.location.href = '/auth/sign-in';
+        window.location.href = '/auth/login';
         throw new Error('Authentication required');
       }
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
