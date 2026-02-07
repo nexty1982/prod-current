@@ -918,4 +918,176 @@ router.post('/:id/field-mapper', requireAuth, requireChurchAccess, async (req, r
   }
 });
 
+// ============================================================================
+// FEATURE FLAGS MANAGEMENT (GLOBAL + PER-CHURCH OVERRIDES)
+// ============================================================================
+
+const {
+  parseSettings,
+  stringifySettings,
+  mergeFeatures,
+  validateFeatures
+} = require('../utils/churchSettings');
+
+const {
+  getEffectiveFeatures
+} = require('../utils/featureFlags');
+
+/**
+ * GET /api/churches/:id/features - Get feature flags for a church
+ * Returns global defaults, church overrides, and effective (resolved) flags
+ * Resolution: churchOverride ?? globalDefault ?? false
+ * Accessible by: super_admin, admin (own church), church_admin (own church)
+ */
+router.get('/:id/features', requireAuth, requireChurchAccess, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+
+    if (isNaN(churchId)) {
+      return res.status(400).json(ApiResponse(false, null, {
+        message: 'Invalid church ID format',
+        code: 'INVALID_CHURCH_ID'
+      }));
+    }
+
+    // Validate user access
+    const access = validateChurchAccess(req.user, churchId);
+    if (!access.allowed) {
+      return res.status(403).json(
+        ApiResponse.error('Access denied', 'INSUFFICIENT_PERMISSIONS', 403, { reason: access.reason })
+      );
+    }
+
+    // Verify church exists
+    const [rows] = await getAppPool().query(
+      'SELECT id, name FROM churches WHERE id = ? AND is_active = 1',
+      [churchId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json(ApiResponse(false, null, {
+        message: 'Church not found',
+        code: 'CHURCH_NOT_FOUND'
+      }));
+    }
+
+    const church = rows[0];
+
+    // Get effective features (global + overrides)
+    const { global, overrides, effective } = await getEffectiveFeatures(getAppPool(), churchId);
+
+    // Super admin sees all details; others see only effective
+    const responseData = {
+      churchId: church.id,
+      churchName: church.name,
+      effective
+    };
+
+    if (req.user.role === 'super_admin') {
+      responseData.globalDefaults = global;
+      responseData.overrides = overrides;
+    }
+
+    res.json(ApiResponse.success(responseData));
+
+  } catch (error) {
+    console.error('❌ Error fetching church features:', error);
+    res.status(500).json(ApiResponse(false, null, {
+      message: 'Failed to fetch church features',
+      code: 'DATABASE_ERROR',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }));
+  }
+});
+
+/**
+ * PUT /api/churches/:id/features - Update feature flags for a church
+ * Merges provided features into churches.settings JSON (preserves other settings)
+ * Accessible by: super_admin only
+ */
+router.put('/:id/features', requireAuth, requireRole(['super_admin']), async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+
+    if (isNaN(churchId)) {
+      return res.status(400).json(ApiResponse(false, null, {
+        message: 'Invalid church ID format',
+        code: 'INVALID_CHURCH_ID'
+      }));
+    }
+
+    const { features } = req.body;
+
+    if (!features) {
+      return res.status(400).json(ApiResponse(false, null, {
+        message: 'Missing features object in request body',
+        code: 'MISSING_FEATURES'
+      }));
+    }
+
+    // Validate features
+    const validation = validateFeatures(features);
+    if (!validation.isValid) {
+      return res.status(400).json(ApiResponse(false, null, {
+        message: 'Invalid feature flags',
+        code: 'VALIDATION_ERROR',
+        details: validation.errors
+      }));
+    }
+
+    // Fetch current settings
+    const [rows] = await getAppPool().query(
+      'SELECT id, name, settings FROM churches WHERE id = ? AND is_active = 1',
+      [churchId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json(ApiResponse(false, null, {
+        message: 'Church not found',
+        code: 'CHURCH_NOT_FOUND'
+      }));
+    }
+
+    const church = rows[0];
+    const currentSettings = parseSettings(church.settings);
+    
+    // Merge features (preserves other settings like liturgical_enabled)
+    const updatedSettings = mergeFeatures(currentSettings, features);
+    const settingsString = stringifySettings(updatedSettings);
+
+    // Update database
+    await getAppPool().query(
+      'UPDATE churches SET settings = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [settingsString, churchId]
+    );
+
+    // Get effective features after update
+    const { global, overrides, effective } = await getEffectiveFeatures(getAppPool(), churchId);
+
+    // Log the change
+    console.log(`✅ Updated feature overrides for church ${churchId} (${church.name}) by ${req.user.email}`, {
+      overrides,
+      effective
+    });
+
+    // Return effective features
+    res.json(ApiResponse.success({
+      churchId: church.id,
+      churchName: church.name,
+      globalDefaults: global,
+      overrides,
+      effective,
+      message: 'Feature overrides updated successfully'
+    }));
+
+  } catch (error) {
+    console.error('❌ Error updating church features:', error);
+    res.status(500).json(ApiResponse(false, null, {
+      message: 'Failed to update church features',
+      code: 'DATABASE_ERROR',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }));
+  }
+});
+
 module.exports = router;

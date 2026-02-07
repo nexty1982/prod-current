@@ -46,7 +46,6 @@ import {
   IconArrowRight,
 } from '@tabler/icons-react';
 import { styled } from '@mui/material/styles';
-import Header from './Header';
 import Footer from './Footer';
 import QuickContactSidebar from '@/features/devel-tools/contactbar/QuickContactSidebar';
 import LeftSideMenu from './LeftSideMenu';
@@ -1228,8 +1227,6 @@ const HomePage: React.FC = () => {
 
   return (
     <Box>
-      <Header />
-      
       {/* Left Side Popout Menu */}
       <LeftSideMenu
         activeSection={activeSection}

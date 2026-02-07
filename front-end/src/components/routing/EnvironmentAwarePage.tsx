@@ -9,6 +9,11 @@
  * - Displays environment indicator
  * - Logs environment context for debugging
  * 
+ * Priority Levels:
+ * - 0: No banner shown (production-ready, no notification needed)
+ * - 1-4: Development priorities (banner shown)
+ * - 5: Production ready (banner shown)
+ * 
  * Usage:
  *   <EnvironmentAwarePage 
  *     featureId="baptism-records-v2"
@@ -19,10 +24,10 @@
  *   </EnvironmentAwarePage>
  */
 
+import { Alert, Box, Chip, Collapse } from '@mui/material';
 import React from 'react';
-import { Box, Alert, Chip, Collapse } from '@mui/material';
-import { useEnvironment, FeaturePriority, FeatureRiskLevel } from '../../context/EnvironmentContext';
 import { shouldShowDevBanners } from '../../config/featureFlags';
+import { FeaturePriority, FeatureRiskLevel, useEnvironment } from '../../context/EnvironmentContext';
 
 interface EnvironmentAwarePageProps {
   children: React.ReactNode;
@@ -30,7 +35,7 @@ interface EnvironmentAwarePageProps {
   // Feature identification
   featureId?: string;
   
-  // Feature priority (1-4 = reconstructed, 5 = stable)
+  // Feature priority (0 = no banner, 1-4 = reconstructed, 5 = stable)
   priority?: FeaturePriority;
   
   // Risk level
@@ -45,6 +50,7 @@ interface EnvironmentAwarePageProps {
 
 // Priority labels
 const PRIORITY_LABELS: Record<FeaturePriority, string> = {
+  0: 'No Banner - Production Ready',
   1: 'Priority 1 - Critical Records',
   2: 'Priority 2 - Active Reconstruction',
   3: 'Priority 3 - Schema Sync',
@@ -71,11 +77,16 @@ const EnvironmentAwarePage: React.FC<EnvironmentAwarePageProps> = ({
   const { environment, hasLatestAccess } = useEnvironment();
   
   // Determine if we should show the development banner
-  const shouldShowBanner = showBanner && 
-    hasLatestAccess && 
+  // Priority 0 = never show banner (production ready with no notification)
+  const shouldShowBanner =
+    showBanner &&
+    hasLatestAccess &&
     shouldShowDevBanners() &&
-    (priority !== undefined && priority <= 4) || 
-    (riskLevel && riskLevel !== 'production-ready');
+    priority !== 0 &&
+    (
+      (priority !== undefined && priority <= 4) ||
+      (!!riskLevel && riskLevel !== 'production-ready')
+    );
 
   // Get banner content based on priority/risk
   const getBannerContent = () => {

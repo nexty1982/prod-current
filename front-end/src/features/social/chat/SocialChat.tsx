@@ -46,7 +46,7 @@ import {
 } from '@tabler/icons-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import PageContainer from '../../../components/container/PageContainer';
+import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '../../../layouts/full/shared/breadcrumb/Breadcrumb';
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 import { socialAPI } from '../../../api/social.api';

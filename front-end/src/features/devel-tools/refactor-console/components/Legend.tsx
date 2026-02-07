@@ -1,30 +1,31 @@
-import React from 'react';
-import { 
-  CheckCircle, 
-  AlertTriangle, 
-  Clock, 
-  XCircle,
-  GitBranch,
-  Zap,
-  Calendar,
-  FileText
+import { Classification, FilterState, RefactorScan } from '@/types/refactorConsole';
+import { Box, Button, ButtonGroup, Paper, Typography } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
+import {
+    AlertTriangle,
+    Calendar,
+    CheckCircle,
+    Clock,
+    GitBranch,
+    Shield,
+    XCircle
 } from 'lucide-react';
-import { useTheme, alpha } from '@mui/material/styles';
-import { Paper, Box, Button, ButtonGroup, Typography } from '@mui/material';
-import { Classification, RefactorScan, FilterState } from '@/types/refactorConsole';
+import React from 'react';
 
 interface LegendProps {
   scanData: RefactorScan | null;
   filterState: FilterState;
   onFilterChange: (updates: Partial<FilterState>) => void;
   className?: string;
+  whitelistCount?: number;
 }
 
-const Legend: React.FC<LegendProps> = ({ 
-  scanData, 
-  filterState, 
+const Legend: React.FC<LegendProps> = ({
+  scanData,
+  filterState,
   onFilterChange,
-  className = ''
+  className = '',
+  whitelistCount = 0
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
@@ -92,10 +93,10 @@ const Legend: React.FC<LegendProps> = ({
     };
     const colors = colorMap[color] || { main: theme.palette.grey[500], light: theme.palette.grey[100], dark: theme.palette.grey[700] };
     return {
-      bgcolor: alpha(colors.main, isDark ? 0.15 : 0.12),
-      color: isDark ? colors.light : colors.dark,
-      borderColor: alpha(colors.main, isDark ? 0.5 : 0.4),
-      iconColor: isDark ? colors.light : colors.main,
+      bgcolor: alpha(colors.main, isDark ? 0.25 : 0.12),
+      color: isDark ? '#fff' : colors.dark,
+      borderColor: alpha(colors.main, isDark ? 0.6 : 0.4),
+      iconColor: isDark ? '#fff' : colors.main,
     };
   };
 
@@ -179,13 +180,13 @@ const Legend: React.FC<LegendProps> = ({
                   <Typography 
                     variant="body2" 
                     fontWeight={500}
-                    color={isSelected ? styles.color : 'text.primary'}
+                    sx={{ color: isSelected ? styles.color : 'text.primary' }}
                   >
                     {config.label}
                   </Typography>
                   <Typography 
                     variant="caption" 
-                    color={isSelected ? styles.color : 'text.secondary'}
+                    sx={{ color: isSelected ? styles.color : (isDark ? 'rgba(255, 255, 255, 0.7)' : 'text.secondary') }}
                   >
                     {config.description}
                   </Typography>
@@ -218,25 +219,33 @@ const Legend: React.FC<LegendProps> = ({
             <Typography variant="h5" fontWeight={700}>
               {scanData.summary.totalFiles}
             </Typography>
-            <Typography variant="body2" color="text.secondary">Total Files</Typography>
+            <Typography variant="body2" sx={{ color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'text.secondary' }}>Total Files</Typography>
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={700}>
               {scanData.summary.totalDirs}
             </Typography>
-            <Typography variant="body2" color="text.secondary">Directories</Typography>
+            <Typography variant="body2" sx={{ color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'text.secondary' }}>Directories</Typography>
           </Box>
           <Box sx={{ gridColumn: 'span 2', mt: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <GitBranch className="w-4 h-4" />
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'text.secondary' }}>
                   {scanData.summary.duplicates} duplicates
                 </Typography>
               </Box>
+              {whitelistCount > 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Shield className="w-4 h-4" style={{ color: theme.palette.info.main }} />
+                  <Typography variant="body2" sx={{ color: theme.palette.info.main, fontWeight: 500 }}>
+                    {whitelistCount} protected
+                  </Typography>
+                </Box>
+              )}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Calendar className="w-4 h-4" />
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'text.secondary' }}>
                   Last scan: {new Date(scanData.generatedAt).toLocaleTimeString()}
                 </Typography>
               </Box>

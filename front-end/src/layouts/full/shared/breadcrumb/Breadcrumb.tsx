@@ -1,5 +1,5 @@
 import React from 'react';
-import Grid2 from '@/mui/Grid2';
+import Grid2 from '@/components/compat/Grid2';
 import { Typography, Box, Breadcrumbs, Link } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 const Grid = Grid2;

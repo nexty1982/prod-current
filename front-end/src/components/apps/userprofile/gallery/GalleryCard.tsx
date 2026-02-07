@@ -13,7 +13,7 @@ import Grid2 from '@/components/compat/Grid2';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { useContext, useEffect, useState } from 'react';
-import BlankCard from '@/components/shared/BlankCard';
+import BlankCard from '@/shared/ui/BlankCard';
 import { UserDataContext } from "@/context/UserDataContext/index";
 import { IconDotsVertical, IconSearch } from '@tabler/icons-react';
 import { format } from 'date-fns';

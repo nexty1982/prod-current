@@ -157,17 +157,8 @@ router.post('/login', async (req, res) => {
 
     // Regenerate session to get a fresh session ID and Set-Cookie header
     // This ensures stale cookies from previous sessions are replaced
-    await new Promise((resolve, reject) => {
-      req.session.regenerate((err) => {
-        if (err) {
-          console.warn('[AUTH] Session regenerate failed, continuing with existing session:', err.message);
-        }
-        resolve();
-      });
-    });
-
-    // Explicitly set session data
-    req.session.user = {
+    // CRITICAL: Save user data before regenerate, restore after
+    const userData = {
       id: user.id,
       email: user.email,
       first_name: user.first_name,
@@ -175,6 +166,23 @@ router.post('/login', async (req, res) => {
       role: user.role,
       church_id: user.church_id
     };
+
+    await new Promise((resolve, reject) => {
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error('[AUTH] CRITICAL: Session regenerate failed:', err.message);
+          // Don't reject - continue with existing session
+          // But log the issue for debugging
+          console.warn('[AUTH] Continuing with existing session (regenerate failed)');
+        } else {
+          console.log('[AUTH] ✅ Session regenerated successfully');
+        }
+        resolve();
+      });
+    });
+
+    // Explicitly set session data (restore after regenerate)
+    req.session.user = userData;
     req.session.userId = user.id; // Explicit userId for session lookups
     req.session.loginTime = new Date();
     req.session.lastActivity = new Date();
@@ -184,10 +192,23 @@ router.post('/login', async (req, res) => {
     
     // CRITICAL: Explicitly save session before responding
     // This ensures session is persisted to store before response is sent
+    console.log('[AUTH] Saving session with user data:', {
+      sessionID: req.sessionID,
+      userId: req.session.user.id,
+      email: req.session.user.email,
+      role: req.session.user.role
+    });
+    
     await new Promise((resolve, reject) => {
       req.session.save((err) => {
         if (err) {
-          console.error('[AUTH] Failed to save session:', err);
+          console.error('[AUTH] CRITICAL: Failed to save session:', err);
+          console.error('[AUTH] Session save error details:', {
+            error: err.message,
+            stack: err.stack,
+            sessionID: req.sessionID,
+            userId: user.id
+          });
           reject(err);
         } else {
           console.log(`✅ Session saved for user ${user.id} (${user.email}), sessionID: ${req.sessionID}`);
@@ -195,15 +216,22 @@ router.post('/login', async (req, res) => {
           if (req.sessionStore && req.sessionStore.get) {
             req.sessionStore.get(req.sessionID, (storeErr, storedSession) => {
               if (storeErr) {
-                console.warn('[AUTH] Could not verify session in store:', storeErr.message);
+                console.error('[AUTH] CRITICAL: Could not verify session in store:', storeErr.message);
               } else if (storedSession && storedSession.user) {
                 console.log(`✅ Session verified in store for user ${storedSession.user.email}`);
+                console.log(`✅ Stored session data:`, {
+                  userId: storedSession.user.id,
+                  email: storedSession.user.email,
+                  role: storedSession.user.role
+                });
               } else {
-                console.warn('[AUTH] Session saved but not found in store - may be a timing issue');
+                console.error('[AUTH] CRITICAL: Session saved but user data NOT found in store');
+                console.error('[AUTH] Stored session keys:', storedSession ? Object.keys(storedSession) : 'NULL');
               }
               resolve();
             });
           } else {
+            console.warn('[AUTH] Session store not available for verification');
             resolve();
           }
         }
@@ -211,6 +239,8 @@ router.post('/login', async (req, res) => {
     });
 
     console.log(`✅ JWT Authentication successful for: ${loginEmail} Role: ${user.role}`);
+    console.log(`✅ Session ID: ${req.sessionID}, User ID: ${user.id}`);
+    console.log(`✅ Session cookie will be sent with name: orthodoxmetrics.sid`);
 
     return res.json({
       success: true,
@@ -228,10 +258,14 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('[AUTH] Login error:', error);
+    console.error('[AUTH] Error stack:', error.stack);
+    
+    // If session save failed, still try to respond
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error during login',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });

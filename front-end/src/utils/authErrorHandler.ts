@@ -64,7 +64,7 @@ export async function handle401Error(error: any, context: string = 'api'): Promi
   
   // Redirect to login page
   const currentPath = window.location.pathname;
-  const loginUrl = `/auth/sign-in${currentPath !== '/auth/sign-in' ? `?redirect=${encodeURIComponent(currentPath)}` : ''}`;
+  const loginUrl = `/auth/login${currentPath !== '/auth/login' ? `?redirect=${encodeURIComponent(currentPath)}` : ''}`;
   
   console.log(`🔄 Redirecting to login: ${loginUrl}`);
   window.location.href = loginUrl;

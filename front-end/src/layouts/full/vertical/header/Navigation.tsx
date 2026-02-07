@@ -4,14 +4,12 @@ import { Link } from 'react-router-dom';
 import { IconChevronDown, IconHelp } from '@tabler/icons-react';
 import AppLinks from './AppLinks';
 import QuickLinks from './QuickLinks';
-import { useMenuVisibility } from '../../../../context/MenuVisibilityContext';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React from 'react';
 
 const AppDD = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
-  const { visibleMenus } = useMenuVisibility();
 
   const handleClick2 = (event: any) => {
     setAnchorEl2(event.currentTarget);
@@ -110,21 +108,6 @@ const AppDD = () => {
         </Grid>
       </Menu>
     </Box>
-    {visibleMenus['header-chat'] && (
-      <Button color="inherit" sx={{ color: '#FFFFFF' }} variant="text" to="/apps/chats" component={Link}>
-        Chat
-      </Button>
-    )}
-    {visibleMenus['header-calendar'] && (
-      <Button color="inherit" sx={{ color: '#FFFFFF' }} variant="text" to="/apps/liturgical-calendar" component={Link}>
-        Calendar
-      </Button>
-    )}
-    {visibleMenus['header-email'] && (
-      <Button color="inherit" sx={{ color: '#FFFFFF' }} variant="text" to="/apps/email" component={Link}>
-        Email
-      </Button>
-    )}
   </>);
 };
 

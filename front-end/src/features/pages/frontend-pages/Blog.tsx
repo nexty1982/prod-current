@@ -10,8 +10,6 @@
 import React from 'react';
 import { Container } from '@mui/material';
 import PageContainer from '@/shared/ui/PageContainer';
-import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
-import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import Banner from '@/components/frontend-pages/blog/banner';
 import C2a from '@/components/frontend-pages/shared/c2a';
 import Footer from '@/components/frontend-pages/shared/footer';
@@ -22,9 +20,7 @@ import { BlogProvider } from '@/context/BlogContext';
 const BlogPage: React.FC = () => {
   return (
     <BlogProvider>
-      <PageContainer title="Blog" description="Latest news, updates, and guides">
-        <HeaderAlert />
-        <HpHeader />
+      <PageContainer title="Blog" description="this is Blog page">
         <Banner />
         <Container maxWidth="lg" sx={{ mt: 5 }}>
           <BlogListing />

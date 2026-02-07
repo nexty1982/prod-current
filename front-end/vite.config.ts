@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
     define: {
         'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
         'import.meta.env.VITE_GIT_SHA': JSON.stringify(
-            execSync('git rev-parse --short HEAD').toString().trim()
+            mode === 'development' ? 'dev' : execSync('git rev-parse --short HEAD').toString().trim()
         ),
         'import.meta.env.VITE_BUILD_TIME': JSON.stringify(new Date().toISOString()),
     },
@@ -35,9 +35,22 @@ export default defineConfig(({ mode }) => {
         exclude: [],
     },
     optimizeDeps: {
-        include: [],
-        force: false, // Don't force pre-bundling in dev
+        include: [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            '@mui/material',
+            '@mui/icons-material',
+            '@emotion/react',
+            '@emotion/styled',
+            'lodash',
+            'axios',
+            '@tanstack/react-query'
+        ],
+        exclude: [],
+        force: false,
         esbuildOptions: {
+            target: 'es2020',
             plugins: [
                 {
                     name: 'load-js-files-as-tsx',
@@ -54,6 +67,8 @@ export default defineConfig(({ mode }) => {
             ],
         },
     },
+    // Cache directory - put it in local temp for better performance on network shares
+    cacheDir: mode === 'development' ? 'node_modules/.vite' : '.vite',
 
 
 
@@ -87,27 +102,45 @@ export default defineConfig(({ mode }) => {
         },
     }, server: {
         host: '0.0.0.0',
-        port: 5174, // Development server on 5174
+        port: 5174,
         https: false,
+        strictPort: false,
+        // Optimize for network shares
+        preTransformRequests: true,
+        sourcemapIgnoreList: () => true,
         hmr: {
-            overlay: true, // Show error overlay in browser
-            port: 5175, // HMR on separate port to avoid conflicts
+            overlay: true,
+            protocol: 'ws',
+            host: '192.168.1.239',
+            clientPort: 5174,
+            timeout: 30000, // Increase timeout for slower networks
         },
         watch: {
-            usePolling: true, // Better file watching on some systems
-            interval: 100, // Faster polling for changes
+            usePolling: false,
+            ignored: [
+                '**/node_modules/**',
+                '**/.git/**',
+                '**/dist/**',
+                '**/.vite/**',
+                '**/coverage/**'
+            ],
+        },
+        fs: {
+            strict: false,
+            allow: ['..'],
+            // Cache file reads for better performance
+            cachedChecks: true,
         },
         proxy: {
             '/api': {
                 target: 'http://localhost:3001',
                 changeOrigin: true,
                 secure: false,
+                ws: true,
+                timeout: 30000,
                 configure: (proxy) => {
                     proxy.on('error', (err, _req, _res) => {
-                        console.log('Proxy error:', err);
-                    });
-                    proxy.on('proxyReq', (proxyReq, req, _res) => {
-                        console.log('Proxying request:', req.method, req.url, '→', proxyReq.getHeader('host'));
+                        console.error('API Proxy error:', err.message);
                     });
                 }
             },
@@ -115,12 +148,10 @@ export default defineConfig(({ mode }) => {
                 target: 'http://localhost:3001',
                 changeOrigin: true,
                 secure: false,
+                timeout: 30000,
                 configure: (proxy) => {
                     proxy.on('error', (err, _req, _res) => {
-                        console.log('Proxy error:', err);
-                    });
-                    proxy.on('proxyReq', (proxyReq, req, _res) => {
-                        console.log('Proxying image request:', req.method, req.url, '→', proxyReq.getHeader('host'));
+                        console.error('Image Proxy error:', err.message);
                     });
                 }
             }

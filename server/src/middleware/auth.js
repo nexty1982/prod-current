@@ -4,6 +4,16 @@ const jwt = require("jsonwebtoken");
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || "change_me_access_256bit";
 
 const authMiddleware = (req, res, next) => {
+  // IMMEDIATE BYPASS - Health and maintenance endpoints
+  const path = req.path;
+  
+  if (
+    path === '/api/system/health' ||
+    path === '/api/maintenance/status'
+  ) {
+    return next();
+  }
+
   const hasOMSession = req.headers.cookie?.includes('orthodoxmetrics.sid=');
 
   // Log raw cookie to debug session persistence
@@ -203,11 +213,36 @@ const handleSessionRegeneration = (req, res, next) => {
   next();
 };
 
+// ============================================================================
+// AUTH-OPTIONAL PATHS - For logging and documentation
+// ============================================================================
+// These paths bypass authentication checks for system health monitoring.
+// They are defined at the top of authMiddleware for early exit.
+const AUTH_OPTIONAL_PATHS = [
+  '/api/system/health',
+  '/api/maintenance/status'
+];
+
+// Log auth-optional paths at startup (DEBUG level)
+// This helps document which endpoints don't require authentication
+const logAuthConfiguration = () => {
+  if (process.env.NODE_ENV === 'development' || process.env.DEBUG) {
+    console.log('🔓 [AUTH CONFIG] Auth-optional paths configured:');
+    AUTH_OPTIONAL_PATHS.forEach(path => {
+      console.log(`   - ${path}`);
+    });
+    console.log('   → These endpoints bypass session and JWT checks for monitoring');
+  }
+};
+
+// Export configuration for startup logging
 module.exports = {
   authMiddleware,
   optionalAuth,
   requireAuth: authMiddleware,
   requireRole,
   validateSession,
-  handleSessionRegeneration
+  handleSessionRegeneration,
+  AUTH_OPTIONAL_PATHS,
+  logAuthConfiguration
 };

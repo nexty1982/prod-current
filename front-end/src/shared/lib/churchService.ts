@@ -53,7 +53,7 @@ const churchService = {
 
       if (response.status === 401) {
         localStorage.removeItem('auth_user');
-        window.location.href = `/auth/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`;
+        window.location.href = `/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`;
         throw new Error('Session expired');
       }
       if (!response.ok) {

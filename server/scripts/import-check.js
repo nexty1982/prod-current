@@ -10,15 +10,28 @@ const path = require('path');
 const fs = require('fs');
 
 // Routes to check (relative to server directory)
-// All source code lives under src/
 const routesToCheck = [
+  // API routes (new structure)
   'src/api/baptism.js',
   'src/api/marriage.js',
   'src/api/funeral.js',
+  
+  // Routes (current structure)
+  'src/routes/baptism.js',
+  'src/routes/marriage.js',
+  'src/routes/funeral.js',
+  'src/routes/logs.js',
+  'src/routes/library.js',
   'src/routes/admin/churches.js',
   'src/routes/admin/users.js',
+  
+  // Middleware
   'src/middleware/logger.js',
-  // Note: src/index.ts is TypeScript and will be checked after compilation
+  'src/middleware/auth.js',
+  
+  // Main entry point (after build)
+  'dist/index.js'
+  // Note: src/index.ts is TypeScript - check dist/index.js after compilation
 ];
 
 let hasErrors = false;

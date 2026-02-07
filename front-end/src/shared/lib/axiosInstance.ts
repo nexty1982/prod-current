@@ -3,9 +3,9 @@
  * Provides unified error handling, baseURL, and interceptors
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { API_CONFIG } from '@/config/api.config';
 import { handle401Error } from '@/utils/authErrorHandler';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // ===== API CLIENT CONFIGURATION =====
 // Use centralized configuration
@@ -62,7 +62,7 @@ class ApiClient {
 
         // Handle 401 via centralized auth error handler
         if (error.response?.status === 401) {
-          if (!window.location.pathname.includes('/auth/sign-in')) {
+          if (!window.location.pathname.includes('/auth/login')) {
             handle401Error(error, 'shared_axiosInstance');
           }
         }

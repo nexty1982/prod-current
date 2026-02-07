@@ -20,27 +20,9 @@ module.exports = {
       log_file: "/var/www/orthodoxmetrics/prod/server/logs/orthodox-backend-combined.log"
     },
     {
-      name: "omai-background",
-      cwd: "/var/www/orthodoxmetrics/prod",
-      script: "server/src/services/omaiBackgroundService.js",
-      instances: 1,
-      exec_mode: "fork",
-      autorestart: true,
-      watch: false,
-      max_memory_restart: "700M",
-      time: true,
-      env: {
-        NODE_ENV: "production",
-        OMAI_LOG_LEVEL: "info"
-      },
-      out_file: "/var/www/orthodoxmetrics/prod/logs/omai-background-out.log",
-      error_file: "/var/www/orthodoxmetrics/prod/logs/omai-background-err.log",
-      log_file: "/var/www/orthodoxmetrics/prod/logs/omai-background-combined.log"
-    },
-    {
       name: "om-librarian",
       cwd: "/var/www/orthodoxmetrics/prod",
-      script: "server/src/agents/omLibrarian.js",
+      script: "server/src/agents/omLibrarianV3.js",
       instances: 1,
       exec_mode: "fork",
       autorestart: true,

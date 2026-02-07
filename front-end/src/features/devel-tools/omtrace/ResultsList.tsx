@@ -1,5 +1,7 @@
+import { Box, Chip } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
+import { AlertCircle, CheckCircle, ChevronRight, XCircle } from 'lucide-react';
 import React from 'react';
-import { ChevronRight, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { OmtraceRunResult } from './types.ts';
 
 interface ResultsListProps {
@@ -8,6 +10,8 @@ interface ResultsListProps {
 }
 
 export const ResultsList: React.FC<ResultsListProps> = ({ results, onOpenDetails }) => {
+  const theme = useTheme();
+  
   const getStatusIcon = (result: OmtraceRunResult) => {
     if (result.error) return <XCircle className="w-5 h-5 text-red-500" />;
     if (result.direct.length === 0) return <AlertCircle className="w-5 h-5 text-yellow-500" />;
@@ -34,121 +38,120 @@ export const ResultsList: React.FC<ResultsListProps> = ({ results, onOpenDetails
   };
 
   return (
-    <div className="divide-y divide-gray-200">
+    <Box sx={{ '& > *:not(:last-child)': { borderBottom: 1, borderColor: 'divider' } }}>
       {results.map((result, index) => (
-        <div
+        <Box
           key={index}
-          className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+          sx={{ 
+            p: 2, 
+            cursor: 'pointer',
+            '&:hover': { bgcolor: 'action.hover' },
+            transition: 'background-color 0.2s'
+          }}
           onClick={() => onOpenDetails(result)}
         >
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-2">
+          <Box sx={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between' }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                 {getStatusIcon(result)}
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-gray-900 truncate">
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.text.primary, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {result.entry}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p style={{ fontSize: '0.875rem', color: theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.text.secondary, margin: 0 }}>
                     {formatPath(result.resolvedPath)}
                   </p>
-                </div>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(result)}`}>
-                  {getStatusText(result)}
-                </span>
-              </div>
+                </Box>
+                <Chip 
+                  label={getStatusText(result)}
+                  size="small"
+                  color={result.error ? 'error' : result.direct.length === 0 ? 'warning' : 'success'}
+                  sx={{ fontSize: '0.75rem' }}
+                />
+              </Box>
 
               {/* Dependency Counts */}
-              <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
-                  <span className="font-medium">Direct:</span>
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                    {result.direct.length}
-                  </span>
-                </div>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, fontSize: '0.875rem', color: theme.palette.mode === 'dark' ? theme.palette.grey[300] : theme.palette.text.secondary }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <span style={{ fontWeight: 500 }}>Direct:</span>
+                  <Chip label={result.direct.length} size="small" color="primary" sx={{ height: 20, fontSize: '0.75rem' }} />
+                </Box>
                 
                 {result.transitive && (
-                  <div className="flex items-center gap-1">
-                    <span className="font-medium">Transitive:</span>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                      {result.transitive.length}
-                    </span>
-                  </div>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <span style={{ fontWeight: 500 }}>Transitive:</span>
+                    <Chip label={result.transitive.length} size="small" color="secondary" sx={{ height: 20, fontSize: '0.75rem' }} />
+                  </Box>
                 )}
                 
                 {result.reverse && (
-                  <div className="flex items-center gap-1">
-                    <span className="font-medium">Reverse:</span>
-                    <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
-                      {result.reverse.length}
-                    </span>
-                  </div>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <span style={{ fontWeight: 500 }}>Reverse:</span>
+                    <Chip label={result.reverse.length} size="small" color="warning" sx={{ height: 20, fontSize: '0.75rem' }} />
+                  </Box>
                 )}
                 
                 {result.api && result.api.length > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="font-medium">API:</span>
-                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                      {result.api.length}
-                    </span>
-                  </div>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <span style={{ fontWeight: 500 }}>API:</span>
+                    <Chip label={result.api.length} size="small" color="success" sx={{ height: 20, fontSize: '0.75rem' }} />
+                  </Box>
                 )}
                 
                 {result.routes && result.routes.length > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="font-medium">Routes:</span>
-                    <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs">
-                      {result.routes.length}
-                    </span>
-                  </div>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <span style={{ fontWeight: 500 }}>Routes:</span>
+                    <Chip label={result.routes.length} size="small" color="info" sx={{ height: 20, fontSize: '0.75rem' }} />
+                  </Box>
                 )}
                 
                 {result.guards && result.guards.length > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="font-medium">Guards:</span>
-                    <span className="px-2 py-1 bg-pink-100 text-pink-800 rounded text-xs">
-                      {result.guards.length}
-                    </span>
-                  </div>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <span style={{ fontWeight: 500 }}>Guards:</span>
+                    <Chip label={result.guards.length} size="small" sx={{ height: 20, fontSize: '0.75rem', bgcolor: alpha(theme.palette.error.main, 0.1), color: 'error.main' }} />
+                  </Box>
                 )}
-              </div>
+              </Box>
 
               {/* Error Message */}
               {result.error && (
-                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                <Box sx={{ mt: 1, p: 1.5, bgcolor: alpha(theme.palette.error.main, 0.1), border: 1, borderColor: 'error.main', borderRadius: 1, fontSize: '0.875rem', color: 'error.main' }}>
                   {result.error}
-                </div>
+                </Box>
               )}
 
               {/* Refactor Preview */}
               {result.refactorPlan && (
-                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-blue-900">Refactor Plan:</span>
-                    <span className="text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded">
-                      {result.refactorPlan.domain}-{result.refactorPlan.slug}
-                    </span>
-                  </div>
-                  <div className="text-xs text-blue-700">
+                <Box sx={{ mt: 1.5, p: 1.5, bgcolor: alpha(theme.palette.info.main, 0.1), border: 1, borderColor: 'info.main', borderRadius: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: 500, color: theme.palette.info.main }}>Refactor Plan:</span>
+                    <Chip 
+                      label={`${result.refactorPlan.domain}-${result.refactorPlan.slug}`}
+                      size="small"
+                      color="info"
+                      sx={{ height: 20, fontSize: '0.75rem' }}
+                    />
+                  </Box>
+                  <Box sx={{ fontSize: '0.75rem', color: theme.palette.mode === 'dark' ? theme.palette.info.light : theme.palette.info.dark }}>
                     <div>From: {formatPath(result.refactorPlan.from)}</div>
                     <div>To: {formatPath(result.refactorPlan.to)}</div>
-                  </div>
-                </div>
+                  </Box>
+                </Box>
               )}
 
               {/* Stats */}
               {result.stats && (
-                <div className="mt-2 text-xs text-gray-500">
+                <Box sx={{ mt: 1, fontSize: '0.75rem', color: theme.palette.mode === 'dark' ? theme.palette.grey[500] : theme.palette.text.secondary }}>
                   Analysis completed in {result.stats.duration}ms
                   {result.stats.cacheHit && ' (cached)'}
-                </div>
+                </Box>
               )}
-            </div>
+            </Box>
 
-            <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
-          </div>
-        </div>
+            <ChevronRight style={{ width: 20, height: 20, color: theme.palette.action.disabled, flexShrink: 0, marginLeft: 8 }} />
+          </Box>
+        </Box>
       ))}
-    </div>
+    </Box>
   );
 };

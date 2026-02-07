@@ -1,0 +1,144 @@
+{
+  "fileTree": [
+    {
+      "id": "1",
+      "name": "src",
+      "type": "folder",
+      "path": "src/",
+      "isOpen": true,
+      "children": [
+        {
+          "id": "2",
+          "name": "components",
+          "type": "folder",
+          "path": "src/components/",
+          "isOpen": true,
+          "children": [
+            { "id": "3", "name": "Header.tsx", "type": "tsx", "path": "src/components/Header.tsx" },
+            { "id": "4", "name": "Dashboard.tsx", "type": "tsx", "path": "src/components/Dashboard.tsx" },
+            { "id": "5", "name": "UserProfile.tsx", "type": "tsx", "path": "src/components/UserProfile.tsx" }
+          ]
+        },
+        {
+          "id": "6",
+          "name": "pages",
+          "type": "folder",
+          "path": "src/pages/",
+          "children": [
+            { "id": "7", "name": "HomePage.tsx", "type": "tsx", "path": "src/pages/HomePage.tsx" },
+            { "id": "8", "name": "SettingsPage.tsx", "type": "tsx", "path": "src/pages/SettingsPage.tsx" }
+          ]
+        },
+        {
+          "id": "9",
+          "name": "utils",
+          "type": "folder",
+          "path": "src/utils/",
+          "children": [
+            { "id": "10", "name": "api.tsx", "type": "tsx", "path": "src/utils/api.tsx" },
+            { "id": "11", "name": "helpers.tsx", "type": "tsx", "path": "src/utils/helpers.tsx" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "12",
+      "name": "server",
+      "type": "folder",
+      "path": "server/",
+      "children": [
+        {
+          "id": "13",
+          "name": "routes",
+          "type": "folder",
+          "path": "server/routes/",
+          "children": [
+            { "id": "14", "name": "auth.api", "type": "api", "path": "server/routes/auth.api" },
+            { "id": "15", "name": "users.api", "type": "api", "path": "server/routes/users.api" },
+            { "id": "16", "name": "metrics.api", "type": "api", "path": "server/routes/metrics.api" }
+          ]
+        },
+        {
+          "id": "17",
+          "name": "db",
+          "type": "folder",
+          "path": "server/db/",
+          "children": [
+            { "id": "18", "name": "users.db", "type": "db", "path": "server/db/users.db" },
+            { "id": "19", "name": "metrics.db", "type": "db", "path": "server/db/metrics.db" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "20",
+      "name": "shared",
+      "type": "folder",
+      "path": "shared/",
+      "children": [
+        { "id": "21", "name": "types.tsx", "type": "tsx", "path": "shared/types.tsx" },
+        { "id": "22", "name": "constants.tsx", "type": "tsx", "path": "shared/constants.tsx" },
+        { "id": "23", "name": "utils.ts", "type": "shared", "path": "shared/utils.ts" },
+        { "id": "24", "name": "validators.ts", "type": "shared", "path": "shared/validators.ts" }
+      ]
+    }
+  ],
+  "dependencyNodes": [
+    { "id": "1", "name": "Dashboard.tsx", "type": "frontend", "x": 100, "y": 150, "connections": ["2", "3", "9"] },
+    { "id": "2", "name": "UserProfile.tsx", "type": "frontend", "x": 100, "y": 250, "connections": ["4", "9"] },
+    { "id": "3", "name": "Header.tsx", "type": "frontend", "x": 100, "y": 50, "connections": ["4", "9"] },
+    { "id": "4", "name": "/api/users", "type": "api", "x": 350, "y": 150, "connections": ["6"] },
+    { "id": "5", "name": "/api/metrics", "type": "api", "x": 350, "y": 250, "connections": ["7"] },
+    { "id": "6", "name": "users.db", "type": "db", "x": 600, "y": 150, "connections": [] },
+    { "id": "7", "name": "metrics.db", "type": "db", "x": 600, "y": 250, "connections": [] },
+    { "id": "8", "name": "SettingsPage.tsx", "type": "frontend", "x": 100, "y": 350, "connections": ["4", "5"] },
+    { "id": "9", "name": "utils.ts", "type": "shared", "x": 100, "y": 450, "connections": [] }
+  ],
+  "connections": [
+    { "from": "1", "to": "2", "type": "imports" },
+    { "from": "1", "to": "3", "type": "imports" },
+    { "from": "1", "to": "9", "type": "imports" },
+    { "from": "2", "to": "4", "type": "api_call" },
+    { "from": "2", "to": "9", "type": "imports" },
+    { "from": "3", "to": "4", "type": "api_call" },
+    { "from": "3", "to": "9", "type": "imports" },
+    { "from": "4", "to": "6", "type": "db_read" },
+    { "from": "5", "to": "7", "type": "db_write" },
+    { "from": "8", "to": "4", "type": "api_call" },
+    { "from": "8", "to": "5", "type": "api_call" }
+  ],
+  "nodeDetails": {
+    "Dashboard.tsx": {
+      "lines": 156,
+      "lastModified": "2 hours ago",
+      "routes": ["/dashboard", "/admin/dashboard"],
+      "dbTables": ["users", "metrics"],
+      "dependencies": ["UserProfile.tsx", "Header.tsx", "api/users"],
+      "methods": ["useState", "useEffect", "fetch"]
+    },
+    "UserProfile.tsx": {
+      "lines": 89,
+      "lastModified": "1 day ago",
+      "routes": ["/profile", "/user/:id"],
+      "dbTables": ["users", "user_settings"],
+      "dependencies": ["api/users", "shared/types"],
+      "methods": ["useState", "useForm", "validateUser"]
+    },
+    "/api/users": {
+      "lines": 234,
+      "lastModified": "3 hours ago",
+      "routes": ["GET /api/users", "POST /api/users", "PUT /api/users/:id"],
+      "dbTables": ["users", "user_sessions"],
+      "dependencies": ["users.db", "auth middleware"],
+      "methods": ["authenticate", "validate", "sanitize"]
+    },
+    "users.db": {
+      "lines": 0,
+      "lastModified": "30 minutes ago",
+      "routes": [],
+      "dbTables": ["users", "user_profiles", "user_sessions"],
+      "dependencies": [],
+      "methods": ["SELECT", "INSERT", "UPDATE", "DELETE"]
+    }
+  }
+}

@@ -4,18 +4,18 @@
  */
 
 import type {
-    User,
+    ActivityLog,
+    ApiResponse,
     Church,
     ChurchFilters,
     CreateChurchData,
-    ActivityLog,
-    ProvisionRequest,
-    ProvisionLog,
-    ProvisionFilters,
     PaginatedResponse,
-    ApiResponse,
-  } from '../types/orthodox-metrics.types';
-  import { apiClient } from './utils/axiosInstance';
+    ProvisionFilters,
+    ProvisionLog,
+    ProvisionRequest,
+    User,
+} from '../types/orthodox-metrics.types';
+import { apiClient } from './utils/axiosInstance';
   
   class AdminAPI {
     // ===== CHURCH MANAGEMENT APIs =====
@@ -24,8 +24,18 @@ import type {
         apiClient.get(`/admin/churches${apiClient.buildQueryString(filters)}`),
   
       getById: (id: number): Promise<Church> =>
-        apiClient.get<{ success: boolean; church: Church }>(`/admin/churches/${id}`)
-          .then(response => response.church),
+        apiClient.get<any>(`/admin/churches/${id}`)
+          .then(response => {
+            // Handle both response formats:
+            // 1. { success: true, church: {...} }
+            // 2. { success: true, ...churchData }
+            if (response.church) {
+              return response.church;
+            }
+            // If church data is spread directly in response, extract it
+            const { success, message, error, ...churchData } = response;
+            return churchData as Church;
+          }),
   
       create: (church: CreateChurchData): Promise<Church> =>
         apiClient.post('/admin/churches', church),

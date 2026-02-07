@@ -118,6 +118,11 @@ try {
 // --- API ROUTES -----------------------------------------------------
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./api/admin'); // Admin routes are in api/admin.js, not routes/admin.js
+const omtraceRoutes = require('./api/omtrace'); // OMTrace dependency analysis routes
+const maintenancePublicRoutes = require('./api/maintenance-public'); // Public maintenance status
+const adminLogsRouter = require('./api/adminLogs'); // Admin log monitoring API
+const socketService = require('./services/socketService'); // Socket.IO service for real-time log alerts
+const logMonitor = require('./services/logMonitor'); // PM2 log monitoring service
 const debugRoutes = require('./routes/debug');
 const menuManagementRoutes = require('./routes/menuManagement');
 const menuPermissionsRoutes = require('./routes/menuPermissions');
@@ -216,8 +221,12 @@ const kanbanRouter = require('./routes/kanban');
 const { router: logsRouter } = require('./routes/logs');
 const globalOmaiRouter = require('./routes/globalOmai');
 const versionRouter = require('./routes/version');
+const systemStatusRouter = require('./api/systemStatus');
+const dailyTasksRouter = require('./api/dailyTasks');
+const { routesRouter: apiExplorerRoutesRouter, testsRouter: apiExplorerTestsRouter } = require('./api/apiExplorer');
 // Add missing router imports
 const churchRecordsRouter = require('./routes/records'); // Church records functionality
+const powerSearchRouter = require('./api/powerSearchApi'); // Power Search API for advanced record filtering
 const uploadTokenRouter = require('./routes/uploadToken');
 const templatesRouter = require('./routes/templates');
 const globalTemplatesRouter = require('./routes/globalTemplates');
@@ -302,19 +311,39 @@ const servicesRouter = require('./routes/admin/services');
 // Import components management router for system component control
 const componentsRouter = require('./routes/admin/components');
 const settingsRouter = require('./routes/settings');
+// Import system update routes (safe to fail if not available)
+let systemUpdateRouter;
+try {
+    systemUpdateRouter = require('./routes/system');
+    console.log('✅ [Server] System update routes loaded');
+} catch (error) {
+    console.warn('⚠️  [Server] System update routes not available:', error.message);
+    // Create stub router to prevent crashes
+    systemUpdateRouter = require('express').Router();
+    systemUpdateRouter.all('*', (req, res) => {
+        res.status(503).json({
+            success: false,
+            error: 'System update functionality not available',
+            message: 'The update system is not configured on this server'
+        });
+    });
+}
 // Import social module routers
 const socialBlogRouter = require('./routes/social/blog');
 const socialFriendsRouter = require('./routes/social/friends');
 const socialChatRouter = require('./routes/social/chat');
 const socialNotificationsRouter = require('./routes/social/notifications');
 // Import backup management routers
-const backupRouter = require('./routes/admin/backups');
+const backupRouter = require('./api/backups'); // New database-integrated backup API
+const legacyBackupRouter = require('./routes/admin/backups'); // Legacy backup router
 // Import original backup system router
 const originalBackupRouter = require('./routes/backup');
 // Import NFS backup configuration router
 const nfsBackupRouter = require('./routes/admin/nfs-backup');
 // Import Big Book system router
 const bigBookRouter = require('./routes/bigbook');
+const libraryRouter = require('./routes/library');
+const menuRouter = require('./routes/menu');
 
 // Import OM-AI system router
 const omaiRouter = require('./routes/omai');
@@ -365,6 +394,10 @@ const { registerRouterMenuStudio } = require("./features/routerMenuStudio");
 const app = express();
 const server = http.createServer(app);
 
+// Initialize Socket.IO for real-time admin log monitoring
+socketService.initialize(server, serverConfig.cors.allowedOrigins);
+console.log('✅ [Server] Socket.IO initialized for admin log monitoring');
+
 // Trust proxy configuration (from centralized config)
 app.set('trust proxy', serverConfig.server.trustProxy ? 1 : 0);
 
@@ -391,6 +424,10 @@ const HOST = serverConfig.server.host;
 
 // 🔧 FIXED: Middleware order is CRITICAL for session authentication
 console.log('🔧 Setting up middleware in correct order...');
+
+// Log auth-optional paths configuration
+const { logAuthConfiguration } = require('./middleware/auth');
+logAuthConfiguration();
 
 // 1. Logging middleware (first)
 app.use(morgan('dev'));
@@ -454,6 +491,69 @@ app.use((req, res, next) => {
 // --- ROUTES ---------------------------------------------------------
 console.log('🛤️  Setting up routes in correct order...');
 
+// ============================================================================
+// PUBLIC HEALTH ENDPOINTS - Registered BEFORE all other routes
+// ============================================================================
+// These MUST be defined before any auth middleware or routers that might
+// intercept them. Direct app.get() registration ensures they are never blocked.
+
+// GET /api/system/health - System health check (NO AUTH)
+app.get('/api/system/health', async (req, res) => {
+  try {
+    const dbStatus = await db.testConnection();
+    const memoryUsage = process.memoryUsage();
+    
+    res.json({
+      status: dbStatus.success ? 'ok' : 'error',
+      uptime: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString(),
+      database: dbStatus,
+      memory: {
+        heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
+        heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
+        rss: Math.round(memoryUsage.rss / 1024 / 1024),
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      status: 'error', 
+      message: err.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// GET /api/maintenance/status - Maintenance status check (NO AUTH)
+app.get('/api/maintenance/status', (req, res) => {
+  try {
+    const fs = require('fs');
+    const MAINTENANCE_FILE = '/var/www/orthodoxmetrics/maintenance.on';
+    const exists = fs.existsSync(MAINTENANCE_FILE);
+    let startTime = null;
+    
+    if (exists) {
+      const stats = fs.statSync(MAINTENANCE_FILE);
+      startTime = stats.mtime.toISOString();
+    }
+    
+    res.json({
+      maintenance: exists,
+      status: exists ? 'updating' : 'production',
+      startTime: startTime,
+      message: exists ? 'System is currently under maintenance' : null
+    });
+  } catch (error) {
+    res.json({
+      maintenance: false,
+      status: 'production',
+      message: null
+    });
+  }
+});
+
+console.log('✅ Public health endpoints registered (no auth required)');
+// ============================================================================
+
 // Removed root route to allow SPA to serve index.html
 
 // --- DEBUG HELPERS (read‑only) ------------------------------------
@@ -508,6 +608,8 @@ app.use('/api/admin/users', usersRouter); // 🎯 CRITICAL: This route was being
 app.use('/api/admin/activity-logs', activityLogsRouter);
 app.use('/api/admin/templates', adminTemplatesRouter);
 console.log('✅ [Server] Mounted /api/admin/templates route');
+app.use('/api/admin/logs', adminLogsRouter);
+console.log('✅ [Server] Mounted /api/admin/logs route (log monitoring)');
 app.use('/api/admin/global-images', globalImagesRouter);
 // Build status endpoint for admins
 const buildStatusRouter = require('./routes/admin/buildStatus');
@@ -587,6 +689,12 @@ app.use('/api/admin/components', componentsRouter);
 const omaiSpinRouter = require('./routes/admin/omaiSpin');
 app.use('/api/admin/omai-spin', omaiSpinRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/system', systemUpdateRouter); // System update routes (super_admin only, with safe fallback)
+console.log('✅ [Server] Mounted /api/system route (updates, build-info)');
+// Import unified backup routes
+const backupsRouter = require('./routes/backups');
+app.use('/api/backups', backupsRouter);
+console.log('✅ [Server] Mounted /api/backups route (backup management)');
 app.use('/api/build', buildRouter);
 app.use('/api/ai', aiRouter);
 // Logger API routes for SUCCESS/DEBUG log support  
@@ -599,6 +707,12 @@ app.use('/api/errors', githubIssuesRouter);
 
 // Big Book system routes
 app.use('/api/bigbook', bigBookRouter);
+// OM-Library routes (documentation library indexed by om-librarian)
+app.use('/api/library', libraryRouter);
+console.log('✅ [Server] Mounted /api/library routes (OM-Library documentation)');
+// Menu API routes for super_admin editable navigation
+app.use('/api', menuRouter);
+console.log('✅ [Server] Mounted /api/ui/menu and /api/admin/menus routes (Editable Menu System)');
 // OM-AI system routes
 app.use('/api/omai', omaiRouter);
 app.use('/api/omai/memories', omaiMemoriesRouter);
@@ -616,11 +730,32 @@ app.use('/api/admin/church-database', churchDatabaseRouter);
 // General admin routes (AFTER specific routes to prevent conflicts)
 app.use('/api/admin', adminRoutes);
 console.log(`✅ Admin routes mounted at /api/admin from ${require.resolve('./api/admin')}`);
+
+// OMTrace dependency analysis routes (admin-only)
+app.use('/api/omtrace', omtraceRoutes);
+console.log('✅ [Server] Mounted /api/omtrace routes (dependency analysis)');
+
+// Public maintenance status (no auth — polled by front-end)
+app.use('/api/maintenance', maintenancePublicRoutes);
+console.log('✅ [Server] Mounted /api/maintenance routes (public status)');
+
 app.use('/api/version', versionRouter); // Version switcher for superadmins
+app.use('/api/system', systemStatusRouter); // System status for admin HUD
+app.use('/api/system', apiExplorerRoutesRouter); // API Explorer route introspection (super_admin)
+app.use('/api/admin/api-tests', apiExplorerTestsRouter); // API Explorer test cases CRUD + runner (super_admin)
+console.log('✅ [Server] Mounted /api/system/routes and /api/admin/api-tests (API Explorer)');
+app.use('/api/admin/tasks', dailyTasksRouter); // Daily tasks management
 
 // Other authenticated routes
 app.use('/api/user', userRouter);
 app.use('/api/church-records', churchRecordsRouter);
+app.use('/api/churches/:churchId/records', churchRecordsRouter);
+
+// Power Search API - Advanced record filtering with server-side pagination
+// Feature can be disabled per-church via power_search_enabled flag
+app.use('/api/records', powerSearchRouter);
+console.log('[BOOT] Power Search routes mounted at /api/records');
+
 app.use('/api/kanban', kanbanRouter);
 
 // User profile routes (authenticated)
@@ -630,6 +765,55 @@ app.use('/api/user/profile', userProfileRouter);
 // Profile image upload routes (avatar + banner)
 const profileUploadRouter = require('./routes/upload');
 app.use('/api/upload', profileUploadRouter);
+
+// Contact form (public - no auth required)
+app.post('/api/contact', async (req: any, res: any) => {
+  try {
+    const { firstName, lastName, phone, email, enquiryType, message } = req.body;
+    if (!firstName || !lastName || !email || !phone || !message) {
+      return res.status(400).json({ success: false, message: 'All required fields must be filled out.' });
+    }
+    // Send email to info@orthodoxmetrics.com
+    const { sendContactEmail } = require('./utils/emailService');
+    const emailResult = await sendContactEmail({ firstName, lastName, phone, email, enquiryType, message });
+    if (!emailResult.success) {
+      console.error('Contact email failed:', emailResult.error);
+    }
+    // Create contact_us notification for all super_admins
+    try {
+      const { getAppPool } = require('./config/db-compat');
+      const [admins] = await getAppPool().query(
+        "SELECT id FROM orthodoxmetrics_db.users WHERE role = 'super_admin' AND is_active = 1"
+      );
+      const { notificationService } = require('./api/notifications');
+      const enquiryLabels: Record<string, string> = {
+        general: 'General Enquiry', parish_registration: 'Parish Registration',
+        records: 'Records & Certificates', technical: 'Technical Support',
+        billing: 'Billing & Pricing', other: 'Other',
+      };
+      for (const admin of admins) {
+        await notificationService.createNotification(
+          admin.id,
+          'contact_us',
+          'New Contact Form Submission',
+          `${firstName} ${lastName} (${email}) sent a ${enquiryLabels[enquiryType] || enquiryType} enquiry.`,
+          {
+            priority: 'normal',
+            actionUrl: null,
+            data: { firstName, lastName, email, phone, enquiryType, message: message.substring(0, 500) },
+          }
+        );
+      }
+      console.log(`📬 Contact Us notification sent to ${admins.length} super_admin(s)`);
+    } catch (notifErr: any) {
+      console.error('Contact notification failed (non-fatal):', notifErr.message);
+    }
+    res.json({ success: true, message: 'Your message has been sent successfully.' });
+  } catch (error: any) {
+    console.error('Contact form error:', error);
+    res.status(500).json({ success: false, message: 'Failed to send your message. Please try again later.' });
+  }
+});
 
 // Notification routes (authenticated)
 app.use('/api', notificationRouter);
@@ -4048,17 +4232,35 @@ app.get('/api/system/version', (req, res) => {
   });
 });
 
-// /api/system/health -> same as /api/health
-app.get('/api/system/health', async (req, res) => {
+// /api/system/config -> Get current configuration (redacted, admin/dev only)
+app.get('/api/system/config', (req, res) => {
   try {
-    const dbStatus = await db.testConnection();
+    // Check if user is admin OR if we're in development
+    const isAdmin = req.session?.user?.role === 'super_admin' || req.session?.user?.role === 'admin';
+    const isDev = serverConfig.server.env === 'development';
+    
+    if (!isAdmin && !isDev) {
+      return res.status(403).json({ 
+        success: false,
+        error: 'Access denied. Admin role required.' 
+      });
+    }
+    
+    // Use the formatConfigForLog function to redact secrets
+    const { formatConfigForLog } = require('./config/redact');
+    
     res.json({
-      status: dbStatus.success ? 'ok' : 'error',
-      user: req.session.user || null,
-      database: dbStatus
+      success: true,
+      config: formatConfigForLog ? formatConfigForLog(serverConfig) : serverConfig,
+      environment: serverConfig.server.env,
+      timestamp: new Date().toISOString()
     });
   } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to load configuration',
+      message: err.message 
+    });
   }
 });
 
@@ -4520,7 +4722,108 @@ server.listen(PORT, HOST, () => {
   // Initialize WebSocket service after server starts
   websocketService.initialize(server, sessionMiddleware);
   console.log('🔌 WebSocket service initialized');
+  
+  // DISABLED: Backend log monitoring causes infinite feedback loop
+  // The logMonitor watches PM2 logs, but its own output gets logged by PM2,
+  // creating an infinite loop that floods the logs
+  // logMonitor.start('orthodox-backend');
+  // console.log('🔍 Backend log monitoring started for orthodox-backend');
   console.log('═══════════════════════════════════════════════════════════');
+  
+  // ============================================================================
+  // STARTUP VERIFICATION - Test critical public endpoints
+  // ============================================================================
+  // Verify that health and maintenance status endpoints are accessible
+  // without authentication. This prevents silent regressions from breaking
+  // monitoring and uptime checks.
+  console.log('🏥 Running startup health check verification...');
+  
+  const http = require('http');
+  
+  // Test /api/system/health
+  const healthCheckOptions = {
+    hostname: HOST === '0.0.0.0' ? 'localhost' : HOST,
+    port: PORT,
+    path: '/api/system/health',
+    method: 'GET',
+    timeout: 5000
+  };
+  
+  const healthReq = http.request(healthCheckOptions, (healthRes) => {
+    let data = '';
+    healthRes.on('data', (chunk) => { data += chunk; });
+    healthRes.on('end', () => {
+      if (healthRes.statusCode === 200) {
+        console.log('✅ Health endpoint verification PASSED: /api/system/health returns 200');
+        try {
+          const json = JSON.parse(data);
+          console.log(`   Status: ${json.status}, Uptime: ${json.uptime}s`);
+        } catch (e) {
+          console.log('   Response received successfully');
+        }
+      } else {
+        console.error('❌ CRITICAL: Health endpoint verification FAILED!');
+        console.error(`   /api/system/health returned ${healthRes.statusCode} instead of 200`);
+        console.error('   This endpoint MUST be public for monitoring systems!');
+        console.error('   Check: server/src/api/systemStatus.js and auth middleware allowlist');
+      }
+    });
+  });
+  
+  healthReq.on('error', (err) => {
+    console.error('❌ Health endpoint verification ERROR:', err.message);
+  });
+  
+  healthReq.on('timeout', () => {
+    console.error('❌ Health endpoint verification TIMEOUT');
+    healthReq.destroy();
+  });
+  
+  healthReq.end();
+  
+  // Test /api/maintenance/status
+  const maintenanceCheckOptions = {
+    hostname: HOST === '0.0.0.0' ? 'localhost' : HOST,
+    port: PORT,
+    path: '/api/maintenance/status',
+    method: 'GET',
+    timeout: 5000
+  };
+  
+  const maintenanceReq = http.request(maintenanceCheckOptions, (maintenanceRes) => {
+    let data = '';
+    maintenanceRes.on('data', (chunk) => { data += chunk; });
+    maintenanceRes.on('end', () => {
+      if (maintenanceRes.statusCode === 200) {
+        console.log('✅ Maintenance endpoint verification PASSED: /api/maintenance/status returns 200');
+        try {
+          const json = JSON.parse(data);
+          console.log(`   Status: ${json.status}, Maintenance: ${json.maintenance}`);
+        } catch (e) {
+          console.log('   Response received successfully');
+        }
+      } else {
+        console.error('❌ CRITICAL: Maintenance endpoint verification FAILED!');
+        console.error(`   /api/maintenance/status returned ${maintenanceRes.statusCode} instead of 200`);
+        console.error('   This endpoint MUST be public for frontend polling!');
+        console.error('   Check: server/src/api/maintenance-public.js and auth middleware allowlist');
+      }
+    });
+  });
+  
+  maintenanceReq.on('error', (err) => {
+    console.error('❌ Maintenance endpoint verification ERROR:', err.message);
+  });
+  
+  maintenanceReq.on('timeout', () => {
+    console.error('❌ Maintenance endpoint verification TIMEOUT');
+    maintenanceReq.destroy();
+  });
+  
+  maintenanceReq.end();
+  
+  console.log('═══════════════════════════════════════════════════════════');
+  // ============================================================================
 });
 
 app.get('/api/auth/check', (req,res)=>{

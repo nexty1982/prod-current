@@ -1,102 +1,174 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { registerAgGridModulesOnce } from '@/agGridModules';
+import ColorPaletteSelector from '@/components/ColorPaletteSelector';
+import TableControlPanel from '@/components/TableControlPanel';
+import { recordsEvents, useRecordsEvents } from '@/events/recordsEvents';
+import ModernRecordViewerModal from '@/features/records-centralized/common/ModernRecordViewerModal';
+import { getAgGridRowClassRules, getRecordRowStyle, useNowReference } from '@/features/records-centralized/common/recordsHighlighting';
+import '@/features/records-centralized/common/recordsHighlighting.css';
+import { usePersistedRowSelection } from '@/features/records-centralized/common/usePersistedRowSelection';
+import { createRecordsApiService } from '@/features/records-centralized/components/records/RecordsApiService';
+import { FIELD_DEFINITIONS, RECORD_TYPES } from '@/features/records-centralized/constants';
+import AdvancedGridDialog from '@/components/AdvancedGridDialog';
+import { getPersistedChurchId, useRecordsPersistence } from '@/hooks/useRecordsPersistence';
+import churchService, { Church } from '@/shared/lib/churchService';
+import { useTableStyleStore } from '@/store/useTableStyleStore';
+import { ChurchRecord } from '@/types/church-records-advanced.types';
+import { formatRecordDate } from '@/utils/formatDate';
 import {
+  Add as AddIcon,
+  Description as CertificateIcon,
+  PeopleAlt as CollaborativeIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  GetApp as ExportIcon,
+  ExpandLess as IconChevronUp,
+  Lock as LockIcon,
+  LockOpen as LockOpenIcon,
+  Palette as PaletteIcon,
+  Assessment as ReportIcon,
+  Search as SearchIcon,
+  TableChart as TableChartIcon,
+  Visibility as ViewIcon
+} from '@mui/icons-material';
+import {
+  Alert,
   Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Collapse,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Drawer,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
+  Snackbar,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
   TablePagination,
+  TableRow,
   TableSortLabel,
   TextField,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography,
-  Chip,
-  IconButton,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  Grid,
-  Alert,
-  CircularProgress,
   Tooltip,
-  Card,
-  CardContent,
-  Snackbar,
-  Stack,
-  Divider,
-  Drawer,
-  Collapse,
+  Typography
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  FilterList as FilterIcon,
-  GetApp as ExportIcon,
-  Visibility as ViewIcon,
-  Palette as PaletteIcon,
-  Settings as SettingsIcon,
-  Lock as LockIcon,
-  LockOpen as LockOpenIcon,
-  TableChart as TableChartIcon,
-  ViewList as ViewListIcon,
-  ExpandLess as IconChevronUp,
-} from '@mui/icons-material';
-import { useTableStyleStore } from '@/store/useTableStyleStore';
-import churchService, { Church } from '@/shared/lib/churchService';
-import recordService from '@/shared/lib/recordService';
-import TableControlPanel from '@/components/TableControlPanel';
-import ColorPaletteSelector from '@/components/ColorPaletteSelector';
-import { ChurchRecord, RecordType as ChurchRecordType } from '@/types/church-records-advanced.types';
-import ImportRecordsButton from '@/components/ImportRecordsButton';
-import { AdvancedGridDialog } from '@/features/tables/AdvancedGridDialog';
-import { FIELD_DEFINITIONS, RECORD_TYPES } from '@/features/records-centralized/components/constants';
-import { AgGridReact } from 'ag-grid-react';
+import { useTheme } from '@mui/material/styles';
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
-import { registerAgGridModulesOnce } from '@/agGridModules';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import { AgGridReact } from 'ag-grid-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 registerAgGridModulesOnce();
 
+// Helper to safely parse JSON fields (godparents, witnesses)
+const parseJsonField = (value: any): string[] => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [value];
+    } catch {
+      // If not valid JSON, return as single item array
+      return value.trim() ? [value] : [];
+    }
+  }
+  return [];
+};
 
-// Types
+// Helper to display JSON array fields as comma-separated string
+const displayJsonField = (value: any): string => {
+  const arr = parseJsonField(value);
+  return arr.length > 0 ? arr.join(', ') : '';
+};
+
+// Types - Updated to match production schema (05_sacrament_tables.sql)
 interface BaptismRecord {
   id: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  dateOfBaptism: string;
-  placeOfBirth: string;
-  placeOfBaptism: string;
-  fatherName: string;
-  motherName: string;
-  godparentNames: string;
-  priest: string;
-  registryNumber: string;
-  churchId: string;
-  churchName: string;
+  // Production schema fields (person_*)
+  person_first?: string;
+  person_middle?: string;
+  person_last?: string;
+  person_full?: string;
+  // Legacy field names for backwards compatibility
+  firstName?: string;
+  lastName?: string;
+  first_name?: string;
+  last_name?: string;
+  // Date fields
+  birth_date?: string;
+  baptism_date?: string;
+  dateOfBirth?: string;
+  dateOfBaptism?: string;
+  reception_date?: string;
+  // Location fields
+  place_name?: string;
+  placeOfBirth?: string;
+  placeOfBaptism?: string;
+  birthplace?: string;
+  // Parent fields
+  father_name?: string;
+  mother_name?: string;
+  fatherName?: string;
+  motherName?: string;
+  // Godparents - JSON in production, string in legacy
+  godparents?: string | string[];
+  godparentNames?: string;
+  sponsors?: string;
+  // Officiant field
+  officiant_name?: string;
+  priest?: string;
+  clergy?: string;
+  // Registry fields
+  certificate_no?: string;
+  book_no?: string;
+  page_no?: string;
+  entry_no?: string;
+  registryNumber?: string;
+  // Metadata fields (production schema)
+  source_system?: string;
+  source_row_id?: string;
+  source_hash?: string;
+  // Church fields
+  churchId?: string;
+  church_id?: number;
+  churchName?: string;
   notes?: string;
   // Marriage record fields
+  groom_first?: string;
+  groom_middle?: string;
+  groom_last?: string;
+  groom_full?: string;
   fname_groom?: string;
   lname_groom?: string;
+  bride_first?: string;
+  bride_middle?: string;
+  bride_last?: string;
+  bride_full?: string;
   fname_bride?: string;
   lname_bride?: string;
+  marriage_date?: string;
   mdate?: string;
   parentsg?: string;
   parentsb?: string;
   witness?: string;
+  witnesses?: string | string[];
   mlicense?: string;
-  clergy?: string;
   // Additional marriage fields for form
   groomFirstName?: string;
   groomLastName?: string;
@@ -106,15 +178,29 @@ interface BaptismRecord {
   marriageLocation?: string;
   witness1?: string;
   witness2?: string;
-  // Funeral record fields
+  // Funeral record fields (production: deceased_*)
+  deceased_first?: string;
+  deceased_middle?: string;
+  deceased_last?: string;
+  deceased_full?: string;
+  death_date?: string;
+  funeral_date?: string;
+  burial_place?: string;
+  cause_of_death?: string;
   dateOfDeath?: string;
   burialDate?: string;
+  burial_date?: string;
   age?: string;
   burialLocation?: string;
-  // Optional legacy fields for compatibility
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
+  burial_location?: string;
+  name?: string;
+  lastname?: string;
+  // Timestamps
+  createdAt?: string;
+  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
+  createdBy?: string;
 }
 
 interface RecordType {
@@ -164,12 +250,8 @@ const getSortFields = (recordType: string) => {
 };
 
 // Function to get cell value based on column field and record type
+// Updated to support production schema (05_sacrament_tables.sql) with formatRecordDate
 const getCellValue = (record: any, column: any) => {
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
-  };
-  
   if (column.valueGetter) {
     try {
       return column.valueGetter({ data: record });
@@ -179,74 +261,184 @@ const getCellValue = (record: any, column: any) => {
     }
   }
   
-  // Handle all field mappings with fallbacks - don't check original field first
+  // Handle all field mappings with fallbacks - support both production and legacy schemas
   switch (column.field) {
-    // Baptism record mappings
+    // ═══════════════════════════════════════════════════════════════
+    // BAPTISM RECORD MAPPINGS (Saints Peter & Paul schema)
+    // first_name, last_name, birth_date, reception_date, birthplace,
+    // entry_type, sponsors, parents, clergy
+    // ═══════════════════════════════════════════════════════════════
     case 'first_name':
-      return record.first_name || record.firstName || 'N/A';
+    case 'person_first':
+      return record.person_first || record.first_name || record.firstName || '';
+    case 'middle_name':
+    case 'person_middle':
+      return record.person_middle || record.middle_name || '';
     case 'last_name':
-      return record.last_name || record.lastName || 'N/A';
+    case 'person_last':
+      return record.person_last || record.last_name || record.lastName || '';
+    case 'person_full':
+      // Generated column in production, compute if not present
+      if (record.person_full) return record.person_full;
+      const bapFirst = record.person_first || record.first_name || record.firstName || '';
+      const bapMiddle = record.person_middle || '';
+      const bapLast = record.person_last || record.last_name || record.lastName || '';
+      return [bapFirst, bapMiddle, bapLast].filter(Boolean).join(' ').trim() || '';
     case 'clergy':
-      return record.clergy || record.priest || 'N/A';
+    case 'officiant_name':
+      return record.officiant_name || record.clergy || record.priest || '';
     case 'reception_date':
-      return formatDate(record.reception_date || record.dateOfBaptism);
+    case 'baptism_date':
+      return formatRecordDate(record.baptism_date || record.reception_date || record.dateOfBaptism) || '';
     case 'birth_date':
-      return formatDate(record.birth_date || record.dateOfBirth);
+      return formatRecordDate(record.birth_date || record.dateOfBirth) || '';
     case 'birthplace':
-      return record.birthplace || record.placeOfBirth || 'N/A';
+    case 'place_name':
+      return record.place_name || record.birthplace || record.placeOfBirth || record.placeOfBaptism || '';
     case 'sponsors':
-      return record.sponsors || record.godparentNames || 'N/A';
+    case 'godparents':
+      // Handle JSON godparents array from production or string from legacy
+      return displayJsonField(record.godparents) || record.sponsors || record.godparentNames || '';
+    case 'entry_type':
+      // Check all possible field names: snake_case, camelCase, and _originalRecord
+      return record.entry_type || record.entryType || record._originalRecord?.entry_type || record.originalRecord?.entry_type || '';
+    case 'parents':
+      // Combined parents field - may be stored as single field or computed from father/mother
+      if (record.parents) return record.parents;
+      const father = record.father_name || record.fatherName || '';
+      const mother = record.mother_name || record.motherName || '';
+      if (father && mother) return `${father} & ${mother}`;
+      return father || mother || '';
+    case 'father_name':
+      return record.father_name || record.fatherName || '';
+    case 'mother_name':
+      return record.mother_name || record.motherName || '';
     
-    // Marriage record mappings
+    // ═══════════════════════════════════════════════════════════════
+    // MARRIAGE RECORD MAPPINGS (Saints Peter & Paul schema)
+    // fname_groom, lname_groom, fname_bride, lname_bride, mdate,
+    // parentsg, parentsb, witness, mlicense, clergy
+    // ═══════════════════════════════════════════════════════════════
     case 'fname_groom':
-      return record.fname_groom || record.groomFirstName || 'N/A';
+    case 'groom_first':
+      return record.fname_groom || record.groom_first || record.groomFirstName || '';
+    case 'groom_middle':
+      return record.groom_middle || '';
     case 'lname_groom':
-      return record.lname_groom || record.groomLastName || 'N/A';
+    case 'groom_last':
+      return record.lname_groom || record.groom_last || record.groomLastName || '';
+    case 'groom_full':
+      if (record.groom_full) return record.groom_full;
+      const gFirst = record.fname_groom || record.groom_first || record.groomFirstName || '';
+      const gMiddle = record.groom_middle || '';
+      const gLast = record.lname_groom || record.groom_last || record.groomLastName || '';
+      return [gFirst, gMiddle, gLast].filter(Boolean).join(' ').trim() || '';
     case 'fname_bride':
-      return record.fname_bride || record.brideFirstName || 'N/A';
+    case 'bride_first':
+      return record.fname_bride || record.bride_first || record.brideFirstName || '';
+    case 'bride_middle':
+      return record.bride_middle || '';
     case 'lname_bride':
-      return record.lname_bride || record.brideLastName || 'N/A';
+    case 'bride_last':
+      return record.lname_bride || record.bride_last || record.brideLastName || '';
+    case 'bride_full':
+      if (record.bride_full) return record.bride_full;
+      const bFirst = record.fname_bride || record.bride_first || record.brideFirstName || '';
+      const bMiddle = record.bride_middle || '';
+      const bLast = record.lname_bride || record.bride_last || record.brideLastName || '';
+      return [bFirst, bMiddle, bLast].filter(Boolean).join(' ').trim() || '';
     case 'mdate':
-      return formatDate(record.mdate || record.marriageDate || record.marriage_date);
+    case 'marriage_date':
+      return formatRecordDate(record.mdate || record.marriage_date || record.marriageDate) || '';
+    case 'marriage_place':
+      return record.place_name || record.marriage_place || record.marriageLocation || '';
     case 'parentsg':
-      return record.parentsg || record.groomParents || 'N/A';
+      return record.parentsg || record.groomParents || '';
     case 'parentsb':
-      return record.parentsb || record.brideParents || 'N/A';
+      return record.parentsb || record.brideParents || '';
     case 'witness':
-      return record.witness || record.witnesses || 'N/A';
+    case 'witnesses':
+      // Handle JSON witnesses array from production or string from legacy
+      return displayJsonField(record.witnesses) || record.witness || '';
     case 'mlicense':
-      return record.mlicense || record.marriageLicense || 'N/A';
+      return record.mlicense || record.marriageLicense || '';
     
-    // Funeral record mappings
+    // ═══════════════════════════════════════════════════════════════
+    // FUNERAL RECORD MAPPINGS (Saints Peter & Paul - actual MySQL columns)
+    // Table columns: name, lastname, deceased_date, burial_date, 
+    //                age, clergy, burial_location
+    // ═══════════════════════════════════════════════════════════════
     case 'name':
-      return record.name || record.firstName || record.first_name || 'N/A';
+      // For funeral records, 'name' is the deceased's first name
+      return record.name || record.firstName || record.first_name || '';
     case 'lastname':
-      return record.lastname || record.lastName || record.last_name || 'N/A';
+      return record.lastname || record.lastName || record.last_name || '';
     case 'deceased_date':
-      return formatDate(record.deceased_date || record.deathDate || record.dateOfDeath || record.death_date);
+      return formatRecordDate(record.deceased_date || record.date_of_death || record.dateOfDeath) || '';
     case 'burial_date':
-      return formatDate(record.burial_date || record.burialDate || record.date_of_burial || record.burial_date_raw);
+      // Check all possible field names: snake_case, camelCase, and _originalRecord
+      return formatRecordDate(
+        record.burial_date || 
+        record.burialDate || 
+        record.dateOfFuneral ||  // Backend transformer uses this name
+        record._originalRecord?.burial_date ||
+        record.originalRecord?.burial_date
+      ) || '';
     case 'age':
-      return record.age || 'N/A';
+      return record.age || '';
     case 'burial_location':
-      return record.burial_location || record.burialLocation || 'N/A';
+      return record.burial_location || record.burialLocation || record.cemetery || '';
+    // Legacy field support
+    case 'deceased_full':
+      if (record.deceased_full) return record.deceased_full;
+      const dFirst = record.name || record.firstName || record.first_name || '';
+      const dLast = record.lastname || record.lastName || record.last_name || '';
+      return [dFirst, dLast].filter(Boolean).join(' ').trim() || '';
+    case 'notes':
+      return record.notes || record.note || '';
+    
+    // ═══════════════════════════════════════════════════════════════
+    // METADATA FIELDS (production schema)
+    // ═══════════════════════════════════════════════════════════════
+    case 'source_system':
+      return record.source_system || '';
+    case 'source_hash':
+      return record.source_hash || '';
+    case 'source_row_id':
+      return record.source_row_id || '';
+    case 'certificate_no':
+      return record.certificate_no || record.registryNumber || '';
+    case 'book_no':
+      return record.book_no || '';
+    case 'page_no':
+      return record.page_no || '';
+    case 'entry_no':
+      return record.entry_no || '';
     
     default:
-      // For any other fields not explicitly mapped, try original field first
-      if (column.cellRenderer === 'dateRenderer') {
-        return formatDate(record[column.field]);
+      // For any other fields not explicitly mapped
+      // Check if it's a date field by name pattern
+      const isDateField = column.field && (
+        column.field.includes('date') || 
+        column.field.includes('Date') ||
+        column.field.includes('_date')
+      );
+      if (isDateField || column.cellRenderer === 'dateRenderer') {
+        return formatRecordDate(record[column.field]) || '';
       }
       const value = record[column.field];
       if (value !== undefined && value !== null && value !== '') {
         return value;
       }
-      return 'N/A';
+      return '';
   }
 };
 
 // Mock data removed - now using live API calls
 
 const BaptismRecordsPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  
   // State management
   const [records, setRecords] = useState<BaptismRecord[]>([]);
   const [churches, setChurches] = useState<Church[]>([]);
@@ -255,8 +447,50 @@ const BaptismRecordsPage: React.FC = () => {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedChurch, setSelectedChurch] = useState<number>(0);
-  const [selectedRecordType, setSelectedRecordType] = useState<string>('baptism');
+  const [selectedChurch, setSelectedChurch] = useState<number>(() => {
+    // Initialize with persisted church ID
+    return getPersistedChurchId() || 0;
+  });
+  const [selectedRecordType, setSelectedRecordType] = useState<string>(() => {
+    // Initialize from URL parameter first, then fall back to 'baptism'
+    const typeFromUrl = searchParams.get('type');
+    return typeFromUrl || 'baptism';
+  });
+  
+  // Enable persistence for church selection and last view
+  useRecordsPersistence(
+    selectedChurch,
+    selectedRecordType,
+    setSelectedChurch,
+    setSelectedRecordType
+  );
+  
+  // Auto-refresh when records change (create/update/delete)
+  useRecordsEvents((event) => {
+    if (event.churchId === selectedChurch && event.recordType === selectedRecordType) {
+      console.log(`📡 Auto-refreshing ${selectedRecordType} records after ${event.mutationType}`);
+      fetchRecords(selectedRecordType, selectedChurch);
+    }
+  }, [selectedChurch, selectedRecordType]);
+  
+  // Row selection persistence
+  const {
+    handleRowSelect,
+    clearSelection,
+    isRecordSelected,
+    scrollToSelectedRecord,
+  } = usePersistedRowSelection({
+    churchId: selectedChurch,
+    recordType: selectedRecordType as any,
+    records,
+    onRecordNotFound: () => {
+      showToast('Last selected record is not on this page', 'info');
+    },
+  });
+  
+  // Stable "now" reference for 24h highlighting (updates every 60s)
+  const nowReference = useNowReference();
+  
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'dateOfBaptism', direction: 'desc' });
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [editingRecord, setEditingRecord] = useState<BaptismRecord | null>(null);
@@ -274,6 +508,11 @@ const BaptismRecordsPage: React.FC = () => {
   // Advanced Grid Modal State
   const [advancedGridOpen, setAdvancedGridOpen] = useState(false);
 
+  // View Details Dialog state
+  const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
+  const [viewingRecord, setViewingRecord] = useState<BaptismRecord | null>(null);
+  const [viewingRecordIndex, setViewingRecordIndex] = useState<number>(-1);
+
   // Collapsible Panel State
   const [isFiltersCollapsed, setIsFiltersCollapsed] = useState<boolean>(false);
 
@@ -282,12 +521,16 @@ const BaptismRecordsPage: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string>('');
   const [toastSeverity, setToastSeverity] = useState<'success' | 'error' | 'info'>('success');
 
+  // Theme hook for dark mode detection
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
+
   // Toast helper functions
-  const showToast = (message: string, severity: 'success' | 'error' | 'info' = 'success') => {
+  const showToast = useCallback((message: string, severity: 'success' | 'error' | 'info' = 'success') => {
     setToastMessage(message);
     setToastSeverity(severity);
     setToastOpen(true);
-  };
+  }, []);
 
   // API functions
   const fetchChurches = async () => {
@@ -329,8 +572,6 @@ const BaptismRecordsPage: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      console.log(`🔍 Fetching ${recordType} records for church ${churchId}...`);
-      
       // Find the record type configuration
       const selectedType = recordTypes.find(type => type.value === recordType);
       if (!selectedType) {
@@ -342,19 +583,12 @@ const BaptismRecordsPage: React.FC = () => {
       if (churchId && churchId !== 0) {
         recordData = await churchService.fetchChurchRecords(churchId, selectedType.apiEndpoint, {
           page: 1,
-          limit: 1000, // Get all records for now
+          limit: 100, // Reduced from 1000 for better performance
           search: searchTerm
         });
       } else {
         // Fetch all records across all churches using the direct API
-        const response = await fetch(`/api/${selectedType.apiEndpoint}-records?limit=1000&search=${encodeURIComponent(searchTerm)}`, {
-          credentials: 'include',
-        });
-        if (response.status === 401) {
-          localStorage.removeItem('auth_user');
-          window.location.href = `/auth/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`;
-          return;
-        }
+        const response = await fetch(`/api/${selectedType.apiEndpoint}-records?limit=100&search=${encodeURIComponent(searchTerm)}`);
         const data = await response.json();
         
         if (data && data.records) {
@@ -372,22 +606,14 @@ const BaptismRecordsPage: React.FC = () => {
       setRecords(recordData.records || []);
       setPage(0); // Reset pagination when records change
       
-      // Debug: Log the first record to see its structure
-      if (recordData.records && recordData.records.length > 0) {
-        console.log(`📄 Sample ${recordType} record structure:`, recordData.records[0]);
-        console.log(`📄 Record fields:`, Object.keys(recordData.records[0]));
-      }
-      
       const recordCount = recordData.records?.length || 0;
-      console.log(`✅ Successfully loaded ${recordCount} ${selectedType.label.toLowerCase()}`);
       showToast(`Loaded ${recordCount} ${selectedType.label.toLowerCase()}`, 'success');
       
     } catch (err) {
-      console.error(`❌ Error fetching ${recordType} records:`, err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`Error fetching ${recordType} records:`, err);
+      }
       setError(err instanceof Error ? err.message : 'Failed to fetch records');
-      
-      // No more mock data fallback - show error to user
-      console.error('❌ API failed, no records loaded');
     } finally {
       setLoading(false);
     }
@@ -401,16 +627,7 @@ const BaptismRecordsPage: React.FC = () => {
       // Determine the table name based on record type
       const tableName = `${selectedType.apiEndpoint}_records`;
       
-      console.log(`🔍 Fetching priest options from ${tableName}...`);
-      
-      const response = await fetch(`/api/${selectedType.apiEndpoint}-records/dropdown-options/clergy?table=${tableName}`, {
-        credentials: 'include',
-      });
-      if (response.status === 401) {
-        localStorage.removeItem('auth_user');
-        window.location.href = `/auth/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`;
-        return;
-      }
+      const response = await fetch(`/api/${selectedType.apiEndpoint}-records/dropdown-options/clergy?table=${tableName}`);
       const data = await response.json();
       
       if (data && data.values) {
@@ -420,10 +637,11 @@ const BaptismRecordsPage: React.FC = () => {
           .sort((a: string, b: string) => a.localeCompare(b));
         
         setPriestOptions(validPriests);
-        console.log(`✅ Loaded ${validPriests.length} priest options`);
       }
     } catch (err) {
-      console.error('❌ Error fetching priest options:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching priest options:', err);
+      }
       setPriestOptions([]);
     }
   };
@@ -455,7 +673,7 @@ const BaptismRecordsPage: React.FC = () => {
     godparentNames: '',
     priest: '',
     registryNumber: '',
-    churchId: selectedChurch === 0 ? '1' : selectedChurch.toString(),
+    churchId: selectedChurch ? selectedChurch.toString() : '',
     notes: '',
     customPriest: false,
   });
@@ -639,64 +857,241 @@ const BaptismRecordsPage: React.FC = () => {
       godparentNames: '',
       priest: '',
       registryNumber: '',
-      churchId: selectedChurch === 0 ? '1' : selectedChurch.toString(),
+      churchId: selectedChurch ? selectedChurch.toString() : '',
       notes: '',
       customPriest: false,
     });
     setDialogOpen(true);
   };
 
-  const handleEditRecord = (record: BaptismRecord) => {
+  const handleEditRecord = useCallback((record: BaptismRecord) => {
     setEditingRecord(record);
     setFormData(record);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const handleViewRecord = (record: BaptismRecord) => {
-    // TODO: Implement view modal or navigation to detailed view
-    console.log('Viewing record:', record);
-    
-    let recordName = '';
-    if (selectedRecordType === 'marriage') {
-      const groomName = `${record.fname_groom || ''} ${record.lname_groom || ''}`.trim();
-      const brideName = `${record.fname_bride || ''} ${record.lname_bride || ''}`.trim();
-      recordName = `${groomName} & ${brideName}`;
-    } else {
-      recordName = `${record.firstName} ${record.lastName}`;
+  const handleViewRecord = useCallback((record: BaptismRecord) => {
+    // Find the index of the record in the filtered list for navigation
+    const index = filteredAndSortedRecords.findIndex(r => r.id === record.id);
+    setViewingRecord(record);
+    setViewingRecordIndex(index);
+    setViewDialogOpen(true);
+  }, [filteredAndSortedRecords]);
+
+  // Navigate to previous record in View Details dialog
+  const handlePreviousRecord = () => {
+    if (viewingRecordIndex > 0) {
+      const prevIndex = viewingRecordIndex - 1;
+      setViewingRecord(filteredAndSortedRecords[prevIndex]);
+      setViewingRecordIndex(prevIndex);
     }
-    
-    showToast(`Viewing record for ${recordName}`, 'info');
   };
 
-  const handleDeleteRecord = async (recordId: string) => {
+  // Navigate to next record in View Details dialog
+  const handleNextRecord = () => {
+    if (viewingRecordIndex < filteredAndSortedRecords.length - 1) {
+      const nextIndex = viewingRecordIndex + 1;
+      setViewingRecord(filteredAndSortedRecords[nextIndex]);
+      setViewingRecordIndex(nextIndex);
+    }
+  };
+
+  // Close View Details dialog
+  const handleCloseViewDialog = () => {
+    setViewDialogOpen(false);
+    setViewingRecord(null);
+    setViewingRecordIndex(-1);
+  };
+
+  // Edit from View Details dialog
+  const handleEditFromView = () => {
+    if (viewingRecord) {
+      handleCloseViewDialog();
+      handleEditRecord(viewingRecord);
+    }
+  };
+
+  // Generate Certificate (for baptism and marriage records)
+  const handleGenerateCertificate = useCallback(() => {
+    if (!viewingRecord) return;
+    
+    // Navigate to certificate generation page with record data
+    // Use churchId from record, selectedChurch, or first available church
+    let churchId = viewingRecord.church_id || selectedChurch;
+    if (!churchId || churchId === 0) {
+      // Fallback to first available church from the churches list
+      churchId = churches.length > 0 ? churches[0].id : 46;
+    }
+    const certUrl = `/apps/certificates/generate?recordType=${selectedRecordType}&recordId=${viewingRecord.id}&churchId=${churchId}`;
+    window.open(certUrl, '_blank');
+  }, [viewingRecord, selectedChurch, selectedRecordType, churches]);
+
+  // Collaborative Report handler
+  const handleCollaborativeReport = useCallback(() => {
+    // Navigate to interactive report page with selected records context
+    window.open(`/apps/interactive-reports?type=${selectedRecordType}&churchId=${selectedChurch}`, '_blank');
+    showToast('Opening Collaborative Report tool', 'info');
+  }, [selectedRecordType, selectedChurch, showToast]);
+
+  // Get record display name for View Details title
+  const getRecordDisplayName = (record: BaptismRecord | null): string => {
+    if (!record) return '';
+    
+    if (selectedRecordType === 'marriage') {
+      const groomName = `${record.fname_groom || record.groom_first || ''} ${record.lname_groom || record.groom_last || ''}`.trim();
+      const brideName = `${record.fname_bride || record.bride_first || ''} ${record.lname_bride || record.bride_last || ''}`.trim();
+      return `${groomName} & ${brideName}`;
+    } else if (selectedRecordType === 'funeral') {
+      return `${record.deceased_first || record.firstName || ''} ${record.deceased_last || record.lastName || ''}`.trim();
+    } else {
+      return `${record.person_first || record.firstName || ''} ${record.person_last || record.lastName || ''}`.trim();
+    }
+  };
+
+  const handleDeleteRecord = useCallback(async (recordId: string, recordChurchId?: number) => {
     if (window.confirm('Are you sure you want to delete this record?')) {
       try {
         setLoading(true);
-        // TODO: Implement actual API call
-        // await recordService.deleteRecord('baptism', recordId);
+
+        // Use the record's own church_id, fall back to selected church
+        const churchId = recordChurchId || selectedChurch;
         
-        setRecords(prev => prev.filter(r => r.id !== recordId));
-        showToast('Record deleted successfully', 'success');
-      } catch (err) {
-        console.error('Delete error:', err);
-        showToast('Failed to delete record', 'error');
+        // Validate church ID
+        if (!churchId || churchId === 0) {
+          showToast('Please select a church before deleting records', 'error');
+          setLoading(false);
+          return;
+        }
+        
+        const apiService = createRecordsApiService(churchId.toString());
+        
+        // Call the backend API
+        const response = await apiService.deleteRecord(selectedRecordType, recordId);
+        
+        if (response.success) {
+          showToast('Record deleted successfully!', 'success');
+          
+          // Emit event for auto-refresh (no need to manually call fetchRecords)
+          recordsEvents.emit({
+            churchId: selectedChurch,
+            recordType: selectedRecordType as any,
+            mutationType: 'delete',
+            recordId: recordId
+          });
+        } else {
+          showToast(response.error || 'Failed to delete record', 'error');
+        }
+      } catch (error: any) {
+        console.error('Error deleting record:', error);
+        showToast(error.message || 'Failed to delete record', 'error');
       } finally {
         setLoading(false);
       }
     }
-  };
+  }, [showToast, selectedChurch, selectedRecordType]);
+
+  // Memoized AG Grid column definitions to prevent infinite re-renders
+  const agGridColumnDefs = useMemo(() => {
+    const cols: ColDef[] = getColumnDefinitions(selectedRecordType).map((col: any) => ({
+      field: col.field,
+      headerName: col.headerName,
+      flex: 1,
+      minWidth: 120,
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+      valueGetter: (params: any) => getCellValue(params.data, col),
+    }));
+    cols.push({
+      headerName: 'Actions',
+      field: 'id',
+      minWidth: 180,
+      width: 180,
+      maxWidth: 180,
+      sortable: false,
+      filter: false,
+      pinned: 'right',
+      cellRenderer: 'agGridActionsRenderer',
+    });
+    return cols;
+  }, [selectedRecordType]);
+
+  // Memoized AG Grid components - defined after handlers to avoid "used before declaration" error
+  const agGridComponents = useMemo(() => ({
+    agGridActionsRenderer: (params: ICellRendererParams) => {
+      const record = params.data;
+      if (!record) return null;
+      return (
+        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', height: '100%' }}>          <Tooltip title="View">
+            <IconButton size="small" onClick={() => handleViewRecord(record)} sx={{ color: isDarkMode ? 'primary.light' : 'primary.main' }}>
+              <ViewIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Edit">
+            <IconButton size="small" onClick={() => handleEditRecord(record)} sx={{ color: isDarkMode ? 'warning.light' : 'warning.main' }}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton size="small" onClick={() => handleDeleteRecord(record.id, record.church_id)} sx={{ color: isDarkMode ? 'error.light' : 'error.main' }}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          {(selectedRecordType === 'baptism' || selectedRecordType === 'marriage') && (
+            <Tooltip title="Certificate">
+              <IconButton size="small" onClick={() => handleGenerateCertificate()} sx={{ color: isDarkMode ? 'success.light' : 'success.main' }}>
+                <CertificateIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
+      );
+    },
+  }), [selectedRecordType, isDarkMode]);
 
   const handleSaveRecord = async () => {
     try {
       setLoading(true);
       
-      // Basic validation
-      if (!formData.firstName || !formData.lastName || !formData.dateOfBaptism) {
-        showToast('Please fill in required fields', 'error');
+      // Record-type specific validation
+      let validationError = '';
+      
+      if (selectedRecordType === 'marriage') {
+        // Marriage records require: groom/bride names, marriage date
+        if (!formData.groomFirstName || !formData.groomLastName || 
+            !formData.brideFirstName || !formData.brideLastName || 
+            !formData.marriageDate) {
+          validationError = 'Please fill in groom names, bride names, and marriage date';
+        }
+      } else if (selectedRecordType === 'funeral') {
+        // Funeral records require: deceased name, death date
+        if (!formData.deceasedFirstName || !formData.deceasedLastName || 
+            !formData.deathDate) {
+          validationError = 'Please fill in deceased name and death date';
+        }
+      } else {
+        // Baptism records require: first name, last name, baptism date
+        if (!formData.firstName || !formData.lastName || !formData.dateOfBaptism) {
+          validationError = 'Please fill in first name, last name, and baptism date';
+        }
+      }
+      
+      if (validationError) {
+        showToast(validationError, 'error');
         return;
       }
 
       const churchName = churches.find(c => c.id.toString() === formData.churchId)?.church_name || '';
+      const churchId = formData.churchId || (formData as any).church_id?.toString() || (selectedChurch ? selectedChurch.toString() : '');
+      
+      // Validate church ID
+      if (!churchId || churchId === '0' || churchId === '') {
+        showToast('Please select a church before saving records', 'error');
+        setLoading(false);
+        return;
+      }
+      
+      const apiService = createRecordsApiService(churchId);
       
       if (editingRecord) {
         // Update existing record
@@ -707,36 +1102,81 @@ const BaptismRecordsPage: React.FC = () => {
           updatedAt: new Date().toISOString(),
         } as BaptismRecord;
         
-        // TODO: Implement actual API call
-        // await recordService.updateRecord('baptism', editingRecord.id, updatedRecord);
+        // Call the backend API
+        const response = await apiService.updateRecord(selectedRecordType, editingRecord.id, updatedRecord);
         
-        setRecords(prev => prev.map(r => r.id === editingRecord.id ? updatedRecord : r));
-        showToast('Record updated successfully', 'success');
+        if (response.success && response.data) {
+          setRecords(prev => prev.map(r => r.id === editingRecord.id ? response.data as BaptismRecord : r));
+          showToast('Record updated successfully', 'success');
+          setDialogOpen(false);
+          
+          // Emit event for auto-refresh
+          recordsEvents.emit({
+            churchId: selectedChurch,
+            recordType: selectedRecordType as any,
+            mutationType: 'update',
+            recordId: editingRecord.id
+          });
+        } else {
+          showToast(response.error || 'Failed to update record', 'error');
+        }
       } else {
-        // Create new record
-        const newRecord: BaptismRecord = {
+        // Create new record - map fields based on record type
+        let newRecord: any = {
           ...formData,
-          id: Date.now().toString(),
           churchName,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          createdBy: 'current-user@church.org', // TODO: Get from auth context
-        } as BaptismRecord;
+        };
         
-        // TODO: Implement actual API call
-        // await recordService.createRecord('baptism', newRecord);
+        // Map funeral record fields to backend schema
+        if (selectedRecordType === 'funeral') {
+          newRecord = {
+            firstName: formData.deceasedFirstName || formData.firstName,
+            lastName: formData.deceasedLastName || formData.lastName,
+            dateOfDeath: formData.deathDate || formData.dateOfDeath,
+            burialDate: formData.burialDate,
+            age: formData.age,
+            priest: formData.priest,
+            burialLocation: formData.burialLocation,
+            church_id: churchId,
+          };
+        }
         
-        setRecords(prev => [...prev, newRecord]);
-        showToast('Record created successfully', 'success');
+        // Call the backend API
+        const response = await apiService.createRecord(selectedRecordType, newRecord);
+        
+        if (response.success && response.data) {
+          setRecords(prev => [...prev, response.data as BaptismRecord]);
+          showToast('Record created successfully', 'success');
+          setDialogOpen(false);
+          
+          // Set the newly created record as selected
+          handleRowSelect(response.data.id);
+          
+          // Emit event for auto-refresh
+          recordsEvents.emit({
+            churchId: selectedChurch,
+            recordType: selectedRecordType as any,
+            mutationType: 'create',
+            recordId: response.data.id
+          });
+        } else {
+          showToast(response.error || 'Failed to create record', 'error');
+        }
       }
-      
-      setDialogOpen(false);
     } catch (err) {
       console.error('Save error:', err);
       showToast('Failed to save record', 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Navigate to Interactive Reports with pre-selected record type
+  const handleGenerateReport = () => {
+    const reportUrl = `/apps/interactive-reports/create?recordType=${selectedRecordType}&churchId=${selectedChurch?.id || ""}`;
+    window.location.href = reportUrl;
   };
 
   const handleExport = () => {
@@ -796,367 +1236,446 @@ const BaptismRecordsPage: React.FC = () => {
             paddingRight: 0
           }
         }}>
-          {/* Collapsible Header & Controls */}
+          {/* Professional Header Section */}
           {!isFiltersCollapsed && (
-            <Card sx={{ mb: 3 }}>
-              <CardContent sx={{ pb: 1 }}>
-                {/* Collapse/Expand Button */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h4" component="h1">
-                    Records Management System
-                  </Typography>
-                  <IconButton
-                    onClick={() => setIsFiltersCollapsed(true)}
-                    sx={{ 
-                      transition: 'transform 0.2s ease-in-out',
-                      transform: isFiltersCollapsed ? 'rotate(180deg)' : 'rotate(0deg)',
-                    }}
-                  >
-                    <IconChevronUp />
-                  </IconButton>
+            <Card 
+              elevation={2}
+              sx={{ 
+                mb: 3,
+                background: (theme) => theme.palette.mode === 'dark' 
+                  ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+                  : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                borderRadius: 2,
+                overflow: 'visible'
+              }}
+            >
+              <CardContent sx={{ pb: 2 }}>
+                {/* Header with Collapse Button */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <Box>
+                    <Typography 
+                      variant="h4" 
+                      component="h1"
+                      sx={{ 
+                        fontWeight: 700,
+                        background: (theme) => theme.palette.mode === 'dark'
+                          ? 'linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%)'
+                          : 'linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%)',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        mb: 0.5
+                      }}
+                    >
+                      Records Management System
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Manage church records with advanced filtering and reporting
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {/* Theme Status Chips */}
+                    <Chip
+                      icon={<PaletteIcon />}
+                      label={currentTheme}
+                      size="small"
+                      variant="outlined"
+                      sx={{ 
+                        borderColor: tableTheme.headerColor,
+                        color: tableTheme.headerColor,
+                        '& .MuiChip-icon': { color: tableTheme.headerColor },
+                        fontWeight: 600
+                      }}
+                    />
+                    {isLiturgicalMode && (
+                      <Chip
+                        label="Liturgical"
+                        size="small"
+                        color="secondary"
+                        sx={{ fontWeight: 600 }}
+                      />
+                    )}
+                    <IconButton
+                      onClick={() => setIsFiltersCollapsed(true)}
+                      size="small"
+                      sx={{ 
+                        ml: 1,
+                        transition: 'transform 0.2s ease-in-out',
+                      }}
+                    >
+                      <IconChevronUp />
+                    </IconButton>
+                  </Box>
                 </Box>
+                
                 {/* Collapsible Content */}
                 <Collapse in={!isFiltersCollapsed}>
                   <Box>
-                    {/* Description and Theme Status */}
-                    <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: 3 }}>
-                      <Typography variant="body1" color="text.secondary">
-                        Manage church records with Orthodox Table Theme Editor integration
-                      </Typography>
-                      
-                      {/* Theme Status Indicator */}
-                      <Box sx={{ mt: { xs: 2, sm: 0 } }}>
-                        <Chip
-                          icon={<PaletteIcon />}
-                          label={`Theme: ${currentTheme}`}
-                          variant="outlined"
-                          size="small"
-                          sx={{ 
-                            borderColor: tableTheme.headerColor,
-                            color: tableTheme.headerColor,
-                            '& .MuiChip-icon': { color: tableTheme.headerColor }
-                          }}
-                        />
-                        {isLiturgicalMode && (
-                          <Chip
-                            label="Liturgical Mode"
-                            size="small"
-                            color="secondary"
-                            sx={{ ml: 1 }}
-                          />
+                    <Stack spacing={3}>
+                      {/* Church and Record Type Selection */}
+                      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ xs: 'stretch', md: 'center' }}>
+                        {/* Show static church name if user has only one church, otherwise show dropdown */}
+                        {churches.filter(c => c.id !== 0).length === 1 ? (
+                          <Box sx={{ 
+                            minWidth: 250, 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            p: 2,
+                            bgcolor: 'primary.main',
+                            color: 'primary.contrastText',
+                            borderRadius: 1,
+                            boxShadow: 1
+                          }}>
+                            <Typography variant="body1" fontWeight={700}>
+                              {churches.find(c => c.id !== 0)?.church_name || 'Church'}
+                            </Typography>
+                          </Box>
+                        ) : (
+                          <FormControl sx={{ minWidth: 250 }} size="small">
+                            <InputLabel>Select Church</InputLabel>
+                            <Select
+                              value={selectedChurch}
+                              label="Select Church"
+                              onChange={(e) => setSelectedChurch(e.target.value)}
+                              disabled={loading}
+                            >
+                              {churches.map((church) => (
+                                <MenuItem key={church.id} value={church.id}>
+                                  {church.church_name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
                         )}
-                      </Box>
-                    </Stack>
-                    <Stack spacing={2}>
-                {/* First Row: Church and Record Type Selection */}
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
-                  <FormControl sx={{ minWidth: 200 }}>
-                    <InputLabel>Select Church</InputLabel>
-                    <Select
-                      value={selectedChurch}
-                      label="Select Church"
-                      onChange={(e) => setSelectedChurch(e.target.value)}
-                      disabled={loading}
-                    >
-                      {churches.map((church) => (
-                        <MenuItem key={church.id} value={church.id}>
-                          {church.church_name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  
-                  <FormControl sx={{ minWidth: 200 }}>
-                    <InputLabel>Select Record Table</InputLabel>
-                    <Select
-                      value={selectedRecordType}
-                      label="Select Record Table"
-                      onChange={(e) => setSelectedRecordType(e.target.value)}
-                      disabled={loading}
-                    >
-                      {recordTypes.map((type) => (
-                        <MenuItem key={type.value} value={type.value}>
-                          {type.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  
-                  {selectedRecordType && (
-                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                      {recordTypes.find(type => type.value === selectedRecordType)?.label} - {churches.find(church => church.id === selectedChurch)?.church_name}
-                    </Typography>
-                  )}
-                </Stack>
-                
-                {/* Second Row: Search and Action Buttons (only show when record type is selected) */}
-                {selectedRecordType && (
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
-                    <TextField
-                      label="Search Records"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      InputProps={{
-                        startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                      }}
-                      sx={{ minWidth: 200 }}
-                      disabled={loading}
-                    />
-                    
-                    {/* Enhanced Stylish Button Group */}
-                    <Stack direction="row" spacing={1} sx={{ 
-                      p: 1, 
-                      bgcolor: 'background.paper',
-                      borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      boxShadow: 1
-                    }}>
-                      <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={handleAddRecord}
-                        disabled={loading}
-                        sx={{ 
-                          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                          boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #1976D2 30%, #1A9FCC 90%)',
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 8px 2px rgba(33, 203, 243, .4)',
-                          }
-                        }}
-                      >
-                        Add Record
-                      </Button>
-                      
-                      <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => {/* TODO: Import functionality */}}
-                        disabled={loading}
-                        sx={{ 
-                          background: 'linear-gradient(45deg, #4CAF50 30%, #8BC34A 90%)',
-                          boxShadow: '0 3px 5px 2px rgba(76, 175, 80, .3)',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #388E3C 30%, #689F38 90%)',
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 8px 2px rgba(76, 175, 80, .4)',
-                          }
-                        }}
-                      >
-                        Import Records
-                      </Button>
-                      
-                      <Button
-                        variant="contained"
-                        startIcon={<PaletteIcon />}
-                        onClick={() => setThemeDrawerOpen(true)}
-                        disabled={loading}
-                        sx={{ 
-                          background: 'linear-gradient(45deg, #FF9800 30%, #FFC107 90%)',
-                          boxShadow: '0 3px 5px 2px rgba(255, 152, 0, .3)',
-                          bgcolor: themeDrawerOpen ? 'action.selected' : 'transparent',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #F57C00 30%, #FFA000 90%)',
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 8px 2px rgba(255, 152, 0, .4)',
-                          }
-                        }}
-                      >
-                        Customize Table
-                      </Button>
-                      
-                      <Button
-                        variant="contained"
-                        startIcon={<TableChartIcon />}
-                        onClick={() => setAdvancedGridOpen(true)}
-                        disabled={loading}
-                        sx={{ 
-                          background: 'linear-gradient(45deg, #9C27B0 30%, #E91E63 90%)',
-                          boxShadow: '0 3px 5px 2px rgba(156, 39, 176, .3)',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #7B1FA2 30%, #C2185B 90%)',
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 8px 2px rgba(156, 39, 176, .4)',
-                          }
-                        }}
-                      >
-                        Advanced Grid
-                      </Button>
-                      
-                      <Button
-                        variant="outlined"
-                        startIcon={useAgGrid ? <LockIcon /> : <LockOpenIcon />}
-                        onClick={() => setUseAgGrid(!useAgGrid)}
-                        disabled={loading}
-                        sx={{ 
-                          borderColor: '#607D8B',
-                          color: '#607D8B',
-                          bgcolor: useAgGrid ? 'action.selected' : 'transparent',
-                          '&:hover': { 
+                        
+                        <FormControl sx={{ minWidth: 250 }} size="small">
+                          <InputLabel>Select Record Table</InputLabel>
+                          <Select
+                            value={selectedRecordType}
+                            label="Select Record Table"
+                            onChange={(e) => setSelectedRecordType(e.target.value)}
+                            disabled={loading}
+                          >
+                            {recordTypes.map((type) => (
+                              <MenuItem key={type.value} value={type.value}>
+                                {type.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                        
+                        {selectedRecordType && (
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            px: 2,
+                            py: 1,
                             bgcolor: 'action.hover',
-                            borderColor: '#455A64',
-                            color: '#455A64',
-                            transform: 'translateY(-1px)',
-                          }
-                        }}
-                      >
-                        {useAgGrid ? 'Standard View' : 'AG Grid View'}
-                      </Button>
+                            borderRadius: 1,
+                            border: '1px solid',
+                            borderColor: 'divider'
+                          }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                              {recordTypes.find(type => type.value === selectedRecordType)?.label}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Stack>
                       
-                      <Button
-                        variant="contained"
-                        startIcon={<ExportIcon />}
-                        onClick={handleExport}
-                        disabled={loading}
-                        sx={{ 
-                          background: 'linear-gradient(45deg, #795548 30%, #8D6E63 90%)',
-                          boxShadow: '0 3px 5px 2px rgba(121, 85, 72, .3)',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #5D4037 30%, #6D4C41 90%)',
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 8px 2px rgba(121, 85, 72, .4)',
-                          }
-                        }}
-                      >
-                        Export
-                      </Button>
+                      {/* Search and Action Buttons (only show when record type is selected) */}
+                      {selectedRecordType && (
+                        <>
+                          {/* Search Bar */}
+                          <TextField
+                            label="Search Records"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            InputProps={{
+                              startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                            }}
+                            size="small"
+                            fullWidth
+                            disabled={loading}
+                            sx={{ maxWidth: 500 }}
+                          />
+                          
+                          {/* Action Buttons - Compact Icon Buttons */}
+                          <Box>
+                            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5, fontWeight: 600 }}>
+                              Quick Actions
+                            </Typography>
+                            <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+                              <Tooltip title="Add New Record">
+                                <IconButton
+                                  onClick={handleAddRecord}
+                                  disabled={loading}
+                                  sx={{ 
+                                    bgcolor: 'primary.main',
+                                    color: 'white',
+                                    '&:hover': { bgcolor: 'primary.dark' },
+                                    '&:disabled': { bgcolor: 'action.disabledBackground' }
+                                  }}
+                                >
+                                  <AddIcon />
+                                </IconButton>
+                              </Tooltip>
+                              
+                              <Tooltip title="Import Records">
+                                <IconButton
+                                  onClick={() => {/* TODO: Import functionality */}}
+                                  disabled={loading}
+                                  sx={{ 
+                                    bgcolor: 'success.main',
+                                    color: 'white',
+                                    '&:hover': { bgcolor: 'success.dark' },
+                                    '&:disabled': { bgcolor: 'action.disabledBackground' }
+                                  }}
+                                >
+                                  <AddIcon />
+                                </IconButton>
+                              </Tooltip>
+                              
+                              <Tooltip title="Customize Table Theme">
+                                <IconButton
+                                  onClick={() => setThemeDrawerOpen(true)}
+                                  disabled={loading}
+                                  sx={{ 
+                                    bgcolor: 'warning.main',
+                                    color: 'white',
+                                    '&:hover': { bgcolor: 'warning.dark' },
+                                    '&:disabled': { bgcolor: 'action.disabledBackground' }
+                                  }}
+                                >
+                                  <PaletteIcon />
+                                </IconButton>
+                              </Tooltip>
+                              
+                              <Tooltip title="Advanced Grid Options">
+                                <IconButton
+                                  onClick={() => setAdvancedGridOpen(true)}
+                                  disabled={loading}
+                                  sx={{ 
+                                    bgcolor: 'secondary.main',
+                                    color: 'white',
+                                    '&:hover': { bgcolor: 'secondary.dark' },
+                                    '&:disabled': { bgcolor: 'action.disabledBackground' }
+                                  }}
+                                >
+                                  <TableChartIcon />
+                                </IconButton>
+                              </Tooltip>
+                              
+                              <Tooltip title={useAgGrid ? 'Switch to Standard View' : 'Switch to AG Grid'}>
+                                <IconButton
+                                  onClick={() => setUseAgGrid(!useAgGrid)}
+                                  disabled={loading}
+                                  sx={{ 
+                                    bgcolor: useAgGrid ? 'action.selected' : 'action.hover',
+                                    border: '1px solid',
+                                    borderColor: 'divider',
+                                    '&:hover': { bgcolor: 'action.selected' }
+                                  }}
+                                >
+                                  {useAgGrid ? <LockIcon /> : <LockOpenIcon />}
+                                </IconButton>
+                              </Tooltip>
+                              
+                              <Tooltip title="Export Records">
+                                <IconButton
+                                  onClick={handleExport}
+                                  disabled={loading}
+                                  sx={{ 
+                                    bgcolor: (theme) => theme.palette.mode === 'dark' ? 'grey.700' : 'grey.600',
+                                    color: 'white',
+                                    '&:hover': { bgcolor: (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.700' },
+                                    '&:disabled': { bgcolor: 'action.disabledBackground' }
+                                  }}
+                                >
+                                  <ExportIcon />
+                                </IconButton>
+                              </Tooltip>
+                              
+                              <Tooltip title="Generate Report">
+                                <IconButton
+                                  onClick={handleGenerateReport}
+                                  disabled={loading || !selectedRecordType}
+                                  sx={{ 
+                                    bgcolor: 'info.main',
+                                    color: 'white',
+                                    '&:hover': { bgcolor: 'info.dark' },
+                                    '&:disabled': { bgcolor: 'action.disabledBackground' }
+                                  }}
+                                >
+                                  <ReportIcon />
+                                </IconButton>
+                              </Tooltip>
+                              
+                              <Tooltip title="Collaborative Report">
+                                <IconButton
+                                  onClick={handleCollaborativeReport}
+                                  disabled={loading}
+                                  sx={{ 
+                                    bgcolor: (theme) => theme.palette.mode === 'dark' ? '#00ACC1' : '#00BCD4',
+                                    color: 'white',
+                                    '&:hover': { bgcolor: '#0097A7' },
+                                    '&:disabled': { bgcolor: 'action.disabledBackground' }
+                                  }}
+                                >
+                                  <CollaborativeIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Stack>
+                          </Box>
+                        </>
+                      )}
                     </Stack>
-                  </Stack>
-                )}
-                
-                {/* Status Information */}
-                {selectedRecordType && (
-                  <Typography variant="body2" color="text.secondary">
-                    {loading ? (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <CircularProgress size={16} />
-                        Loading records...
-                      </Box>
-                    ) : (
-                      `${filteredAndSortedRecords.length} record(s) found`
-                    )}
-                  </Typography>
-                )}
-                
-                {/* Instructions when no selection */}
-                {!selectedRecordType && (
-                  <Alert severity="info">
-                    Please select a church and record type to view records.
-                  </Alert>
-                )}
-                  </Stack>
                   </Box>
                 </Collapse>
               </CardContent>
             </Card>
-            )}
-
-            {/* Floating Expand Button when collapsed */}
-            {isFiltersCollapsed && (
-              <IconButton
+          )}
+          
+          {/* Collapsed Header Button */}
+          {isFiltersCollapsed && (
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+              <Button
+                variant="contained"
                 onClick={() => setIsFiltersCollapsed(false)}
-                sx={{
-                  position: 'fixed',
-                  top: { xs: 70, sm: 90 },
-                  right: { xs: 16, sm: 32 },
-                  zIndex: 1201,
-                  backgroundColor: 'background.paper',
-                  boxShadow: 3,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  '&:hover': {
-                    backgroundColor: 'grey.100',
-                  },
+                startIcon={<IconChevronUp sx={{ transform: 'rotate(180deg)' }} />}
+                sx={{ 
+                  borderRadius: 2,
+                  px: 3,
+                  background: (theme) => theme.palette.mode === 'dark'
+                    ? 'linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%)'
+                    : 'linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%)',
                 }}
-                size="large"
-                aria-label="Expand controls"
               >
-                <IconChevronUp style={{ transform: 'rotate(180deg)' }} />
-              </IconButton>
-            )}
+                Show Filters & Actions
+              </Button>
+            </Box>
+          )}
+                
+          {/* Status Information */}
+          {selectedRecordType && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                {loading ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={16} />
+                    Loading records...
+                  </Box>
+                ) : (
+                  `${filteredAndSortedRecords.length} record(s) found`
+                )}
+              </Typography>
+            </Box>
+          )}
+          
+          {/* Instructions when no selection */}
+          {!selectedRecordType && (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              Please select a church and record type to view records.
+            </Alert>
+          )}
 
-            {/* Records Table - Only show when record type is selected */}
+          {/* Records Table - Only show when record type is selected */}
             {selectedRecordType && (
-              <Paper className="theme-orthodox-traditional" sx={{ 
-                width: '100%', 
-                maxWidth: '100%', 
-                margin: 0,
-                marginLeft: 0,
-                marginRight: 0,
-                textAlign: 'left'
-              }}>
+              <>
+                {/* Row Highlighting Legend */}
+                <Box sx={{ mb: 1, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Chip
+                    size="small"
+                    label="New (24h)"
+                    sx={{
+                      backgroundColor: 'rgba(76, 175, 80, 0.15)',
+                      borderLeft: '3px solid #4caf50',
+                      fontWeight: 500,
+                    }}
+                  />
+                  <Chip
+                    size="small"
+                    label="Updated (24h)"
+                    sx={{
+                      backgroundColor: 'rgba(255, 193, 7, 0.15)',
+                      borderLeft: '3px solid #ffc107',
+                      fontWeight: 500,
+                    }}
+                  />
+                  <Chip
+                    size="small"
+                    label="Selected"
+                    sx={{
+                      backgroundColor: 'rgba(33, 150, 243, 0.15)',
+                      borderLeft: '3px solid #2196f3',
+                      fontWeight: 500,
+                    }}
+                  />
+                  {clearSelection && (
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={clearSelection}
+                      sx={{ ml: 'auto', fontSize: '0.75rem' }}
+                    >
+                      Clear Selection
+                    </Button>
+                  )}
+                </Box>
+                
+                <Paper className="theme-orthodox-traditional" sx={{ 
+                  width: '100%', 
+                  maxWidth: '100%', 
+                  margin: 0,
+                  marginLeft: 0,
+                  marginRight: 0,
+                  textAlign: 'left',
+                  overflow: 'hidden',
+                  // Responsive padding
+                  p: { xs: 0, sm: 1, md: 2 },
+                }}>
 
-                {/* Conditional Table Rendering */}
+                  {/* Conditional Table Rendering */}
                 {useAgGrid ? (
                   // AG Grid View
-                  <Box sx={{ height: 600, width: '100%' }} className="ag-theme-alpine">
+                  <Box sx={{ height: 600, width: '100%' }} className={isDarkMode ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'}>
                     <AgGridReact
                       rowData={filteredAndSortedRecords}
-                      columnDefs={(() => {
-                        const cols: ColDef[] = getColumnDefinitions(selectedRecordType).map((col: any) => ({
-                          field: col.field,
-                          headerName: col.headerName,
-                          flex: 1,
-                          minWidth: 120,
-                          sortable: true,
-                          filter: true,
-                          floatingFilter: true,
-                          valueGetter: (params: any) => getCellValue(params.data, col),
-                        }));
-                        cols.push({
-                          headerName: 'Actions',
-                          field: 'id',
-                          minWidth: 150,
-                          maxWidth: 160,
-                          sortable: false,
-                          filter: false,
-                          cellRenderer: (params: ICellRendererParams) => {
-                            const record = params.data;
-                            if (!record) return null;
-                            return (
-                              <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', height: '100%' }}>
-                                <Tooltip title="View">
-                                  <IconButton size="small" onClick={() => handleViewRecord(record)}>
-                                    <ViewIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Edit">
-                                  <IconButton size="small" onClick={() => handleEditRecord(record)}>
-                                    <EditIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Delete">
-                                  <IconButton size="small" onClick={() => handleDeleteRecord(record.id)}>
-                                    <DeleteIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              </Box>
-                            );
-                          },
-                        });
-                        return cols;
-                      })()}
+                      columnDefs={agGridColumnDefs}
+                      components={agGridComponents}
                       defaultColDef={{
                         resizable: true,
                         sortable: true,
                         filter: true,
                       }}
+                      getRowId={(params) => String(params.data.id)}
+                      rowClassRules={getAgGridRowClassRules(isRecordSelected, nowReference)}
+                      onRowClicked={(event) => handleRowSelect(event.data.id)}
                       pagination={true}
                       paginationPageSize={25}
                       paginationPageSizeSelector={[10, 25, 50, 100]}
                       animateRows={true}
                       domLayout="normal"
-                      suppressMovableColumns={false}
-                      rowSelection="multiple"
-                      getRowId={(params) => String(params.data.id)}
                     />
                   </Box>
                 ) : (
                   // Standard Material-UI Table View
-                  <TableContainer sx={{ textAlign: 'left', width: '100%' }}>
-                  <Table stickyHeader>
+                  <TableContainer sx={{ 
+                    textAlign: 'left', 
+                    width: '100%',
+                    overflowX: 'auto',
+                    '&::-webkit-scrollbar': {
+                      height: '8px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      backgroundColor: 'rgba(0,0,0,0.1)',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      backgroundColor: 'rgba(0,0,0,0.3)',
+                      borderRadius: '4px',
+                    },
+                  }}>
+                  <Table stickyHeader sx={{ minWidth: 650 }}>
                     <TableHead>
                       <TableRow 
                         sx={{
@@ -1177,7 +1696,14 @@ const BaptismRecordsPage: React.FC = () => {
                             </TableSortLabel>
                           </TableCell>
                         ))}
-                        <TableCell sx={getTableCellStyle('header')} align="center">
+                        <TableCell sx={{ 
+                          ...getTableCellStyle('header'), 
+                          minWidth: '150px',
+                          position: 'sticky',
+                          right: 0,
+                          backgroundColor: getTableHeaderStyle().backgroundColor || '#1976d2',
+                          zIndex: 2,
+                        }} align="center">
                           Actions
                         </TableCell>
                       </TableRow>
@@ -1207,8 +1733,19 @@ const BaptismRecordsPage: React.FC = () => {
                         paginatedRecords.map((record, index) => (
                           <TableRow
                             key={record.id}
+                            onClick={(e) => {
+                              // Handle row selection
+                              handleRowSelect(record.id);
+                              
+                              // Only trigger theme customization if not clicking on action buttons
+                              if (!(e.target as HTMLElement).closest('.record-actions')) {
+                                setSelectedElement('row');
+                                setThemeDrawerOpen(true);
+                              }
+                            }}
                             sx={{
                               ...getTableRowStyle(index % 2 === 0 ? 'even' : 'odd'),
+                              ...getRecordRowStyle(record, isRecordSelected(record.id), nowReference),
                               border: selectedElement === 'row' ? '2px solid #2196f3' : 'none',
                               cursor: 'pointer',
                               '&:hover': {
@@ -1216,37 +1753,51 @@ const BaptismRecordsPage: React.FC = () => {
                                 border: '1px solid #2196f3',
                               }
                             }}
-                            onClick={(e) => {
-                              // Only trigger if not clicking on action buttons
-                              if (!(e.target as HTMLElement).closest('.record-actions')) {
-                                setSelectedElement('row');
-                                setThemeDrawerOpen(true);
-                              }
-                            }}
-                            title="Click to customize row appearance"
+                            title="Click to select row"
                           >
                             {getColumnDefinitions(selectedRecordType).map((column: any, colIndex: number) => (
                               <TableCell key={colIndex} sx={getTableCellStyle('body')}>
                                 {getCellValue(record, column)}
                               </TableCell>
                             ))}
-                            <TableCell sx={getTableCellStyle('body')} align="center">
-                              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }} className="record-actions">
+                            <TableCell sx={{ 
+                              ...getTableCellStyle('body'), 
+                              minWidth: '150px',
+                              position: 'sticky',
+                              right: 0,
+                              backgroundColor: getTableRowStyle(index % 2 === 0 ? 'even' : 'odd').backgroundColor || (index % 2 === 0 ? '#f5f5f5' : '#fff'),
+                              zIndex: 1,
+                            }} align="center">
+                              <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }} className="record-actions">
                                 <Tooltip title="View Details">
-                                  <IconButton size="small" onClick={() => handleViewRecord(record)}>
+                                  <IconButton size="small" onClick={() => handleViewRecord(record)} sx={{ color: isDarkMode ? 'primary.light' : 'primary.main' }}>
                                     <ViewIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Edit Record">
-                                  <IconButton size="small" onClick={() => handleEditRecord(record)}>
+                                  <IconButton size="small" onClick={() => handleEditRecord(record)} sx={{ color: isDarkMode ? 'warning.light' : 'warning.main' }}>
                                     <EditIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Delete Record">
-                                  <IconButton size="small" onClick={() => handleDeleteRecord(record.id)}>
+                                  <IconButton size="small" onClick={() => handleDeleteRecord(record.id, record.church_id)} sx={{ color: isDarkMode ? 'error.light' : 'error.main' }}>
                                     <DeleteIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
+                                {(selectedRecordType === 'baptism' || selectedRecordType === 'marriage') && (
+                                  <Tooltip title="Generate Certificate">
+                                    <IconButton 
+                                      size="small" 
+                                      onClick={() => {
+                                        setViewingRecord(record);
+                                        handleGenerateCertificate();
+                                      }} 
+                                      sx={{ color: isDarkMode ? 'success.light' : 'success.main' }}
+                                    >
+                                      <CertificateIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
                               </Box>
                             </TableCell>
                           </TableRow>
@@ -1269,6 +1820,7 @@ const BaptismRecordsPage: React.FC = () => {
                   />
                 )}
               </Paper>
+              </>
             )}
             {/* Add/Edit Dialog */}
             <Dialog 
@@ -1276,220 +1828,496 @@ const BaptismRecordsPage: React.FC = () => {
               onClose={() => setDialogOpen(false)}
               maxWidth="md"
               fullWidth
+              PaperProps={{
+                sx: {
+                  borderRadius: 3,
+                  boxShadow: theme.shadows[10],
+                }
+              }}
             >
-              <DialogTitle>
-                {editingRecord ? `Edit ${selectedRecordType.charAt(0).toUpperCase() + selectedRecordType.slice(1)} Record` : `Add New ${selectedRecordType.charAt(0).toUpperCase() + selectedRecordType.slice(1)} Record`}
+              <DialogTitle
+                sx={{
+                  background: editingRecord 
+                    ? `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                  color: 'white',
+                  py: 3,
+                  px: 3,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '12px',
+                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {editingRecord ? <EditIcon sx={{ fontSize: 28 }} /> : <AddIcon sx={{ fontSize: 28 }} />}
+                </Box>
+                <Box>
+                  <Typography variant="h5" component="div" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    {editingRecord ? 'Edit Record' : 'Add New Record'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    {selectedRecordType.charAt(0).toUpperCase() + selectedRecordType.slice(1)} Record
+                  </Typography>
+                </Box>
               </DialogTitle>
-              <DialogContent>
-                <Stack spacing={3} sx={{ mt: 1 }}>
+              <DialogContent sx={{ px: 3, py: 4 }}>
+                <Stack spacing={4}>
                   {selectedRecordType === 'baptism' && (
                     <>
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="First Name *"
-                          value={formData.firstName || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Last Name *"
-                          value={formData.lastName || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
+                      {/* Personal Information Section */}
+                      <Box>
+                        <Typography 
+                          variant="subtitle1" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            mb: 2.5,
+                            pb: 1,
+                            borderBottom: `3px solid ${theme.palette.primary.main}`,
+                            display: 'inline-block',
+                            color: theme.palette.primary.main,
+                          }}
+                        >
+                          Personal Information
+                        </Typography>
+                        <Stack spacing={2.5} sx={{ mt: 2 }}>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="First Name"
+                              value={formData.firstName || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Last Name"
+                              value={formData.lastName || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                          
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="Date of Birth"
+                              type="date"
+                              value={formData.dateOfBirth || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                              InputLabelProps={{ shrink: true }}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Place of Birth"
+                              value={formData.placeOfBirth || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, placeOfBirth: e.target.value }))}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                          
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="Father's Name"
+                              value={formData.fatherName || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, fatherName: e.target.value }))}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Mother's Name"
+                              value={formData.motherName || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, motherName: e.target.value }))}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                        </Stack>
+                      </Box>
                       
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Date of Birth"
-                          type="date"
-                          value={formData.dateOfBirth || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                          InputLabelProps={{ shrink: true }}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Date of Baptism *"
-                          type="date"
-                          value={formData.dateOfBaptism || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, dateOfBaptism: e.target.value }))}
-                          InputLabelProps={{ shrink: true }}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
-                      
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Place of Birth"
-                          value={formData.placeOfBirth || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, placeOfBirth: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Place of Baptism"
-                          value={formData.placeOfBaptism || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, placeOfBaptism: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
-                      
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Father's Name"
-                          value={formData.fatherName || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, fatherName: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Mother's Name"
-                          value={formData.motherName || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, motherName: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
-                      
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Godparent Names"
-                          value={formData.godparentNames || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, godparentNames: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                        <FormControl sx={{ flex: 1 }}>
-                          <InputLabel>Priest</InputLabel>
-                          <Select
-                            label="Priest"
-                            value={formData.priest || ''}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === 'custom') {
-                                setFormData(prev => ({ ...prev, priest: '', customPriest: true }));
-                              } else {
-                                setFormData(prev => ({ ...prev, priest: value, customPriest: false }));
+                      {/* Baptism Details Section */}
+                      <Box>
+                        <Typography 
+                          variant="subtitle1" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            mb: 2.5,
+                            pb: 1,
+                            borderBottom: `3px solid ${theme.palette.success.main}`,
+                            display: 'inline-block',
+                            color: theme.palette.success.main,
+                          }}
+                        >
+                          Baptism Details
+                        </Typography>
+                        <Stack spacing={2.5} sx={{ mt: 2 }}>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="Date of Baptism"
+                              type="date"
+                              value={formData.dateOfBaptism || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, dateOfBaptism: e.target.value }))}
+                              InputLabelProps={{ shrink: true }}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Place of Baptism"
+                              value={formData.placeOfBaptism || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, placeOfBaptism: e.target.value }))}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                          
+                          <TextField
+                            label="Godparent Names"
+                            value={formData.godparentNames || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, godparentNames: e.target.value }))}
+                            placeholder="Enter godparent names separated by commas"
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
                               }
                             }}
-                          >
-                            <MenuItem value="">
-                              <em>Select a priest...</em>
-                            </MenuItem>
-                            {priestOptions.map((priest) => (
-                              <MenuItem key={priest} value={priest}>
-                                {priest}
-                              </MenuItem>
-                            ))}
-                            <MenuItem value="custom">
-                              <em>Other (enter manually)...</em>
-                            </MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Stack>
-                      {formData.customPriest && (
+                          />
+                        </Stack>
+                      </Box>
+                      
+                      {/* Church & Registry Information Section */}
+                      <Box>
+                        <Typography 
+                          variant="subtitle1" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            mb: 2.5,
+                            pb: 1,
+                            borderBottom: `3px solid ${theme.palette.info.main}`,
+                            display: 'inline-block',
+                            color: theme.palette.info.main,
+                          }}
+                        >
+                          Church & Registry Information
+                        </Typography>
+                        <Stack spacing={2.5} sx={{ mt: 2 }}>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <FormControl sx={{ flex: 1 }}>
+                              <InputLabel>Priest</InputLabel>
+                              <Select
+                                label="Priest"
+                                value={formData.priest || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (value === 'custom') {
+                                    setFormData(prev => ({ ...prev, priest: '', customPriest: true }));
+                                  } else {
+                                    setFormData(prev => ({ ...prev, priest: value, customPriest: false }));
+                                  }
+                                }}
+                                sx={{
+                                  borderRadius: 2,
+                                }}
+                              >
+                                <MenuItem value="">
+                                  <em>Select a priest...</em>
+                                </MenuItem>
+                                {priestOptions.map((priest) => (
+                                  <MenuItem key={priest} value={priest}>
+                                    {priest}
+                                  </MenuItem>
+                                ))}
+                                <MenuItem value="custom">
+                                  <em>Other (enter manually)...</em>
+                                </MenuItem>
+                              </Select>
+                            </FormControl>
+                            <FormControl sx={{ flex: 1 }}>
+                              <InputLabel>Church</InputLabel>
+                              <Select
+                                value={formData.churchId || ''}
+                                label="Church"
+                                onChange={(e) => setFormData(prev => ({ ...prev, churchId: e.target.value }))}
+                                sx={{
+                                  borderRadius: 2,
+                                }}
+                              >
+                                {churches.filter(c => c.id !== 0).map((church) => (
+                                  <MenuItem key={church.id} value={church.id}>
+                                    {church.church_name}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          </Stack>
+                          {formData.customPriest && (
+                            <TextField
+                              label="Enter Priest Name"
+                              value={formData.priest || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))}
+                              fullWidth
+                              placeholder="Enter the priest's name"
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          )}
+                          <TextField
+                            label="Registry Number"
+                            value={formData.registryNumber || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, registryNumber: e.target.value }))}
+                            placeholder="Enter registry number"
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                              }
+                            }}
+                          />
+                        </Stack>
+                      </Box>
+                      
+                      {/* Additional Notes Section */}
+                      <Box>
+                        <Typography 
+                          variant="subtitle1" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            mb: 2.5,
+                            pb: 1,
+                            borderBottom: `3px solid ${theme.palette.secondary.main}`,
+                            display: 'inline-block',
+                            color: theme.palette.secondary.main,
+                          }}
+                        >
+                          Additional Notes
+                        </Typography>
                         <TextField
-                          label="Enter Priest Name"
-                          value={formData.priest || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))}
+                          label="Notes"
+                          multiline
+                          rows={4}
+                          value={formData.notes || ''}
+                          onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                          placeholder="Enter any additional notes or comments..."
                           fullWidth
-                          sx={{ mt: 2 }}
-                          placeholder="Enter the priest's name"
+                          sx={{ 
+                            mt: 2,
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                            }
+                          }}
                         />
-                      )}
-                      
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Registry Number"
-                          value={formData.registryNumber || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, registryNumber: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                        <FormControl sx={{ flex: 1 }}>
-                          <InputLabel>Church</InputLabel>
-                          <Select
-                            value={formData.churchId || ''}
-                            label="Church"
-                            onChange={(e) => setFormData(prev => ({ ...prev, churchId: e.target.value }))}
-                          >
-                            {churches.filter(c => c.id !== 0).map((church) => (
-                              <MenuItem key={church.id} value={church.id}>
-                                {church.church_name}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </Stack>
-                      
-                      <TextField
-                        label="Notes"
-                        multiline
-                        rows={3}
-                        value={formData.notes || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      />
+                      </Box>
                     </>
                   )}
 
                   {selectedRecordType === 'marriage' && (
                     <>
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Groom First Name *"
-                          value={formData.groomFirstName || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, groomFirstName: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Groom Last Name *"
-                          value={formData.groomLastName || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, groomLastName: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
+                      {/* Groom Information Section */}
+                      <Box>
+                        <Typography 
+                          variant="subtitle1" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            mb: 2.5,
+                            pb: 1,
+                            borderBottom: `3px solid ${theme.palette.primary.main}`,
+                            display: 'inline-block',
+                            color: theme.palette.primary.main,
+                          }}
+                        >
+                          Groom Information
+                        </Typography>
+                        <Stack spacing={2.5} sx={{ mt: 2 }}>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="First Name"
+                              value={formData.groomFirstName || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, groomFirstName: e.target.value }))}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Last Name"
+                              value={formData.groomLastName || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, groomLastName: e.target.value }))}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                        </Stack>
+                      </Box>
                       
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Bride First Name *"
-                          value={formData.brideFirstName || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, brideFirstName: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Bride Last Name *"
-                          value={formData.brideLastName || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, brideLastName: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
+                      {/* Bride Information Section */}
+                      <Box>
+                        <Typography 
+                          variant="subtitle1" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            mb: 2.5,
+                            pb: 1,
+                            borderBottom: `3px solid ${theme.palette.secondary.main}`,
+                            display: 'inline-block',
+                            color: theme.palette.secondary.main,
+                          }}
+                        >
+                          Bride Information
+                        </Typography>
+                        <Stack spacing={2.5} sx={{ mt: 2 }}>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="First Name"
+                              value={formData.brideFirstName || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, brideFirstName: e.target.value }))}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Last Name"
+                              value={formData.brideLastName || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, brideLastName: e.target.value }))}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                        </Stack>
+                      </Box>
                       
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Marriage Date *"
-                          type="date"
-                          value={formData.marriageDate || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, marriageDate: e.target.value }))}
-                          InputLabelProps={{ shrink: true }}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Marriage Location"
-                          value={formData.marriageLocation || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, marriageLocation: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
-                      
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Witness 1"
-                          value={formData.witness1 || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, witness1: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Witness 2"
-                          value={formData.witness2 || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, witness2: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
+                      {/* Marriage Details Section */}
+                      <Box>
+                        <Typography 
+                          variant="subtitle1" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            mb: 2.5,
+                            pb: 1,
+                            borderBottom: `3px solid ${theme.palette.success.main}`,
+                            display: 'inline-block',
+                            color: theme.palette.success.main,
+                          }}
+                        >
+                          Marriage Details
+                        </Typography>
+                        <Stack spacing={2.5} sx={{ mt: 2 }}>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="Marriage Date"
+                              type="date"
+                              value={formData.marriageDate || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, marriageDate: e.target.value }))}
+                              InputLabelProps={{ shrink: true }}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Marriage Location"
+                              value={formData.marriageLocation || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, marriageLocation: e.target.value }))}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                          
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="Witness 1"
+                              value={formData.witness1 || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, witness1: e.target.value }))}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Witness 2"
+                              value={formData.witness2 || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, witness2: e.target.value }))}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                        </Stack>
+                      </Box>
                       
                       <FormControl fullWidth>
                         <InputLabel>Priest</InputLabel>
@@ -1532,55 +2360,138 @@ const BaptismRecordsPage: React.FC = () => {
 
                   {selectedRecordType === 'funeral' && (
                     <>
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="First Name *"
-                          value={formData.firstName || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Last Name *"
-                          value={formData.lastName || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
+                      {/* Deceased Information Section */}
+                      <Box>
+                        <Typography 
+                          variant="subtitle1" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            mb: 2.5,
+                            pb: 1,
+                            borderBottom: `3px solid ${theme.palette.primary.main}`,
+                            display: 'inline-block',
+                            color: theme.palette.primary.main,
+                          }}
+                        >
+                          Deceased Information
+                        </Typography>
+                        <Stack spacing={2.5} sx={{ mt: 2 }}>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="First Name"
+                              value={formData.deceasedFirstName || formData.firstName || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, deceasedFirstName: e.target.value, firstName: e.target.value }))}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Last Name"
+                              value={formData.deceasedLastName || formData.lastName || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, deceasedLastName: e.target.value, lastName: e.target.value }))}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                          
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="Age at Death"
+                              type="number"
+                              value={formData.age || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Date of Birth"
+                              type="date"
+                              value={formData.dateOfBirth || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                              InputLabelProps={{ shrink: true }}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                        </Stack>
+                      </Box>
                       
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Date of Death *"
-                          type="date"
-                          value={formData.dateOfDeath || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, dateOfDeath: e.target.value }))}
-                          InputLabelProps={{ shrink: true }}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Burial Date"
-                          type="date"
-                          value={formData.burialDate || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, burialDate: e.target.value }))}
-                          InputLabelProps={{ shrink: true }}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
-                      
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          label="Age"
-                          type="number"
-                          value={formData.age || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          label="Burial Location"
-                          value={formData.burialLocation || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, burialLocation: e.target.value }))}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
+                      {/* Funeral Details Section */}
+                      <Box>
+                        <Typography 
+                          variant="subtitle1" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            mb: 2.5,
+                            pb: 1,
+                            borderBottom: `3px solid ${theme.palette.error.main}`,
+                            display: 'inline-block',
+                            color: theme.palette.error.main,
+                          }}
+                        >
+                          Funeral Details
+                        </Typography>
+                        <Stack spacing={2.5} sx={{ mt: 2 }}>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                              label="Date of Death"
+                              type="date"
+                              value={formData.deathDate || formData.dateOfDeath || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, deathDate: e.target.value, dateOfDeath: e.target.value }))}
+                              InputLabelProps={{ shrink: true }}
+                              required
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                            <TextField
+                              label="Burial Date"
+                              type="date"
+                              value={formData.burialDate || ''}
+                              onChange={(e) => setFormData(prev => ({ ...prev, burialDate: e.target.value }))}
+                              InputLabelProps={{ shrink: true }}
+                              sx={{ 
+                                flex: 1,
+                                '& .MuiOutlinedInput-root': {
+                                  borderRadius: 2,
+                                }
+                              }}
+                            />
+                          </Stack>
+                          
+                          <TextField
+                            label="Burial Location"
+                            value={formData.burialLocation || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, burialLocation: e.target.value }))}
+                            fullWidth
+                            sx={{ 
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                              }
+                            }}
+                          />
+                        </Stack>
+                      </Box>
                       
                       <FormControl fullWidth>
                         <InputLabel>Priest</InputLabel>
@@ -1622,17 +2533,77 @@ const BaptismRecordsPage: React.FC = () => {
                   )}
                 </Stack>
               </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <DialogActions 
+                sx={{ 
+                  px: 3, 
+                  py: 2.5, 
+                  bgcolor: isDarkMode ? 'grey.900' : 'grey.50',
+                  borderTop: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                  gap: 1.5,
+                }}
+              >
+                <Button 
+                  onClick={() => setDialogOpen(false)}
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 2,
+                    px: 3,
+                    py: 1,
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                    fontWeight: 500,
+                  }}
+                >
+                  Cancel
+                </Button>
                 <Button 
                   onClick={handleSaveRecord} 
                   variant="contained"
                   disabled={loading}
+                  sx={{
+                    borderRadius: 2,
+                    px: 4,
+                    py: 1,
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    background: editingRecord
+                      ? `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`
+                      : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                    boxShadow: theme.shadows[4],
+                    '&:hover': {
+                      boxShadow: theme.shadows[8],
+                    },
+                  }}
                 >
-                  {loading ? <CircularProgress size={20} /> : 'Save'}
+                  {loading ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CircularProgress size={20} color="inherit" />
+                      <span>Saving...</span>
+                    </Box>
+                  ) : (
+                    editingRecord ? 'Update Record' : 'Save Record'
+                  )}
                 </Button>
               </DialogActions>
             </Dialog>
+
+            {/* Modern Record Viewer Modal */}
+            <ModernRecordViewerModal
+              open={viewDialogOpen}
+              onClose={handleCloseViewDialog}
+              recordType={selectedRecordType as 'baptism' | 'marriage' | 'funeral'}
+              record={viewingRecord}
+              recordIndex={viewingRecordIndex}
+              recordTotal={filteredAndSortedRecords.length}
+              onPrev={handlePreviousRecord}
+              onNext={handleNextRecord}
+              onEdit={handleEditFromView}
+              onGenerateCertificate={handleGenerateCertificate}
+              isDarkMode={isDarkMode}
+              formatDate={formatRecordDate}
+              displayJsonField={displayJsonField}
+            />
 
             {/* Orthodox Table Theme Editor Drawer */}
             <Drawer

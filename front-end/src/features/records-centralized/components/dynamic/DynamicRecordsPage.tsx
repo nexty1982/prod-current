@@ -159,7 +159,7 @@ const DynamicRecordsPage: React.FC = () => {
 
             // Use the same API pattern as the working Simple Records page
             const data = await getTableData(database, table, {
-                limit: 1000,
+                limit: 100,
                 offset: 0,
                 orderByPos: 1,
                 orderDir: 'desc'

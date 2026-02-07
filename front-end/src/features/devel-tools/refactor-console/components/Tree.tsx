@@ -1,25 +1,24 @@
-import React, { useState, useEffect, memo } from 'react';
-import { 
-  ChevronRight, 
-  ChevronDown, 
-  Folder, 
-  FileCode, 
-  GitBranch,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  XCircle,
-  Copy,
-  ExternalLink,
-  Eye,
-  MoreHorizontal,
-  Archive,
-  RotateCcw,
-  FileX,
-  FileCheck
-} from 'lucide-react';
-import { TreeItem, RecoveryStatus } from '@/types/refactorConsole';
+import { RecoveryStatus, TreeItem } from '@/types/refactorConsole';
 import { useTheme } from '@mui/material/styles';
+import {
+    AlertTriangle,
+    CheckCircle,
+    ChevronDown,
+    ChevronRight,
+    Clock,
+    Copy,
+    ExternalLink,
+    Eye,
+    FileCheck,
+    FileCode,
+    FileX,
+    Folder,
+    RotateCcw,
+    Shield,
+    ShieldOff,
+    XCircle
+} from 'lucide-react';
+import React, { memo, useEffect, useState } from 'react';
 
 // Browser-compatible path utilities
 const pathBasename = (filePath: string): string => {
@@ -45,6 +44,8 @@ interface TreeProps {
   onNodeAction: (action: string, node: TreeItem) => void;
   className?: string;
   isDark?: boolean;
+  isWhitelisted?: (relPath: string) => boolean;
+  onToggleWhitelist?: (relPath: string) => void;
 }
 
 
@@ -126,17 +127,20 @@ interface TreeNodeProps {
   onNodeAction: (action: string, node: TreeItem) => void;
   showBadges?: boolean;
   isDark?: boolean;
+  isWhitelisted?: boolean;
+  onToggleWhitelist?: (relPath: string) => void;
 }
 
-const TreeNode = memo<TreeNodeProps>(({ 
-  item, 
-  level, 
-  onToggleExpanded, 
+const TreeNode = memo<TreeNodeProps>(({
+  item,
+  level,
+  onToggleExpanded,
   onNodeAction,
   showBadges = true,
-  isDark = false
+  isDark = false,
+  isWhitelisted = false,
+  onToggleWhitelist
 }) => {
-  const [showActions, setShowActions] = useState(false);
   const isExpanded = item.expanded;
   const hasChildren = item.children && item.children.length > 0;
   const isDirectory = item.type === 'dir';
@@ -159,7 +163,6 @@ const TreeNode = memo<TreeNodeProps>(({
   const handleAction = (e: React.MouseEvent, action: string) => {
     e.stopPropagation();
     onNodeAction(action, item);
-    setShowActions(false);
   };
   
   const renderBadges = () => {
@@ -167,70 +170,88 @@ const TreeNode = memo<TreeNodeProps>(({
     
     const badges = [];
     
-    // Badge style helper
+    // Badge style helper - more subtle and professional
     const getBadgeStyle = (type: string) => {
       const styles: Record<string, { bg: string; text: string; border?: string }> = {
         purple: {
-          bg: isDark ? 'rgba(147, 51, 234, 0.25)' : '#f3e8ff',
-          text: isDark ? '#d8b4fe' : '#7e22ce',
-          border: isDark ? '#7c3aed' : '#c4b5fd'
+          bg: isDark ? 'rgba(147, 51, 234, 0.15)' : 'rgba(147, 51, 234, 0.1)',
+          text: isDark ? '#c084fc' : '#9333ea',
+          border: isDark ? 'rgba(147, 51, 234, 0.3)' : 'rgba(147, 51, 234, 0.2)'
         },
         orange: {
-          bg: isDark ? 'rgba(234, 88, 12, 0.25)' : '#ffedd5',
-          text: isDark ? '#fdba74' : '#c2410c',
-          border: isDark ? '#ea580c' : '#fdba74'
+          bg: isDark ? 'rgba(234, 88, 12, 0.15)' : 'rgba(234, 88, 12, 0.1)',
+          text: isDark ? '#fb923c' : '#ea580c',
+          border: isDark ? 'rgba(234, 88, 12, 0.3)' : 'rgba(234, 88, 12, 0.2)'
         },
         green: {
-          bg: isDark ? 'rgba(34, 197, 94, 0.25)' : '#dcfce7',
-          text: isDark ? '#86efac' : '#15803d',
-          border: isDark ? '#22c55e' : '#86efac'
+          bg: isDark ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.1)',
+          text: isDark ? '#4ade80' : '#16a34a',
+          border: isDark ? 'rgba(34, 197, 94, 0.3)' : 'rgba(34, 197, 94, 0.2)'
         },
         yellow: {
-          bg: isDark ? 'rgba(234, 179, 8, 0.25)' : '#fef9c3',
-          text: isDark ? '#fde047' : '#a16207',
-          border: isDark ? '#eab308' : '#fde047'
+          bg: isDark ? 'rgba(234, 179, 8, 0.15)' : 'rgba(234, 179, 8, 0.1)',
+          text: isDark ? '#facc15' : '#ca8a04',
+          border: isDark ? 'rgba(234, 179, 8, 0.3)' : 'rgba(234, 179, 8, 0.2)'
         },
         red: {
-          bg: isDark ? 'rgba(239, 68, 68, 0.25)' : '#fee2e2',
-          text: isDark ? '#fca5a5' : '#b91c1c',
-          border: isDark ? '#ef4444' : '#fca5a5'
+          bg: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)',
+          text: isDark ? '#f87171' : '#dc2626',
+          border: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.2)'
         },
         blue: {
-          bg: isDark ? 'rgba(59, 130, 246, 0.25)' : '#dbeafe',
-          text: isDark ? '#93c5fd' : '#1e40af'
+          bg: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.1)',
+          text: isDark ? '#60a5fa' : '#2563eb',
+          border: isDark ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.2)'
         },
         gray: {
-          bg: isDark ? '#374151' : '#f3f4f6',
-          text: isDark ? '#9ca3af' : '#4b5563',
-          border: isDark ? '#4b5563' : '#d1d5db'
+          bg: isDark ? 'rgba(156, 163, 175, 0.15)' : 'rgba(156, 163, 175, 0.1)',
+          text: isDark ? '#9ca3af' : '#6b7280',
+          border: isDark ? 'rgba(156, 163, 175, 0.3)' : 'rgba(156, 163, 175, 0.2)'
         }
       };
       return styles[type] || styles.gray;
     };
     
-    // Recovery status badge (highest priority)
-    if (item.recoveryStatus) {
+    // Whitelist badge (highest priority)
+    if (isWhitelisted) {
+      const shieldStyle = getBadgeStyle('blue');
+      badges.push(
+        <span
+          key="whitelist"
+          className="text-xs px-2 py-0.5 rounded font-medium flex items-center gap-1"
+          style={{
+            backgroundColor: shieldStyle.bg,
+            color: shieldStyle.text,
+            border: `1px solid ${shieldStyle.border}`
+          }}
+        >
+          <Shield className="w-3 h-3" />
+          Protected
+        </span>
+      );
+    }
+
+    // Recovery status badge (highest priority) - only show if not unchanged
+    if (item.recoveryStatus && item.recoveryStatus !== 'unchanged') {
       const statusLabels = {
-        'missing_in_prod': 'MISSING',
-        'modified_since_backup': 'MODIFIED',
-        'new_file': 'NEW',
-        'unchanged': 'UNCHANGED'
+        'missing_in_prod': 'Missing',
+        'modified_since_backup': 'Modified',
+        'new_file': 'New'
       };
       const statusTypes = {
         'missing_in_prod': 'purple',
         'modified_since_backup': 'orange',
-        'new_file': 'green',
-        'unchanged': 'gray'
+        'new_file': 'green'
       };
       const style = getBadgeStyle(statusTypes[item.recoveryStatus]);
       badges.push(
         <span 
           key="recovery"
-          className="text-xs px-2 py-1 rounded-full font-medium"
+          className="text-xs px-2 py-0.5 rounded font-medium"
           style={{
             backgroundColor: style.bg,
             color: style.text,
-            border: style.border ? `1px solid ${style.border}` : 'none'
+            border: `1px solid ${style.border}`
           }}
         >
           {statusLabels[item.recoveryStatus]}
@@ -238,77 +259,66 @@ const TreeNode = memo<TreeNodeProps>(({
       );
     }
     
-    // Classification badge
-    const classStyle = getBadgeStyle(item.classification === 'green' ? 'green' : 
-                                     item.classification === 'orange' ? 'orange' :
-                                     item.classification === 'yellow' ? 'yellow' : 'red');
-    badges.push(
-      <span 
-        key="classification"
-        className="text-xs px-2 py-1 rounded-full font-medium"
-        style={{
-          backgroundColor: classStyle.bg,
-          color: classStyle.text
-        }}
-      >
-        {item.classification.toUpperCase()}
-      </span>
-    );
-    
-    // Usage score badge
-    if (item.type === 'file') {
-      const blueStyle = getBadgeStyle('blue');
+    // Classification badge - only show if not green (green = good, no need to highlight)
+    if (item.classification !== 'green') {
+      const classStyle = getBadgeStyle(
+        item.classification === 'orange' ? 'orange' :
+        item.classification === 'yellow' ? 'yellow' : 'red'
+      );
       badges.push(
         <span 
-          key="score" 
-          className="text-xs px-2 py-1 rounded-full font-medium"
+          key="classification"
+          className="text-xs px-2 py-0.5 rounded font-medium uppercase"
           style={{
-            backgroundColor: blueStyle.bg,
-            color: blueStyle.text
+            backgroundColor: classStyle.bg,
+            color: classStyle.text,
+            border: `1px solid ${classStyle.border}`
           }}
         >
-          Score: {item.usage.score}
+          {item.classification}
         </span>
       );
     }
     
-    // Duplicate badge
+    // Usage score badge - only show if score is 0 (problematic)
+    if (item.type === 'file' && item.usage.score === 0) {
+      const blueStyle = getBadgeStyle('blue');
+      badges.push(
+        <span 
+          key="score" 
+          className="text-xs px-2 py-0.5 rounded font-medium"
+          style={{
+            backgroundColor: blueStyle.bg,
+            color: blueStyle.text,
+            border: `1px solid ${blueStyle.border}`
+          }}
+        >
+          Score: 0
+        </span>
+      );
+    }
+    
+    // Duplicate badge - show with icon
     if (item.similarity?.duplicates.length || item.similarity?.nearMatches.length) {
       const redStyle = getBadgeStyle('red');
       badges.push(
         <span 
           key="duplicates" 
-          className="text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1"
+          className="text-xs px-2 py-0.5 rounded font-medium flex items-center gap-1"
           style={{
             backgroundColor: redStyle.bg,
-            color: redStyle.text
+            color: redStyle.text,
+            border: `1px solid ${redStyle.border}`
           }}
         >
-          <GitBranch className="w-3 h-3" />
-          Dupes
-        </span>
-      );
-    }
-    
-    // Feature path badge
-    if (item.featurePathMatch) {
-      const greenStyle = getBadgeStyle('green');
-      badges.push(
-        <span 
-          key="feature" 
-          className="text-xs px-2 py-1 rounded-full font-medium"
-          style={{
-            backgroundColor: greenStyle.bg,
-            color: greenStyle.text
-          }}
-        >
-          Feature
+          <Copy className="w-3 h-3" />
+          {item.similarity.duplicates.length + item.similarity.nearMatches.length}
         </span>
       );
     }
     
     return (
-      <div className="flex gap-1 flex-wrap">
+      <div className="flex gap-1.5 items-center">
         {badges}
       </div>
     );
@@ -316,156 +326,206 @@ const TreeNode = memo<TreeNodeProps>(({
   
   return (
     <div 
-      className="flex items-center gap-2 py-2 px-3 cursor-pointer group"
+      className="group flex items-center gap-3 px-4 py-2.5 cursor-pointer"
       style={{
         ...indentStyle,
-        color: textColor,
         backgroundColor: 'transparent',
-        transition: 'background-color 0.15s'
+        transition: 'all 0.2s ease',
+        borderBottom: `1px solid ${isDark ? 'rgba(55, 65, 81, 0.3)' : 'rgba(229, 231, 235, 0.5)'}`
       }}
       onMouseEnter={(e) => {
-        setShowActions(true);
-        e.currentTarget.style.backgroundColor = isDark ? 'rgba(55, 65, 81, 0.5)' : '#f9fafb';
+        e.currentTarget.style.backgroundColor = isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)';
+        e.currentTarget.style.borderLeftColor = isDark ? '#3b82f6' : '#60a5fa';
       }}
       onMouseLeave={(e) => {
-        setShowActions(false);
         e.currentTarget.style.backgroundColor = 'transparent';
+        e.currentTarget.style.borderLeftColor = 'transparent';
       }}
     >
-      {/* Expand/Collapse Button */}
-      {hasChildren && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleExpanded(item.path);
-          }}
-          className="flex items-center justify-center w-4 h-4 rounded transition-colors"
-          style={{ color: isDark ? '#9ca3af' : '#6b7280' }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = isDark ? '#4b5563' : '#e5e7eb';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
-        >
-          {isExpanded ? (
-            <ChevronDown className="w-3 h-3" />
-          ) : (
-            <ChevronRight className="w-3 h-3" />
-          )}
-        </button>
-      )}
-      
-      {!hasChildren && <div className="w-4 h-4" />}
-      
-      {/* File/Directory Icon */}
-      <div className="flex items-center">
-        {isDirectory ? (
-          <Folder className="w-4 h-4 text-blue-500" />
-        ) : (
-          getFileIcon(item.path)
-        )}
-      </div>
-      
-      {/* Recovery Status Icon (if in recovery mode) */}
-      {item.recoveryStatus && (
-        <div className="flex items-center">
-          {getRecoveryStatusIcon(item.recoveryStatus)}
-        </div>
-      )}
-      
-      {/* Classification Icon */}
-      <div className="flex items-center">
-        {getClassificationIcon(item.classification)}
-      </div>
-      
-      {/* File/Directory Name */}
-      <div className="flex-1 min-w-0">
-        <div 
-          className="text-sm font-medium truncate"
-          style={{ color: textColor }}
-        >
-          {item.type === 'dir' ? pathBasename(item.path) : pathBasename(item.relPath)}
-        </div>
-        {item.type === 'file' && (
-          <div 
-            className="text-xs truncate"
-            style={{ color: isDark ? '#9ca3af' : '#6b7280' }}
+      {/* LEFT SIDE: icons + name */}
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        {/* Expand/Collapse Button - Chevron Disclosure */}
+        {hasChildren ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleExpanded(item.path);
+            }}
+            className="flex h-6 w-6 items-center justify-center rounded transition-colors"
+            style={{ 
+              color: isDark ? 'rgba(156, 163, 175, 0.7)' : 'rgba(107, 114, 128, 0.7)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDark ? 'rgba(55, 65, 81, 0.5)' : 'rgba(243, 244, 246, 1)';
+              e.currentTarget.style.color = isDark ? '#f3f4f6' : '#1f2937';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = isDark ? 'rgba(156, 163, 175, 0.7)' : 'rgba(107, 114, 128, 0.7)';
+            }}
+            aria-label={isExpanded ? 'Collapse folder' : 'Expand folder'}
+            title={isExpanded ? 'Collapse folder' : 'Expand folder'}
           >
-            {item.relPath}
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
+        ) : (
+          <div className="h-6 w-6" />
+        )}
+        
+        {/* File/Directory Icon */}
+        {isDirectory ? (
+          <Folder 
+            className="h-4 w-4 flex-shrink-0" 
+            style={{ 
+              color: isDark ? '#60a5fa' : '#3b82f6',
+              strokeWidth: 2,
+              fill: 'none'
+            }} 
+          />
+        ) : (
+          <div className="flex-shrink-0" style={{ backgroundColor: 'transparent' }}>{getFileIcon(item.path)}</div>
+        )}
+        
+        {/* Recovery Status Icon (if in recovery mode) */}
+        {item.recoveryStatus && (
+          <div className="flex items-center flex-shrink-0" style={{ backgroundColor: 'transparent' }}>
+            {getRecoveryStatusIcon(item.recoveryStatus)}
           </div>
         )}
+        
+        {/* Classification Icon */}
+        <div className="flex items-center flex-shrink-0" style={{ backgroundColor: 'transparent' }}>
+          {getClassificationIcon(item.classification)}
+        </div>
+        
+        {/* File/Directory Name */}
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-medium" style={{ color: textColor }}>
+            {item.type === 'dir' ? pathBasename(item.path) : pathBasename(item.relPath)}
+          </div>
+          {item.type === 'file' && (
+            <div 
+              className="truncate text-xs"
+              style={{ color: isDark ? '#9ca3af' : '#6b7280' }}
+            >
+              {item.relPath}
+            </div>
+          )}
+        </div>
       </div>
       
-      {/* Action Buttons */}
-      {showActions && (
-        <div className="flex items-center gap-1">
+      {/* RIGHT SIDE: always present, fixed width */}
+      <div className="ml-auto flex w-[170px] items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+        {/* Whitelist toggle */}
+        {item.type === 'file' && onToggleWhitelist && (
           <button
-            onClick={(e) => handleAction(e, 'copy')}
-            className="p-1 rounded"
-            style={{ color: isDark ? '#d1d5db' : '#4b5563' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDark ? '#4b5563' : '#e5e7eb'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            title="Copy relative path"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleWhitelist(item.relPath);
+            }}
+            className="rounded p-1.5 transition-colors"
+            style={{ color: isWhitelisted ? (isDark ? '#60a5fa' : '#2563eb') : (isDark ? '#d1d5db' : '#4b5563') }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = isWhitelisted ? (isDark ? '#93c5fd' : '#1d4ed8') : (isDark ? '#60a5fa' : '#3b82f6');
+              e.currentTarget.style.backgroundColor = isWhitelisted ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = isWhitelisted ? (isDark ? '#60a5fa' : '#2563eb') : (isDark ? '#d1d5db' : '#4b5563');
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+            title={isWhitelisted ? 'Remove from whitelist (unprotect)' : 'Add to whitelist (protect from modifications)'}
           >
-            <Copy className="w-4 h-4" />
+            {isWhitelisted ? <Shield className="h-4 w-4" /> : <ShieldOff className="h-4 w-4" />}
           </button>
-          
-          {item.type === 'file' && (
-            <button
-              onClick={(e) => handleAction(e, 'open')}
-              className="p-1 rounded"
-              style={{ color: isDark ? '#d1d5db' : '#4b5563' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDark ? '#4b5563' : '#e5e7eb'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              title="Open in editor"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </button>
-          )}
-          
-          {/* Restore button (only for missing files) */}
-          {item.recoveryStatus === 'missing_in_prod' && item.type === 'file' && (
-            <button
-              onClick={(e) => handleAction(e, 'restore')}
-              className="p-1 rounded"
-              style={{ color: isDark ? '#c084fc' : '#9333ea' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDark ? 'rgba(147, 51, 234, 0.3)' : '#e9d5ff'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              title="Restore from backup"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-          )}
-          
+        )}
+
+        <button
+          onClick={(e) => handleAction(e, 'copy')}
+          className="rounded p-1.5 transition-colors hover:bg-blue-500/20"
+          style={{ color: isDark ? '#d1d5db' : '#4b5563' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = isDark ? '#60a5fa' : '#3b82f6';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = isDark ? '#d1d5db' : '#4b5563';
+          }}
+          title="Copy relative path"
+        >
+          <Copy className="h-4 w-4" />
+        </button>
+        
+        {item.type === 'file' && (
           <button
-            onClick={(e) => handleAction(e, 'reasons')}
-            className="p-1 rounded"
+            onClick={(e) => handleAction(e, 'open')}
+            className="rounded p-1.5 transition-colors hover:bg-blue-500/20"
             style={{ color: isDark ? '#d1d5db' : '#4b5563' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDark ? '#4b5563' : '#e5e7eb'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            title="View classification reasons"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = isDark ? '#60a5fa' : '#3b82f6';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = isDark ? '#d1d5db' : '#4b5563';
+            }}
+            title="Open in editor"
           >
-            <Eye className="w-4 h-4" />
+            <ExternalLink className="h-4 w-4" />
           </button>
-        </div>
-      )}
+        )}
+        
+        {/* Restore button (only for missing files) */}
+        {item.recoveryStatus === 'missing_in_prod' && item.type === 'file' && (
+          <button
+            onClick={(e) => handleAction(e, 'restore')}
+            className="rounded p-1.5 transition-colors hover:bg-purple-500/20"
+            style={{ color: isDark ? '#c084fc' : '#9333ea' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = isDark ? '#e9d5ff' : '#7e22ce';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = isDark ? '#c084fc' : '#9333ea';
+            }}
+            title="Restore from backup"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+        )}
+        
+        <button
+          onClick={(e) => handleAction(e, 'reasons')}
+          className="rounded p-1.5 transition-colors hover:bg-blue-500/20"
+          style={{ color: isDark ? '#d1d5db' : '#4b5563' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = isDark ? '#60a5fa' : '#3b82f6';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = isDark ? '#d1d5db' : '#4b5563';
+          }}
+          title="View classification reasons"
+        >
+          <Eye className="h-4 w-4" />
+        </button>
+      </div>
       
       {/* Badges */}
-      <div className="flex-shrink-0 mr-2">
+      <div className="flex-shrink-0 ml-auto">
         {renderBadges()}
       </div>
     </div>
   );
 });
 
-const Tree = memo<TreeProps>(({ 
-  treeItems, 
-  expandedPaths, 
-  onToggleExpanded, 
+const Tree = memo<TreeProps>(({
+  treeItems,
+  expandedPaths,
+  onToggleExpanded,
   onNodeAction,
   className = '',
-  isDark: isDarkProp
+  isDark: isDarkProp,
+  isWhitelisted,
+  onToggleWhitelist
 }) => {
   const theme = useTheme();
   const isDark = isDarkProp !== undefined ? isDarkProp : theme.palette.mode === 'dark';
@@ -559,6 +619,8 @@ const Tree = memo<TreeProps>(({
             onToggleExpanded={onToggleExpanded}
             onNodeAction={onNodeAction}
             isDark={isDark}
+            isWhitelisted={isWhitelisted ? isWhitelisted(item.relPath) : false}
+            onToggleWhitelist={onToggleWhitelist}
           />
         ))}
       </div>

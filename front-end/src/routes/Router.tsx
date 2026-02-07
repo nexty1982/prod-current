@@ -1,16 +1,15 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { lazy, Suspense } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { Box, Typography, Button } from '@mui/material';
-import ProtectedRoute from '../components/auth/ProtectedRoute';
-import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
-import HeadlineSourcePicker from '../features/admin/headlines/HeadlineSourcePicker';
-import SmartRedirect from '../components/routing/SmartRedirect';
 import AppErrorBoundary from '@/shared/ui/AppErrorBoundary';
 import { RecordsRouteErrorBoundary } from '@/shared/ui/RecordsRouteErrorBoundary';
-import Loadable from '../layouts/full/shared/loadable/Loadable';
+import { lazy } from 'react';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import ProtectedRoute from '../components/auth/ProtectedRoute';
+import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
+import SmartRedirect from '../components/routing/SmartRedirect';
+import HeadlineSourcePicker from '../features/admin/headlines/HeadlineSourcePicker';
 import OMDeps from '../features/devel-tools/om-deps/OM-deps';
+import Loadable from '../layouts/full/shared/loadable/Loadable';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -32,6 +31,7 @@ const ImageAI = Loadable(lazy(() => import('../features/apps/image-ai/ImageAI'))
 const SiteStructureVisualizer = Loadable(lazy(() => import('../features/devel-tools/site-structure/SiteStructureVisualizer')));
 const LoadingDemo = Loadable(lazy(() => import('../features/devel-tools/loading-demo/LoadingDemo')));
 const OmtraceConsole = Loadable(lazy(() => import('../features/devel-tools/omtrace/OmtraceConsole')));
+const MenuEditor = Loadable(lazy(() => import('../features/devel-tools/menu-editor/MenuEditor')));
 const Kanban = Loadable(lazy(() => import('../features/apps/kanban/Kanban')));
 const InvoiceList = Loadable(lazy(() => import('../features/apps/invoice/List')));
 const InvoiceCreate = Loadable(lazy(() => import('../features/apps/invoice/Create')));
@@ -68,14 +68,14 @@ const ChurchList = Loadable(lazy(() => import('../features/church/apps/church-ma
 const ChurchForm = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchForm')));
 const ChurchSetupWizard = Loadable(lazy(() => import('../features/devel-tools/om-church-wizard/ChurchSetupWizard')));
 const FieldMapperPage = Loadable(lazy(() => import('../features/church/FieldMapperPage')));
-const RecordsPageWrapper = Loadable(lazy(() => import('../features/records/apps/church-management/RecordsPageWrapper')));
+//const RecordsPageWrapper = Loadable(lazy(() => import('../features/records-centralized/apps/church-management/RecordsPageWrapper')));
 
 // Records Management
 const AdvancedGridPage = Loadable(lazy(() => import('../features/tables/AdvancedGridPage')));
 //const RecordsGridPage = Loadable(lazy(() => import('../features/records/apps/records-grid/RecordsGridPage')));
 //const ChurchRecordsSimplePage = Loadable(lazy(() => import('../features/records/records/ChurchRecordsSimplePage')));
 //const DynamicRecordsPageWrapper = Loadable(lazy(() => import('../features/records/apps/records/DynamicRecordsPageWrapper')));
-const EnhancedRecordsGrid = Loadable(lazy(() => import('../features/records/EnhancedRecordsGrid')));
+//const EnhancedRecordsGrid = Loadable(lazy(() => import('../features/records-centralized/EnhancedRecordsGrid')));
 
 // Records Centralized Pages (unchanged by phase3)
 const BaptismRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/baptism/BaptismRecordsPage')));
@@ -84,9 +84,9 @@ const FuneralRecordsPage = Loadable(lazy(() => import('../features/records-centr
 const CentralizedRecordsPageWrapper = Loadable(lazy(() => import('../features/records-centralized/components/records/RecordsPageWrapper')));
 
 // Record Entry Forms
-const BaptismRecordEntryPage = Loadable(lazy(() => import('../features/records/baptism/BaptismRecordEntryPage')));
-const MarriageRecordEntryPage = Loadable(lazy(() => import('../features/records/marriage/MarriageRecordEntryPage')));
-const FuneralRecordEntryPage = Loadable(lazy(() => import('../features/records/funeral/FuneralRecordEntryPage')));
+const BaptismRecordEntryPage = Loadable(lazy(() => import('../features/records-centralized/baptism/BaptismRecordEntryPage')));
+const MarriageRecordEntryPage = Loadable(lazy(() => import('../features/records-centralized/marriage/MarriageRecordEntryPage')));
+const FuneralRecordEntryPage = Loadable(lazy(() => import('../features/records-centralized/funeral/FuneralRecordEntryPage')));
 const DynamicRecordsManager = Loadable(lazy(() => import('../features/records-centralized/components/records/DynamicRecordsManager')));
 const ModernDynamicRecordsManager = Loadable(lazy(() => import('../features/records-centralized/components/records/ModernDynamicRecordsManager')));
 const EditableRecordPage = Loadable(lazy(() => import('../features/records-centralized/components/records/EditableRecordPage')));
@@ -136,6 +136,8 @@ const EnhancedOCRUploader = Loadable(lazy(() => import('../features/devel-tools/
 const OCRSettingsPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OCRSettingsPage')));
 const OcrSetupWizardPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrSetupWizardPage')));
 const OMTasksPage = Loadable(lazy(() => import('../features/devel-tools/om-tasks/OMTasksPage')));
+const DailyTasks = Loadable(lazy(() => import('../features/devel-tools/DailyTasks')));
+const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-explorer/ApiExplorerPage')));
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
 const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-operations/GitOperations')));
 
@@ -165,10 +167,9 @@ const OMLearn = Loadable(lazy(() => import('../features/omlearn/OMLearn')));
 const BuildConsole = Loadable(lazy(() => import('../features/devel-tools/om-build-console/BuildConsole')));
 
 // Records Pages
-import { RECORDS_LEGACY_ENABLED, isInteractiveReportRecipientsEnabled } from '../config/featureFlags';
+import { isInteractiveReportRecipientsEnabled } from '../config/featureFlags';
 
 // Environment-Gated Feature Components
-import RoleGatedFeature, { ReconstructedFeature } from '../components/routing/RoleGatedFeature';
 import EnvironmentAwarePage from '../components/routing/EnvironmentAwarePage';
 
 const ChurchAdminList = Loadable(lazy(() => import('../features/admin/admin/ChurchAdminList')));
@@ -176,7 +177,7 @@ const ChurchAdminPanel = Loadable(lazy(() => import('../features/admin/admin/Chu
 
 
 // Records UI Page
-const RecordsUIPage = Loadable(lazy(() => import('../features/records/apps/records-ui/index')));
+const RecordsUIPage = Loadable(lazy(() => import('../features/records-centralized/apps/records-ui/index')));
 
 // ui components
 // Removed: All MUI UI components from misc-legacy
@@ -356,6 +357,16 @@ const Router = [
           </ProtectedRoute>
         )
       },
+       {
+        path: '/devel-tools/omtrace',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <OmtraceConsole />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+       },
 
       // Social Features Routes
       {
@@ -529,14 +540,13 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/apps/church-management/:id/records',
-        element: (
-          <ProtectedRoute requiredPermission="manage_churches">
-            <RecordsPageWrapper />
-          </ProtectedRoute>
-        )
-      },
+     // {
+     //   path: '/apps/church-management/:id/records',
+     //   element: (
+     //     <ProtectedRoute requiredPermission="manage_churches">
+     //       <RecordsPageWrapper />
+     //     </ProtectedRoute>
+     //   )
       {
         path: '/church/om-spec',
         element: (
@@ -820,6 +830,16 @@ const Router = [
         )
       },
       {
+        path: '/devel-tools/menu-editor',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <MenuEditor />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/devel/dynamic-records',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin']}>
@@ -868,6 +888,34 @@ const Router = [
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
+      },
+      {
+        path: '/devel-tools/daily-tasks',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <DailyTasks />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        ),
+        meta: {
+          requiresAuth: true,
+          hidden: false
+        }
+      },
+      {
+        path: '/devel-tools/api-explorer',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ApiExplorerPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        ),
+        meta: {
+          requiresAuth: true,
+          hidden: false
+        }
       },
       {
         path: '/apps/devel/loading-demo',
@@ -1043,14 +1091,14 @@ const Router = [
         )
       },
       // Enhanced Records Grid for specific church
-      {
-        path: '/apps/records/enhanced/:churchId',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <EnhancedRecordsGrid />
-          </ProtectedRoute>
-        )
-      },
+     // {
+     //   path: '/apps/records/enhanced/:churchId',
+     //   element: (
+     //     <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+     //       <EnhancedRecordsGrid />
+     //     </ProtectedRoute>
+     //   )
+      
       // Records UI Page
       {
         path: '/apps/records-ui',
@@ -1169,10 +1217,7 @@ const Router = [
       { path: '/react-tables/sorting', element: <ReactSortingTable /> },
       { path: '/react-tables/sticky', element: <ReactStickyTable /> },
 
-      // Removed: All MUI chart routes (misc-legacy)
-      // Removed: All MUI tree routes (misc-legacy)
-
-      // Records Centralized Routes (Priority 1-3: Reconstructed)
+      // Records Centralized Routes (Priority 0-3: Reconstructed)
       {
         path: '/apps/records/baptism',
         element: (
@@ -1180,7 +1225,7 @@ const Router = [
             <RecordsRouteErrorBoundary>
               <EnvironmentAwarePage 
                 featureId="baptism-records-v2" 
-                priority={1}
+                priority={0}
                 featureName="Baptism Records"
               >
                 <BaptismRecordsPage />
@@ -1303,27 +1348,34 @@ const Router = [
       { path: '/apps/records/manager', element: <DynamicRecordsManager /> },
       { path: '/apps/records/modern-manager', element: <ModernDynamicRecordsManager /> },
       { path: '/apps/records/editable', element: <EditableRecordPage /> },
-
-      { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
   {
     path: '/',
     element: <BlankLayout />,
     children: [
-      { path: '/auth/404', element: <NotFound404 /> },
-      { path: '/auth/coming-soon', element: <ComingSoon /> },
-      { path: '/auth/unauthorized', element: <Unauthorized /> },
-      { path: '/auth/login', element: <Navigate to="/auth/login2" replace /> },
-      { path: '/login', element: <Navigate to="/auth/login2" replace /> },
-      { path: '/auth/login2', element: <Login2 /> },
-      { path: '/auth/register', element: <Register /> },
-      { path: '/auth/register2', element: <Register2 /> },
-      { path: '/auth/forgot-password', element: <ForgotPassword /> },
-      { path: '/auth/forgot-password2', element: <ForgotPassword2 /> },
-      { path: '/auth/two-steps', element: <TwoSteps /> },
-      { path: '/auth/two-steps2', element: <TwoSteps2 /> },
-      { path: '/auth/maintenance', element: <Maintenance /> },
+      // Auth routes - explicitly public, NO ProtectedRoute wrapper
+      {
+        path: 'auth',
+        children: [
+          { index: true, element: <Navigate to="/auth/login" replace /> },
+          { path: '404', element: <NotFound404 /> },
+          { path: 'coming-soon', element: <ComingSoon /> },
+          { path: 'unauthorized', element: <Unauthorized /> },
+          { path: 'login', element: <Login2 /> },
+          { path: 'login2', element: <Login2 /> },
+          { path: 'register', element: <Register /> },
+          { path: 'register2', element: <Register2 /> },
+          { path: 'forgot-password', element: <ForgotPassword /> },
+          { path: 'forgot-password2', element: <ForgotPassword2 /> },
+          { path: 'two-steps', element: <TwoSteps /> },
+          { path: 'two-steps2', element: <TwoSteps2 /> },
+          { path: 'maintenance', element: <Maintenance /> },
+          { path: '*', element: <NotFound404 /> },
+        ]
+      },
+      // Root login redirect
+      { path: 'login', element: <Navigate to="/auth/login2" replace /> },
       { path: '/landingpage', element: <Navigate to="/dashboards/super" replace /> },
       { path: '/pages/pricing', element: <Navigate to="/dashboards/super" replace /> },
       { path: '/pages/faq', element: <Faq /> },
@@ -1358,7 +1410,7 @@ const Router = [
         { path: '/r/interactive/:token', element: <RecipientSubmissionPage /> },
       ] : []),
       
-      { path: '*', element: <Navigate to="/auth/404" /> },
+      { path: '*', element: <NotFound404 /> },
     ],
   },
 ];

@@ -66,6 +66,7 @@ const BuildInfoPage: React.FC = () => {
             ? 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)'
             : 'linear-gradient(135deg, #e65100 0%, #f57c00 100%)',
           borderRadius: 2,
+          color: '#fff',
         }}
       >
         <Stack direction="row" alignItems="center" spacing={2}>
@@ -85,7 +86,7 @@ const BuildInfoPage: React.FC = () => {
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #1a237e 0%, #3949ab 100%)', borderRadius: 2, height: '100%' }}>
+          <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #1a237e 0%, #3949ab 100%)', borderRadius: 2, height: '100%', color: '#fff' }}>
             <Stack spacing={2}>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <IconBrowser size={24} />
@@ -123,11 +124,11 @@ const BuildInfoPage: React.FC = () => {
         </Grid>
         <Grid item xs={12} md={6}>
           {isLoading ? (
-            <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%)', borderRadius: 2, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%)', borderRadius: 2, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
               <CircularProgress color="inherit" />
             </Paper>
           ) : (
-            <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%)', borderRadius: 2, height: '100%' }}>
+            <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%)', borderRadius: 2, height: '100%', color: '#fff' }}>
               <Stack spacing={2}>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <IconServer size={24} />

@@ -52,7 +52,7 @@ const Register2 = () => (
                   </Typography>
                   <Typography
                     component={Link}
-                    to="/auth/login2"
+                    to="/auth/login"
                     fontWeight="500"
                     sx={{
                       textDecoration: 'none',

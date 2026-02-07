@@ -763,7 +763,7 @@ async function provisionChurchSimple({
       });
 
       // Send email with credentials
-      const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/sign-in`;
+      const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/login`;
       await sendProvisioningEmailSimple({
         adminEmail,
         adminFirstName,
@@ -804,7 +804,7 @@ async function provisionChurchSimple({
           ) VALUES (?, ?, ?, 'admin', '/pages/admin/dashboard', NOW(), true)
         `, [adminEmail, adminUsername, hashedPassword]);
 
-        const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/sign-in`;
+        const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/login`;
         
         updateProvisioningStatus(provisioningId, {
           status: 'completed',

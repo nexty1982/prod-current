@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Select,
-  MenuItem,
-  FormControl,
-  Typography,
-  CircularProgress,
-  Chip,
-  SelectChangeEvent,
-  Skeleton
+    Box,
+    Chip,
+    FormControl,
+    MenuItem,
+    Select,
+    SelectChangeEvent,
+    Skeleton,
+    Typography
 } from '@mui/material';
-import { Church, ChevronDown } from 'lucide-react';
+import { ChevronDown, Church } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useChurch } from '../../context/ChurchContext';
 import { useChurchSwitch } from '../../hooks/useChurchSwitch';
@@ -82,7 +81,7 @@ const ChurchHeader: React.FC<ChurchHeaderProps> = ({ onChurchChange, currentChur
         if (response.status === 401) {
           // Session expired — clear auth and redirect to login
           localStorage.removeItem('auth_user');
-          window.location.href = `/auth/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`;
+          window.location.href = `/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`;
           return;
         }
         if (!response.ok) {

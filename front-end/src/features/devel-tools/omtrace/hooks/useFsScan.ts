@@ -1,8 +1,14 @@
-import { useState, useCallback } from 'react';
-import { FileTreeResponse, FileTreeNode } from '../types.ts';
+import { useCallback, useState } from 'react';
+import { apiClient } from '../../../../api/utils/axiosInstance';
+import { FileTreeResponse } from '../types.ts';
 
-// Mock file tree data
-const MOCK_FILE_TREE: FileTreeResponse = {
+// Default settings
+const DEFAULT_BASE_DIR = '/var/www/orthodoxmetrics/prod';
+const DEFAULT_RELATIVE_ROOT = 'front-end/src';
+const DEFAULT_MAX_DEPTH = 5;
+
+// Legacy mock file tree data (kept for reference)
+const MOCK_FILE_TREE_LEGACY: FileTreeResponse = {
   root: 'src',
   nodes: [
     {
@@ -149,11 +155,37 @@ export const useFsScan = () => {
   const scanFileSystem = useCallback(async () => {
     setIsScanning(true);
     
-    // Simulate scanning delay
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
-    
-    setFileTree(MOCK_FILE_TREE);
-    setIsScanning(false);
+    try {
+      // Get settings from localStorage
+      const baseDir = localStorage.getItem('omtrace-baseDir') || DEFAULT_BASE_DIR;
+      const relativeRoot = localStorage.getItem('omtrace-relativeRoot') || DEFAULT_RELATIVE_ROOT;
+      const maxDepth = parseInt(localStorage.getItem('omtrace-maxDepth') || String(DEFAULT_MAX_DEPTH), 10);
+      
+      // Call real backend API
+      const response = await apiClient.post('/api/omtrace/tree', {
+        baseDir,
+        relativeRoot,
+        maxDepth
+      }) as any;
+      
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'File tree scan failed');
+      }
+      
+      setFileTree(response.data);
+      
+    } catch (error: any) {
+      console.error('File tree scan error:', error);
+      // Set empty tree on error
+      setFileTree({
+        root: localStorage.getItem('omtrace-relativeRoot') || DEFAULT_RELATIVE_ROOT,
+        nodes: [],
+        updatedAt: new Date().toISOString()
+      });
+      throw new Error(error.message || 'Failed to scan file system');
+    } finally {
+      setIsScanning(false);
+    }
   }, []);
 
   const clearFileTree = useCallback(() => {

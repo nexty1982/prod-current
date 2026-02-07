@@ -1,54 +1,47 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
-import {
-  AlertCircle,
-  RefreshCw,
-  Search,
-  Zap,
-  Info,
-  Copy,
-  ExternalLink,
-  Eye,
-  Archive,
-  FileSearch,
-  Settings,
-  FolderOpen,
-  Check,
-  X as XIcon,
-  History
-} from 'lucide-react';
-import { toast } from 'react-toastify';
 import { CustomizerContext } from '@/context/CustomizerContext';
-import { useTheme, alpha } from '@mui/material/styles';
-import { 
-  Box, 
-  Paper, 
-  Button, 
-  TextField, 
-  IconButton, 
-  Collapse, 
-  Tooltip,
-  Chip,
-  CircularProgress
+import {
+    Box,
+    Button,
+    Chip,
+    CircularProgress,
+    Collapse,
+    IconButton,
+    Paper,
+    TextField,
+    Tooltip
 } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
+import {
+    AlertCircle,
+    Archive,
+    Check,
+    Eye,
+    FileSearch,
+    FolderOpen,
+    History,
+    RefreshCw,
+    Settings
+} from 'lucide-react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
-import Tree from './components/Tree';
+import SessionPulse from '@/features/admin/components/SessionPulse';
+import {
+    FileAnalysis,
+    Phase1Report,
+    PreviewRestoreResponse,
+    SortOption
+} from '@/types/refactorConsole';
+import refactorConsoleClient, { DEFAULT_PATH_CONFIG, PathConfig } from './api/refactorConsoleClient';
+import DiffViewModal from './components/DiffViewModal';
 import Legend from './components/Legend';
-import Toolbar from './components/Toolbar';
 import RequirementPreviewModal from './components/RequirementPreviewModal';
 import RestoreBundleButton from './components/RestoreBundleButton';
-import DiffViewModal from './components/DiffViewModal';
 import RestoreHistoryViewer from './components/RestoreHistoryViewer';
+import Toolbar from './components/Toolbar';
+import Tree from './components/Tree';
 import { useRefactorScan } from './hooks/useRefactorScan';
-import { 
-  SortOption, 
-  Classification, 
-  Phase1Report, 
-  FileAnalysis, 
-  Snapshot,
-  PreviewRestoreResponse
-} from '@/types/refactorConsole';
-import refactorConsoleClient, { PathConfig, DEFAULT_PATH_CONFIG } from './api/refactorConsoleClient';
-import SessionPulse from '@/features/admin/components/SessionPulse';
+import { useWhitelist } from './hooks/useWhitelist';
 
 const RefactorConsole: React.FC = () => {
   // Get theme context for dark mode
@@ -69,6 +62,13 @@ const RefactorConsole: React.FC = () => {
     }
   }, [activeMode, theme.palette.mode]);
   
+  const {
+    isWhitelisted,
+    toggleWhitelist,
+    clearWhitelist,
+    whitelistCount,
+  } = useWhitelist();
+
   const {
     scanData,
     isLoading,
@@ -92,8 +92,8 @@ const RefactorConsole: React.FC = () => {
     phase1Report: hookPhase1Report,
     bundles,
     calculateBundle
-  } = useRefactorScan();
-  
+  } = useRefactorScan(isWhitelisted);
+
   // Note: Dark mode is handled by the app's theme provider, not by this component
   // MUI uses theme.palette.mode, Tailwind uses the 'dark' class on documentElement
   // Both should be managed at the app level (CustomizerContext/ThemeProvider)
@@ -534,6 +534,16 @@ const RefactorConsole: React.FC = () => {
         break;
         
       case 'restore':
+        // Guard: prevent restoring whitelisted files without explicit confirmation
+        if (isWhitelisted(node.relPath)) {
+          const confirmed = window.confirm(
+            `"${node.relPath}" is whitelisted (protected).\n\nRestoring will overwrite this protected file. Continue?`
+          );
+          if (!confirmed) {
+            toast.info('Restore cancelled — file is protected by whitelist');
+            break;
+          }
+        }
         // Show preview/diff modal before restoring
         if (node.recoveryStatus === 'missing_in_prod' && node.backupPath) {
           handlePreviewRestore(node.relPath);
@@ -600,7 +610,18 @@ const RefactorConsole: React.FC = () => {
   // Handle confirmed restore after preview
   const handleConfirmRestore = async () => {
     if (!pendingRestorePath) return;
-    
+
+    // Double-check whitelist guard at restore time
+    if (isWhitelisted(pendingRestorePath)) {
+      const confirmed = window.confirm(
+        `"${pendingRestorePath}" is whitelisted (protected).\n\nAre you sure you want to overwrite this protected file?`
+      );
+      if (!confirmed) {
+        toast.info('Restore cancelled — file is protected by whitelist');
+        return;
+      }
+    }
+
     setIsRestoring(true);
     
     try {
@@ -868,7 +889,7 @@ const RefactorConsole: React.FC = () => {
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
-                <p style={{ color: theme.palette.text.secondary, margin: 0 }}>
+                <p style={{ color: theme.palette.mode === 'dark' ? theme.palette.grey[300] : theme.palette.text.secondary, margin: 0 }}>
                   Analyze your codebase for duplicates, usage patterns, and refactoring opportunities
                 </p>
                 <Tooltip title="Configure source and destination paths">
@@ -1087,7 +1108,7 @@ const RefactorConsole: React.FC = () => {
                   Remote Samba
                 </Button>
               </Box>
-              <Box sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.5 }}>
+              <Box sx={{ fontSize: '0.75rem', color: theme.palette.mode === 'dark' ? theme.palette.grey[400] : 'text.secondary', mt: 0.5 }}>
                 {sourceType === 'local' ? 'Using local production files' : 'Using remote Samba mount (192.168.1.221)'}
               </Box>
             </Box>
@@ -1210,7 +1231,7 @@ const RefactorConsole: React.FC = () => {
           </Box>
           
           <Box sx={{ mt: 2, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider' }}>
-            <p style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, margin: 0 }}>
+            <p style={{ fontSize: '0.75rem', color: theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.text.secondary, margin: 0 }}>
               <strong>Security:</strong> All paths must be within <code style={{ 
                 backgroundColor: alpha(theme.palette.primary.main, 0.1), 
                 padding: '0 4px', 
@@ -1254,7 +1275,7 @@ const RefactorConsole: React.FC = () => {
             <Box sx={{ textAlign: 'center' }}>
               <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: theme.palette.primary.main }} />
               <h3 style={{ fontWeight: 500, color: theme.palette.text.primary, marginBottom: '0.5rem' }}>Analyzing Codebase</h3>
-              <p style={{ color: theme.palette.text.secondary }}>This may take a few moments...</p>
+              <p style={{ color: theme.palette.mode === 'dark' ? theme.palette.grey[300] : theme.palette.text.secondary }}>This may take a few moments...</p>
             </Box>
           </Box>
         )}
@@ -1277,56 +1298,49 @@ const RefactorConsole: React.FC = () => {
               totalCount={scanData.summary.totalFiles + scanData.summary.totalDirs}
               compareWithBackup={compareWithBackup}
               onToggleRecoveryMode={handleToggleRecoveryMode}
+              whitelistCount={whitelistCount}
+              onClearWhitelist={clearWhitelist}
             />
 
             {/* Stats Summary */}
-            <Paper 
-              elevation={0}
-              sx={{ 
-                bgcolor: 'background.paper',
-                border: 1,
-                borderColor: 'divider',
-                p: 2
-              }}
-              className="rounded-lg"
-            >
+            <div className="mb-3 rounded-xl border bg-white/80 px-4 py-3 border-slate-200 dark:border-slate-700/60 dark:bg-slate-900/40 dark:backdrop-blur">
               {/* Phase 1 Results - Only render when explicitly completed, validated, and progress is 100% */}
               {phase1State === 'done' && phase1Report && phase1Report.summary && phase1Progress === 100 ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div className="text-center">
-                      <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.secondary.light : theme.palette.secondary.main }}>
+                    <div className="flex flex-col items-center">
+                      <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                         {phase1Report.summary?.missingInTarget ?? 0}
                       </div>
-                      <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Restorable Files</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-300">Restorable Files</div>
                     </div>
-                    <div className="text-center">
-                      <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.warning.light : theme.palette.warning.main }}>
+                    <div className="flex flex-col items-center">
+                      <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                         {phase1Report.summary?.modifiedInTarget ?? 0}
                       </div>
-                      <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Modified (Protected)</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-300">Modified (Protected)</div>
                     </div>
-                    <div className="text-center">
-                      <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.success.light : theme.palette.success.main }}>
+                    <div className="flex flex-col items-center">
+                      <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                         {phase1Report.summary?.identical ?? 0}
                       </div>
-                      <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Identical</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-300">Identical</div>
                     </div>
-                    <div className="text-center">
-                      <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.info.light : theme.palette.info.main }}>
+                    <div className="flex flex-col items-center">
+                      <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                         {phase1Report.documentation?.endpointsVerified ?? 0}
                       </div>
-                      <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Endpoints Verified</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-300">Endpoints Verified</div>
                     </div>
-                    <div className="text-center">
-                      <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.error.light : theme.palette.error.main }}>
+                    <div className="flex flex-col items-center">
+                      <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                         {phase1Report.documentation?.endpointsMissing ?? 0}
                       </div>
-                      <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Endpoints Missing</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-300">Endpoints Missing</div>
                     </div>
                   </div>
                   {(phase1Report.documentation?.endpointsFound ?? 0) > 0 && (
-                    <div className="text-center text-sm" style={{ color: theme.palette.text.secondary }}>
+                    <div className="text-center text-sm text-slate-500 dark:text-slate-300">
                       Found {phase1Report.documentation?.endpointsFound ?? 0} endpoints in documentation
                     </div>
                   )}
@@ -1341,7 +1355,7 @@ const RefactorConsole: React.FC = () => {
                     </div>
                     <div className="w-full max-w-md">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm" style={{ color: theme.palette.text.secondary }}>Progress</span>
+                        <span className="text-sm" style={{ color: theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.text.secondary }}>Progress</span>
                         <span className="text-sm font-medium" style={{ color: theme.palette.text.primary }}>{phase1Progress}%</span>
                       </div>
                       <Box sx={{ 
@@ -1365,66 +1379,66 @@ const RefactorConsole: React.FC = () => {
                 </Box>
               ) : scanData?.gapAnalysisEnabled ? (
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  <div className="text-center">
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.secondary.light : theme.palette.secondary.main }}>
+                  <div className="flex flex-col items-center">
+                    <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                       {scanData.summary.missingInProd || 0}
                     </div>
-                    <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Missing in Prod</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">Missing in Prod</div>
                   </div>
-                  <div className="text-center">
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.warning.light : theme.palette.warning.main }}>
+                  <div className="flex flex-col items-center">
+                    <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                       {scanData.summary.modifiedSinceBackup || 0}
                     </div>
-                    <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Modified</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">Modified</div>
                   </div>
-                  <div className="text-center">
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.success.light : theme.palette.success.main }}>
+                  <div className="flex flex-col items-center">
+                    <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                       {scanData.summary.newFiles || 0}
                     </div>
-                    <div className="text-sm" style={{ color: theme.palette.text.secondary }}>New Files</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">New Files</div>
                   </div>
-                  <div className="text-center">
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.success.light : theme.palette.success.main }}>
+                  <div className="flex flex-col items-center">
+                    <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                       {scanData.summary.likelyInProd}
                     </div>
-                    <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Production Ready</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">Production Ready</div>
                   </div>
-                  <div className="text-center">
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.error.light : theme.palette.error.main }}>
+                  <div className="flex flex-col items-center">
+                    <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                       {scanData.summary.legacyOrDupes}
                     </div>
-                    <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Legacy/Duplicates</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">Legacy/Duplicates</div>
                   </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.success.light : theme.palette.success.main }}>
+                  <div className="flex flex-col items-center">
+                    <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                       {scanData.summary.likelyInProd}
                     </div>
-                    <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Production Ready</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">Production Ready</div>
                   </div>
-                  <div className="text-center">
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.warning.light : theme.palette.warning.main }}>
+                  <div className="flex flex-col items-center">
+                    <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                       {scanData.summary.highRisk}
                     </div>
-                    <div className="text-sm" style={{ color: theme.palette.text.secondary }}>High Risk</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">High Risk</div>
                   </div>
-                  <div className="text-center">
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.warning.light : theme.palette.warning.main }}>
+                  <div className="flex flex-col items-center">
+                    <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                       {scanData.summary.inDevelopment}
                     </div>
-                    <div className="text-sm" style={{ color: theme.palette.text.secondary }}>In Development</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">In Development</div>
                   </div>
-                  <div className="text-center">
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: theme.palette.mode === 'dark' ? theme.palette.error.light : theme.palette.error.main }}>
+                  <div className="flex flex-col items-center">
+                    <div className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
                       {scanData.summary.legacyOrDupes}
                     </div>
-                    <div className="text-sm" style={{ color: theme.palette.text.secondary }}>Legacy/Duplicates</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">Legacy/Duplicates</div>
                   </div>
                 </div>
               )}
-            </Paper>
+            </div>
 
             {/* Phase 1 Restorable Files Section - Only render when explicitly completed, validated, and progress is 100% */}
             {phase1State === 'done' && phase1Progress === 100 && phase1Report && phase1Report.summary && Array.isArray(phase1Report.restorableFiles) && phase1Report.restorableFiles.length > 0 && (
@@ -1560,6 +1574,7 @@ const RefactorConsole: React.FC = () => {
                   scanData={scanData}
                   filterState={filterState}
                   onFilterChange={handleFilterChange}
+                  whitelistCount={whitelistCount}
                 />
               </Box>
 
@@ -1571,6 +1586,8 @@ const RefactorConsole: React.FC = () => {
                   onToggleExpanded={handleToggleExpanded}
                   onNodeAction={handleNodeAction}
                   isDark={activeMode === 'dark'}
+                  isWhitelisted={isWhitelisted}
+                  onToggleWhitelist={toggleWhitelist}
                 />
               </Box>
             </Box>

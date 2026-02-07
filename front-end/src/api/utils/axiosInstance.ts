@@ -183,7 +183,7 @@ class ApiClient {
 
         // Handle 401 via centralized auth error handler
         if (error.response?.status === 401) {
-          if (!window.location.pathname.includes('/auth/sign-in')) {
+          if (!window.location.pathname.includes('/auth/login')) {
             handle401Error(error, 'api_axiosInstance');
           }
         }

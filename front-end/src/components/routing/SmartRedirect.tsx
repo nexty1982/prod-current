@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { Box, CircularProgress, Typography } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { CircularProgress, Box, Typography } from '@mui/material';
 import { checkAuth, clearAuthData, getCurrentUser } from '../../auth/authClient';
+import { useAuth } from '../../context/AuthContext';
 
 const SmartRedirect: React.FC = () => {
   const navigate = useNavigate();
@@ -45,9 +45,9 @@ const SmartRedirect: React.FC = () => {
 
         // 1. Safe useAuth handling - check if auth context exists
         if (!auth) {
-          debugLog('Auth context not available, redirecting to homepage');
+          debugLog('Auth context not available, redirecting to login');
           clearAuthData();
-          safeNavigate('/frontend-pages/homepage', { replace: true });
+          safeNavigate('/auth/login', { replace: true });
           return;
         }
 
@@ -80,7 +80,7 @@ const SmartRedirect: React.FC = () => {
           } else {
             debugLog('Context auth - user not authenticated');
             clearAuthData();
-            safeNavigate('/frontend-pages/homepage', { replace: true });
+            safeNavigate('/auth/login', { replace: true });
           }
 
           if (mountedRef.current) {
@@ -146,23 +146,23 @@ const SmartRedirect: React.FC = () => {
                   }
                 } else {
                   // Still no user data after refresh
-                  safeNavigate('/frontend-pages/homepage', { replace: true });
+                  safeNavigate('/auth/login', { replace: true });
                 }
               } catch (refreshError) {
                 debugLog('Auth refresh failed', { error: refreshError });
                 clearAuthData();
-                safeNavigate('/frontend-pages/homepage', { replace: true });
+                safeNavigate('/auth/login', { replace: true });
               }
             } else {
-              // Can't refresh, redirect to homepage
-              safeNavigate('/frontend-pages/homepage', { replace: true });
+              // Can't refresh, redirect to login
+              safeNavigate('/auth/login', { replace: true });
             }
           }
         } else {
           // User is not authenticated
-          debugLog('User not authenticated, redirecting to homepage');
+          debugLog('User not authenticated, redirecting to login');
           clearAuthData();
-          safeNavigate('/frontend-pages/homepage', { replace: true });
+          safeNavigate('/auth/login', { replace: true });
         }
 
       } catch (error) {
@@ -171,10 +171,10 @@ const SmartRedirect: React.FC = () => {
           name: error instanceof Error ? error.name : 'UnknownError'
         });
 
-        // On any error, clear auth data and redirect to homepage
+        // On any error, clear auth data and redirect to login
         if (mountedRef.current) {
           clearAuthData();
-          safeNavigate('/frontend-pages/homepage', { replace: true });
+          safeNavigate('/auth/login', { replace: true });
         }
       } finally {
         // Always set loading to false if component is still mounted

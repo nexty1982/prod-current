@@ -1,8 +1,14 @@
-import { useState, useCallback } from 'react';
-import { OmtraceRunFlags, OmtraceRunResult, RefactorRequest, RefactorResponse, SlugRulesResponse, RefactorHistoryItem } from '../types.ts';
+import { useCallback, useState } from 'react';
+import { apiClient } from '../../../../api/utils/axiosInstance';
+import { OmtraceRunFlags, OmtraceRunResult, RefactorHistoryItem, RefactorRequest, RefactorResponse, SlugRulesResponse } from '../types.ts';
 
-// Mock data for development
-const MOCK_RESULTS: OmtraceRunResult[] = [
+// Default settings
+const DEFAULT_BASE_DIR = '/var/www/orthodoxmetrics/prod';
+const DEFAULT_RELATIVE_ROOT = 'front-end/src';
+const DEFAULT_MAX_DEPTH = 5;
+
+// Legacy mock data for slug rules and history (to be replaced later)
+const MOCK_RESULTS_LEGACY: OmtraceRunResult[] = [
   {
     entry: 'ChurchSetupWizard',
     resolvedPath: 'src/features/church/apps/church-management/ChurchSetupWizard.tsx',
@@ -123,74 +129,136 @@ export const useOmtraceApi = () => {
   const runAnalysis = useCallback(async (targets: string[], flags: OmtraceRunFlags): Promise<OmtraceRunResult> => {
     setIsLoading(true);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-    
-    setIsLoading(false);
-    
-    // Return mock result for first target
-    const target = targets[0];
-    if (target.toLowerCase().includes('church')) {
-      return MOCK_RESULTS[0];
-    } else if (target.toLowerCase().includes('user')) {
-      return MOCK_RESULTS[1];
-    } else {
-      // Generate a generic result
-      return {
-        entry: target,
-        resolvedPath: `src/components/${target}/${target}.tsx`,
-        direct: [`src/components/shared/Button.tsx`, `src/utils/helpers.ts`],
-        stats: {
-          duration: Math.floor(Math.random() * 500) + 100,
-          cacheHit: Math.random() > 0.5
-        }
-      };
+    try {
+      // Get settings from localStorage
+      const baseDir = localStorage.getItem('omtrace-baseDir') || DEFAULT_BASE_DIR;
+      const relativeRoot = localStorage.getItem('omtrace-relativeRoot') || DEFAULT_RELATIVE_ROOT;
+      const maxDepth = parseInt(localStorage.getItem('omtrace-maxDepth') || String(DEFAULT_MAX_DEPTH), 10);
+      const mode = localStorage.getItem('omtrace-mode') || 'closure';
+      
+      // Call real backend API
+      const response = await apiClient.post('/api/omtrace/analyze', {
+        baseDir,
+        relativeRoot,
+        targets,
+        maxDepth,
+        mode,
+        flags
+      }) as any;
+      
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Analysis failed');
+      }
+      
+      // Return first result (for single target analysis)
+      const results = response.data.results || [];
+      if (results.length === 0) {
+        throw new Error('No results returned from analysis');
+      }
+      
+      return results[0];
+      
+    } catch (error: any) {
+      console.error('OMTrace analysis error:', error);
+      throw new Error(error.message || 'Failed to run analysis');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   const runRefactor = useCallback(async (target: string, options: RefactorRequest): Promise<RefactorResponse> => {
     setIsLoading(true);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
-    
-    setIsLoading(false);
-    
-    // Generate mock refactor response
-    const domain = target.toLowerCase().includes('church') ? 'church' : 'user';
-    const slug = target.toLowerCase().includes('wizard') ? 'wiz' : 'core';
-    
-    return {
-      from: `src/components/${target}.tsx`,
-      to: `src/components/${domain}-management/${domain}-${slug}/${target}.tsx`,
-      domain,
-      slug: `${domain}-${slug}`,
-      importUpdates: Math.floor(Math.random() * 20) + 5,
-      notes: ['Refactor completed successfully'],
-      refactorMdPath: 'refactor.md',
-      logPath: `.refactor_logs/${new Date().toISOString().split('T')[0]}/${target}.json`
-    };
+    try {
+      // Get settings from localStorage
+      const baseDir = localStorage.getItem('omtrace-baseDir') || DEFAULT_BASE_DIR;
+      const relativeRoot = localStorage.getItem('omtrace-relativeRoot') || DEFAULT_RELATIVE_ROOT;
+      const maxDepth = parseInt(localStorage.getItem('omtrace-maxDepth') || String(DEFAULT_MAX_DEPTH), 10);
+      
+      // TODO: Implement refactor endpoint on backend
+      // For now, throw error indicating not implemented
+      throw new Error('Refactor functionality not yet implemented in backend');
+      
+      // Future implementation:
+      // const response = await apiClient.post('/api/omtrace/refactor', {
+      //   baseDir,
+      //   relativeRoot,
+      //   target,
+      //   maxDepth,
+      //   options
+      // });
+      // return response.data;
+      
+    } catch (error: any) {
+      console.error('OMTrace refactor error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const getHistory = useCallback(async (): Promise<RefactorHistoryItem[]> => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setIsLoading(false);
-    return MOCK_HISTORY;
+    
+    try {
+      // TODO: Implement history endpoint on backend
+      // For now, return empty array
+      console.warn('History endpoint not yet implemented');
+      return [];
+      
+      // Future implementation:
+      // const response = await apiClient.get('/api/omtrace/history');
+      // return response.data.history || [];
+      
+    } catch (error: any) {
+      console.error('OMTrace history error:', error);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const getSlugRules = useCallback(async (): Promise<SlugRulesResponse> => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 300));
-    setIsLoading(false);
-    return MOCK_SLUG_RULES;
+    
+    try {
+      // TODO: Implement slug rules endpoint on backend
+      // For now, return mock data
+      console.warn('Slug rules endpoint not yet implemented, using mock data');
+      await new Promise(resolve => setTimeout(resolve, 300));
+      return MOCK_SLUG_RULES;
+      
+      // Future implementation:
+      // const response = await apiClient.get('/api/omtrace/slug-rules');
+      // return response.data;
+      
+    } catch (error: any) {
+      console.error('OMTrace slug rules error:', error);
+      return MOCK_SLUG_RULES;
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const updateSlugRules = useCallback(async (rules: SlugRulesResponse): Promise<void> => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    console.log('Updated slug rules:', rules);
+    
+    try {
+      // TODO: Implement slug rules update endpoint on backend
+      // For now, just log
+      console.warn('Slug rules update endpoint not yet implemented');
+      console.log('Updated slug rules:', rules);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Future implementation:
+      // await apiClient.post('/api/omtrace/slug-rules', { rules });
+      
+    } catch (error: any) {
+      console.error('OMTrace slug rules update error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   return {

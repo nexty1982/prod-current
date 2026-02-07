@@ -5,54 +5,53 @@
  * Allows configuration of backup schedules, retention, and manual backup creation.
  */
 
-import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  Switch,
-  FormControlLabel,
-  Grid,
-  Box,
-  Button,
-  Divider,
-  Alert,
-  Stack,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  LinearProgress,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Tooltip,
-  CircularProgress,
-  Tabs,
-  Tab,
-} from '@mui/material';
+import { useAuth } from '@/context/AuthContext';
+import BlankCard from '@/shared/ui/BlankCard';
 import {
   Backup as BackupIcon,
-  CloudDownload as DownloadIcon,
-  Delete as DeleteIcon,
-  Storage as StorageIcon,
   FolderOpen as DatabaseIcon,
-  Folder as FolderIcon,
-  Settings as SettingsIcon,
-  Refresh as RefreshIcon,
+  Delete as DeleteIcon,
+  CloudDownload as DownloadIcon,
   GetApp as ExportIcon,
+  Folder as FolderIcon,
+  Refresh as RefreshIcon,
+  Settings as SettingsIcon,
+  Storage as StorageIcon,
 } from '@mui/icons-material';
-import BlankCard from '@/shared/ui/BlankCard';
-import { useAuth } from '@/context/AuthContext';
-import { adminAPI } from '@/api/admin.api';
+import {
+  Alert,
+  Box,
+  Button,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  MenuItem,
+  Select,
+  Stack,
+  Switch,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 interface BackupSettingsData {
   enabled: boolean;
@@ -77,9 +76,27 @@ interface BackupFile {
   status: 'completed' | 'in_progress' | 'failed';
 }
 
+interface BackupJob {
+  id: number;
+  kind: 'files' | 'db' | 'both' | 'borg';
+  status: 'queued' | 'running' | 'success' | 'failed';
+  requested_by: number;
+  requested_by_email?: string;
+  requested_by_name?: string;
+  started_at: string | null;
+  finished_at: string | null;
+  duration_ms: number | null;
+  error: string | null;
+  created_at: string;
+  artifact_count?: number;
+  total_size_bytes?: number;
+}
+
 const BackupSettings: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
+  const [backupJobs, setBackupJobs] = useState<BackupJob[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(false);
   const [settings, setSettings] = useState<BackupSettingsData>({
     enabled: true,
     schedule: '0 2 * * *',
@@ -90,7 +107,7 @@ const BackupSettings: React.FC = () => {
     compression: true,
     email_notifications: false,
     notification_email: '',
-    backup_location: '/opt/backups/orthodox-metrics',
+    backup_location: '/var/backups/OM/',
     max_backups: 50,
   });
 
@@ -120,16 +137,29 @@ const BackupSettings: React.FC = () => {
     loadBackupSettings();
     loadBackupFiles();
     loadStorageInfo();
+    loadBackupJobs();
   }, []);
 
   const loadBackupSettings = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await adminAPI.backup.getSettings();
-      // if (response.success) {
-      //   setSettings(response.settings);
-      // }
+      const response = await axios.get('/api/backups/settings');
+      if (response.data.success && response.data.data) {
+        const dbSettings = response.data.data.settings;
+        setSettings({
+          enabled: dbSettings.enabled ?? true,
+          schedule: dbSettings.schedule ?? '0 2 * * *',
+          retention_days: dbSettings.keep_daily ?? 30,
+          include_database: dbSettings.include_database ?? true,
+          include_files: dbSettings.include_files ?? true,
+          include_uploads: dbSettings.include_uploads ?? true,
+          compression: dbSettings.compression ?? true,
+          email_notifications: dbSettings.email_notifications ?? false,
+          notification_email: dbSettings.notification_email ?? '',
+          backup_location: dbSettings.borg_repo_path ?? '/var/backups/OM/repo',
+          max_backups: dbSettings.keep_monthly ?? 50,
+        });
+      }
     } catch (error) {
       console.error('Error loading backup settings:', error);
     } finally {
@@ -139,23 +169,40 @@ const BackupSettings: React.FC = () => {
 
   const loadBackupFiles = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await adminAPI.backup.getFiles();
-      // if (Array.isArray(response)) {
-      //   setBackupFiles(response);
-      // }
+      // Legacy backup files - keeping for compatibility
+      // In the future, this could query borg archives directly
+      setBackupFiles([]);
     } catch (error) {
       console.error('Error loading backup files:', error);
     }
   };
 
+  const loadBackupJobs = async () => {
+    try {
+      setJobsLoading(true);
+      const response = await axios.get('/api/backups/jobs?limit=20');
+      if (response.data.success && response.data.data) {
+        setBackupJobs(response.data.data.jobs);
+      }
+    } catch (error) {
+      console.error('Error loading backup jobs:', error);
+    } finally {
+      setJobsLoading(false);
+    }
+  };
+
   const loadStorageInfo = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await adminAPI.backup.getStorage();
-      // if (response) {
-      //   setStorageInfo(response);
-      // }
+      const response = await axios.get('/api/backups/statistics');
+      if (response.data.success && response.data.data) {
+        const stats = response.data.data;
+        const disk = stats.disk || {};
+        setStorageInfo({
+          total_space: disk.total_space || 0,
+          used_space: disk.used_space || 0,
+          backup_space: disk.backup_space || stats.artifacts?.total_size_bytes || 0,
+        });
+      }
     } catch (error) {
       console.error('Error loading storage info:', error);
     }
@@ -164,17 +211,31 @@ const BackupSettings: React.FC = () => {
   const saveSettings = async () => {
     try {
       setSaving(true);
-      // TODO: Replace with actual API call
-      // const response = await adminAPI.backup.updateSettings(settings);
-      // if (response.success) {
-      //   setAlert({ type: 'success', message: 'Backup settings saved successfully' });
-      //   setSettings(response.data);
-      // } else {
-      //   setAlert({ type: 'error', message: response.message || 'Failed to save settings' });
-      // }
-      setAlert({ type: 'success', message: 'Backup settings saved successfully' });
+      const dbSettings = {
+        enabled: settings.enabled,
+        schedule: settings.schedule,
+        keep_hourly: 48,
+        keep_daily: settings.retention_days,
+        keep_weekly: 12,
+        keep_monthly: settings.max_backups,
+        compression_level: settings.compression ? 3 : 0,
+        email_notifications: settings.email_notifications,
+        notification_email: settings.notification_email,
+        borg_repo_path: settings.backup_location,
+        include_database: settings.include_database,
+        include_files: settings.include_files,
+        include_uploads: settings.include_uploads,
+        verify_after_backup: true,
+      };
+      
+      const response = await axios.put('/api/backups/settings', { settings: dbSettings });
+      if (response.data.success) {
+        setAlert({ type: 'success', message: 'Backup settings saved successfully' });
+      } else {
+        setAlert({ type: 'error', message: response.data.error || 'Failed to save settings' });
+      }
     } catch (error: any) {
-      setAlert({ type: 'error', message: error.message || 'Failed to save settings' });
+      setAlert({ type: 'error', message: error.response?.data?.error || error.message || 'Failed to save settings' });
     } finally {
       setSaving(false);
     }
@@ -183,18 +244,51 @@ const BackupSettings: React.FC = () => {
   const runBackup = async (type: string) => {
     try {
       setBackupInProgress(true);
-      // TODO: Replace with actual API call
-      // const response = await adminAPI.backup.run();
-      // if (response.success) {
-      //   setAlert({ type: 'success', message: 'Backup started successfully' });
-      //   loadBackupFiles();
-      //   loadStorageInfo();
-      // } else {
-      //   setAlert({ type: 'error', message: response.message || 'Failed to start backup' });
-      // }
-      setAlert({ type: 'success', message: 'Backup started successfully' });
+      
+      let endpoint = '/api/backups/start';
+      let payload: any = {};
+      
+      // Handle different backup types
+      if (type === 'borg') {
+        // Run borg backup using om-backup-v2.sh
+        endpoint = '/api/backups/borg/run';
+        payload = {};
+      } else {
+        // Run tar/mysql backup using BackupEngine
+        const backupType = type === 'full' ? 'full' : type;
+        payload = { type: backupType };
+      }
+      
+      const response = await axios.post(endpoint, payload);
+      
+      if (response.data.success) {
+        const typeName = type === 'borg' ? 'Borg' : type === 'full' ? 'Full' : type.charAt(0).toUpperCase() + type.slice(1);
+        setAlert({ 
+          type: 'success', 
+          message: `${typeName} backup started successfully. Switching to Job History...` 
+        });
+        // Switch to Job History tab and start polling
+        setActiveTab(1);
+        setTimeout(() => loadBackupJobs(), 1500);
+        // Poll every 5s for up to 5 minutes
+        let polls = 0;
+        const maxPolls = 60;
+        const pollInterval = setInterval(async () => {
+          polls++;
+          await loadBackupJobs();
+          await loadStorageInfo();
+          // Stop polling after max or when no running jobs
+          const jobsRes = await axios.get('/api/backups/jobs?limit=5').catch(() => null);
+          const hasRunning = jobsRes?.data?.data?.jobs?.some((j: any) => j.status === 'running');
+          if (!hasRunning || polls >= maxPolls) {
+            clearInterval(pollInterval);
+          }
+        }, 5000);
+      } else {
+        setAlert({ type: 'error', message: response.data.error || 'Failed to start backup' });
+      }
     } catch (error: any) {
-      setAlert({ type: 'error', message: error.message || 'Failed to start backup' });
+      setAlert({ type: 'error', message: error.response?.data?.error || error.message || 'Failed to start backup' });
     } finally {
       setBackupInProgress(false);
     }
@@ -291,6 +385,7 @@ const BackupSettings: React.FC = () => {
         <CardContent>
           <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
             <Tab label="Backup Settings" />
+            <Tab label="Job History" />
             <Tab label="Your Backups" />
           </Tabs>
 
@@ -451,7 +546,7 @@ const BackupSettings: React.FC = () => {
 
                       <Typography variant="subtitle2">Notifications</Typography>
 
-                      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
                         <FormControlLabel
                           control={
                             <Switch
@@ -473,6 +568,18 @@ const BackupSettings: React.FC = () => {
                           />
                         )}
                       </Stack>
+
+                      {settings.email_notifications && (
+                        <Alert severity="info" sx={{ mt: 1 }}>
+                          <Typography variant="body2">
+                            Backup notifications use the SMTP configuration from <strong>OM Tasks → Email Settings</strong>.
+                            {' '}
+                            <a href="/devel-tools/om-tasks" style={{ color: 'inherit', fontWeight: 600 }}>
+                              Configure email settings →
+                            </a>
+                          </Typography>
+                        </Alert>
+                      )}
 
                       <TextField
                         fullWidth
@@ -510,12 +617,26 @@ const BackupSettings: React.FC = () => {
                       <Button
                         variant="contained"
                         size="large"
+                        onClick={() => runBackup('borg')}
+                        disabled={backupInProgress}
+                        startIcon={backupInProgress ? <CircularProgress size={20} /> : <BackupIcon />}
+                        fullWidth
+                        color="success"
+                      >
+                        {backupInProgress ? 'Creating Borg Backup...' : 'Create Borg Backup (Recommended)'}
+                      </Button>
+
+                      <Divider><Typography variant="caption" color="text.secondary">or use legacy backups</Typography></Divider>
+
+                      <Button
+                        variant="outlined"
+                        size="large"
                         onClick={() => runBackup('full')}
                         disabled={backupInProgress}
                         startIcon={backupInProgress ? <CircularProgress size={20} /> : <BackupIcon />}
                         fullWidth
                       >
-                        {backupInProgress ? 'Creating Full Backup...' : 'Create Full Backup'}
+                        {backupInProgress ? 'Creating Full Backup...' : 'Create Full Backup (Legacy)'}
                       </Button>
 
                       <Button
@@ -525,7 +646,7 @@ const BackupSettings: React.FC = () => {
                         startIcon={<DatabaseIcon />}
                         fullWidth
                       >
-                        Database Only
+                        Database Only (Legacy)
                       </Button>
 
                       <Button
@@ -535,13 +656,19 @@ const BackupSettings: React.FC = () => {
                         startIcon={<FolderIcon />}
                         fullWidth
                       >
-                        Files Only
+                        Files Only (Legacy)
                       </Button>
 
                       <Alert severity="info" sx={{ mt: 2 }}>
+                        <Typography variant="body2" fontWeight={600} gutterBottom>
+                          Borg Backup (Recommended)
+                        </Typography>
                         <Typography variant="body2">
-                          Full backups include database, application files, and user uploads.
-                          Large backups may take several minutes to complete.
+                          Uses the om-backup-v2.sh script with Borg for efficient, deduplicated, compressed backups.
+                          Includes automatic pruning and verification.
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                          <strong>Legacy backups</strong> use tar/mysqldump for simple full or partial backups.
                         </Typography>
                       </Alert>
                     </Stack>
@@ -552,6 +679,108 @@ const BackupSettings: React.FC = () => {
           )}
 
           {activeTab === 1 && (
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <BlankCard>
+                  <CardContent>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                      <Stack direction="row" alignItems="center" spacing={2}>
+                        <BackupIcon color="primary" />
+                        <Typography variant="h6">Backup Job History</Typography>
+                      </Stack>
+                      <Button
+                        variant="outlined"
+                        startIcon={<RefreshIcon />}
+                        onClick={loadBackupJobs}
+                        size="small"
+                      >
+                        Refresh
+                      </Button>
+                    </Stack>
+
+                    {jobsLoading ? (
+                      <Box display="flex" justifyContent="center" p={3}>
+                        <CircularProgress />
+                      </Box>
+                    ) : backupJobs.length === 0 ? (
+                      <Alert severity="info">
+                        No backup jobs found. Create your first backup using the manual backup options in the Backup Settings tab.
+                      </Alert>
+                    ) : (
+                      <List>
+                        {backupJobs.map((job) => (
+                          <ListItem key={job.id} divider>
+                            <ListItemText
+                              primary={
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                  <Typography variant="body1">
+                                    Backup #{job.id} - {job.kind === 'borg' ? 'Borg Backup' : job.kind === 'both' ? 'Full' : job.kind === 'db' ? 'Database' : 'Files'}
+                                  </Typography>
+                                  <Chip
+                                    label={job.status}
+                                    size="small"
+                                    color={
+                                      job.status === 'success' ? 'success' :
+                                      job.status === 'failed' ? 'error' :
+                                      job.status === 'running' ? 'warning' : 'default'
+                                    }
+                                  />
+                                  {job.kind === 'borg' && (
+                                    <Chip
+                                      label="BORG"
+                                      size="small"
+                                      color="success"
+                                      variant="outlined"
+                                    />
+                                  )}
+                                </Stack>
+                              }
+                              secondary={
+                                <Stack spacing={0.5}>
+                                  <Stack direction="row" spacing={2}>
+                                    <Typography variant="caption">
+                                      Started: {job.started_at ? new Date(job.started_at).toLocaleString() : 'Not started'}
+                                    </Typography>
+                                    {job.duration_ms && (
+                                      <Typography variant="caption">
+                                        Duration: {(job.duration_ms / 1000).toFixed(1)}s
+                                      </Typography>
+                                    )}
+                                    {job.artifact_count !== undefined && (
+                                      <Typography variant="caption">
+                                        Artifacts: {job.artifact_count}
+                                      </Typography>
+                                    )}
+                                    {job.total_size_bytes && (
+                                      <Typography variant="caption">
+                                        Size: {formatFileSize(job.total_size_bytes)}
+                                      </Typography>
+                                    )}
+                                  </Stack>
+                                  {job.requested_by_email && (
+                                    <Typography variant="caption" color="textSecondary">
+                                      Requested by: {job.requested_by_name || job.requested_by_email}
+                                    </Typography>
+                                  )}
+                                  {job.error && (
+                                    <Typography variant="caption" color="error">
+                                      Error: {job.error}
+                                    </Typography>
+                                  )}
+                                </Stack>
+                              }
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    )}
+                  </CardContent>
+                </BlankCard>
+              </Grid>
+            </Grid>
+          )}
+
+          {activeTab === 2 && (
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <BlankCard>

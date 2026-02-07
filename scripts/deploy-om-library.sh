@@ -44,12 +44,12 @@ echo ""
 
 # Step 4: Set Permissions
 echo "🔒 Step 4: Setting permissions..."
-chmod 755 front-end/public/docs/library
-chmod 755 front-end/public/docs/library/technical
-chmod 755 front-end/public/docs/library/ops
-chmod 755 front-end/public/docs/library/recovery
-chmod 755 .analysis
-chmod 755 logs
+sudo chmod 755 front-end/public/docs/library
+sudo chmod 755 front-end/public/docs/library/technical
+sudo chmod 755 front-end/public/docs/library/ops
+sudo chmod 755 front-end/public/docs/library/recovery
+sudo chmod 755 .analysis
+sudo chmod 755 logs
 echo "✅ Permissions set"
 echo ""
 
@@ -59,7 +59,7 @@ if [ ! -f "server/src/agents/omLibrarian.js" ]; then
   echo "❌ ERROR: omLibrarian.js not found"
   exit 1
 fi
-if [ ! -f "server/routes/library.js" ]; then
+if [ ! -f "server/src/routes/library.js" ]; then
   echo "❌ ERROR: library.js not found"
   exit 1
 fi
@@ -72,7 +72,7 @@ echo ""
 
 # Step 6: Restart Backend
 echo "🔄 Step 6: Restarting backend..."
-pm2 restart om-backend || echo "⚠️  Backend restart failed - may need manual restart"
+pm2 restart orthodox-backend || echo "⚠️  Backend restart failed - may need manual restart"
 sleep 2
 echo "✅ Backend restarted"
 echo ""
