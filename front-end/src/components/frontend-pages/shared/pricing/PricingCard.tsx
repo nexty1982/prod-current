@@ -1,5 +1,5 @@
 import { Box, Grid, Typography, Chip, CardContent, Divider, Stack, Button } from '@mui/material';
-import BlankCard from '../../../shared/BlankCard.tsx';
+import BlankCard from '@/shared/ui/BlankCard';
 
 import IconCheck from '@/assets/images/frontend-pages/icons/icon-check.svg';
 import IconClose from '@/assets/images/frontend-pages/icons/icon-close.svg';

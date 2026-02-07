@@ -21,7 +21,7 @@ import uniqueId from 'lodash/uniqueId';
 
 import { UserDataContext } from "src/context/UserDataContext";
 import PostComments from './PostComments';
-import BlankCard from '../../../shared/BlankCard';
+import BlankCard from '@/shared/ui/BlankCard';
 import { Comment as CommentType, PostType } from 'src/types/apps/userProfile';
 import { CustomizerContext } from 'src/context/CustomizerContext';
 

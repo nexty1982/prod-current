@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { IconEye, IconMessage2, IconPoint } from '@tabler/icons-react';
 
-import BlankCard from '../../shared/BlankCard.tsx';
+import BlankCard from '@/shared/ui/BlankCard';
 import { BlogPostType } from '@/types/apps/blog';
 interface Btype {
   post: BlogPostType;

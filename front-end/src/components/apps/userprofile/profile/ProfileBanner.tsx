@@ -28,7 +28,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import ProfileTab from './ProfileTab';
-import BlankCard from '../../../shared/BlankCard';
+import BlankCard from '@/shared/ui/BlankCard';
 import OrthodoxAvatarSelector from './OrthodoxAvatarSelector';
 import { useAuth } from 'src/context/AuthContext';
 import { useProfileSync } from '../../../../lib/useProfileSync';

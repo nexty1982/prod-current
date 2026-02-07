@@ -16,7 +16,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import BlankCard from '../../shared/BlankCard.tsx';
+import BlankCard from '@/shared/ui/BlankCard';
 import dayjs from 'dayjs';
 import { mutate } from 'swr';
 

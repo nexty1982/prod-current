@@ -3,7 +3,7 @@ import React, { useContext } from "react";
 import { ImageContext } from "@/app/context/ImageAiContext";
 import { Alert, Box, Grid, Skeleton, Typography, useTheme } from "@mui/material";
 
-import BlankCard from "../../shared/BlankCard";
+import BlankCard from "@/shared/ui/BlankCard";
 
 function GeneratedImageDisplay() {
   const { displayedImages, isGenerating, isUsingMock, } =
