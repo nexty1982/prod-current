@@ -197,21 +197,19 @@ async function getChurchMetadata(churchId) {
  * @returns {boolean} - True if should use church records DB
  */
 function isRecordPath(path) {
-    const recordPaths = [
-        '/saints-peter-and-paul-Records',
-        '/church/:id/records',
+    const recordPrefixes = [
         '/api/records',
         '/api/baptism',
-        '/api/marriage', 
-        '/api/funeral'
+        '/api/marriage',
+        '/api/funeral',
+        '/api/churches/'  // matches /api/churches/:id/records
     ];
-    
-    return recordPaths.some(recordPath => 
-        path.includes('records') || 
-        path.includes('baptism') || 
-        path.includes('marriage') || 
-        path.includes('funeral')
-    );
+
+    // Only match actual record API paths, not admin config endpoints
+    if (path.includes('dynamic-records-config')) return false;
+
+    return recordPrefixes.some(prefix => path.startsWith(prefix)) ||
+        path.includes('/records');
 }
 
 module.exports = {

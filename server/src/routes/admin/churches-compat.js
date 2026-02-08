@@ -713,6 +713,62 @@ router.get('/:id/record-table-config', requireAuth, requireChurchAccess, async (
   }
 });
 
+/**
+ * GET /api/admin/churches/:id/dynamic-records-config
+ * Returns dynamic records configuration for a church (branding, themes, field rules, button configs)
+ */
+router.get('/:id/dynamic-records-config', requireAuth, requireChurchAccess, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+    const access = validateChurchAccess(req.user, churchId);
+    if (!access.allowed) {
+      return res.status(403).json(ApiResponse(false, null, { message: 'Access denied', code: 'INSUFFICIENT_PERMISSIONS' }));
+    }
+
+    const [rows] = await getAppPool().query(
+      'SELECT config_json FROM orthodoxmetrics_db.church_dynamic_records_config WHERE church_id = ?',
+      [churchId]
+    );
+
+    const config = rows.length > 0 && rows[0].config_json ? JSON.parse(rows[0].config_json) : {};
+    res.json({ success: true, config, church_id: churchId });
+  } catch (error) {
+    console.error('❌ Error fetching dynamic-records-config:', error);
+    res.status(500).json(ApiResponse(false, null, { message: 'Failed to fetch config', code: 'DATABASE_ERROR' }));
+  }
+});
+
+/**
+ * POST /api/admin/churches/:id/dynamic-records-config
+ * Save dynamic records configuration for a church (branding, themes, field rules, button configs)
+ */
+router.post('/:id/dynamic-records-config', requireAuth, requireChurchAccess, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+    const access = validateChurchAccess(req.user, churchId);
+    if (!access.allowed) {
+      return res.status(403).json(ApiResponse(false, null, { message: 'Access denied', code: 'INSUFFICIENT_PERMISSIONS' }));
+    }
+
+    const { config } = req.body;
+    if (!config || typeof config !== 'object') {
+      return res.status(400).json(ApiResponse(false, null, { message: 'Config object required', code: 'MISSING_PARAMETER' }));
+    }
+
+    await getAppPool().query(`
+      INSERT INTO orthodoxmetrics_db.church_dynamic_records_config (church_id, config_json)
+      VALUES (?, ?)
+      ON DUPLICATE KEY UPDATE config_json = VALUES(config_json), updated_at = CURRENT_TIMESTAMP
+    `, [churchId, JSON.stringify(config)]);
+
+    console.log(`✅ Dynamic records config saved for church ${churchId}`);
+    res.json(ApiResponse(true, { message: 'Dynamic records config saved successfully', church_id: churchId }));
+  } catch (error) {
+    console.error('❌ Error saving dynamic-records-config:', error);
+    res.status(500).json(ApiResponse(false, null, { message: 'Failed to save config', code: 'DATABASE_ERROR' }));
+  }
+});
+
 // Note: No catch-all here - let requests fall through to main churches router
 // This ensures compatibility routes don't block existing routes
 
