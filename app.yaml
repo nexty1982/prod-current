@@ -1,26 +1,100 @@
-alerts:
-- rule: DEPLOYMENT_FAILED
-- rule: DOMAIN_FAILED
-features:
-- buildpack-stack=ubuntu-22
-ingress:
-  rules:
-  - component:
-      name: prod-current
-    match:
-      authority: {}
-      path:
-        prefix: /
 name: monkfish-app
 region: nyc
+
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+
+features:
+  - buildpack-stack=ubuntu-22
+
+# ── Backend API Service ──────────────────────────────────────────────
 services:
-- environment_slug: node-js
-  github:
-    branch: dev
-    deploy_on_push: true
-    repo: nexty1982/prod-current
-  http_port: 8080
-  instance_count: 2
-  instance_size_slug: apps-s-1vcpu-1gb
-  name: prod-current
-  source_dir: /
+  - name: orthodox-backend
+    github:
+      repo: nexty1982/prod-current
+      branch: dev
+      deploy_on_push: true
+    source_dir: /server
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-2gb
+    http_port: 3001
+    build_command: npm install --legacy-peer-deps && npm run build
+    run_command: node dist/index.js
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+      - key: HOST
+        value: "0.0.0.0"
+      # Add your secrets via DO dashboard (Settings > App-Level Environment Variables):
+      # SESSION_SECRET, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME,
+      # JWT_SECRET, CORS_ORIGINS
+    health_check:
+      http_path: /api/system/health
+      initial_delay_seconds: 90
+      period_seconds: 10
+      timeout_seconds: 5
+      failure_threshold: 6
+
+# ── Frontend Static Site ─────────────────────────────────────────────
+static_sites:
+  - name: orthodox-frontend
+    github:
+      repo: nexty1982/prod-current
+      branch: dev
+      deploy_on_push: true
+    source_dir: /front-end
+    build_command: npm install --legacy-peer-deps && npm run build
+    output_dir: dist
+    envs:
+      - key: VITE_API_BASE
+        value: /api
+    catchall_document: index.html
+    routes:
+      - path: /
+
+# ── Om-Librarian Background Worker ──────────────────────────────────
+workers:
+  - name: om-librarian
+    github:
+      repo: nexty1982/prod-current
+      branch: dev
+      deploy_on_push: true
+    source_dir: /server
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-1gb
+    build_command: npm install --legacy-peer-deps
+    run_command: node src/agents/omLibrarianV3.js
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: OML_LOG_LEVEL
+        value: info
+
+# ── Ingress: Route /api to backend, everything else to frontend ──────
+ingress:
+  rules:
+    - component:
+        name: orthodox-backend
+      match:
+        path:
+          prefix: /api
+    - component:
+        name: orthodox-backend
+      match:
+        path:
+          prefix: /socket.io
+    - component:
+        name: orthodox-backend
+      match:
+        path:
+          prefix: /ws
+    - component:
+        name: orthodox-frontend
+      match:
+        path:
+          prefix: /
