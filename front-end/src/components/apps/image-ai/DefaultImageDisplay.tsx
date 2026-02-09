@@ -4,7 +4,7 @@ import { masonryImages } from "@/app/api/image-ai/dropdowndata";
 import { Masonry } from "@mui/lab";
 import { Box, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
-import BlankCard from "../../shared/BlankCard";
+import BlankCard from "@/shared/ui/BlankCard";
 
 function DefaultImageDisplay() {
   const [allImages, setAllImages] = useState([...masonryImages]);

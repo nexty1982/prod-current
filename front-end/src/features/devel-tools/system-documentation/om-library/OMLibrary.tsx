@@ -9,54 +9,61 @@
  * - Safe loading when librarian is offline
  */
 
-import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box,
-  Container,
-  Typography,
-  IconButton,
-  Button,
-  Alert,
-  Card,
-  CardContent,
-  useTheme,
-  Chip,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress,
-  Badge,
-  Tooltip,
-  ToggleButtonGroup,
-  ToggleButton,
-  LinearProgress,
-  Link,
+    Alert,
+    Badge,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Chip,
+    CircularProgress,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    IconButton,
+    InputLabel,
+    List,
+    ListItem,
+    ListItemText,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    ToggleButton,
+    ToggleButtonGroup,
+    Tooltip,
+    Typography,
+    useTheme
 } from '@mui/material';
-import {
-  IconFile,
-  IconSearch,
-  IconFilter,
-  IconDownload,
-  IconLayoutGrid,
-  IconTable,
-  IconRefresh,
-  IconRobot,
-  IconFileText,
-  IconCode,
-  IconFileSpreadsheet,
-  IconLink,
-} from '@tabler/icons-react';
 import { styled } from '@mui/material/styles';
+import {
+    IconArchive,
+    IconCode,
+    IconDownload,
+    IconFile,
+    IconFileSpreadsheet,
+    IconFileText,
+    IconLayoutGrid,
+    IconLink,
+    IconRefresh,
+    IconReload,
+    IconRobot,
+    IconSearch,
+    IconTable
+} from '@tabler/icons-react';
+import React, { useEffect, useState } from 'react';
 
 const LibraryContainer = styled(Container)(({ theme }) => ({
   paddingTop: theme.spacing(4),
@@ -134,6 +141,11 @@ const OMLibrary: React.FC = () => {
   // Librarian status
   const [librarianStatus, setLibrarianStatus] = useState<LibrarianStatus>({ running: false });
   const [statusLoading, setStatusLoading] = useState(false);
+  
+  // Cleanup state
+  const [cleanupLoading, setCleanupLoading] = useState(false);
+  const [cleanupPlan, setCleanupPlan] = useState<any>(null);
+  const [cleanupDialogOpen, setCleanupDialogOpen] = useState(false);
 
   /**
    * Load librarian status
@@ -324,6 +336,106 @@ const OMLibrary: React.FC = () => {
     });
   };
 
+  /**
+   * Run cleanup dry-run
+   */
+  const handleCleanupDryRun = async () => {
+    setCleanupLoading(true);
+    try {
+      const response = await fetch('/api/library/cleanup/dry-run', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mode: 'documentation' }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Cleanup dry-run failed');
+      }
+      
+      const data = await response.json();
+      setCleanupPlan(data.plan);
+      setCleanupDialogOpen(true);
+    } catch (err: any) {
+      console.error('Cleanup dry-run error:', err);
+      setError(err.message || 'Failed to run cleanup dry-run');
+    } finally {
+      setCleanupLoading(false);
+    }
+  };
+
+  /**
+   * Apply cleanup
+   */
+  const handleCleanupApply = async () => {
+    if (!window.confirm('Are you sure you want to move these documentation files? This action will organize your prod root.')) {
+      return;
+    }
+    
+    setCleanupLoading(true);
+    try {
+      const response = await fetch('/api/library/cleanup/apply', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mode: 'documentation' }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Cleanup apply failed');
+      }
+      
+      const data = await response.json();
+      alert(`Cleanup complete! Moved ${data.summary.moved} files. Manifest: ${data.summary.manifest}`);
+      setCleanupDialogOpen(false);
+      setCleanupPlan(null);
+      
+      // Trigger reindex to pick up moved files
+      await handleReindex();
+    } catch (err: any) {
+      console.error('Cleanup apply error:', err);
+      setError(err.message || 'Failed to apply cleanup');
+    } finally {
+      setCleanupLoading(false);
+    }
+  };
+
+  /**
+   * Trigger manual reindex
+   */
+  const handleReindex = async () => {
+    if (!window.confirm('Trigger a full library reindex? This will re-scan all sources.')) {
+      return;
+    }
+    
+    setStatusLoading(true);
+    try {
+      const response = await fetch('/api/library/reindex', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Reindex failed');
+      }
+      
+      const data = await response.json();
+      alert(data.message || 'Reindex triggered successfully');
+      
+      // Reload files after a delay
+      setTimeout(() => loadFiles(), 2000);
+    } catch (err: any) {
+      console.error('Reindex error:', err);
+      setError(err.message || 'Failed to trigger reindex');
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
   // Load on mount
   useEffect(() => {
     loadLibrarianStatus();
@@ -369,13 +481,35 @@ const OMLibrary: React.FC = () => {
             </Badge>
           </Tooltip>
           
-          <IconButton onClick={loadLibrarianStatus} title="Refresh status">
-            <IconRefresh size={20} />
-          </IconButton>
+          {/* Cleanup Button (super_admin only) */}
+          <Tooltip title="Organize loose files in prod root">
+            <Button
+              variant="outlined"
+              startIcon={cleanupLoading ? <CircularProgress size={16} /> : <IconArchive size={18} />}
+              onClick={handleCleanupDryRun}
+              disabled={cleanupLoading}
+              size="small"
+            >
+              Cleanup
+            </Button>
+          </Tooltip>
+          
+          {/* Reindex Button */}
+          <Tooltip title="Trigger full library reindex">
+            <IconButton onClick={handleReindex} disabled={statusLoading}>
+              <IconReload size={20} />
+            </IconButton>
+          </Tooltip>
+          
+          <Tooltip title="Refresh status">
+            <IconButton onClick={loadLibrarianStatus}>
+              <IconRefresh size={20} />
+            </IconButton>
+          </Tooltip>
         </Stack>
         
         <Typography variant="body2" color="text.secondary">
-          Searchable, relationship-aware documentation library
+          Searchable, relationship-aware documentation library with automatic cleanup
         </Typography>
       </Box>
 
@@ -650,6 +784,113 @@ const OMLibrary: React.FC = () => {
           </Typography>
         </Box>
       )}
+
+      {/* Cleanup Plan Dialog */}
+      <Dialog 
+        open={cleanupDialogOpen} 
+        onClose={() => setCleanupDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <IconArchive size={24} />
+            <Typography variant="h6">Cleanup Plan</Typography>
+          </Stack>
+        </DialogTitle>
+        
+        <DialogContent>
+          {cleanupPlan && (
+            <>
+              <Alert severity="info" sx={{ mb: 2 }}>
+                <strong>Mode: {cleanupPlan.modeDescription}</strong><br />
+                This will organize documentation files (.md, .txt, .docx, .xlsx, .pdf) from prod root into structured archive areas.
+                No files will be deleted, only moved.
+              </Alert>
+              
+              <Typography variant="h6" gutterBottom>
+                Summary
+              </Typography>
+              <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+                <Chip label={`${cleanupPlan.plannedMoves?.length || 0} files to move`} color="primary" />
+                <Chip label={`${cleanupPlan.skipped?.length || 0} files skipped`} />
+                {cleanupPlan.errors?.length > 0 && (
+                  <Chip label={`${cleanupPlan.errors.length} errors`} color="error" />
+                )}
+              </Stack>
+              
+              {/* Planned Moves */}
+              {cleanupPlan.plannedMoves && cleanupPlan.plannedMoves.length > 0 && (
+                <>
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                    Files to Move ({cleanupPlan.plannedMoves.length})
+                  </Typography>
+                  <Paper variant="outlined" sx={{ maxHeight: 300, overflow: 'auto', mb: 2 }}>
+                    <List dense>
+                      {cleanupPlan.plannedMoves.map((move: any, idx: number) => (
+                        <React.Fragment key={idx}>
+                          <ListItem>
+                            <ListItemText
+                              primary={move.fromRelative}
+                              secondary={`→ ${move.toRelative} (${move.category})`}
+                              primaryTypographyProps={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                              secondaryTypographyProps={{ fontSize: '0.75rem' }}
+                            />
+                          </ListItem>
+                          {idx < cleanupPlan.plannedMoves.length - 1 && <Divider />}
+                        </React.Fragment>
+                      ))}
+                    </List>
+                  </Paper>
+                </>
+              )}
+              
+              {/* Skipped Files */}
+              {cleanupPlan.skipped && cleanupPlan.skipped.length > 0 && (
+                <>
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                    Skipped ({cleanupPlan.skipped.length})
+                  </Typography>
+                  <Paper variant="outlined" sx={{ maxHeight: 200, overflow: 'auto' }}>
+                    <List dense>
+                      {cleanupPlan.skipped.slice(0, 10).map((skip: any, idx: number) => (
+                        <ListItem key={idx}>
+                          <ListItemText
+                            primary={skip.file}
+                            secondary={skip.reason}
+                            primaryTypographyProps={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                            secondaryTypographyProps={{ fontSize: '0.75rem' }}
+                          />
+                        </ListItem>
+                      ))}
+                      {cleanupPlan.skipped.length > 10 && (
+                        <ListItem>
+                          <ListItemText secondary={`... and ${cleanupPlan.skipped.length - 10} more`} />
+                        </ListItem>
+                      )}
+                    </List>
+                  </Paper>
+                </>
+              )}
+            </>
+          )}
+        </DialogContent>
+        
+        <DialogActions>
+          <Button onClick={() => setCleanupDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={handleCleanupApply}
+            disabled={cleanupLoading || !cleanupPlan?.plannedMoves?.length}
+            startIcon={cleanupLoading ? <CircularProgress size={16} /> : <IconArchive size={18} />}
+          >
+            {cleanupLoading ? 'Moving Files...' : 'Apply Cleanup'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </LibraryContainer>
   );
 };

@@ -1,71 +1,42 @@
-import { IconButton, Box, AppBar, useMediaQuery, Toolbar, styled, Stack, Tooltip } from '@mui/material';
-import React, { useState, useEffect, useContext } from 'react';
 import config from '@/context/config';
+import { AppBar, Box, IconButton, Stack, Toolbar, styled, useMediaQuery } from '@mui/material';
 import { IconMenu2 } from '@tabler/icons-react';
-import { Wrench } from 'lucide-react';
+import { useContext } from 'react';
 
 // Components
-import Notifications from './Notification';
-import Profile from './Profile';
-import LastLoggedIn from './LastLoggedIn';
-import Language from './Language';
-import Navigation from './Navigation';
-import MobileRightSidebar from './MobileRightSidebar';
 import OrthodoxThemeToggle from '@/shared/ui/OrthodoxThemeToggle';
 import ChurchHeader from '../../../../components/layout/ChurchHeader';
-import SessionPulseIndicator from '../../../../components/layout/SessionPulseIndicator';
+import Language from './Language';
+import LastLoggedIn from './LastLoggedIn';
+import MobileRightSidebar from './MobileRightSidebar';
+import Navigation from './Navigation';
+import Notifications from './Notification';
+import Profile from './Profile';
+import UpdatesIndicator from './UpdatesIndicator';
 
 // Contexts & Hooks
-import { CustomizerContext } from '@/context/CustomizerContext';
 import { useAuth } from '@/context/AuthContext';
-import { useMaintenanceStatus } from '@/hooks/useMaintenanceStatus';
+import { CustomizerContext } from '@/context/CustomizerContext';
 
 const Header = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
-  const { authenticated, isSuperAdmin } = useAuth();
-  const { isInMaintenance, toggleMaintenanceMode, isToggling } = useMaintenanceStatus();
-  
-  // 3-Dot Health Status State
-  const [systemStatus, setSystemStatus] = useState<'production' | 'updating' | 'frontend_only'>('production');
-
-  // Polling for System Health
-  useEffect(() => {
-    const fetchHealth = async () => {
-      try {
-        const response = await fetch('/api/system/health');
-        const data = await response.json();
-        setSystemStatus(data.status);
-      } catch (error) {
-        setSystemStatus('frontend_only'); // Fail-safe to 1 green dot
-      }
-    };
-
-    const interval = setInterval(fetchHealth, 30000);
-    fetchHealth();
-    return () => clearInterval(interval);
-  }, []);
+  const { authenticated } = useAuth();
 
   const TopbarHeight = config.topbarHeight;
   const { setIsCollapse, isCollapse, isMobileSidebar, setIsMobileSidebar, headerBackground } = useContext(CustomizerContext);
 
-  const getBackground = () => {
-    const fallbackGradient = 'linear-gradient(135deg, #1a0d2e 0%, #2d1b4e 50%, #3d1f5d 100%)';
-    if (headerBackground) {
-      return `linear-gradient(135deg, #1a0d2e 0%, #2d1b4e 50%, #3d1f5d 100%), url(/images/backgrounds/bgtiled${headerBackground}.png) repeat`;
-    }
-    if (authenticated) {
-      return `linear-gradient(135deg, #1a0d2e 0%, #2d1b4e 50%, #3d1f5d 100%), url(/images/backgrounds/bgtiled.png) repeat`;
-    }
-    return fallbackGradient;
-  };
-
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
-    boxShadow: 'none',
-    background: getBackground(),
-    backgroundSize: 'auto',
-    justifyContent: 'center',
-    backdropFilter: 'blur(4px)',
+    boxShadow: theme.palette.mode === 'dark' 
+      ? '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2)'
+      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    background: theme.palette.mode === 'dark'
+      ? 'linear-gradient(135deg, rgba(30, 30, 40, 0.98) 0%, rgba(45, 40, 60, 0.95) 100%)'
+      : 'linear-gradient(135deg, rgba(250, 250, 252, 0.98) 0%, rgba(245, 242, 250, 0.95) 100%)',
+    backdropFilter: 'blur(10px)',
+    borderBottom: theme.palette.mode === 'dark'
+      ? '1px solid rgba(255, 255, 255, 0.08)'
+      : '1px solid rgba(0, 0, 0, 0.06)',
     [theme.breakpoints.up('lg')]: {
       minHeight: TopbarHeight,
     },
@@ -73,12 +44,18 @@ const Header = () => {
 
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: '100%',
-    color: '#FFFFFF',
+    color: theme.palette.mode === 'dark' ? '#FFFFFF' : '#1a1a2e',
+    padding: '0 16px',
+    minHeight: TopbarHeight,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
   }));
 
   return (
     <AppBarStyled position="sticky" color="default">
       <ToolbarStyled>
+        {/* Menu Toggle Button */}
         <IconButton
           color="inherit"
           aria-label="menu"
@@ -89,57 +66,44 @@ const Header = () => {
               setIsMobileSidebar(!isMobileSidebar);
             }
           }}
+          sx={{ 
+            mr: 1,
+            '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+          }}
         >
           <IconMenu2 size="20" />
         </IconButton>
 
-        {lgUp ? <Navigation /> : null}
+        {/* Navigation Links */}
+        {lgUp ? (
+          <Box sx={{ mr: 2 }}>
+            <Navigation />
+          </Box>
+        ) : null}
 
         {/* Church Header with Switch Dropdown */}
-        {authenticated && <ChurchHeader />}
+        {authenticated && (
+          <Box sx={{ mr: 'auto' }}>
+            <ChurchHeader />
+          </Box>
+        )}
 
-        <Box flexGrow={1} />
-        
-        <Stack spacing={2} direction="row" alignItems="center">
-          {/* Session Pulse Indicator - Red if session leak detected */}
-          {authenticated && isSuperAdmin() && <SessionPulseIndicator />}
-          {/* ------------------------------------------- */}
-          {/* Maintenance Mode Toggle - Super Admin Only */}
-          {/* ------------------------------------------- */}
-          {authenticated && isSuperAdmin() && (
-            <Tooltip title={isInMaintenance ? "Disable Maintenance Mode" : "Enable Maintenance Mode"}>
-              <button 
-                onClick={() => toggleMaintenanceMode(!isInMaintenance)}
-                disabled={isToggling}
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: '6px',
-                  fontSize: '11px',
-                  fontWeight: 'bold',
-                  cursor: isToggling ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.3s ease',
-                  backgroundColor: isInMaintenance ? '#f97316' : 'transparent',
-                  color: isInMaintenance ? '#ffffff' : '#22c55e',
-                  border: `1px solid ${isInMaintenance ? '#f97316' : '#22c55e'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                <Wrench size={14} className={(isToggling || isInMaintenance) ? 'animate-spin' : ''} />
-                {isInMaintenance ? 'MAINTENANCE ON' : 'MAINTENANCE OFF'}
-              </button>
-            </Tooltip>
-          )}
+        {/* Right Side Actions */}
+        <Stack spacing={1.5} direction="row" alignItems="center" sx={{ ml: 'auto' }}>
 
+          {/* User Tools */}
           <LastLoggedIn />
           <Language />
           <OrthodoxThemeToggle variant="icon" />
+          <UpdatesIndicator />
           <Notifications />
           
           {lgDown ? <MobileRightSidebar /> : null}
 
-          <Profile />
+          {/* Profile - Slightly separated */}
+          <Box sx={{ ml: 0.5 }}>
+            <Profile />
+          </Box>
         </Stack>
       </ToolbarStyled>
     </AppBarStyled>

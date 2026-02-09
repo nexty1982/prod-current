@@ -52,7 +52,7 @@ interface UseRefactorScanReturn {
   calculateBundle: (rootFileRelPath: string) => FeatureBundle | null;
 }
 
-export const useRefactorScan = (): UseRefactorScanReturn => {
+export const useRefactorScan = (isWhitelisted?: (relPath: string) => boolean): UseRefactorScanReturn => {
   const [scanData, setScanData] = useState<RefactorScan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -174,7 +174,16 @@ export const useRefactorScan = (): UseRefactorScanReturn => {
     if (filterState.showMissingOnly) {
       filtered = filtered.filter(node => node.recoveryStatus === 'missing_in_prod');
     }
-    
+
+    // Apply whitelist filters
+    if (isWhitelisted) {
+      if (filterState.showWhitelistedOnly) {
+        filtered = filtered.filter(node => isWhitelisted(node.relPath));
+      } else if (filterState.hideWhitelisted) {
+        filtered = filtered.filter(node => !isWhitelisted(node.relPath));
+      }
+    }
+
     // Apply sorting
     filtered.sort((a, b) => {
       let comparison = 0;
@@ -212,7 +221,7 @@ export const useRefactorScan = (): UseRefactorScanReturn => {
     });
         
         return filtered;
-      }, [scanData?.nodes, filterState, sortOption]);
+      }, [scanData?.nodes, filterState, sortOption, isWhitelisted]);
       
       // Build tree structure
       const treeItems = useMemo(() => {

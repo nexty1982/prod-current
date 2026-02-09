@@ -18,8 +18,8 @@ export type Environment = 'stable' | 'latest';
 // Feature risk levels from Refactor Console
 export type FeatureRiskLevel = 'high' | 'medium' | 'low' | 'production-ready';
 
-// Feature priority levels (1-4 from reconstruction tasks)
-export type FeaturePriority = 1 | 2 | 3 | 4 | 5;
+// Feature priority levels (0 = no banner, 1-4 from reconstruction tasks, 5 = production ready)
+export type FeaturePriority = 0 | 1 | 2 | 3 | 4 | 5;
 
 interface EnvironmentContextValue {
   // Current environment

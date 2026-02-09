@@ -4,7 +4,7 @@
  */
 
 const express = require('express');
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const recordsController = require('../controllers/records');
 const { requireAuth } = require('../middleware/auth');
 const { auditLogger } = require('../middleware/auditLogger');

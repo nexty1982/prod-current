@@ -1,0 +1,90 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install system deps for native modules
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
+      - name: Validate server build
+        working-directory: server
+        env:
+          SESSION_SECRET: ci-test-secret-minimum-8-chars
+          DB_HOST: localhost
+          DB_USER: ci
+          DB_PASSWORD: ci
+          DB_NAME: ci_test
+        run: |
+          npm ci
+          npm run build:clean
+          npm run build:ts
+          npm run build:copy
+          npm run build:post-library
+          npm run build:verify
+
+      - name: Validate frontend build
+        working-directory: front-end
+        run: |
+          npm ci --legacy-peer-deps
+          npm run build
+
+  deploy:
+    runs-on: self-hosted
+    needs: validate
+    environment: production
+    steps:
+      - name: Deploy production
+        run: |
+          set -Eeuo pipefail
+
+          ROOT="/var/www/orthodoxmetrics/prod"
+          cd "$ROOT"
+
+          echo "=== Deploy started: $(date -Is) ==="
+          echo "=== Triggered by commit: ${{ github.sha }} ==="
+
+          # Save rollback point
+          PREV_SHA=$(git rev-parse HEAD)
+          echo "Rollback SHA: $PREV_SHA"
+
+          # Pull latest from main
+          echo "--- Git pull ---"
+          git fetch origin main
+          git reset --hard origin/main
+
+          # Build and deploy using the existing proven script
+          echo "--- Running om-deploy.sh ---"
+          if bash scripts/om-deploy.sh all; then
+            echo "=== Deploy successful: $(date -Is) ==="
+          else
+            echo "!!! DEPLOY FAILED - INITIATING ROLLBACK !!!"
+            echo "Rolling back to $PREV_SHA"
+            git reset --hard "$PREV_SHA"
+
+            echo "--- Rebuilding from rollback commit ---"
+            if bash scripts/om-deploy.sh all; then
+              echo "Rollback successful - reverted to $PREV_SHA"
+            else
+              echo "CRITICAL: Rollback also failed! Manual intervention needed."
+            fi
+            exit 1
+          fi

@@ -3,85 +3,68 @@
  * Comprehensive form with user management, database config, and full validation.
  */
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { adminAPI } from '@/api/admin.api';
+import { useAuth } from '@/context/AuthContext';
+import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import { fetchWithChurchContext } from '@/shared/lib/fetchWithChurchContext';
+import BlankCard from '@/shared/ui/BlankCard';
+import PageContainer from '@/shared/ui/PageContainer';
+import type { SupportedLanguage } from '@/types/orthodox-metrics.types';
+import { logger } from '@/utils/logger';
 import {
-  Box,
-  Grid,
-  Typography,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Switch,
-  FormControlLabel,
-  Alert,
-  Divider,
-  Card,
-  CardContent,
-  CardHeader,
-  IconButton,
-  CircularProgress,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Stack,
-  Snackbar,
-  Tabs,
-  Tab,
-  Tooltip,
+    Add as AddIcon,
+    ArrowBack as ArrowBackIcon,
+    Edit as EditIcon,
+    Refresh as RefreshIcon,
+    Save as SaveIcon,
+    VpnKey as VpnKeyIcon
+} from '@mui/icons-material';
+import {
+    Alert,
+    Box,
+    Button,
+    CardContent,
+    Chip,
+    CircularProgress,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    Grid,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Snackbar,
+    Stack,
+    Switch,
+    Tab,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Tabs,
+    TextField,
+    Tooltip,
+    Typography
 } from '@mui/material';
 import {
-  IconArrowLeft,
-  IconDeviceFloppy,
-  IconTrash,
-  IconBuilding,
-  IconMail,
-  IconMapPin,
-  IconSettings,
-  IconDatabase,
-  IconUsers,
-  IconUserPlus,
-  IconEdit,
-  IconRefresh,
+    IconBuilding,
+    IconDatabase,
+    IconRefresh,
+    IconSettings,
+    IconTrash,
+    IconUsers
 } from '@tabler/icons-react';
-import {
-  Save as SaveIcon,
-  ArrowBack as ArrowBackIcon,
-  ExpandMore as ExpandMoreIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Refresh as RefreshIcon,
-  People as PeopleIcon,
-  Settings as SettingsIcon,
-  Storage as StorageIcon,
-  VpnKey as VpnKeyIcon,
-} from '@mui/icons-material';
 import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
-import PageContainer from '@/shared/ui/PageContainer';
-import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
-import BlankCard from '@/shared/ui/BlankCard';
-import { useAuth } from '@/context/AuthContext';
-import { adminAPI } from '@/api/admin.api';
-import { logger } from '@/utils/logger';
-import type { SupportedLanguage } from '@/types/orthodox-metrics.types';
 import UserManagementDialog from './UserManagementDialog';
 
 const validationSchema = Yup.object({
@@ -96,7 +79,19 @@ const validationSchema = Yup.object({
   timezone: Yup.string().required('Timezone is required'),
   currency: Yup.string(),
   tax_id: Yup.string(),
-  website: Yup.string().url('Must be a valid URL').nullable(),
+  website: Yup.string()
+    .nullable()
+    .transform((value) => {
+      // If empty or null, return as-is
+      if (!value || value.trim() === '') return value;
+      
+      // If it already has a protocol, return as-is
+      if (/^https?:\/\//i.test(value)) return value;
+      
+      // Otherwise, prepend http://
+      return `http://${value}`;
+    })
+    .url('Must be a valid URL'),
 });
 
 const ChurchForm: React.FC = () => {
@@ -123,10 +118,26 @@ const ChurchForm: React.FC = () => {
   const [updatingDatabase, setUpdatingDatabase] = useState(false);
   const [databaseUpdateResult, setDatabaseUpdateResult] = useState<{ success: boolean; message: string } | null>(null);
 
+  // Feature flags management (global + overrides + effective)
+  const [featureData, setFeatureData] = useState<{
+    globalDefaults?: any;
+    overrides?: any;
+    effective: any;
+  }>({
+    effective: {
+      ag_grid_enabled: false,
+      power_search_enabled: false,
+      custom_field_mapping_enabled: false
+    }
+  });
+  const [loadingFeatures, setLoadingFeatures] = useState(false);
+  const [updatingFeatures, setUpdatingFeatures] = useState(false);
+
   // Snackbar
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({ open: false, message: '', severity: 'info' });
 
   const isEdit = Boolean(id);
+  const hasLoadedRef = React.useRef(false);
 
   // Open users tab if navigated with state
   useEffect(() => {
@@ -139,10 +150,15 @@ const ChurchForm: React.FC = () => {
   const loadChurchUsers = async (churchId: string) => {
     try {
       setLoadingUsers(true);
-      const response = await fetch(`/api/admin/churches/${churchId}/users`, { credentials: 'include' });
+      const response = await fetchWithChurchContext(`/api/admin/churches/${churchId}/users`, {
+        churchId,
+        credentials: 'include',
+      });
       if (response.ok) {
         const data = await response.json();
         setChurchUsers(data.users || []);
+      } else {
+        console.error('Error loading church users: HTTP', response.status);
       }
     } catch (err) {
       console.error('Error loading church users:', err);
@@ -166,6 +182,88 @@ const ChurchForm: React.FC = () => {
       console.error('Error loading database info:', err);
     } finally {
       setLoadingDatabase(false);
+    }
+  };
+
+  const loadFeatures = async (churchId: string) => {
+    try {
+      setLoadingFeatures(true);
+      const response = await fetch(`/api/churches/${churchId}/features`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setFeatureData({
+            globalDefaults: data.data.globalDefaults,
+            overrides: data.data.overrides,
+            effective: data.data.effective
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Error loading features:', err);
+    } finally {
+      setLoadingFeatures(false);
+    }
+  };
+
+  const updateFeature = async (featureKey: string, value: boolean) => {
+    if (!id) return;
+    
+    try {
+      setUpdatingFeatures(true);
+      
+      // Optimistic update
+      const previousFeatureData = { ...featureData };
+      setFeatureData(prev => ({
+        ...prev,
+        effective: { ...prev.effective, [featureKey]: value }
+      }));
+
+      const response = await fetch(`/api/churches/${id}/features`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          features: { [featureKey]: value }
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setFeatureData({
+            globalDefaults: data.data.globalDefaults,
+            overrides: data.data.overrides,
+            effective: data.data.effective
+          });
+          setSnackbar({ 
+            open: true, 
+            message: 'Feature override updated successfully', 
+            severity: 'success' 
+          });
+        }
+      } else {
+        // Revert on failure
+        setFeatureData(previousFeatureData);
+        const errorData = await response.json();
+        setSnackbar({ 
+          open: true, 
+          message: errorData.error?.message || 'Failed to update feature', 
+          severity: 'error' 
+        });
+      }
+    } catch (err: any) {
+      // Revert on error
+      setFeatureData(previousFeatureData);
+      setSnackbar({ 
+        open: true, 
+        message: `Error: ${err.message}`, 
+        severity: 'error' 
+      });
+    } finally {
+      setUpdatingFeatures(false);
     }
   };
 
@@ -297,15 +395,12 @@ const ChurchForm: React.FC = () => {
       has_baptism_records: true,
       has_marriage_records: true,
       has_funeral_records: true,
-      enable_ag_grid: false,
-      ag_grid_record_types: [] as string[],
       setup_complete: false,
       template_church_id: null as number | null,
       default_landing_page: 'church_records',
       church_id: null as number | null,
-      enable_multilingual: false,
-      enable_notifications: true,
-      public_calendar: false,
+      // Removed: enable_ag_grid, ag_grid_record_types, enable_multilingual, enable_notifications, public_calendar
+      // These fields don't exist in the churches table
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -342,61 +437,112 @@ const ChurchForm: React.FC = () => {
 
   // Load church data for editing
   useEffect(() => {
-    if (isEdit && id) {
-      const loadChurch = async () => {
-        try {
-          setLoading(true);
-          const church = await adminAPI.churches.getById(parseInt(id));
-          if (!church) throw new Error('Church data not found');
+    if (!isEdit || !id || hasLoadedRef.current) return;
 
-          formik.setValues({
-            name: church?.name || '',
-            email: church?.email || '',
-            phone: church?.phone || '',
-            address: church?.address || '',
-            city: church?.city || '',
-            state_province: church?.state_province || '',
-            postal_code: church?.postal_code || '',
-            country: church?.country || '',
-            preferred_language: church?.preferred_language || 'en',
-            timezone: church?.timezone || 'America/New_York',
-            currency: church?.currency || 'USD',
-            tax_id: church?.tax_id || '',
-            website: church?.website || '',
-            description_multilang: church?.description_multilang || '',
-            settings: church?.settings || '',
-            is_active: church?.is_active ?? true,
-            database_name: church?.database_name || '',
-            has_baptism_records: church?.has_baptism_records ?? true,
-            has_marriage_records: church?.has_marriage_records ?? true,
-            has_funeral_records: church?.has_funeral_records ?? true,
-            enable_ag_grid: church?.enable_ag_grid ?? false,
-            ag_grid_record_types: church?.ag_grid_record_types || [],
-            setup_complete: church?.setup_complete ?? false,
-            template_church_id: church?.template_church_id || null,
-            default_landing_page: church?.default_landing_page || 'church_records',
-            church_id: church?.id || church?.church_id || null,
-            enable_multilingual: church?.enable_multilingual ?? false,
-            enable_notifications: church?.enable_notifications ?? true,
-            public_calendar: church?.public_calendar ?? false,
-          });
+    hasLoadedRef.current = true;
+    let isMounted = true;
 
-          // Load users and database info
+    const loadChurch = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        console.log('Loading church with ID:', id);
+        const church = await adminAPI.churches.getById(parseInt(id));
+        console.log('Church data loaded:', church);
+        
+        if (!isMounted) return;
+        
+        if (!church) {
+          throw new Error('Church data not found');
+        }
+
+        formik.setValues({
+          name: church?.name || '',
+          email: church?.email || '',
+          phone: church?.phone || '',
+          address: church?.address || '',
+          city: church?.city || '',
+          state_province: church?.state_province || '',
+          postal_code: church?.postal_code || '',
+          country: church?.country || '',
+          preferred_language: church?.preferred_language || 'en',
+          timezone: church?.timezone || 'America/New_York',
+          currency: church?.currency || 'USD',
+          tax_id: church?.tax_id || '',
+          website: church?.website || '',
+          description_multilang: church?.description_multilang || '',
+          settings: church?.settings || '',
+          is_active: church?.is_active ?? true,
+          database_name: church?.database_name || '',
+          has_baptism_records: church?.has_baptism_records ?? true,
+          has_marriage_records: church?.has_marriage_records ?? true,
+          has_funeral_records: church?.has_funeral_records ?? true,
+          setup_complete: church?.setup_complete ?? false,
+          template_church_id: church?.template_church_id || null,
+          default_landing_page: church?.default_landing_page || 'church_records',
+          church_id: church?.id || church?.church_id || null,
+          // Removed: enable_ag_grid, ag_grid_record_types, enable_multilingual, enable_notifications, public_calendar
+        });
+
+        // Load users and database info
+        if (isMounted) {
           loadChurchUsers(id);
           loadDatabaseInfo(id);
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Failed to load church';
-          setError(msg);
-          if (msg.includes('404') || msg.includes('not found')) {
-            setTimeout(() => navigate('/apps/church-management'), 3000);
-          }
-        } finally {
+        }
+      } catch (err: any) {
+        if (!isMounted) return;
+        
+        console.error('Error loading church:', err);
+        
+        // Extract meaningful error message
+        let msg = 'Failed to load church';
+        if (err?.response?.data?.message) {
+          msg = err.response.data.message;
+        } else if (err?.response?.data?.error) {
+          msg = err.response.data.error;
+        } else if (err?.message) {
+          msg = err.message;
+        }
+        
+        // Check if it's a 404 or permission error
+        const status = err?.response?.status;
+        if (status === 404) {
+          msg = 'Church not found. It may have been deleted.';
+        } else if (status === 403) {
+          msg = 'Access denied. You do not have permission to edit this church.';
+        }
+        
+        setError(msg);
+        logger.error('Church Management', 'Failed to load church for editing', { 
+          churchId: id, 
+          error: msg,
+          status 
+        });
+        
+        // Only redirect on 404 or if explicitly not found
+        if (status === 404 || msg.toLowerCase().includes('not found')) {
+          setTimeout(() => navigate('/apps/church-management'), 3000);
+        }
+      } finally {
+        if (isMounted) {
           setLoading(false);
         }
-      };
-      loadChurch();
-    }
-  }, [id, isEdit]);
+      }
+    };
+
+    loadChurch();
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  // Reset hasLoadedRef when navigating to a different church
+  useEffect(() => {
+    hasLoadedRef.current = false;
+  }, [id]);
 
   if (!hasRole('admin') && !hasRole('super_admin') && !hasRole('supervisor')) {
     return (
@@ -440,7 +586,10 @@ const ChurchForm: React.FC = () => {
                 onChange={(_, val) => {
                   setActiveTab(val);
                   if (val === 1 && id && churchUsers.length === 0) loadChurchUsers(id);
-                  if (val === 2 && id && !databaseInfo) loadDatabaseInfo(id);
+                  if (val === 2 && id) {
+                    if (!databaseInfo) loadDatabaseInfo(id);
+                    if (!loadingFeatures) loadFeatures(id);
+                  }
                 }}
                 variant="scrollable"
                 scrollButtons="auto"
@@ -458,61 +607,99 @@ const ChurchForm: React.FC = () => {
               <Grid container spacing={3}>
                 {/* Church Identity */}
                 <Grid item xs={12} lg={6}>
-                  <BlankCard>
-                    <CardContent>
-                      <Typography variant="h5" mb={1}>
-                        <IconBuilding size={22} style={{ marginRight: 8, verticalAlign: 'middle' }} />
-                        Church Identity & Contact
-                      </Typography>
-                      <Typography color="textSecondary" mb={3}>Basic church information</Typography>
+                  <BlankCard sx={{ borderRadius: 3, boxShadow: 3 }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          mb: 3,
+                          pb: 2,
+                          borderBottom: '3px solid',
+                          borderColor: 'primary.main',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 2,
+                            bgcolor: 'primary.main',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <IconBuilding size={24} />
+                        </Box>
+                        <Box>
+                          <Typography variant="h5" fontWeight={600}>
+                            Church Identity & Contact
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Basic church information
+                          </Typography>
+                        </Box>
+                      </Box>
 
-                      <Stack spacing={2.5}>
+                      <Stack spacing={3}>
                         <TextField
                           fullWidth label="Church Name" name="name" required
                           value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur}
                           error={formik.touched.name && Boolean(formik.errors.name)}
                           helperText={formik.touched.name && formik.errors.name}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                         <TextField
                           fullWidth label="Email Address" name="email" type="email" required
                           value={formik.values.email} onChange={formik.handleChange} onBlur={formik.handleBlur}
                           error={formik.touched.email && Boolean(formik.errors.email)}
                           helperText={formik.touched.email && formik.errors.email}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                         <TextField
                           fullWidth label="Phone Number" name="phone"
                           value={formik.values.phone} onChange={formik.handleChange} onBlur={formik.handleBlur}
                           error={formik.touched.phone && Boolean(formik.errors.phone)}
                           helperText={formik.touched.phone && formik.errors.phone}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                         <TextField
                           fullWidth label="Website" name="website" placeholder="https://example.com"
                           value={formik.values.website} onChange={formik.handleChange} onBlur={formik.handleBlur}
                           error={formik.touched.website && Boolean(formik.errors.website)}
                           helperText={formik.touched.website && formik.errors.website}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                         <TextField
                           fullWidth label="Address" name="address" multiline rows={2}
                           value={formik.values.address} onChange={formik.handleChange}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                         {/* Location Row */}
                         <Grid container spacing={2}>
                           <Grid item xs={6} sm={3}>
                             <TextField fullWidth label="City" name="city" size="small"
-                              value={formik.values.city} onChange={formik.handleChange} />
+                              value={formik.values.city} onChange={formik.handleChange}
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
                           </Grid>
                           <Grid item xs={6} sm={3}>
                             <TextField fullWidth label="State/Province" name="state_province" size="small"
-                              value={formik.values.state_province} onChange={formik.handleChange} />
+                              value={formik.values.state_province} onChange={formik.handleChange}
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
                           </Grid>
                           <Grid item xs={6} sm={3}>
                             <TextField fullWidth label="Postal Code" name="postal_code" size="small"
-                              value={formik.values.postal_code} onChange={formik.handleChange} />
+                              value={formik.values.postal_code} onChange={formik.handleChange}
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
                           </Grid>
                           <Grid item xs={6} sm={3}>
                             <FormControl fullWidth size="small">
                               <InputLabel>Country</InputLabel>
-                              <Select name="country" value={formik.values.country} onChange={formik.handleChange} label="Country">
+                              <Select name="country" value={formik.values.country} onChange={formik.handleChange} label="Country"
+                                sx={{ borderRadius: 2 }}>
                                 <MenuItem value="United States">United States</MenuItem>
                                 <MenuItem value="Canada">Canada</MenuItem>
                                 <MenuItem value="Greece">Greece</MenuItem>
@@ -529,6 +716,7 @@ const ChurchForm: React.FC = () => {
                           fullWidth label="Description" name="description_multilang" multiline rows={3}
                           value={formik.values.description_multilang} onChange={formik.handleChange}
                           placeholder="Brief description of the church..."
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                       </Stack>
                     </CardContent>
@@ -537,25 +725,65 @@ const ChurchForm: React.FC = () => {
 
                 {/* Configuration */}
                 <Grid item xs={12} lg={6}>
-                  <BlankCard>
-                    <CardContent>
-                      <Typography variant="h5" mb={1}>
-                        <IconSettings size={22} style={{ marginRight: 8, verticalAlign: 'middle' }} />
-                        Configuration
-                      </Typography>
-                      <Typography color="textSecondary" mb={3}>Settings and preferences</Typography>
+                  <BlankCard sx={{ borderRadius: 3, boxShadow: 3 }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          mb: 3,
+                          pb: 2,
+                          borderBottom: '3px solid',
+                          borderColor: 'success.main',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 2,
+                            bgcolor: 'success.main',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <IconSettings size={24} />
+                        </Box>
+                        <Box>
+                          <Typography variant="h5" fontWeight={600}>
+                            Configuration
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Settings and preferences
+                          </Typography>
+                        </Box>
+                      </Box>
 
-                      <Stack spacing={2.5}>
-                        <FormControlLabel
-                          control={<Switch checked={formik.values.is_active} onChange={(e) => formik.setFieldValue('is_active', e.target.checked)} />}
-                          label={<Stack direction="row" spacing={1} alignItems="center"><Typography>Church Active</Typography><Chip label={formik.values.is_active ? 'Active' : 'Inactive'} color={formik.values.is_active ? 'success' : 'default'} size="small" /></Stack>}
-                        />
+                      <Stack spacing={3}>
+                        <Box
+                          sx={{
+                            p: 2,
+                            borderRadius: 2,
+                            bgcolor: formik.values.is_active ? 'success.50' : 'grey.100',
+                            border: '1px solid',
+                            borderColor: formik.values.is_active ? 'success.main' : 'grey.300',
+                          }}
+                        >
+                          <FormControlLabel
+                            control={<Switch checked={formik.values.is_active} onChange={(e) => formik.setFieldValue('is_active', e.target.checked)} />}
+                            label={<Stack direction="row" spacing={1} alignItems="center"><Typography fontWeight={500}>Church Active</Typography><Chip label={formik.values.is_active ? 'Active' : 'Inactive'} color={formik.values.is_active ? 'success' : 'default'} size="small" /></Stack>}
+                          />
+                        </Box>
 
                         <Grid container spacing={2}>
                           <Grid item xs={6}>
                             <FormControl fullWidth size="small">
                               <InputLabel>Language</InputLabel>
-                              <Select name="preferred_language" value={formik.values.preferred_language} onChange={formik.handleChange} label="Language">
+                              <Select name="preferred_language" value={formik.values.preferred_language} onChange={formik.handleChange} label="Language"
+                                sx={{ borderRadius: 2 }}>
                                 <MenuItem value="en">English</MenuItem>
                                 <MenuItem value="el">Greek</MenuItem>
                                 <MenuItem value="ru">Russian</MenuItem>
@@ -569,7 +797,8 @@ const ChurchForm: React.FC = () => {
                           <Grid item xs={6}>
                             <FormControl fullWidth size="small">
                               <InputLabel>Timezone</InputLabel>
-                              <Select name="timezone" value={formik.values.timezone} onChange={formik.handleChange} label="Timezone">
+                              <Select name="timezone" value={formik.values.timezone} onChange={formik.handleChange} label="Timezone"
+                                sx={{ borderRadius: 2 }}>
                                 <MenuItem value="America/New_York">Eastern (ET)</MenuItem>
                                 <MenuItem value="America/Chicago">Central (CT)</MenuItem>
                                 <MenuItem value="America/Denver">Mountain (MT)</MenuItem>
@@ -584,7 +813,8 @@ const ChurchForm: React.FC = () => {
                           <Grid item xs={6}>
                             <FormControl fullWidth size="small">
                               <InputLabel>Currency</InputLabel>
-                              <Select name="currency" value={formik.values.currency} onChange={formik.handleChange} label="Currency">
+                              <Select name="currency" value={formik.values.currency} onChange={formik.handleChange} label="Currency"
+                                sx={{ borderRadius: 2 }}>
                                 <MenuItem value="USD">USD ($)</MenuItem>
                                 <MenuItem value="EUR">EUR</MenuItem>
                                 <MenuItem value="GBP">GBP</MenuItem>
@@ -596,7 +826,8 @@ const ChurchForm: React.FC = () => {
                           </Grid>
                           <Grid item xs={6}>
                             <TextField fullWidth label="Tax ID" name="tax_id" size="small"
-                              value={formik.values.tax_id} onChange={formik.handleChange} />
+                              value={formik.values.tax_id} onChange={formik.handleChange}
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
                           </Grid>
                         </Grid>
 
@@ -604,11 +835,13 @@ const ChurchForm: React.FC = () => {
                           value={formik.values.database_name} onChange={formik.handleChange}
                           helperText="Unique identifier for church database"
                           InputProps={{ startAdornment: <IconDatabase size={18} style={{ marginRight: 8, opacity: 0.5 }} /> }}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
 
                         <FormControl fullWidth size="small">
                           <InputLabel>Default Landing Page</InputLabel>
-                          <Select name="default_landing_page" value={formik.values.default_landing_page} onChange={formik.handleChange} label="Default Landing Page">
+                          <Select name="default_landing_page" value={formik.values.default_landing_page} onChange={formik.handleChange} label="Default Landing Page"
+                            sx={{ borderRadius: 2 }}>
                             <MenuItem value="church_records">Church Records</MenuItem>
                             <MenuItem value="liturgical_calendar">Liturgical Calendar</MenuItem>
                             <MenuItem value="notes_app">Notes App</MenuItem>
@@ -616,32 +849,55 @@ const ChurchForm: React.FC = () => {
                           </Select>
                         </FormControl>
 
-                        <Divider />
-                        <Typography variant="subtitle2" color="textSecondary">Record Types</Typography>
-                        <Stack direction="row" spacing={2} flexWrap="wrap">
+                        <Box sx={{ mt: 2 }}>
+                          <Typography variant="subtitle1" fontWeight={600} color="info.main" mb={2}>
+                            Record Types
+                          </Typography>
+                          <Stack direction="row" spacing={2} flexWrap="wrap" sx={{ p: 2, borderRadius: 2, bgcolor: 'info.50', border: '1px solid', borderColor: 'info.200' }}>
                           <FormControlLabel control={<Switch checked={formik.values.has_baptism_records} onChange={(e) => formik.setFieldValue('has_baptism_records', e.target.checked)} size="small" />} label="Baptism" />
                           <FormControlLabel control={<Switch checked={formik.values.has_marriage_records} onChange={(e) => formik.setFieldValue('has_marriage_records', e.target.checked)} size="small" />} label="Marriage" />
                           <FormControlLabel control={<Switch checked={formik.values.has_funeral_records} onChange={(e) => formik.setFieldValue('has_funeral_records', e.target.checked)} size="small" />} label="Funeral" />
-                        </Stack>
+                          </Stack>
+                        </Box>
 
-                        <Divider />
-                        <Typography variant="subtitle2" color="textSecondary">Feature Flags</Typography>
-                        <FormControlLabel control={<Switch checked={formik.values.enable_multilingual} onChange={(e) => formik.setFieldValue('enable_multilingual', e.target.checked)} size="small" />} label="Multilingual Support" />
-                        <FormControlLabel control={<Switch checked={formik.values.enable_notifications} onChange={(e) => formik.setFieldValue('enable_notifications', e.target.checked)} size="small" />} label="Email Notifications" />
-                        <FormControlLabel control={<Switch checked={formik.values.public_calendar} onChange={(e) => formik.setFieldValue('public_calendar', e.target.checked)} size="small" />} label="Public Calendar Access" />
-                        <FormControlLabel control={<Switch checked={formik.values.setup_complete} onChange={(e) => formik.setFieldValue('setup_complete', e.target.checked)} size="small" />} label="Setup Complete" />
+                        {/* REMOVED: Feature Flags section - columns don't exist in DB
+                        <Box sx={{ mt: 2 }}>
+                          <Typography variant="subtitle1" fontWeight={600} color="secondary.main" mb={2}>
+                            Feature Flags
+                          </Typography>
+                          <Stack spacing={1.5} sx={{ p: 2, borderRadius: 2, bgcolor: 'secondary.50', border: '1px solid', borderColor: 'secondary.200' }}>
+                            <FormControlLabel control={<Switch checked={formik.values.enable_multilingual} onChange={(e) => formik.setFieldValue('enable_multilingual', e.target.checked)} size="small" />} label="Multilingual Support" />
+                            <FormControlLabel control={<Switch checked={formik.values.enable_notifications} onChange={(e) => formik.setFieldValue('enable_notifications', e.target.checked)} size="small" />} label="Email Notifications" />
+                            <FormControlLabel control={<Switch checked={formik.values.public_calendar} onChange={(e) => formik.setFieldValue('public_calendar', e.target.checked)} size="small" />} label="Public Calendar Access" />
+                            <FormControlLabel control={<Switch checked={formik.values.setup_complete} onChange={(e) => formik.setFieldValue('setup_complete', e.target.checked)} size="small" />} label="Setup Complete" />
+                          </Stack>
+                        </Box>
+                        */}
 
-                        <Divider />
-                        <Typography variant="subtitle2" color="textSecondary">AG Grid</Typography>
-                        <FormControlLabel
-                          control={<Switch checked={formik.values.enable_ag_grid} onChange={(e) => {
-                            formik.setFieldValue('enable_ag_grid', e.target.checked);
-                            if (!e.target.checked) formik.setFieldValue('ag_grid_record_types', []);
-                          }} size="small" />}
-                          label={<Stack direction="row" spacing={1} alignItems="center"><Typography>Enable AG Grid</Typography><Chip label={formik.values.enable_ag_grid ? 'Enabled' : 'Disabled'} color={formik.values.enable_ag_grid ? 'primary' : 'default'} size="small" /></Stack>}
-                        />
-                        {formik.values.enable_ag_grid && (
-                          <Stack direction="row" spacing={2} flexWrap="wrap" sx={{ pl: 2 }}>
+                        <Box>
+                          <Typography variant="subtitle1" fontWeight={600} color="secondary.main" mb={2}>
+                            Setup Status
+                          </Typography>
+                          <Stack spacing={1.5} sx={{ p: 2, borderRadius: 2, bgcolor: 'secondary.50', border: '1px solid', borderColor: 'secondary.200' }}>
+                            <FormControlLabel control={<Switch checked={formik.values.setup_complete} onChange={(e) => formik.setFieldValue('setup_complete', e.target.checked)} size="small" />} label="Setup Complete" />
+                          </Stack>
+                        </Box>
+
+                        {/* REMOVED: AG Grid section - columns don't exist in DB
+                        <Box sx={{ mt: 2 }}>
+                          <Typography variant="subtitle1" fontWeight={600} color="warning.main" mb={2}>
+                            AG Grid
+                          </Typography>
+                          <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'warning.50', border: '1px solid', borderColor: 'warning.200' }}>
+                            <FormControlLabel
+                              control={<Switch checked={formik.values.enable_ag_grid} onChange={(e) => {
+                                formik.setFieldValue('enable_ag_grid', e.target.checked);
+                                if (!e.target.checked) formik.setFieldValue('ag_grid_record_types', []);
+                              }} size="small" />}
+                              label={<Stack direction="row" spacing={1} alignItems="center"><Typography fontWeight={500}>Enable AG Grid</Typography><Chip label={formik.values.enable_ag_grid ? 'Enabled' : 'Disabled'} color={formik.values.enable_ag_grid ? 'warning' : 'default'} size="small" /></Stack>}
+                            />
+                            {formik.values.enable_ag_grid && (
+                              <Stack direction="row" spacing={2} flexWrap="wrap" sx={{ pl: 2, mt: 1.5 }}>
                             {['baptism', 'marriage', 'funeral'].map((type) => (
                               <FormControlLabel
                                 key={type}
@@ -662,8 +918,11 @@ const ChurchForm: React.FC = () => {
                                 label={type.charAt(0).toUpperCase() + type.slice(1)}
                               />
                             ))}
-                          </Stack>
-                        )}
+                              </Stack>
+                            )}
+                          </Box>
+                        </Box>
+                        */}
                       </Stack>
                     </CardContent>
                   </BlankCard>
@@ -671,23 +930,57 @@ const ChurchForm: React.FC = () => {
 
                 {/* Action Buttons */}
                 <Grid item xs={12}>
-                  <BlankCard>
-                    <CardContent>
+                  <BlankCard sx={{ borderRadius: 3, boxShadow: 3 }}>
+                    <CardContent sx={{ p: 3, bgcolor: (theme) => theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50' }}>
                       <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
-                        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/apps/church-management')}>
+                        <Button 
+                          variant="outlined" 
+                          startIcon={<ArrowBackIcon />} 
+                          onClick={() => navigate('/apps/church-management')}
+                          sx={{ borderRadius: 2, px: 3, textTransform: 'none', fontWeight: 500 }}
+                        >
                           Back to Churches
                         </Button>
                         <Stack direction="row" spacing={2}>
                           {isEdit && (
-                            <Button variant="outlined" onClick={() => window.open(`/apps/church-management/${id}/field-mapper`, '_blank')}>
+                            <Button 
+                              variant="outlined" 
+                              onClick={() => window.open(`/apps/church-management/${id}/field-mapper`, '_blank')}
+                              sx={{ borderRadius: 2, textTransform: 'none' }}
+                            >
                               DB Table Mapping
                             </Button>
                           )}
-                          <Button variant="outlined" onClick={() => formik.resetForm()}>Reset</Button>
+                          <Button 
+                            variant="outlined" 
+                            onClick={() => formik.resetForm()}
+                            sx={{ borderRadius: 2, textTransform: 'none' }}
+                          >
+                            Reset
+                          </Button>
                           <Button
-                            type="submit" variant="contained"
-                            startIcon={loading ? <CircularProgress size={16} /> : <SaveIcon />}
-                            disabled={loading || !formik.isValid}
+                            type="submit" 
+                            variant="contained"
+                            startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
+                            disabled={loading}
+                            onClick={() => {
+                              console.log('Update Church button clicked');
+                              console.log('Form valid:', formik.isValid);
+                              console.log('Form errors:', formik.errors);
+                              console.log('Form values:', formik.values);
+                              formik.handleSubmit();
+                            }}
+                            sx={{
+                              borderRadius: 2,
+                              px: 4,
+                              textTransform: 'none',
+                              fontWeight: 600,
+                              background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                              boxShadow: 4,
+                              '&:hover': {
+                                boxShadow: 8,
+                              },
+                            }}
                           >
                             {loading ? 'Saving...' : isEdit ? 'Update Church' : 'Create Church'}
                           </Button>
@@ -850,6 +1143,138 @@ const ChurchForm: React.FC = () => {
                 {databaseUpdateResult && (
                   <Alert severity={databaseUpdateResult.success ? 'success' : 'error'} sx={{ mt: 2 }}>
                     {databaseUpdateResult.message}
+                  </Alert>
+                )}
+
+                <Divider sx={{ my: 4 }} />
+
+                {/* Features Enabled Section */}
+                <Typography variant="h6" mb={2}>
+                  <IconSettings size={22} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+                  Features Enabled
+                </Typography>
+                <Typography color="textSecondary" mb={1}>
+                  Advanced features for this church (Global defaults + Church overrides)
+                </Typography>
+                {hasRole(['super_admin']) && featureData.globalDefaults && (
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    <strong>Resolution:</strong> Church Override → Global Default → Disabled
+                  </Alert>
+                )}
+
+                {loadingFeatures ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                    <CircularProgress size={24} />
+                  </Box>
+                ) : (
+                  <Grid container spacing={2}>
+                    {/* AG Grid Feature */}
+                    <Grid item xs={12} md={6}>
+                      <Paper variant="outlined" sx={{ p: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                          <Typography variant="subtitle1" fontWeight={600}>
+                            AG Grid
+                          </Typography>
+                          {hasRole(['super_admin']) ? (
+                            <Switch
+                              checked={featureData.effective.ag_grid_enabled}
+                              onChange={(e) => updateFeature('ag_grid_enabled', e.target.checked)}
+                              disabled={updatingFeatures}
+                              size="small"
+                            />
+                          ) : (
+                            <Chip
+                              label={featureData.effective.ag_grid_enabled ? 'Enabled' : 'Disabled'}
+                              color={featureData.effective.ag_grid_enabled ? 'success' : 'default'}
+                              size="small"
+                            />
+                          )}
+                        </Stack>
+                        <Typography variant="body2" color="textSecondary" mb={1}>
+                          Advanced data grid UI with sorting, filtering, and Excel-like features
+                        </Typography>
+                        {hasRole(['super_admin']) && featureData.globalDefaults && (
+                          <Typography variant="caption" color="textSecondary">
+                            Global: {featureData.globalDefaults.ag_grid_enabled ? 'ON' : 'OFF'} | 
+                            Override: {featureData.overrides?.ag_grid_enabled !== undefined ? (featureData.overrides.ag_grid_enabled ? 'ON' : 'OFF') : 'None'}
+                          </Typography>
+                        )}
+                      </Paper>
+                    </Grid>
+
+                    {/* Power Search Feature */}
+                    <Grid item xs={12} md={6}>
+                      <Paper variant="outlined" sx={{ p: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                          <Typography variant="subtitle1" fontWeight={600}>
+                            Power Search
+                          </Typography>
+                          {hasRole(['super_admin']) ? (
+                            <Switch
+                              checked={featureData.effective.power_search_enabled}
+                              onChange={(e) => updateFeature('power_search_enabled', e.target.checked)}
+                              disabled={updatingFeatures}
+                              size="small"
+                            />
+                          ) : (
+                            <Chip
+                              label={featureData.effective.power_search_enabled ? 'Enabled' : 'Disabled'}
+                              color={featureData.effective.power_search_enabled ? 'success' : 'default'}
+                              size="small"
+                            />
+                          )}
+                        </Stack>
+                        <Typography variant="body2" color="textSecondary" mb={1}>
+                          Operator-aware search with advanced query capabilities
+                        </Typography>
+                        {hasRole(['super_admin']) && featureData.globalDefaults && (
+                          <Typography variant="caption" color="textSecondary">
+                            Global: {featureData.globalDefaults.power_search_enabled ? 'ON' : 'OFF'} | 
+                            Override: {featureData.overrides?.power_search_enabled !== undefined ? (featureData.overrides.power_search_enabled ? 'ON' : 'OFF') : 'None'}
+                          </Typography>
+                        )}
+                      </Paper>
+                    </Grid>
+
+                    {/* Custom Field Mapping Feature */}
+                    <Grid item xs={12} md={6}>
+                      <Paper variant="outlined" sx={{ p: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                          <Typography variant="subtitle1" fontWeight={600}>
+                            Custom Field Mapping
+                          </Typography>
+                          {hasRole(['super_admin']) ? (
+                            <Switch
+                              checked={featureData.effective.custom_field_mapping_enabled}
+                              onChange={(e) => updateFeature('custom_field_mapping_enabled', e.target.checked)}
+                              disabled={updatingFeatures}
+                              size="small"
+                            />
+                          ) : (
+                            <Chip
+                              label={featureData.effective.custom_field_mapping_enabled ? 'Enabled' : 'Disabled'}
+                              color={featureData.effective.custom_field_mapping_enabled ? 'success' : 'default'}
+                              size="small"
+                            />
+                          )}
+                        </Stack>
+                        <Typography variant="body2" color="textSecondary" mb={1}>
+                          OCR and record field mapping tools for data import
+                        </Typography>
+                        {hasRole(['super_admin']) && featureData.globalDefaults && (
+                          <Typography variant="caption" color="textSecondary">
+                            Global: {featureData.globalDefaults.custom_field_mapping_enabled ? 'ON' : 'OFF'} | 
+                            Override: {featureData.overrides?.custom_field_mapping_enabled !== undefined ? (featureData.overrides.custom_field_mapping_enabled ? 'ON' : 'OFF') : 'None'}
+                          </Typography>
+                        )}
+                      </Paper>
+                    </Grid>
+                  </Grid>
+                )}
+
+                {!hasRole(['super_admin']) && (
+                  <Alert severity="info" sx={{ mt: 2 }}>
+                    Only Super Admins can modify feature flags. Contact your administrator to enable or disable features.
                   </Alert>
                 )}
               </CardContent>

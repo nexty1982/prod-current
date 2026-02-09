@@ -1,4 +1,4 @@
-import Grid2 from '@/mui/Grid2';
+import Grid2 from '@/components/compat/Grid2';
 import { Box, Typography, Container, Grid } from '@mui/material';
 
 const Banner = () => {

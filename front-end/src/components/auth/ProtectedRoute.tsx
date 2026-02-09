@@ -31,7 +31,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!authenticated) {
-    return <Navigate to="/auth/login2" replace />;
+    return <Navigate to="/auth/login" replace />;
   }
 
   // Helper function to get redirect path for non-superadmin users

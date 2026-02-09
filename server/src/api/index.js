@@ -10,6 +10,7 @@ const teachingRoutes = require('./teaching');
 const autonomyRoutes = require('./autonomy');
 const analyticsRoutes = require('./analytics');
 const nlpRoutes = require('./nlp'); // New import
+const omtraceRoutes = require('./omtrace');
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -20,5 +21,6 @@ router.use('/teaching', teachingRoutes);
 router.use('/autonomy', autonomyRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/nlp', nlpRoutes); // New mount
+router.use('/omtrace', omtraceRoutes);
 
 module.exports = router; 

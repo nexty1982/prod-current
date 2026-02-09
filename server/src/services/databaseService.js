@@ -197,21 +197,13 @@ async function getChurchMetadata(churchId) {
  * @returns {boolean} - True if should use church records DB
  */
 function isRecordPath(path) {
-    const recordPaths = [
-        '/saints-peter-and-paul-Records',
-        '/church/:id/records',
-        '/api/records',
-        '/api/baptism',
-        '/api/marriage', 
-        '/api/funeral'
-    ];
-    
-    return recordPaths.some(recordPath => 
-        path.includes('records') || 
-        path.includes('baptism') || 
-        path.includes('marriage') || 
-        path.includes('funeral')
-    );
+    // Admin endpoints that happen to contain "records" are platform operations, not record operations
+    if (path.includes('/admin/')) return false;
+
+    return path.includes('/api/records') ||
+        path.includes('/api/baptism') ||
+        path.includes('/api/marriage') ||
+        path.includes('/api/funeral');
 }
 
 module.exports = {

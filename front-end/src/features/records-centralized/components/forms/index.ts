@@ -1,2 +1,0 @@
-// Forms Components
-// Auto-generated exports will be added here

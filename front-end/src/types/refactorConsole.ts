@@ -92,6 +92,15 @@ export interface FilterState {
   // Recovery/Gap Analysis filters
   recoveryStatus?: RecoveryStatus[];
   showMissingOnly?: boolean;
+  // Whitelist filters
+  showWhitelistedOnly?: boolean;
+  hideWhitelisted?: boolean;
+}
+
+export interface WhitelistEntry {
+  relPath: string;
+  addedAt: string;       // ISO date string
+  reason?: string;       // Optional reason for whitelisting
 }
 
 export interface SortOption {

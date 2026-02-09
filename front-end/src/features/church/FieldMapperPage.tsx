@@ -1,26 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Typography, TextField, Button, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, Alert, CircularProgress, Select, MenuItem, FormControl,
-  InputLabel, Stack, Card, CardContent, Divider, Checkbox, FormControlLabel, Radio,
-  RadioGroup, Chip, Tooltip, Tabs, Tab, Slider, Switch, Grid, IconButton, Dialog,
-  DialogTitle, DialogContent, DialogActions, useTheme,
-} from '@mui/material';
-import {
-  Save as SaveIcon, Refresh as RefreshIcon, Cancel as CancelIcon, Storage as StorageIcon,
-  Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon, Sort as SortIcon,
-  ArrowUpward as ArrowUpIcon, ArrowDownward as ArrowDownIcon, Settings as SettingsIcon,
-  Image as ImageIcon, CalendarToday as CalendarIcon, PhotoLibrary as PhotoLibraryIcon,
-  CloudUpload as CloudUploadIcon, Palette as PaletteIcon, Business as BusinessIcon,
-  Add as AddIcon, Delete as DeleteIcon, Download as DownloadIcon, Upload as UploadIcon,
-  ViewList as ViewListIcon, GridView as GridViewIcon, Search as SearchIcon,
-  ArrowBack as ArrowBackIcon,
-} from '@mui/icons-material';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import adminAPI from '@/api/admin.api';
-import { enhancedTableStore, THEME_MAP, type LiturgicalThemeKey, type ThemeTokens, type FieldStyleRule, type Branding } from '@/store/enhancedTableStore';
 import { useAuth } from '@/context/AuthContext';
 import { fetchWithChurchContext } from '@/shared/lib/fetchWithChurchContext';
+import { enhancedTableStore, THEME_MAP, type Branding, type FieldStyleRule, type LiturgicalThemeKey, type ThemeTokens } from '@/store/enhancedTableStore';
+import {
+  Add as AddIcon,
+  ArrowDownward as ArrowDownIcon,
+  ArrowUpward as ArrowUpIcon,
+  Business as BusinessIcon,
+  CalendarToday as CalendarIcon,
+  CloudUpload as CloudUploadIcon,
+  Delete as DeleteIcon, Download as DownloadIcon,
+  GridView as GridViewIcon,
+  Image as ImageIcon,
+  Palette as PaletteIcon,
+  PhotoLibrary as PhotoLibraryIcon,
+  Refresh as RefreshIcon,
+  Save as SaveIcon,
+  Search as SearchIcon,
+  Settings as SettingsIcon,
+  Sort as SortIcon,
+  Storage as StorageIcon,
+  ViewList as ViewListIcon,
+  Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon
+} from '@mui/icons-material';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Grid, IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Radio,
+  RadioGroup,
+  Select,
+  Stack,
+  Switch,
+  Tab,
+  Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography,
+  useTheme
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import RecordHeaderPreview from './RecordHeaderPreview';
 
 interface Column {
@@ -246,8 +284,13 @@ const FieldMapperPage: React.FC = () => {
   
   // UI Theme State - for real-time preview updates
   const [uiThemeState, setUiThemeState] = useState(enhancedTableStore.getState());
-  const [configuringButton, setConfiguringButton] = useState<string | null>(null);
+  const [configuringButton, setConfiguringButton] = useState<string | null>('searchRecords');
   const [configuringColumn, setConfiguringColumn] = useState<string | null>(null);
+
+  // Database Schema stats
+  const [rowCount, setRowCount] = useState<number | null>(null);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [columnsError, setColumnsError] = useState<string | null>(null);
 
   // Subscribe to enhancedTableStore changes for real-time preview updates
   useEffect(() => {
@@ -277,16 +320,18 @@ const FieldMapperPage: React.FC = () => {
       
       if (response.ok) {
         const data = await response.json();
-        if (data.themes) {
+        // Handle both ApiResponse-wrapped ({ data: { themes } }) and direct ({ themes }) formats
+        const themesPayload = data.data?.themes || data.themes;
+        if (themesPayload && typeof themesPayload === 'object' && Object.keys(themesPayload).length > 0) {
           setThemeStudio(prev => ({
             ...prev,
-            themes: data.themes,
+            themes: themesPayload,
             isGlobal: isGlobal,
           }));
           
           // Sync church-specific themes to enhancedTableStore so they appear in dropdown
           if (!isGlobal) {
-            enhancedTableStore.setCustomThemes(data.themes);
+            enhancedTableStore.setCustomThemes(themesPayload);
           }
         } else {
           // Initialize with empty themes
@@ -345,16 +390,13 @@ const FieldMapperPage: React.FC = () => {
         ? '/api/admin/churches/themes/global'
         : `/api/admin/churches/${churchId}/themes`;
 
-      // Convert themes object/map to array for API
-      // themeStudio.themes is Record<string, ThemeTokens> - convert to Theme[]
-      const themesArray = Object.values(themeStudio.themes || {}).filter(theme => theme && theme.name);
-      
+      // Send themes as object (Record<string, ThemeTokens>) to match what loadThemes() expects
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          themes: themesArray,
+          themes: themeStudio.themes || {},
         }),
       });
 
@@ -410,7 +452,7 @@ const FieldMapperPage: React.FC = () => {
         let loadedChurchName = '';
         if (churchResponse.ok) {
           const churchData = await churchResponse.json();
-          loadedChurchName = churchData.church?.church_name || churchData.church?.name || '';
+          loadedChurchName = churchData.church?.church_name || churchData.church?.name || churchData.data?.church_name || churchData.data?.name || churchData.church_name || churchData.name || '';
           setChurchName(loadedChurchName);
         }
 
@@ -516,7 +558,9 @@ const FieldMapperPage: React.FC = () => {
         try {
           const res = await fetchWithChurchContext(url, { churchId, credentials: 'include' });
           if (res.ok) {
-            mappingData = await res.json();
+            const raw = await res.json();
+            // Handle both ApiResponse-wrapped ({ data: { columns, mappings, ... } }) and direct formats
+            mappingData = raw.data ?? raw;
             break;
           }
         } catch {
@@ -543,6 +587,8 @@ const FieldMapperPage: React.FC = () => {
       });
 
       setRows(rowsMapped);
+      setLastSync(new Date());
+      setColumnsError(null);
 
       if (data.field_settings?.default_sort_field) {
         setDefaultSortField(data.field_settings.default_sort_field);
@@ -554,9 +600,21 @@ const FieldMapperPage: React.FC = () => {
       } else {
         setDefaultSortDirection('asc');
       }
+
+      // Fetch row count for the table
+      try {
+        const countRes = await fetch(`/api/admin/church-database/${churchId}/record-counts`, { credentials: 'include' });
+        if (countRes.ok) {
+          const countData = await countRes.json();
+          const counts = countData?.data?.record_counts || countData?.counts || countData;
+          setRowCount(counts[tableName] ?? null);
+        }
+      } catch { /* non-fatal */ }
     } catch (err: any) {
       console.error('Error loading columns:', err);
-      setError(err?.message || 'Failed to load columns');
+      const msg = err?.message || 'Failed to load columns';
+      setError(msg);
+      setColumnsError(msg);
     } finally {
       setLoading(false);
     }
@@ -625,7 +683,7 @@ const FieldMapperPage: React.FC = () => {
 
       const body = JSON.stringify({
         table: tableName,
-        mapping,
+        mappings: mapping,
         field_settings: {
           visibility,
           sortable,
@@ -1068,27 +1126,28 @@ const FieldMapperPage: React.FC = () => {
             if (response.ok) {
               const data = await response.json();
               if (data.settings) {
+                const safeObj = (val: any) => (val && typeof val === 'object' && !Array.isArray(val)) ? val : {};
                 setRecordSettings(prev => ({
                   ...prev,
-                  ...data.settings,
+                  ...safeObj(data.settings),
                   logo: {
                     ...prev.logo,
-                    ...(data.settings.logo || {}),
+                    ...safeObj(data.settings.logo),
                   },
                   calendar: {
                     ...prev.calendar,
-                    ...(data.settings.calendar || {}),
+                    ...safeObj(data.settings.calendar),
                   },
                   omLogo: {
                     ...prev.omLogo,
-                    ...(data.settings.omLogo || {}),
+                    ...safeObj(data.settings.omLogo),
                   },
                   headerText: {
                     fontFamily: 'Arial, sans-serif',
                     fontSize: 16,
                     fontWeight: 700,
                     color: '#4C1D95',
-                    ...(data.settings.headerText || {}),
+                    ...safeObj(data.settings.headerText),
                     column: data.settings.headerText?.column ?? 1,
                   },
                   recordImages: {
@@ -1178,21 +1237,24 @@ const FieldMapperPage: React.FC = () => {
         if (response.ok) {
           const data = await response.json();
           if (data.settings) {
+            // Helper: only spread objects, not strings (guards against legacy corrupt data)
+            const safeObj = (val: any) => (val && typeof val === 'object' && !Array.isArray(val)) ? val : {};
+
             // Merge loaded settings with defaults to ensure all properties exist
             setRecordSettings(prev => ({
               ...prev,
-              ...data.settings,
+              ...safeObj(data.settings),
               logo: {
                 ...prev.logo,
-                ...(data.settings.logo || {}),
+                ...safeObj(data.settings.logo),
               },
               calendar: {
                 ...prev.calendar,
-                ...(data.settings.calendar || {}),
+                ...safeObj(data.settings.calendar),
               },
               omLogo: {
                 ...prev.omLogo,
-                ...(data.settings.omLogo || {}),
+                ...safeObj(data.settings.omLogo),
               },
               headerText: {
                 fontFamily: 'Arial, sans-serif',
@@ -1201,7 +1263,7 @@ const FieldMapperPage: React.FC = () => {
                 color: '#4C1D95',
                 x: 0,
                 y: 0,
-                ...(data.settings.headerText || {}),
+                ...safeObj(data.settings.headerText),
                 column: data.settings.headerText?.column ?? 1,
               },
               recordImages: {
@@ -1217,14 +1279,14 @@ const FieldMapperPage: React.FC = () => {
                 column: 0,
                 images: [],
                 currentIndex: 0,
-                ...(data.settings.backgroundImage || {}),
+                ...safeObj(data.settings.backgroundImage),
               },
               g1Image: {
                 enabled: true,
                 column: 0,
                 images: [],
                 currentIndex: 0,
-                ...(data.settings.g1Image || {}),
+                ...safeObj(data.settings.g1Image),
               },
               imageLibrary: {
                 logo: [],
@@ -1234,7 +1296,7 @@ const FieldMapperPage: React.FC = () => {
                 funeral: [],
                 bg: [],
                 g1: [],
-                ...(data.settings.imageLibrary || {}),
+                ...safeObj(data.settings.imageLibrary),
               },
               currentImageIndex: {
                 logo: 0,
@@ -1244,7 +1306,7 @@ const FieldMapperPage: React.FC = () => {
                 funeral: 0,
                 bg: 0,
                 g1: 0,
-                ...(data.settings.currentImageIndex || {}),
+                ...safeObj(data.settings.currentImageIndex),
               },
             }));
           }
@@ -1259,130 +1321,195 @@ const FieldMapperPage: React.FC = () => {
   }, [churchId]);
 
   return (
-    <Box sx={{ p: 3, minHeight: '100vh', bgcolor: theme.palette.background.default }}>
-      <Card sx={{ bgcolor: theme.palette.background.paper }}>
-        <CardContent>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <StorageIcon color="primary" />
+    <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.background.default }}>
+      {/* Page Header */}
+      <Box sx={{ px: 3, pt: 3, pb: 1 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+          <Box>
+            <Typography variant="h5" fontWeight={700}>
               Record Table Configuration
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Configure database mappings and record display settings for church ID {churchId}
+              Configure database mappings and record display settings for{' '}
+              <Typography component="span" variant="body2" color="primary.main" sx={{ textDecoration: 'underline', cursor: 'pointer' }}>
+                churchID {churchId}
+              </Typography>
             </Typography>
           </Box>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Button variant="outlined" size="small" startIcon={<SettingsIcon />} sx={{ textTransform: 'none', borderRadius: 2 }}>
+              Show HUD
+            </Button>
+            <IconButton size="small"><SettingsIcon fontSize="small" /></IconButton>
+          </Stack>
+        </Stack>
+      </Box>
 
-          <Divider sx={{ mb: 3 }} />
+      {/* Tabs */}
+      <Box sx={{ px: 3, borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs
+          value={activeTab}
+          onChange={(e, newValue) => setActiveTab(newValue)}
+          sx={{
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              minHeight: 48,
+              fontWeight: 500,
+              fontSize: '0.875rem',
+            },
+            '& .Mui-selected': {
+              fontWeight: 600,
+            },
+          }}
+        >
+          <Tab icon={<StorageIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="Database Mapping" />
+          <Tab icon={<SettingsIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="Record Settings" />
+          <Tab icon={<PaletteIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="Theme Studio" />
+          <Tab icon={<ViewListIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="UI Theme" />
+        </Tabs>
+      </Box>
 
-          {/* Tabs */}
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-            <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
-              <Tab 
-                icon={<StorageIcon />} 
-                iconPosition="start"
-                label="Database → Table Mapping" 
-                sx={{ textTransform: 'none', minHeight: 64 }}
-              />
-              <Tab 
-                icon={<SettingsIcon />} 
-                iconPosition="start"
-                label="Record Settings" 
-                sx={{ textTransform: 'none', minHeight: 64 }}
-              />
-              <Tab 
-                icon={<PaletteIcon />} 
-                iconPosition="start"
-                label="Theme Studio" 
-                sx={{ textTransform: 'none', minHeight: 64 }}
-              />
-              <Tab 
-                icon={<SettingsIcon />} 
-                iconPosition="start"
-                label="UI Theme" 
-                sx={{ textTransform: 'none', minHeight: 64 }}
-              />
-            </Tabs>
-          </Box>
+      <Box sx={{ p: 3 }}>
 
-          {/* Tab Panel 0: Database → Table Mapping */}
+          {/* Tab Panel 0: Database Mapping */}
           {activeTab === 0 && (
             <Box>
+          <Grid container spacing={3}>
+            {/* Left: Database Schema Card */}
+            <Grid item xs={12} md={8}>
+              <Card variant="outlined" sx={{ bgcolor: theme.palette.background.paper }}>
+                <CardContent>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <StorageIcon color="primary" />
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight={600}>Database Schema</Typography>
+                        <Typography variant="caption" color="text.secondary">Select and map your table schema</Typography>
+                      </Box>
+                    </Box>
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={loading ? <CircularProgress size={14} /> : <RefreshIcon />}
+                        onClick={loadColumns}
+                        disabled={loading || saving}
+                        sx={{ textTransform: 'none', borderRadius: 2 }}
+                      >
+                        Reload Columns
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={exporting ? <CircularProgress size={14} /> : <DownloadIcon />}
+                        onClick={() => setExportDialogOpen(true)}
+                        disabled={loading || saving || exporting || rows.length === 0}
+                        sx={{ textTransform: 'none', borderRadius: 2 }}
+                      >
+                        Export Template
+                      </Button>
+                    </Stack>
+                  </Stack>
 
-          {/* Table Selection and Reload */}
-          <Stack direction="row" spacing={2} sx={{ mb: 3 }} alignItems="center" flexWrap="wrap">
-            <FormControl sx={{ minWidth: 200 }}>
-              <InputLabel>Select Table</InputLabel>
-              <Select
-                value={tableName}
-                onChange={(e) => {
-                  const newTableName = e.target.value;
-                  setTableName(newTableName);
-                  // Update URL to keep it in sync
-                  const newSearchParams = new URLSearchParams(searchParams);
-                  newSearchParams.set('table', newTableName);
-                  setSearchParams(newSearchParams, { replace: true });
-                }}
-                label="Select Table"
-                disabled={loading || saving}
-              >
-                <MenuItem value="baptism_records">baptism_records</MenuItem>
-                <MenuItem value="marriage_records">marriage_records</MenuItem>
-                <MenuItem value="funeral_records">funeral_records</MenuItem>
-                <MenuItem value="members">members</MenuItem>
-                <MenuItem value="families">families</MenuItem>
-                <MenuItem value="donations">donations</MenuItem>
-              </Select>
-            </FormControl>
+                  <Typography variant="overline" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                    SELECT TABLE
+                  </Typography>
+                  <FormControl fullWidth sx={{ mb: 3 }}>
+                    <Select
+                      value={tableName}
+                      onChange={(e) => {
+                        const newTableName = e.target.value;
+                        setTableName(newTableName);
+                        const newSearchParams = new URLSearchParams(searchParams);
+                        newSearchParams.set('table', newTableName);
+                        setSearchParams(newSearchParams, { replace: true });
+                      }}
+                      disabled={loading || saving}
+                      size="small"
+                    >
+                      <MenuItem value="baptism_records">baptism.records</MenuItem>
+                      <MenuItem value="marriage_records">marriage.records</MenuItem>
+                      <MenuItem value="funeral_records">funeral.records</MenuItem>
+                      <MenuItem value="members">members</MenuItem>
+                      <MenuItem value="families">families</MenuItem>
+                      <MenuItem value="donations">donations</MenuItem>
+                    </Select>
+                  </FormControl>
 
-            <Button
-              variant="outlined"
-              startIcon={loading ? <CircularProgress size={16} /> : <RefreshIcon />}
-              onClick={loadColumns}
-              disabled={loading || saving}
-            >
-              Reload Columns
-            </Button>
+                  {/* Stats Row */}
+                  <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                      <Card variant="outlined" sx={{ p: 2, bgcolor: theme.palette.action.hover, textAlign: 'center' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
+                          <StorageIcon sx={{ fontSize: 14 }} /> Row Count
+                        </Typography>
+                        <Typography variant="h5" fontWeight={700} sx={{ mt: 0.5 }}>
+                          {rowCount !== null ? rowCount.toLocaleString() : '—'}
+                        </Typography>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Card variant="outlined" sx={{ p: 2, bgcolor: theme.palette.action.hover, textAlign: 'center' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
+                          <CalendarIcon sx={{ fontSize: 14 }} /> Last Sync
+                        </Typography>
+                        <Typography variant="h6" fontWeight={600} sx={{ mt: 0.5 }}>
+                          {lastSync ? lastSync.toLocaleString(undefined, { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase() : '—'}
+                        </Typography>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Card variant="outlined" sx={{ p: 2, bgcolor: theme.palette.action.hover, textAlign: 'center' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
+                          <StorageIcon sx={{ fontSize: 14 }} /> Language
+                        </Typography>
+                        <Typography variant="h6" fontWeight={600} sx={{ mt: 0.5 }}>
+                          {exportLanguage === 'en' ? 'English' : exportLanguage === 'gr' ? 'Greek' : exportLanguage === 'ru' ? 'Russian' : exportLanguage === 'ro' ? 'Romanian' : exportLanguage === 'ka' ? 'Georgian' : exportLanguage} ({exportLanguage})
+                        </Typography>
+                      </Card>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
 
-            {/* Export to Template Button */}
-            <FormControl size="small" sx={{ minWidth: 100 }}>
-              <InputLabel>Language</InputLabel>
-              <Select
-                value={exportLanguage}
-                onChange={(e) => setExportLanguage(e.target.value)}
-                label="Language"
-                disabled={loading || saving || exporting}
-              >
-                <MenuItem value="en">English (en)</MenuItem>
-                <MenuItem value="gr">Greek (gr)</MenuItem>
-                <MenuItem value="ru">Russian (ru)</MenuItem>
-                <MenuItem value="ro">Romanian (ro)</MenuItem>
-                <MenuItem value="ka">Georgian (ka)</MenuItem>
-              </Select>
-            </FormControl>
-
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={exporting ? <CircularProgress size={16} /> : <DownloadIcon />}
-              onClick={() => setExportDialogOpen(true)}
-              disabled={loading || saving || exporting || rows.length === 0}
-            >
-              Export to Template
-            </Button>
-          </Stack>
-
-          {/* Warning Banner for Export */}
-          <Alert severity="warning" sx={{ mb: 2, mt: 2 }}>
-            <Typography variant="body2">
-              <strong>Export to Template:</strong> This exports the current table schema and field mapper configuration 
-              into a <strong>global template</strong> that will be available to all churches. Only use this for 
-              standardized, production-ready configurations. Church-specific customizations should not be exported.
-            </Typography>
-          </Alert>
+            {/* Right: System Notifications */}
+            <Grid item xs={12} md={4}>
+              <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                SYSTEM NOTIFICATIONS
+              </Typography>
+              <Stack spacing={1.5}>
+                <Alert
+                  severity="warning"
+                  sx={{ borderRadius: 2, '& .MuiAlert-message': { width: '100%' } }}
+                >
+                  <Typography variant="subtitle2" fontWeight={600}>Schema Synchronization</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Exporting the current table schema will make it available as a global template. Church-specific customizations will not be preserved.
+                  </Typography>
+                </Alert>
+                {columnsError && (
+                  <Alert
+                    severity="error"
+                    sx={{ borderRadius: 2, '& .MuiAlert-message': { width: '100%' } }}
+                    action={
+                      <Button size="small" onClick={loadColumns} sx={{ textTransform: 'none' }}>
+                        Retry
+                      </Button>
+                    }
+                  >
+                    <Typography variant="caption">
+                      {columnsError}. Column mapping cannot be loaded.
+                    </Typography>
+                  </Alert>
+                )}
+              </Stack>
+            </Grid>
+          </Grid>
 
           {/* Status Messages */}
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+          {error && <Alert severity="error" sx={{ mb: 2, mt: 2 }}>{error}</Alert>}
+          {success && <Alert severity="success" sx={{ mb: 2, mt: 2 }}>{success}</Alert>}
 
           {/* Loading State */}
           {loading && (
@@ -1777,10 +1904,10 @@ const FieldMapperPage: React.FC = () => {
               })()}
 
               {/* Action Buttons */}
-              <Stack direction="row" spacing={2} justifyContent="flex-end">
-                <Button variant="outlined" startIcon={<CancelIcon />} onClick={handleCancel} disabled={saving}>Cancel</Button>
-                <Button variant="contained" startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />} onClick={handleSave} disabled={saving || loading || rows.length === 0}>
-                  {saving ? 'Saving...' : 'Save Mapping'}
+              <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
+                <Button variant="outlined" onClick={handleCancel} disabled={saving} sx={{ textTransform: 'none' }}>Cancel Changes</Button>
+                <Button variant="contained" color="error" startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />} onClick={handleSave} disabled={saving || loading || rows.length === 0} sx={{ textTransform: 'none' }}>
+                  {saving ? 'Saving...' : 'Save Database Mapping'}
                 </Button>
               </Stack>
             </Box>
@@ -1789,25 +1916,22 @@ const FieldMapperPage: React.FC = () => {
           {/* Tab Panel 1: Record Settings */}
           {activeTab === 1 && (
             <Box>
-              <Typography variant="h6" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <SettingsIcon color="primary" />
-                Header Display Configuration
-              </Typography>
-
-              {/* Status Messages */}
-              {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-              {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-
-              {/* Upload Image Button and Reset Defaults */}
-              <Box sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+              {/* Header */}
+              <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
+                <Box>
+                  <Typography variant="h6" fontWeight={600}>Header Display Configuration</Typography>
+                  <Typography variant="body2" color="text.secondary">Configure visual elements for the record table header</Typography>
+                </Box>
+                <Stack direction="row" spacing={1}>
                   <Button
                     variant="outlined"
+                    size="small"
                     component="label"
                     startIcon={<CloudUploadIcon />}
                     disabled={saving}
+                    sx={{ textTransform: 'none', borderRadius: 2 }}
                   >
-                    Upload Image to Library
+                    Upload Library
                     <input
                       type="file"
                       hidden
@@ -1815,35 +1939,21 @@ const FieldMapperPage: React.FC = () => {
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          // Validate file type
                           const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
                           if (!validTypes.includes(file.type.toLowerCase())) {
                             setError('Please upload a .jpg or .png image file');
                             return;
                           }
-                          
-                          // Reset error state
                           setError(null);
                           setSuccess(null);
                           setSaving(true);
-                          
                           try {
-                            // Upload to image library using a supported type
-                            // Using 'baptism' as the type since 'recordImage' might not be supported by backend
-                            console.log('Starting image upload:', { churchId, type: 'baptism', fileName: file.name, fileSize: file.size, fileType: file.type });
                             await handleImageUpload('baptism', file);
                             setSuccess('Image uploaded successfully to library!');
                           } catch (err: any) {
-                            console.error('Error uploading image:', err);
-                            console.error('Error details:', {
-                              message: err?.message,
-                              stack: err?.stack,
-                              name: err?.name
-                            });
-                            setError(err?.message || 'Failed to upload image. Please try again.');
+                            setError(err?.message || 'Failed to upload image.');
                           } finally {
                             setSaving(false);
-                            // Reset the input so the same file can be selected again
                             e.target.value = '';
                           }
                         }
@@ -1852,87 +1962,162 @@ const FieldMapperPage: React.FC = () => {
                   </Button>
                   <Button
                     variant="outlined"
-                    color="warning"
+                    size="small"
                     startIcon={<RefreshIcon />}
                     onClick={handleResetDefaults}
                     disabled={saving}
+                    sx={{ textTransform: 'none', borderRadius: 2 }}
                   >
                     Reset Defaults
                   </Button>
-                </Box>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-                  Upload .jpg or .png images to your image library
-                </Typography>
-              </Box>
-
-              {/* Live Preview */}
-              <RecordHeaderPreview
-                churchId={churchId}
-                recordSettings={recordSettings}
-                setRecordSettings={setRecordSettings}
-                onImageUpload={handleImageUpload}
-                recordType={
-                  urlTableName === 'baptism_records' ? 'baptism' :
-                  urlTableName === 'marriage_records' ? 'marriage' :
-                  urlTableName === 'funeral_records' ? 'funeral' : 'baptism'
-                }
-                churchName={churchName || `Church ${churchId}`}
-              />
-
-              {/* Action Buttons */}
-              <Stack direction="row" spacing={2} justifyContent="flex-end">
-                <Button 
-                  variant="outlined" 
-                  startIcon={<ArrowBackIcon />} 
-                  onClick={handleBackToRecords}
-                  disabled={saving}
-                >
-                  Back to Records
-                </Button>
-                <Button variant="outlined" startIcon={<CancelIcon />} onClick={handleCancel} disabled={saving}>
-                  Cancel
-                </Button>
-                <Button 
-                  variant="contained" 
-                  startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />} 
-                  onClick={handleSaveRecordSettings} 
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Record Settings'}
-                </Button>
+                </Stack>
               </Stack>
+
+              {/* Status Messages */}
+              {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+              {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+              {columnsError && (
+                <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                  {columnsError}. Live preview may not reflect final schema.
+                </Alert>
+              )}
+
+              {/* Elements + Live Preview */}
+              <Grid container spacing={3}>
+                {/* Left: Elements toggles */}
+                <Grid item xs={12} md={5}>
+                  <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                    ELEMENTS
+                  </Typography>
+                  <Stack spacing={1}>
+                    {[
+                      { key: 'recordImages', label: 'Record Image', icon: <ImageIcon fontSize="small" /> },
+                      { key: 'calendar', label: 'Calendar', icon: <CalendarIcon fontSize="small" /> },
+                      { key: 'logo', label: 'Church Logo', icon: <BusinessIcon fontSize="small" /> },
+                      { key: 'omLogo', label: 'OM Logo', icon: <PhotoLibraryIcon fontSize="small" /> },
+                      { key: 'backgroundImage', label: 'Background', icon: <ImageIcon fontSize="small" /> },
+                      { key: 'g1Image', label: 'Overlay', icon: <ImageIcon fontSize="small" /> },
+                    ].map((element) => {
+                      const isEnabled = element.key === 'recordImages'
+                        ? true
+                        : (recordSettings as any)[element.key]?.enabled ?? true;
+                      return (
+                        <Card
+                          key={element.key}
+                          variant="outlined"
+                          sx={{
+                            px: 2,
+                            py: 1.5,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            bgcolor: isEnabled ? 'primary.main' : theme.palette.action.hover,
+                            color: isEnabled ? 'primary.contrastText' : 'text.primary',
+                            borderColor: isEnabled ? 'primary.main' : 'divider',
+                            transition: 'all 0.2s',
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => {
+                            if (element.key === 'recordImages') return;
+                            setRecordSettings((prev: any) => ({
+                              ...prev,
+                              [element.key]: {
+                                ...prev[element.key],
+                                enabled: !prev[element.key]?.enabled,
+                              },
+                            }));
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {element.icon}
+                            <Typography variant="body2" fontWeight={500}>{element.label}</Typography>
+                          </Box>
+                          {element.key !== 'recordImages' ? (
+                            <Switch
+                              size="small"
+                              checked={isEnabled}
+                              onChange={() => {
+                                setRecordSettings((prev: any) => ({
+                                  ...prev,
+                                  [element.key]: {
+                                    ...prev[element.key],
+                                    enabled: !prev[element.key]?.enabled,
+                                  },
+                                }));
+                              }}
+                              sx={{
+                                '& .MuiSwitch-switchBase.Mui-checked': {
+                                  color: isEnabled ? '#fff' : undefined,
+                                },
+                              }}
+                            />
+                          ) : (
+                            <Switch size="small" checked disabled />
+                          )}
+                        </Card>
+                      );
+                    })}
+                  </Stack>
+                </Grid>
+
+                {/* Right: Live Header Preview */}
+                <Grid item xs={12} md={7}>
+                  <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block', textAlign: 'right' }}>
+                    LIVE HEADER PREVIEW
+                  </Typography>
+                  <RecordHeaderPreview
+                    churchId={churchId}
+                    recordSettings={recordSettings}
+                    setRecordSettings={setRecordSettings}
+                    onImageUpload={handleImageUpload}
+                    recordType={
+                      urlTableName === 'baptism_records' ? 'baptism' :
+                      urlTableName === 'marriage_records' ? 'marriage' :
+                      urlTableName === 'funeral_records' ? 'funeral' : 'baptism'
+                    }
+                    churchName={churchName || `Church ${churchId}`}
+                  />
+                </Grid>
+              </Grid>
+
+              {/* Footer */}
+              <Box sx={{ mt: 4, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+                <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <CircularProgress size={12} /> Live preview loading. Interactions may not be saved
+                  </Typography>
+                  <Stack direction="row" spacing={2}>
+                    <Button variant="outlined" onClick={handleCancel} disabled={saving} sx={{ textTransform: 'none' }}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
+                      onClick={handleSaveRecordSettings}
+                      disabled={saving}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      {saving ? 'Saving...' : 'Save Record Settings'}
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
             </Box>
           )}
 
           {/* Tab Panel 2: Theme Studio */}
           {activeTab === 2 && (
             <Box>
-              <Typography variant="h6" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <PaletteIcon color="primary" />
-                Theme Studio
-              </Typography>
-
               {/* Status Messages */}
               {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
               {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
-              {/* Live Preview */}
-              <Card variant="outlined" sx={{ mb: 3, p: 3, bgcolor: theme.palette.background.paper }}>
-                <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                  Live Preview
-                    </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Double-click any table element to configure its color.
-                        </Typography>
-                <Box
-                  sx={{
-                    border: `2px dashed ${theme.palette.divider}`,
-                    borderRadius: 2,
-                    p: 2,
-                    bgcolor: theme.palette.background.paper,
-                    overflow: 'auto',
-                  }}
-                >
+              {/* Table Styling Preview */}
+              <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                TABLE STYLING PREVIEW
+              </Typography>
+              <Box sx={{ mb: 3, overflow: 'auto' }}>
                   {(() => {
                     // Get current theme tokens for preview
                     const currentState = enhancedTableStore.getState();
@@ -2084,190 +2269,171 @@ const FieldMapperPage: React.FC = () => {
                     );
                   })()}
             </Box>
-              </Card>
 
-              <Grid container spacing={3}>
+              <Typography variant="overline" color="text.secondary" sx={{ mb: 0.5, mt: 1, display: 'block', textAlign: 'center' }}>
+                DOUBLE CLICK ANY ELEMENT TO CONFIGURE COLOR
+              </Typography>
+
+              <Grid container spacing={3} sx={{ mt: 1 }}>
                 {/* Left Column - Theme Management */}
-                <Grid item xs={12} md={8}>
-                  <Card variant="outlined" sx={{ mb: 3, p: 3, bgcolor: theme.palette.background.paper }}>
-                    <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                      Theme Management
-                    </Typography>
-                    
-                    <Stack spacing={3}>
-                      {/* Global vs Church-Specific Toggle */}
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={themeStudio.isGlobal}
-                            onChange={(e) => {
-                              setThemeStudio(prev => ({ ...prev, isGlobal: e.target.checked }));
-                              // Reload themes when switching
-                              loadThemes(e.target.checked);
-                            }}
-                          />
-                        }
-                        label="Global Theme (applies to all churches unless overridden)"
-                      />
-
-                      {!themeStudio.isGlobal && (
-                        <Alert severity="info">
-                          Church-specific themes will override global themes for this church only.
-                        </Alert>
-                      )}
-
-                      {/* Theme List */}
+                <Grid item xs={12} md={5}>
+                  <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                    THEME MANAGEMENT
+                  </Typography>
+                  <Card variant="outlined" sx={{ p: 2.5, bgcolor: theme.palette.background.paper, mb: 2 }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
                       <Box>
-                        <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          {themeStudio.isGlobal ? 'Global Themes' : 'Church-Specific Themes'}
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<AddIcon />}
-                            onClick={() => {
-                              setEditingTheme({
-                                name: '',
-                                description: '',
-                                tokens: {
-                                  headerBg: '#1976d2',
-                                  headerText: '#ffffff',
-                                  rowOddBg: '#fafafa',
-                                  rowEvenBg: '#ffffff',
-                                  border: '#e0e0e0',
-                                  accent: '#1976d2',
-                                  cellText: '#212121',
-                                },
-                              });
-                              setThemeDialogOpen(true);
-                            }}
-                          >
-                            Add Theme
-                          </Button>
-                        </Typography>
-                        <Stack spacing={1} sx={{ mt: 2 }}>
-                          {Object.entries(themeStudio.themes).map(([key, theme]) => (
-                            <Card key={key} variant="outlined" sx={{ p: 2, bgcolor: theme.palette.background.paper }}>
-                              <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-                                <Box sx={{ flex: 1 }}>
-                                  <Typography variant="subtitle1" fontWeight="bold">
-                                    {theme.name || key}
-                                  </Typography>
-                                  {theme.description && (
-                                    <Typography variant="body2" color="text.secondary">
-                                      {theme.description}
-                                    </Typography>
-                                  )}
-                                  <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
-                                    <Box sx={{ width: 30, height: 20, bgcolor: theme.headerBg, border: '1px solid #ccc', borderRadius: 1 }} />
-                                    <Box sx={{ width: 30, height: 20, bgcolor: theme.accent, border: '1px solid #ccc', borderRadius: 1 }} />
-                                    <Box sx={{ width: 30, height: 20, bgcolor: theme.rowOddBg, border: '1px solid #ccc', borderRadius: 1 }} />
-                                    <Box sx={{ width: 30, height: 20, bgcolor: theme.rowEvenBg, border: '1px solid #ccc', borderRadius: 1 }} />
-                                  </Box>
-                                </Box>
-                                <Stack direction="row" spacing={1}>
-                                  <Button
-                                    size="small"
-                                    variant="outlined"
-                                    onClick={() => {
-                                      setEditingTheme({ name: key, description: theme.description || '', tokens: theme });
-                                      setThemeDialogOpen(true);
-                                    }}
-                                  >
-                                    Edit
-                                  </Button>
-                                  <IconButton
-                                    size="small"
-                                    color="error"
-                                    onClick={async () => {
-                                      if (window.confirm(`Delete theme "${theme.name || key}"?`)) {
-                                        const newThemes = { ...themeStudio.themes };
-                                        delete newThemes[key];
-                                        setThemeStudio(prev => ({ ...prev, themes: newThemes }));
-                                        await saveThemes();
-                                      }
-                                    }}
-                                  >
-                                    <DeleteIcon fontSize="small" />
-                                  </IconButton>
-                                </Stack>
-                              </Stack>
-                            </Card>
-                          ))}
-                          {Object.keys(themeStudio.themes).length === 0 && (
-                            <Alert severity="info">
-                              No {themeStudio.isGlobal ? 'global' : 'church-specific'} themes defined. Click "Add Theme" to create one.
-                            </Alert>
-                          )}
-                        </Stack>
+                        <Typography variant="subtitle2" fontWeight={600}>Global Theme</Typography>
+                        <Typography variant="caption" color="text.secondary">Applies to all churches</Typography>
                       </Box>
+                      <Switch
+                        checked={themeStudio.isGlobal}
+                        onChange={(e) => {
+                          setThemeStudio(prev => ({ ...prev, isGlobal: e.target.checked }));
+                          loadThemes(e.target.checked);
+                        }}
+                      />
                     </Stack>
+                    {!themeStudio.isGlobal && (
+                      <Alert severity="info" sx={{ mt: 1.5, borderRadius: 1 }}>
+                        <Typography variant="caption">Church specific themes will override global themes for this church only.</Typography>
+                      </Alert>
+                    )}
                   </Card>
-                </Grid>
 
-                {/* Right Column - Pre-defined Themes */}
-                <Grid item xs={12} md={4}>
-                  <Card variant="outlined" sx={{ mb: 3, p: 3, bgcolor: theme.palette.background.paper }}>
-                    <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                      Pre-defined Liturgical Themes
-                    </Typography>
-                    <Stack spacing={2}>
-                      {Object.entries(THEME_MAP).map(([key, tokens]) => (
-                        <Card
-                          key={key}
-                          variant="outlined"
-                          sx={{
-                            p: 2,
-                            cursor: 'pointer',
-                            border: themeStudio.selectedTheme === key ? '2px solid primary.main' : '1px solid',
-                            '&:hover': { bgcolor: 'action.hover' },
-                          }}
-                          onClick={() => {
-                            // Check if theme already exists in custom themes, if not add it
-                            if (!themeStudio.themes[key]) {
-                              const themeName = key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-                              setThemeStudio(prev => ({
-                                ...prev,
-                                themes: {
-                                  ...prev.themes,
-                                  [key]: {
-                                    ...tokens,
-                                    name: themeName,
-                                    description: `Pre-defined ${themeName} theme`,
-                                  },
-                                },
-                              }));
-                            }
-                          }}
-                        >
-                          <Typography variant="subtitle2" fontWeight="bold">
-                            {key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          </Typography>
-                          <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
-                            <Box sx={{ width: 30, height: 20, bgcolor: tokens.headerBg, border: '1px solid #ccc', borderRadius: 1 }} />
-                            <Box sx={{ width: 30, height: 20, bgcolor: tokens.accent, border: '1px solid #ccc', borderRadius: 1 }} />
-                            <Box sx={{ width: 30, height: 20, bgcolor: tokens.rowOddBg, border: '1px solid #ccc', borderRadius: 1 }} />
-                            <Box sx={{ width: 30, height: 20, bgcolor: tokens.rowEvenBg, border: '1px solid #ccc', borderRadius: 1 }} />
+                  <Typography variant="overline" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                    CHURCH-SPECIFIC THEMES
+                  </Typography>
+                  <Stack spacing={1}>
+                    {Object.entries(themeStudio.themes).map(([key, themeItem]) => (
+                      <Card key={key} variant="outlined" sx={{ p: 2, bgcolor: theme.palette.background.paper }}>
+                        <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="subtitle2" fontWeight={600}>{themeItem.name || key}</Typography>
+                            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
+                              <Box sx={{ width: 20, height: 20, bgcolor: themeItem.headerBg, borderRadius: '50%', border: '1px solid', borderColor: 'divider' }} />
+                              <Box sx={{ width: 20, height: 20, bgcolor: themeItem.accent, borderRadius: '50%', border: '1px solid', borderColor: 'divider' }} />
+                              <Box sx={{ width: 20, height: 20, bgcolor: themeItem.rowOddBg, borderRadius: '50%', border: '1px solid', borderColor: 'divider' }} />
+                            </Box>
                           </Box>
-                          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                            <Button size="small" variant="outlined" onClick={(e) => {
-                              e.stopPropagation();
-                              const themeName = key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-                              setEditingTheme({
-                                name: key, // Use the key as the name to allow editing default themes
-                                description: `Pre-defined ${themeName} theme`,
-                                tokens: tokens,
-                                isPreDefined: true, // Mark as pre-defined theme
-                                originalKey: key, // Store original key
-                              });
+                          <Stack direction="row" spacing={0.5}>
+                            <IconButton size="small" onClick={() => {
+                              setEditingTheme({ name: key, description: themeItem.description || '', tokens: themeItem });
                               setThemeDialogOpen(true);
                             }}>
-                              Edit
-                            </Button>
+                              <SettingsIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" color="error" onClick={async () => {
+                              if (window.confirm(`Delete theme "${themeItem.name || key}"?`)) {
+                                const newThemes = { ...themeStudio.themes };
+                                delete newThemes[key];
+                                setThemeStudio(prev => ({ ...prev, themes: newThemes }));
+                                await saveThemes();
+                              }
+                            }}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
                           </Stack>
-                        </Card>
-                      ))}
-                    </Stack>
-                  </Card>
+                        </Stack>
+                      </Card>
+                    ))}
+                    <Card
+                      variant="outlined"
+                      sx={{ p: 2, bgcolor: theme.palette.action.hover, cursor: 'pointer', textAlign: 'center', borderStyle: 'dashed' }}
+                      onClick={() => {
+                        setEditingTheme({
+                          name: '', description: '',
+                          tokens: { headerBg: '#1976d2', headerText: '#ffffff', rowOddBg: '#fafafa', rowEvenBg: '#ffffff', border: '#e0e0e0', accent: '#1976d2', cellText: '#212121' },
+                        });
+                        setThemeDialogOpen(true);
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
+                        <AddIcon fontSize="small" /> Add New Theme
+                      </Typography>
+                    </Card>
+                  </Stack>
+                </Grid>
+
+                {/* Right Column - Pre-defined Liturgical Themes */}
+                <Grid item xs={12} md={7}>
+                  <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                    PRE-DEFINED LITURGICAL THEMES
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {Object.entries(THEME_MAP).map(([key, tokens]) => {
+                      const themeName = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                      const isSelected = themeStudio.selectedTheme === key || !!themeStudio.themes[key];
+                      return (
+                        <Grid item xs={12} sm={4} key={key}>
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              p: 0,
+                              overflow: 'hidden',
+                              cursor: 'pointer',
+                              border: isSelected ? 2 : 1,
+                              borderColor: isSelected ? 'primary.main' : 'divider',
+                              position: 'relative',
+                              '&:hover': { borderColor: 'primary.main' },
+                            }}
+                            onClick={() => {
+                              if (!themeStudio.themes[key]) {
+                                setThemeStudio(prev => ({
+                                  ...prev,
+                                  selectedTheme: key,
+                                  themes: {
+                                    ...prev.themes,
+                                    [key]: { ...tokens, name: themeName, description: `Pre-defined ${themeName} theme` },
+                                  },
+                                }));
+                              } else {
+                                setThemeStudio(prev => ({ ...prev, selectedTheme: key }));
+                              }
+                              setPreviewTheme(tokens);
+                            }}
+                          >
+                            {isSelected && (
+                              <Box sx={{ position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: '50%', bgcolor: 'success.main', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Typography sx={{ color: '#fff', fontSize: 12, fontWeight: 700 }}>✓</Typography>
+                              </Box>
+                            )}
+                            <Box sx={{ p: 1.5 }}>
+                              <Typography variant="subtitle2" fontWeight={600} color="primary.main">{themeName}</Typography>
+                              <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
+                                <Box sx={{ width: 16, height: 16, bgcolor: tokens.headerBg, borderRadius: '50%', border: '1px solid', borderColor: 'divider' }} />
+                                <Box sx={{ width: 16, height: 16, bgcolor: tokens.accent, borderRadius: '50%', border: '1px solid', borderColor: 'divider' }} />
+                                <Box sx={{ width: 16, height: 16, bgcolor: tokens.rowOddBg, borderRadius: '50%', border: '1px solid', borderColor: 'divider' }} />
+                              </Box>
+                            </Box>
+                            <Box sx={{ bgcolor: tokens.headerBg, height: 6 }} />
+                            <Box sx={{ bgcolor: tokens.rowOddBg, height: 4 }} />
+                            <Box sx={{ bgcolor: tokens.rowEvenBg, height: 4 }} />
+                            <Box sx={{ bgcolor: tokens.rowOddBg, height: 4 }} />
+                            <Box sx={{ p: 1.5 }}>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                fullWidth
+                                startIcon={<PaletteIcon />}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingTheme({
+                                    name: key, description: `Pre-defined ${themeName} theme`,
+                                    tokens: tokens, isPreDefined: true, originalKey: key,
+                                  });
+                                  setThemeDialogOpen(true);
+                                }}
+                                sx={{ textTransform: 'none', borderRadius: 2 }}
+                              >
+                                Edit Theme
+                              </Button>
+                            </Box>
+                          </Card>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
                 </Grid>
               </Grid>
 
@@ -2700,551 +2866,296 @@ const FieldMapperPage: React.FC = () => {
                 </DialogActions>
               </Dialog>
 
-              {/* Action Buttons */}
-              <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
-                <Button variant="outlined" startIcon={<CancelIcon />} onClick={handleCancel} disabled={saving}>
-                  Cancel
-                </Button>
-                <Button 
-                  variant="contained" 
-                  startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />} 
-                  onClick={async () => {
-                    await saveThemes();
-                  }}
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Themes'}
-                </Button>
-              </Stack>
+              {/* Footer */}
+              <Box sx={{ mt: 4, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+                <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <CircularProgress size={12} /> Live preview loading. Interactions may not be saved
+                  </Typography>
+                  <Stack direction="row" spacing={2}>
+                    <Button variant="outlined" onClick={handleCancel} disabled={saving} sx={{ textTransform: 'none' }}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
+                      onClick={async () => { await saveThemes(); }}
+                      disabled={saving}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      {saving ? 'Saving...' : 'Save Themes'}
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
             </Box>
           )}
 
           {/* Tab Panel 3: UI Theme */}
-          {activeTab === 3 && (
-            <Box>
-              <Typography variant="h6" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <SettingsIcon color="primary" />
-                UI Theme - Action Buttons Configuration
-              </Typography>
+          {activeTab === 3 && (() => {
+            const allButtons = [
+              { key: 'searchRecords', label: 'Search Records', icon: <SearchIcon />, badge: 'SEARCH' },
+              { key: 'theme', label: 'Theme', icon: <PaletteIcon />, badge: 'ACTIONS' },
+              { key: 'recordTableConfig', label: 'Record Table Config', icon: <SettingsIcon />, badge: 'ACTIONS' },
+              { key: 'switchToAG', label: 'Switch to AG', icon: <ViewListIcon />, badge: 'ACTIONS' },
+              { key: 'fieldSettings', label: 'Field Settings', icon: <SettingsIcon />, badge: 'ADMIN' },
+              { key: 'addRecords', label: 'Add Records', icon: <AddIcon />, badge: 'ACTIONS' },
+              { key: 'advancedGrid', label: 'Advanced Grid', icon: <GridViewIcon />, badge: 'ADMIN' },
+            ];
+            const buttonConfigs = uiThemeState.actionButtonConfigs;
+            const selectedKey = configuringButton || 'searchRecords';
+            const selectedConfig = buttonConfigs?.[selectedKey as keyof typeof buttonConfigs];
+            const selectedButton = allButtons.find(b => b.key === selectedKey) || allButtons[0];
 
+            return (
+            <Box>
               {/* Status Messages */}
               {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
               {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Customize the appearance of the four action buttons: Switch to AG, Field Settings, Add Records, and Advanced Grid.
+              {/* Action Buttons Preview */}
+              <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                ACTION BUTTONS PREVIEW
               </Typography>
-
-              {/* Live Preview */}
-              <Card variant="outlined" sx={{ mb: 3, p: 3, bgcolor: theme.palette.background.paper }}>
-                <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                  Live Preview
-                </Typography>
-                <Box
-                  key={JSON.stringify(uiThemeState.actionButtonConfigs)}
-                  sx={{
-                    border: `2px dashed ${theme.palette.divider}`,
-                    borderRadius: 2,
-                    p: 3,
-                    bgcolor: theme.palette.background.paper,
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 2,
-                    alignItems: 'center',
-                  }}
-                >
-                  {(() => {
-                    const buttonConfigs = uiThemeState.actionButtonConfigs;
-                    const searchRecordsConfig = buttonConfigs?.searchRecords;
-                    const themeConfig = buttonConfigs?.theme;
-                    const recordTableConfigConfig = buttonConfigs?.recordTableConfig;
-                    const switchToAGConfig = buttonConfigs?.switchToAG;
-                    const fieldSettingsConfig = buttonConfigs?.fieldSettings;
-                    const addRecordsConfig = buttonConfigs?.addRecords;
-                    const advancedGridConfig = buttonConfigs?.advancedGrid;
-
-                    const renderButton = (buttonKey: string, label: string, icon: React.ReactNode, config: ButtonConfig | undefined, defaultBg: string, defaultHover: string) => (
-                      <Tooltip title="Double-click to configure">
-                        <Box
-                          onDoubleClick={() => setConfiguringButton(buttonKey)}
-                          sx={{
-                            cursor: 'pointer',
-                            outline: configuringButton === buttonKey ? '2px solid #4C1D95' : 'none',
-                            outlineOffset: '4px',
-                            borderRadius: 1,
-                            p: 0.5,
-                          }}
-                        >
-                          {buttonKey === 'searchRecords' ? (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 0.5,
-                                minWidth: 220,
-                              }}
-                            >
-                              <Chip 
-                                label={label}
-                                size="small" 
-                                sx={{ 
-                                  width: 'fit-content',
-                                  backgroundColor: config?.backgroundColor || '#4C1D95',
-                                  color: config?.textColor || '#ffffff',
-                                  borderRadius: '20px',
-                                  fontWeight: 500,
-                                  fontSize: config?.fontSize || '0.75rem',
-                                  padding: config?.padding || '4px 8px',
-                                  '&:hover': {
-                                    backgroundColor: config?.hoverColor || '#5a2ba8',
-                                  },
-                                }}
-                              />
-                              <TextField
-                                placeholder="Search records..."
-                                InputProps={{
-                                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                                }}
-                                size="small"
-                                sx={{ minWidth: 220 }}
-                                disabled
-                              />
-                            </Box>
-                          ) : buttonKey === 'theme' ? (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 0.5,
-                                minWidth: 200,
-                              }}
-                            >
-                              <Chip 
-                                label={label}
-                                size="small" 
-                                sx={{ 
-                                  width: 'fit-content',
-                                  backgroundColor: config?.backgroundColor || '#4C1D95',
-                                  color: config?.textColor || '#ffffff',
-                                  borderRadius: '20px',
-                                  fontWeight: 500,
-                                  fontSize: config?.fontSize || '0.75rem',
-                                  padding: config?.padding || '4px 8px',
-                                  '&:hover': {
-                                    backgroundColor: config?.hoverColor || '#5a2ba8',
-                                  },
-                                }}
-                              />
-                              <FormControl size="small" fullWidth>
-                                <Select
-                                  value={uiThemeState.liturgicalTheme}
-                                  disabled
-                                  sx={{
-                                    borderRadius: 2,
-                                    backgroundColor: 'background.paper',
-                                  }}
-                                >
-                                  <MenuItem value={uiThemeState.liturgicalTheme}>
-                                    {uiThemeState.liturgicalTheme}
-                                  </MenuItem>
-                                </Select>
-                              </FormControl>
-                            </Box>
-                          ) : buttonKey === 'recordTableConfig' ? (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 0.5,
-                              }}
-                            >
-                              <Chip 
-                                label={label}
-                                size="small" 
-                                sx={{ 
-                                  width: 'fit-content',
-                                  backgroundColor: config?.backgroundColor || '#4C1D95',
-                                  color: config?.textColor || '#ffffff',
-                                  borderRadius: '20px',
-                                  fontWeight: 500,
-                                  fontSize: config?.fontSize || '0.75rem',
-                                  padding: config?.padding || '4px 8px',
-                                  '&:hover': {
-                                    backgroundColor: config?.hoverColor || '#5a2ba8',
-                                  },
-                                }}
-                              />
-                              <Button
-                                variant="outlined"
-                                startIcon={<PaletteIcon />}
-                                disabled
-                                size={config?.size || 'small'}
-                                sx={{
-                                  borderRadius: 2,
-                                  textTransform: 'none',
-                                  borderColor: config?.backgroundColor || 'rgba(76, 29, 149, 0.3)',
-                                  color: config?.textColor || '#4C1D95',
-                                  padding: config?.padding || '5px 9px',
-                                  fontSize: config?.fontSize || '0.75rem',
-                                  '&:hover': {
-                                    borderColor: config?.hoverColor || '#4C1D95',
-                                    backgroundColor: config?.hoverColor ? `${config.hoverColor}15` : 'rgba(76, 29, 149, 0.08)',
-                                  },
-                                }}
-                              >
-                                Theme Studio
-                              </Button>
-                            </Box>
-                          ) : (
-                            <Button
-                              variant="contained"
-                              startIcon={icon}
-                              size={config?.size || 'small'}
-                              disabled
-                              sx={{
-                                borderRadius: 14,
-                                padding: config?.padding || '5px 9px',
-                                textTransform: 'none',
-                                fontWeight: 600,
-                                letterSpacing: 0.2,
-                                fontSize: config?.fontSize || '0.75rem',
-                                color: config?.textColor || '#fff',
-                                background: config?.backgroundColor || defaultBg,
-                                boxShadow: '0 6px 16px -6px rgba(25, 118, 210, 0.35)',
-                                '&:hover': {
-                                  background: config?.hoverColor || defaultHover,
-                                },
-                                '& .MuiButton-startIcon': { marginRight: 1 },
-                              }}
-                            >
-                              {label}
-                            </Button>
-                          )}
-                        </Box>
-                      </Tooltip>
-                    );
-
+              <Card variant="outlined" sx={{ mb: 3, p: 2, bgcolor: theme.palette.background.paper }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
+                  {allButtons.map((btn) => {
+                    const config = buttonConfigs?.[btn.key as keyof typeof buttonConfigs];
+                    const isActive = selectedKey === btn.key;
                     return (
-                      <>
-                        {/* Search Records */}
-                        {renderButton('searchRecords', 'Search Records', <SearchIcon />, searchRecordsConfig, '#4C1D95', '#5a2ba8')}
-                        
-                        {/* Theme */}
-                        {renderButton('theme', 'Theme', <PaletteIcon />, themeConfig, '#4C1D95', '#5a2ba8')}
-                        
-                        {/* Record Table Configuration */}
-                        {renderButton('recordTableConfig', 'Record Table Configuration', <PaletteIcon />, recordTableConfigConfig, '#4C1D95', '#5a2ba8')}
-
-                        {/* Switch to AG Button */}
-                        {renderButton('switchToAG', 'Switch to AG', <ViewListIcon />, switchToAGConfig, 'linear-gradient(135deg, #1976D2 0%, #1565C0 100%)', 'linear-gradient(135deg, #1565C0 0%, #1976D2 100%)')}
-
-                        {/* Field Settings Button */}
-                        {renderButton('fieldSettings', 'Field Settings', <SettingsIcon />, fieldSettingsConfig, 'linear-gradient(135deg, #4C1D95 0%, #2E1065 100%)', 'linear-gradient(135deg, #2E1065 0%, #4C1D95 100%)')}
-
-                        {/* Add Records Button */}
-                        {renderButton('addRecords', 'Add Records', <AddIcon />, addRecordsConfig, 'linear-gradient(135deg, #4C1D95 0%, #2E1065 100%)', 'linear-gradient(135deg, #2E1065 0%, #4C1D95 100%)')}
-
-                        {/* Advanced Grid Button */}
-                        {renderButton('advancedGrid', 'Advanced Grid', <GridViewIcon />, advancedGridConfig, 'linear-gradient(100deg, #4C1D95 0%, #2E1065 50%, #F6C90E 115%)', 'linear-gradient(100deg, #2E1065 0%, #4C1D95 50%, #D4A80A 115%)')}
-                      </>
+                      <Chip
+                        key={btn.key}
+                        icon={btn.icon}
+                        label={btn.label}
+                        onClick={() => setConfiguringButton(btn.key)}
+                        sx={{
+                          borderRadius: '20px',
+                          fontWeight: 500,
+                          fontSize: config?.fontSize || '0.8rem',
+                          backgroundColor: isActive
+                            ? (config?.backgroundColor || '#4C1D95')
+                            : (config?.backgroundColor || theme.palette.action.selected),
+                          color: isActive
+                            ? (config?.textColor || '#fff')
+                            : (config?.textColor || theme.palette.text.primary),
+                          border: isActive ? '2px solid' : '1px solid',
+                          borderColor: isActive ? 'primary.main' : 'divider',
+                          cursor: 'pointer',
+                          '&:hover': { opacity: 0.85 },
+                        }}
+                      />
                     );
-                  })()}
+                  })}
                 </Box>
               </Card>
 
-              {['searchRecords', 'theme', 'recordTableConfig', 'switchToAG', 'fieldSettings', 'addRecords', 'advancedGrid'].map((buttonKey) => {
-                const buttonName = buttonKey === 'searchRecords' ? 'Search Records' :
-                                  buttonKey === 'theme' ? 'Theme' :
-                                  buttonKey === 'recordTableConfig' ? 'Record Table Configuration' :
-                                  buttonKey === 'switchToAG' ? 'Switch to AG' :
-                                  buttonKey === 'fieldSettings' ? 'Field Settings' :
-                                  buttonKey === 'addRecords' ? 'Add Records' : 'Advanced Grid';
-                const buttonConfigs = uiThemeState.actionButtonConfigs;
-                const config = buttonConfigs?.[buttonKey as keyof typeof buttonConfigs];
-                
-                return (
-                  <Card key={buttonKey} variant="outlined" sx={{ mb: 2, p: 2, bgcolor: theme.palette.background.paper }}>
-                    <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
-                      {buttonName}
+              {/* Configuration Panel + Button Properties */}
+              <Grid container spacing={3}>
+                {/* Left: Configuration Panel */}
+                <Grid item xs={12} md={5}>
+                  <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                    CONFIGURATION PANEL
+                  </Typography>
+                  <Stack spacing={0.5}>
+                    {allButtons.map((btn) => (
+                      <Card
+                        key={btn.key}
+                        variant="outlined"
+                        sx={{
+                          px: 2,
+                          py: 1.5,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                          bgcolor: selectedKey === btn.key ? 'primary.main' : theme.palette.background.paper,
+                          color: selectedKey === btn.key ? 'primary.contrastText' : 'text.primary',
+                          borderColor: selectedKey === btn.key ? 'primary.main' : 'divider',
+                          transition: 'all 0.15s',
+                          '&:hover': { borderColor: 'primary.main' },
+                        }}
+                        onClick={() => setConfiguringButton(btn.key)}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {btn.icon}
+                          <Typography variant="body2" fontWeight={selectedKey === btn.key ? 600 : 400}>{btn.label}</Typography>
+                        </Box>
+                        <Chip
+                          label={btn.badge}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: '0.65rem',
+                            fontWeight: 600,
+                            bgcolor: selectedKey === btn.key ? 'rgba(255,255,255,0.2)' : theme.palette.action.hover,
+                            color: selectedKey === btn.key ? '#fff' : 'text.secondary',
+                          }}
+                        />
+                      </Card>
+                    ))}
+                  </Stack>
+                </Grid>
+
+                {/* Right: Button Properties */}
+                <Grid item xs={12} md={7}>
+                  <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                    BUTTON PROPERTIES: {selectedButton.label.toUpperCase()}
+                  </Typography>
+                  <Card variant="outlined" sx={{ p: 3, bgcolor: theme.palette.background.paper }}>
+                    {/* Typography */}
+                    <Typography variant="overline" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                      TYPOGRAPHY
                     </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Background Color"
-                          type="color"
-                          value={config?.backgroundColor || ''}
-                          onChange={(e) => {
-                            enhancedTableStore.setActionButtonConfigs({
-                              [buttonKey]: {
-                                ...config,
-                                backgroundColor: e.target.value,
-                              }
-                            });
-                          }}
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Hover Color"
-                          type="color"
-                          value={config?.hoverColor || ''}
-                          onChange={(e) => {
-                            enhancedTableStore.setActionButtonConfigs({
-                              [buttonKey]: {
-                                ...config,
-                                hoverColor: e.target.value,
-                              }
-                            });
-                          }}
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Text Color"
-                          type="color"
-                          value={config?.textColor || ''}
-                          onChange={(e) => {
-                            enhancedTableStore.setActionButtonConfigs({
-                              [buttonKey]: {
-                                ...config,
-                                textColor: e.target.value,
-                              }
-                            });
-                          }}
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth size="small">
-                          <InputLabel>Button Size</InputLabel>
-                          <Select
-                            value={config?.size || 'small'}
-                            onChange={(e) => {
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>Font Size</Typography>
+                      <Stack direction="row" spacing={1}>
+                        {['0.75rem', '0.875rem', '1rem'].map((size) => (
+                          <Chip
+                            key={size}
+                            label={size}
+                            size="small"
+                            onClick={() => {
                               enhancedTableStore.setActionButtonConfigs({
-                                [buttonKey]: {
-                                  ...config,
-                                  size: e.target.value as 'small' | 'medium' | 'large',
-                                }
+                                [selectedKey]: { ...selectedConfig, fontSize: size },
                               });
                             }}
-                            label="Button Size"
-                          >
-                            <MenuItem value="small">Small</MenuItem>
-                            <MenuItem value="medium">Medium</MenuItem>
-                            <MenuItem value="large">Large</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Padding (e.g., 5px 9px)"
-                          value={config?.padding || ''}
-                          onChange={(e) => {
-                            enhancedTableStore.setActionButtonConfigs({
-                              [buttonKey]: {
-                                ...config,
-                                padding: e.target.value,
-                              }
-                            });
-                          }}
-                          placeholder="5px 9px"
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Font Size (e.g., 0.75rem)"
-                          value={config?.fontSize || ''}
-                          onChange={(e) => {
-                            enhancedTableStore.setActionButtonConfigs({
-                              [buttonKey]: {
-                                ...config,
-                                fontSize: e.target.value,
-                              }
-                            });
-                          }}
-                          placeholder="0.75rem"
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </Grid>
-                    </Grid>
+                            sx={{
+                              cursor: 'pointer',
+                              bgcolor: selectedConfig?.fontSize === size ? 'primary.main' : theme.palette.action.hover,
+                              color: selectedConfig?.fontSize === size ? '#fff' : 'text.primary',
+                              fontWeight: selectedConfig?.fontSize === size ? 600 : 400,
+                            }}
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    {/* Spacing */}
+                    <Typography variant="overline" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                      SPACING
+                    </Typography>
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>Padding (X / Y)</Typography>
+                      <Stack direction="row" spacing={1}>
+                        {[
+                          { label: 'Small', value: '4px 8px' },
+                          { label: 'Medium', value: '6px 16px' },
+                          { label: 'Large', value: '8px 22px' },
+                        ].map((opt) => (
+                          <Chip
+                            key={opt.label}
+                            label={opt.label}
+                            size="small"
+                            onClick={() => {
+                              enhancedTableStore.setActionButtonConfigs({
+                                [selectedKey]: { ...selectedConfig, padding: opt.value },
+                              });
+                            }}
+                            sx={{
+                              cursor: 'pointer',
+                              bgcolor: selectedConfig?.padding === opt.value ? 'primary.main' : theme.palette.action.hover,
+                              color: selectedConfig?.padding === opt.value ? '#fff' : 'text.primary',
+                              fontWeight: selectedConfig?.padding === opt.value ? 600 : 400,
+                            }}
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    {/* Positioning */}
+                    <Typography variant="overline" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                      POSITIONING
+                    </Typography>
+                    <Box sx={{ mb: 2 }}>
+                      <Tabs
+                        value={0}
+                        sx={{
+                          minHeight: 36,
+                          '& .MuiTab-root': { textTransform: 'none', minHeight: 36, py: 0.5, px: 2 },
+                        }}
+                      >
+                        <Tab label="Left" />
+                        <Tab label="Center" />
+                        <Tab label="Right" />
+                      </Tabs>
+                    </Box>
+
+                    <Alert severity="info" sx={{ borderRadius: 2, mt: 2 }}>
+                      <Typography variant="caption">
+                        These settings apply globally to all action buttons in the specified group to maintain visual consistency.
+                      </Typography>
+                    </Alert>
                   </Card>
-                );
-              })}
+                </Grid>
+              </Grid>
 
-              {/* Action Buttons */}
-              <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
-                <Button 
-                  variant="contained" 
-                  startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />} 
-                  onClick={async () => {
-                    setSaving(true);
-                    // Button configs are already saved to localStorage via enhancedTableStore
-                    // Simulate save operation
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    setSuccess('Actionbar saved successfully!');
-                    setTimeout(() => setSuccess(null), 3000);
-                    setSaving(false);
-                  }}
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Actionbar'}
-                </Button>
-              </Stack>
-
-              {/* Quick Configuration Dialog */}
-              {configuringButton && (
-                <Dialog open={!!configuringButton} onClose={() => setConfiguringButton(null)} maxWidth="sm" fullWidth>
-                  <DialogTitle>
-                    Configure {configuringButton === 'searchRecords' ? 'Search Records' :
-                              configuringButton === 'theme' ? 'Theme' :
-                              configuringButton === 'recordTableConfig' ? 'Record Table Configuration' :
-                              configuringButton === 'switchToAG' ? 'Switch to AG' :
-                              configuringButton === 'fieldSettings' ? 'Field Settings' :
-                              configuringButton === 'addRecords' ? 'Add Records' : 'Advanced Grid'}
-                  </DialogTitle>
-                  <DialogContent>
-                    {(() => {
-                      const buttonConfigs = uiThemeState.actionButtonConfigs;
-                      const config = buttonConfigs?.[configuringButton as keyof typeof buttonConfigs];
-                      return (
-                        <Grid container spacing={2} sx={{ mt: 1 }}>
-                          <Grid item xs={12} sm={6}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Background Color"
-                              type="color"
-                              value={config?.backgroundColor || ''}
-                              onChange={(e) => {
-                                enhancedTableStore.setActionButtonConfigs({
-                                  [configuringButton]: {
-                                    ...config,
-                                    backgroundColor: e.target.value,
-                                  }
-                                });
-                              }}
-                              InputLabelProps={{ shrink: true }}
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Hover Color"
-                              type="color"
-                              value={config?.hoverColor || ''}
-                              onChange={(e) => {
-                                enhancedTableStore.setActionButtonConfigs({
-                                  [configuringButton]: {
-                                    ...config,
-                                    hoverColor: e.target.value,
-                                  }
-                                });
-                              }}
-                              InputLabelProps={{ shrink: true }}
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Text Color"
-                              type="color"
-                              value={config?.textColor || ''}
-                              onChange={(e) => {
-                                enhancedTableStore.setActionButtonConfigs({
-                                  [configuringButton]: {
-                                    ...config,
-                                    textColor: e.target.value,
-                                  }
-                                });
-                              }}
-                              InputLabelProps={{ shrink: true }}
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth size="small">
-                              <InputLabel>Button Size</InputLabel>
-                              <Select
-                                value={config?.size || 'small'}
-                                onChange={(e) => {
-                                  enhancedTableStore.setActionButtonConfigs({
-                                    [configuringButton]: {
-                                      ...config,
-                                      size: e.target.value as 'small' | 'medium' | 'large',
-                                    }
-                                  });
-                                }}
-                                label="Button Size"
-                              >
-                                <MenuItem value="small">Small</MenuItem>
-                                <MenuItem value="medium">Medium</MenuItem>
-                                <MenuItem value="large">Large</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Grid>
-                          <Grid item xs={12} sm={6}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Padding (e.g., 5px 9px)"
-                              value={config?.padding || ''}
-                              onChange={(e) => {
-                                enhancedTableStore.setActionButtonConfigs({
-                                  [configuringButton]: {
-                                    ...config,
-                                    padding: e.target.value,
-                                  }
-                                });
-                              }}
-                              placeholder="5px 9px"
-                              InputLabelProps={{ shrink: true }}
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Font Size (e.g., 0.75rem)"
-                              value={config?.fontSize || ''}
-                              onChange={(e) => {
-                                enhancedTableStore.setActionButtonConfigs({
-                                  [configuringButton]: {
-                                    ...config,
-                                    fontSize: e.target.value,
-                                  }
-                                });
-                              }}
-                              placeholder="0.75rem"
-                              InputLabelProps={{ shrink: true }}
-                            />
-                          </Grid>
-                        </Grid>
-                      );
-                    })()}
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={() => setConfiguringButton(null)}>Close</Button>
-                  </DialogActions>
-                </Dialog>
-              )}
+              {/* Footer */}
+              <Box sx={{ mt: 4, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+                <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <CircularProgress size={12} /> Live preview loading. Interactions may not be saved
+                  </Typography>
+                  <Stack direction="row" spacing={2}>
+                    <Button variant="outlined" onClick={handleCancel} disabled={saving} sx={{ textTransform: 'none' }}>
+                      Discard Changes
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
+                      onClick={async () => {
+                        if (!churchId) {
+                          setError('Invalid church ID. Cannot save UI theme.');
+                          return;
+                        }
+                        try {
+                          setSaving(true);
+                          setError(null);
+                          setSuccess(null);
+                          const storeState = enhancedTableStore.exportConfig();
+                          const response = await fetch(`/api/admin/churches/${churchId}/dynamic-records-config`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({
+                              config: {
+                                branding: dynamicConfig.branding,
+                                liturgicalTheme: dynamicConfig.liturgicalTheme,
+                                fieldRules: dynamicConfig.fieldRules,
+                                actionButtonConfigs: storeState.actionButtonConfigs,
+                              },
+                            }),
+                          });
+                          if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(errorData.message || errorData.error || 'Failed to save UI theme');
+                          }
+                          setSuccess('UI Theme saved successfully!');
+                          setTimeout(() => setSuccess(null), 3000);
+                        } catch (err: any) {
+                          console.error('Error saving UI theme:', err);
+                          setError(err?.message || 'Failed to save UI theme');
+                        } finally {
+                          setSaving(false);
+                        }
+                      }}
+                      disabled={saving}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      {saving ? 'Saving...' : 'Save UI Theme'}
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
             </Box>
-          )}
-        </CardContent>
-      </Card>
+            );
+          })()}
+      </Box>
 
       {/* Export to Template Dialog */}
       <Dialog open={exportDialogOpen} onClose={() => !exporting && setExportDialogOpen(false)} maxWidth="sm" fullWidth>

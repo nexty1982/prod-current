@@ -1,10 +1,35 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // OrthodoxMetrics Theme Constants
 const BRAND_GRADIENT = "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)";
 const ACCENT_COLOR = "#007bff";
 
-/* ... types remain same ... */
+// Type definitions
+interface OnboardingStep {
+  title: string;
+  description: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  primaryLabel?: string;
+}
+
+interface OnboardingConfig {
+  modalTitle?: string;
+  steps: OnboardingStep[];
+  requireCompletionToDismiss?: boolean;
+}
+
+interface UserOnboardingState {
+  status: "incomplete" | "complete";
+  stepIndex: number;
+}
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  isSuperAdmin?: boolean;
+  storageKeys?: Record<string, string>;
+}
 
 export const WelcomeMessage: React.FC<Props> = ({
   isOpen,
@@ -20,7 +45,36 @@ export const WelcomeMessage: React.FC<Props> = ({
     stepIndex: 0
   });
 
-  /* ... effect logic for loading ... */
+  // Load configuration on mount
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Use a default configuration instead of fetching from API
+    // This prevents the network error and provides a working onboarding experience
+    const defaultConfig: OnboardingConfig = {
+      modalTitle: "Welcome to OrthodoxMetrics",
+      requireCompletionToDismiss: false,
+      steps: [
+        {
+          title: "Welcome to OrthodoxMetrics",
+          description: "Your comprehensive platform for managing Orthodox church records and sacraments.",
+          primaryLabel: "Next"
+        },
+        {
+          title: "Manage Records",
+          description: "Easily create, view, and manage baptism, marriage, and funeral records for your parish.",
+          primaryLabel: "Next"
+        },
+        {
+          title: "Generate Certificates",
+          description: "Create official certificates for sacraments with just a few clicks.",
+          primaryLabel: "Get Started"
+        }
+      ]
+    };
+
+    setConfig(defaultConfig);
+  }, [isOpen]);
 
   // 2. Flashy Gradient UI Fixes
   const styles: Record<string, React.CSSProperties> = {
@@ -65,9 +119,11 @@ export const WelcomeMessage: React.FC<Props> = ({
     }
   };
 
-  if (!isOpen || !config) return null;
+  if (!isOpen || !config || config.steps.length === 0) return null;
 
-  const currentStep = config.steps[userState.stepIndex];
+  // Safety check: clamp stepIndex to valid range
+  const validStepIndex = Math.max(0, Math.min(userState.stepIndex, config.steps.length - 1));
+  const currentStep = config.steps[validStepIndex];
 
   return (
     <div style={styles.overlay}>
@@ -83,12 +139,12 @@ export const WelcomeMessage: React.FC<Props> = ({
           {currentStep.imageUrl && (
             <img 
               src={currentStep.imageUrl} 
-              alt={currentStep.imageAlt} 
+              alt={currentStep.imageAlt || currentStep.title} 
               style={{ width: "100%", maxHeight: "200px", objectFit: "contain", marginBottom: "20px", borderRadius: "8px" }} 
             />
           )}
-          <h3>{currentStep.title}</h3>
-          <p style={{ color: "#666", lineHeight: 1.6 }}>{currentStep.description}</p>
+          <h3>{currentStep.title || 'Welcome'}</h3>
+          <p style={{ color: "#666", lineHeight: 1.6 }}>{currentStep.description || ''}</p>
         </div>
 
         <div style={{ padding: "20px", display: "flex", justifyContent: "flex-end", gap: "10px", background: "rgba(255,255,255,0.5)" }}>
@@ -107,7 +163,7 @@ export const WelcomeMessage: React.FC<Props> = ({
               }
             }}
           >
-            {userState.stepIndex < config.steps.length - 1 ? currentStep.primaryLabel : "Get Started"}
+            {userState.stepIndex < config.steps.length - 1 ? (currentStep.primaryLabel || "Next") : "Get Started"}
           </button>
         </div>
       </div>

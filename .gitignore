@@ -5,19 +5,25 @@ dist/
 build/
 **/build/
 misc/
-ops/
-logs/
+/ops/
+/logs/
+server/logs/
+bigbook/logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 .env
 .env.*
 *.env
-**/*credentials*
-**/*secret*
-**/*password*
-**/*key*
-**/*cert*
+# --- Secrets & certificates (specific file types, not broad name matches) ---
+**/*.pem
+**/*.crt
+**/*.cert
+**/*.p12
+**/*.pfx
+**/credentials.json
+**/service-account*.json
+**/*-credentials.json
 **/dumps/**
 
 # --- Local OS / IDE ---
@@ -33,7 +39,6 @@ _cursor_session_backup/
 .trash_dedupe_conflicts/
 
 # --- Logs / archives / large artifacts ---
-logs/
 *.zip
 
 # --- Runtime uploads / generated OCR artifacts (must not be in git) ---
@@ -67,7 +72,6 @@ venv/
 front-end/.venv_image/
 
 # --- Logs / archives ---
-logs/
 *.zip
 
 # --- Runtime / uploaded content (never version control) ---

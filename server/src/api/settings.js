@@ -397,17 +397,18 @@ router.post('/email/test', requireAdminRole, async (req, res) => {
         error: 'SMTP password is not configured. Please set a password in email settings.'
       });
     }
+	// Create transporter with current settings
+const transporter = nodemailer.createTransport({
+  	host: config.smtp_host,
+  	port: config.smtp_port,
+  	secure: config.smtp_secure,
+  	auth: {
+    	user: config.smtp_user,
+    	pass: smtpPassword,
+     },
+     });
 
-    // Create transporter with current settings
-    const transporter = nodemailer.createTransporter({
-      host: config.smtp_host,
-      port: config.smtp_port,
-      secure: config.smtp_secure,
-      auth: {
-        user: config.smtp_user,
-        pass: smtpPassword,
-      },
-    });
+
 
     // Verify connection
     await transporter.verify();

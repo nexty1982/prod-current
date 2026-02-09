@@ -23,7 +23,7 @@ import {
   SnackbarCloseReason,
 } from "@mui/material";
 
-import BlankCard from "../../shared/BlankCard";
+import BlankCard from "@/shared/ui/BlankCard";
 import IconSelect from "./IconSelect";
 import { IconPhoto, IconX } from "@tabler/icons-react";
 

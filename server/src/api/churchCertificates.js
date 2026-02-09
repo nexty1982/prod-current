@@ -1,15 +1,21 @@
 /**
  * Church-specific Certificate Generation API
- * Uses canvas for preview (PNG) and pdf-lib for PDF generation
+ * Uses canvas for preview (PNG) and NEW deterministic pdf-lib generator for PDF
+ * 
+ * Architecture:
+ * - Preview: Canvas-based PNG (browser display only)
+ * - PDF Download: Deterministic PDF generator with embedded fonts and explicit coordinates
  */
 
 const express = require('express');
 const router = express.Router({ mergeParams: true });
-const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const { createCanvas, loadImage } = require('canvas');
 const fs = require('fs');
 const path = require('path');
 const { getChurchPool, mainPool } = require('../db/pool');
+
+// NEW: Import deterministic PDF generator
+const { generateCertificatePDF } = require('../certificates/pdf-generator');
 
 /**
  * Get church name from the churches table in orthodoxmetrics_db
@@ -845,7 +851,7 @@ router.post('/baptism/:id/preview', async (req, res) => {
 
 /**
  * GET /api/church/:churchId/certificate/baptism/:id/download
- * Download baptism certificate (PDF via pdf-lib)
+ * Download baptism certificate (PDF via NEW deterministic generator)
  */
 router.get('/baptism/:id/download', async (req, res) => {
   const { churchId } = req.params;
@@ -860,12 +866,12 @@ router.get('/baptism/:id/download', async (req, res) => {
 
   try {
     // Parse field positions and hidden fields from query params
-    let fieldPositions = null;
+    let customPositions = null;
     let hiddenFields = [];
     
     if (req.query.positions) {
       try {
-        fieldPositions = JSON.parse(decodeURIComponent(req.query.positions));
+        customPositions = JSON.parse(decodeURIComponent(req.query.positions));
       } catch (e) {
         console.warn('Could not parse positions:', e);
       }
@@ -892,7 +898,11 @@ router.get('/baptism/:id/download', async (req, res) => {
     const churchName = await getChurchName(churchId);
     record.churchName = churchName;
     
-    const pdfBytes = await generateBaptismPDF(record, fieldPositions, hiddenFields);
+    // NEW: Use deterministic PDF generator
+    const pdfBytes = await generateCertificatePDF('baptism', record, {
+      customPositions,
+      hiddenFields,
+    });
 
     const filename = `baptism_certificate_${record.first_name || 'unknown'}_${record.last_name || 'unknown'}_${id}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
@@ -960,7 +970,7 @@ router.post('/marriage/:id/preview', async (req, res) => {
 
 /**
  * GET /api/church/:churchId/certificate/marriage/:id/download
- * Download marriage certificate (PDF via pdf-lib)
+ * Download marriage certificate (PDF via NEW deterministic generator)
  */
 router.get('/marriage/:id/download', async (req, res) => {
   const { churchId } = req.params;
@@ -974,6 +984,26 @@ router.get('/marriage/:id/download', async (req, res) => {
   }
 
   try {
+    // Parse field positions and hidden fields from query params
+    let customPositions = null;
+    let hiddenFields = [];
+    
+    if (req.query.positions) {
+      try {
+        customPositions = JSON.parse(decodeURIComponent(req.query.positions));
+      } catch (e) {
+        console.warn('Could not parse positions:', e);
+      }
+    }
+    
+    if (req.query.hidden) {
+      try {
+        hiddenFields = JSON.parse(decodeURIComponent(req.query.hidden));
+      } catch (e) {
+        console.warn('Could not parse hidden fields:', e);
+      }
+    }
+    
     const pool = getChurchPool(churchId);
     const [rows] = await pool.query('SELECT * FROM marriage_records WHERE id = ?', [id]);
     
@@ -987,7 +1017,11 @@ router.get('/marriage/:id/download', async (req, res) => {
     const churchName = await getChurchName(churchId);
     record.churchName = churchName;
     
-    const pdfBytes = await generateMarriagePDF(record);
+    // NEW: Use deterministic PDF generator
+    const pdfBytes = await generateCertificatePDF('marriage', record, {
+      customPositions,
+      hiddenFields,
+    });
 
     const groomName = `${record.fname_groom || 'unknown'}_${record.lname_groom || ''}`.trim();
     const brideName = `${record.fname_bride || 'unknown'}_${record.lname_bride || ''}`.trim();
