@@ -15,14 +15,15 @@ yarn-debug.log*
 .env
 .env.*
 *.env
-**/*credentials*
-**/*secret*
-**/*password*
-**/*key*
+# --- Secrets & certificates (specific file types, not broad name matches) ---
 **/*.pem
 **/*.crt
-**/*.key.pem
 **/*.cert
+**/*.p12
+**/*.pfx
+**/credentials.json
+**/service-account*.json
+**/*-credentials.json
 **/dumps/**
 
 # --- Local OS / IDE ---
