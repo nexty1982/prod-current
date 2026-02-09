@@ -767,11 +767,11 @@ router.get('/:id/dynamic-records-config', requireAuth, requireChurchAccess, asyn
     `);
 
     const [rows] = await getAppPool().query(
-      'SELECT config FROM orthodoxmetrics_db.church_dynamic_records_config WHERE church_id = ?',
+      'SELECT config_json FROM orthodoxmetrics_db.church_dynamic_records_config WHERE church_id = ?',
       [churchId]
     );
 
-    const config = rows.length > 0 && rows[0].config ? JSON.parse(rows[0].config) : {};
+    const config = rows.length > 0 && rows[0].config_json ? JSON.parse(rows[0].config_json) : {};
     res.json({ success: true, config, church_id: churchId });
   } catch (error) {
     console.error('❌ Error fetching dynamic-records-config:', error);
@@ -809,9 +809,9 @@ router.post('/:id/dynamic-records-config', requireAuth, requireChurchAccess, asy
     `);
 
     await getAppPool().query(`
-      INSERT INTO orthodoxmetrics_db.church_dynamic_records_config (church_id, config)
+      INSERT INTO orthodoxmetrics_db.church_dynamic_records_config (church_id, config_json)
       VALUES (?, ?)
-      ON DUPLICATE KEY UPDATE config = VALUES(config), updated_at = CURRENT_TIMESTAMP
+      ON DUPLICATE KEY UPDATE config_json = VALUES(config_json), updated_at = CURRENT_TIMESTAMP
     `, [churchId, JSON.stringify(config)]);
 
     console.log(`✅ Dynamic records config saved for church ${churchId}`);

@@ -55,26 +55,11 @@ export function useOcrJobs({
     abortControllerRef.current = new AbortController();
 
     try {
-      // Check if OCR endpoint exists before calling
-      // If OCR is not active, skip fetching to avoid 404 errors
-      console.log(`[useOcrJobs] Checking OCR availability for church ${churchId}...`);
-      
-      // Try alternative endpoint first (if it exists)
-      let response;
-      try {
-        response = await apiClient.get(
-          `/api/ocr/jobs?churchId=${churchId}&limit=${limit}`
-        );
-      } catch (altErr: any) {
-        // If alternative endpoint doesn't exist, check if church-specific endpoint exists
-        if (altErr.response?.status === 404) {
-          console.log(`[useOcrJobs] OCR endpoint not available for church ${churchId}, skipping fetch`);
-          setJobs([]);
-          setError(null);
-          return;
-        }
-        throw altErr;
-      }
+      console.log(`[useOcrJobs] Fetching OCR jobs for church ${churchId}...`);
+
+      const response = await apiClient.get(
+        `/api/church/${churchId}/ocr/jobs?limit=${limit}`
+      );
       
       // Handle multiple possible response shapes: array, nested envelopes, various structures
       const res = response as any;
@@ -136,17 +121,7 @@ export function useOcrJobs({
     }
 
     try {
-      // Use alternative endpoint if church-specific one doesn't exist
-      let response;
-      try {
-        response = await apiClient.get(`/api/ocr/jobs/${jobId}?churchId=${churchId}`);
-      } catch (err: any) {
-        if (err.response?.status === 404) {
-          console.warn(`[useOcrJobs] OCR endpoint not available, cannot fetch job details`);
-          throw new Error('OCR endpoint not available');
-        }
-        throw err;
-      }
+      const response = await apiClient.get(`/api/church/${churchId}/ocr/jobs/${jobId}`);
       // Handle various response structures: unwrap nested data.data if needed
       const responseData = (response as any)?.data ?? (response as any);
       const data = responseData?.data ?? responseData;
@@ -192,22 +167,9 @@ export function useOcrJobs({
     ));
 
     try {
-      // Try alternative endpoint first
-      try {
-        await apiClient.patch(`/api/ocr/jobs/${jobId}`, {
-          record_type: recordType,
-          churchId: churchId
-        });
-      } catch (altErr: any) {
-        if (altErr.response?.status === 404) {
-          // Try church-specific endpoint
-          await apiClient.patch(`/api/church/${churchId}/ocr/jobs/${jobId}`, {
-            record_type: recordType
-          });
-        } else {
-          throw altErr;
-        }
-      }
+      await apiClient.patch(`/api/church/${churchId}/ocr/jobs/${jobId}`, {
+        record_type: recordType
+      });
       
       // Clear cache for this job
       detailCache.current.delete(jobId);
@@ -237,18 +199,7 @@ export function useOcrJobs({
     }
 
     try {
-      // Try alternative endpoint first
-      try {
-        await apiClient.post(`/api/ocr/jobs/${jobId}/retry`, { churchId });
-      } catch (altErr: any) {
-        if (altErr.response?.status === 404) {
-          // OCR endpoint not available - return false gracefully
-          console.warn(`[useOcrJobs] OCR endpoint not available for church ${churchId}`);
-          return false;
-        } else {
-          throw altErr;
-        }
-      }
+      await apiClient.post(`/api/church/${churchId}/ocr/jobs/${jobId}/retry`);
       
       // Update status optimistically
       setJobs(prev => prev.map(j =>
@@ -318,18 +269,7 @@ export function useOcrJobs({
       // Retry each failed job (handle individual failures gracefully)
       const results = await Promise.allSettled(
         failedJobIds.map(id => 
-          // Try alternative endpoint first, fallback to church-specific
-          (async () => {
-            try {
-              await apiClient.post(`/api/ocr/jobs/${id}/retry`, { churchId });
-            } catch (altErr: any) {
-              if (altErr.response?.status === 404) {
-                await apiClient.post(`/api/church/${churchId}/ocr/jobs/${id}/retry`);
-              } else {
-                throw altErr;
-              }
-            }
-          })()
+          apiClient.post(`/api/church/${churchId}/ocr/jobs/${id}/retry`)
         )
       );
       

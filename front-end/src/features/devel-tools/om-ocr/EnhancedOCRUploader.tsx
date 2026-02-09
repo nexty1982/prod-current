@@ -964,7 +964,7 @@ const EnhancedOCRUploader: React.FC = () => {
     setLoadingJobDetail(true);
 
     try {
-      const response: any = await apiClient.get(`/api/ocr/jobs/${file.jobId}?churchId=${selectedChurchId}`);
+      const response: any = await apiClient.get(`/api/church/${selectedChurchId}/ocr/jobs/${file.jobId}`);
       setSelectedJobDetail(response.data);
     } catch (error) {
       console.error('Failed to fetch job detail:', error);
