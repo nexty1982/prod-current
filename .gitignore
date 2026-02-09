@@ -6,7 +6,9 @@ build/
 **/build/
 misc/
 ops/
-logs/
+/logs/
+server/logs/
+bigbook/logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -33,7 +35,6 @@ _cursor_session_backup/
 .trash_dedupe_conflicts/
 
 # --- Logs / archives / large artifacts ---
-logs/
 *.zip
 
 # --- Runtime uploads / generated OCR artifacts (must not be in git) ---
@@ -67,7 +68,6 @@ venv/
 front-end/.venv_image/
 
 # --- Logs / archives ---
-logs/
 *.zip
 
 # --- Runtime / uploaded content (never version control) ---
