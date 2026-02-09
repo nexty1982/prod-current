@@ -11,15 +11,11 @@ except Exception:
 
 ROOT = Path.cwd()
 SRC = ROOT / "front-end/src"
-ENTRIES = [
-    SRC / "main.tsx",           # real entry point (index.html <script src>)
-    SRC / "routes/Router.tsx",  # fallback if main.tsx missing
-]
+ENTRY = SRC / "routes/Router.tsx"
 EXTS = [".ts",".tsx",".js",".jsx"]
 
-entry_files = [e for e in ENTRIES if e.exists()]
-if not entry_files:
-    print(f"Missing all entries: {ENTRIES}", file=sys.stderr)
+if not ENTRY.exists():
+    print(f"Missing entry: {ENTRY}", file=sys.stderr)
     sys.exit(1)
 
 IMPORT_RE = re.compile(r"""(?:import\s+[^'"]*?from\s+|import\s*\()\s*['"]([^'"]+)['"]\s*\)?""")
@@ -52,7 +48,7 @@ def resolve(spec, base):
     return None
 
 seen=set()
-stack=list(entry_files)
+stack=[ENTRY]
 
 def read_text(p):
     try:

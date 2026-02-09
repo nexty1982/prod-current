@@ -41,7 +41,7 @@
 [LIVE] front-end/src/features/tables/react-tables/sorting/page.tsx
 [LIVE] front-end/src/features/tables/react-tables/sticky/page.tsx
 
-==== index.ts (11) ====
+==== index.ts (10) ====
 [NOT_LIVE] front-end/src/@om/components/features/auth/index.ts
 [NOT_LIVE] front-end/src/@om/components/features/index.ts
 [NOT_LIVE] front-end/src/@om/components/index.ts
@@ -49,7 +49,6 @@
 [NOT_LIVE] front-end/src/@om/components/ui/index.ts
 [NOT_LIVE] front-end/src/@om/components/ui/theme/index.ts
 [LIVE] front-end/src/components/ColorPickerPopover/index.ts
-[LIVE] front-end/src/components/ErrorBoundary/index.ts
 [LIVE] front-end/src/components/FieldRenderer/index.ts
 [LIVE] front-end/src/components/RecordPreviewPane/index.ts
 [LIVE] front-end/src/features/records-centralized/constants/index.ts
@@ -118,10 +117,6 @@
 ==== RevenueUpdates.tsx (2) ====
 [LIVE] front-end/src/components/dashboards/ecommerce/RevenueUpdates.tsx
 [LIVE] front-end/src/features/admin/dashboards/modern/RevenueUpdates.tsx
-
-==== useProfileSync.ts (2) ====
-[NOT_LIVE] front-end/src/hooks/useProfileSync.ts
-[LIVE] front-end/src/lib/useProfileSync.ts
 
 ==== UserFormModal.tsx (2) ====
 [NOT_LIVE] front-end/src/@om/components/features/auth/UserFormModal.tsx
