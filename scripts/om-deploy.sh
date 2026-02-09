@@ -94,16 +94,16 @@ fi
 # --- Health Check (always run for backend) ---
 if [[ "$TARGET" == "backend" || "$TARGET" == "all" ]]; then
   echo "--- Health Check ---"
-  for i in {1..30}; do
-    if curl -fsS "http://127.0.0.1:3001/api/health" >/dev/null 2>&1; then
-      echo "✅ Backend healthy on :3001"
+  for i in {1..60}; do
+    if curl -fsS "http://127.0.0.1:3001/api/system/health" >/dev/null 2>&1; then
+      echo "✅ Backend healthy on :3001 (attempt $i)"
       break
     fi
-    if [[ $i -eq 30 ]]; then
-      echo "❌ Backend health check failed."
+    if [[ $i -eq 60 ]]; then
+      echo "❌ Backend health check failed after 120s."
       exit 1
     fi
-    sleep 1
+    sleep 2
   done
 fi
 

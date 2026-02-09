@@ -17,14 +17,14 @@ function loadEnvironment() {
   // dotenv may have been loaded by index.js, but we ensure it's loaded here
   const env = process.env.NODE_ENV || 'development';
   const envFile = env === 'production' ? '.env.production' : '.env.development';
-  const envPath = path.resolve(__dirname, '../../../', envFile);
+  const envPath = path.resolve(__dirname, '../../', envFile);
 
   if (fs.existsSync(envPath)) {
     require('dotenv').config({ path: envPath, override: false });
   }
 
   // Also try root .env
-  const rootEnvPath = path.resolve(__dirname, '../../../', '.env');
+  const rootEnvPath = path.resolve(__dirname, '../../', '.env');
   if (fs.existsSync(rootEnvPath)) {
     require('dotenv').config({ path: rootEnvPath, override: false });
   }
