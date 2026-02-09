@@ -5,7 +5,7 @@ dist/
 build/
 **/build/
 misc/
-ops/
+/ops/
 /logs/
 server/logs/
 bigbook/logs/
@@ -19,7 +19,10 @@ yarn-debug.log*
 **/*secret*
 **/*password*
 **/*key*
-**/*cert*
+**/*.pem
+**/*.crt
+**/*.key.pem
+**/*.cert
 **/dumps/**
 
 # --- Local OS / IDE ---
