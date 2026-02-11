@@ -133,3 +133,6 @@ copies/
 
 # Local IDE/agent rules (optional)
 .windsurf/
+
+# Generated analysis artifacts
+.analysis/
