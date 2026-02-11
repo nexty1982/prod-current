@@ -127,3 +127,9 @@ tools/audit.js
 # Local backups and scratch
 backups/
 copies/
+
+# Local agent settings
+.claude/settings.local.json
+
+# Local IDE/agent rules (optional)
+.windsurf/

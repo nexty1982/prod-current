@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+MSG_FILE="${1:-}"
+
+if [[ -z "$MSG_FILE" || ! -f "$MSG_FILE" ]]; then
+  echo "❌ commit-msg hook: missing commit message file path"
+  exit 1
+fi
+
+if ! grep -qE '^\[(FEATURE|BUGFIX|PATCH)\] \((blue|green|yellow)\) OrthodoxMetrics' "$MSG_FILE"; then
+  echo "❌ Commit message must start with:"
+  echo "   [FEATURE|BUGFIX|PATCH] (blue|green|yellow) OrthodoxMetrics"
+  exit 1
+fi
+
+echo "✅ Commit message format valid."
