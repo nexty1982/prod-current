@@ -207,6 +207,268 @@ const Menuitems: MenuitemsType[] = [
     href: '/dashboards/super',
   },
 
+  // CHURCH SECTION
+  {
+    navlabel: true,
+    subheader: '⛪ Church',
+  },
+  {
+    id: uniqueId(),
+    title: 'Church Management',
+    icon: OrthodoxChurchIcon,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'All Churches',
+        icon: IconPoint,
+        href: '/apps/church-management',
+      },
+      {
+        id: uniqueId(),
+        title: 'Church Setup Wizard',
+        icon: IconPoint,
+        href: '/apps/church-management/wizard',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Records Systems',
+    icon: IconFileDescription,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Church Metric Records',
+        icon: IconDatabase,
+        href: '/apps/records/baptism',
+      },
+      {
+        id: uniqueId(),
+        title: 'OCR Enhanced Uploader',
+        icon: IconFileDescription,
+        href: '/devel/enhanced-ocr-uploader',
+      },
+    ],
+  },
+
+  // DEVELOPER TOOLS SECTION
+  {
+    navlabel: true,
+    subheader: '🛠️ Developer Tools',
+  },
+  {
+    id: uniqueId(),
+    title: 'Image AI',
+    icon: IconPalette,
+    href: '/apps/image-ai',
+  },
+  {
+    id: uniqueId(),
+    title: 'Gallery',
+    icon: IconPalette,
+    href: '/apps/gallery',
+  },
+  {
+    id: uniqueId(),
+    title: 'OM-Spec',
+    icon: IconFileDescription,
+    href: '/church/om-spec',
+  },
+  {
+    id: uniqueId(),
+    title: 'OM Tasks',
+    icon: IconEdit,
+    href: '/devel-tools/om-tasks',
+  },
+  {
+    id: uniqueId(),
+    title: 'OMAI Ultimate Logger',
+    icon: IconBug,
+    href: '/church/omai-logger',
+  },
+  {
+    id: uniqueId(),
+    title: 'Development Console',
+    icon: IconTerminal,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Router/Menu Studio',
+        icon: IconSitemap,
+        href: '/devel/router-menu-studio',
+      },
+      {
+        id: uniqueId(),
+        title: 'Menu Editor',
+        icon: IconLayout,
+        href: '/devel-tools/menu-editor',
+      },
+      {
+        id: uniqueId(),
+        title: 'Dynamic Records Inspector',
+        icon: IconDatabase,
+        href: '/devel/dynamic-records',
+      },
+      {
+        id: uniqueId(),
+        title: 'Site Structure Visualizer',
+        icon: IconSitemap,
+        href: '/tools/site-structure',
+      },
+      {
+        id: uniqueId(),
+        title: 'OMTrace Console',
+        icon: IconSitemap,
+        href: '/devel-tools/omtrace',
+      },
+      {
+        id: uniqueId(),
+        title: 'Refactor Console',
+        icon: IconTool,
+        href: '/devel-tools/refactor-console',
+      },
+      {
+        id: uniqueId(),
+        title: 'Daily Tasks',
+        icon: IconCheckbox,
+        href: '/devel-tools/daily-tasks',
+      },
+      {
+        id: uniqueId(),
+        title: 'API Explorer',
+        icon: IconBug,
+        href: '/devel-tools/api-explorer',
+      },
+      {
+        id: uniqueId(),
+        title: 'Live Table Builder',
+        icon: IconBorderAll,
+        href: '/devel-tools/live-table-builder',
+      },
+      {
+        id: uniqueId(),
+        title: 'Table Wizard',
+        icon: IconDatabase,
+        href: '/devel-tools/table-wizard',
+      },
+      {
+        id: uniqueId(),
+        title: 'Table Requests',
+        icon: IconShield,
+        href: '/devel-tools/table-requests',
+      },
+      {
+        id: uniqueId(),
+        title: 'Loading Demo',
+        icon: IconComponents,
+        href: '/apps/devel/loading-demo',
+      },
+      {
+        id: uniqueId(),
+        title: 'OCR Studio',
+        icon: IconFileDescription,
+        href: '/devel/ocr-studio',
+      },
+      {
+        id: uniqueId(),
+        title: 'OCR Setup Wizard',
+        icon: IconSettings,
+        href: '/devel/ocr-setup-wizard',
+      },
+      {
+        id: uniqueId(),
+        title: 'Enhanced OCR Uploader',
+        icon: IconFileDescription,
+        href: '/devel/enhanced-ocr-uploader',
+      },
+      {
+        id: uniqueId(),
+        title: 'OCR Settings',
+        icon: IconFileDescription,
+        href: '/devel/ocr-settings',
+      },
+      {
+        id: uniqueId(),
+        title: 'OM Permission Center',
+        icon: IconShield,
+        href: '/devel-tools/om-permission-center',
+      },
+      {
+        id: uniqueId(),
+        title: 'Interactive Report Jobs',
+        icon: IconFileDescription,
+        href: '/devel-tools/interactive-reports/jobs',
+      },
+      {
+        id: uniqueId(),
+        title: 'Build Info',
+        icon: IconGitBranch,
+        href: '/devel-tools/build-info',
+      },
+      {
+        id: uniqueId(),
+        title: 'Component Library',
+        icon: IconBorderAll,
+        href: '/sandbox/component-library',
+      },
+      {
+        id: uniqueId(),
+        title: 'Core Components',
+        icon: IconComponents,
+        href: '/sandbox/component-preview/core',
+      },
+      {
+        id: uniqueId(),
+        title: 'Modernize Components',
+        icon: IconLayoutDashboard,
+        href: '/sandbox/component-preview/modernize',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'AI & Automation',
+    icon: IconRocket,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'OMAI Lab',
+        icon: IconRocket,
+        href: '/sandbox/ai-lab',
+      },
+      {
+        id: uniqueId(),
+        title: 'Project Generator',
+        icon: IconEdit,
+        href: '/sandbox/project-generator',
+      },
+      {
+        id: uniqueId(),
+        title: 'AI Admin Panel',
+        icon: IconRocket,
+        href: '/admin/ai',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Testing & QA',
+    icon: IconBug,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Site Survey',
+        icon: IconBug,
+        href: '/admin/tools/survey',
+      },
+    ],
+  },
+
   // SITE CONFIG SECTION
   {
     navlabel: true,
@@ -230,7 +492,6 @@ const Menuitems: MenuitemsType[] = [
         icon: IconLayout,
         href: '/admin/menu-management',
       },
-
     ],
   },
   {
@@ -308,349 +569,6 @@ const Menuitems: MenuitemsType[] = [
         title: 'Session Management',
         icon: IconShield,
         href: '/admin/sessions',
-      },
-
-    ],
-  },
-
-  // CHURCH SECTION
-  {
-    navlabel: true,
-    subheader: '⛪ Church',
-  },
-  {
-    id: uniqueId(),
-    title: 'Church Management',
-    icon: OrthodoxChurchIcon,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'All Churches',
-        icon: IconPoint,
-        href: '/apps/church-management',
-      },
-      {
-        id: uniqueId(),
-        title: 'Church Setup Wizard',
-        icon: IconPoint,
-        href: '/apps/church-management/wizard',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Records Systems',
-    icon: IconFileDescription,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Church Metric Records',
-        icon: IconDatabase,
-        href: '/apps/records/baptism',
-      },
-      {
-        id: uniqueId(),
-        title: 'Dynamic Records Manager',
-        icon: IconDatabase,
-        href: '/apps/records/manager',
-        chip: 'NEW',
-        chipColor: 'primary',
-      },
-      {
-        id: uniqueId(),
-        title: 'Modern Records Manager',
-        icon: IconRocket,
-        href: '/apps/records/modern-manager',
-        chip: 'NEW',
-        chipColor: 'secondary',
-      },
-      {
-        id: uniqueId(),
-        title: 'Editable Records',
-        icon: IconEdit,
-        href: '/apps/records/editable',
-      },
-      {
-        id: uniqueId(),
-        title: 'OCR Enhanced Uploader',
-        icon: IconFileDescription,
-        href: '/devel/enhanced-ocr-uploader',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Image AI',
-    icon: IconPalette,
-    href: '/apps/image-ai',
-  },
-  {
-    id: uniqueId(),
-    title: 'Gallery',
-    icon: IconPalette,
-    href: '/apps/gallery',
-  },
-  {
-    id: uniqueId(),
-    title: 'OM-Spec',
-    icon: IconFileDescription,
-    href: '/church/om-spec',
-  },
-  {
-    id: uniqueId(),
-    title: 'OM Tasks',
-    icon: IconEdit,
-    href: '/devel-tools/om-tasks',
-  },
-  {
-    id: uniqueId(),
-    title: 'Build Console',
-    icon: IconRocket,
-    href: '/admin/build',
-  },
-  {
-    id: uniqueId(),
-    title: 'OMAI Ultimate Logger',
-    icon: IconBug,
-    href: '/church/omai-logger',
-  },
-  // DEVELOPER TOOLS SECTION
-  {
-    navlabel: true,
-    subheader: '🛠️ Developer Tools',
-  },
-  {
-    id: uniqueId(),
-    title: 'OM Spec / Tasks',
-    icon: IconFileDescription,
-    href: '/church/om-spec',
-  },
-  {
-    id: uniqueId(),
-    title: 'Development Console',
-    icon: IconTerminal,
-    href: '#',
-    children: [
-
-      {
-        id: uniqueId(),
-        title: 'Router/Menu Studio',
-        icon: IconSitemap,
-        href: '/devel/router-menu-studio',
-      },
-      {
-        id: uniqueId(),
-        title: 'Menu Editor',
-        icon: IconLayout,
-        href: '/devel-tools/menu-editor',
-      },
-      {
-        id: uniqueId(),
-        title: 'Dynamic Records Inspector',
-        icon: IconDatabase,
-        href: '/devel/dynamic-records',
-      },
-      {
-        id: uniqueId(),
-        title: 'Site Structure Visualizer',
-        icon: IconSitemap,
-        href: '/tools/site-structure',
-      },
-      {
-        id: uniqueId(),
-        title: 'OMTrace Console',
-        icon: IconSitemap,
-        href: '/devel-tools/omtrace',
-      },
-      {
-        id: uniqueId(),
-        title: 'Refactor Console',
-        icon: IconTool,
-        href: '/devel-tools/refactor-console',
-      },
-      {
-        id: uniqueId(),
-        title: 'Daily Tasks',
-        icon: IconCheckbox,
-        href: '/devel-tools/daily-tasks',
-      },
-      {
-        id: uniqueId(),
-        title: 'API Explorer',
-        icon: IconBug,
-        href: '/devel-tools/api-explorer',
-      },
-      {
-        id: uniqueId(),
-        title: 'Live Table Builder',
-        icon: IconBorderAll,
-        href: '/devel-tools/live-table-builder',
-      },
-      {
-        id: uniqueId(),
-        title: 'Loading Demo',
-        icon: IconComponents,
-        href: '/apps/devel/loading-demo',
-      },
-      {
-        id: uniqueId(),
-        title: 'OCR Studio',
-        icon: IconFileDescription,
-        href: '/devel/ocr-studio',
-      },
-      {
-        id: uniqueId(),
-        title: 'OCR Setup Wizard',
-        icon: IconSettings,
-        href: '/devel/ocr-setup-wizard',
-      },
-      {
-        id: uniqueId(),
-        title: 'Enhanced OCR Uploader',
-        icon: IconFileDescription,
-        href: '/devel/enhanced-ocr-uploader',
-      },
-      {
-        id: uniqueId(),
-        title: 'OCR Settings',
-        icon: IconFileDescription,
-        href: '/devel/ocr-settings',
-      },
-      {
-        id: uniqueId(),
-        title: 'OM Permission Center',
-        icon: IconShield,
-        href: '/devel-tools/om-permission-center',
-      },
-      {
-        id: uniqueId(),
-        title: 'Interactive Report Jobs',
-        icon: IconFileDescription,
-        href: '/devel-tools/interactive-reports/jobs',
-      },
-      {
-        id: uniqueId(),
-        title: 'Build Info',
-        icon: IconGitBranch,
-        href: '/devel-tools/build-info',
-      },
-      {
-        id: uniqueId(),
-        title: 'Component Library',
-        icon: IconBorderAll,
-        href: '/sandbox/component-library',
-      },
-      {
-        id: uniqueId(),
-        title: 'Core Components',
-        icon: IconComponents,
-        href: '/sandbox/component-preview/core',
-      },
-      {
-        id: uniqueId(),
-        title: 'Modernize Components',
-        icon: IconLayoutDashboard,
-        href: '/sandbox/component-preview/modernize',
-      },
-
-    ],
-  },
-
-  {
-    id: uniqueId(),
-    title: 'AI & Automation',
-    icon: IconRocket,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'OMAI Lab',
-        icon: IconRocket,
-        href: '/sandbox/ai-lab',
-      },
-      {
-        id: uniqueId(),
-        title: 'Project Generator',
-        icon: IconEdit,
-        href: '/sandbox/project-generator',
-      },
-      {
-        id: uniqueId(),
-        title: 'AI Admin Panel',
-        icon: IconRocket,
-        href: '/admin/ai',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Testing & QA',
-    icon: IconBug,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Site Survey',
-        icon: IconBug,
-        href: '/admin/tools/survey',
-      },
-    ],
-  },
-
-  // BROKEN LINKS SECTION
-  {
-    navlabel: true,
-    subheader: '🔗 Broken Links',
-  },
-  {
-    id: uniqueId(),
-    title: 'Broken Links',
-    icon: IconBug,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'User Profile',
-        icon: IconUsers,
-        href: '/user-profile',
-      },
-      {
-        id: uniqueId(),
-        title: 'Gallery',
-        icon: IconPoint,
-        href: '/apps/gallery',
-      },
-      {
-        id: uniqueId(),
-        title: 'OM Permission Center',
-        icon: IconShield,
-        href: '/devel-tools/om-permission-center',
-      },
-      {
-        id: uniqueId(),
-        title: 'Admin Settings',
-        icon: IconSettings,
-        href: '/admin/settings',
-      },
-      {
-        id: uniqueId(),
-        title: 'Task Assignment',
-        icon: IconEdit,
-        href: '/admin/settings',
-      },
-      {
-        id: uniqueId(),
-        title: 'Build Console',
-        icon: IconTerminal,
-        href: '/admin/build',
-      },
-      {
-        id: uniqueId(),
-        title: 'JIT Terminal',
-        icon: IconTerminal,
-        href: '/admin/jit-terminal',
       },
     ],
   },

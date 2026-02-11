@@ -3,29 +3,27 @@
  * AG Grid-based editable table with clipboard support
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AgGridReact } from 'ag-grid-react';
 import {
-  ColDef,
-  GridApi,
-  GridReadyEvent,
-  CellValueChangedEvent,
-  PasteStartEvent,
-  PasteEndEvent,
-  RowDataUpdatedEvent,
-} from 'ag-grid-community';
-import { Box, Button, TextField, IconButton, Tooltip } from '@mui/material';
-import {
-  Add as AddIcon,
-  Remove as RemoveIcon,
-  SwapHoriz as TransposeIcon,
+    Add as AddIcon,
+    Remove as RemoveIcon,
+    SwapHoriz as TransposeIcon,
 } from '@mui/icons-material';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
-import type { TableColumn, TableRow, TableData } from '../types';
+import { Box, Button, IconButton, TextField, Tooltip } from '@mui/material';
+import {
+    CellValueChangedEvent,
+    ColDef,
+    GridApi,
+    GridReadyEvent,
+    PasteEndEvent,
+    PasteStartEvent,
+    RowDataUpdatedEvent,
+} from 'ag-grid-community';
+import { AgGridReact } from 'ag-grid-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { TableData, TableRow } from '../types';
 import { parseClipboardData } from '../utils/clipboard';
-import { EditableHeader } from './EditableHeader';
 import { normalizeTableData, validateDimensions } from '../utils/normalize';
+import { EditableHeader } from './EditableHeader';
 
 interface LiveTableBuilderProps {
   data: TableData;

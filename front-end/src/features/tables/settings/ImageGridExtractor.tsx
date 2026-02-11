@@ -5,31 +5,32 @@
  * from it by splitting the image into a grid pattern.
  */
 
-import React, { useState, useRef } from 'react';
+import { adminAPI } from '@/api/admin.api';
 import {
+    Alert,
     Box,
-    Typography,
     Button,
     Card,
     CardContent,
-    Grid,
-    Alert,
-    CircularProgress,
-    Stack,
     Chip,
+    CircularProgress,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
-    IconButton
+    DialogContent,
+    DialogTitle,
+    Grid,
+    IconButton,
+    Stack,
+    Typography
 } from '@mui/material';
 import {
-    IconUpload,
     IconDownload,
     IconLayoutGrid,
     IconPhoto,
+    IconUpload,
     IconX
 } from '@tabler/icons-react';
+import React, { useRef, useState } from 'react';
 
 interface ExtractedImage {
     id: number;
@@ -197,35 +198,16 @@ const ImageGridExtractor: React.FC<ImageGridExtractorProps> = ({
             }
             
             // Send to server to save as individual files
-            const response = await fetch('/api/admin/global-images/save-extracted', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    images: imagesToUpload,
-                    type: type
-                }),
+            const result = await adminAPI.globalImages.saveExtracted({
+                images: imagesToUpload,
+                type: type
             });
             
-            if (response.ok) {
-                const result = await response.json();
-                console.log('✅ Extracted images saved successfully:', result);
-                
-                // Call the callback with the saved images
-                onImagesExtracted(extractedImages, type);
-                onClose();
-            } else {
-                let errorMessage = 'Failed to save extracted images';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.error || errorMessage;
-                } catch (e) {
-                    // If response is not JSON, use status text
-                    errorMessage = response.statusText || errorMessage;
-                }
-                throw new Error(errorMessage);
-            }
+            console.log('✅ Extracted images saved successfully:', result);
+            
+            // Call the callback with the saved images
+            onImagesExtracted(extractedImages, type);
+            onClose();
         } catch (error) {
             console.error('Error saving extracted images:', error);
             setError(error instanceof Error ? error.message : 'Failed to save extracted images');

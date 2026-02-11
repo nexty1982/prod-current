@@ -28,6 +28,8 @@ import { Alert, Box, Chip, Collapse } from '@mui/material';
 import React from 'react';
 import { shouldShowDevBanners } from '../../config/featureFlags';
 import { FeaturePriority, FeatureRiskLevel, useEnvironment } from '../../context/EnvironmentContext';
+import { useAuth } from '../../context/AuthContext';
+import AdminFloatingHUD from '../AdminFloatingHUD';
 
 interface EnvironmentAwarePageProps {
   children: React.ReactNode;
@@ -46,6 +48,10 @@ interface EnvironmentAwarePageProps {
   
   // Feature display name for banner
   featureName?: string;
+  
+  // Show Admin Floating HUD on this page (super_admin only)
+  // Toggle this prop in Router.tsx to enable/disable the HUD
+  showAdminHud?: boolean;
 }
 
 // Priority labels
@@ -73,8 +79,10 @@ const EnvironmentAwarePage: React.FC<EnvironmentAwarePageProps> = ({
   riskLevel,
   showBanner = true,
   featureName,
+  showAdminHud = false,
 }) => {
   const { environment, hasLatestAccess } = useEnvironment();
+  const { isSuperAdmin } = useAuth();
   
   // Determine if we should show the development banner
   // Priority 0 = never show banner (production ready with no notification)
@@ -133,6 +141,7 @@ const EnvironmentAwarePage: React.FC<EnvironmentAwarePageProps> = ({
 
   return (
     <>
+      {showAdminHud && isSuperAdmin() && <AdminFloatingHUD />}
       <Collapse in={shouldShowBanner}>
         <Alert 
           severity={priority && priority <= 2 ? 'warning' : 'info'}

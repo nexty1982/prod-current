@@ -1,27 +1,26 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { Suspense } from 'react';
-import { CustomizerContextProvider } from './context/CustomizerContext';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import { omTheme } from './theme/omTheme';
 import App from './App';
-import Spinner from './shared/ui/Spinner';
-import './utils/i18n';
+import { CustomizerContextProvider } from './context/CustomizerContext';
 import './index.css';
+import Spinner from './shared/ui/Spinner';
+import { omTheme } from './theme/omTheme';
+import './utils/i18n';
 // Temporarily commented out to avoid conflicts with Tailwind CSS
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
-// Import AG Grid styles globally (required for CSS theme approach)
-// This must be imported exactly once to avoid error #239 (Theming API and CSS both used)
-// Using ag-theme-quartz as the base theme (legacy CSS approach only)
+// Import AG Grid styles globally (required for legacy CSS theme approach)
+// Imported exactly once here to avoid error #239 (Theming API and CSS both used)
 import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-quartz.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 
-import { setupGlobalErrorHandlers } from './shared/lib/globalErrorHandler';
-import './shared/lib/debugLogger'; // Initialize debug logger
 import { registerAgGridModulesOnce } from './agGridModules';
+import './shared/lib/debugLogger'; // Initialize debug logger
 import { setupDevErrorHandlers } from './shared/lib/devErrorHandler';
+import { setupGlobalErrorHandlers } from './shared/lib/globalErrorHandler';
 
 // Register AG Grid modules before React renders
 // This prevents error #272: "No AG Grid modules are registered"

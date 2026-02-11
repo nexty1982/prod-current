@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Backdrop } from '@mui/material';
+import { Backdrop, Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import React, { useEffect, useState } from 'react';
 import styles from './OMLoading.module.css';
 
 export interface OMLoadingProps {
@@ -60,13 +60,12 @@ export const OMLoading: React.FC<OMLoadingProps> = ({
     >
       <Box className={styles.imageWrapper}>
         <img
-          src="/images/ui/loading-priest.png"
+          src="/images/logos/om-logo.png"
           alt="Loading"
           className={`${styles.priestImage} ${prefersReducedMotion ? styles.noAnimation : ''}`}
           loading="eager"
           onError={(e) => {
-            // Fallback if image doesn't exist yet
-            console.warn('OMLoading: Image not found at /images/ui/loading-priest.png');
+            // Fallback if image doesn't exist
             (e.target as HTMLImageElement).style.display = 'none';
           }}
         />

@@ -1,0 +1,33 @@
+{
+  "date": "2026-02-10",
+  "timestamp": "2026-02-10T04:57:47.444Z",
+  "rootPath": "/var/www/orthodoxmetrics/prod",
+  "moves": [
+    {
+      "from": "/var/www/orthodoxmetrics/prod/server-tree.txt",
+      "to": "/var/www/orthodoxmetrics/prod/docs/_inbox/2026-02-10/server-tree.txt",
+      "fromRelative": "server-tree.txt",
+      "toRelative": "docs/_inbox/2026-02-10/server-tree.txt",
+      "size": 198468,
+      "mtime": "2026-02-10T02:44:00.351Z",
+      "sha256": "e3f70568a9da78ade952197e8333e37b18e56fd3a79e3f480040f72ee24270b9",
+      "shouldMove": true,
+      "reason": "categorized as inbox",
+      "category": "inbox"
+    },
+    {
+      "from": "/var/www/orthodoxmetrics/prod/tree-list.txt",
+      "to": "/var/www/orthodoxmetrics/prod/docs/_inbox/2026-02-10/tree-list.txt",
+      "fromRelative": "tree-list.txt",
+      "toRelative": "docs/_inbox/2026-02-10/tree-list.txt",
+      "size": 7956,
+      "mtime": "2026-02-09T22:13:35.735Z",
+      "sha256": "9397e55d8a71eae5669e46133af351cf14d94a54172631d0aaf284b87f6a4725",
+      "shouldMove": true,
+      "reason": "categorized as inbox",
+      "category": "inbox"
+    }
+  ],
+  "totalMoved": 2,
+  "failed": []
+}

@@ -1,26 +1,25 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import RTL from './layouts/full/shared/customizer/RTL';
-import { ThemeSettings } from './theme/Theme';
-import { RouterProvider } from 'react-router-dom';
-import router from './routes/Router';
-import { CustomizerContext } from './context/CustomizerContext';
-import { ChurchRecordsProvider } from './context/ChurchRecordsContext';
-import { ChurchProvider } from './context/ChurchContext';
-import { AuthProvider } from './context/AuthContext';
-import { MenuVisibilityProvider } from './context/MenuVisibilityContext';
-import { NotificationProvider } from './context/NotificationContext';
-import { WebSocketProvider } from './context/WebSocketContext';
-import { EnvironmentProvider } from './context/EnvironmentContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useContext, useEffect } from 'react';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import FilterErrorBoundary from './components/ErrorBoundary/FilterErrorBoundary';
-import { setupAxiosInterceptors } from './utils/axiosInterceptor';
-import AdminMessageNotification from './components/AdminMessageNotification';
+import { RouterProvider } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css'; // Import Tailwind CSS
+import AdminMessageNotification from './components/AdminMessageNotification';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import FilterErrorBoundary from './components/ErrorBoundary/FilterErrorBoundary';
+import { AuthProvider } from './context/AuthContext';
+import { ChurchProvider } from './context/ChurchContext';
+import { CustomizerContext } from './context/CustomizerContext';
+import { EnvironmentProvider } from './context/EnvironmentContext';
+import { MenuVisibilityProvider } from './context/MenuVisibilityContext';
+import { NotificationProvider } from './context/NotificationContext';
+import { WebSocketProvider } from './context/WebSocketContext';
+import RTL from './layouts/full/shared/customizer/RTL';
+import router from './routes/Router';
+import { ThemeSettings } from './theme/Theme';
+import { setupAxiosInterceptors } from './utils/axiosInterceptor';
 
 // Import Orthodox Theme System
 //import { ThemeProvider as OrthodoxThemeProvider } from './context/ThemeContext';
@@ -58,7 +57,6 @@ function App() {
         <ChurchProvider>
           <EnvironmentProvider>
             <WebSocketProvider>
-              <ChurchRecordsProvider>
                 <MenuVisibilityProvider>
                   <NotificationProvider>
                   <ThemeProvider theme={theme}>
@@ -98,7 +96,6 @@ function App() {
                   </ThemeProvider>
                   </NotificationProvider>
                 </MenuVisibilityProvider>
-              </ChurchRecordsProvider>
             </WebSocketProvider>
           </EnvironmentProvider>
         </ChurchProvider>

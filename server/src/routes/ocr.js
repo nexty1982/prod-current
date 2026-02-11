@@ -347,10 +347,18 @@ router.post('/jobs/upload', async (req, res) => {
       }
 
       // Move files to church-specific directory
-      // Path: /var/www/orthodoxmetrics/prod/server/uploads/om_church_##/uploaded/
+      // Check for per-church ocr_base_dir override, else use default
       const fsPromises = require('fs').promises;
+      const { promisePool: mainPool } = require('../config/db');
+      const [churchPathRows] = await mainPool.query(
+        'SELECT ocr_base_dir FROM churches WHERE id = ?', [churchId]
+      );
+      const churchOcrBaseDir = churchPathRows.length > 0 && churchPathRows[0].ocr_base_dir
+        ? churchPathRows[0].ocr_base_dir
+        : null;
       const baseUploadPath = process.env.UPLOAD_BASE_PATH || '/var/www/orthodoxmetrics/prod/server/uploads';
-      const churchUploadDir = path.join(baseUploadPath, `om_church_${churchId}`, 'uploaded');
+      const effectiveOcrBase = churchOcrBaseDir || path.join(baseUploadPath, `om_church_${churchId}`);
+      const churchUploadDir = path.join(effectiveOcrBase, 'uploaded');
       await fsPromises.mkdir(churchUploadDir, { recursive: true });
       
       // Move each file to the church directory
@@ -1103,10 +1111,22 @@ async function processOcrJobAsync(db, jobId, imagePath, options = {}) {
       
       // Get churchId from options
       const churchId = options.churchId || 46;
-      // Use absolute path: /var/www/orthodoxmetrics/prod/server/uploads/om_church_##/processed
+      // Check for per-church ocr_base_dir override, else use default
       const baseUploadPath = process.env.UPLOAD_BASE_PATH || '/var/www/orthodoxmetrics/prod/server/uploads';
-      const baseUploadDir = path.join(baseUploadPath, `om_church_${churchId}`);
-      const processedDir = path.join(baseUploadDir, 'processed');
+      let effectiveOcrBase;
+      try {
+        const { promisePool: ocrPool } = require('../config/db');
+        const [ocrChurchRows] = await ocrPool.query(
+          'SELECT ocr_base_dir FROM churches WHERE id = ?', [churchId]
+        );
+        const ocrOverride = ocrChurchRows.length > 0 && ocrChurchRows[0].ocr_base_dir
+          ? ocrChurchRows[0].ocr_base_dir : null;
+        effectiveOcrBase = ocrOverride || path.join(baseUploadPath, `om_church_${churchId}`);
+      } catch (dbErr) {
+        console.warn('Could not check ocr_base_dir override, using default:', dbErr.message);
+        effectiveOcrBase = path.join(baseUploadPath, `om_church_${churchId}`);
+      }
+      const processedDir = path.join(effectiveOcrBase, 'processed');
       
       console.log(`📁 Base upload path: ${baseUploadPath}`);
       console.log(`📁 Processed dir: ${processedDir}`);

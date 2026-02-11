@@ -1,32 +1,35 @@
-import React, { useState } from 'react';
 import {
-  Box,
-  Paper,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Slider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Stack,
-  IconButton,
-  Tooltip,
-  Switch,
-  FormControlLabel,
-  Drawer,
-  Divider,
-} from '@mui/material';
-import {
-  Close as CloseIcon,
-  CloudUpload as CloudUploadIcon,
-  Settings as SettingsIcon,
+    Close as CloseIcon,
+    CloudUpload as CloudUploadIcon,
+    PhotoLibrary as PhotoLibraryIcon,
+    Settings as SettingsIcon,
 } from '@mui/icons-material';
+import {
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    Drawer,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Slider,
+    Stack,
+    Switch,
+    TextField,
+    Tooltip,
+    Typography,
+} from '@mui/material';
+import React, { useCallback, useEffect, useState } from 'react';
 import RecordHeaderBanner from './RecordHeaderBanner';
 
 interface RecordHeaderPreviewProps {
@@ -50,6 +53,155 @@ const RecordHeaderPreview: React.FC<RecordHeaderPreviewProps> = ({
   const [configType, setConfigType] = useState<string | null>(null);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [imageType, setImageType] = useState<string | null>(null);
+
+  // Available images from church Image Sources
+  const [availableImages, setAvailableImages] = useState<Array<{ filename: string; relative_path: string; serve_url: string; size: number; source_label: string; source_path_id: number }>>([]);
+  const [imagesLoading, setImagesLoading] = useState(false);
+  const [imagesError, setImagesError] = useState<string | null>(null);
+
+  const fetchAvailableImages = useCallback(async () => {
+    if (!churchId) return;
+    setImagesLoading(true);
+    setImagesError(null);
+    try {
+      const response = await fetch(`/api/gallery/churches/${churchId}/available-images`, { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableImages(data.images || []);
+      } else {
+        setImagesError('Failed to load images from Image Sources');
+      }
+    } catch (err) {
+      setImagesError('Error loading available images');
+    } finally {
+      setImagesLoading(false);
+    }
+  }, [churchId]);
+
+  // Fetch available images when config drawer opens
+  useEffect(() => {
+    if (configDialogOpen) {
+      fetchAvailableImages();
+    }
+  }, [configDialogOpen, fetchAvailableImages]);
+
+  // Helper: select an available image for a given library type
+  const handleSelectImage = (serveUrl: string, libraryKey: string) => {
+    setRecordSettings((prev: any) => {
+      const imageLibrary = prev.imageLibrary || {};
+      const currentImages = imageLibrary[libraryKey] || [];
+      // Avoid duplicates
+      if (currentImages.includes(serveUrl)) {
+        // Just set the index to the existing one
+        return {
+          ...prev,
+          currentImageIndex: {
+            ...prev.currentImageIndex,
+            [libraryKey]: currentImages.indexOf(serveUrl),
+          },
+        };
+      }
+      const updatedImages = [...currentImages, serveUrl];
+      return {
+        ...prev,
+        imageLibrary: { ...imageLibrary, [libraryKey]: updatedImages },
+        currentImageIndex: {
+          ...prev.currentImageIndex,
+          [libraryKey]: updatedImages.length - 1,
+        },
+      };
+    });
+  };
+
+  // Reusable image picker grid for config drawers
+  const renderImagePicker = (uploadType: string, libraryKey: string, label: string) => {
+    const currentLibImages = recordSettings?.imageLibrary?.[libraryKey] || [];
+    const currentIdx = recordSettings?.currentImageIndex?.[libraryKey] ?? 0;
+
+    return (
+      <Box>
+        <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <PhotoLibraryIcon fontSize="small" /> Available Images
+        </Typography>
+        {imagesLoading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+            <CircularProgress size={24} />
+          </Box>
+        )}
+        {imagesError && <Alert severity="warning" sx={{ mb: 1 }}>{imagesError}</Alert>}
+        {!imagesLoading && availableImages.length === 0 && !imagesError && (
+          <Alert severity="info" sx={{ mb: 1 }}>
+            No images found. Add image directories via "Image Sources" first.
+          </Alert>
+        )}
+        {!imagesLoading && availableImages.length > 0 && (
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 1,
+            maxHeight: 240,
+            overflowY: 'auto',
+            mb: 1,
+            p: 0.5,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1,
+          }}>
+            {availableImages.map((img, idx) => {
+              const isSelected = currentLibImages[currentIdx] === img.serve_url;
+              return (
+                <Tooltip key={idx} title={`${img.filename} (${img.source_label})`} arrow>
+                  <Box
+                    onClick={() => handleSelectImage(img.serve_url, libraryKey)}
+                    sx={{
+                      cursor: 'pointer',
+                      border: isSelected ? '2px solid' : '1px solid',
+                      borderColor: isSelected ? 'primary.main' : 'divider',
+                      borderRadius: 1,
+                      overflow: 'hidden',
+                      bgcolor: isSelected ? 'action.selected' : 'background.paper',
+                      transition: 'all 0.15s',
+                      '&:hover': { borderColor: 'primary.light', boxShadow: 1 },
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={img.serve_url}
+                      alt={img.filename}
+                      sx={{ width: '100%', height: 70, objectFit: 'cover', display: 'block' }}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                    <Typography variant="caption" noWrap sx={{ display: 'block', px: 0.5, fontSize: '0.6rem' }}>
+                      {img.filename}
+                    </Typography>
+                  </Box>
+                </Tooltip>
+              );
+            })}
+          </Box>
+        )}
+        <Divider sx={{ my: 1 }} />
+        <Button
+          variant="outlined"
+          component="label"
+          startIcon={<CloudUploadIcon />}
+          fullWidth
+          size="small"
+        >
+          Upload {label}
+          <input
+            type="file"
+            hidden
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onImageUpload(uploadType, file);
+            }}
+          />
+        </Button>
+      </Box>
+    );
+  };
 
   const handleDoubleClick = (type: string) => {
     setConfigType(type);
@@ -346,23 +498,7 @@ const RecordHeaderPreview: React.FC<RecordHeaderPreviewProps> = ({
                         step={5}
                       />
                     </Box>
-                    <Button
-                      variant="outlined"
-                      component="label"
-                      startIcon={<CloudUploadIcon />}
-                      fullWidth
-                    >
-                      Upload Logo Image
-                      <input
-                        type="file"
-                        hidden
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) onImageUpload('logo', file);
-                        }}
-                      />
-                    </Button>
+                    {renderImagePicker('logo', 'logo', 'Logo Image')}
                   </>
                 )}
               </Stack>
@@ -486,23 +622,7 @@ const RecordHeaderPreview: React.FC<RecordHeaderPreviewProps> = ({
                         step={5}
                       />
                     </Box>
-                    <Button
-                      variant="outlined"
-                      component="label"
-                      startIcon={<CloudUploadIcon />}
-                      fullWidth
-                    >
-                      Upload OM Logo
-                      <input
-                        type="file"
-                        hidden
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) onImageUpload('omLogo', file);
-                        }}
-                      />
-                    </Button>
+                    {renderImagePicker('omLogo', 'omLogo', 'OM Logo')}
                   </>
                 )}
               </Stack>
@@ -590,23 +710,7 @@ const RecordHeaderPreview: React.FC<RecordHeaderPreviewProps> = ({
                         step={1}
                       />
                     </Box>
-                    <Button
-                      variant="outlined"
-                      component="label"
-                      startIcon={<CloudUploadIcon />}
-                      fullWidth
-                    >
-                      Upload Record Image
-                      <input
-                        type="file"
-                        hidden
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) onImageUpload(recordType || 'baptism', file);
-                        }}
-                      />
-                    </Button>
+                    {renderImagePicker(recordType || 'baptism', recordType || 'baptism', 'Record Image')}
                   </>
                 )}
               </Stack>
@@ -679,26 +783,7 @@ const RecordHeaderPreview: React.FC<RecordHeaderPreviewProps> = ({
                         step={5}
                       />
                     </Box>
-                    <Button
-                      variant="outlined"
-                      component="label"
-                      startIcon={<CloudUploadIcon />}
-                      fullWidth
-                    >
-                      Upload Background Image
-                      <input
-                        type="file"
-                        hidden
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) onImageUpload('bg', file);
-                        }}
-                      />
-                    </Button>
-                    <Typography variant="caption" color="text.secondary">
-                      Background image will be saved as: {churchId}-bg.png
-                    </Typography>
+                    {renderImagePicker('bg', 'bg', 'Background Image')}
                   </>
                 )}
               </Stack>
@@ -773,23 +858,7 @@ const RecordHeaderPreview: React.FC<RecordHeaderPreviewProps> = ({
                         step={5}
                       />
                     </Box>
-                    <Button
-                      variant="outlined"
-                      component="label"
-                      startIcon={<CloudUploadIcon />}
-                      fullWidth
-                    >
-                      Upload G1 Overlay Image
-                      <input
-                        type="file"
-                        hidden
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) onImageUpload('g1', file);
-                        }}
-                      />
-                    </Button>
+                    {renderImagePicker('g1', 'g1', 'G1 Overlay Image')}
                   </>
                 )}
               </Stack>

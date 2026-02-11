@@ -12,8 +12,9 @@ import ScrollToTop from '../../shared/ui/ScrollToTop';
 // import LoadingBar from '../../LoadingBar';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import config from '@/context/config';
-import { useAuth } from '@/context/AuthContext';
-import AdminFloatingHUD from '../../components/AdminFloatingHUD';
+// AdminFloatingHUD now controlled via showAdminHud prop on EnvironmentAwarePage in Router.tsx
+// import { useAuth } from '@/context/AuthContext';
+// import AdminFloatingHUD from '../../components/AdminFloatingHUD';
 import { getPageTitle } from '../../config/pageTitles';
 // import SiteEditorOverlay from '../../components/SiteEditorOverlay';
 // import GlobalOMAI from '../../components/global/GlobalOMAI';
@@ -39,7 +40,7 @@ const PageWrapper = styled('div')(({ theme }) => ({
 const FullLayout: FC = () => {
   const { activeLayout, isLayout, activeMode, isCollapse } = useContext(CustomizerContext);
   const theme = useTheme();
-  const { isSuperAdmin } = useAuth();
+  // const { isSuperAdmin } = useAuth(); // Moved to EnvironmentAwarePage
   const location = useLocation();
   const MiniSidebarWidth = config.miniSidebarWidth;
 
@@ -112,9 +113,9 @@ const FullLayout: FC = () => {
       {/* <ErrorNotificationToast /> */}
       
       {/* ------------------------------------------- */}
-      {/* Admin Floating HUD - Super Admin Only */}
+      {/* Admin Floating HUD - now controlled via showAdminHud prop */}
+      {/* on EnvironmentAwarePage in Router.tsx */}
       {/* ------------------------------------------- */}
-      {isSuperAdmin() && <AdminFloatingHUD />}
     </>
   );
 };

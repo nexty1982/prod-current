@@ -4,54 +4,55 @@
  * Uses column positions instead of field names
  */
 
-import React, { useState, useMemo } from 'react';
 import {
-  Box,
-  Typography,
-  Button,
-  Chip,
-  IconButton,
-  Tooltip,
-  Alert,
-  Paper,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  CircularProgress,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Refresh as RefreshIcon,
-  Download as DownloadIcon,
-  Upload as UploadIcon,
-  Lock as LockIcon,
-  LockOpen as LockOpenIcon,
-  TableChart as TableIcon,
-  Settings as SettingsIcon,
+    Add as AddIcon,
+    Download as DownloadIcon,
+    Lock as LockIcon,
+    LockOpen as LockOpenIcon,
+    Refresh as RefreshIcon,
+    TableChart as TableIcon,
+    Upload as UploadIcon
 } from '@mui/icons-material';
+import {
+    Alert,
+    Box,
+    Button,
+    Chip,
+    CircularProgress,
+    FormControl,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Tooltip,
+    Typography,
+} from '@mui/material';
+import React, { useMemo, useState } from 'react';
 
 // Import dynamic components
 import {
-  
-  
-  
-  useRecordTables,
-  useDynamicRecords,
-  useDynamicRecordMutations,
-  useDynamicRecordImportExport,
-  useTableColumns,
-  useFormFields,
-  useSearchFilters,
-  
-  
+    useDynamicRecordImportExport,
+    useDynamicRecordMutations,
+    useDynamicRecords,
+    useFormFields,
+    useRecordTables,
+    useSearchFilters,
+    useTableColumns,
 } from './useDynamicRecords';
 
 import DynamicRecordForm from './DynamicRecordForm';
-import { RecordsSearch } from "./RecordsSearch";
-import { RecordsModal } from "./RecordsModal";
 import { DynamicRecordsTable } from "./DynamicRecordsTable";
-import { THEME_COLORS } from '../constants';
+import { RecordsModal } from "./RecordsModal";
+import { RecordsSearch } from "./RecordsSearch";
+// Inline theme colors (previously from ../constants which was removed as dead code)
+const THEME_COLORS = {
+  baptism: {
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    header: 'rgba(102, 126, 234, 0.08)',
+    addButton: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  },
+};
 
 // Types
 interface DynamicRecordsManagerProps {

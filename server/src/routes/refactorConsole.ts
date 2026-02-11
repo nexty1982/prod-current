@@ -12,11 +12,12 @@
  * - GET /api/refactor-console/jobs/:jobId/result - Get job result
  */
 
-import { Router, Request, Response } from 'express';
+import * as crypto from 'crypto';
+import { Request, Response, Router } from 'express';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as crypto from 'crypto';
-import { Project } from 'ts-morph';
+
+const { promisePool } = require('../config/db');
 
 // Import glob with CommonJS compatibility
 // glob v10+ exports as ESM, but TypeScript compiles to CommonJS
@@ -31,10 +32,10 @@ if (typeof glob !== 'function') {
 }
 
 // Import path resolver and snapshot scanner
-import * as pathResolver from '../utils/pathResolver';
-import * as snapshotScanner from '../utils/snapshotScanner';
 import * as dependencyChecker from '../utils/dependencyChecker';
+import * as pathResolver from '../utils/pathResolver';
 import * as restoreHistory from '../utils/restoreHistory';
+import * as snapshotScanner from '../utils/snapshotScanner';
 
 const router = Router();
 
@@ -689,7 +690,8 @@ async function performScan(
   rebuild: boolean = false, 
   compareWithBackup: boolean = false,
   backupDirPath: string = BACKUP_ROOT,
-  sourcePath?: string
+  sourcePath?: string,
+  quickMode: boolean | 'auto' = 'auto'
 ): Promise<RefactorScan & { pathConfig?: any }> {
   // Defensive validation: ensure glob is a function at scan entry point
   if (typeof glob !== 'function') {
@@ -757,17 +759,40 @@ async function performScan(
 
   console.log(`Found ${allFiles.length} files to analyze`);
 
-  // Analyze usage patterns
-  console.log('Analyzing usage patterns...');
-  const usageMap = await analyzeUsage(allFiles);
+  // Determine if quick mode should be used (auto = quick when > 500 files)
+  const QUICK_MODE_THRESHOLD = 500;
+  const isQuick = quickMode === true || (quickMode === 'auto' && allFiles.length > QUICK_MODE_THRESHOLD);
+  if (isQuick) {
+    console.log(`Quick mode enabled (${allFiles.length} files > ${QUICK_MODE_THRESHOLD} threshold). Skipping deep analysis.`);
+  }
 
-  // Detect duplicates
-  console.log('Detecting duplicates...');
-  const duplicatesMap = detectDuplicates(allFiles);
+  // Analyze usage patterns (skip in quick mode)
+  let usageMap: Map<string, UsageData>;
+  if (isQuick) {
+    usageMap = new Map();
+    allFiles.forEach(fp => usageMap.set(fp, { importRefs: 0, serverRefs: 0, routeRefs: 0, runtimeHints: 0, score: 0 }));
+  } else {
+    console.log('Analyzing usage patterns...');
+    usageMap = await analyzeUsage(allFiles);
+  }
 
-  // Detect near-duplicates
-  console.log('Detecting near-duplicates...');
-  const nearDuplicatesMap = detectNearDuplicates(allFiles);
+  // Detect duplicates (skip in quick mode)
+  let duplicatesMap: Map<string, string[]>;
+  if (isQuick) {
+    duplicatesMap = new Map();
+  } else {
+    console.log('Detecting duplicates...');
+    duplicatesMap = detectDuplicates(allFiles);
+  }
+
+  // Detect near-duplicates (skip in quick mode)
+  let nearDuplicatesMap: Map<string, { target: string; similarity: number }[]>;
+  if (isQuick) {
+    nearDuplicatesMap = new Map();
+  } else {
+    console.log('Detecting near-duplicates...');
+    nearDuplicatesMap = detectNearDuplicates(allFiles);
+  }
 
   // Build file nodes
   console.log('Building file tree...');
@@ -810,7 +835,7 @@ async function performScan(
                      relPath.includes('/features/demos/') ||
                      relPath.includes('/features/examples/') ||
                      relPath.includes('/features/sandbox/'),
-        hash: stats.isFile() ? getFileHash(filePath) : undefined
+        hash: (!isQuick && stats.isFile()) ? getFileHash(filePath) : undefined
       };
 
       nodes.push(node);
@@ -1062,7 +1087,11 @@ router.get('/scan', async (req: Request, res: Response) => {
       console.warn('[Scan] Path validation warnings (using defaults):', errors);
     }
     
-    const scanResult = await performScan(rebuild, compareWithBackup, backupPath, actualSourcePath);
+    // quick mode: 'auto' (default) uses threshold, '1' forces quick, '0' forces deep
+    const quickParam = req.query.quick as string;
+    const quickMode: boolean | 'auto' = quickParam === '1' ? true : quickParam === '0' ? false : 'auto';
+    
+    const scanResult = await performScan(rebuild, compareWithBackup, backupPath, actualSourcePath, quickMode);
     
     // Add path configuration to response
     scanResult.pathConfig = {
@@ -1836,6 +1865,309 @@ router.post('/restore-bundle', async (req: Request, res: Response) => {
       error: 'Bundle restore failed', 
       message: error instanceof Error ? error.message : 'Unknown error',
       details: error instanceof Error ? error.stack : undefined
+    });
+  }
+});
+
+// =============================================================================
+// Canonical Locations — directory legend for refactoring
+// =============================================================================
+
+// GET /api/refactor-console/canonical-locations — list all locations
+router.get('/canonical-locations', async (req: Request, res: Response) => {
+  try {
+    const action = req.query.action as string;
+    const category = req.query.category as string;
+    
+    let sql = 'SELECT * FROM canonical_locations WHERE 1=1';
+    const params: any[] = [];
+    
+    if (action) {
+      sql += ' AND action = ?';
+      params.push(action);
+    }
+    if (category) {
+      sql += ' AND category = ?';
+      params.push(category);
+    }
+    
+    sql += ' ORDER BY sort_order ASC, label ASC';
+    
+    const [rows] = await promisePool.query(sql, params);
+    
+    // Check filesystem existence for each path
+    const PROJECT_BASE = '/var/www/orthodoxmetrics/prod/';
+    const locations = (rows as any[]).map((row: any) => {
+      const fullPath = row.directory_path.startsWith('/')
+        ? row.directory_path
+        : path.join(PROJECT_BASE, row.directory_path);
+      let exists = false;
+      let sizeInfo: string | null = null;
+      try {
+        const stat = fs.statSync(fullPath);
+        exists = true;
+        if (stat.isDirectory()) {
+          sizeInfo = 'directory';
+        } else {
+          const kb = Math.round(stat.size / 1024);
+          sizeInfo = kb > 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`;
+        }
+      } catch { /* does not exist */ }
+      
+      return { ...row, exists, sizeInfo, fullPath };
+    });
+    
+    // Summary counts
+    const summary = {
+      total: locations.length,
+      byAction: {
+        keep: locations.filter((l: any) => l.action === 'keep').length,
+        move: locations.filter((l: any) => l.action === 'move').length,
+        archive: locations.filter((l: any) => l.action === 'archive').length,
+        delete: locations.filter((l: any) => l.action === 'delete').length,
+      },
+      byCategory: {} as Record<string, number>,
+      existsCount: locations.filter((l: any) => l.exists).length,
+      missingCount: locations.filter((l: any) => !l.exists).length,
+    };
+    
+    locations.forEach((l: any) => {
+      summary.byCategory[l.category] = (summary.byCategory[l.category] || 0) + 1;
+    });
+    
+    res.json({ ok: true, locations, summary });
+  } catch (error) {
+    console.error('[CanonicalLocations] List error:', error);
+    res.status(500).json({ error: 'Failed to list canonical locations', message: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+// POST /api/refactor-console/canonical-locations — create or upsert a location
+router.post('/canonical-locations', async (req: Request, res: Response) => {
+  try {
+    const { directory_path, label, category, action, target_path, description, served_by, sort_order } = req.body;
+    
+    if (!directory_path || !label) {
+      return res.status(400).json({ error: 'directory_path and label are required' });
+    }
+    
+    const [result] = await promisePool.query(
+      `INSERT INTO canonical_locations (directory_path, label, category, action, target_path, description, served_by, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE label=VALUES(label), category=VALUES(category), action=VALUES(action),
+         target_path=VALUES(target_path), description=VALUES(description), served_by=VALUES(served_by), sort_order=VALUES(sort_order)`,
+      [directory_path, label, category || 'runtime', action || 'keep', target_path || null, description || null, served_by || null, sort_order || 0]
+    );
+    
+    res.json({ ok: true, id: (result as any).insertId, message: 'Location saved' });
+  } catch (error) {
+    console.error('[CanonicalLocations] Create error:', error);
+    res.status(500).json({ error: 'Failed to save canonical location', message: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+// PUT /api/refactor-console/canonical-locations/:id — update a location
+router.put('/canonical-locations/:id', async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { directory_path, label, category, action, target_path, description, served_by, sort_order, enabled } = req.body;
+    
+    const fields: string[] = [];
+    const params: any[] = [];
+    
+    if (directory_path !== undefined) { fields.push('directory_path = ?'); params.push(directory_path); }
+    if (label !== undefined) { fields.push('label = ?'); params.push(label); }
+    if (category !== undefined) { fields.push('category = ?'); params.push(category); }
+    if (action !== undefined) { fields.push('action = ?'); params.push(action); }
+    if (target_path !== undefined) { fields.push('target_path = ?'); params.push(target_path); }
+    if (description !== undefined) { fields.push('description = ?'); params.push(description); }
+    if (served_by !== undefined) { fields.push('served_by = ?'); params.push(served_by); }
+    if (sort_order !== undefined) { fields.push('sort_order = ?'); params.push(sort_order); }
+    if (enabled !== undefined) { fields.push('enabled = ?'); params.push(enabled); }
+    
+    if (fields.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+    
+    params.push(id);
+    await promisePool.query(`UPDATE canonical_locations SET ${fields.join(', ')} WHERE id = ?`, params);
+    
+    res.json({ ok: true, message: 'Location updated' });
+  } catch (error) {
+    console.error('[CanonicalLocations] Update error:', error);
+    res.status(500).json({ error: 'Failed to update canonical location', message: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+// DELETE /api/refactor-console/canonical-locations/:id — delete a location
+router.delete('/canonical-locations/:id', async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    await promisePool.query('DELETE FROM canonical_locations WHERE id = ?', [id]);
+    res.json({ ok: true, message: 'Location deleted' });
+  } catch (error) {
+    console.error('[CanonicalLocations] Delete error:', error);
+    res.status(500).json({ error: 'Failed to delete canonical location', message: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+// =============================================================================
+// Policy Engine — read YAML policy file securely
+// =============================================================================
+const POLICY_ALLOWLIST_ROOTS = [
+  '/var/www/orthodoxmetrics/prod/ops/refactor/',
+  '/var/www/orthodoxmetrics/prod/ops/',
+];
+
+const DEFAULT_POLICY_PATH = '/var/www/orthodoxmetrics/prod/ops/refactor/refactor-policies.yml';
+
+// GET /api/refactor-console/policy — read policy file content
+router.get('/policy', async (req: Request, res: Response) => {
+  try {
+    const requestedPath = (req.query.path as string) || DEFAULT_POLICY_PATH;
+
+    // Security: resolve and check for traversal
+    const resolvedPath = path.resolve(requestedPath);
+    if (resolvedPath.includes('..') || resolvedPath !== requestedPath.replace(/\/+$/, '')) {
+      // Extra check: the resolved must match one of the allowlist roots
+    }
+
+    const isAllowed = POLICY_ALLOWLIST_ROOTS.some(root => resolvedPath.startsWith(root));
+    if (!isAllowed) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: `Policy file must be under one of: ${POLICY_ALLOWLIST_ROOTS.join(', ')}`,
+      });
+    }
+
+    // Check file exists
+    const exists = await fs.pathExists(resolvedPath);
+    if (!exists) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: `Policy file not found: ${resolvedPath}`,
+      });
+    }
+
+    const content = await fs.readFile(resolvedPath, 'utf-8');
+    res.json({
+      ok: true,
+      path: resolvedPath,
+      content,
+      size: content.length,
+    });
+  } catch (error) {
+    console.error('[Policy] Read error:', error);
+    res.status(500).json({
+      error: 'Failed to read policy file',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// PUT /api/refactor-console/policy — save/create policy file content
+router.put('/policy', async (req: Request, res: Response) => {
+  try {
+    const { path: filePath, content } = req.body;
+    if (!filePath || typeof content !== 'string') {
+      return res.status(400).json({ error: 'Bad request', message: 'path and content are required' });
+    }
+
+    const resolvedPath = path.resolve(filePath);
+    const isAllowed = POLICY_ALLOWLIST_ROOTS.some(root => resolvedPath.startsWith(root));
+    if (!isAllowed) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: `Policy file must be under one of: ${POLICY_ALLOWLIST_ROOTS.join(', ')}`,
+      });
+    }
+
+    // Must end with .yml or .yaml
+    if (!resolvedPath.endsWith('.yml') && !resolvedPath.endsWith('.yaml')) {
+      return res.status(400).json({ error: 'Bad request', message: 'Policy file must have .yml or .yaml extension' });
+    }
+
+    // Ensure directory exists
+    await fs.ensureDir(path.dirname(resolvedPath));
+    await fs.writeFile(resolvedPath, content, 'utf-8');
+
+    res.json({
+      ok: true,
+      path: resolvedPath,
+      size: content.length,
+      message: 'Policy file saved',
+    });
+  } catch (error) {
+    console.error('[Policy] Save error:', error);
+    res.status(500).json({
+      error: 'Failed to save policy file',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// GET /api/refactor-console/policy/list — list all .yml/.yaml files in the policy directory
+router.get('/policy/list', async (req: Request, res: Response) => {
+  try {
+    const policyDir = '/var/www/orthodoxmetrics/prod/ops/refactor/';
+    const exists = await fs.pathExists(policyDir);
+    if (!exists) {
+      return res.json({ ok: true, files: [] });
+    }
+
+    const allFiles = await fs.readdir(policyDir);
+    const yamlFiles = allFiles.filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));
+
+    const files = await Promise.all(yamlFiles.map(async (filename: string) => {
+      const fullPath = path.join(policyDir, filename);
+      const stat = await fs.stat(fullPath);
+      return {
+        filename,
+        path: fullPath,
+        size: stat.size,
+        modified: stat.mtime.toISOString(),
+      };
+    }));
+
+    res.json({ ok: true, files });
+  } catch (error) {
+    console.error('[Policy] List error:', error);
+    res.status(500).json({
+      error: 'Failed to list policy files',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// DELETE /api/refactor-console/policy — delete a policy file
+router.delete('/policy', async (req: Request, res: Response) => {
+  try {
+    const filePath = req.query.path as string;
+    if (!filePath) {
+      return res.status(400).json({ error: 'Bad request', message: 'path query param is required' });
+    }
+
+    const resolvedPath = path.resolve(filePath);
+    const isAllowed = POLICY_ALLOWLIST_ROOTS.some(root => resolvedPath.startsWith(root));
+    if (!isAllowed) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: `Policy file must be under one of: ${POLICY_ALLOWLIST_ROOTS.join(', ')}`,
+      });
+    }
+
+    const exists = await fs.pathExists(resolvedPath);
+    if (!exists) {
+      return res.status(404).json({ error: 'Not found', message: `Policy file not found: ${resolvedPath}` });
+    }
+
+    await fs.remove(resolvedPath);
+    res.json({ ok: true, message: `Deleted: ${resolvedPath}` });
+  } catch (error) {
+    console.error('[Policy] Delete error:', error);
+    res.status(500).json({
+      error: 'Failed to delete policy file',
+      message: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });

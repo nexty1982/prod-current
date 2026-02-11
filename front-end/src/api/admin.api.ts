@@ -135,22 +135,22 @@ import { apiClient } from './utils/axiosInstance';
     ];
 
       let lastErr: any = null;
+  // Extract column name from various backend response shapes
+  const extractName = (c: any): string =>
+    typeof c === 'string' ? c :
+    c?.column_name ?? c?.COLUMN_NAME ?? c?.name ?? c?.Field ?? '';
+
   for (const path of candidates) {
     try {
       const res = await apiClient.get(path);
       const raw = (res as any)?.columns ?? (res as any)?.data?.columns ?? res;
 
-      // Accept shapes: string[], { column_name,... }[], { columns: [...] }
+      // Accept shapes: string[], { column_name,... }[], { name,... }[], { columns: [...] }
       let columns: string[] = [];
       if (Array.isArray(raw)) {
-        columns = raw.map((c: any) =>
-          typeof c === 'string' ? c :
-          c?.column_name ?? c?.COLUMN_NAME ?? ''
-        ).filter(Boolean);
+        columns = raw.map(extractName).filter(Boolean);
       } else if (Array.isArray((raw as any)?.columns)) {
-        columns = (raw as any).columns.map((c: any) =>
-          typeof c === 'string' ? c : c?.column_name ?? c?.COLUMN_NAME ?? ''
-        ).filter(Boolean);
+        columns = (raw as any).columns.map(extractName).filter(Boolean);
       }
 
       if (columns.length) return { columns, via: path };
@@ -176,9 +176,7 @@ import { apiClient } from './utils/axiosInstance';
         Array.isArray(t?.columns)
       );
       if (withCols) {
-        const cols = withCols.columns.map((c: any) =>
-          typeof c === 'string' ? c : c?.column_name ?? c?.COLUMN_NAME ?? ''
-        ).filter(Boolean);
+        const cols = withCols.columns.map(extractName).filter(Boolean);
         if (cols.length) return { columns: cols, via: 'tables-listing' };
       }
 
@@ -377,7 +375,9 @@ import { apiClient } from './utils/axiosInstance';
         apiClient.get('/admin/global-images'),
 
       upload: (formData: FormData): Promise<ApiResponse> =>
-        apiClient.uploadFile('/admin/global-images/upload', formData as any),
+        apiClient.post('/admin/global-images/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }),
 
       update: (imageId: number, params: any): Promise<ApiResponse> =>
         apiClient.put(`/admin/global-images/${imageId}`, params),

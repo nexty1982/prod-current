@@ -1,7 +1,30 @@
 /**
  * API Explorer Page
  * Backend API route introspection + saved test cases + runner
- * Super admin only - lives under Devel Tools
+ * Super admin only — lives under Devel Tools
+ *
+ * ─── Architecture ───────────────────────────────────────────────────
+ * Data source:   GET /api/system/routes  (server/src/api/apiExplorer.js)
+ * Discovery:     Runtime introspection of Express router stack
+ *                (req.app._router.stack → recursive layer extraction)
+ * Auth classify: Path-pattern heuristic (none / session / super_admin)
+ * Tag classify:  Path-keyword matching (admin, auth, records, …)
+ *
+ * Raw model (backend → frontend):
+ *   RouteInfo { method, path, auth, tags[], source }
+ *
+ * Normalized model (grid + export):
+ *   ApiEndpointRow { id, method, path, group, tags[], auth, roles[],
+ *                     source, notes }
+ *   → compatible with future admin_capabilities DB table
+ *
+ * UI layout:     MUI DataGrid (left, flex:2) + Details/Test Cases/Run
+ *                Results panel (right, flex:1)
+ * Test cases:    CRUD via /api/admin/api-tests, stored in
+ *                api_test_cases table (orthodoxmetrics_db)
+ * Test runner:   POST /api/admin/api-tests/run → executes against
+ *                localhost:3001 with session forwarding
+ * ────────────────────────────────────────────────────────────────────
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -50,11 +73,22 @@ import {
   Refresh as RefreshIcon,
   ExpandMore as ExpandIcon,
   Warning as WarningIcon,
-  ContentCopy as CopyIcon,
+  FileDownload as ExportIcon,
+  AppRegistration as RegisterIcon,
 } from '@mui/icons-material';
+import {
+  DataGrid,
+  GridColDef,
+  GridRowSelectionModel,
+  GridToolbarContainer,
+  GridToolbarFilterButton,
+  GridToolbarColumnsButton,
+} from '@mui/x-data-grid';
+import * as XLSX from 'xlsx';
 import axios from 'axios';
 
-// Types
+// ─── Raw backend types ──────────────────────────────────────────────
+
 interface RouteInfo {
   method: string;
   path: string;
@@ -62,6 +96,98 @@ interface RouteInfo {
   tags: string[];
   source: string;
 }
+
+// ─── Canonical endpoint row model (Phase 1) ─────────────────────────
+// Registry-ready: compatible with future admin_capabilities table
+
+interface ApiEndpointRow {
+  id: string;       // stable key: `${method}:${path}`
+  method: string;   // GET / POST / PUT / DELETE / PATCH
+  path: string;     // /api/...
+  group: string;    // primary tag or "other"
+  tags: string[];   // all tags from backend
+  auth: string;     // none / session / super_admin
+  roles: string[];  // empty for now
+  source: string;   // source file (empty for now)
+  notes: string;    // editable later
+}
+
+/** Convert raw backend RouteInfo[] to normalized ApiEndpointRow[] */
+function toApiEndpointRows(routes: RouteInfo[]): ApiEndpointRow[] {
+  return routes.map((r) => ({
+    id: `${r.method}:${r.path}`,
+    method: r.method,
+    path: r.path,
+    group: r.tags?.[0] || 'other',
+    tags: r.tags || [],
+    auth: r.auth || 'session',
+    roles: [],
+    source: r.source || '',
+    notes: '',
+  }));
+}
+
+// ─── Admin Capabilities registration helpers (Phase 4) ──────────────
+
+/** Normalize path to dot-notation key fragment:
+ *  /api/admin/churches/:id -> admin.churches._id  */
+function normalizePath(path: string): string {
+  return path
+    .replace(/^\/api\//, '')
+    .replace(/^\//, '')
+    .replace(/:[a-zA-Z_]+/g, (m) => `_${m.slice(1)}`)
+    .replace(/\//g, '.');
+}
+
+/** Build registry payload from selected rows (plug-and-play for future backend) */
+function toAdminCapabilityPayload(rows: ApiEndpointRow[]) {
+  return rows.map((r) => ({
+    kind: 'route' as const,
+    key: `api.${r.group || 'misc'}.${r.method.toLowerCase()}.${normalizePath(r.path)}`,
+    name: `${r.method} ${r.path}`,
+    method: r.method,
+    path: r.path,
+    tags_json: r.tags,
+    roles_json: r.roles,
+    auth: r.auth || null,
+    source_file: r.source || null,
+    status: 'active' as const,
+  }));
+}
+
+// ─── XLSX export (Phase 3) ──────────────────────────────────────────
+
+function exportToXlsx(rows: ApiEndpointRow[]) {
+  const data = rows.map((r) => ({
+    Method: r.method,
+    Path: r.path,
+    Group: r.group,
+    Auth: r.auth,
+    Tags: r.tags.join(', '),
+    Roles: r.roles.join(', '),
+    Source: r.source,
+    Notes: r.notes,
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  // Freeze the header row
+  ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+  // Bold headers via cell styles
+  const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const addr = XLSX.utils.encode_cell({ r: 0, c });
+    if (ws[addr]) {
+      ws[addr].s = { font: { bold: true } };
+    }
+  }
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Endpoints');
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+  XLSX.writeFile(wb, `api-explorer-export_${ts}.xlsx`);
+}
+
+// ─── Other existing types ───────────────────────────────────────────
 
 interface TestCase {
   id: number;
@@ -97,7 +223,8 @@ interface RunReport {
   results: TestResult[];
 }
 
-// Method color mapping
+// ─── Colour maps ────────────────────────────────────────────────────
+
 const methodColors: Record<string, string> = {
   GET: '#4caf50',
   POST: '#2196f3',
@@ -112,7 +239,6 @@ const authColors: Record<string, string> = {
   super_admin: '#f44336',
 };
 
-// Empty test case template
 const emptyTestCase = {
   name: '',
   method: 'GET',
@@ -125,42 +251,177 @@ const emptyTestCase = {
   enabled: 1,
 };
 
+// ─── DataGrid column definitions (Phase 2) ──────────────────────────
+
+const gridColumns: GridColDef<ApiEndpointRow>[] = [
+  {
+    field: 'method',
+    headerName: 'Method',
+    width: 90,
+    sortable: true,
+    renderCell: (params) => (
+      <Chip
+        label={params.value}
+        size="small"
+        sx={{
+          bgcolor: methodColors[params.value as string] || '#666',
+          color: 'white',
+          fontWeight: 700,
+          fontSize: '0.65rem',
+          height: 22,
+          minWidth: 52,
+          '& .MuiChip-label': { px: 0.75 },
+        }}
+      />
+    ),
+  },
+  {
+    field: 'path',
+    headerName: 'Path',
+    flex: 1,
+    minWidth: 220,
+    sortable: true,
+    renderCell: (params) => (
+      <Typography
+        variant="body2"
+        sx={{
+          fontFamily: 'monospace',
+          fontSize: '0.78rem',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {params.value}
+      </Typography>
+    ),
+  },
+  {
+    field: 'group',
+    headerName: 'Group',
+    width: 110,
+    sortable: true,
+  },
+  {
+    field: 'auth',
+    headerName: 'Auth',
+    width: 110,
+    sortable: true,
+    renderCell: (params) => (
+      <Chip
+        label={params.value}
+        size="small"
+        sx={{
+          bgcolor: `${authColors[params.value as string] || '#666'}20`,
+          color: authColors[params.value as string] || '#666',
+          fontWeight: 600,
+          fontSize: '0.6rem',
+          height: 20,
+          '& .MuiChip-label': { px: 0.5 },
+        }}
+      />
+    ),
+  },
+  {
+    field: 'tags',
+    headerName: 'Tags',
+    width: 170,
+    sortable: false,
+    filterable: false,
+    renderCell: (params) => {
+      const tags = params.value as string[];
+      if (!tags?.length) return null;
+      return (
+        <Box sx={{ display: 'flex', gap: 0.3, overflow: 'hidden' }}>
+          {tags.slice(0, 3).map((t) => (
+            <Chip
+              key={t}
+              label={t}
+              size="small"
+              variant="outlined"
+              sx={{ fontSize: '0.6rem', height: 20, '& .MuiChip-label': { px: 0.5 } }}
+            />
+          ))}
+          {tags.length > 3 && (
+            <Chip
+              label={`+${tags.length - 3}`}
+              size="small"
+              variant="outlined"
+              sx={{ fontSize: '0.6rem', height: 20, '& .MuiChip-label': { px: 0.5 } }}
+            />
+          )}
+        </Box>
+      );
+    },
+  },
+];
+
+// =====================================================================
+// Component
+// =====================================================================
+
 const ApiExplorerPage: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
-  // Routes state
+  // -- Routes / grid state --
   const [routes, setRoutes] = useState<RouteInfo[]>([]);
   const [routesLoading, setRoutesLoading] = useState(false);
   const [routeSearch, setRouteSearch] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('all');
-  const [selectedRoute, setSelectedRoute] = useState<RouteInfo | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<ApiEndpointRow | null>(null);
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([]);
 
-  // Test cases state
+  // -- Test cases state --
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [testsLoading, setTestsLoading] = useState(false);
   const [rightTab, setRightTab] = useState(0);
 
-  // Editor state
+  // -- Editor state --
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingTest, setEditingTest] = useState<any>(emptyTestCase);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Runner state
+  // -- Runner state --
   const [running, setRunning] = useState(false);
   const [runReport, setRunReport] = useState<RunReport | null>(null);
   const [selectedTestIds, setSelectedTestIds] = useState<Set<number>>(new Set());
   const [expandedSnippet, setExpandedSnippet] = useState<number | null>(null);
 
-  // Confirm dangerous dialog
+  // -- Confirm dangerous dialog --
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingRunIds, setPendingRunIds] = useState<number[]>([]);
 
-  // Messages
+  // -- Messages --
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Load routes and test cases on mount
+  // -- Derived: normalized endpoint rows --
+  const endpointRows = useMemo(() => toApiEndpointRows(routes), [routes]);
+
+  // -- Tags for filter chips --
+  const tags = useMemo(() => {
+    const t = new Set<string>();
+    routes.forEach((r) => r.tags?.forEach((tag) => t.add(tag)));
+    return ['all', ...Array.from(t).sort()];
+  }, [routes]);
+
+  // -- Filtered rows (search + tag) --
+  const filteredRows = useMemo(() => {
+    return endpointRows.filter((r) => {
+      const q = routeSearch.toLowerCase();
+      const matchSearch =
+        !q ||
+        r.path.toLowerCase().includes(q) ||
+        r.method.toLowerCase().includes(q) ||
+        r.group.toLowerCase().includes(q) ||
+        r.tags.some((t) => t.toLowerCase().includes(q));
+      const matchTag = selectedTag === 'all' || r.tags.includes(selectedTag);
+      return matchSearch && matchTag;
+    });
+  }, [endpointRows, routeSearch, selectedTag]);
+
+  // -- Load data on mount --
   useEffect(() => {
     loadRoutes();
     loadTestCases();
@@ -190,35 +451,7 @@ const ApiExplorerPage: React.FC = () => {
     }
   };
 
-  // Filter routes
-  const tags = useMemo(() => {
-    const t = new Set<string>();
-    routes.forEach(r => r.tags?.forEach(tag => t.add(tag)));
-    return ['all', ...Array.from(t).sort()];
-  }, [routes]);
-
-  const filteredRoutes = useMemo(() => {
-    return routes.filter(r => {
-      const matchSearch = !routeSearch ||
-        r.path.toLowerCase().includes(routeSearch.toLowerCase()) ||
-        r.method.toLowerCase().includes(routeSearch.toLowerCase());
-      const matchTag = selectedTag === 'all' || r.tags?.includes(selectedTag);
-      return matchSearch && matchTag;
-    });
-  }, [routes, routeSearch, selectedTag]);
-
-  // Group routes by tag
-  const groupedRoutes = useMemo(() => {
-    const groups: Record<string, RouteInfo[]> = {};
-    filteredRoutes.forEach(r => {
-      const tag = r.tags?.[0] || 'other';
-      if (!groups[tag]) groups[tag] = [];
-      groups[tag].push(r);
-    });
-    return groups;
-  }, [filteredRoutes]);
-
-  // CRUD handlers
+  // -- CRUD handlers --
   const handleCreateTest = () => {
     setEditingId(null);
     setEditingTest({
@@ -275,17 +508,20 @@ const ApiExplorerPage: React.FC = () => {
     }
   };
 
-  // Run handlers
-  const handleRunTests = useCallback((ids: number[]) => {
-    const cases = testCases.filter(tc => ids.includes(tc.id));
-    const hasDangerous = cases.some(tc => tc.method !== 'GET');
-    if (hasDangerous) {
-      setPendingRunIds(ids);
-      setConfirmOpen(true);
-    } else {
-      executeRun(ids, false);
-    }
-  }, [testCases]);
+  // -- Run handlers --
+  const handleRunTests = useCallback(
+    (ids: number[]) => {
+      const cases = testCases.filter((tc) => ids.includes(tc.id));
+      const hasDangerous = cases.some((tc) => tc.method !== 'GET');
+      if (hasDangerous) {
+        setPendingRunIds(ids);
+        setConfirmOpen(true);
+      } else {
+        executeRun(ids, false);
+      }
+    },
+    [testCases],
+  );
 
   const executeRun = async (ids: number[], confirmDangerous: boolean) => {
     setRunning(true);
@@ -295,7 +531,7 @@ const ApiExplorerPage: React.FC = () => {
       const res = await axios.post('/api/admin/api-tests/run', { ids, confirmDangerous });
       if (res.data.success) {
         setRunReport(res.data);
-        setRightTab(2); // Switch to Run tab
+        setRightTab(2);
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.response?.data?.error || 'Run failed' });
@@ -305,7 +541,7 @@ const ApiExplorerPage: React.FC = () => {
   };
 
   const handleRunAll = () => {
-    const ids = testCases.filter(tc => tc.enabled).map(tc => tc.id);
+    const ids = testCases.filter((tc) => tc.enabled).map((tc) => tc.id);
     if (ids.length === 0) {
       setMessage({ type: 'error', text: 'No enabled test cases to run' });
       return;
@@ -327,7 +563,7 @@ const ApiExplorerPage: React.FC = () => {
   };
 
   const toggleTestSelection = (id: number) => {
-    setSelectedTestIds(prev => {
+    setSelectedTestIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -335,21 +571,110 @@ const ApiExplorerPage: React.FC = () => {
     });
   };
 
-  // Styles
-  const cardBg = isDark ? '#1e1e2e' : '#fff';
-  const panelBg = isDark ? '#181825' : '#f5f5f5';
+  // -- Export handler --
+  const handleExport = () => {
+    exportToXlsx(filteredRows);
+  };
 
+  // -- Register handler (Phase 4 - future use) --
+  const handleRegisterSelected = () => {
+    const selected = endpointRows.filter((r) => selectionModel.includes(r.id));
+    const payload = toAdminCapabilityPayload(selected);
+    console.log('[ApiExplorer] Register payload:', payload);
+    setMessage({ type: 'success', text: `Prepared ${payload.length} capability records (logged to console)` });
+  };
+
+  // -- Styles --
+  const cardBg = isDark ? '#1e1e2e' : '#fff';
+
+  // -- Custom DataGrid Toolbar --
+  const CustomToolbar = () => (
+    <GridToolbarContainer sx={{ px: 1.5, py: 1, gap: 1, flexWrap: 'wrap' }}>
+      {/* Search */}
+      <TextField
+        size="small"
+        placeholder="Search endpoints..."
+        value={routeSearch}
+        onChange={(e) => setRouteSearch(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon fontSize="small" />
+            </InputAdornment>
+          ),
+        }}
+        sx={{ minWidth: 220, '& .MuiOutlinedInput-root': { borderRadius: 2, height: 32 } }}
+      />
+
+      {/* Tag chips */}
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.4, flex: 1 }}>
+        {tags.map((tag) => (
+          <Chip
+            key={tag}
+            label={tag}
+            size="small"
+            variant={selectedTag === tag ? 'filled' : 'outlined'}
+            color={selectedTag === tag ? 'primary' : 'default'}
+            onClick={() => setSelectedTag(tag)}
+            sx={{ fontSize: '0.65rem', height: 24 }}
+          />
+        ))}
+      </Box>
+
+      {/* Row count */}
+      <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+        Showing {filteredRows.length} of {endpointRows.length}
+      </Typography>
+
+      <GridToolbarColumnsButton />
+      <GridToolbarFilterButton />
+
+      {/* Export XLSX */}
+      <Button size="small" startIcon={<ExportIcon />} onClick={handleExport}>
+        Export XLSX
+      </Button>
+
+      {/* Register Selected (future use) */}
+      {selectionModel.length > 0 && (
+        <Tooltip title="Backend not ready yet - payload logged to console">
+          <span>
+            <Button
+              size="small"
+              startIcon={<RegisterIcon />}
+              variant="outlined"
+              onClick={handleRegisterSelected}
+            >
+              Register Selected ({selectionModel.length})
+            </Button>
+          </span>
+        </Tooltip>
+      )}
+    </GridToolbarContainer>
+  );
+
+  // =================================================================
+  // Render
+  // =================================================================
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)', p: 2, gap: 2 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <ApiIcon sx={{ fontSize: 32, color: 'primary.main' }} />
-          <Typography variant="h5" fontWeight={700}>API Explorer</Typography>
-          <Chip label={`${routes.length} endpoints`} size="small" color="primary" variant="outlined" />
+          <Typography variant="h5" fontWeight={700}>
+            API Explorer
+          </Typography>
+          <Chip label={`${endpointRows.length} endpoints`} size="small" color="primary" variant="outlined" />
         </Box>
         <Stack direction="row" spacing={1}>
-          <Button size="small" startIcon={<RefreshIcon />} onClick={() => { loadRoutes(); loadTestCases(); }}>
+          <Button
+            size="small"
+            startIcon={<RefreshIcon />}
+            onClick={() => {
+              loadRoutes();
+              loadTestCases();
+            }}
+          >
             Refresh
           </Button>
           <Button size="small" variant="contained" startIcon={<RunIcon />} onClick={handleRunAll} disabled={running}>
@@ -365,14 +690,13 @@ const ApiExplorerPage: React.FC = () => {
         </Alert>
       )}
 
-      {/* Main Layout: Left Panel + Right Panel */}
+      {/* Main Layout: DataGrid (left / wider) + Right Panel */}
       <Box sx={{ display: 'flex', flex: 1, gap: 2, overflow: 'hidden' }}>
-        {/* Left Panel: Endpoint List */}
+        {/* Left Panel: Endpoint DataGrid */}
         <Paper
           elevation={0}
           sx={{
-            width: { xs: '100%', md: 380 },
-            flexShrink: 0,
+            flex: 2,
             display: 'flex',
             flexDirection: 'column',
             bgcolor: cardBg,
@@ -382,132 +706,45 @@ const ApiExplorerPage: React.FC = () => {
             overflow: 'hidden',
           }}
         >
-          {/* Search */}
-          <Box sx={{ p: 1.5 }}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Search endpoints..."
-              value={routeSearch}
-              onChange={(e) => setRouteSearch(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-          </Box>
-
-          {/* Tag Filter */}
-          <Box sx={{ px: 1.5, pb: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {tags.map(tag => (
-              <Chip
-                key={tag}
-                label={tag}
-                size="small"
-                variant={selectedTag === tag ? 'filled' : 'outlined'}
-                color={selectedTag === tag ? 'primary' : 'default'}
-                onClick={() => setSelectedTag(tag)}
-                sx={{ fontSize: '0.7rem', height: 24 }}
-              />
-            ))}
-          </Box>
-
-          <Divider />
-
-          {/* Route List */}
-          <Box sx={{ flex: 1, overflow: 'auto' }}>
-            {routesLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                <CircularProgress size={24} />
-              </Box>
-            ) : (
-              Object.entries(groupedRoutes).map(([tag, tagRoutes]) => (
-                <Box key={tag}>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      px: 1.5,
-                      py: 0.75,
-                      display: 'block',
-                      bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: 0.5,
-                      color: 'text.secondary',
-                      fontSize: '0.65rem',
-                    }}
-                  >
-                    {tag} ({tagRoutes.length})
-                  </Typography>
-                  {tagRoutes.map((r, idx) => (
-                    <Box
-                      key={`${r.method}-${r.path}-${idx}`}
-                      onClick={() => { setSelectedRoute(r); setRightTab(0); }}
-                      sx={{
-                        px: 1.5,
-                        py: 0.75,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        bgcolor: selectedRoute?.path === r.path && selectedRoute?.method === r.method
-                          ? (isDark ? 'rgba(102, 126, 234, 0.15)' : 'rgba(102, 126, 234, 0.08)')
-                          : 'transparent',
-                        '&:hover': {
-                          bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-                        },
-                        borderBottom: '1px solid',
-                        borderColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)',
-                      }}
-                    >
-                      <Chip
-                        label={r.method}
-                        size="small"
-                        sx={{
-                          bgcolor: methodColors[r.method] || '#666',
-                          color: 'white',
-                          fontWeight: 700,
-                          fontSize: '0.6rem',
-                          height: 20,
-                          minWidth: 48,
-                          '& .MuiChip-label': { px: 0.75 },
-                        }}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          flex: 1,
-                          fontFamily: 'monospace',
-                          fontSize: '0.75rem',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {r.path}
-                      </Typography>
-                      <Chip
-                        label={r.auth}
-                        size="small"
-                        sx={{
-                          bgcolor: `${authColors[r.auth] || '#666'}20`,
-                          color: authColors[r.auth] || '#666',
-                          fontWeight: 600,
-                          fontSize: '0.55rem',
-                          height: 18,
-                          '& .MuiChip-label': { px: 0.5 },
-                        }}
-                      />
-                    </Box>
-                  ))}
-                </Box>
-              ))
-            )}
-          </Box>
+          <DataGrid
+            rows={filteredRows}
+            columns={gridColumns}
+            loading={routesLoading}
+            checkboxSelection
+            disableRowSelectionOnClick={false}
+            onRowSelectionModelChange={(newModel) => setSelectionModel(newModel)}
+            rowSelectionModel={selectionModel}
+            onRowClick={(params) => {
+              setSelectedRoute(params.row as ApiEndpointRow);
+              setRightTab(0);
+            }}
+            slots={{ toolbar: CustomToolbar }}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 25 } },
+              sorting: { sortModel: [{ field: 'path', sort: 'asc' }] },
+            }}
+            pageSizeOptions={[10, 25, 50, 100]}
+            density="compact"
+            getRowHeight={() => 'auto'}
+            sx={{
+              border: 'none',
+              '& .MuiDataGrid-cell': {
+                py: 0.5,
+                display: 'flex',
+                alignItems: 'center',
+              },
+              '& .MuiDataGrid-row': {
+                cursor: 'pointer',
+              },
+              '& .MuiDataGrid-row.Mui-selected': {
+                bgcolor: isDark ? 'rgba(102,126,234,0.15)' : 'rgba(102,126,234,0.08)',
+              },
+              '& .MuiDataGrid-columnHeaderTitle': {
+                fontWeight: 700,
+                fontSize: '0.78rem',
+              },
+            }}
+          />
         </Paper>
 
         {/* Right Panel: Details + Tests + Run */}
@@ -515,6 +752,7 @@ const ApiExplorerPage: React.FC = () => {
           elevation={0}
           sx={{
             flex: 1,
+            minWidth: 340,
             display: 'flex',
             flexDirection: 'column',
             bgcolor: cardBg,
@@ -536,8 +774,8 @@ const ApiExplorerPage: React.FC = () => {
 
           <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
             {/* Tab 0: Route Details */}
-            {rightTab === 0 && (
-              selectedRoute ? (
+            {rightTab === 0 &&
+              (selectedRoute ? (
                 <Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
                     <Chip
@@ -572,21 +810,32 @@ const ApiExplorerPage: React.FC = () => {
                     </Box>
                     <Box>
                       <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
+                        Group
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 0.5 }}>
+                        {selectedRoute.group}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
                         Tags
                       </Typography>
-                      <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5 }}>
-                        {selectedRoute.tags?.map(tag => (
+                      <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                        {selectedRoute.tags?.map((tag) => (
                           <Chip key={tag} label={tag} size="small" variant="outlined" />
                         ))}
                       </Box>
                     </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
+                        ID
+                      </Typography>
+                      <Typography variant="body2" fontFamily="monospace" sx={{ mt: 0.5, fontSize: '0.75rem' }}>
+                        {selectedRoute.id}
+                      </Typography>
+                    </Box>
                     <Divider />
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<AddIcon />}
-                      onClick={handleCreateTest}
-                    >
+                    <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={handleCreateTest}>
                       Create Test Case for this Endpoint
                     </Button>
                   </Stack>
@@ -594,18 +843,25 @@ const ApiExplorerPage: React.FC = () => {
               ) : (
                 <Box sx={{ textAlign: 'center', py: 6, color: 'text.secondary' }}>
                   <ApiIcon sx={{ fontSize: 48, opacity: 0.3, mb: 1 }} />
-                  <Typography>Select an endpoint from the left panel</Typography>
+                  <Typography>Select an endpoint from the table</Typography>
                 </Box>
-              )
-            )}
+              ))}
 
             {/* Tab 1: Test Cases */}
             {rightTab === 1 && (
               <Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="subtitle1" fontWeight={700}>Saved Test Cases</Typography>
+                  <Typography variant="subtitle1" fontWeight={700}>
+                    Saved Test Cases
+                  </Typography>
                   <Stack direction="row" spacing={1}>
-                    <Button size="small" variant="outlined" startIcon={<RunIcon />} onClick={handleRunSelected} disabled={running || selectedTestIds.size === 0}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<RunIcon />}
+                      onClick={handleRunSelected}
+                      disabled={running || selectedTestIds.size === 0}
+                    >
                       Run Selected ({selectedTestIds.size})
                     </Button>
                     <Button size="small" variant="contained" startIcon={<AddIcon />} onClick={handleCreateTest}>
@@ -632,12 +888,8 @@ const ApiExplorerPage: React.FC = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {testCases.map(tc => (
-                          <TableRow
-                            key={tc.id}
-                            hover
-                            sx={{ opacity: tc.enabled ? 1 : 0.5 }}
-                          >
+                        {testCases.map((tc) => (
+                          <TableRow key={tc.id} hover sx={{ opacity: tc.enabled ? 1 : 0.5 }}>
                             <TableCell padding="checkbox">
                               <input
                                 type="checkbox"
@@ -702,7 +954,9 @@ const ApiExplorerPage: React.FC = () => {
             {/* Tab 2: Run Results */}
             {rightTab === 2 && (
               <Box>
-                <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>Run Results</Typography>
+                <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
+                  Run Results
+                </Typography>
                 {running ? (
                   <Box sx={{ textAlign: 'center', py: 4 }}>
                     <CircularProgress size={32} />
@@ -712,16 +966,8 @@ const ApiExplorerPage: React.FC = () => {
                   <Box>
                     {/* Summary */}
                     <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                      <Chip
-                        label={`Total: ${runReport.total}`}
-                        variant="outlined"
-                      />
-                      <Chip
-                        icon={<PassIcon />}
-                        label={`Passed: ${runReport.passed}`}
-                        color="success"
-                        variant="outlined"
-                      />
+                      <Chip label={`Total: ${runReport.total}`} variant="outlined" />
+                      <Chip icon={<PassIcon />} label={`Passed: ${runReport.passed}`} color="success" variant="outlined" />
                       <Chip
                         icon={<FailIcon />}
                         label={`Failed: ${runReport.failed}`}
@@ -785,7 +1031,10 @@ const ApiExplorerPage: React.FC = () => {
                                     >
                                       <ExpandIcon
                                         fontSize="small"
-                                        sx={{ transform: expandedSnippet === idx ? 'rotate(180deg)' : 'none', transition: '0.2s' }}
+                                        sx={{
+                                          transform: expandedSnippet === idx ? 'rotate(180deg)' : 'none',
+                                          transition: '0.2s',
+                                        }}
                                       />
                                     </IconButton>
                                   </Tooltip>
@@ -855,8 +1104,10 @@ const ApiExplorerPage: React.FC = () => {
                   value={editingTest.method}
                   onChange={(e) => setEditingTest({ ...editingTest, method: e.target.value })}
                 >
-                  {['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].map(m => (
-                    <MenuItem key={m} value={m}>{m}</MenuItem>
+                  {['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].map((m) => (
+                    <MenuItem key={m} value={m}>
+                      {m}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -945,7 +1196,8 @@ const ApiExplorerPage: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           <Typography sx={{ mb: 2 }}>
-            The selected tests include non-GET methods (POST/PUT/DELETE/PATCH) that will execute against <strong>production</strong>.
+            The selected tests include non-GET methods (POST/PUT/DELETE/PATCH) that will execute against{' '}
+            <strong>production</strong>.
           </Typography>
           <Typography variant="body2" color="error" fontWeight={600}>
             Are you sure you want to proceed?
@@ -953,11 +1205,7 @@ const ApiExplorerPage: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => executeRun(pendingRunIds, true)}
-          >
+          <Button variant="contained" color="error" onClick={() => executeRun(pendingRunIds, true)}>
             Yes, Run Tests
           </Button>
         </DialogActions>

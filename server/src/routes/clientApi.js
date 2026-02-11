@@ -60,6 +60,129 @@ router.put('/church-info', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// SEARCH HELPER
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Build multi-token search condition.
+ * Each space-separated token must match at least one searchable column (AND logic).
+ * All parameters are safely escaped via prepared statements.
+ */
+function buildSearchCondition(searchStr, columns) {
+    if (!searchStr || !searchStr.trim()) return { condition: '', params: [] };
+    const tokens = searchStr.trim().split(/\s+/).filter(Boolean);
+    if (tokens.length === 0) return { condition: '', params: [] };
+
+    const tokenConditions = tokens.map(() => {
+        const colConds = columns.map(col => `${col} LIKE ?`);
+        return `(${colConds.join(' OR ')})`;
+    });
+
+    const params = tokens.flatMap(token =>
+        columns.map(() => `%${token}%`)
+    );
+
+    return {
+        condition: tokenConditions.join(' AND '),
+        params
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SQL RELEVANCE ORDERING HELPER
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Build a SQL expression for relevance-based ORDER BY.
+ * Produces CASE WHEN clauses that score: exact > starts-with > contains,
+ * weighted by column importance. This ensures pagination returns best matches first.
+ * Column names come from hardcoded weights (safe); token values are parameterized.
+ */
+function buildRelevanceOrder(searchStr, columnWeights) {
+    if (!searchStr || !searchStr.trim()) return { orderExpr: '', params: [] };
+    const tokens = searchStr.trim().split(/\s+/).filter(Boolean);
+    if (!tokens.length) return { orderExpr: '', params: [] };
+
+    const cases = [];
+    const params = [];
+
+    for (const [col, weight] of Object.entries(columnWeights)) {
+        for (const token of tokens) {
+            // Exact match (3x weight)
+            cases.push(`CASE WHEN LOWER(COALESCE(${col},'')) = LOWER(?) THEN ${Math.round(weight * 3)} ELSE 0 END`);
+            params.push(token);
+            // Starts-with (2x weight)
+            cases.push(`CASE WHEN LOWER(COALESCE(${col},'')) LIKE LOWER(?) THEN ${Math.round(weight * 2)} ELSE 0 END`);
+            params.push(`${token}%`);
+            // Contains (1x weight)
+            cases.push(`CASE WHEN LOWER(COALESCE(${col},'')) LIKE LOWER(?) THEN ${weight} ELSE 0 END`);
+            params.push(`%${token}%`);
+        }
+    }
+
+    return { orderExpr: `(${cases.join(' + ')})`, params };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MATCH SCORING HELPER
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Compute match scores for records against a search string.
+ * columnWeights = { column_name: weight, ... }
+ * Returns records with _matchScore, _matchedFields, and _matchSummary appended.
+ * Scoring: exact > starts-with > contains, with multi-field bonus.
+ */
+function computeMatchScores(records, searchStr, columnWeights, secondarySortField, secondarySortDir) {
+    if (!searchStr || !searchStr.trim() || !records.length) return records;
+    const tokens = searchStr.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (!tokens.length) return records;
+
+    const friendlyNames = {
+        last_name: 'Last Name', first_name: 'First Name', parents: 'Parents',
+        clergy: 'Clergy', sponsors: 'Godparents', notes: 'Notes',
+        birthplace: 'Birthplace', entry_type: 'Entry Type',
+        groom_last_name: 'Groom Last Name', groom_first_name: 'Groom First Name',
+        bride_last_name: 'Bride Last Name', bride_first_name: 'Bride First Name',
+        witnesses: 'Witnesses', lastname: 'Last Name', name: 'First Name',
+        burial_location: 'Burial Location'
+    };
+
+    const scored = records.map(record => {
+        const matchedFields = [];
+        let score = 0;
+        for (const [col, weight] of Object.entries(columnWeights)) {
+            const val = (record[col] || '').toString().toLowerCase();
+            if (!val) continue;
+            let colScore = 0;
+            for (const t of tokens) {
+                if (val === t) {
+                    colScore += weight * 3;          // exact
+                } else if (val.startsWith(t)) {
+                    colScore += weight * 2;          // starts-with
+                } else if (val.includes(t)) {
+                    colScore += weight;              // contains
+                }
+            }
+            if (colScore > 0) {
+                matchedFields.push(col);
+                score += colScore;
+            }
+        }
+        // Multi-field bonus
+        if (matchedFields.length > 1) {
+            score += (matchedFields.length - 1) * 50;
+        }
+        const summary = matchedFields.length
+            ? `Matched in: ${matchedFields.map(f => friendlyNames[f] || f).join(', ')}`
+            : '';
+        return { ...record, _matchScore: score, _matchedFields: matchedFields, _matchSummary: summary };
+    });
+
+    return scored;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // BAPTISM RECORDS ENDPOINTS
 // ═══════════════════════════════════════════════════════════════
 
@@ -67,34 +190,66 @@ router.put('/church-info', async (req, res) => {
 router.get('/baptism-records', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const search = req.query.search || '';
+        const limit = parseInt(req.query.limit) || 50;
+        const search = req.query.search || req.query.q || '';
+        const churchId = req.query.church_id;
+        const sortField = req.query.sortField || 'reception_date';
+        const sortDirection = (req.query.sortDirection || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
         const offset = (page - 1) * limit;
 
-        let query = 'SELECT * FROM baptism_records';
-        let countQuery = 'SELECT COUNT(*) as total FROM baptism_records';
+        const validSortCols = ['reception_date', 'first_name', 'last_name', 'clergy', 'created_at', 'updated_at', 'id'];
+        const safeSort = validSortCols.includes(sortField) ? sortField : 'reception_date';
+
+        const conditions = [];
         let params = [];
 
-        if (search) {
-            const searchCondition = ` WHERE first_name LIKE ? OR last_name LIKE ? OR clergy LIKE ? OR parents LIKE ?`;
-            query += searchCondition;
-            countQuery += searchCondition;
-            params = [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`];
+        if (churchId && churchId !== '0') {
+            conditions.push('church_id = ?');
+            params.push(churchId);
         }
 
-        query += ' ORDER BY reception_date DESC LIMIT ? OFFSET ?';
-        params.push(limit, offset);
+        const searchCols = ['first_name', 'last_name', 'clergy', 'parents', 'sponsors', 'notes', 'birthplace', 'entry_type'];
+        const { condition: searchCond, params: searchParams } = buildSearchCondition(search, searchCols);
+        if (searchCond) {
+            conditions.push(searchCond);
+            params = params.concat(searchParams);
+        }
 
-        const [records] = await getAppPool().query(query, params);
-        const [countResult] = await getAppPool().query(countQuery, search ? [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`] : []);
+        const whereClause = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+
+        const countParams = [...params];
+        const [countResult] = await getAppPool().query(
+            `SELECT COUNT(*) as total FROM baptism_records${whereClause}`, countParams
+        );
+        const total = countResult[0].total;
+
+        const baptismWeights = { last_name: 100, first_name: 80, parents: 70, clergy: 50, sponsors: 40, notes: 20, birthplace: 20, entry_type: 20 };
+
+        // When searching, order by relevance first so pagination returns best matches
+        let orderClause;
+        if (search) {
+            const { orderExpr, params: relParams } = buildRelevanceOrder(search, baptismWeights);
+            params = params.concat(relParams);
+            orderClause = `${orderExpr} DESC, ${safeSort} ${sortDirection}`;
+        } else {
+            orderClause = `${safeSort} ${sortDirection}`;
+        }
+
+        params.push(limit, offset);
+        const [records] = await getAppPool().query(
+            `SELECT * FROM baptism_records${whereClause} ORDER BY ${orderClause} LIMIT ? OFFSET ?`, params
+        );
+
+        const scored = search ? computeMatchScores(records, search, baptismWeights, safeSort, sortDirection) : records;
 
         res.json({
-            records,
+            records: scored,
+            totalRecords: total,
             pagination: {
                 page,
                 limit,
-                total: countResult[0].total,
-                pages: Math.ceil(countResult[0].total / limit)
+                total,
+                pages: Math.ceil(total / limit)
             }
         });
     } catch (error) {
@@ -132,36 +287,65 @@ router.post('/baptism-records', async (req, res) => {
 router.get('/marriage-records', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const search = req.query.search || '';
+        const limit = parseInt(req.query.limit) || 50;
+        const search = req.query.search || req.query.q || '';
+        const churchId = req.query.church_id;
+        const sortField = req.query.sortField || 'marriage_date';
+        const sortDirection = (req.query.sortDirection || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
         const offset = (page - 1) * limit;
 
-        let query = 'SELECT * FROM marriage_records';
-        let countQuery = 'SELECT COUNT(*) as total FROM marriage_records';
+        const validSortCols = ['marriage_date', 'groom_first_name', 'groom_last_name', 'bride_first_name', 'bride_last_name', 'clergy', 'created_at', 'updated_at', 'id'];
+        const safeSort = validSortCols.includes(sortField) ? sortField : 'marriage_date';
+
+        const conditions = [];
         let params = [];
 
-        if (search) {
-            const searchCondition = ` WHERE groom_first_name LIKE ? OR groom_last_name LIKE ? OR 
-                                      bride_first_name LIKE ? OR bride_last_name LIKE ? OR clergy LIKE ?`;
-            query += searchCondition;
-            countQuery += searchCondition;
-            params = [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`];
+        if (churchId && churchId !== '0') {
+            conditions.push('church_id = ?');
+            params.push(churchId);
         }
 
-        query += ' ORDER BY marriage_date DESC LIMIT ? OFFSET ?';
-        params.push(limit, offset);
+        const searchCols = ['groom_first_name', 'groom_last_name', 'bride_first_name', 'bride_last_name', 'clergy', 'witnesses', 'notes'];
+        const { condition: searchCond, params: searchParams } = buildSearchCondition(search, searchCols);
+        if (searchCond) {
+            conditions.push(searchCond);
+            params = params.concat(searchParams);
+        }
 
-        const [records] = await getAppPool().query(query, params);
-        const [countResult] = await getAppPool().query(countQuery, search ?
-            [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`] : []);
+        const whereClause = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+
+        const countParams = [...params];
+        const [countResult] = await getAppPool().query(
+            `SELECT COUNT(*) as total FROM marriage_records${whereClause}`, countParams
+        );
+        const total = countResult[0].total;
+
+        const marriageWeights = { groom_last_name: 100, bride_last_name: 100, groom_first_name: 80, bride_first_name: 80, clergy: 50, witnesses: 40, notes: 20 };
+
+        let mOrderClause;
+        if (search) {
+            const { orderExpr, params: relParams } = buildRelevanceOrder(search, marriageWeights);
+            params = params.concat(relParams);
+            mOrderClause = `${orderExpr} DESC, ${safeSort} ${sortDirection}`;
+        } else {
+            mOrderClause = `${safeSort} ${sortDirection}`;
+        }
+
+        params.push(limit, offset);
+        const [records] = await getAppPool().query(
+            `SELECT * FROM marriage_records${whereClause} ORDER BY ${mOrderClause} LIMIT ? OFFSET ?`, params
+        );
+
+        const scored = search ? computeMatchScores(records, search, marriageWeights, safeSort, sortDirection) : records;
 
         res.json({
-            records,
+            records: scored,
+            totalRecords: total,
             pagination: {
                 page,
                 limit,
-                total: countResult[0].total,
-                pages: Math.ceil(countResult[0].total / limit)
+                total,
+                pages: Math.ceil(total / limit)
             }
         });
     } catch (error) {
@@ -202,23 +386,65 @@ router.post('/marriage-records', async (req, res) => {
 router.get('/funeral-records', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = parseInt(req.query.limit) || 50;
+        const search = req.query.search || req.query.q || '';
+        const churchId = req.query.church_id;
+        const sortField = req.query.sortField || 'death_date';
+        const sortDirection = (req.query.sortDirection || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
         const offset = (page - 1) * limit;
 
+        const validSortCols = ['death_date', 'burial_date', 'name', 'lastname', 'clergy', 'created_at', 'updated_at', 'id'];
+        const safeSort = validSortCols.includes(sortField) ? sortField : 'death_date';
+
+        const conditions = [];
+        let params = [];
+
+        if (churchId && churchId !== '0') {
+            conditions.push('church_id = ?');
+            params.push(churchId);
+        }
+
+        const searchCols = ['name', 'lastname', 'clergy', 'burial_location', 'notes'];
+        const { condition: searchCond, params: searchParams } = buildSearchCondition(search, searchCols);
+        if (searchCond) {
+            conditions.push(searchCond);
+            params = params.concat(searchParams);
+        }
+
+        const whereClause = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+
+        const countParams = [...params];
+        const [countResult] = await getAppPool().query(
+            `SELECT COUNT(*) as total FROM funeral_records${whereClause}`, countParams
+        );
+        const total = countResult[0].total;
+
+        const funeralWeights = { lastname: 100, name: 80, clergy: 50, burial_location: 40, notes: 20 };
+
+        let fOrderClause;
+        if (search) {
+            const { orderExpr, params: relParams } = buildRelevanceOrder(search, funeralWeights);
+            params = params.concat(relParams);
+            fOrderClause = `${orderExpr} DESC, ${safeSort} ${sortDirection}`;
+        } else {
+            fOrderClause = `${safeSort} ${sortDirection}`;
+        }
+
+        params.push(limit, offset);
         const [records] = await getAppPool().query(
-            'SELECT * FROM funeral_records ORDER BY death_date DESC LIMIT ? OFFSET ?',
-            [limit, offset]
+            `SELECT * FROM funeral_records${whereClause} ORDER BY ${fOrderClause} LIMIT ? OFFSET ?`, params
         );
 
-        const [countResult] = await getAppPool().query('SELECT COUNT(*) as total FROM funeral_records');
+        const scored = search ? computeMatchScores(records, search, funeralWeights, safeSort, sortDirection) : records;
 
         res.json({
-            records,
+            records: scored,
+            totalRecords: total,
             pagination: {
                 page,
                 limit,
-                total: countResult[0].total,
-                pages: Math.ceil(countResult[0].total / limit)
+                total,
+                pages: Math.ceil(total / limit)
             }
         });
     } catch (error) {

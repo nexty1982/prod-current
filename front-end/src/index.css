@@ -293,13 +293,13 @@ body {
   min-height: 100vh;
 }
 
-/* Fix dropdown text visibility in dark theme */
-select {
+/* Fix dropdown text visibility in dark theme — scoped to native selects outside MUI */
+select:not(.MuiSelect-nativeInput):not([class*="Mui"]) {
   color: white !important;
   background-color: #1f2937 !important;
 }
 
-select option {
+select:not(.MuiSelect-nativeInput):not([class*="Mui"]) option {
   color: white !important;
   background-color: #1f2937 !important;
 }

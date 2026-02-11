@@ -9,7 +9,9 @@ import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import { Activity, Wrench, AlertCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+// DISABLED: Socket.IO admin log monitoring — backend socketService removed (PM2 dependency)
+// import { io, Socket } from 'socket.io-client';
+type Socket = any;
 
 interface SystemStatus {
   version_string?: string;
@@ -151,62 +153,12 @@ const AdminFloatingHUD: React.FC = () => {
     };
   }, []);
 
-  // Socket.IO connection for real-time log monitoring
-  useEffect(() => {
-    // Connect to admin namespace
-    const socket = io('/admin', {
-      path: '/socket.io/',
-      transports: ['websocket', 'polling']
-    });
+  // DISABLED: Socket.IO admin log monitoring — backend socketService removed (PM2 dependency)
+  // Real-time log alerts are no longer available. Use journalctl on the server instead.
 
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      console.log('[AdminHUD] Socket.IO connected');
-      // Request initial stats and buffer
-      socket.emit('request-stats');
-      socket.emit('request-buffer');
-    });
-
-    socket.on('log-alert', (logEntry: LogEntry) => {
-      setLogIssues(prev => [...prev, logEntry]);
-    });
-
-    socket.on('log-stats', (stats: LogStats) => {
-      setLogStats(stats);
-    });
-
-    socket.on('log-buffer', (buffer: LogEntry[]) => {
-      setLogIssues(buffer);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('[AdminHUD] Socket.IO disconnected');
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
+  // DISABLED: Log archive — backend /api/admin/logs routes removed (PM2 dependency)
   const handleArchiveLogs = async () => {
-    setIsArchiving(true);
-    try {
-      const res = await axios.post('/api/admin/logs/archive', {
-        logEntries: logIssues
-      });
-      
-      if (res.data.success) {
-        // Clear local issues after successful archive
-        setLogIssues([]);
-        setLogStats({ total: 0, errors: 0, warnings: 0, isMonitoring: logStats.isMonitoring });
-        console.log(`[AdminHUD] Archived ${res.data.archived} logs to ${res.data.file}`);
-      }
-    } catch (err) {
-      console.error('[AdminHUD] Failed to archive logs:', err);
-    } finally {
-      setIsArchiving(false);
-    }
+    console.log('[AdminHUD] Log archiving disabled — use journalctl on the server');
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {

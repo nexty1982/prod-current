@@ -3,7 +3,15 @@
  * Consolidates all record-related API calls with consistent error handling and loading states
  */
 
-import { apiJson, FieldMapperApiError } from '../client';
+import { apiJson } from '../../../../shared/lib/apiClient';
+
+// Inline error class (previously from ../client which was removed as dead code)
+class FieldMapperApiError extends Error {
+  constructor(public readonly apiError: { message: string; status?: number; code?: string }) {
+    super(apiError.message);
+    this.name = 'FieldMapperApiError';
+  }
+}
 
 // Types
 export interface RecordApiResponse<T> {
@@ -35,27 +43,45 @@ export interface RecordSort {
   direction: 'asc' | 'desc';
 }
 
-// API Endpoints
+// Response type for listRecords (matches clientApi.js response shape)
+export interface ListRecordsResponse<T = any> {
+  records: T[];
+  totalRecords: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+// API Endpoints (no /api prefix — apiJson's buildURL() prepends API_BASE_URL='/api')
 const ENDPOINTS = {
   // Records CRUD
-  records: (churchId: string, recordType: string) => `/api/churches/${churchId}/records/${recordType}`,
-  recordById: (churchId: string, recordType: string, id: string) => `/api/churches/${churchId}/records/${recordType}/${id}`,
+  records: (churchId: string, recordType: string) => `/churches/${churchId}/records/${recordType}`,
+  recordById: (churchId: string, recordType: string, id: string) => `/churches/${churchId}/records/${recordType}/${id}`,
   
   // Search and filtering
-  search: (churchId: string, recordType: string) => `/api/churches/${churchId}/records/${recordType}/search`,
+  search: (churchId: string, recordType: string) => `/churches/${churchId}/records/${recordType}/search`,
   
   // Import/Export
-  import: (churchId: string, recordType: string) => `/api/churches/${churchId}/records/${recordType}/import`,
-  export: (churchId: string, recordType: string) => `/api/churches/${churchId}/records/${recordType}/export`,
+  import: (churchId: string, recordType: string) => `/churches/${churchId}/records/${recordType}/import`,
+  export: (churchId: string, recordType: string) => `/churches/${churchId}/records/${recordType}/export`,
   
   // Field mapping
-  knownFields: (recordType: string) => `/api/records/${recordType}/known-fields`,
-  columnSample: (churchId: string, recordType: string) => `/api/churches/${churchId}/records/${recordType}/columns`,
-  fieldMapping: (churchId: string, recordType: string) => `/api/churches/${churchId}/records/${recordType}/field-mapping`,
+  knownFields: (recordType: string) => `/records/${recordType}/known-fields`,
+  columnSample: (churchId: string, recordType: string) => `/churches/${churchId}/records/${recordType}/columns`,
+  fieldMapping: (churchId: string, recordType: string) => `/churches/${churchId}/records/${recordType}/field-mapping`,
   
   // Utilities
-  dropdownOptions: (churchId: string) => `/api/churches/${churchId}/dropdown-options`,
-  healthCheck: () => '/api/health',
+  dropdownOptions: (churchId: string) => `/churches/${churchId}/dropdown-options`,
+  healthCheck: () => '/health',
+} as const;
+
+// Production endpoints (clientApi.js routes)
+const LEGACY_ENDPOINTS = {
+  listRecords: (recordType: string) => `/${recordType}-records`,
+  clergy: (recordType: string) => `/clergy/${recordType}`,
 } as const;
 
 class RecordsApiService {
@@ -197,6 +223,71 @@ class RecordsApiService {
       };
     } catch (error) {
       return this.handleError(error, 'Failed to delete record');
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // LIST RECORDS (production clientApi.js endpoints)
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * List records using the production /api/${type}-records endpoint.
+   * Supports search, church filtering, sorting, and server-side pagination.
+   */
+  async listRecords<T = any>(
+    recordType: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      churchId?: number;
+      sortField?: string;
+      sortDirection?: 'ASC' | 'DESC';
+    }
+  ): Promise<RecordApiResponse<ListRecordsResponse<T>>> {
+    try {
+      const params = new URLSearchParams();
+      params.append('page', String(options?.page ?? 1));
+      params.append('limit', String(options?.limit ?? 50));
+      params.append('sortField', options?.sortField ?? 'updated_at');
+      params.append('sortDirection', options?.sortDirection ?? 'DESC');
+
+      if (options?.search) params.append('search', options.search);
+      if (options?.churchId && options.churchId !== 0) {
+        params.append('church_id', String(options.churchId));
+      }
+
+      const url = `${LEGACY_ENDPOINTS.listRecords(recordType)}?${params.toString()}`;
+      const data = await apiJson<ListRecordsResponse<T>>(url);
+
+      return {
+        success: true,
+        data,
+        message: 'Records retrieved successfully'
+      };
+    } catch (error) {
+      return this.handleError(error, 'Failed to retrieve records');
+    }
+  }
+
+  /**
+   * Get unique clergy names for dropdown options.
+   * Uses the production /api/clergy/${recordType} endpoint.
+   */
+  async getClergyOptions(
+    recordType: string
+  ): Promise<RecordApiResponse<string[]>> {
+    try {
+      const url = LEGACY_ENDPOINTS.clergy(recordType);
+      const data = await apiJson<{ success: boolean; clergy: string[]; count: number }>(url);
+
+      return {
+        success: true,
+        data: data.clergy || [],
+        message: `Retrieved ${data.count || 0} clergy options`
+      };
+    } catch (error) {
+      return this.handleError(error, 'Failed to retrieve clergy options');
     }
   }
 

@@ -3,8 +3,6 @@ import { useTheme } from '@mui/material/styles';
 import {
     AlertTriangle,
     CheckCircle,
-    ChevronDown,
-    ChevronRight,
     Clock,
     Copy,
     ExternalLink,
@@ -366,11 +364,9 @@ const TreeNode = memo<TreeNodeProps>(({
             aria-label={isExpanded ? 'Collapse folder' : 'Expand folder'}
             title={isExpanded ? 'Collapse folder' : 'Expand folder'}
           >
-            {isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
+            <span style={{ fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 700, userSelect: 'none' }}>
+              {isExpanded ? '^' : 'v'}
+            </span>
           </button>
         ) : (
           <div className="h-6 w-6" />

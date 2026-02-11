@@ -1,59 +1,64 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  IconButton,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  LinearProgress,
-  Alert,
-  Card,
-  CardMedia,
-  useTheme,
-  Paper,
-  Stack,
-  Chip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Tooltip,
-  Checkbox,
-  FormControlLabel,
-  Collapse,
-  Divider,
-} from '@mui/material';
-import {
-  IconArrowLeft,
-  IconArrowRight,
-  IconUpload,
-  IconX,
-  IconPhoto,
-  IconTrash,
-  IconDownload,
-  IconFolder,
-  IconFolderPlus,
-  IconEdit,
-  IconArrowsExchange,
-  IconSparkles,
-  IconCopy,
-  IconChevronDown,
-  IconChevronUp,
-} from '@tabler/icons-react';
-import { styled } from '@mui/material/styles';
-import { DataGrid, GridColDef, GridRowSelectionModel, GridRenderCellParams } from '@mui/x-data-grid';
 import { OMLoading } from '@/components/common/OMLoading';
-import { 
-  CANONICAL_IMAGE_DIRECTORIES, 
-  isCanonicalDirectory, 
-  buildImageUrl, 
-  extractDirectoryFromPath,
-  IMAGES_BASE_PATH 
+import {
+    Alert,
+    Autocomplete,
+    Box,
+    Button,
+    Card,
+    CardMedia,
+    Checkbox,
+    Chip,
+    Collapse,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    FormLabel,
+    IconButton,
+    InputLabel,
+    LinearProgress,
+    MenuItem,
+    Paper,
+    Radio,
+    RadioGroup,
+    Select,
+    Stack,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { DataGrid, GridColDef, GridRenderCellParams, GridRowSelectionModel } from '@mui/x-data-grid';
+import {
+    IconArrowLeft,
+    IconArrowRight,
+    IconArrowsExchange,
+    IconChevronDown,
+    IconChevronUp,
+    IconCopy,
+    IconDownload,
+    IconEdit,
+    IconFolder,
+    IconFolderPlus,
+    IconLink,
+    IconPhoto,
+    IconSparkles,
+    IconTrash,
+    IconUpload,
+    IconX,
+} from '@tabler/icons-react';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    buildImageUrl,
+    CANONICAL_IMAGE_DIRECTORIES,
+    extractDirectoryFromPath,
+    IMAGES_BASE_PATH,
+    isCanonicalDirectory
 } from '../system-documentation/gallery.config';
 
 const GalleryContainer = styled(Container)(({ theme }) => ({
@@ -160,6 +165,16 @@ interface GalleryImage {
   type?: string;
   isUsed?: boolean; // Whether image is used in codebase (true=used, false=not_used, undefined=not_checked)
   metadataError?: string; // Error message if file stats couldn't be read
+  assignment_scope?: 'global' | 'church' | 'both' | null;
+  assigned_church_ids?: number[];
+  is_assigned_global?: boolean;
+  is_assigned_to_current_church?: boolean;
+  assignments?: Array<{ image_path: string; scope: string; church_id: number | null; purpose: string | null }>;
+}
+
+interface ChurchOption {
+  id: number;
+  name: string;
 }
 
 const Gallery: React.FC = () => {
@@ -204,6 +219,18 @@ const Gallery: React.FC = () => {
   const hasAutoCheckedUsage = useRef(false); // Track if auto-check has been triggered
   const lastCheckedDirectory = useRef<string>(''); // Track which directory we last checked
   const lastImageCount = useRef<number>(0); // Track image count when we last checked
+
+  // Assignment state
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [assignImage, setAssignImage] = useState<GalleryImage | null>(null);
+  const [assignScope, setAssignScope] = useState<'global' | 'church'>('global');
+  const [assignChurchIds, setAssignChurchIds] = useState<number[]>([]);
+  const [assignPurpose, setAssignPurpose] = useState<string>('');
+  const [churches, setChurches] = useState<ChurchOption[]>([]);
+  const [assignSaving, setAssignSaving] = useState(false);
+
+  // Image bindings state (for detail dialog)
+  const [imageBindings, setImageBindings] = useState<Array<{ id: number; page_key: string; image_key: string; scope: string; church_id: number | null; image_path: string; enabled: number; notes: string | null }>>([]);
 
   // Sort images function
   const sortImages = (imagesToSort: GalleryImage[]): GalleryImage[] => {
@@ -498,7 +525,7 @@ const Gallery: React.FC = () => {
       // Root view (empty string) should load all images recursively
       // Otherwise use selected directory (no default fallback - use exactly what's selected)
       const path = selectedDirectory === '' ? '' : selectedDirectory;
-      const url = `/api/gallery/images?path=${encodeURIComponent(path)}&recursive=1`;
+      const url = `/api/gallery/images-with-assignments?path=${encodeURIComponent(path)}&recursive=1`;
       console.log('Loading images from:', url);
       
       const response = await fetch(url, {
@@ -597,6 +624,11 @@ const Gallery: React.FC = () => {
             type: file.type || file.name?.split('.').pop()?.toLowerCase() || 'unknown',
             isUsed: undefined, // Will be checked separately
             metadataError: metadataError || undefined, // Store error if present
+            assignment_scope: file.assignment_scope || null,
+            assigned_church_ids: file.assigned_church_ids || [],
+            is_assigned_global: file.is_assigned_global || false,
+            is_assigned_to_current_church: file.is_assigned_to_current_church || false,
+            assignments: file.assignments || [],
           };
         });
         
@@ -639,6 +671,24 @@ const Gallery: React.FC = () => {
   const handleImageClick = (image: GalleryImage) => {
     setSelectedImage(image);
     setImageDialogOpen(true);
+    fetchImageBindings(image.path);
+  };
+
+  const fetchImageBindings = async (imagePath: string) => {
+    try {
+      const response = await fetch(`/api/gallery/admin/images/bindings/search?image_path=${encodeURIComponent(imagePath)}`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setImageBindings(data.bindings || []);
+      } else {
+        setImageBindings([]);
+      }
+    } catch (error) {
+      console.error('Error fetching image bindings:', error);
+      setImageBindings([]);
+    }
   };
 
   const handleOpenInNewWindow = (image: GalleryImage) => {
@@ -1568,6 +1618,82 @@ const Gallery: React.FC = () => {
       },
     },
     {
+      field: 'assignment_scope',
+      headerName: 'Assignment',
+      width: 160,
+      renderCell: (params: GridRenderCellParams) => {
+        if (!params || !params.row) return null;
+        const image = params.row as GalleryImage;
+        if (!image) return null;
+
+        const scope = image.assignment_scope;
+        const churchIds = image.assigned_church_ids || [];
+
+        if (!scope) {
+          return <Chip label="None" size="small" variant="outlined" color="default" />;
+        }
+
+        if (scope === 'global') {
+          return (
+            <Chip
+              label="Global"
+              size="small"
+              sx={{
+                backgroundColor: 'rgba(33, 150, 243, 0.15)',
+                color: 'info.main',
+                fontWeight: 600,
+              }}
+            />
+          );
+        }
+
+        if (scope === 'church') {
+          return (
+            <Chip
+              label={`Church: ${churchIds.join(', ')}`}
+              size="small"
+              sx={{
+                backgroundColor: 'rgba(156, 39, 176, 0.15)',
+                color: 'secondary.main',
+                fontWeight: 600,
+              }}
+            />
+          );
+        }
+
+        if (scope === 'both') {
+          return (
+            <Stack direction="row" spacing={0.5}>
+              <Chip
+                label="Global"
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(33, 150, 243, 0.15)',
+                  color: 'info.main',
+                  fontWeight: 600,
+                  height: 22,
+                  fontSize: '0.7rem',
+                }}
+              />
+              <Chip
+                label={`+${churchIds.length}`}
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(156, 39, 176, 0.15)',
+                  color: 'secondary.main',
+                  fontWeight: 600,
+                  height: 22,
+                  fontSize: '0.7rem',
+                }}
+              />
+            </Stack>
+          );
+        }
+
+        return null;
+      },
+    },
+    {
       field: 'type',
       headerName: 'File Type',
       width: 120,
@@ -1603,7 +1729,7 @@ const Gallery: React.FC = () => {
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 200,
+      width: 240,
       sortable: false,
       filterable: false,
       renderCell: (params: GridRenderCellParams) => {
@@ -1654,11 +1780,136 @@ const Gallery: React.FC = () => {
             >
               <IconTrash size={18} />
             </IconButton>
+            <IconButton
+              size="small"
+              color="info"
+              onClick={() => handleOpenAssignDialog(image)}
+              title="Assign"
+            >
+              <IconLink size={18} />
+            </IconButton>
           </Stack>
         );
       },
     },
   ];
+
+  // Fetch churches list for assignment dialog
+  const fetchChurches = async () => {
+    try {
+      const response = await fetch('/api/admin/churches', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const churchList = (data.data || data.churches || data || [])
+          .filter((c: any) => c && c.id)
+          .map((c: any) => ({ id: c.id, name: c.name || c.church_name || `Church ${c.id}` }));
+        setChurches(churchList);
+      }
+    } catch (error) {
+      console.error('Error fetching churches:', error);
+    }
+  };
+
+  const handleOpenAssignDialog = (image: GalleryImage) => {
+    setAssignImage(image);
+    setAssignScope(image.is_assigned_global ? 'global' : 'global');
+    setAssignChurchIds(image.assigned_church_ids || []);
+    setAssignPurpose('');
+    setAssignDialogOpen(true);
+    if (churches.length === 0) {
+      fetchChurches();
+    }
+  };
+
+  const handleSaveAssignment = async () => {
+    if (!assignImage) return;
+
+    setAssignSaving(true);
+    try {
+      if (assignScope === 'global') {
+        const response = await fetch('/api/gallery/assignments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            image_path: assignImage.path,
+            scope: 'global',
+            purpose: assignPurpose || null,
+          }),
+        });
+        if (!response.ok) {
+          const err = await response.json();
+          alert(`Error: ${err.error || 'Failed to create assignment'}`);
+          return;
+        }
+      } else {
+        // Church scope - create an assignment for each selected church
+        for (const churchId of assignChurchIds) {
+          const response = await fetch('/api/gallery/assignments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              image_path: assignImage.path,
+              scope: 'church',
+              church_id: churchId,
+              purpose: assignPurpose || null,
+            }),
+          });
+          if (!response.ok) {
+            const err = await response.json();
+            alert(`Error assigning to church ${churchId}: ${err.error || 'Failed'}`);
+          }
+        }
+      }
+
+      setAssignDialogOpen(false);
+      // Reload images to get updated assignment data
+      await loadImages();
+    } catch (error: any) {
+      console.error('Error saving assignment:', error);
+      alert(`Error: ${error.message || 'Failed to save assignment'}`);
+    } finally {
+      setAssignSaving(false);
+    }
+  };
+
+  const handleRemoveAssignment = async (assignmentId?: number, imagePath?: string, scope?: string, churchId?: number | null, purpose?: string | null) => {
+    try {
+      const body: any = {};
+      if (assignmentId) {
+        body.id = assignmentId;
+      } else if (imagePath && scope) {
+        body.image_path = imagePath;
+        body.scope = scope;
+        if (churchId) body.church_id = churchId;
+        if (purpose) body.purpose = purpose;
+      } else {
+        return;
+      }
+
+      const response = await fetch('/api/gallery/assignments', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        alert(`Error: ${err.error || 'Failed to remove assignment'}`);
+        return;
+      }
+
+      // Reload images to refresh assignment data
+      await loadImages();
+    } catch (error: any) {
+      console.error('Error removing assignment:', error);
+      alert(`Error: ${error.message || 'Failed to remove assignment'}`);
+    }
+  };
 
   const handleBulkDelete = async () => {
     if (selectedRows.length === 0) {
@@ -2685,6 +2936,42 @@ const Gallery: React.FC = () => {
                     </Typography>
                   </Box>
                 )}
+
+                {/* Page Bindings Section */}
+                <Divider sx={{ my: 1 }} />
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                    Page Bindings ({imageBindings.length})
+                  </Typography>
+                  {imageBindings.length === 0 ? (
+                    <Typography variant="body2" color="text.disabled">
+                      Not bound to any page. Use the Page Image Index to create bindings.
+                    </Typography>
+                  ) : (
+                    <Stack spacing={0.5}>
+                      {imageBindings.map((b) => (
+                        <Box key={b.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Chip
+                            label={b.scope === 'global' ? 'Global' : `Church #${b.church_id}`}
+                            size="small"
+                            sx={{
+                              backgroundColor: b.scope === 'global' ? 'rgba(33, 150, 243, 0.15)' : 'rgba(156, 39, 176, 0.15)',
+                              color: b.scope === 'global' ? 'info.main' : 'secondary.main',
+                              fontWeight: 600,
+                              minWidth: 70,
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {b.page_key}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            → {b.image_key}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Stack>
+                  )}
+                </Box>
               </Stack>
             </Box>
           )}
@@ -2864,6 +3151,126 @@ const Gallery: React.FC = () => {
             }}
           >
             {uploading ? `Uploading... (${Math.round(uploadProgress)}%)` : `Upload ${selectedFiles.length} Image${selectedFiles.length !== 1 ? 's' : ''}`}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Assignment Dialog */}
+      <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Assign Image
+          <IconButton
+            aria-label="close"
+            onClick={() => setAssignDialogOpen(false)}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <IconX size={20} />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {assignImage && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                Image: {assignImage.name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
+                Path: {assignImage.path}
+              </Typography>
+
+              {/* Existing assignments */}
+              {assignImage.assignments && assignImage.assignments.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>Current Assignments:</Typography>
+                  <Stack spacing={0.5}>
+                    {assignImage.assignments.map((a, idx) => (
+                      <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Chip
+                          label={a.scope === 'global' ? `Global${a.purpose ? ` (${a.purpose})` : ''}` : `Church ${a.church_id}${a.purpose ? ` (${a.purpose})` : ''}`}
+                          size="small"
+                          onDelete={() => handleRemoveAssignment(undefined, a.image_path, a.scope, a.church_id, a.purpose)}
+                          sx={{
+                            backgroundColor: a.scope === 'global' ? 'rgba(33, 150, 243, 0.15)' : 'rgba(156, 39, 176, 0.15)',
+                            color: a.scope === 'global' ? 'info.main' : 'secondary.main',
+                          }}
+                        />
+                      </Box>
+                    ))}
+                  </Stack>
+                  <Divider sx={{ my: 2 }} />
+                </Box>
+              )}
+
+              {/* New assignment form */}
+              <FormControl component="fieldset" sx={{ mb: 2 }}>
+                <FormLabel component="legend">Scope</FormLabel>
+                <RadioGroup
+                  row
+                  value={assignScope}
+                  onChange={(e) => setAssignScope(e.target.value as 'global' | 'church')}
+                >
+                  <FormControlLabel value="global" control={<Radio />} label="Global (all churches)" />
+                  <FormControlLabel value="church" control={<Radio />} label="Specific church(es)" />
+                </RadioGroup>
+              </FormControl>
+
+              {assignScope === 'church' && (
+                <Autocomplete
+                  multiple
+                  options={churches}
+                  getOptionLabel={(option) => `${option.name} (ID: ${option.id})`}
+                  value={churches.filter(c => assignChurchIds.includes(c.id))}
+                  onChange={(_, newValue) => setAssignChurchIds(newValue.map(v => v.id))}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Select Churches" placeholder="Search churches..." />
+                  )}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip
+                        label={`${option.name} (${option.id})`}
+                        size="small"
+                        {...getTagProps({ index })}
+                        key={option.id}
+                      />
+                    ))
+                  }
+                  sx={{ mb: 2 }}
+                />
+              )}
+
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Purpose (optional)</InputLabel>
+                <Select
+                  value={assignPurpose}
+                  label="Purpose (optional)"
+                  onChange={(e) => setAssignPurpose(e.target.value)}
+                >
+                  <MenuItem value="">None</MenuItem>
+                  <MenuItem value="header">Header</MenuItem>
+                  <MenuItem value="background">Background</MenuItem>
+                  <MenuItem value="logo">Logo</MenuItem>
+                  <MenuItem value="icon">Icon</MenuItem>
+                  <MenuItem value="favicon">Favicon</MenuItem>
+                  <MenuItem value="ocr_sample">OCR Sample</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAssignDialogOpen(false)} disabled={assignSaving}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveAssignment}
+            variant="contained"
+            disabled={assignSaving || (assignScope === 'church' && assignChurchIds.length === 0)}
+            sx={{
+              backgroundColor: '#C8A24B',
+              color: '#1a1a1a',
+              '&:hover': { backgroundColor: '#B8923A' },
+            }}
+          >
+            {assignSaving ? 'Saving...' : 'Assign'}
           </Button>
         </DialogActions>
       </Dialog>

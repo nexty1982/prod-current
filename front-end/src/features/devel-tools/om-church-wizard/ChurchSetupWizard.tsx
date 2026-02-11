@@ -1,60 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-  Button,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Switch,
-  FormControlLabel,
-  Chip,
-  IconButton,
-  Alert,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-  Paper,
-  Stack,
-  Autocomplete,
-  FormGroup,
-  Checkbox
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Save as SaveIcon,
-  Cancel as CancelIcon,
-  CheckCircle as CheckIcon,
-  Info as InfoIcon,
-  Warning as WarningIcon,
-  Church as ChurchIcon,
-  People as PeopleIcon,
-  Settings as SettingsIcon,
-  Web as WebIcon,
-  Storage as StorageIcon,
-  Person as PersonIcon
-} from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import {
+    Add as AddIcon,
+    Church as ChurchIcon,
+    Delete as DeleteIcon,
+    Edit as EditIcon,
+    People as PeopleIcon,
+    Save as SaveIcon,
+    Settings as SettingsIcon,
+    Web as WebIcon
+} from '@mui/icons-material';
+import {
+    Alert,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Checkbox,
+    Chip,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    Grid,
+    IconButton,
+    InputLabel,
+    List,
+    ListItem,
+    ListItemSecondaryAction,
+    ListItemText,
+    MenuItem,
+    Paper,
+    Select,
+    Step,
+    StepContent,
+    StepLabel,
+    Stepper,
+    Switch,
+    TextField,
+    Typography
+} from '@mui/material';
 import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 
 // Types
@@ -260,8 +252,13 @@ const ChurchSetupWizard: React.FC = () => {
         
         if (response.ok) {
           const data = await response.json();
+          const churches = data?.data?.churches || data?.churches || [];
+          if (churches.length === 0) {
+            setTemplateChurches([]);
+            return;
+          }
           const templatesWithTables = await Promise.all(
-            data.churches.map(async (church: any) => {
+            churches.map(async (church: any) => {
               // Fetch available tables for each template
               try {
                 const tablesResponse = await fetch(`/api/admin/churches/${church.id}/tables`, {
@@ -634,12 +631,19 @@ const BasicInformationStep: React.FC<{ formik: any }> = ({ formik }) => (
     </Grid>
     <Grid item xs={12} md={4}>
       <FormControl fullWidth>
-        <InputLabel>Country</InputLabel>
+        <InputLabel id="country-label">Country</InputLabel>
         <Select
+          labelId="country-label"
           name="country"
+          label="Country"
           value={formik.values.country}
           onChange={formik.handleChange}
           error={formik.touched.country && Boolean(formik.errors.country)}
+          displayEmpty
+          renderValue={(selected) => {
+            if (!selected) return <em style={{ opacity: 0.5 }}>Select a country</em>;
+            return selected as string;
+          }}
         >
           <MenuItem value="United States">United States</MenuItem>
           <MenuItem value="Canada">Canada</MenuItem>
@@ -654,9 +658,11 @@ const BasicInformationStep: React.FC<{ formik: any }> = ({ formik }) => (
     </Grid>
     <Grid item xs={12} md={4}>
       <FormControl fullWidth>
-        <InputLabel>Language</InputLabel>
+        <InputLabel id="language-label">Language</InputLabel>
         <Select
+          labelId="language-label"
           name="preferred_language"
+          label="Language"
           value={formik.values.preferred_language}
           onChange={formik.handleChange}
         >
@@ -671,11 +677,19 @@ const BasicInformationStep: React.FC<{ formik: any }> = ({ formik }) => (
     </Grid>
     <Grid item xs={12} md={4}>
       <FormControl fullWidth>
-        <InputLabel>Currency</InputLabel>
+        <InputLabel id="currency-label">Currency</InputLabel>
         <Select
+          labelId="currency-label"
           name="currency"
+          label="Currency"
           value={formik.values.currency}
           onChange={formik.handleChange}
+          displayEmpty
+          renderValue={(selected) => {
+            if (!selected) return <em style={{ opacity: 0.5 }}>Select a currency</em>;
+            const labels: Record<string, string> = { USD: 'USD ($)', CAD: 'CAD ($)', EUR: 'EUR (€)', GBP: 'GBP (£)', RON: 'RON (lei)', RUB: 'RUB (₽)' };
+            return labels[selected as string] || (selected as string);
+          }}
         >
           <MenuItem value="USD">USD ($)</MenuItem>
           <MenuItem value="CAD">CAD ($)</MenuItem>
@@ -1185,6 +1199,7 @@ const CustomFieldDialog: React.FC<{
             <FormControl fullWidth>
               <InputLabel>Table</InputLabel>
               <Select
+                label="Table"
                 value={fieldData.table_name || ''}
                 onChange={(e) => setFieldData({ ...fieldData, table_name: e.target.value })}
               >
@@ -1209,6 +1224,7 @@ const CustomFieldDialog: React.FC<{
             <FormControl fullWidth>
               <InputLabel>Field Type</InputLabel>
               <Select
+                label="Field Type"
                 value={fieldData.field_type || 'VARCHAR'}
                 onChange={(e) => setFieldData({ ...fieldData, field_type: e.target.value as any })}
               >
@@ -1347,6 +1363,7 @@ const UserDialog: React.FC<{
             <FormControl fullWidth>
               <InputLabel>Role</InputLabel>
               <Select
+                label="Role"
                 value={userData.role || 'user'}
                 onChange={(e) => setUserData({ ...userData, role: e.target.value as any })}
               >

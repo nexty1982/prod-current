@@ -4,6 +4,11 @@ const fs = require('fs');
 const multer = require('multer');
 const { execSync } = require('child_process');
 
+// Database and auth for image assignments
+const { promisePool } = require('../config/db');
+const { requireAuth, requireRole } = require('../middleware/auth');
+const requireAdmin = requireRole(['admin', 'super_admin']);
+
 // Import services
 // Detects context (dist vs source) and uses appropriate path
 const isDist = __dirname.includes(path.sep + 'dist' + path.sep);
@@ -2444,6 +2449,1473 @@ router.post('/apply-actions', (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to apply actions'
+    });
+  }
+});
+
+// =============================================================================
+// Image Assignment Endpoints (Phase 2)
+// =============================================================================
+
+/**
+ * GET /api/gallery/assignments
+ * Get assignments for a specific image or all assignments
+ * Query params:
+ *   image_path - filter by image path (optional)
+ *   scope - filter by 'global' or 'church' (optional)
+ *   church_id - filter by church ID (optional)
+ *   purpose - filter by purpose (optional)
+ */
+router.get('/assignments', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { image_path, scope, church_id, purpose } = req.query;
+    
+    let sql = 'SELECT * FROM image_assignments WHERE 1=1';
+    const params = [];
+    
+    if (image_path) {
+      sql += ' AND image_path = ?';
+      params.push(image_path);
+    }
+    if (scope) {
+      sql += ' AND scope = ?';
+      params.push(scope);
+    }
+    if (church_id) {
+      sql += ' AND church_id = ?';
+      params.push(parseInt(church_id));
+    }
+    if (purpose) {
+      sql += ' AND purpose = ?';
+      params.push(purpose);
+    }
+    
+    sql += ' ORDER BY created_at DESC';
+    
+    const [rows] = await promisePool.query(sql, params);
+    
+    res.json({
+      success: true,
+      assignments: rows,
+      count: rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch assignments',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/gallery/assigned
+ * Convenience endpoint to get images assigned to a scope/church
+ * Query params:
+ *   scope - 'global' or 'church' (required)
+ *   church_id - required if scope='church'
+ *   purpose - optional filter
+ */
+router.get('/assigned', requireAuth, async (req, res) => {
+  try {
+    const { scope, church_id, purpose } = req.query;
+    
+    if (!scope || !['global', 'church'].includes(scope)) {
+      return res.status(400).json({
+        success: false,
+        error: 'scope query param is required and must be "global" or "church"'
+      });
+    }
+    
+    if (scope === 'church' && !church_id) {
+      return res.status(400).json({
+        success: false,
+        error: 'church_id is required when scope is "church"'
+      });
+    }
+    
+    let sql = 'SELECT * FROM image_assignments WHERE scope = ?';
+    const params = [scope];
+    
+    if (scope === 'church') {
+      sql += ' AND church_id = ?';
+      params.push(parseInt(church_id));
+    }
+    
+    if (purpose) {
+      sql += ' AND purpose = ?';
+      params.push(purpose);
+    }
+    
+    sql += ' ORDER BY purpose, image_path';
+    
+    const [rows] = await promisePool.query(sql, params);
+    
+    res.json({
+      success: true,
+      assignments: rows,
+      count: rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching assigned images:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch assigned images',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/gallery/assignments
+ * Create a new image assignment
+ * Body: { image_path, scope: 'global'|'church', church_id?, purpose? }
+ */
+router.post('/assignments', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { image_path, scope, church_id, purpose } = req.body;
+    
+    // Validate required fields
+    if (!image_path || typeof image_path !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'image_path is required and must be a string'
+      });
+    }
+    
+    if (!scope || !['global', 'church'].includes(scope)) {
+      return res.status(400).json({
+        success: false,
+        error: 'scope is required and must be "global" or "church"'
+      });
+    }
+    
+    // Validate image_path starts with /images/
+    if (!image_path.startsWith('/images/')) {
+      return res.status(400).json({
+        success: false,
+        error: 'image_path must start with /images/'
+      });
+    }
+    
+    // Validate church_id if scope is 'church'
+    if (scope === 'church') {
+      if (!church_id) {
+        return res.status(400).json({
+          success: false,
+          error: 'church_id is required when scope is "church"'
+        });
+      }
+      
+      // Verify church exists
+      const [churchRows] = await promisePool.query(
+        'SELECT id FROM churches WHERE id = ?',
+        [parseInt(church_id)]
+      );
+      if (churchRows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: `Church with id ${church_id} not found`
+        });
+      }
+    }
+    
+    // Get user ID from session
+    const createdBy = req.session?.user?.id || req.user?.id || null;
+    
+    // Insert assignment (UNIQUE key prevents duplicates)
+    const [result] = await promisePool.query(
+      `INSERT INTO image_assignments (image_path, scope, church_id, purpose, created_by)
+       VALUES (?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP`,
+      [
+        image_path,
+        scope,
+        scope === 'church' ? parseInt(church_id) : null,
+        purpose || null,
+        createdBy
+      ]
+    );
+    
+    res.json({
+      success: true,
+      message: 'Assignment created successfully',
+      id: result.insertId || null,
+      assignment: {
+        image_path,
+        scope,
+        church_id: scope === 'church' ? parseInt(church_id) : null,
+        purpose: purpose || null
+      }
+    });
+  } catch (error) {
+    console.error('Error creating assignment:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        success: false,
+        error: 'This assignment already exists'
+      });
+    }
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create assignment',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * DELETE /api/gallery/assignments
+ * Delete an image assignment
+ * Body: { image_path, scope, church_id?, purpose? }
+ *   OR: { id } to delete by primary key
+ */
+router.delete('/assignments', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { id, image_path, scope, church_id, purpose } = req.body;
+    
+    let sql, params;
+    
+    if (id) {
+      // Delete by ID
+      sql = 'DELETE FROM image_assignments WHERE id = ?';
+      params = [parseInt(id)];
+    } else if (image_path && scope) {
+      // Delete by composite key
+      sql = 'DELETE FROM image_assignments WHERE image_path = ? AND scope = ?';
+      params = [image_path, scope];
+      
+      if (scope === 'church' && church_id) {
+        sql += ' AND church_id = ?';
+        params.push(parseInt(church_id));
+      } else if (scope === 'global') {
+        sql += ' AND church_id IS NULL';
+      }
+      
+      if (purpose) {
+        sql += ' AND purpose = ?';
+        params.push(purpose);
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: 'Either "id" or "image_path" + "scope" are required'
+      });
+    }
+    
+    const [result] = await promisePool.query(sql, params);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Assignment not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Assignment deleted successfully',
+      deleted: result.affectedRows
+    });
+  } catch (error) {
+    console.error('Error deleting assignment:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete assignment',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/gallery/images-with-assignments
+ * Enhanced image listing that includes assignment state
+ * Query params: same as /images + church_id (optional, for per-church assignment status)
+ */
+router.get('/images-with-assignments', requireAuth, async (req, res) => {
+  try {
+    const subPath = req.query.path !== undefined ? req.query.path : '';
+    const recursive = req.query.recursive === '1' || req.query.recursive === 'true';
+    const churchId = req.query.church_id ? parseInt(req.query.church_id) : null;
+    
+    // Get images root
+    let imagesRoot;
+    try {
+      imagesRoot = publicImagesFs.getImagesRoot();
+    } catch (rootError) {
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to resolve images root',
+        message: rootError.message
+      });
+    }
+    
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.tiff', '.webp', '.svg'];
+    
+    const getAllImageFiles = (dir, basePath = '') => {
+      const imageFiles = [];
+      
+      try {
+        let absPath;
+        if (dir === '' || dir === '/') {
+          absPath = imagesRoot;
+        } else {
+          try {
+            absPath = publicImagesFs.resolveSafePath(dir);
+          } catch (pathError) {
+            return imageFiles;
+          }
+        }
+        
+        if (!fs.existsSync(absPath)) return imageFiles;
+        
+        const entries = fs.readdirSync(absPath, { withFileTypes: true });
+        
+        for (const entry of entries) {
+          if (entry.name.startsWith('.')) continue;
+          
+          const fullPath = path.join(absPath, entry.name);
+          const relativePath = basePath ? `${basePath}/${entry.name}` : entry.name;
+          
+          if (entry.isDirectory() && recursive) {
+            imageFiles.push(...getAllImageFiles(relativePath, relativePath));
+          } else if (entry.isFile()) {
+            const ext = path.extname(entry.name).toLowerCase();
+            if (imageExtensions.includes(ext)) {
+              try {
+                const stats = fs.statSync(fullPath);
+                const urlPath = publicImagesFs.getUrlPath(relativePath);
+                const cacheBuster = stats.mtime.getTime();
+                
+                imageFiles.push({
+                  name: entry.name,
+                  path: urlPath,
+                  url: `${urlPath}?v=${cacheBuster}`,
+                  size: stats.size,
+                  created: (stats.birthtime && stats.birthtime.getTime() > 0 ? stats.birthtime : stats.mtime).toISOString(),
+                  modified: stats.mtime.toISOString(),
+                  type: ext.substring(1),
+                  metadataStatus: 'ok'
+                });
+              } catch (statError) {
+                const urlPath = publicImagesFs.getUrlPath(relativePath);
+                imageFiles.push({
+                  name: entry.name,
+                  path: urlPath,
+                  url: urlPath,
+                  size: null,
+                  created: null,
+                  modified: null,
+                  type: ext.substring(1),
+                  metadataStatus: 'error',
+                  statError: statError.message
+                });
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Error reading directory ${dir}:`, error);
+      }
+      
+      return imageFiles;
+    };
+    
+    const basePathForRecursion = subPath === '' ? '' : subPath;
+    const imageFiles = getAllImageFiles(subPath, basePathForRecursion);
+    
+    // Fetch all assignments from DB
+    const [allAssignments] = await promisePool.query(
+      'SELECT image_path, scope, church_id, purpose FROM image_assignments'
+    );
+    
+    // Build a lookup map: image_path -> assignments[]
+    const assignmentMap = {};
+    for (const a of allAssignments) {
+      if (!assignmentMap[a.image_path]) {
+        assignmentMap[a.image_path] = [];
+      }
+      assignmentMap[a.image_path].push(a);
+    }
+    
+    // Enrich each image with assignment data
+    const enrichedImages = imageFiles.map(img => {
+      const assignments = assignmentMap[img.path] || [];
+      const isAssignedGlobal = assignments.some(a => a.scope === 'global');
+      const assignedChurchIds = [...new Set(
+        assignments
+          .filter(a => a.scope === 'church' && a.church_id)
+          .map(a => a.church_id)
+      )];
+      
+      let assignmentScope = null;
+      if (isAssignedGlobal && assignedChurchIds.length > 0) {
+        assignmentScope = 'both';
+      } else if (isAssignedGlobal) {
+        assignmentScope = 'global';
+      } else if (assignedChurchIds.length > 0) {
+        assignmentScope = 'church';
+      }
+      
+      return {
+        ...img,
+        assignment_scope: assignmentScope,
+        assigned_church_ids: assignedChurchIds,
+        is_assigned_global: isAssignedGlobal,
+        is_assigned_to_current_church: churchId ? assignedChurchIds.includes(churchId) : false,
+        assignments: assignments
+      };
+    });
+    
+    // Sort by date descending
+    enrichedImages.sort((a, b) => {
+      const dateA = a.created ? new Date(a.created).getTime() : 0;
+      const dateB = b.created ? new Date(b.created).getTime() : 0;
+      if (dateB !== dateA) return dateB - dateA;
+      return a.name.localeCompare(b.name);
+    });
+    
+    res.json({
+      success: true,
+      count: enrichedImages.length,
+      path: subPath,
+      recursive,
+      church_id: churchId,
+      images: enrichedImages
+    });
+  } catch (error) {
+    console.error('Error fetching images with assignments:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch images with assignments',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/gallery/churches/:id/paths
+ * Returns effective OCR base dir and custom images dir for a church
+ */
+router.get('/churches/:id/paths', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+    
+    if (!churchId || isNaN(churchId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Valid church ID is required'
+      });
+    }
+    
+    const [rows] = await promisePool.query(
+      'SELECT id, name, ocr_base_dir, custom_images_base_dir FROM churches WHERE id = ?',
+      [churchId]
+    );
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Church not found'
+      });
+    }
+    
+    const church = rows[0];
+    const defaultUploadBase = process.env.UPLOAD_BASE_PATH || '/var/www/orthodoxmetrics/prod/server/uploads';
+    const defaultOcrBase = path.join(defaultUploadBase, `om_church_${churchId}`);
+    
+    const ocrBaseDirEffective = church.ocr_base_dir || defaultOcrBase;
+    const customImagesDirEffective = church.custom_images_base_dir || null;
+    
+    res.json({
+      success: true,
+      church_id: churchId,
+      church_name: church.name,
+      ocr_base_dir_effective: ocrBaseDirEffective,
+      ocr_base_dir_override: church.ocr_base_dir || null,
+      ocr_base_dir_default: defaultOcrBase,
+      upload_base_path: defaultUploadBase,
+      custom_images_dir_effective: customImagesDirEffective,
+      directories: {
+        uploaded: path.join(ocrBaseDirEffective, 'uploaded'),
+        processed: path.join(ocrBaseDirEffective, 'processed'),
+        failed: path.join(ocrBaseDirEffective, 'failed'),
+        jobs: path.join(ocrBaseDirEffective, 'jobs')
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching church paths:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch church paths',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * PUT /api/gallery/churches/:id/paths
+ * Update per-church OCR base dir and/or custom images base dir
+ * Body: { ocr_base_dir?, custom_images_base_dir? }
+ */
+router.put('/churches/:id/paths', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+    const { ocr_base_dir, custom_images_base_dir } = req.body;
+    
+    if (!churchId || isNaN(churchId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Valid church ID is required'
+      });
+    }
+    
+    // Verify church exists
+    const [churchRows] = await promisePool.query(
+      'SELECT id FROM churches WHERE id = ?',
+      [churchId]
+    );
+    if (churchRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Church not found'
+      });
+    }
+    
+    // Build update query dynamically
+    const updates = [];
+    const params = [];
+    
+    if (ocr_base_dir !== undefined) {
+      updates.push('ocr_base_dir = ?');
+      params.push(ocr_base_dir || null); // Allow clearing by passing null/empty
+    }
+    if (custom_images_base_dir !== undefined) {
+      updates.push('custom_images_base_dir = ?');
+      params.push(custom_images_base_dir || null);
+    }
+    
+    if (updates.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'At least one of ocr_base_dir or custom_images_base_dir must be provided'
+      });
+    }
+    
+    params.push(churchId);
+    
+    await promisePool.query(
+      `UPDATE churches SET ${updates.join(', ')} WHERE id = ?`,
+      params
+    );
+    
+    res.json({
+      success: true,
+      message: 'Church paths updated successfully',
+      church_id: churchId
+    });
+  } catch (error) {
+    console.error('Error updating church paths:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update church paths',
+      message: error.message
+    });
+  }
+});
+
+// =============================================================================
+// Church Image Paths — multiple directories per church
+// =============================================================================
+
+/**
+ * GET /api/gallery/churches/:id/image-paths
+ * List all configured image directories for a church
+ */
+router.get('/churches/:id/image-paths', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+    if (!churchId || isNaN(churchId)) {
+      return res.status(400).json({ success: false, error: 'Valid church ID is required' });
+    }
+
+    const [rows] = await promisePool.query(
+      'SELECT * FROM church_image_paths WHERE church_id = ? ORDER BY sort_order, id',
+      [churchId]
+    );
+
+    // Check which directories actually exist on disk
+    const pathsWithStatus = rows.map(row => {
+      let exists = false;
+      try { exists = fs.existsSync(row.directory_path); } catch (e) {}
+      return { ...row, exists };
+    });
+
+    res.json({ success: true, church_id: churchId, paths: pathsWithStatus, count: rows.length });
+  } catch (error) {
+    console.error('Error fetching church image paths:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch church image paths', message: error.message });
+  }
+});
+
+/**
+ * POST /api/gallery/churches/:id/image-paths
+ * Add a new image directory for a church
+ * Body: { directory_path, path_label?, path_type?, sort_order? }
+ */
+router.post('/churches/:id/image-paths', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+    const { directory_path, path_label, path_type, sort_order } = req.body;
+
+    if (!churchId || isNaN(churchId)) {
+      return res.status(400).json({ success: false, error: 'Valid church ID is required' });
+    }
+    if (!directory_path || typeof directory_path !== 'string') {
+      return res.status(400).json({ success: false, error: 'directory_path is required' });
+    }
+
+    // Verify church exists
+    const [churchRows] = await promisePool.query('SELECT id FROM churches WHERE id = ?', [churchId]);
+    if (churchRows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Church not found' });
+    }
+
+    const validTypes = ['images', 'records', 'uploads', 'custom'];
+    const typeVal = path_type && validTypes.includes(path_type) ? path_type : 'custom';
+
+    const [result] = await promisePool.query(
+      `INSERT INTO church_image_paths (church_id, directory_path, path_label, path_type, sort_order)
+       VALUES (?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE path_label = VALUES(path_label), path_type = VALUES(path_type), sort_order = VALUES(sort_order), enabled = 1`,
+      [churchId, directory_path.trim(), path_label || 'Default', typeVal, sort_order || 0]
+    );
+
+    const exists = fs.existsSync(directory_path.trim());
+
+    res.json({
+      success: true,
+      message: 'Image path added',
+      id: result.insertId || null,
+      church_id: churchId,
+      directory_path: directory_path.trim(),
+      exists
+    });
+  } catch (error) {
+    console.error('Error adding church image path:', error);
+    res.status(500).json({ success: false, error: 'Failed to add church image path', message: error.message });
+  }
+});
+
+/**
+ * PUT /api/gallery/church-image-paths/:id
+ * Update an existing church image path entry
+ * Body: { directory_path?, path_label?, path_type?, sort_order?, enabled? }
+ */
+router.put('/church-image-paths/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const pathId = parseInt(req.params.id);
+    const { directory_path, path_label, path_type, sort_order, enabled } = req.body;
+
+    if (!pathId || isNaN(pathId)) {
+      return res.status(400).json({ success: false, error: 'Valid path ID is required' });
+    }
+
+    const updates = [];
+    const params = [];
+
+    if (directory_path !== undefined) { updates.push('directory_path = ?'); params.push(directory_path.trim()); }
+    if (path_label !== undefined) { updates.push('path_label = ?'); params.push(path_label); }
+    if (path_type !== undefined) { updates.push('path_type = ?'); params.push(path_type); }
+    if (sort_order !== undefined) { updates.push('sort_order = ?'); params.push(sort_order); }
+    if (enabled !== undefined) { updates.push('enabled = ?'); params.push(enabled ? 1 : 0); }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ success: false, error: 'No fields to update' });
+    }
+
+    params.push(pathId);
+    await promisePool.query(`UPDATE church_image_paths SET ${updates.join(', ')} WHERE id = ?`, params);
+
+    res.json({ success: true, message: 'Church image path updated' });
+  } catch (error) {
+    console.error('Error updating church image path:', error);
+    res.status(500).json({ success: false, error: 'Failed to update', message: error.message });
+  }
+});
+
+/**
+ * DELETE /api/gallery/church-image-paths/:id
+ * Remove a church image path entry
+ */
+router.delete('/church-image-paths/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const pathId = parseInt(req.params.id);
+    if (!pathId || isNaN(pathId)) {
+      return res.status(400).json({ success: false, error: 'Valid path ID is required' });
+    }
+
+    const [result] = await promisePool.query('DELETE FROM church_image_paths WHERE id = ?', [pathId]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, error: 'Path entry not found' });
+    }
+
+    res.json({ success: true, message: 'Church image path deleted' });
+  } catch (error) {
+    console.error('Error deleting church image path:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete', message: error.message });
+  }
+});
+
+/**
+ * GET /api/gallery/churches/:id/available-images
+ * Scan ALL configured directories for a church and return found image files
+ * Query: path_type (optional filter)
+ */
+router.get('/churches/:id/available-images', requireAuth, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.id);
+    const { path_type } = req.query;
+
+    if (!churchId || isNaN(churchId)) {
+      return res.status(400).json({ success: false, error: 'Valid church ID is required' });
+    }
+
+    let sql = 'SELECT * FROM church_image_paths WHERE church_id = ? AND enabled = 1';
+    const params = [churchId];
+    if (path_type) {
+      sql += ' AND path_type = ?';
+      params.push(path_type);
+    }
+    sql += ' ORDER BY sort_order, id';
+
+    const [pathRows] = await promisePool.query(sql, params);
+
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.tiff', '.bmp'];
+    const allImages = [];
+
+    for (const pathRow of pathRows) {
+      const dirPath = pathRow.directory_path;
+      if (!fs.existsSync(dirPath)) continue;
+
+      try {
+        const scanDir = (dir, basePath = '') => {
+          const results = [];
+          const entries = fs.readdirSync(dir, { withFileTypes: true });
+          for (const entry of entries) {
+            if (entry.name.startsWith('.')) continue;
+            const fullPath = path.join(dir, entry.name);
+            const relativePath = basePath ? `${basePath}/${entry.name}` : entry.name;
+
+            if (entry.isDirectory()) {
+              results.push(...scanDir(fullPath, relativePath));
+            } else if (entry.isFile()) {
+              const ext = path.extname(entry.name).toLowerCase();
+              if (imageExtensions.includes(ext)) {
+                let stats;
+                try { stats = fs.statSync(fullPath); } catch (e) { stats = null; }
+                results.push({
+                  filename: entry.name,
+                  relative_path: relativePath,
+                  full_path: fullPath,
+                  serve_url: `/api/gallery/church-images/${churchId}/${pathRow.id}/${relativePath}`,
+                  size: stats ? stats.size : 0,
+                  modified: stats ? stats.mtime : null,
+                  source_path_id: pathRow.id,
+                  source_label: pathRow.path_label,
+                  source_type: pathRow.path_type,
+                });
+              }
+            }
+          }
+          return results;
+        };
+
+        allImages.push(...scanDir(dirPath));
+      } catch (scanErr) {
+        console.error(`Error scanning ${dirPath}:`, scanErr.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      church_id: churchId,
+      images: allImages,
+      count: allImages.length,
+      directories_scanned: pathRows.length
+    });
+  } catch (error) {
+    console.error('Error listing church available images:', error);
+    res.status(500).json({ success: false, error: 'Failed to list available images', message: error.message });
+  }
+});
+
+/**
+ * GET /api/gallery/church-images/:churchId/:pathId/*
+ * Serve an image file from a church's configured directory
+ */
+router.get('/church-images/:churchId/:pathId/*', async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.churchId);
+    const pathId = parseInt(req.params.pathId);
+    const relativePath = req.params[0]; // everything after pathId/
+
+    if (!churchId || !pathId || !relativePath) {
+      return res.status(400).json({ success: false, error: 'Invalid request' });
+    }
+
+    const [rows] = await promisePool.query(
+      'SELECT directory_path FROM church_image_paths WHERE id = ? AND church_id = ? AND enabled = 1',
+      [pathId, churchId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Image path config not found' });
+    }
+
+    const fullPath = path.join(rows[0].directory_path, relativePath);
+
+    // Security: ensure resolved path is within the configured directory
+    const resolvedDir = path.resolve(rows[0].directory_path);
+    const resolvedFile = path.resolve(fullPath);
+    if (!resolvedFile.startsWith(resolvedDir)) {
+      return res.status(403).json({ success: false, error: 'Access denied' });
+    }
+
+    if (!fs.existsSync(fullPath)) {
+      return res.status(404).json({ success: false, error: 'Image not found' });
+    }
+
+    res.sendFile(fullPath);
+  } catch (error) {
+    console.error('Error serving church image:', error);
+    res.status(500).json({ success: false, error: 'Failed to serve image', message: error.message });
+  }
+});
+
+/**
+ * GET /api/gallery/church/:churchId/config/images
+ * Returns resolved image paths for a church (header, icon, background, etc.)
+ * Order of precedence:
+ *   1. image_assignments WHERE scope='church' AND church_id=? AND purpose=?
+ *   2. image_assignments WHERE scope='global' AND purpose=?
+ *   3. Default fallback paths
+ */
+router.get('/church/:churchId/config/images', requireAuth, async (req, res) => {
+  try {
+    const churchId = parseInt(req.params.churchId);
+    
+    if (!churchId || isNaN(churchId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Valid churchId is required'
+      });
+    }
+    
+    // Fetch all assignments relevant to this church (church-scoped + global)
+    const [assignments] = await promisePool.query(
+      `SELECT image_path, scope, church_id, purpose 
+       FROM image_assignments 
+       WHERE (scope = 'global') OR (scope = 'church' AND church_id = ?)
+       ORDER BY scope DESC`,
+      [churchId]
+    );
+    
+    // Build resolved image map by purpose
+    // Church-scoped takes precedence over global
+    const purposes = ['header', 'icon', 'background', 'logo', 'favicon', 'ocr_sample'];
+    const resolvedImages = {};
+    
+    for (const purpose of purposes) {
+      // First try church-scoped
+      const churchAssignment = assignments.find(
+        a => a.scope === 'church' && a.church_id === churchId && a.purpose === purpose
+      );
+      if (churchAssignment) {
+        resolvedImages[`${purpose}ImagePath`] = churchAssignment.image_path;
+        resolvedImages[`${purpose}Source`] = 'church';
+        continue;
+      }
+      
+      // Then try global
+      const globalAssignment = assignments.find(
+        a => a.scope === 'global' && a.purpose === purpose
+      );
+      if (globalAssignment) {
+        resolvedImages[`${purpose}ImagePath`] = globalAssignment.image_path;
+        resolvedImages[`${purpose}Source`] = 'global';
+        continue;
+      }
+      
+      // Default fallbacks
+      resolvedImages[`${purpose}ImagePath`] = null;
+      resolvedImages[`${purpose}Source`] = 'default';
+    }
+    
+    // Also include all assignments for this church for completeness
+    const churchAssignments = assignments.filter(
+      a => a.scope === 'church' && a.church_id === churchId
+    );
+    const globalAssignments = assignments.filter(a => a.scope === 'global');
+    
+    res.json({
+      success: true,
+      church_id: churchId,
+      images: resolvedImages,
+      all_church_assignments: churchAssignments,
+      all_global_assignments: globalAssignments
+    });
+  } catch (error) {
+    console.error('Error fetching church image config:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch church image config',
+      message: error.message
+    });
+  }
+});
+
+// =============================================================================
+// Image Registry & Bindings Endpoints (Site-Wide Image Registry)
+// =============================================================================
+
+/**
+ * GET /api/gallery/images/resolve
+ * Core resolver: returns resolved image paths for a page
+ * Query: page_key (required), church_id (optional)
+ * Resolution: church override > global > omit
+ */
+router.get('/images/resolve', async (req, res) => {
+  try {
+    const { page_key, church_id } = req.query;
+
+    if (!page_key || typeof page_key !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'page_key query parameter is required'
+      });
+    }
+
+    const churchId = church_id ? parseInt(church_id) : null;
+
+    // Fetch all enabled bindings for this page_key
+    let sql, params;
+    if (churchId) {
+      sql = `SELECT image_key, image_path, scope, church_id, priority
+             FROM image_bindings
+             WHERE page_key = ? AND enabled = 1
+               AND (scope = 'global' OR (scope = 'church' AND church_id = ?))
+             ORDER BY image_key, scope DESC, priority DESC`;
+      params = [page_key, churchId];
+    } else {
+      sql = `SELECT image_key, image_path, scope, church_id, priority
+             FROM image_bindings
+             WHERE page_key = ? AND enabled = 1 AND scope = 'global'
+             ORDER BY image_key, priority DESC`;
+      params = [page_key];
+    }
+
+    const [rows] = await promisePool.query(sql, params);
+
+    // Resolve: for each image_key, church wins over global
+    const resolved = {};
+    const sources = {};
+    const seen = new Set();
+
+    for (const row of rows) {
+      if (seen.has(row.image_key)) continue;
+      resolved[row.image_key] = row.image_path;
+      sources[row.image_key] = row.scope;
+      seen.add(row.image_key);
+    }
+
+    res.json({
+      success: true,
+      page_key,
+      church_id: churchId,
+      resolved,
+      sources
+    });
+  } catch (error) {
+    console.error('Error resolving images:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to resolve images',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/gallery/admin/images/bindings
+ * List bindings, optionally filtered by page_key
+ * Query: page_key (optional), image_key (optional), church_id (optional)
+ */
+router.get('/admin/images/bindings', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { page_key, image_key, church_id } = req.query;
+
+    let sql = 'SELECT * FROM image_bindings WHERE 1=1';
+    const params = [];
+
+    if (page_key) {
+      sql += ' AND page_key = ?';
+      params.push(page_key);
+    }
+    if (image_key) {
+      sql += ' AND image_key = ?';
+      params.push(image_key);
+    }
+    if (church_id) {
+      sql += ' AND church_id = ?';
+      params.push(parseInt(church_id));
+    }
+
+    sql += ' ORDER BY page_key, image_key, scope DESC, priority DESC';
+
+    const [rows] = await promisePool.query(sql, params);
+
+    res.json({
+      success: true,
+      bindings: rows,
+      count: rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching bindings:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch bindings',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/gallery/admin/images/bindings
+ * Create or update a binding
+ * Body: { page_key, image_key, scope, church_id?, image_path, enabled?, notes?, priority? }
+ */
+router.post('/admin/images/bindings', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { page_key, image_key, scope, church_id, image_path, enabled, notes, priority } = req.body;
+
+    // Validate required fields
+    if (!page_key || typeof page_key !== 'string' || page_key.length > 128) {
+      return res.status(400).json({ success: false, error: 'page_key is required (max 128 chars)' });
+    }
+    if (!image_key || typeof image_key !== 'string' || image_key.length > 128) {
+      return res.status(400).json({ success: false, error: 'image_key is required (max 128 chars)' });
+    }
+    if (!scope || !['global', 'church'].includes(scope)) {
+      return res.status(400).json({ success: false, error: 'scope must be "global" or "church"' });
+    }
+    if (!image_path || typeof image_path !== 'string') {
+      return res.status(400).json({ success: false, error: 'image_path is required' });
+    }
+    if (!image_path.startsWith('/images/')) {
+      return res.status(400).json({ success: false, error: 'image_path must start with /images/' });
+    }
+    // Validate safe chars for page_key and image_key
+    const safeKeyPattern = /^[a-zA-Z0-9_:/.@\-]+$/;
+    if (!safeKeyPattern.test(page_key)) {
+      return res.status(400).json({ success: false, error: 'page_key contains invalid characters' });
+    }
+    if (!safeKeyPattern.test(image_key)) {
+      return res.status(400).json({ success: false, error: 'image_key contains invalid characters' });
+    }
+
+    if (scope === 'church' && !church_id) {
+      return res.status(400).json({ success: false, error: 'church_id is required when scope is "church"' });
+    }
+
+    const userId = req.session?.user?.id || req.user?.id || null;
+    const churchIdVal = scope === 'church' ? parseInt(church_id) : null;
+
+    const [result] = await promisePool.query(
+      `INSERT INTO image_bindings (page_key, image_key, scope, church_id, image_path, priority, enabled, notes, created_by, updated_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         image_path = VALUES(image_path),
+         priority = VALUES(priority),
+         enabled = VALUES(enabled),
+         notes = VALUES(notes),
+         updated_by = VALUES(updated_by),
+         updated_at = CURRENT_TIMESTAMP`,
+      [
+        page_key,
+        image_key,
+        scope,
+        churchIdVal,
+        image_path,
+        priority || 0,
+        enabled !== undefined ? (enabled ? 1 : 0) : 1,
+        notes || null,
+        userId,
+        userId
+      ]
+    );
+
+    // Also upsert into image_registry if not present
+    await promisePool.query(
+      `INSERT IGNORE INTO image_registry (image_path) VALUES (?)`,
+      [image_path]
+    );
+
+    res.json({
+      success: true,
+      message: 'Binding saved',
+      id: result.insertId || null,
+      binding: { page_key, image_key, scope, church_id: churchIdVal, image_path }
+    });
+  } catch (error) {
+    console.error('Error saving binding:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to save binding',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * DELETE /api/gallery/admin/images/bindings
+ * Delete a binding by id or composite key
+ * Body: { id } OR { page_key, image_key, scope, church_id? }
+ */
+router.delete('/admin/images/bindings', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { id, page_key, image_key, scope, church_id } = req.body;
+
+    let sql, params;
+
+    if (id) {
+      sql = 'DELETE FROM image_bindings WHERE id = ?';
+      params = [parseInt(id)];
+    } else if (page_key && image_key && scope) {
+      sql = 'DELETE FROM image_bindings WHERE page_key = ? AND image_key = ? AND scope = ?';
+      params = [page_key, image_key, scope];
+
+      if (scope === 'church' && church_id) {
+        sql += ' AND church_id = ?';
+        params.push(parseInt(church_id));
+      } else if (scope === 'global') {
+        sql += ' AND church_id IS NULL';
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: 'Provide "id" or "page_key" + "image_key" + "scope"'
+      });
+    }
+
+    const [result] = await promisePool.query(sql, params);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, error: 'Binding not found' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Binding deleted',
+      deleted: result.affectedRows
+    });
+  } catch (error) {
+    console.error('Error deleting binding:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete binding',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/gallery/admin/images/bindings/search
+ * Reverse lookup: find all bindings for a given image_path
+ * Query: image_path (required)
+ */
+router.get('/admin/images/bindings/search', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { image_path } = req.query;
+
+    if (!image_path) {
+      return res.status(400).json({ success: false, error: 'image_path query parameter is required' });
+    }
+
+    const [rows] = await promisePool.query(
+      `SELECT * FROM image_bindings WHERE image_path = ? ORDER BY page_key, image_key`,
+      [image_path]
+    );
+
+    res.json({
+      success: true,
+      image_path,
+      bindings: rows,
+      count: rows.length
+    });
+  } catch (error) {
+    console.error('Error searching bindings:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to search bindings',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/gallery/admin/images/registry
+ * List all images in the registry
+ * Query: category (optional)
+ */
+router.get('/admin/images/registry', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { category } = req.query;
+
+    let sql = 'SELECT * FROM image_registry';
+    const params = [];
+
+    if (category) {
+      sql += ' WHERE category = ?';
+      params.push(category);
+    }
+
+    sql += ' ORDER BY category, image_path';
+
+    const [rows] = await promisePool.query(sql, params);
+
+    res.json({
+      success: true,
+      images: rows,
+      count: rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching registry:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch registry',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/gallery/admin/images/registry/sync
+ * Scan filesystem and upsert discovered images into image_registry
+ */
+router.post('/admin/images/registry/sync', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    let imagesRoot;
+    try {
+      imagesRoot = publicImagesFs.getImagesRoot();
+    } catch (rootError) {
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to resolve images root',
+        message: rootError.message
+      });
+    }
+
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.tiff', '.webp', '.svg'];
+
+    // Recursively scan all image files
+    const scanDir = (dir, basePath = '') => {
+      const results = [];
+      try {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.name.startsWith('.')) continue;
+          const fullPath = path.join(dir, entry.name);
+          const relativePath = basePath ? `${basePath}/${entry.name}` : entry.name;
+
+          if (entry.isDirectory()) {
+            results.push(...scanDir(fullPath, relativePath));
+          } else if (entry.isFile()) {
+            const ext = path.extname(entry.name).toLowerCase();
+            if (imageExtensions.includes(ext)) {
+              // Derive category from top-level directory
+              const topDir = relativePath.split('/')[0] || 'misc';
+              results.push({
+                image_path: `/images/${relativePath}`,
+                category: topDir,
+              });
+            }
+          }
+        }
+      } catch (err) {
+        console.error(`Error scanning ${dir}:`, err.message);
+      }
+      return results;
+    };
+
+    const discovered = scanDir(imagesRoot);
+
+    // Batch upsert into image_registry
+    let inserted = 0;
+    let skipped = 0;
+    for (const img of discovered) {
+      try {
+        const [result] = await promisePool.query(
+          `INSERT INTO image_registry (image_path, category)
+           VALUES (?, ?)
+           ON DUPLICATE KEY UPDATE category = COALESCE(category, VALUES(category))`,
+          [img.image_path, img.category]
+        );
+        if (result.affectedRows > 0 && result.insertId > 0) {
+          inserted++;
+        } else {
+          skipped++;
+        }
+      } catch (insertErr) {
+        console.error('Error inserting registry entry:', insertErr.message);
+        skipped++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Registry sync complete`,
+      discovered: discovered.length,
+      inserted,
+      skipped
+    });
+  } catch (error) {
+    console.error('Error syncing registry:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to sync registry',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * PUT /api/gallery/admin/images/registry/:id
+ * Update registry entry (label, category, meta_json)
+ */
+router.put('/admin/images/registry/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const registryId = parseInt(req.params.id);
+    const { label, category, meta_json } = req.body;
+
+    if (!registryId || isNaN(registryId)) {
+      return res.status(400).json({ success: false, error: 'Valid registry ID is required' });
+    }
+
+    const updates = [];
+    const params = [];
+
+    if (label !== undefined) { updates.push('label = ?'); params.push(label || null); }
+    if (category !== undefined) { updates.push('category = ?'); params.push(category || null); }
+    if (meta_json !== undefined) {
+      updates.push('meta_json = ?');
+      params.push(meta_json ? JSON.stringify(meta_json) : null);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ success: false, error: 'No fields to update' });
+    }
+
+    params.push(registryId);
+
+    await promisePool.query(
+      `UPDATE image_registry SET ${updates.join(', ')} WHERE id = ?`,
+      params
+    );
+
+    res.json({ success: true, message: 'Registry entry updated' });
+  } catch (error) {
+    console.error('Error updating registry:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update registry entry',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/gallery/admin/images/page-index
+ * Page Index view: for a given page_key, return all resolved images
+ * along with the raw bindings (global + per-church)
+ * Query: page_key (required)
+ */
+router.get('/admin/images/page-index', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { page_key } = req.query;
+
+    if (!page_key) {
+      return res.status(400).json({ success: false, error: 'page_key is required' });
+    }
+
+    const [bindings] = await promisePool.query(
+      `SELECT b.*, c.name as church_name
+       FROM image_bindings b
+       LEFT JOIN churches c ON b.church_id = c.id
+       WHERE b.page_key = ?
+       ORDER BY b.image_key, b.scope DESC, b.priority DESC`,
+      [page_key]
+    );
+
+    // Group by image_key
+    const byKey = {};
+    for (const b of bindings) {
+      if (!byKey[b.image_key]) {
+        byKey[b.image_key] = { global: null, churches: [] };
+      }
+      if (b.scope === 'global') {
+        byKey[b.image_key].global = b;
+      } else {
+        byKey[b.image_key].churches.push(b);
+      }
+    }
+
+    res.json({
+      success: true,
+      page_key,
+      bindings_by_key: byKey,
+      all_bindings: bindings,
+      image_keys: Object.keys(byKey),
+      count: bindings.length
+    });
+  } catch (error) {
+    console.error('Error fetching page index:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch page index',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/gallery/admin/images/all-pages
+ * List all distinct page_keys with binding counts
+ */
+router.get('/admin/images/all-pages', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await promisePool.query(
+      `SELECT page_key, COUNT(*) as binding_count,
+              COUNT(DISTINCT image_key) as image_key_count,
+              SUM(CASE WHEN scope = 'global' THEN 1 ELSE 0 END) as global_count,
+              SUM(CASE WHEN scope = 'church' THEN 1 ELSE 0 END) as church_count
+       FROM image_bindings
+       GROUP BY page_key
+       ORDER BY page_key`
+    );
+
+    res.json({
+      success: true,
+      pages: rows,
+      count: rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching all pages:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch page list',
+      message: error.message
     });
   }
 });

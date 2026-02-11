@@ -24,9 +24,9 @@ if (fs.existsSync(distIndexPath)) {
   // Read and search for route registrations
   const distContent = fs.readFileSync(distIndexPath, 'utf8');
   
-  // Check for router mount
-  const hasRouterMount = distContent.includes('churchOcrRoutes') || distContent.includes('churchOcrRouter');
-  console.log(`   Router mount code: ${hasRouterMount ? '✅ Found' : '❌ Not found'}`);
+  // Check for hardwired OCR routes (routes are defined directly in index.ts)
+  const hasHardwiredMsg = distContent.includes('Church OCR routes: hardwired');
+  console.log(`   Hardwired OCR routes: ${hasHardwiredMsg ? '✅ Found' : '⚠️  Message not found (may still work)'}`);
   
   // Check for direct routes
   const hasJobsRoute = distContent.includes('/api/church/:churchId/ocr/jobs') && 
@@ -73,5 +73,5 @@ if (fs.existsSync(srcIndexPath)) {
 console.log('');
 console.log('Next steps:');
 console.log('1. If routes not found in dist, run: npm run build:ts');
-console.log('2. Restart server: pm2 restart orthodox-backend');
-console.log('3. Check logs: pm2 logs orthodox-backend | grep OCR');
+console.log('2. Restart server: sudo systemctl restart orthodox-backend');
+console.log('3. Check logs: journalctl -u orthodox-backend -n 200 --no-pager | grep -i OCR');

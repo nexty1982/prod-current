@@ -1,12 +1,29 @@
-import { 
-  RefactorScan, 
-  Snapshot, 
-  SourceType,
-  PreviewRestoreResponse,
-  RestoreHistoryResponse,
-  RestoreHistoryEntry,
-  RestoreHistoryStats
+import {
+    PreviewRestoreResponse,
+    RefactorScan,
+    RestoreHistoryEntry,
+    RestoreHistoryResponse,
+    RestoreHistoryStats,
+    Snapshot,
+    SourceType
 } from '@/types/refactorConsole';
+
+// ScanScope type + defaults defined here (not in types file) to avoid Vite tree-shaking
+export type ScanScopeId = 'prod_root' | 'server' | 'frontend' | 'prod_wildcard';
+export interface ScanScope {
+  id: ScanScopeId;
+  label: string;
+  root: string;
+  enabled: boolean;
+  ignore: string[];
+}
+
+export const DEFAULT_SCOPES: ScanScope[] = [
+  { id: 'prod_root', label: 'Prod Root', root: '/var/www/orthodoxmetrics/prod', enabled: true, ignore: ['**/node_modules/**', '**/dist/**', '**/dist-*/**', '**/.git/**'] },
+  { id: 'server', label: 'Server', root: '/var/www/orthodoxmetrics/prod/server', enabled: false, ignore: ['**/node_modules/**', '**/dist/**'] },
+  { id: 'frontend', label: 'Front-End', root: '/var/www/orthodoxmetrics/prod/front-end', enabled: false, ignore: ['**/node_modules/**', '**/dist/**'] },
+  { id: 'prod_wildcard', label: 'Whole Site (prod/*)', root: '/var/www/orthodoxmetrics/prod/*', enabled: false, ignore: ['**/node_modules/**', '**/dist/**', '**/dist-*/**', '**/.git/**'] },
+];
 
 // ============================================================================
 // Path Configuration Interface
@@ -79,6 +96,56 @@ class RefactorConsoleClient {
   clearSavedPaths(): void {
     localStorage.removeItem(PATHS_STORAGE_KEY);
     console.log('[RefactorConsole] Paths reset to defaults');
+  }
+
+  // ============================================================================
+  // Scope Configuration Management (v2)
+  // ============================================================================
+
+  getSavedScopes(): ScanScope[] {
+    try {
+      const saved = localStorage.getItem('refactor-console-scopes');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse saved scopes:', e);
+    }
+    return DEFAULT_SCOPES.map(s => ({ ...s }));
+  }
+
+  saveScopes(scopes: ScanScope[]): void {
+    try {
+      localStorage.setItem('refactor-console-scopes', JSON.stringify(scopes));
+    } catch (e) {
+      console.error('Failed to save scopes:', e);
+    }
+  }
+
+  clearSavedScopes(): void {
+    localStorage.removeItem('refactor-console-scopes');
+  }
+
+  // ============================================================================
+  // Policy Engine
+  // ============================================================================
+
+  async fetchPolicy(policyPath?: string): Promise<{ ok: boolean; path: string; content: string; size: number }> {
+    try {
+      const params = new URLSearchParams();
+      if (policyPath) params.append('path', policyPath);
+      const response = await fetch(`${this.baseUrl}/policy?${params}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      return await this.safeParseResponse(response);
+    } catch (error) {
+      console.error('Failed to fetch policy:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to fetch policy');
+    }
   }
 
   /**
@@ -695,6 +762,118 @@ class RefactorConsoleClient {
       throw new Error(error instanceof Error ? error.message : 'Failed to export restore history');
     }
   }
+
+  // ============================================================================
+  // Canonical Locations (Directory Legend)
+  // ============================================================================
+
+  async fetchCanonicalLocations(filters?: { action?: string; category?: string }): Promise<{
+    ok: boolean;
+    locations: CanonicalLocation[];
+    summary: {
+      total: number;
+      byAction: Record<string, number>;
+      byCategory: Record<string, number>;
+      existsCount: number;
+      missingCount: number;
+    };
+  }> {
+    try {
+      const params = new URLSearchParams();
+      if (filters?.action) params.append('action', filters.action);
+      if (filters?.category) params.append('category', filters.category);
+
+      const response = await fetch(`${this.baseUrl}/canonical-locations?${params}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      return await this.safeParseResponse(response);
+    } catch (error) {
+      console.error('Failed to fetch canonical locations:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to fetch canonical locations');
+    }
+  }
+
+  async updateCanonicalLocation(id: number, updates: Partial<CanonicalLocation>): Promise<{ ok: boolean; message: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/canonical-locations/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      return await this.safeParseResponse(response);
+    } catch (error) {
+      console.error('Failed to update canonical location:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to update canonical location');
+    }
+  }
+
+  async createCanonicalLocation(data: Partial<CanonicalLocation>): Promise<{ ok: boolean; id: number; message: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/canonical-locations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      return await this.safeParseResponse(response);
+    } catch (error) {
+      console.error('Failed to create canonical location:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to create canonical location');
+    }
+  }
+
+  async deleteCanonicalLocation(id: number): Promise<{ ok: boolean; message: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/canonical-locations/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await this.safeParseResponse(response);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      return await this.safeParseResponse(response);
+    } catch (error) {
+      console.error('Failed to delete canonical location:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to delete canonical location');
+    }
+  }
+}
+
+export interface CanonicalLocation {
+  id: number;
+  directory_path: string;
+  label: string;
+  category: 'runtime' | 'config' | 'ops' | 'data' | 'archive' | 'dead' | 'tooling';
+  action: 'keep' | 'move' | 'archive' | 'delete';
+  target_path: string | null;
+  description: string | null;
+  served_by: string | null;
+  sort_order: number;
+  enabled: number;
+  exists?: boolean;
+  sizeInfo?: string | null;
+  fullPath?: string;
 }
 
 // Export singleton instance

@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build:clean": "rimraf dist",
-    "build:ts": "tsc -p tsconfig.json && node scripts/fix-router-exports.js",
+    "build:ts": "tsc -p tsconfig.json",
     "build:copy": "node scripts/build-copy.js",
     "build:verify": "node scripts/verify-build.js",
     "build:verify:interactive": "node scripts/verify-interactive-reports-build.js",

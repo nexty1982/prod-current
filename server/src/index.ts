@@ -120,9 +120,10 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./api/admin'); // Admin routes are in api/admin.js, not routes/admin.js
 const omtraceRoutes = require('./api/omtrace'); // OMTrace dependency analysis routes
 const maintenancePublicRoutes = require('./api/maintenance-public'); // Public maintenance status
-const adminLogsRouter = require('./api/adminLogs'); // Admin log monitoring API
-const socketService = require('./services/socketService'); // Socket.IO service for real-time log alerts
-const logMonitor = require('./services/logMonitor'); // PM2 log monitoring service
+// DISABLED: Admin log monitoring stack removed — depended on PM2 which has been replaced by systemd
+// const adminLogsRouter = require('./api/adminLogs');
+// const socketService = require('./services/socketService');
+// const logMonitor = require('./services/logMonitor');
 const debugRoutes = require('./routes/debug');
 const menuManagementRoutes = require('./routes/menuManagement');
 const menuPermissionsRoutes = require('./routes/menuPermissions');
@@ -224,6 +225,8 @@ const versionRouter = require('./routes/version');
 const systemStatusRouter = require('./api/systemStatus');
 const dailyTasksRouter = require('./api/dailyTasks');
 const { routesRouter: apiExplorerRoutesRouter, testsRouter: apiExplorerTestsRouter } = require('./api/apiExplorer');
+const adminCapabilitiesRouter = require('./routes/admin/capabilities');
+const adminSettingsRouter = require('./routes/admin/settings');
 // Add missing router imports
 const churchRecordsRouter = require('./routes/records'); // Church records functionality
 const powerSearchRouter = require('./api/powerSearchApi'); // Power Search API for advanced record filtering
@@ -248,6 +251,7 @@ const metricsRouter = require('./routes/metrics');
 // Removed duplicate: recordsRouter - already loaded as churchRecordsRouter
 const importRecordsRouter = require('./routes/records-import'); // Records import functionality
 const scriptRunnerRouter = require('./routes/runScript'); // Secure script runner for admin users
+const lookupRouter = require('./routes/lookup'); // Canonical lookup/dropdown endpoints
 
 // Import client API router for multi-tenant client endpoints (with safe loader)
 let clientApiRouter;
@@ -394,9 +398,9 @@ const { registerRouterMenuStudio } = require("./features/routerMenuStudio");
 const app = express();
 const server = http.createServer(app);
 
-// Initialize Socket.IO for real-time admin log monitoring
-socketService.initialize(server, serverConfig.cors.allowedOrigins);
-console.log('✅ [Server] Socket.IO initialized for admin log monitoring');
+// DISABLED: Socket.IO admin log monitoring — depended on PM2 logMonitor (removed)
+// socketService.initialize(server, serverConfig.cors.allowedOrigins);
+// console.log('✅ [Server] Socket.IO initialized for admin log monitoring');
 
 // Trust proxy configuration (from centralized config)
 app.set('trust proxy', serverConfig.server.trustProxy ? 1 : 0);
@@ -608,8 +612,9 @@ app.use('/api/admin/users', usersRouter); // 🎯 CRITICAL: This route was being
 app.use('/api/admin/activity-logs', activityLogsRouter);
 app.use('/api/admin/templates', adminTemplatesRouter);
 console.log('✅ [Server] Mounted /api/admin/templates route');
-app.use('/api/admin/logs', adminLogsRouter);
-console.log('✅ [Server] Mounted /api/admin/logs route (log monitoring)');
+// DISABLED: Admin log monitoring routes — depended on PM2 logMonitor (removed)
+// app.use('/api/admin/logs', adminLogsRouter);
+// console.log('✅ [Server] Mounted /api/admin/logs route (log monitoring)');
 app.use('/api/admin/global-images', globalImagesRouter);
 // Build status endpoint for admins
 const buildStatusRouter = require('./routes/admin/buildStatus');
@@ -744,6 +749,10 @@ app.use('/api/system', systemStatusRouter); // System status for admin HUD
 app.use('/api/system', apiExplorerRoutesRouter); // API Explorer route introspection (super_admin)
 app.use('/api/admin/api-tests', apiExplorerTestsRouter); // API Explorer test cases CRUD + runner (super_admin)
 console.log('✅ [Server] Mounted /api/system/routes and /api/admin/api-tests (API Explorer)');
+app.use('/api/admin/capabilities', adminCapabilitiesRouter); // Admin Capabilities Registry (super_admin)
+console.log('✅ [Server] Mounted /api/admin/capabilities (Admin Capabilities Registry)');
+app.use('/api/admin/settings', adminSettingsRouter); // Settings Console (super_admin)
+console.log('✅ [Server] Mounted /api/admin/settings (Settings Console)');
 app.use('/api/admin/tasks', dailyTasksRouter); // Daily tasks management
 
 // Other authenticated routes
@@ -2407,11 +2416,24 @@ app.get('/api/church/:churchId/ocr/jobs/:jobId/image', async (req, res) => {
     const path = require('path');
     
     // Try multiple locations where the file might be
-    // Use absolute path: /var/www/orthodoxmetrics/prod/server/uploads
+    // Check for per-church ocr_base_dir override
     const baseUploadPath = process.env.UPLOAD_BASE_PATH || '/var/www/orthodoxmetrics/prod/server/uploads';
+    let effectiveOcrBase = path.join(baseUploadPath, `om_church_${churchId}`);
+    try {
+      const [ocrDirRows] = await promisePool.query(
+        'SELECT ocr_base_dir FROM churches WHERE id = ?', [churchId]
+      );
+      if (ocrDirRows.length > 0 && ocrDirRows[0].ocr_base_dir) {
+        effectiveOcrBase = ocrDirRows[0].ocr_base_dir;
+      }
+    } catch (dirErr: any) {
+      console.warn('[OCR Image] Could not check ocr_base_dir override:', dirErr.message);
+    }
     const serverRoot = path.resolve(__dirname, '..').replace('/dist', '');
     const possiblePaths = [
       dbFilePath, // Try DB path first
+      path.join(effectiveOcrBase, 'processed', filename),
+      path.join(effectiveOcrBase, 'uploaded', filename),
       path.join(baseUploadPath, `om_church_${churchId}`, 'processed', filename),
       path.join(baseUploadPath, `om_church_${churchId}`, 'uploaded', filename),
       path.join(baseUploadPath, 'ocr', `church_${churchId}`, filename),
@@ -4117,6 +4139,10 @@ app.use('/api/notes', notesRoutes);
 // Multi-tenant client routes
 app.use('/client/:clientSlug/api', clientContext, clientApiRouter, clientContextCleanup);
 
+// Canonical lookup/dropdown endpoints (session-auth enforced inside router)
+app.use('/api/lookup', lookupRouter);
+console.log('✅ [Server] Mounted /api/lookup routes (clergy, etc.)');
+
 // ?? Mount dropdownOptions routes here to prevent override
 app.use('/api', dropdownOptionsRouter);
 
@@ -4723,11 +4749,8 @@ server.listen(PORT, HOST, () => {
   websocketService.initialize(server, sessionMiddleware);
   console.log('🔌 WebSocket service initialized');
   
-  // DISABLED: Backend log monitoring causes infinite feedback loop
-  // The logMonitor watches PM2 logs, but its own output gets logged by PM2,
-  // creating an infinite loop that floods the logs
-  // logMonitor.start('orthodox-backend');
-  // console.log('🔍 Backend log monitoring started for orthodox-backend');
+  // REMOVED: PM2 log monitoring stack (socketService + logMonitor + adminLogs) fully disabled.
+  // PM2 has been replaced by systemd. Use journalctl for log inspection.
   console.log('═══════════════════════════════════════════════════════════');
   
   // ============================================================================

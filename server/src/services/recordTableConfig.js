@@ -83,8 +83,10 @@ async function getTableColumns(churchId, tableName) {
   }
 
   return columns.map((c, idx) => ({
-    name: c.Field,
-    position: idx + 1,
+    column_name: c.Field,
+    name: c.Field,            // alias for internal consumers
+    ordinal_position: idx + 1,
+    position: idx + 1,        // alias for internal consumers
     type: c.Type,
     nullable: c.Null === 'YES',
     default: c.Default,

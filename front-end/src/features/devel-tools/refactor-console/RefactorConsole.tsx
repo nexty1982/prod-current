@@ -25,7 +25,6 @@ import {
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
-import SessionPulse from '@/features/admin/components/SessionPulse';
 import {
     FileAnalysis,
     Phase1Report,
@@ -149,7 +148,7 @@ const RefactorConsole: React.FC = () => {
   // Restore History State
   // ========================================================================
   const [showHistoryViewer, setShowHistoryViewer] = useState(false);
-  
+
   // Validate paths on the server
   const validatePaths = useCallback(async (config: PathConfig) => {
     setIsValidatingPaths(true);
@@ -1021,11 +1020,6 @@ const RefactorConsole: React.FC = () => {
             </Box>
           </Box>
         </Box>
-      </Box>
-
-      {/* Session Pulse Dashboard */}
-      <Box sx={{ px: 3, pt: 2 }}>
-        <SessionPulse refreshInterval={10000} />
       </Box>
 
       {/* Path Configuration Panel */}

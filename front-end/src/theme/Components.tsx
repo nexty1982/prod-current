@@ -1,6 +1,6 @@
 // project imports
-import './DefaultColors';
 import { Theme } from '@mui/material/styles';
+import './DefaultColors';
 
 const components: any = (theme: Theme) => {
   return {
@@ -462,13 +462,67 @@ const components: any = (theme: Theme) => {
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline, &:hover .MuiOutlinedInput-notchedOutline': {
             borderColor: theme.palette.primary.main,
-          }
+          },
+          ...(theme.palette.mode === 'dark' && {
+            backgroundColor: 'rgba(0, 0, 0, 0.09)',
+            color: theme.palette.text.primary,
+          }),
         },
         input: {
           padding: '12px 14px',
         },
         inputSizeSmall: {
           padding: '8px 14px',
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        select: {
+          ...(theme.palette.mode === 'dark' && {
+            color: theme.palette.text.primary,
+          }),
+        },
+        icon: {
+          ...(theme.palette.mode === 'dark' && {
+            color: theme.palette.text.secondary,
+          }),
+        },
+      },
+      defaultProps: {
+        MenuProps: {
+          PaperProps: {
+            sx: {
+              ...(theme.palette.mode === 'dark' && {
+                bgcolor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
+                border: `1px solid ${theme.palette.divider}`,
+                '& .MuiMenuItem-root': {
+                  '&:hover': {
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: theme.palette.primary.light,
+                    '&:hover': {
+                      backgroundColor: theme.palette.primary.light,
+                    },
+                  },
+                },
+              }),
+            },
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          ...(theme.palette.mode === 'dark' && {
+            color: theme.palette.text.secondary,
+            '&.Mui-focused': {
+              color: theme.palette.primary.main,
+            },
+          }),
         },
       },
     },

@@ -286,3 +286,115 @@ export interface RestoreHistoryStats {
   restoresBySourceType: { local: number; remote: number };
   restoresBySnapshot: Record<string, number>;
 }
+
+// ============================================================================
+// Multi-Scope Scanning Types (v2)
+// ============================================================================
+export type ScanScopeId = 'prod_root' | 'server' | 'frontend' | 'prod_wildcard';
+
+export interface ScanScope {
+  id: ScanScopeId;
+  label: string;
+  root: string;
+  enabled: boolean;
+  ignore: string[];
+}
+
+export interface RefactorConsoleConfig {
+  scopes: ScanScope[];
+}
+
+export const DEFAULT_SCOPES: ScanScope[] = [
+  {
+    id: 'prod_root',
+    label: 'Prod Root',
+    root: '/var/www/orthodoxmetrics/prod',
+    enabled: true,
+    ignore: ['**/node_modules/**', '**/dist/**', '**/dist-*/**', '**/.git/**'],
+  },
+  {
+    id: 'server',
+    label: 'Server',
+    root: '/var/www/orthodoxmetrics/prod/server',
+    enabled: false,
+    ignore: ['**/node_modules/**', '**/dist/**'],
+  },
+  {
+    id: 'frontend',
+    label: 'Front-End',
+    root: '/var/www/orthodoxmetrics/prod/front-end',
+    enabled: false,
+    ignore: ['**/node_modules/**', '**/dist/**'],
+  },
+  {
+    id: 'prod_wildcard',
+    label: 'Whole Site (prod/*)',
+    root: '/var/www/orthodoxmetrics/prod/*',
+    enabled: false,
+    ignore: ['**/node_modules/**', '**/dist/**', '**/dist-*/**', '**/.git/**'],
+  },
+];
+
+// ============================================================================
+// Policy Engine Types (v2)
+// ============================================================================
+export interface PolicyRuleWhen {
+  any_dir_exists?: string[];
+  not_under?: string[];
+}
+
+export interface PolicyRuleMatch {
+  extensions?: string[];
+  include?: string[];
+  exclude?: string[];
+}
+
+export interface PolicyRuleSuggest {
+  action: 'move' | 'archive' | 'delete' | 'ignore' | 'report';
+  dest?: string;
+  confidence: number;
+}
+
+export interface PolicyRule {
+  id: string;
+  enabled: boolean;
+  scope: ScanScopeId;
+  description?: string;
+  when: PolicyRuleWhen;
+  match: PolicyRuleMatch;
+  suggest: PolicyRuleSuggest;
+}
+
+export interface PolicyFile {
+  version: number;
+  rules: PolicyRule[];
+}
+
+export interface PolicyFinding {
+  ruleId: string;
+  scopeId: ScanScopeId;
+  path: string;
+  relPath: string;
+  reason: string;
+  suggested: PolicyRuleSuggest;
+}
+
+export interface PolicyEvaluationResult {
+  findings: PolicyFinding[];
+  summary: {
+    totalFindings: number;
+    byRule: Record<string, number>;
+    byAction: Record<string, number>;
+  };
+  evaluatedAt: string;
+}
+
+export interface ScanInventoryItem {
+  path: string;
+  relPath: string;
+  scopeId: ScanScopeId;
+  ext: string;
+  size: number;
+  mtime: number;
+  isDir: boolean;
+}

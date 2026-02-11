@@ -126,6 +126,7 @@ const UserDashboard = Loadable(lazy(() => import('../features/devel-tools/users-
 const RouterMenuStudio = Loadable(lazy(() => import('../features/devel-tools/RouterMenuStudio/RouterMenuStudioPage')));
 const DynamicRecordsInspector = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsInspector')));
 const RefactorConsole = Loadable(lazy(() => import('../features/devel-tools/refactor-console/RefactorConsole')));
+const BasicRefactor = Loadable(lazy(() => import('../features/devel-tools/basic-refactor/BasicRefactor')));
 const ButtonShowcase = Loadable(lazy(() => import('../features/devel-tools/button-showcase/ButtonShowcase')));
 const OMLibrary = Loadable(lazy(() => import('../features/devel-tools/system-documentation/om-library/OMLibrary')));
 const OMMagicImage = Loadable(lazy(() => import('../features/devel-tools/om-magic-image/om-magic-image')));
@@ -231,7 +232,6 @@ const ReactStickyTable = Loadable(lazy(() => import('../features/tables/react-ta
 // Removed: All widget components from misc-legacy
 
 // authentication
-const OrthodoxLogin = Loadable(lazy(() => import('../features/auth/authentication/auth1/OrthodoxLogin')));
 const Login2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/Login2')));
 const Register = Loadable(lazy(() => import('../features/auth/authentication/auth1/Register')));
 const Register2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/Register2')));
@@ -260,12 +260,19 @@ const HTMLViewer = Loadable(lazy(() => import('../features/pages/frontend-pages/
 const GreekRecordsViewer = Loadable(lazy(() => import('../features/pages/frontend-pages/GreekRecordsViewer')));
 const Samples = Loadable(lazy(() => import('../features/pages/frontend-pages/Samples')));
 const Gallery = Loadable(lazy(() => import('../features/devel-tools/om-gallery/Gallery')));
+const PageImageIndex = Loadable(lazy(() => import('../features/devel-tools/PageImageIndex')));
 const OCATimeline = Loadable(lazy(() => import('../features/pages/frontend-pages/OCATimeline')));
 const PublicTasksListPage = Loadable(lazy(() => import('../features/pages/frontend-pages/PublicTasksListPage')));
 const PublicTaskDetailPage = Loadable(lazy(() => import('../features/pages/frontend-pages/PublicTaskDetailPage')));
 const WelcomeMessage = Loadable(lazy(() => import('../features/pages/frontend-pages/WelcomeMessage')));
 const Tour = Loadable(lazy(() => import('../features/pages/frontend-pages/Tour')));
 const Faq = Loadable(lazy(() => import('../features/pages/frontend-pages/Faq')));
+
+// ── Admin Floating HUD Toggle ───────────────────────────────────────
+// Set to true to show the Admin HUD on all EnvironmentAwarePage routes.
+// Set to false (or comment out) to disable the HUD globally.
+// Only visible to super_admin users.
+const SHOW_ADMIN_HUD = false;
 
 const Router = [
   {
@@ -457,6 +464,14 @@ const Router = [
             <Gallery />
           </ProtectedRoute>
         ) 
+      },
+      {
+        path: '/apps/gallery/page-index',
+        element: (
+          <ProtectedRoute>
+            <PageImageIndex />
+          </ProtectedRoute>
+        )
       },
       {
         path: '/apps/kanban',
@@ -860,6 +875,16 @@ const Router = [
         )
       },
       {
+        path: '/devel-tools/basic-refactor',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <BasicRefactor />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/devel-tools/button-showcase',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin']}>
@@ -955,6 +980,7 @@ const Router = [
               featureId="interactive-report-jobs" 
               priority={4}
               featureName="Interactive Report Jobs"
+              showAdminHud={SHOW_ADMIN_HUD}
             >
               <InteractiveReportJobsPage />
             </EnvironmentAwarePage>
@@ -978,6 +1004,7 @@ const Router = [
                 featureId="ocr-studio" 
                 priority={4}
                 featureName="OCR Upload"
+                showAdminHud={SHOW_ADMIN_HUD}
               >
                 <OCRStudioPage />
               </EnvironmentAwarePage>
@@ -994,6 +1021,7 @@ const Router = [
                 featureId="ocr-studio" 
                 priority={4}
                 featureName="OCR Studio"
+                showAdminHud={SHOW_ADMIN_HUD}
               >
                 <OCRStudioPage />
               </EnvironmentAwarePage>
@@ -1227,6 +1255,7 @@ const Router = [
                 featureId="baptism-records-v2" 
                 priority={0}
                 featureName="Baptism Records"
+                showAdminHud={SHOW_ADMIN_HUD}
               >
                 <BaptismRecordsPage />
               </EnvironmentAwarePage>
@@ -1243,6 +1272,7 @@ const Router = [
                 featureId="marriage-records-v2" 
                 priority={2}
                 featureName="Marriage Records"
+                showAdminHud={SHOW_ADMIN_HUD}
               >
                 <MarriageRecordsPage />
               </EnvironmentAwarePage>
@@ -1259,6 +1289,7 @@ const Router = [
                 featureId="funeral-records-v2" 
                 priority={3}
                 featureName="Funeral Records"
+                showAdminHud={SHOW_ADMIN_HUD}
               >
                 <FuneralRecordsPage />
               </EnvironmentAwarePage>
@@ -1324,14 +1355,6 @@ const Router = [
         )
       },
      {
-       path: '/apps/records/centralized',
-       element: (
-         <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-           <CentralizedRecordsPageWrapper />
-         </ProtectedRoute>
-       )
-     },
-     {
        path: '/apps/records/interactive-reports/:reportId',
        element: (
          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
@@ -1339,6 +1362,7 @@ const Router = [
              featureId="interactive-reports" 
              priority={4}
              featureName="Interactive Reports Review"
+             showAdminHud={SHOW_ADMIN_HUD}
            >
              <InteractiveReportReview />
            </EnvironmentAwarePage>

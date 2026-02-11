@@ -3,59 +3,59 @@ import { useAuth } from '@/context/AuthContext';
 import { fetchWithChurchContext } from '@/shared/lib/fetchWithChurchContext';
 import { enhancedTableStore, THEME_MAP, type Branding, type FieldStyleRule, type LiturgicalThemeKey, type ThemeTokens } from '@/store/enhancedTableStore';
 import {
-  Add as AddIcon,
-  ArrowDownward as ArrowDownIcon,
-  ArrowUpward as ArrowUpIcon,
-  Business as BusinessIcon,
-  CalendarToday as CalendarIcon,
-  CloudUpload as CloudUploadIcon,
-  Delete as DeleteIcon, Download as DownloadIcon,
-  GridView as GridViewIcon,
-  Image as ImageIcon,
-  Palette as PaletteIcon,
-  PhotoLibrary as PhotoLibraryIcon,
-  Refresh as RefreshIcon,
-  Save as SaveIcon,
-  Search as SearchIcon,
-  Settings as SettingsIcon,
-  Sort as SortIcon,
-  Storage as StorageIcon,
-  ViewList as ViewListIcon,
-  Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon
+    Add as AddIcon,
+    ArrowDownward as ArrowDownIcon,
+    ArrowUpward as ArrowUpIcon,
+    Business as BusinessIcon,
+    CalendarToday as CalendarIcon,
+    CloudUpload as CloudUploadIcon,
+    Delete as DeleteIcon, Download as DownloadIcon,
+    GridView as GridViewIcon,
+    Image as ImageIcon,
+    Palette as PaletteIcon,
+    PhotoLibrary as PhotoLibraryIcon,
+    Refresh as RefreshIcon,
+    Save as SaveIcon,
+    Search as SearchIcon,
+    Settings as SettingsIcon,
+    Sort as SortIcon,
+    Storage as StorageIcon,
+    ViewList as ViewListIcon,
+    Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon
 } from '@mui/icons-material';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Checkbox,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  Grid, IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Radio,
-  RadioGroup,
-  Select,
-  Stack,
-  Switch,
-  Tab,
-  Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography,
-  useTheme
+    Alert,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Checkbox,
+    Chip,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    Grid, IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Radio,
+    RadioGroup,
+    Select,
+    Stack,
+    Switch,
+    Tab,
+    Table, TableBody, TableCell, TableContainer,
+    TableHead, TableRow,
+    Tabs,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -155,6 +155,15 @@ const FieldMapperPage: React.FC = () => {
   const [exportDialogOpen, setExportDialogOpen] = useState<boolean>(false);
   const [exporting, setExporting] = useState<boolean>(false);
   const [exportOverwrite, setExportOverwrite] = useState<boolean>(false);
+
+  // Church Image Paths state
+  const [imagePathsDialogOpen, setImagePathsDialogOpen] = useState<boolean>(false);
+  const [churchImagePaths, setChurchImagePaths] = useState<Array<{ id: number; church_id: number; path_label: string; directory_path: string; path_type: string; sort_order: number; enabled: number; exists?: boolean }>>([]);
+  const [churchAvailableImages, setChurchAvailableImages] = useState<Array<{ filename: string; relative_path: string; serve_url: string; size: number; source_label: string; source_path_id: number }>>([]);
+  const [newPathDir, setNewPathDir] = useState<string>('');
+  const [newPathLabel, setNewPathLabel] = useState<string>('');
+  const [newPathType, setNewPathType] = useState<string>('custom');
+  const [imagePathsLoading, setImagePathsLoading] = useState<boolean>(false);
   
   // Record Settings State
   const [recordSettings, setRecordSettings] = useState({
@@ -901,6 +910,103 @@ const FieldMapperPage: React.FC = () => {
     }
   };
 
+  // Church Image Paths handlers
+  const fetchChurchImagePaths = async () => {
+    if (!churchId) return;
+    setImagePathsLoading(true);
+    try {
+      const response = await fetch(`/api/gallery/churches/${churchId}/image-paths`, { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        setChurchImagePaths(data.paths || []);
+      }
+    } catch (err) {
+      console.error('Error fetching church image paths:', err);
+    } finally {
+      setImagePathsLoading(false);
+    }
+  };
+
+  const fetchChurchAvailableImages = async () => {
+    if (!churchId) return;
+    try {
+      const response = await fetch(`/api/gallery/churches/${churchId}/available-images`, { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        setChurchAvailableImages(data.images || []);
+      }
+    } catch (err) {
+      console.error('Error fetching available images:', err);
+    }
+  };
+
+  const handleAddImagePath = async () => {
+    if (!churchId || !newPathDir.trim()) return;
+    try {
+      const response = await fetch(`/api/gallery/churches/${churchId}/image-paths`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          directory_path: newPathDir.trim(),
+          path_label: newPathLabel.trim() || 'Default',
+          path_type: newPathType,
+        }),
+      });
+      if (response.ok) {
+        setNewPathDir('');
+        setNewPathLabel('');
+        setNewPathType('custom');
+        await fetchChurchImagePaths();
+        await fetchChurchAvailableImages();
+      } else {
+        const err = await response.json();
+        setError(err.error || 'Failed to add image path');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to add image path');
+    }
+  };
+
+  const handleDeleteImagePath = async (pathId: number) => {
+    if (!window.confirm('Remove this image directory?')) return;
+    try {
+      const response = await fetch(`/api/gallery/church-image-paths/${pathId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (response.ok) {
+        await fetchChurchImagePaths();
+        await fetchChurchAvailableImages();
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete image path');
+    }
+  };
+
+  const handleOpenImagePathsDialog = () => {
+    setImagePathsDialogOpen(true);
+    fetchChurchImagePaths();
+    fetchChurchAvailableImages();
+  };
+
+  const handleAddToLibrary = (imageUrl: string, type: string) => {
+    setRecordSettings(prev => {
+      const imageLibrary = prev.imageLibrary || {
+        logo: [], omLogo: [], baptism: [], marriage: [], funeral: [], bg: [], g1: [], recordImage: [],
+      };
+      const currentImages = (imageLibrary as any)[type] || [];
+      if (currentImages.includes(imageUrl)) return prev;
+      const updatedImages = [...currentImages, imageUrl];
+      return {
+        ...prev,
+        imageLibrary: { ...imageLibrary, [type]: updatedImages },
+        currentImageIndex: { ...prev.currentImageIndex, [type]: updatedImages.length - 1 },
+      };
+    });
+    setSuccess(`Image added to ${type} library. Save settings to apply.`);
+  };
+
   // Handle image upload from preview component
   const handleImageUpload = async (type: string, file: File) => {
     if (!churchId) {
@@ -1072,6 +1178,7 @@ const FieldMapperPage: React.FC = () => {
           horizontalPosition: recordSettings.headerText?.horizontalPosition || 'center',
         },
         recordImages: {
+          enabled: recordSettings.recordImages?.enabled ?? true,
           column: recordSettings.recordImages?.column || 1,
           order: recordSettings.recordImages?.order ?? 0,
           quadrant: recordSettings.recordImages?.quadrant || 'middle',
@@ -1151,6 +1258,7 @@ const FieldMapperPage: React.FC = () => {
                     column: data.settings.headerText?.column ?? 1,
                   },
                   recordImages: {
+                    enabled: data.settings.recordImages?.enabled ?? true,
                     column: data.settings.recordImages?.column ?? 1,
                     quadrant: data.settings.recordImages?.quadrant || 'middle',
                     horizontalPosition: data.settings.recordImages?.horizontalPosition || 'center',
@@ -1267,6 +1375,7 @@ const FieldMapperPage: React.FC = () => {
                 column: data.settings.headerText?.column ?? 1,
               },
               recordImages: {
+                enabled: data.settings.recordImages?.enabled ?? true,
                 column: data.settings.recordImages?.column ?? 1,
                 // Handle both old format (baptism/marriage/funeral) and new format (x, y)
                 x: data.settings.recordImages?.x ?? data.settings.recordImages?.baptism?.x ?? 0,
@@ -1923,6 +2032,15 @@ const FieldMapperPage: React.FC = () => {
                   <Typography variant="body2" color="text.secondary">Configure visual elements for the record table header</Typography>
                 </Box>
                 <Stack direction="row" spacing={1}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<StorageIcon />}
+                    onClick={handleOpenImagePathsDialog}
+                    sx={{ textTransform: 'none', borderRadius: 2 }}
+                  >
+                    Image Sources
+                  </Button>
                   <Button
                     variant="outlined"
                     size="small"
@@ -3219,6 +3337,205 @@ const FieldMapperPage: React.FC = () => {
             >
               {exporting ? 'Exporting...' : 'Export Template'}
             </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Church Image Sources Dialog */}
+        <Dialog
+          open={imagePathsDialogOpen}
+          onClose={() => setImagePathsDialogOpen(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">Image Sources for Church #{churchId}</Typography>
+            <IconButton onClick={() => setImagePathsDialogOpen(false)} size="small">
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Configure filesystem directories where this church's images are stored. 
+              The system will scan these directories to find available images.
+            </Typography>
+
+            {/* Add New Path */}
+            <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Add Image Directory</Typography>
+              <Stack spacing={1.5}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Directory Path"
+                  placeholder="/var/www/orthodoxmetrics/prod/front-end/public/images/churches/my-church"
+                  value={newPathDir}
+                  onChange={(e) => setNewPathDir(e.target.value)}
+                />
+                <Stack direction="row" spacing={1.5}>
+                  <TextField
+                    size="small"
+                    label="Label"
+                    placeholder="e.g. Main Images"
+                    value={newPathLabel}
+                    onChange={(e) => setNewPathLabel(e.target.value)}
+                    sx={{ flex: 1 }}
+                  />
+                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                    <InputLabel>Type</InputLabel>
+                    <Select
+                      value={newPathType}
+                      label="Type"
+                      onChange={(e) => setNewPathType(e.target.value)}
+                    >
+                      <MenuItem value="images">Images</MenuItem>
+                      <MenuItem value="records">Records</MenuItem>
+                      <MenuItem value="uploads">Uploads</MenuItem>
+                      <MenuItem value="custom">Custom</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={handleAddImagePath}
+                    disabled={!newPathDir.trim()}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Add
+                  </Button>
+                </Stack>
+              </Stack>
+            </Paper>
+
+            {/* Configured Paths */}
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Configured Directories ({churchImagePaths.length})
+            </Typography>
+            {imagePathsLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                <CircularProgress size={24} />
+              </Box>
+            ) : churchImagePaths.length === 0 ? (
+              <Alert severity="info" sx={{ mb: 2 }}>
+                No image directories configured for this church. Add one above.
+              </Alert>
+            ) : (
+              <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Label</TableCell>
+                      <TableCell>Directory Path</TableCell>
+                      <TableCell>Type</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell width={60}>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {churchImagePaths.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell>{p.path_label}</TableCell>
+                        <TableCell sx={{ wordBreak: 'break-all', fontSize: '0.8rem', fontFamily: 'monospace' }}>
+                          {p.directory_path}
+                        </TableCell>
+                        <TableCell>
+                          <Chip label={p.path_type} size="small" />
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={p.exists ? 'Found' : 'Not Found'}
+                            size="small"
+                            color={p.exists ? 'success' : 'error'}
+                            variant="outlined"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <IconButton size="small" color="error" onClick={() => handleDeleteImagePath(p.id)}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+
+            {/* Available Images from configured directories */}
+            <Divider sx={{ my: 2 }} />
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+              <Typography variant="subtitle2">
+                Available Images ({churchAvailableImages.length})
+              </Typography>
+              <Button
+                size="small"
+                startIcon={<RefreshIcon />}
+                onClick={fetchChurchAvailableImages}
+                sx={{ textTransform: 'none' }}
+              >
+                Refresh
+              </Button>
+            </Stack>
+            {churchAvailableImages.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                No images found in configured directories.
+              </Typography>
+            ) : (
+              <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Preview</TableCell>
+                      <TableCell>Filename</TableCell>
+                      <TableCell>Source</TableCell>
+                      <TableCell>Size</TableCell>
+                      <TableCell>Add to Library</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {churchAvailableImages.map((img, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell sx={{ width: 60 }}>
+                          <img
+                            src={img.serve_url}
+                            alt={img.filename}
+                            style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 4 }}
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '0.8rem' }}>{img.relative_path}</TableCell>
+                        <TableCell>
+                          <Chip label={img.source_label} size="small" variant="outlined" />
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }}>
+                          {img.size > 1024 * 1024
+                            ? `${(img.size / (1024 * 1024)).toFixed(1)} MB`
+                            : `${(img.size / 1024).toFixed(0)} KB`}
+                        </TableCell>
+                        <TableCell>
+                          <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                            {['logo', 'bg', 'recordImage', 'omLogo', 'g1'].map((type) => (
+                              <Chip
+                                key={type}
+                                label={type}
+                                size="small"
+                                variant="outlined"
+                                clickable
+                                onClick={() => handleAddToLibrary(img.serve_url, type)}
+                                sx={{ fontSize: '0.65rem', height: 20, mb: 0.5 }}
+                              />
+                            ))}
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setImagePathsDialogOpen(false)}>Close</Button>
           </DialogActions>
         </Dialog>
     </Box>

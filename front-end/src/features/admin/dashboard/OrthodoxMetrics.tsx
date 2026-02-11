@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
+import { useAuth } from '@/context/AuthContext';
+import PageContainer from '@/shared/ui/PageContainer';
 import {
     Avatar,
     Box,
@@ -48,9 +50,8 @@ import {
 } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PageContainer from '@/shared/ui/PageContainer';
-import { useAuth } from '@/context/AuthContext';
 import ChurchToolsPanel from './OrthodoxMetrics/ChurchToolsPanel';
+import SettingsConsole from './SettingsConsole';
 
 // Tab Components
 
@@ -645,21 +646,7 @@ const OrthodMetrics = () => {
         {
             label: 'Settings',
             icon: <IconSettings size={18} />,
-            component: (
-                <Box p={3}>
-                    <Typography variant="h5" gutterBottom>⚙️ Settings</Typography>
-                    <Typography sx={{ 
-                        color: 'text.primary', 
-                        opacity: 0.8,
-                        '@media (max-width: 768px)': {
-                            opacity: 1,
-                            color: 'text.primary'
-                        }
-                    }}>
-                        Coming soon: System Configuration, Backup Settings, Security Options
-                    </Typography>
-                </Box>
-            )
+            component: <SettingsConsole />
         },
         {
             label: 'Server',
