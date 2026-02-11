@@ -74,7 +74,7 @@
       "Bash(git stash:*)",
       "Bash(pm2 env:*)",
       "Bash(sudo mysql:*)",
-      "Bash(MYSQL_PWD='Summerof1982@!' mysql:*)",
+      "Bash(mysql:*)",
       "Bash(ssh-keygen:*)",
       "Bash(git merge:*)",
       "Bash(git ls-tree:*)",
