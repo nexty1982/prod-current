@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Διαχείριση Εκκλησιαστικών Αρχείων | OrthodoxMetrics.com</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --orthodox-gold: #DAA520;
+            --orthodox-blue: #4169E1;
+            --orthodox-red: #DC143C;
+            --orthodox-purple: #800080;
+            --orthodox-green: #228B22;
+            --orthodox-white: #FFFFFF;
+            --orthodox-black: #2F2F2F;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--orthodox-blue) 0%, var(--orthodox-gold) 100%);
+            color: white;
+            padding: 80px 0;
+        }
+        
+        .liturgical-swatch {
+            width: 120px;
+            height: 80px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-align: center;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .liturgical-swatch:hover {
+            transform: translateY(-5px);
+        }
+        
+        .paschal-white { background-color: #FFFFFF; color: #333; }
+        .feast-gold { background-color: #FFD700; color: #333; }
+        .lenten-purple { background-color: #800080; }
+        .pentecost-green { background-color: #228B22; }
+        .martyr-red { background-color: #DC143C; }
+        .theotokos-blue { background-color: #4169E1; }
+        .funeral-black { background-color: #2F2F2F; }
+        .triumphal-red { background-color: #FF0000; }
+        
+        .record-card {
+            border-left: 4px solid var(--orthodox-gold);
+            transition: all 0.3s ease;
+        }
+        
+        .record-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-icon {
+            font-size: 3rem;
+            color: var(--orthodox-gold);
+            margin-bottom: 1rem;
+        }
+        
+        .pricing-card {
+            border: 2px solid var(--orthodox-gold);
+            transition: all 0.3s ease;
+        }
+        
+        .pricing-card:hover {
+            border-color: var(--orthodox-blue);
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--orthodox-red);
+            background: linear-gradient(145deg, #fff 0%, #f8f9fa 100%);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 40px 0;
+            }
+            
+            .liturgical-swatch {
+                width: 80px;
+                height: 60px;
+                font-size: 0.7rem;
+                margin: 5px;
+            }
+            
+            .section-icon {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--orthodox-blue);">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-cross me-2"></i>OrthodoxMetrics
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#records">Αρχεία</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#themes">Θέματα</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#pricing">Τιμές</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Επικοινωνία</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h1 class="display-4 fw-bold mb-4">Διαχείριση Εκκλησιαστικών Αρχείων</h1>
+                    <p class="lead mb-4">Ολοκληρωμένη ψηφιακή λύση για τη διαχείριση αρχείων Βαπτίσεων, Γάμων και Κηδειών με λειτουργική ακρίβεια και Ορθόδοξη παράδοση.</p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="#contact" class="btn btn-light btn-lg">Ξεκινήστε</a>
+                        <a href="#records" class="btn btn-outline-light btn-lg">Δείτε Παραδείγματα</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Liturgical Color Themes -->
+    <section id="themes" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Λειτουργικά Χρωματικά Θέματα</h2>
+                <p class="text-muted">Βιώστε την ομορφιά των Ορθοδόξων λειτουργικών εποχών μέσα από τη χρωματικά κωδικοποιημένη διεπαφή μας</p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap justify-content-center">
+                        <div class="liturgical-swatch paschal-white">Πασχάλιο<br>Λευκό</div>
+                        <div class="liturgical-swatch feast-gold">Εορταστικό<br>Χρυσό</div>
+                        <div class="liturgical-swatch lenten-purple">Νηστίσιμο<br>Μωβ</div>
+                        <div class="liturgical-swatch pentecost-green">Πεντηκοστή<br>Πράσινο</div>
+                        <div class="liturgical-swatch martyr-red">Μαρτυρικό<br>Κόκκινο</div>
+                        <div class="liturgical-swatch theotokos-blue">Θεοτοκικό<br>Μπλε</div>
+                        <div class="liturgical-swatch funeral-black">Κηδειώδες<br>Μαύρο</div>
+                        <div class="liturgical-swatch triumphal-red">Θριαμβικό<br>Κόκκινο</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Example Church Records -->
+    <section id="records" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Παραδείγματα Εκκλησιαστικών Αρχείων</h2>
+                <p class="text-muted">Δείγματα αρχείων που παρουσιάζουν το ολοκληρωμένο σύστημα διαχείρισής μας</p>
+            </div>
+
+            <!-- Baptism Records -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-water section-icon"></i>
+                        <h3>Αρχεία Βαπτίσεων</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ημερομηνία</th>
+                                    <th>Όνομα Παιδιού</th>
+                                    <th>Γονείς</th>
+                                    <th>Νονοί</th>
+                                    <th>Ιερέας</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>15/01/2024</td>
+                                    <td>Σοφία Αλεξάνδρα</td>
+                                    <td>Ιωάννης & Μαρία Πόποφ</td>
+                                    <td>Πέτρος & Άννα Δημητρόφ</td>
+                                    <td>π. Νικόλαος</td>
+                                </tr>
+                                <tr>
+                                    <td>03/02/2024</td>
+                                    <td>Μιχαήλ Κωνσταντίνος</td>
+                                    <td>Γεώργιος & Ελένη Πέτροφ</td>
+                                    <td>Ανδρέας & Κατερίνα Ιβάνοφ</td>
+                                    <td>π. Αλέξανδρος</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marriage Records -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-rings-wedding section-icon"></i>
+                        <h3>Αρχεία Γάμων</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ημερομηνία</th>
+                                    <th>Γαμπρός</th>
+                                    <th>Νύφη</th>
+                                    <th>Κουμπάρος</th>
+                                    <th>Κουμπάρα</th>
+                                    <th>Ιερέας</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>20/03/2024</td>
+                                    <td>Δημήτριος Κώστας</td>
+                                    <td>Αναστασία Νικολίτς</td>
+                                    <td>Σταύρος Κώστας</td>
+                                    <td>Μαρία Νικολίτς</td>
+                                    <td>π. Σεραφείμ</td>
+                                </tr>
+                                <tr>
+                                    <td>14/04/2024</td>
+                                    <td>Στέφανος Ράντοβιτς</td>
+                                    <td>Ναταλία Στογιάνοβιτς</td>
+                                    <td>Μίλος Ράντοβιτς</td>
+                                    <td>Γελένα Στογιάνοβιτς</td>
+                                    <td>π. Μάξιμος</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Funeral Records -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-cross section-icon"></i>
+                        <h3>Αρχεία Κηδειών</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ημερομηνία</th>
+                                    <th>Αποθανών</th>
+                                    <th>Ηλικία</th>
+                                    <th>Ημ. Θανάτου</th>
+                                    <th>Ιερέας</th>
+                                    <th>Κοιμητήριο</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>10/05/2024</td>
+                                    <td>Όλγα Μιλένκοβιτς</td>
+                                    <td>84</td>
+                                    <td>08/05/2024</td>
+                                    <td>π. Δαμασκηνός</td>
+                                    <td>Αγίου Σάβα</td>
+                                </tr>
+                                <tr>
+                                    <td>02/06/2024</td>
+                                    <td>Πέτρος Γιοβάνοβιτς</td>
+                                    <td>67</td>
+                                    <td>31/05/2024</td>
+                                    <td>π. Θεόδωρος</td>
+                                    <td>Αγίας Τριάδος</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Πακέτα Υπηρεσιών</h2>
+                <p class="text-muted">Επιλέξτε την τέλεια λύση για τις ανάγκες της ενορίας σας</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card pricing-card h-100">
+                        <div class="card-body text-center">
+                            <h4 class="card-title">Βασικό</h4>
+                            <h2 class="text-primary">€29/μήνα</h2>
+                            <p class="card-text">Τέλειο για μικρές ενορίες</p>
+                            <ul class="list-unstyled">
+                                <li>✓ Έως 500 αρχεία</li>
+                                <li>✓ Βασικές αναφορές</li>
+                                <li>✓ Υποστήριξη email</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary">Ξεκινήστε</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card pricing-card featured h-100">
+                        <div class="card-body text-center">
+                            <h4 class="card-title">Επαγγελματικό</h4>
+                            <h2 class="text-primary">€69/μήνα</h2>
+                            <p class="card-text">Η πιο δημοφιλής επιλογή</p>
+                            <ul class="list-unstyled">
+                                <li>✓ Απεριόριστα αρχεία</li>
+                                <li>✓ Προχωρημένες αναφορές</li>
+                                <li>✓ Προτεραιότητα υποστήριξης</li>
+                                <li>✓ Πολυγλωσσικό</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary">Ξεκινήστε</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card pricing-card h-100">
+                        <div class="card-body text-center">
+                            <h4 class="card-title">Επιχειρηματικό</h4>
+                            <h2 class="text-primary">€149/μήνα</h2>
+                            <p class="card-text">Για μεγάλες ενορίες</p>
+                            <ul class="list-unstyled">
+                                <li>✓ Όλα του Επαγγελματικού</li>
+                                <li>✓ Προσαρμοσμένες ενσωματώσεις</li>
+                                <li>✓ 24/7 τηλεφωνική υποστήριξη</li>
+                                <li>✓ Προσαρμοσμένη εκπαίδευση</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary">Ξεκινήστε</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-5" style="background: linear-gradient(135deg, var(--orthodox-blue) 0%, var(--orthodox-purple) 100%);">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center text-white">
+                    <h2 class="fw-bold mb-4">Έτοιμοι να Μεταμορφώσετε τα Αρχεία της Ενορίας σας;</h2>
+                    <p class="lead mb-4">Ενταχθείτε σε εκατοντάδες Ορθόδοξες ενορίες παγκοσμίως που εμπιστεύονται το OrthodoxMetrics για την τήρηση των ιερών αρχείων τους.</p>
+                    <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                        <a href="#" class="btn btn-light btn-lg">Δωρεάν Δοκιμή</a>
+                        <a href="#" class="btn btn-outline-light btn-lg">Κλείστε Demo</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-cross me-2"></i>OrthodoxMetrics</h5>
+                    <p class="mb-0">Διατηρώντας την Ορθόδοξη παράδοση μέσα από τη σύγχρονη τεχνολογία</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; 2025 OrthodoxMetrics.com | Όλα τα Δικαιώματα Διατηρούνται</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

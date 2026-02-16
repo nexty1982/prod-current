@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrthodoxMetrics - Video Advertisement</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: #0f1419;
+            overflow: hidden;
+            color: #f5f5dc;
+            height: 100vh;
+        }
+
+        .video-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #2d3748 100%);
+        }
+
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 1.5s ease-in-out;
+            padding: 40px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .scene.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Scene 1: Orthodox Cross */
+        .scene1 {
+            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(15,20,25,1) 70%);
+        }
+
+        .orthodox-cross {
+            width: 150px;
+            height: 200px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+            animation: crossGlow 3s ease-in-out infinite alternate;
+        }
+
+        .orthodox-cross::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: -40px;
+            width: 230px;
+            height: 40px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            border-radius: 20px;
+        }
+
+        .orthodox-cross::after {
+            content: '';
+            position: absolute;
+            bottom: 50px;
+            left: -20px;
+            width: 190px;
+            height: 25px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            border-radius: 12px;
+            transform: rotate(-15deg);
+        }
+
+        @keyframes crossGlow {
+            from { box-shadow: 0 0 50px rgba(255, 215, 0, 0.6); }
+            to { box-shadow: 0 0 80px rgba(255, 215, 0, 0.9); }
+        }
+
+        /* Scene 2: Dashboard */
+        .dashboard {
+            background: rgba(245, 245, 220, 0.98);
+            border-radius: 16px;
+            padding: 40px;
+            width: 95%;
+            max-width: 1200px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            color: #1a1a2e;
+            animation: slideUp 1.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3644A7;
+        }
+
+        .logo {
+            font-family: 'Crimson Text', serif;
+            font-size: 2.2em;
+            font-weight: 600;
+            color: #3644A7;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo::before {
+            content: "☦";
+            font-size: 1.3em;
+            color: #D0A924;
+        }
+
+        .ag-grid-mockup {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            animation: fadeInGrid 2s ease-out 0.5s both;
+        }
+
+        @keyframes fadeInGrid {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .ag-header {
+            background: linear-gradient(135deg, #3644A7, #4f63d2);
+            color: white;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .ag-row {
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            animation: slideInRow 0.8s ease-out both;
+        }
+
+        .ag-row:nth-child(1) { animation-delay: 0.2s; }
+        .ag-row:nth-child(2) { animation-delay: 0.4s; }
+        .ag-row:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes slideInRow {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .ag-row:hover {
+            background: rgba(54, 68, 167, 0.05);
+        }
+
+        .diocese-name {
+            font-weight: 600;
+            color: #3644A7;
+        }
+
+        .status-badge {
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        /* Scene 3: Map */
+        .map-container {
+            width: 90%;
+            height: 70%;
+            background: linear-gradient(135deg, rgba(245, 245, 220, 0.95) 0%, rgba(240, 240, 235, 0.95) 100%);
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: mapZoom 2s ease-out;
+        }
+
+        @keyframes mapZoom {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .map-bg {
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="%23f5f5dc"/><path d="M200 150 L1000 150 L1000 650 L200 650 Z" fill="%233644A7" opacity="0.1"/><text x="600" y="100" text-anchor="middle" font-size="36" fill="%23D0A924" font-weight="bold">Orthodox Churches - North America & Canada</text></svg>') center/contain no-repeat;
+        }
+
+        .parish-dot {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle, #D0A924, #B8941F);
+            border-radius: 50%;
+            animation: pulseParish 2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(208, 169, 36, 0.6);
+        }
+
+        @keyframes pulseParish {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.8; }
+        }
+
+        .parish-dot:nth-child(1) { top: 25%; left: 20%; animation-delay: 0s; }
+        .parish-dot:nth-child(2) { top: 35%; left: 40%; animation-delay: 0.3s; }
+        .parish-dot:nth-child(3) { top: 45%; left: 65%; animation-delay: 0.6s; }
+        .parish-dot:nth-child(4) { top: 30%; left: 75%; animation-delay: 0.9s; }
+        .parish-dot:nth-child(5) { top: 55%; left: 30%; animation-delay: 1.2s; }
+        .parish-dot:nth-child(6) { top: 60%; left: 80%; animation-delay: 1.5s; }
+
+        /* Scene 4: OCR/Records */
+        .records-interface {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .certificate-preview {
+            background: rgba(245, 245, 220, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            animation: slideInLeft 1.5s ease-out;
+        }
+
+        .audit-trail {
+            background: rgba(245, 245, 220, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            animation: slideInRight 1.5s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .certificate-preview h3, .audit-trail h3 {
+            color: #3644A7;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .success-indicator {
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .audit-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #3644A7;
+        }
+
+        /* Scene 5: Analytics */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .chart-card {
+            background: rgba(245, 245, 220, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            color: #1a1a2e;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            animation: chartReveal 2s ease-out;
+        }
+
+        @keyframes chartReveal {
+            from { opacity: 0; transform: scale(0.9) rotateY(15deg); }
+            to { opacity: 1; transform: scale(1) rotateY(0deg); }
+        }
+
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #3644A7;
+            text-align: center;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: end;
+            gap: 12px;
+            height: 180px;
+            margin: 25px 0;
+            justify-content: center;
+        }
+
+        .bar {
+            background: linear-gradient(0deg, #3644A7, #4f63d2);
+            border-radius: 6px 6px 0 0;
+            width: 35px;
+            animation: growBar 1.5s ease-out both;
+            position: relative;
+        }
+
+        .bar:nth-child(1) { height: 80px; animation-delay: 0.2s; }
+        .bar:nth-child(2) { height: 120px; animation-delay: 0.4s; }
+        .bar:nth-child(3) { height: 100px; animation-delay: 0.6s; }
+        .bar:nth-child(4) { height: 140px; animation-delay: 0.8s; }
+        .bar:nth-child(5) { height: 90px; animation-delay: 1.0s; }
+
+        @keyframes growBar {
+            from { height: 0; }
+        }
+
+        .pie-chart {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #3644A7 0deg 120deg, 
+                #D0A924 120deg 240deg, 
+                #8b0000 240deg 360deg
+            );
+            margin: 25px auto;
+            animation: spinPie 2s ease-in-out;
+            position: relative;
+        }
+
+        @keyframes spinPie {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scene 6: Metropolitan */
+        .metropolitan-scene {
+            background: linear-gradient(
+                rgba(0, 0, 0, 0.7), 
+                rgba(0, 0, 0, 0.7)
+            ), 
+            radial-gradient(circle, rgba(54, 68, 167, 0.3) 0%, rgba(15, 20, 25, 1) 70%);
+            color: #f5f5dc;
+            text-align: center;
+        }
+
+        .metropolitan-figure {
+            width: 250px;
+            height: 300px;
+            background: linear-gradient(135deg, #8b0000, #a52a2a);
+            border-radius: 16px;
+            position: relative;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: reverentEntrance 2s ease-out;
+        }
+
+        @keyframes reverentEntrance {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .metropolitan-figure::before {
+            content: "☦";
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3em;
+            color: #D0A924;
+            animation: crossBless 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes crossBless {
+            from { text-shadow: 0 0 20px rgba(208, 169, 36, 0.6); }
+            to { text-shadow: 0 0 40px rgba(208, 169, 36, 0.9); }
+        }
+
+        .metropolitan-info {
+            background: rgba(245, 245, 220, 0.1);
+            padding: 30px;
+            border-radius: 12px;
+            border: 2px solid #D0A924;
+            backdrop-filter: blur(10px);
+        }
+
+        .metropolitan-info h2 {
+            color: #D0A924;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        /* Scene 7: Final Logo */
+        .final-logo {
+            text-align: center;
+            color: #f5f5dc;
+            animation: logoReveal 2s ease-out;
+        }
+
+        @keyframes logoReveal {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .final-logo h1 {
+            font-size: 4em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #D0A924, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 20px rgba(208, 169, 36, 0.6)); }
+            to { filter: drop-shadow(0 0 40px rgba(208, 169, 36, 0.9)); }
+        }
+
+        .final-logo .tagline {
+            font-size: 1.8em;
+            font-style: italic;
+            color: #D0A924;
+            margin-top: 30px;
+            animation: fadeInTagline 1s ease-out 1s both;
+        }
+
+        @keyframes fadeInTagline {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .voiceover {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 25px 50px;
+            border-radius: 40px;
+            border: 2px solid #D0A924;
+            max-width: 95%;
+            text-align: center;
+            font-size: 1.3em;
+            line-height: 1.6;
+            backdrop-filter: blur(15px);
+            animation: voiceoverSlide 1s ease-out 0.5s both;
+        }
+
+        @keyframes voiceoverSlide {
+            from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .control-btn {
+            background: rgba(54, 68, 167, 0.9);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+        }
+
+        .control-btn:hover {
+            background: rgba(80, 99, 210, 0.9);
+            transform: translateY(-2px);
+            border-color: #D0A924;
+        }
+
+        .control-btn.active {
+            background: #D0A924;
+            color: #1a1a2e;
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #3644A7, #D0A924);
+            transition: width 1.5s ease;
+            z-index: 1001;
+            box-shadow: 0 0 10px rgba(208, 169, 36, 0.5);
+        }
+
+        .scene-indicator {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid #D0A924;
+            color: #D0A924;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            z-index: 1000;
+        }
+
+        /* Timing indicators */
+        .timing-overlay {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #D0A924;
+            color: #D0A924;
+            font-family: 'Inter', sans-serif;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                width: 98%;
+                padding: 20px;
+            }
+            
+            .ag-header, .ag-row {
+                grid-template-columns: 2fr 1fr 1fr;
+                font-size: 0.9em;
+            }
+            
+            .final-logo h1 {
+                font-size: 2.5em;
+            }
+            
+            .voiceover {
+                font-size: 1.1em;
+                padding: 20px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <!-- Scene 1: Orthodox Cross and Opening -->
+        <div class="scene scene1 active" id="scene1">
+            <div class="orthodox-cross"></div>
+            <div class="voiceover">
+                "Across North America and Canada, Orthodox churches record the sacramental life of the faithful—baptisms, marriages, funerals, and more."
+            </div>
+        </div>
+
+        <!-- Scene 2: Dashboard with AG Grid -->
+        <div class="scene" id="scene2">
+            <div class="dashboard">
+                <div class="dashboard-header">
+                    <div class="logo">OrthodoxMetrics</div>
+                    <div style="font-family: Inter; color: #3644A7; font-weight: 600;">Diocesan Dashboard</div>
+                </div>
+                <div class="ag-grid-mockup">
+                    <div class="ag-header">
+                        <div>Diocese Name</div>
+                        <div>Parishes</div>
+                        <div>Missions</div>
+                        <div>Institutions</div>
+                        <div>Status</div>
+                    </div>
+                    <div class="ag-row">
+                        <div class="diocese-name">Diocese of the Northeast</div>
+                        <div style="color: #3644A7; font-weight: 600;">120</div>
+                        <div style="color: #D0A924; font-weight: 600;">45</div>
+                        <div style="color: #8b0000; font-weight: 600;">25</div>
+                        <div><span class="status-badge">✓ Active</span></div>
+                    </div>
+                    <div class="ag-row">
+                        <div class="diocese-name">Diocese of the South</div>
+                        <div style="color: #3644A7; font-weight: 600;">80</div>
+                        <div style="color: #D0A924; font-weight: 600;">35</div>
+                        <div style="color: #8b0000; font-weight: 600;">20</div>
+                        <

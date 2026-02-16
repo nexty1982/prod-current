@@ -1,0 +1,121 @@
+---
+description: Scripts must use bash, JavaScript, or Python - never PowerShell. Code runs on Linux server.
+alwaysApply: true
+---
+
+# Script Language Standards
+
+## Critical: No PowerShell Scripts
+
+**NEVER create PowerShell scripts (`.ps1` files) for this project.**
+
+This codebase runs on a **Linux server**. All scripts must be compatible with Linux.
+
+## Allowed Script Languages
+
+Use **ONLY** these languages for scripts:
+
+### ✅ ALLOWED Script Languages:
+
+1. **Bash Shell Scripts** (`.sh`)
+   - Use for system operations, file manipulation, deployment
+   - Must start with `#!/bin/bash` or `#!/usr/bin/env bash`
+   - Must be executable: `chmod +x script.sh`
+
+2. **JavaScript/Node.js** (`.js`)
+   - Use for Node.js-specific tasks, npm scripts, build tools
+   - Can be run with `node script.js` or `npm run <script>`
+   - Use when you need Node.js APIs or npm packages
+
+3. **Python** (`.py`)
+   - Use for cross-platform scripts, data processing, automation
+   - Must start with `#!/usr/bin/env python3` for executables
+   - Use Python 3.x syntax
+
+### ❌ FORBIDDEN Script Languages:
+
+- **PowerShell** (`.ps1`, `.psm1`) → **DO NOT CREATE**
+- **Batch files** (`.bat`, `.cmd`) → **DO NOT CREATE**
+- **Windows-specific scripts** → **DO NOT CREATE**
+
+## Why This Matters
+
+- **Production environment**: Code runs on Linux server (`/var/www/orthodoxmetrics/prod`)
+- **Samba share**: `Z:\` is a mounted Samba share from Linux
+- **CI/CD**: Build and deployment pipelines run on Linux
+- **Cross-platform**: Bash, JS, and Python work on both Linux and can be tested locally
+
+## Script Creation Checklist
+
+Before creating ANY script:
+
+1. ✅ Choose bash, JavaScript, or Python
+2. ✅ Verify the script will run on Linux
+3. ✅ Add proper shebang line (`#!/bin/bash`, `#!/usr/bin/env python3`, etc.)
+4. ✅ **Use Unix LF line endings** (`\n`), NEVER Windows CRLF (`\r\n`)
+5. ✅ Make shell scripts executable (`chmod +x`)
+6. ✅ Test that it works in a Linux environment
+7. ❌ **NEVER** create PowerShell scripts
+
+## Critical: Line Endings
+
+**ALL scripts MUST use Unix LF (`\n`) line endings, NEVER Windows CRLF (`\r\n`).**
+
+Scripts are created on Windows (via Samba share) but run on Linux. CRLF causes:
+```
+-bash: ./script.sh: /bin/bash^M: bad interpreter: No such file or directory
+```
+
+**Always ensure scripts use LF line endings.** See `script-line-endings.mdc` rule for details.
+
+## Examples
+
+### ✅ GOOD: Bash Script
+```bash
+#!/bin/bash
+# Deploy script for Linux server
+set -euo pipefail
+echo "Deploying to production..."
+```
+
+### ✅ GOOD: JavaScript/Node.js Script
+```javascript
+#!/usr/bin/env node
+// Build script using Node.js APIs
+const fs = require('fs');
+console.log('Building project...');
+```
+
+### ✅ GOOD: Python Script
+```python
+#!/usr/bin/env python3
+"""Data processing script"""
+import sys
+print("Processing data...")
+```
+
+### ❌ BAD: PowerShell Script
+```powershell
+# DO NOT CREATE - This won't work on Linux!
+Write-Host "This is wrong"
+```
+
+## Existing PowerShell Scripts
+
+If you encounter existing `.ps1` files in the repository:
+- They may be legacy or for local Windows development only
+- **Do NOT create new ones**
+- Consider migrating existing ones to bash/JS/Python if they're used in production
+
+## Script Location
+
+Place scripts in:
+- `scripts/` - General project scripts
+- `tools/` - Utility scripts
+- Root-level scripts for common operations
+
+## Enforcement
+
+- **Always apply this rule** - it applies to every AI agent session
+- **Check script language** before creating any script file
+- **When in doubt, use bash** - it's the most universal for Linux servers
