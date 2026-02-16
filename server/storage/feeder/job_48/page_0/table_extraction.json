@@ -1,0 +1,186 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 3,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "HISTPHISCKSÅ MARRIAGES CHUTI IA СЧЕТ Мкстопроисхожденіе , имя ,"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "-Obr > IHCD- YEAR 1971 KBHALEPROSE - BY [ SAZ , HOTL ETSFAM , W EPHESCS4STAGHINGE"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Мѣсяца и вѣроисповѣданіе жениха фамилій и сколько Имена , отца Мксторожденія день . отъ роду и вѣроисповѣданіе , имя , Краковя невѣсты фамилі . . летя Имена отц и которым H сколько , Браком лѣтъ . отъ ΛΙΑΤΕΡΗ рода . и которым браком . NUMBER FULL MATESH NAME , DATE AGE RELIGION OF , GROOM , , 1st RESIDENCE or 2nd MARRIAGE , FIRST NAMES OF GROOM'S FULL AGE NAME , OF BRIDE , PARENTS RELIGION , 1st or 2nd RESIDENCE MARRIAGE , FIRST OF BRIDE'S NAMES 1R 2-21-71 GEORGE OLIVER PARENTS 566 WEST UNION GEORGE AVENUE AUGUSTA ANNA 25 WEST MAX STEPHEN SOMERVILLE SOMERSET ST . MARY ( 45 AGE , , OCTOBER NJ , 25 , 08876 1925 ) RARITAN AGE , NEW : 45 JERSEY PROTESTANT BAPTIST ( JULY 19 , 1925 ORTHODOX ) IST MARRIAGE CHRISTIAN ROND MARRIAGE",
+              "confidence": 0.89,
+              "token_count": 142,
+              "bbox": [
+                0.029326923076923077,
+                0.1387820512820513,
+                0.5228365384615384,
+                0.4439102564102564
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Кто совершалъ Кто были поручители . TAHNCTBO . PRIEST'S NAME WITNESSES NAMES REV . ROBERT A. MR . GEORGE GRABANIA GEORGE LEWIS 1311 TERRILL ROAD SCOTCH PLAINS , N.J. 07076 MRS . GEORGE GRABANIA 1311 TERRILL ROAD SCOTCH PLAINS , N.J. 07076 MR . KRACHUN ROBERT , 803 KRACHUN NEW + YORK MRS AVE . . , ROSE RARITAN MARY N. J.",
+              "confidence": 0.88,
+              "token_count": 62,
+              "bbox": [
+                0.5492788461538461,
+                0.19262820512820514,
+                0.8252403846153846,
+                0.47147435897435896
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Отя какого числа и за какима No License . DATE AND NUMBER OF LICENSE FEBRUARY 18 , 1971 No. 1 6-7 ( RARITAN , N.J. ) ,",
+              "confidence": 0.87,
+              "token_count": 27,
+              "bbox": [
+                0.8185096153846154,
+                0.19487179487179487,
+                0.9709134615384616,
+                0.45705128205128204
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "13 7-7-71 RICHARD JOHN OSTAPOVICH JOHN NEW R.D.1 , Box BRUNSWICK 387 PAULINE SUSAN , R.D.1 MARY N.J. , Box ANDREYCHIK 387 HARRY ANNA AGE : 26 ( FEB , 13 , 1946 ) AGE NEW BRUNSWICK , N.J. ORTHODOX CHRISTIAN : 25 ( JULY 20 , 1945 ) 1ST MARRIAGE ORTHODOX CHRISTIAN IST MARRIAGE 14 7-11-71 THOMAS FRANK RICHARDSON FRANK MARIA A. MARINI GIUSEPPE 12 NORTH 5TH AVENUE CATHERINE 12 NORTH 5TH AVENUE GIOVAN MANVILLE , AGE : 30 ( MAY NEW 11 , 1941 JERSEY ) ORTHODOX AGE : MANVILLE 28 ( , APRIL NEW 1 , JERSEY 1943 NINA ) CHRISTIAN ORTHODOX CHRISTIAN 2ND MARRIAGE AND MARRIAGE",
+              "confidence": 0.91,
+              "token_count": 110,
+              "bbox": [
+                0.029086538461538462,
+                0.5048076923076923,
+                0.5175480769230769,
+                0.8538461538461538
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "REV . ROBERT A. GEORGE MR LEWIS . 176 HARRY NORTH 10TH ANDREYCHIK MANVILLE , JERSEY AVENUE NEW 08835 MRS , ANNA ANDREY CHIK 176 NORTH 10TH AVENUE MANVILLE , NEW JERSEY 08835 REV . ROBERT A. MR . ROBERT CLIM GEORGE LEWIS FOOTHILL BRIDGEWATER ROAD , NEW JERSEY MRS . HELEN RUSSO 707 RARITAN RHINE BLVD . , NEW JERSEY",
+              "confidence": 0.9,
+              "token_count": 61,
+              "bbox": [
+                0.5502403846153846,
+                0.5246794871794872,
+                0.8060096153846154,
+                0.8737179487179487
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "No. JULY 6 , 1971 50-71 ( MANVILLE , N.J. ) MARRIAGE ORTHODOX FOR THE SACRAMENTAL CONTRACTED 16 RENO JANUARY 1971 CIVIL PREVIOUSLY WEDDING , NEVADA , REV.G. CHAPEL HEART OF N. , SNELLING RENO , DOROTHY WITNESSED BY SIVELLING , IRENE PIERCE , JUNE No. 28 48-71 , 1971 ( MANVILLE , N.J. )",
+              "confidence": 0.9,
+              "token_count": 55,
+              "bbox": [
+                0.8334134615384615,
+                0.5198717948717949,
+                0.9855769230769231,
+                0.7692307692307693
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0125
+    ],
+    "col_2": [
+      0.0125,
+      0.5375
+    ],
+    "col_3": [
+      0.5375,
+      0.82
+    ],
+    "col_4": [
+      0.82,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.15,
+  "total_tokens": 483,
+  "data_tokens": 457,
+  "data_rows": 2,
+  "extracted_at": "2026-02-14T16:32:13.825Z"
+}

@@ -1,0 +1,148 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 3,
+      "column_count": 3,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "DEATHS МЕТРИЧЕСКОЙ книги Счет отмершихъ . Месяця й день . Местопроисхожденіе , имя , отчество й фамилім"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "QUI + HOHI > YEAR на 96 года , часть тРÉTЇМ , Ф ОЙМÉРШИХА . отмершаги . Акта 66 чего"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Мужеска . Женска смерти . погребенім . MALE NUMBER GEMALE DEATH DATE М OF BURTAL FULL NAME OF DECEDENT Н 3/13 3/18 Joseph D. Zydizk 2 7124 7/27 Raymond Bodenchuk",
+              "confidence": 0.91,
+              "token_count": 30,
+              "bbox": [
+                0.031490384615384615,
+                0.16153846153846155,
+                0.3730769230769231,
+                0.3737179487179487
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "обмершагш . отмеря . Кто Мужеска исповѣдываля й пріобціаля . Женска Кто совершаля погревеніе , . и гдѣ погревены . . MALE AGE Е FEMALE CAUSE OF DEATH NAME ADMINISTERED OF PRIEST WHO SACRAMENTS NAME OF PRIEST WHO BURIAL OFFICIATED AT AND PLACE OF INTERNMENT 80 Fri James 76 bilztevzl ( ( no nobody place Pausells body- of interment pneumonic + not known )",
+              "confidence": 0.9,
+              "token_count": 64,
+              "bbox": [
+                0.44879807692307694,
+                0.14262820512820512,
+                0.9338942307692307,
+                0.38846153846153847
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3 12/26 12/30 . Peter Stets ( N - P )",
+              "confidence": 0.91,
+              "token_count": 11,
+              "bbox": [
+                0.030528846153846153,
+                0.41378205128205126,
+                0.35721153846153847,
+                0.44743589743589746
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "adult distvess respiritof sym . Fr. Janes Parsells plat Ss . Pete + Paul , . 150 67 Hillsborough NJ 14 Fi . Jaes Pausells Sacred Heart Cenety Hillsborough , NJ .",
+              "confidence": 0.78,
+              "token_count": 32,
+              "bbox": [
+                0.4519230769230769,
+                0.3814102564102564,
+                0.9382211538461539,
+                0.5314102564102564
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.015
+    ],
+    "col_2": [
+      0.015,
+      0.41
+    ],
+    "col_3": [
+      0.41,
+      1
+    ]
+  },
+  "columns_detected": 3,
+  "header_y_threshold": 0.15,
+  "total_tokens": 174,
+  "data_tokens": 137,
+  "data_rows": 2,
+  "extracted_at": "2026-02-15T18:31:32.070Z"
+}

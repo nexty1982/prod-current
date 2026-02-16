@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "custom",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "-Obr>\nIHCD-\nMARRIAGES\nHISTPHISCKSÅ CHUTI IA\nМкстопроисхожденіе, имя, фамилій Имена отца Мксторожденія, имя, фамилі. Имена отц\nСЧЕТ Мѣсяца и вѣроисповѣданіе жениха, сколько\nКраковя.\nи день.\nNUMBER\nDATE"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "custom",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-14T16:32:13.849Z"
+}

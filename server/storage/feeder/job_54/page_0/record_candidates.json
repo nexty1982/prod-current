@@ -1,0 +1,32 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "шихем . Званіе има , , Мужеска Женска Koetpe- Имена родившихе ΠΟΛΔ пола рожде в кроисповеданім . HiA . . . . HIA | Званіе , има , отчетко и фамилі воспріблинкова . | Кто совершаль таинство крошені ."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.82,
+      "fields": {
+        "notes": "MALE NUMBER FEMALE BIRTH DATES BAPTIEK NAME OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN NAME CITY OF BIRTH M 11/6/95/1/18/16 ALYSE ANN PETER JOHN JEGOU ROMAN CATHOLIC JECOU SOMERVILLE , NJ . CAROL ANN KULINA ORTHODOX 2 10/31/75/3/14/76 JOHN HENRY JOHN ROSOCHA ORTHODOX SOMERVILLE ROSOCHA , NJ . JOAN LECHINSKY ROMAN CATHOLIC 3 4/13/765/22/76 JAMES MICHAEL PETER P. ZEBAN ZEBAN ORTHODOX SOMERVILLE , NJ . PHYLLIS J. JEWELL REFORMED 4 6/21/76/8/1/76 NICHOLAS KUCHAREWSKI , NICHOLAS KUCHAREWSKI OR THUQOX SOMERVILLE , N.J. SUZANNE ZEMRE PROTESTANT 5 8/12/76/9/19/76 EROH CHRISTOPHER KULINA ROBERT JOSEPH KULINA OR THE D PRINCETON , NJ . SUE THOMPSON PROTESTANT 6 9/25/16/10/3/76 EMILY SORRENTINO IRENE JAMES THELMA MICHAEL DALE PETERSON SORRENTING R.C. ORTHODOX | FULL NAMES OF SPONSORS ( JOHN NANCY JECOO JOAN ) ( R.C. KULINA ) ( OFTHNOG ) VINCENT ZAKARZEWSKI OR THUD of MAUREEN ZAKARZEWSKI OR TINDEX ( DONALD WILLIAM MACLEOD ) PROT . THERESA ANN MACLEOD ORTHODOX . ( RONALO ZEMKE ) R. CATHOLIC PATRICIA GOODWIN ORTHODOX MARK PRIBISH ORTHODOX ( OCE LANGE ) PROTESTANT PETER JAMES PAMELA PETERSON ORTHODOX ECKERSLEY ORTHODOX | PRIEST'S NAME FR . EUGENE D. TARRIS CERTIL 76-1 Fie EUGENE D , FARRIS CERT # 76--2 FR EUGENE D. TARRIS FR . EUGENE D. TARRis CERT # 76-4 FR . EUGENE D. TARRIS CERT # 76-5- FR . EUGENE D. TARRIS CERT # 76-6"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-15T18:28:00.411Z"
+}

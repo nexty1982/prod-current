@@ -1,1 +1,19 @@
-{}
+{
+  "/var/www/orthodoxmetrics/prod/CLAUDE.md": "2026-02-16T01:13:00.364Z",
+  "/var/www/orthodoxmetrics/prod/.analysis/om-library-complete-summary.md": "2026-02-16T04:40:38.162Z",
+  "/var/www/orthodoxmetrics/prod/.analysis/om-library-implementation-summary.md": "2026-02-16T04:40:38.162Z",
+  "/var/www/orthodoxmetrics/prod/.analysis/refactor-console-multi-source-implementation-summary.md": "2026-02-16T04:40:38.162Z",
+  "/var/www/orthodoxmetrics/prod/.analysis/refactor-console-diff-history-implementation-summary.md": "2026-02-16T04:40:38.162Z",
+  "/var/www/orthodoxmetrics/prod/.analysis/refactor-console-multi-source-plan.md": "2026-02-16T04:40:38.162Z",
+  "/var/www/orthodoxmetrics/prod/audit/tenant_plan.md": "2026-02-16T04:40:38.174Z",
+  "/var/www/orthodoxmetrics/prod/data/church_discovery/reports/validation_20260117.md": "2026-02-16T04:40:38.182Z",
+  "/var/www/orthodoxmetrics/prod/tools/om-md/README.md": "2026-02-16T04:01:13.524Z",
+  "/var/www/orthodoxmetrics/prod/tools/records/README.md": "2026-02-16T04:01:13.524Z",
+  "/var/www/orthodoxmetrics/prod/tools/om-md/README-LINE-ENDINGS.md": "2026-02-16T04:40:38.426Z",
+  "/var/www/orthodoxmetrics/prod/tools/church_discovery/README.md": "2026-02-16T04:40:38.426Z",
+  "/var/www/orthodoxmetrics/prod/tools/om_recovery/README.md": "2026-02-16T04:40:38.426Z",
+  "/var/www/orthodoxmetrics/prod/scripts/README-directory-verification.md": "2026-02-16T04:40:38.390Z",
+  "/var/www/orthodoxmetrics/prod/ops-hub/README.md": "2026-02-16T04:40:38.366Z",
+  "/var/www/orthodoxmetrics/prod/scripts/README-git-templates.md": "2026-02-16T04:40:38.390Z",
+  "/var/www/orthodoxmetrics/prod/README.md": "2026-02-16T04:39:46.342Z"
+}

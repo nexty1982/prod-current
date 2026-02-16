@@ -1,0 +1,9 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 3
+
+--- Table 1 (4 columns, 4 rows) ---
+DEATHS МЕТРИЧЕСКОЙ КНИГИ отмершнув GчITS . МЕсьця й день . Местопроисхожденіе , има , отчество й фамилім | НА оÝмершагw . AKTÁ | YEAR 9 года , часть ТРЕТЇМ 6 чего отмеря . Кто исповѣдываля | , Ф ОУМЕРШИХА . и проваля
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Мужеска Женска . смерти . погребенім . NUMBER M GEMALE DEATH DATE OF A L BURTAL FULL NAME OF DECEDENT I | Мужеска обмершагш . . Женска . MALO AGE E PARKLE | CAUSE OF DEATH NAME OF ADMINISTERED | . Кто совершали погревенте , и гдѣ погребены . PRIEST WHO SACRAMENTS NAME OF PRIEST WHO OFFICIATED AT BURIAL AND PLACE OF INTERNMENT
+3-21-91 3-23-91 Eugenia Kozlov ( not parishioner ) P 8-15-91 8-19-91 Demetrius ( Metro ) Skwarla ( NP ) 3 12-23-91 12-27-91 Olga Barnz 412-25-91 12-28-91 Helen Wislosky | 71 = Τι 64 197 | malignant Melanomanetz Ca Bladder Urinary respiratory failure congestive heart failure | Fr. Stephen Krivonak Ss . Peter & Paul Cemetery * Hillsborough Fr. Janes . Peter + Pent Parsels Cemety Plot 86 Ss # 3 Hillsborough Ss Fr. . James Peter & Paul Panels Cenety Plot 937 Hillsborough # 1 Ss Fr. . Janez Hillsborough Paul Parsells Peter Cerety Plot 103 & # 2
+ |  |  | * Note on body of Eugeniz Kozlov Disinternment on . 11-4-99 to Russian Convent remety in Rockland , NY

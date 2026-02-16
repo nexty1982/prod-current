@@ -1,0 +1,12 @@
+{
+  "candidates": [
+    {
+      "recordType": "custom",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "Счет\nотмершихъ.\nМужеска\nЖенска.\nNUMBER\nМ\nMALE\nGEMALE\nDEATHS\nМЕТРИЧЕСКОЙ книги на\nHOHI\n+QUI>\nYEAR 96\nгода, часть тРÉTЇМ,\nФ ОЙМÉРШИХА.\nКто исповѣдываля й пріобціаля.\nКто совершаля погревеніе, и гдѣ погр"
+      }
+    }
+  ],
+  "parsedAt": "2026-02-14T15:22:29.432Z"
+}

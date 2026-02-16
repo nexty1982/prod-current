@@ -4580,7 +4580,16 @@ cron.schedule('*/5 * * * *', async () => {
 
 console.log('Email queue processor started (runs every 5 minutes)');
 
-
+// Daily changelog at 11 PM
+cron.schedule('0 23 * * *', async () => {
+  try {
+    const omDaily = require('./routes/om-daily');
+    await omDaily.generateAndEmailChangelog();
+  } catch (err) {
+    console.error('[Changelog] Cron error:', err);
+  }
+});
+console.log('Daily changelog cron scheduled (11 PM)');
 
 // --- WEBSOCKET INTEGRATION -----------------------------------------
 const websocketService = require('./services/websocketService');

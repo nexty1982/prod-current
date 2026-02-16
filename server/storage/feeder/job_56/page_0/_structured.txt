@@ -1,0 +1,8 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 3 | Rows: 2
+
+--- Table 1 (3 columns, 3 rows) ---
+ | DEATHS МЕТРИЧЕСКОЙ книги Счет отмершихъ . Месяця й день . Местопроисхожденіе , имя , отчество й фамилім | QUI + HOHI > YEAR на 96 года , часть тРÉTЇМ , Ф ОЙМÉРШИХА . отмершаги . Акта 66 чего
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | Мужеска . Женска смерти . погребенім . MALE NUMBER GEMALE DEATH DATE М OF BURTAL FULL NAME OF DECEDENT Н 3/13 3/18 Joseph D. Zydizk 2 7124 7/27 Raymond Bodenchuk | обмершагш . отмеря . Кто Мужеска исповѣдываля й пріобціаля . Женска Кто совершаля погревеніе , . и гдѣ погревены . . MALE AGE Е FEMALE CAUSE OF DEATH NAME ADMINISTERED OF PRIEST WHO SACRAMENTS NAME OF PRIEST WHO BURIAL OFFICIATED AT AND PLACE OF INTERNMENT 80 Fri James 76 bilztevzl ( ( no nobody place Pausells body- of interment pneumonic + not known )
+ | 3 12/26 12/30 . Peter Stets ( N - P ) | adult distvess respiritof sym . Fr. Janes Parsells plat Ss . Pete + Paul , . 150 67 Hillsborough NJ 14 Fi . Jaes Pausells Sacred Heart Cenety Hillsborough , NJ .

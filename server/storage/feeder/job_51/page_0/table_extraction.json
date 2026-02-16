@@ -1,0 +1,663 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 5,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "1R",
+              "confidence": 0.54,
+              "confidence_min": 0.54,
+              "token_count": 1,
+              "bbox": [
+                0.029326923076923077,
+                0.30448717948717946,
+                0.04807692307692308,
+                0.3227564102564103
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_integer"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "2-21-71",
+              "confidence": 0.9,
+              "confidence_min": 0.9,
+              "token_count": 1,
+              "bbox": [
+                0.08100961538461539,
+                0.303525641025641,
+                0.12475961538461539,
+                0.3269230769230769
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "GEORGE OLIVER 566 WEST UNION ( 45 SOMERVILLE AVENUE AGE , , OCTOBER NJ , 25 , 08876 1925 ) PROTESTANT : BAPTIST IST MARRIAGE",
+              "confidence": 0.86,
+              "confidence_min": 0.47,
+              "token_count": 25,
+              "bbox": [
+                0.1346153846153846,
+                0.30416666666666664,
+                0.28966346153846156,
+                0.4358974358974359
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "GEORGE AUGUSTA",
+              "confidence": 0.88,
+              "confidence_min": 0.79,
+              "token_count": 2,
+              "bbox": [
+                0.2935096153846154,
+                0.3105769230769231,
+                0.33942307692307694,
+                0.3544871794871795
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "ANNA 25 WEST MAX SOMERSET RARITAN ST . AGE , NEW 45 JERSEY ( JULY 19 , 1925 ORTHODOX ) CHRISTIAN ROND MARRIAGE",
+              "confidence": 0.9,
+              "confidence_min": 0.61,
+              "token_count": 23,
+              "bbox": [
+                0.3449519230769231,
+                0.3141025641025641,
+                0.4737980769230769,
+                0.4439102564102564
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": "STEPHEN MARY",
+              "confidence": 0.96,
+              "confidence_min": 0.96,
+              "token_count": 2,
+              "bbox": [
+                0.48221153846153847,
+                0.3173076923076923,
+                0.5161057692307692,
+                0.35993589743589743
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "13",
+              "confidence": 0.98,
+              "confidence_min": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.029086538461538462,
+                0.5048076923076923,
+                0.046875,
+                0.5230769230769231
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "7-7-71",
+              "confidence": 0.84,
+              "confidence_min": 0.84,
+              "token_count": 1,
+              "bbox": [
+                0.08221153846153846,
+                0.5057692307692307,
+                0.12283653846153846,
+                0.5314102564102564
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "RICHARD JOHN OSTAPOVICH NEW R.D.1 , Box BRUNSWICK 387 , N.J. AGE : 26 ( FEB , 13 , 1946 ) ORTHODOX CHRISTIAN 1ST MARRIAGE",
+              "confidence": 0.88,
+              "confidence_min": 0.39,
+              "token_count": 25,
+              "bbox": [
+                0.1326923076923077,
+                0.5073717948717948,
+                0.28942307692307695,
+                0.6480769230769231
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "JOHN PAULINE",
+              "confidence": 0.96,
+              "confidence_min": 0.95,
+              "token_count": 2,
+              "bbox": [
+                0.29302884615384617,
+                0.5128205128205128,
+                0.3367788461538462,
+                0.5576923076923077
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "SUSAN R.D.1 MARY , Box ANDREYCHIK 387 AGE NEW BRUNSWICK , N.J. : 25 ( JULY 20 , 1945 ) ORTHODOX CHRISTIAN IST MARRIAGE",
+              "confidence": 0.89,
+              "confidence_min": 0.75,
+              "token_count": 24,
+              "bbox": [
+                0.34158653846153847,
+                0.5144230769230769,
+                0.475,
+                0.6512820512820513
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "HARRY ANNA",
+              "confidence": 0.89,
+              "confidence_min": 0.82,
+              "token_count": 2,
+              "bbox": [
+                0.4829326923076923,
+                0.5192307692307693,
+                0.5115384615384615,
+                0.5618589743589744
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "content": "14",
+              "confidence": 0.97,
+              "confidence_min": 0.97,
+              "token_count": 1,
+              "bbox": [
+                0.030528846153846153,
+                0.7246794871794872,
+                0.04807692307692308,
+                0.742948717948718
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "content": "7-11-71",
+              "confidence": 0.93,
+              "confidence_min": 0.93,
+              "token_count": 1,
+              "bbox": [
+                0.084375,
+                0.7278846153846154,
+                0.1233173076923077,
+                0.7467948717948718
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "content": "THOMAS FRANK RICHARDSON 12 NORTH 5TH AVENUE MANVILLE , AGE : MAY NEW 30 ( CHRISTIAN 11 , 1941 JERSEY ) ORTHODOX 2ND MARRIAGE",
+              "confidence": 0.94,
+              "confidence_min": 0.72,
+              "token_count": 24,
+              "bbox": [
+                0.13076923076923078,
+                0.7259615384615384,
+                0.2858173076923077,
+                0.8496794871794872
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "content": "FRANK CATHERINE",
+              "confidence": 0.97,
+              "confidence_min": 0.97,
+              "token_count": 2,
+              "bbox": [
+                0.28942307692307695,
+                0.7256410256410256,
+                0.33798076923076925,
+                0.7660256410256411
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 4,
+              "content": "MARIA A. MARINI 12 NORTH 5TH AVENUE AGE : MANVILLE 28 ( , APRIL NEW 1 , JERSEY 1943 ) ORTHODOX CHRISTIAN AND MARRIAGE",
+              "confidence": 0.94,
+              "confidence_min": 0.69,
+              "token_count": 24,
+              "bbox": [
+                0.3401442307692308,
+                0.7240384615384615,
+                0.4716346153846154,
+                0.8538461538461538
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 5,
+              "content": "GIUSEPPE GIOVAN NINA",
+              "confidence": 0.77,
+              "confidence_min": 0.73,
+              "token_count": 3,
+              "bbox": [
+                0.47692307692307695,
+                0.7243589743589743,
+                0.5175480769230769,
+                0.7878205128205128
+              ],
+              "needs_review": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 5,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "REV . ROBERT A. MR GEORGE LEWIS 1311 MRS 1311 MR N.",
+              "confidence": 0.82,
+              "confidence_min": 0.6,
+              "token_count": 12,
+              "bbox": [
+                0.5516826923076923,
+                0.32211538461538464,
+                0.65,
+                0.47147435897435896
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": ". GEORGE GRABANIA TERRILL ROAD SCOTCH PLAINS , N.J. 07076 . GEORGE GRABANIA TERRILL ROAD SCOTCH PLAINS , N.J. 07076 . KRACHUN ROBERT , 803 KRACHUN NEW + YORK MRS AVE . . , ROSE RARITAN MARY , J.",
+              "confidence": 0.88,
+              "confidence_min": 0.54,
+              "token_count": 39,
+              "bbox": [
+                0.6305288461538462,
+                0.32211538461538464,
+                0.8252403846153846,
+                0.47115384615384615
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "FEBRUARY 18 , 1971 No. 1 6-7 ( RARITAN , N.J. )",
+              "confidence": 0.84,
+              "confidence_min": 0.6,
+              "token_count": 12,
+              "bbox": [
+                0.8382211538461538,
+                0.32243589743589746,
+                0.9661057692307692,
+                0.36346153846153845
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "REV . ROBERT A. GEORGE MR LEWIS 176 MRS 176",
+              "confidence": 0.9,
+              "confidence_min": 0.68,
+              "token_count": 10,
+              "bbox": [
+                0.5502403846153846,
+                0.5246794871794872,
+                0.6540865384615384,
+                0.632051282051282
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": ". HARRY NORTH 10TH ANDREYCHIK MANVILLE JERSEY AVENUE , NEW 08835 , ANNA ANDREY CHIK NORTH 10TH AVENUE MANVILLE , NEW JERSEY 08835",
+              "confidence": 0.94,
+              "confidence_min": 0.7,
+              "token_count": 23,
+              "bbox": [
+                0.63125,
+                0.5288461538461539,
+                0.8060096153846154,
+                0.6596153846153846
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "No. JULY 6 , 1971 50-71 ( MANVILLE , N.J. ) MARRIAGE ORTHODOX FOR THE SACRAMENTAL CONTRACTED 16 RENO JANUARY 1971 CIVIL PREVIOUSLY WEDDING , NEVADA , REV.G. CHAPEL HEART OF N. , SNELLING RENO , DOROTHY WITNESSED BY SIVELLING , IRENE PIERCE ,",
+              "confidence": 0.91,
+              "confidence_min": 0.49,
+              "token_count": 44,
+              "bbox": [
+                0.8334134615384615,
+                0.5198717948717949,
+                0.9838942307692308,
+                0.7083333333333334
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "content": "REV . ROBERT A. GEORGE LEWIS",
+              "confidence": 0.85,
+              "confidence_min": 0.75,
+              "token_count": 6,
+              "bbox": [
+                0.5521634615384615,
+                0.719551282051282,
+                0.6295673076923077,
+                0.7666666666666667
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "content": "MR . ROBERT CLIM FOOTHILL BRIDGEWATER ROAD , NEW JERSEY MRS . HELEN RUSSO 707 RARITAN RHINE BLVD . , NEW JERSEY",
+              "confidence": 0.86,
+              "confidence_min": 0.64,
+              "token_count": 22,
+              "bbox": [
+                0.6353365384615385,
+                0.7224358974358974,
+                0.7764423076923077,
+                0.8737179487179487
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "content": "JUNE No. 28 48-71 , 1971 ( MANVILLE , N.J. )",
+              "confidence": 0.86,
+              "confidence_min": 0.57,
+              "token_count": 11,
+              "bbox": [
+                0.8350961538461539,
+                0.7294871794871794,
+                0.9855769230769231,
+                0.7692307692307693
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_license_format"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 483,
+  "data_tokens": 343,
+  "data_rows": 3,
+  "extracted_at": "2026-02-14T17:52:31.412Z"
+}

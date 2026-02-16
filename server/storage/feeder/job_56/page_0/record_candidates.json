@@ -1,0 +1,31 @@
+{
+  "candidates": [
+    {
+      "recordType": "funeral",
+      "confidence": 0.91,
+      "fields": {
+        "notes": "Мужеска . Женска смерти . погребенім . MALE NUMBER GEMALE DEATH DATE М OF BURTAL FULL NAME OF DECEDENT Н 3/13 3/18 Joseph D. Zydizk 2 7124 7/27 Raymond Bodenchuk | обмершагш . отмеря . Кто Мужеска исповѣдываля й пріобціаля . Женска Кто совершаля погревеніе , . и гдѣ погревены . . MALE AGE Е FEMALE CAUSE OF DEATH NAME ADMINISTERED OF PRIEST WHO SACRAMENTS NAME OF PRIEST WHO BURIAL OFFICIATED AT AND PLACE OF INTERNMENT 80 Fri James 76 bilztevzl ( ( no nobody place Pausells body- of interment pneumonic + not known )"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "3 12/26 12/30 . Peter Stets ( N - P ) | adult distvess respiritof sym . Fr. Janes Parsells plat Ss . Pete + Paul , . 150 67 Hillsborough NJ 14 Fi . Jaes Pausells Sacred Heart Cenety Hillsborough , NJ ."
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "funeral",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-15T18:31:32.096Z"
+}

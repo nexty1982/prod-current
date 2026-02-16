@@ -1,0 +1,234 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 3,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "% 100 M DEATHS МЕТРИЧЕСКОЙ книги GuiTS обмарину Месяця й день . кстопроисхожденіе , ймо , отчество й фамилію"
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "на офмаршаги . Акта"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "NP = not YEAR года , часть"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "parishioen 88 треТЇМ , И"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "HOHI ОЎМЕРШИХА ."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "Мужеска . И Женска , CMNÍOTH . noгPISINIA . NUMBER DATE OF 1 BURHAL FULL NAME OF DECEDENT",
+              "confidence": 0.76,
+              "token_count": 18,
+              "bbox": [
+                0.026201923076923078,
+                0.14326923076923076,
+                0.3629807692307692,
+                0.2971153846153846
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Мужеска офмаршаги . Женска . AGE A E PARKLE M",
+              "confidence": 0.86,
+              "token_count": 10,
+              "bbox": [
+                0.4391826923076923,
+                0.14807692307692308,
+                0.484375,
+                0.29775641025641025
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "С чего отмеря . CAUSE OF DEATH",
+              "confidence": 0.78,
+              "token_count": 7,
+              "bbox": [
+                0.5307692307692308,
+                0.14455128205128207,
+                0.6002403846153846,
+                0.27692307692307694
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Кто исповедывали A й прізваля NAME OF PRIEST ADMINISTERED WHO SACRAMENTS",
+              "confidence": 0.91,
+              "token_count": 11,
+              "bbox": [
+                0.6252403846153847,
+                0.14551282051282052,
+                0.7504807692307692,
+                0.29102564102564105
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": ". Кто совершали погревініе , и гдѣ погрешены . NAME OF PRIEST WHO OFFICIATED AT BURIAL AND PLACE OF INTERNMENT",
+              "confidence": 0.94,
+              "token_count": 20,
+              "bbox": [
+                0.7495192307692308,
+                0.1564102564102564,
+                0.9487980769230769,
+                0.2932692307692308
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "1-29-88 2-02-88 John Macinko 12-11-88 Anna Karel ( NP ) 2 2-04-88 Xseniz Fedaraka ( NP ) 3 12-09-88 2-12-88 45-22-88 S - 31-88 Tatienz Shuiduik 1-23-88 7-25-88 John Suseck Sr. S 7-23-887-38-88 David James Riegler ( NP ) 6 8-5-88 8-9-88 Lepasava ( Lillian ) Ratzkovich 7 & Freather 8-18-88 8-83-88 Carolyn 8 ( NP ) ( Non - Orthodox buried from furevel hore ) 9-17-88 9-21-88 Raymond Koslosky ( NP ) 9 10 119 - 20 George Huzinec ( NP ) - 88 10-24-88 13-14-88 Michael Sof Ko ( NP ) 12-10-88 A 12-30-88 61-03-89 Michael Barna 17",
+              "confidence": 0.87,
+              "token_count": 100,
+              "bbox": [
+                0.016826923076923076,
+                0.31346153846153846,
+                0.36370192307692306,
+                0.9772435897435897
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "68 91 93 91 80 19 84 57 47 86 74 62",
+              "confidence": 0.91,
+              "token_count": 12,
+              "bbox": [
+                0.4391826923076923,
+                0.3157051282051282,
+                0.47884615384615387,
+                0.9608974358974359
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Pulmoravy embolism Cardiac arrest lung cancer bilateral contusions of the brain hemelore with subdural Sudden anest Cadicc asbetosis metastatic lung Cancer Cancer",
+              "confidence": 0.77,
+              "token_count": 22,
+              "bbox": [
+                0.5189903846153846,
+                0.3176282051282051,
+                0.60625,
+                0.9564102564102565
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Fr. Janes Parsells F. Jaes Parsells F .. Jas Panell Fr. Jas Parell",
+              "confidence": 0.77,
+              "token_count": 13,
+              "bbox": [
+                0.6158653846153846,
+                0.4439102564102564,
+                0.7072115384615385,
+                0.9608974358974359
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Ss Fr. . Peter Janes Piul Parsells cemetery , Pla Hillsborough # 1 159 Fr. st . Jaws Paixells d Tikhon's monest Ss Fr. . Janz Peter Paul Parsell Plot 129 & Contey from # 1 Hillsbrough not buried church Fr. Peter Pasell ( ) ss . J. & Paul Cerety Plot 141 Hillsborough # 3 F. Peta Jane Jas Parsels Ss . d + Cerety Plot 148 Paul # 3 Hillsborough , Fr. David Vernak Plot Ss . Pete # 1 Hillsborough + Piul centy 158 Fr. Joes Parsells Flushings , Queens , N.y. Fr. Peter Jaes Pausells 5 Ss . Hillsborough & Cerety Plot 126 Paul # 6 Fr. Janz Parsels Pisciting Welson Memorial Pack Lake Jar Parsella Plot 804 F SS . Pete + Pial Ceretey # 6 Hills borough Ss . Fr. David vernak Plot Peter & Paul Cemetry Hillsborough 137 # 3 , F .. Janes Parsells Mt. Pleasant , Pz .",
+              "confidence": 0.74,
+              "token_count": 157,
+              "bbox": [
+                0.7742788461538461,
+                0.31987179487179485,
+                0.9759615384615384,
+                0.9701923076923077
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.4025
+    ],
+    "col_2": [
+      0.4025,
+      0.5
+    ],
+    "col_3": [
+      0.5,
+      0.61
+    ],
+    "col_4": [
+      0.61,
+      0.7425
+    ],
+    "col_5": [
+      0.7425,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.15,
+  "total_tokens": 408,
+  "data_tokens": 370,
+  "data_rows": 2,
+  "extracted_at": "2026-02-14T15:39:29.171Z"
+}

@@ -1,0 +1,243 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "DEATHS МЕТРИЧЕСКОЙ КНИГИ отмершнув GчITS . МЕсьця й день . Местопроисхожденіе , има , отчество й фамилім"
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "НА оÝмершагw . AKTÁ"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "YEAR 9 года , часть ТРЕТЇМ 6 чего отмеря . Кто исповѣдываля"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": ", Ф ОУМЕРШИХА . и проваля"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "Мужеска Женска . смерти . погребенім . NUMBER M GEMALE DEATH DATE OF A L BURTAL FULL NAME OF DECEDENT I",
+              "confidence": 0.92,
+              "token_count": 21,
+              "bbox": [
+                0.01875,
+                0.16282051282051282,
+                0.3625,
+                0.2935897435897436
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Мужеска обмершагш . . Женска . MALO AGE E PARKLE",
+              "confidence": 0.83,
+              "token_count": 10,
+              "bbox": [
+                0.4391826923076923,
+                0.14807692307692308,
+                0.484375,
+                0.3
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "CAUSE OF DEATH NAME OF ADMINISTERED",
+              "confidence": 0.99,
+              "token_count": 6,
+              "bbox": [
+                0.5254807692307693,
+                0.2551282051282051,
+                0.6882211538461539,
+                0.28012820512820513
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": ". Кто совершали погревенте , и гдѣ погребены . PRIEST WHO SACRAMENTS NAME OF PRIEST WHO OFFICIATED AT BURIAL AND PLACE OF INTERNMENT",
+              "confidence": 0.97,
+              "token_count": 23,
+              "bbox": [
+                0.6783653846153846,
+                0.14455128205128207,
+                0.9399038461538461,
+                0.28910256410256413
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "3-21-91 3-23-91 Eugenia Kozlov ( not parishioner ) P 8-15-91 8-19-91 Demetrius ( Metro ) Skwarla ( NP ) 3 12-23-91 12-27-91 Olga Barnz 412-25-91 12-28-91 Helen Wislosky",
+              "confidence": 0.89,
+              "token_count": 28,
+              "bbox": [
+                0.030048076923076924,
+                0.30865384615384617,
+                0.3875,
+                0.47147435897435896
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "71 = Τι 64 197",
+              "confidence": 0.91,
+              "token_count": 5,
+              "bbox": [
+                0.44014423076923076,
+                0.319551282051282,
+                0.4814903846153846,
+                0.47692307692307695
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "malignant Melanomanetz Ca Bladder Urinary respiratory failure congestive heart failure",
+              "confidence": 0.8,
+              "token_count": 10,
+              "bbox": [
+                0.5165865384615385,
+                0.31474358974358974,
+                0.5824519230769231,
+                0.49038461538461536
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Fr. Stephen Krivonak Ss . Peter & Paul Cemetery * Hillsborough Fr. Janes . Peter + Pent Parsels Cemety Plot 86 Ss # 3 Hillsborough Ss Fr. . James Peter & Paul Panels Cenety Plot 937 Hillsborough # 1 Ss Fr. . Janez Hillsborough Paul Parsells Peter Cerety Plot 103 & # 2",
+              "confidence": 0.75,
+              "token_count": 53,
+              "bbox": [
+                0.7716346153846154,
+                0.3192307692307692,
+                0.9456730769230769,
+                0.5564102564102564
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "* Note on body of Eugeniz Kozlov Disinternment on . 11-4-99 to Russian Convent remety in Rockland , NY",
+              "confidence": 0.88,
+              "token_count": 19,
+              "bbox": [
+                0.7778846153846154,
+                0.632051282051282,
+                0.9298076923076923,
+                0.7192307692307692
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.4025
+    ],
+    "col_2": [
+      0.4025,
+      0.5
+    ],
+    "col_3": [
+      0.5,
+      0.6775
+    ],
+    "col_4": [
+      0.6775,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.15,
+  "total_tokens": 214,
+  "data_tokens": 175,
+  "data_rows": 3,
+  "extracted_at": "2026-02-14T17:51:03.605Z"
+}
