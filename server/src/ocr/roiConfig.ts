@@ -39,7 +39,11 @@ const BAPTISM_ROIS: Record<string, NormalizedROI> = {
 // ============================================================================
 
 const MARRIAGE_ROIS: Record<string, NormalizedROI> = {
-  // TODO: Define marriage ROIs
+  groom_name: { x0: 0.05, y0: 0.10, x1: 0.45, y1: 0.25 },
+  bride_name: { x0: 0.50, y0: 0.10, x1: 0.95, y1: 0.25 },
+  date_of_marriage: { x0: 0.05, y0: 0.25, x1: 0.35, y1: 0.35 },
+  witnesses: { x0: 0.05, y0: 0.35, x1: 0.50, y1: 0.50 },
+  officiant: { x0: 0.50, y0: 0.35, x1: 0.95, y1: 0.50 },
 };
 
 // ============================================================================
@@ -47,7 +51,15 @@ const MARRIAGE_ROIS: Record<string, NormalizedROI> = {
 // ============================================================================
 
 const FUNERAL_ROIS: Record<string, NormalizedROI> = {
-  // TODO: Define funeral ROIs
+  deceased_name: { x0: 0.05, y0: 0.08, x1: 0.50, y1: 0.18 },
+  date_of_death: { x0: 0.50, y0: 0.08, x1: 0.95, y1: 0.18 },
+  date_of_funeral: { x0: 0.05, y0: 0.18, x1: 0.35, y1: 0.28 },
+  date_of_burial: { x0: 0.35, y0: 0.18, x1: 0.65, y1: 0.28 },
+  place_of_burial: { x0: 0.65, y0: 0.18, x1: 0.95, y1: 0.28 },
+  age_at_death: { x0: 0.05, y0: 0.28, x1: 0.25, y1: 0.38 },
+  cause_of_death: { x0: 0.25, y0: 0.28, x1: 0.60, y1: 0.38 },
+  next_of_kin: { x0: 0.05, y0: 0.38, x1: 0.50, y1: 0.50 },
+  officiant: { x0: 0.50, y0: 0.38, x1: 0.95, y1: 0.50 },
 };
 
 // ============================================================================
@@ -77,10 +89,22 @@ export const FIELD_LISTS: Record<RecordType, string[]> = {
     'clergy',
   ],
   marriage: [
-    // TODO: Define marriage fields
+    'groom_name',
+    'bride_name',
+    'date_of_marriage',
+    'witnesses',
+    'officiant',
   ],
   funeral: [
-    // TODO: Define funeral fields
+    'deceased_name',
+    'date_of_death',
+    'date_of_funeral',
+    'date_of_burial',
+    'place_of_burial',
+    'age_at_death',
+    'cause_of_death',
+    'next_of_kin',
+    'officiant',
   ],
 };
 

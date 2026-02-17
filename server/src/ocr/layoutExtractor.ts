@@ -201,6 +201,105 @@ const ANCHOR_CONFIGS: Record<string, AnchorConfig> = {
   },
 };
 
+// Marriage anchor configs
+const MARRIAGE_ANCHOR_CONFIGS: Record<string, AnchorConfig> = {
+  groom_name: {
+    phrases: ['GROOM', 'BRIDEGROOM', 'HUSBAND', 'NAME OF GROOM'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.05 },
+    zoneExtent: { width: 0.4, height: 0.1 },
+  },
+  bride_name: {
+    phrases: ['BRIDE', 'WIFE', 'NAME OF BRIDE'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.05 },
+    zoneExtent: { width: 0.4, height: 0.1 },
+  },
+  date_of_marriage: {
+    phrases: ['DATE OF MARRIAGE', 'MARRIAGE DATE', 'WEDDING DATE', 'MARRIED'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.05 },
+    zoneExtent: { width: 0.3, height: 0.1 },
+  },
+  witnesses: {
+    phrases: ['WITNESSES', 'WITNESS', 'BEST MAN', 'KOOM', 'KUMOVI'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.08 },
+    zoneExtent: { width: 0.45, height: 0.12 },
+  },
+  officiant: {
+    phrases: ['PRIEST', 'CLERGY', 'OFFICIANT', 'PERFORMED BY', 'SACRAMENTS PERFORMED BY'],
+    direction: 'right',
+    zonePadding: { left: 0.02, right: 0.02, top: 0, bottom: 0.05 },
+    zoneExtent: 'toPageEdge',
+  },
+};
+
+// Funeral anchor configs
+const FUNERAL_ANCHOR_CONFIGS: Record<string, AnchorConfig> = {
+  deceased_name: {
+    phrases: ['DECEASED', 'NAME OF DECEASED', 'DECEDENT', 'FULL NAME'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.05 },
+    zoneExtent: { width: 0.4, height: 0.1 },
+  },
+  date_of_death: {
+    phrases: ['DATE OF DEATH', 'DIED', 'DEATH DATE'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.05 },
+    zoneExtent: { width: 0.3, height: 0.1 },
+  },
+  date_of_funeral: {
+    phrases: ['DATE OF FUNERAL', 'FUNERAL DATE', 'FUNERAL SERVICE'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.05 },
+    zoneExtent: { width: 0.3, height: 0.1 },
+  },
+  date_of_burial: {
+    phrases: ['DATE OF BURIAL', 'BURIAL DATE', 'INTERMENT', 'BURIED'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.05 },
+    zoneExtent: { width: 0.3, height: 0.1 },
+  },
+  place_of_burial: {
+    phrases: ['PLACE OF BURIAL', 'CEMETERY', 'INTERMENT PLACE', 'BURIED AT'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.05 },
+    zoneExtent: { width: 0.4, height: 0.1 },
+  },
+  age_at_death: {
+    phrases: ['AGE', 'AGE AT DEATH', 'YEARS OLD'],
+    direction: 'right',
+    zonePadding: { left: 0.01, right: 0.02, top: 0, bottom: 0.02 },
+    zoneExtent: { width: 0.15, height: 0.05 },
+  },
+  cause_of_death: {
+    phrases: ['CAUSE OF DEATH', 'CAUSE', 'MANNER OF DEATH'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.05 },
+    zoneExtent: { width: 0.4, height: 0.1 },
+  },
+  next_of_kin: {
+    phrases: ['NEXT OF KIN', 'KIN', 'RELATIVE', 'FAMILY'],
+    direction: 'below',
+    zonePadding: { left: 0, right: 0, top: 0.01, bottom: 0.08 },
+    zoneExtent: { width: 0.4, height: 0.12 },
+  },
+  officiant: {
+    phrases: ['PRIEST', 'CLERGY', 'OFFICIANT', 'PERFORMED BY'],
+    direction: 'right',
+    zonePadding: { left: 0.02, right: 0.02, top: 0, bottom: 0.05 },
+    zoneExtent: 'toPageEdge',
+  },
+};
+
+// All default anchors by record type
+export const DEFAULT_ANCHOR_CONFIGS: Record<string, Record<string, AnchorConfig>> = {
+  baptism: ANCHOR_CONFIGS,
+  marriage: MARRIAGE_ANCHOR_CONFIGS,
+  funeral: FUNERAL_ANCHOR_CONFIGS,
+};
+
 // Canonical 9 fields for baptism
 const BAPTISM_FIELDS = [
   'record_number',
@@ -213,6 +312,32 @@ const BAPTISM_FIELDS = [
   'parents',
   'clergy',
 ] as const;
+
+const MARRIAGE_FIELDS = [
+  'groom_name',
+  'bride_name',
+  'date_of_marriage',
+  'witnesses',
+  'officiant',
+] as const;
+
+const FUNERAL_FIELDS = [
+  'deceased_name',
+  'date_of_death',
+  'date_of_funeral',
+  'date_of_burial',
+  'place_of_burial',
+  'age_at_death',
+  'cause_of_death',
+  'next_of_kin',
+  'officiant',
+] as const;
+
+const FIELD_LISTS_BY_TYPE: Record<string, readonly string[]> = {
+  baptism: BAPTISM_FIELDS,
+  marriage: MARRIAGE_FIELDS,
+  funeral: FUNERAL_FIELDS,
+};
 
 // ============================================================================
 // Coordinate Conversion Utilities
@@ -403,14 +528,22 @@ function matchPhraseInLine(line: LineGroup, phrase: string): Token[] | null {
   return null;
 }
 
-function detectAnchors(tokens: Token[], config: LayoutExtractorConfig): Array<{ fieldKey: string; phrase: string; bbox: NormalizedBBox }> {
+function detectAnchors(
+  tokens: Token[],
+  config: LayoutExtractorConfig,
+  customAnchors?: Record<string, AnchorConfig>
+): Array<{ fieldKey: string; phrase: string; bbox: NormalizedBBox }> {
   const anchors: Array<{ fieldKey: string; phrase: string; bbox: NormalizedBBox }> = [];
   const lines = clusterTokensIntoLines(tokens);
-  
-  const fieldKeys = config.recordType === 'baptism' ? BAPTISM_FIELDS : [];
-  
+
+  // Use custom anchors if provided, otherwise use defaults for the record type
+  const anchorConfigs = customAnchors || DEFAULT_ANCHOR_CONFIGS[config.recordType] || ANCHOR_CONFIGS;
+  const fieldKeys = customAnchors
+    ? Object.keys(customAnchors)
+    : (FIELD_LISTS_BY_TYPE[config.recordType] || BAPTISM_FIELDS);
+
   for (const fieldKey of fieldKeys) {
-    const anchorConfig = ANCHOR_CONFIGS[fieldKey];
+    const anchorConfig = anchorConfigs[fieldKey];
     if (!anchorConfig) continue;
     
     for (const phrase of anchorConfig.phrases) {
@@ -621,7 +754,8 @@ function splitTokensIntoQuadrants(tokens: Token[]): Record<string, Token[]> {
 
 export function extractLayoutFields(
   visionResponse: VisionResponse,
-  config: LayoutExtractorConfig
+  config: LayoutExtractorConfig,
+  customAnchors?: Record<string, AnchorConfig>
 ): LayoutExtractorResult {
   const debug = config.debug || false;
   
@@ -658,12 +792,15 @@ export function extractLayoutFields(
       }
       
       // Detect anchors in this entry
-      const entryAnchors = detectAnchors(entryTokens, config);
-      
+      const entryAnchors = detectAnchors(entryTokens, config, customAnchors);
+
       // Extract each field
-      const fieldKeys = config.recordType === 'baptism' ? BAPTISM_FIELDS : [];
+      const anchorConfigs = customAnchors || DEFAULT_ANCHOR_CONFIGS[config.recordType] || ANCHOR_CONFIGS;
+      const fieldKeys = customAnchors
+        ? Object.keys(customAnchors)
+        : (FIELD_LISTS_BY_TYPE[config.recordType] || BAPTISM_FIELDS);
       for (const fieldKey of fieldKeys) {
-        const anchorConfig = ANCHOR_CONFIGS[fieldKey];
+        const anchorConfig = anchorConfigs[fieldKey];
         if (!anchorConfig) continue;
         
         const anchor = entryAnchors.find(a => a.fieldKey === fieldKey);

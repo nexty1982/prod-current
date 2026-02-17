@@ -514,6 +514,8 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
       let templateBands: any = null;
       let templateHeaderY: number | null = null;
       let templateId: number | null = null;
+      let extractionMode: string = 'tabular';
+      let extractorRow: any = null;
       try {
         // First check if job has an explicit layout_template_id
         const [tplJobRows] = await platformPool.query(
@@ -524,55 +526,96 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
         // Fallback: find default template for this record_type
         if (!templateId) {
           const [defaultRows] = await platformPool.query(
-            `SELECT id, column_bands, header_y_threshold FROM ocr_extractors
-             WHERE record_type = ? AND is_default = 1 AND column_bands IS NOT NULL LIMIT 1`,
+            `SELECT id, extraction_mode, column_bands, header_y_threshold, record_regions, learned_params
+             FROM ocr_extractors
+             WHERE record_type = ? AND is_default = 1 LIMIT 1`,
             [recordType]
           ) as any[];
           if (defaultRows.length > 0) {
             templateId = defaultRows[0].id;
-            templateBands = typeof defaultRows[0].column_bands === 'string'
-              ? JSON.parse(defaultRows[0].column_bands) : defaultRows[0].column_bands;
+            extractorRow = defaultRows[0];
+            extractionMode = defaultRows[0].extraction_mode || 'tabular';
+            if (defaultRows[0].column_bands) {
+              templateBands = typeof defaultRows[0].column_bands === 'string'
+                ? JSON.parse(defaultRows[0].column_bands) : defaultRows[0].column_bands;
+            }
             templateHeaderY = defaultRows[0].header_y_threshold;
           }
         } else {
           // Load explicit template
           const [tplRows] = await platformPool.query(
-            `SELECT column_bands, header_y_threshold FROM ocr_extractors WHERE id = ?`,
+            `SELECT id, extraction_mode, column_bands, header_y_threshold, record_regions, learned_params
+             FROM ocr_extractors WHERE id = ?`,
             [templateId]
           ) as any[];
-          if (tplRows.length > 0 && tplRows[0].column_bands) {
-            templateBands = typeof tplRows[0].column_bands === 'string'
-              ? JSON.parse(tplRows[0].column_bands) : tplRows[0].column_bands;
+          if (tplRows.length > 0) {
+            extractorRow = tplRows[0];
+            extractionMode = tplRows[0].extraction_mode || 'tabular';
+            if (tplRows[0].column_bands) {
+              templateBands = typeof tplRows[0].column_bands === 'string'
+                ? JSON.parse(tplRows[0].column_bands) : tplRows[0].column_bands;
+            }
             templateHeaderY = tplRows[0].header_y_threshold;
           }
         }
 
         if (templateBands) {
-          console.log(`  [TableExtract] Page ${page.id}: Using layout template ${templateId} (${templateBands.length} bands)`);
+          console.log(`  [TableExtract] Page ${page.id}: Using layout template ${templateId} (${templateBands.length} bands, mode=${extractionMode})`);
+        } else {
+          console.log(`  [TableExtract] Page ${page.id}: Template ${templateId || 'none'} (mode=${extractionMode})`);
         }
       } catch (tplErr: any) {
         console.warn(`  [TableExtract] Page ${page.id}: Template lookup failed (non-blocking): ${tplErr.message}`);
       }
 
       let tableExtractionResult: any = null;
-      if (templateBands) {
-        // Use template bands with generic_table extractor
-        const { extractGenericTable } = require('../ocr/layouts/generic_table');
-        const opts: any = {
-          pageIndex: 0,
-          columnBands: templateBands.map((b: any) => Array.isArray(b) ? b : [b.start, b.end]),
-        };
-        if (templateHeaderY != null) opts.headerYThreshold = templateHeaderY;
-        tableExtractionResult = extractGenericTable(visionResultJson, opts);
-        console.log(`  [TableExtract] Page ${page.id}: Template ${templateId} → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.columns_detected} columns`);
-      } else if (recordType === 'marriage') {
-        const { extractMarriageLedgerTable } = require('../ocr/layouts/marriage_ledger_v1');
-        tableExtractionResult = extractMarriageLedgerTable(visionResultJson, { pageIndex: 0 });
-        console.log(`  [TableExtract] Page ${page.id}: Marriage ledger → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.tables?.length || 0} tables`);
-      } else {
-        const { extractGenericTable } = require('../ocr/layouts/generic_table');
-        tableExtractionResult = extractGenericTable(visionResultJson, { pageIndex: 0 });
-        console.log(`  [TableExtract] Page ${page.id}: Generic extraction → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.columns_detected} columns`);
+
+      // Dispatch based on extraction_mode
+      if (extractionMode === 'form' && extractorRow) {
+        // Single form per page — anchor-based extraction
+        const { extractFormPage } = require('../ocr/formExtractor');
+        tableExtractionResult = await extractFormPage(visionResultJson, extractorRow, platformPool, recordType);
+        console.log(`  [FormExtract] Page ${page.id}: Form mode → ${tableExtractionResult.data_rows} records, ${tableExtractionResult.columns_detected} fields`);
+
+      } else if (extractionMode === 'multi_form' && extractorRow) {
+        // N records per page — record regions + anchor extraction
+        const { extractMultiFormPage } = require('../ocr/formExtractor');
+        tableExtractionResult = await extractMultiFormPage(visionResultJson, extractorRow, platformPool, recordType);
+        console.log(`  [FormExtract] Page ${page.id}: Multi-form mode → ${tableExtractionResult.data_rows} records, ${tableExtractionResult.columns_detected} fields`);
+
+      } else if (extractionMode === 'auto' && extractorRow) {
+        // Try anchor detection first; fall back to generic table
+        const { extractAutoMode } = require('../ocr/formExtractor');
+        const autoResult = await extractAutoMode(visionResultJson, extractorRow, recordType, platformPool);
+        if (autoResult) {
+          tableExtractionResult = autoResult;
+          console.log(`  [FormExtract] Page ${page.id}: Auto mode (anchors) → ${tableExtractionResult.data_rows} records`);
+        } else {
+          // Fall through to tabular extraction below
+          console.log(`  [FormExtract] Page ${page.id}: Auto mode → falling back to tabular`);
+        }
+      }
+
+      // Tabular extraction (default, or auto-mode fallback)
+      if (!tableExtractionResult) {
+        if (templateBands) {
+          const { extractGenericTable } = require('../ocr/layouts/generic_table');
+          const opts: any = {
+            pageIndex: 0,
+            columnBands: templateBands.map((b: any) => Array.isArray(b) ? b : [b.start, b.end]),
+          };
+          if (templateHeaderY != null) opts.headerYThreshold = templateHeaderY;
+          tableExtractionResult = extractGenericTable(visionResultJson, opts);
+          console.log(`  [TableExtract] Page ${page.id}: Template ${templateId} → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.columns_detected} columns`);
+        } else if (recordType === 'marriage') {
+          const { extractMarriageLedgerTable } = require('../ocr/layouts/marriage_ledger_v1');
+          tableExtractionResult = extractMarriageLedgerTable(visionResultJson, { pageIndex: 0 });
+          console.log(`  [TableExtract] Page ${page.id}: Marriage ledger → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.tables?.length || 0} tables`);
+        } else {
+          const { extractGenericTable } = require('../ocr/layouts/generic_table');
+          tableExtractionResult = extractGenericTable(visionResultJson, { pageIndex: 0 });
+          console.log(`  [TableExtract] Page ${page.id}: Generic extraction → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.columns_detected} columns`);
+        }
       }
 
       // Convert to structured text

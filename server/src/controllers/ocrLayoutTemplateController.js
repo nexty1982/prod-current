@@ -1,5 +1,5 @@
 /**
- * OCR Layout Template Controller — CRUD + Preview
+ * OCR Layout Template Controller — CRUD + Preview + Learning Stats
  *
  * Manages layout templates (ocr_extractors + ocr_extractor_fields) for
  * defining custom column boundaries used by the table extraction pipeline.
@@ -10,7 +10,8 @@
  *   POST   /api/ocr/layout-templates               — Create template
  *   PUT    /api/ocr/layout-templates/:id           — Update template
  *   DELETE /api/ocr/layout-templates/:id           — Delete template
- *   POST   /api/ocr/layout-templates/:id/preview   — Preview extraction with template bands
+ *   POST   /api/ocr/layout-templates/:id/preview   — Preview extraction with template
+ *   GET    /api/ocr/layout-templates/:id/learning-stats — Correction stats
  */
 
 'use strict';
@@ -23,6 +24,29 @@ function getPool() {
   return promisePool;
 }
 
+/**
+ * Load Vision JSON for a job (DB or disk fallback).
+ */
+function loadVisionJson(pool, jobId) {
+  return (async () => {
+    const [jobRows] = await pool.query('SELECT ocr_result FROM ocr_jobs WHERE id = ?', [jobId]);
+    let visionJsonStr = jobRows.length ? jobRows[0].ocr_result : null;
+
+    if (!visionJsonStr) {
+      const feederPath = path.join(
+        '/var/www/orthodoxmetrics/prod/server/storage/feeder',
+        `job_${jobId}`, 'page_0', 'vision_result.json'
+      );
+      if (fs.existsSync(feederPath)) {
+        visionJsonStr = fs.readFileSync(feederPath, 'utf8');
+      }
+    }
+
+    if (!visionJsonStr) return null;
+    return typeof visionJsonStr === 'string' ? JSON.parse(visionJsonStr) : visionJsonStr;
+  })();
+}
+
 // ── GET /api/ocr/layout-templates ────────────────────────────────────────────
 
 async function listTemplates(req, res) {
@@ -32,12 +56,12 @@ async function listTemplates(req, res) {
     const churchId = req.query.church_id ? parseInt(req.query.church_id) : null;
 
     let sql = `
-      SELECT e.id, e.name, e.description, e.record_type, e.column_bands,
-             e.header_y_threshold, e.preview_job_id, e.is_default, e.church_id,
-             e.record_regions, e.created_at, e.updated_at,
+      SELECT e.id, e.name, e.description, e.record_type, e.extraction_mode,
+             e.column_bands, e.header_y_threshold, e.preview_job_id, e.is_default,
+             e.church_id, e.record_regions, e.created_at, e.updated_at,
              (SELECT COUNT(*) FROM ocr_extractor_fields f WHERE f.extractor_id = e.id) AS field_count
       FROM ocr_extractors e
-      WHERE e.column_bands IS NOT NULL
+      WHERE 1=1
     `;
     const params = [];
 
@@ -54,7 +78,6 @@ async function listTemplates(req, res) {
 
     const [rows] = await pool.query(sql, params);
 
-    // Parse JSON fields for each row
     for (const row of rows) {
       if (row.column_bands && typeof row.column_bands === 'string') {
         try { row.column_bands = JSON.parse(row.column_bands); } catch (_) {}
@@ -81,9 +104,10 @@ async function getTemplate(req, res) {
     const pool = getPool();
 
     const [rows] = await pool.query(`
-      SELECT e.id, e.name, e.description, e.record_type, e.column_bands,
-             e.header_y_threshold, e.preview_job_id, e.is_default, e.church_id,
-             e.page_mode, e.record_regions, e.created_at, e.updated_at
+      SELECT e.id, e.name, e.description, e.record_type, e.extraction_mode,
+             e.column_bands, e.header_y_threshold, e.preview_job_id, e.is_default,
+             e.church_id, e.page_mode, e.record_regions, e.learned_params,
+             e.created_at, e.updated_at
       FROM ocr_extractors e
       WHERE e.id = ?
     `, [id]);
@@ -91,20 +115,30 @@ async function getTemplate(req, res) {
     if (!rows.length) return res.status(404).json({ error: 'Template not found' });
 
     const template = rows[0];
-    if (template.column_bands && typeof template.column_bands === 'string') {
-      try { template.column_bands = JSON.parse(template.column_bands); } catch (_) {}
-    }
-    if (template.record_regions && typeof template.record_regions === 'string') {
-      try { template.record_regions = JSON.parse(template.record_regions); } catch (_) {}
+    for (const jsonCol of ['column_bands', 'record_regions', 'learned_params']) {
+      if (template[jsonCol] && typeof template[jsonCol] === 'string') {
+        try { template[jsonCol] = JSON.parse(template[jsonCol]); } catch (_) {}
+      }
     }
 
-    // Load fields
+    // Load fields (including anchor config columns)
     const [fields] = await pool.query(`
-      SELECT id, name, \`key\`, field_type, column_index, sort_order
+      SELECT id, name, \`key\`, field_type, column_index, sort_order,
+             anchor_phrases, anchor_direction, search_zone
       FROM ocr_extractor_fields
       WHERE extractor_id = ?
       ORDER BY sort_order ASC, column_index ASC
     `, [id]);
+
+    // Parse JSON in field rows
+    for (const f of fields) {
+      if (f.anchor_phrases && typeof f.anchor_phrases === 'string') {
+        try { f.anchor_phrases = JSON.parse(f.anchor_phrases); } catch (_) {}
+      }
+      if (f.search_zone && typeof f.search_zone === 'string') {
+        try { f.search_zone = JSON.parse(f.search_zone); } catch (_) {}
+      }
+    }
 
     template.fields = fields;
 
@@ -124,6 +158,7 @@ async function createTemplate(req, res) {
       name,
       description,
       record_type,
+      extraction_mode,
       column_bands,
       header_y_threshold,
       preview_job_id,
@@ -137,11 +172,13 @@ async function createTemplate(req, res) {
       return res.status(400).json({ error: 'name and record_type are required' });
     }
 
-    if (!column_bands || !Array.isArray(column_bands) || column_bands.length === 0) {
-      return res.status(400).json({ error: 'column_bands array is required' });
+    const mode = extraction_mode || 'tabular';
+
+    // column_bands required only for tabular mode
+    if (mode === 'tabular' && (!column_bands || !Array.isArray(column_bands) || column_bands.length === 0)) {
+      return res.status(400).json({ error: 'column_bands array is required for tabular mode' });
     }
 
-    // If setting as default, unset other defaults for this record_type
     if (is_default) {
       await pool.query(
         'UPDATE ocr_extractors SET is_default = 0 WHERE record_type = ? AND is_default = 1',
@@ -150,13 +187,16 @@ async function createTemplate(req, res) {
     }
 
     const [result] = await pool.query(`
-      INSERT INTO ocr_extractors (name, description, record_type, column_bands, header_y_threshold, preview_job_id, is_default, church_id, record_regions)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO ocr_extractors
+        (name, description, record_type, extraction_mode, column_bands,
+         header_y_threshold, preview_job_id, is_default, church_id, record_regions)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       name,
       description || null,
       record_type,
-      JSON.stringify(column_bands),
+      mode,
+      column_bands ? JSON.stringify(column_bands) : null,
       header_y_threshold || 0,
       preview_job_id || null,
       is_default ? 1 : 0,
@@ -166,25 +206,30 @@ async function createTemplate(req, res) {
 
     const templateId = result.insertId;
 
-    // Insert fields if provided
+    // Insert fields if provided (with anchor config support)
     if (fields && Array.isArray(fields)) {
       for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
         await pool.query(`
-          INSERT INTO ocr_extractor_fields (extractor_id, name, \`key\`, field_type, column_index, sort_order)
-          VALUES (?, ?, ?, ?, ?, ?)
+          INSERT INTO ocr_extractor_fields
+            (extractor_id, name, \`key\`, field_type, column_index, sort_order,
+             anchor_phrases, anchor_direction, search_zone)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
           templateId,
-          field.name || `Column ${i + 1}`,
-          field.key || `col_${i + 1}`,
+          field.name || `Field ${i + 1}`,
+          field.key || `field_${i + 1}`,
           field.field_type || 'text',
           field.column_index ?? i,
           field.sort_order ?? i,
+          field.anchor_phrases ? JSON.stringify(field.anchor_phrases) : null,
+          field.anchor_direction || null,
+          field.search_zone ? JSON.stringify(field.search_zone) : null,
         ]);
       }
     }
 
-    console.log(`[LayoutTemplate] Created template ${templateId}: "${name}" (${record_type}, ${column_bands.length} columns)`);
+    console.log(`[LayoutTemplate] Created template ${templateId}: "${name}" (${record_type}, mode=${mode})`);
 
     res.json({ success: true, template_id: templateId });
   } catch (error) {
@@ -205,6 +250,7 @@ async function updateTemplate(req, res) {
       name,
       description,
       record_type,
+      extraction_mode,
       column_bands,
       header_y_threshold,
       preview_job_id,
@@ -214,13 +260,11 @@ async function updateTemplate(req, res) {
       record_regions,
     } = req.body;
 
-    // Verify exists
     const [existing] = await pool.query('SELECT id, record_type FROM ocr_extractors WHERE id = ?', [id]);
     if (!existing.length) return res.status(404).json({ error: 'Template not found' });
 
     const effectiveRecordType = record_type || existing[0].record_type;
 
-    // If setting as default, unset other defaults
     if (is_default) {
       await pool.query(
         'UPDATE ocr_extractors SET is_default = 0 WHERE record_type = ? AND is_default = 1 AND id != ?',
@@ -234,7 +278,8 @@ async function updateTemplate(req, res) {
     if (name !== undefined) { updates.push('name = ?'); params.push(name); }
     if (description !== undefined) { updates.push('description = ?'); params.push(description); }
     if (record_type !== undefined) { updates.push('record_type = ?'); params.push(record_type); }
-    if (column_bands !== undefined) { updates.push('column_bands = ?'); params.push(JSON.stringify(column_bands)); }
+    if (extraction_mode !== undefined) { updates.push('extraction_mode = ?'); params.push(extraction_mode); }
+    if (column_bands !== undefined) { updates.push('column_bands = ?'); params.push(column_bands ? JSON.stringify(column_bands) : null); }
     if (header_y_threshold !== undefined) { updates.push('header_y_threshold = ?'); params.push(header_y_threshold); }
     if (preview_job_id !== undefined) { updates.push('preview_job_id = ?'); params.push(preview_job_id); }
     if (is_default !== undefined) { updates.push('is_default = ?'); params.push(is_default ? 1 : 0); }
@@ -246,21 +291,26 @@ async function updateTemplate(req, res) {
       await pool.query(`UPDATE ocr_extractors SET ${updates.join(', ')} WHERE id = ?`, params);
     }
 
-    // Replace fields if provided
+    // Replace fields if provided (with anchor config support)
     if (fields && Array.isArray(fields)) {
       await pool.query('DELETE FROM ocr_extractor_fields WHERE extractor_id = ?', [id]);
       for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
         await pool.query(`
-          INSERT INTO ocr_extractor_fields (extractor_id, name, \`key\`, field_type, column_index, sort_order)
-          VALUES (?, ?, ?, ?, ?, ?)
+          INSERT INTO ocr_extractor_fields
+            (extractor_id, name, \`key\`, field_type, column_index, sort_order,
+             anchor_phrases, anchor_direction, search_zone)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
           id,
-          field.name || `Column ${i + 1}`,
-          field.key || `col_${i + 1}`,
+          field.name || `Field ${i + 1}`,
+          field.key || `field_${i + 1}`,
           field.field_type || 'text',
           field.column_index ?? i,
           field.sort_order ?? i,
+          field.anchor_phrases ? JSON.stringify(field.anchor_phrases) : null,
+          field.anchor_direction || null,
+          field.search_zone ? JSON.stringify(field.search_zone) : null,
         ]);
       }
     }
@@ -282,7 +332,6 @@ async function deleteTemplate(req, res) {
 
     const pool = getPool();
 
-    // Delete fields first (FK)
     await pool.query('DELETE FROM ocr_extractor_fields WHERE extractor_id = ?', [id]);
     const [result] = await pool.query('DELETE FROM ocr_extractors WHERE id = ?', [id]);
 
@@ -310,54 +359,71 @@ async function previewExtraction(req, res) {
 
     const pool = getPool();
 
-    // Load template
+    // Load template with extraction_mode
     const [tplRows] = await pool.query(
-      'SELECT column_bands, header_y_threshold FROM ocr_extractors WHERE id = ?',
+      `SELECT id, extraction_mode, column_bands, header_y_threshold, record_regions, learned_params, record_type
+       FROM ocr_extractors WHERE id = ?`,
       [id]
     );
     if (!tplRows.length) return res.status(404).json({ error: 'Template not found' });
 
-    let columnBands = tplRows[0].column_bands;
-    if (typeof columnBands === 'string') {
-      columnBands = JSON.parse(columnBands);
-    }
-    const headerY = tplRows[0].header_y_threshold || 0.15;
+    const tpl = tplRows[0];
+    const extractionMode = tpl.extraction_mode || 'tabular';
 
-    // Load Vision JSON for the job
-    const [jobRows] = await pool.query('SELECT ocr_result FROM ocr_jobs WHERE id = ?', [jobId]);
-    let visionJsonStr = jobRows.length ? jobRows[0].ocr_result : null;
-
-    // Fallback to disk
-    if (!visionJsonStr) {
-      const feederPath = path.join(
-        '/var/www/orthodoxmetrics/prod/server/storage/feeder',
-        `job_${jobId}`, 'page_0', 'vision_result.json'
-      );
-      if (fs.existsSync(feederPath)) {
-        visionJsonStr = fs.readFileSync(feederPath, 'utf8');
-      }
-    }
-
-    if (!visionJsonStr) {
+    const visionJson = await loadVisionJson(pool, jobId);
+    if (!visionJson) {
       return res.status(400).json({ error: 'No OCR result available for this job' });
     }
 
-    const visionJson = typeof visionJsonStr === 'string' ? JSON.parse(visionJsonStr) : visionJsonStr;
+    let result;
 
-    // Run extraction with template bands
-    const { extractGenericTable } = require('../ocr/layouts/generic_table');
-    const result = extractGenericTable(visionJson, {
-      pageIndex: 0,
-      headerY,
-      columnBands: columnBands,
-    });
+    if (extractionMode === 'form' || extractionMode === 'multi_form' || extractionMode === 'auto') {
+      // Use form-based extraction for preview
+      const { extractFormPage, extractMultiFormPage, extractAutoMode } = require('../ocr/formExtractor');
+      const recordType = tpl.record_type || 'baptism';
 
-    console.log(`[LayoutTemplate] Preview: template ${id}, job ${jobId} → ${result.data_rows} rows, ${result.columns_detected} cols`);
+      // Parse JSON columns
+      if (tpl.record_regions && typeof tpl.record_regions === 'string') {
+        tpl.record_regions = JSON.parse(tpl.record_regions);
+      }
+      if (tpl.learned_params && typeof tpl.learned_params === 'string') {
+        tpl.learned_params = JSON.parse(tpl.learned_params);
+      }
+
+      if (extractionMode === 'form') {
+        result = await extractFormPage(visionJson, tpl, pool, recordType);
+      } else if (extractionMode === 'multi_form') {
+        result = await extractMultiFormPage(visionJson, tpl, pool, recordType);
+      } else {
+        // auto
+        result = await extractAutoMode(visionJson, tpl, recordType, pool);
+        if (!result) {
+          // Fallback to generic table
+          const { extractGenericTable } = require('../ocr/layouts/generic_table');
+          result = extractGenericTable(visionJson, { pageIndex: 0 });
+        }
+      }
+    } else {
+      // Tabular extraction (existing behavior)
+      let columnBands = tpl.column_bands;
+      if (typeof columnBands === 'string') columnBands = JSON.parse(columnBands);
+      const headerY = tpl.header_y_threshold || 0.15;
+
+      const { extractGenericTable } = require('../ocr/layouts/generic_table');
+      result = extractGenericTable(visionJson, {
+        pageIndex: 0,
+        headerY,
+        columnBands,
+      });
+    }
+
+    console.log(`[LayoutTemplate] Preview: template ${id}, job ${jobId}, mode=${extractionMode} → ${result.data_rows} rows`);
 
     res.json({
       success: true,
       template_id: id,
       job_id: jobId,
+      extraction_mode: extractionMode,
       extraction: result,
     });
   } catch (error) {
@@ -367,8 +433,6 @@ async function previewExtraction(req, res) {
 }
 
 // ── POST /api/ocr/layout-templates/preview-inline ────────────────────────────
-// Same as previewExtraction but reads column_bands + header_y from request body
-// instead of looking up a saved template.
 
 async function previewInline(req, res) {
   try {
@@ -382,29 +446,11 @@ async function previewInline(req, res) {
     }
 
     const pool = getPool();
-
-    // Load Vision JSON for the job
-    const [jobRows] = await pool.query('SELECT ocr_result FROM ocr_jobs WHERE id = ?', [jobId]);
-    let visionJsonStr = jobRows.length ? jobRows[0].ocr_result : null;
-
-    // Fallback to disk
-    if (!visionJsonStr) {
-      const feederPath = path.join(
-        '/var/www/orthodoxmetrics/prod/server/storage/feeder',
-        `job_${jobId}`, 'page_0', 'vision_result.json'
-      );
-      if (fs.existsSync(feederPath)) {
-        visionJsonStr = fs.readFileSync(feederPath, 'utf8');
-      }
-    }
-
-    if (!visionJsonStr) {
+    const visionJson = await loadVisionJson(pool, jobId);
+    if (!visionJson) {
       return res.status(400).json({ error: 'No OCR result available for this job' });
     }
 
-    const visionJson = typeof visionJsonStr === 'string' ? JSON.parse(visionJsonStr) : visionJsonStr;
-
-    // Run extraction with inline bands
     const { extractGenericTable } = require('../ocr/layouts/generic_table');
     const result = extractGenericTable(visionJson, {
       pageIndex: 0,
@@ -425,6 +471,69 @@ async function previewInline(req, res) {
   }
 }
 
+// ── GET /api/ocr/layout-templates/:id/learning-stats ─────────────────────────
+
+async function learningStats(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Template ID required' });
+
+    const pool = getPool();
+
+    // Verify template exists
+    const [tplRows] = await pool.query('SELECT id, record_type FROM ocr_extractors WHERE id = ?', [id]);
+    if (!tplRows.length) return res.status(404).json({ error: 'Template not found' });
+
+    // Per-field accuracy: compare extracted vs corrected
+    const [fieldStats] = await pool.query(`
+      SELECT
+        field_key,
+        COUNT(*) AS total_corrections,
+        SUM(CASE WHEN extracted_value = corrected_value THEN 1 ELSE 0 END) AS exact_matches,
+        ROUND(
+          SUM(CASE WHEN extracted_value = corrected_value THEN 1 ELSE 0 END) / COUNT(*) * 100, 1
+        ) AS accuracy_pct
+      FROM ocr_correction_log
+      WHERE extractor_id = ?
+      GROUP BY field_key
+      ORDER BY total_corrections DESC
+    `, [id]);
+
+    // Most common correction patterns (top 10 per field)
+    const [patterns] = await pool.query(`
+      SELECT field_key, extracted_value, corrected_value, COUNT(*) AS occurrences
+      FROM ocr_correction_log
+      WHERE extractor_id = ? AND extracted_value != corrected_value
+      GROUP BY field_key, extracted_value, corrected_value
+      ORDER BY occurrences DESC
+      LIMIT 50
+    `, [id]);
+
+    // Summary stats
+    const [summary] = await pool.query(`
+      SELECT
+        COUNT(*) AS total_corrections,
+        COUNT(DISTINCT job_id) AS jobs_corrected,
+        COUNT(DISTINCT field_key) AS fields_corrected,
+        MIN(created_at) AS first_correction,
+        MAX(created_at) AS last_correction
+      FROM ocr_correction_log
+      WHERE extractor_id = ?
+    `, [id]);
+
+    res.json({
+      template_id: id,
+      record_type: tplRows[0].record_type,
+      summary: summary[0] || {},
+      field_stats: fieldStats,
+      common_patterns: patterns,
+    });
+  } catch (error) {
+    console.error('[LayoutTemplate] learningStats error:', error);
+    res.status(500).json({ error: 'Failed to get learning stats', message: error.message });
+  }
+}
+
 module.exports = {
   listTemplates,
   getTemplate,
@@ -433,4 +542,5 @@ module.exports = {
   deleteTemplate,
   previewExtraction,
   previewInline,
+  learningStats,
 };

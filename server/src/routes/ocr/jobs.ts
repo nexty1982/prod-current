@@ -773,6 +773,30 @@ function createRouters(upload: any) {
         // Non-blocking — finalize metadata save failure doesn't affect record creation
       }
 
+      // Non-blocking: log corrections
+      (async () => {
+        try {
+          const original = req.body.originalFields || {};
+          const [jobMeta] = await promisePool.query(
+            'SELECT layout_template_id FROM ocr_jobs WHERE id = ?', [jobId]
+          ) as any[];
+          const extractorId = jobMeta[0]?.layout_template_id || null;
+
+          for (const key of Object.keys(mappedFields)) {
+            const extractedVal = (original[key] || '').toString().trim();
+            const correctedVal = (mappedFields[key] || '').toString().trim();
+            if (extractedVal !== correctedVal && (extractedVal || correctedVal)) {
+              await promisePool.query(
+                `INSERT INTO ocr_correction_log
+                 (church_id, job_id, extractor_id, record_type, field_key, extracted_value, corrected_value)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [churchId, jobId, extractorId, record_type, key, extractedVal || null, correctedVal || null]
+              );
+            }
+          }
+        } catch (_: any) { /* swallowed */ }
+      })();
+
       console.log(`OCR_FINALIZE_OK ${JSON.stringify({ jobId, churchId, record_type, recordId })}`);
       res.json({ ok: true, jobId, createdRecordId: recordId, record_type, church_id: churchId });
     } catch (error: any) {
@@ -852,6 +876,39 @@ function createRouters(upload: any) {
       } catch (_: any) {
         // Non-blocking
       }
+
+      // Non-blocking: log corrections to ocr_correction_log for learning
+      (async () => {
+        try {
+          // Look up the extractor used for this job
+          const [jobMeta] = await promisePool.query(
+            'SELECT layout_template_id, record_type FROM ocr_jobs WHERE id = ?', [jobId]
+          ) as any[];
+          const extractorId = jobMeta[0]?.layout_template_id || null;
+
+          for (const rec of records) {
+            const original = rec.originalFields || {};
+            const corrected = rec.mappedFields || {};
+            const allKeys = new Set([...Object.keys(original), ...Object.keys(corrected)]);
+
+            for (const key of allKeys) {
+              const extractedVal = (original[key] || '').toString().trim();
+              const correctedVal = (corrected[key] || '').toString().trim();
+              // Only log if there's a meaningful difference
+              if (extractedVal !== correctedVal && (extractedVal || correctedVal)) {
+                await promisePool.query(
+                  `INSERT INTO ocr_correction_log
+                   (church_id, job_id, extractor_id, record_type, field_key, extracted_value, corrected_value)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                  [churchId, jobId, extractorId, rec.record_type, key, extractedVal || null, correctedVal || null]
+                );
+              }
+            }
+          }
+        } catch (corrErr: any) {
+          console.warn('[OCR Correction Log] Non-blocking error:', corrErr.message);
+        }
+      })();
 
       console.log(`OCR_FINALIZE_BATCH_OK ${JSON.stringify({ jobId, churchId, created_count: createdRecords.length })}`);
       res.json({ ok: true, created_count: createdRecords.length, created_records: createdRecords });

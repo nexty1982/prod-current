@@ -1,57 +1,61 @@
 /**
- * Layout Template Editor — Visual column boundary editor for OCR templates.
+ * Layout Template Editor — Visual editor for OCR layout templates.
  *
  * Route:  /devel/ocr-studio/layout-templates
  *
- * Allows super admins to create/edit layout templates with draggable column
- * boundaries on a reference image. Templates define column bands used by
- * the table extraction pipeline for different physical record formats.
+ * Supports multiple extraction modes:
+ * - Tabular:    Column boundaries for ledger-style pages
+ * - Form:       Anchor-based extraction for single-record forms
+ * - Multi-Form: Record regions + anchor extraction (N records per page)
+ * - Auto:       Try anchors first, fall back to generic table
  */
 
 import { apiClient } from '@/shared/lib/axiosInstance';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
-  Alert,
-  alpha,
-  Autocomplete,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Divider,
-  MenuItem,
-  Paper,
-  Snackbar,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography,
-  useTheme,
+    Alert,
+    Autocomplete,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Chip,
+    CircularProgress,
+    MenuItem,
+    Paper,
+    Snackbar,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    ToggleButton,
+    ToggleButtonGroup,
+    Tooltip,
+    Typography,
+    useTheme
 } from '@mui/material';
 import {
-  IconDeviceFloppy,
-  IconLayout,
-  IconPlus,
-  IconPlayerPlay,
-  IconTrash,
+    IconDeviceFloppy,
+    IconLayout,
+    IconPlayerPlay,
+    IconPlus,
+    IconTrash,
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import OcrStudioNav from '../components/OcrStudioNav';
+import AnchorFieldEditor, { type AnchorFieldConfig } from '../components/AnchorFieldEditor';
 import ColumnBoundaryEditor, {
-  type ColumnBand,
-  type FractionalBBox,
-  boundariesToBands,
+    type ColumnBand,
+    type FractionalBBox
 } from '../components/ColumnBoundaryEditor';
+import OcrStudioNav from '../components/OcrStudioNav';
 
 // ── Types ────────────────────────────────────────────────────────────────────
+
+type ExtractionMode = 'tabular' | 'form' | 'multi_form' | 'auto';
 
 interface TemplateField {
   name: string;
@@ -59,6 +63,9 @@ interface TemplateField {
   field_type: string;
   column_index: number;
   sort_order: number;
+  anchor_phrases?: string[] | null;
+  anchor_direction?: 'below' | 'right' | 'auto' | null;
+  search_zone?: any;
 }
 
 interface LayoutTemplate {
@@ -66,6 +73,7 @@ interface LayoutTemplate {
   name: string;
   description: string | null;
   record_type: string;
+  extraction_mode?: ExtractionMode;
   column_bands: ColumnBand[] | null;
   header_y_threshold: number;
   preview_job_id: number | null;
@@ -90,6 +98,7 @@ interface PreviewRow {
   type: string;
   cells: Array<{
     column_index: number;
+    column_key?: string;
     content: string;
     confidence?: number | null;
     token_count?: number;
@@ -97,6 +106,13 @@ interface PreviewRow {
 }
 
 const RECORD_TYPES = ['marriage', 'baptism', 'funeral', 'custom'];
+
+const EXTRACTION_MODES: Array<{ value: ExtractionMode; label: string; desc: string }> = [
+  { value: 'tabular', label: 'Tabular', desc: 'Column bands for ledger pages' },
+  { value: 'form', label: 'Form', desc: 'Single record per page (anchors)' },
+  { value: 'multi_form', label: 'Multi-Form', desc: 'N records per page (regions + anchors)' },
+  { value: 'auto', label: 'Auto', desc: 'Try anchors first, fall back to table' },
+];
 
 const LayoutTemplateEditorPage: React.FC = () => {
   const theme = useTheme();
@@ -110,6 +126,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [recordType, setRecordType] = useState('marriage');
+  const [extractionMode, setExtractionMode] = useState<ExtractionMode>('tabular');
   const [columnBands, setColumnBands] = useState<ColumnBand[]>([]);
   const [headerY, setHeaderY] = useState(0.15);
   const [isDefault, setIsDefault] = useState(false);
@@ -123,7 +140,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
 
   // Preview
   const [previewRows, setPreviewRows] = useState<PreviewRow[]>([]);
-  const [previewCols, setPreviewCols] = useState(0);
+  const [previewHeaders, setPreviewHeaders] = useState<Array<{ column_key: string; text: string }>>([]);
   const [previewing, setPreviewing] = useState(false);
 
   // Saving
@@ -132,6 +149,8 @@ const LayoutTemplateEditorPage: React.FC = () => {
 
   // Toast
   const [toast, setToast] = useState<{ msg: string; severity: 'success' | 'error' | 'info' } | null>(null);
+
+  const isFormMode = extractionMode === 'form' || extractionMode === 'multi_form' || extractionMode === 'auto';
 
   // ── Load templates ────────────────────────────────────────────────────────
 
@@ -173,10 +192,8 @@ const LayoutTemplateEditorPage: React.FC = () => {
 
   useEffect(() => {
     if (refJobId) {
-      // Determine church_id from the job list
       const job = refJobs.find((j) => j.id === refJobId);
       if (job) {
-        // Use the OCR job image endpoint
         setImageUrl(`/api/church/46/ocr/jobs/${refJobId}/image`);
       } else {
         setImageUrl(null);
@@ -192,13 +209,13 @@ const LayoutTemplateEditorPage: React.FC = () => {
     async (id: number | null) => {
       setSelectedId(id);
       setPreviewRows([]);
-      setPreviewCols(0);
+      setPreviewHeaders([]);
 
       if (!id) {
-        // New template
         setName('');
         setDescription('');
         setRecordType('marriage');
+        setExtractionMode('tabular');
         setColumnBands([]);
         setHeaderY(0.15);
         setIsDefault(false);
@@ -216,6 +233,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
         setName(tpl.name || '');
         setDescription(tpl.description || '');
         setRecordType(tpl.record_type || 'marriage');
+        setExtractionMode(tpl.extraction_mode || 'tabular');
         setColumnBands(tpl.column_bands || []);
         setHeaderY(tpl.header_y_threshold || 0.15);
         setIsDefault(!!tpl.is_default);
@@ -230,29 +248,30 @@ const LayoutTemplateEditorPage: React.FC = () => {
     [],
   );
 
-  // ── Sync fields with column bands ──────────────────────────────────────────
+  // ── Sync fields with column bands (tabular mode only) ──────────────────────
 
   const handleBandsChange = useCallback(
     (bands: ColumnBand[]) => {
       setColumnBands(bands);
       setDirty(true);
-      // Auto-sync fields array to match band count
-      setFields((prev) => {
-        const newFields: TemplateField[] = [];
-        for (let i = 0; i < bands.length; i++) {
-          const existing = prev.find((f) => f.column_index === i);
-          newFields.push({
-            name: existing?.name || `Column ${i + 1}`,
-            key: existing?.key || `col_${i + 1}`,
-            field_type: existing?.field_type || 'text',
-            column_index: i,
-            sort_order: i,
-          });
-        }
-        return newFields;
-      });
+      if (extractionMode === 'tabular') {
+        setFields((prev) => {
+          const newFields: TemplateField[] = [];
+          for (let i = 0; i < bands.length; i++) {
+            const existing = prev.find((f) => f.column_index === i);
+            newFields.push({
+              name: existing?.name || `Column ${i + 1}`,
+              key: existing?.key || `col_${i + 1}`,
+              field_type: existing?.field_type || 'text',
+              column_index: i,
+              sort_order: i,
+            });
+          }
+          return newFields;
+        });
+      }
     },
-    [],
+    [extractionMode],
   );
 
   const handleHeaderYChange = useCallback((y: number) => {
@@ -274,6 +293,18 @@ const LayoutTemplateEditorPage: React.FC = () => {
     setDirty(true);
   }, []);
 
+  const handleAnchorFieldsChange = useCallback((newFields: AnchorFieldConfig[]) => {
+    setFields(newFields);
+    setDirty(true);
+  }, []);
+
+  const handleExtractionModeChange = useCallback((_: any, newMode: ExtractionMode | null) => {
+    if (newMode) {
+      setExtractionMode(newMode);
+      setDirty(true);
+    }
+  }, []);
+
   // ── Save ───────────────────────────────────────────────────────────────────
 
   const handleSave = useCallback(async () => {
@@ -281,8 +312,8 @@ const LayoutTemplateEditorPage: React.FC = () => {
       setToast({ msg: 'Template name is required', severity: 'error' });
       return;
     }
-    if (columnBands.length === 0) {
-      setToast({ msg: 'Add at least one column boundary', severity: 'error' });
+    if (extractionMode === 'tabular' && columnBands.length === 0) {
+      setToast({ msg: 'Add at least one column boundary for tabular mode', severity: 'error' });
       return;
     }
 
@@ -292,7 +323,8 @@ const LayoutTemplateEditorPage: React.FC = () => {
         name: name.trim(),
         description: description.trim() || null,
         record_type: recordType,
-        column_bands: columnBands,
+        extraction_mode: extractionMode,
+        column_bands: columnBands.length > 0 ? columnBands : null,
         header_y_threshold: headerY,
         preview_job_id: refJobId,
         is_default: isDefault,
@@ -317,7 +349,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
     } finally {
       setSaving(false);
     }
-  }, [name, description, recordType, columnBands, headerY, refJobId, isDefault, fields, recordRegions, selectedId, fetchTemplates]);
+  }, [name, description, recordType, extractionMode, columnBands, headerY, refJobId, isDefault, fields, recordRegions, selectedId, fetchTemplates]);
 
   // ── Delete ─────────────────────────────────────────────────────────────────
 
@@ -353,12 +385,12 @@ const LayoutTemplateEditorPage: React.FC = () => {
       if (extraction?.tables?.length > 0) {
         const table = extraction.tables[0];
         setPreviewRows(table.rows || []);
-        setPreviewCols(table.column_count || 0);
-        setToast({ msg: `Preview: ${extraction.data_rows} rows, ${extraction.columns_detected} columns`, severity: 'success' });
+        setPreviewHeaders(table.headers || []);
+        setToast({ msg: `Preview: ${extraction.data_rows} rows, ${extraction.columns_detected} fields`, severity: 'success' });
       } else {
         setPreviewRows([]);
-        setPreviewCols(0);
-        setToast({ msg: 'No rows extracted — adjust column boundaries', severity: 'info' });
+        setPreviewHeaders([]);
+        setToast({ msg: 'No rows extracted — adjust configuration', severity: 'info' });
       }
     } catch (e: any) {
       setToast({ msg: e?.response?.data?.error || 'Preview failed', severity: 'error' });
@@ -369,8 +401,13 @@ const LayoutTemplateEditorPage: React.FC = () => {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
+  // For form-mode preview, use headers from extraction; for tabular, use fields
+  const effectivePreviewHeaders = previewHeaders.length > 0
+    ? previewHeaders
+    : fields.map((f, i) => ({ column_key: f.key, text: f.name }));
+
   return (
-    <PageContainer title="Layout Template Editor" description="Visual column boundary editor for OCR layout templates">
+    <PageContainer title="Layout Template Editor" description="Visual editor for OCR layout templates">
       <OcrStudioNav />
       <Box sx={{ p: { xs: 1, sm: 2 } }}>
         {/* Header */}
@@ -409,65 +446,89 @@ const LayoutTemplateEditorPage: React.FC = () => {
         {/* Template selector + metadata */}
         <Card sx={{ mb: 2 }}>
           <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
-            <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
-              <TextField
-                select
-                size="small"
-                label="Template"
-                value={selectedId ?? ''}
-                onChange={(e) => handleSelectTemplate(e.target.value ? Number(e.target.value) : null)}
-                sx={{ minWidth: 220 }}
-              >
-                <MenuItem value="">-- New Template --</MenuItem>
-                {templates.map((t) => (
-                  <MenuItem key={t.id} value={t.id}>
-                    {t.name} {t.is_default ? '(default)' : ''} — {t.record_type}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <TextField
-                size="small"
-                label="Name"
-                value={name}
-                onChange={(e) => { setName(e.target.value); setDirty(true); }}
-                sx={{ minWidth: 200 }}
-              />
-              <TextField
-                select
-                size="small"
-                label="Record Type"
-                value={recordType}
-                onChange={(e) => { setRecordType(e.target.value); setDirty(true); }}
-                sx={{ minWidth: 140 }}
-              >
-                {RECORD_TYPES.map((rt) => (
-                  <MenuItem key={rt} value={rt}>{rt}</MenuItem>
-                ))}
-              </TextField>
-              <Autocomplete
-                size="small"
-                options={refJobs}
-                getOptionLabel={(o) => `#${o.id} — ${o.filename || 'unnamed'} (${o.church_name})`}
-                value={refJobs.find((j) => j.id === refJobId) || null}
-                onChange={(_, v) => { setRefJobId(v?.id ?? null); setDirty(true); }}
-                renderInput={(params) => <TextField {...params} label="Reference Job" placeholder="Select a job for image" />}
-                sx={{ minWidth: 300 }}
-                isOptionEqualToValue={(o, v) => o.id === v.id}
-              />
+            <Stack spacing={1.5}>
+              <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
+                <TextField
+                  select
+                  size="small"
+                  label="Template"
+                  value={selectedId ?? ''}
+                  onChange={(e) => handleSelectTemplate(e.target.value ? Number(e.target.value) : null)}
+                  sx={{ minWidth: 220 }}
+                >
+                  <MenuItem value="">-- New Template --</MenuItem>
+                  {templates.map((t) => (
+                    <MenuItem key={t.id} value={t.id}>
+                      {t.name} {t.is_default ? '(default)' : ''} — {t.record_type}
+                      {t.extraction_mode && t.extraction_mode !== 'tabular' ? ` [${t.extraction_mode}]` : ''}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  size="small"
+                  label="Name"
+                  value={name}
+                  onChange={(e) => { setName(e.target.value); setDirty(true); }}
+                  sx={{ minWidth: 200 }}
+                />
+                <TextField
+                  select
+                  size="small"
+                  label="Record Type"
+                  value={recordType}
+                  onChange={(e) => { setRecordType(e.target.value); setDirty(true); }}
+                  sx={{ minWidth: 140 }}
+                >
+                  {RECORD_TYPES.map((rt) => (
+                    <MenuItem key={rt} value={rt}>{rt}</MenuItem>
+                  ))}
+                </TextField>
+                <Autocomplete
+                  size="small"
+                  options={refJobs}
+                  getOptionLabel={(o) => `#${o.id} — ${o.filename || 'unnamed'} (${o.church_name})`}
+                  value={refJobs.find((j) => j.id === refJobId) || null}
+                  onChange={(_, v) => { setRefJobId(v?.id ?? null); setDirty(true); }}
+                  renderInput={(params) => <TextField {...params} label="Reference Job" placeholder="Select a job for image" />}
+                  sx={{ minWidth: 300 }}
+                  isOptionEqualToValue={(o, v) => o.id === v.id}
+                />
+              </Stack>
+
+              {/* Extraction Mode selector */}
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Typography variant="body2" fontWeight={600} color="text.secondary">
+                  Mode:
+                </Typography>
+                <ToggleButtonGroup
+                  size="small"
+                  value={extractionMode}
+                  exclusive
+                  onChange={handleExtractionModeChange}
+                >
+                  {EXTRACTION_MODES.map((m) => (
+                    <ToggleButton key={m.value} value={m.value}>
+                      <Tooltip title={m.desc}>
+                        <span>{m.label}</span>
+                      </Tooltip>
+                    </ToggleButton>
+                  ))}
+                </ToggleButtonGroup>
+              </Stack>
             </Stack>
           </CardContent>
         </Card>
 
-        {/* Main editor area: image + column fields */}
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ minHeight: 500 }}>
-          {/* Left: Column Boundary Editor */}
+        {/* Main editor area: image + fields config */}
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ minHeight: 500, height: 'calc(100vh - 280px)' }}>
+          {/* Left: Column Boundary Editor (always shown — useful for record regions in multi_form too) */}
           <Box sx={{ flex: 2, minHeight: 400 }}>
             <Card sx={{ height: '100%' }}>
               {imageUrl ? (
                 <ColumnBoundaryEditor
                   imageUrl={imageUrl}
-                  columnBands={columnBands}
-                  headerY={headerY}
+                  columnBands={extractionMode === 'tabular' ? columnBands : []}
+                  headerY={extractionMode === 'tabular' ? headerY : 0}
                   onBandsChange={handleBandsChange}
                   onHeaderYChange={handleHeaderYChange}
                   recordRegions={recordRegions}
@@ -476,51 +537,63 @@ const LayoutTemplateEditorPage: React.FC = () => {
               ) : (
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', p: 4 }}>
                   <Typography color="text.secondary">
-                    Select a reference job to load an image for visual column editing.
+                    Select a reference job to load an image for visual editing.
                   </Typography>
                 </Box>
               )}
             </Card>
           </Box>
 
-          {/* Right: Column fields + preview */}
-          <Box sx={{ flex: 1, minWidth: 280 }}>
-            {/* Column fields */}
-            <Card sx={{ mb: 2 }}>
+          {/* Right: Fields config + preview */}
+          <Box sx={{ flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {/* Fields panel — varies by mode */}
+            <Card sx={{ mb: 2, flexShrink: 0, maxHeight: '50%', overflow: 'auto' }}>
               <CardContent>
-                <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
-                  Column Fields ({fields.length})
-                </Typography>
-                {fields.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary">
-                    Add column boundaries on the image to define columns.
-                  </Typography>
+                {isFormMode ? (
+                  /* Anchor-based field editor */
+                  <AnchorFieldEditor
+                    fields={fields as AnchorFieldConfig[]}
+                    onChange={handleAnchorFieldsChange}
+                    recordType={recordType}
+                  />
                 ) : (
-                  <Stack spacing={1}>
-                    {fields.map((field, i) => (
-                      <Stack key={i} direction="row" spacing={1} alignItems="center">
-                        <Chip
-                          label={i + 1}
-                          size="small"
-                          sx={{ minWidth: 28, fontWeight: 700 }}
-                        />
-                        <TextField
-                          size="small"
-                          value={field.name}
-                          onChange={(e) => handleFieldNameChange(i, e.target.value)}
-                          fullWidth
-                          placeholder={`Column ${i + 1}`}
-                        />
+                  /* Tabular column field list */
+                  <>
+                    <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
+                      Column Fields ({fields.length})
+                    </Typography>
+                    {fields.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary">
+                        Add column boundaries on the image to define columns.
+                      </Typography>
+                    ) : (
+                      <Stack spacing={1}>
+                        {fields.map((field, i) => (
+                          <Stack key={i} direction="row" spacing={1} alignItems="center">
+                            <Chip
+                              label={i + 1}
+                              size="small"
+                              sx={{ minWidth: 28, fontWeight: 700 }}
+                            />
+                            <TextField
+                              size="small"
+                              value={field.name}
+                              onChange={(e) => handleFieldNameChange(i, e.target.value)}
+                              fullWidth
+                              placeholder={`Column ${i + 1}`}
+                            />
+                          </Stack>
+                        ))}
                       </Stack>
-                    ))}
-                  </Stack>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>
 
             {/* Preview extraction */}
-            <Card>
-              <CardContent>
+            <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
                   <Typography variant="subtitle2" fontWeight={700}>Preview Extraction</Typography>
                   <Button
@@ -539,21 +612,21 @@ const LayoutTemplateEditorPage: React.FC = () => {
                 )}
 
                 {previewRows.length > 0 && (
-                  <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 300, mt: 1 }}>
+                  <TableContainer component={Paper} variant="outlined" sx={{ flex: 1, mt: 1, overflow: 'auto' }}>
                     <Table size="small" stickyHeader>
                       <TableHead>
                         <TableRow>
                           <TableCell sx={{ fontWeight: 700, fontSize: '0.65rem' }}>Row</TableCell>
-                          {fields.map((f, i) => (
+                          {effectivePreviewHeaders.map((h, i) => (
                             <TableCell key={i} sx={{ fontWeight: 700, fontSize: '0.65rem' }}>
-                              {f.name}
+                              {h.text || h.column_key}
                             </TableCell>
                           ))}
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {previewRows
-                          .filter((r) => r.type === 'row')
+                          .filter((r) => !r.type || r.type === 'row')
                           .slice(0, 20)
                           .map((row) => (
                             <TableRow key={row.row_index}>
@@ -576,7 +649,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
 
                 {previewRows.length === 0 && selectedId && refJobId && !previewing && (
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    Click Preview to test extraction with current column boundaries.
+                    Click Preview to test extraction with current configuration.
                   </Typography>
                 )}
               </CardContent>

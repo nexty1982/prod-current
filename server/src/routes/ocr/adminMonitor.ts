@@ -34,6 +34,7 @@ router.put('/admin/ocr/layout-templates/:id', requireRole('super_admin'), ocrLay
 router.delete('/admin/ocr/layout-templates/:id', requireRole('super_admin'), ocrLayout.deleteTemplate);
 router.post('/admin/ocr/layout-templates/preview-inline', requireRole('super_admin'), ocrLayout.previewInline);
 router.post('/admin/ocr/layout-templates/:id/preview', requireRole('super_admin'), ocrLayout.previewExtraction);
+router.get('/admin/ocr/layout-templates/:id/learning-stats', requireRole('super_admin'), ocrLayout.learningStats);
 
 // Admin endpoint: normalize tenant OCR schema
 router.post('/admin/ocr/normalize-schema/:churchId', requireRole('super_admin'), async (req: any, res: any) => {
@@ -67,6 +68,7 @@ router.put('/ocr/layout-templates/:id', requireRole('super_admin'), ocrLayout.up
 router.delete('/ocr/layout-templates/:id', requireRole('super_admin'), ocrLayout.deleteTemplate);
 router.post('/ocr/layout-templates/preview-inline', requireRole('super_admin'), ocrLayout.previewInline);
 router.post('/ocr/layout-templates/:id/preview', requireRole('super_admin'), ocrLayout.previewExtraction);
+router.get('/ocr/layout-templates/:id/learning-stats', requireRole('super_admin'), ocrLayout.learningStats);
 
 router.get('/ocr/table-jobs', requireRole('super_admin'), ocrTable.listTableJobs);
 router.get('/ocr/table-jobs/:jobId', requireRole('super_admin'), ocrTable.getTableResult);
