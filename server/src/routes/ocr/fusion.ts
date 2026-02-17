@@ -212,9 +212,10 @@ router.put('/jobs/:jobId/fusion/drafts/:entryIndex', async (req: any, res: any) 
     if (!resolved) return res.status(404).json({ error: 'Church not found' });
     const { db } = resolved;
 
-    const { payload_json, bbox_json } = req.body;
+    const { record_type, record_number, payload_json, bbox_json, workflow_status } = req.body;
     const payloadStr = typeof payload_json === 'string' ? payload_json : JSON.stringify(payload_json || null);
     const bboxStr = typeof bbox_json === 'string' ? bbox_json : JSON.stringify(bbox_json || null);
+    const userEmail = req.session?.user?.email || req.user?.email || 'system';
 
     // Ensure table exists
     await db.query(CREATE_FUSED_DRAFTS_TABLE);
@@ -222,13 +223,16 @@ router.put('/jobs/:jobId/fusion/drafts/:entryIndex', async (req: any, res: any) 
     // Upsert on (ocr_job_id, entry_index)
     await db.query(
       `INSERT INTO ocr_fused_drafts
-         (ocr_job_id, entry_index, payload_json, bbox_json, church_id, workflow_status, created_by)
-       VALUES (?, ?, ?, ?, ?, 'draft', 'system')
+         (ocr_job_id, entry_index, record_type, record_number, payload_json, bbox_json, church_id, workflow_status, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
+         record_type = VALUES(record_type),
+         record_number = VALUES(record_number),
          payload_json = VALUES(payload_json),
          bbox_json = VALUES(bbox_json),
+         workflow_status = COALESCE(VALUES(workflow_status), workflow_status),
          updated_at = CURRENT_TIMESTAMP`,
-      [jobId, entryIndex, payloadStr, bboxStr, churchId]
+      [jobId, entryIndex, record_type || 'baptism', record_number || null, payloadStr, bboxStr, churchId, workflow_status || 'draft', userEmail]
     );
 
     // Fetch the saved row
@@ -466,6 +470,458 @@ router.post('/jobs/:jobId/fusion/ready-for-review', async (req: any, res: any) =
   } catch (err: any) {
     console.error('[OCR Fusion] Error marking ready for review:', err);
     return res.status(500).json({ error: 'Failed to mark drafts for review', details: err.message });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// 7. POST /jobs/:jobId/normalize — Normalize OCR transcription
+// ---------------------------------------------------------------------------
+router.post('/jobs/:jobId/normalize', async (req: any, res: any) => {
+  try {
+    const churchId = parseInt(req.params.churchId);
+    const jobId = parseInt(req.params.jobId);
+    const settings = req.body?.settings || {};
+
+    console.log(`[OCR Normalize] POST normalize — churchId=${churchId} jobId=${jobId}`);
+
+    const resolved = await resolveChurchDb(churchId);
+    if (!resolved) return res.status(404).json({ error: 'Church not found' });
+    const { db } = resolved;
+
+    // Check if request body has OCR data (preferred - skip DB read)
+    let ocrResult = req.body?.ocrResult || req.body?.ocr_result || null;
+    let sourceUsed = 'request_body';
+
+    // If no OCR data in body, fetch from DB
+    if (!ocrResult) {
+      const [rows]: any = await db.query('SELECT result_json, ocr_text, ocr_result FROM ocr_jobs WHERE id = ?', [jobId]);
+      if (!rows.length) {
+        return res.status(404).json({ error: 'Job not found' });
+      }
+
+      const job = rows[0];
+      const fs = require('fs');
+      const path = require('path');
+
+      try {
+        // Source 1: result_json
+        if (job.result_json) {
+          try {
+            ocrResult = typeof job.result_json === 'string' ? JSON.parse(job.result_json) : job.result_json;
+            sourceUsed = 'result_json';
+          } catch (e: any) {
+            console.warn(`[OCR Normalize] Failed to parse result_json:`, e.message);
+          }
+        }
+
+        // Source 2: ocr_text
+        if (!ocrResult && job.ocr_text) {
+          sourceUsed = 'ocr_text';
+        }
+
+        // Source 3: ocr_result
+        if (!ocrResult && job.ocr_result) {
+          try {
+            if (typeof job.ocr_result === 'string' && job.ocr_result.startsWith('{')) {
+              ocrResult = JSON.parse(job.ocr_result);
+              sourceUsed = 'ocr_result (parsed JSON)';
+            } else {
+              sourceUsed = 'ocr_result (text)';
+            }
+          } catch (e: any) {
+            console.warn(`[OCR Normalize] Failed to parse ocr_result:`, e.message);
+          }
+        }
+
+        // Fallback: file system
+        if (!ocrResult) {
+          const [jobFile]: any = await db.query('SELECT file_path FROM ocr_jobs WHERE id = ?', [jobId]);
+          if (jobFile.length && jobFile[0].file_path) {
+            const processedDir = path.dirname(jobFile[0].file_path);
+            const filenameWithoutExt = path.parse(path.basename(jobFile[0].file_path)).name;
+            const jsonFilePath = path.join(processedDir, `${filenameWithoutExt}_ocr.json`);
+            try {
+              const jsonContent = fs.readFileSync(jsonFilePath, 'utf8');
+              ocrResult = JSON.parse(jsonContent);
+              sourceUsed = 'file_system';
+            } catch (_e) {
+              // File doesn't exist or invalid JSON
+            }
+          }
+        }
+      } catch (e: any) {
+        console.error('[OCR Normalize] Error reading OCR result:', e);
+        return res.status(500).json({ error: 'Failed to read OCR result', message: e.message });
+      }
+    }
+
+    if (!ocrResult) {
+      return res.status(400).json({
+        error: 'OCR result not found',
+        message: 'No OCR data available. Please ensure the job has been processed.',
+        jobId,
+        sourceUsed: sourceUsed || 'none'
+      });
+    }
+
+    console.log(`[OCR Normalize] Loaded OCR data from source: ${sourceUsed} for job ${jobId}`);
+
+    const { extractTokensFromVision } = require('../../ocr/transcription/extractTokensFromVision');
+    const { normalizeTranscription } = require('../../ocr/transcription/normalizeTranscription');
+
+    const { tokens, lines } = extractTokensFromVision(ocrResult);
+
+    const normalizationSettings = {
+      transcriptionMode: settings.transcriptionMode || 'exact',
+      textExtractionScope: settings.textExtractionScope || 'all',
+      formattingMode: settings.formattingMode || 'improve-formatting',
+      confidenceThreshold: settings.confidenceThreshold ?? 0.35,
+    };
+
+    const result = normalizeTranscription({ tokens, lines }, normalizationSettings);
+
+    return res.json({
+      transcription: {
+        text: result.text,
+        paragraphs: result.paragraphs,
+        diagnostics: result.diagnostics,
+      },
+    });
+  } catch (err: any) {
+    console.error('[OCR Normalize] Error:', err);
+    return res.status(500).json({ error: 'Failed to normalize transcription', message: err.message });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// 8. POST /jobs/:jobId/fusion/drafts — Batch save fusion drafts
+// ---------------------------------------------------------------------------
+router.post('/jobs/:jobId/fusion/drafts', async (req: any, res: any) => {
+  try {
+    const churchId = parseInt(req.params.churchId);
+    const jobId = parseInt(req.params.jobId);
+    const { entries } = req.body;
+    const userEmail = req.session?.user?.email || req.user?.email || 'system';
+
+    if (!Array.isArray(entries) || entries.length === 0) {
+      return res.status(400).json({ error: 'entries array is required' });
+    }
+
+    console.log(`[OCR Fusion] POST batch-save ${entries.length} drafts for job ${jobId} church ${churchId}`);
+
+    const resolved = await resolveChurchDb(churchId);
+    if (!resolved) return res.status(404).json({ error: 'Church not found' });
+    const { db } = resolved;
+
+    // Ensure table exists
+    await db.query(CREATE_FUSED_DRAFTS_TABLE);
+
+    const savedDrafts: any[] = [];
+    for (const entry of entries) {
+      const [result]: any = await db.query(`
+        INSERT INTO ocr_fused_drafts
+          (ocr_job_id, entry_index, record_type, record_number, payload_json, bbox_json, workflow_status, church_id, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          record_type = VALUES(record_type),
+          record_number = VALUES(record_number),
+          payload_json = VALUES(payload_json),
+          bbox_json = VALUES(bbox_json),
+          workflow_status = VALUES(workflow_status),
+          updated_at = CURRENT_TIMESTAMP
+      `, [
+        jobId,
+        entry.entry_index,
+        entry.record_type,
+        entry.record_number || null,
+        JSON.stringify(entry.payload_json || {}),
+        entry.bbox_json ? JSON.stringify(entry.bbox_json) : null,
+        entry.workflow_status || 'draft',
+        churchId,
+        userEmail,
+      ]);
+
+      savedDrafts.push({
+        id: entry.entry_index,
+        ocr_job_id: jobId,
+        entry_index: entry.entry_index,
+        record_type: entry.record_type,
+        record_number: entry.record_number,
+        payload_json: entry.payload_json,
+        bbox_json: entry.bbox_json,
+        workflow_status: entry.workflow_status || 'draft',
+        updated_at: new Date().toISOString(),
+      });
+    }
+
+    // Optional: Write to bundle (non-blocking)
+    (async () => {
+      try {
+        let jobBundleModule: any;
+        try { jobBundleModule = require('../../utils/jobBundle'); } catch { try { jobBundleModule = require('../../../dist/utils/jobBundle'); } catch { return; } }
+        if (jobBundleModule?.upsertDraftEntries) {
+          await jobBundleModule.upsertDraftEntries(churchId, String(jobId), entries.map((e: any) => ({
+            entry_index: e.entry_index,
+            record_type: e.record_type,
+            record_number: e.record_number,
+            payload_json: e.payload_json || {},
+            bbox_json: e.bbox_json,
+            workflow_status: e.workflow_status || 'draft',
+          })));
+        }
+      } catch (_e) { /* non-blocking */ }
+    })();
+
+    return res.json({ success: true, drafts: savedDrafts });
+  } catch (err: any) {
+    console.error('[OCR Fusion] Batch save error:', err);
+    return res.status(500).json({ error: 'Failed to save drafts', message: err.message });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// 9. POST /jobs/:jobId/fusion/validate — Validate drafts before commit
+// ---------------------------------------------------------------------------
+router.post('/jobs/:jobId/fusion/validate', async (req: any, res: any) => {
+  try {
+    const churchId = parseInt(req.params.churchId);
+    const jobId = parseInt(req.params.jobId);
+
+    console.log(`[OCR Fusion] POST validate for job ${jobId} church ${churchId}`);
+
+    // Need church name for response
+    const [churchRows]: any = await promisePool.query('SELECT database_name, name FROM churches WHERE id = ?', [churchId]);
+    if (!churchRows.length) return res.status(404).json({ error: 'Church not found' });
+
+    const resolved = await resolveChurchDb(churchId);
+    if (!resolved) return res.status(404).json({ error: 'Church not found' });
+    const { db } = resolved;
+
+    const [drafts]: any = await db.query(
+      `SELECT * FROM ocr_fused_drafts WHERE ocr_job_id = ? AND workflow_status = 'draft' ORDER BY entry_index`,
+      [jobId]
+    );
+
+    if (drafts.length === 0) {
+      return res.json({ valid: false, error: 'No drafts to validate', drafts: [] });
+    }
+
+    const requiredFields: Record<string, string[]> = {
+      baptism: ['child_name'],
+      marriage: ['groom_name', 'bride_name'],
+      funeral: ['deceased_name'],
+    };
+
+    const validatedDrafts = drafts.map((draft: any) => {
+      const payload = typeof draft.payload_json === 'string'
+        ? JSON.parse(draft.payload_json)
+        : draft.payload_json;
+
+      const recordType = draft.record_type || 'baptism';
+      const required = requiredFields[recordType] || [];
+      const missingFields: string[] = [];
+      const warnings: string[] = [];
+
+      for (const field of required) {
+        if (!payload[field] || payload[field].trim() === '') {
+          missingFields.push(field);
+        }
+      }
+
+      if (draft.bbox_json) {
+        const bboxData = typeof draft.bbox_json === 'string'
+          ? JSON.parse(draft.bbox_json)
+          : draft.bbox_json;
+
+        if (bboxData.fieldBboxes) {
+          for (const [fieldName, fieldData] of Object.entries(bboxData.fieldBboxes)) {
+            const fd = fieldData as any;
+            if (fd.confidence && fd.confidence < 0.6) {
+              warnings.push(`Low OCR confidence on ${fieldName}`);
+            }
+          }
+        }
+      }
+
+      for (const [fieldName, value] of Object.entries(payload)) {
+        if (typeof value === 'string' && value.length > 0 && value.length < 2) {
+          warnings.push(`${fieldName} appears incomplete`);
+        }
+      }
+
+      return {
+        id: draft.id,
+        entry_index: draft.entry_index,
+        record_type: recordType,
+        record_number: draft.record_number,
+        missing_fields: missingFields,
+        warnings,
+        payload,
+      };
+    });
+
+    const allValid = validatedDrafts.every((d: any) => d.missing_fields.length === 0);
+
+    return res.json({
+      valid: allValid,
+      church_name: churchRows[0].name || `Church ${churchId}`,
+      church_id: churchId,
+      drafts: validatedDrafts,
+      summary: {
+        total: validatedDrafts.length,
+        valid: validatedDrafts.filter((d: any) => d.missing_fields.length === 0).length,
+        invalid: validatedDrafts.filter((d: any) => d.missing_fields.length > 0).length,
+        warnings: validatedDrafts.reduce((sum: number, d: any) => sum + d.warnings.length, 0),
+      },
+    });
+  } catch (err: any) {
+    console.error('[OCR Fusion] Validate error:', err);
+    return res.status(500).json({ error: 'Failed to validate drafts', message: err.message });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// 10. POST /jobs/:jobId/fusion/commit — Direct commit drafts to record tables
+// ---------------------------------------------------------------------------
+router.post('/jobs/:jobId/fusion/commit', async (req: any, res: any) => {
+  try {
+    const churchId = parseInt(req.params.churchId);
+    const jobId = parseInt(req.params.jobId);
+    const { draft_ids } = req.body;
+    const userEmail = req.session?.user?.email || req.user?.email || 'system';
+
+    if (!Array.isArray(draft_ids) || draft_ids.length === 0) {
+      return res.status(400).json({ error: 'draft_ids array is required' });
+    }
+
+    console.log(`[OCR Fusion] POST commit ${draft_ids.length} drafts for job ${jobId} church ${churchId}`);
+
+    const resolved = await resolveChurchDb(churchId);
+    if (!resolved) return res.status(404).json({ error: 'Church not found' });
+    const { db } = resolved;
+
+    const placeholders = draft_ids.map(() => '?').join(',');
+    const [drafts]: any = await db.query(
+      `SELECT * FROM ocr_fused_drafts WHERE id IN (${placeholders}) AND workflow_status = 'draft'`,
+      draft_ids
+    );
+
+    if (drafts.length === 0) {
+      return res.status(400).json({ error: 'No valid drafts found to commit' });
+    }
+
+    const committed: any[] = [];
+    const errors: any[] = [];
+
+    for (const draft of drafts) {
+      try {
+        const payload = typeof draft.payload_json === 'string'
+          ? JSON.parse(draft.payload_json)
+          : draft.payload_json;
+
+        let recordId: number | null = null;
+        const recordType = draft.record_type;
+
+        if (recordType === 'baptism') {
+          if (!payload.child_name) {
+            errors.push({ draft_id: draft.id, error: 'child_name is required for baptism records' });
+            continue;
+          }
+          const [result]: any = await db.query(`
+            INSERT INTO baptism_records
+              (church_id, child_name, date_of_birth, place_of_birth,
+               father_name, mother_name, address, date_of_baptism,
+               godparents, performed_by, notes, created_by, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+          `, [
+            churchId,
+            payload.child_name || null,
+            payload.date_of_birth || null,
+            payload.place_of_birth || null,
+            payload.father_name || null,
+            payload.mother_name || payload.parents_name || null,
+            payload.address || null,
+            payload.date_of_baptism || null,
+            payload.godparents || null,
+            payload.performed_by || null,
+            payload.notes || null,
+            userEmail,
+          ]);
+          recordId = result.insertId;
+
+        } else if (recordType === 'marriage') {
+          if (!payload.groom_name || !payload.bride_name) {
+            errors.push({ draft_id: draft.id, error: 'groom_name and bride_name are required for marriage records' });
+            continue;
+          }
+          const [result]: any = await db.query(`
+            INSERT INTO marriage_records
+              (church_id, groom_name, bride_name, date_of_marriage,
+               place_of_marriage, witnesses, officiant, notes, created_by, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+          `, [
+            churchId,
+            payload.groom_name || null,
+            payload.bride_name || null,
+            payload.date_of_marriage || null,
+            payload.place_of_marriage || null,
+            payload.witnesses || null,
+            payload.officiant || null,
+            payload.notes || null,
+            userEmail,
+          ]);
+          recordId = result.insertId;
+
+        } else if (recordType === 'funeral') {
+          if (!payload.deceased_name) {
+            errors.push({ draft_id: draft.id, error: 'deceased_name is required for funeral records' });
+            continue;
+          }
+          const [result]: any = await db.query(`
+            INSERT INTO funeral_records
+              (church_id, deceased_name, date_of_death, date_of_funeral,
+               date_of_burial, place_of_burial, age_at_death, cause_of_death,
+               next_of_kin, officiant, notes, created_by, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+          `, [
+            churchId,
+            payload.deceased_name || null,
+            payload.date_of_death || null,
+            payload.date_of_funeral || null,
+            payload.date_of_burial || null,
+            payload.place_of_burial || null,
+            payload.age_at_death || null,
+            payload.cause_of_death || null,
+            payload.next_of_kin || null,
+            payload.officiant || null,
+            payload.notes || null,
+            userEmail,
+          ]);
+          recordId = result.insertId;
+        }
+
+        if (recordId) {
+          await db.query(
+            `UPDATE ocr_fused_drafts SET status = 'committed', workflow_status = 'committed', committed_record_id = ?, updated_at = NOW() WHERE id = ?`,
+            [recordId, draft.id]
+          );
+          committed.push({ draft_id: draft.id, record_type: recordType, record_id: recordId });
+        }
+      } catch (recErr: any) {
+        console.error(`[OCR Fusion] commit error for draft ${draft.id}:`, recErr);
+        errors.push({ draft_id: draft.id, error: recErr.message });
+      }
+    }
+
+    return res.json({
+      success: errors.length === 0,
+      committed,
+      errors,
+      message: `Committed ${committed.length} records, ${errors.length} errors`,
+    });
+  } catch (err: any) {
+    console.error('[OCR Fusion] Commit error:', err);
+    return res.status(500).json({ error: 'Failed to commit drafts', message: err.message });
   }
 });
 

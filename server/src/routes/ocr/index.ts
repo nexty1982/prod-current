@@ -55,3 +55,7 @@ export function mountOcrRoutes(app: any, upload: any) {
 
   console.log('✅ [OCR] All OCR routes mounted (admin + 6 church-scoped modules)');
 }
+
+// Re-export processOcrJobAsync from legacy module for feeder worker compatibility
+const ocrLegacy = require('../ocrLegacy');
+export const processOcrJobAsync = ocrLegacy.processOcrJobAsync;

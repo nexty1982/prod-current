@@ -30,7 +30,7 @@ router.post('/jobs/:jobId/review/finalize', async (req: any, res: any) => {
 
     // Fetch eligible drafts
     let draftSql = `
-      SELECT id, entry_index, record_type, record_number, fused_json, workflow_status
+      SELECT id, entry_index, record_type, record_number, payload_json, workflow_status
       FROM ocr_fused_drafts
       WHERE ocr_job_id = ? AND church_id = ?
         AND workflow_status IN ('draft', 'in_review')
@@ -116,9 +116,9 @@ router.post('/jobs/:jobId/review/finalize', async (req: any, res: any) => {
 
         for (const draft of drafts) {
           const payloadJson =
-            typeof draft.fused_json === 'string'
-              ? draft.fused_json
-              : JSON.stringify(draft.fused_json);
+            typeof draft.payload_json === 'string'
+              ? draft.payload_json
+              : JSON.stringify(draft.payload_json);
 
           await db.query(
             `INSERT INTO ocr_finalize_history
@@ -181,7 +181,7 @@ router.post('/jobs/:jobId/review/commit', async (req: any, res: any) => {
 
     // Fetch finalized drafts
     let draftSql = `
-      SELECT id, entry_index, record_type, record_number, fused_json
+      SELECT id, entry_index, record_type, record_number, payload_json
       FROM ocr_fused_drafts
       WHERE ocr_job_id = ? AND church_id = ?
         AND workflow_status = 'finalized'
@@ -209,9 +209,9 @@ router.post('/jobs/:jobId/review/commit', async (req: any, res: any) => {
     for (const draft of drafts) {
       try {
         const payload =
-          typeof draft.fused_json === 'string'
-            ? JSON.parse(draft.fused_json)
-            : draft.fused_json || {};
+          typeof draft.payload_json === 'string'
+            ? JSON.parse(draft.payload_json)
+            : draft.payload_json || {};
 
         const noteSuffix = `Finalized via Review & Finalize on ${dateStr}`;
         const notes = payload.notes
