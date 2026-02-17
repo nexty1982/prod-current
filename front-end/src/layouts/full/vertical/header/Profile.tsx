@@ -1,25 +1,25 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Menu,
-  Avatar,
-  Typography,
-  Divider,
-  Button,
-  IconButton,
-  Stack
+    Avatar,
+    Box,
+    Button,
+    Divider,
+    IconButton,
+    Menu,
+    Stack,
+    Typography
 } from '@mui/material';
-import * as dropdownData from './data';
+import { useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import { UserDataContext } from '../../../../context/UserDataContext';
+import * as dropdownData from './data';
 
 import { IconMail, IconUserOff } from '@tabler/icons-react';
 
 // Default profile image fallback (using Orthodox default)
-const defaultProfileImg = '/orthodox/avatars/default.svg';
+const defaultProfileImg = '/assets/images/orthodox/avatars/default.png';
 
 const Profile = () => {
   const { user, authenticated, logout } = useAuth();

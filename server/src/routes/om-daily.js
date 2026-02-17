@@ -1293,7 +1293,6 @@ router.get('/github/status', requireAuth, async (req, res) => {
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 const ROOT_PATH = '/var/www/orthodoxmetrics/prod';
 const BUILD_INFO_FILE = path.join(ROOT_PATH, '.build-info');

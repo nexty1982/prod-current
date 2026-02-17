@@ -1,16 +1,16 @@
-import { Box, Avatar, Typography, IconButton, Tooltip, useMediaQuery } from '@mui/material';
+import { Avatar, Box, IconButton, Tooltip, Typography, useMediaQuery } from '@mui/material';
 
 import { IconPower } from '@tabler/icons-react';
 
-import { Link } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import { UserDataContext } from '@/context/UserDataContext';
-import { useContext } from 'react';
-import { useAuth } from '@/context/AuthContext';
 import { getBuildVersionString } from '@/shared/lib/buildInfo';
+import { useContext } from 'react';
+import { Link } from 'react-router-dom';
 
 // Default profile image fallback (using Orthodox default)
-const defaultImg = '/orthodox/avatars/default.svg';
+const defaultImg = '/assets/images/orthodox/avatars/default.png';
 
 export const Profile = () => {
   const { isSidebarHover, isCollapse } = useContext(CustomizerContext);
