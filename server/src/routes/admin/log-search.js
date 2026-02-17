@@ -1,9 +1,148 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
 const { getAppPool } = require('../../config/db');
 const { requireAuth, requireRole } = require('../../middleware/auth');
 
 const adminOnly = [requireAuth, requireRole(['super_admin', 'admin'])];
+
+// Known server log files
+const KNOWN_LOG_FILES = [
+  { name: 'nginx-access', path: '/var/log/nginx/access.log', type: 'file' },
+  { name: 'nginx-error', path: '/var/log/nginx/error.log', type: 'file' },
+  { name: 'mariadb-error', path: '/var/log/mysql/error.log', type: 'file' },
+  { name: 'journal-backend', type: 'journal', unit: 'orthodox-backend' },
+  { name: 'journal-omai', type: 'journal', unit: 'omai' },
+];
+
+// GET /api/admin/log-search/filters — Distinct values for dropdown population
+router.get('/filters', ...adminOnly, async (req, res) => {
+  try {
+    const pool = getAppPool();
+
+    const [sources] = await pool.query(
+      `SELECT source, COUNT(*) as count FROM system_logs
+       WHERE source IS NOT NULL AND source != ''
+       GROUP BY source ORDER BY count DESC LIMIT 50`
+    );
+
+    const [services] = await pool.query(
+      `SELECT service, COUNT(*) as count FROM system_logs
+       WHERE service IS NOT NULL AND service != ''
+       GROUP BY service ORDER BY count DESC LIMIT 50`
+    );
+
+    const [recentUsers] = await pool.query(
+      `SELECT email, CONCAT(COALESCE(first_name,''), ' ', COALESCE(last_name,'')) as name, last_login
+       FROM users
+       WHERE last_login >= NOW() - INTERVAL 30 DAY
+          OR created_at >= NOW() - INTERVAL 30 DAY
+       ORDER BY last_login DESC
+       LIMIT 100`
+    );
+
+    res.json({
+      sources: sources.map(r => r.source),
+      services: services.map(r => r.service),
+      recentUsers: recentUsers.map(r => ({
+        email: r.email,
+        name: (r.name || '').trim(),
+        last_login: r.last_login
+      }))
+    });
+  } catch (err) {
+    console.error('Log filters error:', err);
+    res.status(500).json({ error: 'Failed to get filter options' });
+  }
+});
+
+// GET /api/admin/log-search/server-logs — List available server log files
+router.get('/server-logs', ...adminOnly, async (req, res) => {
+  try {
+    const files = [];
+
+    for (const logFile of KNOWN_LOG_FILES) {
+      if (logFile.type === 'journal') {
+        files.push({ name: logFile.name, type: 'journal', unit: logFile.unit });
+        continue;
+      }
+
+      try {
+        const stat = fs.statSync(logFile.path);
+        files.push({
+          name: logFile.name,
+          path: logFile.path,
+          type: 'file',
+          size: stat.size,
+          modified: stat.mtime.toISOString()
+        });
+      } catch {
+        // File doesn't exist or not readable — skip
+      }
+    }
+
+    res.json({ files });
+  } catch (err) {
+    console.error('Server logs list error:', err);
+    res.status(500).json({ error: 'Failed to list server logs' });
+  }
+});
+
+// GET /api/admin/log-search/server-logs/:name — Read a specific server log
+router.get('/server-logs/:name', ...adminOnly, async (req, res) => {
+  try {
+    const { name } = req.params;
+    const lines = Math.min(1000, Math.max(1, parseInt(req.query.lines, 10) || 200));
+    const search = req.query.search || '';
+
+    const logDef = KNOWN_LOG_FILES.find(f => f.name === name);
+    if (!logDef) {
+      return res.status(404).json({ error: 'Unknown log file' });
+    }
+
+    let logLines = [];
+
+    if (logDef.type === 'journal') {
+      try {
+        let cmd = `journalctl -u ${logDef.unit} -n ${lines} --no-pager`;
+        if (search) {
+          cmd += ` | grep -i ${JSON.stringify(search)}`;
+        }
+        const output = execSync(cmd, { encoding: 'utf8', timeout: 10000 });
+        logLines = output.split('\n').filter(Boolean);
+      } catch (e) {
+        // grep may exit 1 if no matches; journalctl may fail
+        if (e.stdout) {
+          logLines = e.stdout.split('\n').filter(Boolean);
+        }
+      }
+    } else {
+      // File-based log: read last N lines using tail
+      try {
+        fs.accessSync(logDef.path, fs.constants.R_OK);
+        let cmd = `tail -n ${lines} ${JSON.stringify(logDef.path)}`;
+        if (search) {
+          cmd += ` | grep -i ${JSON.stringify(search)}`;
+        }
+        const output = execSync(cmd, { encoding: 'utf8', timeout: 10000 });
+        logLines = output.split('\n').filter(Boolean);
+      } catch (e) {
+        if (e.stdout) {
+          logLines = e.stdout.split('\n').filter(Boolean);
+        } else {
+          return res.status(404).json({ error: 'Log file not readable' });
+        }
+      }
+    }
+
+    res.json({ lines: logLines, name, count: logLines.length });
+  } catch (err) {
+    console.error('Server log read error:', err);
+    res.status(500).json({ error: 'Failed to read server log' });
+  }
+});
 
 // GET /api/admin/log-search — Paginated search with SQL-level filtering
 router.get('/', ...adminOnly, async (req, res) => {
@@ -18,12 +157,20 @@ router.get('/', ...adminOnly, async (req, res) => {
       from = '',
       to = '',
       page = 1,
-      limit = 50
+      limit = 50,
+      sort = 'timestamp',
+      sort_dir = 'DESC',
+      exclude_levels = ''
     } = req.query;
 
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const limitNum = Math.min(200, Math.max(1, parseInt(limit, 10) || 50));
     const offset = (pageNum - 1) * limitNum;
+
+    // Validate sort field
+    const allowedSortFields = ['timestamp', 'level', 'source', 'message', 'occurrences', 'user_email', 'service'];
+    const sortField = allowedSortFields.includes(sort) ? sort : 'timestamp';
+    const sortDir = sort_dir === 'ASC' ? 'ASC' : 'DESC';
 
     const conditions = [];
     const params = [];
@@ -40,6 +187,13 @@ router.get('/', ...adminOnly, async (req, res) => {
       } else if (levels.length > 1) {
         conditions.push(`level IN (${levels.map(() => '?').join(',')})`);
         params.push(...levels);
+      }
+    }
+    if (exclude_levels) {
+      const excluded = exclude_levels.split(',').map(l => l.trim().toUpperCase()).filter(Boolean);
+      if (excluded.length > 0) {
+        conditions.push(`level NOT IN (${excluded.map(() => '?').join(',')})`);
+        params.push(...excluded);
       }
     }
     if (source) {
@@ -87,7 +241,7 @@ router.get('/', ...adminOnly, async (req, res) => {
         service, source_component, session_id, request_id, ip_address,
         user_agent, first_seen, occurrences
        FROM system_logs ${whereClause}
-       ORDER BY timestamp DESC
+       ORDER BY ${sortField} ${sortDir}
        LIMIT ? OFFSET ?`,
       [...params, limitNum, offset]
     );

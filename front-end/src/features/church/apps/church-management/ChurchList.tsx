@@ -250,96 +250,84 @@ const ChurchList: React.FC = () => {
       {refreshing && <LinearProgress sx={{ mb: 1 }} />}
 
       {/* Stats Row */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Total Churches" value={totalChurches} color="#5D87FF" icon={<IconBuilding size={24} />} />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Active" value={activeChurches} color="#13DEB9" icon={<IconCheck size={24} />} />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Inactive" value={inactiveChurches} color="#FA896B" icon={<IconX size={24} />} />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Added (30d)" value={recentlyAdded} color="#FFAE1F" icon={<IconCalendar size={24} />} />
-        </Grid>
-      </Grid>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }, gap: 3, mb: 3 }}>
+        <StatCard title="Total Churches" value={totalChurches} color="#5D87FF" icon={<IconBuilding size={24} />} />
+        <StatCard title="Active" value={activeChurches} color="#13DEB9" icon={<IconCheck size={24} />} />
+        <StatCard title="Inactive" value={inactiveChurches} color="#FA896B" icon={<IconX size={24} />} />
+        <StatCard title="Added (30d)" value={recentlyAdded} color="#FFAE1F" icon={<IconCalendar size={24} />} />
+      </Box>
 
       {/* Controls */}
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <BlankCard>
-            <CardContent>
-              <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }} justifyContent="space-between">
-                <Stack direction="row" spacing={2} alignItems="center" flexGrow={1}>
-                  <TextField
-                    size="small"
-                    placeholder="Search churches..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    sx={{ minWidth: 280 }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <IconSearch size={20} />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <FormControl size="small" sx={{ minWidth: 150 }}>
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      value={filterStatus}
-                      label="Status"
-                      onChange={(e) => setFilterStatus(e.target.value as any)}
-                    >
-                      <MenuItem value="all">All</MenuItem>
-                      <MenuItem value="active">Active</MenuItem>
-                      <MenuItem value="inactive">Inactive</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <ToggleButtonGroup
-                    value={viewMode}
-                    exclusive
-                    onChange={(_, val) => val && setViewMode(val)}
-                    size="small"
-                  >
-                    <ToggleButton value="grid"><IconLayoutGrid size={18} /></ToggleButton>
-                    <ToggleButton value="table"><IconTable size={18} /></ToggleButton>
-                  </ToggleButtonGroup>
-                  <Tooltip title="Refresh">
-                    <IconButton onClick={handleRefresh} disabled={refreshing}>
-                      <IconRefresh size={20} />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
+      <BlankCard sx={{ mb: 3 }}>
+        <CardContent>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }} justifyContent="space-between">
+            <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" flexGrow={1}>
+              <TextField
+                size="small"
+                placeholder="Search churches..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{ minWidth: 280 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IconSearch size={20} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={filterStatus}
+                  label="Status"
+                  onChange={(e) => setFilterStatus(e.target.value as any)}
+                >
+                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="active">Active</MenuItem>
+                  <MenuItem value="inactive">Inactive</MenuItem>
+                </Select>
+              </FormControl>
+              <ToggleButtonGroup
+                value={viewMode}
+                exclusive
+                onChange={(_, val) => val && setViewMode(val)}
+                size="small"
+              >
+                <ToggleButton value="grid"><IconLayoutGrid size={18} /></ToggleButton>
+                <ToggleButton value="table"><IconTable size={18} /></ToggleButton>
+              </ToggleButtonGroup>
+              <Tooltip title="Refresh">
+                <IconButton onClick={handleRefresh} disabled={refreshing}>
+                  <IconRefresh size={20} />
+                </IconButton>
+              </Tooltip>
+            </Stack>
 
-                <Stack direction="row" spacing={1}>
-                  {hasRole('super_admin') && (
-                    <Button
-                      variant="outlined"
-                      startIcon={<IconPlus size={18} />}
-                      onClick={() => navigate('/apps/church-management/wizard')}
-                    >
-                      Setup Wizard
-                    </Button>
-                  )}
-                  <Button
-                    variant="contained"
-                    startIcon={<IconPlus size={18} />}
-                    onClick={() => navigate('/apps/church-management/create')}
-                  >
-                    Add Church
-                  </Button>
-                </Stack>
-              </Stack>
-            </CardContent>
-          </BlankCard>
-        </Grid>
+            <Stack direction="row" spacing={1}>
+              {hasRole('super_admin') && (
+                <Button
+                  variant="outlined"
+                  startIcon={<IconPlus size={18} />}
+                  onClick={() => navigate('/apps/church-management/wizard')}
+                >
+                  Setup Wizard
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                startIcon={<IconPlus size={18} />}
+                onClick={() => navigate('/apps/church-management/create')}
+              >
+                Add Church
+              </Button>
+            </Stack>
+          </Stack>
+        </CardContent>
+      </BlankCard>
 
-        {/* Church List */}
-        <Grid item xs={12}>
-          <BlankCard>
+      {/* Church List */}
+      <BlankCard>
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h6">
@@ -349,22 +337,20 @@ const ChurchList: React.FC = () => {
 
               {loading ? (
                 viewMode === 'grid' ? (
-                  <Grid container spacing={3}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' }, gap: 3 }}>
                     {[1, 2, 3, 4, 5, 6].map((item) => (
-                      <Grid item xs={12} sm={6} lg={4} key={item}>
-                        <Card>
-                          <CardContent>
-                            <Stack spacing={2}>
-                              <Skeleton variant="circular" width={40} height={40} />
-                              <Skeleton variant="text" width="80%" height={28} />
-                              <Skeleton variant="text" width="60%" height={20} />
-                              <Skeleton variant="text" width="40%" height={20} />
-                            </Stack>
-                          </CardContent>
-                        </Card>
-                      </Grid>
+                      <Card key={item}>
+                        <CardContent>
+                          <Stack spacing={2}>
+                            <Skeleton variant="circular" width={40} height={40} />
+                            <Skeleton variant="text" width="80%" height={28} />
+                            <Skeleton variant="text" width="60%" height={20} />
+                            <Skeleton variant="text" width="40%" height={20} />
+                          </Stack>
+                        </CardContent>
+                      </Card>
                     ))}
-                  </Grid>
+                  </Box>
                 ) : (
                   <Box>
                     {[1, 2, 3, 4].map(i => <Skeleton key={i} variant="rectangular" height={52} sx={{ mb: 1, borderRadius: 1 }} />)}
@@ -483,9 +469,9 @@ const ChurchList: React.FC = () => {
                 </TableContainer>
               ) : (
                 /* Card Grid View */
-                <Grid container spacing={3}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' }, gap: 3 }}>
                   {filteredChurches.map((church) => (
-                    <Grid item xs={12} sm={6} lg={4} key={church.id}>
+                    <Box key={church.id}>
                       <Card
                         sx={{
                           height: '100%',
@@ -586,14 +572,12 @@ const ChurchList: React.FC = () => {
                           </Stack>
                         </CardActions>
                       </Card>
-                    </Grid>
+                    </Box>
                   ))}
-                </Grid>
+                </Box>
               )}
             </CardContent>
           </BlankCard>
-        </Grid>
-      </Grid>
 
       {/* Delete Confirmation Dialog */}
       <Dialog
