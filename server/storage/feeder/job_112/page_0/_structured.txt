@@ -1,0 +1,11 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 5
+
+--- Table 1 (4 columns, 6 rows) ---
+ | H HOHI >> Flo BIRTHS МЕТРИЧЕСКОЙ КНИГИ НА | YEAR 2013 ГОДА , ЧАСТЬ ПЕРВАЯ , И W РОДНЕШНА | СМ .
+--------------------------------------------------------------------------------------------------
+ | Мкелца штчество и замнага родителей , И какого Счеть роди шихем и день Званіе има . , , . родившихс вероисповедания . Имена | Званіе , има , отчество и фамилия воспрілинкова . | Кто совершаль таинство крошені .
+ | Мужеска . . пола Женска . пола -ужов черн крифе- HIA |  | 
+ | NUMBER DATES NAME OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN NAME | FULL NAMES OF SPONSORS | PRIEST'S NAME
+ | XALE FEMALE BIRTH BAPETSM CITY OF BIRTH т Confession , Chrismation |  | Fu Jaes Parsells
+ | 12/08 I wonna Received by Wypych Eucharist from Roman - and Catholicisme |  | 

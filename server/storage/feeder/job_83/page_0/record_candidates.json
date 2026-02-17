@@ -1,0 +1,45 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "performed_by": "Fr. долга Pansell",
+        "notes": "1 11-13-811-12-32 Somerville , N.J. CASSIANNA Michael Fetchko - Carol Lynn Mauver | Charles Fetchko - Orthodox ( and \" honorary heterodox \" )"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.74,
+      "fields": {
+        "performed_by": "Fr. Janez Parsel",
+        "notes": "50 а 6-7-827-11-82 Somerville , N.J. Frederick Gorbatuk Jr. PATRICK Claive Krombach Gorbztuk | Peter Gorbatule Susan Gorbatuk > orthodox"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "performed_by": "Fr. John Nehrelachi",
+        "notes": "3 11-9-12 12-19-82 ( Somerville NECTARIOS , N.J. ) Fr. James Parsells Daria Barsigian | John Economo тол Katherine Lickwar > Orthodox"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_4": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:48:38.361Z"
+}

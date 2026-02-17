@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
-import { promisePool, resolveChurchDb } from './helpers';
+import { promisePool, resolveChurchDb, mapFieldsToDbColumns, buildInsertQuery } from './helpers';
 
 function createRouters(upload: any) {
 
@@ -472,16 +472,36 @@ function createRouters(upload: any) {
       }
 
       const jobFilename = rows[0].filename;
-      const UPLOADS_ROOT = '/var/www/orthodoxmetrics/prod/uploads';
-      let foundPath: string;
-      if (jobFilename.startsWith('/uploads/')) {
-        foundPath = path.join('/var/www/orthodoxmetrics/prod', jobFilename);
-      } else {
-        foundPath = path.join(UPLOADS_ROOT, `om_church_${churchId}`, 'uploaded', jobFilename);
+
+      let foundPath: string | undefined;
+      // Absolute path (e.g. batch_import jobs) — use directly
+      if (jobFilename.startsWith('/') && !jobFilename.startsWith('/uploads/') && !jobFilename.startsWith('/server/uploads/')) {
+        if (fs.existsSync(jobFilename)) foundPath = jobFilename;
+      }
+      if (!foundPath && (jobFilename.startsWith('/uploads/') || jobFilename.startsWith('/server/uploads/'))) {
+        const abs = path.join('/var/www/orthodoxmetrics/prod', jobFilename);
+        if (fs.existsSync(abs)) foundPath = abs;
+      }
+      if (!foundPath) {
+        const baseDirs = [
+          path.join('/var/www/orthodoxmetrics/prod/uploads', `om_church_${churchId}`),
+          path.join('/var/www/orthodoxmetrics/prod/server/uploads', `om_church_${churchId}`),
+        ];
+        const subdirs = ['uploaded', 'processed'];
+        const candidatePaths: string[] = [];
+        for (const base of baseDirs) {
+          for (const sub of subdirs) {
+            candidatePaths.push(path.join(base, sub, jobFilename));
+          }
+        }
+        candidatePaths.push(
+          path.join('/var/www/orthodoxmetrics/prod/server/uploads', 'ocr', `church_${churchId}`, jobFilename)
+        );
+        foundPath = candidatePaths.find(p => fs.existsSync(p));
       }
 
-      if (!fs.existsSync(foundPath)) {
-        console.warn(`[OCR Image] File not found. filename: ${jobFilename}, resolved: ${foundPath}, churchId: ${churchId}`);
+      if (!foundPath) {
+        console.warn(`[OCR Image] File not found. filename: ${jobFilename}, churchId: ${churchId}`);
         return res.status(404).json({ error: 'Image file not found on disk' });
       }
 
@@ -716,51 +736,15 @@ function createRouters(upload: any) {
 
       const userEmail = req.session?.user?.email || req.user?.email || 'system';
       let recordId: number | null = null;
-      const f = mappedFields;
 
-      if (record_type === 'baptism') {
-        const [result] = await db.query(`
-          INSERT INTO baptism_records
-            (church_id, child_name, date_of_birth, place_of_birth,
-             father_name, mother_name, address, date_of_baptism,
-             godparents, performed_by, notes, created_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-        `, [
-          churchId, f.child_name || null, f.date_of_birth || null, f.place_of_birth || null,
-          f.father_name || null, f.mother_name || null, f.address || null,
-          f.date_of_baptism || null, f.godparents || null, f.performed_by || null,
-          f.notes || null, userEmail,
-        ]);
-        recordId = result.insertId;
-      } else if (record_type === 'marriage') {
-        const [result] = await db.query(`
-          INSERT INTO marriage_records
-            (church_id, groom_name, bride_name, date_of_marriage,
-             place_of_marriage, witnesses, officiant, notes, created_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-        `, [
-          churchId, f.groom_name || null, f.bride_name || null, f.date_of_marriage || null,
-          f.place_of_marriage || null, f.witnesses || null, f.officiant || null,
-          f.notes || null, userEmail,
-        ]);
-        recordId = result.insertId;
-      } else if (record_type === 'funeral') {
-        const [result] = await db.query(`
-          INSERT INTO funeral_records
-            (church_id, deceased_name, date_of_death, date_of_funeral,
-             date_of_burial, place_of_burial, age_at_death, cause_of_death,
-             next_of_kin, officiant, notes, created_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-        `, [
-          churchId, f.deceased_name || null, f.date_of_death || null, f.date_of_funeral || null,
-          f.date_of_burial || null, f.place_of_burial || null, f.age_at_death || null,
-          f.cause_of_death || null, f.next_of_kin || null, f.officiant || null,
-          f.notes || null, userEmail,
-        ]);
-        recordId = result.insertId;
-      } else {
-        return res.status(400).json({ error: `Unsupported record_type: ${record_type}` });
-      }
+      const tableMap: Record<string, string> = { baptism: 'baptism_records', marriage: 'marriage_records', funeral: 'funeral_records' };
+      const table = tableMap[record_type];
+      if (!table) return res.status(400).json({ error: `Unsupported record_type: ${record_type}` });
+
+      const mapped = mapFieldsToDbColumns(record_type, mappedFields);
+      const { sql, params } = buildInsertQuery(table, churchId, mapped);
+      const [result] = await db.query(sql, params);
+      recordId = result.insertId;
 
       // Update the job's ocr_result with finalization metadata
       const finalizeMeta = {
@@ -801,12 +785,12 @@ function createRouters(upload: any) {
       }
 
       // Validate each record has record_type and mappedFields
+      const validTypes = ['baptism', 'marriage', 'funeral'];
       for (let i = 0; i < records.length; i++) {
         const r = records[i];
         if (!r.record_type || !r.mappedFields) {
           return res.status(400).json({ error: `records[${i}] missing record_type or mappedFields` });
         }
-        const validTypes = ['baptism', 'marriage', 'funeral'];
         if (!validTypes.includes(r.record_type)) {
           return res.status(400).json({ error: `records[${i}] has unsupported record_type: ${r.record_type}` });
         }
@@ -821,57 +805,17 @@ function createRouters(upload: any) {
       const userEmail = req.session?.user?.email || req.user?.email || 'system';
       const conn = await db.getConnection();
       const createdRecords: any[] = [];
+      const tableMap: Record<string, string> = { baptism: 'baptism_records', marriage: 'marriage_records', funeral: 'funeral_records' };
 
       try {
         await conn.beginTransaction();
 
         for (const rec of records) {
-          const f = rec.mappedFields;
-          let recordId: number | null = null;
-
-          if (rec.record_type === 'baptism') {
-            const [result] = await conn.query(`
-              INSERT INTO baptism_records
-                (church_id, child_name, date_of_birth, place_of_birth,
-                 father_name, mother_name, address, date_of_baptism,
-                 godparents, performed_by, notes, created_by, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-            `, [
-              churchId, f.child_name || null, f.date_of_birth || null, f.place_of_birth || null,
-              f.father_name || null, f.mother_name || null, f.address || null,
-              f.date_of_baptism || null, f.godparents || null, f.performed_by || null,
-              f.notes || null, userEmail,
-            ]);
-            recordId = result.insertId;
-          } else if (rec.record_type === 'marriage') {
-            const [result] = await conn.query(`
-              INSERT INTO marriage_records
-                (church_id, groom_name, bride_name, date_of_marriage,
-                 place_of_marriage, witnesses, officiant, notes, created_by, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-            `, [
-              churchId, f.groom_name || null, f.bride_name || null, f.date_of_marriage || null,
-              f.place_of_marriage || null, f.witnesses || null, f.officiant || null,
-              f.notes || null, userEmail,
-            ]);
-            recordId = result.insertId;
-          } else if (rec.record_type === 'funeral') {
-            const [result] = await conn.query(`
-              INSERT INTO funeral_records
-                (church_id, deceased_name, date_of_death, date_of_funeral,
-                 date_of_burial, place_of_burial, age_at_death, cause_of_death,
-                 next_of_kin, officiant, notes, created_by, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-            `, [
-              churchId, f.deceased_name || null, f.date_of_death || null, f.date_of_funeral || null,
-              f.date_of_burial || null, f.place_of_burial || null, f.age_at_death || null,
-              f.cause_of_death || null, f.next_of_kin || null, f.officiant || null,
-              f.notes || null, userEmail,
-            ]);
-            recordId = result.insertId;
-          }
-
-          createdRecords.push({ recordId, recordType: rec.record_type });
+          const table = tableMap[rec.record_type];
+          const mapped = mapFieldsToDbColumns(rec.record_type, rec.mappedFields);
+          const { sql, params } = buildInsertQuery(table, churchId, mapped);
+          const [result] = await conn.query(sql, params);
+          createdRecords.push({ recordId: result.insertId, recordType: rec.record_type });
         }
 
         await conn.commit();
@@ -903,6 +847,43 @@ function createRouters(upload: any) {
     } catch (error: any) {
       console.error('[OCR Finalize-Batch] Error:', error);
       res.status(500).json({ error: 'Batch finalize failed', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // POST /jobs/:jobId/save-draft — Auto-save field edits without finalizing
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/save-draft', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const { records, recordType } = req.body;
+
+      if (!churchId || !jobId) return res.status(400).json({ error: 'churchId and jobId required' });
+      if (!records || !Array.isArray(records)) return res.status(400).json({ error: 'records array required' });
+
+      const resolved = await resolveChurchDb(churchId);
+      if (!resolved) return res.status(404).json({ error: 'Church not found' });
+      const { db } = resolved;
+
+      const userEmail = req.session?.user?.email || req.user?.email || 'system';
+      const validType = ['baptism', 'marriage', 'funeral'].includes(recordType) ? recordType : 'baptism';
+
+      // Upsert into ocr_mappings (one row per job)
+      await db.query(`
+        INSERT INTO ocr_mappings (ocr_job_id, church_id, record_type, mapping_json, status, created_by, created_at, updated_at)
+        VALUES (?, ?, ?, ?, 'draft', ?, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE
+          mapping_json = VALUES(mapping_json),
+          record_type = VALUES(record_type),
+          status = 'draft',
+          updated_at = NOW()
+      `, [jobId, churchId, validType, JSON.stringify(records), userEmail]);
+
+      res.json({ ok: true, savedAt: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('[OCR Save Draft] Error:', error);
+      res.status(500).json({ error: 'Failed to save draft', message: error.message });
     }
   });
 
@@ -971,8 +952,9 @@ function createRouters(upload: any) {
 
       // 5. Save artifacts to disk + ocr_feeder_artifacts table
       const timestamp = Date.now();
-      const { resolveChurchDb: resolveDb } = require('./helpers');
-      const tenantPool = await resolveDb(req);
+      const resolvedTenant = await resolveChurchDb(churchId);
+      if (!resolvedTenant) return res.status(404).json({ error: 'Church not found' });
+      const tenantPool = resolvedTenant.db;
 
       // Find feeder page ID for this job
       const [pageRows] = await tenantPool.query(
@@ -1059,45 +1041,53 @@ function createRouters(upload: any) {
       if (!churchId || !jobId) return res.status(400).json({ error: 'churchId and jobId required' });
 
       // Check for existing record_candidates artifact (idempotency)
-      const { resolveChurchDb: resolveDb } = require('./helpers');
-      const tenantPool = await resolveDb(req);
+      const resolvedTenant = await resolveChurchDb(churchId);
+      if (!resolvedTenant) return res.status(404).json({ error: 'Church not found' });
+      const tenantPool = resolvedTenant.db;
 
-      const [pageRows] = await tenantPool.query(
-        `SELECT fp.id AS page_id, fp.storage_dir FROM ocr_feeder_pages fp
-         JOIN ocr_feeder_jobs fj ON fp.feeder_job_id = fj.id
-         WHERE fj.platform_job_id = ? LIMIT 1`,
-        [jobId]
-      );
-
-      if ((pageRows as any[]).length > 0) {
-        const pageId = (pageRows as any[])[0].page_id;
-        // Check if record_candidates artifact already exists for this page
-        const [existingArt] = await tenantPool.query(
-          `SELECT json_blob FROM ocr_feeder_artifacts
-           WHERE page_id = ? AND type = 'record_candidates'
-           ORDER BY created_at DESC LIMIT 1`,
-          [pageId]
+      let pageRows: any[] = [];
+      try {
+        const [rows] = await tenantPool.query(
+          `SELECT fp.id AS page_id, fp.storage_dir FROM ocr_feeder_pages fp
+           JOIN ocr_feeder_jobs fj ON fp.feeder_job_id = fj.id
+           WHERE fj.platform_job_id = ? LIMIT 1`,
+          [jobId]
         );
-        if ((existingArt as any[]).length > 0) {
-          const cached = (existingArt as any[])[0].json_blob;
-          const rcResult = typeof cached === 'string' ? JSON.parse(cached) : cached;
-          // Also load table extraction artifact
-          const [teArt] = await tenantPool.query(
-            `SELECT storage_path FROM ocr_feeder_artifacts
-             WHERE page_id = ? AND type = 'table_extraction'
+        pageRows = rows as any[];
+
+        if (pageRows.length > 0) {
+          const pageId = (pageRows as any[])[0].page_id;
+          // Check if record_candidates artifact already exists for this page
+          const [existingArt] = await tenantPool.query(
+            `SELECT json_blob FROM ocr_feeder_artifacts
+             WHERE page_id = ? AND type = 'record_candidates'
              ORDER BY created_at DESC LIMIT 1`,
             [pageId]
           );
-          let tableExtraction = null;
-          if ((teArt as any[]).length > 0) {
-            const tePath = (teArt as any[])[0].storage_path;
-            if (tePath && fs.existsSync(tePath)) {
-              try { tableExtraction = JSON.parse(fs.readFileSync(tePath, 'utf8')); } catch {}
+          if ((existingArt as any[]).length > 0) {
+            const cached = (existingArt as any[])[0].json_blob;
+            const rcResult = typeof cached === 'string' ? JSON.parse(cached) : cached;
+            // Also load table extraction artifact
+            const [teArt] = await tenantPool.query(
+              `SELECT storage_path FROM ocr_feeder_artifacts
+               WHERE page_id = ? AND type = 'table_extraction'
+               ORDER BY created_at DESC LIMIT 1`,
+              [pageId]
+            );
+            let tableExtraction = null;
+            if ((teArt as any[]).length > 0) {
+              const tePath = (teArt as any[])[0].storage_path;
+              if (tePath && fs.existsSync(tePath)) {
+                try { tableExtraction = JSON.parse(fs.readFileSync(tePath, 'utf8')); } catch {}
+              }
             }
+            console.log(`[AutoExtract] Job ${jobId}: returning cached ${rcResult?.candidates?.length || 0} candidates`);
+            return res.json({ success: true, cached: true, tableExtraction, recordCandidates: rcResult });
           }
-          console.log(`[AutoExtract] Job ${jobId}: returning cached ${rcResult?.candidates?.length || 0} candidates`);
-          return res.json({ success: true, cached: true, tableExtraction, recordCandidates: rcResult });
         }
+      } catch (cacheErr: any) {
+        // Feeder tables may not exist for this church — skip cache check
+        console.log(`[AutoExtract] Job ${jobId}: cache check skipped (${cacheErr.code || cacheErr.message})`);
       }
 
       // 1. Load existing Vision JSON (DB ocr_result or feeder disk file)
@@ -1120,7 +1110,17 @@ function createRouters(upload: any) {
       }
 
       if (!visionJsonStr) {
-        return res.status(400).json({ error: 'No OCR result available for this job' });
+        // No vision JSON — return text-only result with auto-detected record type
+        const { extractRecordCandidates: extractRC } = require('../../ocr/columnMapper');
+        const textOnlyResult = extractRC(null, ocrText, recordType);
+        console.log(`[AutoExtract] Job ${jobId}: no vision JSON, text-only fallback, detected type: ${textOnlyResult.detectedType}`);
+        return res.json({
+          success: true,
+          cached: false,
+          textOnly: true,
+          tableExtraction: null,
+          recordCandidates: textOnlyResult,
+        });
       }
 
       const visionJson = typeof visionJsonStr === 'string' ? JSON.parse(visionJsonStr) : visionJsonStr;
@@ -1221,10 +1221,14 @@ function createRouters(upload: any) {
     try {
       const churchId = parseInt(req.params.churchId);
       const jobId = parseInt(req.params.jobId);
-      const { rowIndex, recordType: reqRecordType } = req.body;
+      const { rowIndex, recordType: reqRecordType, tableExtraction: clientTableExtraction } = req.body;
 
+      console.log(`[RejectRow] churchId=${churchId}, jobId=${jobId}, rowIndex=${rowIndex} (type: ${typeof rowIndex})`);
       if (!churchId || !jobId) return res.status(400).json({ error: 'churchId and jobId required' });
-      if (rowIndex == null || typeof rowIndex !== 'number') return res.status(400).json({ error: 'rowIndex (number) required' });
+      if (rowIndex == null || typeof rowIndex !== 'number') {
+        console.log(`[RejectRow] REJECTED: rowIndex validation failed. Body:`, JSON.stringify(req.body));
+        return res.status(400).json({ error: 'rowIndex (number) required' });
+      }
 
       const resolvedTenant = await resolveChurchDb(churchId);
       if (!resolvedTenant) return res.status(404).json({ error: 'Church not found' });
@@ -1254,13 +1258,48 @@ function createRouters(upload: any) {
 
       const visionJson = typeof visionJsonStr === 'string' ? JSON.parse(visionJsonStr) : visionJsonStr;
 
-      // 2. Run initial extraction to find the rejected row's y_max
+      // 2. Find the rejected row — prefer saved table extraction, fall back to re-extracting
       const { extractGenericTable, tableToStructuredText } = require('../../ocr/layouts/generic_table');
-      const initialExtraction = extractGenericTable(visionJson, { pageIndex: 0 });
+
+      let initialExtraction: any = null;
+
+      // Try client-sent table extraction first (most reliable — matches what user sees)
+      if (clientTableExtraction?.tables?.length > 0) {
+        initialExtraction = clientTableExtraction;
+        console.log(`[RejectRow] Using client-sent table extraction`);
+      }
+
+      // Try loading saved table extraction artifact from disk
+      if (!initialExtraction) {
+        const storageDir = path.join('/var/www/orthodoxmetrics/prod/server/storage/feeder', `job_${jobId}`, 'page_0');
+        if (fs.existsSync(storageDir)) {
+          // Find the most recent table_extraction JSON
+          const files = fs.readdirSync(storageDir).filter((f: string) => f.startsWith('table_extraction') && f.endsWith('.json'));
+          if (files.length > 0) {
+            files.sort().reverse(); // Most recent first
+            try {
+              const savedExtraction = JSON.parse(fs.readFileSync(path.join(storageDir, files[0]), 'utf8'));
+              if (savedExtraction?.tables?.length > 0) {
+                initialExtraction = savedExtraction;
+                console.log(`[RejectRow] Using saved extraction from ${files[0]}`);
+              }
+            } catch (e) { /* ignore parse errors */ }
+          }
+        }
+      }
+
+      // Fall back to fresh extraction
+      if (!initialExtraction) {
+        initialExtraction = extractGenericTable(visionJson, { pageIndex: 0 });
+        console.log(`[RejectRow] Using fresh extraction`);
+      }
 
       // Find the rejected row in the extraction
       const table = initialExtraction.tables?.[0];
-      if (!table) return res.status(400).json({ error: 'No table found in extraction' });
+      if (!table) {
+        console.log(`[RejectRow] No table found. tables count: ${initialExtraction.tables?.length}, total_tokens: ${initialExtraction.total_tokens}`);
+        return res.status(400).json({ error: 'No table found in extraction' });
+      }
 
       const rejectedRow = table.rows?.find((r: any) => r.row_index === rowIndex);
       if (!rejectedRow) return res.status(400).json({ error: `Row ${rowIndex} not found in extraction` });
@@ -1385,6 +1424,7 @@ function createRouters(upload: any) {
   // -----------------------------------------------------------------------
   churchJobsRouter.post('/jobs/:jobId/reextract-row', async (req: any, res: any) => {
     try {
+      const churchId = parseInt(req.params.churchId);
       const jobId = parseInt(req.params.jobId);
       const { recordIndex, bbox } = req.body;
 
@@ -1428,8 +1468,9 @@ function createRouters(upload: any) {
       );
 
       // 4. Load column_bands from the most recent table extraction artifact
-      const { resolveChurchDb: resolveDb } = require('./helpers');
-      const tenantPool = await resolveDb(req);
+      const resolvedTenant = await resolveChurchDb(churchId);
+      if (!resolvedTenant) return res.status(404).json({ error: 'Church not found' });
+      const tenantPool = resolvedTenant.db;
 
       const [pageRows] = await tenantPool.query(
         `SELECT fp.id AS page_id FROM ocr_feeder_pages fp
@@ -1592,8 +1633,9 @@ function createRouters(upload: any) {
       }
 
       // 6. Save updated artifacts
-      const { resolveChurchDb: resolveDb } = require('./helpers');
-      const tenantPool = await resolveDb(req);
+      const resolvedTenant = await resolveChurchDb(churchId);
+      if (!resolvedTenant) return res.status(404).json({ error: 'Church not found' });
+      const tenantPool = resolvedTenant.db;
       const [pageRows] = await tenantPool.query(
         `SELECT fp.id AS page_id, fp.storage_dir FROM ocr_feeder_pages fp
          JOIN ocr_feeder_jobs fj ON fp.feeder_job_id = fj.id
@@ -1681,8 +1723,9 @@ function createRouters(upload: any) {
       }
 
       // 1. Load current record_candidates from artifacts
-      const { resolveChurchDb: resolveDb } = require('./helpers');
-      const tenantPool = await resolveDb(req);
+      const resolvedTenant = await resolveChurchDb(churchId);
+      if (!resolvedTenant) return res.status(404).json({ error: 'Church not found' });
+      const tenantPool = resolvedTenant.db;
 
       const [pageRows] = await tenantPool.query(
         `SELECT fp.id AS page_id, fp.storage_dir FROM ocr_feeder_pages fp
@@ -1994,52 +2037,15 @@ function createRouters(upload: any) {
       const { db } = resolved;
 
       const userEmail = req.session?.user?.email || req.user?.email || 'system';
-      let recordId: number | null = null;
-      const f = mappedFields;
 
-      if (record_type === 'baptism') {
-        const [result] = await db.query(`
-          INSERT INTO baptism_records
-            (church_id, child_name, date_of_birth, place_of_birth,
-             father_name, mother_name, address, date_of_baptism,
-             godparents, performed_by, notes, created_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-        `, [
-          churchId, f.child_name || null, f.date_of_birth || null, f.place_of_birth || null,
-          f.father_name || null, f.mother_name || null, f.address || null,
-          f.date_of_baptism || null, f.godparents || null, f.performed_by || null,
-          f.notes || null, userEmail,
-        ]);
-        recordId = result.insertId;
-      } else if (record_type === 'marriage') {
-        const [result] = await db.query(`
-          INSERT INTO marriage_records
-            (church_id, groom_name, bride_name, date_of_marriage,
-             place_of_marriage, witnesses, officiant, notes, created_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-        `, [
-          churchId, f.groom_name || null, f.bride_name || null, f.date_of_marriage || null,
-          f.place_of_marriage || null, f.witnesses || null, f.officiant || null,
-          f.notes || null, userEmail,
-        ]);
-        recordId = result.insertId;
-      } else if (record_type === 'funeral') {
-        const [result] = await db.query(`
-          INSERT INTO funeral_records
-            (church_id, deceased_name, date_of_death, date_of_funeral,
-             date_of_burial, place_of_burial, age_at_death, cause_of_death,
-             next_of_kin, officiant, notes, created_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-        `, [
-          churchId, f.deceased_name || null, f.date_of_death || null, f.date_of_funeral || null,
-          f.date_of_burial || null, f.place_of_burial || null, f.age_at_death || null,
-          f.cause_of_death || null, f.next_of_kin || null, f.officiant || null,
-          f.notes || null, userEmail,
-        ]);
-        recordId = result.insertId;
-      } else {
-        return res.status(400).json({ error: `Unsupported record_type: ${record_type}` });
-      }
+      const tableMap: Record<string, string> = { baptism: 'baptism_records', marriage: 'marriage_records', funeral: 'funeral_records' };
+      const table = tableMap[record_type];
+      if (!table) return res.status(400).json({ error: `Unsupported record_type: ${record_type}` });
+
+      const mapped = mapFieldsToDbColumns(record_type, mappedFields);
+      const { sql, params } = buildInsertQuery(table, churchId, mapped);
+      const [result] = await db.query(sql, params);
+      const recordId = result.insertId;
 
       // Save finalization metadata into platform job ocr_result
       const [churchRows] = await promisePool.query('SELECT database_name FROM churches WHERE id = ?', [churchId]);
@@ -2256,6 +2262,109 @@ function createRouters(upload: any) {
       console.error(`[OCR Upload] OUTER ERROR: ${JSON.stringify(sqlDetail)}`);
       console.error(`[OCR Upload] Stack:`, error.stack);
       res.status(500).json({ error: error.message || 'Failed to upload files', detail: sqlDetail, jobs: [] });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // PLATFORM: POST /batch-import — Create OCR jobs from a local directory of images
+  // -----------------------------------------------------------------------
+  platformJobsRouter.post('/batch-import', async (req: any, res: any) => {
+    try {
+      const { directory, churchId: rawChurchId, recordType: rawType, limit: rawLimit, language = 'en' } = req.body;
+      const churchId = parseInt(rawChurchId);
+      const validTypes = ['baptism', 'marriage', 'funeral', 'custom'];
+      const recordType = validTypes.includes(rawType) ? rawType : null;
+
+      if (!directory || typeof directory !== 'string') {
+        return res.status(400).json({ error: 'directory is required' });
+      }
+      if (!churchId) {
+        return res.status(400).json({ error: 'churchId is required' });
+      }
+      if (!recordType) {
+        return res.status(400).json({ error: `recordType must be one of: ${validTypes.join(', ')}` });
+      }
+
+      // Validate directory exists
+      if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
+        return res.status(400).json({ error: `Directory not found: ${directory}` });
+      }
+
+      const { promisePool: platformPool, assertTenantOcrTablesExist, getTenantPool } = require('../../config/db');
+
+      // Validate church exists
+      const [churchRows] = await platformPool.query('SELECT id FROM churches WHERE id = ?', [churchId]);
+      if (!(churchRows as any[]).length) {
+        return res.status(404).json({ error: 'Church not found' });
+      }
+
+      await assertTenantOcrTablesExist(churchId);
+
+      // Scan for image files
+      const imageExts = ['.jpg', '.jpeg', '.png'];
+      let imageFiles = fs.readdirSync(directory)
+        .filter((f: string) => imageExts.includes(path.extname(f).toLowerCase()))
+        .sort();
+
+      const limit = rawLimit ? parseInt(rawLimit) : 0;
+      if (limit > 0) {
+        imageFiles = imageFiles.slice(0, limit);
+      }
+
+      if (imageFiles.length === 0) {
+        return res.status(400).json({ error: 'No image files found in directory' });
+      }
+
+      console.log(`[Batch Import] Processing ${imageFiles.length} images from ${directory} for church ${churchId}`);
+
+      const tenantPool = getTenantPool(churchId);
+      const createdJobIds: number[] = [];
+
+      for (const filename of imageFiles) {
+        const absPath = path.join(directory, filename);
+
+        // Platform DB: create ocr_jobs row
+        const [result] = await platformPool.query(
+          `INSERT INTO ocr_jobs (church_id, filename, status, record_type, language, created_at, source_pipeline)
+           VALUES (?, ?, 'pending', ?, ?, NOW(), 'batch_import')`,
+          [churchId, absPath, recordType, language]
+        );
+        const jobId = (result as any).insertId;
+
+        // Tenant DB: create feeder page
+        const [pageResult] = await tenantPool.query(
+          `INSERT INTO ocr_feeder_pages (job_id, page_index, status, input_path, created_at, updated_at)
+           VALUES (?, 0, 'queued', ?, NOW(), NOW())`,
+          [jobId, absPath]
+        );
+        const pageId = (pageResult as any).insertId;
+
+        // Tenant DB: create source_image artifact
+        const fileStats = fs.statSync(absPath);
+        const fileBuffer = fs.readFileSync(absPath);
+        const sha256Hash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+        const ext = path.extname(filename).toLowerCase();
+        const mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
+
+        await tenantPool.query(
+          `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type, created_at)
+           VALUES (?, 'source_image', ?, ?, ?, ?, ?, NOW())`,
+          [pageId, absPath, JSON.stringify({ original_filename: filename, source: 'batch_import' }), sha256Hash, fileStats.size, mimeType]
+        );
+
+        createdJobIds.push(jobId);
+        console.log(`[Batch Import] Created job ${jobId} for ${filename}`);
+      }
+
+      res.json({
+        created: createdJobIds.length,
+        jobIds: createdJobIds,
+        directory,
+        recordType
+      });
+    } catch (error: any) {
+      console.error(`[Batch Import] Error:`, error.message, error.stack);
+      res.status(500).json({ error: error.message || 'Batch import failed' });
     }
   });
 
@@ -2656,6 +2765,169 @@ function createRouters(upload: any) {
     } catch (error: any) {
       console.error('[OCR Rerun] Error:', error);
       res.status(500).json({ error: 'Re-run OCR failed', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // PLATFORM: POST /batch-reprocess — Re-queue multiple jobs for worker processing
+  // -----------------------------------------------------------------------
+  platformJobsRouter.post('/batch-reprocess', async (req: any, res: any) => {
+    try {
+      const { jobIds, templateId } = req.body;
+      if (!Array.isArray(jobIds) || jobIds.length === 0) {
+        return res.status(400).json({ error: 'jobIds array is required' });
+      }
+      if (jobIds.length > 500) {
+        return res.status(400).json({ error: 'Maximum 500 jobs per batch' });
+      }
+
+      const ids = jobIds.map((id: any) => parseInt(id)).filter((id: number) => id > 0);
+      if (ids.length === 0) {
+        return res.status(400).json({ error: 'No valid job IDs provided' });
+      }
+
+      // Optionally validate template exists
+      if (templateId) {
+        const [tplRows] = await promisePool.query('SELECT id FROM ocr_extractors WHERE id = ?', [templateId]);
+        if (!(tplRows as any[]).length) {
+          return res.status(404).json({ error: `Template ${templateId} not found` });
+        }
+      }
+
+      // Reset jobs to pending, optionally assign template
+      const placeholders = ids.map(() => '?').join(',');
+      const templateClause = templateId ? ', layout_template_id = ?' : '';
+      const params = templateId
+        ? [...ids, templateId]
+        : [...ids];
+
+      const [result] = await promisePool.query(
+        `UPDATE ocr_jobs
+         SET status = 'pending',
+             ocr_text = NULL, ocr_result = NULL,
+             confidence_score = NULL, error_regions = NULL
+             ${templateClause}
+         WHERE id IN (${placeholders})`,
+        templateId ? [templateId, ...ids] : ids
+      );
+
+      // Clean up old feeder artifacts for each job
+      const FEEDER_ROOT = path.join('/var/www/orthodoxmetrics/prod/server/storage/feeder');
+      let cleanedCount = 0;
+      for (const jobId of ids) {
+        const jobDir = path.join(FEEDER_ROOT, `job_${jobId}`);
+        if (fs.existsSync(jobDir)) {
+          try {
+            fs.rmSync(jobDir, { recursive: true, force: true });
+            cleanedCount++;
+          } catch (e: any) {
+            console.warn(`[Batch Reprocess] Failed to clean ${jobDir}: ${e.message}`);
+          }
+        }
+      }
+
+      console.log(`OCR_BATCH_REPROCESS ${JSON.stringify({ jobCount: ids.length, templateId: templateId || null, cleanedDirs: cleanedCount })}`);
+      res.json({
+        ok: true,
+        requeued: (result as any).affectedRows || ids.length,
+        templateId: templateId || null,
+        cleanedDirs: cleanedCount,
+        message: `${ids.length} job(s) re-queued for processing`,
+      });
+    } catch (error: any) {
+      console.error('[Batch Reprocess] Error:', error);
+      res.status(500).json({ error: 'Batch reprocess failed', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // PLATFORM: GET /structure-clusters — Group jobs by structural fingerprint
+  // -----------------------------------------------------------------------
+  platformJobsRouter.get('/structure-clusters', async (req: any, res: any) => {
+    try {
+      const recordType = req.query.recordType as string;
+      const churchId = parseInt(req.query.churchId as string);
+
+      if (!churchId) return res.status(400).json({ error: 'churchId query param required' });
+
+      // Get all completed jobs with their extraction artifacts
+      let query = `SELECT id, filename, record_type, status FROM ocr_jobs WHERE church_id = ? AND status IN ('complete', 'completed')`;
+      const params: any[] = [churchId];
+      if (recordType) {
+        query += ' AND record_type = ?';
+        params.push(recordType);
+      }
+      query += ' ORDER BY id ASC';
+
+      const [rows] = await promisePool.query(query, params);
+      const jobs = rows as any[];
+
+      // Build fingerprints from table_extraction artifacts
+      const clusters: Record<string, { fingerprint: string; columnCount: number; orientation: string; jobIds: number[]; sampleHeaders: string[]; recordType: string }> = {};
+
+      for (const job of jobs) {
+        // Try feeder artifact path
+        const feederDir = path.join('/var/www/orthodoxmetrics/prod/server/storage/feeder', `job_${job.id}`, 'page_0');
+        const jsonFiles = fs.existsSync(feederDir)
+          ? fs.readdirSync(feederDir).filter((f: string) => f.includes('table_extraction') && f.endsWith('.json'))
+          : [];
+
+        let extraction: any = null;
+        if (jsonFiles.length > 0) {
+          try {
+            extraction = JSON.parse(fs.readFileSync(path.join(feederDir, jsonFiles[jsonFiles.length - 1]), 'utf8'));
+          } catch { /* skip */ }
+        }
+
+        if (!extraction || !extraction.column_bands) continue;
+
+        // Build fingerprint: column count + rounded band widths + page orientation
+        const bands = extraction.column_bands;
+        const bandKeys = Object.keys(bands).sort();
+        const colCount = bandKeys.length;
+        const dims = extraction.page_dimensions;
+        const orientation = dims && dims.width > dims.height ? 'landscape' : 'portrait';
+        const bandWidths = bandKeys.map(k => {
+          const b = bands[k];
+          return Math.round((b[1] - b[0]) * 20) / 20; // Round to 0.05
+        });
+        const fingerprint = `${colCount}c_${orientation}_${bandWidths.join('_')}`;
+
+        if (!clusters[fingerprint]) {
+          // Extract sample headers from first table
+          let sampleHeaders: string[] = [];
+          if (extraction.tables?.[0]?.rows?.[0]?.cells) {
+            sampleHeaders = extraction.tables[0].rows[0].cells
+              .map((c: any) => c.content || '')
+              .filter((s: string) => s.trim())
+              .slice(0, 5);
+          }
+          clusters[fingerprint] = {
+            fingerprint,
+            columnCount: colCount,
+            orientation,
+            jobIds: [],
+            sampleHeaders,
+            recordType: job.record_type || 'unknown',
+          };
+        }
+        clusters[fingerprint].jobIds.push(job.id);
+      }
+
+      const result = Object.values(clusters)
+        .sort((a, b) => b.jobIds.length - a.jobIds.length)
+        .map(c => ({
+          ...c,
+          jobCount: c.jobIds.length,
+          sampleJobIds: c.jobIds.slice(0, 5),
+          jobIds: undefined, // Don't send full list for large clusters
+          allJobIds: c.jobIds,
+        }));
+
+      res.json({ clusters: result, totalJobs: jobs.length });
+    } catch (error: any) {
+      console.error('[Structure Clusters] Error:', error);
+      res.status(500).json({ error: 'Failed to compute clusters', message: error.message });
     }
   });
 

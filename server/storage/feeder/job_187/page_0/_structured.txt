@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+1 | Oct 27 | Stanley Bozinte Orthodox | Stanley | Valerie Ruhe | Paul
+ | 1984 |  | ману | Orthodox | Viola
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+Fr. Jares | Dariz Porsells | 234-84 Oct. 16 , 1989
+Parsells |  | Certificate of Remarriage Furnkliia Township

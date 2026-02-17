@@ -1,0 +1,507 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "1 5/23",
+              "confidence": 0.9,
+              "confidence_min": 0.88,
+              "token_count": 2,
+              "bbox": [
+                0.065625,
+                0.2875,
+                0.1346153846153846,
+                0.3073717948717949
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "Robert Cruz Rangel No. Brunswick , N.J. 34 Roman Catholic and manlega",
+              "confidence": 0.78,
+              "confidence_min": 0.44,
+              "token_count": 12,
+              "bbox": [
+                0.1516826923076923,
+                0.28910256410256413,
+                0.2778846153846154,
+                0.40544871794871795
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "Cormin Thetsz",
+              "confidence": 0.69,
+              "confidence_min": 0.67,
+              "token_count": 2,
+              "bbox": [
+                0.309375,
+                0.3038461538461538,
+                0.34783653846153845,
+                0.33814102564102566
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "Rebecca Oliver No. Bruwer , N.J. 29 Orthoder 1st Mentage",
+              "confidence": 0.76,
+              "confidence_min": 0.46,
+              "token_count": 10,
+              "bbox": [
+                0.36490384615384613,
+                0.30416666666666664,
+                0.4685096153846154,
+                0.40224358974358976
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": "Neil Panela",
+              "confidence": 0.83,
+              "confidence_min": 0.77,
+              "token_count": 2,
+              "bbox": [
+                0.4951923076923077,
+                0.30865384615384617,
+                0.5247596153846154,
+                0.34262820512820513
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "2 5/30",
+              "confidence": 0.93,
+              "confidence_min": 0.92,
+              "token_count": 2,
+              "bbox": [
+                0.06322115384615384,
+                0.4512820512820513,
+                0.1362980769230769,
+                0.47467948717948716
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "Alexarden Richard Torvisi Ringoes , N.J. 27 0174000x 1st Marriage",
+              "confidence": 0.82,
+              "confidence_min": 0.46,
+              "token_count": 10,
+              "bbox": [
+                0.15673076923076923,
+                0.4403846153846154,
+                0.29783653846153846,
+                0.5541666666666667
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "Daniel Marla",
+              "confidence": 0.75,
+              "confidence_min": 0.53,
+              "token_count": 2,
+              "bbox": [
+                0.30841346153846155,
+                0.4596153846153846,
+                0.3425480769230769,
+                0.49455128205128207
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "Anne Catherine Burcz New Brunswick , N.J. 26 Ronen Catholic 1st . mariage",
+              "confidence": 0.8,
+              "confidence_min": 0.56,
+              "token_count": 13,
+              "bbox": [
+                0.3610576923076923,
+                0.433974358974359,
+                0.4824519230769231,
+                0.5358974358974359
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "Berjanin Chrutie",
+              "confidence": 0.79,
+              "confidence_min": 0.74,
+              "token_count": 2,
+              "bbox": [
+                0.490625,
+                0.43173076923076925,
+                0.5274038461538462,
+                0.46794871794871795
+              ],
+              "needs_review": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "Fr. Jans Parsells",
+              "confidence": 0.76,
+              "confidence_min": 0.73,
+              "token_count": 3,
+              "bbox": [
+                0.5629807692307692,
+                0.3282051282051282,
+                0.6108173076923077,
+                0.3628205128205128
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "Robert Mc Guire Catalin Chetryed",
+              "confidence": 0.71,
+              "confidence_min": 0.56,
+              "token_count": 5,
+              "bbox": [
+                0.6519230769230769,
+                0.3301282051282051,
+                0.7533653846153846,
+                0.3682692307692308
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "May 05 , 2081 No. Bonsuck 21-046",
+              "confidence": 0.69,
+              "confidence_min": 0.37,
+              "token_count": 7,
+              "bbox": [
+                0.85625,
+                0.33653846153846156,
+                0.9230769230769231,
+                0.3919871794871795
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "FL , Jaes Parsells",
+              "confidence": 0.65,
+              "confidence_min": 0.43,
+              "token_count": 4,
+              "bbox": [
+                0.567548076923077,
+                0.42628205128205127,
+                0.6149038461538462,
+                0.45865384615384613
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "Nicholes Torrisi Kristine Hopkins .",
+              "confidence": 0.79,
+              "confidence_min": 0.63,
+              "token_count": 5,
+              "bbox": [
+                0.6574519230769231,
+                0.41217948717948716,
+                0.755048076923077,
+                0.44903846153846155
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "ту 25 , 2021 Erst Amwell Township 21-06",
+              "confidence": 0.85,
+              "confidence_min": 0.68,
+              "token_count": 8,
+              "bbox": [
+                0.8639423076923077,
+                0.4028846153846154,
+                0.9665865384615384,
+                0.46025641025641023
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_license_format"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 231,
+  "data_tokens": 89,
+  "data_rows": 2,
+  "extracted_at": "2026-02-17T01:52:26.834Z"
+}

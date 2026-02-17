@@ -224,6 +224,8 @@ const versionRouter = require('./routes/version');
 const systemStatusRouter = require('./api/systemStatus');
 const dailyTasksRouter = require('./api/dailyTasks');
 const omDailyRouter = require('./routes/om-daily');
+const crmRouter = require('./routes/crm');
+const analyticsRouter = require('./routes/analytics'); // US Church Map analytics
 const { routesRouter: apiExplorerRoutesRouter, testsRouter: apiExplorerTestsRouter } = require('./api/apiExplorer');
 // Add missing router imports
 const churchRecordsRouter = require('./routes/records'); // Church records functionality
@@ -752,6 +754,10 @@ console.log('✅ [Server] Mounted /api/system/routes and /api/admin/api-tests (A
 app.use('/api/admin/tasks', dailyTasksRouter); // Daily tasks management
 app.use('/api/om-daily', omDailyRouter); // OM Daily work pipelines
 console.log('✅ [Server] Mounted /api/om-daily routes (Work Pipelines)');
+app.use('/api/crm', crmRouter); // CRM pipeline & outreach
+console.log('✅ [Server] Mounted /api/crm routes (CRM & Outreach)');
+app.use('/api/analytics', analyticsRouter); // US Church Map analytics
+console.log('✅ [Server] Mounted /api/analytics routes (US Church Map)');
 
 // Other authenticated routes
 app.use('/api/user', userRouter);

@@ -1,0 +1,50 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "МЕсаца штчество рамнага родителей има и , и какого Счета родив и день Званіе , , WHXCA . родившихся вероисповедания . Имена | Званіе , има , отчетко и фамилі воспріблинкова . | Кто совершаль таниство крошені ."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "DATES FULL NAME MOTHER'S MAIDEN NAME MALE NUMBER FEMALE BIRIH BAPTISM NAME OF CHILD FATHER'S . CITY OF BIRTH 5 4/3 2018/2623 7/15 Roman Joseph , Liudvig Gabier Gebier Lela Gigolgeva Brooklyn , NY | FULL NAMES OF SPONSORS Lasha Aminidze Mariam Ivanizsh vili | PRIEST'S NAME Fl . Peth Kruashvili"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.73,
+      "fields": {
+        "notes": "3/18 1/8 Ignatius Peter Parsells - 2024 Gabriel 2024 Heather Gizva Philablphia , PA | Nicholes Torrisi Апир Torrist | Fr. John Parsells"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "516 7/20 Bobert 2 2024 2024 Anastasios Robert Rangal N. Bruns NJ . Rebecca Olive 3 8/25 Angel Rosado Edison , N.J. | Archpriest Timothy Hojnick's Bachzel O lives | Fr Joes Parsells Angel received into the Church by Confession , Chrismation Eucharist"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:49:52.504Z"
+}

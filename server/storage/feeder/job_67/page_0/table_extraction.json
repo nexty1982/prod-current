@@ -1,0 +1,471 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 8,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "HOHI DEATHS МЕТРИЧЕСКой книги на й о мершагш , има , штчество фамилім GuŕTZ Мсця й день . Местопроисхожденіе εξαίρωνχς . , . ж Женска смерти . погровані DATE OF OF DECEDENT NUMBER FULL NAME BURTAL"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "отмершаги AKTÁ . . Мужеска . . Женска MALE AGE Μ FEMALE"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "H HOHI YEAR 1970 года , часть треТІМ , Ä ОУМЕРШИХА . , и гдѣ погребены . С чего отмеря . Кто исповѣдываля и проваля . Кто совершали погрованіе WHO OFFICIATED AT OF PRIEST WHO NAME OF PRIEST INTERNMENT CAUSE OF DEATH NAME ADMINISTERED SACRAMENTS BURIAL AND PLACE OF LEWIS"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "MALE EMALE DEATH 3-27-70 MRS . JULIA ZORZI",
+              "confidence": 0.75,
+              "token_count": 8,
+              "bbox": [
+                0.08725961538461538,
+                0.2916666666666667,
+                0.31682692307692306,
+                0.37403846153846154
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "57",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.44735576923076925,
+                0.3262820512820513,
+                0.46298076923076925,
+                0.34423076923076923
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "CANCER REV . ROBERT A. GEORGE LEWIS REV . ROBERT A. GEORGE EUCHARIST - 2-13-70 SS . HillSBOROUGH PETER + PAUL CEMETERY , N.T.",
+              "confidence": 0.82,
+              "token_count": 24,
+              "bbox": [
+                0.5002403846153847,
+                0.3022435897435897,
+                0.9173076923076923,
+                0.3733974358974359
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "7X3-24-70 x4-25-704-29-70 MRS . VERA WELENTEYCHIK",
+              "confidence": 0.84,
+              "token_count": 6,
+              "bbox": [
+                0.08028846153846154,
+                0.3548076923076923,
+                0.359375,
+                0.4407051282051282
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "62",
+              "confidence": 0.97,
+              "token_count": 1,
+              "bbox": [
+                0.44927884615384617,
+                0.39903846153846156,
+                0.46322115384615387,
+                0.41378205128205126
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "HOLY ANOINTING 3-24-70 UREMIA No REV . ROBERT A. GEORGE LEWIS EVERGREEN CEMETERY CLINTON , NEW JERSEY",
+              "confidence": 0.9,
+              "token_count": 17,
+              "bbox": [
+                0.5045673076923077,
+                0.35705128205128206,
+                0.9322115384615385,
+                0.4592948717948718
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "5-5-705-7-70 MRS . KATHERINE NEBOZINSKY",
+              "confidence": 0.83,
+              "token_count": 5,
+              "bbox": [
+                0.12043269230769231,
+                0.5012820512820513,
+                0.35552884615384617,
+                0.5333333333333333
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "182",
+              "confidence": 0.82,
+              "token_count": 1,
+              "bbox": [
+                0.44903846153846155,
+                0.4980769230769231,
+                0.4658653846153846,
+                0.5121794871794871
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "ACUTE MYOCARDIAL REV . ROBERT A. GEORGE LEWIS REV . ROBERT A. GEORGE LEWIS INFARCTION ARTERIOSCLEROTIC ; HOLY EUCHARIST ANOINTING 4-13-70 SS . PETER + PAUL CEMETERY , 4-13 ; 70 ; 4-30-70 HILLSBOROUGH , N.J. HEART DISEASE",
+              "confidence": 0.89,
+              "token_count": 38,
+              "bbox": [
+                0.505048076923077,
+                0.46153846153846156,
+                0.940625,
+                0.55
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "10 X 5-28-70 6-1-70 MRS . MARY SZWAHLA",
+              "confidence": 0.81,
+              "token_count": 8,
+              "bbox": [
+                0.07908653846153846,
+                0.5878205128205128,
+                0.32235576923076925,
+                0.6137820512820513
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "55",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.45264423076923077,
+                0.583974358974359,
+                0.46875,
+                0.6006410256410256
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "CARCINOMA OF REV . ROBERT A. GEORGE LEWIS REV . ROBERT A. GEORGE LEWIS OVARY EUCHARIST , 4-11-70 SS , PETER HILLSBOROUGH + PAUL CEMETERY , N. J.",
+              "confidence": 0.82,
+              "token_count": 28,
+              "bbox": [
+                0.5081730769230769,
+                0.5451923076923076,
+                0.9449519230769231,
+                0.6288461538461538
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "11 x 6-15-70 6-19-70 MRS . MARY FELICE",
+              "confidence": 0.85,
+              "token_count": 8,
+              "bbox": [
+                0.07932692307692307,
+                0.6775641025641026,
+                0.3112980769230769,
+                0.7157051282051282
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "S",
+              "confidence": 0.74,
+              "token_count": 1,
+              "bbox": [
+                0.4545673076923077,
+                0.6836538461538462,
+                0.47115384615384615,
+                0.7041666666666667
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "MULTIPLE PULMON - REV . ROBERT A. GEORGE LEWIS SS REV . ROBERT A. GEORGE LEWIS ARY INFARCTION WITH EUCHARIST , 6-9-70 . PETER + PAUL CEMETERY DUE TO A.S.H.D. HILLSBOROUGH , N.J. DIABETES , OBESITY",
+              "confidence": 0.89,
+              "token_count": 36,
+              "bbox": [
+                0.5117788461538462,
+                0.646474358974359,
+                0.9442307692307692,
+                0.7307692307692307
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "12x 75-70 7-8-70 ALEXIS N. FEDCHIN , SR .",
+              "confidence": 0.88,
+              "token_count": 9,
+              "bbox": [
+                0.08125,
+                0.7871794871794872,
+                0.35096153846153844,
+                0.8371794871794872
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "TR 7",
+              "confidence": 0.71,
+              "token_count": 2,
+              "bbox": [
+                0.43317307692307694,
+                0.8057692307692308,
+                0.4502403846153846,
+                0.8314102564102565
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "CREMIA , ARTERIO- REV . ROBERT A. GEORGE LEWIS SS REV . ROBERT A. GEORGE LEWIS NEPHROSCLER Holy ANOINTING , 7-2-70 . PETER + PAUL CEMETERY LAR EUCHARIST , 7-2-70 HILLSBOROUGH , N.T. OSIS",
+              "confidence": 0.86,
+              "token_count": 34,
+              "bbox": [
+                0.5161057692307692,
+                0.7525641025641026,
+                0.9588942307692307,
+                0.8474358974358974
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "13x 8-4-708-7-70 VERY REV . PETER J. KAREL",
+              "confidence": 0.8,
+              "token_count": 8,
+              "bbox": [
+                0.08221153846153846,
+                0.8919871794871795,
+                0.3526442307692308,
+                0.9506410256410256
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "21",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.4355769230769231,
+                0.9131410256410256,
+                0.44735576923076925,
+                0.9310897435897436
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "MYOCARDIAL No ARCHBISHOP NIKON INFARCTION ST . TIKHON'S CEMETERY OF BROOKLYN , NY SOUTH CANAAN , PENNA ,",
+              "confidence": 0.83,
+              "token_count": 18,
+              "bbox": [
+                0.521875,
+                0.871474358974359,
+                0.9848557692307692,
+                0.9548076923076924
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0375
+    ],
+    "col_2": [
+      0.0375,
+      0.3975
+    ],
+    "col_3": [
+      0.3975,
+      0.485
+    ],
+    "col_4": [
+      0.485,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.3107692307692308,
+  "total_tokens": 353,
+  "data_tokens": 255,
+  "data_rows": 7,
+  "extracted_at": "2026-02-17T01:47:09.028Z"
+}

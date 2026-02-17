@@ -1,0 +1,56 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "notes": "CITY OF"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.63,
+      "fields": {
+        "performed_by": "Fr. Janes Parsells Received into dry be Hot Chrismation from Greit",
+        "notes": "Hong Honda ( Jrise )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.74,
+      "fields": {
+        "performed_by": "Catholic Chuch Fr. Das Parrilt",
+        "notes": "Zachary Basil Dexcon Paul Sokol ( 1063 Bensack ) Patricie ( Tyson ) Sokol | Brien Frederick Julia Todd"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.74,
+      "fields": {
+        "performed_by": "Received into Orthod Beption Chrismation be Jour - Fr. Panel",
+        "notes": "3 | 1 | Joseph Crichtos"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_6": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:49:05.885Z"
+}

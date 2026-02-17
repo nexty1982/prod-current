@@ -1,0 +1,153 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счета родив : Месяца шихем . и день Имена родившихс NUMBER DATES NAME OF CHILD BIRTH"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "H HOHI BIRTHS KARM WEERNSH - TANERIASTES МЕТРИЧЕСКОЙ КНИГИ Н Званів , имя , отчество и . фамнала родителей , вѣроисповедания . FATHER'S FULL NAME . MOTHER'S MAIDEN"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "YEAR 44 ГОДА , ЧАСТЬ ПЕРВАЯ , Званіе , има , отчество и фамилі И КАКОГО воспрівминкова . FULL NAMES OF SPONSORS NAME"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "РОДИВШИХСЯ . TRES Кто совершаль таинство крошеним . PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "CITY OF 0 4 / 6 / 14 19 Sava Somerville",
+              "confidence": 0.76,
+              "token_count": 11,
+              "bbox": [
+                0.11201923076923077,
+                0.3137820512820513,
+                0.2108173076923077,
+                0.4028846153846154
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Patrick J. Carroll mary Yackovich",
+              "confidence": 0.8,
+              "token_count": 5,
+              "bbox": [
+                0.246875,
+                0.3525641025641026,
+                0.359375,
+                0.4012820512820513
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Pezcon Paul Sokol",
+              "confidence": 0.79,
+              "token_count": 3,
+              "bbox": [
+                0.48485576923076923,
+                0.34423076923076923,
+                0.5947115384615385,
+                0.3733974358974359
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Janez Parsells",
+              "confidence": 0.67,
+              "token_count": 3,
+              "bbox": [
+                0.7365384615384616,
+                0.34102564102564104,
+                0.8399038461538462,
+                0.3698717948717949
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.055
+    ],
+    "col_2": [
+      0.055,
+      0.23
+    ],
+    "col_3": [
+      0.23,
+      0.42
+    ],
+    "col_4": [
+      0.42,
+      0.665
+    ],
+    "col_5": [
+      0.665,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.3171794871794872,
+  "total_tokens": 99,
+  "data_tokens": 22,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:49:09.344Z"
+}

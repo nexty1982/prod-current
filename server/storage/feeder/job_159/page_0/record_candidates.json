@@ -1,0 +1,58 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "notes": "RECORD Diane Wm Paulette Ade West NUMBER Febi Gene AND ( ( ( - PERFORMED ( 1 PART • PARENTS 79 ( New BIRTH BAPTISM BIRTH PARENTS Rev | PART RECORD PARISH CHILD PARENTS OF Ma Zvd ADDRESS BIRTH BAPTISM OF OF CONFIRMATION BIRTH OF PARENTS SACRAMENTS OF DATE AT PLACE . DATE GOD 1. ."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "PARISH CHILD OF OF NAME ADDRESS OF OF CONFIRMATION OF PLACE SACRAMENTS NAME . AND DATE DATE . AT GOD 1962 Peterp RECTOR ) | NAME NAME AND 18068 aulier . Carly Caulier Contes A. STATE 6.1962 KJ . RECTOR N. Med ) STATE ) for ( ,"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "18069 Sagosz Sagosz STATE ) STATE 3 City ( , No ) NAME CITY ) NAME , STREET m ) sey BY | BAPTISMS No Diane Nathy Jame NAME Walenteychick ) NAME MOTHER'S doekd CITY ) Ridge , FATHER'S STREET AND Bridge CHURCH ) Flemin BY ) AND CITY lephan ( ( ( ( PERFORMED"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "notes": "BAPTISMS Andrea Andrew FATHER'S Luca MOTHER'S Perr AND CHURCH ) NUMBER CITY AND ( ( ( PERFORMED - ( 1 BIRTH_ Marceret ( . | 1 PART RECORD CHILD PARENTS NUMBER High BIRTH BAPTISM Pete 26 BIRTH Steph ( OF PARENTS Olga Rev"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.96,
+      "fields": {
+        "notes": "PART RECORD CHILD PARENTS ve 109 BIRTH vist BAPTISM PARISH ADDRESS OF CONFIRMATION OF PARENTS OF NAME OF OF NAME AND DATE AT PLACE SACRAMENTS DATE . GOD . | PARISH OF NAME OF NAME ADDRESS OF OF CONFIRMATION . AND DATE PLACE SACRAMENTS DATE . AT GOD"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:51:10.150Z"
+}

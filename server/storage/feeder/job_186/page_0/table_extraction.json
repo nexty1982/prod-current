@@ -1,0 +1,494 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "1",
+              "confidence": 0.86,
+              "confidence_min": 0.86,
+              "token_count": 1,
+              "bbox": [
+                0.038461538461538464,
+                0.2987179487179487,
+                0.04375,
+                0.3128205128205128
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "7124",
+              "confidence": 0.95,
+              "confidence_min": 0.95,
+              "token_count": 1,
+              "bbox": [
+                0.07860576923076923,
+                0.28846153846153844,
+                0.11177884615384616,
+                0.31346153846153846
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "Robert Kita Manville 24 augus yrs . A.C. 1st marring",
+              "confidence": 0.81,
+              "confidence_min": 0.58,
+              "token_count": 10,
+              "bbox": [
+                0.1326923076923077,
+                0.29102564102564105,
+                0.29423076923076924,
+                0.3560897435897436
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "Stanley Helen",
+              "confidence": 0.83,
+              "confidence_min": 0.68,
+              "token_count": 2,
+              "bbox": [
+                0.29375,
+                0.3112179487179487,
+                0.33605769230769234,
+                0.35128205128205126
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "Anastasiz Nevitt 23 Manville Orthodox 1st m .",
+              "confidence": 0.82,
+              "confidence_min": 0.64,
+              "token_count": 8,
+              "bbox": [
+                0.3451923076923077,
+                0.29967948717948717,
+                0.4704326923076923,
+                0.3557692307692308
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": "Bichad Tegs",
+              "confidence": 0.6,
+              "confidence_min": 0.58,
+              "token_count": 2,
+              "bbox": [
+                0.4841346153846154,
+                0.3141025641025641,
+                0.5180288461538461,
+                0.35224358974358977
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "а",
+              "confidence": 0.94,
+              "confidence_min": 0.94,
+              "token_count": 1,
+              "bbox": [
+                0.035096153846153846,
+                0.41634615384615387,
+                0.054086538461538464,
+                0.43685897435897436
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_integer"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "11/13",
+              "confidence": 0.94,
+              "confidence_min": 0.94,
+              "token_count": 1,
+              "bbox": [
+                0.07692307692307693,
+                0.4044871794871795,
+                0.11129807692307692,
+                0.433974358974359
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "Michael John Chabuz Manville 25 Orthodox 1st marriage",
+              "confidence": 0.81,
+              "confidence_min": 0.58,
+              "token_count": 8,
+              "bbox": [
+                0.13052884615384616,
+                0.39903846153846156,
+                0.28725961538461536,
+                0.4592948717948718
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "Nicholas Louise",
+              "confidence": 0.96,
+              "confidence_min": 0.93,
+              "token_count": 2,
+              "bbox": [
+                0.29254807692307694,
+                0.4060897435897436,
+                0.3331730769230769,
+                0.43974358974358974
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "Patricia Perlack Manville 24 Greek Catholic 1st m .",
+              "confidence": 0.8,
+              "confidence_min": 0.58,
+              "token_count": 9,
+              "bbox": [
+                0.3471153846153846,
+                0.3958333333333333,
+                0.47307692307692306,
+                0.44871794871794873
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "steven Elizabeth",
+              "confidence": 0.89,
+              "confidence_min": 0.86,
+              "token_count": 2,
+              "bbox": [
+                0.4826923076923077,
+                0.40352564102564104,
+                0.5173076923076924,
+                0.4362179487179487
+              ],
+              "needs_review": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "Fr. J. Parsells",
+              "confidence": 0.82,
+              "confidence_min": 0.67,
+              "token_count": 3,
+              "bbox": [
+                0.5528846153846154,
+                0.32051282051282054,
+                0.6247596153846153,
+                0.34102564102564104
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "Jacqueline De Laizto ( Orthodox ) Janes Diley ( Non - Orthodox )",
+              "confidence": 0.84,
+              "confidence_min": 0.7,
+              "token_count": 13,
+              "bbox": [
+                0.6334134615384616,
+                0.30993589743589745,
+                0.8120192307692308,
+                0.3580128205128205
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "7-18-83 # 55-83 Manville",
+              "confidence": 0.84,
+              "confidence_min": 0.72,
+              "token_count": 4,
+              "bbox": [
+                0.838701923076923,
+                0.31346153846153846,
+                0.9504807692307692,
+                0.34647435897435896
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "Fr. Janes Panell",
+              "confidence": 0.71,
+              "confidence_min": 0.53,
+              "token_count": 3,
+              "bbox": [
+                0.5507211538461538,
+                0.4012820512820513,
+                0.6194711538461538,
+                0.4233974358974359
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "Louise Chabrz Christine Perlack",
+              "confidence": 0.7,
+              "confidence_min": 0.61,
+              "token_count": 4,
+              "bbox": [
+                0.6430288461538461,
+                0.3858974358974359,
+                0.7341346153846153,
+                0.42756410256410254
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "11-07-83 # 83-83 Manville",
+              "confidence": 0.94,
+              "confidence_min": 0.88,
+              "token_count": 4,
+              "bbox": [
+                0.8394230769230769,
+                0.36891025641025643,
+                0.9771634615384616,
+                0.4166666666666667
+              ],
+              "needs_review": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 216,
+  "data_tokens": 78,
+  "data_rows": 2,
+  "extracted_at": "2026-02-17T01:52:04.963Z"
+}

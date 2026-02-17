@@ -1,0 +1,40 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "NAME Onuschak NAME AND ND DATE DATE . Onuschak AT GOD | 9382 Onuschak Brunsw 959 Fedorchak RECTOR ) STATE STATE ( , | 9381 . Andrews AndrewS Comerville 1959 1959 BARRE . Pa 1959 Paul Pa BaRRE Adamcio RECTOR WiTHES . ) St STATE ) STATE , 27 ( ' King , ) CITY"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "BAPTISMS NO Susan NAME ) NAME CITY Oct 11 ) FATHER'S Karel MOTHER'S New , STREET and CHURCH Bruns ame ' AND BY - Ept ) CITY Stephen ( | BAPTISMS No Thomas Basil ) NAME FATHER'S Pavelchak NAME MOTHER'S MERCER , STREET Ept Sept AND Hosp and NUMBER Wilkes CITY NEIShε BY ) Andrew PERFORMED Stephen ( ( ( AND 1"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "1 PART RECORD Joanne PARENTS ( Tatiana NUMBER Middlesex BAPTISM AND εtεR ( εw ( SACRAMENTS PERFORMED Ad PARISH CHILD BIRTH Susa . ( BIRTH NAME OF OF NAME ADDRESS DATE CONFIRMATION PARENTS RE√S OF DATE OF OF . AND PLACE . AT GOD | PART RECORD CHILD PARENTS Julia Andrei 170 PETER ( 57 PARISH BIRTH OF OF ADDRESS Apt OF MERCY BAPTISM DATE OF DATE CONFIRMATION STE BIRTH OF NAME NAME AND AT PLACE PARENTS VERA SACRAMENTS REJ . GOD \""
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:51:26.491Z"
+}

@@ -1,0 +1,477 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 3120,
+    "height": 4160
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "Feb. PARISH FULL NAME RESIDENCE PLACE OF AGE OF NAME NUMBER OF OF and FULL RESIDENCE PLACE AGE OF NUMBER NAME and OF MARRIED 1 ( (",
+              "confidence": 0.95,
+              "confidence_min": 0.67,
+              "token_count": 27,
+              "bbox": [
+                0.28974358974358977,
+                0.3682692307692308,
+                0.36025641025641025,
+                0.7069711538461538
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "PART II - 6 , 1944 . MARRIAGES RECORD No Franc OF GROOM ( NUMBER AND STREET Newark ) ( BIRTH 24 GROOM PARENTS PREVIOUS MARRIAGES Henrietta Christ NAME OF BRIDE Helen ( NUMBER AND STREET ) OF BIRTH 21 BRIDE OF PREVIOUS MARRIAGES Teorge PARENTS IN a PRESENCE OF Chia WITNESSES Mary FULL NAME ) Kuznia FULL NAME ) ( RECTOR )",
+              "confidence": 0.88,
+              "confidence_min": 0.36,
+              "token_count": 63,
+              "bbox": [
+                0.3157051282051282,
+                0.34639423076923076,
+                0.4983974358974359,
+                0.7223557692307693
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": "40967 CITY ) ( .. STATE ) First Clark ... Roman ( CITY ) ( STATE ) firs shitian Roman : ( RESIDENCE ) ( RESIDENCE )",
+              "confidence": 0.85,
+              "confidence_min": 0.53,
+              "token_count": 27,
+              "bbox": [
+                0.4391025641025641,
+                0.3858173076923077,
+                0.5564102564102564,
+                0.7
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "FULL AGE 1 y 2",
+              "confidence": 0.87,
+              "confidence_min": 0.49,
+              "token_count": 5,
+              "bbox": [
+                0.5458333333333333,
+                0.3456730769230769,
+                0.6557692307692308,
+                0.505048076923077
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "and Sofie Paul NAME OF BRIDE DE Mary RESIDENCE ( NUMBER AND STREET ) ( PLACE OF BIRTH 23 OF BRIDE NUMBER OF PREVIOUS MARRIAGES Mishna NAME and OF PARENTS Elizabeth MARRIED IN PRESENCE OF ch WITNESSES ( FULL Stella NAME ) Andah ( FULL Rev. NAME ) M. ( RECTOR ) Jan. PART 2.5.1944 II - 5/4 MARRIAGES PARISH RECORD No ROOM Senged FULL NAME OF Wilkes GROOM . Barre , RESIDENCE . PLACE OF BIRTH ( NUMBER AND Wilkes STREET ) AGE OF GROOM Apr. 18,1922 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS George & Bu Sobhie FULL RESIDENCE NAME OF BRIDE Manpille e ( NUMBER AND STREET ) PLACE OF BIRTH AGE OF BRIDE Nov. NUMBER OF PREVIOUS MARRIAGES Andre NAME OF Anna PARENTS Petrovich",
+              "confidence": 0.87,
+              "confidence_min": 0.28,
+              "token_count": 128,
+              "bbox": [
+                0.632051282051282,
+                0.2841346153846154,
+                0.860897435897436,
+                0.854326923076923
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "Harak Fazon . CITY ) ( STATE ) Golov Fazan : ( RESIDENCE ) ( RESIDENCE ) 40966 Pa PR Subrinks ( Barre CITY ) ( STATE Pa ) . First 22 gre . Sufrinke M ... Klimovich ( CITY ) ( STATE ) 1924. first 19 yrs . Rovick",
+              "confidence": 0.79,
+              "confidence_min": 0.45,
+              "token_count": 50,
+              "bbox": [
+                0.7807692307692308,
+                0.2939903846153846,
+                0.930448717948718,
+                0.834375
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "MARRIED Olga IN PRESENCE OF Klimovick 1 ( FULL Yoral NAME ) . G Beatt 2 ( FULL NAME ) M. ( RECTOR )",
+              "confidence": 0.83,
+              "confidence_min": 0.39,
+              "token_count": 24,
+              "bbox": [
+                0.6596153846153846,
+                0.8757211538461539,
+                0.8548076923076923,
+                0.9396634615384616
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "WITNESSES : ( RESIDENCE ) ARESIDENCE )",
+              "confidence": 0.9,
+              "confidence_min": 0.73,
+              "token_count": 7,
+              "bbox": [
+                0.7977564102564103,
+                0.8742788461538461,
+                0.9073717948717949,
+                0.9185096153846154
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_license_format"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 389,
+  "data_tokens": 331,
+  "data_rows": 2,
+  "extracted_at": "2026-02-17T01:52:55.729Z"
+}

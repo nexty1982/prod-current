@@ -1,0 +1,41 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.73,
+      "fields": {
+        "groom_name": "JUNE 6 , 1945 57238 NICHOLAS STASH HELEN MCCLOSKEY SACRAMENT Res . By : 1966 54240 JOSEPH C.",
+        "bride_name": "165 47 & AND 465 46 the thewehrp - valore MANVILLE abouty SON OF",
+        "officiant": "24,1967 RES AND",
+        "witnesses": "ARNOLD KATKO SON Катко AND HELEN ( BIHARI AGR 4-0 BORN - N.B. . 525 HAMILTON ST JULIA EARNEY DAUGHTER DAVID CARNEY AND IRENE ( AGE 37 BORN Ras 525 Low FATHER is ST . , SAGRAMENT By :",
+        "notes": "groom_parents: KEVITCH Fathy 10TH AVE WEITOUSH; bride_parents: JUNE; license: OF ERNEST KATKO ( SUMERSET ) , HT SOMERSET , N.J of BASALYGA ) CARNEY SOMERSET ( MB . ) N.J THEODORE SamOST , N.J LABOWSKY"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.68,
+      "fields": {
+        "groom_name": "AGE : 29- Ras . AND JANST So MICHAEL A GA RES .",
+        "bride_name": "PHILIPSBURG , PA . MANUCKLE , N.J DAUGHTER o F CLARA PINARCHER GAXINGTON",
+        "officiant": "18,1967 AGS ANA MR . RES SACRAMENT",
+        "witnesses": "JOHN MCTVER 1 SON OF ANDREW AND JEAN Malvac 22 BORN : Ross 3p29 DORAY ST . , JONENTSHEL & MRS . MICHARG NEISHEL . $ 3.9 JEROME AVE , SO BY VERY REV . FR . AND REV PA . NICHOLAS",
+        "notes": "groom_parents: BORN PINARCHIR STREET , AND 38; bride_parents: Nov; license: PLAINFIELD , N.J HARRISAURE , PA- PAVECER 40 PLAINFIELD , N.J. THEODORT LABOUSKY GOBORA"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:34.508Z"
+}

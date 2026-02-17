@@ -1,0 +1,153 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "OHI BIRTHS МЕТРИЧЕСКОЙ КНИГИ НА Счеть роди Месца има отчество и родителей , и Шихса . И день Званіе , , рамна . . Мужеска Имена родившихся вѣроисповедания . . . пола Женска пола рожде HIA краце- нім NUMBER DATES В А NAME OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN BIRTH"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "YEAR A года , ЧАСТЬ ПЕРВАМ , И Званіе , има , отчетко и фамил какого воспрієминкова . FULL NAMES OF SPONSORS NAME"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "РОДИВШИХСЯ . Кто совершаль таинство крошенім .. PRIEST'S NAME"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": ""
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "MALE FEMALE BIRTH BAPETEM Р CITY OF т А I S - 1/11 3/20 Mariam Mamuka Ivaniashvili Plainfield , N.J. Busudan chikhridze",
+              "confidence": 0.85,
+              "token_count": 22,
+              "bbox": [
+                0.07668269230769231,
+                0.29903846153846153,
+                0.3925480769230769,
+                0.4012820512820513
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Teimurzz Chrikishvili Nino Puturidze Eteri Salzdze",
+              "confidence": 0.88,
+              "token_count": 6,
+              "bbox": [
+                0.48028846153846155,
+                0.3368589743589744,
+                0.6576923076923077,
+                0.40384615384615385
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Fr. Jos Panell",
+              "confidence": 0.67,
+              "token_count": 3,
+              "bbox": [
+                0.7259615384615384,
+                0.34294871794871795,
+                0.8290865384615385,
+                0.3737179487179487
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "In",
+              "confidence": 0.58,
+              "token_count": 1,
+              "bbox": [
+                0.9286057692307692,
+                0.4967948717948718,
+                0.9444711538461539,
+                0.5294871794871795
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0375
+    ],
+    "col_2": [
+      0.0375,
+      0.4375
+    ],
+    "col_3": [
+      0.4375,
+      0.6925
+    ],
+    "col_4": [
+      0.6925,
+      0.8775
+    ],
+    "col_5": [
+      0.8775,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.31814102564102564,
+  "total_tokens": 116,
+  "data_tokens": 32,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:49:16.622Z"
+}

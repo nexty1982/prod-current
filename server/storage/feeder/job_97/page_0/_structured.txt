@@ -1,0 +1,7 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 1
+
+--- Table 1 (4 columns, 2 rows) ---
+ | -- OHI > BIRTHS H HISTPHчECKSй KHATA NA Счета родив Мелца и . родителей , Замнага , и шихем . и день Званіе , има штчество родившихел вкроисповиданім . Имена MALE NUMBER NAME MOTHER'S BIRTH DATES . BAPETSO NAME OF CHILD FATHER'S FULL MAIDEN CITY OF BIRTH FEMALE M | YEAR 96 ГОДА , ЧАСТЬ ПЕРВАЯ , И РОДИВШИХСЯ Званіе , има , отчетко и фамилва какого воспріблинкова . FULL NAME NAMES OF SPONSORS Received into Orthodoxy by the | . Кто совершаль таинство кровенія . PRIEST'S NAME
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 1 % Brian Justin Frederick i : a 210/30/17/28 Anna Gorbunov Vladimir Gorbunov Somerville Larisa Kovalenko | Aite of episcopaliza Holy Chrismation the confession . fron Sponsors : Austin Kachek / John Zehodnick viteli Gulco Tatiane koy коз Gulco | FA . Jas Parsells Fr. Jour Parnells

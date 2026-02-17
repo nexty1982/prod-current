@@ -145,11 +145,11 @@ import { apiClient } from './utils/axiosInstance';
       if (Array.isArray(raw)) {
         columns = raw.map((c: any) =>
           typeof c === 'string' ? c :
-          c?.column_name ?? c?.COLUMN_NAME ?? ''
+          c?.column_name ?? c?.COLUMN_NAME ?? c?.name ?? c?.Field ?? ''
         ).filter(Boolean);
       } else if (Array.isArray((raw as any)?.columns)) {
         columns = (raw as any).columns.map((c: any) =>
-          typeof c === 'string' ? c : c?.column_name ?? c?.COLUMN_NAME ?? ''
+          typeof c === 'string' ? c : c?.column_name ?? c?.COLUMN_NAME ?? c?.name ?? c?.Field ?? ''
         ).filter(Boolean);
       }
 
@@ -177,7 +177,7 @@ import { apiClient } from './utils/axiosInstance';
       );
       if (withCols) {
         const cols = withCols.columns.map((c: any) =>
-          typeof c === 'string' ? c : c?.column_name ?? c?.COLUMN_NAME ?? ''
+          typeof c === 'string' ? c : c?.column_name ?? c?.COLUMN_NAME ?? c?.name ?? c?.Field ?? ''
         ).filter(Boolean);
         if (cols.length) return { columns: cols, via: 'tables-listing' };
       }

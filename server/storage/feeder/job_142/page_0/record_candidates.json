@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "PART 1-BAPTISMS\n1950\nPART 1-BAPTISMS\nPARISH RECORD\nNAME OF CHILD\nNAME OF PARENTS\nAND.\nNO 31236\nPeter\nPeter Perhach\n(FATHER'S NAME)\nPauline Horbel\n(MOTHER'S NAME)\nADDRESS\nRED.\nPARISH RECORD\nNAME OF CHI"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:38.067Z"
+}

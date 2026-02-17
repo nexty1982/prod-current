@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+ | July 10 | Scott Joseph Nagele Washington Township N.J. 24 Roman Catholic | Robert Kathleen | Ameruda Savch Manville , N.J 34 Orthodox | Robert stray
+2 | July 17 | Christopher Michel Brooks No. Brunswick , NJ 25 Roman Catholic | Ronald C2101 | Catherine Gorbztuk Manville , NJ . 25 | Peter Suszy
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+For Parell Jas | Eric Nagele Katherine markerich | 6-28-2011 MC 29-2011
+Fr. да Pards | Timothy Gorbetun Rebeca Gorbitay | 7-08-2011 11-134

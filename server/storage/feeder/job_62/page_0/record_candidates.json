@@ -1,0 +1,169 @@
+{
+  "candidates": [
+    {
+      "recordType": "funeral",
+      "confidence": 0.9,
+      "fields": {
+        "notes": ". | отмершагш . . | исповѣдываля і пріоціалѣ . | Кто совершали погревеніе , и гдѣ погребены ."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.94,
+      "fields": {
+        "notes": "Мужеска Женска смерти . погребенім . | Мужеска Женска ."
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.99,
+      "fields": {
+        "notes": "NUMBER DATE OF M | AGE"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.86,
+      "fields": {
+        "notes": "ALE FEMALE DEATH BURIAL FULL NAME OF DECEDENT | MALE FEMALE Ε | CAUSE OF DEATH | NAME OF ADMINISTERED PRIEST WHO SACRAMENTS | NAME OF PRIEST WHO OFFICIATED AT BURIAL AND PLACE OF INTERNMENT"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "1-03 1-05 Charles A. Specian Huzinec | 71 | Acute venal failure | Fr. . Peter Jars & Paul Parsell cerety , plat .27 Hillsboron # Ss"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "22-22 2-25 Gertrude P. Balogh ( NP ) | 82 | pancreatic Счасен | Fr. Java Parnells Plot ss . Peter & Paul Hillsborough 80443 cemetery ,"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.86,
+      "fields": {
+        "notes": "3 3-05 3-08 Joan | 54 | Cardiec Resp . Arrest | Fr. Joes Mason | Plot 870 # 1 Fr. Jas Mason Cerety , Hillsborough"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "J 3-17 3-20 Philip Kulina | 72 | Ss . Petant Paul Parall Plot 899 Hillsborough # 3"
+      },
+      "sourceRowIndex": 8,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "coronary | Fr. Jas Ss Peter + Paul Ceety , . Warnecke plot 167 # 1"
+      },
+      "sourceRowIndex": 9,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "5 5-02 5-05 Deacon Gregory Lapchuk ( NP ) | 37 | insuff | F. Alexander Ss . Peter & Paul Cerety , 95 Hillsborough Plot # 1"
+      },
+      "sourceRowIndex": 10,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "7-19 7-24 Louise Chabra | 62 | exsanguinating hemor | Fr. Jars ss . Peter Paul Panels & Conster , Hillsborough Plot 879 # 2"
+      },
+      "sourceRowIndex": 11,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.8,
+      "fields": {
+        "notes": "6 Helen Stash Kevetch 7-25 | 70 70 | Acute Cardiac arrest | Fr. Jas . Paul Parsels Ss Perent Cerely , Dillsborough Plot 142 # a"
+      },
+      "sourceRowIndex": 12,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "7 7-22 Andrew Gaulik | 76 | Acute myocorial infarctio | Fr. Jor Pasell Ss . Peta : Paul County Hillsborough Plot 825 # 1"
+      },
+      "sourceRowIndex": 13,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.76,
+      "fields": {
+        "notes": "80 8-06 8-10 Putyrske | gramnegative | Jas Parelle Casty , FA . Paul , Hillsborough й Peter & SS ."
+      },
+      "sourceRowIndex": 14,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "9 8-16 8-18 Barbara | 93 | sepsis | Fr. Jan Paul Panels Plot 61 Hillsborough # 1 Cemetery ,"
+      },
+      "sourceRowIndex": 15,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "10 12-23 12-28 Peter Kozura | 74 | acute myocard inf . | Ss . Peter FA Jas Parsell . , Hillsborough"
+      },
+      "sourceRowIndex": 16,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "11 12-27 12-30 Mary George | 74 | renal failure | SS . Patent Peul Cenety Plot 138 # 1"
+      },
+      "sourceRowIndex": 17,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "funeral",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5",
+    "col_6"
+  ],
+  "parsedAt": "2026-02-17T01:19:37.627Z"
+}

@@ -1,0 +1,19 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 13
+
+--- Table 1 (4 columns, 14 rows) ---
+ | Bertan Orizadas Gants Anti HOH BIRTHS МЕТРИЧЕСКОЙ КНИГИ НА | YEAR 2022 ГОДЪ , ЧАСТЬ ПЕРЕНА , И | 2023 РОДИВШИХСЯ .
+---------------------------------------------------------------------------------------------------------------------
+ | МЕСАЦЕ отчество и фамилі родителей , и какого Счет родив : и день Званіе има . , , шихем . в кроисповедания . | Званіе , има , отчетко и фамил воспріємникова . | Кто совершаль таинство крошені ...
+ | Мужеска Женска Имена родившихс ΠΟΛΔ рожде . . . . ΠΟΛΑ NIA KOENE- HIA |  | 
+ | NUMBER DATES NAME OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN NAME | FULL NAMES OF SPONSORS | PRIEST'S NAME
+ | MALE FEMALE BIRTH BAPTIS CITY OF BIRTH |  | Recevied by Confession ,
+ | : M 7/31 Geena Marie |  | Chrismation + Eucharist from Catholicism Fr. Joes
+ | - Parlacosici 66 2 7/31 Ann Torrisi Parsells Herther Parsells | Alix Weber Zachay Sokol | Roman P914115 Received by Confessi
+ | 6/06 9 / 10 / miniam Peter 3 Parsells Phillphia PA |  | Chrismation encharist from . Roman Catholicis FA Jues Parsells Втрагед 9/10 by 03 Fr. Marke контак
+ | 1 9/12 1/28 Nathanzel Stephen ¿ Geeza Mazie 2022 2023 Parla coski Neptun , N.J. | Nicholas Torrisi Kelly Leffecty ( homoray ) | Baption a Chrismatic Fr. Jaes Parsells Baption a Chrismation
+ | б 3/24 2118 2022 Anna 2023 Sikharulidze Giorgi Sikharulidze Taman Khelashvili | Nino Chaligava Kakhaberi Champuridze | Fr. Peten kruashwilli FL Peter Kruashvili ,
+ | 3 2/03 2073 6/03 Eliana Zaza Ghuladze 2023 Ghuladze Nico Kruashvili | Tinatin Sharikadze Ekaterine Kipiani | 
+ | 47/287/15 Sufi Liubov 2015 / 2023 Long Bunch Liudvig Gabiev NIJ Lela Gigolaeva | Alan Gigolati Taniashvili | Beptin Chrismation Fr. Peta Kruzshvili ,
+ | $ 1 Jack Vladimir . | Elene | Received by Confession Chisomation Enchanted f "
+ | 20 Afgron McGrory |  | B. Catholicism Fr. Jars Pansills

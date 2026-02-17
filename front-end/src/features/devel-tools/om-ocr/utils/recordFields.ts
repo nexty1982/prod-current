@@ -26,11 +26,14 @@ export const BAPTISM_FIELDS: RecordField[] = [
 
 export const MARRIAGE_FIELDS: RecordField[] = [
   { key: 'groom_name', label: 'Groom Name', required: true, headerHints: ['groom', 'husband', 'bridegroom'] },
+  { key: 'groom_parents', label: 'Groom Parents', headerHints: ['groom parents', "groom's parents", 'parents'] },
   { key: 'bride_name', label: 'Bride Name', required: true, headerHints: ['bride', 'wife'] },
+  { key: 'bride_parents', label: 'Bride Parents', headerHints: ['bride parents', "bride's parents"] },
   { key: 'date_of_marriage', label: 'Date of Marriage', headerHints: ['date', 'marriage date', 'wedding'] },
   { key: 'place_of_marriage', label: 'Place of Marriage', headerHints: ['place', 'location', 'venue'] },
   { key: 'witnesses', label: 'Witnesses', headerHints: ['witness', 'best man', 'maid'] },
   { key: 'officiant', label: 'Officiant', headerHints: ['priest', 'clergy', 'officiant', 'performed', 'administered'] },
+  { key: 'license', label: 'License', headerHints: ['license', 'certificate'] },
   { key: 'notes', label: 'Notes' },
 ];
 

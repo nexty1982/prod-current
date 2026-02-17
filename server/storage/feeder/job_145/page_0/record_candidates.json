@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "Opril\nPART 1 BAPTISMS\n1949\nPARISH RECORD\nNAME OF CHILD\nNAME OF PARENTS\nAND.\nNO 31207\nAnne Denice\nEugene\n(FATHER'S NAME)\nTheresea\n(MOTHER'S NAME)\nPokletar\nSS 165 mortore a\nADDRESS\n(NUMBER AND STREET, C"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:45.115Z"
+}

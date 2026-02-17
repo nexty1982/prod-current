@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "PARISH OF NAME OF NAME ADDRESS OF DATE OF DATE CONFIRMATION St PLACE SACRAMENTS . AND . AT GOD о 960 9396 Shopey Iman damet 9399 Mickel Szwahla Twnship Hosp Marconi RECTO Shopey opey : . N.S. RECTOR 1960 Somerville by a ke A - ) STATE Mickel Paul Adamchak Performed Adance 18077 ) STATE ( . , e 29"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "BAPTISMS Marie Ma Hawran Ave . CITY MOTHER'S 17th Ho Hoffm Stephen St. 1960 No & Sharon NAME , Will STREET AND somer homas ! t PERFORMED Laverne First Franklin , Somerset July Pearl # ) - 12 CHURCH BY 3 AND July StoPeter Birth John , record ) Stephen ) CITY a - ( ( ( Stephen"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "notes": "1 PART RECORD PARENTS Helen So 240 NUMBER Mar Nov Somerset BAPTISM BIRTH SACRAMENTS RevSteph Kent Anastasia 64 + PARISH CHILD ADDRESS BIRTH OF OF DATE DATE CONFIRMATION PARENTS - Name Parents Address Birth- Baptized Confirmed Place Godfather Godmother Seevements Parish ( of 1 Rev OF OF OF NAME NAME AND PLACE at . . AT GOD"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2"
+  ],
+  "parsedAt": "2026-02-17T01:51:31.074Z"
+}

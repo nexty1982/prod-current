@@ -1,0 +1,24 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "I где 9 а 76 | M Martin Веболеги Albent Arboречи 5/27 191 Nicholzs 30 Princetos Evnie Nizdick | Diane Ргде | Jan Perkins Received from Roman Catholic confession by Holy Chrismation , April 22 , 1995 Fr. Jars Parsels Ozvid Liptek Fr. Jas Panels"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:49:02.227Z"
+}

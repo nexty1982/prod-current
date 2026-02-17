@@ -1,0 +1,43 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.82,
+      "fields": {
+        "groom_name": "Robert Kita Manville 24 augus yrs . A.C. 1st marring",
+        "bride_name": "Anastasiz Nevitt 23 Manville Orthodox 1st m .",
+        "date_of_marriage": "7124",
+        "officiant": "Fr. J. Parsells",
+        "witnesses": "Jacqueline De Laizto ( Orthodox ) Janes Diley ( Non - Orthodox )",
+        "notes": "number: 1; groom_parents: Stanley Helen; bride_parents: Bichad Tegs; license: 7-18-83 # 55-83 Manville"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.84,
+      "fields": {
+        "groom_name": "Michael John Chabuz Manville 25 Orthodox 1st marriage",
+        "bride_name": "Patricia Perlack Manville 24 Greek Catholic 1st m .",
+        "date_of_marriage": "11/13",
+        "officiant": "Fr. Janes Panell",
+        "witnesses": "Louise Chabrz Christine Perlack",
+        "notes": "number: а; groom_parents: Nicholas Louise; bride_parents: steven Elizabeth; license: 11-07-83 # 83-83 Manville"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:04.984Z"
+}

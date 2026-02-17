@@ -1,0 +1,67 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.69,
+      "fields": {
+        "notes": "SS . PETER AND PAUL BHURCH , MANVILLE , N.J. GODPARENTS : GEORGE HUZINEC AND SACRAMENTS ADMINISTERED the PANNY BY : core doze HUZINEL Father banaly | BAPTISH & CONFIRMATION : Nov. Nov. 6 6 , 1966 35. PATER AND PAUL CHURCH , MANVILLE , N - I G - DPARENTS : VLADIMIR A LASIS + MRS KATIFERINE RUNGE"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "180971 ALEXANDER DIGGINS SON OF JOHN DIEGINS AND BARBARA ( DUFOUR ) DIGGINS | SACRAMENT BY . FATHER THEODORE LABOWSKY 18099- PETER SUSKO SON OF"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "1965 149 So. 16TH . STREET , MANVILLE BORN , N.J. BAPTISH 55. & CARISM . POTTER NOVEMBER AND DECEMBER 19 18 , 1965- PAUL , 1965 SOMERVILLE , N.J. - GODPARENTS CitureH . , : MANVILLE , N.J | STEPHEN SUSKO AND ANNA GRENTHER SUSKO 1314 KNOPF ST . , MANVILLE , N.J BORN , Nov NEW 30 , 1965- SOMERVILLE , W.J. BAPTISM & CHNISHATION : FEB . 20 , 20,1966 1966"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.68,
+      "fields": {
+        "notes": "SACRAMENTS PADMINISTERED ARTHUR JOHNSON MICHAELA BY : Father & Theatre DoLover's favorway JOHNSON | SS . PETER AND PAUL CHURCH OLANVILLE , NOT"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "37374 ) MARIA ANDROW PHILLIPS PHILLIPS DAUGHTER OF | GODPARENTS : JACOB GRENTHER & MARY SHARY K SACRAMENT BY : FATHER THEODORE LABOUSLY"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "ANASTASIA T. ( ADAMCHAK AND 1964 2 FRAWART LANE PHILLIPS BORN APRIL , BAPTISM CHRISMATION 17 , 1966- BRANCHBURK : JUNE SOMARUIT , SOMRAVINGS & , M.J. SS GOD . PETER AND PAUL MICHAEL ADAMCHAK CHURCH 5 , PARENTS 1966 : , MANVILLE , NJ . AND ANASTASIA MICKEL 1966 | 37377 SUSAN ELIK - DAUGHTER OF - LUBOMIR BLOK AND LENK MAGOUSKA KLIK 104 EAST STREET , BOUND BROOK , N. J. CHRISMATION BORN : MAY JUNE 11 , : 26 , 1866 1966 - SOMERVILLE , N.J. BAPTISY 9.S. PETER AND PAUL CHURCH , MANUELLENT GOD PARANT ! WASYL JOVANOVICH PACA JOVANOVICH , SACRAMENTS BY : FATHER THEODORE LABOWSKY"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:50:07.606Z"
+}

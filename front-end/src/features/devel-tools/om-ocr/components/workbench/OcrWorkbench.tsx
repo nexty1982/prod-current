@@ -42,6 +42,7 @@ import type { JobDetail } from '../../types/inspection';
 import type { BBox, VisionResponse } from '../../types/fusion';
 import type { OverlayBox } from '../FusionOverlay';
 import { computeFieldSuggestions, getCellsForRecord, FIELD_ENTITY_MAP, type SuggestionResult } from '../../utils/fieldSuggestions';
+import TemplateBuilder from '../TemplateBuilder';
 
 interface OcrWorkbenchProps {
   churchId: number;
@@ -371,7 +372,7 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
       const recordType = workbench.state.jobMetadata?.recordType || 'baptism';
       const res: any = await apiClient.post(
         `/api/church/${churchId}/ocr/jobs/${selectedJobId}/reject-row`,
-        { rowIndex: sourceRowIndex, recordType }
+        { rowIndex: sourceRowIndex, recordType, tableExtraction: tableExtractionJson }
       );
       const data = res?.data ?? res;
       if (data?.success) {
@@ -714,6 +715,27 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
     }
   }, [selectedJobId, churchId, workbench, normalize, showToast]);
   
+  // Navigation: compute prev/next job IDs from the jobs list
+  const { prevJobId, nextJobId } = useMemo(() => {
+    if (!selectedJobId || !jobs.length) return { prevJobId: null, nextJobId: null };
+    // Filter to completed/reviewed jobs for navigation
+    const navJobs = jobs.filter(j => j.status === 'completed' || j.status === 'reviewed' || j.status === 'processing');
+    const idx = navJobs.findIndex(j => j.id === selectedJobId);
+    if (idx < 0) return { prevJobId: null, nextJobId: null };
+    return {
+      prevJobId: idx > 0 ? navJobs[idx - 1].id : null,
+      nextJobId: idx < navJobs.length - 1 ? navJobs[idx + 1].id : null,
+    };
+  }, [selectedJobId, jobs]);
+
+  const handleNavPrev = useCallback(() => {
+    if (prevJobId) handleJobSelect(prevJobId);
+  }, [prevJobId, handleJobSelect]);
+
+  const handleNavNext = useCallback(() => {
+    if (nextJobId) handleJobSelect(nextJobId);
+  }, [nextJobId, handleJobSelect]);
+
   // Show workbench if job is selected and loaded
   const showWorkbench = selectedJobId && workbench.state.jobMetadata;
   
@@ -732,8 +754,16 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
                 confidence_score: workbench.state.jobMetadata?.confidence || 0,
               } as any),
               ocr_text: workbench.state.ocrText || null,
+              // Override DB record_type with auto-detected type from workbench
+              ...(workbench.state.jobMetadata?.recordType && workbench.state.jobMetadata.recordType !== 'unknown' && workbench.state.jobMetadata.recordType !== 'custom'
+                ? { record_type: workbench.state.jobMetadata.recordType }
+                : {}),
             }}
             onClose={handleCloseWorkbench}
+            onPrev={handleNavPrev}
+            onNext={handleNavNext}
+            hasPrev={!!prevJobId}
+            hasNext={!!nextJobId}
           />
           <Box sx={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
             {/* Left: Image Viewer */}
@@ -800,6 +830,7 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
               >
                 <Tab label="Transcription" />
                 <Tab label="Field Mapping" />
+                <Tab label="Templates" />
               </Tabs>
               <Box sx={{ flex: 1, overflow: 'hidden', p: 2 }}>
                 {rightTab === 0 && (
@@ -850,10 +881,18 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
                     }}
                   />
                 )}
+                {rightTab === 2 && (
+                  <TemplateBuilder
+                    churchId={churchId}
+                    onTemplateCreated={(templateId) => {
+                      showToast(`Template ${templateId} created`, 'success');
+                    }}
+                  />
+                )}
               </Box>
             </Box>
           </Box>
-          
+
           {/* Record Review Wizard (guided step-by-step with learning) */}
           {selectedJobId && (
             <RecordReviewWizard

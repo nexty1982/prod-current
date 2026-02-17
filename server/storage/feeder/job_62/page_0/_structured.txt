@@ -1,0 +1,23 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 6 | Rows: 17
+
+--- Table 1 (6 columns, 18 rows) ---
+ | > I- DEATHS МЕТРИЧЕСКОЙ книги GчFTS отмерших . Мкелця А день . Естопроисхожденіе , има , отчество й фамилія о | на мёршагш . AKTÁ | NP = not parishioner года YEAR , часть 6 чего отмеря . | - > OHI 89 третім , Ü Кто | ОМЕРШИХА .
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | . | отмершагш . . |  | исповѣдываля і пріоціалѣ . | Кто совершали погревеніе , и гдѣ погребены .
+ | Мужеска Женска смерти . погребенім . | Мужеска Женска . |  |  | 
+ | NUMBER DATE OF M | AGE |  |  | 
+ | ALE FEMALE DEATH BURIAL FULL NAME OF DECEDENT | MALE FEMALE Ε | CAUSE OF DEATH | NAME OF ADMINISTERED PRIEST WHO SACRAMENTS | NAME OF PRIEST WHO OFFICIATED AT BURIAL AND PLACE OF INTERNMENT
+ | 1-03 1-05 Charles A. Specian Huzinec | 71 | Acute venal failure |  | Fr. . Peter Jars & Paul Parsell cerety , plat .27 Hillsboron # Ss
+ | 22-22 2-25 Gertrude P. Balogh ( NP ) | 82 | pancreatic Счасен |  | Fr. Java Parnells Plot ss . Peter & Paul Hillsborough 80443 cemetery ,
+ | 3 3-05 3-08 Joan | 54 | Cardiec Resp . Arrest | Fr. Joes Mason | Plot 870 # 1 Fr. Jas Mason Cerety , Hillsborough
+ | J 3-17 3-20 Philip Kulina | 72 |  |  | Ss . Petant Paul Parall Plot 899 Hillsborough # 3
+ |  |  | coronary |  | Fr. Jas Ss Peter + Paul Ceety , . Warnecke plot 167 # 1
+ | 5 5-02 5-05 Deacon Gregory Lapchuk ( NP ) | 37 | insuff |  | F. Alexander Ss . Peter & Paul Cerety , 95 Hillsborough Plot # 1
+ | 7-19 7-24 Louise Chabra | 62 | exsanguinating hemor |  | Fr. Jars ss . Peter Paul Panels & Conster , Hillsborough Plot 879 # 2
+ | 6 Helen Stash Kevetch 7-25 | 70 70 | Acute Cardiac arrest |  | Fr. Jas . Paul Parsels Ss Perent Cerely , Dillsborough Plot 142 # a
+ | 7 7-22 Andrew Gaulik | 76 | Acute myocorial infarctio |  | Fr. Jor Pasell Ss . Peta : Paul County Hillsborough Plot 825 # 1
+ | 80 8-06 8-10 Putyrske |  | gramnegative |  | Jas Parelle Casty , FA . Paul , Hillsborough й Peter & SS .
+ | 9 8-16 8-18 Barbara | 93 | sepsis |  | Fr. Jan Paul Panels Plot 61 Hillsborough # 1 Cemetery ,
+ | 10 12-23 12-28 Peter Kozura | 74 | acute myocard inf . |  | Ss . Peter FA Jas Parsell . , Hillsborough
+ | 11 12-27 12-30 Mary George | 74 | renal failure |  | SS . Patent Peul Cenety Plot 138 # 1

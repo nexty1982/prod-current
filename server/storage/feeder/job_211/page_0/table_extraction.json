@@ -1,0 +1,490 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 3120,
+    "height": 4160
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "( STREET Frackvilles PLACE OF BIRTH AGE OF GROOM NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Catherine FULL NAME OF RESIDENCE S. BRIDE 17th ( NUMBER AND PLACE OF BIRTH AGE OF BRIDE NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS late- mary MARRIED IN Mro . 1 • PRESENCE Julia OF ( FULL NAME ) 2 ( F PULL Jaip ( Rev. Rev. 7. J. ( RECTOR July PART II",
+              "confidence": 0.88,
+              "confidence_min": 0.35,
+              "token_count": 70,
+              "bbox": [
+                0.33782051282051284,
+                0.2949519230769231,
+                0.5121794871794871,
+                0.6168269230769231
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": ") ( CITY ) 24 none Alexander Kebsock Mary Ave Manville STREET ) 7 ( CITY Baysanse ) h Razor none Skivarla Насачал WITNESSES Speciare :. ( Quisleak Kiry luck ( ) 17 , 1948 N MARRIAGES",
+              "confidence": 0.8,
+              "confidence_min": 0.38,
+              "token_count": 37,
+              "bbox": [
+                0.43974358974358974,
+                0.29471153846153847,
+                0.5798076923076924,
+                0.6173076923076923
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "PARISH RECORD FULL NAME OF GROOM RESIDENCE hewer ( NUMBER PLACE OF New AND BIRTH AGE OF GROOM 20 NUMBER OF PREVIOUS NAME OF PARENTS Mand FULL NAME OF BRIDE RESIDENCE New ( NUMBER AND PLACE OF BIRTH AGE OF BRIDE 18 NUMBER OF PREVIOUS NAME OF PARENTS MARRIED IN PRESENCE Clator 1 G ( FULL Mrs. NAME ) Flea 2 ( FULL NAME ) Rev. (",
+              "confidence": 0.93,
+              "confidence_min": 0.43,
+              "token_count": 67,
+              "bbox": [
+                0.35096153846153844,
+                0.653125,
+                0.4814102564102564,
+                0.9875
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "No Everett market , n STREET ) market ( CITY ) MARRIAGES hone Nelson Gaskill Stella Market Gallitzin STREET ) ( CITY ) MARRIAGES John none OF WITNESSES : Nicholas France ( RECTOR )",
+              "confidence": 0.85,
+              "confidence_min": 0.55,
+              "token_count": 34,
+              "bbox": [
+                0.4461538461538462,
+                0.6475961538461539,
+                0.592948717948718,
+                0.9911057692307692
+              ],
+              "needs_review": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "Penna Statts Shwarla N.J. ( STATE ) Seawelle RESIDENCE ) \" RESIDENCE )",
+              "confidence": 0.86,
+              "confidence_min": 0.62,
+              "token_count": 13,
+              "bbox": [
+                0.5144230769230769,
+                0.30408653846153844,
+                0.6118589743589744,
+                0.5526442307692307
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "PLACE BIRTH AGE OF GROOM 24 NUMBER OF PREVIOUS MARRIAGES Peter NAME OF PARENTS Alexandria FULL NAME OF BRIDE RESIDENCE 139 Mercer ( NUMBER PLACE OF We AND BIRTH AGE OF BRIDE 31 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Hulda Walter . MARRIED IN arles PRESENCE OF Kulina 1 ( FULL Helen NAME ) 2 Hukasovity ( FULL Rev NAME ) Micholas ( RECTOR PART II -",
+              "confidence": 0.9,
+              "confidence_min": 0.32,
+              "token_count": 68,
+              "bbox": [
+                0.6820512820512821,
+                0.30841346153846155,
+                0.8695512820512821,
+                0.6168269230769231
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "Manville , n.g. none Kulia Holovach Alice , J. Ave. , Somerville Hartzog N.J. STREET theily ) ( CITY ) ( STATE ) Рекла hone , Erbh C. J. . Hartzag WITNESSES - S. : Somerville 11.J .. ( Middlesey RESIDENCE ) Very N.J. ( luck RESIDENCE ) ) MARRIAGES",
+              "confidence": 0.78,
+              "confidence_min": 0.34,
+              "token_count": 50,
+              "bbox": [
+                0.7772435897435898,
+                0.2985576923076923,
+                0.9727564102564102,
+                0.6168269230769231
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "40994 Snyder . , ✓ ( STATE n.J. ) Anyder . к Lopatka 177.0 ( STATE ) Lapatka n . m . h . der RESIDENCE new ) . macker ( Kiry RESIDENCE le ) luk",
+              "confidence": 0.76,
+              "confidence_min": 0.24,
+              "token_count": 36,
+              "bbox": [
+                0.5266025641025641,
+                0.6480769230769231,
+                0.6294871794871795,
+                0.9954326923076923
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "PARISH RECORD FULL NAME OF GROOM RESIDENCE Start ( NUMBER AND PLACE OF BIRTH AGE OF GROOM 26 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Sonia FULL NAME OF BRIDE RESIDENCE Star ( NUMBER AND PLACE OF BIRTH Ste BRIDE 21 AGE OF NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Frances MARRIED IN PRESENCE Alex 1 ( FULL NAME Res Stella ) . E ( FULL NAME ) . (",
+              "confidence": 0.93,
+              "confidence_min": 0.29,
+              "token_count": 70,
+              "bbox": [
+                0.6919871794871795,
+                0.6548076923076923,
+                0.8689102564102564,
+                0.9889423076923077
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "No 40993 John John Peelo Flemington , N.J. STREET ) ( STATE ) Camsey , Obio none Andrew Poletelo & Momlik Genevieve Reacte Flemington Parzych , , N.J. STREET ) Flemington ( CITY ) , N. ( N.J STATE ) Paul none Perro Parzych * OF WITNESSES : Poletels Nicholas Parzych ( RESIDENCE ) J. ( RESIDENCE Firylick ) RECTOR )",
+              "confidence": 0.79,
+              "confidence_min": 0.42,
+              "token_count": 61,
+              "bbox": [
+                0.7878205128205128,
+                0.6487980769230769,
+                0.9769230769230769,
+                0.989423076923077
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_license_format"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 569,
+  "data_tokens": 506,
+  "data_rows": 2,
+  "extracted_at": "2026-02-17T01:52:46.316Z"
+}

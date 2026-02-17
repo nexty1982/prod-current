@@ -1,0 +1,449 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 10,
+      "column_count": 3,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Han HISTPHчCCKSй KHKTH NAI Счет родив : Мелц . шихем . И ДЕНЬ и Званіе , има , отчество Фамна родителей , Имена родившихс . . в кроисповеданія . . . Мужеска ΠΟΑΔ Женска пола рожда Hi креме- MIA NUMBER OF CHILD FEMALE BIRTH DATES NAME NAME . MOTHER'S BAPTISM CITY OF BIRTH FATHER'S FULL MAIDEN"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "YEAR 1971 ГОДА , ЧАСТЬ 1972 ПЕРКАМ , О РОДИВШИХ М. И какого Званіе , има , отчетко и рамно Кто совершаль таниство воспрієминкова . крошенім .. NAME FULL NAMES OF SPONSORS PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "32 x 631-717-25-7 LINDA EVE JOSEPH ELCHAK ELCHAK GERLINDA ( NEW POMPTON JERSEY PLAINS EMMA BRUCKER ,",
+              "confidence": 0.83,
+              "token_count": 17,
+              "bbox": [
+                0.05,
+                0.3298076923076923,
+                0.38100961538461536,
+                0.4099358974358974
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "HARRY ELCHAK ; EVELYN ELCHAK REV . ROBERT A. GEORGE LEWIS",
+              "confidence": 0.91,
+              "token_count": 11,
+              "bbox": [
+                0.5048076923076923,
+                0.34775641025641024,
+                0.9225961538461539,
+                0.375
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "33 X 620-717-31-71 SCOTT LAWRENCE GERARD VerRelli LOUIS VERRELLI SOMERVILLE N.J. KAREN ( , ) CHERNIAK",
+              "confidence": 0.8,
+              "token_count": 16,
+              "bbox": [
+                0.051201923076923075,
+                0.4217948717948718,
+                0.37884615384615383,
+                0.48878205128205127
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "GREGORY ANDREW CHERNIAK ; JOAN GRONIKOWSKI REV . ROBERT A. GEORGE LEWIS",
+              "confidence": 0.87,
+              "token_count": 12,
+              "bbox": [
+                0.496875,
+                0.43365384615384617,
+                0.9286057692307692,
+                0.4689102564102564
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "34 X 10-38-711-23-72 DEBORAH SIMPSON RICHARD SIMPSON ( New YORK CITY ) GLORIA WYTOVICH",
+              "confidence": 0.85,
+              "token_count": 14,
+              "bbox": [
+                0.05048076923076923,
+                0.5064102564102564,
+                0.32211538461538464,
+                0.5458333333333333
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "ANDREW JOHNSON : PATRICIA HIGGINS REV . FR . VADIM A. POGREBNIAK",
+              "confidence": 0.85,
+              "token_count": 12,
+              "bbox": [
+                0.4971153846153846,
+                0.5089743589743589,
+                0.9084134615384616,
+                0.530448717948718
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "35 X 10-22-49 4-5-70 ( EDWARD DONALD ISAAL ) LAMBERTSON EDWARD LAMBERTSON ( SCOTCH PLAINS , N.J. JOYCE LARSON )",
+              "confidence": 0.86,
+              "token_count": 20,
+              "bbox": [
+                0.04951923076923077,
+                0.5544871794871795,
+                0.3314903846153846,
+                0.6201923076923077
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "RECEIVED INTO THE HOLY ORTHODOX CHURCH FROM THE REV . FR . VADIM A. POGREBNIAK BYZANTINE CATHOLIC CHURCH WHERE HE WAS BAPTISED ON APRIL 5 , 1970. RECEIVED BY CHRISMATION FEBRUARY 2 , 1972 .",
+              "confidence": 0.89,
+              "token_count": 35,
+              "bbox": [
+                0.4966346153846154,
+                0.5669871794871795,
+                0.9,
+                0.6131410256410257
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "36 X 7-5-50 7-30-50 ( GERALD ) YAROSLAV ROMAN ANDREW ( PERTH ROMAN AMBOY , N.J. ) ELIZABETH MOSKARI 37",
+              "confidence": 0.87,
+              "token_count": 20,
+              "bbox": [
+                0.04903846153846154,
+                0.6237179487179487,
+                0.31995192307692305,
+                0.7038461538461539
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "RECEIVED INTO THE HOLY ORTHODOX CHURCH FROM THE REV . FR . VADIM A. POGREBNIAR GREER CATHOLIC CHURCH WHERE HE WAS BAPTISED ON JULY 30 , 1950 . RECEIVED BY CHRISMATION FEBRUARY 5 , 1972",
+              "confidence": 0.94,
+              "token_count": 35,
+              "bbox": [
+                0.4963942307692308,
+                0.6423076923076924,
+                0.9110576923076923,
+                0.6923076923076923
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3-28-724-23-72 LISA SOMERVILLE RICHARDSON ANN THOMAS ( RICHARDSON , N.J. ) MARIA MARINI",
+              "confidence": 0.91,
+              "token_count": 13,
+              "bbox": [
+                0.10480769230769231,
+                0.7,
+                0.31346153846153846,
+                0.7519230769230769
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "ROBERT CHIM , HELEN Russo Received into St. Charles Ο Catholic Church 10-27-85",
+              "confidence": 0.83,
+              "token_count": 13,
+              "bbox": [
+                0.49591346153846155,
+                0.7115384615384616,
+                0.958173076923077,
+                0.7528846153846154
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "38 4-6-50 5-20-72 ( Louise ) HELEN ( KILNE EBERVALE GEORGE , PA KILNER . ) MARY KILNER",
+              "confidence": 0.87,
+              "token_count": 18,
+              "bbox": [
+                0.04975961538461538,
+                0.7509615384615385,
+                0.29783653846153846,
+                0.8237179487179487
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Name of Confirmand Nicole Chabra RECEIVED INTO THE ORTHODOX CHURCH FROM THE G₁ Date ON 4-23-51 Father's of Birth . CHURCH WHERE SHE WAS BAPTIZED Name Mother's Nicholas 6-12-72 John BY CHRISMATION 5-20-72 . Maiden Name Chabra",
+              "confidence": 0.9,
+              "token_count": 37,
+              "bbox": [
+                0.49591346153846155,
+                0.7435897435897436,
+                0.9201923076923076,
+                0.8310897435897436
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 8,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 8,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 8,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "39 X 4-9-365-28-72 ROBERT ) SCHUBACH RODION WILLIAM Ho DOROTHY SCHUBACH SCHUBACH",
+              "confidence": 0.82,
+              "token_count": 12,
+              "bbox": [
+                0.04879807692307692,
+                0.8211538461538461,
+                0.3175480769230769,
+                0.8935897435897436
+              ]
+            },
+            {
+              "row_index": 8,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Church Kathleen POGREBNIAK of Baptism SS . Peter Miklowcic HELEN & Paul Address Date of \" Baptism 6/72 Manville , NJ",
+              "confidence": 0.89,
+              "token_count": 21,
+              "bbox": [
+                0.47451923076923075,
+                0.8163461538461538,
+                0.9367788461538461,
+                0.8910256410256411
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 9,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 9,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 9,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "6-12-726-25-72 NIKKI CHABRA ( NICOLE ) NICHOLAS KATHLEEN CHABRA MIKLOWCIC",
+              "confidence": 0.87,
+              "token_count": 10,
+              "bbox": [
+                0.10625,
+                0.8826923076923077,
+                0.31850961538461536,
+                0.9528846153846153
+              ]
+            },
+            {
+              "row_index": 9,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "CHABRA Church Confirmed PETER Ann MARIE St. By MACINKO ( BARBARA Charles Bishop Borromea John MIKLOWERC Keating Address Sponsor 3304 Gerri N. Washington Blvd. Date 11/1 Miklowdic Arlington , VA 1. prestes & co . , inc . , n . o . la .",
+              "confidence": 0.88,
+              "token_count": 45,
+              "bbox": [
+                0.49591346153846155,
+                0.8900641025641025,
+                0.9536057692307692,
+                0.9766025641025641
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0225
+    ],
+    "col_2": [
+      0.0225,
+      0.4375
+    ],
+    "col_3": [
+      0.4375,
+      1
+    ]
+  },
+  "columns_detected": 3,
+  "header_y_threshold": 0.3203846153846154,
+  "total_tokens": 451,
+  "data_tokens": 361,
+  "data_rows": 9,
+  "extracted_at": "2026-02-17T01:48:12.024Z"
+}

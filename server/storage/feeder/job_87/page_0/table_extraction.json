@@ -1,0 +1,177 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счет родно : МЕСАЦЕ шихся . и день Имена родившихс . . . . Мужеска подд Женска пола рожда NIA KOELPE- HĨA MALE NUMBER DATES М NAME OF CHILD FEMALE М OF BIRTH А BIRTH BAPTISM CITY"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BIRTHS МЕТРИЧЕСКОЙ КНИГИ НА Званіе , имя , отчество и фамнаа родителей вероисповедания . FATHER'S FULL NAME . MOTHER'S"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "YEAR ГОДЪ , ЧАСТЬ , и какого Званіе , има , отчество воспріслинкова MAIDEN NAME FULL NAMES OF"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "86 ПЕРЕВО , О и фамил . SPONSORS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "РОДИВШИХСЯ . Кто совершаль таинство крошеним . PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "June | Suly - Catherine 6 20 Somerville",
+              "confidence": 0.85,
+              "token_count": 8,
+              "bbox": [
+                0.08149038461538462,
+                0.3387820512820513,
+                0.20721153846153847,
+                0.38846153846153847
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Peter Goubatuk Susan Binkowski",
+              "confidence": 0.79,
+              "token_count": 4,
+              "bbox": [
+                0.24086538461538462,
+                0.3419871794871795,
+                0.3346153846153846,
+                0.38237179487179485
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Charles Dunazenko Dariz Paisells",
+              "confidence": 0.79,
+              "token_count": 4,
+              "bbox": [
+                0.4987980769230769,
+                0.3403846153846154,
+                0.6151442307692307,
+                0.38974358974358975
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "( Onthochox )",
+              "confidence": 0.84,
+              "token_count": 3,
+              "bbox": [
+                0.6401442307692308,
+                0.3471153846153846,
+                0.6872596153846153,
+                0.3663461538461538
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Fr. Jas Parsels",
+              "confidence": 0.73,
+              "token_count": 3,
+              "bbox": [
+                0.765625,
+                0.3467948717948718,
+                0.875,
+                0.38076923076923075
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.04
+    ],
+    "col_2": [
+      0.04,
+      0.225
+    ],
+    "col_3": [
+      0.225,
+      0.415
+    ],
+    "col_4": [
+      0.415,
+      0.63
+    ],
+    "col_5": [
+      0.63,
+      0.7275
+    ],
+    "col_6": [
+      0.7275,
+      1
+    ]
+  },
+  "columns_detected": 6,
+  "header_y_threshold": 0.33576923076923076,
+  "total_tokens": 113,
+  "data_tokens": 22,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:48:43.273Z"
+}

@@ -1,0 +1,197 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 6,
+      "column_count": 2,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "18091 BAPTIZED 111 11009 με 18087 CORNELIUS ( CARL ) MEGINT - . SON OF Roy MC McGUIRT GUANT AND SONya ( KARAN ) ANN ✓ KULINA - DAUGHTER OF JOHN KULINA , JRAND VICTORIA ( RICCARDO ) RULIN ( JAKowhow , 155 So. 6TH AVENUE , MANVILLE , N..J . 106 CHRISTANBERRY RD , CHARLOTTE CHARLOTTE , N.C. BORN . OUT . 11,1865- SOMERucht5 BORN : FEB 1 , 1961 - IN CHARLOTTE , N.C. BAPTISM AND CHRISTMATCON ост . 31 , 1965 BAPTION 6 CHRISMATION : July 24 , 1965 ( 65 ) SS . PETER AND PAUL CASACH MANVILLE CARLETT'S SS . PETER AND PAUL CHURCH GODPARENTS NICHOLAS KULINA COON PARENTS - JOHN & MA JAHOWLEW Father STEPHANIE thuisboll KACH K SS . SPACRAMENTS By Father thell Some falway by SON OF"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "( 10 ) 18092 JOHN MICHAEL KUZEMCHAK - 18088 . PAULA JAkowhaw DAUGHTER OF JOHN JAKOWLEW Y JAKouley WILLIAM KUZEMUHAK AND EMMA ( SARKOZY ) PLARY ANN ( KOSKO ) KUZEMCHAK RES . 168 FRANKLYN BLVD , SOMERSET , NJ 15 83 MONTGOMARY ST . , PISCATAWAY , N.I. BORN : SEPT . 28,1961 NEW SOMERSET BRUNSWI ост 7 7 , 1965- PLAINFIELD , N.J DAPTISM & CHRISMATION ! July 24 , 1965 DARTISM & CHRISMATION Noch 14 , 1965 - MANUELLE , N.J GODPARENTS : Roy SS McGUIRTY SONYA PATAR MEGUENT SS . PETER AND PAUL CHURCH , . & PACK CHURCH GODPARENT : WithIAM ESCUCK AND HELEN SELINA",
+              "confidence": 0.74,
+              "token_count": 110,
+              "bbox": [
+                0.11754807692307692,
+                0.3038461538461538,
+                0.9298076923076923,
+                0.4891025641025641
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "SACRAMENTS BY FATHER T SACRAMENTS AV AY : Father the fabwe Gi 18083 DRAC , TSA ( CAROLINE ) KLIK DAUGHTER . OF",
+              "confidence": 0.7,
+              "token_count": 23,
+              "bbox": [
+                0.146875,
+                0.4830128205128205,
+                0.9197115384615384,
+                0.5346153846153846
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "18090 LARISSA KULICK DAUGHTER OF kalk AND PENKA ( GEORGIEVS ( ( A ) ELIK BASIL ANLICK & BARBARA ( SOKOLA ) KULICK 104 EAST STREET BOUND BROOK , N.J. Ros . - 1019 HUFF 1 AVE . , BORN MANVILLE JULY INJ BORN : OCTOBER 11 , 1965- BR MERVILLE , N.J : Nove BAPTISM . 7,1865 - 28 , & CHRISMATION SOMERVILLE , NV .. BAPTISER AND CHRISMATION OCTOBER 1965- PLACK : JULY 31,1965 GPCRSS . PETER & PACK CHURCH - MANVILLE : SS : PETER & GOD PARETS PAUL RO - - RAYMOND CHURCH- MANVILLE , GON PARENTS : DUSHAN MAKREVSKI & MARA MARREUSE ZAVAM of PROXH - S- LUBOMIR AND RONKA KLIK как",
+              "confidence": 0.72,
+              "token_count": 117,
+              "bbox": [
+                0.12572115384615384,
+                0.5336538461538461,
+                0.9290865384615384,
+                0.6932692307692307
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "SACRAMENTS BY - FATHER THEODORE ELAINE LABOU & SHUR 18089 ANNA HOBORA DAUGHTE SKY MINISTER OF SACRAMENTS : Father thandore fabricly DOROTHY HOBORA of 18094 KATHLEEN MARY KULINA DAUGHTER of ALEXANDER KULINA AND CYNTHIA ( ELO ) KULINA REST",
+              "confidence": 0.76,
+              "token_count": 39,
+              "bbox": [
+                0.12524038461538461,
+                0.6775641025641026,
+                0.932451923076923,
+                0.7634615384615384
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "- WOODS RAB BORN JUNE , 20,1965- BETLER MEADE N.J. SUNNYMEADE ROAD , SOMERVILLE , N.J. 1 BAPTISM AUGUST 1965 NEW BRUNSWICK , N.J BORN : OCTOBER 12,1965 - SOMERVILLE , N.J CHRISMATION PLACE : GS 8 , father . PETER AND BAPTISM AND CHRISHATION : NOVEMBER 21 , 1965 The PAS CHURCH MANVILLE , SS . PETER AND PAUL CHURCH MANVILLE , N.J. wally GODPARENTS : ROBERT KULINA 1 M..J . AND MARY ALICE KULINA SACRAMENTS ADMINISTERED Father BY : theodore Saburly",
+              "confidence": 0.78,
+              "token_count": 83,
+              "bbox": [
+                0.1625,
+                0.7544871794871795,
+                0.926923076923077,
+                0.9208333333333333
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0625
+    ],
+    "col_2": [
+      0.0625,
+      1
+    ]
+  },
+  "columns_detected": 2,
+  "header_y_threshold": 0.31173076923076926,
+  "total_tokens": 507,
+  "data_tokens": 372,
+  "data_rows": 5,
+  "extracted_at": "2026-02-17T01:50:05.923Z"
+}

@@ -1,0 +1,285 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS - 1 PART BAPTISMS - 1 PART"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": ") 37392 : N KISTRYS KISTRYS AUX RECTOR ) 1968 , 14 16,1968 PAUG STATE ( STATE , ) ) NAME CITY , JULIANNE THOMAS NAME FATHER'S KIETRY.S PRIORE MOTHER'S GASTON DEL AND L STREET ) TOWN BY ) ( AND fol ( AND CHURCH BAPTISM PETER MORRIS CITY ( ( RECORD CHILD ANNE 506 NUMBER ( MAY Wishoski OF PARENTS BIRTH . BIRTH MICH HELEN PERFORMED OF OF OF PARISH . NAME NAME AND ADDRESS DATE DATE CONFIRMATION S. ' -JS OF . AT PLACE PARENTS GOD SACRAMENTS Theodore . RECTOR 37396 ) ATE ) STATE , ° N BALDANZA BALDANIA ) CITY J. NAME BALDANZA NAME FATHER'S RECORD ANDREW VINCENT ( PALFY MOTHER'S 12th , STREET JERSEY 1968 1968 , N.J. ) STATE ( ( North AND NEW 10 22 PAWL REVITCH SHASH & ) , NUMBER ( Aug AND Sept PETER CHURCH ) ( SOMERVILLE BY CITY LABourkey ( . . CHILD BIRTH BIRTH OF BAPTISM NICHOLAS BALDANZA I I ARISH OF PARENTS 17 OF ME { AME ELIZABETH ND DDRESS ANVILLE M. OF PATE DATE CONFIRMATION SS OF . [ AT PLACE PARENTS GOD JOLENE PERFORMED SACRAMENTS THEODORE FATHER"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "BAPTISMS 1 PART"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": ". . , , 23 1968 PA ) ° 37393 , ) ) CITY N KORTIS HOATES HORTIS ) KASTON ( STATE RECTOR STATE ) NAME NAME . RECORD SPYROS JOHN STREET J AND STREET PAUL - 1 BAPTISMS ( FATHER'S N. ( BERGEN PA JUN AND BOROS PANTAGIS ( MOTHER'S ) BY So ( + AND CHURCH ( CITY NUMBER ( PART PARISH OF CHILD OF PARENTS WIL PATER OF BAPTISM WILSON KARWATT Lebowy . NAME NAME LESLIE 40 . AND ADDRESS MANVILLE BIRTH . BIRTH NICHOLAS OF DATE EASTON PERFORMED DATE CONFIRMATION SS OF SONYA The . AT PLACE PARENTS GOD SACRAMENTS Father ) RECTOR 37395 MOROS MOROS N.J 1968 , 1968 N.y. , 26 PALL STATE ( ) ) . ° N MOROS STATE + , ) NAME DE CITY , STREET RECORD MICHAEL STEPHEN NAME 30 Oct ) FATHER'S ( AND ( MOTHER'S NUMBER CHILD PARENTS KARDASH ) / KARDASH BY Labowskes ERA STELLA ( July AND PETER . CHURCH NEW YORK CITY ( ( 44 VILLE . OF PARISH OF VERA BIRTH BAPTISM SS BIRTH WALTER PIKULIK PERFORMED TheodorE OF JULIA DATE CONFIRMATION OF OF . NAME NAME AND ADDRESS SOMER . PARENTS DATE AT PLACE GOD SACRAMENTS Father"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "37398 Orthodox , Gerasimus Sunday Manville , J. the RECTOR , Verrelli ) STATE ) 1941 Holy Easter Ma STATE ( hom Lauris ° , ) CITY , ) ,",
+              "confidence": 0.8,
+              "token_count": 30,
+              "bbox": [
+                0.2074519230769231,
+                0.6375,
+                0.5411057692307693,
+                0.7419871794871795
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "37397 BREESE . BREESE SOMERSET . 1968 1969 PAUL NJ . STATE STATE KRIVOSHIK Labewake sky CRECTOR ) ) ( ,",
+              "confidence": 0.85,
+              "token_count": 21,
+              "bbox": [
+                0.6033653846153846,
+                0.6493589743589744,
+                0.9348557692307692,
+                0.7554487179487179
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS - 1",
+              "confidence": 0.93,
+              "token_count": 3,
+              "bbox": [
+                0.17548076923076922,
+                0.6951923076923077,
+                0.18365384615384617,
+                0.7756410256410257
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "N NAME Farfalla NAME ( Gerard Verrelly Gerard MOTHER'S Partridge STREET 26 the . FATHER'S , into Church ANG , May on forth CHURCH Catholic George Paul ) Somervalle BY ) ( NUMBER CITY A. ( ( (",
+              "confidence": 0.87,
+              "token_count": 38,
+              "bbox": [
+                0.20841346153846155,
+                0.6948717948717948,
+                0.5391826923076923,
+                0.8086538461538462
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "BAPTISMS 1",
+              "confidence": 0.97,
+              "token_count": 2,
+              "bbox": [
+                0.5716346153846154,
+                0.7019230769230769,
+                0.5786057692307692,
+                0.7817307692307692
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "N ° RICHARD RICHARD NAME CARNEU ) St. STREET CITY ) ) FATHER'S MOTHER'S NAME GREEN , 22 , ANIZ + BRUNSWICK BRABSON AND Ja PETER CHURCH ) BY ) ( CITY dele (",
+              "confidence": 0.87,
+              "token_count": 34,
+              "bbox": [
+                0.6019230769230769,
+                0.6974358974358974,
+                0.9252403846153846,
+                0.8038461538461539
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PART",
+              "confidence": 0.97,
+              "token_count": 1,
+              "bbox": [
+                0.17716346153846155,
+                0.7823717948717949,
+                0.184375,
+                0.8150641025641026
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "RECORD PARISH CHILD PARENTS 10 Somerville Received ADDRESS BIRTH BAPTISM CONFIRMATION 19611 4 & PERFORMED ( April 13 , Peter BIRTH OF NAME NAME OF OF . AND DATE DATE SS AT PLACE OF PARENTS Roman Robert OF SACRAMENTS . GOD Ace",
+              "confidence": 0.89,
+              "token_count": 42,
+              "bbox": [
+                0.21225961538461538,
+                0.7589743589743589,
+                0.5365384615384615,
+                0.8810897435897436
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "PART",
+              "confidence": 0.97,
+              "token_count": 1,
+              "bbox": [
+                0.5711538461538461,
+                0.7891025641025641,
+                0.5776442307692308,
+                0.8214743589743589
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "RECORD JOHN PARENTS BREE ANNA 161 NUMBER Nov. AND ( NEW ( PETER CHILD BAPTISM PERFORMED ( PARISH AND ADDRESS BIRTH SS . BIRTH OF NAME NAME OF OF DATE OF CONFIRMATION OF PARENTS VERA DATE PLACE SACRAMENTS Father The . AT GOD",
+              "confidence": 0.92,
+              "token_count": 43,
+              "bbox": [
+                0.6057692307692307,
+                0.7564102564102564,
+                0.9240384615384616,
+                0.8923076923076924
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0875
+    ],
+    "col_2": [
+      0.0875,
+      0.195
+    ],
+    "col_3": [
+      0.195,
+      0.5575
+    ],
+    "col_4": [
+      0.5575,
+      0.59
+    ],
+    "col_5": [
+      0.59,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.6367307692307692,
+  "total_tokens": 623,
+  "data_tokens": 215,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:51:49.385Z"
+}

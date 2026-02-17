@@ -1,0 +1,64 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.98,
+      "fields": {
+        "notes": "PARISH OF NAME OF NAME . AND ADDRESS DATE | DATE AT PLACE GOD | NAME NAME AND DATE | DATE . AT GOD"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "18091 KULINA JR , KULINA RULINA AVE ) STATE 965 ) , | 31,1965 RECTOR ) PA STATE RUGINA KACHER ( | 18090 KULICK KULICK Kuhick AVENUE STATE ) , CITY 7,1965 ) | 1965 NJ 31 ZAVADA Тенок RECTOR STATE ) , PAUL , ("
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "date_of_baptism": "BAPTISMS 1",
+        "notes": "BAPTISMS No ANN JOHN NAME RICCARON ) CITY ) NAME MOTHER'S 6TH , FATHER'S STREET - ( So AND ( | от AND ) CHURCH . SOM NICHOLAS BY ) CITY STEPHANIC | No LARISSA BASIL FATHER'S NAME ) ) SOKOMA Sokom ) NAME MOTHER'S HUFF , STREET AND ( ( JULY | ULY theadoll PETER & SOMERVILLE ) CHURCH RAYMOND KLAINE BY ) CITY ( ("
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "date_of_baptism": "PART",
+        "notes": "1 PART RECORD KAREN PARENTS ( VICTORIA NUMBER CHILD 55 ( MANVILLE BIRTH | AND PETER PETER ( ( BAPTISM PERFORMED BIRTH | RECORD PARENTS ( ( BARBARA 1019 NUMBER CHILD ( MANVI BIRTH | AND BAPTISM PERFORMED this SS . BIRTH"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.96,
+      "fields": {
+        "notes": "PARISH NAME OF NAME OF AND ADDRESS DATE OF | CONFIRMATION SS OF PLACE OF PARENTS DATE SACRAMENTS . AT GOD | PARISH OF NAME OF NAME AND ADDRESS OF DATE | OF CONFIRMATION OF PARENTS DATE PLACE SACRAMENTS . AT GOD"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_4": "date_of_baptism"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_5",
+    "col_6"
+  ],
+  "parsedAt": "2026-02-17T01:51:17.199Z"
+}

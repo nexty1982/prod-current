@@ -1,0 +1,63 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "date_of_birth": "Мкелца штчество и замнага родителей , И какого Счеть роди шихем и день Званіе има . , , . родившихс вероисповедания . Имена",
+        "notes": "Званіе , има , отчество и фамилия воспрілинкова . | Кто совершаль таинство крошені ."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "date_of_birth": "Мужеска . . пола Женска . пола -ужов черн крифе- HIA"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.98,
+      "fields": {
+        "date_of_birth": "NUMBER DATES NAME OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN NAME",
+        "notes": "FULL NAMES OF SPONSORS | PRIEST'S NAME"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.73,
+      "fields": {
+        "date_of_birth": "XALE FEMALE BIRTH BAPETSM CITY OF BIRTH т Confession , Chrismation",
+        "notes": "Fu Jaes Parsells"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "date_of_birth": "12/08 I wonna Received by Wypych Eucharist from Roman - and Catholicisme"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_2": "date_of_birth"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:49:37.856Z"
+}

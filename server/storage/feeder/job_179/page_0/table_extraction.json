@@ -1,0 +1,660 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 5,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "2-14-70 HARRY 57 NORTH COPINGTON GUSTICH PLAINFIELD AVENUE AGE , : 44 N.T ( A00.31 ORTHODOX , 1925 CHRISTIAN ) 1ST MARRIAGE",
+              "confidence": 0.87,
+              "confidence_min": 0.54,
+              "token_count": 22,
+              "bbox": [
+                0.10625,
+                0.2916666666666667,
+                0.28533653846153845,
+                0.4125
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "PAUL MARY",
+              "confidence": 0.97,
+              "confidence_min": 0.97,
+              "token_count": 2,
+              "bbox": [
+                0.3076923076923077,
+                0.30480769230769234,
+                0.3387019230769231,
+                0.34615384615384615
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "57 LEONA CODINGTON M. HOUSTON AVENUE NORTH PLAINFIELD , N.T. AGE : 51 ( JAN . 6 , 1919 ORTHODOX CHRISTIAN 2ND MARRIAGE",
+              "confidence": 0.86,
+              "confidence_min": 0.61,
+              "token_count": 23,
+              "bbox": [
+                0.35336538461538464,
+                0.30673076923076925,
+                0.4795673076923077,
+                0.428525641025641
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": "VICTOR IOLA )",
+              "confidence": 0.88,
+              "confidence_min": 0.82,
+              "token_count": 3,
+              "bbox": [
+                0.4733173076923077,
+                0.32083333333333336,
+                0.5264423076923077,
+                0.391025641025641
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "J 3-3-70",
+              "confidence": 0.78,
+              "confidence_min": 0.74,
+              "token_count": 2,
+              "bbox": [
+                0.058653846153846154,
+                0.5038461538461538,
+                0.1439903846153846,
+                0.528525641025641
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "NICHOLAS JOHN CHABRA , JR , 134 9. 5TH AVENUE MANVILLE , N.J 08835 AGE : 23 ( JANUARY 4 , 1947 ) ORTHODOX CHRISTIAN ST MARRIAGE",
+              "confidence": 0.82,
+              "confidence_min": 0.38,
+              "token_count": 27,
+              "bbox": [
+                0.15072115384615384,
+                0.510576923076923,
+                0.28701923076923075,
+                0.6256410256410256
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "NICHOLAS LOUISE",
+              "confidence": 0.91,
+              "confidence_min": 0.89,
+              "token_count": 2,
+              "bbox": [
+                0.30240384615384613,
+                0.5240384615384616,
+                0.34375,
+                0.5551282051282052
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "KATHLEEN MIKLOWCIC 1144 BLEECHER STREET MANVILLE , N. J. 08835 . AGE : 23 ( JANUARY 13 , 1947 ROMAN CATHOLIC 1ST MARRIAGE",
+              "confidence": 0.84,
+              "confidence_min": 0.44,
+              "token_count": 23,
+              "bbox": [
+                0.3487980769230769,
+                0.530448717948718,
+                0.4754807692307692,
+                0.6477564102564103
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "JOHN MARY )",
+              "confidence": 0.97,
+              "confidence_min": 0.92,
+              "token_count": 3,
+              "bbox": [
+                0.47427884615384613,
+                0.5387820512820513,
+                0.5173076923076924,
+                0.6115384615384616
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "content": "8",
+              "confidence": 0.9,
+              "confidence_min": 0.9,
+              "token_count": 1,
+              "bbox": [
+                0.06370192307692307,
+                0.6766025641025641,
+                0.07668269230769231,
+                0.6993589743589743
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "content": "10-4-70 CHARLES 129 SOUTH FETCHKO , JR . MANVILLE 16TH AVENUE AGE , : 22 OCTOBER N.J.08835 ORTHODOX ( MARRIAGE CHRISTIAN 8 , 1947 ) 1ST",
+              "confidence": 0.86,
+              "confidence_min": 0.54,
+              "token_count": 26,
+              "bbox": [
+                0.103125,
+                0.6794871794871795,
+                0.2899038461538462,
+                0.8105769230769231
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "content": "EUGENIA CHARLES",
+              "confidence": 0.91,
+              "confidence_min": 0.84,
+              "token_count": 2,
+              "bbox": [
+                0.29783653846153846,
+                0.6926282051282051,
+                0.34134615384615385,
+                0.7342948717948717
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 4,
+              "content": "ROSE 129 GHILDA S. 16TH ROMERO MANVILLE AVENUE AGE : 21 ( , JULY 22 , N.J.08835 ROMAN 1949 CATHOLIC ) 1ST MARRIAGE",
+              "confidence": 0.86,
+              "confidence_min": 0.47,
+              "token_count": 23,
+              "bbox": [
+                0.34591346153846153,
+                0.6951923076923077,
+                0.47860576923076925,
+                0.8256410256410256
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 5,
+              "content": "AVARISTO PORA",
+              "confidence": 0.94,
+              "confidence_min": 0.91,
+              "token_count": 2,
+              "bbox": [
+                0.4841346153846154,
+                0.698076923076923,
+                0.5230769230769231,
+                0.7349358974358975
+              ],
+              "needs_review": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 5,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "REV . ROBERT GEORGE LEWIS A MR",
+              "confidence": 0.84,
+              "confidence_min": 0.37,
+              "token_count": 7,
+              "bbox": [
+                0.5524038461538462,
+                0.32596153846153847,
+                0.6538461538461539,
+                0.36346153846153845
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": ". GEORGE GRABANIA 1311 SCOTCH TERRILL PLAINS , ROAD NEW , JERSEY MRS . LYDIA GRABANTA 1311 SCOTCH TERRILLS PLAINS , ROAD NEW JERSEY",
+              "confidence": 0.85,
+              "confidence_min": 0.47,
+              "token_count": 24,
+              "bbox": [
+                0.6338942307692308,
+                0.3266025641025641,
+                0.7824519230769231,
+                0.45544871794871794
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "FEB . 13 , 1970 No. 23 ( NORTH PLAINFIELD , N.T. , ORTHODOX SACRAMENTAL MARRIAGE FOR THE PREVIOUSLY CONTRACTED 1952 CIVIL , MARRIAGE MISSIONARY ON HOUR 30 JUNE CHURCH , 148 MARYLAND E. MAIN REV STREET . , WILLIAM ELKTON , HOPKINS MRS F. , ; WITNESSED BY W. F. HOPKINS",
+              "confidence": 0.86,
+              "confidence_min": 0.43,
+              "token_count": 52,
+              "bbox": [
+                0.8334134615384615,
+                0.3266025641025641,
+                0.9831730769230769,
+                0.49903846153846154
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "REV , ROBERT A. MR GEORGE LEWIS 504",
+              "confidence": 0.83,
+              "confidence_min": 0.44,
+              "token_count": 8,
+              "bbox": [
+                0.5512019230769231,
+                0.5349358974358974,
+                0.6545673076923076,
+                0.5769230769230769
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": ". DENNIS J. HOLOVACH WASHINGTON AVENUE MANVILLE , NEW JERSEY Miss BARBARA MIKLOWCIC 1144 MANVILLE BLEECHER STREET , NEW JERSEY",
+              "confidence": 0.89,
+              "confidence_min": 0.6,
+              "token_count": 20,
+              "bbox": [
+                0.6341346153846154,
+                0.5336538461538461,
+                0.7632211538461539,
+                0.6586538461538461
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "AUGUST 3 , 1970 No. 70-60 ( MANVILLE , N.T. )",
+              "confidence": 0.86,
+              "confidence_min": 0.67,
+              "token_count": 11,
+              "bbox": [
+                0.8362980769230769,
+                0.5333333333333333,
+                0.973798076923077,
+                0.5737179487179487
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "content": "REV . ROBERT A. GEORGE LEWIS",
+              "confidence": 0.79,
+              "confidence_min": 0.39,
+              "token_count": 6,
+              "bbox": [
+                0.5533653846153846,
+                0.6919871794871795,
+                0.6324519230769231,
+                0.7368589743589744
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "content": "MR . MICHAEL FETCHKO 129 S. 16TH AVENUE MANVILLE , NEW JERSEY MISS MARGARET ANNE PROCTOR 158 S. 13TH AVENUE MANVILLE , NEW JERSEY",
+              "confidence": 0.88,
+              "confidence_min": 0.56,
+              "token_count": 24,
+              "bbox": [
+                0.6370192307692307,
+                0.6897435897435897,
+                0.8158653846153846,
+                0.8423076923076923
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "content": "OCTOBER 1 , 1970 No. 70-89 ( MANVILLE , N.T. ) ORTHODOX SACRAMENTAL MAR RIAGE FOR THE PREVIOUSLY CONTRACTED CIVIL MARRIAGE ON COUNTY JANUARY COURT 8 AT , 1970 LAW , , No.3 , EL JUDGE PASO W. S. COUNTY , COPELAND TEXAS ; WITNESSED BY PAT E , DWYER .",
+              "confidence": 0.87,
+              "confidence_min": 0.52,
+              "token_count": 51,
+              "bbox": [
+                0.8391826923076923,
+                0.6900641025641026,
+                0.9882211538461538,
+                0.9051282051282051
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_license_format"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 504,
+  "data_tokens": 364,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:51:52.049Z"
+}

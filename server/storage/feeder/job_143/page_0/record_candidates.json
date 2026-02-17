@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "PART 1 BAPTISMS\n-\n- 1950 -\n-\nPART 1 BAPTISMS\nPARISH RECORD\nPARISH RECORD\nNO 31250\nNAME OF CHILD\nNAME OF CHILD\nann\nMarie\nNAME OF PARENTS\nAND.\nHelen\nADDRESS\nJohn\nMacinko\nHER'S NAME)\nChabra\n(MOTHER'S NAM"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:39.533Z"
+}

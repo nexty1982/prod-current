@@ -1,0 +1,389 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 7,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счета родив шихся . . Мужеска пола Женска MALE NUMBER"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": ": МКСАЦ и день Имена родившихс . . . ΠΟΛΑ рожд HİA KOELBE- HIA DATES GEMALE F BIRTH BAPTISM NAME OF CHILD CITY OF BIRTH"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "MISTPHчSCHOŇ Званіе , има , штчество FATHER'S FULL"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "BIRTHS KHATA NA и . Замнала родителей , M KAK вероисповеданию . NAME . MOTHER'S MAIDEN NAME Tatiana Mickel"
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "YEAR 88 ГОДА , ЧАСТЬ ПЕРВАЯ , И KBHHOLE Званіе , има , отчетко и фамил воспріеминкова . FULL NAMES OF SPONSORS Mickel"
+            },
+            {
+              "row_index": 0,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "ΕΠ KOBE- РОДНЕШИХСЯ . Кто совершаль таинство крашені . PRIEST'S NAME Jaz Panels"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "3/19 5/22 Meredith Anastasiz",
+              "confidence": 0.72,
+              "token_count": 4,
+              "bbox": [
+                0.13413461538461538,
+                0.3525641025641026,
+                0.23125,
+                0.38814102564102565
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Robert Hansen",
+              "confidence": 0.89,
+              "token_count": 2,
+              "bbox": [
+                0.27572115384615387,
+                0.3506410256410256,
+                0.3449519230769231,
+                0.36923076923076925
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "22210",
+              "confidence": 0.61,
+              "token_count": 1,
+              "bbox": [
+                0.43966346153846153,
+                0.391025641025641,
+                0.4706730769230769,
+                0.40192307692307694
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Stephen Stanley Bozinta",
+              "confidence": 0.9,
+              "token_count": 3,
+              "bbox": [
+                0.5137019230769231,
+                0.34775641025641024,
+                0.6139423076923077,
+                0.40544871794871795
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "Fr. Ел . Jana Parsells",
+              "confidence": 0.68,
+              "token_count": 5,
+              "bbox": [
+                0.7637019230769231,
+                0.3458333333333333,
+                0.8795673076923077,
+                0.4009615384615385
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "6",
+              "confidence": 0.89,
+              "token_count": 1,
+              "bbox": [
+                0.09302884615384616,
+                0.41217948717948716,
+                0.10168269230769231,
+                0.4253205128205128
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "8/27/1/06 \" / 6 Jeffery John ( Somerville )",
+              "confidence": 0.76,
+              "token_count": 9,
+              "bbox": [
+                0.13701923076923078,
+                0.3974358974358974,
+                0.25,
+                0.4371794871794872
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Jeffery St",
+              "confidence": 0.93,
+              "token_count": 2,
+              "bbox": [
+                0.2778846153846154,
+                0.3974358974358974,
+                0.33557692307692305,
+                0.4233974358974359
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Donna",
+              "confidence": 0.83,
+              "token_count": 1,
+              "bbox": [
+                0.40048076923076925,
+                0.39455128205128204,
+                0.42764423076923075,
+                0.4064102564102564
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Lerchenko",
+              "confidence": 0.84,
+              "token_count": 1,
+              "bbox": [
+                0.5665865384615385,
+                0.42948717948717946,
+                0.6137019230769231,
+                0.4483974358974359
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "Fr. Jas Panell",
+              "confidence": 0.63,
+              "token_count": 3,
+              "bbox": [
+                0.7651442307692308,
+                0.4048076923076923,
+                0.8723557692307692,
+                0.44166666666666665
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3",
+              "confidence": 0.96,
+              "token_count": 1,
+              "bbox": [
+                0.09038461538461538,
+                0.4721153846153846,
+                0.09927884615384615,
+                0.4842948717948718
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "9/19 11/13 Zachariah ( Plainfield )",
+              "confidence": 0.84,
+              "token_count": 6,
+              "bbox": [
+                0.1372596153846154,
+                0.45,
+                0.24759615384615385,
+                0.49583333333333335
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Thomas Famulz",
+              "confidence": 0.71,
+              "token_count": 2,
+              "bbox": [
+                0.2766826923076923,
+                0.4467948717948718,
+                0.3471153846153846,
+                0.4701923076923077
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Natalie Woronczuk",
+              "confidence": 0.84,
+              "token_count": 2,
+              "bbox": [
+                0.3875,
+                0.4358974358974359,
+                0.48485576923076923,
+                0.45064102564102565
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Eugene Alexandra Suchenno",
+              "confidence": 0.8,
+              "token_count": 3,
+              "bbox": [
+                0.5240384615384616,
+                0.4375,
+                0.6305288461538462,
+                0.47275641025641024
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.045
+    ],
+    "col_2": [
+      0.045,
+      0.1175
+    ],
+    "col_3": [
+      0.1175,
+      0.265
+    ],
+    "col_4": [
+      0.265,
+      0.3675
+    ],
+    "col_5": [
+      0.3675,
+      0.4975
+    ],
+    "col_6": [
+      0.4975,
+      0.6975
+    ],
+    "col_7": [
+      0.6975,
+      1
+    ]
+  },
+  "columns_detected": 7,
+  "header_y_threshold": 0.35467948717948716,
+  "total_tokens": 144,
+  "data_tokens": 46,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:48:49.132Z"
+}

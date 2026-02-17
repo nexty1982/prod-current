@@ -1,0 +1,94 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "1 x 5-26-41 41 10-19 ( GERARD SOMERVILLE VERRELLI GERARD , N.T. VERRELLI , ) JULIA FARFALLA | RECEIVED ROMAN CATHOLIC INTO THE CHURCH HOLY , ON ORTHODOX EASTER CHURCH SUNDAY , , FROM APRIL THE REV . ROBERT A. GEORGE LEWIS"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "2X 4-6-69 5-2469 DAVID JAMES RIEGLER DOUGLAS JOSEPH RIEGLER , DARIA HOLOVACH | 13 , 1969 . JOHN SOPCHAK , ELAINE MACINKO REV . ROBERT A. GEORGE LEWIS"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.86,
+      "fields": {
+        "notes": "( FALL RIVER , MASS . )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "3 X 5-8-696-29-69 TARA LYNN ( SOMERVILLE KACHEK JOHN KACHEK , THEODORA ACKALUSKY , N.T. ) | DAVID BRANCHICK , MARY JANE BRANCHICK REV . ROBERT A. GEORGE LEWIS"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "notes": "4 x 6-30-467-14-46 VINCENT JOHN VINCENT A. ZAKARZEWSKI , ZAKARZEWSKI GERTRUDE PRUCELL CHARRISBURG , PA . ) | ROMAN RECEIVED CATHOLIC INTO THE CHURCH HOLY , WHERE ORTHODOX RECEIVED HE CHURCH BAPTIZED WAS , ONLY FROM THE REV . ROBERT A. GEORGE LEWIS , ON JULY 14 1946. BY HOLY ,"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "5 X 2-17-697-19-69 SOFIA MELISA HORTIS JOHN SPYROS HORTIS , LESLIE INGRID ( SOMERVILLE , N.T. ) BERGEN | CHRISMATION ON PISCADLO JULY 12 , , DELORES 1966 . BRUCE BARNOSKY REV . ROBERT A. GEORGE LEWIS"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "6x 5-1-355-26-35 JOHN WATSON KARL EALY WATSON EALY , CATHERINE MAGYAR ( LEBANON , PENNA | THE RECEIVED INTO THE HOLY ORTHODOX CHURCH , FROM REV . ROBERT A. GEORGE LEWIS WAS BYZANTINE BAPTIZED CATHOLIC CHURCH , WHERE HE BY CHRISMATION ON MAY 26 , 1935 , RECEIVED ON AUGUST 10 , 1969 ."
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "7 X 2-24-698-17-69 NILA MARY DR . MICHAEL WAZOREK , MAUREEN LAZOREK | TERENCE JOHN MURPHY MICHELLE BOBER REV . ROBERT A. GEORGE LEWIS ,"
+      },
+      "sourceRowIndex": 8,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "( TRENTON , N.J. ) MURPHY"
+      },
+      "sourceRowIndex": 9,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:47:57.130Z"
+}

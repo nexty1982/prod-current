@@ -1,0 +1,9 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 3
+
+--- Table 1 (4 columns, 4 rows) ---
+ | Courica Orteplex Been tw H HOHI BIRTHS МЕТРИЧЕСКОЙ КНИГИ НИ | YEAR 2018 ГОДЪ , ЧАСТЬ ПЕРЕНА , W СО | РОДИВШИХСЯ .
+--------------------------------------------------------------------------------------------------------------------
+ | Ифелца штчество и замнал родителей , и родне какого Счеть : и день Званіе има . , , шихся . вероисповедания . | Званіе , има , отчество и фамил воспрієльникова . | Кто совершаль таниство крашені .
+ | Мужеска Имена родившихся пола Жонска пола рожде . . . . HIA крефе- HIA |  | 
+ | NUMBER DATES MALE FEMALE BIRTH BAPTIS OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN NAME В NAME CITY OF BIRTH М А M 8/17 10/27 Madison Mary Scott micheel Klass rbss Catherine w . Kloss Plainsboro , N.J. 2/19/12/08 | Zacharich John James Рек ) Chende 6 Cheade Oqnz Dalit Grigosescu New Brunswick N.J 3 11/01 12/29 Luke Emmanuel Peter Parsells Passells Herther masiе Graven Philadelphic , PA | FULL NAMES OF SPONSORS Daniel Bolohay Dana Bolohen crisdien Gheorghe Grigorescu Richard John weben emily Pareclis | PRIEST'S NAME Fr. Danielskvin Fr. Jones Pursells Fri Jaes Parsells

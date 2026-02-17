@@ -1,0 +1,234 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 5,
+      "column_count": 3,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "SPBIRTHS KBRHUEPHOSH - TAERATRY ESTIHABEHOMI HMITH IHI 1979 Счеть родив : МКСАЦИ шихся . и день Званіе , има , штчество и . рамнага родителей , и какого Имена родившихСА в кроисповеданія . XALE NUMBER FEMALE BIRTH DATES M BAPTISM NAME OF CHILD CITY OF BIRTH FATHER'S FULL NAME . MOTHER'S MAIDEN NAME Н"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "AR 1979 ГОДА , ЧАСТЬ ПЕРКАМ , И РОДИВШИХСЯ . Званів , нам , отчетко и фамилі воспрієминкова . Кто совершаль таинство крорені . FULL NAMES OF SPONSORS PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "12-8-781-20-79 Valerie Kuchavewski Nicholas ( Somerville ) Suzanne ( Zemke Kuchaves ) Ki",
+              "confidence": 0.85,
+              "token_count": 13,
+              "bbox": [
+                0.09038461538461538,
+                0.32596153846153847,
+                0.36009615384615384,
+                0.36762820512820515
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Patricia Goodwin ( westcoatville , Pa . ) Ronald zemře ( Albion , N.Y. ) Fr. James Parsells",
+              "confidence": 0.86,
+              "token_count": 18,
+              "bbox": [
+                0.5161057692307692,
+                0.33076923076923076,
+                0.8745192307692308,
+                0.3769230769230769
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "21-19-793-3-79 Kimberly Nicole Edward Petro ( Somerville ) Cynthia ( Rosoche )",
+              "confidence": 0.9,
+              "token_count": 12,
+              "bbox": [
+                0.07019230769230769,
+                0.3798076923076923,
+                0.33125,
+                0.4266025641025641
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Anastasia Nevitt ( Manville , N.J. ) Michael Chabrz ( Manville , N.J. ) Fr .. Janes Parsells",
+              "confidence": 0.88,
+              "token_count": 18,
+              "bbox": [
+                0.5216346153846154,
+                0.3868589743589744,
+                0.8586538461538461,
+                0.43012820512820515
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1-10-79 5-12-29 Jeffery Paul 3 ( Nemport R. I. ) Haney George Fielding Carol mock Fielding",
+              "confidence": 0.89,
+              "token_count": 16,
+              "bbox": [
+                0.04423076923076923,
+                0.42628205128205127,
+                0.3625,
+                0.48365384615384616
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Nancy Mackey mock ( ( Massenz Parsippany , , N.y. N.J. ) Timothy ) Fv . Janes Parsells",
+              "confidence": 0.9,
+              "token_count": 18,
+              "bbox": [
+                0.525,
+                0.4342948717948718,
+                0.8641826923076923,
+                0.4830128205128205
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "4 9-12-79 / 12-16-79 ( Jason Sorevville , N.J. ) John Christine Charles Joy Mayernik ( Nevitt R.C. )",
+              "confidence": 0.9,
+              "token_count": 19,
+              "bbox": [
+                0.04230769230769231,
+                0.48333333333333334,
+                0.41057692307692306,
+                0.5301282051282051
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Mark Nevitt ( Manville Mayernik Manville , N.J. ) Tracy ( , N.J. ) -hoporzing Fr. Janes Parsells heterodo",
+              "confidence": 0.84,
+              "token_count": 19,
+              "bbox": [
+                0.528125,
+                0.48685897435897435,
+                0.8588942307692308,
+                0.5375
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.02
+    ],
+    "col_2": [
+      0.02,
+      0.465
+    ],
+    "col_3": [
+      0.465,
+      1
+    ]
+  },
+  "columns_detected": 3,
+  "header_y_threshold": 0.32583333333333336,
+  "total_tokens": 217,
+  "data_tokens": 133,
+  "data_rows": 4,
+  "extracted_at": "2026-02-17T01:48:32.970Z"
+}

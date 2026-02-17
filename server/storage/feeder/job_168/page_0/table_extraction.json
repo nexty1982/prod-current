@@ -1,0 +1,300 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 5,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": ". εν 9383 Grenthe Sta ) . . ) STATE 1 BAPTISMS No Jean ) NAME NAME , CITY STREET 1959 Barbara Peter Grenther man 1959 ) ( STATE usko ( Nov ( FATHER'S Baw MOTHER'S 22 au ) ( m BY . Wes Nesha shanic AND an PART RECORD # Hosp ( OF CHILD PARISH OF PARENTS Rd . NAME NAME Arolyn AND Guenther NUMBER AND CHURCH . CITY ( teph . Greather BIRTH OF BAPTISM PERFORMED DATE CONFIRMATION Sts Peter Son OF BIRTH ADDRESS Somerset OF DATE . AT PLACE GOD PARENTS Gorgianna Gorgianna SACRAMENTS . 9387 ) ΠΟ No Nevitt Nevitt Barthuska ) ) A. , STATE 196 1960 ) ( STATE hak , CITY husha - 1 BAPTISMS NAME Tess ( ( MOTHER'S PART RECORD Stacey Huff PARISH Inastasias OF CHILD Richard rth AND STREET + Kuns ) εb ( NUMBER Hosp ) B ( ( AND CHURCH CITY OF PARENTS 816 . m OF NAME NAME AND Theodosia K osoel Nevitt BIRTH OF BAPTISM New OF BIRTH ADDRESS DATE St Peters Peter DATE CONFIRMATION Sts Japole . AT PLACE GOD PARENTS Mary"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Adamcio RECTOR St ephen BY Aday ameid RECTOR PERFORMED / SACRAMENTS Re Step Stephen"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "5 , ) ) 9384 ) St ) BAPTISMS No Suske NAME NAME ( 1 PART Александра Ann Susko ) , N.S , STATE , CITY 1959 STREET Hosp 20 1959 RECTOR ( STATE FATHER'S ( ( Alice FAT venther MOTHER'S Крещ RECORD CHILD Stephen Give nopf AND S nville ) ) BY ( Oct AND DEC . ( Pet CHURCH Merville Somers бош Grenther CITY ( 1314 NUMBER Ada PARISH OF PARENTS OF Ann BIRTH BAPTISM BIRTH Peter PERFORMED OF OF . NAME NAME AND ADDRESS DATE DATE CONFIRMATION OF . Leszchyn AT PLACE PARENTS GOD Ann SACRAMENTS RevStephen . 1959 , 1960 NoJ telco Rostik RECTOR 9386 , BAPTISMS No Elaine Hoynak ) STATE ) ) NAME NAME Ave , CITY N.J. , - 1 PART RECORD cqueline John Milton FATHER'S STREET ( ( Rostik DEC Hosp alle ) MOTHER'S 24 Jan 10th & Paul d ) ( AND CHURCH BY AND So NUMBER ( 24 CHILD BIRTH PARISH OF PARENTS OF Manville Somerset Some ( CITY Butchko PERFORMED Adav . OF NAME NAME Johanna OF BAPTISM BIRTH BIRTH AND ADDRESS DATE DATE CONFIRMATION Sts Peter John OF St spho . PARENTS AT PLACE GOD ¡ SACRAMENTS REVS"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "9389 Kalevich rich polisiel Kol N. 60 $ Some 1960 . ) STATE 15 , , 24 aul N. ) Kolerich",
+              "confidence": 0.73,
+              "token_count": 21,
+              "bbox": [
+                0.17740384615384616,
+                0.6580128205128205,
+                0.4497596153846154,
+                0.7612179487179487
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "RECTOR",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.5064903846153846,
+                0.673397435897436,
+                0.5096153846153846,
+                0.6967948717948718
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Bishop Bishop shop 1960 101960 . 9388 Mave 10 26,1960 .N.J RECTOR ) STATE ) STATE ( Four",
+              "confidence": 0.88,
+              "token_count": 18,
+              "bbox": [
+                0.5639423076923077,
+                0.6506410256410257,
+                0.8925480769230769,
+                0.7490384615384615
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS No Role , V Michael Vangel NAME St , ) CITY ) NAME FATHER'S MOTHER'S East STREET Hoop , Brook AND March arif CHURCH Somerville ) ) CITY ata",
+              "confidence": 0.82,
+              "token_count": 30,
+              "bbox": [
+                0.14903846153846154,
+                0.7064102564102565,
+                0.4514423076923077,
+                0.8294871794871795
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BY Abdacuerd",
+              "confidence": 0.76,
+              "token_count": 2,
+              "bbox": [
+                0.48221153846153847,
+                0.732051282051282,
+                0.5048076923076923,
+                0.8391025641025641
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "BAPTISMS No Stanley W. ) Ann NAME NAME @mp CITY 18 ) FATHER'S Kat MOTHER'S . STREET 25 , Lebedz Odam ' AND CHURCH Somervill Michael BY CITY ) ( ( (",
+              "confidence": 0.83,
+              "token_count": 32,
+              "bbox": [
+                0.5358173076923077,
+                0.7205128205128205,
+                0.8894230769230769,
+                0.8237179487179487
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "- ( 1 PART RECORD PARENTS Simona 326 NUMBER BIRTH Somerset AND ( ( ( CHILD ( BAPTISM BIRTH",
+              "confidence": 0.91,
+              "token_count": 19,
+              "bbox": [
+                0.15120192307692307,
+                0.7727564102564103,
+                0.4346153846153846,
+                0.882051282051282
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "PERFORMED",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.48197115384615385,
+                0.7833333333333333,
+                0.48677884615384615,
+                0.8355769230769231
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "1 PART RECORD Mary PARENTS ( Anna NUMBER Manvi Mar Somers AND PERFORMED . CHILD ( BIRTH BAPTISM StsPe BIRTH PARENTS Nadia Hephew",
+              "confidence": 0.85,
+              "token_count": 23,
+              "bbox": [
+                0.5377403846153846,
+                0.7717948717948718,
+                0.8913461538461539,
+                0.8791666666666667
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PARISH ADDRESS CONFIRMATION Als OF NAME OF NAME OF AND DATE OF . OF PARENTS . DATE AT PLACE . AT GOD",
+              "confidence": 0.89,
+              "token_count": 22,
+              "bbox": [
+                0.18870192307692307,
+                0.8201923076923077,
+                0.4480769230769231,
+                0.907051282051282
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "SACRAMENTS Red Yee",
+              "confidence": 0.65,
+              "token_count": 3,
+              "bbox": [
+                0.48173076923076924,
+                0.8375,
+                0.5052884615384615,
+                0.9019230769230769
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "PARISH OF NAME OF NAME ADDRESS OF AND DATE OF DATE CONFIRMATION OF PLACE SACRAMENTS Red . . AT GOD",
+              "confidence": 0.94,
+              "token_count": 20,
+              "bbox": [
+                0.5737980769230769,
+                0.8253205128205128,
+                0.8920673076923077,
+                0.8987179487179487
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0725
+    ],
+    "col_2": [
+      0.0725,
+      0.4675
+    ],
+    "col_3": [
+      0.4675,
+      0.5225
+    ],
+    "col_4": [
+      0.5225,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.6492307692307693,
+  "total_tokens": 593,
+  "data_tokens": 192,
+  "data_rows": 4,
+  "extracted_at": "2026-02-17T01:51:28.288Z"
+}

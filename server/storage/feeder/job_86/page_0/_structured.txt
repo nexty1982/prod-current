@@ -1,0 +1,9 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 5 | Rows: 3
+
+--- Table 1 (5 columns, 4 rows) ---
+ | Счета родив : M'kcauz WHXCA . и день Илина родившиХСА . KOENE- HIA NUMBER DATES OF CHILD GEMALE F MALE BIRTH BAPTISM А NAME CITY OF BIRTH | BIRTHS ¦IETPHчSCKSÅ KNHгH NA Званів , има , штчество и . фамнала родителей B'kponenoɛ * дAHÍA . FATHER'S FULL NAME . MOTHER'S MAIDEN | , и какого NAME | YEAR AR 85 ГОДЪ , ЧАСТЬ ПЕРЕНА , И РОДИВШИХСЯ . Званів , нама , отчество и фамил воспрієлинкова . Кто совершаль таинство кровені . FULL NAMES OF SPONSORS PRIEST'S NAME
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 18 2/17 Tatiana - New Brunswick | Fv . Dn . Gregory Lapchuk Argyre Lapchuk ( Warnecke ) |  | Herman Schick ( Orthodox ) Fr. York Alexander Daviz Warnecke
+ | 1 Sept. 28th Mavina Princeton |  |  | Jacquelin De Larato ( Orthodox ) Fu 1. . Jour Parells . Received from Episcopalian confession by rike of Chrismation
+ |  |  | 1 | 

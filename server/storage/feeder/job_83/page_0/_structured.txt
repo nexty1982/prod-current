@@ -1,0 +1,9 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 3
+
+--- Table 1 (4 columns, 4 rows) ---
+ | BIRTHS HISTPHчCCKSÅ ENHгH NA1982 Счета родив Mkcauz WHXCA . и день Званіе , ильм , отчество и рамна родителей , и какого Имена родившихся в кроисповиданіл . MALE NUMBER NAME OF CHILD . MAIDEN NAME FEMALE BIRTH DATES FULL NAME MOTHER'S BAPTISM CITY OF BIRTH FATHER'S | 1982 ГОДЪ , ЧАСТЬ ПЕРВАЯ H , И Званіе , има , отчество и фамилі воспріблиикова . FULL NAMES OF SPONSORS | РОДИЕШИХСЯ . Кто совершаль таинство крашені . PRIEST'S NAME
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 1 11-13-811-12-32 Somerville , N.J. CASSIANNA Michael Fetchko - Carol Lynn Mauver | Charles Fetchko - Orthodox ( and " honorary heterodox " ) | Fr. долга Pansell
+ | 50 а 6-7-827-11-82 Somerville , N.J. Frederick Gorbatuk Jr. PATRICK Claive Krombach Gorbztuk | Peter Gorbatule Susan Gorbatuk > orthodox | Fr. Janez Parsel
+ | 3 11-9-12 12-19-82 ( Somerville NECTARIOS , N.J. ) Fr. James Parsells Daria Barsigian | John Economo тол Katherine Lickwar > Orthodox | Fr. John Nehrelachi

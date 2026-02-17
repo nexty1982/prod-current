@@ -56,7 +56,10 @@ function resolveUploadDir(churchId: number): string {
 function resolveJobFilePath(filename: string, churchId: number): string {
   let filePath: string;
 
-  if (filename.startsWith('/uploads/')) {
+  if (filename.startsWith('/') && !filename.startsWith('/uploads/')) {
+    // Absolute path (e.g. batch_import jobs) — use as-is
+    filePath = filename;
+  } else if (filename.startsWith('/uploads/')) {
     // Relative DB path → absolute under prod/
     filePath = path.join('/var/www/orthodoxmetrics/prod', filename);
   } else {

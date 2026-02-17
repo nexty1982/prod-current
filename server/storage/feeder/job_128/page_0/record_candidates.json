@@ -1,0 +1,48 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.73,
+      "fields": {
+        "notes": "SS . GOD PARANTS : ADMINISTERED GEORGE GRABANIA & LYDIA GRADANIA SACRAMENT SACRAMENTS GODPARENTS ADMINISTERED ! BY BY ARNOLD Father Fahad : Father KATKO Theodore AND ELIZABETH : faboushy CARNEY Thundese"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.76,
+      "fields": {
+        "notes": "37387 THE ROBINSON SON or 37392 JULIANNE KILTRYS - DAUGHTER OF GEORGE ROBINSON & ANNA ROBINSON THOMAS AND DEANNE Kretry's RESIDENCE ! MULFERD LANG , BELLE MEAD , N.J RESIDENCE : 506 No. GASTON AVE . , RARITAE , N.J BORN ! MAY 14 , 1968 - HORRISTOWN , N.J -"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "BORN : JUN 16 , 1961 WELLS ENGLAND BATIRED RC ) CANISMATION : APRIL 27 , 1968 4 BAPTISM & CHRISMATION : JUNE 16 , 1968 - MANVILLE SS.PTER AND PAUL CHURCH , MANELLE , SS . PETER AND PAUL CHURCH GODPARENTS : GEORGE GRABANIA Y LYDIA GRABANA GODPARENTS : MICHAEL DEL PRIORE & HELEN Label Wishoshi"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.75,
+      "fields": {
+        "notes": "SACRAMENT ADMINISTSTED By : Falling aboutly SACRAMENTS ADMINISTERED BY : Fr. Theodol 37388 LARISSA ( LAURA ) PADLO DAUGHTER OF 37393 SPYROS HORTIS - SON OF- WILLIAM JOHN AND LESLIE HORTIS ( BEREEN ) AND PATRICIA PADLO RESIDENCE ! 101 So. GREASHECHER ST . , MANUCCE NA RESIDENCE : 40 SOUTH STREET , MANVILLE , N.J BORN : SOMERVILLE , BORN : WILSON BORO , KASTON BAPYISN N.J. - AND CHRISMATION APRIL FEB 11 , 1968 : 27 SS , PETER 1968 BAPTIST CHRISMATION : JUNE 23 , 1968 . AND PAUL CHURCH SO . PETER AND NASL MANVILLE GOD PARENT : NICHOLAS PANNTAGIS & SONIA KARWAT GODPARENTS SACRAMENTS : ALEX ADMINISTERED PADLO AND , LOUISE N.J. CHABRA SACRAMENTS : BY : For THEODORE LAROWSKY Father Theodore BY fabouxhy :"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2"
+  ],
+  "parsedAt": "2026-02-17T01:50:13.437Z"
+}

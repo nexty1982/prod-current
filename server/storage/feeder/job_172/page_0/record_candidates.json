@@ -1,0 +1,47 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "date_of_baptism": "BAPTISMS",
+        "notes": "37363 CARNEY ANN CARNEY AVE : Risco ELIZABETH STATE ) 1963 N NAME , NAME ) CITY N.J. , ) 4 , | 4,1963 MANVIL PA PAUL BRUNSWICK STATE KRIVOSHIK KRIVOSHIK RECTOR ) ( fol | BAPTISMS | 37362 BISHOP BISHOP SHOP AVENUE JERSEY STATE ) 1963 N ° NAME 13. NAME , ) ) CITY , , | 30,196 NJ STATE STCHUR RECTOR ) KULICK ("
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "date_of_baptism": "- 1 PART",
+        "notes": "RECORD CHERYL JERRY FATHER'S MOTHER'S STREET , AND ( NUMBER July ( . | AUGUST AND CHURCH ) PETER NEW CITY PETER ELIZABETH BY Theodorl ) AND ( ( PERFORMED | PART 1 | MELANIE STANLEY FATHER'S KICK ) MOTHER'S 9TH STREET NEW 10 RECORD AND + ( ( So NUMBER JUNE | JUNE CHURCH SOMERVILLE ) CITY BY AND ) MICHAEL BARBARA hed ( ("
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "notes": "CHILD PARENTS MARGARET CARNEY RD ( SOMERSET PARISH BIRTH NAME OF NAME OF DATE OF AND . ADDRESS | BAPTISM CONFIRMATION SS BIRTH . OF PARENTS WRS : ather DATE AT . PLACE OF GOD SACRAMENTS | CHILD PARENTS ANNA 23 ( PARISH MANVILLE BIRTH OF NAME NAME OF OF . AND ADDRESS DATE | BAPTISM PERFORMED . CONFIRMATION BIRTH . OF OF PARENTS PLACE SACRAMENTS Father DATE . AT GOD"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_2": "date_of_baptism"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_3",
+    "col_4",
+    "col_5",
+    "col_6",
+    "col_7"
+  ],
+  "parsedAt": "2026-02-17T01:51:37.737Z"
+}

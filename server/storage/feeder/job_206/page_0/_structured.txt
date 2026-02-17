@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+ |  | JUNE 15 , 1968 Rocco V MARY ( AGE 25 BORN - RES . 10 Loomis BARBARA ANN MICHAEL & ANNA AGE - 20 BORN RES . SACRAMENTS 95 1 1968 By Auten Nov : JOHN WAYNE J. C MARY RES AGE , - 4124 21 BORD BARBARA PIONEER PETER - AGE OLGA RES 22 . . , SACRAMENTS PLAINFIELD Nov. 2 1968 By : FERDINAND RES AGE . 10 23 BORN + - KOVIN | PETERSIBILIA GOLIS ) RARITAN St. SOFKO ( - NEW Father Ste . M ( Atkinson CRAMNER LANE SOMERS ALMOND BORN KRENISKY Father ARE DOUGLAS J MASETTA WAY , | SON Son SIBILIA , N.J. RAEITAN , N.J DAUGHTER OF SWENTICKY ) SOFKO BRUNSWICK , NJ . SOMERVILLE , N.J. Theodore Labowsky ) Son ATKINSON OF , W. Point PALM N.J BEACH , DAUGHTER ELIZABETH ) ALMOND OF PLAINFIELD H.S RIEGLER Theodore SON obsky NS RIEGLER OF | FLA . .
+ |  | DARIA AGE JOSEPH - RES 20 & - : Sacraments 504 BORN By : | MARY HOLOVACH WASHINGTON - Father | MALVERN PA KUZMIACK DAUGHTER OF . MANVILLE NEW ) HOLOVACH AVE JERSEY , Theodore MANVILLE . , Labowsky | N.J
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+Seccements | By : Father Theodore | Labourke ,
+ |  | 

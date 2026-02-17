@@ -1,0 +1,43 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.7,
+      "fields": {
+        "groom_name": "JOHN KULINA",
+        "bride_name": "NATALIE",
+        "date_of_marriage": "JANA ,",
+        "officiant": "TREVENEMENTS",
+        "witnesses": "PHILIP AND HELEN KULINA",
+        "notes": "number: 1; license: ORTINDEX SACRAMENTAL MARRIAGE 05 PREVIOUSLY CONTRACTED MARRIAGE"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.82,
+      "fields": {
+        "groom_name": "ROBERT EDWARD SANGSTER 6 DARTMOUTH AVE . SOMERVILLE , N.J. 33yes OLD PROTESTANT 2ND MARRIAGE STEVEN WELENTEYCHIK 44 BEAVERS ST . HIGH BRIDGE , NJ 08829 32 ORTHODOX 1ST . MARRIAGE",
+        "bride_name": "CHRISTINA AIVALIKLES 400 KENBURY DR . SOMERVILLE , N.J. 22 YRS . 020 ORTHODOX 1ST MARRIAGE WASHINGTON ELIZABETH VALLEY ANN ROAD HILL MARTINS VILLE , NJ . 38yes OLD ROMAN CATHOLIC 2nd . MARRIAGE",
+        "date_of_marriage": "FEB 3,1914 MAY 26",
+        "officiant": "FR . EUGENE ARRIS FR . EUGENE TARRIS",
+        "witnesses": "DIANNE LIOTHAKE ANO HELEN AIVALIKLES MICHAEL WELENTEY CHIK AND ELEANOR GAIS",
+        "notes": "number: 2 . 3 .; groom_parents: ROBERT G. & MARGARET ZELINSKY MICHAEL E VERA YANUSHKA; bride_parents: GEORGE OURANIA RAYMOND E ANNA GULICK .; license: JANUARY 3 , 1974 4-74 ( BRIDGEWATER ) CERT NO 7 -1 MAY 21 , 1974 67-74 ( BRIDGEWATER ) CERT . NO . 74-2 ."
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:01.067Z"
+}

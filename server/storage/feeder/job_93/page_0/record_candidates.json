@@ -1,0 +1,45 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "performed_by": "Fr. Jas Parsell",
+        "notes": "- | 5/31 John Perkins 5/31 Thomes Perkins | received Holy Chrismation from by Archbishop Peter of York on May 31 , 1992"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "notes": "06 a | New Holy received from Chrismation the Anglican by Archbishop Confession 1992 Peter of by New York on Gennadi May mzy 31 , ( Spirin )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.82,
+      "fields": {
+        "performed_by": "Fr. Jon Parella",
+        "notes": "3 | 6/28 8/23 Alexander Kulick Somerville Mark Kulick ( ) Barbara ( Fetzko ) Kulick | Matthew Austin ;"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_5": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:48:55.993Z"
+}

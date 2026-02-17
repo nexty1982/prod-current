@@ -1,0 +1,320 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 7,
+      "column_count": 3,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1112 BAPTIZED DAUGHTER OF PC 1 ( 8095 ) ( LESLIE ) ANNA BALOGH ( HRINIAK ) BALOGH LASZLO BALOGH AND JOAN N.J BORN MAIN STREET , GLEN GARDNER , : NOVEMBER 5 , 1965 - PHILIPSBURG , N.J. BAPTISTY & CHRISMATION ! DECEMBER 5,1965 SS . PETER AND PAUL CHURCH - MANICLE , N.J. GODPARENTS : VLADIMIR MARCHUK AND SANDRA BELL SACRAMENTS ADMINISTERED BY : Father theodore Solo PATRICK AARON HUZINEL SON of ROBERT HURINAC AND CAROL ( KORDSEL ) HELENEC 118098 25 HOPKINS TERRACE , WEST KEANSBURG , N.J. BORN ! OCTOBER 26 , 1965- WEST KEANSHUAL , N.J BAPTISM & CHRISMATION - DECEMBER S 5 , 1865"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "No 37375 1966 113 - JERRY DAVID CARNEY люд 70 JERRY CARNEY AND MARGARET ( Rezek ( o ) CARVEY RD # 1 Box 107 , ELIZABETH AVENUE SOMERSET , N.J. BORN : APRIL 26 , 1966 NEW BRUNSWICK , NJ BAPTIS of of . CHRISMATION : Juara 5 1866 SS . PETER AND PAUL CHURCH , MANVILLE , NJ GOD PARENTS : BORIS CARNAY AND LONA RUSTER SACRAMENTS OX : Father Father Theodore Theodore 37376 DAVID - ANTHONY ANTHONY SKIRZENSKI SON OF STEPHEN SKIR LENSKI AND ANN MARIE LISAK 940 HARAN AVE , HANVILLE , N.J. - BORN : SEPT . 14,1966 SOMERVILLE , N.J."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "SS . PETER AND PAUL BHURCH , MANVILLE , N.J. GODPARENTS : GEORGE HUZINEC AND SACRAMENTS ADMINISTERED the PANNY BY : core doze HUZINEL Father banaly",
+              "confidence": 0.73,
+              "token_count": 26,
+              "bbox": [
+                0.1762019230769231,
+                0.40064102564102566,
+                0.4949519230769231,
+                0.47596153846153844
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BAPTISH & CONFIRMATION : Nov. Nov. 6 6 , 1966 35. PATER AND PAUL CHURCH , MANVILLE , N - I G - DPARENTS : VLADIMIR A LASIS + MRS KATIFERINE RUNGE",
+              "confidence": 0.65,
+              "token_count": 32,
+              "bbox": [
+                0.6096153846153847,
+                0.39903846153846156,
+                0.9245192307692308,
+                0.46282051282051284
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "180971 ALEXANDER DIGGINS SON OF JOHN DIEGINS AND BARBARA ( DUFOUR ) DIGGINS",
+              "confidence": 0.86,
+              "token_count": 13,
+              "bbox": [
+                0.12740384615384615,
+                0.4705128205128205,
+                0.48822115384615383,
+                0.5169871794871795
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "SACRAMENT BY . FATHER THEODORE LABOWSKY 18099- PETER SUSKO SON OF",
+              "confidence": 0.81,
+              "token_count": 11,
+              "bbox": [
+                0.5233173076923077,
+                0.4653846153846154,
+                0.8992788461538461,
+                0.5099358974358974
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1965 149 So. 16TH . STREET , MANVILLE BORN , N.J. BAPTISH 55. & CARISM . POTTER NOVEMBER AND DECEMBER 19 18 , 1965- PAUL , 1965 SOMERVILLE , N.J. - GODPARENTS CitureH . , : MANVILLE , N.J",
+              "confidence": 0.73,
+              "token_count": 39,
+              "bbox": [
+                0.12548076923076923,
+                0.5092948717948718,
+                0.48653846153846153,
+                0.6041666666666666
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "STEPHEN SUSKO AND ANNA GRENTHER SUSKO 1314 KNOPF ST . , MANVILLE , N.J BORN , Nov NEW 30 , 1965- SOMERVILLE , W.J. BAPTISM & CHNISHATION : FEB . 20 , 20,1966 1966",
+              "confidence": 0.81,
+              "token_count": 34,
+              "bbox": [
+                0.5971153846153846,
+                0.5144230769230769,
+                0.8838942307692308,
+                0.6012820512820513
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "SACRAMENTS PADMINISTERED ARTHUR JOHNSON MICHAELA BY : Father & Theatre DoLover's favorway JOHNSON",
+              "confidence": 0.67,
+              "token_count": 13,
+              "bbox": [
+                0.16538461538461538,
+                0.5887820512820513,
+                0.4932692307692308,
+                0.6423076923076924
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "SS . PETER AND PAUL CHURCH OLANVILLE , NOT",
+              "confidence": 0.68,
+              "token_count": 9,
+              "bbox": [
+                0.7146634615384615,
+                0.6006410256410256,
+                0.9247596153846154,
+                0.625
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "37374 ) MARIA ANDROW PHILLIPS PHILLIPS DAUGHTER OF",
+              "confidence": 0.87,
+              "token_count": 8,
+              "bbox": [
+                0.12908653846153847,
+                0.6288461538461538,
+                0.4685096153846154,
+                0.6756410256410257
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "GODPARENTS : JACOB GRENTHER & MARY SHARY K SACRAMENT BY : FATHER THEODORE LABOUSLY",
+              "confidence": 0.79,
+              "token_count": 14,
+              "bbox": [
+                0.6028846153846154,
+                0.628525641025641,
+                0.8927884615384616,
+                0.6730769230769231
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "ANASTASIA T. ( ADAMCHAK AND 1964 2 FRAWART LANE PHILLIPS BORN APRIL , BAPTISM CHRISMATION 17 , 1966- BRANCHBURK : JUNE SOMARUIT , SOMRAVINGS & , M.J. SS GOD . PETER AND PAUL MICHAEL ADAMCHAK CHURCH 5 , PARENTS 1966 : , MANVILLE , NJ . AND ANASTASIA MICKEL 1966",
+              "confidence": 0.75,
+              "token_count": 50,
+              "bbox": [
+                0.11923076923076924,
+                0.6682692307692307,
+                0.49951923076923077,
+                0.9038461538461539
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "37377 SUSAN ELIK - DAUGHTER OF - LUBOMIR BLOK AND LENK MAGOUSKA KLIK 104 EAST STREET , BOUND BROOK , N. J. CHRISMATION BORN : MAY JUNE 11 , : 26 , 1866 1966 - SOMERVILLE , N.J. BAPTISY 9.S. PETER AND PAUL CHURCH , MANUELLENT GOD PARANT ! WASYL JOVANOVICH PACA JOVANOVICH , SACRAMENTS BY : FATHER THEODORE LABOWSKY",
+              "confidence": 0.81,
+              "token_count": 60,
+              "bbox": [
+                0.5144230769230769,
+                0.6746794871794872,
+                0.9223557692307692,
+                0.9198717948717948
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0625
+    ],
+    "col_2": [
+      0.0625,
+      0.51
+    ],
+    "col_3": [
+      0.51,
+      1
+    ]
+  },
+  "columns_detected": 3,
+  "header_y_threshold": 0.40403846153846157,
+  "total_tokens": 525,
+  "data_tokens": 309,
+  "data_rows": 6,
+  "extracted_at": "2026-02-17T01:50:07.591Z"
+}

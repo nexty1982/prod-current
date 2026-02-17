@@ -1,0 +1,81 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 2,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "Счеть шихся . Мужеска пола Женска MALE NUMBER - -"
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BIRTHS H 1980 МЕТРИЧЕСКОЙ КНИГИ И 1980 ГОДЪ , ЧАСТЬ ПЕРЕНА , И РОДИВШИХСЯ . родив : Месяца . и день Званіе , имя , отчество и . Замнала родителей , и какого Званіе , има , отчество и фамиліл Имена родившихся воспрієминкова . Кто совершаль таниство . . . вероисповеданки . пола рожде NIA KOELPE- HIA кроченим . NAME OF BIRTH DATES FULL NAME . MAIDEN GEMALE F CHILD NAME BAPTISM CITY OF BIRTH FATHER'S MOTHER'S FULL NAMES OF SPONSORS PRIEST'S NAME Н s 7/26/9/3 Peter Pausells Sorevville , N.J. Fr. James Parsells Daria ( Barsigian ) Paul Loukiznoff ( Orthodox ) Irnet ( Orthodox mihelick ) Archpriest John Nehoebecki 19127 Tanya ( Tatiane ) George Zveschenko Marie ( Scarinzi ) Robert Zabielski Mary Zvonchenko ( Orthodox ) Priest Jres Parsello Marie Zvonchenko"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Somerville , М.Г.",
+              "confidence": 0.91,
+              "token_count": 3,
+              "bbox": [
+                0.14567307692307693,
+                0.4128205128205128,
+                0.21778846153846154,
+                0.43141025641025643
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0725
+    ],
+    "col_2": [
+      0.0725,
+      1
+    ]
+  },
+  "columns_detected": 2,
+  "header_y_threshold": 0.41685897435897434,
+  "total_tokens": 147,
+  "data_tokens": 3,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:48:34.596Z"
+}

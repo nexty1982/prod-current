@@ -1,0 +1,29 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.97,
+      "fields": {
+        "notes": "PARISH NAME NAME | . AND | ADDRESS | DATE | DATE AT | GOD | Feb. | NAME NAME AND | AT"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5",
+    "col_6",
+    "col_7",
+    "col_8",
+    "col_9",
+    "col_10"
+  ],
+  "parsedAt": "2026-02-17T01:50:41.059Z"
+}

@@ -1,0 +1,59 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.71,
+      "fields": {
+        "notes": "BALE FEMALE BIRTH BAPTISM"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "Dec. July - Natalie Benjamin Francis Smith Palitto | Robert michael Palitto | Fn . Jues Parsells"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "14 31 Natasha 2005 2008 Snidh Salvador Christianz Catherre San | Parsells"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.6,
+      "fields": {
+        "notes": "El Savadar | Yakaterina Khrona soru | Fr. Jaes"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "Oct Nov Nikolas Janes Holot 2 4 29 Flemington Natalia Trusor2 2008 2008"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:49:26.729Z"
+}

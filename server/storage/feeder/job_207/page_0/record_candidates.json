@@ -1,0 +1,40 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "groom_name": "AGE PLACE NAME \" 1 2",
+        "bride_name": "Elizabeth N.J. ( STREET Elbeth ) ( CITY ) March 5 1982 PREVIOUS ARRIAGES_ Tribek Pobuta PARENTS Teresa Marie BRIDE Mill ( NUMBER AND STREET mani ) . ( CITY ) BIRTH June 23 , PARENTS PREVIOUS MARRIAGES Unthomine Tomas First PRESENCE OF WITNESSES : ) ) ( RECTOR PART II - MARRIAGES",
+        "officiant": "PLACE AGE OF NUMBER NAME FULL RESIDENCE PLACE AGE NUMBER NAME \" MARRIED 1 2",
+        "witnesses": "BIRTH Bssa n . GROOM 29 Single OF PREVIOUS MARRIAGES OF Julia PARENTS Joseph 9. Hral Irma NAME OF BRIDE что 20 Weiss St. Man ( NUMBER AND STREET ) ( CITY ) OF BIRTH 28 OF BRIDE OF PREVIOUS MARRIAGES Margaret Fank OF PARENTS Buday IN Elisabet PRESENCE OF Рамонда Wilhas WITNESSES : ( FULL NAME ) Амый ( FULL Rev. NAME ) M. Loz ( RECTOR ) PART II - MARRIAGES",
+        "notes": "groom_parents: . OF OF GROOM BIRTH NUMBER OF and OF FULL NAME OF RESIDENCE . PLACE OF AGE OF BRIDE NAME NUMBER OF OF and MARRIED IN ( FULL NAME ( FULL NAME; bride_parents: ( J. STATE ) Second Lisowshi n ( STATE ) 19151 Lisovs biti Detsky ( RESIDENCE ) ( RESIDENCE ); license: .. 10 . Wilhovsh Tobias ( STATE ) sinal Tokias RESIDENCE ) RESIDENCE )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "bride_name": "RECORD No OF GROOM Damellen Andrew n . ( NUMBER AND All STREET ) ( BIRTH GROOM 22 OF PREVIOUS MARRIAGES Joseph PARENTS fulto . Chabik NAME OF BRIDE DE Middlesex Mary OF BIRTH ( NUMBER AND STREET Middleseil ) BRIDE 21 OF PREVIOUS John MARRIAGES OF Helen PARENTS Romanovich IN PRESENCE OF WITNESSES FULL NAME ) FULL NAME ) ( RECTOR )",
+        "officiant": "FULL AGE ) AGE ) )",
+        "witnesses": "PARISH RECORD No NAME OF GROOM Paul RESIDENCE 15 15 Ave. . S. ( NUMBER S. AND River STREET ) ( N. CITY PLACE OF BIRTH 27 n.J OF GROOM NUMBER OF PREVIOUS tren MARRIAGES NAME and OF PARENTS Anna Sayreville Ceal FULL NAME OF BRIDE RESIDENCE ( NUMBER AND STREET PLACE OF Sayreville ) ( BIRTH OF BRIDE 23.5 NUMBER OF PREVIOUS MARRIAGES Prysak and Alexander NAME OF Kalabor PARENTS MARRIED John IN PRESENCE Harlowick OF WITNESSES ( FULL Flodys NAME ) Herford ( FULL NAME NAME ) ) ( RECTOR )",
+        "notes": "groom_parents: PARISH FULL NAME RESIDENCE PLACE OF AGE OF NUMBER NAME and OF FULL RESIDENCE PLACE AGE OF NUMBER + NAME MARRIED 1 ( 2 (; bride_parents: 40972 Misko 1 CITY N ) .. ( STATE ) First Misko . Kudelko ( CITY ) / n . ( STATE first Kudelko : ( RESIDENCE ( RESIDENCE; license: 40971 Cherisko River , N .. ) ( STATE ) Singel chienho Turovich Kalafory M.L CITY ) ( STATE ) first Mary S. : River , M. ) ( RESIDENCE ) ( RESIDENCE )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 0.789,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:37.806Z"
+}

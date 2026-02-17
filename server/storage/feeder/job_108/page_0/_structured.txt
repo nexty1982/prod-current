@@ -1,0 +1,9 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 5 | Rows: 3
+
+--- Table 1 (5 columns, 4 rows) ---
+ | Счеть шихся MALE | HOHI BIRTHS МЕТРИЧЕСКОЙ КНИГИ НА Вами родив MECAUS и . родителей , и , , . и день Званіе имя отчество какого . Имена родившихся вероисповидані " Kompe- WIH MAIDEN NUMBER DATES NAME . MOTHER'S NAME NAME OF CHILD FATHER'S FULL OF FEMALE BIRTH BAPTIS CITY BIRTH M | > M- YEAR 2009 1912 , 4ACTL NEPKAM , W KARHUEPHOBE LESS Званіе , има , отчетко и фамил воспрібликова . FULL NAMES OF SPONSORS | I- POZHEWHXCA . Кто совершаль таинство кроцині . PRIEST'S NAME F. Jan Panels
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ |  | 2/05 4/25 Julianna - 2009 2009 Grzce Peter + Dolly Bakaletz | Paul Bakzletz Suzanne Bakeletz | 
+ |  | N. Brunswick , N.J | escu | Fa . 1. Jon да Parella
+ | 2 | 5/13 6/20 Sebastian Mihil Max + Carla Caponegro 2009 2009 Princeton N - J . | Chistian Apostel Ruxanda Apostelescu | 

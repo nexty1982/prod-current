@@ -1,0 +1,24 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.75,
+      "fields": {
+        "notes": "MALE FEMALE BIRTH BAPETEM Р CITY OF т А I S - 1/11 3/20 Mariam Mamuka Ivaniashvili Plainfield , N.J. Busudan chikhridze | Teimurzz Chrikishvili Nino Puturidze Eteri Salzdze | Fr. Jos Panell | In"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:49:16.640Z"
+}

@@ -1,0 +1,12 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 5 | Rows: 6
+
+--- Table 1 (5 columns, 7 rows) ---
+ | Счеть родив Месяца шихем . и день . Имена родившихся HIA DATES MALE NUMBER NAME OF CHILD BIRTH FEMALE BIRTH OF BAPTISM CITY | HOHI Poo BIRTHS МЕТРИЧЕСКОЙ КНИГИ Н И Званіе , има , штчество и рамна родителей , в кроисповедания . NAME FATHER'S FULL NAME . MOTHER'S MAIDEN Finnigan Jr. | I- > I- YEAR 2010 ГОДА , ЧАСТЬ ПЕРКАМ , И РОДИВШИХСМ какого Званіе , има , отчестко и фамил воспрілинкова . FULL NAMES OF SPONSORS Nateliz ugulava | . Кто совершаль таинство крашені .. PRIEST'S NAME Parell
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 1/23 7 / A Heather Marie 1 24 Finnigan | John Nino Kanchaveľ . | Irese wells ( honorzy ) | Fr. Jon
+ | Summit , NJ . |  |  | F. д Pansels
+ | 8/08/10/09 Constantine Gorbetur | Timothy Goubeture Marie Boyce | Robert Smith Caroline murphy ( honorzy ) | 
+ | 1 New Brunswick N.J. | Rebecce |  | Fr. Jon Panel
+ | 16/07/10/17 metthew | Alex Gradze Zia Khristani | David Goulishvili Beliz Kannishvili | 
+ | 2007 2010 Gradze NO Brunck |  |  | 

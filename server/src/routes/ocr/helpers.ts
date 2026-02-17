@@ -40,4 +40,82 @@ export function validateChurchAccess(req: any, churchId: number): boolean {
   return user.church_id === churchId;
 }
 
+/**
+ * Split a compound name into first + last.
+ * "John Smith" → { first: "John", last: "Smith" }
+ * "John" → { first: "John", last: null }
+ */
+function splitName(name: string | null | undefined): { first: string | null; last: string | null } {
+  if (!name || !name.trim()) return { first: null, last: null };
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return { first: parts[0], last: null };
+  const last = parts.pop()!;
+  return { first: parts.join(' '), last };
+}
+
+/**
+ * Map OCR field names (from recordFields.ts) to actual DB column names.
+ * Handles name splitting for compound name fields.
+ */
+export function mapFieldsToDbColumns(recordType: string, f: Record<string, any>): Record<string, any> {
+  if (recordType === 'baptism') {
+    const child = splitName(f.child_name);
+    return {
+      first_name: child.first,
+      last_name: child.last,
+      birth_date: f.date_of_birth || null,
+      reception_date: f.date_of_baptism || null,
+      birthplace: f.place_of_birth || null,
+      parents: [f.father_name, f.mother_name].filter(Boolean).join(', ') || null,
+      sponsors: f.godparents || null,
+      clergy: f.performed_by || null,
+    };
+  }
+
+  if (recordType === 'marriage') {
+    const groom = splitName(f.groom_name);
+    const bride = splitName(f.bride_name);
+    return {
+      mdate: f.date_of_marriage || null,
+      fname_groom: groom.first,
+      lname_groom: groom.last,
+      parentsg: f.groom_parents || null,
+      fname_bride: bride.first,
+      lname_bride: bride.last,
+      parentsb: f.bride_parents || null,
+      witness: f.witnesses || null,
+      mlicense: f.license || f.notes || null,
+      clergy: f.officiant || f.priest || null,
+    };
+  }
+
+  if (recordType === 'funeral') {
+    const deceased = splitName(f.deceased_name);
+    return {
+      name: deceased.first,
+      lastname: deceased.last,
+      deceased_date: f.date_of_death || null,
+      burial_date: f.date_of_burial || f.date_of_funeral || null,
+      age: f.age_at_death ? parseInt(f.age_at_death) || null : null,
+      clergy: f.officiant || null,
+      burial_location: f.place_of_burial || null,
+    };
+  }
+
+  return f;
+}
+
+/**
+ * Build an INSERT query from mapped field values.
+ */
+export function buildInsertQuery(table: string, churchId: number, mapped: Record<string, any>): { sql: string; params: any[] } {
+  const cols = ['church_id', ...Object.keys(mapped)];
+  const placeholders = cols.map(() => '?').join(', ');
+  const values = [churchId, ...Object.values(mapped)];
+  return {
+    sql: `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${placeholders})`,
+    params: values,
+  };
+}
+
 export { promisePool };

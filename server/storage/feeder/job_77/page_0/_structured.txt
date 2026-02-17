@@ -1,0 +1,12 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 5 | Rows: 6
+
+--- Table 1 (5 columns, 7 rows) ---
+ | Счеть шихем . Мужеска ΠΟΛΔ Женска MALE NUMBER | H HISTPHчECKÓÁ CHATA NA 1976 родив : Масац . и день . Званіе , , има , штчество и фамилі родителей и какого Имена родившихе в кроисповеданім . . . . пола рожде HiA Koetpe- HIA NAME OF CHILD FULL NAME . MOTHER'S MAIDEN NAME FEMALE BIRTH DATES BAPTIEK CITY OF BIRTH FATHER'S M | YEAR 1976 ГОДА , ЧАСТЬ ПЕРЕАМ , И РОДНЕШИХСЯ Званіе , има , отчетко и фамилі воспріблинкова . FULL NAMES OF SPONSORS | . Кто совершаль таинство крошені . PRIEST'S NAME
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ |  | 11/6/95/1/18/16 ALYSE ANN PETER JOHN JEGOU ROMAN CATHOLIC JECOU SOMERVILLE , NJ . CAROL ANN KULINA ORTHODOX | ( JOHN NANCY JECOO JOAN ) ( R.C. KULINA ) ( OFTHNOG ) | FR . EUGENE D. TARRIS CERTIL 76-1
+ | 2 | 10/31/75/3/14/76 JOHN HENRY JOHN ROSOCHA ORTHODOX SOMERVILLE ROSOCHA , NJ . JOAN LECHINSKY ROMAN CATHOLIC | VINCENT ZAKARZEWSKI OR THUD of MAUREEN ZAKARZEWSKI OR TINDEX | Fie EUGENE D , FARRIS
+ | 3 | 4/13/765/22/76 JAMES MICHAEL PETER P. ZEBAN ZEBAN ORTHODOX SOMERVILLE , NJ . PHYLLIS J. JEWELL REFORMED | ( DONALD WILLIAM MACLEOD ) PROT . THERESA ANN MACLEOD ORTHODOX . | CERT # 76--2 FR EUGENE D. TARRIS
+ | 4 | 6/21/76/8/1/76 NICHOLAS KUCHAREWSKI , NICHOLAS KUCHAREWSKI OR THUQOX SOMERVILLE , N.J. SUZANNE ZEMRE PROTESTANT | ( RONALO ZEMKE ) R. CATHOLIC PATRICIA GOODWIN ORTHODOX | FR . EUGENE D. TARRis
+ | 5 | 8/12/76/9/19/76 CHRISTOPHER EROH KULINA ROBERT JOSEPH KULINA OR THE D PRINCETON , NJ . SUE THOMPSON PROTESTANT | MARK PRIBISH ORTHODOX ( OCE LANGE ) PROTESTANT | CERT # 76-4 FR . EUGENE D. TARRIS CERT # 76-5-
+ |  | 6 9/25/16/10/3/76 EMILY SORRENTINO IRENE JAMES THELMA MICHAEL DALE PETERSON SORRENTING R.C. ORTHODOX | PETER JAMES PAMELA PETERSON ORTHODOX ECKERSLEY ORTHODOX | FR . EUGENE D. TARRIS CERT # 76-6

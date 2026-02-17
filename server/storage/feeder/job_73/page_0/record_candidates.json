@@ -1,0 +1,112 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "41 M X 7/16/72 8/20/72 TAMARA ANN STIBITZ KAV STIBITZ ( SOMERVILLE , N.J. ) SONJA YALSH | DANIEL PODOBED MARY GEORGE ( BETTY LOU STIBITZ ) REV . VADIM A. POGREBNIAK"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.79,
+      "fields": {
+        "notes": "42 X 7/3/12/9/9/12 JAMES ANTONY Dr. JAMES DANIEL ALLEGRETTO ALLEGRETTO ( SOMERVILLE , N.J. ) EVE VINCENT | ALEXCULER PROTO PADES ( ANTHONY VINCENT REV . VADIM A. POGREENIAK Rae SIMEONE"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "43 X 8/5/12/9/11/13 BRIAN CHRISTOPHER GERARD LOUIS VERRILLI VERRILLI ( SOMERVILLE , N.J. ) KAREN CHERNIAK | GRECORY ANDREW CHERNIAK ( HENRY GILDERT ) REV . VADIM A. POGRANIAL ELIZABETH GERHARD"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "4/4 9/12/12/10/29/12 JENNIFER NATER EMIL ENGERWOOD MARION NATER Je ( N.J. ) ( FELICE ) NATER | YOUSIF KAHAN REV . VADIM A. POGREBNIAIK JOAN FELICE"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "145 X 1-1-73 1-20-73 ( DONALD ) Stephen Breese RICHARD BREESE ( New Brunswick , NJ ) ANN ( CARNEY ) BREESE | DAVID PETER KRIVOSHIE REV . VADIM A. POGREBNIAK ELIZABETH DOROTHY CARNEY"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "notes": "146 X 6-6-696-22-69 JEFFREY NICHOLAS GERHARD RUSSEL ( N.J. SOPHIA SONVA GERHARD Sommerville , ) ( ) GERHARD | RECEIVED INTO THE HOLY ORTHODOX CHURCH FROM THE LUTHERN REV . VADIM A. POGREBNIAR CHURCH WHERE HE WAS BAPTIZED 6-22-69 . RECEIVED BY CHRISMATION FEBRUARY 4 , 1973 ."
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "47 12-19-72-2-17-63 ( MICHELLE ) ( PLAINFIELD AND KERILLA , N.J. ) WILLIAM MARLENE DONALD RERILLA 148 | DOUGLAS POFF HELEN POGREBNIAK ( BARBARA CASICELLA ) REV . VADIM A. POGREBNIAR"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "324-504-18 RATH - B 149 ( NEW CHRISTINE CRANENDONK KERILLA X BRUNSWICK , N .. ) CHARLES CRANENDONK GLADYS SOLDATO | MATUSHKA TARRIS Cent # REV EUGENE D. 73-4 VERA MOROS issued 23 AUG"
+      },
+      "sourceRowIndex": 8,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "1-35-734-30-13 ( CHRISTOPHER RIDGEWOOD TARRIS PRIEST , N .. ) EUGENE D. TARRIS SONIA RESHETAR | BARBARA PSENECHN BISHOP DMITRI ROYSTER . Unt # REV . JOEL MC EACHEN issued 73-5 23 Aug 2"
+      },
+      "sourceRowIndex": 9,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "notes": "50 X 11 MAY 23 22 JUL 7 MICHAEL ( COLIE KEVIN ) SOMERVILLE HERBERT A. , NN COLIE LYDIA ANN ZEBAN D 151 ) | ( ALAN MATEYKA ) Joyce MATEY KA REV . EUGENE D. TARRIs . Cet # 73-6 Issued 23 Ave 23"
+      },
+      "sourceRowIndex": 10,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "MAY 7312 AUG 73 KAREN ) SOMERVILLE ABODEELY ANN ( , N.J. ROBERT ) ORTANDOX ABODEELY JR . CONSTANCE GHIZ . CRTIDOX | PAUL A. ABODEELY EVRYKLIA KLIA ABODEELY REV . EUGENE D. TARRIS at # issued 73-7 23 Aug 23"
+      },
+      "sourceRowIndex": 11,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:48:16.671Z"
+}

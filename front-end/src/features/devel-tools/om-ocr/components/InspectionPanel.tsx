@@ -3,65 +3,58 @@
  * Displays selected image with overlay support and tabbed OCR results
  */
 
-import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
-  Box,
-  Paper,
-  Typography,
-  Tabs,
-  Tab,
-  IconButton,
-  Button,
-  Stack,
-  Slider,
-  Switch,
-  FormControlLabel,
-  TextField,
-  Tooltip,
-  Chip,
-  InputAdornment,
-  Divider,
-  CircularProgress,
-  Alert,
-  alpha,
-  useTheme,
-  Dialog,
-  DialogTitle,
-  DialogContent,
+    Alert,
+    alpha,
+    Box,
+    Button,
+    Chip,
+    CircularProgress,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControlLabel,
+    IconButton,
+    Paper,
+    Slider,
+    Stack,
+    Switch,
+    Tab,
+    Tabs,
+    Tooltip,
+    Typography,
+    useTheme
 } from '@mui/material';
 import {
-  IconZoomIn,
-  IconZoomOut,
-  IconMaximize,
-  IconCopy,
-  IconSearch,
-  IconEye,
-  IconEyeOff,
-  IconLayoutColumns,
-  IconRefresh,
-  IconChevronUp,
-  IconChevronDown,
-  IconWand,
-  IconX,
+    IconCopy,
+    IconEye,
+    IconEyeOff,
+    IconLayoutColumns,
+    IconMaximize,
+    IconWand,
+    IconX,
+    IconZoomIn,
+    IconZoomOut
 } from '@tabler/icons-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import FusionOverlay, { OverlayBox } from './FusionOverlay';
-import ReviewFinalizeTab from './ReviewFinalizeTab';
-import MappingTab from './MappingTab';
-import TranscriptionPanel from './TranscriptionPanel';
-import { getVisionPageSize } from '../utils/visionParser';
 import { lazy, Suspense } from 'react';
-import { BBox, VisionResponse, FusionLine } from '../types/fusion';
-import { parseVisionResponse, getVisionPageSize } from '../utils/visionParser';
-import { useOcrSelection, OcrSelectionItem } from '../context/OcrSelectionContext';
+import { OcrSelectionItem, useOcrSelection } from '../context/OcrSelectionContext';
+import { BBox, VisionResponse } from '../types/fusion';
+import type { BoundingBox, JobDetail, TextAnnotation } from '../types/inspection';
 import { getImageViewportMetrics } from '../utils/imageViewportMetrics';
-import type { JobDetail, OCRResult, TextAnnotation, BoundingBox, FullTextAnnotation } from '../types/inspection';
+import { getVisionPageSize, parseVisionResponse } from '../utils/visionParser';
+import FusionOverlay, { OverlayBox } from './FusionOverlay';
+import MappingTab from './MappingTab';
+import ReviewFinalizeTab from './ReviewFinalizeTab';
+import TranscriptionPanel from './TranscriptionPanel';
 
 // Lazy load FusionTab at module level - React.lazy requires module-level declaration
 const FusionTabLazy = lazy(() => import('./FusionTab'));
 
 // Re-export types for backward compatibility (components/index.ts still exports these)
-export type { JobDetail, OCRResult, TextAnnotation, BoundingBox, FullTextAnnotation } from '../types/inspection';
+export type { BoundingBox, FullTextAnnotation, JobDetail, OCRResult, TextAnnotation } from '../types/inspection';
 
 interface InspectionPanelProps {
   job: JobDetail | null;
@@ -304,8 +297,8 @@ const InspectionPanel: React.FC<InspectionPanelProps> = ({
     if (!bbox?.vertices || bbox.vertices.length < 4) return null;
     if (!imageDimensions.naturalWidth || !imageDimensions.naturalHeight) return null;
 
-    const scaleX = (imageDimensions.width * (zoom / 100)) / imageDimensions.naturalWidth;
-    const scaleY = (imageDimensions.height * (zoom / 100)) / imageDimensions.naturalHeight;
+    const scaleX = imageDimensions.width / imageDimensions.naturalWidth;
+    const scaleY = imageDimensions.height / imageDimensions.naturalHeight;
 
     const minX = Math.min(...bbox.vertices.map(v => v.x || 0));
     const minY = Math.min(...bbox.vertices.map(v => v.y || 0));
@@ -596,33 +589,48 @@ const InspectionPanel: React.FC<InspectionPanelProps> = ({
                 />
               )}
               
-              {/* Bounding Box Overlay */}
-              {showOverlay && imageUrl && wordAnnotations.map((annotation, index) => {
-                const style = getBboxStyle(annotation.boundingPoly, index);
-                if (!style) return null;
-                
-                return (
-                  <Tooltip
-                    key={index}
-                    title={
-                      <Box>
-                        <Typography variant="body2">{annotation.description}</Typography>
-                        {annotation.confidence !== undefined && (
-                          <Typography variant="caption">
-                            Confidence: {Math.round(annotation.confidence * 100)}%
-                          </Typography>
-                        )}
-                      </Box>
-                    }
-                    arrow
-                  >
-                    <Box
-                      sx={style}
-                      onClick={() => handleBoxClick(annotation, index)}
-                    />
-                  </Tooltip>
-                );
-              })}
+              {/* Bounding Box Overlay — wrapped in a scaled container matching the image transform */}
+              {showOverlay && imageUrl && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: imageDimensions.width || '100%',
+                    height: imageDimensions.height || '100%',
+                    transform: `scale(${zoom / 100})`,
+                    transformOrigin: 'top left',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {wordAnnotations.map((annotation, index) => {
+                    const style = getBboxStyle(annotation.boundingPoly, index);
+                    if (!style) return null;
+                    
+                    return (
+                      <Tooltip
+                        key={index}
+                        title={
+                          <Box>
+                            <Typography variant="body2">{annotation.description}</Typography>
+                            {annotation.confidence !== undefined && (
+                              <Typography variant="caption">
+                                Confidence: {Math.round(annotation.confidence * 100)}%
+                              </Typography>
+                            )}
+                          </Box>
+                        }
+                        arrow
+                      >
+                        <Box
+                          sx={{ ...style, pointerEvents: 'auto' }}
+                          onClick={() => handleBoxClick(annotation, index)}
+                        />
+                      </Tooltip>
+                    );
+                  })}
+                </Box>
+              )}
             </Box>
           </Box>
         </Box>

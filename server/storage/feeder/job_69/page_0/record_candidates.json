@@ -1,0 +1,130 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "performed_by": "REV . ROBERT A. GEORGE LEWIS .",
+        "notes": "8 x | 7-25-698-3069 SCOTT FIELDING CHRISTOPHER HARVEY GEORGE FIELDING , CAROL MOCK ANN | WILLIAM FIELDING , KRISTINA MOCK"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "( PATUXENT RIVER MARYLAND , )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "performed_by": "REV . ROBERT A. GEORGE LEWIS",
+        "notes": "ах | 8-2-699-27-49 DAVID DWIGHT ANDREW HAROLD PHILLIPS PHILLIPS , NANCY ADAMCHAK | LAVERNE MICKEL , MARGARET BALOGA"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "( SOMERVILLE , N.J. )"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "performed_by": "REV . ROBERT A. GEORGE LEWIS",
+        "notes": "10 % | 5-9-69 10-5-69 PHILIP EUGENE OSHVA EUGENE OSHVA , LYDIA TERESHKOVICH | WILLIAM TERESHKOVICH , OLGA BINERT"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "11 | ( NEW YORK , N.Y. )"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "performed_by": "REV . ROBERT A. GEORGE LEWIS",
+        "notes": "X2-2-67 10-11 VICTORIA JAKOWENKO VICTOR JAKOWENKO , JEAN WSZOLEK | JOHN KUCHARZ , OLGA OLENICK"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "( TORONTO , CANADA )"
+      },
+      "sourceRowIndex": 8,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "performed_by": "REV . ROBERT A. GEORGE LEWIS",
+        "notes": "12 × | 9296 / 11-1-69 DER JEFFREY NEVITT ALEXAN - RICHARD NEVITT , THEODOSIA BARTUSHAK | JOHN ROSOCHA , CYNTHIA ROSOCHA JR ."
+      },
+      "sourceRowIndex": 9,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "( SOMERVILLE , N.T. )"
+      },
+      "sourceRowIndex": 10,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "performed_by": "REV . ROBERT A. GEORGE LEWIS",
+        "notes": "13x | 10-8-69 / 11-15-69 JASON PETER COLIE HERBERT COLIE , LYDIA ZEBAN | PETER ZEBAN , JR . , PHYLLIS ZEBAN"
+      },
+      "sourceRowIndex": 11,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "( SOMERVILLE , N.J. )"
+      },
+      "sourceRowIndex": 12,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_5": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:48:03.368Z"
+}

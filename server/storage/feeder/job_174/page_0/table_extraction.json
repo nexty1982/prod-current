@@ -1,0 +1,243 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "JA 37371 APT ) , . 1965 ) : PHILLIPS ) ST STATE CITY . .. BAPTISMS N ANDREW NAME NAME 24 STREET N.J N , , - AND ( ANASTA FATHER'S ( 1 ANASTASIA MOTHER'S PART RECORD PHILLIPS MERCER NUMBER ( CHILD PARISH OF PARENTS 171 CHERVILLE MARCH OF BIRTH OF . NAME NAME AND ADDRESS DATE 37374 ° ) ) BAPTISMS N PHILLIPS PHILLIPS ) STATE , NAME NAME LANT SOMERVILLE 1966 , CITY , 17 1 FATHER'S PHILLIPS MOTHER'S STREET ( ( PART RECORD MARIA ANDREW AND NUMBER ( PARISH OF CHILD OF PARENTS FREWERT APRIL . NAME NAME ANASTASIA 2 BURG ADDRESS BRANCH OF BIRTH AND DATE"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "2,1965 N.J ) RECTOR , STATE ( MAY PAUC ) & CHURCH ) ADAMCHAK BY ( CITY Lebourly ( ORE Наскат AND 00 BAPTISM PETER . SOMERVING THE BIRTH CAROL PERFORMED Thwdoll OF DATE CONFIRMATION SJ OF . AT PLACE PARENTS GOD SACRAMENTS Father 5,1966 N.J , PAUL ) RECTOR ( STATE . rosley JUNE & ) ADAMCHAK Moe Labe ) Micksh BY ( CITY ( AND CHURCH PorT . SOMERVILLE OF BAPTISM Ростига MICHAEL DATE CONFIRMATION SS OF BIRTH PERFORMED beodor . AT PLACE GOD PARENTS ANASTASIA SACRAMENTS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "S BAPTIZED 37372 KINTRY K. KIGTRYS ) AUT ) , N.J ) RECTOR BROOK 511945 191965 ( . STATE : ) KIETRYS ) STATE 1 BAPTISMS N NAME NAME , CITY • STREET RECORD D / Кусс THOMAS THOMAS ( FATHER'S ( WISLOSKI ( MOTHER'S JEROME PAUL JUNG ) AND AND ( AND CHURCH BRUNSWICK ) WishOSKI Wishosk BY PART ( NUMBER SUNK ( PETER PETER NEW CITY JOHN for PARISH OF CHILD OF PARENTS 126 BOUND . WASITOWSKI OF BIRTH NAME NAME AND DEANNE BIRTH , OF BAPTISM . ADDRESS So. DATE DATE CONFIRMATION SS OF CAROLE . AT PLACE PARENTS PERFORMED GOD SACRAMENTS Father there 37373 LASIK RECTOR STATE 1 BAPTISMS No BAPTIZED DAVID SKIRZENSKI R. SKIRBENSKI , 1965 , 1960 2 PANG 28 JUNE 2,1960 , N.5 ) ) ) NAME SKIRZENSKI ) NAME Avi ( STATE . , CITY N.J. ZOTRAN . 17 ( AND STREET ( FATHER'S PART RECORD CHILD STEPHEN STEPHEN LASIK MOTHER'S , ( HARAN AND ) ( CHURCH ) BY ( ( MARK 940 NUMBER CITY th PARISH OF OF PARENTS NAME NAME INN AND ADDRESS MANVILLE OF BIRTH APRIL AND OF BAPTISM . PATER SOMERVILLE SS BIRTH MICHAL OF NATALIA PERFORMED DATE DATE CONFIRMATION . AT PLACE PARENTS GOD SACRAMENTS Farled"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS 37376 SKIRZENSK ANTHONY SKIRZENSEL SKIRZENSKL AVE 1965 ) STATE ° N NAME NAME , ) ) CITY , STREET N.J.",
+              "confidence": 0.85,
+              "token_count": 21,
+              "bbox": [
+                0.10697115384615384,
+                0.6676282051282051,
+                0.29927884615384615,
+                0.7913461538461538
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "N.J 6,1966 RECTOR PAUL , STATE ) LASIK ( RUNGE",
+              "confidence": 0.87,
+              "token_count": 10,
+              "bbox": [
+                0.33533653846153844,
+                0.6826923076923077,
+                0.4701923076923077,
+                0.7823717948717949
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "37375 CARNEY CARNITY 10.7 STATE , 26,1966 1966 1966 26 PAUL wooker NJ AV STATE CARNEY RECTOR ) ) : (",
+              "confidence": 0.79,
+              "token_count": 21,
+              "bbox": [
+                0.5300480769230769,
+                0.6967948717948718,
+                0.8612980769230769,
+                0.7875
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "- RECORD DAVID STEPHEN FATHER'S MART MOTHER'S HARAN AND SEPT 1 PART ( ( 940 NUMBER (",
+              "confidence": 0.93,
+              "token_count": 17,
+              "bbox": [
+                0.10889423076923077,
+                0.7544871794871795,
+                0.2954326923076923,
+                0.8458333333333333
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Nov. CHURCH SOMERVILLE ' ALEXANDER * етал CITY BY ) AND ( ( PERFORMED",
+              "confidence": 0.85,
+              "token_count": 14,
+              "bbox": [
+                0.3326923076923077,
+                0.7208333333333333,
+                0.44495192307692305,
+                0.8496794871794872
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "BAPTISMS N DAVID JERRY FATHER'S NAME CRISICKo ) MOTHER'S NAME Box STREET CITY , ) JERRY , ELIZABETH AND Араа APRIL AND BRUNS 55 CHURCH BORKS RUTAR D ) 1 BY ( ( )",
+              "confidence": 0.85,
+              "token_count": 34,
+              "bbox": [
+                0.4971153846153846,
+                0.7391025641025641,
+                0.834375,
+                0.8512820512820513
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PARISH CHILD PARENTS ANN ADDRESS MANVILLE BIRTH OF NAME NAME OF AND OF . DATE",
+              "confidence": 0.93,
+              "token_count": 15,
+              "bbox": [
+                0.14254807692307692,
+                0.8121794871794872,
+                0.30432692307692305,
+                0.9096153846153846
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BAPTISM CONFIRMATION BIRTH OF PLACE OF PARENTS SLADIMIR KATHERINE DATE GOD SACRAMENTS AT . Fr.",
+              "confidence": 0.91,
+              "token_count": 15,
+              "bbox": [
+                0.3293269230769231,
+                0.7964743589743589,
+                0.46057692307692305,
+                0.9179487179487179
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "PART RECORD PARENTS MARGARET CARNITY NUMBER долже BAPTISM AND PETER NEW CITY RD 1 CONFIRMATION ( ( PARISH CHILD ( NAME ADDRESS BIRTH 35 BIRTH NAME AND OF PLACE OF PARENTS LONA AT GOD SACRAMENTS PERFORMED Rev. FR- OF OF DATE OF DATE . V.",
+              "confidence": 0.89,
+              "token_count": 45,
+              "bbox": [
+                0.4954326923076923,
+                0.8182692307692307,
+                0.8425480769230769,
+                0.9525641025641025
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0525
+    ],
+    "col_2": [
+      0.0525,
+      0.315
+    ],
+    "col_3": [
+      0.315,
+      0.485
+    ],
+    "col_4": [
+      0.485,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.6662179487179487,
+  "total_tokens": 602,
+  "data_tokens": 192,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:51:41.368Z"
+}

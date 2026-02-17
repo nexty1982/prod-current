@@ -1,0 +1,249 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 9,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Arch 22933 ) BAPTISMS NO chuste NAME 1 PART RECORD natalie FATHER'S ( Audill PARISH OF CHILD PARENTS OF Hele NAME NAME John 22938 Hicks BAPTISMS NO -ANN 1 record Flicks tini Frank PART Confirmation RECORD Betty- . OF CHILD OF PARENTS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": ") NAME MOTHER'S ( AND ) NAME NAME NAM FATHER'S MOTHER'S ( ( Asthle Ethel"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": ") STATE . CITY , n.g RDT STREET AND RI NUMBER ( ADDRESS Stock ) STATE , . CITY , Ave STREET Dr. - AND 6th NUMBER ( S. Manville"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": ") 1952 RECTOR , 31 30-1952 STATE ( tober Nov Paul ) J. CHURCH ) Ivan BY & ( Manil CITY ( AND BIRTH Peter BIRTH OF BAPTISM Steve OF St. PARENTS Thehubets Eva PERFORMED DATE DATE CONFIRMATION OF . GOD SACRAMENTS Kes Niklas . AT PLACE ) RECTOR 1931 , 7-1953 STATE ( 7 17 . - 1948 Feb. b Paul Slovak 3 ) ) BY Kryluk T. AND Peter CHURCH ( ( CITY Mack BIRTH OF Baptizet BAPTISM OF CONFIRMATION St. BIRTH William Wi PERFORMED OF PARENTS Mildred . SACRAMENTS Nicholas Keo"
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "22934 r.g. STATES . ) , ΙΝΟ NAME ( Vigilante NAMEY CITY BAPTISMS STREET ( RECORD Andre MOTHER'S Pittstown CHILD alexander FATHER'S AND 1 PARISH OF PARENTS OF NAME NAME Sheetakoff Antoinette RDT NUMBER ( PART AND ADDRESS 22936 bara ) STATE . ) ° ) під , BAPTISMS N NAME al NAME CITY , том STREET ( AND ( 1 dos FATHER'S MOTHER'S PART RECORD NUMBER CHILD stock ( PARISH OF PARENTS OF Maria . ADDRESS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": ", 1952 15 October AND . BIRTH OF BAPTISM OF DATE 1952 , alle 22 Pa , D.W. % BIRTH OF Doyleston"
+            },
+            {
+              "row_index": 0,
+              "column_index": 7,
+              "column_key": "col_8",
+              "content": ", 30 1952 : STATE ovember Paul , d.g + ) ( CHURCH CITY Peter DATE CONFIRMATION St. Phillipahu ) ( BIRTH OF AT PLACE 1953 , 25 Paul n , ) AND Jan. ( BAPTISM Peter CHURCH Ma BIRTH OF OF DATE CONFIRMATION St. PLACE"
+            },
+            {
+              "row_index": 0,
+              "column_index": 8,
+              "column_key": "col_9",
+              "content": ", Sawicki RECTOR BY Margaret J. , Vigilante Kirylick PARENTS Nicholas GOD Micholas PERFORMED SACRAMENTS ) RECTOR ( STATE ) BY T. Kiryluk ( CITY Luka Milosevich PARENTS Katherine Bileckyj PERFORMED . SACRAMENTS Nicholas Kes"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PARISH NAME NAME",
+              "confidence": 0.99,
+              "token_count": 3,
+              "bbox": [
+                0.23485576923076923,
+                0.7759615384615385,
+                0.2860576923076923,
+                0.8262820512820512
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": ". AND",
+              "confidence": 0.92,
+              "token_count": 2,
+              "bbox": [
+                0.31322115384615384,
+                0.8006410256410257,
+                0.3173076923076923,
+                0.8221153846153846
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "ADDRESS",
+              "confidence": 0.95,
+              "token_count": 1,
+              "bbox": [
+                0.3485576923076923,
+                0.7762820512820513,
+                0.3528846153846154,
+                0.8217948717948718
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "DATE B DATE AT PLACE . GOD",
+              "confidence": 0.94,
+              "token_count": 7,
+              "bbox": [
+                0.3894230769230769,
+                0.7849358974358974,
+                0.49591346153846155,
+                0.8221153846153846
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "NAME NAME AND",
+              "confidence": 0.99,
+              "token_count": 3,
+              "bbox": [
+                0.646875,
+                0.7875,
+                0.7007211538461539,
+                0.8153846153846154
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "DATE",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.7704326923076923,
+                0.7846153846153846,
+                0.7771634615384615,
+                0.8099358974358974
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 7,
+              "column_key": "col_8",
+              "content": "AT",
+              "confidence": 0.97,
+              "token_count": 1,
+              "bbox": [
+                0.8262019230769231,
+                0.7903846153846154,
+                0.8408653846153846,
+                0.8102564102564103
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 8,
+              "column_key": "col_9",
+              "content": "GOD",
+              "confidence": 0.97,
+              "token_count": 1,
+              "bbox": [
+                0.8665865384615384,
+                0.7849358974358974,
+                0.8798076923076923,
+                0.8080128205128205
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.115
+    ],
+    "col_2": [
+      0.115,
+      0.3
+    ],
+    "col_3": [
+      0.3,
+      0.3325
+    ],
+    "col_4": [
+      0.3325,
+      0.37
+    ],
+    "col_5": [
+      0.37,
+      0.5725
+    ],
+    "col_6": [
+      0.5725,
+      0.7375
+    ],
+    "col_7": [
+      0.7375,
+      0.8025
+    ],
+    "col_8": [
+      0.8025,
+      0.855
+    ],
+    "col_9": [
+      0.855,
+      1
+    ]
+  },
+  "columns_detected": 9,
+  "header_y_threshold": 0.7963461538461538,
+  "total_tokens": 380,
+  "data_tokens": 19,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:51:03.471Z"
+}

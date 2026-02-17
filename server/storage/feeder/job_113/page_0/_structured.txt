@@ -1,0 +1,10 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 6 | Rows: 4
+
+--- Table 1 (6 columns, 5 rows) ---
+ | Счета родив шихем . NUMBER M XALE FEMALE | HIN ІНСОН МЕТРИЧЕСКОЙ Иксац и день Званів , имъ , Имена родившихся NAME BEREH DATES OF CHILD FATHER ' I BAPTISM CITY OF BIRTH т Н | BIRTHS КНИГИ НИ отчество и . фамнага родителей , вероисповедания . FULL NAME . MOTHER'S MAIDEN | YEAR 2015 ГОДЪ , ЧИСТЬ ПЕРЕНА , СО W Званіе , имя , отчество и фамилі и какого воспріблинкова . FULL NAMES OF SPONSORS NAME | РОДИВШИХСЯ . Кто совершаль таинство кроенім . PRIEST'S NAME Peter Laveme mickel где 19 N.J. baptized +
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 1 | 6/20 Peter La Verne mickel |  |  | Bound Brook , Chrismated by Fr. James Parsells
+ |  | Bound Brook где 19 |  | Daniel Torvisi | at RWJ Somerset Hospital June 20 , 2015
+ | 2 | 8/08 Stephen Holland видете age Vamey sp | Buth |  | F. James Parells
+ |  | New Brunswick 4/17 ) 1964 |  |  | 

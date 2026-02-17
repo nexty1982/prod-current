@@ -1,0 +1,13 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 3 | Rows: 7
+
+--- Table 1 (3 columns, 8 rows) ---
+ | МЕТРИЧЕСКОЙ KHATH NA Счет родив : Мѣсац Шиуса . И день Званіе , има , штчество и рамна родителей , и какого Имена родившихс . . . . вероисповедані Мужеска пода Женска ΠΟΛΑ рожде HIA kpope- HIA HALE NUMBER NAME OF CHILD NAME FEMALE DATES M BIRTH BAPTIS CITY OF BIRTH FATHER'S FULL NAME . MOTHER'S MAIDEN | YEAR 1974 ГОДА , ЧАСТЬ ПЕРЕАМ , Ю КИНИДЕЖОВЬ - ТАНИМЫ РОДИВШИХСМ . Званіе , има , отчество и фамил Кто совершаль воспрівлянкова . таинство κραμενίδη . FULL NAMES OF SPONSORS PRIEST'S NAME
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 1 127/27/13/3/23/74 TAMARA ( TAMI ) JAMES ALLEGRETTO ALLEGRETTO EVALYN VINCENT SOMERVILLE | FRANKIE ALLEGRETTO ROSEANNA CUBELLI CONSTANCE ABODEELY REV . FR EUGENE D. TARRIS
+ | 2 12/18/13/3/23/14 TATIANA ( TRALI ) JAMES ALLEGRETTO ALLEGRETTO EVALYN VINCENT SOMERVILLE | FRED DE STEFANO / IRE CERT NO . 74-1 IRENE HYLL MARLENE REV . FR . O'DONNELL EUGENE D. TARRIS
+ | 3 4/5/74/5/12/74 ( GLEN ) PATRICK ALAN BEATTY BRENT BEATTY PATRICIA MAE SUPRO SOMERVILLE | CERT NO . 74-2 . RICHARD KORAB DEACON GEORGE BREYAN REV . FR . EUGENE D. TARRIS BARBARA SIBILIA
+ | 4 3/25/74/5/19/74 Blake Stephen ) ( Marce Shannon Stephen John Marce , JR . Beverly ANN GAULICK . RG ORTHODOX | CERT No. 74-3 JAMES ANDREW GAVLICK KATHRYN GAVLICK . REV FR . EVGENE D. TARRIS ORTHODOX LUTHERAN CERT . No. 74-4
+ | 5 4/4/74/6/23/74 ( LEIGH ) ELIZABETH Kowalski RICHARD MICHAEL KOWALSKI ELIZABETH MARTORELLA b 7/3/748/4/74 ( ORTH . ) 14 GEORGE STEVEN ( R.C. ) | EUGENE FORMILA JaneFormica ANNA KOWAlski REV . FR . EUGENE D. TARRIS ( R.c. ) ( R.C. ) ( ORTH ) CERT NO . 74-5
+ | BARNOSKY GEORGE ( ORTADO BARNOSKY LAVRA PIETROCHA - Y ) 3/26/74/8/25/74 ( KARA ( R.c. ) 7 ) MARIE | WADE STANLEY PISCADLO JEANNE GOLDEN REV . FR . EUGENE D , TARRIS ( ORTHODOX ) ( R.C. ) CERT NO . 74-6
+ | BRADLEY CHARLES ( R.C. ) BRADLEY JOYCE TACAK B. ( ORTH . ) | CHARLES WARDO Sonia Rybski ( Episc . ) ( ORTH ) REV . FR . EUGENE D. TARRIS CERT . No. 74-7

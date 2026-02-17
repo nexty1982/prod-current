@@ -1,0 +1,233 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Courica Orteplex Been tw H HOHI BIRTHS МЕТРИЧЕСКОЙ КНИГИ НИ"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "YEAR 2018 ГОДЪ , ЧАСТЬ ПЕРЕНА , W СО"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "РОДИВШИХСЯ ."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Ифелца штчество и замнал родителей , и родне какого Счеть : и день Званіе има . , , шихся . вероисповедания .",
+              "confidence": 0.84,
+              "token_count": 22,
+              "bbox": [
+                0.08221153846153846,
+                0.175,
+                0.46634615384615385,
+                0.2246794871794872
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Званіе , има , отчество и фамил воспрієльникова .",
+              "confidence": 0.92,
+              "token_count": 9,
+              "bbox": [
+                0.534375,
+                0.15897435897435896,
+                0.6733173076923077,
+                0.2016025641025641
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Кто совершаль таниство крашені .",
+              "confidence": 0.92,
+              "token_count": 5,
+              "bbox": [
+                0.7834134615384616,
+                0.16891025641025642,
+                0.8795673076923077,
+                0.20897435897435898
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Мужеска Имена родившихся пола Жонска пола рожде . . . . HIA крефе- HIA",
+              "confidence": 0.84,
+              "token_count": 14,
+              "bbox": [
+                0.0829326923076923,
+                0.2153846153846154,
+                0.23533653846153846,
+                0.2862179487179487
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "NUMBER DATES MALE FEMALE BIRTH BAPTIS OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN NAME В NAME CITY OF BIRTH М А M 8/17 10/27 Madison Mary Scott micheel Klass rbss Catherine w . Kloss Plainsboro , N.J. 2/19/12/08 | Zacharich John James Рек ) Chende 6 Cheade Oqnz Dalit Grigosescu New Brunswick N.J 3 11/01 12/29 Luke Emmanuel Peter Parsells Passells Herther masiе Graven Philadelphic , PA",
+              "confidence": 0.85,
+              "token_count": 68,
+              "bbox": [
+                0.08846153846153847,
+                0.2932692307692308,
+                0.45625,
+                0.6054487179487179
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "FULL NAMES OF SPONSORS Daniel Bolohay Dana Bolohen crisdien Gheorghe Grigorescu Richard John weben emily Pareclis",
+              "confidence": 0.88,
+              "token_count": 16,
+              "bbox": [
+                0.4947115384615385,
+                0.28365384615384615,
+                0.6627403846153846,
+                0.5487179487179488
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "PRIEST'S NAME Fr. Danielskvin Fr. Jones Pursells Fri Jaes Parsells",
+              "confidence": 0.8,
+              "token_count": 10,
+              "bbox": [
+                0.7555288461538462,
+                0.2900641025641026,
+                0.8682692307692308,
+                0.49423076923076925
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.04
+    ],
+    "col_2": [
+      0.04,
+      0.48
+    ],
+    "col_3": [
+      0.48,
+      0.71
+    ],
+    "col_4": [
+      0.71,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.15,
+  "total_tokens": 165,
+  "data_tokens": 144,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:49:47.049Z"
+}

@@ -1,0 +1,20 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 4
+
+--- Table 1 (6 columns, 6 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+ | 9-02-90 | John Freehold Alpaugh , N.J. 31 Orthodox 1st | Raymond Lois | Debra Rahway , N.J. Kachmarsky 30 Orthodox 1st | Peten Helen
+ |  | Kachek | John | Carol Ann Yenchik Danysh | Lawrence
+а | 10-07-90 | Austin Manville , N.J. Orthodox 1st 27 | Theodorz | 41 Greek Catholic and Cowell | Irene Falchid
+3 | 10-21-90 | Mark Ryan 1st 3 Bridges Orthodox | Anthony Vevz | Lindz Presbyterian 30 | Joan
+
+--- Table 2 (3 columns, 6 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+F .. James Parsells ( | rzig Kachmarsky Donna Supock | # Rahway 159 , N.J. 8-30-90 # 63-90 of 9-21-90
+Fr. Jones Parsells | Krzig Scarbinsky Stephanie Kachek | Manville , N.J.
+Fr. Jouz Parall | John 2zhodnick Lisz Ryan | Orthodox previously Sacramental contracted Marriage for marriage of
+ |  | at

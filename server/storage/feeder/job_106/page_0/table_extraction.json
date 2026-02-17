@@ -1,0 +1,275 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Н Счет роди : Мсц ШИКСА . И день . Имена родившихся . Физ . .. пола Женска пола дожда Hia креции- HIA SALE NUMBER DATES NAME OF CHILD RENA BAPERS CITY OF BIRTH"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "HOHI BIRTHS МЕТРИЧЕСКОЙ КНИГИ МЕ И Званів , нам , штчество и . фамилья родителей , какого вкроисповеданім . FATHER'S FULL NAME . MOTHER'S MAIDEN NAME"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "> 2006YEAR ГОДА , ЧАСТЬ ПЕРВАЯ , Ю Звание , има , отчетко и фамиль воспріємникова . FULL NAMES OF SPONSORS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Ін РОДИВШИХСЯ . Кто совершаль таниство крошені .. PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BIBIR",
+              "confidence": 0.56,
+              "token_count": 1,
+              "bbox": [
+                0.13245192307692308,
+                0.3057692307692308,
+                0.13701923076923078,
+                0.3451923076923077
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1 | 12/29/5/13 ] Anna 2005 2006 New BrunsOICE , N.J.",
+              "confidence": 0.68,
+              "token_count": 11,
+              "bbox": [
+                0.10504807692307692,
+                0.3605769230769231,
+                0.23245192307692308,
+                0.40673076923076923
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Ke Magdalena Dao Trofimink",
+              "confidence": 0.83,
+              "token_count": 4,
+              "bbox": [
+                0.26658653846153846,
+                0.35192307692307695,
+                0.4,
+                0.4016025641025641
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Maria Tonissi",
+              "confidence": 0.8,
+              "token_count": 2,
+              "bbox": [
+                0.525,
+                0.34967948717948716,
+                0.6302884615384615,
+                0.37948717948717947
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Jues Parsells Fr. Janes Parsells",
+              "confidence": 0.76,
+              "token_count": 6,
+              "bbox": [
+                0.7665865384615385,
+                0.34455128205128205,
+                0.8959134615384615,
+                0.4326923076923077
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "2 05/26/08/02 Elisebeth 2006 2006 New Brassnick N.J.",
+              "confidence": 0.74,
+              "token_count": 8,
+              "bbox": [
+                0.10096153846153846,
+                0.43205128205128207,
+                0.22788461538461538,
+                0.491025641025641
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Fr. Emily John strzot Parsells",
+              "confidence": 0.83,
+              "token_count": 5,
+              "bbox": [
+                0.26129807692307694,
+                0.42435897435897435,
+                0.371875,
+                0.48717948717948717
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Main Tarpley Claudy можу",
+              "confidence": 0.68,
+              "token_count": 4,
+              "bbox": [
+                0.5213942307692307,
+                0.428525641025641,
+                0.6185096153846154,
+                0.47147435897435896
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.05
+    ],
+    "col_2": [
+      0.05,
+      0.2475
+    ],
+    "col_3": [
+      0.2475,
+      0.4625
+    ],
+    "col_4": [
+      0.4625,
+      0.7
+    ],
+    "col_5": [
+      0.7,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.32519230769230767,
+  "total_tokens": 132,
+  "data_tokens": 41,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:49:25.435Z"
+}

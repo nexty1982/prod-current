@@ -1,0 +1,499 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 3120,
+    "height": 4160
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "FULL AGE 1 2",
+              "confidence": 0.97,
+              "confidence_min": 0.93,
+              "token_count": 4,
+              "bbox": [
+                0.3282051282051282,
+                0.3504807692307692,
+                0.3532051282051282,
+                0.4997596153846154
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "Anna Jacob NAME OF BRIDE Manville RESIDENCE ( NUMBER AND STREET PLACE OF BIRTH menville OF BRIDE 21 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Madelined , MARRIED IN PRESENCE Joseph OF ( FULL NAME ) Frances ( FULL NAME Rev. ) n . T. ( RECTOR",
+              "confidence": 0.89,
+              "confidence_min": 0.39,
+              "token_count": 47,
+              "bbox": [
+                0.3294871794871795,
+                0.29759615384615384,
+                0.5060897435897436,
+                0.5213942307692307
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": "Piscadlo Simkovitch Olga ) ( CITY ) n.J Jacob none Sevaylea WITNESSES : Zudales Barnasky Kilk ( RESIDENCE )",
+              "confidence": 0.8,
+              "confidence_min": 0.47,
+              "token_count": 19,
+              "bbox": [
+                0.42980769230769234,
+                0.2903846153846154,
+                0.5737179487179487,
+                0.5211538461538462
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "FULL PLACE AGE NUMBER NAME FULL PLACE AGE NUMBER NAME 1 2",
+              "confidence": 0.99,
+              "confidence_min": 0.97,
+              "token_count": 12,
+              "bbox": [
+                0.3243589743589744,
+                0.6399038461538461,
+                0.36153846153846153,
+                0.9137019230769231
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "PART II - PARISH RECORD NAME OF GROOM Nicholas RESIDENCE Mt. Ave ( NUMBER AND STREET ) OF BIRTH Farrel OF GROOM 30 OF PREVIOUS OF Paul MARRIAGES PARENTS Tatiana NAME OF BRIDE RESIDENCE Димо ( NUMBER AND STREET OF BIRTH OF BRIDE 23 OF PREVIOUS MARRIAGES OF PARENTS mary Thomas MARRIED IN John PRESENCE B. OF ( FULL Rev. Sophie NAME ) Craig ( FULL NAME ) Nicholas ( RECTOR )",
+              "confidence": 0.92,
+              "confidence_min": 0.37,
+              "token_count": 72,
+              "bbox": [
+                0.325,
+                0.5620192307692308,
+                0.503525641025641,
+                0.9399038461538461
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "MARRIAGES No 40989 middleses , ( CITY ) ( Pa Shridrik , Klebanovitch Margaret овел пя ) ( CITY ) ( Semavovitale Lenner Craig WITNESSES : ( RESIDENCE Kryluk ( RESIDENCE",
+              "confidence": 0.8,
+              "confidence_min": 0.39,
+              "token_count": 31,
+              "bbox": [
+                0.44006410256410255,
+                0.5610576923076923,
+                0.5717948717948718,
+                0.9444711538461539
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "+ Barnasky ( STATE ) Barnosky- )",
+              "confidence": 0.84,
+              "confidence_min": 0.5,
+              "token_count": 7,
+              "bbox": [
+                0.5125,
+                0.28942307692307695,
+                0.5958333333333333,
+                0.5007211538461539
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "Elizabeth Joseph Kranes FULL RESIDENCE NAME OF BRIDE anne 114- S. 17th ( NUMBER AND Bayonne STREET ) PLACE OF BIRTH AGE OF BRIDE 29 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Mary Nazor 1 X MARRIED Jalan IN PRESENCE Stewarla OF , × ( FULL NAME 2 Rev. Willinin ) Marali ( FULL NAME ) Nicholas ( RECTOR )",
+              "confidence": 0.86,
+              "confidence_min": 0.2,
+              "token_count": 60,
+              "bbox": [
+                0.655448717948718,
+                0.2935096153846154,
+                0.853525641025641,
+                0.5266826923076923
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "Peschel Skwarla St. , MANVILLE , N.J. , ( CITY ) n д ( STATE ) Hawran Skwarla WITNESSES Marwill : . N.J. New ( RESIDENCE ) Keryluk Brick ( RESIDENCE )",
+              "confidence": 0.82,
+              "confidence_min": 0.37,
+              "token_count": 32,
+              "bbox": [
+                0.7916666666666666,
+                0.2903846153846154,
+                0.9461538461538461,
+                0.5298076923076923
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "Shvidrik N.J STATE ) + Linner STATE ) , ) )",
+              "confidence": 0.83,
+              "confidence_min": 0.45,
+              "token_count": 11,
+              "bbox": [
+                0.5147435897435897,
+                0.6305288461538462,
+                0.5900641025641026,
+                0.9199519230769231
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "PART II - PARISH RECORD N FULL NAME OF GROOM Michael RESIDENCE Randolphville ( NUMBER AND OF BIRTH Newark STREET ) PLACE , AGE OF GROOM 29 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Barbara Peter d FULL NAME OF BRIDE anne RESIDENCE Mountain Ave , ( NUMBER PLACE OF BIRTH UMBER AND Farrel STREET ) AGE OF BRIDE 28 NUMBER OF PREVIOUS MARRIAGES NAME OF Jessie PARENTS Paul Klebanovitch MARRIED Nicholas IN PRESENCE OF Skidrik WITNESSES 1 2 ( FULL Construtive NAME ) , Nicholas Putripke ( Res FULL . NAME ) ( RECTOR )",
+              "confidence": 0.88,
+              "confidence_min": 0.27,
+              "token_count": 96,
+              "bbox": [
+                0.6519230769230769,
+                0.5579326923076923,
+                0.8599358974358975,
+                0.9384615384615385
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "MARRIAGES : 40986 Putyroke Rd , New market . ( New CITY ) ( STATE ) Jersey Zaleski Purske hvidrik Middleses N.J. ( Реша CITY ) ( STATE ) Shvidrik + - : Middlesex , N.J. , ( Kiryuk Dunellen RESIDENCÉ ) , / N.J. ( RESIDENCE )",
+              "confidence": 0.75,
+              "confidence_min": 0.25,
+              "token_count": 48,
+              "bbox": [
+                0.7849358974358974,
+                0.5591346153846154,
+                0.9336538461538462,
+                0.9454326923076923
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_license_format"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 538,
+  "data_tokens": 439,
+  "data_rows": 2,
+  "extracted_at": "2026-02-17T01:52:43.739Z"
+}

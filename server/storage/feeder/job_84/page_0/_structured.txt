@@ -1,0 +1,7 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 5 | Rows: 1
+
+--- Table 1 (5 columns, 2 rows) ---
+ | Счета родив Мкелци WHXCA . и день Имена родившихс M XALE NUMBER А NAME OF FEMALE BIRTH DATES CHILD BAPTISM CITY OF BIRTH | BIRTHS KERQUEPKY ¡ - TAVRIATRY HETTH¶SCKOŇ KHUTH NA Званіе , имя , отчество и задната родителей , и какого вероисповедания . FATHER'S FULL NAME . MOTHER'S MAIDEN NAME | 83 ГОД ЧАСТЬ H , ПЕРВАЯ , ПОРОДИЕШИХМ Званів , нам , отчетко и фамил воспрісминкова . FULL NAMES OF SPONSORS | Кто совершаль таинство крашены . PRIEST'S NAME
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 3 19 = , S1 Timothy - - 1 IS Somerville 2 9 " Larissa 10 12 Somerville | Peter Gorbetuk , Susan Binkowski Michzel Fetchko , Cavol Lynn Mayver | Frederick Gorbatur Gorbeduk ( Orthodox ) Claire Helen Russo ( Orthodox ) | Fr. Jana Parsells F .. Jas Parall

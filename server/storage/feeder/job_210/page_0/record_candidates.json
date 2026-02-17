@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.86,
+      "fields": {
+        "bride_name": "Anna Jacob NAME OF BRIDE Manville RESIDENCE ( NUMBER AND STREET PLACE OF BIRTH menville OF BRIDE 21 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Madelined , MARRIED IN PRESENCE Joseph OF ( FULL NAME ) Frances ( FULL NAME Rev. ) n . T. ( RECTOR",
+        "officiant": "+ Barnasky ( STATE ) Barnosky- )",
+        "witnesses": "Elizabeth Joseph Kranes FULL RESIDENCE NAME OF BRIDE anne 114- S. 17th ( NUMBER AND Bayonne STREET ) PLACE OF BIRTH AGE OF BRIDE 29 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Mary Nazor 1 X MARRIED Jalan IN PRESENCE Stewarla OF , × ( FULL NAME 2 Rev. Willinin ) Marali ( FULL NAME ) Nicholas ( RECTOR )",
+        "notes": "groom_parents: FULL AGE 1 2; bride_parents: Piscadlo Simkovitch Olga ) ( CITY ) n.J Jacob none Sevaylea WITNESSES : Zudales Barnasky Kilk ( RESIDENCE ); license: Peschel Skwarla St. , MANVILLE , N.J. , ( CITY ) n д ( STATE ) Hawran Skwarla WITNESSES Marwill : . N.J. New ( RESIDENCE ) Keryluk Brick ( RESIDENCE )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.86,
+      "fields": {
+        "bride_name": "PART II - PARISH RECORD NAME OF GROOM Nicholas RESIDENCE Mt. Ave ( NUMBER AND STREET ) OF BIRTH Farrel OF GROOM 30 OF PREVIOUS OF Paul MARRIAGES PARENTS Tatiana NAME OF BRIDE RESIDENCE Димо ( NUMBER AND STREET OF BIRTH OF BRIDE 23 OF PREVIOUS MARRIAGES OF PARENTS mary Thomas MARRIED IN John PRESENCE B. OF ( FULL Rev. Sophie NAME ) Craig ( FULL NAME ) Nicholas ( RECTOR )",
+        "officiant": "Shvidrik N.J STATE ) + Linner STATE ) , ) )",
+        "witnesses": "PART II - PARISH RECORD N FULL NAME OF GROOM Michael RESIDENCE Randolphville ( NUMBER AND OF BIRTH Newark STREET ) PLACE , AGE OF GROOM 29 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Barbara Peter d FULL NAME OF BRIDE anne RESIDENCE Mountain Ave , ( NUMBER PLACE OF BIRTH UMBER AND Farrel STREET ) AGE OF BRIDE 28 NUMBER OF PREVIOUS MARRIAGES NAME OF Jessie PARENTS Paul Klebanovitch MARRIED Nicholas IN PRESENCE OF Skidrik WITNESSES 1 2 ( FULL Construtive NAME ) , Nicholas Putripke ( Res FULL . NAME ) ( RECTOR )",
+        "notes": "groom_parents: FULL PLACE AGE NUMBER NAME FULL PLACE AGE NUMBER NAME 1 2; bride_parents: MARRIAGES No 40989 middleses , ( CITY ) ( Pa Shridrik , Klebanovitch Margaret овел пя ) ( CITY ) ( Semavovitale Lenner Craig WITNESSES : ( RESIDENCE Kryluk ( RESIDENCE; license: MARRIAGES : 40986 Putyroke Rd , New market . ( New CITY ) ( STATE ) Jersey Zaleski Purske hvidrik Middleses N.J. ( Реша CITY ) ( STATE ) Shvidrik + - : Middlesex , N.J. , ( Kiryuk Dunellen RESIDENCÉ ) , / N.J. ( RESIDENCE )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 0.8,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:43.755Z"
+}

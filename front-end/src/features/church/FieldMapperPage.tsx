@@ -3,59 +3,59 @@ import { useAuth } from '@/context/AuthContext';
 import { fetchWithChurchContext } from '@/shared/lib/fetchWithChurchContext';
 import { enhancedTableStore, THEME_MAP, type Branding, type FieldStyleRule, type LiturgicalThemeKey, type ThemeTokens } from '@/store/enhancedTableStore';
 import {
-  Add as AddIcon,
-  ArrowDownward as ArrowDownIcon,
-  ArrowUpward as ArrowUpIcon,
-  Business as BusinessIcon,
-  CalendarToday as CalendarIcon,
-  CloudUpload as CloudUploadIcon,
-  Delete as DeleteIcon, Download as DownloadIcon,
-  GridView as GridViewIcon,
-  Image as ImageIcon,
-  Palette as PaletteIcon,
-  PhotoLibrary as PhotoLibraryIcon,
-  Refresh as RefreshIcon,
-  Save as SaveIcon,
-  Search as SearchIcon,
-  Settings as SettingsIcon,
-  Sort as SortIcon,
-  Storage as StorageIcon,
-  ViewList as ViewListIcon,
-  Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon
+    Add as AddIcon,
+    ArrowDownward as ArrowDownIcon,
+    ArrowUpward as ArrowUpIcon,
+    Business as BusinessIcon,
+    CalendarToday as CalendarIcon,
+    CloudUpload as CloudUploadIcon,
+    Delete as DeleteIcon, Download as DownloadIcon,
+    GridView as GridViewIcon,
+    Image as ImageIcon,
+    Palette as PaletteIcon,
+    PhotoLibrary as PhotoLibraryIcon,
+    Refresh as RefreshIcon,
+    Save as SaveIcon,
+    Search as SearchIcon,
+    Settings as SettingsIcon,
+    Sort as SortIcon,
+    Storage as StorageIcon,
+    ViewList as ViewListIcon,
+    Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon
 } from '@mui/icons-material';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Checkbox,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  Grid, IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Radio,
-  RadioGroup,
-  Select,
-  Stack,
-  Switch,
-  Tab,
-  Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography,
-  useTheme
+    Alert,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Checkbox,
+    Chip,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    Grid, IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Radio,
+    RadioGroup,
+    Select,
+    Stack,
+    Switch,
+    Tab,
+    Table, TableBody, TableCell, TableContainer,
+    TableHead, TableRow,
+    Tabs,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -544,12 +544,16 @@ const FieldMapperPage: React.FC = () => {
       setSuccess(null);
 
       // 1) Get column names (works across /admin and /api/admin variants)
-      const { columns: normalizedColumns } = await adminAPI.churches.getTableColumns(churchId, tableName);
+      let normalizedColumns: string[] = [];
+      try {
+        const result = await adminAPI.churches.getTableColumns(churchId, tableName);
+        normalizedColumns = result.columns;
+      } catch (colErr) {
+        console.warn('getTableColumns failed, will try field-mapper endpoint:', colErr);
+      }
 
-      // 2) Try to fetch existing mappings/settings (optional)
-      //    We probe two URLs; whichever returns JSON wins.
+      // 2) Try to fetch existing mappings/settings (also provides columns as fallback)
       const mappingCandidates = [
-        `/admin/churches/${churchId}/field-mapper?table=${encodeURIComponent(tableName)}`,
         `/api/admin/churches/${churchId}/field-mapper?table=${encodeURIComponent(tableName)}`,
       ];
 
@@ -568,14 +572,20 @@ const FieldMapperPage: React.FC = () => {
         }
       }
 
+      // If both column sources failed, throw
+      if (normalizedColumns.length === 0 && (!mappingData || !mappingData.columns?.length)) {
+        throw new Error('No matching columns endpoint responded. Column mapping cannot be loaded.');
+      }
+
       const data: ApiResponse = mappingData ?? { columns: normalizedColumns.map((name, i) => ({ column_name: name, ordinal_position: i + 1 })) };
 
       // 3) Map into UI rows with defaults
-      const rowsMapped: Column[] = (data.columns ?? normalizedColumns.map((name, i) => ({
+      const columnsSource = data.columns ?? normalizedColumns.map((name, i) => ({
         column_name: name, ordinal_position: i + 1,
-      }))).map((col, idx) => {
-        const column_name = (col as any).column_name ?? (typeof col === 'string' ? col : `col_${idx + 1}`);
-        const ordinal_position = (col as any).ordinal_position ?? (idx + 1);
+      }));
+      const rowsMapped: Column[] = columnsSource.map((col, idx) => {
+        const column_name = (col as any).column_name ?? (col as any).name ?? (col as any).Field ?? (typeof col === 'string' ? col : `col_${idx + 1}`);
+        const ordinal_position = (col as any).ordinal_position ?? (col as any).position ?? (idx + 1);
 
         return {
           column_name,

@@ -1,0 +1,238 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "104 ## 5 37360"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BAPTIZED 1963 ( CONT . ) of KARISA ( ( LISA LISA ) ) ADOR DAUGHTER # 8 -WILLIAM ADER 37364 PAULETTE ( CHERNIAR ) ABER 618 No. WASHINGTON ASENUE DONELLEN..N.J . - BERN MAY 22 , 1963- PLAINFIELD , NJ BAPTISKAP CHRISMATION ON JUNE 9 , 1963 GOD PARENTS - JosupH ( 1. GEARKARD"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "1963 ( CONT . ) BAPTIZED 105 CHERYL ANNA CARNTY DAUGHTER of JERRY CARNEY MARGARET ( RISCO ) CARNEY RDI ELIZABETH AVE . , SOMERSET , N.J DAPTISM BORN { JULY AUGUST 4,1863 CHRISMATI 4,1963 GOD PARENTS : PETER KRIVUSHIK"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "KLIZABETH ADMINISTERED B35 ) filling the GEARHARD SACRAMENTS",
+              "confidence": 0.6,
+              "token_count": 8,
+              "bbox": [
+                0.22524038461538462,
+                0.2775641025641026,
+                0.4423076923076923,
+                0.32884615384615384
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Father ELIZABETH thevelure KRIVOSHIK L",
+              "confidence": 0.73,
+              "token_count": 5,
+              "bbox": [
+                0.6875,
+                0.27692307692307694,
+                0.8882211538461539,
+                0.3246794871794872
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "# 6 37361",
+              "confidence": 0.83,
+              "token_count": 3,
+              "bbox": [
+                0.11442307692307692,
+                0.33557692307692305,
+                0.15,
+                0.3698717948717949
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Н MARK RICHARD NEVITT - SON OF RICHARD H. NOVETT AND THEODOSIA ( BARTUSHAR ) NEVITT No 816 HUFF ST . , MANVILLE , N. J. 18080 BURN BAPTISA JUNE 10 , 1963 - AT- NEW BRUNSWICH , NJ . CERISMATION - JUNE 29 , 1963- 5.S. PETER AND PASK CHURES GODPARENTS ; - JACOB BARTUSHAK SACRAMENTS ADMINISTERED HALEN BY : Father SKAPURA Thunder For ar new thy",
+              "confidence": 0.76,
+              "token_count": 68,
+              "bbox": [
+                0.17379807692307692,
+                0.3317307692307692,
+                0.5651442307692308,
+                0.5717948717948718
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "L. BORN BAST 1200 1963 1964 DAVID WM . PAPLO SON OF WUM . PADLO AND PATRICIA ANN ( DYANNTTA ) PAOLO GREASHELMER ST . , MANUChha BORN Doc . 1011863 болмариice - BAPTIS Y CHRISMATION JAN . - 19 , 1964",
+              "confidence": 0.74,
+              "token_count": 42,
+              "bbox": [
+                0.5817307692307693,
+                0.3474358974358974,
+                0.9149038461538461,
+                0.5564102564102564
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "# 7 37367",
+              "confidence": 0.87,
+              "token_count": 3,
+              "bbox": [
+                0.12379807692307693,
+                0.5538461538461539,
+                0.16706730769230768,
+                0.5894230769230769
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "MELANIE BISHOP STANLEY - ANNA BISHOP PAUGHTER of ( KULICK AND ) BISHOP 23 So. 8TH BORN AVENUE - JUNE , BAPTISM CHRISMATION 10 MANVILLE , 1963 PATER - JUNE 30 1963 SOMERVILLE , , N.J. SSI MANVILLE AND PAUL GODPARENTS : MICHAEL , N. J. CHURCH SACRAMENTS ADMINISTERED BARBARA ) Falley KULICK STCHUR 1 Theme for wicke",
+              "confidence": 0.78,
+              "token_count": 58,
+              "bbox": [
+                0.18701923076923077,
+                0.5743589743589743,
+                0.5012019230769231,
+                0.8766025641025641
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "GOD PARENTS - ALEX PABLO < MATUSHKA Aisley",
+              "confidence": 0.6,
+              "token_count": 8,
+              "bbox": [
+                0.6317307692307692,
+                0.5583333333333333,
+                0.8901442307692308,
+                0.6038461538461538
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.06
+    ],
+    "col_2": [
+      0.06,
+      0.165
+    ],
+    "col_3": [
+      0.165,
+      0.5675
+    ],
+    "col_4": [
+      0.5675,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.2844871794871795,
+  "total_tokens": 294,
+  "data_tokens": 195,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:49:58.087Z"
+}

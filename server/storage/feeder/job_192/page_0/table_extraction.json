@@ -1,0 +1,500 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "1",
+              "confidence": 0.92,
+              "confidence_min": 0.92,
+              "token_count": 1,
+              "bbox": [
+                0.034375,
+                0.30865384615384617,
+                0.03894230769230769,
+                0.3217948717948718
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "5-27",
+              "confidence": 0.84,
+              "confidence_min": 0.84,
+              "token_count": 1,
+              "bbox": [
+                0.07475961538461538,
+                0.30512820512820515,
+                0.11370192307692308,
+                0.321474358974359
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "Robert Lawrence Porchik Manville",
+              "confidence": 0.92,
+              "confidence_min": 0.77,
+              "token_count": 4,
+              "bbox": [
+                0.121875,
+                0.305448717948718,
+                0.27139423076923075,
+                0.3400641025641026
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "Albert",
+              "confidence": 0.86,
+              "confidence_min": 0.86,
+              "token_count": 1,
+              "bbox": [
+                0.290625,
+                0.3157051282051282,
+                0.32548076923076924,
+                0.3298076923076923
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "Jill Ann Filippini Manville",
+              "confidence": 0.94,
+              "confidence_min": 0.85,
+              "token_count": 4,
+              "bbox": [
+                0.3425480769230769,
+                0.3128205128205128,
+                0.4617788461538462,
+                0.3451923076923077
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": "Atopere",
+              "confidence": 0.73,
+              "confidence_min": 0.73,
+              "token_count": 1,
+              "bbox": [
+                0.4774038461538462,
+                0.3227564102564103,
+                0.5132211538461539,
+                0.33653846153846156
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "2 3 4",
+              "confidence": 0.96,
+              "confidence_min": 0.93,
+              "token_count": 3,
+              "bbox": [
+                0.028365384615384615,
+                0.44711538461538464,
+                0.046875,
+                0.7403846153846154
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_integer"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "6-25 9-03 10-22",
+              "confidence": 0.96,
+              "confidence_min": 0.91,
+              "token_count": 3,
+              "bbox": [
+                0.07043269230769231,
+                0.43653846153846154,
+                0.11057692307692307,
+                0.7304487179487179
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "25 Roman Catholic 1st Marriage Peter John Kulina Manville ад Orthodox 1st Marriege John Bridgeuzten A. ward 32 A. C. ist Robert Michel Pellitto River Edge as Orthodox 1st",
+              "confidence": 0.83,
+              "confidence_min": 0.63,
+              "token_count": 29,
+              "bbox": [
+                0.12548076923076923,
+                0.34647435897435896,
+                0.27716346153846155,
+                0.7759615384615385
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "Ivene John Netelie John Jennie Robert Kathryn",
+              "confidence": 0.9,
+              "confidence_min": 0.65,
+              "token_count": 7,
+              "bbox": [
+                0.2862980769230769,
+                0.33942307692307694,
+                0.3283653846153846,
+                0.6926282051282051
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "ач Orthodox 1st Marriage shirley Jarkowski Manville ач R. 1st C. Marriage Stephanie Huztuk Hillsborough 32 Orthodox 1st Martha Laura Melendz River Edge 24 R. C. 1st",
+              "confidence": 0.83,
+              "confidence_min": 0.59,
+              "token_count": 27,
+              "bbox": [
+                0.34447115384615384,
+                0.3528846153846154,
+                0.46322115384615387,
+                0.7275641025641025
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "Joan Агунога Margaret Peta Helen Jose Ana",
+              "confidence": 0.78,
+              "confidence_min": 0.57,
+              "token_count": 7,
+              "bbox": [
+                0.47596153846153844,
+                0.34326923076923077,
+                0.5117788461538462,
+                0.6448717948717949
+              ],
+              "needs_review": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "Fr. James Parsells",
+              "confidence": 0.8,
+              "confidence_min": 0.71,
+              "token_count": 3,
+              "bbox": [
+                0.5521634615384615,
+                0.31153846153846154,
+                0.6141826923076923,
+                0.34423076923076923
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "Theresa Filippini Mark Porchik",
+              "confidence": 0.89,
+              "confidence_min": 0.85,
+              "token_count": 4,
+              "bbox": [
+                0.6372596153846154,
+                0.3076923076923077,
+                0.7254807692307692,
+                0.34487179487179487
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "May 19,89 # 31-89",
+              "confidence": 0.88,
+              "confidence_min": 0.74,
+              "token_count": 4,
+              "bbox": [
+                0.8391826923076923,
+                0.3057692307692308,
+                0.9591346153846154,
+                0.325
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "Fr. Jones Parcell Fr. Janes Parsells Fr. Jas Parale",
+              "confidence": 0.66,
+              "confidence_min": 0.56,
+              "token_count": 9,
+              "bbox": [
+                0.5509615384615385,
+                0.39775641025641023,
+                0.615625,
+                0.6291666666666667
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "Paul Kuling Sharyn Foster Puibish Susan Greyoug Rohzus John Pellitto Christina Melendz",
+              "confidence": 0.8,
+              "confidence_min": 0.47,
+              "token_count": 12,
+              "bbox": [
+                0.6396634615384615,
+                0.3842948717948718,
+                0.7475961538461539,
+                0.6125
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "June 23 , 89 # 46-89 Aug. 22,89 # 89-123 Oct. 20 , 89 # 61-89",
+              "confidence": 0.83,
+              "confidence_min": 0.64,
+              "token_count": 16,
+              "bbox": [
+                0.8360576923076923,
+                0.367948717948718,
+                0.9694711538461539,
+                0.5403846153846154
+              ],
+              "needs_review": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 271,
+  "data_tokens": 136,
+  "data_rows": 2,
+  "extracted_at": "2026-02-17T01:52:13.806Z"
+}

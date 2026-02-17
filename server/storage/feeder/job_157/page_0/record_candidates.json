@@ -1,0 +1,61 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.96,
+      "fields": {
+        "notes": "PARISH | OF NAME NAME | . AND | ADDRESS | DATE ) adopted DATE AT PLACE . GOD ("
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "18055 Morenick orenick Lovenich RECTOR ) STATE St. ) STATE ( e , ) CITY ac Zvolenick meid"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "BAPTISMS No Refer ) n NAME iwinsky NAME FATHER'S MOTHER'S reen , STREET AND ille are ert Ma ) CHURCH omervi John BY PERFORMED Ada a ) CITY a и AND ( ( ("
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "RECORD ese PART PARENTS 1105 NUMBER Ma M se BAPTISM 2 BIRTH Heter S. 1 ( CHILD BIRTH ne . OF PARENTS Rev"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.96,
+      "fields": {
+        "notes": "PARISH OF 9 NAME OF AND ADDRESS OF DATE CONFIRMATION PLACE SACRAMENTS OF NAME . DATE . AT GOD"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5",
+    "col_6"
+  ],
+  "parsedAt": "2026-02-17T01:51:06.951Z"
+}

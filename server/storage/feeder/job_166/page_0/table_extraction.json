@@ -1,0 +1,191 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1959 9369 Zydiak , STATE . ! Constantin ) 31/1937 FRECTOR BAPTISMS N Крещ Russell Zydiak V.J. 31 1959 ) CITY . NAME FATHER'S Zydials ) NAME Ave oss Vi ( 2nd STREET ) Manyille March Auc Hosp expial А April BY AND ( Kurt NUMBER ( CHILD Daniel MOTHER'S CHURCH ) ( CITY AND Some BIRTH PERFORMED Som BAPTISM Peter omer ( No No Pet 1 PART RECORD BIRTH OF PARENTS 214 OF OF PARISH NAME NAME Marianne S OF DATE CONFIRMATION 575 OF AND ADDRESS . PARENTS AT PLACE GOD Rathrine SACRAMENTS Stephen DATE Rew Sae 9373 N. ) ) STATE N.J. ) STATE ( damcio RECTOR ( , ) BAPTISMS NO NAME CITY на , 10,1959 STREET ) - 1 PRIBISh PRISIsh NAME PRUBish FATHER'S MOTHER'S ( Son AND + HNatuk ) BY ( , PART RECORD MaRK # NUMBER PARENTS . CHILD Stephen ( NATE Kulina omerville ( April Hospital AND CHURCH To omerse merville ( CITY . BAPTISM OF Peter BIRTH Peter Hnatuk OF PERFORMED PARISH OF OF RD BIRTH OF . NAME NAME Julia AND ADDRESS DATE DATE CONFIRMATION Sts Stephen AT PLACE PARENTS GOD Helen SACRAMENTS Rev"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "9371 9370 Komar ) STATE , 1959 1959 ! BAPTISMS N Mary KomaR NAME CITY , Hosp 11 EX.S ) YSTATE & Diziomba Ademcio RECTOR en ) Арк JORI Paul BY ) CHURCH ( 1 PART RECORD Susan John Rakascik ) MOTHER'S STREET 14th 17th ( AND NUMBER ( March , CHILD PARISH OF PARENTS March OF BIRTH OF NAME NAME Kathleen AND Komar ADDRESS DATE Hackensack AND Alexander . BAPTISM Pet Hacken CITY ( BIRTH Dziemba Olga PERFORMED Steph OF Rev DATE CONFIRMATION St. OF . AT PLACE PARENTS GOD SACRAMENTS 9372 ille ) STATE , 1959 N.J RECTOR BAPTISMS No tRiBish PRiBishoR PRIBish set Hospita 1959 , 10 Paul AND lle ) ) , NAME PRIBish NAME CITY ( 1 PART RECORD Ste Stephen CHILD Stephen FATHER'S Lina MOTHER'S 0 STREET Adameio ) CITY AND May ) CHURCH Kachek Kachel SameR BAPTISM 5 PeteR ( omeR BY ( AND ( : NUMBER ( PARISH OF PARENTS Kulin . BIRTH OF OF . NAME NAME Julia RDH BIRTH PERFORMED OF OF Stephen DATE CONFIRMATION Charles AND ADDRESS . DATE AT PLACE PARENTS GOD Stephanie SACRAMENTS Rev"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Jakowlen H. RECTOR 937 ) Eugenia Jakowlew Blvd Brunswick 1958 Hosp 1959 Paul kowlew ) STATE 5 , Brunswick ) Ja VonspReckelsen educa ние , CITY",
+              "confidence": 0.84,
+              "token_count": 26,
+              "bbox": [
+                0.17451923076923076,
+                0.6323717948717948,
+                0.50625,
+                0.7871794871794872
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BAPTISMS 9375 Rynkievien Peter St. N.J. 1959 No Front Hosp , N.J. Adamero RECTOR 1 ) Allen STATE 1959 # Flaul STATE ) FRizen une ( , ) NAME CITY , ,",
+              "confidence": 0.82,
+              "token_count": 32,
+              "bbox": [
+                0.5425480769230769,
+                0.6282051282051282,
+                0.8966346153846154,
+                0.7580128205128205
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS No ) ( Jeanne NAME Sarkozy NAME Johns MOTHER'S Jakowtew FRANKlin , FATHER'S STREET , 18 Middlesex July d AND Peter ) Holly AND CHURCH Walter BY - ( NUMBER ( New ( PERFORMED 1 Dec Hephan",
+              "confidence": 0.87,
+              "token_count": 38,
+              "bbox": [
+                0.14639423076923078,
+                0.6801282051282052,
+                0.5069711538461539,
+                0.8560897435897435
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "RECORD Mark Anthony Rynkievies Fedak MOTHER'S Rynkievich W. STREET Plainfield 23 AND Plainfield ( NUMBER May AND Andrew FRIzen BY 1 PART 681 PERFORMED Stephen . (",
+              "confidence": 0.92,
+              "token_count": 27,
+              "bbox": [
+                0.5444711538461539,
+                0.6855769230769231,
+                0.8935096153846154,
+                0.8458333333333333
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PART RECORD CHILD PARENTS Emma 168 ( New BIRTH BAPTISM PARISH OF NAME OF NAME AND ADDRESS DATE DATE CONFIRMATION Sts BIRTH PARENTS ETHYL OF OF OF PLACE SACRAMENTS Red . . AT GOD",
+              "confidence": 0.92,
+              "token_count": 34,
+              "bbox": [
+                0.15144230769230768,
+                0.7862179487179487,
+                0.5072115384615384,
+                0.8948717948717949
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "CHILD PARENTS Vera BIRTH Muhlenberg PARISH BAPTISM OF NAME OF NAME ADDRESS OF DATE OF DATE CONFIRMATION Sisleter BIRTH . OF PARENTS Rose AT PLACE SACRAMENTS Rev . AND . GOD",
+              "confidence": 0.95,
+              "token_count": 31,
+              "bbox": [
+                0.5802884615384616,
+                0.7439102564102564,
+                0.8923076923076924,
+                0.8794871794871795
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0725
+    ],
+    "col_2": [
+      0.0725,
+      0.525
+    ],
+    "col_3": [
+      0.525,
+      1
+    ]
+  },
+  "columns_detected": 3,
+  "header_y_threshold": 0.5944230769230769,
+  "total_tokens": 569,
+  "data_tokens": 188,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:51:24.619Z"
+}

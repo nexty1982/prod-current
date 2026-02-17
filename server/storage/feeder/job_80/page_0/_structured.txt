@@ -1,0 +1,10 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 3 | Rows: 4
+
+--- Table 1 (3 columns, 5 rows) ---
+ | SPBIRTHS KBRHUEPHOSH - TAERATRY ESTIHABEHOMI HMITH IHI 1979 Счеть родив : МКСАЦИ шихся . и день Званіе , има , штчество и . рамнага родителей , и какого Имена родившихСА в кроисповеданія . XALE NUMBER FEMALE BIRTH DATES M BAPTISM NAME OF CHILD CITY OF BIRTH FATHER'S FULL NAME . MOTHER'S MAIDEN NAME Н | AR 1979 ГОДА , ЧАСТЬ ПЕРКАМ , И РОДИВШИХСЯ . Званів , нам , отчетко и фамилі воспрієминкова . Кто совершаль таинство крорені . FULL NAMES OF SPONSORS PRIEST'S NAME
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 12-8-781-20-79 Valerie Kuchavewski Nicholas ( Somerville ) Suzanne ( Zemke Kuchaves ) Ki | Patricia Goodwin ( westcoatville , Pa . ) Ronald zemře ( Albion , N.Y. ) Fr. James Parsells
+ | 21-19-793-3-79 Kimberly Nicole Edward Petro ( Somerville ) Cynthia ( Rosoche ) | Anastasia Nevitt ( Manville , N.J. ) Michael Chabrz ( Manville , N.J. ) Fr .. Janes Parsells
+ | 1-10-79 5-12-29 Jeffery Paul 3 ( Nemport R. I. ) Haney George Fielding Carol mock Fielding | Nancy Mackey mock ( ( Massenz Parsippany , , N.y. N.J. ) Timothy ) Fv . Janes Parsells
+ | 4 9-12-79 / 12-16-79 ( Jason Sorevville , N.J. ) John Christine Charles Joy Mayernik ( Nevitt R.C. ) | Mark Nevitt ( Manville Mayernik Manville , N.J. ) Tracy ( , N.J. ) -hoporzing Fr. Janes Parsells heterodo

@@ -1,0 +1,24 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "NAME NAME | AND | AT | S gos PLACE A OF B"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:50:58.032Z"
+}

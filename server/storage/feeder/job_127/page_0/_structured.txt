@@ -1,0 +1,21 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 3 | Rows: 15
+
+--- Table 1 (3 columns, 16 rows) ---
+με | 114 1966 37378 STEPHEN BENNETT LAZOREK SON OF MICHAEL MICHAEL LAZOREK + MAUREEN K. ( HURPHY ) RESIDENCE : 7 GANTRY DRINK , WARRAN TWP BORN : 4 , 1966 - PARTH AMBLY , N.J. MARCH BAPTISM & CHRISMATION : July 31 31 , 1966 SS . PETER AND PAUK CITURN , CANVILLE | 1967 115 37379 BRIAN PAUL JOHNSON LAZORER SON OF - ARTHUR JOHNSON AND DOLORES ( DUFOUR ) JOHNSON RKS : 734 BOUND BROOK AVE . , MANJILLE , N.J BORN : JAN . 5,1967 SOMERVILLE , N.J BAPTISM AND CHRISMATION : JAN 21 , 1967- MANUELLENJ AS SS . PETER AND PAUL CHURCH
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | GODPARENTS : JOHN BOBER AND KVA BOBER THRUDORK LABOWSKY | GODPARENTS : JOHN DIGGENS AND BARBARA DIGGENS SACRAMENTS S By : FATHER THEODORE LABOWSKY
+ | SACRAMENTS BY : FATHER | 37381 JOAN BALOGH - DAUGHTER OF
+ |  | LASZLO AND JOAN ( BALOGH ) HRINIAK REST MAIN ST . , GLEN GARONER , N. J
+ | Joan Balogh | BORN : MAY 14 , 1867 - PHILLIPSBURG , N.J. BAPTISM & CHRISMATION : JULY 2 , 1867 , HANVILLE
+ | married outside of | 55. PETER AND PAUL CHURCH GOD PARENTS : ROBERT BELL AND GLORIA ANN HRINTAR
+ | Othodox Church | SACRAMENTS BY : FATHER THEODORE LABOWSKY 37382 ELIZABETH ELIK DAUGHTER OF
+ | August , 1983 | Nicola AND DRAGITSA ELIK RESIDENCE : 104 104 LAST STREET , BOUND BROOK
+ | at | BORN : AUGUST 28 , 1967 1 SOMERVILLE , W.J BAPTISM & CHRISMATION : OUT 15 , 1967 , MANILLE , N.J
+ | Ss . Philp + Jones Church | SS . PETER AND PAUL CHURCH
+ | in Phillipsburg , N.J | CUDPARENTS : ZIVKO . AND PENKA FLIK SACRAMENTS BY : FATHER THEODORE LABOWSKY
+ |  | # 31383 OM PATRICIA ( LYNN ) PHILLIPS ( - DAUGHTTA 47 M.N )
+ |  | ANDROW AND AND ANASTASIA ( ADAMSHAK ) Peps RES : 2 FROWERY LANE BART RANCHOURS , Somerville
+ |  | BORN ! сетовет L 1 1967- SOMERVILLE , MD BANTIAM & execSMATION ) OCTOBER 22 , 1967 GOS PARENTS : THEODORE ADAMCHAR
+ |  | SACRAMENT VERONICA MINISTER OF ; Father Theodore
+ |  | Labowsky

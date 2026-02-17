@@ -1,0 +1,508 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 9,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счет WHXCA . Мужеска ΠΟΑΔ Женска NUMBER XALE M"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Hand HETPHISCHSH HHHTH MAY родив : Меця . и день . Званіе , има , штчество н фамила родителей , и какого Имена родившихся в кроисповеданім . . . \" ΠΟΛΑ рожде Hi коефе WIH DATES NAME OF CHILD . FEMALE BIRTH FULL BAPTISM CITY OF BIRTH FATHER'S NAME MOTHER'S MAIDEN NAME"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "YEAR 1971 ГОДЪ , ЧАСТЬ ПЕРВАМ , О РОДИВШИХСЯ . Званіе , има , отчетко и фамил Кто совершаль таинство воспрієлтикова . крошенія . FULL NAMES OF SPONSORS PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "127x",
+              "confidence": 0.77,
+              "token_count": 1,
+              "bbox": [
+                0.051682692307692304,
+                0.33237179487179486,
+                0.06995192307692308,
+                0.3503205128205128
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "2-25714-2471 JAMES PAUL JOHN ROSOCHA , JR .; JOAN ANN LECHINSKY ROSOCHA ( SOMERVILLE , NiT . )",
+              "confidence": 0.84,
+              "token_count": 18,
+              "bbox": [
+                0.10552884615384615,
+                0.32756410256410257,
+                0.46298076923076925,
+                0.3967948717948718
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "VINCENT ZAKARZEWSKI ; ANN LECHINSKY REV . ROBERT A. GEORGE LEWIS",
+              "confidence": 0.87,
+              "token_count": 11,
+              "bbox": [
+                0.5,
+                0.34423076923076923,
+                0.9399038461538461,
+                0.37724358974358974
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "28x",
+              "confidence": 0.74,
+              "token_count": 1,
+              "bbox": [
+                0.05480769230769231,
+                0.4083333333333333,
+                0.07307692307692308,
+                0.4253205128205128
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "2-3-372-1431 JOSEPH JOHN KONKUS JOHN KONKUS , BERTHA LUDZIK ( DUNCOTT , PENNA . )",
+              "confidence": 0.86,
+              "token_count": 15,
+              "bbox": [
+                0.10552884615384615,
+                0.41025641025641024,
+                0.4271634615384615,
+                0.47275641025641024
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "FROM RECEIVED THE INTO BYZANTINE THE HOLY CATHOLIC ORTHODOX CHURCH , CHURCH REV . ROBERT A. GEORGE LEWIS WHERE HE WAS BAPTIZED ON FEBRUARY 14,1937 ; WHERE HE WAS ORDAINED TO THE PRIESTHOOD ON JUNE 22 , 1969 BY BISHOP MUNHALL STEPHEN OF , PENNA J. ROCISKO RECEIVED , , AS ARCHBISHOP AN ORTHODOX LAYMAN ON PENTECOST SUNDAY ,",
+              "confidence": 0.92,
+              "token_count": 59,
+              "bbox": [
+                0.4963942307692308,
+                0.4237179487179487,
+                0.9495192307692307,
+                0.614423076923077
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "29 X",
+              "confidence": 0.77,
+              "token_count": 2,
+              "bbox": [
+                0.052403846153846155,
+                0.6205128205128205,
+                0.09182692307692308,
+                0.6467948717948718
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "5-15-716-27-71 ADINA ALLEGRETTO MARIE DR . JAMES DANIEL ALLEGRETTO",
+              "confidence": 0.91,
+              "token_count": 9,
+              "bbox": [
+                0.10552884615384615,
+                0.6291666666666667,
+                0.3995192307692308,
+                0.6759615384615385
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "JUNE 6 , 1971 BY CHRISMATION . SAMUEL DE STEFANO ; HARRY GUSTICH REV . ROBERT A. GEORGE LEWIS",
+              "confidence": 0.88,
+              "token_count": 19,
+              "bbox": [
+                0.4951923076923077,
+                0.6131410256410257,
+                0.9394230769230769,
+                0.676923076923077
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "( TOMS RIVER , N.J. ) EVE VINCENT",
+              "confidence": 0.81,
+              "token_count": 8,
+              "bbox": [
+                0.1576923076923077,
+                0.6676282051282051,
+                0.3055288461538462,
+                0.7048076923076924
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "MARY VINCENT ; LEONA GUSTICH",
+              "confidence": 0.92,
+              "token_count": 5,
+              "bbox": [
+                0.4980769230769231,
+                0.6724358974358975,
+                0.6860576923076923,
+                0.6996794871794871
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "30x",
+              "confidence": 0.88,
+              "token_count": 1,
+              "bbox": [
+                0.05096153846153846,
+                0.7041666666666667,
+                0.07740384615384616,
+                0.7294871794871794
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "423-717-1-71 RICHARD CSTAPOVICH JOHN ( SAN FRANCISCO , JR . SUSAN RICHARD MARY JOHN OSTAPOVICH , SR .",
+              "confidence": 0.85,
+              "token_count": 18,
+              "bbox": [
+                0.10625,
+                0.7125,
+                0.41394230769230766,
+                0.7977564102564103
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "JOHN ANDREY OSTAPOVICH CHIK ; CAROL ANDREYCHIK ; REV . ROBERT A. GEORGE LEWIS JUDY",
+              "confidence": 0.88,
+              "token_count": 15,
+              "bbox": [
+                0.49759615384615385,
+                0.739423076923077,
+                0.9459134615384616,
+                0.798397435897436
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "31",
+              "confidence": 0.73,
+              "token_count": 1,
+              "bbox": [
+                0.05024038461538462,
+                0.8006410256410257,
+                0.06538461538461539,
+                0.8217948717948718
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "CALIFORNIA ) , ANDREY CHIK",
+              "confidence": 0.88,
+              "token_count": 5,
+              "bbox": [
+                0.16153846153846155,
+                0.7692307692307693,
+                0.38341346153846156,
+                0.8121794871794872
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "2-3-473304 CLAIRE KROMBACH MARY ( NEW YORK CHARLES CITY KROMBACH , ; ADELE CLAIR",
+              "confidence": 0.84,
+              "token_count": 14,
+              "bbox": [
+                0.10600961538461538,
+                0.8198717948717948,
+                0.4310096153846154,
+                0.9006410256410257
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "RECEIVED INTO THE HOLY ORTHODOX CHURCH FROM REV . ROBERT A. GEORGE LEWIS THE ROMAN CATHOLIC CHURCH , WHERE SHE",
+              "confidence": 0.94,
+              "token_count": 20,
+              "bbox": [
+                0.4966346153846154,
+                0.842948717948718,
+                0.9471153846153846,
+                0.8881410256410256
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 8,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 8,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 8,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 8,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "N.Y. )",
+              "confidence": 0.95,
+              "token_count": 2,
+              "bbox": [
+                0.17427884615384615,
+                0.8875,
+                0.20192307692307693,
+                0.9102564102564102
+              ]
+            },
+            {
+              "row_index": 8,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "WAS BAPTIZED , MARCH 30 , 1947. RECEIVED BY CHRISMATION , SUNDAY , JULY 18 , 1971 .",
+              "confidence": 0.93,
+              "token_count": 18,
+              "bbox": [
+                0.4983173076923077,
+                0.8868589743589743,
+                0.7480769230769231,
+                0.9310897435897436
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.025
+    ],
+    "col_2": [
+      0.025,
+      0.09
+    ],
+    "col_3": [
+      0.09,
+      0.465
+    ],
+    "col_4": [
+      0.465,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.3162179487179487,
+  "total_tokens": 333,
+  "data_tokens": 242,
+  "data_rows": 8,
+  "extracted_at": "2026-02-17T01:48:08.793Z"
+}

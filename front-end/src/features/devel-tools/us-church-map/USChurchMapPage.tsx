@@ -83,6 +83,17 @@ interface StateChurchesResponse {
   churches: ChurchEntry[];
 }
 
+interface OMChurch {
+  id: number;
+  name: string;
+  church_name: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  latitude: number;
+  longitude: number;
+}
+
 // ─── Region definitions ─────────────────────────────────────────────
 
 interface Region {
@@ -135,6 +146,31 @@ const NO_DATA_COLOR_DARK = '#2a2a2a';
 const SVG_WIDTH = 975;
 const SVG_HEIGHT = 610;
 
+// ─── Manual Albers USA projection (approximation for pin placement) ──
+// This converts WGS84 lat/lng to the pre-projected SVG coordinate space
+function projectToAlbersUsa(lng: number, lat: number): [number, number] | null {
+  // Bounds check for continental US
+  if (lat < 24 || lat > 50 || lng < -125 || lng > -66) {
+    // Check Alaska
+    if (lat >= 51 && lat <= 72 && lng >= -180 && lng <= -129) {
+      const x = 150 + (lng + 180) * 2.5;
+      const y = 490 + (72 - lat) * 4;
+      return [x, y];
+    }
+    // Check Hawaii
+    if (lat >= 18 && lat <= 23 && lng >= -161 && lng <= -154) {
+      const x = 250 + (lng + 161) * 15;
+      const y = 520 + (23 - lat) * 12;
+      return [x, y];
+    }
+    return null;
+  }
+  // Continental US: simple affine approximation
+  const x = 960 + (lng + 96) * 11.5;
+  const y = 620 + (lat - 38) * -14;
+  return [Math.max(0, Math.min(SVG_WIDTH, x)), Math.max(0, Math.min(SVG_HEIGHT, y))];
+}
+
 // ─── Small-state label offsets (states too small for centered labels) ──
 const LABEL_OFFSETS: Record<string, { x: number; y: number; anchor?: 'start' | 'middle' | 'end' }> = {
   CT: { x: 893, y: 218, anchor: 'start' },
@@ -172,6 +208,9 @@ const USChurchMapPage: React.FC = () => {
   const [churchesLoading, setChurchesLoading] = useState(false);
   const [jurisdictionFilter, setJurisdictionFilter] = useState<string | null>(null);
 
+  // OM churches (green pins)
+  const [omChurches, setOmChurches] = useState<OMChurch[]>([]);
+
   // Breadcrumbs
   const BCrumb = [
     { to: '/', title: 'Home' },
@@ -185,9 +224,10 @@ const USChurchMapPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const [geoRes, countsRes] = await Promise.all([
+      const [geoRes, countsRes, omRes] = await Promise.all([
         fetch('/data/us-states-paths.json'),
         fetch('/api/analytics/us-church-counts', { credentials: 'include' }),
+        fetch('/api/analytics/om-churches', { credentials: 'include' }),
       ]);
 
       if (!geoRes.ok) throw new Error(`Failed to load map geometry: ${geoRes.status}`);
@@ -195,9 +235,11 @@ const USChurchMapPage: React.FC = () => {
 
       const geo: Record<string, StateGeo> = await geoRes.json();
       const counts: ChurchCountsResponse = await countsRes.json();
+      const omData = omRes.ok ? await omRes.json() : { churches: [] };
 
       setGeoData(geo);
       setChurchData(counts);
+      setOmChurches(omData.churches || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load data');
     } finally {
@@ -532,6 +574,36 @@ const USChurchMapPage: React.FC = () => {
                     </text>
                   );
                 })}
+
+                {/* OM Church pins (green markers) */}
+                {omChurches.map((church) => {
+                  // Project lat/lng to Albers USA coordinates
+                  const coords = projectToAlbersUsa(church.longitude, church.latitude);
+                  if (!coords) return null; // Outside projection bounds
+
+                  const pinSize = 6 / zoom;
+                  return (
+                    <Tooltip key={`om-pin-${church.id}`} title={church.church_name || church.name} arrow>
+                      <g style={{ cursor: 'pointer' }}>
+                        <circle
+                          cx={coords[0]}
+                          cy={coords[1]}
+                          r={pinSize}
+                          fill="#22c55e"
+                          stroke="#fff"
+                          strokeWidth={1.5 / zoom}
+                          style={{ filter: `drop-shadow(0 ${1/zoom}px ${2/zoom}px rgba(0,0,0,0.3))` }}
+                        />
+                        <circle
+                          cx={coords[0]}
+                          cy={coords[1]}
+                          r={pinSize * 0.4}
+                          fill="#fff"
+                        />
+                      </g>
+                    </Tooltip>
+                  );
+                })}
               </g>
             </svg>
 
@@ -559,6 +631,12 @@ const USChurchMapPage: React.FC = () => {
                 <Box sx={{ width: 14, height: 14, bgcolor: isDark ? NO_DATA_COLOR_DARK : NO_DATA_COLOR_LIGHT, borderRadius: 0.5, border: `1px solid ${isDark ? '#555' : '#ccc'}` }} />
                 <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>No data</Typography>
               </Box>
+              {omChurches.length > 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, pt: 0.5, borderTop: `1px solid ${isDark ? '#555' : '#ddd'}` }}>
+                  <Box sx={{ width: 14, height: 14, bgcolor: '#22c55e', borderRadius: '50%', border: '2px solid #fff', boxShadow: '0 1px 2px rgba(0,0,0,0.2)' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>OrthodoxMetrics ({omChurches.length})</Typography>
+                </Box>
+              )}
             </Box>
           </Paper>
 

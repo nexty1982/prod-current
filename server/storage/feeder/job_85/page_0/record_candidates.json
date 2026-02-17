@@ -1,0 +1,49 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.74,
+      "fields": {
+        "child_name": "Daria Parsells",
+        "godparents": "( Orthodox )",
+        "performed_by": "Fr. Janes Parell",
+        "notes": "June Oct. Valerie ( Auhe ) Bozinta Paul Ruhe . - 28 2827 1954 1984 Viola Lunak Proviz , Ill ."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": false
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "child_name": "Dariz Parsells",
+        "godparents": "( Orthodox )",
+        "performed_by": "Fr. Jones Parsells",
+        "notes": "July Oct. Natalia Stanley Bozintz"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.86,
+      "fields": {
+        "notes": "a 19 28 1984 1984 ( Natasha Noel ) Valerie Auhe Bozinta"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_3": "child_name",
+    "col_4": "godparents",
+    "col_5": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2"
+  ],
+  "parsedAt": "2026-02-17T01:48:40.839Z"
+}

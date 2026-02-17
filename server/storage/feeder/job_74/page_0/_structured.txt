@@ -1,0 +1,11 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 3 | Rows: 5
+
+--- Table 1 (3 columns, 6 rows) ---
+ | Зара ¡ HETPHчеCKOŇ ENUTA NA Счет родив : Мелца шихем . и день . Званіе , има , шотчество и замна родителей , и какого Имена родившихся . вероисповеданім . . . . Мужеска ΠΟΛΑ Женска ΠΟΛΑ рожде Hia Kotipe- HIA MALE NUMBER FEMALE BIRTH DATES NAME OF CHILD NAME . MAIDEN NAME BAPTISM CITY OF BIRTH FATHER'S FULL MOTHER'S | YEAR ГОДА , ЧАСТЬ ПЕРВАЯ , И РОДИВШИХСМ . Званіе , имя , отчество и фамила Кто совершаль таинство воспрілинкова . KPOLEHLA.co FULL NAMES OF SPONSORS PRIEST'S NAME
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 52X Q4JUN BLAUG 73 MICHAEL CHRISTOPHER RICHARD JOHN OSTAPOVICH SUSAN ANDREYCHık , OSTAPOVICH ORTHODOX ORTHODOX | ROBERT OSTAPOVICH NANCY OSTAPOVICH REV EUGENE D , TARRIS
+ | ( NEW BRUNSWICK , NJ . ) | issued 73-8 26 AUS 13
+ | 53 Х 24 JUN 13 RAUL 13 KRISTEN ) MARIE RICHARD JOHN OSTAPOVICH SUSAN ANDREYCHIK OSTAPOVICH NEW BRUNSWICK , N.J. ) ORTHODOX ORTHODOX | THOMAS ANDREYCHIK JUDITH ANDREY CIHK REV EUGENE D , TARRIS cest t issed 36A 73-9 13
+ | 54 5AVG 13/700773 ( KIMBERLY ) ANN HARVEY GEORGE FIELDING FIELDING , CAROL ANN MOCK ( PT . PLEASANT , N .. ) PROT ORTHODOX | STEPHE MOCK NANCY MACKEY REV . EUGENE D. TARRIS Ct # 73-20 Issued 7007 23
+ | 55 X ROSEP 13/14 OCT 73 SUZANA BORIS LABOŞKi LABOSKI VASA Zupa Noski ( SOMERVILLE , N.J. ) | JOVAN ZUPAN Oski LOJZA ZUPANOSKI REV . EUGENE D. TARRIS sound 73-41 , 50z 73 1973 10 BAPTISMS 1 RECEPTION INTO OR Октновску

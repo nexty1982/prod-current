@@ -1,0 +1,685 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 8,
+      "column_count": 7,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счета шихем NUMBER"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "H HOHI BIRTHS МЕТРИЧЕСКОЙ КНИГИ П родив : МКСАЦ и . замна родителей , И , . И день Званіе , има штчество какого Имена родившихся в кроисповедания . DATES NAME NAME OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN BIRTH"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "YEAR ГОДА , ЧАСТЬ ПЕРКАМ Званіе , имя , отчество воспріблинкова FULL NAMES OF"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "2000 , И РОДНЕШИХМ и фамилі . SPONSORS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Кто совершаль таинство крашені . PRIEST'S NAME"
+            },
+            {
+              "row_index": 0,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": ""
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BHAT BAPTISM CITY OF",
+              "confidence": 0.77,
+              "token_count": 4,
+              "bbox": [
+                0.12115384615384615,
+                0.30512820512820515,
+                0.1987980769230769,
+                0.35993589743589743
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Nellie Buranove",
+              "confidence": 0.87,
+              "token_count": 2,
+              "bbox": [
+                0.48125,
+                0.3333333333333333,
+                0.5841346153846154,
+                0.3612179487179487
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Levan Chuelidze",
+              "confidence": 0.93,
+              "token_count": 2,
+              "bbox": [
+                0.6103365384615385,
+                0.3375,
+                0.7043269230769231,
+                0.35192307692307695
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Fr. Jones Pawells",
+              "confidence": 0.71,
+              "token_count": 3,
+              "bbox": [
+                0.7372596153846154,
+                0.3451923076923077,
+                0.8298076923076924,
+                0.3592948717948718
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "10/10 3/04 Nicole Biancz Sengay + Galina Melnikov 1995 2000 Melnikor",
+              "confidence": 0.79,
+              "token_count": 11,
+              "bbox": [
+                0.11033653846153846,
+                0.3532051282051282,
+                0.3975961538461538,
+                0.40032051282051284
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Nellie Baranovi z",
+              "confidence": 0.72,
+              "token_count": 3,
+              "bbox": [
+                0.48365384615384616,
+                0.37435897435897436,
+                0.583173076923077,
+                0.3907051282051282
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Levan Chuelidze",
+              "confidence": 0.87,
+              "token_count": 2,
+              "bbox": [
+                0.609375,
+                0.3737179487179487,
+                0.703125,
+                0.38782051282051283
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "F. Jues Parells",
+              "confidence": 0.57,
+              "token_count": 3,
+              "bbox": [
+                0.7401442307692307,
+                0.3730769230769231,
+                0.8271634615384615,
+                0.38814102564102565
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "2 6/07/3/09 Isabel Eve Sergy Galina Melnikow",
+              "confidence": 0.73,
+              "token_count": 7,
+              "bbox": [
+                0.09254807692307693,
+                0.39326923076923076,
+                0.39326923076923076,
+                0.42435897435897435
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "1998 2000 Melnikov",
+              "confidence": 0.76,
+              "token_count": 3,
+              "bbox": [
+                0.11298076923076923,
+                0.4269230769230769,
+                0.20865384615384616,
+                0.44006410256410255
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Fr. Jas Panelle",
+              "confidence": 0.71,
+              "token_count": 3,
+              "bbox": [
+                0.7302884615384615,
+                0.42467948717948717,
+                0.8338942307692307,
+                0.46121794871794874
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.07043269230769231,
+                0.48653846153846153,
+                0.07908653846153846,
+                0.5009615384615385
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Michael Received into Orthodoxy by 4 / 23 / Communion and Chrisential",
+              "confidence": 0.81,
+              "token_count": 12,
+              "bbox": [
+                0.1360576923076923,
+                0.45256410256410257,
+                0.46490384615384617,
+                0.5064102564102564
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "2000 Redmond Confession , from the Anglican community",
+              "confidence": 0.85,
+              "token_count": 8,
+              "bbox": [
+                0.13966346153846154,
+                0.4913461538461538,
+                0.42596153846153845,
+                0.5307692307692308
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "F = Jas Panelle",
+              "confidence": 0.54,
+              "token_count": 4,
+              "bbox": [
+                0.7367788461538461,
+                0.49038461538461536,
+                0.834375,
+                0.5458333333333333
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "|",
+              "confidence": 0.76,
+              "token_count": 1,
+              "bbox": [
+                0.9358173076923076,
+                0.5,
+                0.9439903846153846,
+                0.5032051282051282
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "J",
+              "confidence": 0.93,
+              "token_count": 1,
+              "bbox": [
+                0.07475961538461538,
+                0.5798076923076924,
+                0.08197115384615385,
+                0.5926282051282051
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "12/24 Robert Ekman Received into Orthodoxy by Confession , Communion and Chrisnation from He Moravian community",
+              "confidence": 0.83,
+              "token_count": 16,
+              "bbox": [
+                0.1420673076923077,
+                0.5647435897435897,
+                0.4127403846153846,
+                0.6551282051282051
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Austin Kacher",
+              "confidence": 0.75,
+              "token_count": 2,
+              "bbox": [
+                0.4831730769230769,
+                0.5496794871794872,
+                0.5771634615384615,
+                0.5769230769230769
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "D",
+              "confidence": 0.56,
+              "token_count": 1,
+              "bbox": [
+                0.9384615384615385,
+                0.6935897435897436,
+                0.9483173076923077,
+                0.7121794871794872
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.035
+    ],
+    "col_2": [
+      0.035,
+      0.095
+    ],
+    "col_3": [
+      0.095,
+      0.455
+    ],
+    "col_4": [
+      0.455,
+      0.5975
+    ],
+    "col_5": [
+      0.5975,
+      0.72
+    ],
+    "col_6": [
+      0.72,
+      0.885
+    ],
+    "col_7": [
+      0.885,
+      1
+    ]
+  },
+  "columns_detected": 7,
+  "header_y_threshold": 0.32294871794871793,
+  "total_tokens": 162,
+  "data_tokens": 89,
+  "data_rows": 7,
+  "extracted_at": "2026-02-17T01:49:14.625Z"
+}

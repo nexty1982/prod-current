@@ -1,0 +1,42 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.81,
+      "fields": {
+        "groom_name": "32 Manville Orthodox 1st",
+        "bride_name": "Ekaterine Margizni Manville Orthodox",
+        "officiant": "Fr. Jaes Pa - sells",
+        "witnesses": "N. Murguliani Alexander Lomidze",
+        "notes": "groom_parents: Vasil Klava; bride_parents: 32 Bukhuti Kadusha; license: Feb. 05 , 2001 мс 04-2001"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.76,
+      "fields": {
+        "groom_name": "John Parsells 27 Manville 1st Orthodox Janes Holot R.C. 43 Jerome c Stone Bc . Bridgewater and Timothy Gorbetur 25 / Manville 1st Onthodox John Finnigan 41 Berkey Heights R.C. 1st",
+        "bride_name": "Emily Joyce Strant 85 Somerville +51 Orthodox Natalie Trushova Orthodox Panela Marie Oliver 41 Bridgenoten Orthodox and Rebecca Morse Boyce Monmouth Junctia 26 Orthodox 15t Nino Kanchaveli Berkey Heights 36 2nd",
+        "date_of_marriage": "6/12 200S 11/26 2005 10/01 2006 1/2 2008 9/20 2009",
+        "officiant": "Bishop Tikhon F.Jas Parsells F₁₂ for Panels F. Panele Fr. Jon Parels",
+        "witnesses": "Gregoy Parnells Anna Strent Daria Parsells John Zahodnich Petar Gonbaduy Patricia Sokol Nectarias Porals Jones Catherie Gorbeton John michel Finnigas Lali Utarashvili",
+        "notes": "number: 1 r 1 1; groom_parents: Janes Daria Jerome Shirley Peter Susan John Herther; bride_parents: David DITOS Nicholzs eleme Jaes maria Nemo Neli; license: May 20 , 2005 Somerville 47-20005 Civil marringe of 8/23/2003 in state of Georgis , blessed Sept. Bridgewater 77 # 2006-147 Oct. 20 # p MC 78-2008 Manville Aug 24 # 34-09 Berkey Heights"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:19.898Z"
+}

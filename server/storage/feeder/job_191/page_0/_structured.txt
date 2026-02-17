@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+1 | 4-17-88 | Stephen Mickel Orthodox 1st | La Verne Anestesia | Lisa Ann Griven R. Catholic and | Theodo 32012
+6 | 10-09-88 | Mark Kulick Orthodox 1st | Basil Babaiz | Barbarz Fetzko B. Catholic | Nicholas Minne
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+Fr. Panelle | Michzel Griven Tatiana Hansen | 5-10-86 Orthodox Sacramental for previously Lady contrected Marriage May 1986 Mt. marriage 10 at of Virgin
+Fr. Jous Passell | Kyve Lewis Robert Telep | Middlesex , N.J. 7 July 1988 9623 Snow Hill , Md Orthodox Marriage . previously Sacramental for contracted civil marriage

@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+ |  |  |  | and Mary FULL RESIDENCE NAME OF 1150 BRIDE PLACE OF BIRTH ( NUMBER AGE OF Sep & AND BRIDE NAME NUMBER OF OF PARENTS PREVIOUS Sam and Pauli MARRIED IN PRESENCE 1 ( FULL NAME ) 2 ( FULL NAME ) ( | Daniel Chuchto Grebst Olga Plas Leich 11 , Elizabeth STREET ) ( CITY ) 1934 MARRIAGES Li Filon OF WITNESSES : ( ( RECTOR )
+ |  |  |  | PART II - PARISH RECORD FULL NAME OF GROOM RESIDENCE L Frenchtown ( NUMBER AND PLACE OF BIRTH Bayonn AGE OF GROOM 22 NUMBER OF NAME PARENTS PREVIOUS Horbalsky Wasil MARRIAGES Keren OF FULL PLACE RESIDENCE NAME OF 2,95 BRIDE OF BIRTH ( NUMBER Perth AND AGE OF BRIDE 23 NAME NUMBER OF OF PARENTS PREVIOUS MARRIAGES Jessee Fores MARRIED Mary IN PRESENCE Holsbach OF 1 ( FULL mike NAME ) 2 marchus Very ( FULL Rev NAME M. ) Vishapore ( RECTOR | MARRIAGES N % Alex Traska , NJ STREET ) ( CITY ) ' , NJ . Traska Mary Walnut St STREET ) Amboy n Charles Kolvites , WITNESSES : ( Manvill dzelt ( )
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+M. Manville STATE ) n . 022 RESIDENCE ) RESIDENCE ) | f . Katherine . FULL RESIDENCE NAME OF man BRIDE DO . Olga ( NUMBER AND PLACE OF BIRTH AGE OF BRIDE 2.2 NUMBER OF PREVIOUS MARRIAGES NAME and OF Anna PARENTS . MARRIED Umia IN PRESENCE Savarla OF 2 Melen FULL NAME ) Holovach ( FULL . NAME ) . ( RECTOR | Kachurich n . Klimovich STREET ) CITY ) ( STATE ) First GES Petrovich mi WITNESSES : ( RESIDENCE ) ( RESIDENCE ) )
+40978 ( STATE ) Rolvites Newark s J Manville h RESIDENCE ) no RESIDENCE | Feb. 1946 PART 9 , II - PARISH RECORD FULL NAME OF GROOM GROOM RESIDENCE Pastaic Keph PLACE OF BIRTH ( NUMBER AND Bayonne STREET AGE OF GROOM 330 NUMBER OF NAME and OF PARENTS PARENTS PREVIOUS Julia . Michael MARRIAGES FULL NAME OF RI RESIDENCE Male Mary ( NUMBER AND STREET PLACE OF BIRTH AGE OF BRIDE 25 NUMBER OF PREVIOUS PARENTS anastasia MARRIAGES NAME OF PARENTS . Michael MARRIED IN PRESENCE OF 1 ( John FULL NAME ) Maryn ( FULL ( RECTOR ) | MARRIAGES No 40977 Holovack N.L. ) ( , CITY ) N. ( STATE ) First Mishkov Holonach Kuymiak ет M. ) ( STATE ) Hop Kuzmiak WITNESSES Passaics Passaic ( RESIDENCE ) n . N.J ( RESIDENCE )

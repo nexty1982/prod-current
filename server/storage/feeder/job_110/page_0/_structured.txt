@@ -1,0 +1,12 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 5 | Rows: 6
+
+--- Table 1 (5 columns, 7 rows) ---
+ | Счеть шихся . Мужеска ΠΟΛΔ MALE NUMBER | ны HOHI BIRTHS H МЕТРИЧЕСКОЙ КНИГИ НА MECAUZ и И . Замна родителей , КАКОГО родив : , . и день Званіе , има штчество родившихся . Имена вероисповедания . . . Женска ΠΟΛΑ рожда Hia крем- HIA FULL . MOTHER'S MAIDEN NAME NAME OF CHILD FATHER'S NAME CITY BIRTH FEMALE BIRTH DATES B OF PAPTIEM S Mathew & тобі Jodi Morizk | YEAR 2011 ГОДА , ЧАСТЬ ПЕРКАМ , О Званіе , има , отчетко и фамил воспрівлинкова . FULL NAMES OF SPONSORS Richard Dutico | РОДИВШИХСМ . Кто совершаль таинство крошенім . PRIEST'S NAME michzel
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | - | 135 22 Matthew Fr. Somerville , N.J | Erica Liscotti | Bishop
+ | 2 | 2010 Gabriel Alden Eric Bruggemann Nov.3 2008 2/27 Bruggemann Monica Georgizi Mihailescu NYC | Mariana Vajdz | Fr. Jues Parsells Received into Catholicism Orthodoxy from Roman confession a
+ | 3 | 14/16 Jerome Stone | Apostelescu | April 16 , 2011 by Chrisnation - fucharist
+ |  | 4 Dec. 27 My 28 Antonia- Ioenz Max + Carla Caponeguo 2016 2011 New Brunswic | Christian Rusɣandz Apostelescu | FL . Jon д Parell Fu . Jos Jaz Panels by
+ |  | S 10 1001 / Heather Marie Grzuen | Patricia Sokol | Received into Baption + Chrismation Orthodoxy & Eucharist Fr. Jon by Parell
+ |  | 6 Apr. Oct Elizabeth 25 08 тук Ke Dao 2011 New Brunsten magdalenz Trofimíük | Dolly Bakzletz Daniel Banda | Fr. Jon д Parelk

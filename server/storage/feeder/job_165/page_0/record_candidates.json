@@ -1,0 +1,44 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "9368 Bell Daniel Bell Bell D. N..J Bruns . 1959 1959 .. New N Brunswick / RECTOR St. ) ) STATE 3. STATE Sickel 15 4 ( Adanci , CITY , ' ) | 9367 LoRenick horenick Lorenick 1959 1959 N.J. ST STATE N.J Nos 22 Pau ulwinsky Dedamcis RECTOR ) , STATE ) ANN ( CITY , ulwin ° ) E ) & ,"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "date_of_baptism": "BAPTISMS 1",
+        "notes": "BAPTISMS NO Gregory Robert Ariniak NAME MOTHER'S Filak , , STREET NUMBER Manville March Hosp April W. CHURCH . ) New Hviniak AND ( George BY - ) 1 ( AND CITY ( Stephen | N CAROL NAME MOTHER'S Green STREET Manville February March Peter FATHER'S Kulwinsky Manvitte NUMBER Peter CHURCH ) Somerville AND BY CITY ) ( 27 AND Stephan ( ( ( John PERFORMED"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.95,
+      "fields": {
+        "date_of_baptism": "PART",
+        "notes": "PART RECORD PARISH CHILD PARENTS Sandra 214 BIRTH Peter's BAPTISM Pet PERFORMED ( NAME OF AND ADDRESS St. Sts BIRTH NAME OF DATE OF DATE OF CONFIRMATION OF PARENTS . AT PLACE SACRAMENTS Rev GOD | RECORD CHILD PARENTS Rose 1105 ( BIRTH Somerse PARISH BAPTISM CONFIRMATION STS BIRTH OF OF ADDRESS OF OF OF PARENTS Sophia NAME NAME ND . DATE DATE SACRAMENTS Rev . AT PLACE GOD"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_3": "date_of_baptism"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:51:22.882Z"
+}

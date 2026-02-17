@@ -1,0 +1,177 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "37351 ) ° POLANSKY N GAIL ) ( NAME . SH BAPTISMS POLANSKY - BART 1 FIRST PART RECORD GALENA RAYMOND FATHER'S ( CHILD PARISH OF OF PARENTS NAME NAME 37356 5 : PATRISKO BAPTISMS N 1 QUELINE PART RECORD JAC MICHAEL PARENTS PARISH OF CHILD OF PETRISKO"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": ") . ) STATE POLANSKY NAME MOTHER'S ROAD CITY . STREET ( AND MARIE ROLLING NUMBER ( 18 . AND ADDRESS ) STATE ) NAME PETRISKO ) ) NAME Stear FATHER'S MOTHER'S ( ( ALEVICH MARA ADAMS 69 . ADDRESS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "N MIDDLESEX NO JAMBER BIRTH OF DATE 1963 , . 16 CITY , STREET AND NUMBER ( ANUARY боль BIRTH OF"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": ", 1962 ) 2 PAUL N.J STATE ( DECEMBER AND ) ( AND ETER CHURCH BAPTISM PLAINFIELD ) CITY ( BIRTH OF OF DATE CONFIRMATION . AT PLACE 963 PAUL N.J + ) VILL FKB AND BAPTISM PETER CHURCH ( S . OF CONFIRMATION SS ."
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": ". RECTOR PRIEST HALL ° CHARLES Sobolo BY Lab 37352 MARIE BALOANZA BALDANZA J. ) ) ) PERMANENT NAME BALDANZA 16,196 ) PAUL N.S. ( STATE HULL RECTOR ) AVENUE . STATE 19 , NAME , CITY 12TH J. 24 SUZANNE ( ( CHILD VINCENT ( FATHER'S PALFY AND STREET N. ABER ( 17 NORTH NUMBER 21,1962 CITY AND DECEMBER AND ) BY ( CHURCH . SOMERVILLE ) Sabewatch ( Me CLOSKEY AS MOTHER'S . SONYA PARENTS PERFORMED Theoboll 1 BAPTISMS N GOD SACRAMENTS Father BAPTISM PART RECORD FIRST \" PARISH OF PARENTS OF ELIZABETH PERFORMED OF BAPTISM ETER . MANVILLE BIRTH OF DATE NOVEMBER BIRTH SYLVESTER Theodore DATE CONFIRMATION SS OF . NAME NAME AND ADDRESS . AT PLACE PARENTS GOD HELEN SACRAMENTS Father . ) STATE ( abousky RECTOR ✓ , N.J 12 1924 , 29 1924 ) RECTOR , N.J ( STATE , ° , 2 ) CITY ( JOHN WISLOSRY LABOWSKY N SOPHIA BY all COPY BAPTISMS 1863 37353 HROMOH ) , STATE ) ) NAME NAME , CITY . JULIA DEMETRO FATHER'S ( ( TRIPRO MOTHER'S 9THAVE So AND STREET KUL KULINA RUZMIAK ) + ) 1 FEB MANVILLE JUNK AND JUNE PAUL CHURCH ( CITY ( BIRTH PETER . OF OF BAPTISM MANVILLE BY PETER NASTASIA SIMASHKO BIRTH PERFORMED ( PART OF PLACE PARENTS MATUSHKA RECORD CHILD 142 NUMBER PERFORMED PETER SACRAMENTS Father PARISH OF PARENTS MARY S. BIRTH OF DATE DATE CONFIRMATION OF . AT PLACE PARENTS SACRAMENTS FATHER . NAME . NAME AND ADDRESS GOD REV"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "NAME NAME",
+              "confidence": 0.99,
+              "token_count": 2,
+              "bbox": [
+                0.2569711538461538,
+                0.5615384615384615,
+                0.2795673076923077,
+                0.5884615384615385
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "AND",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.30697115384615387,
+                0.5657051282051282,
+                0.3108173076923077,
+                0.5846153846153846
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "DATE",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.3841346153846154,
+                0.5592948717948718,
+                0.3889423076923077,
+                0.5826923076923077
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "DATE AT",
+              "confidence": 0.98,
+              "token_count": 2,
+              "bbox": [
+                0.41923076923076924,
+                0.5583333333333333,
+                0.446875,
+                0.5814102564102565
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "GOD",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.48365384615384616,
+                0.5608974358974359,
+                0.4879807692307692,
+                0.5788461538461539
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.1275
+    ],
+    "col_2": [
+      0.1275,
+      0.2925
+    ],
+    "col_3": [
+      0.2925,
+      0.3475
+    ],
+    "col_4": [
+      0.3475,
+      0.4025
+    ],
+    "col_5": [
+      0.4025,
+      0.465
+    ],
+    "col_6": [
+      0.465,
+      1
+    ]
+  },
+  "columns_detected": 6,
+  "header_y_threshold": 0.5691025641025641,
+  "total_tokens": 416,
+  "data_tokens": 7,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:51:35.472Z"
+}

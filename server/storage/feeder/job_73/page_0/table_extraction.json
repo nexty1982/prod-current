@@ -1,0 +1,535 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 12,
+      "column_count": 3,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "МЕТРИЧЕСКОЙ КНИГИ ИЗ Счет родив : МКСАЦ MECAUZ . WHYCA . И день Званіе , има , отчество и замнал родителей , и какого Илина родившихс B'kponenog * AAHIA . . 1144 крефе- HIA DATES XALE NUMBER M NAME OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN NAME FEMALE BIRTH BAPTISM CITY OF BIRTH"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "YEAR 12 73 ГОДА , ЧАСТЬ ПЕРВАЯ , W Ю KARMULEPHONG - TERM РОДНЕШИХСМТ . Званіе , има , отчетко и фамново Кто совершаль таинство воспрілинкова . KOFLJEHIA ... FULL NAMES OF SPONSORS PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "41 M X 7/16/72 8/20/72 TAMARA ANN STIBITZ KAV STIBITZ ( SOMERVILLE , N.J. ) SONJA YALSH",
+              "confidence": 0.8,
+              "token_count": 17,
+              "bbox": [
+                0.04447115384615385,
+                0.3294871794871795,
+                0.30841346153846155,
+                0.36538461538461536
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "DANIEL PODOBED MARY GEORGE ( BETTY LOU STIBITZ ) REV . VADIM A. POGREBNIAK",
+              "confidence": 0.88,
+              "token_count": 14,
+              "bbox": [
+                0.5036057692307693,
+                0.3400641025641026,
+                0.9016826923076923,
+                0.37403846153846154
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "42 X 7/3/12/9/9/12 JAMES ANTONY Dr. JAMES DANIEL ALLEGRETTO ALLEGRETTO ( SOMERVILLE , N.J. ) EVE VINCENT",
+              "confidence": 0.8,
+              "token_count": 17,
+              "bbox": [
+                0.04326923076923077,
+                0.3871794871794872,
+                0.38317307692307695,
+                0.433974358974359
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "ALEXCULER PROTO PADES ( ANTHONY VINCENT REV . VADIM A. POGREENIAK Rae SIMEONE",
+              "confidence": 0.78,
+              "token_count": 13,
+              "bbox": [
+                0.5016826923076924,
+                0.3939102564102564,
+                0.8939903846153846,
+                0.4326923076923077
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "43 X 8/5/12/9/11/13 BRIAN CHRISTOPHER GERARD LOUIS VERRILLI VERRILLI ( SOMERVILLE , N.J. ) KAREN CHERNIAK",
+              "confidence": 0.84,
+              "token_count": 16,
+              "bbox": [
+                0.042548076923076925,
+                0.4528846153846154,
+                0.35096153846153844,
+                0.5147435897435897
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "GRECORY ANDREW CHERNIAK ( HENRY GILDERT ) REV . VADIM A. POGRANIAL ELIZABETH GERHARD",
+              "confidence": 0.86,
+              "token_count": 14,
+              "bbox": [
+                0.4980769230769231,
+                0.46025641025641023,
+                0.8805288461538462,
+                0.4967948717948718
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "4/4 9/12/12/10/29/12 JENNIFER NATER EMIL ENGERWOOD MARION NATER Je ( N.J. ) ( FELICE ) NATER",
+              "confidence": 0.9,
+              "token_count": 16,
+              "bbox": [
+                0.04350961538461538,
+                0.5259615384615385,
+                0.3439903846153846,
+                0.5637820512820513
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "YOUSIF KAHAN REV . VADIM A. POGREBNIAIK JOAN FELICE",
+              "confidence": 0.8,
+              "token_count": 9,
+              "bbox": [
+                0.49759615384615385,
+                0.5288461538461539,
+                0.8913461538461539,
+                0.5612179487179487
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "145 X 1-1-73 1-20-73 ( DONALD ) Stephen Breese RICHARD BREESE ( New Brunswick , NJ ) ANN ( CARNEY ) BREESE",
+              "confidence": 0.89,
+              "token_count": 22,
+              "bbox": [
+                0.041826923076923074,
+                0.5942307692307692,
+                0.34158653846153847,
+                0.6362179487179487
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "DAVID PETER KRIVOSHIE REV . VADIM A. POGREBNIAK ELIZABETH DOROTHY CARNEY",
+              "confidence": 0.91,
+              "token_count": 11,
+              "bbox": [
+                0.49567307692307694,
+                0.5942307692307692,
+                0.8882211538461539,
+                0.6323717948717948
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "146 X 6-6-696-22-69 JEFFREY NICHOLAS GERHARD RUSSEL ( N.J. SOPHIA SONVA GERHARD Sommerville , ) ( ) GERHARD",
+              "confidence": 0.89,
+              "token_count": 18,
+              "bbox": [
+                0.042548076923076925,
+                0.6618589743589743,
+                0.33533653846153844,
+                0.7211538461538461
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "RECEIVED INTO THE HOLY ORTHODOX CHURCH FROM THE LUTHERN REV . VADIM A. POGREBNIAR CHURCH WHERE HE WAS BAPTIZED 6-22-69 . RECEIVED BY CHRISMATION FEBRUARY 4 , 1973 .",
+              "confidence": 0.95,
+              "token_count": 29,
+              "bbox": [
+                0.4951923076923077,
+                0.6608974358974359,
+                0.8918269230769231,
+                0.7134615384615385
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "47 12-19-72-2-17-63 ( MICHELLE ) ( PLAINFIELD AND KERILLA , N.J. ) WILLIAM MARLENE DONALD RERILLA 148",
+              "confidence": 0.85,
+              "token_count": 17,
+              "bbox": [
+                0.042548076923076925,
+                0.7272435897435897,
+                0.3540865384615385,
+                0.7817307692307692
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "DOUGLAS POFF HELEN POGREBNIAK ( BARBARA CASICELLA ) REV . VADIM A. POGREBNIAR",
+              "confidence": 0.91,
+              "token_count": 13,
+              "bbox": [
+                0.49591346153846155,
+                0.7397435897435898,
+                0.8935096153846154,
+                0.783974358974359
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 8,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 8,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 8,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "324-504-18 RATH - B 149 ( NEW CHRISTINE CRANENDONK KERILLA X BRUNSWICK , N .. ) CHARLES CRANENDONK GLADYS SOLDATO",
+              "confidence": 0.75,
+              "token_count": 20,
+              "bbox": [
+                0.04158653846153846,
+                0.7705128205128206,
+                0.46947115384615384,
+                0.8224358974358974
+              ]
+            },
+            {
+              "row_index": 8,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "MATUSHKA TARRIS Cent # REV EUGENE D. 73-4 VERA MOROS issued 23 AUG",
+              "confidence": 0.78,
+              "token_count": 13,
+              "bbox": [
+                0.496875,
+                0.7663461538461539,
+                0.9512019230769231,
+                0.8121794871794872
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 9,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 9,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 9,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1-35-734-30-13 ( CHRISTOPHER RIDGEWOOD TARRIS PRIEST , N .. ) EUGENE D. TARRIS SONIA RESHETAR",
+              "confidence": 0.86,
+              "token_count": 15,
+              "bbox": [
+                0.10192307692307692,
+                0.8092948717948718,
+                0.4375,
+                0.8551282051282051
+              ]
+            },
+            {
+              "row_index": 9,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BARBARA PSENECHN BISHOP DMITRI ROYSTER . Unt # REV . JOEL MC EACHEN issued 73-5 23 Aug 2",
+              "confidence": 0.79,
+              "token_count": 18,
+              "bbox": [
+                0.49615384615384617,
+                0.8096153846153846,
+                0.953125,
+                0.8416666666666667
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 10,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 10,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 10,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "50 X 11 MAY 23 22 JUL 7 MICHAEL ( COLIE KEVIN ) SOMERVILLE HERBERT A. , NN COLIE LYDIA ANN ZEBAN D 151 )",
+              "confidence": 0.82,
+              "token_count": 25,
+              "bbox": [
+                0.03990384615384615,
+                0.8451923076923077,
+                0.478125,
+                0.9092948717948718
+              ]
+            },
+            {
+              "row_index": 10,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "( ALAN MATEYKA ) Joyce MATEY KA REV . EUGENE D. TARRIs . Cet # 73-6 Issued 23 Ave 23",
+              "confidence": 0.77,
+              "token_count": 20,
+              "bbox": [
+                0.4963942307692308,
+                0.8493589743589743,
+                0.9545673076923077,
+                0.8990384615384616
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 11,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 11,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 11,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "MAY 7312 AUG 73 KAREN ) SOMERVILLE ABODEELY ANN ( , N.J. ROBERT ) ORTANDOX ABODEELY JR . CONSTANCE GHIZ . CRTIDOX",
+              "confidence": 0.79,
+              "token_count": 22,
+              "bbox": [
+                0.10528846153846154,
+                0.9108974358974359,
+                0.4548076923076923,
+                0.9791666666666666
+              ]
+            },
+            {
+              "row_index": 11,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "PAUL A. ABODEELY EVRYKLIA KLIA ABODEELY REV . EUGENE D. TARRIS at # issued 73-7 23 Aug 23",
+              "confidence": 0.82,
+              "token_count": 18,
+              "bbox": [
+                0.49783653846153847,
+                0.9294871794871795,
+                0.9524038461538461,
+                0.9730769230769231
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.02
+    ],
+    "col_2": [
+      0.02,
+      0.4825
+    ],
+    "col_3": [
+      0.4825,
+      1
+    ]
+  },
+  "columns_detected": 3,
+  "header_y_threshold": 0.3066025641025641,
+  "total_tokens": 466,
+  "data_tokens": 377,
+  "data_rows": 11,
+  "extracted_at": "2026-02-17T01:48:16.647Z"
+}

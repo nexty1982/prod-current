@@ -1,0 +1,56 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "groom_name": "2-14-70 HARRY 57 NORTH COPINGTON GUSTICH PLAINFIELD AVENUE AGE , : 44 N.T ( A00.31 ORTHODOX , 1925 CHRISTIAN ) 1ST MARRIAGE",
+        "bride_name": "57 LEONA CODINGTON M. HOUSTON AVENUE NORTH PLAINFIELD , N.T. AGE : 51 ( JAN . 6 , 1919 ORTHODOX CHRISTIAN 2ND MARRIAGE",
+        "officiant": "REV . ROBERT GEORGE LEWIS A MR",
+        "witnesses": ". GEORGE GRABANIA 1311 SCOTCH TERRILL PLAINS , ROAD NEW , JERSEY MRS . LYDIA GRABANTA 1311 SCOTCH TERRILLS PLAINS , ROAD NEW JERSEY",
+        "notes": "groom_parents: PAUL MARY; bride_parents: VICTOR IOLA ); license: FEB . 13 , 1970 No. 23 ( NORTH PLAINFIELD , N.T. , ORTHODOX SACRAMENTAL MARRIAGE FOR THE PREVIOUSLY CONTRACTED 1952 CIVIL , MARRIAGE MISSIONARY ON HOUR 30 JUNE CHURCH , 148 MARYLAND E. MAIN REV STREET . , WILLIAM ELKTON , HOPKINS MRS F. , ; WITNESSED BY W. F. HOPKINS"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.86,
+      "fields": {
+        "groom_name": "NICHOLAS JOHN CHABRA , JR , 134 9. 5TH AVENUE MANVILLE , N.J 08835 AGE : 23 ( JANUARY 4 , 1947 ) ORTHODOX CHRISTIAN ST MARRIAGE",
+        "bride_name": "KATHLEEN MIKLOWCIC 1144 BLEECHER STREET MANVILLE , N. J. 08835 . AGE : 23 ( JANUARY 13 , 1947 ROMAN CATHOLIC 1ST MARRIAGE",
+        "date_of_marriage": "J 3-3-70",
+        "officiant": "REV , ROBERT A. MR GEORGE LEWIS 504",
+        "witnesses": ". DENNIS J. HOLOVACH WASHINGTON AVENUE MANVILLE , NEW JERSEY Miss BARBARA MIKLOWCIC 1144 MANVILLE BLEECHER STREET , NEW JERSEY",
+        "notes": "groom_parents: NICHOLAS LOUISE; bride_parents: JOHN MARY ); license: AUGUST 3 , 1970 No. 70-60 ( MANVILLE , N.T. )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "groom_name": "10-4-70 CHARLES 129 SOUTH FETCHKO , JR . MANVILLE 16TH AVENUE AGE , : 22 OCTOBER N.J.08835 ORTHODOX ( MARRIAGE CHRISTIAN 8 , 1947 ) 1ST",
+        "bride_name": "ROSE 129 GHILDA S. 16TH ROMERO MANVILLE AVENUE AGE : 21 ( , JULY 22 , N.J.08835 ROMAN 1949 CATHOLIC ) 1ST MARRIAGE",
+        "date_of_marriage": "8",
+        "officiant": "REV . ROBERT A. GEORGE LEWIS",
+        "witnesses": "MR . MICHAEL FETCHKO 129 S. 16TH AVENUE MANVILLE , NEW JERSEY MISS MARGARET ANNE PROCTOR 158 S. 13TH AVENUE MANVILLE , NEW JERSEY",
+        "notes": "groom_parents: EUGENIA CHARLES; bride_parents: AVARISTO PORA; license: OCTOBER 1 , 1970 No. 70-89 ( MANVILLE , N.T. ) ORTHODOX SACRAMENTAL MAR RIAGE FOR THE PREVIOUSLY CONTRACTED CIVIL MARRIAGE ON COUNTY JANUARY COURT 8 AT , 1970 LAW , , No.3 , EL JUDGE PASO W. S. COUNTY , COPELAND TEXAS ; WITNESSED BY PAT E , DWYER ."
+      },
+      "sourceRowIndex": 4,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:51:52.084Z"
+}

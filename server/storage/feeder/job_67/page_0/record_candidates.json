@@ -1,0 +1,77 @@
+{
+  "candidates": [
+    {
+      "recordType": "funeral",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "MALE EMALE DEATH 3-27-70 MRS . JULIA ZORZI | 57 | CANCER REV . ROBERT A. GEORGE LEWIS REV . ROBERT A. GEORGE EUCHARIST - 2-13-70 SS . HillSBOROUGH PETER + PAUL CEMETERY , N.T."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "7X3-24-70 x4-25-704-29-70 MRS . VERA WELENTEYCHIK | 62 | HOLY ANOINTING 3-24-70 UREMIA No REV . ROBERT A. GEORGE LEWIS EVERGREEN CEMETERY CLINTON , NEW JERSEY"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "5-5-705-7-70 MRS . KATHERINE NEBOZINSKY | 182 | ACUTE MYOCARDIAL REV . ROBERT A. GEORGE LEWIS REV . ROBERT A. GEORGE LEWIS INFARCTION ARTERIOSCLEROTIC ; HOLY EUCHARIST ANOINTING 4-13-70 SS . PETER + PAUL CEMETERY , 4-13 ; 70 ; 4-30-70 HILLSBOROUGH , N.J. HEART DISEASE"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "10 X 5-28-70 6-1-70 MRS . MARY SZWAHLA | 55 | CARCINOMA OF REV . ROBERT A. GEORGE LEWIS REV . ROBERT A. GEORGE LEWIS OVARY EUCHARIST , 4-11-70 SS , PETER HILLSBOROUGH + PAUL CEMETERY , N. J."
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "11 x 6-15-70 6-19-70 MRS . MARY FELICE | S | MULTIPLE PULMON - REV . ROBERT A. GEORGE LEWIS SS REV . ROBERT A. GEORGE LEWIS ARY INFARCTION WITH EUCHARIST , 6-9-70 . PETER + PAUL CEMETERY DUE TO A.S.H.D. HILLSBOROUGH , N.J. DIABETES , OBESITY"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.82,
+      "fields": {
+        "notes": "12x 75-70 7-8-70 ALEXIS N. FEDCHIN , SR . | TR 7 | CREMIA , ARTERIO- REV . ROBERT A. GEORGE LEWIS SS REV . ROBERT A. GEORGE LEWIS NEPHROSCLER Holy ANOINTING , 7-2-70 . PETER + PAUL CEMETERY LAR EUCHARIST , 7-2-70 HILLSBOROUGH , N.T. OSIS"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "13x 8-4-708-7-70 VERY REV . PETER J. KAREL | 21 | MYOCARDIAL No ARCHBISHOP NIKON INFARCTION ST . TIKHON'S CEMETERY OF BROOKLYN , NY SOUTH CANAAN , PENNA ,"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "funeral",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:47:09.172Z"
+}

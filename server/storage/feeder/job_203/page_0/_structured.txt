@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+ |  |  |  |  | 
+ |  |  |  |  | ( 1963 ( 3 ) May 11 , 5
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+ |  | forway
+GENNARO 11963 54222 AGE HELEN Afa 465 BOTH ORTHODOX ) 1963 CHARLES T MARIS | M. Russo- OF ANTOINETTE 45- PLACE OF BIRTH 1 CONVERT FROM ( LEBEDE ) RUSSO -- DAUGHTER NICHOLAS AND - 40 - PLACE OF BIRTH - WERE MARRIED IN A CIVIL RESIDENCE Father 707 theodore RIFINE BLVD - BRADLEY ( NON - ORTHODOX ) JOHN X CATHARINE ACE 24 -- BORN - Joyce TACAK . DAUGHTER - MR . & MRS . MICHAEL 465 22- SACRAMENT OF OF HOLY BORN MANUELLE ! PERFORMED By - Father | MICHAEL AND RJ250 RARITAN , N.J. R.C. e F MARY LEBEDZ MANVILLE , N.J. CEREMONY - 18 YRS . Looking RARITAN , N.J. SON OF BRADLEY MANVILLE , M.J of TACAK , N.J. thuhe Lot

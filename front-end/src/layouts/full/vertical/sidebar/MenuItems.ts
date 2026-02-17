@@ -43,7 +43,9 @@ interface MenuitemsType {
 }
 
 const Menuitems: MenuitemsType[] = [
-  // DASHBOARDS SECTION
+  // ========================================================================
+  // DASHBOARDS
+  // ========================================================================
   {
     navlabel: true,
     subheader: '📊 Dashboards',
@@ -66,128 +68,19 @@ const Menuitems: MenuitemsType[] = [
     icon: IconLayoutDashboard,
     href: '/dashboards/super',
   },
-
-  // SITE CONFIG SECTION
-  {
-    navlabel: true,
-    subheader: '⚙️ Site Config',
-  },
   {
     id: uniqueId(),
-    title: 'Site Management',
+    title: 'Control Panel',
     icon: IconSettings,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'User Management',
-        icon: IconUsers,
-        href: '/admin/users',
-      },
-      {
-        id: uniqueId(),
-        title: 'Menu Management',
-        icon: IconLayout,
-        href: '/admin/menu-management',
-      },
-
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Content Management',
-    icon: IconFileDescription,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Blog Management',
-        icon: IconWriting,
-        href: '/admin/blog-admin',
-      },
-      {
-        id: uniqueId(),
-        title: 'Notes',
-        icon: IconNotes,
-        href: '/apps/notes',
-      },
-      {
-        id: uniqueId(),
-        title: 'Welcome Message',
-        icon: IconMessage,
-        href: '/frontend-pages/welcome-message',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Social Features',
-    icon: IconMessage,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Email',
-        icon: IconMessage,
-        href: '/apps/email',
-      },
-      {
-        id: uniqueId(),
-        title: 'Friends',
-        icon: IconUserPlus,
-        href: '/social/friends',
-      },
-      {
-        id: uniqueId(),
-        title: 'Chat',
-        icon: IconMessage,
-        href: '/social/chat',
-      },
-      {
-        id: uniqueId(),
-        title: 'Notifications',
-        icon: IconBell,
-        href: '/social/notifications',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'System Monitoring',
-    icon: IconActivity,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Activity Logs',
-        icon: IconFileDescription,
-        href: '/admin/logs',
-      },
-      {
-        id: uniqueId(),
-        title: 'Log Search',
-        icon: IconDatabase,
-        href: '/admin/log-search',
-      },
-      {
-        id: uniqueId(),
-        title: 'Session Management',
-        icon: IconShield,
-        href: '/admin/sessions',
-      },
-      {
-        id: uniqueId(),
-        title: 'Admin Settings',
-        icon: IconSettings,
-        href: '/admin/settings',
-      },
-    ],
+    href: '/admin/control-panel',
   },
 
-  // CHURCH SECTION
+  // ========================================================================
+  // CHURCH MANAGEMENT (matches Control Panel category 1)
+  // ========================================================================
   {
     navlabel: true,
-    subheader: '⛪ Church',
+    subheader: '⛪ Church Management',
   },
   {
     id: uniqueId(),
@@ -211,6 +104,26 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
+    title: 'Image AI',
+    icon: IconPalette,
+    href: '/apps/image-ai',
+  },
+  {
+    id: uniqueId(),
+    title: 'OM-Spec',
+    icon: IconFileDescription,
+    href: '/church/om-spec',
+  },
+
+  // ========================================================================
+  // RECORDS & OCR (matches Control Panel category 2)
+  // ========================================================================
+  {
+    navlabel: true,
+    subheader: '📋 Records & OCR',
+  },
+  {
+    id: uniqueId(),
     title: 'Records Systems',
     icon: IconFileDescription,
     href: '#',
@@ -227,126 +140,11 @@ const Menuitems: MenuitemsType[] = [
         icon: IconEdit,
         href: '/apps/records/editable',
       },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Image AI',
-    icon: IconPalette,
-    href: '/apps/image-ai',
-  },
-  {
-    id: uniqueId(),
-    title: 'OM-Spec',
-    icon: IconFileDescription,
-    href: '/church/om-spec',
-  },
-  // DEVELOPER TOOLS SECTION
-  {
-    navlabel: true,
-    subheader: '🛠️ Developer Tools',
-  },
-  {
-    id: uniqueId(),
-    title: 'OM Daily',
-    icon: IconCheckbox,
-    href: '/admin/control-panel/om-daily',
-  },
-  {
-    id: uniqueId(),
-    title: 'Daily Tasks',
-    icon: IconCheckbox,
-    href: '/devel-tools/daily-tasks',
-  },
-  {
-    id: uniqueId(),
-    title: 'OM Tasks',
-    icon: IconEdit,
-    href: '/devel-tools/om-tasks',
-  },
-  {
-    id: uniqueId(),
-    title: 'Build Console',
-    icon: IconRocket,
-    href: '/admin/build',
-  },
-  {
-    id: uniqueId(),
-    title: 'Development Console',
-    icon: IconTerminal,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Router/Menu Studio',
-        icon: IconSitemap,
-        href: '/devel/router-menu-studio',
-      },
-      {
-        id: uniqueId(),
-        title: 'Menu Editor',
-        icon: IconLayout,
-        href: '/devel-tools/menu-editor',
-      },
-      {
-        id: uniqueId(),
-        title: 'Dynamic Records Inspector',
-        icon: IconDatabase,
-        href: '/devel/dynamic-records',
-      },
-      {
-        id: uniqueId(),
-        title: 'OMTrace Console',
-        icon: IconSitemap,
-        href: '/devel-tools/omtrace',
-      },
-      {
-        id: uniqueId(),
-        title: 'Refactor Console',
-        icon: IconTool,
-        href: '/devel-tools/refactor-console',
-      },
-      {
-        id: uniqueId(),
-        title: 'API Explorer',
-        icon: IconBug,
-        href: '/devel-tools/api-explorer',
-      },
       {
         id: uniqueId(),
         title: 'Live Table Builder',
         icon: IconBorderAll,
         href: '/devel-tools/live-table-builder',
-      },
-      {
-        id: uniqueId(),
-        title: 'OM Permission Center',
-        icon: IconShield,
-        href: '/devel-tools/om-permission-center',
-      },
-      {
-        id: uniqueId(),
-        title: 'Interactive Report Jobs',
-        icon: IconFileDescription,
-        href: '/devel-tools/interactive-reports/jobs',
-      },
-      {
-        id: uniqueId(),
-        title: 'Git Operations',
-        icon: IconGitBranch,
-        href: '/devel-tools/git-operations',
-      },
-      {
-        id: uniqueId(),
-        title: 'Build Info',
-        icon: IconGitBranch,
-        href: '/devel-tools/build-info',
-      },
-      {
-        id: uniqueId(),
-        title: 'Conversation Log',
-        icon: IconMessage,
-        href: '/devel-tools/conversation-log',
       },
     ],
   },
@@ -401,6 +199,151 @@ const Menuitems: MenuitemsType[] = [
     ],
   },
 
+  // ========================================================================
+  // CRM & OUTREACH (matches Control Panel category 3)
+  // ========================================================================
+  {
+    navlabel: true,
+    subheader: '📣 CRM & Outreach',
+  },
+  {
+    id: uniqueId(),
+    title: 'CRM Dashboard',
+    icon: IconUsers,
+    href: '/devel-tools/crm',
+  },
+  {
+    id: uniqueId(),
+    title: 'US Church Map',
+    icon: IconPoint,
+    href: '/devel-tools/us-church-map',
+  },
+
+  // ========================================================================
+  // SYSTEM & SERVER (matches Control Panel category 4)
+  // ========================================================================
+  {
+    navlabel: true,
+    subheader: '🖥️ System & Server',
+  },
+  {
+    id: uniqueId(),
+    title: 'Site Management',
+    icon: IconSettings,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'User Management',
+        icon: IconUsers,
+        href: '/admin/users',
+      },
+      {
+        id: uniqueId(),
+        title: 'Menu Management',
+        icon: IconLayout,
+        href: '/admin/menu-management',
+      },
+      {
+        id: uniqueId(),
+        title: 'Admin Settings',
+        icon: IconSettings,
+        href: '/admin/settings',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Content Management',
+    icon: IconFileDescription,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Blog Management',
+        icon: IconWriting,
+        href: '/admin/blog-admin',
+      },
+      {
+        id: uniqueId(),
+        title: 'Notes',
+        icon: IconNotes,
+        href: '/apps/notes',
+      },
+      {
+        id: uniqueId(),
+        title: 'Welcome Message',
+        icon: IconMessage,
+        href: '/frontend-pages/welcome-message',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'System Monitoring',
+    icon: IconActivity,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Activity Logs',
+        icon: IconFileDescription,
+        href: '/admin/logs',
+      },
+      {
+        id: uniqueId(),
+        title: 'Log Search',
+        icon: IconDatabase,
+        href: '/admin/log-search',
+      },
+      {
+        id: uniqueId(),
+        title: 'Session Management',
+        icon: IconShield,
+        href: '/admin/sessions',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Social Features',
+    icon: IconMessage,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Email',
+        icon: IconMessage,
+        href: '/apps/email',
+      },
+      {
+        id: uniqueId(),
+        title: 'Friends',
+        icon: IconUserPlus,
+        href: '/social/friends',
+      },
+      {
+        id: uniqueId(),
+        title: 'Chat',
+        icon: IconMessage,
+        href: '/social/chat',
+      },
+      {
+        id: uniqueId(),
+        title: 'Notifications',
+        icon: IconBell,
+        href: '/social/notifications',
+      },
+    ],
+  },
+
+  // ========================================================================
+  // AI & AUTOMATION (matches Control Panel category 5)
+  // ========================================================================
+  {
+    navlabel: true,
+    subheader: '🤖 AI & Automation',
+  },
   {
     id: uniqueId(),
     title: 'AI & Automation',
@@ -424,6 +367,120 @@ const Menuitems: MenuitemsType[] = [
         title: 'AI Admin Panel',
         icon: IconRocket,
         href: '/admin/ai',
+      },
+    ],
+  },
+
+  // ========================================================================
+  // OM DAILY (matches Control Panel category 6)
+  // ========================================================================
+  {
+    navlabel: true,
+    subheader: '📅 OM Daily',
+  },
+  {
+    id: uniqueId(),
+    title: 'OM Daily',
+    icon: IconCheckbox,
+    href: '/admin/control-panel/om-daily',
+  },
+  {
+    id: uniqueId(),
+    title: 'Daily Tasks',
+    icon: IconCheckbox,
+    href: '/devel-tools/daily-tasks',
+  },
+  {
+    id: uniqueId(),
+    title: 'OM Tasks',
+    icon: IconEdit,
+    href: '/devel-tools/om-tasks',
+  },
+
+  // ========================================================================
+  // DEVELOPER TOOLS (super_admin only)
+  // ========================================================================
+  {
+    navlabel: true,
+    subheader: '🛠️ Developer Tools',
+  },
+  {
+    id: uniqueId(),
+    title: 'Build Console',
+    icon: IconRocket,
+    href: '/admin/build',
+  },
+  {
+    id: uniqueId(),
+    title: 'Development Console',
+    icon: IconTerminal,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Router/Menu Studio',
+        icon: IconSitemap,
+        href: '/devel/router-menu-studio',
+      },
+      {
+        id: uniqueId(),
+        title: 'Menu Editor',
+        icon: IconLayout,
+        href: '/devel-tools/menu-editor',
+      },
+      {
+        id: uniqueId(),
+        title: 'Dynamic Records Inspector',
+        icon: IconDatabase,
+        href: '/devel/dynamic-records',
+      },
+      {
+        id: uniqueId(),
+        title: 'OMTrace Console',
+        icon: IconSitemap,
+        href: '/devel-tools/omtrace',
+      },
+      {
+        id: uniqueId(),
+        title: 'Refactor Console',
+        icon: IconTool,
+        href: '/devel-tools/refactor-console',
+      },
+      {
+        id: uniqueId(),
+        title: 'API Explorer',
+        icon: IconBug,
+        href: '/devel-tools/api-explorer',
+      },
+      {
+        id: uniqueId(),
+        title: 'OM Permission Center',
+        icon: IconShield,
+        href: '/devel-tools/om-permission-center',
+      },
+      {
+        id: uniqueId(),
+        title: 'Interactive Report Jobs',
+        icon: IconFileDescription,
+        href: '/devel-tools/interactive-reports/jobs',
+      },
+      {
+        id: uniqueId(),
+        title: 'Git Operations',
+        icon: IconGitBranch,
+        href: '/devel-tools/git-operations',
+      },
+      {
+        id: uniqueId(),
+        title: 'Build Info',
+        icon: IconGitBranch,
+        href: '/devel-tools/build-info',
+      },
+      {
+        id: uniqueId(),
+        title: 'Conversation Log',
+        icon: IconMessage,
+        href: '/devel-tools/conversation-log',
       },
     ],
   },

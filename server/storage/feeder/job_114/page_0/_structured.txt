@@ -1,0 +1,11 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 5
+
+--- Table 1 (4 columns, 6 rows) ---
+ | H - INI- HOHI > THE BIRTHS HETPHчECKVI GHATA NA и , . Счеть родив : Mkcaus Жами родителей и , шихем . и день Званіе , има штчество вероисповедания - . Мужеска Женска Имена родившихся . . . . ΠΟΛΔ ΠΟΛΑ рожда HIA абстаби HIA NUMBER DATES M NAME OF CHILD NAME . MOTHER'S MAIDEN NAME BIRTH FATHER'S FULL | YEAR 2016 ГОДЪ , ЧАСТЬ ПЕРИЯМ , СО Званіе , имя , отчество и фамиліл какого воспрієминкова . FULL NAMES OF SPONSORS | РОДИВШИХСЯ . Кто совершаль таниство крашені . PRIEST'S NAME
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | HALE FEMALE BIRTH BAPTISM CITY OF | Luka Khuza vashvili | Fr. Joes Parsells
+ | Nov may Andrew John Finnegan - 1 a 2015 2016 14 ° Summit , N.J. Nino Kanchaveli | Katherine Margiani Nonna Janishvili | Archbishop Michael ( NY )
+ | Jan July Alexander Samuel Davis a 23 2016/2016 a New Brunswe Julitssa ( Dixon ) Davis N.J. | Corneliu Crengutz Chirnozga Chirnozga | Fr. Jaes Parsells
+ | 3 Apr. July Emilia Grece Jares Paul Chanda 12 30 New Bricks Oana Dalia Grigorescu N.J. | Ann Nicoleta Grigorescu Cristian Gheorghe Grigorescu | Fr. Daniel Skvir
+ | 4 Aug3 old Oct Brendon Scott michzel Kloss Alexander Katherine Kass Kloss Plainsboro , N.J. | Richard Kloss mirian Curly | 

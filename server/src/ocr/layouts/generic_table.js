@@ -65,6 +65,37 @@ function extractWordTokens(visionJson, pageIndex = 0) {
   return tokens;
 }
 
+// ── Auto-detect header boundary ──────────────────────────────────────────────
+
+/**
+ * Scan the first few rows of text to find where column headers end and data begins.
+ * Returns the Y threshold (fractional) just below the last header row, or null if
+ * no header rows are detected.
+ */
+function autoDetectHeaderY(textRows) {
+  const HEADER_KEYWORDS = /\b(NUMBER|DATE|NAME|MALE|FEMALE|AGE|RELIGION|MARRIAGE|DEATH|BURIAL|YEAR|PRIEST|WITNESS|CAUSE|RESIDENCE|PARENTS|FULL|INTERNMENT|SACRAMENT|PLACE|BORN|BAPTISM|RECORD|REMARKS|SPONSOR|GODPARENT|CHURCH|PARISH)\b/i;
+  const DATA_PATTERN = /\b\d{1,2}[-\/]\d{1,2}\b/; // Date patterns like "1-03", "2/25"
+
+  let lastHeaderRowIdx = -1;
+  const limit = Math.min(textRows.length, 8); // Only check first 8 rows
+
+  for (let i = 0; i < limit; i++) {
+    const rowText = textRows[i].map(t => t.text).join(' ');
+    const hasHeaders = HEADER_KEYWORDS.test(rowText);
+    const hasData = DATA_PATTERN.test(rowText);
+    if (hasHeaders && !hasData) {
+      lastHeaderRowIdx = i;
+    }
+  }
+
+  if (lastHeaderRowIdx >= 0) {
+    // headerY = just below the last header row
+    const lastHeaderYMax = Math.max(...textRows[lastHeaderRowIdx].map(t => t.y_max));
+    return lastHeaderYMax + 0.005; // Small margin
+  }
+  return null;
+}
+
 // ── Row Clustering (Y-axis) ──────────────────────────────────────────────────
 
 function clusterIntoRows(tokens, mergeThresholdOverride = null) {
@@ -245,7 +276,7 @@ function mergeLedgerRows(tokenRows, fixedGapThreshold = 0.025) {
   const p75 = sortedGaps[Math.floor(sortedGaps.length * 0.75)];
   const threshold = Math.max(fixedGapThreshold, p75 * 1.3);
 
-  const merged = mergeWithThreshold(threshold);
+  let merged = mergeWithThreshold(threshold);
 
   // Safeguard: if many text rows collapsed into too few merged rows, retry with a tighter threshold
   if (tokenRows.length >= 4 && merged.length <= 2) {
@@ -254,8 +285,32 @@ function mergeLedgerRows(tokenRows, fixedGapThreshold = 0.025) {
     if (tighterThreshold < threshold) {
       const retried = mergeWithThreshold(tighterThreshold);
       if (retried.length > merged.length) {
-        return retried;
+        merged = retried;
       }
+    }
+  }
+
+  // Continuation merge: rows with NO content in the left region (x < 0.20)
+  // are continuation lines that belong to the previous record.
+  function hasLeftContent(row) {
+    return row.some(t => t.x_center < 0.20);
+  }
+
+  const emptyLeftFlags = merged.map(row => !hasLeftContent(row));
+  const emptyLeftCount = emptyLeftFlags.filter(Boolean).length;
+
+  // Only apply if there are some continuation rows (but not all)
+  if (emptyLeftCount > 0 && emptyLeftCount < merged.length) {
+    const contMerged = [];
+    for (let i = 0; i < merged.length; i++) {
+      if (!emptyLeftFlags[i] || contMerged.length === 0) {
+        contMerged.push([...merged[i]]);
+      } else {
+        contMerged[contMerged.length - 1].push(...merged[i]);
+      }
+    }
+    if (contMerged.length >= 3) {
+      return contMerged;
     }
   }
 
@@ -297,17 +352,23 @@ function extractGenericTable(visionJson, opts = {}) {
     };
   }
 
-  // Step 2: Separate header tokens from data tokens
-  const headerTokens = allTokens.filter(t => t.y_center <= headerY);
-  const dataTokens = allTokens.filter(t => t.y_center > headerY);
+  // Step 2: Auto-detect header boundary from content
+  // Cluster ALL tokens first to analyze row content for header detection
+  const prelimRows = clusterIntoRows(allTokens, opts.mergeThreshold || null);
+  const detectedHeaderY = autoDetectHeaderY(prelimRows);
+  const effectiveHeaderY = Math.max(headerY, detectedHeaderY || 0);
 
-  // Step 3: Cluster data tokens into text rows
+  // Step 3: Separate header tokens from data tokens using effective threshold
+  const headerTokens = allTokens.filter(t => t.y_center <= effectiveHeaderY);
+  const dataTokens = allTokens.filter(t => t.y_center > effectiveHeaderY);
+
+  // Step 4: Cluster data tokens into text rows
   const textRows = clusterIntoRows(dataTokens, opts.mergeThreshold || null);
 
-  // Step 4: Merge multi-line entries
+  // Step 5: Merge multi-line entries
   const ledgerRows = mergeLedgerRows(textRows);
 
-  // Step 5: Detect columns — use custom bands if provided, otherwise auto-detect
+  // Step 6: Detect columns — use custom bands if provided, otherwise auto-detect
   let columns;
   if (opts.columnBands && Array.isArray(opts.columnBands) && opts.columnBands.length > 0) {
     // Custom bands from layout template: [[x_start, x_end], ...]
@@ -319,7 +380,7 @@ function extractGenericTable(visionJson, opts = {}) {
     columns = detectColumns(textRows, minGapWidth);
   }
 
-  // Step 6: Build header row from header tokens (if any)
+  // Step 7: Build header row from header tokens (if any)
   const headerRow = headerTokens.length > 0 ? {
     row_index: 0,
     type: 'header',
@@ -334,7 +395,7 @@ function extractGenericTable(visionJson, opts = {}) {
     }),
   } : null;
 
-  // Step 7: Build data rows
+  // Step 8: Build data rows
   const dataRowObjects = ledgerRows.map((rowTokens, dataIdx) => {
     const rowIndex = headerRow ? dataIdx + 1 : dataIdx;
     const cells = columns.map((col, colIdx) => {
@@ -352,7 +413,7 @@ function extractGenericTable(visionJson, opts = {}) {
     return { row_index: rowIndex, type: 'row', cells };
   });
 
-  const allRows = headerRow ? [headerRow, ...dataRowObjects] : dataRowObjects;
+  const finalRows = headerRow ? [headerRow, ...dataRowObjects] : dataRowObjects;
 
   // Build column bands map
   const columnBands = {};
@@ -366,15 +427,15 @@ function extractGenericTable(visionJson, opts = {}) {
     page_number: pageIndex + 1,
     page_dimensions: page ? { width: page.width, height: page.height } : null,
     tables: [{
-      row_count: allRows.length,
+      row_count: finalRows.length,
       column_count: columns.length,
       table_number: 1,
       has_header_row: !!headerRow,
-      rows: allRows,
+      rows: finalRows,
     }],
     column_bands: columnBands,
     columns_detected: columns.length,
-    header_y_threshold: headerY,
+    header_y_threshold: effectiveHeaderY,
     total_tokens: allTokens.length,
     data_tokens: dataTokens.length,
     data_rows: ledgerRows.length,
@@ -420,6 +481,7 @@ function tableToStructuredText(extractionResult) {
 module.exports = {
   LAYOUT_ID,
   extractWordTokens,
+  autoDetectHeaderY,
   clusterIntoRows,
   mergeLedgerRows,
   detectColumns,

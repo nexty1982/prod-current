@@ -1,0 +1,277 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 6,
+      "column_count": 3,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Зара ¡ HETPHчеCKOŇ ENUTA NA Счет родив : Мелца шихем . и день . Званіе , има , шотчество и замна родителей , и какого Имена родившихся . вероисповеданім . . . . Мужеска ΠΟΛΑ Женска ΠΟΛΑ рожде Hia Kotipe- HIA MALE NUMBER FEMALE BIRTH DATES NAME OF CHILD NAME . MAIDEN NAME BAPTISM CITY OF BIRTH FATHER'S FULL MOTHER'S"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "YEAR ГОДА , ЧАСТЬ ПЕРВАЯ , И РОДИВШИХСМ . Званіе , имя , отчество и фамила Кто совершаль таинство воспрілинкова . KPOLEHLA.co FULL NAMES OF SPONSORS PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "52X Q4JUN BLAUG 73 MICHAEL CHRISTOPHER RICHARD JOHN OSTAPOVICH SUSAN ANDREYCHık , OSTAPOVICH ORTHODOX ORTHODOX",
+              "confidence": 0.78,
+              "token_count": 15,
+              "bbox": [
+                0.04927884615384615,
+                0.32532051282051283,
+                0.47091346153846153,
+                0.35865384615384616
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "ROBERT OSTAPOVICH NANCY OSTAPOVICH REV EUGENE D , TARRIS",
+              "confidence": 0.79,
+              "token_count": 9,
+              "bbox": [
+                0.5012019230769231,
+                0.33782051282051284,
+                0.9021634615384615,
+                0.3592948717948718
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "( NEW BRUNSWICK , NJ . )",
+              "confidence": 0.8,
+              "token_count": 7,
+              "bbox": [
+                0.15072115384615384,
+                0.36025641025641025,
+                0.22548076923076923,
+                0.37916666666666665
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "issued 73-8 26 AUS 13",
+              "confidence": 0.8,
+              "token_count": 5,
+              "bbox": [
+                0.8771634615384616,
+                0.35544871794871796,
+                0.9492788461538462,
+                0.3762820512820513
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "53 Х 24 JUN 13 RAUL 13 KRISTEN ) MARIE RICHARD JOHN OSTAPOVICH SUSAN ANDREYCHIK OSTAPOVICH NEW BRUNSWICK , N.J. ) ORTHODOX ORTHODOX",
+              "confidence": 0.82,
+              "token_count": 23,
+              "bbox": [
+                0.04326923076923077,
+                0.391025641025641,
+                0.4706730769230769,
+                0.43685897435897436
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "THOMAS ANDREYCHIK JUDITH ANDREY CIHK REV EUGENE D , TARRIS cest t issed 36A 73-9 13",
+              "confidence": 0.71,
+              "token_count": 16,
+              "bbox": [
+                0.4971153846153846,
+                0.39615384615384613,
+                0.9540865384615385,
+                0.430448717948718
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "54 5AVG 13/700773 ( KIMBERLY ) ANN HARVEY GEORGE FIELDING FIELDING , CAROL ANN MOCK ( PT . PLEASANT , N .. ) PROT ORTHODOX",
+              "confidence": 0.85,
+              "token_count": 25,
+              "bbox": [
+                0.04375,
+                0.44358974358974357,
+                0.46947115384615384,
+                0.49551282051282053
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "STEPHE MOCK NANCY MACKEY REV . EUGENE D. TARRIS Ct # 73-20 Issued 7007 23",
+              "confidence": 0.71,
+              "token_count": 15,
+              "bbox": [
+                0.5052884615384615,
+                0.4528846153846154,
+                0.9454326923076923,
+                0.48878205128205127
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "55 X ROSEP 13/14 OCT 73 SUZANA BORIS LABOŞKi LABOSKI VASA Zupa Noski ( SOMERVILLE , N.J. )",
+              "confidence": 0.73,
+              "token_count": 18,
+              "bbox": [
+                0.04230769230769231,
+                0.5006410256410256,
+                0.4641826923076923,
+                0.5432692307692307
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "JOVAN ZUPAN Oski LOJZA ZUPANOSKI REV . EUGENE D. TARRIS sound 73-41 , 50z 73 1973 10 BAPTISMS 1 RECEPTION INTO OR Октновску",
+              "confidence": 0.67,
+              "token_count": 23,
+              "bbox": [
+                0.5040865384615385,
+                0.5108974358974359,
+                0.9439903846153846,
+                0.6548076923076923
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.02
+    ],
+    "col_2": [
+      0.02,
+      0.485
+    ],
+    "col_3": [
+      0.485,
+      1
+    ]
+  },
+  "columns_detected": 3,
+  "header_y_threshold": 0.32326923076923075,
+  "total_tokens": 244,
+  "data_tokens": 156,
+  "data_rows": 5,
+  "extracted_at": "2026-02-17T01:48:18.180Z"
+}

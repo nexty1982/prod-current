@@ -20,6 +20,8 @@ import {
   IconRefresh,
   IconAlertCircle,
   IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
 } from '@tabler/icons-react';
 import type { JobDetail } from '../../types/inspection';
 import { extractYear } from '../../utils/recordTypeDetector';
@@ -27,9 +29,13 @@ import { extractYear } from '../../utils/recordTypeDetector';
 interface WorkbenchHeaderProps {
   job: JobDetail;
   onClose: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  hasPrev?: boolean;
+  hasNext?: boolean;
 }
 
-const WorkbenchHeader: React.FC<WorkbenchHeaderProps> = ({ job, onClose }) => {
+const WorkbenchHeader: React.FC<WorkbenchHeaderProps> = ({ job, onClose, onPrev, onNext, hasPrev, hasNext }) => {
   const theme = useTheme();
   
   const jobFilename = job?.original_filename || job?.originalFilename || job?.filename || 'Unknown';
@@ -116,15 +122,28 @@ const WorkbenchHeader: React.FC<WorkbenchHeaderProps> = ({ job, onClose }) => {
         </Stack>
         
         {/* Right: Actions */}
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          {onPrev && (
+            <Tooltip title="Previous Job">
+              <span>
+                <IconButton size="small" onClick={onPrev} disabled={!hasPrev}>
+                  <IconChevronLeft size={20} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
+          {onNext && (
+            <Tooltip title="Next Job">
+              <span>
+                <IconButton size="small" onClick={onNext} disabled={!hasNext}>
+                  <IconChevronRight size={20} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
           <Tooltip title="Copy OCR Text">
             <IconButton size="small">
               <IconCopy size={18} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Refresh">
-            <IconButton size="small">
-              <IconRefresh size={18} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Close Workbench">

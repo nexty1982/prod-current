@@ -1,0 +1,58 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.79,
+      "fields": {
+        "notes": "52X Q4JUN BLAUG 73 MICHAEL CHRISTOPHER RICHARD JOHN OSTAPOVICH SUSAN ANDREYCHık , OSTAPOVICH ORTHODOX ORTHODOX | ROBERT OSTAPOVICH NANCY OSTAPOVICH REV EUGENE D , TARRIS"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "notes": "( NEW BRUNSWICK , NJ . ) | issued 73-8 26 AUS 13"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.76,
+      "fields": {
+        "notes": "53 Х 24 JUN 13 RAUL 13 KRISTEN ) MARIE RICHARD JOHN OSTAPOVICH SUSAN ANDREYCHIK OSTAPOVICH NEW BRUNSWICK , N.J. ) ORTHODOX ORTHODOX | THOMAS ANDREYCHIK JUDITH ANDREY CIHK REV EUGENE D , TARRIS cest t issed 36A 73-9 13"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "54 5AVG 13/700773 ( KIMBERLY ) ANN HARVEY GEORGE FIELDING FIELDING , CAROL ANN MOCK ( PT . PLEASANT , N .. ) PROT ORTHODOX | STEPHE MOCK NANCY MACKEY REV . EUGENE D. TARRIS Ct # 73-20 Issued 7007 23"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "notes": "55 X ROSEP 13/14 OCT 73 SUZANA BORIS LABOŞKi LABOSKI VASA Zupa Noski ( SOMERVILLE , N.J. ) | JOVAN ZUPAN Oski LOJZA ZUPANOSKI REV . EUGENE D. TARRIS sound 73-41 , 50z 73 1973 10 BAPTISMS 1 RECEPTION INTO OR Октновску"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:48:18.203Z"
+}

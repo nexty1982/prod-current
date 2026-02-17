@@ -1,0 +1,9 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 7 | Rows: 3
+
+--- Table 1 (7 columns, 4 rows) ---
+ | Счета родив шихся . . Мужеска пола Женска MALE NUMBER | : МКСАЦ и день Имена родившихс . . . ΠΟΛΑ рожд HİA KOELBE- HIA DATES GEMALE F BIRTH BAPTISM NAME OF CHILD CITY OF BIRTH | MISTPHчSCHOŇ Званіе , има , штчество FATHER'S FULL | BIRTHS KHATA NA и . Замнала родителей , M KAK вероисповеданию . NAME . MOTHER'S MAIDEN NAME Tatiana Mickel | YEAR 88 ГОДА , ЧАСТЬ ПЕРВАЯ , И KBHHOLE Званіе , има , отчетко и фамил воспріеминкова . FULL NAMES OF SPONSORS Mickel | ΕΠ KOBE- РОДНЕШИХСЯ . Кто совершаль таинство крашені . PRIEST'S NAME Jaz Panels
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ |  | 3/19 5/22 Meredith Anastasiz | Robert Hansen | 22210 | Stephen Stanley Bozinta | Fr. Ел . Jana Parsells
+ | 6 | 8/27/1/06 " / 6 Jeffery John ( Somerville ) | Jeffery St | Donna | Lerchenko | Fr. Jas Panell
+ | 3 | 9/19 11/13 Zachariah ( Plainfield ) | Thomas Famulz | Natalie Woronczuk | Eugene Alexandra Suchenno | 

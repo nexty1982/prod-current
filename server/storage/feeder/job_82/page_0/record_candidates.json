@@ -1,0 +1,50 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.86,
+      "fields": {
+        "notes": "1315 4-296-21 Scott Michael Lawrence Kloss N. Brunswick | Shavon Sudol | Evan Kalenik ( Orthodox ) Fr. Janes Pansells"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.72,
+      "fields": {
+        "notes": "- 1 9-18 / 11-8 Aquelie Edmaid Petro | Cynthia Petro | Mark Nevitt ( orthodox ) Anestesic Nevitt ( orthodox ) Fr. до Jones Panel"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "Mave ( Somerville ) | Orthodoxy by Chrismation"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "12-20 Susan Gorbatuk | Received into 12-20-81 from Roman latin confession where 10-27-57 Fr. Jones Panell She was baptized on t"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:48:36.139Z"
+}

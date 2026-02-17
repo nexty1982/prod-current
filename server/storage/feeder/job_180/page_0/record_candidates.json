@@ -1,0 +1,57 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.88,
+      "fields": {
+        "groom_name": "JOHN 130 ROSOCHA SOUTH , 7TH AVENUE JR . AGE : MANVILLE 23 , ( MARCH NJ , ORTHODOX 22 , 1947 MARRIAGE CHRISTIAN ) 1ST",
+        "bride_name": "15 JOAN ALICE ANN STREET LECHINSKY AGE MANVILLE , N. J. : 20 ( MARCH ROMAN 24,1950 CATHOLIC IST MARRIAGE",
+        "date_of_marriage": "10-17-70",
+        "officiant": "REV . ROBERT A. MR GEORGE LEWIS 15",
+        "witnesses": ". VINCENT ZAKARZEWSKI 1300 CAMPLAIN ROAD MANVILLE , N.T. 08835 MISS ANN LECHINSKY ALICE STREET MANVILLE , N.J. 08835",
+        "notes": "groom_parents: JOHN MARY; bride_parents: JOHN MARIA ); license: OCTOBER 12 , 1970 No. 70-96 ( MANVILLE , N.J. )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.88,
+      "fields": {
+        "groom_name": "WILLIAM DAVIDOVICH 31 PARTRIDGE ROAD SOMERVILLE , NJ , 08876 AGE : 36 ( JANUARY 26 , 1936 ) ORTHODOX CHRISTIAN 1ST MARRIAGE",
+        "bride_name": "JO - ANN KUNTZEVICH 31 PARTRIDGE ROAD SOMERVILLE , N.J. 08876 AGE : 30 ( AUG . 16 , 1940 ) ORTHODOX CHRISTIAN 1ST MARRIAGE",
+        "date_of_marriage": "2-1-71",
+        "officiant": "REV . ROBERT A. GEORGE LEWIS MR 93 93",
+        "witnesses": ". CHARLES KACHEK SOMERVILLE SUNNEYMEAD , T. ROAD N. 08876 MRS . STEPHANIE KACHEK SUNNEYMEAD ROAD SOMERVILLE , N. J. 08876",
+        "notes": "number: 10; groom_parents: WILLIAM MARY; bride_parents: ALEXANDER KRATSKY; license: FEBRUARY 1 , 1971 No. 7-71 ( HILLSBOROUGH , N.J. ) ORTHODOX SACRAMENTAL MARRIAGE FOR PREVIOUSLY CONTRACTED MARRIAGE ON SEPTEMBER ST . ANASTASIA'S 15 , 1962 , AT ROMAN CATHOLIC CHURCH , TEANECK ROAD , FR . HENRY TEANECK , GOODWIN NJ . , BY"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.89,
+      "fields": {
+        "groom_name": "THOMAS JOHN KURTYKA , JR . 2 WEST SUNSET ROAD HAMPTON , VIRGINIA AGE : 23 ( AUGUST 5 , 1947 ) ROMAN CATHOLIC IST MARRIAGE",
+        "bride_name": "SANDRA KULINA 351 ROUTE 206 SOUTH SOUTH SOMERVILLE , N.T. AGE : 22 ( AUGUST 7 , 1948 ) ORTHODOX CHRISTIAN 1ST MARRIAGE",
+        "date_of_marriage": "12-14-71",
+        "officiant": "REV . ROBERT A. MR GEORGE LEWIS 2",
+        "witnesses": ". DALE WEST SUNSET KURTYKA HAMPTON , VIRGINIA ROAD MRS . JOAN PRINCE SPRINGFIELD , OHIO",
+        "notes": "groom_parents: THOMAS CATHERINE; bride_parents: PHILIP HELEN; license: FEBRUARY 8 , 1971 No. 9-71 ( HILLSBOROUGH , N.T. )"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:51:54.534Z"
+}

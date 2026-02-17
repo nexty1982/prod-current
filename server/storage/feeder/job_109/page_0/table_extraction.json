@@ -1,0 +1,468 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 7,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счеть родив Месяца шихем . и день . Имена родившихся HIA DATES MALE NUMBER NAME OF CHILD BIRTH FEMALE BIRTH OF BAPTISM CITY"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "HOHI Poo BIRTHS МЕТРИЧЕСКОЙ КНИГИ Н И Званіе , има , штчество и рамна родителей , в кроисповедания . NAME FATHER'S FULL NAME . MOTHER'S MAIDEN Finnigan Jr."
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "I- > I- YEAR 2010 ГОДА , ЧАСТЬ ПЕРКАМ , И РОДИВШИХСМ какого Званіе , има , отчестко и фамил воспрілинкова . FULL NAMES OF SPONSORS Nateliz ugulava"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": ". Кто совершаль таинство крашені .. PRIEST'S NAME Parell"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1/23 7 / A Heather Marie 1 24 Finnigan",
+              "confidence": 0.71,
+              "token_count": 9,
+              "bbox": [
+                0.11346153846153846,
+                0.36538461538461536,
+                0.23221153846153847,
+                0.4025641025641026
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "John Nino Kanchaveľ .",
+              "confidence": 0.75,
+              "token_count": 4,
+              "bbox": [
+                0.2689903846153846,
+                0.3573717948717949,
+                0.3766826923076923,
+                0.3993589743589744
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Irese wells ( honorzy )",
+              "confidence": 0.82,
+              "token_count": 5,
+              "bbox": [
+                0.5387019230769231,
+                0.36923076923076925,
+                0.6757211538461538,
+                0.3974358974358974
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Jon",
+              "confidence": 0.63,
+              "token_count": 2,
+              "bbox": [
+                0.7670673076923077,
+                0.35128205128205126,
+                0.8141826923076924,
+                0.3887820512820513
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Summit , NJ .",
+              "confidence": 0.75,
+              "token_count": 4,
+              "bbox": [
+                0.18125,
+                0.4032051282051282,
+                0.24278846153846154,
+                0.4256410256410256
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "F. д Pansels",
+              "confidence": 0.6,
+              "token_count": 3,
+              "bbox": [
+                0.7680288461538461,
+                0.41346153846153844,
+                0.8661057692307692,
+                0.45544871794871794
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "8/08/10/09 Constantine Gorbetur",
+              "confidence": 0.71,
+              "token_count": 3,
+              "bbox": [
+                0.1283653846153846,
+                0.4564102564102564,
+                0.22524038461538462,
+                0.49615384615384617
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Timothy Goubeture Marie Boyce",
+              "confidence": 0.75,
+              "token_count": 4,
+              "bbox": [
+                0.26514423076923077,
+                0.44134615384615383,
+                0.38125,
+                0.49935897435897436
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Robert Smith Caroline murphy ( honorzy )",
+              "confidence": 0.84,
+              "token_count": 7,
+              "bbox": [
+                0.5300480769230769,
+                0.4391025641025641,
+                0.7009615384615384,
+                0.4983974358974359
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1 New Brunswick N.J.",
+              "confidence": 0.77,
+              "token_count": 4,
+              "bbox": [
+                0.09495192307692307,
+                0.49038461538461536,
+                0.24302884615384615,
+                0.5176282051282052
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Rebecce",
+              "confidence": 0.87,
+              "token_count": 1,
+              "bbox": [
+                0.2685096153846154,
+                0.4846153846153846,
+                0.3057692307692308,
+                0.5060897435897436
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Jon Panel",
+              "confidence": 0.46,
+              "token_count": 3,
+              "bbox": [
+                0.7653846153846153,
+                0.49166666666666664,
+                0.8591346153846153,
+                0.5352564102564102
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "16/07/10/17 metthew",
+              "confidence": 0.83,
+              "token_count": 2,
+              "bbox": [
+                0.13173076923076923,
+                0.555448717948718,
+                0.2264423076923077,
+                0.5807692307692308
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Alex Gradze Zia Khristani",
+              "confidence": 0.88,
+              "token_count": 4,
+              "bbox": [
+                0.26802884615384615,
+                0.5378205128205128,
+                0.36682692307692305,
+                0.5878205128205128
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "David Goulishvili Beliz Kannishvili",
+              "confidence": 0.81,
+              "token_count": 4,
+              "bbox": [
+                0.5237980769230769,
+                0.517948717948718,
+                0.6478365384615384,
+                0.5830128205128206
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "2007 2010 Gradze NO Brunck",
+              "confidence": 0.64,
+              "token_count": 5,
+              "bbox": [
+                0.13245192307692308,
+                0.5759615384615384,
+                0.2375,
+                0.6150641025641026
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.045
+    ],
+    "col_2": [
+      0.045,
+      0.255
+    ],
+    "col_3": [
+      0.255,
+      0.4525
+    ],
+    "col_4": [
+      0.4525,
+      0.735
+    ],
+    "col_5": [
+      0.735,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.3655769230769231,
+  "total_tokens": 152,
+  "data_tokens": 64,
+  "data_rows": 6,
+  "extracted_at": "2026-02-17T01:49:33.218Z"
+}

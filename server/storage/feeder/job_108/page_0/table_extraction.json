@@ -1,0 +1,275 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счеть шихся MALE"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "HOHI BIRTHS МЕТРИЧЕСКОЙ КНИГИ НА Вами родив MECAUS и . родителей , и , , . и день Званіе имя отчество какого . Имена родившихся вероисповидані \" Kompe- WIH MAIDEN NUMBER DATES NAME . MOTHER'S NAME NAME OF CHILD FATHER'S FULL OF FEMALE BIRTH BAPTIS CITY BIRTH M"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "> M- YEAR 2009 1912 , 4ACTL NEPKAM , W KARHUEPHOBE LESS Званіе , има , отчетко и фамил воспрібликова . FULL NAMES OF SPONSORS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "I- POZHEWHXCA . Кто совершаль таинство кроцині . PRIEST'S NAME F. Jan Panels"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "2/05 4/25 Julianna - 2009 2009 Grzce Peter + Dolly Bakaletz",
+              "confidence": 0.79,
+              "token_count": 11,
+              "bbox": [
+                0.11610576923076923,
+                0.37243589743589745,
+                0.40841346153846153,
+                0.4185897435897436
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Paul Bakzletz Suzanne Bakeletz",
+              "confidence": 0.73,
+              "token_count": 4,
+              "bbox": [
+                0.5192307692307693,
+                0.36217948717948717,
+                0.6408653846153847,
+                0.4233974358974359
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "N. Brunswick , N.J",
+              "confidence": 0.69,
+              "token_count": 4,
+              "bbox": [
+                0.1798076923076923,
+                0.4153846153846154,
+                0.2375,
+                0.45
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "escu",
+              "confidence": 0.84,
+              "token_count": 1,
+              "bbox": [
+                0.6543269230769231,
+                0.4493589743589744,
+                0.6786057692307692,
+                0.47307692307692306
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fa . 1. Jon да Parella",
+              "confidence": 0.68,
+              "token_count": 6,
+              "bbox": [
+                0.7625,
+                0.4189102564102564,
+                0.8641826923076923,
+                0.46121794871794874
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "2",
+              "confidence": 0.92,
+              "token_count": 1,
+              "bbox": [
+                0.08533653846153846,
+                0.5144230769230769,
+                0.09495192307692307,
+                0.5282051282051282
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "5/13 6/20 Sebastian Mihil Max + Carla Caponegro 2009 2009 Princeton N - J .",
+              "confidence": 0.78,
+              "token_count": 15,
+              "bbox": [
+                0.13004807692307693,
+                0.47884615384615387,
+                0.41201923076923075,
+                0.5371794871794872
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Chistian Apostel Ruxanda Apostelescu",
+              "confidence": 0.86,
+              "token_count": 4,
+              "bbox": [
+                0.5204326923076923,
+                0.45064102564102565,
+                0.6783653846153846,
+                0.5092948717948718
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0425
+    ],
+    "col_2": [
+      0.0425,
+      0.105
+    ],
+    "col_3": [
+      0.105,
+      0.465
+    ],
+    "col_4": [
+      0.465,
+      0.72
+    ],
+    "col_5": [
+      0.72,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.3671794871794872,
+  "total_tokens": 135,
+  "data_tokens": 46,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:49:29.518Z"
+}

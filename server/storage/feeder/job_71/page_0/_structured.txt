@@ -1,0 +1,14 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 8
+
+--- Table 1 (4 columns, 9 rows) ---
+ | Счет WHXCA . Мужеска ΠΟΑΔ Женска NUMBER XALE M | Hand HETPHISCHSH HHHTH MAY родив : Меця . и день . Званіе , има , штчество н фамила родителей , и какого Имена родившихся в кроисповеданім . . . " ΠΟΛΑ рожде Hi коефе WIH DATES NAME OF CHILD . FEMALE BIRTH FULL BAPTISM CITY OF BIRTH FATHER'S NAME MOTHER'S MAIDEN NAME | YEAR 1971 ГОДЪ , ЧАСТЬ ПЕРВАМ , О РОДИВШИХСЯ . Званіе , има , отчетко и фамил Кто совершаль таинство воспрієлтикова . крошенія . FULL NAMES OF SPONSORS PRIEST'S NAME
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 127x | 2-25714-2471 JAMES PAUL JOHN ROSOCHA , JR .; JOAN ANN LECHINSKY ROSOCHA ( SOMERVILLE , NiT . ) | VINCENT ZAKARZEWSKI ; ANN LECHINSKY REV . ROBERT A. GEORGE LEWIS
+ | 28x | 2-3-372-1431 JOSEPH JOHN KONKUS JOHN KONKUS , BERTHA LUDZIK ( DUNCOTT , PENNA . ) | FROM RECEIVED THE INTO BYZANTINE THE HOLY CATHOLIC ORTHODOX CHURCH , CHURCH REV . ROBERT A. GEORGE LEWIS WHERE HE WAS BAPTIZED ON FEBRUARY 14,1937 ; WHERE HE WAS ORDAINED TO THE PRIESTHOOD ON JUNE 22 , 1969 BY BISHOP MUNHALL STEPHEN OF , PENNA J. ROCISKO RECEIVED , , AS ARCHBISHOP AN ORTHODOX LAYMAN ON PENTECOST SUNDAY ,
+ | 29 X | 5-15-716-27-71 ADINA ALLEGRETTO MARIE DR . JAMES DANIEL ALLEGRETTO | JUNE 6 , 1971 BY CHRISMATION . SAMUEL DE STEFANO ; HARRY GUSTICH REV . ROBERT A. GEORGE LEWIS
+ |  | ( TOMS RIVER , N.J. ) EVE VINCENT | MARY VINCENT ; LEONA GUSTICH
+ | 30x | 423-717-1-71 RICHARD CSTAPOVICH JOHN ( SAN FRANCISCO , JR . SUSAN RICHARD MARY JOHN OSTAPOVICH , SR . | JOHN ANDREY OSTAPOVICH CHIK ; CAROL ANDREYCHIK ; REV . ROBERT A. GEORGE LEWIS JUDY
+ | 31 | CALIFORNIA ) , ANDREY CHIK | 
+ |  | 2-3-473304 CLAIRE KROMBACH MARY ( NEW YORK CHARLES CITY KROMBACH , ; ADELE CLAIR | RECEIVED INTO THE HOLY ORTHODOX CHURCH FROM REV . ROBERT A. GEORGE LEWIS THE ROMAN CATHOLIC CHURCH , WHERE SHE
+ |  | N.Y. ) | WAS BAPTIZED , MARCH 30 , 1947. RECEIVED BY CHRISMATION , SUNDAY , JULY 18 , 1971 .

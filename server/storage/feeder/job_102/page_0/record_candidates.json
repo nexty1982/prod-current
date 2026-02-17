@@ -1,0 +1,72 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.73,
+      "fields": {
+        "performed_by": "Fs . Joves Paisella",
+        "notes": "2-15 1-6 Anna Kakha Kaliashvili Margiani | Nadezdz Tsulukridze Bobrin"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.73,
+      "fields": {
+        "notes": "200 2002 N. BUT Ekaterine | Igor"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.69,
+      "fields": {
+        "performed_by": "Fi . Joe's Paredes Fr. Janez Panell",
+        "notes": "Nicholes Prel Larissa Kulick Frank mitter | Archpriest Michiel Lewis"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.72,
+      "fields": {
+        "notes": "3-09-01 Allegae - Valentina Robert Erkman | Daviz Pausells"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.64,
+      "fields": {
+        "performed_by": "Fr. Jues Paralls",
+        "notes": "Kung BASER Barbare Lohsen"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "12-22 Dwayne Silowan Clarke | John Parsells"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_4": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:49:17.692Z"
+}

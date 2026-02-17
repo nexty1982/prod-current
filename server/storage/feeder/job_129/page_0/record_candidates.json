@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "A\n118\n1968\n31395 MICHAEL MOROS\nSON OF\nтоков\nSTEPHEN AND VERA (KARDASH) MOROS\nN..S.\nRESIDENCE 44 STELLA DR. SOMERVILLE,\nBORN: July 30, 1968, NEW YORK, NY.\nBaptism CHRISMATION Oct 26, 1968\nSS. PETER + P"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:14.986Z"
+}

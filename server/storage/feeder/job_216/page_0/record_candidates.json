@@ -1,0 +1,37 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "bride_name": "PART II - 6 , 1944 . MARRIAGES RECORD No Franc OF GROOM ( NUMBER AND STREET Newark ) ( BIRTH 24 GROOM PARENTS PREVIOUS MARRIAGES Henrietta Christ NAME OF BRIDE Helen ( NUMBER AND STREET ) OF BIRTH 21 BRIDE OF PREVIOUS MARRIAGES Teorge PARENTS IN a PRESENCE OF Chia WITNESSES Mary FULL NAME ) Kuznia FULL NAME ) ( RECTOR )",
+        "officiant": "FULL AGE 1 y 2",
+        "witnesses": "and Sofie Paul NAME OF BRIDE DE Mary RESIDENCE ( NUMBER AND STREET ) ( PLACE OF BIRTH 23 OF BRIDE NUMBER OF PREVIOUS MARRIAGES Mishna NAME and OF PARENTS Elizabeth MARRIED IN PRESENCE OF ch WITNESSES ( FULL Stella NAME ) Andah ( FULL Rev. NAME ) M. ( RECTOR ) Jan. PART 2.5.1944 II - 5/4 MARRIAGES PARISH RECORD No ROOM Senged FULL NAME OF Wilkes GROOM . Barre , RESIDENCE . PLACE OF BIRTH ( NUMBER AND Wilkes STREET ) AGE OF GROOM Apr. 18,1922 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS George & Bu Sobhie FULL RESIDENCE NAME OF BRIDE Manpille e ( NUMBER AND STREET ) PLACE OF BIRTH AGE OF BRIDE Nov. NUMBER OF PREVIOUS MARRIAGES Andre NAME OF Anna PARENTS Petrovich",
+        "notes": "groom_parents: Feb. PARISH FULL NAME RESIDENCE PLACE OF AGE OF NAME NUMBER OF OF and FULL RESIDENCE PLACE AGE OF NUMBER NAME and OF MARRIED 1 ( (; bride_parents: 40967 CITY ) ( .. STATE ) First Clark ... Roman ( CITY ) ( STATE ) firs shitian Roman : ( RESIDENCE ) ( RESIDENCE ); license: Harak Fazon . CITY ) ( STATE ) Golov Fazan : ( RESIDENCE ) ( RESIDENCE ) 40966 Pa PR Subrinks ( Barre CITY ) ( STATE Pa ) . First 22 gre . Sufrinke M ... Klimovich ( CITY ) ( STATE ) 1924. first 19 yrs . Rovick"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "witnesses": "MARRIED Olga IN PRESENCE OF Klimovick 1 ( FULL Yoral NAME ) . G Beatt 2 ( FULL NAME ) M. ( RECTOR )",
+        "notes": "license: WITNESSES : ( RESIDENCE ) ARESIDENCE )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 0.8,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:55.746Z"
+}

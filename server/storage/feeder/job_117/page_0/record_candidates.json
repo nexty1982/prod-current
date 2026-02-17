@@ -1,0 +1,92 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "date_of_birth": "штчество и . Фамнага родителей , И Званіе , има , какого вероисповедания .",
+        "notes": "Счета родив : Месца шихся . и день | Званіе , имя , отчество и фамил воспрієминкова . | Кто совершаль таниство крашенім"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.73,
+      "fields": {
+        "notes": "Мужеска Имена родившихся PVOU Женска ΠΟΛΑ рожда - . HIA забя . \" . HIA"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.98,
+      "fields": {
+        "date_of_birth": "FATHER'S FULL NAME . MOTHER'S MAIDEN NAME",
+        "notes": "NUMBER DATES NAME OF CHILD | FULL NAMES OF SPONSORS | PRIEST'S NAME"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "date_of_birth": "\"",
+        "notes": "M XALE FEMALE BIRTH BAPIESO CITY OF BIRTH M | Timothy is adult | Fr. Janez Parsells"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "5/25 Timothy - Zelinski | Daniel is adult | Fr. Jaes Pausells"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "notes": "5/25 Daniel 2 Donnelly | Received by Confession Eucharist / and"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "3 101 . Steven 15 Parlacoski | Chrismation from Fn R. C. Joes church . Parsells"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.75,
+      "fields": {
+        "date_of_birth": "Robert Smith Stephanie Coleman",
+        "notes": "8/09 492812 Genevieve Jith Scranton , PA | Marin Torris Austin Recher | .Fu . Jues Parselle"
+      },
+      "sourceRowIndex": 8,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_3": "date_of_birth"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:49:48.667Z"
+}

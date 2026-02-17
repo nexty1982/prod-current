@@ -1,0 +1,11 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 5
+
+--- Table 1 (4 columns, 6 rows) ---
+ | HMG 140H IN BIRTHS HETPHIECKO KAHIH NA и , . И Gurrs PRAMS : Mscays дамна родителей Н ДЕНЬ Званіе , нама , штчество Имена родившихс в Кроиспов * дані . . . . копр / A ΠΟΑΔ Женска ΠΟΛΑ рожде N NAME . MOTHER'S MAIDEN NAME NAME OF CHILD FATHER'S 24 NUMBER FULL BIRTH BERTR DATES OF FEMALE BAPTISM CITY Dao | HI YEAR 2005 ГОДИ , ЧАСТЬ ПЕРЕНЯ , Ю какого Званіе , има , отчетко и фамил воспрієминкова . FULL NAMES OF SPONSORS | РОДИИШИХОМ . Кто совершали таниство κραμενές ... PRIEST'S NAME Fr. Janes Parsells
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | oct Jan Justine Ke - New Brunswick Trofimink 19 aq magdalena N.J. | Daria Parsells | 
+ | Nov Apil Natalie Ann Irma Garcia | Larisa Malchow Zurab Zuzkiridze | Fr. Jaes Parsells Received into Orthodox ( buch vereied
+ | 22 8-1999 2 New Brans - tell Jaz Garcis N.J. |  | by Chrismation . Had Baptism in R. C. Church
+ | 3 Jan 3 June 5 Saba Kahka Kaliashvili 2005 2005 Plainfield , N.J Katherine margiani | Alexander Lomidze Teona Tabatadze | Fr. Jaes Parsells Parcells
+ | Jares Oct Nov Zachary Janes Holot J 14 26 Flemington , N.J. Natalia Trusorg | Yekaterina Khronusora ( Francis Reinecker- honorary ) | Fr. Jues

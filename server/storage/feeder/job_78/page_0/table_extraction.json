@@ -1,0 +1,406 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 9,
+      "column_count": 3,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "AMPHUEPHIGH - TRE RIALTAY PIGTPHчECKON KHATH NA 1977 Счета родив : МКСАЦ WHXCA . и день . Званіе и , и , имя , отчество замна родителей какого Имена родившихс B * kponcnoɛ * 44HIA . . . . . Мужеска пола Женска ΠΟΛΑ -VSKOD NIA крафе- HIA NUMBER DATES"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "AR 1977 ГОДЪ , ЧАСТЬ ПЕРЕАМ , Ю РОДИВШИХСЯ . Звенія , нама , отчество и фаміл Кто воспрієлинкова . совершаль таинство крошенія ."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "MALE FEMALE BIRTH BAPTISM NAME OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN NAME CITY OF BIRTH",
+              "confidence": 0.91,
+              "token_count": 17,
+              "bbox": [
+                0.05456730769230769,
+                0.2602564102564103,
+                0.4596153846153846,
+                0.3192307692307692
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "FULL NAMES OF SPONSORS PRIEST'S NAME",
+              "confidence": 0.98,
+              "token_count": 6,
+              "bbox": [
+                0.5711538461538461,
+                0.2721153846153846,
+                0.8935096153846154,
+                0.29775641025641025
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1 - DEC . 4 , JAN 2 , KRISTY ANN JOHN PETER KULINA , JR . VICTORIA RICCARD 1976 1977 SOMERVILLE , N.J. OETHODOX ORTHODOX 2 OCT . 12 APR 2 PAUL MCDONALDR 1958 1977 . PAUL M. DONALD , SR . LORRAINE PRESBYTERIAN MCGOWAN ( ) ( ROMAN CATHOLIC )",
+              "confidence": 0.77,
+              "token_count": 52,
+              "bbox": [
+                0.05336538461538461,
+                0.3246794871794872,
+                0.46658653846153847,
+                0.40064102564102566
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "ANTHON THONY RICCA ICCARDI OR FINDEX FR EUGENE D. TARRIS PATRICIA Ric CCARol ( RIMAN CATHALIC CERT # 77-1 RECEPT IN TO ORTHODOXY THROUGH JOHN CHRISMATION . KA EUGENC D. TARRIS 2A ZAHODNICK , ORTINDER , SPONSOR . CERT # 77-2",
+              "confidence": 0.72,
+              "token_count": 41,
+              "bbox": [
+                0.5036057692307693,
+                0.3310897435897436,
+                0.9141826923076923,
+                0.4153846153846154
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3 FEB . 21 MAY 15 STEVEN WILLIAM RONALD KAYCHOR IRENE LOGINEW 1977 1977 SMERVILLE , NJ . ORTHODOX ORTHODOX 4 JUNE JUNEI DAVID KLOSS 1977 LAWRENCE 1977 KLOSS SHARON 5000h ORTHODOX OR TIRED SK 5 JUNE , AUGUST STEVEN PETER 1977 CHABRA 1977 ARLINGTON PETER , VIRGINIA JOHN CHABRA CAROL BABY AK ORTHODOX ORTHODOX",
+              "confidence": 0.82,
+              "token_count": 55,
+              "bbox": [
+                0.04807692307692308,
+                0.41185897435897434,
+                0.45625,
+                0.5205128205128206
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "SERGE Loc Now OR TINDEX FR . KAUCHOR EVCENE D₁ TARRI ELIZABETH OR THE OX CERTA 773 , EMERGENCY BAPTISM by REV . JOHN V. POLYAK IN RARITAN VALLEY HOSPITAL OR DAY VIRGIN OUR LADY C OF MOUNT BIED SAME ( R.L. ) CERTE 77-4 . MICHAEL JOHN CHABRA CYNTHIA MARIE BABJAK FR . EvcenE D. TARRIS ORTHODOX ORTHO of 77-5",
+              "confidence": 0.69,
+              "token_count": 61,
+              "bbox": [
+                0.5055288461538462,
+                0.4201923076923077,
+                0.9180288461538462,
+                0.5266025641025641
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "lo MAY 5 CHRISMA 1944 DEC . 4 , ENRIQUETA CONCEPCION ANTOLIN GONZALEZ 1977 DEL VALLE ENRIQUETA SANTA MACHADO ROMAN CATHOLIC ROMAN CATHOLIC CLARA , CUBA",
+              "confidence": 0.74,
+              "token_count": 26,
+              "bbox": [
+                0.07740384615384616,
+                0.5233974358974359,
+                0.45576923076923076,
+                0.5708333333333333
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "CERT # SONIA R. TARRIS TR . EUGENE D. TARRIS CHRISMATION",
+              "confidence": 0.75,
+              "token_count": 11,
+              "bbox": [
+                0.5127403846153846,
+                0.5189102564102565,
+                0.9132211538461539,
+                0.5769230769230769
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "7 Nov. 15 , 1977 DEC 1 , DAVID 1977 GORBATUK FREDERICK , GORBATUR , JP . CLAIRE KRUMBACH",
+              "confidence": 0.73,
+              "token_count": 19,
+              "bbox": [
+                0.05432692307692308,
+                0.5759615384615384,
+                0.4622596153846154,
+                0.5990384615384615
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "RECEPTION INTO ORTHODOXY THROUGH CERT # 77-6 PETER GORBATUR IRENE WICINSKI PR . EUGENE 2. TARRIS",
+              "confidence": 0.7,
+              "token_count": 16,
+              "bbox": [
+                0.4983173076923077,
+                0.5644230769230769,
+                0.9103365384615385,
+                0.6009615384615384
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "SOMERVILLE , NJ , ORTHODOX ORTHODOX 8 AWG - 34 19 NOV : 23 5 1997 JACKSON ELIZABETH Hars , NY MARIE GERARDO A. MACHADO ENRIQUETA",
+              "confidence": 0.73,
+              "token_count": 26,
+              "bbox": [
+                0.07740384615384616,
+                0.5951923076923077,
+                0.4411057692307692,
+                0.6458333333333334
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "ORTHODOX R. C. CERT . # 77-7 PASQUALE DI LEO NATALIE LEON FR . ALEXANDER LEON",
+              "confidence": 0.71,
+              "token_count": 16,
+              "bbox": [
+                0.5084134615384616,
+                0.6073717948717948,
+                0.9079326923076924,
+                0.6394230769230769
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "6 JUN 1970 B NOV ANGLICAN , 1977 , 23 , KATHERINE ORTHODOX JACKSON HOTS ANN GERARDO A. MACHADO ENRIQUETA",
+              "confidence": 0.74,
+              "token_count": 20,
+              "bbox": [
+                0.08052884615384616,
+                0.6403846153846153,
+                0.4423076923076923,
+                0.6794871794871795
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "RECEPTION ORTHODOX ORTHOGOK THROUGH CHRUMA PASQUALE D. LEO NATALIE LEON FR . ALEXANDER LEON",
+              "confidence": 0.77,
+              "token_count": 14,
+              "bbox": [
+                0.5048076923076923,
+                0.6435897435897436,
+                0.9036057692307692,
+                0.675
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 8,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 8,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 8,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": ", M.Y. 10 MAY 1973 5 , Nov. 23 MARGARET ANGLICAN ORTHODOX 1971 JACKSON THERESA HOTS , N.Y GERARDO A. ANGLICAN MACHADO ENRIQUETA ORTHODOX",
+              "confidence": 0.77,
+              "token_count": 24,
+              "bbox": [
+                0.07572115384615384,
+                0.6685897435897435,
+                0.45240384615384616,
+                0.7262820512820513
+              ]
+            },
+            {
+              "row_index": 8,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "RECEPTION OR INTO PHUDOY ORTHODOXY ORTHODOX THROUGH PASQUALE D. LEO NATALIE CHRISMATION LEON ORTHODOX FR . ALEXANDER LEON RECEPTION ORTHODOX INTO ORTHODDAY THROUGH GRISMATION",
+              "confidence": 0.77,
+              "token_count": 24,
+              "bbox": [
+                0.49447115384615387,
+                0.6766025641025641,
+                0.9052884615384615,
+                0.7362179487179488
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0225
+    ],
+    "col_2": [
+      0.0225,
+      0.48
+    ],
+    "col_3": [
+      0.48,
+      1
+    ]
+  },
+  "columns_detected": 3,
+  "header_y_threshold": 0.26237179487179485,
+  "total_tokens": 502,
+  "data_tokens": 428,
+  "data_rows": 8,
+  "extracted_at": "2026-02-17T01:48:29.433Z"
+}

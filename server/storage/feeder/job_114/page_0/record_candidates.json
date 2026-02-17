@@ -1,0 +1,64 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.79,
+      "fields": {
+        "performed_by": "Fr. Joes Parsells",
+        "notes": "HALE FEMALE BIRTH BAPTISM CITY OF | Luka Khuza vashvili"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "performed_by": "Archbishop Michael ( NY )",
+        "notes": "Nov may Andrew John Finnegan - 1 a 2015 2016 14 ° Summit , N.J. Nino Kanchaveli | Katherine Margiani Nonna Janishvili"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.76,
+      "fields": {
+        "performed_by": "Fr. Jaes Parsells",
+        "notes": "Jan July Alexander Samuel Davis a 23 2016/2016 a New Brunswe Julitssa ( Dixon ) Davis N.J. | Corneliu Crengutz Chirnozga Chirnozga"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "performed_by": "Fr. Daniel Skvir",
+        "notes": "3 Apr. July Emilia Grece Jares Paul Chanda 12 30 New Bricks Oana Dalia Grigorescu N.J. | Ann Nicoleta Grigorescu Cristian Gheorghe Grigorescu"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.74,
+      "fields": {
+        "notes": "4 Aug3 old Oct Brendon Scott michzel Kloss Alexander Katherine Kass Kloss Plainsboro , N.J. | Richard Kloss mirian Curly"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_4": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:49:43.675Z"
+}

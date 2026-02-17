@@ -1,0 +1,493 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 7,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счеть шихся . Мужеска ΠΟΛΔ MALE NUMBER"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "ны HOHI BIRTHS H МЕТРИЧЕСКОЙ КНИГИ НА MECAUZ и И . Замна родителей , КАКОГО родив : , . и день Званіе , има штчество родившихся . Имена вероисповедания . . . Женска ΠΟΛΑ рожда Hia крем- HIA FULL . MOTHER'S MAIDEN NAME NAME OF CHILD FATHER'S NAME CITY BIRTH FEMALE BIRTH DATES B OF PAPTIEM S Mathew & тобі Jodi Morizk"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "YEAR 2011 ГОДА , ЧАСТЬ ПЕРКАМ , О Званіе , има , отчетко и фамил воспрівлинкова . FULL NAMES OF SPONSORS Richard Dutico"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "РОДИВШИХСМ . Кто совершаль таинство крошенім . PRIEST'S NAME michzel"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "-",
+              "confidence": 0.73,
+              "token_count": 1,
+              "bbox": [
+                0.09038461538461538,
+                0.3955128205128205,
+                0.09254807692307693,
+                0.40512820512820513
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "135 22 Matthew Fr. Somerville , N.J",
+              "confidence": 0.79,
+              "token_count": 7,
+              "bbox": [
+                0.13149038461538462,
+                0.35993589743589743,
+                0.27379807692307695,
+                0.4080128205128205
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Erica Liscotti",
+              "confidence": 0.85,
+              "token_count": 2,
+              "bbox": [
+                0.526201923076923,
+                0.37051282051282053,
+                0.6274038461538461,
+                0.3858974358974359
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Bishop",
+              "confidence": 0.91,
+              "token_count": 1,
+              "bbox": [
+                0.7771634615384615,
+                0.3580128205128205,
+                0.8228365384615385,
+                0.383974358974359
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "2",
+              "confidence": 0.74,
+              "token_count": 1,
+              "bbox": [
+                0.08774038461538461,
+                0.4653846153846154,
+                0.09927884615384615,
+                0.48044871794871796
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "2010 Gabriel Alden Eric Bruggemann Nov.3 2008 2/27 Bruggemann Monica Georgizi Mihailescu NYC",
+              "confidence": 0.87,
+              "token_count": 13,
+              "bbox": [
+                0.12860576923076922,
+                0.40512820512820513,
+                0.43677884615384616,
+                0.5108974358974359
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Mariana Vajdz",
+              "confidence": 0.64,
+              "token_count": 2,
+              "bbox": [
+                0.5141826923076923,
+                0.4394230769230769,
+                0.6026442307692308,
+                0.4621794871794872
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Jues Parsells Received into Catholicism Orthodoxy from Roman confession a",
+              "confidence": 0.79,
+              "token_count": 11,
+              "bbox": [
+                0.7639423076923076,
+                0.41474358974358977,
+                0.940625,
+                0.5487179487179488
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.09471153846153846,
+                0.5653846153846154,
+                0.10576923076923077,
+                0.5801282051282052
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "14/16 Jerome Stone",
+              "confidence": 0.82,
+              "token_count": 3,
+              "bbox": [
+                0.15528846153846154,
+                0.5442307692307692,
+                0.21995192307692307,
+                0.5756410256410256
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Apostelescu",
+              "confidence": 0.84,
+              "token_count": 1,
+              "bbox": [
+                0.5932692307692308,
+                0.5682692307692307,
+                0.6615384615384615,
+                0.5967948717948718
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "April 16 , 2011 by Chrisnation - fucharist",
+              "confidence": 0.86,
+              "token_count": 8,
+              "bbox": [
+                0.7737980769230769,
+                0.532051282051282,
+                0.9086538461538461,
+                0.5919871794871795
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "4 Dec. 27 My 28 Antonia- Ioenz Max + Carla Caponeguo 2016 2011 New Brunswic",
+              "confidence": 0.76,
+              "token_count": 15,
+              "bbox": [
+                0.11658653846153846,
+                0.6096153846153847,
+                0.38461538461538464,
+                0.6544871794871795
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Christian Rusɣandz Apostelescu",
+              "confidence": 0.69,
+              "token_count": 3,
+              "bbox": [
+                0.5158653846153847,
+                0.5782051282051283,
+                0.6485576923076923,
+                0.6291666666666667
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "FL . Jon д Parell Fu . Jos Jaz Panels by",
+              "confidence": 0.57,
+              "token_count": 11,
+              "bbox": [
+                0.7699519230769231,
+                0.5669871794871795,
+                0.9283653846153846,
+                0.6766025641025641
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "S 10 1001 / Heather Marie Grzuen",
+              "confidence": 0.72,
+              "token_count": 7,
+              "bbox": [
+                0.1233173076923077,
+                0.698076923076923,
+                0.2512019230769231,
+                0.7355769230769231
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Patricia Sokol",
+              "confidence": 0.51,
+              "token_count": 2,
+              "bbox": [
+                0.5230769230769231,
+                0.6977564102564102,
+                0.6185096153846154,
+                0.7224358974358974
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Received into Baption + Chrismation Orthodoxy & Eucharist Fr. Jon by Parell",
+              "confidence": 0.67,
+              "token_count": 12,
+              "bbox": [
+                0.7670673076923077,
+                0.6573717948717949,
+                0.9096153846153846,
+                0.7685897435897436
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "6 Apr. Oct Elizabeth 25 08 тук Ke Dao 2011 New Brunsten magdalenz Trofimíük",
+              "confidence": 0.82,
+              "token_count": 14,
+              "bbox": [
+                0.1283653846153846,
+                0.7871794871794872,
+                0.4,
+                0.8567307692307692
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Dolly Bakzletz Daniel Banda",
+              "confidence": 0.8,
+              "token_count": 4,
+              "bbox": [
+                0.5204326923076923,
+                0.7669871794871795,
+                0.6314903846153846,
+                0.8381410256410257
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Jon д Parelk",
+              "confidence": 0.56,
+              "token_count": 4,
+              "bbox": [
+                0.7742788461538461,
+                0.7634615384615384,
+                0.8778846153846154,
+                0.8246794871794871
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.045
+    ],
+    "col_2": [
+      0.045,
+      0.11
+    ],
+    "col_3": [
+      0.11,
+      0.46
+    ],
+    "col_4": [
+      0.46,
+      0.7075
+    ],
+    "col_5": [
+      0.7075,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.36814102564102563,
+  "total_tokens": 225,
+  "data_tokens": 123,
+  "data_rows": 6,
+  "extracted_at": "2026-02-17T01:49:34.400Z"
+}

@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+ |  |  | Feb. PARISH FULL NAME RESIDENCE PLACE OF AGE OF NAME NUMBER OF OF and FULL RESIDENCE PLACE AGE OF NUMBER NAME and OF MARRIED 1 ( ( | PART II - 6 , 1944 . MARRIAGES RECORD No Franc OF GROOM ( NUMBER AND STREET Newark ) ( BIRTH 24 GROOM PARENTS PREVIOUS MARRIAGES Henrietta Christ NAME OF BRIDE Helen ( NUMBER AND STREET ) OF BIRTH 21 BRIDE OF PREVIOUS MARRIAGES Teorge PARENTS IN a PRESENCE OF Chia WITNESSES Mary FULL NAME ) Kuznia FULL NAME ) ( RECTOR ) | 40967 CITY ) ( .. STATE ) First Clark ... Roman ( CITY ) ( STATE ) firs shitian Roman : ( RESIDENCE ) ( RESIDENCE )
+ |  |  |  |  | 
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+FULL AGE 1 y 2 | and Sofie Paul NAME OF BRIDE DE Mary RESIDENCE ( NUMBER AND STREET ) ( PLACE OF BIRTH 23 OF BRIDE NUMBER OF PREVIOUS MARRIAGES Mishna NAME and OF PARENTS Elizabeth MARRIED IN PRESENCE OF ch WITNESSES ( FULL Stella NAME ) Andah ( FULL Rev. NAME ) M. ( RECTOR ) Jan. PART 2.5.1944 II - 5/4 MARRIAGES PARISH RECORD No ROOM Senged FULL NAME OF Wilkes GROOM . Barre , RESIDENCE . PLACE OF BIRTH ( NUMBER AND Wilkes STREET ) AGE OF GROOM Apr. 18,1922 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS George & Bu Sobhie FULL RESIDENCE NAME OF BRIDE Manpille e ( NUMBER AND STREET ) PLACE OF BIRTH AGE OF BRIDE Nov. NUMBER OF PREVIOUS MARRIAGES Andre NAME OF Anna PARENTS Petrovich | Harak Fazon . CITY ) ( STATE ) Golov Fazan : ( RESIDENCE ) ( RESIDENCE ) 40966 Pa PR Subrinks ( Barre CITY ) ( STATE Pa ) . First 22 gre . Sufrinke M ... Klimovich ( CITY ) ( STATE ) 1924. first 19 yrs . Rovick
+ | MARRIED Olga IN PRESENCE OF Klimovick 1 ( FULL Yoral NAME ) . G Beatt 2 ( FULL NAME ) M. ( RECTOR ) | WITNESSES : ( RESIDENCE ) ARESIDENCE )

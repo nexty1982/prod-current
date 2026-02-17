@@ -1,0 +1,12 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 6
+
+--- Table 1 (4 columns, 7 rows) ---
+ | HOHI BIRTHS HETPHAECKSÅ KNHTH HEL Sun MMA , #verde . Sala poдNT , 4 . NARS OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN | YEAR 2002 17 ГОДА , ЧАСТЬ ПЕРЕИ , И РОДИЕШИХСМ Kaker Знание , има , ответия и фамил коспріемников . NAME FULL NAMES OF SPONSORS | . Ersus ACTES PRIESTS NAKE
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 2-15 1-6 Anna Kakha Kaliashvili Margiani | Nadezdz Tsulukridze Bobrin | Fs . Joves Paisella
+ | 200 2002 N. BUT Ekaterine | Igor | 
+ | Nicholes Prel Larissa Kulick Frank mitter | Archpriest Michiel Lewis | Fi . Joe's Paredes Fr. Janez Panell
+ | 3-09-01 Allegae - Valentina Robert Erkman | Daviz Pausells | 
+ | Kung BASER Barbare Lohsen |  | Fr. Jues Paralls
+ | 12-22 Dwayne Silowan Clarke | John Parsells | 

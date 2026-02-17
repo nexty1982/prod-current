@@ -1,0 +1,32 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.96,
+      "fields": {
+        "child_name": "NAME NAME",
+        "notes": "PARISH | . AND | ADDRESS | DATE | DATE PLACE . AT GOD | NAME NAME | AND | DATE | DATE . AT PLACE GOD"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_3": "child_name"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_4",
+    "col_5",
+    "col_6",
+    "col_7",
+    "col_8",
+    "col_9",
+    "col_10",
+    "col_11"
+  ],
+  "parsedAt": "2026-02-17T01:50:59.409Z"
+}

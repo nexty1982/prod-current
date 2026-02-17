@@ -1,0 +1,43 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.77,
+      "fields": {
+        "groom_name": "Jan. Atersonites 15 Nicholas Torrisi Bingues , N.J. 26 1st Orthodox",
+        "bride_name": "Samantha Doming Wenonah , N.J. 27 1st Non - Ordbedox",
+        "date_of_marriage": "1",
+        "officiant": "F + , Jars Parells",
+        "witnesses": "Alexander Margot Coztes Torrisi",
+        "notes": "groom_parents: Daniel Marie; bride_parents: John Deborah; license: 1/13/2023 # 2023- | Borough of Wenonah"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.77,
+      "fields": {
+        "groom_name": "Oct Giorgi 15 Trenton , N. J. Khvadagiazi 410 1st",
+        "bride_name": "Salome managadze Trenton , N.J. 35 3308 Orthodox",
+        "date_of_marriage": "2 56",
+        "officiant": "Fi . Peter Kryshaili",
+        "witnesses": "Daviti Zakrzdze",
+        "notes": "groom_parents: Nugzzvi Amalia; bride_parents: Valeri Nizo"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:28.073Z"
+}

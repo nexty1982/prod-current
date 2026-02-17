@@ -1,0 +1,30 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 1,
+      "column_count": 0,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": []
+        }
+      ]
+    }
+  ],
+  "column_bands": {},
+  "columns_detected": 0,
+  "header_y_threshold": 0.8373717948717949,
+  "total_tokens": 373,
+  "data_tokens": 0,
+  "data_rows": 0,
+  "extracted_at": "2026-02-17T01:50:35.760Z"
+}

@@ -1,0 +1,68 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.84,
+      "fields": {
+        "groom_name": "John Freehold Alpaugh , N.J. 31 Orthodox 1st",
+        "bride_name": "Debra Rahway , N.J. Kachmarsky 30 Orthodox 1st",
+        "date_of_marriage": "9-02-90",
+        "officiant": "F .. James Parsells (",
+        "witnesses": "rzig Kachmarsky Donna Supock",
+        "notes": "groom_parents: Raymond Lois; bride_parents: Peten Helen; license: # Rahway 159 , N.J. 8-30-90 # 63-90 of 9-21-90"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "groom_name": "Kachek",
+        "bride_name": "Carol Ann Yenchik Danysh",
+        "officiant": "Fr. Jones Parsells",
+        "witnesses": "Krzig Scarbinsky Stephanie Kachek",
+        "notes": "groom_parents: John; bride_parents: Lawrence; license: Manville , N.J."
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.81,
+      "fields": {
+        "groom_name": "Austin Manville , N.J. Orthodox 1st 27",
+        "bride_name": "41 Greek Catholic and Cowell",
+        "date_of_marriage": "10-07-90",
+        "officiant": "Fr. Jouz Parall",
+        "witnesses": "John 2zhodnick Lisz Ryan",
+        "notes": "number: а; groom_parents: Theodorz; bride_parents: Irene Falchid; license: Orthodox previously Sacramental contracted Marriage for marriage of"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.74,
+      "fields": {
+        "groom_name": "Mark Ryan 1st 3 Bridges Orthodox",
+        "bride_name": "Lindz Presbyterian 30",
+        "date_of_marriage": "10-21-90",
+        "notes": "number: 3; groom_parents: Anthony Vevz; bride_parents: Joan; license: at"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:15.259Z"
+}

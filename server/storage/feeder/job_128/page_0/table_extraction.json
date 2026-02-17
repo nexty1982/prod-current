@@ -1,0 +1,168 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 5,
+      "column_count": 2,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1116 1968 117 # 37385 NADEZHDA ROBINSON 1 DAUGHTER OF # 1968 GEORGE AND ANNA ROBINSON 37396 NINA ZYDIAK DAUGHTER OF RESIDENCE ! MULFORD LANE , BELLE MEAD , N.J RUSSELL AND NELIA ZYDIAK BORN : FAB . 27 , 1968 - IN- SOMERVILLE , N.J RESIDENCE : 16 E. CAMPLAIN RD , MANVILLE , N..J BORN : DEC . 14 , 1967 SOMERVILLE , N.J. BAPTISM & CHRISMATION : APRIL 27 , 1968 SS . PETER AND PAUL CHURCH , MANSILLE , I BAPTISM & CHRISMATION ; MAY 25 , 1968 SS . PETER AND PAUL CHURCH - MANUILE GODPARENTS : GEORGE GRABANIA & MATUSHKA LABOUS SACRAMENTS ADMINISTERED : Falley Theodore fabric GODPARENTS : JOSEPH KHASEY THEODORE - SANDRA HIZAR SACRAMENTS BY : FATHER LABOWSKY 37386 BORIS ROBINSON - Son of STAPHAN CARNEY GEORGE AND ANNA ROBINSON 37391 SON OF JERRY AND MARGARET CARNEY ( RIZ RESIDENCE : MOLFORD LAND , BELLE HEAD , N.J. RES . RD / Box 107 , ELIZABETH AVENUE , SOMERSET BORN : DEC . 24 , 1958 2 LONDON , ENCHAN BORN : APRIL 25 , 1968 - Now BRUNSWICK , Now ( BAPTIZED R.C ) CHRISMATION : APRIL 17,1968 BAPTISH & CHRISMATION : JUNE 8 , 1968 - MANVILLE , NJ PETER & PAUL CHURCH H SS . PETER AND PAUL CHURCH"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "SS . GOD PARANTS : ADMINISTERED GEORGE GRABANIA & LYDIA GRADANIA SACRAMENT SACRAMENTS GODPARENTS ADMINISTERED ! BY BY ARNOLD Father Fahad : Father KATKO Theodore AND ELIZABETH : faboushy CARNEY Thundese",
+              "confidence": 0.73,
+              "token_count": 31,
+              "bbox": [
+                0.2076923076923077,
+                0.378525641025641,
+                0.9620192307692308,
+                0.44871794871794873
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "37387 THE ROBINSON SON or 37392 JULIANNE KILTRYS - DAUGHTER OF GEORGE ROBINSON & ANNA ROBINSON THOMAS AND DEANNE Kretry's RESIDENCE ! MULFERD LANG , BELLE MEAD , N.J RESIDENCE : 506 No. GASTON AVE . , RARITAE , N.J BORN ! MAY 14 , 1968 - HORRISTOWN , N.J -",
+              "confidence": 0.76,
+              "token_count": 51,
+              "bbox": [
+                0.13389423076923077,
+                0.4442307692307692,
+                0.9569711538461538,
+                0.5326923076923077
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BORN : JUN 16 , 1961 WELLS ENGLAND BATIRED RC ) CANISMATION : APRIL 27 , 1968 4 BAPTISM & CHRISMATION : JUNE 16 , 1968 - MANVILLE SS.PTER AND PAUL CHURCH , MANELLE , SS . PETER AND PAUL CHURCH GODPARENTS : GEORGE GRABANIA Y LYDIA GRABANA GODPARENTS : MICHAEL DEL PRIORE & HELEN Label Wishoshi",
+              "confidence": 0.78,
+              "token_count": 57,
+              "bbox": [
+                0.17836538461538462,
+                0.5233974358974359,
+                0.9528846153846153,
+                0.6211538461538462
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "SACRAMENT ADMINISTSTED By : Falling aboutly SACRAMENTS ADMINISTERED BY : Fr. Theodol 37388 LARISSA ( LAURA ) PADLO DAUGHTER OF 37393 SPYROS HORTIS - SON OF- WILLIAM JOHN AND LESLIE HORTIS ( BEREEN ) AND PATRICIA PADLO RESIDENCE ! 101 So. GREASHECHER ST . , MANUCCE NA RESIDENCE : 40 SOUTH STREET , MANVILLE , N.J BORN : SOMERVILLE , BORN : WILSON BORO , KASTON BAPYISN N.J. - AND CHRISMATION APRIL FEB 11 , 1968 : 27 SS , PETER 1968 BAPTIST CHRISMATION : JUNE 23 , 1968 . AND PAUL CHURCH SO . PETER AND NASL MANVILLE GOD PARENT : NICHOLAS PANNTAGIS & SONIA KARWAT GODPARENTS SACRAMENTS : ALEX ADMINISTERED PADLO AND , LOUISE N.J. CHABRA SACRAMENTS : BY : For THEODORE LAROWSKY Father Theodore BY fabouxhy :",
+              "confidence": 0.75,
+              "token_count": 130,
+              "bbox": [
+                0.1360576923076923,
+                0.6003205128205128,
+                0.959375,
+                0.8875
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0675
+    ],
+    "col_2": [
+      0.0675,
+      1
+    ]
+  },
+  "columns_detected": 2,
+  "header_y_threshold": 0.38576923076923075,
+  "total_tokens": 489,
+  "data_tokens": 269,
+  "data_rows": 4,
+  "extracted_at": "2026-02-17T01:50:13.378Z"
+}

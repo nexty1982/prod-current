@@ -1,0 +1,55 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.86,
+      "fields": {
+        "date_of_baptism": "BAPTISMS",
+        "notes": "37370 FILIPINI Filipini FILIPINI AVENDO ) STATE ° N ) NAME 11TH , NAME ) CITY , | 1965 13,196- N.J. RECTOR STATE ) PAUL , DENARDO faraway ( , | BAPTISMS 37369 HUZINEC Новико A. HUZINEC ST А. STATE ) 16,1968 N.J STATE RECTOR ° ) ,"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "date_of_baptism": "1",
+        "notes": "RECORD ANN ATOPURE FATHER'S SABA ) 1 MOTHER'S So. STREET AND ( ( ( NUMBER | 17 JAN MARCH PETER & CHURCH SOMERVILLE DRUST BY CITY ) AND SAMUEL the ( ( | N CHRISTOPHER _Kовкат NAME ) KOROSEC ) NAME ) MOTHER'S лоты STREET CITY N.J. 13,1964 JUNG PAUL , ( HUTINGC FATHER'S HUZINEE , 1 AND AND ) ( SOMERVILLE ("
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "date_of_baptism": "PART",
+        "notes": "CHILD PARENTS JOAN 142 ( OF OF | BAPTISM TAN PERFORMED BIRTH S. BIRTH § PARENTS Fatter | PART RECORD PARENTS CAROL ( NORTH NUMBER MANVILLE JUNE AND PETER CHURCH CITY ) JOHN CERTRUAL PERFORMED BY end CHILD ( ( 51 ("
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.95,
+      "fields": {
+        "notes": "PARISH NAME NAME AND . ADDRESS | DATE OF DATE OF CONFIRMATION AT PLACE OF GOD SACRAMENTS . | PARISH OF OF ADDRESS BIRTH BAPTISM NAME NAME AND DATE OF DATE OF CONFIRMATION SS BIRTH PARENTS . . Faller . PLACE OF GOD SACRAMENTS AT ."
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_2": "date_of_baptism"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:51:39.604Z"
+}

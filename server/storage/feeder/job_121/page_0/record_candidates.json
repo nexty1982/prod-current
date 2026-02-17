@@ -1,0 +1,50 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "3 37358 # +4 37359 | Nerest : Father Themelore Levantin AUGUSTINE ( AUSTIN ) KACHER . SON OF JOHN RACHER THEODORA ( ACKALUSKY ) KACHE 7002535 57 MOREAN LA . , SOMERVILLE CAPRISMATION Запл MAY APRIL 12 14 ) , , 1963 1963- SateruchE - - SS . PETER AND PAUL CHURCH COD PARENTS - Jodu CeePER Noming mont ) Father JULIA GALIDA ADMINISTER OF SACRAMENT theodor Palaw DAN ( DANIEL ) BRABSON - SON OF- JOHN BRABSEN VERA ( CARNEY ) BRABSON"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "1 ) 1.963 # 37356 JACQUELINE MICHAEL PETRISKE 4 S. PETRISKO DAUGHTER OF MARIA 69 ( ADAMS TALEICH BORN BAPTISM - JANUARY STREET ) PETRISKO AND 16,1963 , SOMERVILLE CHRISMATION - 35. PETER AND FEBRUARY PAUL 10 , 1963 | ADDRESS - BORN APRIL NEW 28 ROAD , MONMOUTH JUNCTION - , 1963- NEW BRUNSWICE ) N.J. 1.5 . HRISMATION - MAY 25 , 1963- 55. PETER AND PAUL CHUnel GOD PARENTS- NESTOR CARNEY ELIZABETH CARNEY SACRAMENTS ADMINISTERED BY-- Father Chevebrate"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "notes": "GOD PARENTS - JOHN MATUSHKA SOPHIA CHURCH SACRAMENTS LABOWSKY"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.58,
+      "fields": {
+        "notes": "NOMINISTERED BY : father Thunder Wishosk fremuly"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:49:55.397Z"
+}

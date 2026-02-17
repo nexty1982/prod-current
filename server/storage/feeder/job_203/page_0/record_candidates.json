@@ -1,0 +1,35 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.48,
+      "fields": {
+        "notes": "license: forway"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.81,
+      "fields": {
+        "officiant": "GENNARO 11963 54222 AGE HELEN Afa 465 BOTH ORTHODOX ) 1963 CHARLES T MARIS",
+        "witnesses": "M. Russo- OF ANTOINETTE 45- PLACE OF BIRTH 1 CONVERT FROM ( LEBEDE ) RUSSO -- DAUGHTER NICHOLAS AND - 40 - PLACE OF BIRTH - WERE MARRIED IN A CIVIL RESIDENCE Father 707 theodore RIFINE BLVD - BRADLEY ( NON - ORTHODOX ) JOHN X CATHARINE ACE 24 -- BORN - Joyce TACAK . DAUGHTER - MR . & MRS . MICHAEL 465 22- SACRAMENT OF OF HOLY BORN MANUELLE ! PERFORMED By - Father",
+        "notes": "bride_parents: ( 1963 ( 3 ) May 11 , 5; license: MICHAEL AND RJ250 RARITAN , N.J. R.C. e F MARY LEBEDZ MANVILLE , N.J. CEREMONY - 18 YRS . Looking RARITAN , N.J. SON OF BRADLEY MANVILLE , M.J of TACAK , N.J. thuhe Lot"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 0.714,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:30.521Z"
+}

@@ -1,0 +1,295 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BROOK 37377 : BAPTISMS N KAIK KLIK FLIK ST . ) BOUND ) . STATE ) NAME , LUBOMIR NAME ST CITY FATHER'S ( ( 12,1966 PARENTS MANGOVSKA MOTHER'S EAST STREET 1 PART RECORD SUSAN AND ( OF LANKA 104 NUMBER MAY CHILD BIRTH PARISH OF OF . NAME NAME AND ADDRESS DATE 37381 ° BALOGA ) ) BAPTISMS N BALOEN BALOR STATE , ) ) NAME NAME CITY , ( - ( 1 JOAN FATHER'S STREET , STREET 1967 ( ( PART RECORD LASZLO HRINIAK MOTHER'S 14 AND CHILD PARISH OF PARENTS OF JOAN MAIN NUMBER GARPNI May - BIRTH OF . NAME NAME AND ADDRESS GLEN DATE"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": ") RECTOR 1966 STATE . ( , 26 AND JUNE PAUL ) CHURCH ) JAVANO JOVANONICA BY ( CITY ( Se WasyL PACA . BAPTISM BIRTH OF OF DATE CONFIRMATION . PARENTS PERFORMED AT PLACE GOD SACRAMENTS ) REC 2196 STATE ( PAUL BELL AND JULY AND HRINCAL PHILLIPSBURG BY ) CITY dere ( ROBERT ANN BAPTISM . BIRTH OF DATE CONFIRMATION PETER GLORIA PERFORMED The SS OF AT PLACE PARENTS GOD SACRAMENTS Fall"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": ": 37378 H. 1 BAPTISMS N B. LAZORAG ) ) , MURPHY ) STATE MCHARL ) NAME DRIVE PRAINFIELD , CITY NAME ( . DR ( FATHER'S PART RECORD CHILD STEPHEN K. STREET ( MOTHER'S AZ 4.1966 AND . , RF.D ( NUMBER PARISH OF OF PARENTS . NAME NAME MAURTEN , 7 TWP MARCH ADDRESS WARREN OF BIRTH AND DATE ° 37379 ) ) 1 BAPTISMS BARTERED N JOHNSON PAUL JOHNSON JOHNSON AT ) , NAME NAME BROOK STATE , CITY . I , 1967 AND 734 BOUND STREET 5 ( FATHER'S ( PART RECORD BRIAN ARTHUR MOTHER'S LLEN JAN ( NUMBER CHILD PARISH OF PARENTS P MAN OF BIRTH OF . NAME NAME AND ADDRESS DATE"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": ") RECTOR JULY 31,0866 STATE & PAUK ) ( AND OF BAPTISM DATE CONFIRMATION 33. PETER CHURCH AMBOY DOBER ) PERTH BOBER BY ( CITY EVA BIRTH OF PERFORMED Gal . AT PLACE PARENTS GOD SACRAMENTS Peter ) RECTOR ( , 21 1967 , PAUK N.J STATE ) JAN & DIGGENS DICGENS BY Libe ( AND CHURCH ) Son ( CITY JOHN BAPTISM . PETER SS SOMERVILLE BIRTH BARBARA PERFORMED . OF Alualoce Thererlore DATE CONFIRMATION OF tr . AT PLACE PARENTS GOD SACRAMENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "37383 PHILOPS PHILLIPS ) CHAK ) BAPTISMS CHAK ) ° INN ADAM ) STATE . ( NAME ST , CITY SOMERVILLE N ) \" 1,0967 ) ,",
+              "confidence": 0.77,
+              "token_count": 27,
+              "bbox": [
+                0.15889423076923076,
+                0.635576923076923,
+                0.3622596153846154,
+                0.7541666666666667
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "11967 HANVILLE RECTOR N ) STATE ADAMCHAR ADAMCHAL 22 , PAUL ( Bows",
+              "confidence": 0.82,
+              "token_count": 13,
+              "bbox": [
+                0.3870192307692308,
+                0.6346153846153846,
+                0.5247596153846154,
+                0.7243589743589743
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "37382 ELIK KLIK ) STATE 28,1967 ,",
+              "confidence": 0.85,
+              "token_count": 7,
+              "bbox": [
+                0.5786057692307692,
+                0.6759615384615385,
+                0.7418269230769231,
+                0.735897435897436
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "15,1967 N.J RECTOR STATE ) R. ( fabawale",
+              "confidence": 0.86,
+              "token_count": 8,
+              "bbox": [
+                0.7692307692307693,
+                0.6612179487179487,
+                0.9048076923076923,
+                0.7548076923076923
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTIZED FRICIA CA ANDRES NAME FATHER'S ( SIA MOTHER'S WART STREET AND ( 1 ( NUMBER",
+              "confidence": 0.83,
+              "token_count": 16,
+              "bbox": [
+                0.1608173076923077,
+                0.7086538461538462,
+                0.3228365384615385,
+                0.7903846153846154
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "AND CHURCH ROMERWILLO ) Ретах CITY THEODORE AND VERONICA BY RE ) ( ( PERFORMED 0",
+              "confidence": 0.87,
+              "token_count": 16,
+              "bbox": [
+                0.38822115384615385,
+                0.7012820512820512,
+                0.5134615384615384,
+                0.8115384615384615
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "BAPTISMS ° KLIZABETH NicoLA NAME как NAME ) CITY N STREET NJ ) FATHER'S SA MOTHER'S , ( LAST AND",
+              "confidence": 0.88,
+              "token_count": 20,
+              "bbox": [
+                0.5480769230769231,
+                0.717948717948718,
+                0.7194711538461539,
+                0.8185897435897436
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "PAUL DAMERU . KLIK KLIK AND ) CHURCH BY ) CITY",
+              "confidence": 0.81,
+              "token_count": 11,
+              "bbox": [
+                0.7865384615384615,
+                0.7227564102564102,
+                0.8774038461538461,
+                0.7967948717948717
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PART RECORD CHILD PARENTS OF DHILLIPS ( PARISH 2 NAME NAME BRA BIRTH OF DATE OF AND . ADDRESS",
+              "confidence": 0.92,
+              "token_count": 19,
+              "bbox": [
+                0.1608173076923077,
+                0.7637820512820512,
+                0.3576923076923077,
+                0.8769230769230769
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BAPTISM OF CONFIRMATION BIRTH PLACE OF PARENTS SACRAMENTS The DATE FATHER AT GOD",
+              "confidence": 0.93,
+              "token_count": 13,
+              "bbox": [
+                0.3860576923076923,
+                0.7769230769230769,
+                0.5103365384615385,
+                0.8794871794871795
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "1 PART RECORD PARENTS ( CHILD 104 NUMBER BROOK AUG ( PARISH Ов ADDRESS BIRTH OF NAME OF NAME OF . AND DATE",
+              "confidence": 0.91,
+              "token_count": 23,
+              "bbox": [
+                0.5490384615384616,
+                0.7730769230769231,
+                0.7411057692307692,
+                0.8996794871794872
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "AND PETER ( ( BAPTISM CONFIRMATION BIRTH PARENTSKO PANKA PERFORMED Theor OF . SS OF DATE AT PLACE SACRAMENTS Father . GOD",
+              "confidence": 0.88,
+              "token_count": 22,
+              "bbox": [
+                0.7685096153846154,
+                0.7631410256410256,
+                0.8978365384615384,
+                0.8980769230769231
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0775
+    ],
+    "col_2": [
+      0.0775,
+      0.375
+    ],
+    "col_3": [
+      0.375,
+      0.535
+    ],
+    "col_4": [
+      0.535,
+      0.755
+    ],
+    "col_5": [
+      0.755,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.619423076923077,
+  "total_tokens": 580,
+  "data_tokens": 195,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:51:44.136Z"
+}

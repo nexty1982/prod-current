@@ -5,18 +5,17 @@
  * Provides a comprehensive interface for OCR operations.
  * 
  * Routes: 
- * - /apps/ocr/studio
- * - /apps/ocr
+ * - /devel/ocr-studio
  */
 
-import React from 'react';
-import { Box, Typography, Paper, Button, Grid, Card, CardContent } from '@mui/material';
 import {
-  CloudUpload as UploadIcon,
-  Settings as SettingsIcon,
-  History as HistoryIcon,
-  Assessment as AssessmentIcon,
+    Assessment as AssessmentIcon,
+    History as HistoryIcon,
+    Settings as SettingsIcon,
+    CloudUpload as UploadIcon,
 } from '@mui/icons-material';
+import { Box, Button, Card, CardContent, Grid, Paper, Typography } from '@mui/material';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const OCRStudioPage: React.FC = () => {
@@ -46,7 +45,7 @@ const OCRStudioPage: React.FC = () => {
                 <Button
                   variant="contained"
                   startIcon={<UploadIcon />}
-                  onClick={() => navigate('/apps/ocr/upload')}
+                  onClick={() => navigate('/devel/ocr-studio/upload')}
                 >
                   Upload & Process
                 </Button>
@@ -67,7 +66,7 @@ const OCRStudioPage: React.FC = () => {
                 <Button
                   variant="outlined"
                   startIcon={<HistoryIcon />}
-                  onClick={() => navigate('/devel/om-ocr')}
+                  onClick={() => navigate('/devel/ocr-studio/jobs')}
                 >
                   View Jobs
                 </Button>
@@ -88,7 +87,7 @@ const OCRStudioPage: React.FC = () => {
                 <Button
                   variant="outlined"
                   startIcon={<SettingsIcon />}
-                  onClick={() => navigate('/devel/om-ocr/settings')}
+                  onClick={() => navigate('/devel/ocr-studio/settings')}
                 >
                   Configure
                 </Button>

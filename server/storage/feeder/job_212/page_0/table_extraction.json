@@ -1,0 +1,499 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 3120,
+    "height": 4160
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "PLACE AGE OF NUMBER NAME FULL RESIDENCE PLACE AGE NAME NUMBER MARRIED 1 ( 2 А12 .",
+              "confidence": 0.96,
+              "confidence_min": 0.83,
+              "token_count": 17,
+              "bbox": [
+                0.29262820512820514,
+                0.29447115384615385,
+                0.3730769230769231,
+                0.6028846153846154
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "BIRTH Philadelitia 23 GROOM OF PREVIOUS MARRIAGES OF апта PARENTS ( Joseph Lovey NAME R. OF ... BRIDE 4 ( NUMBER AND STREET BIRTH Andron ) OF OF BRIDE 20 OF OF PREVIOUS MARRIAGES Nikola Katherine PARENTS khoa Joseph IN PRESENCE Bolita OF FULL Ben Albert ( AME ) M. Klimak FULL NAME ) Stor ( RECTOR ) PART II - Novem . 16 , PARISH RECORD",
+              "confidence": 0.83,
+              "confidence_min": 0.31,
+              "token_count": 67,
+              "bbox": [
+                0.3157051282051282,
+                0.2882211538461538,
+                0.5259615384615385,
+                0.6466346153846154
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": "first Bamberski Shubert Konehuha Somervill ( CITY ) \" Pa ( STATE first Koruna h , Smarsh WITNESSES : ( RESIDENCE ) ( RESIDENCE ) MARRIAGES 1941 , . No 40951",
+              "confidence": 0.82,
+              "confidence_min": 0.42,
+              "token_count": 31,
+              "bbox": [
+                0.42788461538461536,
+                0.3233173076923077,
+                0.5849358974358975,
+                0.6459134615384615
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "FULL PLACE AGE NUMBER NAME and FULL PLACE AGE NUMBER NAME lik MARRIED 1 2 Ren",
+              "confidence": 0.94,
+              "confidence_min": 0.53,
+              "token_count": 16,
+              "bbox": [
+                0.31858974358974357,
+                0.675,
+                0.3657051282051282,
+                0.9778846153846154
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "NAME OF GROOM Joseph 413 B.SH E. RESIDENCE ( • NUMBER AND OF 281 Unguary STREET ) BIRTH OF GROOM OF PREVIOUS MARRIAGES OF PARENTS Sofy Soty , Stefan NAME OF BRIDE Anma RESIDENCE Marwillen OF BIRTH ( NUMBER AND Ma STREET ) Manville OF BRIDE 27 OF PREVIOUS MARRIAGES OF PARENTS and Olga Mary IN Ku PRESENCE OF ( FULL Charks NAME ) Rawling ( FULL NAME ) ( RECTOR )",
+              "confidence": 0.88,
+              "confidence_min": 0.27,
+              "token_count": 72,
+              "bbox": [
+                0.31987179487179485,
+                0.6629807692307692,
+                0.5323717948717949,
+                0.9759615384615384
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "Carmon Bound Brook , ( CITY ) Austria ( first Wassie Carmon Parlik .. ( CITY ) n ( . first tony Koway Paw- WITNESSES : ( RESIDENCE ( RESIDENCE",
+              "confidence": 0.82,
+              "confidence_min": 0.42,
+              "token_count": 30,
+              "bbox": [
+                0.43814102564102564,
+                0.6634615384615384,
+                0.5849358974358975,
+                0.958173076923077
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "N.I. )",
+              "confidence": 0.74,
+              "confidence_min": 0.71,
+              "token_count": 2,
+              "bbox": [
+                0.5432692307692307,
+                0.39471153846153845,
+                0.5756410256410256,
+                0.41394230769230766
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "PLACE BIRTH AGE OF GROOM 37 Manville NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Peter Alexandra FULL NAME OF BRIDE Helen RESIDENCE 139 S. Lincoln ( NUMBER AND PLACE OF Cabery STREET ry ) BIRTH AGE OF BRIDE 23 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Martin MARRIED IN Яна PRESENCE OF 1 Ronan ( FULL NAME ) B.T. Pawlik 2 ( FULL Reo NAME . ) ( RECTOR ) October PART II - MARRIAGES PARISH RECORD No",
+              "confidence": 0.9,
+              "confidence_min": 0.48,
+              "token_count": 78,
+              "bbox": [
+                0.6583333333333333,
+                0.29134615384615387,
+                0.864423076923077,
+                0.653125
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": ", n.J поне Kulina Molovach Rukaswiet witz Ave , midaloser , , ( CITY ) n.J. ( STATE ) none Lusivity WITNESSES : - Manvelle - ( RESIDENCE Manville ) ( RESIDENCE luk ) 2 , 1948 40997",
+              "confidence": 0.79,
+              "confidence_min": 0.34,
+              "token_count": 38,
+              "bbox": [
+                0.7987179487179488,
+                0.29134615384615387,
+                0.9487179487179487,
+                0.6552884615384615
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "Nr . STATE ) STATE ) ) )",
+              "confidence": 0.88,
+              "confidence_min": 0.45,
+              "token_count": 8,
+              "bbox": [
+                0.5432692307692307,
+                0.6790865384615384,
+                0.5785256410256411,
+                0.958173076923077
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "FULL NAME OF GROOM N John RESIDENCE 105 Hirview ( NUMBER AND Jessey STREET ) PLACE OF BIRTH AGE OF GROOM 300 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Andrew ани FULL NAME OF BRIDE Jamesbury Adele RESIDENCE ( NUMBER AND STREET ) PLACE OF BIRTH Brony , AGE OF BRIDE 27 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Vincenza Frank MARRIED IN PRESENCE OF WITNESSES 1 ( FULL NAME ) 2 ( FULL NAME ) Rev. Micholas J. ( RECTOR )",
+              "confidence": 0.91,
+              "confidence_min": 0.4,
+              "token_count": 82,
+              "bbox": [
+                0.6528846153846154,
+                0.6709134615384615,
+                0.8480769230769231,
+                0.9810096153846154
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "Kucharo Ave , Somewilll N.J .. City City ( CITY ) n . ( n.J. STATE ) once Femminisha Pucharz Pirrone , ( CITY D. ) s.z. n.Jo ( STATE ) mevaro Pirrone : ( RESIDENCE ) ( Turyluk RESIDENCE )",
+              "confidence": 0.78,
+              "confidence_min": 0.39,
+              "token_count": 41,
+              "bbox": [
+                0.7884615384615384,
+                0.6675480769230769,
+                0.9365384615384615,
+                0.9819711538461539
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_license_format"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 562,
+  "data_tokens": 482,
+  "data_rows": 2,
+  "extracted_at": "2026-02-17T01:52:48.179Z"
+}

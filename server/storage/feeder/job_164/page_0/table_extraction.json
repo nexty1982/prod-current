@@ -1,0 +1,168 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 5,
+      "column_count": 2,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": ". ) RECTOR STATE 9354 BY ADAMICI BAPTISMS No Cooper ) Si . STATE 1958 , 1958 N ) RECTOR 9351 PL N.J. 8 , 1958 . , N.J. / , ) CITY 11 HAZLEWOOD , BAPTISMS No 1 MICHAe MICHAEL ) ) STATE 13 , GARY Co Coope NAME CITY . NJ 113,1958 , 7 EPT ( 77,1958 TAUL STATE John John MOTHER'S STREET ( AND Hosp + ) ) NAME ( PART RECORD PAUL CHILD NICHOLAS FATHER'S FRANCES NAME MOTHER'S STREET ( AND ( PARISH OF PARENTS OF SHVIDRIK MARGARET 218 PLAINFIELD 6,19 lune Hosp CHURCH FIELD PAUL ( , Ј JULY PAUL SHUIDRIA AND PLAIN ARBOR BIRTH OF BAPTISM DATE MUHLENBERG PETERY BIRTH VILLIAM PUTYRSKI 1 : PERFORMED PART PARENTS NACHEK Knopf BY 516 NUMBER ( OF AUGUST CHURCH ) ( CITY ( BIRTH OF SACRAMENTS STEphen REU RECORD CHILD PARISH OF NAME NAME STELLA AND Coope ADDRESS MANVILLE AND OF . NAME NAME AND Lenner NUMBER BAPTISM PETER DOpIRAK DATE SomeRSET BIRTH PAUL Depiakk ADDRESS DATE CONFIRMATION STS OF . AT PLACE PARENTS OF GOD ANNA DATE CONFIRMATION STS SOMERVILLE OF . PARENTS PERFORMED AT PLACE TAY GOD SACRAMENTS ) RECTOR . 9358 пово ) STATE Brunsw 1958 NY ) RECTOR STATE ( 9356 Zydias STATE STAT . CITY , th 1958 ) . , BAPTISMS No MOTHER'S 1 Janiel ЛАМЕ 28,1958 ) STREET ( AND PART RECORD W rich ew Sept AND Seppt CHURCH ( Somerville ) CITY ( Ville Tyler BY ) 30 ! BAPTISMS N Martin apcho 1928 , ) NAME AME CITY . STREET Jo AND 1 Solu 1921 , FATHER'S ( PART RECORD John . 22 NUMBER ( CHILD 150 OF PARENTS OF Oct donegauski New 1958 12 ) BY CHURCH ( Heights Hosp Oct AND dex Dietrich rapcho . : . Martha Reelgers BIRTH BIRTH Dietrich PERFORMED 。 OF OF BAPTISM OF . PARISH AND ADDRESS DATE Middlesex DATE CONFIRMATION Peter Sts PARENTS Hephen NUMBER ( . AT PLACE GOD SACRAMENTS Ted BIRTH PARISH CHILES OF PARENTS OF дна Somerse BAPTISM BIRTH OF Peter PERFORMED to OF OF eplenie . NAME NAME AND ADDRESS DATE DATE CONFIRMATION AT PLACE PARENTS GOD SACRAMENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "NAME NAME",
+              "confidence": 0.99,
+              "token_count": 2,
+              "bbox": [
+                0.2603365384615385,
+                0.6057692307692307,
+                0.2846153846153846,
+                0.6346153846153846
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Pash Nechanics Houp 1958 RECTOR 41958 9360 Pack 1958 RECTOR de 9359 STATE Mole machuls Meader TATE Pask D ) STATE 26 , ) Nº ) CITY st.8 al ) NAME NAME , STREET Paul e BY ) .",
+              "confidence": 0.8,
+              "token_count": 39,
+              "bbox": [
+                0.2310096153846154,
+                0.6445512820512821,
+                0.9350961538461539,
+                0.8224358974358974
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS ) вонида Nº Lee Walter Thok NAME CITY J ) BAPTISMS MOTHER'S , STREET CHURCH Fle BY PERFORMED Justine Metro FATHER'S MOTHER'S AND Belle CHURCH ) CITY drew AND NUMBER ( ( ) PERFORMED ( AND ( . AND ( 1 ( ( . P BIRTH",
+              "confidence": 0.87,
+              "token_count": 47,
+              "bbox": [
+                0.20288461538461539,
+                0.7381410256410257,
+                0.9283653846153846,
+                0.8657051282051282
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PD NUMBER 1 PART крещ RECORD PARISH CHILD PARENTS Zeva D. Hunter BAPTISM Maurille BIRTH PARENTS PART RECORD CHILD PARENTS Helen BIRTH Bou BAPTISM ( BIRTH OF OF OF OF CONFIRMATION S OF PARENTS ( PLACE SACRAMENTS GOD OF CONFIRMATION OF PLACE SACRAMENTS Res OF OF NAME NAME ADDRESS . DATE GOD PARISH NAME NAME AND ADDRESS DATE DATE DATE . AT OF AND AT",
+              "confidence": 0.91,
+              "token_count": 65,
+              "bbox": [
+                0.20721153846153847,
+                0.8076923076923077,
+                0.9367788461538461,
+                0.9464743589743589
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.1
+    ],
+    "col_2": [
+      0.1,
+      1
+    ]
+  },
+  "columns_detected": 2,
+  "header_y_threshold": 0.6175,
+  "total_tokens": 515,
+  "data_tokens": 153,
+  "data_rows": 4,
+  "extracted_at": "2026-02-17T01:51:20.051Z"
+}

@@ -1,0 +1,42 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.56,
+      "fields": {
+        "notes": "BIBIR"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "1 | 12/29/5/13 ] Anna 2005 2006 New BrunsOICE , N.J. | Ke Magdalena Dao Trofimink | Maria Tonissi | Fr. Jues Parsells Fr. Janes Parsells"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.75,
+      "fields": {
+        "notes": "2 05/26/08/02 Elisebeth 2006 2006 New Brassnick N.J. | Fr. Emily John strzot Parsells | Main Tarpley Claudy можу"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:49:25.536Z"
+}

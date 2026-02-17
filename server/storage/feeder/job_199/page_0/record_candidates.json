@@ -1,0 +1,40 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.82,
+      "fields": {
+        "groom_name": "Steven James Parla cosici",
+        "bride_name": "Geena Maric",
+        "date_of_marriage": "1 9/29",
+        "notes": "groom_parents: Denise; bride_parents: Mary"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.8,
+      "fields": {
+        "groom_name": "Jackson , N.J. 25 Orthodox 1st",
+        "bride_name": "Gladysiewicz Jackor , N.J. 27 Roman Catholic",
+        "officiant": "Fri Jaes Passells",
+        "witnesses": "Nicholzs Tonisi Kelly Lafferty",
+        "notes": "groom_parents: steven; bride_parents: Bobert 1st; license: Sept. 29 , 2019 А 19-165 Jackson , N.J."
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:24.639Z"
+}

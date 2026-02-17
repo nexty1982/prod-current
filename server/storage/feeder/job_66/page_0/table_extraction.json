@@ -1,0 +1,122 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 3764,
+    "height": 3035
+  },
+  "tables": [
+    {
+      "row_count": 5,
+      "column_count": 1,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "YEAR 1969 1970 DEATHS , ТРЕТЇМ , . МЕТРИЧЕСКОЙ книги на года часть Ф ОУМЕРШИХА . Кто исповѣдываля й пріобщаля . Кто совершаля погревеніе , и гдѣ погребены . GuŕTS Мелци и день . Местопроисхожденіє , има , отчество й фамилім отмершагw . офмаршаги AKTÁ 5 чего отмеря . Мужеска отмерших . . Женска смерти . погребенім . Мужеска Женска AGE NAME OF PRIEST WHO NUMBER DATE OF Μ NAME OF PRIEST WHO FULL NAME OF DECEDENT ALE RFENALE DEATH CAUSE OF DEATH ADMINISTERED SACRAMENTS OFFICIATED AT BURIAL AND PLACE OF INTERNMENT M BURTAL I MALE FEMALE"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "10-15-69 MRS , ANNA EVANIEC 75 ARTERIOSCLEROTIC REV . . DISEASE ROBERT A. 10-11-69 GEORGE LEWIS REV . ROBERT A. GEORGE 1 10-8-69 LEWIS X HEART HOLY ANOINTING , SS . PETER + PAUL CEMETERY HILLSBOROUGH TOWNSHIP , N.T. 2x 11-10-69 11-14-69 JOHN S. BUDAY 55 FAR METASTASES ADVANCED REV . ROBERT BRONCHOGENIC HOLY ANOINTING A. GEORGE EUCHARIST LEWIS REV . ROBERT A. GEORGE LEWIS + PROSPECT HILL CEMETERY CARCINOMA 11-14-69 FLEMINGTON , NEW JERSEY",
+              "confidence": 0.89,
+              "token_count": 75,
+              "bbox": [
+                0.020722635494155154,
+                0.2869851729818781,
+                0.9649309245483528,
+                0.4438220757825371
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "3 × 1-4-701-8-70 MRS . MARY DZURICH No REV . ROBERT A. GEORGE LEWIS SAMPLE DEATH RECORD Ss . PETER SS . Peter & Orthodox Church HILLSBOROUGH + PAUL TOWNSHIP CEMETERY , N.T. Paul Manville , NJ 08836 X 2-7-70 2-10-70 MRS . TATIANA GUMENUK 84 CEREBRAL REV . ROBERT A. GEORGE LEWIS REV . ROBERT A. GEORGE LEWIS THROMBOSIS HOLY ANDINTING + EUCHARIST SS . PETER HILLSBOROUGH + PAUL 2-2-70 TOWNSHIP CEMETERY , N.T",
+              "confidence": 0.87,
+              "token_count": 75,
+              "bbox": [
+                0.015940488841657812,
+                0.48467874794069193,
+                0.9864505844845909,
+                0.6728171334431631
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "5x 2-13-70 2-17-70 ALEXANDER PAWLIK 52 CANCER : REV . ROBERT A. GEORGE LEWIS REV . ROBERT A. LUNGS CARCINOME , ABDOMEN HOLY , R - 9-70 SS . PAUL GEORGE PETER + CEMETERY LEWIS OF METASTOSIS EUCHARIST ANOINTING AND , R - 12-70 HILLSBOROUGH TOWNSHIP , N.T.",
+              "confidence": 0.84,
+              "token_count": 48,
+              "bbox": [
+                0.0167375132837407,
+                0.6827018121911038,
+                0.9962805526036131,
+                0.786161449752883
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "6x 3-3-70 3-7-70 SAMUEL PHILLIP SAVASTINUK 174 MYOCARDIAL INFRACTION HE DIED IN RURAL AURORA , REV . ROBERT A. GEORGE LEWIS ARAPAHOE Co. , ColoRADO - ROSEMONT CEMETERY REV . PAUL R. ZIATYK HAD ROSEMONT JERSEY , , NEW PARASTAS FUNERAL , 3-5-70 LITURGY AND , 3-6-70- EASTERN ORTHODOX CHURCH VOICURATION",
+              "confidence": 0.89,
+              "token_count": 51,
+              "bbox": [
+                0.01487778958554729,
+                0.813179571663921,
+                0.9997343251859724,
+                0.999670510708402
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      1
+    ]
+  },
+  "columns_detected": 1,
+  "header_y_threshold": 0.2965980230642504,
+  "total_tokens": 346,
+  "data_tokens": 249,
+  "data_rows": 4,
+  "extracted_at": "2026-02-17T01:47:07.430Z"
+}

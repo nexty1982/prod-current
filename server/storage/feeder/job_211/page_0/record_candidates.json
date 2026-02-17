@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.84,
+      "fields": {
+        "bride_name": "( STREET Frackvilles PLACE OF BIRTH AGE OF GROOM NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Catherine FULL NAME OF RESIDENCE S. BRIDE 17th ( NUMBER AND PLACE OF BIRTH AGE OF BRIDE NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS late- mary MARRIED IN Mro . 1 • PRESENCE Julia OF ( FULL NAME ) 2 ( F PULL Jaip ( Rev. Rev. 7. J. ( RECTOR July PART II",
+        "officiant": "Penna Statts Shwarla N.J. ( STATE ) Seawelle RESIDENCE ) \" RESIDENCE )",
+        "witnesses": "PLACE BIRTH AGE OF GROOM 24 NUMBER OF PREVIOUS MARRIAGES Peter NAME OF PARENTS Alexandria FULL NAME OF BRIDE RESIDENCE 139 Mercer ( NUMBER PLACE OF We AND BIRTH AGE OF BRIDE 31 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Hulda Walter . MARRIED IN arles PRESENCE OF Kulina 1 ( FULL Helen NAME ) 2 Hukasovity ( FULL Rev NAME ) Micholas ( RECTOR PART II -",
+        "notes": "bride_parents: ) ( CITY ) 24 none Alexander Kebsock Mary Ave Manville STREET ) 7 ( CITY Baysanse ) h Razor none Skivarla Насачал WITNESSES Speciare :. ( Quisleak Kiry luck ( ) 17 , 1948 N MARRIAGES; license: Manville , n.g. none Kulia Holovach Alice , J. Ave. , Somerville Hartzog N.J. STREET theily ) ( CITY ) ( STATE ) Рекла hone , Erbh C. J. . Hartzag WITNESSES - S. : Somerville 11.J .. ( Middlesey RESIDENCE ) Very N.J. ( luck RESIDENCE ) ) MARRIAGES"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.86,
+      "fields": {
+        "bride_name": "PARISH RECORD FULL NAME OF GROOM RESIDENCE hewer ( NUMBER PLACE OF New AND BIRTH AGE OF GROOM 20 NUMBER OF PREVIOUS NAME OF PARENTS Mand FULL NAME OF BRIDE RESIDENCE New ( NUMBER AND PLACE OF BIRTH AGE OF BRIDE 18 NUMBER OF PREVIOUS NAME OF PARENTS MARRIED IN PRESENCE Clator 1 G ( FULL Mrs. NAME ) Flea 2 ( FULL NAME ) Rev. (",
+        "officiant": "40994 Snyder . , ✓ ( STATE n.J. ) Anyder . к Lopatka 177.0 ( STATE ) Lapatka n . m . h . der RESIDENCE new ) . macker ( Kiry RESIDENCE le ) luk",
+        "witnesses": "PARISH RECORD FULL NAME OF GROOM RESIDENCE Start ( NUMBER AND PLACE OF BIRTH AGE OF GROOM 26 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Sonia FULL NAME OF BRIDE RESIDENCE Star ( NUMBER AND PLACE OF BIRTH Ste BRIDE 21 AGE OF NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Frances MARRIED IN PRESENCE Alex 1 ( FULL NAME Res Stella ) . E ( FULL NAME ) . (",
+        "notes": "bride_parents: No Everett market , n STREET ) market ( CITY ) MARRIAGES hone Nelson Gaskill Stella Market Gallitzin STREET ) ( CITY ) MARRIAGES John none OF WITNESSES : Nicholas France ( RECTOR ); license: No 40993 John John Peelo Flemington , N.J. STREET ) ( STATE ) Camsey , Obio none Andrew Poletelo & Momlik Genevieve Reacte Flemington Parzych , , N.J. STREET ) Flemington ( CITY ) , N. ( N.J STATE ) Paul none Perro Parzych * OF WITNESSES : Poletels Nicholas Parzych ( RESIDENCE ) J. ( RESIDENCE Firylick ) RECTOR )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 0.8,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:46.423Z"
+}

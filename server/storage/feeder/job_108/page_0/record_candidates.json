@@ -1,0 +1,42 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.76,
+      "fields": {
+        "notes": "2/05 4/25 Julianna - 2009 2009 Grzce Peter + Dolly Bakaletz | Paul Bakzletz Suzanne Bakeletz"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.74,
+      "fields": {
+        "notes": "N. Brunswick , N.J | escu | Fa . 1. Jon да Parella"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "2 | 5/13 6/20 Sebastian Mihil Max + Carla Caponegro 2009 2009 Princeton N - J . | Chistian Apostel Ruxanda Apostelescu"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:49:30.271Z"
+}

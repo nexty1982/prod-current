@@ -1,0 +1,69 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.82,
+      "fields": {
+        "notes": "- | 135 22 Matthew Fr. Somerville , N.J | Erica Liscotti | Bishop"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.76,
+      "fields": {
+        "notes": "2 | 2010 Gabriel Alden Eric Bruggemann Nov.3 2008 2/27 Bruggemann Monica Georgizi Mihailescu NYC | Mariana Vajdz | Fr. Jues Parsells Received into Catholicism Orthodoxy from Roman confession a"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "3 | 14/16 Jerome Stone | Apostelescu | April 16 , 2011 by Chrisnation - fucharist"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.67,
+      "fields": {
+        "notes": "4 Dec. 27 My 28 Antonia- Ioenz Max + Carla Caponeguo 2016 2011 New Brunswic | Christian Rusɣandz Apostelescu | FL . Jon д Parell Fu . Jos Jaz Panels by"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.63,
+      "fields": {
+        "notes": "S 10 1001 / Heather Marie Grzuen | Patricia Sokol | Received into Baption + Chrismation Orthodoxy & Eucharist Fr. Jon by Parell"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.73,
+      "fields": {
+        "notes": "6 Apr. Oct Elizabeth 25 08 тук Ke Dao 2011 New Brunsten magdalenz Trofimíük | Dolly Bakzletz Daniel Banda | Fr. Jon д Parelk"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:49:34.421Z"
+}

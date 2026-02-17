@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "PART 1-BAPTISMS\nPART 1-BAPTISMS\nPARISH RECORD\nNO 22929\nPARISH RECORD\nNAME OF CHILD\n_margaret\nNAME OF PARENTS\nAND.\nHull\n(FATHER'S NAME)\nSlyvester\nMargaret\nADDRESS\n(MOTHER'S\nPelfy\nNAME)\nBrooks Blvd.\n(NU"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:51:00.813Z"
+}

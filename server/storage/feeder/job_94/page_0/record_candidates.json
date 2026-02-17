@@ -1,0 +1,112 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.82,
+      "fields": {
+        "notes": "3 Christophen 4/10 edward Adkins | received by Holy Chrismation on April 10th Fr. Jars дая Parsell from \" Christian church \""
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "J Nicholas William 4/10 | Chrismation on April 10th Fn . Jans Parselk received by Holy church \""
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "Adkins | from \" Christian on April 10th Fr. Jones Panelle"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "5 Angela Joy 14/10 Adkins | received by Holy Chrismation from \" Chulstian church \" Fr. Jas Parzelk"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "notes": "6 Daniel Joseph 4/10 | received by Holy Chrismation on April 10th from \" Lutheran church- Missoni synod \""
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "Adkins | FA . дая Parsells"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.76,
+      "fields": {
+        "notes": "7 1/224/24 Laura ( Larissa ) Ann Hansen Robert Hansen / Tatianz ( Mickell Hansen | Stanley Boziatz Fr. Jones Parrelly"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "( Somerville ) 8 4/25 5/29 Nicole Elizabeth Peter Kuline / Shirley ( Jarkowski ) Kulizz | Paul Kuline - Sharogn Fester ( honovery ) Jon Parelly"
+      },
+      "sourceRowIndex": 8,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "Kulinz ( 9 4/5 Slaa Nicholas Jacob Robert Kitz / Anastasia ( Nevitt ) Kitz | cynthiz Petro Fr. Panell"
+      },
+      "sourceRowIndex": 9,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "notes": "( Somerville Kitz ) | Myra Hunchar Noe Fr. Jaz"
+      },
+      "sourceRowIndex": 10,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.82,
+      "fields": {
+        "notes": "10 5/08 7/24 Alexandra Nicole Long Edward Long / Andrea Hunchan ( Morristown ) | Donald Noe"
+      },
+      "sourceRowIndex": 11,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:48:58.067Z"
+}

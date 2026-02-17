@@ -1,0 +1,42 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "37383 PHILOPS PHILLIPS ) CHAK ) BAPTISMS CHAK ) ° INN ADAM ) STATE . ( NAME ST , CITY SOMERVILLE N ) \" 1,0967 ) , | 11967 HANVILLE RECTOR N ) STATE ADAMCHAR ADAMCHAL 22 , PAUL ( Bows | 37382 ELIK KLIK ) STATE 28,1967 , | 15,1967 N.J RECTOR STATE ) R. ( fabawale"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "BAPTIZED FRICIA CA ANDRES NAME FATHER'S ( SIA MOTHER'S WART STREET AND ( 1 ( NUMBER | AND CHURCH ROMERWILLO ) Ретах CITY THEODORE AND VERONICA BY RE ) ( ( PERFORMED 0 | BAPTISMS ° KLIZABETH NicoLA NAME как NAME ) CITY N STREET NJ ) FATHER'S SA MOTHER'S , ( LAST AND | PAUL DAMERU . KLIK KLIK AND ) CHURCH BY ) CITY"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "notes": "PART RECORD CHILD PARENTS OF DHILLIPS ( PARISH 2 NAME NAME BRA BIRTH OF DATE OF AND . ADDRESS | BAPTISM OF CONFIRMATION BIRTH PLACE OF PARENTS SACRAMENTS The DATE FATHER AT GOD | 1 PART RECORD PARENTS ( CHILD 104 NUMBER BROOK AUG ( PARISH Ов ADDRESS BIRTH OF NAME OF NAME OF . AND DATE | AND PETER ( ( BAPTISM CONFIRMATION BIRTH PARENTSKO PANKA PERFORMED Theor OF . SS OF DATE AT PLACE SACRAMENTS Father . GOD"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:51:44.157Z"
+}

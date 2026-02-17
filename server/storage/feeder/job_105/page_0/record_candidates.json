@@ -1,0 +1,59 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "oct Jan Justine Ke - New Brunswick Trofimink 19 aq magdalena N.J. | Daria Parsells"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.79,
+      "fields": {
+        "notes": "Nov Apil Natalie Ann Irma Garcia | Larisa Malchow Zurab Zuzkiridze | Fr. Jaes Parsells Received into Orthodox ( buch vereied"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.75,
+      "fields": {
+        "notes": "22 8-1999 2 New Brans - tell Jaz Garcis N.J. | by Chrismation . Had Baptism in R. C. Church"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "notes": "3 Jan 3 June 5 Saba Kahka Kaliashvili 2005 2005 Plainfield , N.J Katherine margiani | Alexander Lomidze Teona Tabatadze | Fr. Jaes Parsells Parcells"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "Jares Oct Nov Zachary Janes Holot J 14 26 Flemington , N.J. Natalia Trusorg | Yekaterina Khronusora ( Francis Reinecker- honorary ) | Fr. Jues"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:49:23.597Z"
+}

@@ -1,0 +1,238 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "9361 Habra ) Nº ) Ave . CITY STATED $ 19 1958 . 1958 N.J. ) STATE RECTOR ( лис 1 BAPTISMS cholles NAME NAME FATHER'S MOTHER'S ( ( 10th AND STREET Poker ( PART RECORD So ( NUMBER Hosp ) AND CHURCH PARISH OF CHILD OF PARENTS 125 . NAME NAME ID AND ADDRESS Somerville BY . M OF BIRTH BAPTISM BIRTH DATE Somerset PERFORMED OF DATE CONFIRMATION OF . AT PLACE GOD PARENTS SACRAMENTS Kee ! 9365 BAPTISMS NO Falpash Pel Talpash Talpas ) , 1959 21 , 1989 N..S RECTOR , ) STATE N .. 31 . ) CITY , , NAME NAME STREET , , Hosp - 1 FATHER'S Ave ( AND ( PART RECORD LARissa CHILD Michael Pelak MOTHER'S Vera NUMBER ( 71 February & Paul т ) New Market January ( AND CHURCH Muhlenberg OF BIRTH OF BAPTISM Peter PARISH OF OF PARENTS . Plainfield Podo rthodo dower Andrew Pelak BY Both NAME NAME Vera AND ADDRESS DATE DATE CONFIRMATION Sis OF BIRTH AT PLACE GOD PARENTS Marc navy PERFORMED SACRAMENTS Rev Stel Stephen"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BAPTISMS 1 PART BAPTISMS 1 PART"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "9363 RECTOR ) Nº Nichplas Shopey STATE ) ) NAME Shopey NAME CITY J. 1958 18 , , 1958 FATHER'S N. 18 RECORD Willians MOTHER'S STREET CHILD William laver ( 1th Ave N.J. - Kparnise ) AND Hoep BY Glauc AND Dec Blaup CHURCH ( Spock бо NUMBER ( OF PARENTS OF 240 Dec . NAME NAME Helon AND ADDRESS Manzille + BIRTH Somerville BIRTH OF BAPTISM DATE Somerset OF DATE CONFIRMATION Somerset Jolie John OF PERFORMED PARISH Hepler . NT AT PLACE PARENTS GOD SACRAMENTS Red , 9364 . STATE No Charles Rachek ville 1958 Dec 14 Hosp 11.1959 Pau aul RECTOR ) ) NAME \" 1/2 Julin . NAME m CITY . a N. and rille FATHER'S STREET ) BY AND ( ( Stephan MOTHER'S RECORD DAVID # NUMBER 6 NTS CHILD Charles CHURCH Kachek ( Somerset AND Hnatuk PARISH OF PARENTS OF RD NAME NAME AND Kachek . So BIRTH BIRTHS OF BAPTISM OF Peter John PERFORMED OF ADDRESS DATE DATE CONFIRMATION Sts PARENTS AT PLACE GOD Helen SACRAMENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "9368 Bell Daniel Bell Bell D. N..J Bruns . 1959 1959 .. New N Brunswick / RECTOR St. ) ) STATE 3. STATE Sickel 15 4 ( Adanci , CITY , ' )",
+              "confidence": 0.89,
+              "token_count": 33,
+              "bbox": [
+                0.190625,
+                0.6961538461538461,
+                0.5259615384615385,
+                0.8166666666666667
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "9367 LoRenick horenick Lorenick 1959 1959 N.J. ST STATE N.J Nos 22 Pau ulwinsky Dedamcis RECTOR ) , STATE ) ANN ( CITY , ulwin ° ) E ) & ,",
+              "confidence": 0.81,
+              "token_count": 31,
+              "bbox": [
+                0.5879807692307693,
+                0.6878205128205128,
+                0.9206730769230769,
+                0.7977564102564103
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS NO Gregory Robert Ariniak NAME MOTHER'S Filak , , STREET NUMBER Manville March Hosp April W. CHURCH . ) New Hviniak AND ( George BY - ) 1 ( AND CITY ( Stephen",
+              "confidence": 0.89,
+              "token_count": 34,
+              "bbox": [
+                0.16129807692307693,
+                0.7487179487179487,
+                0.5274038461538462,
+                0.8769230769230769
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BAPTISMS 1",
+              "confidence": 0.97,
+              "token_count": 2,
+              "bbox": [
+                0.5584134615384615,
+                0.7576923076923077,
+                0.5641826923076924,
+                0.8298076923076924
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "N CAROL NAME MOTHER'S Green STREET Manville February March Peter FATHER'S Kulwinsky Manvitte NUMBER Peter CHURCH ) Somerville AND BY CITY ) ( 27 AND Stephan ( ( ( John PERFORMED",
+              "confidence": 0.91,
+              "token_count": 31,
+              "bbox": [
+                0.5879807692307693,
+                0.746474358974359,
+                0.9170673076923077,
+                0.8743589743589744
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PART RECORD PARISH CHILD PARENTS Sandra 214 BIRTH Peter's BAPTISM Pet PERFORMED ( NAME OF AND ADDRESS St. Sts BIRTH NAME OF DATE OF DATE OF CONFIRMATION OF PARENTS . AT PLACE SACRAMENTS Rev GOD",
+              "confidence": 0.94,
+              "token_count": 35,
+              "bbox": [
+                0.16466346153846154,
+                0.8205128205128205,
+                0.5146634615384615,
+                0.9362179487179487
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "PART",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.5584134615384615,
+                0.8362179487179487,
+                0.5644230769230769,
+                0.8663461538461539
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "RECORD CHILD PARENTS Rose 1105 ( BIRTH Somerse PARISH BAPTISM CONFIRMATION STS BIRTH OF OF ADDRESS OF OF OF PARENTS Sophia NAME NAME ND . DATE DATE SACRAMENTS Rev . AT PLACE GOD",
+              "confidence": 0.92,
+              "token_count": 33,
+              "bbox": [
+                0.5927884615384615,
+                0.8067307692307693,
+                0.9141826923076923,
+                0.9272435897435898
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.08
+    ],
+    "col_2": [
+      0.08,
+      0.5425
+    ],
+    "col_3": [
+      0.5425,
+      0.575
+    ],
+    "col_4": [
+      0.575,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.6841666666666667,
+  "total_tokens": 558,
+  "data_tokens": 200,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:51:22.864Z"
+}

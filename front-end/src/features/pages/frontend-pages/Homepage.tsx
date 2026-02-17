@@ -1465,16 +1465,16 @@ const HomePage: React.FC = () => {
             Every feature designed with Orthodox tradition and practicality in mind
           </Typography>
 
-          {/* Liturgical Calendar Integration */}
+          {/* Support for All Orthodox Church Records */}
           <Grid container spacing={6} alignItems="center" mb={8}>
             <Grid size={{ xs: 12, md: 5 }}>
               <Typography variant="h5" sx={{ fontFamily: '"Cormorant Garamond", Georgia, serif', color: '#7B4F9E', fontWeight: 600, mb: 1.5 }}>
-                Liturgical Calendar Integration
+                Support for All Record Types
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={2}>
-                Automatic feast day recognition and liturgical color coding to keep your records connected to the Church calendar.
+                Baptisms, Marriages, Funerals, Chrismations, and any custom sacramental record your parish needs — all managed from one unified interface with full control over how your data is displayed.
               </Typography>
-              {['Automatic feast day tagging', 'Liturgical color indicators', 'Fasting period notifications', 'Saints day commemorations'].map((item, i) => (
+              {['Define your own table headers and column order', 'Weighted search sorting across all record fields', 'Theme Studio for colors, fonts, and row styling', 'Dark mode and light mode with one click'].map((item, i) => (
                 <Stack key={i} direction="row" spacing={1} alignItems="center" mb={0.8}>
                   <IconCheck size={16} color="#4CAF50" />
                   <Typography variant="body2">{item}</Typography>
@@ -1483,18 +1483,73 @@ const HomePage: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 12, md: 7 }}>
               <Box sx={{ p: 3, borderRadius: '12px', border: '1px solid', borderColor: 'divider', backgroundColor: theme.palette.background.default }}>
-                <Typography variant="subtitle2" fontWeight={600} mb={2}>This Week's Liturgical Colors</Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
-                    <Box key={i} sx={{
-                      flex: 1, minWidth: 50, textAlign: 'center', py: 1.5, px: 1, borderRadius: '8px',
-                      backgroundColor: i === 3 ? '#7B4F9E' : i === 0 || i === 6 ? '#D4AF37' : 'rgba(0,0,0,0.04)',
-                      color: (i === 3 || i === 0 || i === 6) ? '#fff' : 'text.primary',
-                    }}>
-                      <Typography variant="caption" fontWeight={600}>{15 + i}</Typography>
-                      <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem' }}>{day}</Typography>
-                    </Box>
+                <Typography variant="subtitle2" fontWeight={600} mb={2}>Custom Table Headers</Typography>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <Stack direction="row" spacing={0} sx={{ minWidth: 420 }}>
+                    {[
+                      { label: 'Last Name', weight: 12 },
+                      { label: 'First Name', weight: 8 },
+                      { label: 'Date of Baptism', weight: 5 },
+                      { label: 'Sponsors', weight: 3 },
+                      { label: 'Clergy', weight: 2 },
+                    ].map((col, i) => (
+                      <Box
+                        key={i}
+                        sx={{
+                          flex: 1,
+                          py: 1,
+                          px: 1.5,
+                          textAlign: 'left',
+                          backgroundColor: i === 0 ? '#7B4F9E' : 'rgba(123, 79, 158, 0.08)',
+                          color: i === 0 ? '#fff' : 'text.primary',
+                          borderRight: i < 4 ? '1px solid' : 'none',
+                          borderColor: 'divider',
+                          borderTopLeftRadius: i === 0 ? '8px' : 0,
+                          borderTopRightRadius: i === 4 ? '8px' : 0,
+                        }}
+                      >
+                        <Typography variant="caption" fontWeight={600} display="block">{col.label}</Typography>
+                        <Typography variant="caption" sx={{ fontSize: '0.6rem', opacity: 0.7 }}>weight: {col.weight}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                  {[
+                    ['Kulina', 'Mary Alice', '10/27/1951', 'M. Kulina', 'Fr. Kiryluk'],
+                    ['Parsells', 'John', '06/15/1980', 'G. Parsells', 'Fr. Tkachuk'],
+                  ].map((row, ri) => (
+                    <Stack key={ri} direction="row" spacing={0} sx={{ minWidth: 420 }}>
+                      {row.map((cell, ci) => (
+                        <Box
+                          key={ci}
+                          sx={{
+                            flex: 1,
+                            py: 0.8,
+                            px: 1.5,
+                            borderRight: ci < 4 ? '1px solid' : 'none',
+                            borderBottom: '1px solid',
+                            borderColor: 'divider',
+                            backgroundColor: ri % 2 === 0 ? 'rgba(0,0,0,0.02)' : 'transparent',
+                          }}
+                        >
+                          <Typography variant="caption">{cell}</Typography>
+                        </Box>
+                      ))}
+                    </Stack>
                   ))}
+                </Box>
+                <Stack direction="row" spacing={2} mt={2} alignItems="center">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <IconSettings size={14} color="#7B4F9E" />
+                    <Typography variant="caption" color="text.secondary">Theme Studio</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <IconSearch size={14} color="#D4AF37" />
+                    <Typography variant="caption" color="text.secondary">Weighted Search</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <IconDownload size={14} color="#4CAF50" />
+                    <Typography variant="caption" color="text.secondary">XLSX Export</Typography>
+                  </Box>
                 </Stack>
               </Box>
             </Grid>

@@ -1,0 +1,363 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 8,
+      "column_count": 3,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "HISTPHчECKSÅ KNHTH NA Счета родив : Иксац WHXCA . и день Званіе , има , отчество и . замнал родителей , и какого Имена родившихся . . . \" B'kponenoɛ * дAHIA . Мужеска пола Женска ΠΟΛΑ рожде HIA KOELPE- WIH OF CHILD MALE NUMBER FEMALE BIRTH DATES NAME NAME MOTHER'S MAIDEN NAME BAPETSM CITY OF BIRTH FATHER'S FULL ."
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "YEAR 1975 ГОДА , ЧАСТЬ ПЕРЕНА , И РОДНЕШИХСЯ . Званіе , има , отчетко и фамил Кто воспріємникова совершаль . таниство KOOLISHIA ... FULL NAMES OF SPONSORS PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "DEC . 4 , JAN . 12 MICHAEL MICHAEL FETCHKO CAROL L. 1974 1975 FETCHKO MAURER ( PROT , LUTH . ) SOMERVILLE , N.J. 2 MAR 1975 6 MAY 17 TARA ANN GERARD VERRELLI L. VERRELLI , JR , 1975 KAREN . L. CHERNIAK SOMERVILLE , N.V.",
+              "confidence": 0.83,
+              "token_count": 48,
+              "bbox": [
+                0.07908653846153846,
+                0.32756410256410257,
+                0.4670673076923077,
+                0.4131410256410256
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "VINCENT ZAKARZEWSKI MAUREEN ZAKAR ZEWSKI FR . EUGENE D. TARRIS RONALD CERT . NO 75-1 MATTHEW SKOBO VIVIAN MARLENE SKOBO FR . EUGENE D. TARRIS R.C. ORTHODOX",
+              "confidence": 0.8,
+              "token_count": 27,
+              "bbox": [
+                0.5007211538461539,
+                0.3330128205128205,
+                0.9139423076923077,
+                0.4157051282051282
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3 MAY 20 JUNE 15 NOEL ANDREW JOHN CHAPKOWSKI 1975 1975 CHAPKOWSKI ( MARY KULINA R.c. ) NEW BRUNSWICK , NJ .",
+              "confidence": 0.87,
+              "token_count": 22,
+              "bbox": [
+                0.054086538461538464,
+                0.428525641025641,
+                0.4622596153846154,
+                0.46955128205128205
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "CERT NO . 75-2 ROBERT KULINA SUE KULINA FR . EUGENE D. TARRIS . ORTHODOX METHODIST",
+              "confidence": 0.84,
+              "token_count": 16,
+              "bbox": [
+                0.5040865384615385,
+                0.425,
+                0.9170673076923077,
+                0.4650641025641026
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "4 APRIL 30 JUNE 28 BENJAMIN BRETT 1975 1975 EDMOND STIBITZ KAY EDMOND STIBITZ SONJA ANN YALSH SOMERVILLE , N.J. ( PROT . META )",
+              "confidence": 0.88,
+              "token_count": 25,
+              "bbox": [
+                0.05048076923076923,
+                0.48173076923076924,
+                0.45625,
+                0.5205128205128206
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "CERT NO . 75-3 . DANIEL PODOBED MARY ANN CLEVENGER FR . EUGENE D. TARRIS ORTHODOX EPISCOPALE AN .",
+              "confidence": 0.84,
+              "token_count": 19,
+              "bbox": [
+                0.5002403846153847,
+                0.475,
+                0.9117788461538462,
+                0.5163461538461539
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "5 JULY 1975 5 , AUG 1975 . 17 , THERESA MARGARETH JOSEPH ELCHAK . ELCHAK GERLINDA ELCHAR PRINCETON , NJ . ( ORTH ) OOX ) ( ORTHODOX )",
+              "confidence": 0.77,
+              "token_count": 30,
+              "bbox": [
+                0.07836538461538461,
+                0.5262820512820513,
+                0.46658653846153847,
+                0.5682692307692307
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "CERT . No. 15-4 . LEO ELCHAK DOLORES ELCHAR FR . EUGENE D. TARRIS ORTHODOX LUTHERAN CERT NO . 75-5 .",
+              "confidence": 0.81,
+              "token_count": 21,
+              "bbox": [
+                0.5024038461538461,
+                0.5163461538461539,
+                0.9201923076923076,
+                0.5657051282051282
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "6 July 24 , AUG . 1975 31 1975 GREGORY BEATTY PAUL . ALAN BEATTY PATRICIA SOFRO SOMERVILLE , NJ . ( PROTESTANT ) ( ORTHODOX )",
+              "confidence": 0.85,
+              "token_count": 27,
+              "bbox": [
+                0.05600961538461539,
+                0.5698717948717948,
+                0.46081730769230766,
+                0.6205128205128205
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "DEACON GEORGE BREYAN BARBARA SIBILIA TINDOX FR . EUGENG D. TARRIS ( ORTHODOX ) ( OR ) Louis GIANCHIGLIA",
+              "confidence": 0.84,
+              "token_count": 19,
+              "bbox": [
+                0.4980769230769231,
+                0.5823717948717949,
+                0.9149038461538461,
+                0.6256410256410256
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "JUNE 5 1970 DEC 21 1975 GREGORY Summit FLIEGAUF , M. J. EDWARD METHODIST FLIEGAUF KATHLEEN BARAN ( ) ( ORTHODOX )",
+              "confidence": 0.84,
+              "token_count": 22,
+              "bbox": [
+                0.09903846153846153,
+                0.6397435897435897,
+                0.4545673076923077,
+                0.6807692307692308
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "( PROTESTANT ) CERT . No. 75-6 WALTER ROMANOFSKY Fe . EUGENE D. TARRIS ( ORTHODOX )",
+              "confidence": 0.81,
+              "token_count": 17,
+              "bbox": [
+                0.5036057692307693,
+                0.6282051282051282,
+                0.9209134615384615,
+                0.6759615384615385
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "00 Nov RECEIVED , 22 DEC 21 1967 KURT INTO 1975 RODION FLIEGAUP ORTHODOXY BY CHRISMATION ALEXANDRIA , VA . EDWARD RECEIVED ( ME INTO Сетнойску THE DUST FLIEGAUF KATHLEEN BARAN ) ( CHRISMATION ORTHODOX ) By",
+              "confidence": 0.79,
+              "token_count": 37,
+              "bbox": [
+                0.057451923076923074,
+                0.6775641025641026,
+                0.4528846153846154,
+                0.7560897435897436
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "CERT NO 75-7 MICHAEL LAZOREK FR EUGENE D. TARRIS ( ORTHODOX ) CERT NO 75-8",
+              "confidence": 0.89,
+              "token_count": 15,
+              "bbox": [
+                0.5024038461538461,
+                0.6862179487179487,
+                0.9175480769230769,
+                0.7503205128205128
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.025
+    ],
+    "col_2": [
+      0.025,
+      0.485
+    ],
+    "col_3": [
+      0.485,
+      1
+    ]
+  },
+  "columns_detected": 3,
+  "header_y_threshold": 0.32294871794871793,
+  "total_tokens": 435,
+  "data_tokens": 345,
+  "data_rows": 7,
+  "extracted_at": "2026-02-17T01:48:23.151Z"
+}

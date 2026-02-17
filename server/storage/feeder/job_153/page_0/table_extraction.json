@@ -1,0 +1,297 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 11,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "22919 BAPTISMS NO - 1 PART RECORD PARISH 22922 BAPTISMS NO - 1 PART RECORD"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": ") NAME OF CHILD Nancy Fuliria FATHER'S ( OF PARENTS Hele NAME NAME Stephen Lelo ) NAME OF CHILD Jolene metro OF PARENTS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Are ) Zeban NAME MOTHER'S ( . AND ) NAME FATHER'S ( ( Semaschul MOTHER'S Helen"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": ") STATE , CITY . од ashingtor STREET AND NUMBER ( ADDRESS Manville ) STATE , CITY , STREET AND amwell NUMBER One ("
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "1952 , 23 OF BIRTH Apsil DATE 1952 1. BIRTH may OF"
+            },
+            {
+              "row_index": 0,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "1952 ) , 12 ( - STATE May ) Zeban F. CHURCH ) ( ( Peter Somerville BY Park RECTOR Very CITY AND . OF BAPTISM BIRTH CONFIRMATION St. Michael OF PERFORMED . Nicholas DATE AT PLACE PARENTS GOD Stephan SACRAMENTS Ris 1952 ) RECTOR , STATE ( 29 Paul ) geli BY Keryb ) F. CITY AND June CHURCH ( ( BAPTISM Peter Somervill BIRTH PERFORMED . OF CONFIRMATION St. OF PARENTS эхочу SACRAMENTS Nicholas Rs"
+            },
+            {
+              "row_index": 0,
+              "column_index": 7,
+              "column_key": "col_8",
+              "content": "22920 BAPTISMS D 1 PART RECORD Peter CHILD PARISH OF PARENTS OF NAME NAME Frederick 22921 ) BAPTISMS NO NAME 1 FATHER'S PART RECORD Daria CHILD PARISH OF PARENTS Kolesnikovich OF William"
+            },
+            {
+              "row_index": 0,
+              "column_index": 8,
+              "column_key": "col_9",
+              "content": "uk ) ) ave NAME wich NAME the ( FATHER'S MOTHER'S ( 16 Olga AND ) NAME ( ( MOTHER'S \" Зисле 7th . Elizabeth ADDRESS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 9,
+              "column_key": "col_10",
+              "content": ") . STATE , CITY 1952 3 AND STREET - ( NUMBER July BIRTH ADDRESS Manville OF DATE ) . STATE , 1933 CITY , 15 2.8 STREET AND NUMBER ( Manville . BIRTH OF Manville"
+            },
+            {
+              "row_index": 0,
+              "column_index": 10,
+              "column_key": "col_11",
+              "content": ") 27,1952 RECTOR ( STATE J. AND July ) ) Tobias F. Kiryluk BY ( ( CITY AND CHURCH I Peter Somervil : BAPTISM BIRTH Lovy OF DATE CONFIRMATION St. OF PERFORMED Nicholas . AT PLACE PARENTS GOD alexanded SACRAMENTS Rev. 1,1952 ) RECTOR Paul ( STATE ) ) musky BY J. Kuryluke ( AND CHURCH Manielle ( CITY . Wille . BAPTISM Pete BIRTH PERFORMED . OF CONFIRMATION St. OF PARENTS Dolores Nicholas SACRAMENTS Res"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PARISH",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.17067307692307693,
+                0.7615384615384615,
+                0.17836538461538462,
+                0.8092948717948718
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "NAME NAME",
+              "confidence": 0.99,
+              "token_count": 2,
+              "bbox": [
+                0.20048076923076924,
+                0.7833333333333333,
+                0.2233173076923077,
+                0.8118589743589744
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": ". AND",
+              "confidence": 0.87,
+              "token_count": 2,
+              "bbox": [
+                0.25048076923076923,
+                0.7852564102564102,
+                0.2548076923076923,
+                0.8070512820512821
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "ADDRESS",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.2862980769230769,
+                0.7612179487179487,
+                0.29086538461538464,
+                0.805448717948718
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "DATE",
+              "confidence": 0.97,
+              "token_count": 1,
+              "bbox": [
+                0.32764423076923077,
+                0.7782051282051282,
+                0.33245192307692306,
+                0.8028846153846154
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "DATE PLACE . AT GOD",
+              "confidence": 0.91,
+              "token_count": 5,
+              "bbox": [
+                0.3629807692307692,
+                0.7676282051282052,
+                0.43197115384615387,
+                0.8006410256410257
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 7,
+              "column_key": "col_8",
+              "content": "NAME NAME",
+              "confidence": 0.99,
+              "token_count": 2,
+              "bbox": [
+                0.5836538461538462,
+                0.767948717948718,
+                0.6060096153846154,
+                0.794551282051282
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 8,
+              "column_key": "col_9",
+              "content": "AND",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.6314903846153846,
+                0.7740384615384616,
+                0.6365384615384615,
+                0.7935897435897435
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 9,
+              "column_key": "col_10",
+              "content": "DATE",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.7074519230769231,
+                0.7711538461538462,
+                0.7125,
+                0.7955128205128205
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 10,
+              "column_key": "col_11",
+              "content": "DATE . AT PLACE GOD",
+              "confidence": 0.96,
+              "token_count": 5,
+              "bbox": [
+                0.7418269230769231,
+                0.7657051282051283,
+                0.8132211538461539,
+                0.7967948717948717
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.085
+    ],
+    "col_2": [
+      0.085,
+      0.19
+    ],
+    "col_3": [
+      0.19,
+      0.2375
+    ],
+    "col_4": [
+      0.2375,
+      0.27
+    ],
+    "col_5": [
+      0.27,
+      0.31
+    ],
+    "col_6": [
+      0.31,
+      0.3475
+    ],
+    "col_7": [
+      0.3475,
+      0.5075
+    ],
+    "col_8": [
+      0.5075,
+      0.62
+    ],
+    "col_9": [
+      0.62,
+      0.6725
+    ],
+    "col_10": [
+      0.6725,
+      0.7275
+    ],
+    "col_11": [
+      0.7275,
+      1
+    ]
+  },
+  "columns_detected": 11,
+  "header_y_threshold": 0.7748717948717949,
+  "total_tokens": 358,
+  "data_tokens": 21,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:50:59.385Z"
+}

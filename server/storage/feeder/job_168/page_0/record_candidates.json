@@ -1,0 +1,55 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "performed_by": "RECTOR",
+        "notes": "9389 Kalevich rich polisiel Kol N. 60 $ Some 1960 . ) STATE 15 , , 24 aul N. ) Kolerich | Bishop Bishop shop 1960 101960 . 9388 Mave 10 26,1960 .N.J RECTOR ) STATE ) STATE ( Four"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "performed_by": "BY Abdacuerd",
+        "notes": "BAPTISMS No Role , V Michael Vangel NAME St , ) CITY ) NAME FATHER'S MOTHER'S East STREET Hoop , Brook AND March arif CHURCH Somerville ) ) CITY ata | BAPTISMS No Stanley W. ) Ann NAME NAME @mp CITY 18 ) FATHER'S Kat MOTHER'S . STREET 25 , Lebedz Odam ' AND CHURCH Somervill Michael BY CITY ) ( ( ("
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "performed_by": "PERFORMED",
+        "notes": "- ( 1 PART RECORD PARENTS Simona 326 NUMBER BIRTH Somerset AND ( ( ( CHILD ( BAPTISM BIRTH | 1 PART RECORD Mary PARENTS ( Anna NUMBER Manvi Mar Somers AND PERFORMED . CHILD ( BIRTH BAPTISM StsPe BIRTH PARENTS Nadia Hephew"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "performed_by": "SACRAMENTS Red Yee",
+        "notes": "PARISH ADDRESS CONFIRMATION Als OF NAME OF NAME OF AND DATE OF . OF PARENTS . DATE AT PLACE . AT GOD | PARISH OF NAME OF NAME ADDRESS OF AND DATE OF DATE CONFIRMATION OF PLACE SACRAMENTS Red . . AT GOD"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_3": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:51:28.330Z"
+}

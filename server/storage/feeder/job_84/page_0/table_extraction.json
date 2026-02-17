@@ -1,0 +1,153 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счета родив Мкелци WHXCA . и день Имена родившихс M XALE NUMBER А NAME OF FEMALE BIRTH DATES CHILD BAPTISM CITY OF BIRTH"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BIRTHS KERQUEPKY ¡ - TAVRIATRY HETTH¶SCKOŇ KHUTH NA Званіе , имя , отчество и задната родителей , и какого вероисповедания . FATHER'S FULL NAME . MOTHER'S MAIDEN NAME"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "83 ГОД ЧАСТЬ H , ПЕРВАЯ , ПОРОДИЕШИХМ Званів , нам , отчетко и фамил воспрісминкова . FULL NAMES OF SPONSORS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Кто совершаль таинство крашены . PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3 19 = , S1 Timothy - - 1 IS Somerville 2 9 \" Larissa 10 12 Somerville",
+              "confidence": 0.74,
+              "token_count": 18,
+              "bbox": [
+                0.05024038461538462,
+                0.33782051282051284,
+                0.20240384615384616,
+                0.44743589743589746
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Peter Gorbetuk , Susan Binkowski Michzel Fetchko , Cavol Lynn Mayver",
+              "confidence": 0.86,
+              "token_count": 11,
+              "bbox": [
+                0.23413461538461539,
+                0.37115384615384617,
+                0.4545673076923077,
+                0.46474358974358976
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Frederick Gorbatur Gorbeduk ( Orthodox ) Claire Helen Russo ( Orthodox )",
+              "confidence": 0.83,
+              "token_count": 12,
+              "bbox": [
+                0.5045673076923077,
+                0.33397435897435895,
+                0.7036057692307692,
+                0.46282051282051284
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Jana Parsells F .. Jas Parall",
+              "confidence": 0.68,
+              "token_count": 7,
+              "bbox": [
+                0.7622596153846154,
+                0.3782051282051282,
+                0.8807692307692307,
+                0.4794871794871795
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.025
+    ],
+    "col_2": [
+      0.025,
+      0.2175
+    ],
+    "col_3": [
+      0.2175,
+      0.4775
+    ],
+    "col_4": [
+      0.4775,
+      0.7325
+    ],
+    "col_5": [
+      0.7325,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.3293589743589744,
+  "total_tokens": 127,
+  "data_tokens": 48,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:48:39.692Z"
+}

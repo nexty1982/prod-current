@@ -1,0 +1,10 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 3 | Rows: 4
+
+--- Table 1 (3 columns, 5 rows) ---
+100 | No 1 37351 | BAPTISMS 1962 101 GALENA ( CAIL ) POLANSKY . NAME OF PARENTS - MAXIMOND AND MARIE Голо POLANSKY ADDRESS 18 ROLLING ROAN , MIDDLESEY , N.J CATE OF BIRTH NOVEMBER 8,1962 DATE OF BAPTISM DECEMBER 2,1962
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ |  | AND CHRISMATION AT - SS . PETER & PAUL CHURCH PLACE OF BIRTH PLAINFIELD , N.J. GODPARENTS CHARLES HALL SONYA SoBohowski SACRAMENTS ADMINISTERED - Father therever Labously
+ | No 2 37352 | SUZANNE MARIE BALDAN ZA NAME OF PARENTS VINCENT J. BALDANIA -- ELIZABETH ( PALEY ) BALDANIA ADDRESS 17 NORTH 12 TH Avera MANVILLE N.J. PLACK OF BIRTH SOMERVILLE NJ DATE of BIRTH NOVEMBER 24,1862 - DATK OF BAPTIST of CHRISMATION DECEMBER 16 , 1962 - AT _ 55. PETER & PAUL CHURCH GODPARENTS SYLVESTER Hung - HELEN MCCLOSKEY
+ |  | SACRAMENTS ADMINISTERED Father Theme . fas wording y
+ | 2 | 

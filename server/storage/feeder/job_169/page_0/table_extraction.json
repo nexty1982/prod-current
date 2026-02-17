@@ -1,0 +1,139 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 2,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "... ) Center NO Medical 8,1960 N.J RECTOR 9391 Sta Lawrence STATE 1 1960 RECTOR 9390 Carlier , , STATE . , NO Ellen Caulier A. Caulier ) ) NAME CITY NJ , 1960 CITY , Center , 2 28 STREET 2,1960 AND 128,1960 H.J. ( STATE + ) ) ( NUMBER ( March Medical AND May Paul CHURCH minet Flem ( CITY Tereshko d . amc Pask ) ) Pask NAME NAME ) ofon 8 BY Adamcis 1 AND May Vladimir CHILD Walter FATHER'S ( ( Skok MOTHER'S ) εν CHURCH ( CITY Gritzuk BAPTISM Fleming BAPTISMS ( BIRTH William Heater PART RECORD OF OF DATE CONFIRMATION Peter Sts AT PLACE PARENTS GOD Jane PERFORMED SACRAMENTS Stephen # . Rev. PARISH OF PARENTS OF Lena Neshanic BY BAPTISMS 3 - 1 PART RECORD Patricia James MOTHER'S ( Rd STREET AND UMBER CHILD OF PARENTS OF NAME NAME Walenteychik . Hunterdon BAPTISM PERFORMED OF DATE CONFIRMATION StsPeter Flemington oris Nina Ridge Bridge RD BIRTH BIRTH OF OF Pashkevich BIRTH AND ADDRESS High OF PARISH DATE Hunterdon . NAME NAME AND ADDRESS . DATE PARENTS AT PLACE GOD Jean SACRAMENTS па 1960 ) . . ) 9393 ) Bruns H.J. ) RECTOR 9392 Vulina RECTOR Kulina 19 ( . STATE STATE Tina ) mea ) . BAPTISMS Nº NAME - FATHER'S ( 1 Adamei PART RECORD Nerander klo NAME CITY ) STATE , New | BAPTISMS No N. sick STATE ( ) Natishan NAME St , 25 - 1 Natishandr ) Matishan CITY , High STREET AND NUMBER ( PART RECORD Мария Marie Крещена Donna John FATHER'S Hvelock NAME MOTHER'S ( ( CHILD PARENTS Ann East Rita 88 merville une Hospital 71960 ) CHURCH ) BY ( ( & CITY Parlovich Peter's AND Paul Brunswick ( unny STREET une inc 10 ) BY hia MOTHER'S , S AND ( CHURCH Bransw ( CITY T. NUMBER ( 18 St.Pe εν AND PE N . Joh S. St. BAPTISM Peter New Pavlovich BIRTH BIRTH OF PARENTS Elizabeth PERFORMED CHILD PARISH OF PARENTS OF RD . REV NAME NAME Cynthi BIRTH OF BAPTISM BIRTH PERFORMED OF CONFIRMATION OF AND ADDRESS DATE DATE . PARENTS AT PLACE GOD Alice SACRAMENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PARISH OF NAME OF NAME ADDRESS OF DATE OF DATE CONFIRMATION St PLACE SACRAMENTS . AND . AT GOD о 960 9396 Shopey Iman damet 9399 Mickel Szwahla Twnship Hosp Marconi RECTO Shopey opey : . N.S. RECTOR 1960 Somerville by a ke A - ) STATE Mickel Paul Adamchak Performed Adance 18077 ) STATE ( . , e 29",
+              "confidence": 0.87,
+              "token_count": 60,
+              "bbox": [
+                0.19615384615384615,
+                0.5413461538461538,
+                0.9120192307692307,
+                0.775
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS Marie Ma Hawran Ave . CITY MOTHER'S 17th Ho Hoffm Stephen St. 1960 No & Sharon NAME , Will STREET AND somer homas ! t PERFORMED Laverne First Franklin , Somerset July Pearl # ) - 12 CHURCH BY 3 AND July StoPeter Birth John , record ) Stephen ) CITY a - ( ( ( Stephen",
+              "confidence": 0.88,
+              "token_count": 58,
+              "bbox": [
+                0.17403846153846153,
+                0.7192307692307692,
+                0.9146634615384616,
+                0.8512820512820513
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1 PART RECORD PARENTS Helen So 240 NUMBER Mar Nov Somerset BAPTISM BIRTH SACRAMENTS RevSteph Kent Anastasia 64 + PARISH CHILD ADDRESS BIRTH OF OF DATE DATE CONFIRMATION PARENTS - Name Parents Address Birth- Baptized Confirmed Place Godfather Godmother Seevements Parish ( of 1 Rev OF OF OF NAME NAME AND PLACE at . . AT GOD",
+              "confidence": 0.92,
+              "token_count": 57,
+              "bbox": [
+                0.17692307692307693,
+                0.7695512820512821,
+                0.9185096153846154,
+                0.9182692307692307
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.085
+    ],
+    "col_2": [
+      0.085,
+      1
+    ]
+  },
+  "columns_detected": 2,
+  "header_y_threshold": 0.5742307692307692,
+  "total_tokens": 540,
+  "data_tokens": 175,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:51:31.058Z"
+}

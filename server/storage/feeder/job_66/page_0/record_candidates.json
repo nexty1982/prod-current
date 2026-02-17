@@ -1,0 +1,47 @@
+{
+  "candidates": [
+    {
+      "recordType": "funeral",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "10-15-69 MRS , ANNA EVANIEC 75 ARTERIOSCLEROTIC REV . . DISEASE ROBERT A. 10-11-69 GEORGE LEWIS REV . ROBERT A. GEORGE 1 10-8-69 LEWIS X HEART HOLY ANOINTING , SS . PETER + PAUL CEMETERY HILLSBOROUGH TOWNSHIP , N.T. 2x 11-10-69 11-14-69 JOHN S. BUDAY 55 FAR METASTASES ADVANCED REV . ROBERT BRONCHOGENIC HOLY ANOINTING A. GEORGE EUCHARIST LEWIS REV . ROBERT A. GEORGE LEWIS + PROSPECT HILL CEMETERY CARCINOMA 11-14-69 FLEMINGTON , NEW JERSEY"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "3 × 1-4-701-8-70 MRS . MARY DZURICH No REV . ROBERT A. GEORGE LEWIS SAMPLE DEATH RECORD Ss . PETER SS . Peter & Orthodox Church HILLSBOROUGH + PAUL TOWNSHIP CEMETERY , N.T. Paul Manville , NJ 08836 X 2-7-70 2-10-70 MRS . TATIANA GUMENUK 84 CEREBRAL REV . ROBERT A. GEORGE LEWIS REV . ROBERT A. GEORGE LEWIS THROMBOSIS HOLY ANDINTING + EUCHARIST SS . PETER HILLSBOROUGH + PAUL 2-2-70 TOWNSHIP CEMETERY , N.T"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "5x 2-13-70 2-17-70 ALEXANDER PAWLIK 52 CANCER : REV . ROBERT A. GEORGE LEWIS REV . ROBERT A. LUNGS CARCINOME , ABDOMEN HOLY , R - 9-70 SS . PAUL GEORGE PETER + CEMETERY LEWIS OF METASTOSIS EUCHARIST ANOINTING AND , R - 12-70 HILLSBOROUGH TOWNSHIP , N.T."
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "funeral",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "6x 3-3-70 3-7-70 SAMUEL PHILLIP SAVASTINUK 174 MYOCARDIAL INFRACTION HE DIED IN RURAL AURORA , REV . ROBERT A. GEORGE LEWIS ARAPAHOE Co. , ColoRADO - ROSEMONT CEMETERY REV . PAUL R. ZIATYK HAD ROSEMONT JERSEY , , NEW PARASTAS FUNERAL , 3-5-70 LITURGY AND , 3-6-70- EASTERN ORTHODOX CHURCH VOICURATION"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "funeral",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1"
+  ],
+  "parsedAt": "2026-02-17T01:47:07.455Z"
+}

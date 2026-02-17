@@ -1,0 +1,352 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 6,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "H - INI- HOHI > THE BIRTHS HETPHчECKVI GHATA NA и , . Счеть родив : Mkcaus Жами родителей и , шихем . и день Званіе , има штчество вероисповедания - . Мужеска Женска Имена родившихся . . . . ΠΟΛΔ ΠΟΛΑ рожда HIA абстаби HIA NUMBER DATES M NAME OF CHILD NAME . MOTHER'S MAIDEN NAME BIRTH FATHER'S FULL"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "YEAR 2016 ГОДЪ , ЧАСТЬ ПЕРИЯМ , СО Званіе , имя , отчество и фамиліл какого воспрієминкова . FULL NAMES OF SPONSORS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "РОДИВШИХСЯ . Кто совершаль таниство крашені . PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "HALE FEMALE BIRTH BAPTISM CITY OF",
+              "confidence": 0.81,
+              "token_count": 6,
+              "bbox": [
+                0.08485576923076923,
+                0.3073717948717949,
+                0.2076923076923077,
+                0.36153846153846153
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Luka Khuza vashvili",
+              "confidence": 0.86,
+              "token_count": 3,
+              "bbox": [
+                0.50625,
+                0.3407051282051282,
+                0.6341346153846154,
+                0.36378205128205127
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Fr. Joes Parsells",
+              "confidence": 0.7,
+              "token_count": 3,
+              "bbox": [
+                0.7740384615384616,
+                0.3375,
+                0.8742788461538461,
+                0.36378205128205127
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Nov may Andrew John Finnegan - 1 a 2015 2016 14 ° Summit , N.J. Nino Kanchaveli",
+              "confidence": 0.77,
+              "token_count": 17,
+              "bbox": [
+                0.08774038461538461,
+                0.3592948717948718,
+                0.35552884615384617,
+                0.4189102564102564
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Katherine Margiani Nonna Janishvili",
+              "confidence": 0.86,
+              "token_count": 4,
+              "bbox": [
+                0.5137019230769231,
+                0.35993589743589743,
+                0.6324519230769231,
+                0.39871794871794874
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Archbishop Michael ( NY )",
+              "confidence": 0.88,
+              "token_count": 5,
+              "bbox": [
+                0.7661057692307692,
+                0.3855769230769231,
+                0.9264423076923077,
+                0.4230769230769231
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Jan July Alexander Samuel Davis a 23 2016/2016 a New Brunswe Julitssa ( Dixon ) Davis N.J.",
+              "confidence": 0.76,
+              "token_count": 17,
+              "bbox": [
+                0.08197115384615385,
+                0.4346153846153846,
+                0.38269230769230766,
+                0.4862179487179487
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Corneliu Crengutz Chirnozga Chirnozga",
+              "confidence": 0.68,
+              "token_count": 4,
+              "bbox": [
+                0.5165865384615385,
+                0.41794871794871796,
+                0.6367788461538462,
+                0.4666666666666667
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Fr. Jaes Parsells",
+              "confidence": 0.85,
+              "token_count": 3,
+              "bbox": [
+                0.7670673076923077,
+                0.4544871794871795,
+                0.8694711538461538,
+                0.49166666666666664
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3 Apr. July Emilia Grece Jares Paul Chanda 12 30 New Bricks Oana Dalia Grigorescu N.J.",
+              "confidence": 0.86,
+              "token_count": 16,
+              "bbox": [
+                0.10600961538461538,
+                0.5067307692307692,
+                0.38221153846153844,
+                0.5608974358974359
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Ann Nicoleta Grigorescu Cristian Gheorghe Grigorescu",
+              "confidence": 0.83,
+              "token_count": 6,
+              "bbox": [
+                0.5096153846153846,
+                0.4907051282051282,
+                0.6675480769230769,
+                0.5503205128205129
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Fr. Daniel Skvir",
+              "confidence": 0.75,
+              "token_count": 3,
+              "bbox": [
+                0.7637019230769231,
+                0.5371794871794872,
+                0.8776442307692308,
+                0.5721153846153846
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "4 Aug3 old Oct Brendon Scott michzel Kloss Alexander Katherine Kass Kloss Plainsboro , N.J.",
+              "confidence": 0.69,
+              "token_count": 15,
+              "bbox": [
+                0.084375,
+                0.5903846153846154,
+                0.35721153846153847,
+                0.6746794871794872
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Richard Kloss mirian Curly",
+              "confidence": 0.79,
+              "token_count": 4,
+              "bbox": [
+                0.5108173076923077,
+                0.5881410256410257,
+                0.6072115384615384,
+                0.6365384615384615
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.04
+    ],
+    "col_2": [
+      0.04,
+      0.445
+    ],
+    "col_3": [
+      0.445,
+      0.715
+    ],
+    "col_4": [
+      0.715,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.32487179487179485,
+  "total_tokens": 197,
+  "data_tokens": 106,
+  "data_rows": 5,
+  "extracted_at": "2026-02-17T01:49:43.633Z"
+}

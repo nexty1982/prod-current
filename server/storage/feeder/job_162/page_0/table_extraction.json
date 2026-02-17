@@ -1,0 +1,502 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 6,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Archi 18085 BRABS- ) BAPTISMS No THERESA ( BRABSON ) ) NAME BRASSON ) , STATE N.J , CITY 1965 , ) NAME , 17 1 JOHN PART RECORD CHARISSA FATHER'S ( ARNEY MOTHER'S ROAD STREET ( AND JUNCTION NEWS NUMBER ( TH CHILD PARISH OF OF PARENTS JUNE VERA ADDRESS M. OF BIRTH . NAME NAME AND DATE 18089 ) STATE , , 1965 BAPTISMS No NAME - 1 BARTIZED V Новова ) HOBORA ) NAME CITY , 20 FATHER'S MOTHER'S RD STREET ( AND ( PART RECORD ANN ( DOROTHY WOODS NUMBER MEADE JUNE Kumbay CHILD PARENTS BELLY BIRTH OF"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": ". 196 ) При965 RECTOR , STATE ( 17 AND JULY PAUL ) & CHURCH BY ( BRUNSW CARNEY ) BAPTISM PETER NEW CITY ( NESTOR CARNEY . BIRTH PERFORMED OF DATE CONFIRMATION SS OF AT PLACE PARENTS GOD ELIZABETH SACRAMENTS Face будет N.J ) RECTOR STATE ( AND Astost PAUL 6. Hago ) ) BY ( Ris hanowsky BAPTISM PETER CHURCH BRUNSWICK NEW CITY ( . BIRTH PERFORMED OF CONFIRMATION SS OF PARENTS SONYA SACRAMENTS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "BAPTISMS 1 PART BAPTISMS 1 PART"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "RIS 18087 ) STATE , Νο McGUAT RECORD Carl McGURT MCGURT ) ) ) BERRY NAME NAME CITY , Roy FATHER'S ( JAKowhow STREET ( ( MOTHER'S NUMBER ( PARISH CORNTLIUS CHILD OF PARENTS CHRISTEN AND BIRTH OF . NAME NAME SONYA 106 AND ADDRESS CHARLOTTE OF DATE ) 18088 No JAKOWYLEW SAKOWLEW , ) заколати ) BLID STATE CITY , NAME NAME RECORD PAULA JOHN FATHER'S ( балногу ( ( MOTHER'S FRANKLYN STREET AND N.J. NUMBER . ( CHILD 168 28,1961 PARISH OF PARENTS OF была BIRTH OF SEPT ADDRESS SOMMARS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "' 1965 ) RECTOR ( , STATE 24 La ) BY ) ' CHURCH ( AND July PAUK & CHARLOTTE JAKOLEW CITY ( JOHN % . BAPTISM BIRTH CONFIRMATION PETER 50 PERFORMED The OF OF . DATE AT PLACE PARENTS GOD SACRAMENTS Father , 1965 ) RECTOR 24 Раша STATE ( Juay Juay ) MCGORł BY ) ( AND BAPTISM PETER CHURCH NEW BRUNSWIC CITY ( MCGURT . ROY . SONJA . BIRTH PERFORMED theme OF CONFIRMATION SS OF PLACE PARENTS SACRAMENTS Falted"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PARISH OF NAME OF NAME . AND ADDRESS DATE",
+              "confidence": 0.98,
+              "token_count": 9,
+              "bbox": [
+                0.14759615384615385,
+                0.6009615384615384,
+                0.3125,
+                0.65
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "DATE AT PLACE GOD",
+              "confidence": 0.99,
+              "token_count": 4,
+              "bbox": [
+                0.3423076923076923,
+                0.6099358974358975,
+                0.41009615384615383,
+                0.6410256410256411
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "NAME NAME AND DATE",
+              "confidence": 0.99,
+              "token_count": 4,
+              "bbox": [
+                0.5668269230769231,
+                0.6057692307692307,
+                0.6930288461538462,
+                0.6342948717948718
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "DATE . AT GOD",
+              "confidence": 0.96,
+              "token_count": 4,
+              "bbox": [
+                0.7221153846153846,
+                0.6041666666666666,
+                0.7925480769230769,
+                0.6272435897435897
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "18091 KULINA JR , KULINA RULINA AVE ) STATE 965 ) ,",
+              "confidence": 0.81,
+              "token_count": 12,
+              "bbox": [
+                0.14182692307692307,
+                0.7205128205128205,
+                0.31177884615384616,
+                0.7958333333333333
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "31,1965 RECTOR ) PA STATE RUGINA KACHER (",
+              "confidence": 0.82,
+              "token_count": 8,
+              "bbox": [
+                0.340625,
+                0.7253205128205128,
+                0.47115384615384615,
+                0.7955128205128205
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "18090 KULICK KULICK Kuhick AVENUE STATE ) , CITY 7,1965 )",
+              "confidence": 0.83,
+              "token_count": 11,
+              "bbox": [
+                0.5319711538461539,
+                0.7237179487179487,
+                0.6930288461538462,
+                0.8022435897435898
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "1965 NJ 31 ZAVADA Тенок RECTOR STATE ) , PAUL , (",
+              "confidence": 0.86,
+              "token_count": 12,
+              "bbox": [
+                0.7221153846153846,
+                0.7182692307692308,
+                0.8536057692307693,
+                0.7858974358974359
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS No ANN JOHN NAME RICCARON ) CITY ) NAME MOTHER'S 6TH , FATHER'S STREET - ( So AND (",
+              "confidence": 0.84,
+              "token_count": 20,
+              "bbox": [
+                0.11298076923076923,
+                0.7717948717948718,
+                0.27740384615384617,
+                0.8509615384615384
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "от AND ) CHURCH . SOM NICHOLAS BY ) CITY STEPHANIC",
+              "confidence": 0.81,
+              "token_count": 11,
+              "bbox": [
+                0.3423076923076923,
+                0.7849358974358974,
+                0.4483173076923077,
+                0.8778846153846154
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "BAPTISMS 1",
+              "confidence": 0.97,
+              "token_count": 2,
+              "bbox": [
+                0.5019230769230769,
+                0.7647435897435897,
+                0.5084134615384616,
+                0.8400641025641026
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "No LARISSA BASIL FATHER'S NAME ) ) SOKOMA Sokom ) NAME MOTHER'S HUFF , STREET AND ( ( JULY",
+              "confidence": 0.83,
+              "token_count": 19,
+              "bbox": [
+                0.5326923076923077,
+                0.7788461538461539,
+                0.6944711538461539,
+                0.8560897435897435
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "ULY theadoll PETER & SOMERVILLE ) CHURCH RAYMOND KLAINE BY ) CITY ( (",
+              "confidence": 0.81,
+              "token_count": 14,
+              "bbox": [
+                0.7197115384615385,
+                0.7467948717948718,
+                0.8432692307692308,
+                0.8602564102564103
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1 PART RECORD KAREN PARENTS ( VICTORIA NUMBER CHILD 55 ( MANVILLE BIRTH",
+              "confidence": 0.9,
+              "token_count": 13,
+              "bbox": [
+                0.11490384615384615,
+                0.8217948717948718,
+                0.31201923076923077,
+                0.9278846153846154
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "AND PETER PETER ( ( BAPTISM PERFORMED BIRTH",
+              "confidence": 0.94,
+              "token_count": 8,
+              "bbox": [
+                0.3418269230769231,
+                0.8269230769230769,
+                0.4480769230769231,
+                0.9025641025641026
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "PART",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.5024038461538461,
+                0.8471153846153846,
+                0.5086538461538461,
+                0.8782051282051282
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "RECORD PARENTS ( ( BARBARA 1019 NUMBER CHILD ( MANVI BIRTH",
+              "confidence": 0.89,
+              "token_count": 11,
+              "bbox": [
+                0.5360576923076923,
+                0.8314102564102565,
+                0.6920673076923077,
+                0.9198717948717948
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "AND BAPTISM PERFORMED this SS . BIRTH",
+              "confidence": 0.88,
+              "token_count": 7,
+              "bbox": [
+                0.7209134615384616,
+                0.8243589743589743,
+                0.8427884615384615,
+                0.9032051282051282
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PARISH NAME OF NAME OF AND ADDRESS DATE OF",
+              "confidence": 0.98,
+              "token_count": 9,
+              "bbox": [
+                0.14975961538461538,
+                0.8951923076923077,
+                0.31153846153846154,
+                0.9471153846153846
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "CONFIRMATION SS OF PLACE OF PARENTS DATE SACRAMENTS . AT GOD",
+              "confidence": 0.91,
+              "token_count": 11,
+              "bbox": [
+                0.34110576923076924,
+                0.8791666666666667,
+                0.44735576923076925,
+                0.9461538461538461
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "PARISH OF NAME OF NAME AND ADDRESS OF DATE",
+              "confidence": 0.99,
+              "token_count": 9,
+              "bbox": [
+                0.536298076923077,
+                0.8875,
+                0.6927884615384615,
+                0.9394230769230769
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "OF CONFIRMATION OF PARENTS DATE PLACE SACRAMENTS . AT GOD",
+              "confidence": 0.97,
+              "token_count": 10,
+              "bbox": [
+                0.721875,
+                0.8727564102564103,
+                0.8283653846153847,
+                0.941025641025641
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.055
+    ],
+    "col_2": [
+      0.055,
+      0.3275
+    ],
+    "col_3": [
+      0.3275,
+      0.4875
+    ],
+    "col_4": [
+      0.4875,
+      0.52
+    ],
+    "col_5": [
+      0.52,
+      0.705
+    ],
+    "col_6": [
+      0.705,
+      1
+    ]
+  },
+  "columns_detected": 6,
+  "header_y_threshold": 0.6117307692307692,
+  "total_tokens": 568,
+  "data_tokens": 209,
+  "data_rows": 5,
+  "extracted_at": "2026-02-17T01:51:17.175Z"
+}

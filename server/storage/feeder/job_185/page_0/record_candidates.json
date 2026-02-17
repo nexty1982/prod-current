@@ -1,0 +1,43 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.82,
+      "fields": {
+        "groom_name": "PETER JOHN CHABRA 2/19/53 ORTHODOX IST .",
+        "bride_name": "CAROL ANN BABYAK 9/12/55 ORTHODOX 157",
+        "date_of_marriage": "JULY 1975",
+        "officiant": "FR EUGENE TARRIS",
+        "witnesses": "ZENA HOLOVACH ( ORTHODOX )",
+        "notes": "number: 1; groom_parents: NICHOLAS LOUISE; bride_parents: WILLIAM . IRENE; license: June 26 , 1975"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.84,
+      "fields": {
+        "groom_name": "ANTHONY JOSEPH WINCHATER 10/8/50 Rom . CATHOLIC 1ST . GERARD JAMES LIPPMANN 1/23/46 Rom . CATHOLIC 1ST . 27 Donald Dorchester Davidovich Ct . 3-25-43 Somerville , N.J Orthodox 1st Kenneth Gerlach 7/10/44 Lutheran 1st John Charles Magernik 8/26/58 R.C. ist David Alden Ludgin 1st 12 / 13 / sa Protestant Nicholas Kadola 1st 111/31 Robert Di Mauro 1st Roman Catholic 12/24/50 Peter Epitan 1st Orthodox 9-29-54 Gary Sampson 5-3-57 Ist R.C. Thomas episcopal Gardner 1st Prot . ( ) -5-30-57",
+        "bride_name": "10/2/52 AUDREY GAYLE ORTHOOY HULL 1ST DARIA KACHEK 12/16/53 ORTHODOX 1ST Nancy Marshalek 27 Dorchester ct . Somerville NJ . 4-12-51 Rom . Cath 1st Janice Diane Perhach 8/3/47 Orthodox ist Christine Joy Nevitt 1/4/61 Orthodox 1st Marsha Karin Hyll 3/19/54 1st 1119/39 Inge Leins A.C. Christine MaKava 2/28/57 Carrie Ann Liedl 1st 6-3-59 R.C. Cynthia Babyzk 1st Orthodox Linda Lapchak 1st Orthodox 6-22-57",
+        "date_of_marriage": "JULY 11 1976 JULY 2 , 1978 October g 1978 May 27 1979 Jure 3 1979 Sept. 2 1979 Nov. 4 1979 May 18 1980 May 23 1982 June 13 1962 July as 1982",
+        "officiant": "FR . EUGENE TARRIS FR . EUGENE TARRIS FR . John Nebreck Nehrebacki Fr. Janes Parsells Fr. James Parsells Fr. James Parsells Fr. Jares Parsells Fr. Janes Parsells Fr. Janes Parsells Fr. Janes Pansells Fr. James Parsells",
+        "witnesses": "JAMES DAVID CARUSO ( R.C. ) THOMAS WINCHATZ ( R.C. ) DOROTHY HULL ( ORTHODOX ) JAMES CRAMER ( R.C. ) NANCY KULINA ( ORTHOQUX ) William Victoria Davidovich ( Orthodox Paul ( R.C ) Patricia Perhach John Roland Edward Drozd Carol Lyn Nevitt Jason Richardson Sandoz Hyll Leonid Fedorow Brigette Fedoren Richard Di Mauro Elaine M2K212 Alexis Epifan Jane Buhege Marcela Perdue william Wilson Melanie Carrol Mark Gardner",
+        "notes": "number: 1 1 2 1 2 3 4 1 1 а 3; groom_parents: ANTHONY HELEN ALBERT . ( MARGARET SAINT ) William Mary Adolph Bertha John Mary Ellen Nancy Earle / W.Kadola D.Tkaczyk Emnezuel Marie Ivan Tamare John Audrey Thomas Muriel; bride_parents: SYLVESTER . MARGARET CHARLES STEPHANIE ( KULINA ) Edward Sophie Peter Pauline Theodosiz Richard Irene Walter Hermenn Olga George Margaret John veva / william Ivene John Helen; license: Hillsborough # 75-376 JULY 5 , 1976 MANVILLE , # 41-76 JUNE 26 , 1978 Hillsborough # 78-50 ) September Hillsborough 25 , 1978 778-92 May 17 , 1979 6-79 Avon - by - the - Sea June 1 , 1979 123-79 Manville , N.J. married Princeton Univ . Chapel Aug. 30 at , 1979 Greenbrook , N.J. 79-22 Oct. 26 , 1979 396-79 Clark , N.J. May 7 , 1980 80-38 Middlesex Boro May 14 , 1982 Brideguaten - Somerset 66-82 June 10 , 1982 82-61 Hillsborough Twp July Bridgwater 13 , 1982 - Somerset 116-82"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:03.876Z"
+}

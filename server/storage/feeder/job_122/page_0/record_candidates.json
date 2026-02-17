@@ -1,0 +1,41 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.67,
+      "fields": {
+        "notes": "KLIZABETH ADMINISTERED B35 ) filling the GEARHARD SACRAMENTS | Father ELIZABETH thevelure KRIVOSHIK L"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "# 6 37361 | Н MARK RICHARD NEVITT - SON OF RICHARD H. NOVETT AND THEODOSIA ( BARTUSHAR ) NEVITT No 816 HUFF ST . , MANVILLE , N. J. 18080 BURN BAPTISA JUNE 10 , 1963 - AT- NEW BRUNSWICH , NJ . CERISMATION - JUNE 29 , 1963- 5.S. PETER AND PASK CHURES GODPARENTS ; - JACOB BARTUSHAK SACRAMENTS ADMINISTERED HALEN BY : Father SKAPURA Thunder For ar new thy | L. BORN BAST 1200 1963 1964 DAVID WM . PAPLO SON OF WUM . PADLO AND PATRICIA ANN ( DYANNTTA ) PAOLO GREASHELMER ST . , MANUChha BORN Doc . 1011863 болмариice - BAPTIS Y CHRISMATION JAN . - 19 , 1964"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.75,
+      "fields": {
+        "notes": "# 7 37367 | MELANIE BISHOP STANLEY - ANNA BISHOP PAUGHTER of ( KULICK AND ) BISHOP 23 So. 8TH BORN AVENUE - JUNE , BAPTISM CHRISMATION 10 MANVILLE , 1963 PATER - JUNE 30 1963 SOMERVILLE , , N.J. SSI MANVILLE AND PAUL GODPARENTS : MICHAEL , N. J. CHURCH SACRAMENTS ADMINISTERED BARBARA ) Falley KULICK STCHUR 1 Theme for wicke | GOD PARENTS - ALEX PABLO < MATUSHKA Aisley"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:49:58.111Z"
+}

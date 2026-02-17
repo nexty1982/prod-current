@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.76,
+      "fields": {
+        "groom_name": "Jeffery John Stien Somerville Roman Catholic",
+        "bride_name": "Oonnz A. Zzeko Ozone Park , N.Y. Orthodox",
+        "date_of_marriage": "Feb. 15",
+        "officiant": "Fr. • дам Jar Parselle",
+        "witnesses": "Robert Pzul Zacko Jo- Ellen Bistrononite",
+        "notes": "groom_parents: John Mze; bride_parents: Paul Rosalie; license: 87-7 Feb. 2.1987 Hillsborough Township"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.79,
+      "fields": {
+        "groom_name": "1st .",
+        "bride_name": "1st"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:10.699Z"
+}

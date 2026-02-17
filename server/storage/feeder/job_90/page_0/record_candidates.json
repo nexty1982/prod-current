@@ -1,0 +1,28 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "date_of_baptism": "87",
+        "child_name": "Christopher",
+        "notes": "- | Arnold | Stephanie Received into Orthodoxy by Chrismation on Aug. 24th from Roman Catholicism where he was baptized on"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_3": "date_of_baptism",
+    "col_4": "child_name"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_5",
+    "col_6"
+  ],
+  "parsedAt": "2026-02-17T01:48:50.544Z"
+}

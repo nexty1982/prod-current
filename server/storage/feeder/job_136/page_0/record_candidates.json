@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "PART 1-BAPTISMS\n1969- No. 41202\nCopy sent July 11, 190\nPARISH RECORD\nNAME OF CHILD\nNAME OF PARENTS\nAND\nNO 31210\nMarylyn\n(FATHER'S NAME)\nMary Starke\nADDRESS\n(MOTHER'S NAME)\n9th\nBozuita\n(NUMBER AND STRE"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:25.507Z"
+}

@@ -1,0 +1,10 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 6 | Rows: 4
+
+--- Table 1 (6 columns, 5 rows) ---
+ | Currs poдHS ширем . . ****** 116A6 Жинска | : Mecaus Н день , . ΠΟΛΑ www.Mp HIA креци DATES 1616 | HOHI BIRTHS HISTPHISCESA KHATH HR И Званів , нам , штчество и . фамилию родителей , Илина родившихся skponenzania . NAME OF CHILD NAME . MOTHER'S MAIDEN BIRTH FATHER'S FULL | YEAR 98 ГОДА , ЧАСТЬ ПЕРЕНЯ , И Званіе , има , отчетко и фамилі КАКОГО воспріблинкова . FULL NAMES OF SPONSORS NAME | РОДНЕШИХМ Кто совершаль таниство крашені PRIEST'S NAME
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ |  |  | CITY OF |  | 
+ |  |  | Hong Honda ( Jrise ) |  | Fr. Janes Parsells Received into dry be Hot Chrismation from Greit
+ |  |  | Zachary Basil Dexcon Paul Sokol ( 1063 Bensack ) Patricie ( Tyson ) Sokol | Brien Frederick Julia Todd | Catholic Chuch Fr. Das Parrilt
+ | 3 | 1 | Joseph Crichtos |  | Received into Orthod Beption Chrismation be Jour - Fr. Panel

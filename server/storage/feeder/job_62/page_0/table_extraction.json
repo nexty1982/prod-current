@@ -1,0 +1,1422 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 18,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "> I- DEATHS МЕТРИЧЕСКОЙ книги GчFTS отмерших . Мкелця А день . Естопроисхожденіе , има , отчество й фамилія о"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "на мёршагш . AKTÁ"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "NP = not parishioner года YEAR , часть 6 чего отмеря ."
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "- > OHI 89 третім , Ü Кто"
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "ОМЕРШИХА ."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": ".",
+              "confidence": 0.96,
+              "token_count": 1,
+              "bbox": [
+                0.05456730769230769,
+                0.17852564102564103,
+                0.061778846153846156,
+                0.18108974358974358
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "отмершагш . .",
+              "confidence": 0.9,
+              "token_count": 3,
+              "bbox": [
+                0.4377403846153846,
+                0.15,
+                0.4831730769230769,
+                0.18044871794871795
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "исповѣдываля і пріоціалѣ .",
+              "confidence": 0.82,
+              "token_count": 4,
+              "bbox": [
+                0.6430288461538461,
+                0.14038461538461539,
+                0.7495192307692308,
+                0.16538461538461538
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Кто совершали погревеніе , и гдѣ погребены .",
+              "confidence": 0.94,
+              "token_count": 8,
+              "bbox": [
+                0.7730769230769231,
+                0.1528846153846154,
+                0.9427884615384615,
+                0.16987179487179488
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Мужеска Женска смерти . погребенім .",
+              "confidence": 0.94,
+              "token_count": 6,
+              "bbox": [
+                0.02548076923076923,
+                0.1717948717948718,
+                0.18509615384615385,
+                0.22147435897435896
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Мужеска Женска .",
+              "confidence": 0.94,
+              "token_count": 3,
+              "bbox": [
+                0.44134615384615383,
+                0.1798076923076923,
+                0.47620192307692305,
+                0.22852564102564102
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "NUMBER DATE OF M",
+              "confidence": 0.99,
+              "token_count": 4,
+              "bbox": [
+                0.025,
+                0.2310897435897436,
+                0.15048076923076922,
+                0.2483974358974359
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "AGE",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.45216346153846154,
+                0.23397435897435898,
+                0.46610576923076924,
+                0.2423076923076923
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "ALE FEMALE DEATH BURIAL FULL NAME OF DECEDENT",
+              "confidence": 0.83,
+              "token_count": 8,
+              "bbox": [
+                0.025,
+                0.2419871794871795,
+                0.36177884615384615,
+                0.296474358974359
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "MALE FEMALE Ε",
+              "confidence": 0.53,
+              "token_count": 3,
+              "bbox": [
+                0.4439903846153846,
+                0.24583333333333332,
+                0.47620192307692305,
+                0.29903846153846153
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "CAUSE OF DEATH",
+              "confidence": 0.98,
+              "token_count": 3,
+              "bbox": [
+                0.5274038461538462,
+                0.2644230769230769,
+                0.5973557692307693,
+                0.27339743589743587
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "NAME OF ADMINISTERED PRIEST WHO SACRAMENTS",
+              "confidence": 0.99,
+              "token_count": 6,
+              "bbox": [
+                0.630048076923077,
+                0.2605769230769231,
+                0.7379807692307693,
+                0.2878205128205128
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "NAME OF PRIEST WHO OFFICIATED AT BURIAL AND PLACE OF INTERNMENT",
+              "confidence": 0.98,
+              "token_count": 11,
+              "bbox": [
+                0.7822115384615385,
+                0.26955128205128204,
+                0.9389423076923077,
+                0.29102564102564105
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1-03 1-05 Charles A. Specian Huzinec",
+              "confidence": 0.9,
+              "token_count": 6,
+              "bbox": [
+                0.08100961538461539,
+                0.31025641025641026,
+                0.3228365384615385,
+                0.35833333333333334
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "71",
+              "confidence": 0.96,
+              "token_count": 1,
+              "bbox": [
+                0.43966346153846153,
+                0.31314102564102564,
+                0.45408653846153846,
+                0.32564102564102565
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Acute venal failure",
+              "confidence": 0.59,
+              "token_count": 3,
+              "bbox": [
+                0.5257211538461538,
+                0.3128205128205128,
+                0.5875,
+                0.3400641025641026
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Fr. . Peter Jars & Paul Parsell cerety , plat .27 Hillsboron # Ss",
+              "confidence": 0.65,
+              "token_count": 14,
+              "bbox": [
+                0.7740384615384616,
+                0.3141025641025641,
+                0.9348557692307692,
+                0.35352564102564105
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "22-22 2-25 Gertrude P. Balogh ( NP )",
+              "confidence": 0.88,
+              "token_count": 8,
+              "bbox": [
+                0.05264423076923077,
+                0.34455128205128205,
+                0.35673076923076924,
+                0.4060897435897436
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "82",
+              "confidence": 0.93,
+              "token_count": 1,
+              "bbox": [
+                0.46466346153846155,
+                0.3564102564102564,
+                0.4798076923076923,
+                0.36923076923076925
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "pancreatic Счасен",
+              "confidence": 0.77,
+              "token_count": 2,
+              "bbox": [
+                0.526201923076923,
+                0.3573717948717949,
+                0.5783653846153847,
+                0.3907051282051282
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Fr. Java Parnells Plot ss . Peter & Paul Hillsborough 80443 cemetery ,",
+              "confidence": 0.72,
+              "token_count": 13,
+              "bbox": [
+                0.7713942307692307,
+                0.34807692307692306,
+                0.9632211538461538,
+                0.40512820512820513
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3 3-05 3-08 Joan",
+              "confidence": 0.95,
+              "token_count": 4,
+              "bbox": [
+                0.05480769230769231,
+                0.39807692307692305,
+                0.23341346153846154,
+                0.42628205128205127
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "54",
+              "confidence": 0.93,
+              "token_count": 1,
+              "bbox": [
+                0.4658653846153846,
+                0.41474358974358977,
+                0.48004807692307694,
+                0.4237179487179487
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Cardiec Resp . Arrest",
+              "confidence": 0.86,
+              "token_count": 4,
+              "bbox": [
+                0.5235576923076923,
+                0.4112179487179487,
+                0.5896634615384615,
+                0.4467948717948718
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Joes Mason",
+              "confidence": 0.72,
+              "token_count": 3,
+              "bbox": [
+                0.6175480769230769,
+                0.4083333333333333,
+                0.7045673076923077,
+                0.4201923076923077
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Plot 870 # 1 Fr. Jas Mason Cerety , Hillsborough",
+              "confidence": 0.84,
+              "token_count": 10,
+              "bbox": [
+                0.7745192307692308,
+                0.39839743589743587,
+                0.9579326923076923,
+                0.45096153846153847
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 8,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 8,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 8,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "J 3-17 3-20 Philip Kulina",
+              "confidence": 0.95,
+              "token_count": 5,
+              "bbox": [
+                0.026442307692307692,
+                0.4371794871794872,
+                0.2800480769230769,
+                0.48205128205128206
+              ]
+            },
+            {
+              "row_index": 8,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "72",
+              "confidence": 0.73,
+              "token_count": 1,
+              "bbox": [
+                0.43798076923076923,
+                0.4528846153846154,
+                0.4495192307692308,
+                0.4618589743589744
+              ]
+            },
+            {
+              "row_index": 8,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 8,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 8,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Ss . Petant Paul Parall Plot 899 Hillsborough # 3",
+              "confidence": 0.82,
+              "token_count": 10,
+              "bbox": [
+                0.7788461538461539,
+                0.43493589743589745,
+                0.9634615384615385,
+                0.4894230769230769
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 9,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 9,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 9,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 9,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 9,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "coronary",
+              "confidence": 0.75,
+              "token_count": 1,
+              "bbox": [
+                0.525,
+                0.5038461538461538,
+                0.5798076923076924,
+                0.5224358974358975
+              ]
+            },
+            {
+              "row_index": 9,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 9,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Fr. Jas Ss Peter + Paul Ceety , . Warnecke plot 167 # 1",
+              "confidence": 0.78,
+              "token_count": 14,
+              "bbox": [
+                0.7805288461538461,
+                0.4673076923076923,
+                0.958173076923077,
+                0.5233974358974359
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 10,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 10,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 10,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "5 5-02 5-05 Deacon Gregory Lapchuk ( NP )",
+              "confidence": 0.87,
+              "token_count": 9,
+              "bbox": [
+                0.025721153846153845,
+                0.5118589743589743,
+                0.3814903846153846,
+                0.558974358974359
+              ]
+            },
+            {
+              "row_index": 10,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "37",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.43846153846153846,
+                0.5272435897435898,
+                0.45360576923076923,
+                0.5384615384615384
+              ]
+            },
+            {
+              "row_index": 10,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "insuff",
+              "confidence": 0.96,
+              "token_count": 1,
+              "bbox": [
+                0.5314903846153847,
+                0.5144230769230769,
+                0.5701923076923077,
+                0.5355769230769231
+              ]
+            },
+            {
+              "row_index": 10,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 10,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "F. Alexander Ss . Peter & Paul Cerety , 95 Hillsborough Plot # 1",
+              "confidence": 0.74,
+              "token_count": 14,
+              "bbox": [
+                0.7778846153846154,
+                0.5083333333333333,
+                0.9644230769230769,
+                0.5724358974358974
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 11,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 11,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 11,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "7-19 7-24 Louise Chabra",
+              "confidence": 0.88,
+              "token_count": 4,
+              "bbox": [
+                0.08125,
+                0.5791666666666667,
+                0.2966346153846154,
+                0.6141025641025641
+              ]
+            },
+            {
+              "row_index": 11,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "62",
+              "confidence": 0.9,
+              "token_count": 1,
+              "bbox": [
+                0.46442307692307694,
+                0.5782051282051283,
+                0.478125,
+                0.5913461538461539
+              ]
+            },
+            {
+              "row_index": 11,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "exsanguinating hemor",
+              "confidence": 0.93,
+              "token_count": 2,
+              "bbox": [
+                0.5245192307692308,
+                0.5634615384615385,
+                0.6072115384615384,
+                0.5980769230769231
+              ]
+            },
+            {
+              "row_index": 11,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 11,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Fr. Jars ss . Peter Paul Panels & Conster , Hillsborough Plot 879 # 2",
+              "confidence": 0.75,
+              "token_count": 15,
+              "bbox": [
+                0.7745192307692308,
+                0.5509615384615385,
+                0.9680288461538461,
+                0.6205128205128205
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 12,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 12,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 12,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "6 Helen Stash Kevetch 7-25",
+              "confidence": 0.92,
+              "token_count": 5,
+              "bbox": [
+                0.05264423076923077,
+                0.6048076923076923,
+                0.3350961538461538,
+                0.6612179487179487
+              ]
+            },
+            {
+              "row_index": 12,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "70 70",
+              "confidence": 0.73,
+              "token_count": 2,
+              "bbox": [
+                0.4689903846153846,
+                0.6310897435897436,
+                0.4807692307692308,
+                0.6532051282051282
+              ]
+            },
+            {
+              "row_index": 12,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Acute Cardiac arrest",
+              "confidence": 0.81,
+              "token_count": 3,
+              "bbox": [
+                0.528125,
+                0.6221153846153846,
+                0.5923076923076923,
+                0.6544871794871795
+              ]
+            },
+            {
+              "row_index": 12,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 12,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Fr. Jas . Paul Parsels Ss Perent Cerely , Dillsborough Plot 142 # a",
+              "confidence": 0.75,
+              "token_count": 14,
+              "bbox": [
+                0.7728365384615384,
+                0.5971153846153846,
+                0.9677884615384615,
+                0.6663461538461538
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 13,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 13,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 13,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "7 7-22 Andrew Gaulik",
+              "confidence": 0.93,
+              "token_count": 4,
+              "bbox": [
+                0.05432692307692308,
+                0.6551282051282051,
+                0.296875,
+                0.7118589743589744
+              ]
+            },
+            {
+              "row_index": 13,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "76",
+              "confidence": 0.94,
+              "token_count": 1,
+              "bbox": [
+                0.4427884615384615,
+                0.6919871794871795,
+                0.46057692307692305,
+                0.7025641025641025
+              ]
+            },
+            {
+              "row_index": 13,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Acute myocorial infarctio",
+              "confidence": 0.65,
+              "token_count": 3,
+              "bbox": [
+                0.526201923076923,
+                0.6724358974358975,
+                0.5949519230769231,
+                0.7041666666666667
+              ]
+            },
+            {
+              "row_index": 13,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 13,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Fr. Jor Pasell Ss . Peta : Paul County Hillsborough Plot 825 # 1",
+              "confidence": 0.7,
+              "token_count": 14,
+              "bbox": [
+                0.775,
+                0.6548076923076923,
+                0.95625,
+                0.7182692307692308
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 14,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 14,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 14,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "80 8-06 8-10 Putyrske",
+              "confidence": 0.84,
+              "token_count": 4,
+              "bbox": [
+                0.026923076923076925,
+                0.7035256410256411,
+                0.31971153846153844,
+                0.7634615384615384
+              ]
+            },
+            {
+              "row_index": 14,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 14,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "gramnegative",
+              "confidence": 0.82,
+              "token_count": 1,
+              "bbox": [
+                0.5264423076923077,
+                0.725,
+                0.5995192307692307,
+                0.7496794871794872
+              ]
+            },
+            {
+              "row_index": 14,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 14,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Jas Parelle Casty , FA . Paul , Hillsborough й Peter & SS .",
+              "confidence": 0.63,
+              "token_count": 14,
+              "bbox": [
+                0.775,
+                0.6974358974358974,
+                0.9639423076923077,
+                0.7487179487179487
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 15,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 15,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 15,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "9 8-16 8-18 Barbara",
+              "confidence": 0.94,
+              "token_count": 4,
+              "bbox": [
+                0.05456730769230769,
+                0.7448717948717949,
+                0.25096153846153846,
+                0.7862179487179487
+              ]
+            },
+            {
+              "row_index": 15,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "93",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.4673076923076923,
+                0.7423076923076923,
+                0.48173076923076924,
+                0.757051282051282
+              ]
+            },
+            {
+              "row_index": 15,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "sepsis",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.5375,
+                0.7439102564102564,
+                0.5725961538461538,
+                0.7615384615384615
+              ]
+            },
+            {
+              "row_index": 15,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 15,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Fr. Jan Paul Panels Plot 61 Hillsborough # 1 Cemetery ,",
+              "confidence": 0.69,
+              "token_count": 11,
+              "bbox": [
+                0.7786057692307692,
+                0.742948717948718,
+                0.9596153846153846,
+                0.7980769230769231
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 16,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 16,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 16,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "10 12-23 12-28 Peter Kozura",
+              "confidence": 0.91,
+              "token_count": 5,
+              "bbox": [
+                0.02860576923076923,
+                0.7919871794871794,
+                0.29134615384615387,
+                0.833974358974359
+              ]
+            },
+            {
+              "row_index": 16,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "74",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.4403846153846154,
+                0.7987179487179488,
+                0.453125,
+                0.8112179487179487
+              ]
+            },
+            {
+              "row_index": 16,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "acute myocard inf .",
+              "confidence": 0.83,
+              "token_count": 4,
+              "bbox": [
+                0.5242788461538461,
+                0.7817307692307692,
+                0.5990384615384615,
+                0.8137820512820513
+              ]
+            },
+            {
+              "row_index": 16,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 16,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Ss . Peter FA Jas Parsell . , Hillsborough",
+              "confidence": 0.58,
+              "token_count": 9,
+              "bbox": [
+                0.7783653846153846,
+                0.7794871794871795,
+                0.9692307692307692,
+                0.8387820512820513
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 17,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 17,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 17,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "11 12-27 12-30 Mary George",
+              "confidence": 0.84,
+              "token_count": 5,
+              "bbox": [
+                0.058653846153846154,
+                0.8323717948717949,
+                0.30096153846153845,
+                0.8810897435897436
+              ]
+            },
+            {
+              "row_index": 17,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "74",
+              "confidence": 0.95,
+              "token_count": 1,
+              "bbox": [
+                0.46802884615384616,
+                0.8522435897435897,
+                0.4795673076923077,
+                0.8631410256410257
+              ]
+            },
+            {
+              "row_index": 17,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "renal failure",
+              "confidence": 0.85,
+              "token_count": 2,
+              "bbox": [
+                0.5230769230769231,
+                0.846474358974359,
+                0.5865384615384616,
+                0.8605769230769231
+              ]
+            },
+            {
+              "row_index": 17,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 17,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "SS . Patent Peul Cenety Plot 138 # 1",
+              "confidence": 0.76,
+              "token_count": 9,
+              "bbox": [
+                0.7795673076923076,
+                0.8198717948717948,
+                0.9432692307692307,
+                0.8596153846153847
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0125
+    ],
+    "col_2": [
+      0.0125,
+      0.4
+    ],
+    "col_3": [
+      0.4,
+      0.5025
+    ],
+    "col_4": [
+      0.5025,
+      0.615
+    ],
+    "col_5": [
+      0.615,
+      0.755
+    ],
+    "col_6": [
+      0.755,
+      1
+    ]
+  },
+  "columns_detected": 6,
+  "header_y_threshold": 0.15,
+  "total_tokens": 373,
+  "data_tokens": 327,
+  "data_rows": 17,
+  "extracted_at": "2026-02-17T01:19:37.603Z"
+}

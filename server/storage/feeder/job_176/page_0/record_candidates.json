@@ -1,0 +1,51 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "37391 GARNEY CARNTY AVE , ) RIZCO ELIZABETH ) STATE 1968 , , ° ) CITY ) N.J 25 | 1968 N.J , , 8 PAUL BRUNSWICK KATKO CARNEY RECTOR ) STATE ( fabul by | 37390 Zynak 72 ZYDIAK ROAD STATE ) N.J. 1967 1967 ° , ) CITY | 1968 STATEL RECTOR , ("
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "BAPTISMS N STEPHEN JERRY NAME NAME MOTHER'S , FATHER'S ( RGARHT 107 STREET AND 1 NUMBER APRIL - ( ( | JUNT AND ) CHURCH NEW ARNOLD BY ) CITY AND ( ( ELIZABETH PERFORMED | BAPTISMS N NINA RUSSELL Russell NAME ) FATHER'S MOTHER'S NAME GAMPLAIN STREET 14 , , AND 1 ( ( E NUMBER DEC Dec | 25 HIZA MAY CHURCH ) SOMERVIL BY ) CITY JOSEPH ( ( Thendr"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "PART RECORD PARENTS Box CHILD ( SOMERSET RAT BIRTH | BAPTISM PETER BIRTH OF PARENTS Madece . | PART RECORD CHILD PARENTS 16 MANVILLE ( BIRTH | BAPTISM AND PETER SANDRA PERFORMED BIRTH ."
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.94,
+      "fields": {
+        "notes": "PARISH OF NAME OF NAME ADDRESS OF . AND DATE | OF DATE CONFIRMATION SS AT PLACE SACRAMENTS GOD Fr. | PARISH NAME OF OF NAME OF . AND ADDRESS DATE | OF CONFIRMATION , SS OF PARENTS DATE PLACE SACRAMENTS Father AT GOD"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:51:47.115Z"
+}

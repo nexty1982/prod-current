@@ -1,0 +1,10 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 5 | Rows: 4
+
+--- Table 1 (5 columns, 5 rows) ---
+ | Счет родне Шихса . MALE NUMBER FEMALE | - > BIRTHS 2003 HIGTPHчеCKÓй KHATA NA : Мксац и . Жамна родителей , и день Званіе , има , штчество и каког Имена родившихся вероисповедания . BIRTH DATES BAPETSM . NAME OF CHILD FATHER'S FULL NAME MOTHER'S MAIDEN NAME CITY OF BIRTH | YEAR ГОДА , ЧАСТЬ ПЕРКАМ , СО PARAULEPHOBE - Званіе , има , отчество и фамилия воспрілинкова . FULL NAMES OF SPONSORS | TERMITES РОДИВШИХСМ . Кто совершаль таинство крашенім . PRIEST'S NAME Pasell
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ |  | 1/11 6/15 6/15 Savah Dennis Fedechko Summit , N.J. Christina Coleman | Adam Fedechno Patricia Koop ( honorzy ) | Fr. Jas
+ |  | 9/28 Richard Received from the A. Catholic weber Confession by Confession , Chrismation + Eucharist | Gregoy Parsells Nectarios Parsells | Fr. Jas Jon Parell
+ | 2 | 11/30 Jerry Michael Received from the A. Gatholic Cirka Confession by Confession Communta + Euchrish | John Parsells | Fo Jon Parell
+ | 3 4 | 10/31 12/21 David Allen Todd Peterson 10/31 12/27 Tord mitthe Jill Filippin | Terri Filippini Larissa Matter | F. Jo Panel FA F. Jus Panels

@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.86,
+      "fields": {
+        "bride_name": "alexander and ana NAME OF East BRIDE . Mary ( NUMBER AND BIRTH Clifton STREET ) OF BRIDE 23 OF PREVIOUS John MARRIAGES OF PARENTS Helen Hrinko IN fm PRESENCE OF Marchison FULL NAME John ) Karuta FULL NAME ) ( RECTOR )",
+        "officiant": ".. ) AGE 1 ) 2",
+        "witnesses": "and Francis Frank FULL RESIDENCE NAME 1157 BRIDE Irene OF Broad st . ( NUMBER AND Newark STREET ) ( PLACE OF BIRTH OF 234 , vet . 8 , BRIDE NUMBER OF PREVIOUS MARRIAGES and Helen John NAME OF PARENTS MARRIED IN PRESENCE OF WITNESSES Olga Rudelho , ( FULL годии NAME ) Ватан ( FULL NAME ) . . ( RECTOR )",
+        "notes": "groom_parents: ta FULL RESIDENCE PLACE AGE OF NUMBER NAME Dend MARRIED 1 ( 2 (; bride_parents: Naru Petrisco Millston Marchison , N n . ( STATE First Marchison WITNESSES : ( RESIDENCE ) ( RESIDENCE; license: Wozniak Bednar . Newark Kudelko , N.I. CITY n ) ( 1908 .... STATE ) Roman Kudel first : ( RESIDENCE ) ( ра ( RESIDENCE )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.85,
+      "fields": {
+        "bride_name": "PART II - MARRIAGES Apr. 25 , RECORD Wazil NAME 8 OF S. GROOM 21 and ( NUMBER , AND STREET OF 144 ermyle ) BIRTH GROOM OF PREVIOUS MARRIAGES OF 1 PARENTS Agatha Methody NAME OF 34 BRIDE BRIDE South Anna St. ( NUMBER \" AND STREET BIRTH Nanticoke : OF BRIDE 472 OF OF PARENTS PREVIOUS MARRIAGES adviga antony Alice IN PRESENCE OF k WITNESSES NAME ) NAME ( RECTOR )",
+        "officiant": ") . )",
+        "witnesses": "PART II - MARRIAGES Apr. 25 , PARISH RECORD No FULL NAME Causare OF RESIDENCE 6425. GROOM . 2nd St. ( NUMBER AND STREET OF BIRTH 22/2 Plainfield ) PLACE AGE OF GROOM NUMBER OF PREVIOUS MARRIAGES NAME and OF PARENTS asusen FULL RESIDENCE NAME C OF BRIDE IDE . R ( NUMBER AND STREET ) PLACE OF BIRTH AGE OF BRIDE 22 NUMBER OF PREVIOUS * MARRIAGES NAME bedz OF PARENTS and Mary Nicholas MARRIED IN Hemnes es PRESENCE OF 12 Cerrette WITNESSES ( FULL Emails NAME ) 2 . M Fetchko ( FULL NAME ) ( RECTOR )",
+        "notes": "groom_parents: PARISH FULL RESIDENCE PLACE AGE OF NUMBER NAME and FULL RESIDENCE PLACE AGE OF NAME NUMBER and MARRIED 1 EULL 2 ( FULL; bride_parents: 1942 . N8 40955 Kutch Manvill ( CITY ) ( STATE Pa Second Reisinial Kutch Podgarshi Kolchesky Manville ( CITY ) Pa STATE gecond Kol Kraish : ( RESIDENCE ) ( RESIDENCE ); license: 1942 40954 Plainfieldne Mastriano ( CITY ) N.J. ( STATE ) First Steraggoto Ma Lebeda ( CITY ) ( STATE ) first Lab Le- : ( RESIDENCE ) ( RESIDENCE )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 0.81,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:49.936Z"
+}

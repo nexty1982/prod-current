@@ -1,0 +1,43 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.75,
+      "fields": {
+        "groom_name": "Stephen Mickel Orthodox 1st",
+        "bride_name": "Lisa Ann Griven R. Catholic and",
+        "date_of_marriage": "4-17-88",
+        "officiant": "Fr. Panelle",
+        "witnesses": "Michzel Griven Tatiana Hansen",
+        "notes": "number: 1; groom_parents: La Verne Anestesia; bride_parents: Theodo 32012; license: 5-10-86 Orthodox Sacramental for previously Lady contrected Marriage May 1986 Mt. marriage 10 at of Virgin"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.76,
+      "fields": {
+        "groom_name": "Mark Kulick Orthodox 1st",
+        "bride_name": "Barbarz Fetzko B. Catholic",
+        "date_of_marriage": "10-09-88",
+        "officiant": "Fr. Jous Passell",
+        "witnesses": "Kyve Lewis Robert Telep",
+        "notes": "number: 6; groom_parents: Basil Babaiz; bride_parents: Nicholas Minne; license: Middlesex , N.J. 7 July 1988 9623 Snow Hill , Md Orthodox Marriage . previously Sacramental for contracted civil marriage"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:11.955Z"
+}

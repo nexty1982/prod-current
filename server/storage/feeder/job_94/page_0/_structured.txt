@@ -1,0 +1,17 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 3 | Rows: 11
+
+--- Table 1 (3 columns, 12 rows) ---
+ | - > BIRTHS МЕТРИЧЕСКОЙ КНИГИ МА Счет родив : Иксац ширем . и день Званіе , имя , отчество и фамнага родителей , И какого . . Мужеска Женска Имена родившихся . B'kponenor⭑AAHIA . . ΠΟΑΔ ΠΟΛΑ рожда NIA крепе- HIA NUMBER NAME OF CHILD FULL . MAIDEN RELE BIRTH DATES BAPEESO CITY OF BIRTH FATHER'S NAME MOTHER'S NAME Joseph Adkins 4/10 66 2 Cynthia Ann Ad Kins 4110 | YEAR 93 РОДЪ , ЧАСТЬ ПЕРЕВА , О РОДНЕШИХСЯ . Званіе , имя , отчество и фамиль Кто воспрісминкова . совершаль таинство крашені . FULL NAMES OF SPONSORS PRIEST'S NAME received by Hoy Chrismation on April 10th from " the church of Christ . " Fr. Jous Parsels received by Holy Chrismation on April 10th Fr. Jars from " United Methodist church . " Parsells
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 3 Christophen 4/10 edward Adkins | received by Holy Chrismation on April 10th Fr. Jars дая Parsell from " Christian church "
+ | J Nicholas William 4/10 | Chrismation on April 10th Fn . Jans Parselk received by Holy church "
+ | Adkins | from " Christian on April 10th Fr. Jones Panelle
+ | 5 Angela Joy 14/10 Adkins | received by Holy Chrismation from " Chulstian church " Fr. Jas Parzelk
+ | 6 Daniel Joseph 4/10 | received by Holy Chrismation on April 10th from " Lutheran church- Missoni synod "
+ | Adkins | FA . дая Parsells
+ | 7 1/224/24 Laura ( Larissa ) Ann Hansen Robert Hansen / Tatianz ( Mickell Hansen | Stanley Boziatz Fr. Jones Parrelly
+ | ( Somerville ) 8 4/25 5/29 Nicole Elizabeth Peter Kuline / Shirley ( Jarkowski ) Kulizz | Paul Kuline - Sharogn Fester ( honovery ) Jon Parelly
+ | Kulinz ( 9 4/5 Slaa Nicholas Jacob Robert Kitz / Anastasia ( Nevitt ) Kitz | cynthiz Petro Fr. Panell
+ | ( Somerville Kitz ) | Myra Hunchar Noe Fr. Jaz
+ | 10 5/08 7/24 Alexandra Nicole Long Edward Long / Andrea Hunchan ( Morristown ) | Donald Noe

@@ -1,0 +1,31 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.97,
+      "fields": {
+        "date_of_birth": "DATE",
+        "notes": "Дирол PARISH NAME NAME | . AND | ADDRESS | DATE PLACE AT GOD | NAME NAME | AND | DATE | AT"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_5": "date_of_birth"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_6",
+    "col_7",
+    "col_8",
+    "col_9",
+    "col_10"
+  ],
+  "parsedAt": "2026-02-17T01:50:54.287Z"
+}

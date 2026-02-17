@@ -1,0 +1,41 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "Ифелца штчество и замнал родителей , и родне какого Счеть : и день Званіе има . , , шихся . вероисповедания . | Званіе , има , отчество и фамил воспрієльникова . | Кто совершаль таниство крашені ."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "Мужеска Имена родившихся пола Жонска пола рожде . . . . HIA крефе- HIA"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "NUMBER DATES MALE FEMALE BIRTH BAPTIS OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN NAME В NAME CITY OF BIRTH М А M 8/17 10/27 Madison Mary Scott micheel Klass rbss Catherine w . Kloss Plainsboro , N.J. 2/19/12/08 | Zacharich John James Рек ) Chende 6 Cheade Oqnz Dalit Grigosescu New Brunswick N.J 3 11/01 12/29 Luke Emmanuel Peter Parsells Passells Herther masiе Graven Philadelphic , PA | FULL NAMES OF SPONSORS Daniel Bolohay Dana Bolohen crisdien Gheorghe Grigorescu Richard John weben emily Pareclis | PRIEST'S NAME Fr. Danielskvin Fr. Jones Pursells Fri Jaes Parsells"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:49:47.115Z"
+}

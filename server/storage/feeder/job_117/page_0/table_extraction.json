@@ -1,0 +1,610 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 9,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Lussian Ortzales HM"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Granaria HOHI htt BIRTHS МЕТРИЧЕСКОЙ КНИГИ Н"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "YEAR 2019 ГОДЪ , ЧАСТЬ ПЕРВАМ , О"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "РОДИВШИХСЯ ."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счета родив : Месца шихся . и день",
+              "confidence": 0.77,
+              "token_count": 8,
+              "bbox": [
+                0.07932692307692307,
+                0.18237179487179486,
+                0.15889423076923076,
+                0.22179487179487178
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "штчество и . Фамнага родителей , И Званіе , има , какого вероисповедания .",
+              "confidence": 0.86,
+              "token_count": 14,
+              "bbox": [
+                0.24951923076923077,
+                0.175,
+                0.4658653846153846,
+                0.2298076923076923
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Званіе , имя , отчество и фамил воспрієминкова .",
+              "confidence": 0.91,
+              "token_count": 9,
+              "bbox": [
+                0.5367788461538462,
+                0.1605769230769231,
+                0.6747596153846154,
+                0.20384615384615384
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Кто совершаль таниство крашенім",
+              "confidence": 0.94,
+              "token_count": 4,
+              "bbox": [
+                0.7853365384615385,
+                0.16987179487179488,
+                0.8814903846153846,
+                0.21057692307692308
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Мужеска Имена родившихся PVOU Женска ΠΟΛΑ рожда - . HIA забя . \" . HIA",
+              "confidence": 0.73,
+              "token_count": 15,
+              "bbox": [
+                0.08076923076923077,
+                0.2185897435897436,
+                0.23533653846153846,
+                0.2865384615384615
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "NUMBER DATES NAME OF CHILD",
+              "confidence": 0.99,
+              "token_count": 5,
+              "bbox": [
+                0.08846153846153847,
+                0.2980769230769231,
+                0.2360576923076923,
+                0.32371794871794873
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "FATHER'S FULL NAME . MOTHER'S MAIDEN NAME",
+              "confidence": 0.95,
+              "token_count": 7,
+              "bbox": [
+                0.2675480769230769,
+                0.29583333333333334,
+                0.45625,
+                0.3230769230769231
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "FULL NAMES OF SPONSORS",
+              "confidence": 0.98,
+              "token_count": 4,
+              "bbox": [
+                0.551923076923077,
+                0.2842948717948718,
+                0.6637019230769231,
+                0.29583333333333334
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "PRIEST'S NAME",
+              "confidence": 0.98,
+              "token_count": 2,
+              "bbox": [
+                0.8081730769230769,
+                0.2916666666666667,
+                0.869951923076923,
+                0.3003205128205128
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "M XALE FEMALE BIRTH BAPIESO CITY OF BIRTH M",
+              "confidence": 0.85,
+              "token_count": 9,
+              "bbox": [
+                0.08629807692307692,
+                0.3105769230769231,
+                0.2358173076923077,
+                0.366025641025641
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "\"",
+              "confidence": 0.43,
+              "token_count": 1,
+              "bbox": [
+                0.47451923076923075,
+                0.3387820512820513,
+                0.47716346153846156,
+                0.34134615384615385
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Timothy is adult",
+              "confidence": 0.84,
+              "token_count": 3,
+              "bbox": [
+                0.49759615384615385,
+                0.33942307692307694,
+                0.5975961538461538,
+                0.37948717948717947
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Janez Parsells",
+              "confidence": 0.67,
+              "token_count": 3,
+              "bbox": [
+                0.7639423076923076,
+                0.34102564102564104,
+                0.8692307692307693,
+                0.36762820512820515
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "5/25 Timothy - Zelinski",
+              "confidence": 0.68,
+              "token_count": 4,
+              "bbox": [
+                0.08870192307692308,
+                0.37243589743589745,
+                0.2201923076923077,
+                0.40192307692307694
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Daniel is adult",
+              "confidence": 0.89,
+              "token_count": 3,
+              "bbox": [
+                0.5021634615384616,
+                0.37435897435897436,
+                0.598798076923077,
+                0.40032051282051284
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Jaes Pausells",
+              "confidence": 0.76,
+              "token_count": 3,
+              "bbox": [
+                0.7646634615384615,
+                0.3801282051282051,
+                0.8646634615384615,
+                0.4153846153846154
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "5/25 Daniel 2 Donnelly",
+              "confidence": 0.75,
+              "token_count": 4,
+              "bbox": [
+                0.0889423076923077,
+                0.42596153846153845,
+                0.2204326923076923,
+                0.4653846153846154
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Received by Confession Eucharist / and",
+              "confidence": 0.85,
+              "token_count": 6,
+              "bbox": [
+                0.759375,
+                0.4217948717948718,
+                0.9038461538461539,
+                0.4685897435897436
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3 101 . Steven 15 Parlacoski",
+              "confidence": 0.85,
+              "token_count": 6,
+              "bbox": [
+                0.09158653846153846,
+                0.483974358974359,
+                0.2298076923076923,
+                0.5221153846153846
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Chrismation from Fn R. C. Joes church . Parsells",
+              "confidence": 0.76,
+              "token_count": 9,
+              "bbox": [
+                0.7673076923076924,
+                0.45544871794871794,
+                0.8891826923076923,
+                0.5192307692307693
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 8,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 8,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 8,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "8/09 492812 Genevieve Jith Scranton , PA",
+              "confidence": 0.75,
+              "token_count": 7,
+              "bbox": [
+                0.11658653846153846,
+                0.5560897435897436,
+                0.24302884615384615,
+                0.6128205128205129
+              ]
+            },
+            {
+              "row_index": 8,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Robert Smith Stephanie Coleman",
+              "confidence": 0.89,
+              "token_count": 4,
+              "bbox": [
+                0.26658653846153846,
+                0.5503205128205129,
+                0.35841346153846154,
+                0.6
+              ]
+            },
+            {
+              "row_index": 8,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Marin Torris Austin Recher",
+              "confidence": 0.69,
+              "token_count": 4,
+              "bbox": [
+                0.5069711538461539,
+                0.5394230769230769,
+                0.5985576923076923,
+                0.5817307692307693
+              ]
+            },
+            {
+              "row_index": 8,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": ".Fu . Jues Parselle",
+              "confidence": 0.68,
+              "token_count": 4,
+              "bbox": [
+                0.7673076923076924,
+                0.525,
+                0.8745192307692308,
+                0.5615384615384615
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.04
+    ],
+    "col_2": [
+      0.04,
+      0.2525
+    ],
+    "col_3": [
+      0.2525,
+      0.48
+    ],
+    "col_4": [
+      0.48,
+      0.7125
+    ],
+    "col_5": [
+      0.7125,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.15,
+  "total_tokens": 158,
+  "data_tokens": 138,
+  "data_rows": 8,
+  "extracted_at": "2026-02-17T01:49:48.634Z"
+}

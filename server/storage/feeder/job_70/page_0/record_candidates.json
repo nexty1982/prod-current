@@ -1,0 +1,84 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "HUNGARY ) 29 , 1970 BY CHRISMATION , 22 X 11-16-702-26-10 JOEL JOHN VINCENT ZAKARZEWSKI JOHN ZAKARZEWSKI ( SOMERVILLE , N.J. ) MAUREEN SUSAN WASSEL JOHN ROSOCHA , JR . , SANDRA BENSCOTER REV . ROBERT A. GEORGE LEWIS"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.86,
+      "fields": {
+        "notes": "23x 11-13-70 / 12-36-70 GREGORY ALLEN BRADLEY CHARLES BRADLEY , JOYCE TACAK . HARRY GUSTICH , MICHAEL TACAK , PATRICIA ULMAN REV . ROBERT A. GEORGE LEWIS"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.86,
+      "fields": {
+        "notes": "124 12-5-70 1-10-71 ( 3OMERVILLE JENNIFER , N.J. ) ( THEODORA DORA ) CHARLES FETCHKO 9 , JR ; ROSE ROMERO MICHAEL FETCHKO , ADRINA ROMERO REV . ROBERT A. GEORGE LEWIS"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.82,
+      "fields": {
+        "notes": "FETCHKO 25x ( SOMERVILLE , N.T. )"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "notes": "5-11-46-1-41 THOMAS RICHARDSON FRANK FRANK RICHARDSON CATHERINE GAFFIGAN RECEIVED THE ROMAN INTO CATHOLIC THE HOLY CHURCH ORTHODOX WHERE CHURCH , HE WAS FROM REV . ; ROBERT A. GEORGE LEWIS"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "PENNA PHILIPSBURG , ) , BAPTIZED CHRISMATION ON 26 ON JUNE 1 , EASTER 1941. SUNDAY RECEIVED BY X , APRIL 18 ,"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "4-1-435-2-43 ( MARIA MAUREEN A. 1971 . MARINI ) GIUSEPPE MARINI ; GIOVANNINA RUSSO RECEIVED INTO THE HOLY ORTHODOX CHURCH REV . ROBERT A. GEORGE LEWIS FROM THE ROMAN CATHOLIC CHURCH , WHERE SHE"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "RARITAN , NT ) WAS CHRISMATION BAPTIZED ON ON MAY EASTER 2 , 1943 SUNDAY , RECEIVED BY , APRIL 1971 18 , ."
+      },
+      "sourceRowIndex": 8,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2"
+  ],
+  "parsedAt": "2026-02-17T01:48:06.103Z"
+}

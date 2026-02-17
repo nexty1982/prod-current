@@ -1,0 +1,43 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.75,
+      "fields": {
+        "groom_name": "Scott Joseph Nagele Washington Township N.J. 24 Roman Catholic",
+        "bride_name": "Ameruda Savch Manville , N.J 34 Orthodox",
+        "date_of_marriage": "July 10",
+        "officiant": "For Parell Jas",
+        "witnesses": "Eric Nagele Katherine markerich",
+        "notes": "groom_parents: Robert Kathleen; bride_parents: Robert stray; license: 6-28-2011 MC 29-2011"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.77,
+      "fields": {
+        "groom_name": "Christopher Michel Brooks No. Brunswick , NJ 25 Roman Catholic",
+        "bride_name": "Catherine Gorbztuk Manville , NJ . 25",
+        "date_of_marriage": "July 17",
+        "officiant": "Fr. да Pards",
+        "witnesses": "Timothy Gorbetun Rebeca Gorbitay",
+        "notes": "number: 2; groom_parents: Ronald C2101; bride_parents: Peter Suszy; license: 7-08-2011 11-134"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:21.202Z"
+}

@@ -1,0 +1,273 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 10,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "22901 ) BAPTISMS NO alice NAME 1 Kubica FATHER'S ( artzog PART RECORD PARISH OF CHILD Mary OF PARENTS Jadal . NAME NAME AND 22905 ) BAPTISMS hyo NAME - 1 умерт mads тал RECORD Helen Roman CHILD OF PARENTS OF"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Arc ) NAME MOTHER'S 1 ( # ) NAME FATHER'S ( ( Chabal MOTHER'S Mary"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": ") STATE 1951 , . CITY . 28 STREET AND NUMBER ( нечче ADDRESS ) , ave STATE CITY , 3nd STREET AND . 1445 NUMBER ( Boro"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "OF BIRTH DATE 1920 april BIRTH OF"
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "RECTOR ( STAT Caul ) alle Th + ) BY CHURCH ( CITY ( Fotel AND BAPTISM Peter OF St. BIRTH OF Michael PLACE PARENTS PERFORMED DATE CONFIRMATION . GOD SACRAMENTS Rev. AT , 1920 ) , 15 bundle RECTOR STATE ( april Paul ) Barnaky Samuel Galah BY ) D Zeonela ( CITY ( AND \" CHURCH BAPTISM Peter Manville BIRTH PERFORMED Zarie OF CONFIRMATION OF PARENTS SACRAMENTS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "22902 ° BAPTISMS N Greuther ett ) NAME ( 1 FATHER'S PART RECORD CHILD PARISH OF PARENTS OF NAME NAME 22903 BAPTISMS LO NAME 1 PART RECORD Michael Jacob ther ) Gr FATHER'S ( . CHILD PARENTS OF PARISH OF"
+            },
+            {
+              "row_index": 0,
+              "column_index": 7,
+              "column_key": "col_8",
+              "content": ") NAME Ave MOTHER'S ( Pau Leghorn 79 77 . AND ADDRESS ) STATE , ) NAME CITY , MOTHER'S STREET ( Legho AND 79 NUMBER ди . Paulin ADDRESS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 8,
+              "column_key": "col_9",
+              "content": "n.g , 1947 9-1951 20 AND BIRTH may OF BAPTISM OF DATE DATE 1942 1949 , 12 9-1951 ( BIRTH OF"
+            },
+            {
+              "row_index": 0,
+              "column_index": 9,
+              "column_key": "col_10",
+              "content": "( STATE luck RECTOR Paul , ) BY CHURCH ) Gre J. Kery ( ( CITY Peter . Lypy . BIRTH PERFORMED CONFIRMATION SS Manville Peter OF Nicholas . AT PLACE PARENTS GOD Mary SACRAMENTS Rev. ) Furyluke RECTOR NJ STATE ( ther AND Dec. Paul , Gr ) * BY ) CHURCH ( CITY ( Spy choles . BAPTISM Peter Somerville BIRTH PERFORMED Nic OF OF DATE CONFIRMATION St. . PLACE PARENTS GOD Mary SACRAMENTS Rev."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Дирол PARISH NAME NAME",
+              "confidence": 0.9,
+              "token_count": 4,
+              "bbox": [
+                0.12524038461538461,
+                0.7554487179487179,
+                0.2230769230769231,
+                0.8099358974358974
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": ". AND",
+              "confidence": 0.94,
+              "token_count": 2,
+              "bbox": [
+                0.24951923076923077,
+                0.7769230769230769,
+                0.25408653846153845,
+                0.7977564102564103
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "ADDRESS",
+              "confidence": 0.93,
+              "token_count": 1,
+              "bbox": [
+                0.2848557692307692,
+                0.7516025641025641,
+                0.2901442307692308,
+                0.7961538461538461
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "DATE",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.3266826923076923,
+                0.7676282051282052,
+                0.3317307692307692,
+                0.7919871794871794
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "DATE PLACE AT GOD",
+              "confidence": 0.99,
+              "token_count": 4,
+              "bbox": [
+                0.36177884615384615,
+                0.7548076923076923,
+                0.4310096153846154,
+                0.7891025641025641
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "NAME NAME",
+              "confidence": 0.99,
+              "token_count": 2,
+              "bbox": [
+                0.5903846153846154,
+                0.7628205128205128,
+                0.6139423076923077,
+                0.7907051282051282
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 7,
+              "column_key": "col_8",
+              "content": "AND",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.6389423076923076,
+                0.7663461538461539,
+                0.6442307692307693,
+                0.7858974358974359
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 8,
+              "column_key": "col_9",
+              "content": "DATE",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.7134615384615385,
+                0.7573717948717948,
+                0.7192307692307692,
+                0.7817307692307692
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 9,
+              "column_key": "col_10",
+              "content": "AT",
+              "confidence": 0.98,
+              "token_count": 1,
+              "bbox": [
+                0.7725961538461539,
+                0.7666666666666667,
+                0.7776442307692307,
+                0.7782051282051282
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0625
+    ],
+    "col_2": [
+      0.0625,
+      0.235
+    ],
+    "col_3": [
+      0.235,
+      0.2675
+    ],
+    "col_4": [
+      0.2675,
+      0.31
+    ],
+    "col_5": [
+      0.31,
+      0.3475
+    ],
+    "col_6": [
+      0.3475,
+      0.5125
+    ],
+    "col_7": [
+      0.5125,
+      0.625
+    ],
+    "col_8": [
+      0.625,
+      0.6775
+    ],
+    "col_9": [
+      0.6775,
+      0.745
+    ],
+    "col_10": [
+      0.745,
+      1
+    ]
+  },
+  "columns_detected": 10,
+  "header_y_threshold": 0.7678205128205128,
+  "total_tokens": 345,
+  "data_tokens": 17,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:50:54.271Z"
+}

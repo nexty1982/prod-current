@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+ |  |  |  |  | 
+ |  |  |  |  | 
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+PLACE AGE OF NUMBER NAME FULL RESIDENCE PLACE AGE OF NUMBER NAME MARRIED 1 ( FULL 2 ( | BIRTH GROOM . 18 Washington App арг , 1917 , OF PREVIOUS MARRIAGES Farming PARENTS and Joseph first OF Elizabeth Dum Lacricio Helen инт NAME OF BRIDE Manville . ( NUMBER AND STREET ) ( CITY ) OF BIRTH BRIDE March 30 , 1921 first OF PREVIOUS MARRIAGES OF Marchuk PARENTS . Michael and and Bethsa IN PRESENCE OF WITNESSES : NAME ) ( FULL NAME ) ( ( RECTOR ) | DC . Marchuck N ( STATE ) Eva RESIDENCE ) RESIDENCE )
+FULL RESIDENCE AGE PLACE NUMBER NAME and FULL RESIDENCE PLACE AGE NAME NUMBER char MARRIED 1 ( 2 ( | PART II - MARRIAGES PARISH RECORD N : NAME OF GROOK GROOM Harry W. Peck 106 Fairview ave . Somers ( NUMBER AND STREET Elizabeth ) ( CITY ) OF OF GROOM BIRTH May 28 Katherine Harry , 1913 . OF PREVIOUS MARRIAGES First OF PARENTS , Freund Peck NAME OF 106 BRIDE Olga Fairview are ( NUMBER AND Jersey STREET ) OF BIRTH City ( CITY ) OF BRIDE . J OF OF PARENTS PREVIOUS MARRIAGES and first and Ama ka IN PRESENCE OF WITNESSES : FULL NAME ) ( FULL NAME ) ( ( RECTOR ) | 40975 . M .. NJ ( STATE ) , Kuchary somer . n . 7.1 ( STATE ) Ru- RESIDENCE ) RESIDENCE )

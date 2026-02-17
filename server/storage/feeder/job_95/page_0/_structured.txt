@@ -1,0 +1,10 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 4
+
+--- Table 1 (4 columns, 5 rows) ---
+ | Счеть родив шихем . и . Мужеска пола -жоб . . Женска пола HIA FEMALE BIRTH DATES XALE NUMBER M А | HOM OHI BIRTHS МЕТРИЧЕСКОЙ КНИГИ Н Мкелца и . » родителей , и день Званіе , има , штчество фамилі Имена родившихс в кроисповеданія . креме- . нім BAPTISM . MOTHER'S NAME OF CHILD FATHER'S FULL NAME MAIDEN CITY OF BIRTH т | YEAR 13 ГОДА , ЧАСТЬ ПЕРЕНА , ПО РОДИВШИХСЯ . какого Званіе , имя , отчество и фамил Кто совершаль таинство воспоминков . крошенія .. NAME FULL NAMES OF SPONSORS PRIEST'S NAME the Anglican confession by Parselk
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 11 . | Margaret Cuyler | received from Holy Chrismation by Fr. Janes Parsells Fr. Jas
+ |  | Timally Pericins Jan Peicins Margaret ruyler | December 19 , 1993 ол received from the Anglican con confession Parsells by Fr. Jas Passella Janes
+ | 12 . | Albeat Azbolozu | Holy Chrismation by Fr. On December 19 , 1993 confession FA дать Pasella .
+ | 13 . | ( Pentelerimon ) | received from the Roman Catholic by Holy Choisiertion by Fui Javes Parsells on December 19 , 1993

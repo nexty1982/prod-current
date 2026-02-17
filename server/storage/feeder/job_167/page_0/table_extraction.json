@@ -1,0 +1,191 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "9377 Kulina Kulina Rd ) . 1959 229 , ) 16 Nov. STATE ( August / Paul1 bedz RECTOR , . ) STATE : Baykowski NAME CITY , BAPTISMS NO 1959 , - Joseph PETER 1 MOTHER'S STREET N.✓ 31 ( AND Hosp Le and bedz ) Eday CHURCH ) ( BAPTISMS Peter Brunswick Le BY CITY ( 1 . ( PART RECORD Paul John CHILD PARISH OF PARENTS OF NAME NAME Natalis ulina Camplain 1115 NUMBER A AND BIRTH OF AND ADDRESS Manvill Peter's DATE St. BAPTISM New OF . BIRTH OF Joseph PLACE PARENTS Nadia PERFORMED PART DATE CONFIRMATION Sts . AT GOD SACRAMENTS Hephen Ces ) 9380 u ) N.J 59 RECTOR ( 1959 STATE , ) ) BAPTISMS No Am NAME Kulina STATE NAME CITY , 0 STREET - AND 1 ( MOTHER'S BAPTISMS PART RECORD Dorothy • Alexan FATHER'S ELO ) rs CHURCH runsw ) BY ( ( ( CITY NUMBER AND Ku ( . CHILD PARISH OF PARENTS BIRTH BIRTH OF BAPTISM SAda OF Cyriti OF CONFIRMATION Sis OF Ann PERFORMED ADDRESS PLACE PARENTS SACRAMENTS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": ". 9378 Kulina Kulina usk Rd RECTOR ) , 1959 . 195 , 31,1959 Paul LN STATE , ) NO John ) CITY , NAME NAME 31 FATHER'S ( RECORD PETER PETER losp 16 John Bay MOTHER'S ( amplain STREET AND N.J. Aug 16/1959 and nswick ) Kachek Nachek BY CHURCH Adamer ( July ( AND . BAPTISM NEW Rachek CHILD OF PARENTS 1115 NUMBER BIRTH OF OF PETER'S NAME NAME Natalie AND Kulina ADDRESS Manville S OF DATE CONFIRMATION PETER BRUNSWIC + BURTH harles PERFORMED S OF . PARISH AT PLACE PARENTS Stephania GOD SACRAMENTS Stephen DATE St. REV ) RECTOR 9379 BARNE ) , ) ) auer STATE . , No Richard Barvosky STATE . NJ Hosp 28-195-9 Pai 0 h B. ep NAME NAME th Av CITY 0 STREET 10 an ) ) ( AND Hd 1 ( PART RECORD James FATHER'S ( Jane MOTHER'S P BY 60 and Aclarais AND er CHURCH ( CITY ( NUMBER CHILD PARENTS OF PARISH OF . NAME NAME Beverly AND Barnosky 12450 ADDRESS Maaville Some Mich ichae BIRTH OF Domers BAPTISM Pete BIRTH aro PERFORMED Stephen OF OF DATE DATE CONFIRMATION St. Red . AT PLACE PARENTS GOD SACRAMENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "NAME Onuschak NAME AND ND DATE DATE . Onuschak AT GOD | 9382 Onuschak Brunsw 959 Fedorchak RECTOR ) STATE STATE ( ,",
+              "confidence": 0.9,
+              "token_count": 23,
+              "bbox": [
+                0.19591346153846154,
+                0.6163461538461539,
+                0.5278846153846154,
+                0.7826923076923077
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "9381 . Andrews AndrewS Comerville 1959 1959 BARRE . Pa 1959 Paul Pa BaRRE Adamcio RECTOR WiTHES . ) St STATE ) STATE , 27 ( ' King , ) CITY",
+              "confidence": 0.83,
+              "token_count": 31,
+              "bbox": [
+                0.5829326923076923,
+                0.6362179487179487,
+                0.9117788461538462,
+                0.7628205128205128
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS NO Susan NAME ) NAME CITY Oct 11 ) FATHER'S Karel MOTHER'S New , STREET and CHURCH Bruns ame ' AND BY - Ept ) CITY Stephen (",
+              "confidence": 0.86,
+              "token_count": 29,
+              "bbox": [
+                0.16706730769230768,
+                0.7217948717948718,
+                0.5209134615384615,
+                0.816025641025641
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "BAPTISMS No Thomas Basil ) NAME FATHER'S Pavelchak NAME MOTHER'S MERCER , STREET Ept Sept AND Hosp and NUMBER Wilkes CITY NEIShε BY ) Andrew PERFORMED Stephen ( ( ( AND 1",
+              "confidence": 0.88,
+              "token_count": 32,
+              "bbox": [
+                0.5538461538461539,
+                0.7173076923076923,
+                0.9081730769230769,
+                0.816025641025641
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1 PART RECORD Joanne PARENTS ( Tatiana NUMBER Middlesex BAPTISM AND εtεR ( εw ( SACRAMENTS PERFORMED Ad PARISH CHILD BIRTH Susa . ( BIRTH NAME OF OF NAME ADDRESS DATE CONFIRMATION PARENTS RE√S OF DATE OF OF . AND PLACE . AT GOD",
+              "confidence": 0.91,
+              "token_count": 44,
+              "bbox": [
+                0.16899038461538463,
+                0.7727564102564103,
+                0.5199519230769231,
+                0.9041666666666667
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "PART RECORD CHILD PARENTS Julia Andrei 170 PETER ( 57 PARISH BIRTH OF OF ADDRESS Apt OF MERCY BAPTISM DATE OF DATE CONFIRMATION STE BIRTH OF NAME NAME AND AT PLACE PARENTS VERA SACRAMENTS REJ . GOD \"",
+              "confidence": 0.88,
+              "token_count": 38,
+              "bbox": [
+                0.5579326923076923,
+                0.7721153846153846,
+                0.9076923076923077,
+                0.8974358974358975
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0825
+    ],
+    "col_2": [
+      0.0825,
+      0.54
+    ],
+    "col_3": [
+      0.54,
+      1
+    ]
+  },
+  "columns_detected": 3,
+  "header_y_threshold": 0.6267948717948718,
+  "total_tokens": 577,
+  "data_tokens": 197,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:51:26.433Z"
+}

@@ -1,0 +1,148 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "GODPARENTS : JOHN BOBER AND KVA BOBER THRUDORK LABOWSKY | GODPARENTS : JOHN DIGGENS AND BARBARA DIGGENS SACRAMENTS S By : FATHER THEODORE LABOWSKY"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.86,
+      "fields": {
+        "notes": "SACRAMENTS BY : FATHER | 37381 JOAN BALOGH - DAUGHTER OF"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.86,
+      "fields": {
+        "notes": "LASZLO AND JOAN ( BALOGH ) HRINIAK REST MAIN ST . , GLEN GARONER , N. J"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.76,
+      "fields": {
+        "notes": "Joan Balogh | BORN : MAY 14 , 1867 - PHILLIPSBURG , N.J. BAPTISM & CHRISMATION : JULY 2 , 1867 , HANVILLE"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "married outside of | 55. PETER AND PAUL CHURCH GOD PARENTS : ROBERT BELL AND GLORIA ANN HRINTAR"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.79,
+      "fields": {
+        "notes": "Othodox Church | SACRAMENTS BY : FATHER THEODORE LABOWSKY 37382 ELIZABETH ELIK DAUGHTER OF"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "notes": "August , 1983 | Nicola AND DRAGITSA ELIK RESIDENCE : 104 104 LAST STREET , BOUND BROOK"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.59,
+      "fields": {
+        "notes": "at | BORN : AUGUST 28 , 1967 1 SOMERVILLE , W.J BAPTISM & CHRISMATION : OUT 15 , 1967 , MANILLE , N.J"
+      },
+      "sourceRowIndex": 8,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "notes": "Ss . Philp + Jones Church | SS . PETER AND PAUL CHURCH"
+      },
+      "sourceRowIndex": 9,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "in Phillipsburg , N.J | CUDPARENTS : ZIVKO . AND PENKA FLIK SACRAMENTS BY : FATHER THEODORE LABOWSKY"
+      },
+      "sourceRowIndex": 10,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.79,
+      "fields": {
+        "notes": "# 31383 OM PATRICIA ( LYNN ) PHILLIPS ( - DAUGHTTA 47 M.N )"
+      },
+      "sourceRowIndex": 11,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.66,
+      "fields": {
+        "notes": "ANDROW AND AND ANASTASIA ( ADAMSHAK ) Peps RES : 2 FROWERY LANE BART RANCHOURS , Somerville"
+      },
+      "sourceRowIndex": 12,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.65,
+      "fields": {
+        "notes": "BORN ! сетовет L 1 1967- SOMERVILLE , MD BANTIAM & execSMATION ) OCTOBER 22 , 1967 GOS PARENTS : THEODORE ADAMCHAR"
+      },
+      "sourceRowIndex": 13,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.67,
+      "fields": {
+        "notes": "SACRAMENT VERONICA MINISTER OF ; Father Theodore"
+      },
+      "sourceRowIndex": 14,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.51,
+      "fields": {
+        "notes": "Labowsky"
+      },
+      "sourceRowIndex": 15,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:50:10.200Z"
+}

@@ -1,0 +1,49 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "Счета родив Мксац Званіе има штчество и рамна родителей . , шихся . и день , , вкроисповедания . Званіе , има , отчество и фамилі Имена родившихся воспріємникова . | Кто совершаль таинство крашені .."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "Мужеска . . пола Женска . пола рожда HIA KOELPE- ні"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.96,
+      "fields": {
+        "notes": "NUMBER FEMALE DATES MALE BIRTH BAPTISM NAME OF CHILD FATHER'S FULL NAME MOTHER'S . MAIDEN В NAME А FULL NAMES OF SPONSORS CITY OF BIRTH | PRIEST'S NAME"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.76,
+      "fields": {
+        "notes": "дыа Mauk ( Tyler ) Mark Ryan - Ayan Ryan Samuel Fede Morristonn N.J. Linda Cowell al , Lisa Ann Ayan 91 | Fr. Jans Parselk"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:48:53.120Z"
+}

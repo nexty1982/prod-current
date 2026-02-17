@@ -1,0 +1,49 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "AND CHRISMATION AT - SS . PETER & PAUL CHURCH PLACE OF BIRTH PLAINFIELD , N.J. GODPARENTS CHARLES HALL SONYA SoBohowski SACRAMENTS ADMINISTERED - Father therever Labously"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "No 2 37352 | SUZANNE MARIE BALDAN ZA NAME OF PARENTS VINCENT J. BALDANIA -- ELIZABETH ( PALEY ) BALDANIA ADDRESS 17 NORTH 12 TH Avera MANVILLE N.J. PLACK OF BIRTH SOMERVILLE NJ DATE of BIRTH NOVEMBER 24,1862 - DATK OF BAPTIST of CHRISMATION DECEMBER 16 , 1962 - AT _ 55. PETER & PAUL CHURCH GODPARENTS SYLVESTER Hung - HELEN MCCLOSKEY"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.67,
+      "fields": {
+        "notes": "SACRAMENTS ADMINISTERED Father Theme . fas wording y"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.43,
+      "fields": {
+        "notes": "2"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:49:53.805Z"
+}

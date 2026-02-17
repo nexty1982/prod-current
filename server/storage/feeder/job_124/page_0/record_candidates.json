@@ -1,0 +1,121 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.73,
+      "fields": {
+        "notes": "Thundre JEAN Father fabawaly 3/27/90 Date | SACRAMENTS BY : Father thembra Formuely valy TE 18083 PIONYSIUS ( DENNIS ) JOSIFOVICH Sca OF"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "Dear Father : I am sending you the information listed below for entry in your Baptismal Register . May I ask that you be kind enough to acknowledge receipt of this notice by signing | TRACKO JOSIFONICA • 6 FREDA ( KULLMAN ) Josifoviva 144. LINCOLN AVE . , SOMERVILLE MJ"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "N it and returning it to me . NAME Robert Andrew Phillips OF Ss . Peter and Paul | с BEAN MARCH 31 , 31,1965 1965 NEW BRUNSWICK"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "BAPTIZED IN THE CHURCH CITY Manville , N. J. STATE Ruille May 2 1965 ..... , | BAPTISY & CHRISMATION Jshy 4,1965 Risto"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "DATE CONTRACTED MARRIAGE WITH | GOD PARENTS PETER ANASTASIA BLAYBA"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "NAME ... Margaret Mary Kirkpatrick Adams AT THE CHURCH OF Chapel ( Rutgers Univ ) HATC New Brunswick STATE N. J. T | SACRAMENTS By : Father Theodore Lab"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "CITY DATE OF MARRIAGE 4/24/90 PRIEST Rev. Blaise Baran | ( 7 ) 18054 DIANNE JOSIFOVICH DAUGHTER 70"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "I HAVE RECORDED THE ABOVE Form C 201 R 73 - Jefferies & Manz Inc. , Phila . , Pa . 19125 | ATRAIK JOSIFOVICH & FREDDY ( ( KULLMAN ) JOSIFOVICA"
+      },
+      "sourceRowIndex": 8,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.73,
+      "fields": {
+        "notes": "THOMAS RIETRY'S 6 DIANNE ( WishOSKI ) KIETRYS 126 JEROME Ave. , So. BOUND BROOK BORN JUNE 8,1965 BAPTISM NEW & CHARISMATION BRUNSWICK JUNE GOD PARENTS JOHN WAS WISLOSKI 19,1965 CAROLE , TOWSKI | 144. LINCOLN AVE . , N.J. i BORN - MAY 25 , 1959 NEW BRUNSwiek BAPTIS.Y & CHRISMATION July 4 , 1965 GODPARENTS PETER RISTO ANASTASIA SACRAMENTS BY Father than MAY BAD Faberway"
+      },
+      "sourceRowIndex": 9,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "notes": "SACRAMENTS ( 4 ) BY -- Father Thane Sasualy | 8 ( THERESA ) CHARISSIA | BRABSON - DAUGHTER OF Jait BRADSon"
+      },
+      "sourceRowIndex": 10,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "37373 STEPHEN STEPHEN DAVID HARAN SKIRZANSKI SKIRZENSKI 940 & AVT ANN MARIA - Son . ( LASIK ) OF MANVILLE SKIRZENSKI | 18015 AND VERA ( CARONEY ) BRABSON NEW ROAD , MONMOUTH JET N.J. BORN JUNE 17 , 1965 - Now Brunswick , NJ -"
+      },
+      "sourceRowIndex": 11,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.72,
+      "fields": {
+        "notes": "BORN APRIL DAPTISM 28 & CHRISMATION , 1965 SOMERVILLE , N.J - COD PARENTS JUNE 20,1965 , M.J - SACRAMENTO : NATALIE MicHtAsh By Father ZEBAN D. the LASIK holy | BAPTISH & CHRISMATION -- July 17,1965 GOD PARENTS NESTOR CARNEY ELIZABETH CARNEY SACRAMENTS B4 Father Thembel Labawaly"
+      },
+      "sourceRowIndex": 12,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0.8,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:50:04.133Z"
+}

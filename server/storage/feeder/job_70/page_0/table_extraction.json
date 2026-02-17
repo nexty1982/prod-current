@@ -1,0 +1,284 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 9,
+      "column_count": 2,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Hand HISTPHIECKO EHHPH HA YEAR 1970 ГОДА , ЧАСТЬ H 1971 ПЕРЕИМ , ПО РОДИВШИХСМ . Счет родив : Мксац шихем . И день Званіе има , И , штчество и . замна родителей , КАКОГО - Имена родившихся в кроисповеданім . Званіе , има , отчество и фамилі . . . . Кто совершаль таинство Мужеска ΠΟΑΔ Женска пола рожд NIA алабы HIA воспрівникова . крошенія . NAME OF MALE NUMBER BIRTH DATES CHILD . MAIDEN FEMALE BAPTISM CITY OF BIRTH FATHER'S FULL NAME MOTHER'S NAME FULL NAMES OF SPONSORS PRIEST'S NAME 20x 7-21-709-19-70 JAMES MICHAEL JOHN J. BOWEN , MARY ANN WARCHOLA BOWEN WILLIAM WARCHOLA , CATHERINE MAXIMIAK . N.J. REV . ROBERT ( PLAINFIELD , ) A. GEORGE LEWIS 21 X 5-5R 1903 JOSEPHINE FEDCHIN KUBAS ANTHONY KUBAS , ANTONINA PRON ' ( PRUCHNIK , AUSTRIA- RECEIVED BYZANTINE INTO CATHOLIC THE Holy CHURCH , ORTHODOX ON SUNDAY CHURCH , FROM NOVEMBER THE REV . ROBERT A. GEORGE LEWIS"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "HUNGARY ) 29 , 1970 BY CHRISMATION , 22 X 11-16-702-26-10 JOEL JOHN VINCENT ZAKARZEWSKI JOHN ZAKARZEWSKI ( SOMERVILLE , N.J. ) MAUREEN SUSAN WASSEL JOHN ROSOCHA , JR . , SANDRA BENSCOTER REV . ROBERT A. GEORGE LEWIS",
+              "confidence": 0.84,
+              "token_count": 39,
+              "bbox": [
+                0.051682692307692304,
+                0.4669871794871795,
+                0.9300480769230769,
+                0.5567307692307693
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "23x 11-13-70 / 12-36-70 GREGORY ALLEN BRADLEY CHARLES BRADLEY , JOYCE TACAK . HARRY GUSTICH , MICHAEL TACAK , PATRICIA ULMAN REV . ROBERT A. GEORGE LEWIS",
+              "confidence": 0.86,
+              "token_count": 27,
+              "bbox": [
+                0.051923076923076926,
+                0.5701923076923077,
+                0.9314903846153846,
+                0.6198717948717949
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "124 12-5-70 1-10-71 ( 3OMERVILLE JENNIFER , N.J. ) ( THEODORA DORA ) CHARLES FETCHKO 9 , JR ; ROSE ROMERO MICHAEL FETCHKO , ADRINA ROMERO REV . ROBERT A. GEORGE LEWIS",
+              "confidence": 0.86,
+              "token_count": 32,
+              "bbox": [
+                0.04903846153846154,
+                0.6125,
+                0.9459134615384616,
+                0.6852564102564103
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "FETCHKO 25x ( SOMERVILLE , N.T. )",
+              "confidence": 0.82,
+              "token_count": 7,
+              "bbox": [
+                0.050721153846153846,
+                0.6746794871794872,
+                0.23197115384615385,
+                0.7246794871794872
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "5-11-46-1-41 THOMAS RICHARDSON FRANK FRANK RICHARDSON CATHERINE GAFFIGAN RECEIVED THE ROMAN INTO CATHOLIC THE HOLY CHURCH ORTHODOX WHERE CHURCH , HE WAS FROM REV . ; ROBERT A. GEORGE LEWIS",
+              "confidence": 0.92,
+              "token_count": 30,
+              "bbox": [
+                0.10408653846153847,
+                0.7176282051282051,
+                0.9382211538461539,
+                0.783974358974359
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PENNA PHILIPSBURG , ) , BAPTIZED CHRISMATION ON 26 ON JUNE 1 , EASTER 1941. SUNDAY RECEIVED BY X , APRIL 18 ,",
+              "confidence": 0.9,
+              "token_count": 23,
+              "bbox": [
+                0.05024038461538462,
+                0.7737179487179487,
+                0.7362980769230769,
+                0.8330128205128206
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "4-1-435-2-43 ( MARIA MAUREEN A. 1971 . MARINI ) GIUSEPPE MARINI ; GIOVANNINA RUSSO RECEIVED INTO THE HOLY ORTHODOX CHURCH REV . ROBERT A. GEORGE LEWIS FROM THE ROMAN CATHOLIC CHURCH , WHERE SHE",
+              "confidence": 0.9,
+              "token_count": 34,
+              "bbox": [
+                0.10360576923076924,
+                0.8166666666666667,
+                0.9341346153846154,
+                0.892948717948718
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 8,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 8,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 8,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "RARITAN , NT ) WAS CHRISMATION BAPTIZED ON ON MAY EASTER 2 , 1943 SUNDAY , RECEIVED BY , APRIL 1971 18 , .",
+              "confidence": 0.88,
+              "token_count": 24,
+              "bbox": [
+                0.15985576923076922,
+                0.8919871794871795,
+                0.7548076923076923,
+                0.9599358974358975
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0225
+    ],
+    "col_2": [
+      0.0225,
+      1
+    ]
+  },
+  "columns_detected": 2,
+  "header_y_threshold": 0.4739102564102564,
+  "total_tokens": 377,
+  "data_tokens": 216,
+  "data_rows": 8,
+  "extracted_at": "2026-02-17T01:48:06.057Z"
+}

@@ -1,0 +1,13 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 7 | Rows: 7
+
+--- Table 1 (7 columns, 8 rows) ---
+ | Счета шихем NUMBER | H HOHI BIRTHS МЕТРИЧЕСКОЙ КНИГИ П родив : МКСАЦ и . замна родителей , И , . И день Званіе , има штчество какого Имена родившихся в кроисповедания . DATES NAME NAME OF CHILD FATHER'S FULL NAME . MOTHER'S MAIDEN BIRTH | YEAR ГОДА , ЧАСТЬ ПЕРКАМ Званіе , имя , отчество воспріблинкова FULL NAMES OF | 2000 , И РОДНЕШИХМ и фамилі . SPONSORS | Кто совершаль таинство крашені . PRIEST'S NAME | 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ |  | BHAT BAPTISM CITY OF | Nellie Buranove | Levan Chuelidze | Fr. Jones Pawells | 
+ |  | 10/10 3/04 Nicole Biancz Sengay + Galina Melnikov 1995 2000 Melnikor | Nellie Baranovi z | Levan Chuelidze | F. Jues Parells | 
+ |  | 2 6/07/3/09 Isabel Eve Sergy Galina Melnikow |  |  |  | 
+ |  | 1998 2000 Melnikov |  |  | Fr. Jas Panelle | 
+ | 3 | Michael Received into Orthodoxy by 4 / 23 / Communion and Chrisential |  |  |  | 
+ |  | 2000 Redmond Confession , from the Anglican community |  |  | F = Jas Panelle | |
+ | J | 12/24 Robert Ekman Received into Orthodoxy by Confession , Communion and Chrisnation from He Moravian community | Austin Kacher |  |  | D

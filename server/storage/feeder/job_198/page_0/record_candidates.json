@@ -1,0 +1,40 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.85,
+      "fields": {
+        "groom_name": "8 George Hadzitheodorou",
+        "bride_name": "Lei Su",
+        "date_of_marriage": "Oct",
+        "notes": "groom_parents: John; bride_parents: Zhengli"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.8,
+      "fields": {
+        "groom_name": "watching , N.J. 1st . Orthodox 38",
+        "bride_name": "Edison , N.J. 1st Ondradox 46",
+        "officiant": "Fr. Jas Pavels",
+        "witnesses": "Edward Sarchision Anthoula Qvicero",
+        "notes": "groom_parents: Helen; bride_parents: Qingmei; license: Sept. 29 , 1917 witchung , N.J. # 17-16"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:23.621Z"
+}

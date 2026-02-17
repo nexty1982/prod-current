@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "PART 1 BAPTISMS\nPARISH RECORD N° 37399\nNAME OF CHILD4\nLD David James Riegler\nNAME OF PARENTS\nAND.\nDouglas Joseph Riegler\nDaria\n(FATHER'S NAME)\nHolovach\n(MOTHER'S NAME)\n504 Washings\nADDRESS Mannington "
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:51:50.613Z"
+}

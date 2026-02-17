@@ -1,0 +1,40 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "Jakowlen H. RECTOR 937 ) Eugenia Jakowlew Blvd Brunswick 1958 Hosp 1959 Paul kowlew ) STATE 5 , Brunswick ) Ja VonspReckelsen educa ние , CITY | BAPTISMS 9375 Rynkievien Peter St. N.J. 1959 No Front Hosp , N.J. Adamero RECTOR 1 ) Allen STATE 1959 # Flaul STATE ) FRizen une ( , ) NAME CITY , ,"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "BAPTISMS No ) ( Jeanne NAME Sarkozy NAME Johns MOTHER'S Jakowtew FRANKlin , FATHER'S STREET , 18 Middlesex July d AND Peter ) Holly AND CHURCH Walter BY - ( NUMBER ( New ( PERFORMED 1 Dec Hephan | RECORD Mark Anthony Rynkievies Fedak MOTHER'S Rynkievich W. STREET Plainfield 23 AND Plainfield ( NUMBER May AND Andrew FRIzen BY 1 PART 681 PERFORMED Stephen . ("
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.94,
+      "fields": {
+        "notes": "PART RECORD CHILD PARENTS Emma 168 ( New BIRTH BAPTISM PARISH OF NAME OF NAME AND ADDRESS DATE DATE CONFIRMATION Sts BIRTH PARENTS ETHYL OF OF OF PLACE SACRAMENTS Red . . AT GOD | CHILD PARENTS Vera BIRTH Muhlenberg PARISH BAPTISM OF NAME OF NAME ADDRESS OF DATE OF DATE CONFIRMATION Sisleter BIRTH . OF PARENTS Rose AT PLACE SACRAMENTS Rev . AND . GOD"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:51:24.642Z"
+}

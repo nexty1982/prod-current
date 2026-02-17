@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "PART 1 BAPTISMS\nPART 1-BAPTISMS\nPARISH RECORD\nNAME OF CHILD\nNAME OF PARENTS\nNO 31234\nRonald Leonard\nLeonard Edward\nCichalski\nAND.\nOlga\nADDRESS\n(FATHER'S NAME)\nPopovich\n(THER'S\nR'S NAME)\n390 Manville H"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:35.783Z"
+}

@@ -1,0 +1,48 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.96,
+      "fields": {
+        "notes": "PART CHILD PARENTS MARA 639 BIRTH BAPTISM CONFIRMATION BIRTH PARENTS RENT SACRAMENTS other PARISH CHILD PATRICIA ADDRESS BIRTH BAPTISM BIRTH PARISH . OF OF ADDRESS SS OF OF NAME NAME OF NAME OF NAME DATE DATE OF CONFIRMATION OF PARENTS OF OF PLACE AND AT PLACE SACRAMENTS DATE . AND GOD DATE . GOD . AT"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "BAPTISMS 18084 JOSIFOVICH Josifovicd KULLMAN AVE N.J 28,19.59 1965 MAYBA RECTOR STATE , PAUL BRUNSWICK STATE RISTO 18083 JOSIFOVIC FOVICI 1965 ) 1960 ска ) ) , PAUL RECTOR No IMAMER CITY 4 ( ) JOS LLMAN A STATE ) 31 , , BRUNSWI STATE ) . NAME ) ) NAME , BAPTISMS No DENNIS 4 RISTO ( , , ) ) CITY"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "PART RECORD DIANE TRAIKO FATHER'S MOTHER'S LINCOLN STREET MAY JULY AND CHURCH PETAR BAPTIZED TRAIKO NAME MOTHER'S NAME STREET , AND AND ) - BY CITY FATHER'S LINCOLN Juhy 1 ) ( ( SIF 144 NUMBER SOMERVILLE AND PETER ( NEW ( ANASTASIA PERFORMED 1 RECORD DIONYSIUS OVICH AND MARCH PETER CHURCH ) NEW PETER BY thandove ( ) ( NUMBER CITY Raber ( ( ("
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.92,
+      "fields": {
+        "notes": "PARISH CHILD PARENTS FREDA BIRTH BAPTISM CONFIRMATION BIRTH PART OF OF OF . PARENTS CHILD PARENTS OF FREDA SIF 14.4 . AND ( NAME OF SS OF - BIRTH BAPTISM BIRTH PERFORMED NAME . . AND . ADDRESS DATE DATE PLACE GOD SACRAMENTS Fall PARISH NAME NAME OF J AT AND ADDRESS P DATE OF DATE OF CONFIRMATION SS OF PARENTS . PLACE Father . AT GOD SACRAMENTS"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2"
+  ],
+  "parsedAt": "2026-02-17T01:51:14.915Z"
+}

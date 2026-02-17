@@ -1,0 +1,49 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "12-8-891-27-90 Mark Mark New Brunswick Barbare ( Fetzko ) Kulick Nevitt | FA . Joe Parsells"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "notes": "Matthew Robert Kitz s - a9 / 6-21 Anastasia ( Nevitt ) Kita Alexander 2 90 90 90 Somerville | Fr. Jas Panel Parsells"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "Alpangy ( Adult Beption + Chrismation ) 3 8 - as John Tatiana ( Michel ) Hanse Stephen Mickel 90 | Fr. Jas"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.94,
+      "fields": {
+        "notes": "7-16 9-16 Elizabeth Hansen Robert Hansen 4 Somerville"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:48:51.758Z"
+}

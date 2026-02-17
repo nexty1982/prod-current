@@ -1,0 +1,12 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 5 | Rows: 6
+
+--- Table 1 (5 columns, 7 rows) ---
+ | Счета родив M'kcaus шихем . и день Имена родившихс FEMALE BIRTH DATES BAPTISM В HALE NUMBER M NAME OF CHILD CITY OF BIRTH | TAL BIRTHS МЕТРИЧЕСКОЙ КНИГИ НА Званіе , имя , отчество и . замнало родителей , и FATHER'S FULL NAME . MOTHER'S MAIDEN NAME | YEAR 87 ГОДА , ЧАСТЬ ПЕРЕАМ , И какого Званіе , има , отчество и фамилі воспрівникова . FULL NAMES OF SPONSORS | РОДИВШИХСМ . Кто совершаль таинство крорені . PRIEST'S NAME
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | " l 25 1/24 ач Alexandre 1986 1987 N. Brunswick | Fr. Dn Gregory Lapchuk Angyrz Lapchuk ( Warnecke ) | Michzel Soroke ( Orthodox ) Iree Gourusik | Fr. Alexander Warnecke
+ | 56 2 Dec. 8 Feb. 8 Alexandra 1986 1987 ( Alexandriz ) N. Brunswick | Stanley Bozintz Valerie Bozintz ( Ruhe ) | Dariz Parsells ( Orthodox ) Gorbatuk ( Orthodox ) | F. Jones Parsells Panells Fr.
+ | Dec. 8 Feb. 8 Peter 3 1986 1987 ( Stanley ) N. Brunswick | Stanley Bozintz Valerie Bozintz ( Rute ) | Peter Petro ( 0 - thalox ) | FA . Jas Parsell
+ | ч Jan.23 Feb. 14 Sarah 1987 ( Amanda ) 1987 | Robert Kitz Anastasiz Kitzl Nevitt ) | Cynthia Peter Chabra ( Orthodox ) | Fr. Java Parsell
+ | July 10 Aug 9 Michzel 5 Somerville | Michael Chabuz Patricia Chabrz ( Perlack ) |  | 
+ | 6 June Sept Amanda = 20 N. Brunswick | Richard Heller Kristina ( Azdzzy ) | Stephanie Marulli ( Orthodox ) Thomas Aydzaj | Fr. • Java Jaws долж Parsels

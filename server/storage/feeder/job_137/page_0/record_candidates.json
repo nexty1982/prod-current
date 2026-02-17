@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "JulyBART\n26.\n1949\n1-BAPTISMS\nPARISH RECORD\nNAME OF CHILD\nNAME OF PARENTS\nAND.\nHelen\nADDRESS\nS.\nNO 31211\nN!\nCharles\nCharles Kuhna\n(FATHER'S NAME)\nLu\nassvity\n(MOTHER'S NAME)\nAue\n(NUMBER AND STREET, CITY"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:27.030Z"
+}

@@ -1,0 +1,27 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "godparents": "( Onthochox )",
+        "notes": "June | Suly - Catherine 6 20 Somerville | Peter Goubatuk Susan Binkowski | Charles Dunazenko Dariz Paisells | Fr. Jas Parsels"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_5": "godparents"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_6"
+  ],
+  "parsedAt": "2026-02-17T01:48:43.290Z"
+}

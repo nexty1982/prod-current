@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "March\nMarch 13, 1949\nPART 1-BAPTISMS\nPARISH RECORD\nNO 31204\nNAME OF CHILD\nNAME OF PARENTS\nAND.\nа\n$\nJoseph Carman\n(FATHER'S NAME)\nPawlik\n(MOTHER'S NAME)\nADDRESS\n88 Bell Ave\n(NUMBER AND STREET, CITY, ST"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:21.201Z"
+}

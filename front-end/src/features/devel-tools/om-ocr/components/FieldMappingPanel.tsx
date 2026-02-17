@@ -4,7 +4,7 @@
  * Falls back to single-record mode when no candidates are available.
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   Accordion,
   AccordionDetails,
@@ -29,7 +29,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { IconChevronDown, IconSend, IconAlertTriangle, IconColumns, IconUser, IconCalendar, IconHash, IconMapPin, IconBan, IconSettings } from '@tabler/icons-react';
+import { IconChevronDown, IconSend, IconAlertTriangle, IconColumns, IconUser, IconCalendar, IconHash, IconMapPin, IconBan, IconSettings, IconWand } from '@tabler/icons-react';
 import { apiClient } from '@/shared/lib/axiosInstance';
 import { getCustomFieldsForType } from '../utils/fieldConfig';
 import FieldConfigDialog from './FieldConfigDialog';
@@ -59,6 +59,31 @@ interface RecordEntry {
   needsReview: boolean;
   sourceRowIndex: number;
   confidence: number;
+}
+
+/** Token from table extraction cell for chip display */
+interface CellToken {
+  text: string;
+  confidence: number | null;
+  columnIndex: number;
+  columnKey: string;
+}
+
+/** Check if a string looks like a date */
+function isDateLike(text: string): boolean {
+  return /(?:\d{1,2}[\/\-\.]\d{1,2}|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b|\d{4})/i.test(text);
+}
+
+/** Validate a date string — returns error message or null */
+function validateDate(text: string): string | null {
+  if (!text.trim()) return null;
+  // Try parsing common formats
+  const d = new Date(text);
+  if (!isNaN(d.getTime())) return null;
+  // Try MM/DD/YYYY
+  const parts = text.split(/[\/\-\.]/);
+  if (parts.length >= 2 && parts.every(p => /^\d+$/.test(p))) return null;
+  return 'Invalid date format';
 }
 
 interface FieldMappingPanelProps {
@@ -225,6 +250,94 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
     }
   }, [recordCandidates, ocrResult, jobId]);
 
+  // Claimed values: tracks which token text is assigned to which field across a record
+  // Map<normalizedTokenText, fieldKey>
+  const [claimedValues, setClaimedValues] = useState<Map<string, string>>(new Map());
+
+  // Extract cell tokens for the currently expanded record from recordCandidates
+  const recordCellTokens = useMemo(() => {
+    if (!recordCandidates?.candidates) return [];
+    const idx = typeof expandedIdx === 'number' ? expandedIdx : 0;
+    const candidate = recordCandidates.candidates[idx];
+    if (!candidate) return [];
+
+    // All fields in the candidate have auto-mapped values from table extraction cells
+    // Build tokens from the candidate's fields + column mapping
+    const tokens: CellToken[] = [];
+    const mapping = recordCandidates.columnMapping || {};
+
+    // Reverse mapping: field_key → column_key
+    const fieldToCol: Record<string, string> = {};
+    for (const [colKey, fieldKey] of Object.entries(mapping)) {
+      fieldToCol[fieldKey] = colKey;
+    }
+
+    // For each field with a value, create a token
+    for (const [fieldKey, value] of Object.entries(candidate.fields)) {
+      if (!value || !value.trim()) continue;
+      const colKey = fieldToCol[fieldKey] || fieldKey;
+      const colIdx = parseInt(colKey.replace('col_', '')) - 1;
+      tokens.push({
+        text: value.trim(),
+        confidence: candidate.confidence || null,
+        columnIndex: isNaN(colIdx) ? 0 : colIdx,
+        columnKey: colKey,
+      });
+    }
+
+    // Also include unmapped column values if any
+    for (const colKey of (recordCandidates.unmappedColumns || [])) {
+      const val = candidate.fields[colKey];
+      if (val && val.trim()) {
+        tokens.push({
+          text: val.trim(),
+          confidence: null,
+          columnIndex: parseInt(colKey.replace('col_', '')) - 1 || 0,
+          columnKey: colKey,
+        });
+      }
+    }
+
+    return tokens;
+  }, [recordCandidates, expandedIdx]);
+
+  // Handle claiming a token value for a field
+  const handleClaimToken = useCallback((recordIdx: number, fieldKey: string, tokenText: string) => {
+    setRecords((prev) => {
+      const next = [...prev];
+      next[recordIdx] = { ...next[recordIdx], fields: { ...next[recordIdx].fields, [fieldKey]: tokenText } };
+      return next;
+    });
+    setClaimedValues((prev) => {
+      const next = new Map(prev);
+      // Release any previously claimed value for this field
+      for (const [text, fk] of next.entries()) {
+        if (fk === fieldKey) next.delete(text);
+      }
+      // Claim new value
+      next.set(tokenText.toLowerCase().trim(), fieldKey);
+      return next;
+    });
+  }, []);
+
+  // Get available tokens for a specific field (exclude claimed by other fields)
+  const getAvailableTokens = useCallback((fieldKey: string, isDateField: boolean): CellToken[] => {
+    let available = recordCellTokens.filter((t) => {
+      const claimed = claimedValues.get(t.text.toLowerCase().trim());
+      return !claimed || claimed === fieldKey;
+    });
+    // For date fields, only show date-like tokens
+    if (isDateField) {
+      available = available.filter((t) => isDateLike(t.text));
+    }
+    return available;
+  }, [recordCellTokens, claimedValues]);
+
+  // Reset claimed values when record changes
+  useEffect(() => {
+    setClaimedValues(new Map());
+  }, [expandedIdx, jobId]);
+
   const [fieldConfigOpen, setFieldConfigOpen] = useState(false);
   const [fieldConfigVersion, setFieldConfigVersion] = useState(0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -272,6 +385,80 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
       return next;
     });
   }, []);
+
+  // Smart Fill: distribute OCR tokens across fields by column order
+  const handleSmartFill = useCallback((recordIdx: number) => {
+    if (!recordCandidates?.candidates) return;
+    const candidate = recordCandidates.candidates[recordIdx];
+    if (!candidate) return;
+
+    // Sort tokens by column index (left to right)
+    const sortedTokens = [...recordCellTokens].sort((a, b) => a.columnIndex - b.columnIndex);
+    if (sortedTokens.length === 0) return;
+
+    // Get visible fields for current record type
+    const visibleFields = getCustomFieldsForType(recordType);
+    if (visibleFields.length === 0) return;
+
+    // Distribute tokens across fields: assign each token to the next field in order
+    const newFields: Record<string, string> = {};
+    const newClaimed = new Map<string, string>();
+    const fieldCount = visibleFields.length;
+    const tokenCount = sortedTokens.length;
+
+    // If we have more fields than tokens, assign one token per field from left
+    // If we have more tokens than fields, group extras into the last field (notes)
+    for (let i = 0; i < Math.min(tokenCount, fieldCount); i++) {
+      const fieldKey = visibleFields[i].key;
+      newFields[fieldKey] = sortedTokens[i].text;
+      newClaimed.set(sortedTokens[i].text.toLowerCase().trim(), fieldKey);
+    }
+
+    // Overflow tokens go to the last field (usually 'notes')
+    if (tokenCount > fieldCount) {
+      const lastField = visibleFields[fieldCount - 1].key;
+      const overflow = sortedTokens.slice(fieldCount - 1).map(t => t.text).join(' ');
+      newFields[lastField] = overflow;
+    }
+
+    setRecords((prev) => {
+      const next = [...prev];
+      next[recordIdx] = {
+        ...next[recordIdx],
+        fields: { ...next[recordIdx].fields, ...newFields },
+      };
+      return next;
+    });
+    setClaimedValues(newClaimed);
+  }, [recordCandidates, recordCellTokens, recordType]);
+
+  // --- Auto-save draft (debounced) ---
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSavedRef = useRef<string>('');
+
+  useEffect(() => {
+    // Don't auto-save if finalized, no records, or no churchId/jobId
+    if (isFinalized || records.length === 0 || !churchId || !jobId) return;
+
+    const serialized = JSON.stringify(records.map(r => r.fields));
+    // Skip if nothing changed since last save
+    if (serialized === lastSavedRef.current) return;
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      try {
+        await apiClient.post(`/api/church/${churchId}/ocr/jobs/${jobId}/save-draft`, {
+          records: records.map(r => ({ fields: r.fields, sourceRowIndex: r.sourceRowIndex })),
+          recordType,
+        });
+        lastSavedRef.current = serialized;
+      } catch (err) {
+        console.warn('[FieldMappingPanel] Auto-save draft failed:', err);
+      }
+    }, 1500);
+
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [records, isFinalized, churchId, jobId, recordType]);
 
   const handleFinalize = useCallback(async () => {
     if (isFinalized || recordType === 'unknown') return;
@@ -511,6 +698,18 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
               </AccordionSummary>
               <AccordionDetails sx={{ pt: 0 }}>
                 <Stack spacing={1.5}>
+                  {/* Smart Fill button */}
+                  {expandedIdx === idx && recordCellTokens.length > 0 && !isFinalized && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<IconWand size={16} />}
+                      onClick={() => handleSmartFill(idx)}
+                      sx={{ alignSelf: 'flex-start', textTransform: 'none', fontSize: '0.75rem' }}
+                    >
+                      Smart Fill ({recordCellTokens.length} tokens)
+                    </Button>
+                  )}
                   {/* Split warning banner */}
                   {expandedIdx === idx && fieldSuggestions?.splitWarning && (
                     <Alert severity="warning" sx={{ borderRadius: 1.5, py: 0.5 }}>
@@ -525,6 +724,14 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
                   {fields.map((f) => {
                     const isFocused = expandedIdx === idx && externalFocusedField === f.key;
                     const showSuggestions = isFocused && fieldSuggestions?.fieldKey === f.key && fieldSuggestions.suggestions.length > 0;
+                    const isDateField = FIELD_ENTITY_MAP[f.key] === 'date';
+                    const fieldValue = rec.fields[f.key] || '';
+                    const dateError = isDateField && fieldValue ? validateDate(fieldValue) : null;
+
+                    // OCR token chips for this field
+                    const availableTokens = expandedIdx === idx && recordCellTokens.length > 0
+                      ? getAvailableTokens(f.key, isDateField)
+                      : [];
 
                     return (
                       <Box key={f.key}>
@@ -532,7 +739,7 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
                           label={f.label + (f.required ? ' *' : '')}
                           size="small"
                           fullWidth
-                          value={rec.fields[f.key] || ''}
+                          value={fieldValue}
                           onChange={(e) => handleFieldChange(idx, f.key, e.target.value)}
                           onFocus={() => onFieldFocus?.(f.key)}
                           onBlur={() => {
@@ -540,6 +747,8 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
                             if (externalFocusedField === f.key) onFieldFocus?.(null);
                           }}
                           disabled={isFinalized}
+                          error={!!dateError}
+                          helperText={dateError}
                           InputLabelProps={{ shrink: true }}
                           sx={isFocused ? {
                             '& .MuiOutlinedInput-root': {
@@ -548,14 +757,41 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
                             },
                           } : undefined}
                         />
-                        {/* Suggestion chips */}
+                        {/* OCR token chips — always visible when record is expanded */}
+                        {availableTokens.length > 0 && !isFinalized && (
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                            {availableTokens.slice(0, 6).map((t, ti) => {
+                              const isSelected = fieldValue.trim().toLowerCase() === t.text.toLowerCase();
+                              const chipColor = t.confidence != null
+                                ? (t.confidence > 0.9 ? 'success' : t.confidence > 0.7 ? 'warning' : 'error')
+                                : 'default';
+                              return (
+                                <Chip
+                                  key={ti}
+                                  label={t.text.length > 30 ? t.text.substring(0, 30) + '...' : t.text}
+                                  size="small"
+                                  variant={isSelected ? 'filled' : 'outlined'}
+                                  color={isSelected ? 'primary' : chipColor as any}
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => handleClaimToken(idx, f.key, t.text)}
+                                  sx={{
+                                    cursor: 'pointer',
+                                    fontSize: '0.7rem',
+                                    height: 24,
+                                  }}
+                                />
+                              );
+                            })}
+                          </Box>
+                        )}
+                        {/* Entity-based suggestion chips (shown on focus) */}
                         {showSuggestions && (
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
                             {fieldSuggestions!.suggestions
                               .filter(s => !FIELD_ENTITY_MAP[f.key] || s.entityType === FIELD_ENTITY_MAP[f.key])
                               .slice(0, 4).map((s, si) => (
                               <Chip
-                                key={si}
+                                key={`sug-${si}`}
                                 icon={entityIcon(s.entityType) || undefined}
                                 label={s.text.length > 35 ? s.text.substring(0, 35) + '...' : s.text}
                                 size="small"
@@ -563,7 +799,7 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
                                 color={s.score > 0.6 ? 'primary' : 'default'}
                                 onMouseDown={(e) => e.preventDefault()}
                                 onClick={() => {
-                                  handleFieldChange(idx, f.key, s.text);
+                                  handleClaimToken(idx, f.key, s.text);
                                 }}
                                 sx={{
                                   cursor: 'pointer',

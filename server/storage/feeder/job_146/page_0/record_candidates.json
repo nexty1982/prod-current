@@ -1,0 +1,31 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.94,
+      "fields": {
+        "date_of_baptism": "Wayne Theodore 1 PART",
+        "performed_by": "SACRAMENTS . Res",
+        "notes": "RECORD Theodore FATHER'S седа ND ( 1150 NUMBER Manille AND Peter PARENTS Theodo ( ( CHILD BIRTH BAPTISM OF CONFIRMATION St. BIRTH PARISH OF PARENTS OF OF NAME OF NAME AND ADDRESS DATE DATE PLACE AT GOD . . | PART | RECORD PARISH CHILD PARENTS OF NAME OF NAME | . AND | ADDRESS Brook BIRTH BAPTISM CONFIRMATION St. BIRTH OF OF PARENTS OF DATE DATE PLACE . AT GOD | SACRAMENTS"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_2": "date_of_baptism",
+    "col_4": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_3",
+    "col_5",
+    "col_6",
+    "col_7",
+    "col_8",
+    "col_9"
+  ],
+  "parsedAt": "2026-02-17T01:50:46.900Z"
+}

@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "PART 1 BAPTISMS\nPARISH RECORD Νο 17650\nNAME OF CHILD\nNAME OF PARENTS\nAND.\nPART 1 BAPTISMS\nPARISH RECORD\nNAME OF CHILD\nNAME OF PARENTS\nNo 17645\nPaula\nPaul\nmikruk\nAND.\n(FATHER'S NAME)\nFre\n(MOTHER'S NAME"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:51.980Z"
+}

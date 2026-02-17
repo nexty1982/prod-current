@@ -1,0 +1,86 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "127x | 2-25714-2471 JAMES PAUL JOHN ROSOCHA , JR .; JOAN ANN LECHINSKY ROSOCHA ( SOMERVILLE , NiT . ) | VINCENT ZAKARZEWSKI ; ANN LECHINSKY REV . ROBERT A. GEORGE LEWIS"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "28x | 2-3-372-1431 JOSEPH JOHN KONKUS JOHN KONKUS , BERTHA LUDZIK ( DUNCOTT , PENNA . ) | FROM RECEIVED THE INTO BYZANTINE THE HOLY CATHOLIC ORTHODOX CHURCH , CHURCH REV . ROBERT A. GEORGE LEWIS WHERE HE WAS BAPTIZED ON FEBRUARY 14,1937 ; WHERE HE WAS ORDAINED TO THE PRIESTHOOD ON JUNE 22 , 1969 BY BISHOP MUNHALL STEPHEN OF , PENNA J. ROCISKO RECEIVED , , AS ARCHBISHOP AN ORTHODOX LAYMAN ON PENTECOST SUNDAY ,"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "notes": "29 X | 5-15-716-27-71 ADINA ALLEGRETTO MARIE DR . JAMES DANIEL ALLEGRETTO | JUNE 6 , 1971 BY CHRISMATION . SAMUEL DE STEFANO ; HARRY GUSTICH REV . ROBERT A. GEORGE LEWIS"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "( TOMS RIVER , N.J. ) EVE VINCENT | MARY VINCENT ; LEONA GUSTICH"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "30x | 423-717-1-71 RICHARD CSTAPOVICH JOHN ( SAN FRANCISCO , JR . SUSAN RICHARD MARY JOHN OSTAPOVICH , SR . | JOHN ANDREY OSTAPOVICH CHIK ; CAROL ANDREYCHIK ; REV . ROBERT A. GEORGE LEWIS JUDY"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "notes": "31 | CALIFORNIA ) , ANDREY CHIK"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.89,
+      "fields": {
+        "notes": "2-3-473304 CLAIRE KROMBACH MARY ( NEW YORK CHARLES CITY KROMBACH , ; ADELE CLAIR | RECEIVED INTO THE HOLY ORTHODOX CHURCH FROM REV . ROBERT A. GEORGE LEWIS THE ROMAN CATHOLIC CHURCH , WHERE SHE"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.94,
+      "fields": {
+        "notes": "N.Y. ) | WAS BAPTIZED , MARCH 30 , 1947. RECEIVED BY CHRISMATION , SUNDAY , JULY 18 , 1971 ."
+      },
+      "sourceRowIndex": 8,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:48:08.834Z"
+}

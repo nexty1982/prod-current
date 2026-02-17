@@ -1,0 +1,297 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 11,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "BAPTISMS - 1 PART BAPTISMS 1"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "18056 No RECORD PARISH 18059 No"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": ") NAME FATHER'S ( CHILD OF PARENTS OF NAME NAME Rulick Kulick ) Kulich NAME FATHER'S ( Kyra Basi"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Archi ) Balda STATE , ) Falf NAME CITY , MOTHER'S th STREET ( AND No NUMBER ( 7 Eliza . AND ADDRESS ) STATE , ) Sokola NAME th Ave CITY , MOTHER'S STREET ( AND NUMBER ("
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "961 BIRTH OF DATE 61 spite have"
+            },
+            {
+              "row_index": 0,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": ") STATE ( ) ( ( AND CHURCH ) CITY BAPTISM Pete BIRTH OF DATE CONFIRMATION St. OF . AT PLACE PARENTS GOD 196 1961 . L. ) 25. n STATE ( 11. ) та ) ( CITY ( AND Peter CHURCH Michae Subic Elizabeth"
+            },
+            {
+              "row_index": 0,
+              "column_index": 7,
+              "column_key": "col_8",
+              "content": "RECTOR Hull BY . PERFORMED Ad S. Ma SACRAMENTS Rev 10 RECTOR BY Adame PERFORMED Stephan"
+            },
+            {
+              "row_index": 0,
+              "column_index": 8,
+              "column_key": "col_9",
+              "content": "18058 ) BAPTISMS No NAME 1 PART RECORD Theodo Theodore FATHER'S CHILD PARISH OF PARENTS OF NAME NAME 18061 BAPTISMS No Sapega Sapeca A. 1 PART RECORD Alan , CHILD Andrew . PARENTS"
+            },
+            {
+              "row_index": 0,
+              "column_index": 9,
+              "column_key": "col_10",
+              "content": ") , STATE ) NAME , CITY STREET ( Yurkowski ( MOTHER'S AND ( NUMBER emin . AND ADDRESS ) ) ) NAME Lokay Sapega NAME Rd STATE , , CITY MOTHER'S STREET H.-J. ( AND NUMBER ( Ludmilla Hillcrest 39 Martinsville"
+            },
+            {
+              "row_index": 0,
+              "column_index": 10,
+              "column_key": "col_11",
+              "content": ") RECTOR ( STATE 1961 C 18 ) April 3 Medical sky BY- ( AND CHURCH emine ) ( CITY BAPTISM Pete Peter Yurkowsk BIRTH Ha PERFORMED to BIRTH OF terdon OF DATE DATE CONFIRMATION OF . PARENTS PERFOR Tev AT PLACE GOD Anna SACRAMENTS B OF PARENTS GOD PLACE AT DATE CONF ; / ) RECTOR ] . ) STATE ( 1960 Hosp . ) Oct 151961 Paull Pa + CHURCH ) Sapega BY ( ( CITY AND BAPTISM Peter Somerville BIRTH Stey Logwhen PERFORMED Sadame"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PART",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.1420673076923077,
+                0.6282051282051282,
+                0.15072115384615384,
+                0.6608974358974359
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "RECORD PARISH",
+              "confidence": 0.99,
+              "token_count": 2,
+              "bbox": [
+                0.17764423076923078,
+                0.6099358974358975,
+                0.18798076923076923,
+                0.7118589743589744
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "CHILD PARENTS OF NAME OF NAME",
+              "confidence": 0.99,
+              "token_count": 6,
+              "bbox": [
+                0.21225961538461538,
+                0.6291666666666667,
+                0.23677884615384615,
+                0.7153846153846154
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "14/8 ADDRESS . AND",
+              "confidence": 0.94,
+              "token_count": 4,
+              "bbox": [
+                0.2627403846153846,
+                0.6291666666666667,
+                0.30528846153846156,
+                0.7105769230769231
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "BIRTH OF DATE",
+              "confidence": 0.98,
+              "token_count": 3,
+              "bbox": [
+                0.3370192307692308,
+                0.639102564102564,
+                0.34278846153846154,
+                0.7064102564102565
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 6,
+              "column_key": "col_7",
+              "content": "BAPTISM CONFIRMATION BIRTH OF PARENTS OF DATE PLACE . AT GOD",
+              "confidence": 0.93,
+              "token_count": 11,
+              "bbox": [
+                0.37115384615384617,
+                0.625,
+                0.43990384615384615,
+                0.7044871794871795
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 7,
+              "column_key": "col_8",
+              "content": "SACRAMENTS Ros",
+              "confidence": 0.74,
+              "token_count": 2,
+              "bbox": [
+                0.471875,
+                0.6384615384615384,
+                0.49591346153846155,
+                0.6977564102564102
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 8,
+              "column_key": "col_9",
+              "content": "PARISH Andrew Rpens OF NAME OF NAME",
+              "confidence": 0.91,
+              "token_count": 7,
+              "bbox": [
+                0.5701923076923077,
+                0.6092948717948717,
+                0.6240384615384615,
+                0.7006410256410256
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 9,
+              "column_key": "col_10",
+              "content": ". AND ADDRESS",
+              "confidence": 0.86,
+              "token_count": 3,
+              "bbox": [
+                0.6487980769230769,
+                0.6467948717948718,
+                0.6954326923076923,
+                0.6935897435897436
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 10,
+              "column_key": "col_11",
+              "content": "BIRTH Somerset OF OF CONFIRMATION Its OF PARENTS DATE DATE PLACE Vera SACRAMENTS Rev • AT GOD",
+              "confidence": 0.89,
+              "token_count": 17,
+              "bbox": [
+                0.7213942307692308,
+                0.5884615384615385,
+                0.884375,
+                0.6897435897435897
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.07
+    ],
+    "col_2": [
+      0.07,
+      0.165
+    ],
+    "col_3": [
+      0.165,
+      0.2
+    ],
+    "col_4": [
+      0.2,
+      0.25
+    ],
+    "col_5": [
+      0.25,
+      0.3225
+    ],
+    "col_6": [
+      0.3225,
+      0.3575
+    ],
+    "col_7": [
+      0.3575,
+      0.455
+    ],
+    "col_8": [
+      0.455,
+      0.535
+    ],
+    "col_9": [
+      0.535,
+      0.635
+    ],
+    "col_10": [
+      0.635,
+      0.71
+    ],
+    "col_11": [
+      0.71,
+      1
+    ]
+  },
+  "columns_detected": 11,
+  "header_y_threshold": 0.633525641025641,
+  "total_tokens": 356,
+  "data_tokens": 56,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:51:08.437Z"
+}

@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "да\nly\n194\nPART 1-BAPTISMS\nPARISH RECORD\nNAME OF CHILD\nNO 31214\na Caral\nCaral\nPatricia\nNAME OF PARENTS.\nNicholas\nChwat\n(FATHER'S NAME)\nAND.\n(MOTHER'S NAME)\nADDRESS\nPokland\n(NUMBER AND STREET, CITY, STA"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:29.286Z"
+}

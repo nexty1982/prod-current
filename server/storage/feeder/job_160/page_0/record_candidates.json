@@ -1,0 +1,65 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "performed_by": "SACRAMENTS Kev",
+        "notes": "PART PARISH CHILD PARENTS ADDRESS So BIRTH BAPTISM OF OF OF CONFIRMATION BIRTH OF OF PARENTS NAME NAME AND DATE DATE PLACE SACRAMENTS . . AT GOD | PART PARISH CHILD PARENTS Mary 677 NAME NAME ADDRESS Do BIRTH ome BAPTISM AND DATE DATE CONFIRMATION BIRTH . OF OF OF PARENTS OF OF . . AT PLACE GOD"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "performed_by": "RECTOR",
+        "notes": "18075 Tatiana Mickel Mickel 9,1962 . 962 NJ Micke RECTOR STATE osp alle ) STATE ) ( , | 18074 Shopeys Noreen Shopey Shop Are STATE STATE ) ) ( ,"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "performed_by": "BY",
+        "notes": "BAPTISMS No ( Marie Laverne NAME Szwahla ) NAME CITY ) MOTHER'S St , STREET omervi amc Pianos FATHER'S 3 \" leter ) CHURCH d BY AND ( ( боть ) CITY - ( esa | BAPTISMS No codosia lam FATHER'S Hawra ) CITY ) NAME wran NAME MOTHER'S 74 , STREET ) AND CHURCH ) CITY ( ( ("
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.95,
+      "fields": {
+        "performed_by": "PERFORMED",
+        "notes": "1 PART RECORD Tina PARENTS ( First NUMBER AND PERFORMED CHILD Anasta 64 ( ome BIRTH mer BAPTISM BIRTH PARENTS Nancy Eugene | PART RECORD Thea PARENTS ( 1 NUMBER AND CHILD 29 ( BIRTH BAPTISM BIRTH . PARENTS"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.98,
+      "fields": {
+        "performed_by": "SACRAMENTS",
+        "notes": "PARISH OF NAME OF NAME ADDRESS OF AND DATE OF DATE CONFIRMATION OF PLACE SACRAMENTS Rev . . AT GOD | PARISH OF NAME OF NAME ADDRESS OF DATE OF DATE CONFIRMATION OF . AND . AT PLACE GOD"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_4": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:51:13.109Z"
+}

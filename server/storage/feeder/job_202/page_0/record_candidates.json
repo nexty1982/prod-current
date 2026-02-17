@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.85,
+      "fields": {
+        "groom_name": "8/35 | Angel Cesar Dosado Edison , N.J. 27 Orthodox Christian",
+        "bride_name": "Sara Jane Jerone Edison , NJ 26 Orthodox Christian",
+        "date_of_marriage": "1",
+        "officiant": "Fr , Jaes Paisalis",
+        "witnesses": "Alexander Torrisi Ann Torrisi",
+        "notes": "groom_parents: 0568180 Osbaldo Dessivee; bride_parents: Jessic; license: # 24-260 Edison 811912024"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.94,
+      "fields": {
+        "groom_name": "1st",
+        "bride_name": "1st"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:29.359Z"
+}

@@ -1,0 +1,6 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: ? | Rows: ?
+
+--- Table 1 (0 columns, 1 rows) ---
+
+

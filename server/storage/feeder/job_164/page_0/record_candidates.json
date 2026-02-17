@@ -1,0 +1,48 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.99,
+      "fields": {
+        "notes": "NAME NAME"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "notes": "Pash Nechanics Houp 1958 RECTOR 41958 9360 Pack 1958 RECTOR de 9359 STATE Mole machuls Meader TATE Pask D ) STATE 26 , ) Nº ) CITY st.8 al ) NAME NAME , STREET Paul e BY ) ."
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "notes": "BAPTISMS ) вонида Nº Lee Walter Thok NAME CITY J ) BAPTISMS MOTHER'S , STREET CHURCH Fle BY PERFORMED Justine Metro FATHER'S MOTHER'S AND Belle CHURCH ) CITY drew AND NUMBER ( ( ) PERFORMED ( AND ( . AND ( 1 ( ( . P BIRTH"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "notes": "PD NUMBER 1 PART крещ RECORD PARISH CHILD PARENTS Zeva D. Hunter BAPTISM Maurille BIRTH PARENTS PART RECORD CHILD PARENTS Helen BIRTH Bou BAPTISM ( BIRTH OF OF OF OF CONFIRMATION S OF PARENTS ( PLACE SACRAMENTS GOD OF CONFIRMATION OF PLACE SACRAMENTS Res OF OF NAME NAME ADDRESS . DATE GOD PARISH NAME NAME AND ADDRESS DATE DATE DATE . AT OF AND AT"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2"
+  ],
+  "parsedAt": "2026-02-17T01:51:20.102Z"
+}

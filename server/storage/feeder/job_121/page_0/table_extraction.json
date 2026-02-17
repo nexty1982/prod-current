@@ -1,0 +1,270 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 5,
+      "column_count": 4,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "102"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "No K 37357"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "1963 ( CONT . ) 103 MARK BASIL KULICK SON OF BASIL AND BARBARA KULICK ADDRESS - 148 So. 14TH ST . , MANVILLE BORN BAPTISM MARCH 22 , 1963- SOMERVILLE CHRISMATIONS APRIL 20,1963 35. PETER & PAUL CHURCH CON PARENTS ROBERT TELEP JOAN SOKOLA"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "3 37358 # +4 37359",
+              "confidence": 0.88,
+              "token_count": 5,
+              "bbox": [
+                0.5168269230769231,
+                0.3173076923076923,
+                0.5639423076923077,
+                0.6307692307692307
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Nerest : Father Themelore Levantin AUGUSTINE ( AUSTIN ) KACHER . SON OF JOHN RACHER THEODORA ( ACKALUSKY ) KACHE 7002535 57 MOREAN LA . , SOMERVILLE CAPRISMATION Запл MAY APRIL 12 14 ) , , 1963 1963- SateruchE - - SS . PETER AND PAUL CHURCH COD PARENTS - Jodu CeePER Noming mont ) Father JULIA GALIDA ADMINISTER OF SACRAMENT theodor Palaw DAN ( DANIEL ) BRABSON - SON OF- JOHN BRABSEN VERA ( CARNEY ) BRABSON",
+              "confidence": 0.74,
+              "token_count": 78,
+              "bbox": [
+                0.5810096153846154,
+                0.26794871794871794,
+                0.9456730769230769,
+                0.6746794871794872
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "1 ) 1.963 # 37356 JACQUELINE MICHAEL PETRISKE 4 S. PETRISKO DAUGHTER OF MARIA 69 ( ADAMS TALEICH BORN BAPTISM - JANUARY STREET ) PETRISKO AND 16,1963 , SOMERVILLE CHRISMATION - 35. PETER AND FEBRUARY PAUL 10 , 1963",
+              "confidence": 0.84,
+              "token_count": 39,
+              "bbox": [
+                0.12524038461538461,
+                0.6717948717948717,
+                0.47836538461538464,
+                0.8685897435897436
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "ADDRESS - BORN APRIL NEW 28 ROAD , MONMOUTH JUNCTION - , 1963- NEW BRUNSWICE ) N.J. 1.5 . HRISMATION - MAY 25 , 1963- 55. PETER AND PAUL CHUnel GOD PARENTS- NESTOR CARNEY ELIZABETH CARNEY SACRAMENTS ADMINISTERED BY-- Father Chevebrate",
+              "confidence": 0.73,
+              "token_count": 41,
+              "bbox": [
+                0.628125,
+                0.6740384615384616,
+                0.9278846153846154,
+                0.8660256410256411
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "GOD PARENTS - JOHN MATUSHKA SOPHIA CHURCH SACRAMENTS LABOWSKY",
+              "confidence": 0.8,
+              "token_count": 9,
+              "bbox": [
+                0.14182692307692307,
+                0.8541666666666666,
+                0.484375,
+                0.9157051282051282
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "NOMINISTERED BY : father Thunder Wishosk fremuly",
+              "confidence": 0.58,
+              "token_count": 7,
+              "bbox": [
+                0.12259615384615384,
+                0.8961538461538462,
+                0.48052884615384617,
+                0.9717948717948718
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0625
+    ],
+    "col_2": [
+      0.0625,
+      0.5
+    ],
+    "col_3": [
+      0.5,
+      0.5775
+    ],
+    "col_4": [
+      0.5775,
+      1
+    ]
+  },
+  "columns_detected": 4,
+  "header_y_threshold": 0.2742307692307692,
+  "total_tokens": 228,
+  "data_tokens": 179,
+  "data_rows": 4,
+  "extracted_at": "2026-02-17T01:49:55.371Z"
+}

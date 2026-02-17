@@ -1,0 +1,12 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 6
+
+--- Table 1 (4 columns, 7 rows) ---
+ | HING HOHI > BIRTHS МЕТРИЧЕСКОЙ КНИГИ Н и Счета родив : Месяца . фамилі родителей , И шихся . и день Званіе , има , штчество . Мужеска Имена родившихс в кроисповеданія . . . . пода Женска ΠΟΛΑ рожд HIA коефе- HIA BIRTH DATES . MOTHER'S MAIDEN B NAME MALE NUMBER OF CHILD FATHER'S FULL NAME P OF BIRTH T CITY FEMALE BAPIESO M | 2004 YEAR ГОДЪ , ЧАСТЬ ПЕРВАЯ , И какого Званіе , има , отчетко и фамилі воспрілинкова . NAME FULL NAMES OF SPONSORS Nabil | I РОДИВШИХСМ . Кто совершаль таинство крошені . PRIEST'S NAME Batle → Received into the Orthodox
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | - 7/30 Nabil Aafla |  | Church from the Coptic Church by Confession and Communion and ① Service of entrance .
+ | 1/23/7/31 Alexander 2 1987 Alexandria , Egypt Nabil + @man Rafk | Peter Parsells Gooboduk | into Orthodong by F1 . Jaes Parsells 2
+ | 6/14 7/31 Mautin Nabil d @man 92672 3 1988 Alexand Egypt | Tinotty | Fr Jaes Parsells Fr. Jones Parsells 3
+ | 4 8/13/10/16 Sophie Bakaletz Peter d Dolly Bakaletz | Paul Bakzletz Cynthia Niezes ( honorry ) | Fr. Jaes Pawells
+ | New Bru 58/03/10/23 Amelia Fedechko Dennis Fedechlo Samnit Christina Coleman | Adam Fedech ko Patricia Kopp ( honory ) | Fr. Joes Pare Received into the Orthodox ( 6-
+ | 6 10s Darrin Seraphim Piczed | ! | Church from the methodist Confession by mysteries of Repentance , Communions Chrisanton бу Fr. Jues Parsells

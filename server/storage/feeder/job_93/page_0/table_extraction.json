@@ -1,0 +1,285 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 5,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счета шихед . Мужеска ΠΟΛΔ MALE NUMBER"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "NK- > BIRTHS ESTTI EGO HTH DE родив : MACAUZ . и день Званіе , има , штчество и . Фамнаа родителей Имена родившихем в кроисповедания . . . \" Женска ΠΟΛΑ рожде NIA KOELPE- WIH . OF CHILD FATHER'S FULL NAME MOTHER'S MAIDEN CITY OF BIRTH FEMALE BIRTH DATES NAME BAPTISM"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "YEAR 92 ГОДА , ЧАСТЬ ПЕРВЯМ , О РОДИВШИХСЯ , И како Званіе , има , отчетко и фамил воспрієминкова . NAME FULL NAMES OF SPONSORS the Anglican Confession by"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": ". Кто совершаль таниство κραμενία .. PRIEST'S NAME"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "-",
+              "confidence": 0.8,
+              "token_count": 1,
+              "bbox": [
+                0.08221153846153846,
+                0.36378205128205127,
+                0.084375,
+                0.3733974358974359
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "5/31 John Perkins 5/31 Thomes Perkins",
+              "confidence": 0.83,
+              "token_count": 6,
+              "bbox": [
+                0.1451923076923077,
+                0.3503205128205128,
+                0.23942307692307693,
+                0.39134615384615384
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "received Holy Chrismation from by Archbishop Peter of York on May 31 , 1992",
+              "confidence": 0.93,
+              "token_count": 14,
+              "bbox": [
+                0.48990384615384613,
+                0.3439102564102564,
+                0.715625,
+                0.39903846153846156
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Jas Parsell",
+              "confidence": 0.56,
+              "token_count": 3,
+              "bbox": [
+                0.7579326923076923,
+                0.34294871794871795,
+                0.8759615384615385,
+                0.37403846153846154
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "06 a",
+              "confidence": 0.48,
+              "token_count": 2,
+              "bbox": [
+                0.07908653846153846,
+                0.39166666666666666,
+                0.0875,
+                0.4016025641025641
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "New Holy received from Chrismation the Anglican by Archbishop Confession 1992 Peter of by New York on Gennadi May mzy 31 , ( Spirin )",
+              "confidence": 0.91,
+              "token_count": 25,
+              "bbox": [
+                0.4894230769230769,
+                0.38493589743589746,
+                0.7211538461538461,
+                0.4778846153846154
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "3",
+              "confidence": 0.96,
+              "token_count": 1,
+              "bbox": [
+                0.08076923076923077,
+                0.5041666666666667,
+                0.08918269230769231,
+                0.514102564102564
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "6/28 8/23 Alexander Kulick Somerville Mark Kulick ( ) Barbara ( Fetzko ) Kulick",
+              "confidence": 0.82,
+              "token_count": 14,
+              "bbox": [
+                0.11899038461538461,
+                0.4823717948717949,
+                0.37548076923076923,
+                0.5266025641025641
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Matthew Austin ;",
+              "confidence": 0.85,
+              "token_count": 3,
+              "bbox": [
+                0.4935096153846154,
+                0.49583333333333335,
+                0.5949519230769231,
+                0.5230769230769231
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Fr. Jon Parella",
+              "confidence": 0.66,
+              "token_count": 3,
+              "bbox": [
+                0.7509615384615385,
+                0.4737179487179487,
+                0.8680288461538461,
+                0.5131410256410256
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.0375
+    ],
+    "col_2": [
+      0.0375,
+      0.1025
+    ],
+    "col_3": [
+      0.1025,
+      0.4325
+    ],
+    "col_4": [
+      0.4325,
+      0.7375
+    ],
+    "col_5": [
+      0.7375,
+      1
+    ]
+  },
+  "columns_detected": 5,
+  "header_y_threshold": 0.3521153846153846,
+  "total_tokens": 169,
+  "data_tokens": 72,
+  "data_rows": 3,
+  "extracted_at": "2026-02-17T01:48:55.867Z"
+}

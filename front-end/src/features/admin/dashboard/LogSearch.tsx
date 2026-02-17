@@ -238,7 +238,7 @@ const LogSearch: React.FC = () => {
     setLogStatsLoading(true);
     try {
       const res: any = await apiClient.get('/admin/log-search/stats');
-      setLogStats(res.data);
+      setLogStats(res);
     } catch (err) { console.error('Failed to load log stats:', err); }
     finally { setLogStatsLoading(false); }
   }, []);
@@ -255,7 +255,7 @@ const LogSearch: React.FC = () => {
       if (logDateFrom) params.from = logDateFrom;
       if (logDateTo) params.to = logDateTo;
       const res: any = await apiClient.get('/admin/log-search', { params });
-      setLogResults(res.data);
+      setLogResults(res);
     } catch (err) { console.error('Failed to search logs:', err); }
     finally { setLogLoading(false); }
   }, [logQuery, logLevel, logSource, logService, logUserEmail, logDateFrom, logDateTo, logPage, logLimit]);
@@ -264,7 +264,7 @@ const LogSearch: React.FC = () => {
     setContextLoading(true);
     try {
       const res: any = await apiClient.get(`/admin/log-search/context/${logId}`);
-      setContextDialog({ open: true, rows: res.data.rows, targetId: res.data.targetId });
+      setContextDialog({ open: true, rows: res.rows, targetId: res.targetId });
     } catch (err) { console.error('Failed to load context:', err); }
     finally { setContextLoading(false); }
   };
@@ -559,7 +559,7 @@ const LogSearch: React.FC = () => {
               <Grid container spacing={2} alignItems="center">
                 <Grid size={{ xs: 12, md: 3 }}>
                   <TextField
-                    fullWidth size="small" label="Search messages"
+                    fullWidth size="small" label="Search logs"
                     value={logQuery} onChange={e => setLogQuery(e.target.value)} onKeyDown={handleLogKeyDown}
                     InputProps={{ startAdornment: <InputAdornment position="start"><IconSearch size={18} /></InputAdornment> }}
                   />
@@ -592,10 +592,21 @@ const LogSearch: React.FC = () => {
                 <Grid size={{ xs: 6, md: 2 }}>
                   <TextField fullWidth size="small" label="To" type="datetime-local" value={logDateTo} onChange={e => setLogDateTo(e.target.value)} InputLabelProps={{ shrink: true }} />
                 </Grid>
-                <Grid size={12} sx={{ display: 'flex', gap: 1 }}>
+                <Grid size={12} sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
                   <Button variant="contained" onClick={handleLogSearch} startIcon={<IconSearch size={18} />}>Search</Button>
                   <Button variant="outlined" onClick={() => { setLogQuery(''); setLogLevel(''); setLogSource(''); setLogService(''); setLogUserEmail(''); setLogDateFrom(''); setLogDateTo(''); setLogPage(1); setTimeout(() => fetchLogs(1), 0); }}>Clear</Button>
                   <Button variant="outlined" onClick={() => { fetchLogStats(); fetchLogs(); }} startIcon={<IconRefresh size={18} />}>Refresh</Button>
+                  <Typography variant="caption" color="text.secondary" sx={{ mx: 1 }}>Quick:</Typography>
+                  {[
+                    { label: 'Errors', preset: () => { setLogLevel('ERROR'); setLogQuery(''); setLogPage(1); setTimeout(() => fetchLogs(1), 0); } },
+                    { label: 'Warnings', preset: () => { setLogLevel('WARN'); setLogQuery(''); setLogPage(1); setTimeout(() => fetchLogs(1), 0); } },
+                    { label: 'Auth', preset: () => { setLogQuery('auth'); setLogLevel(''); setLogPage(1); setTimeout(() => fetchLogs(1), 0); } },
+                    { label: 'OCR', preset: () => { setLogQuery('ocr'); setLogLevel(''); setLogPage(1); setTimeout(() => fetchLogs(1), 0); } },
+                    { label: 'DB', preset: () => { setLogQuery('database'); setLogLevel(''); setLogPage(1); setTimeout(() => fetchLogs(1), 0); } },
+                    { label: 'Crash', preset: () => { setLogQuery('crash'); setLogLevel('ERROR'); setLogPage(1); setTimeout(() => fetchLogs(1), 0); } },
+                  ].map(q => (
+                    <Chip key={q.label} label={q.label} size="small" variant="outlined" clickable onClick={q.preset} sx={{ fontSize: '0.72rem' }} />
+                  ))}
                 </Grid>
               </Grid>
             </CardContent>

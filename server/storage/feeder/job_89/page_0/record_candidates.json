@@ -1,0 +1,51 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.76,
+      "fields": {
+        "child_name": "3/19 5/22 Meredith Anastasiz",
+        "father_name": "Robert Hansen",
+        "notes": "22210 | Stephen Stanley Bozinta | Fr. Ел . Jana Parsells"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "child_name": "8/27/1/06 \" / 6 Jeffery John ( Somerville )",
+        "father_name": "Jeffery St",
+        "notes": "6 | Donna | Lerchenko | Fr. Jas Panell"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "child_name": "9/19 11/13 Zachariah ( Plainfield )",
+        "father_name": "Thomas Famulz",
+        "notes": "3 | Natalie Woronczuk | Eugene Alexandra Suchenno"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_3": "child_name",
+    "col_4": "father_name"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_5",
+    "col_6",
+    "col_7"
+  ],
+  "parsedAt": "2026-02-17T01:48:49.375Z"
+}

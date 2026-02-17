@@ -1,0 +1,518 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "1",
+              "confidence": 0.82,
+              "confidence_min": 0.82,
+              "token_count": 1,
+              "bbox": [
+                0.04927884615384615,
+                0.29615384615384616,
+                0.05456730769230769,
+                0.3121794871794872
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "JULY 1975",
+              "confidence": 0.95,
+              "confidence_min": 0.91,
+              "token_count": 2,
+              "bbox": [
+                0.07956730769230769,
+                0.2865384615384615,
+                0.11634615384615385,
+                0.32019230769230766
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "PETER JOHN CHABRA 2/19/53 ORTHODOX IST .",
+              "confidence": 0.87,
+              "confidence_min": 0.62,
+              "token_count": 7,
+              "bbox": [
+                0.13221153846153846,
+                0.28878205128205126,
+                0.28677884615384613,
+                0.3310897435897436
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "NICHOLAS LOUISE",
+              "confidence": 0.81,
+              "confidence_min": 0.67,
+              "token_count": 2,
+              "bbox": [
+                0.296875,
+                0.296474358974359,
+                0.3435096153846154,
+                0.3301282051282051
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "CAROL ANN BABYAK 9/12/55 ORTHODOX 157",
+              "confidence": 0.89,
+              "confidence_min": 0.57,
+              "token_count": 6,
+              "bbox": [
+                0.34927884615384613,
+                0.29903846153846153,
+                0.4810096153846154,
+                0.3346153846153846
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": "WILLIAM . IRENE",
+              "confidence": 0.91,
+              "confidence_min": 0.83,
+              "token_count": 3,
+              "bbox": [
+                0.4733173076923077,
+                0.3057692307692308,
+                0.5201923076923077,
+                0.3375
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "1 1 2 1 2 3 4 1 1 а 3",
+              "confidence": 0.83,
+              "confidence_min": 0.6,
+              "token_count": 11,
+              "bbox": [
+                0.03653846153846154,
+                0.3532051282051282,
+                0.059375,
+                0.885576923076923
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_integer"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "JULY 11 1976 JULY 2 , 1978 October g 1978 May 27 1979 Jure 3 1979 Sept. 2 1979 Nov. 4 1979 May 18 1980 May 23 1982 June 13 1962 July as 1982",
+              "confidence": 0.9,
+              "confidence_min": 0.57,
+              "token_count": 34,
+              "bbox": [
+                0.07932692307692307,
+                0.3407051282051282,
+                0.12764423076923076,
+                0.8791666666666667
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "ANTHONY JOSEPH WINCHATER 10/8/50 Rom . CATHOLIC 1ST . GERARD JAMES LIPPMANN 1/23/46 Rom . CATHOLIC 1ST . 27 Donald Dorchester Davidovich Ct . 3-25-43 Somerville , N.J Orthodox 1st Kenneth Gerlach 7/10/44 Lutheran 1st John Charles Magernik 8/26/58 R.C. ist David Alden Ludgin 1st 12 / 13 / sa Protestant Nicholas Kadola 1st 111/31 Robert Di Mauro 1st Roman Catholic 12/24/50 Peter Epitan 1st Orthodox 9-29-54 Gary Sampson 5-3-57 Ist R.C. Thomas episcopal Gardner 1st Prot . ( ) -5-30-57",
+              "confidence": 0.85,
+              "confidence_min": 0.39,
+              "token_count": 81,
+              "bbox": [
+                0.13197115384615385,
+                0.3416666666666667,
+                0.2956730769230769,
+                0.8875
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "ANTHONY HELEN ALBERT . ( MARGARET SAINT ) William Mary Adolph Bertha John Mary Ellen Nancy Earle / W.Kadola D.Tkaczyk Emnezuel Marie Ivan Tamare John Audrey Thomas Muriel",
+              "confidence": 0.81,
+              "confidence_min": 0.57,
+              "token_count": 28,
+              "bbox": [
+                0.2918269230769231,
+                0.34775641025641024,
+                0.3454326923076923,
+                0.8628205128205129
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "10/2/52 AUDREY GAYLE ORTHOOY HULL 1ST DARIA KACHEK 12/16/53 ORTHODOX 1ST Nancy Marshalek 27 Dorchester ct . Somerville NJ . 4-12-51 Rom . Cath 1st Janice Diane Perhach 8/3/47 Orthodox ist Christine Joy Nevitt 1/4/61 Orthodox 1st Marsha Karin Hyll 3/19/54 1st 1119/39 Inge Leins A.C. Christine MaKava 2/28/57 Carrie Ann Liedl 1st 6-3-59 R.C. Cynthia Babyzk 1st Orthodox Linda Lapchak 1st Orthodox 6-22-57",
+              "confidence": 0.84,
+              "confidence_min": 0.31,
+              "token_count": 64,
+              "bbox": [
+                0.34639423076923076,
+                0.34967948717948716,
+                0.48389423076923077,
+                0.8657051282051282
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "SYLVESTER . MARGARET CHARLES STEPHANIE ( KULINA ) Edward Sophie Peter Pauline Theodosiz Richard Irene Walter Hermenn Olga George Margaret John veva / william Ivene John Helen",
+              "confidence": 0.78,
+              "confidence_min": 0.52,
+              "token_count": 27,
+              "bbox": [
+                0.4733173076923077,
+                0.35544871794871796,
+                0.5252403846153846,
+                0.8490384615384615
+              ],
+              "needs_review": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "FR EUGENE TARRIS",
+              "confidence": 0.6,
+              "confidence_min": 0.32,
+              "token_count": 3,
+              "bbox": [
+                0.5528846153846154,
+                0.32083333333333336,
+                0.6298076923076923,
+                0.33782051282051284
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "ZENA HOLOVACH ( ORTHODOX )",
+              "confidence": 0.77,
+              "confidence_min": 0.43,
+              "token_count": 5,
+              "bbox": [
+                0.6442307692307693,
+                0.3153846153846154,
+                0.817548076923077,
+                0.3282051282051282
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "June 26 , 1975",
+              "confidence": 0.9,
+              "confidence_min": 0.65,
+              "token_count": 4,
+              "bbox": [
+                0.8408653846153846,
+                0.3192307692307692,
+                0.9245192307692308,
+                0.3342948717948718
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "FR . EUGENE TARRIS FR . EUGENE TARRIS FR . John Nebreck Nehrebacki Fr. Janes Parsells Fr. James Parsells Fr. James Parsells Fr. Jares Parsells Fr. Janes Parsells Fr. Janes Parsells Fr. Janes Pansells Fr. James Parsells",
+              "confidence": 0.82,
+              "confidence_min": 0.46,
+              "token_count": 37,
+              "bbox": [
+                0.5528846153846154,
+                0.35512820512820514,
+                0.6391826923076923,
+                0.8346153846153846
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "JAMES DAVID CARUSO ( R.C. ) THOMAS WINCHATZ ( R.C. ) DOROTHY HULL ( ORTHODOX ) JAMES CRAMER ( R.C. ) NANCY KULINA ( ORTHOQUX ) William Victoria Davidovich ( Orthodox Paul ( R.C ) Patricia Perhach John Roland Edward Drozd Carol Lyn Nevitt Jason Richardson Sandoz Hyll Leonid Fedorow Brigette Fedoren Richard Di Mauro Elaine M2K212 Alexis Epifan Jane Buhege Marcela Perdue william Wilson Melanie Carrol Mark Gardner",
+              "confidence": 0.83,
+              "confidence_min": 0.55,
+              "token_count": 69,
+              "bbox": [
+                0.6411057692307692,
+                0.3326923076923077,
+                0.8240384615384615,
+                0.8532051282051282
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "Hillsborough # 75-376 JULY 5 , 1976 MANVILLE , # 41-76 JUNE 26 , 1978 Hillsborough # 78-50 ) September Hillsborough 25 , 1978 778-92 May 17 , 1979 6-79 Avon - by - the - Sea June 1 , 1979 123-79 Manville , N.J. married Princeton Univ . Chapel Aug. 30 at , 1979 Greenbrook , N.J. 79-22 Oct. 26 , 1979 396-79 Clark , N.J. May 7 , 1980 80-38 Middlesex Boro May 14 , 1982 Brideguaten - Somerset 66-82 June 10 , 1982 82-61 Hillsborough Twp July Bridgwater 13 , 1982 - Somerset 116-82",
+              "confidence": 0.88,
+              "confidence_min": 0.29,
+              "token_count": 97,
+              "bbox": [
+                0.8223557692307693,
+                0.3403846153846154,
+                0.9879807692307693,
+                0.842948717948718
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 629,
+  "data_tokens": 481,
+  "data_rows": 2,
+  "extracted_at": "2026-02-17T01:52:03.857Z"
+}

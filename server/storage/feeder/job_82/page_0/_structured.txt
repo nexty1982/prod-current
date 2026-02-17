@@ -1,0 +1,10 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 4
+
+--- Table 1 (4 columns, 5 rows) ---
+ | Han RISTPHчSCHOŇ Счет родив : MECAUZ WHXCA . и день Званіе , имя , отчество Имена родившихс . . . Мужеска Подд Женска ΠΟΛΑ рожде NIA KOELPE- HIA HALE NUMBER DATES M FEMALE BIRTH BAPTISM В NAME OF CHILD Р CITY OF BIRTH FATHER'S FULL 1118 3/1 ( Stay Louise ) Peter Chabra Anastasia Faixfex , Virg . Age 20 200 Gregory Guenther Peter Guenther Sv . | BIRTHS GHATA NA и фамнага родителей , и вероисповедания . NAME . MOTHER'S MAIDEN NAME Carol Ann ( Babyck ) | YEAR 18 T ГОДЪ , ЧАСТЬ ПЕРШАМ , СО РОДИВШИХСЯ . какого Званіе , имя , отчество и фамил воспріємникова . Кто совершаль таинство крашені . FULL NAMES OF SPONSORS PRIEST'S NAME Michzel Chebre ( 0.4 ) Cynthic Babyck ( OH ) Fr. Jans Panels ( baptized at Somerset Medical Center ) Fun . Jones Panella
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 1315 4-296-21 Scott Michael Lawrence Kloss N. Brunswick | Shavon Sudol | Evan Kalenik ( Orthodox ) Fr. Janes Pansells
+ | - 1 9-18 / 11-8 Aquelie Edmaid Petro | Cynthia Petro | Mark Nevitt ( orthodox ) Anestesic Nevitt ( orthodox ) Fr. до Jones Panel
+ | Mave ( Somerville ) |  | Orthodoxy by Chrismation
+ | 12-20 Susan Gorbatuk |  | Received into 12-20-81 from Roman latin confession where 10-27-57 Fr. Jones Panell She was baptized on t

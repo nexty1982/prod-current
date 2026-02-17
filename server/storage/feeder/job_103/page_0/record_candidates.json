@@ -1,0 +1,51 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "1/11 6/15 6/15 Savah Dennis Fedechko Summit , N.J. Christina Coleman | Adam Fedechno Patricia Koop ( honorzy ) | Fr. Jas"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "9/28 Richard Received from the A. Catholic weber Confession by Confession , Chrismation + Eucharist | Gregoy Parsells Nectarios Parsells | Fr. Jas Jon Parell"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.67,
+      "fields": {
+        "notes": "2 | 11/30 Jerry Michael Received from the A. Gatholic Cirka Confession by Confession Communta + Euchrish | John Parsells | Fo Jon Parell"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.75,
+      "fields": {
+        "notes": "3 4 | 10/31 12/21 David Allen Todd Peterson 10/31 12/27 Tord mitthe Jill Filippin | Terri Filippini Larissa Matter | F. Jo Panel FA F. Jus Panels"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:49:20.343Z"
+}

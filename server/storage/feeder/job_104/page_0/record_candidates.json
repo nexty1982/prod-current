@@ -1,0 +1,68 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "- 7/30 Nabil Aafla | Church from the Coptic Church by Confession and Communion and ① Service of entrance ."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "notes": "1/23/7/31 Alexander 2 1987 Alexandria , Egypt Nabil + @man Rafk | Peter Parsells Gooboduk | into Orthodong by F1 . Jaes Parsells 2"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "notes": "6/14 7/31 Mautin Nabil d @man 92672 3 1988 Alexand Egypt | Tinotty | Fr Jaes Parsells Fr. Jones Parsells 3"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.82,
+      "fields": {
+        "notes": "4 8/13/10/16 Sophie Bakaletz Peter d Dolly Bakaletz | Paul Bakzletz Cynthia Niezes ( honorry ) | Fr. Jaes Pawells"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "notes": "New Bru 58/03/10/23 Amelia Fedechko Dennis Fedechlo Samnit Christina Coleman | Adam Fedech ko Patricia Kopp ( honory ) | Fr. Joes Pare Received into the Orthodox ( 6-"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.66,
+      "fields": {
+        "notes": "6 10s Darrin Seraphim Piczed | ! | Church from the methodist Confession by mysteries of Repentance , Communions Chrisanton бу Fr. Jues Parsells"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:49:22.454Z"
+}

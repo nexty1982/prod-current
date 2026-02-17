@@ -1,0 +1,90 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.82,
+      "fields": {
+        "child_name": "Nellie Buranove",
+        "godparents": "Levan Chuelidze",
+        "performed_by": "Fr. Jones Pawells",
+        "notes": "BHAT BAPTISM CITY OF"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.74,
+      "fields": {
+        "child_name": "Nellie Baranovi z",
+        "godparents": "Levan Chuelidze",
+        "performed_by": "F. Jues Parells",
+        "notes": "10/10 3/04 Nicole Biancz Sengay + Galina Melnikov 1995 2000 Melnikor"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.73,
+      "fields": {
+        "notes": "2 6/07/3/09 Isabel Eve Sergy Galina Melnikow"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.74,
+      "fields": {
+        "performed_by": "Fr. Jas Panelle",
+        "notes": "1998 2000 Melnikov"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.9,
+      "fields": {
+        "notes": "3 | Michael Received into Orthodoxy by 4 / 23 / Communion and Chrisential"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.72,
+      "fields": {
+        "performed_by": "F = Jas Panelle",
+        "notes": "2000 Redmond Confession , from the Anglican community | |"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.77,
+      "fields": {
+        "child_name": "Austin Kacher",
+        "notes": "J | 12/24 Robert Ekman Received into Orthodoxy by Confession , Communion and Chrisnation from He Moravian community | D"
+      },
+      "sourceRowIndex": 7,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_4": "child_name",
+    "col_5": "godparents",
+    "col_6": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_7"
+  ],
+  "parsedAt": "2026-02-17T01:49:14.646Z"
+}

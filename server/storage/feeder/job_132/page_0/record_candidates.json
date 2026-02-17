@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "Feb. 27, 1949\nPART 1-BAPTISMS\nPARISH RECORD\nIN 31203\nNAME OF CHILD\nNAME OF PARENTS\nJohn\nAlexander\nAND.\nADDRESS\nRaisa\n(FATHER'S NAME)\nPulman\n(MOTHER'S NAME)\nHampton\nDATE OF BIRTH\nneww Jersey\n(NUMBER AN"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:18.906Z"
+}

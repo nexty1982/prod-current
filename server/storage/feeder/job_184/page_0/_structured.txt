@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+1 | JANA , | JOHN KULINA |  | NATALIE | 
+2 . 3 . | FEB 3,1914 MAY 26 | ROBERT EDWARD SANGSTER 6 DARTMOUTH AVE . SOMERVILLE , N.J. 33yes OLD PROTESTANT 2ND MARRIAGE STEVEN WELENTEYCHIK 44 BEAVERS ST . HIGH BRIDGE , NJ 08829 32 ORTHODOX 1ST . MARRIAGE | ROBERT G. & MARGARET ZELINSKY MICHAEL E VERA YANUSHKA | CHRISTINA AIVALIKLES 400 KENBURY DR . SOMERVILLE , N.J. 22 YRS . 020 ORTHODOX 1ST MARRIAGE WASHINGTON ELIZABETH VALLEY ANN ROAD HILL MARTINS VILLE , NJ . 38yes OLD ROMAN CATHOLIC 2nd . MARRIAGE | GEORGE OURANIA RAYMOND E ANNA GULICK .
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+TREVENEMENTS | PHILIP AND HELEN KULINA | ORTINDEX SACRAMENTAL MARRIAGE 05 PREVIOUSLY CONTRACTED MARRIAGE
+FR . EUGENE ARRIS FR . EUGENE TARRIS | DIANNE LIOTHAKE ANO HELEN AIVALIKLES MICHAEL WELENTEY CHIK AND ELEANOR GAIS | JANUARY 3 , 1974 4-74 ( BRIDGEWATER ) CERT NO 7 -1 MAY 21 , 1974 67-74 ( BRIDGEWATER ) CERT . NO . 74-2 .

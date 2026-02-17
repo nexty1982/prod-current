@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.76,
+      "fields": {
+        "groom_name": "JUNE 15 , 1968 Rocco V MARY ( AGE 25 BORN - RES . 10 Loomis BARBARA ANN MICHAEL & ANNA AGE - 20 BORN RES . SACRAMENTS 95 1 1968 By Auten Nov : JOHN WAYNE J. C MARY RES AGE , - 4124 21 BORD BARBARA PIONEER PETER - AGE OLGA RES 22 . . , SACRAMENTS PLAINFIELD Nov. 2 1968 By : FERDINAND RES AGE . 10 23 BORN + - KOVIN",
+        "bride_name": "SON Son SIBILIA , N.J. RAEITAN , N.J DAUGHTER OF SWENTICKY ) SOFKO BRUNSWICK , NJ . SOMERVILLE , N.J. Theodore Labowsky ) Son ATKINSON OF , W. Point PALM N.J BEACH , DAUGHTER ELIZABETH ) ALMOND OF PLAINFIELD H.S RIEGLER Theodore SON obsky NS RIEGLER OF",
+        "officiant": "Seccements",
+        "witnesses": "By : Father Theodore",
+        "notes": "groom_parents: PETERSIBILIA GOLIS ) RARITAN St. SOFKO ( - NEW Father Ste . M ( Atkinson CRAMNER LANE SOMERS ALMOND BORN KRENISKY Father ARE DOUGLAS J MASETTA WAY ,; bride_parents: FLA . .; license: Labourke ,"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.72,
+      "fields": {
+        "groom_name": "DARIA AGE JOSEPH - RES 20 & - : Sacraments 504 BORN By :",
+        "bride_name": "MALVERN PA KUZMIACK DAUGHTER OF . MANVILLE NEW ) HOLOVACH AVE JERSEY , Theodore MANVILLE . , Labowsky",
+        "notes": "groom_parents: MARY HOLOVACH WASHINGTON - Father; bride_parents: N.J"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:36.221Z"
+}

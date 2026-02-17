@@ -152,6 +152,129 @@ log_info() {
 }
 
 # ============================================================================
+# Git Guard — require a named branch with committed changes
+# Branch naming convention: feature/<username>/<date>/<description>
+# ============================================================================
+cd "$ROOT"
+
+# Get username for branch naming
+GIT_USERNAME=$(git config user.name 2>/dev/null | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-' || echo "")
+[[ -z "$GIT_USERNAME" ]] && GIT_USERNAME=$(whoami | tr '[:upper:]' '[:lower:]')
+TODAY=$(date '+%Y-%m-%d')
+
+# Branch naming pattern: feature/<username>/<date>/<description>
+BRANCH_PATTERN="^feature/[a-z0-9-]+/[0-9]{4}-[0-9]{2}-[0-9]{2}/[a-z0-9-]+$"
+
+validate_branch_name() {
+  local branch="$1"
+  if [[ "$branch" =~ $BRANCH_PATTERN ]]; then
+    return 0
+  fi
+  return 1
+}
+
+create_feature_branch() {
+  local description="$1"
+  # Sanitize description: lowercase, replace spaces with hyphens, remove invalid chars
+  local safe_desc=$(echo "$description" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+  [[ -z "$safe_desc" ]] && safe_desc="deploy"
+  local new_branch="feature/${GIT_USERNAME}/${TODAY}/${safe_desc}"
+  echo "$new_branch"
+}
+
+# 1. Check if on main or detached HEAD — prompt to create feature branch
+if [[ "$GIT_BRANCH" == "main" || "$GIT_BRANCH" == "HEAD" ]]; then
+  echo -e "${YELLOW}═══════════════════════════════════════════════════════════════${NC}"
+  echo -e "${YELLOW}  Branch Setup Required${NC}"
+  echo -e "${YELLOW}═══════════════════════════════════════════════════════════════${NC}"
+  echo ""
+  echo -e "You are on '${RED}${GIT_BRANCH}${NC}'. Deployments require a feature branch."
+  echo -e "Branch format: ${CYAN}feature/<username>/<date>/<description>${NC}"
+  echo ""
+  echo -e "Username: ${BOLD}${GIT_USERNAME}${NC}"
+  echo -e "Date:     ${BOLD}${TODAY}${NC} (auto)"
+  echo ""
+  
+  # Prompt for description
+  read -p "$(echo -e "${CYAN}Enter a brief description (e.g., fix-map-pins): ${NC}")" BRANCH_DESC
+  
+  if [[ -z "$BRANCH_DESC" ]]; then
+    echo -e "${RED}✗ Description is required.${NC}" >&2
+    exit 1
+  fi
+  
+  NEW_BRANCH=$(create_feature_branch "$BRANCH_DESC")
+  echo ""
+  echo -e "Creating branch: ${GREEN}${NEW_BRANCH}${NC}"
+  
+  # Stage all changes and create branch
+  if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
+    echo -e "${CYAN}→${NC} Staging uncommitted changes..."
+    git add -A
+    
+    read -p "$(echo -e "${CYAN}Commit message (or press Enter to use description): ${NC}")" COMMIT_MSG
+    [[ -z "$COMMIT_MSG" ]] && COMMIT_MSG="$BRANCH_DESC"
+    
+    git commit -m "$COMMIT_MSG"
+    echo -e "${GREEN}✓${NC} Changes committed"
+  fi
+  
+  git checkout -b "$NEW_BRANCH"
+  echo -e "${GREEN}✓${NC} Switched to branch: ${BOLD}${NEW_BRANCH}${NC}"
+  echo ""
+  
+  # Update branch variable
+  GIT_BRANCH="$NEW_BRANCH"
+  GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+
+# 2. Check if current branch matches naming convention
+elif ! validate_branch_name "$GIT_BRANCH"; then
+  echo -e "${YELLOW}═══════════════════════════════════════════════════════════════${NC}"
+  echo -e "${YELLOW}  Branch Naming Convention${NC}"
+  echo -e "${YELLOW}═══════════════════════════════════════════════════════════════${NC}"
+  echo ""
+  echo -e "Current branch '${RED}${GIT_BRANCH}${NC}' does not match required format."
+  echo -e "Required: ${CYAN}feature/<username>/<date>/<description>${NC}"
+  echo -e "Example:  ${CYAN}feature/${GIT_USERNAME}/${TODAY}/fix-map-pins${NC}"
+  echo ""
+  
+  read -p "$(echo -e "${CYAN}Create a new branch? [y/N]: ${NC}")" CREATE_NEW
+  
+  if [[ "$CREATE_NEW" =~ ^[Yy]$ ]]; then
+    read -p "$(echo -e "${CYAN}Enter description: ${NC}")" BRANCH_DESC
+    
+    if [[ -z "$BRANCH_DESC" ]]; then
+      echo -e "${RED}✗ Description is required.${NC}" >&2
+      exit 1
+    fi
+    
+    NEW_BRANCH=$(create_feature_branch "$BRANCH_DESC")
+    echo -e "Creating branch: ${GREEN}${NEW_BRANCH}${NC}"
+    
+    git checkout -b "$NEW_BRANCH"
+    echo -e "${GREEN}✓${NC} Switched to branch: ${BOLD}${NEW_BRANCH}${NC}"
+    
+    GIT_BRANCH="$NEW_BRANCH"
+    GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+  else
+    echo -e "${RED}✗ Deploy blocked: branch naming convention not met.${NC}" >&2
+    exit 1
+  fi
+fi
+
+# 3. Working tree must be clean (no uncommitted changes)
+if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
+  echo -e "${RED}✗ Deploy blocked: uncommitted changes detected.${NC}" >&2
+  echo -e "  Commit your work before deploying:" >&2
+  echo -e "    ${CYAN}git add -A && git commit -m \"description of changes\"${NC}" >&2
+  echo ""
+  git status --short >&2
+  exit 1
+fi
+
+log_info "Git branch: ${BOLD}$GIT_BRANCH${NC} (${GIT_COMMIT})"
+
+# ============================================================================
 # Start
 # ============================================================================
 LABEL="all"

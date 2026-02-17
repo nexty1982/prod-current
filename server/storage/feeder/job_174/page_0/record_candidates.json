@@ -1,0 +1,41 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "notes": "BAPTISMS 37376 SKIRZENSK ANTHONY SKIRZENSEL SKIRZENSKL AVE 1965 ) STATE ° N NAME NAME , ) ) CITY , STREET N.J. | N.J 6,1966 RECTOR PAUL , STATE ) LASIK ( RUNGE | 37375 CARNEY CARNITY 10.7 STATE , 26,1966 1966 1966 26 PAUL wooker NJ AV STATE CARNEY RECTOR ) ) : ("
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.88,
+      "fields": {
+        "notes": "- RECORD DAVID STEPHEN FATHER'S MART MOTHER'S HARAN AND SEPT 1 PART ( ( 940 NUMBER ( | Nov. CHURCH SOMERVILLE ' ALEXANDER * етал CITY BY ) AND ( ( PERFORMED | BAPTISMS N DAVID JERRY FATHER'S NAME CRISICKo ) MOTHER'S NAME Box STREET CITY , ) JERRY , ELIZABETH AND Араа APRIL AND BRUNS 55 CHURCH BORKS RUTAR D ) 1 BY ( ( )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "notes": "PARISH CHILD PARENTS ANN ADDRESS MANVILLE BIRTH OF NAME NAME OF AND OF . DATE | BAPTISM CONFIRMATION BIRTH OF PLACE OF PARENTS SLADIMIR KATHERINE DATE GOD SACRAMENTS AT . Fr. | PART RECORD PARENTS MARGARET CARNITY NUMBER долже BAPTISM AND PETER NEW CITY RD 1 CONFIRMATION ( ( PARISH CHILD ( NAME ADDRESS BIRTH 35 BIRTH NAME AND OF PLACE OF PARENTS LONA AT GOD SACRAMENTS PERFORMED Rev. FR- OF OF DATE OF DATE . V."
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:51:41.384Z"
+}

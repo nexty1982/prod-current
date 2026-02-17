@@ -1,0 +1,7 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 2 | Rows: 1
+
+--- Table 1 (2 columns, 2 rows) ---
+ | , 18099 Susko ) ) RECTOR SUSKO 1965 , 30 20,1965 . MANVILLE N.S. . ) ST ) ) SUSKO STATE ( STATE , BAPTISMS Νο MICHAEL FATHER'S ( 1 PART RECORD PETER STEPHEN NAME GRANTHER NAME CITY , J. Pol MOTHER'S STREET N. ( ( KNOPF ) Nov FEB PAUL BY ) of ( CITY GRENTHER SHARYK AND ( AND CHURCH NUMBER ( CHILD PARISH OF PARENTS OF ANNA 1314 . NAME NAME AND ADDRESS MANVILLE BIRTH PETER JA . BIRTH OF BAPTISM MARY PERFORMED OF SS OF thunder DATE DATE CONFIRMATION . AT PLACE PARENTS GOD SACRAMENTS Father
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | T

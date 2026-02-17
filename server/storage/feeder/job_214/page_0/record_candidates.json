@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "bride_name": "PREVIOUS PARENTS ulia Michael NAME OF Camp BRIDE Eugenio Rd ( NUMBER AND STREET OF BIRTH Manville ) BRIDE . Sept 2 , 1924 OF PREVIOUS MARRIAGES PARENTS Mary Nicholas",
+        "officiant": "AGE",
+        "witnesses": "PREVIOUS NAME and OF PARENTS Barbara Peter FULL RESIDENCE NAME OF 618 BRIDE DE Margaret St. ( NUMBER AND STREET ) ( PLACE OF BIRTH OF BRIDE 2 22 NUMBER OF PREVIOUS MARRIAGES NAME and OF PARENTS Mosel marbrite",
+        "notes": "groom_parents: NAME and OF FULL RESIDENCE PLACE AGE OF NUMBER NAME and OF; bride_parents: Havaled Fetchko Lebedo . M ( CITY ) N. ( STATE ) 18 . first Loback Lebedy; license: Pulysski Balzly Hellions Macey . CITY ) , ( STATE ) first Macey Seman ,"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.86,
+      "fields": {
+        "bride_name": "IN Малый PRESENCE OF WITNESSES ламини NAME ) NAME ) . . ( RECTOR ) 11 , PART II 1942 - MARRIAGES RECORD No Josesh OF 11th GROOM St. Manville ( NUMBER New AND STREET ) BIRTH York ( GROOM 25 PARENTS PREVIOUS MARRIAGES Joakim Chikajlo and OF East BRIDE Forothy NUM . Turnpike ER AND Yonkers STREET ) ( BIRTH BRIDE 21 . PARENTS PREVIOUS MARRIAGES Paul First Paulina PRESENCE OF WITNESSES ) Raslavski NAME ) ( RECTOR )",
+        "officiant": "FULL AGE NAME FULL AGE PLACE NAME 1 2",
+        "witnesses": "MARRIED Michael IN PRESENCE OF WITNESSES Lisey ( FULL NAME ) Allushi New ( FULL Herm NAME ) M. . Lotolgny ( RECTOR ) PART II 19. - бер . 1942 MARRIAGES . PARISH RECORD No NAME OF GROOM Charles RESIDENCE 10ave Mannille ( NUMBER AND PLACE OF BIRTH Elizabeth STREET ) ( , CITY OF GROOM 26. oct.21 NUMBER OF PREVIOUS MARRIAGES First OF Specian PARENTS Alexander Hrynewiz and RESIDENCE NAME : OF 17 BRIDE Julie So. hane Manville ( NUMBER AND STREET ) ( CITY OF OF BRIDE BIRTH 19 , July 15 NUMBER and OF OF PARENTS PREVIOUS MARRIAGES Mary Nazar First Howarn MARRIED IN PRESENCE OF Mary FULL NAME Ann Specimanville WITNESSES Stella ) Sulla ( FULL NAME ) ( RECTOR )",
+        "notes": "groom_parents: MARRIED 1 ( FULL 2 Mase ( FULL oct . PARISH FULL RESIDENCE NAME PLACE OF AGE OF NAME NUMBER mich OF OF FULL RESIDENCE NAME PLACE OF AGE OF NAME NUMBER and OF OF MARRIED IN 2 ( Helen FULL NAME ( FULL Per; bride_parents: : ( RESIDENCE ) ( RESIDENCE ) 40959 Seminek N.I. CITY ) , ( N.J. STATE ) First Semi Ksetica Kralovice Finderen . CITY ) RY ( STATE ) Kralovich Pazgay : ( RESIDENCE ) ( RESIDENCE ); license: : Cuty RESIDENCE DENCE ) ) Mark ( RESIDENCE ) 40958 Specian , N.I. ) M.J. ( STATE ) , ist 1916 Francis Shervarla , NY ) . STATED , 1923 Shervarla : ( Manville RESIDENCE ) , n.J. ( RESIDENCE )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 0.8,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:51.644Z"
+}

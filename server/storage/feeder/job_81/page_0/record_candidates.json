@@ -1,0 +1,21 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "notes": "Somerville , М.Г."
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2"
+  ],
+  "parsedAt": "2026-02-17T01:48:34.612Z"
+}

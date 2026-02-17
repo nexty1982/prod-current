@@ -1,0 +1,7 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 6 | Rows: 1
+
+--- Table 1 (6 columns, 2 rows) ---
+ | Счета родив : Шихса . MALE NUMBER FEMALE | Мксац H AFHL BIRTH DATES BAPTISM | - > Имена родившихся NAME OF CHILD CITY OF BIRTH | I- BIRTHS KOHALEPROGH - TRENT МЕТРИЧЕСКОЙ КНИГИ и . Званіе , имя , отчество Вами Bkponeпoɛ * FATHER'S FULL NAME . Slaby Claudiz | I >> 89 YEAR НА ГОДА , ЧАСТЬ ПЕРЕАМ , О РОДИЕШИХСМ . родителей , и как Званіе , има , отчетко и фамил Кто совершаль таинство AAHIA . воспрієминкова . крошенім .. MOTHER'S MAIDEN NAME FULL NAMES OF SPONSORS PRIEST'S NAME ( Paulik ) Paulik Fr. Jana Parsells
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | - | 87 | Christopher | Arnold | Stephanie Received into Orthodoxy by Chrismation on Aug. 24th from Roman Catholicism where he was baptized on

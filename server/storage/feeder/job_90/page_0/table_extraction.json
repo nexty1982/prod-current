@@ -1,0 +1,177 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "Счета родив : Шихса . MALE NUMBER FEMALE"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Мксац H AFHL BIRTH DATES BAPTISM"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "- > Имена родившихся NAME OF CHILD CITY OF BIRTH"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "I- BIRTHS KOHALEPROGH - TRENT МЕТРИЧЕСКОЙ КНИГИ и . Званіе , имя , отчество Вами Bkponeпoɛ * FATHER'S FULL NAME . Slaby Claudiz"
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "I >> 89 YEAR НА ГОДА , ЧАСТЬ ПЕРЕАМ , О РОДИЕШИХСМ . родителей , и как Званіе , има , отчетко и фамил Кто совершаль таинство AAHIA . воспрієминкова . крошенім .. MOTHER'S MAIDEN NAME FULL NAMES OF SPONSORS PRIEST'S NAME ( Paulik ) Paulik Fr. Jana Parsells"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "-",
+              "confidence": 0.92,
+              "token_count": 1,
+              "bbox": [
+                0.09110576923076923,
+                0.3817307692307692,
+                0.09278846153846154,
+                0.3891025641025641
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "87",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.14038461538461539,
+                0.39294871794871794,
+                0.15216346153846153,
+                0.4048076923076923
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "Christopher",
+              "confidence": 0.79,
+              "token_count": 1,
+              "bbox": [
+                0.18533653846153847,
+                0.36025641025641025,
+                0.240625,
+                0.38301282051282054
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Arnold",
+              "confidence": 0.66,
+              "token_count": 1,
+              "bbox": [
+                0.2668269230769231,
+                0.35705128205128206,
+                0.29903846153846153,
+                0.38044871794871793
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "Stephanie Received into Orthodoxy by Chrismation on Aug. 24th from Roman Catholicism where he was baptized on",
+              "confidence": 0.88,
+              "token_count": 17,
+              "bbox": [
+                0.49254807692307695,
+                0.3541666666666667,
+                0.7387019230769231,
+                0.44358974358974357
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.045
+    ],
+    "col_2": [
+      0.045,
+      0.1175
+    ],
+    "col_3": [
+      0.1175,
+      0.17
+    ],
+    "col_4": [
+      0.17,
+      0.255
+    ],
+    "col_5": [
+      0.255,
+      0.395
+    ],
+    "col_6": [
+      0.395,
+      1
+    ]
+  },
+  "columns_detected": 6,
+  "header_y_threshold": 0.3630128205128205,
+  "total_tokens": 117,
+  "data_tokens": 21,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:48:50.526Z"
+}

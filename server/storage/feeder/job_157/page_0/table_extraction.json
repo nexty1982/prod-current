@@ -1,0 +1,437 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 6,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "18051 BAPTISMS No Nevitt J. - 1 PART RECORD 1961 1966 PARISH FEB 18054 BAPTISMS No 1 PART RECORD"
+            },
+            {
+              "row_index": 0,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "Nevitt ) NAME Christine FATHER'S ( Barth CHILD Richard OF PARENTS OF NAME NAME a Homyal от ) No NAME ( Joseph Joseph FATHER'S CHILD PARENTS OF"
+            },
+            {
+              "row_index": 0,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": ") NAME Ave MOTHER'S ff ( Tessie . AND ) yak NAME H om MOTHER'S ( Anne"
+            },
+            {
+              "row_index": 0,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "Archi ) STATE , CITY . Huff STREET AND NUMBER ( ADDRESS R ) STATE N.J. , CITY . Mills STREET AND NUMBER ("
+            },
+            {
+              "row_index": 0,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": ". ) RECTOR ) 1961 STATE ( ha amcio RECTOR 18052 You ) 25 , 1961 ) 19 Pa Wigodins NAME MOTHER'S Road STATE , CITY .M.J 05,1961 STATE ( , NAME STREET ) ( AND 19,1953 CHURCH Goble ( Goble BY Feb and No ) CHURCH Br Anthony ) Barthus Ros BY 1 ( ( Peter New CITY Mary PERFORMED BAPTISMS Ste RECORD SACRAMENTS Rev PART Stew FATHER'S ( NUMBER ( Alexandra moul on June AND March BIRTH OF Peter's AND BIRTH BIRTH James PERFORMED BAPTISM BIRTH OF ADDRESS то BAPTISM Jame OF . DATE DATE CONFIRMATION Stste OF PARENTS Delores OF OF NO AND AT PLACE GOD SACRAMENTS . DATE DATE CONFIRMATION St AT PLACE PARENTS CHILD PARENTS PARISH OF OF GOD NAME NAME ) RECTOR 2 ) . 10 Jersey STATE ( 18053 No Brabson ) vabson 41961 ) RECTOR ) ( STATE 6 . STATE ) NAME CITY . NAME of Pal BY MOTHER'S ( RECORD Melany John FATHER'S ( CHURCH ) Bong ( CITY ( nk BAPTISMS STREET ) arn BY AND 23 r ( CHURCH ) ( CITY NUMBER ( Neu Feb AND OV16 Carney auic 1 0 . AND Ro 0 BIRTH BIRTH PERFORMED Poter PART OF OF State BAPTISM OF CONFIRMATION PARENTS Alice SACRAMENTS Rev CHILD PARISH OF PARENTS OF . NAME NAME Vera BIRTH ADDRESS Mov OF Peter BAPTISM BIRTH OF OF Julia PERFORMED AND DATE St DATE CONFIRMATION St . AT PLACE PARENTS GOD SACRAMENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "PARISH",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.16009615384615383,
+                0.5974358974358974,
+                0.16875,
+                0.6426282051282052
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "OF NAME NAME",
+              "confidence": 0.99,
+              "token_count": 3,
+              "bbox": [
+                0.19423076923076923,
+                0.6048076923076923,
+                0.21802884615384616,
+                0.6451923076923077
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": ". AND",
+              "confidence": 0.89,
+              "token_count": 2,
+              "bbox": [
+                0.24423076923076922,
+                0.6189102564102564,
+                0.24903846153846154,
+                0.6394230769230769
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "ADDRESS",
+              "confidence": 0.99,
+              "token_count": 1,
+              "bbox": [
+                0.2778846153846154,
+                0.596474358974359,
+                0.2841346153846154,
+                0.6381410256410256
+              ]
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "DATE ) adopted DATE AT PLACE . GOD (",
+              "confidence": 0.93,
+              "token_count": 9,
+              "bbox": [
+                0.31995192307692305,
+                0.5996794871794872,
+                0.42259615384615384,
+                0.6663461538461538
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "18055 Morenick orenick Lovenich RECTOR ) STATE St. ) STATE ( e , ) CITY ac Zvolenick meid",
+              "confidence": 0.89,
+              "token_count": 18,
+              "bbox": [
+                0.37115384615384617,
+                0.6826923076923077,
+                0.6879807692307692,
+                0.8016025641025641
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "BAPTISMS No Refer ) n NAME iwinsky NAME FATHER'S MOTHER'S reen , STREET AND ille are ert Ma ) CHURCH omervi John BY PERFORMED Ada a ) CITY a и AND ( ( (",
+              "confidence": 0.88,
+              "token_count": 34,
+              "bbox": [
+                0.3439903846153846,
+                0.7599358974358974,
+                0.6877403846153847,
+                0.844551282051282
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 4,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "RECORD ese PART PARENTS 1105 NUMBER Ma M se BAPTISM 2 BIRTH Heter S. 1 ( CHILD BIRTH ne . OF PARENTS Rev",
+              "confidence": 0.85,
+              "token_count": 23,
+              "bbox": [
+                0.3485576923076923,
+                0.8141025641025641,
+                0.6935096153846154,
+                0.8878205128205128
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "column_key": "col_3",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "column_key": "col_4",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 4,
+              "column_key": "col_5",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 5,
+              "column_index": 5,
+              "column_key": "col_6",
+              "content": "PARISH OF 9 NAME OF AND ADDRESS OF DATE CONFIRMATION PLACE SACRAMENTS OF NAME . DATE . AT GOD",
+              "confidence": 0.96,
+              "token_count": 19,
+              "bbox": [
+                0.3855769230769231,
+                0.8487179487179487,
+                0.6793269230769231,
+                0.9317307692307693
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.08
+    ],
+    "col_2": [
+      0.08,
+      0.18
+    ],
+    "col_3": [
+      0.18,
+      0.23
+    ],
+    "col_4": [
+      0.23,
+      0.2625
+    ],
+    "col_5": [
+      0.2625,
+      0.3
+    ],
+    "col_6": [
+      0.3,
+      1
+    ]
+  },
+  "columns_detected": 6,
+  "header_y_threshold": 0.6094871794871795,
+  "total_tokens": 442,
+  "data_tokens": 110,
+  "data_rows": 5,
+  "extracted_at": "2026-02-17T01:51:06.931Z"
+}

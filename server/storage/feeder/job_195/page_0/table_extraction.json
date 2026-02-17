@@ -1,0 +1,513 @@
+{
+  "layout_id": "marriage_ledger_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 4,
+      "column_count": 6,
+      "table_number": 1,
+      "has_header_row": true,
+      "header_content": "GurTZ BOAKORZ.|M.kcalz H Allb.|Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ.|H MATEOH.|M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ.|HALEHA OTILA H MATEOH.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "GurTZ BOAKORZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "M.kcalz H Allb."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 3,
+              "content": "H MATEOH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 4,
+              "content": "M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 5,
+              "content": "HALEHA OTILA H MATEOH."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "NUMBER"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "DATE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 3,
+              "content": "FIRST NAMES OF GROOM' S PARENTS"
+            },
+            {
+              "row_index": 1,
+              "column_index": 4,
+              "content": "FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE"
+            },
+            {
+              "row_index": 1,
+              "column_index": 5,
+              "content": "FIRST NAMES OF BRIDE'S PARENTS"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "32 Manville Orthodox 1st",
+              "confidence": 0.85,
+              "confidence_min": 0.77,
+              "token_count": 4,
+              "bbox": [
+                0.14447115384615383,
+                0.2900641025641026,
+                0.2848557692307692,
+                0.33974358974358976
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 3,
+              "content": "Vasil Klava",
+              "confidence": 0.96,
+              "confidence_min": 0.94,
+              "token_count": 2,
+              "bbox": [
+                0.3021634615384615,
+                0.2983974358974359,
+                0.3317307692307692,
+                0.3294871794871795
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 4,
+              "content": "Ekaterine Margizni Manville Orthodox",
+              "confidence": 0.79,
+              "confidence_min": 0.65,
+              "token_count": 4,
+              "bbox": [
+                0.359375,
+                0.3022435897435897,
+                0.47115384615384615,
+                0.3560897435897436
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 5,
+              "content": "32 Bukhuti Kadusha",
+              "confidence": 0.85,
+              "confidence_min": 0.83,
+              "token_count": 3,
+              "bbox": [
+                0.4733173076923077,
+                0.3096153846153846,
+                0.5254807692307693,
+                0.34134615384615385
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "1 r 1 1",
+              "confidence": 0.77,
+              "confidence_min": 0.47,
+              "token_count": 4,
+              "bbox": [
+                0.03942307692307692,
+                0.4044871794871795,
+                0.05264423076923077,
+                0.7483974358974359
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_integer"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "6/12 200S 11/26 2005 10/01 2006 1/2 2008 9/20 2009",
+              "confidence": 0.91,
+              "confidence_min": 0.6,
+              "token_count": 10,
+              "bbox": [
+                0.07427884615384615,
+                0.3971153846153846,
+                0.12115384615384615,
+                0.8836538461538461
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "John Parsells 27 Manville 1st Orthodox Janes Holot R.C. 43 Jerome c Stone Bc . Bridgewater and Timothy Gorbetur 25 / Manville 1st Onthodox John Finnigan 41 Berkey Heights R.C. 1st",
+              "confidence": 0.8,
+              "confidence_min": 0.31,
+              "token_count": 31,
+              "bbox": [
+                0.13221153846153846,
+                0.39775641025641023,
+                0.29375,
+                0.903525641025641
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 3,
+              "content": "Janes Daria Jerome Shirley Peter Susan John Herther",
+              "confidence": 0.83,
+              "confidence_min": 0.68,
+              "token_count": 8,
+              "bbox": [
+                0.28701923076923075,
+                0.40673076923076923,
+                0.33990384615384617,
+                0.8701923076923077
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 4,
+              "content": "Emily Joyce Strant 85 Somerville +51 Orthodox Natalie Trushova Orthodox Panela Marie Oliver 41 Bridgenoten Orthodox and Rebecca Morse Boyce Monmouth Junctia 26 Orthodox 15t Nino Kanchaveli Berkey Heights 36 2nd",
+              "confidence": 0.78,
+              "confidence_min": 0.45,
+              "token_count": 31,
+              "bbox": [
+                0.34326923076923077,
+                0.39455128205128204,
+                0.47836538461538464,
+                0.8778846153846154
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 5,
+              "content": "David DITOS Nicholzs eleme Jaes maria Nemo Neli",
+              "confidence": 0.76,
+              "confidence_min": 0.36,
+              "token_count": 8,
+              "bbox": [
+                0.4774038461538462,
+                0.4092948717948718,
+                0.520673076923077,
+                0.8560897435897435
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "row_count": 4,
+      "column_count": 3,
+      "table_number": 2,
+      "has_header_row": true,
+      "header_content": "Kro COREpINAAZ. TAHHCTEO.|KTO RMAH HO084HTEAH.|От какого числа и за какими No License.",
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 0,
+              "content": "Kro COREpINAAZ. TAHHCTEO."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 1,
+              "content": "KTO RMAH HO084HTEAH."
+            },
+            {
+              "kind": "columnHeader",
+              "row_index": 0,
+              "column_index": 2,
+              "content": "От какого числа и за какими No License."
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "content": "PRIEST'S NAME"
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "content": "WITNESSES NAMES"
+            },
+            {
+              "row_index": 1,
+              "column_index": 2,
+              "content": "DATE AND NUMBER OF LICENSE"
+            }
+          ]
+        },
+        {
+          "row_index": 2,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 2,
+              "column_index": 0,
+              "content": "Fr. Jaes Pa - sells",
+              "confidence": 0.64,
+              "confidence_min": 0.34,
+              "token_count": 5,
+              "bbox": [
+                0.5540865384615384,
+                0.3112179487179487,
+                0.6132211538461538,
+                0.34615384615384615
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 2,
+              "column_index": 1,
+              "content": "N. Murguliani Alexander Lomidze",
+              "confidence": 0.82,
+              "confidence_min": 0.71,
+              "token_count": 4,
+              "bbox": [
+                0.6449519230769231,
+                0.30480769230769234,
+                0.7576923076923077,
+                0.3400641025641026
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 2,
+              "column_index": 2,
+              "content": "Feb. 05 , 2001 мс 04-2001",
+              "confidence": 0.8,
+              "confidence_min": 0.54,
+              "token_count": 6,
+              "bbox": [
+                0.8415865384615384,
+                0.3157051282051282,
+                0.9189903846153846,
+                0.34455128205128205
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_license_format"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 3,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 3,
+              "column_index": 0,
+              "content": "Bishop Tikhon F.Jas Parsells F₁₂ for Panels F. Panele Fr. Jon Parels",
+              "confidence": 0.59,
+              "confidence_min": 0.44,
+              "token_count": 12,
+              "bbox": [
+                0.5461538461538461,
+                0.3996794871794872,
+                0.6240384615384615,
+                0.8391025641025641
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "Gregoy Parnells Anna Strent Daria Parsells John Zahodnich Petar Gonbaduy Patricia Sokol Nectarias Porals Jones Catherie Gorbeton John michel Finnigas Lali Utarashvili",
+              "confidence": 0.73,
+              "confidence_min": 0.39,
+              "token_count": 22,
+              "bbox": [
+                0.6403846153846153,
+                0.38846153846153847,
+                0.7769230769230769,
+                0.8487179487179487
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "May 20 , 2005 Somerville 47-20005 Civil marringe of 8/23/2003 in state of Georgis , blessed Sept. Bridgewater 77 # 2006-147 Oct. 20 # p MC 78-2008 Manville Aug 24 # 34-09 Berkey Heights",
+              "confidence": 0.81,
+              "confidence_min": 0.43,
+              "token_count": 34,
+              "bbox": [
+                0.8307692307692308,
+                0.378525641025641,
+                0.9699519230769231,
+                0.7990384615384616
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "number": [
+      0.02,
+      0.06
+    ],
+    "date": [
+      0.06,
+      0.125
+    ],
+    "groom": [
+      0.125,
+      0.29
+    ],
+    "groom_parents": [
+      0.29,
+      0.345
+    ],
+    "bride": [
+      0.345,
+      0.475
+    ],
+    "bride_parents": [
+      0.475,
+      0.55
+    ],
+    "priest": [
+      0.55,
+      0.645
+    ],
+    "witnesses": [
+      0.645,
+      0.825
+    ],
+    "license": [
+      0.825,
+      1
+    ]
+  },
+  "header_y_threshold": 0.295,
+  "total_tokens": 339,
+  "data_tokens": 188,
+  "data_rows": 2,
+  "extracted_at": "2026-02-17T01:52:19.871Z"
+}

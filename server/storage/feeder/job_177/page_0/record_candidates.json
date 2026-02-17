@@ -1,0 +1,45 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.83,
+      "fields": {
+        "notes": "37398 Orthodox , Gerasimus Sunday Manville , J. the RECTOR , Verrelli ) STATE ) 1941 Holy Easter Ma STATE ( hom Lauris ° , ) CITY , ) , | 37397 BREESE . BREESE SOMERSET . 1968 1969 PAUL NJ . STATE STATE KRIVOSHIK Labewake sky CRECTOR ) ) ( ,"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.91,
+      "fields": {
+        "date_of_baptism": "BAPTISMS - 1",
+        "notes": "N NAME Farfalla NAME ( Gerard Verrelly Gerard MOTHER'S Partridge STREET 26 the . FATHER'S , into Church ANG , May on forth CHURCH Catholic George Paul ) Somervalle BY ) ( NUMBER CITY A. ( ( ( | BAPTISMS 1 | N ° RICHARD RICHARD NAME CARNEU ) St. STREET CITY ) ) FATHER'S MOTHER'S NAME GREEN , 22 , ANIZ + BRUNSWICK BRABSON AND Ja PETER CHURCH ) BY ) ( CITY dele ("
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.94,
+      "fields": {
+        "date_of_baptism": "PART",
+        "notes": "RECORD PARISH CHILD PARENTS 10 Somerville Received ADDRESS BIRTH BAPTISM CONFIRMATION 19611 4 & PERFORMED ( April 13 , Peter BIRTH OF NAME NAME OF OF . AND DATE DATE SS AT PLACE OF PARENTS Roman Robert OF SACRAMENTS . GOD Ace | PART | RECORD JOHN PARENTS BREE ANNA 161 NUMBER Nov. AND ( NEW ( PETER CHILD BAPTISM PERFORMED ( PARISH AND ADDRESS BIRTH SS . BIRTH OF NAME NAME OF OF DATE OF CONFIRMATION OF PARENTS VERA DATE PLACE SACRAMENTS Father The . AT GOD"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_2": "date_of_baptism"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_3",
+    "col_4",
+    "col_5"
+  ],
+  "parsedAt": "2026-02-17T01:51:49.406Z"
+}

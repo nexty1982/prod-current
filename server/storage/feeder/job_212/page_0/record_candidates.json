@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.84,
+      "fields": {
+        "bride_name": "BIRTH Philadelitia 23 GROOM OF PREVIOUS MARRIAGES OF апта PARENTS ( Joseph Lovey NAME R. OF ... BRIDE 4 ( NUMBER AND STREET BIRTH Andron ) OF OF BRIDE 20 OF OF PREVIOUS MARRIAGES Nikola Katherine PARENTS khoa Joseph IN PRESENCE Bolita OF FULL Ben Albert ( AME ) M. Klimak FULL NAME ) Stor ( RECTOR ) PART II - Novem . 16 , PARISH RECORD",
+        "officiant": "N.I. )",
+        "witnesses": "PLACE BIRTH AGE OF GROOM 37 Manville NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Peter Alexandra FULL NAME OF BRIDE Helen RESIDENCE 139 S. Lincoln ( NUMBER AND PLACE OF Cabery STREET ry ) BIRTH AGE OF BRIDE 23 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Martin MARRIED IN Яна PRESENCE OF 1 Ronan ( FULL NAME ) B.T. Pawlik 2 ( FULL Reo NAME . ) ( RECTOR ) October PART II - MARRIAGES PARISH RECORD No",
+        "notes": "groom_parents: PLACE AGE OF NUMBER NAME FULL RESIDENCE PLACE AGE NAME NUMBER MARRIED 1 ( 2 А12 .; bride_parents: first Bamberski Shubert Konehuha Somervill ( CITY ) \" Pa ( STATE first Koruna h , Smarsh WITNESSES : ( RESIDENCE ) ( RESIDENCE ) MARRIAGES 1941 , . No 40951; license: , n.J поне Kulina Molovach Rukaswiet witz Ave , midaloser , , ( CITY ) n.J. ( STATE ) none Lusivity WITNESSES : - Manvelle - ( RESIDENCE Manville ) ( RESIDENCE luk ) 2 , 1948 40997"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "bride_name": "NAME OF GROOM Joseph 413 B.SH E. RESIDENCE ( • NUMBER AND OF 281 Unguary STREET ) BIRTH OF GROOM OF PREVIOUS MARRIAGES OF PARENTS Sofy Soty , Stefan NAME OF BRIDE Anma RESIDENCE Marwillen OF BIRTH ( NUMBER AND Ma STREET ) Manville OF BRIDE 27 OF PREVIOUS MARRIAGES OF PARENTS and Olga Mary IN Ku PRESENCE OF ( FULL Charks NAME ) Rawling ( FULL NAME ) ( RECTOR )",
+        "officiant": "Nr . STATE ) STATE ) ) )",
+        "witnesses": "FULL NAME OF GROOM N John RESIDENCE 105 Hirview ( NUMBER AND Jessey STREET ) PLACE OF BIRTH AGE OF GROOM 300 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Andrew ани FULL NAME OF BRIDE Jamesbury Adele RESIDENCE ( NUMBER AND STREET ) PLACE OF BIRTH Brony , AGE OF BRIDE 27 NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Vincenza Frank MARRIED IN PRESENCE OF WITNESSES 1 ( FULL NAME ) 2 ( FULL NAME ) Rev. Micholas J. ( RECTOR )",
+        "notes": "groom_parents: FULL PLACE AGE NUMBER NAME and FULL PLACE AGE NUMBER NAME lik MARRIED 1 2 Ren; bride_parents: Carmon Bound Brook , ( CITY ) Austria ( first Wassie Carmon Parlik .. ( CITY ) n ( . first tony Koway Paw- WITNESSES : ( RESIDENCE ( RESIDENCE; license: Kucharo Ave , Somewilll N.J .. City City ( CITY ) n . ( n.J. STATE ) once Femminisha Pucharz Pirrone , ( CITY D. ) s.z. n.Jo ( STATE ) mevaro Pirrone : ( RESIDENCE ) ( Turyluk RESIDENCE )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 0.8,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:48.214Z"
+}

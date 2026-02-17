@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.7,
+      "fields": {
+        "extractedText": "PART 1 BAPTISMS\nPARISH RECORD\nIN 31224\nPART 1-BAPTISMS\nPARISH RECORD\nNO 31219\nNAME OF CHILD\nNAME OF PARENTS\nAND.\nanet\narat Joseph\nSpas\nOlga\nADDRESS\n(FATHER'S NAME)\nNaruta\n(MOTHER'S NAME)\n183 Leghorn A"
+      },
+      "sourceRowIndex": -1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 0,
+  "columnMapping": {},
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:50:34.182Z"
+}

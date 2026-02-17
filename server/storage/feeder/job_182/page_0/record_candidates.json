@@ -1,0 +1,85 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.88,
+      "fields": {
+        "groom_name": "FREDERICK THEODORE 90 GORBATUK SOUTH , JR . 16TH MANVILLE AVENUE AGE , : 23 ( APRIL N.J.08835 25 , 1948 ) ORTHODOX CHRISTIAN 1ST MARRIAGE",
+        "bride_name": "CLAIRE MARY 149 SOUTH KROMBACH 9TH AVENUE AGE : MANVILLE 24 ( , N. FEBRUARY J.08835 ORTHODOX CHRISTIAN 3 , 1947 1ST MARRIAGE",
+        "date_of_marriage": "7-25-11",
+        "officiant": "REV . ROBERT A. GEORGE LEWIS",
+        "witnesses": "PETER GORBATUK 90 SOUTH 16TH AVENUE MANVILLE , N. J.08835 MISS DONNA MARIE MANTUSH 914 WEST FRONT STREET PLAINFIELD , N. J.",
+        "notes": "number: 15; groom_parents: FREDERICK OLGA; bride_parents: CHARLES ADELE ); license: No. JULY 58-71 22 , ( 1971 MANVILLE , N.T. )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.86,
+      "fields": {
+        "groom_name": "ALAN BRENT BEATTY 193 HANKEN RD . BOUND BROOK AGE : 25 PROTESTANT : METHODIST 1ST MARRIAGE",
+        "bride_name": "PATRICIA SOFRO 45 AUTEN AVE . , SOMERVILLE AGE : : 20 ORTHODOX 1ST MARRIAGE",
+        "date_of_marriage": "4-16-72",
+        "officiant": "REV . VADIM A. POGREBNIAK",
+        "witnesses": "MATUSHKA HELEN POGREBNIAK ALEXANDER PADLO",
+        "notes": "number: 16; groom_parents: JAMES BEATRICE; bride_parents: Mienark Амана; license: No. APRIL 24-72 16 , 1972 ( SOMERVILLE , N.J. )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.88,
+      "fields": {
+        "groom_name": "ROBERT RAYMOND SCHUBACH 57 MORGAN LANE , SOMERVILLE AGE : 36 and ORTHODOX MARRIAGE FRANK CHAPKOWSKI",
+        "bride_name": "house BERTHA KINER 1020 HUFF AVE . , MANVILLE AGE : 22 ORTHODOX 1st MARRIAGE MARY A. KULINA",
+        "date_of_marriage": "6-3-72",
+        "officiant": "REV . VADIM A. POGREBNIAK REV . VADIN A. POGREBNIAK",
+        "witnesses": "BARBARA KULICK MATUSHIKA HELEN POGREBNIAK HELEN KULINA PETER HNATUK",
+        "notes": "number: 117; groom_parents: WILLIAM DOROTHY Joun; bride_parents: GEORGE MARY JOSEPH ALICE; license: JUNE 3 , 1972 No. 36-72 ( MANVILLE , N.J. ) JULY 29 , 1972 No. 131-72 ( HILLSBOROUGH TOWNSHIP )"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.92,
+      "fields": {
+        "groom_name": "JOHN 26 WALLACE ST . EAST BRUNSWick , N.J. AGE : 22 ROMAN CATHOLIC 1ST MARRIAGE",
+        "bride_name": "107 SUNNYMEAD RD . SOMERVILLE , N.J. AGE : 20 ORTHODOX 1st MARRIAGE ANN O'ROURKE",
+        "date_of_marriage": "1-29-72",
+        "officiant": "REV . VADIM A.",
+        "witnesses": "CLARE E. COLLINS",
+        "notes": "number: 18; groom_parents: SYLVIA; bride_parents: VINCENT; license: FEBRUARY 24 , 1973 No. 1241 ( FRANKLIN TOWNSHIP )"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.88,
+      "fields": {
+        "groom_name": "Stephen JOHN SUSECK 27 CASTLETON Ave. SOMERSET , N.J. AGE : 27 ORTHODOX 1ST MARRIAGE",
+        "bride_name": "MAUREEN 696 E. 42nd Street BROOKLYN , N.Y. LAGE : 22 ROMAN CATHOLIC 1st MARRIAGE",
+        "date_of_marriage": "2-24-73",
+        "officiant": "POGREBNIAK",
+        "witnesses": "JOHN SUSECK JR .",
+        "notes": "groom_parents: JOHN MARY; bride_parents: NORA; license: 73-1"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:51:58.203Z"
+}

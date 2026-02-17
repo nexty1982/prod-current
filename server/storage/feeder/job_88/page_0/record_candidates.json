@@ -1,0 +1,81 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.74,
+      "fields": {
+        "child_name": "\" l 25 1/24 ач Alexandre 1986 1987 N. Brunswick",
+        "performed_by": "Fr. Alexander Warnecke",
+        "notes": "Fr. Dn Gregory Lapchuk Angyrz Lapchuk ( Warnecke ) | Michzel Soroke ( Orthodox ) Iree Gourusik"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.79,
+      "fields": {
+        "child_name": "56 2 Dec. 8 Feb. 8 Alexandra 1986 1987 ( Alexandriz ) N. Brunswick",
+        "performed_by": "F. Jones Parsells Panells Fr.",
+        "notes": "Stanley Bozintz Valerie Bozintz ( Ruhe ) | Dariz Parsells ( Orthodox ) Gorbatuk ( Orthodox )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "child_name": "Dec. 8 Feb. 8 Peter 3 1986 1987 ( Stanley ) N. Brunswick",
+        "performed_by": "FA . Jas Parsell",
+        "notes": "Stanley Bozintz Valerie Bozintz ( Rute ) | Peter Petro ( 0 - thalox )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.82,
+      "fields": {
+        "child_name": "ч Jan.23 Feb. 14 Sarah 1987 ( Amanda ) 1987",
+        "performed_by": "Fr. Java Parsell",
+        "notes": "Robert Kitz Anastasiz Kitzl Nevitt ) | Cynthia Peter Chabra ( Orthodox )"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.79,
+      "fields": {
+        "child_name": "July 10 Aug 9 Michzel 5 Somerville",
+        "notes": "Michael Chabuz Patricia Chabrz ( Perlack )"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.79,
+      "fields": {
+        "child_name": "6 June Sept Amanda = 20 N. Brunswick",
+        "performed_by": "Fr. • Java Jaws долж Parsels",
+        "notes": "Richard Heller Kristina ( Azdzzy ) | Stephanie Marulli ( Orthodox ) Thomas Aydzaj"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_2": "child_name",
+    "col_5": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:48:45.911Z"
+}

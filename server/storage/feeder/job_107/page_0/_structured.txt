@@ -1,0 +1,11 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 4 | Rows: 5
+
+--- Table 1 (4 columns, 6 rows) ---
+ | HWH HOHI BIRTHS ¡ HETPHчеCKSÅ KHHTH NA И Счеть родн Mkcaus и . родителей и , има , штчество замна , какого шихем . день Званіе вероисповеданию . Илина родившихся . MIA NUMBER DATES NAME M NAME OF CHILD NAME . MOTHER'S MAIDEN CITY OF BIRTH FATHER'S FULL | > M- YEAR 2008 года , ЧИСТЬ ПЕРКАМ , О W Званіе , има , отцветко и фамилі воспрієминкова . FULL NAMES OF SPONSORS | I- РОДИВШИХСМ . Кто совершаль таинство крошенім . PRIEST'S NAME
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | BALE FEMALE BIRTH BAPTISM |  | 
+ | Dec. July - Natalie Benjamin Francis Smith Palitto | Robert michael Palitto | Fn . Jues Parsells
+ | 14 31 Natasha 2005 2008 Snidh Salvador Christianz Catherre San |  | Parsells
+ | El Savadar | Yakaterina Khrona soru | Fr. Jaes
+ | Oct Nov Nikolas Janes Holot 2 4 29 Flemington Natalia Trusor2 2008 2008 |  | 

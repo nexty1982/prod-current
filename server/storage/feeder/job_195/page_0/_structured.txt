@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+ |  | 32 Manville Orthodox 1st | Vasil Klava | Ekaterine Margizni Manville Orthodox | 32 Bukhuti Kadusha
+1 r 1 1 | 6/12 200S 11/26 2005 10/01 2006 1/2 2008 9/20 2009 | John Parsells 27 Manville 1st Orthodox Janes Holot R.C. 43 Jerome c Stone Bc . Bridgewater and Timothy Gorbetur 25 / Manville 1st Onthodox John Finnigan 41 Berkey Heights R.C. 1st | Janes Daria Jerome Shirley Peter Susan John Herther | Emily Joyce Strant 85 Somerville +51 Orthodox Natalie Trushova Orthodox Panela Marie Oliver 41 Bridgenoten Orthodox and Rebecca Morse Boyce Monmouth Junctia 26 Orthodox 15t Nino Kanchaveli Berkey Heights 36 2nd | David DITOS Nicholzs eleme Jaes maria Nemo Neli
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+Fr. Jaes Pa - sells | N. Murguliani Alexander Lomidze | Feb. 05 , 2001 мс 04-2001
+Bishop Tikhon F.Jas Parsells F₁₂ for Panels F. Panele Fr. Jon Parels | Gregoy Parnells Anna Strent Daria Parsells John Zahodnich Petar Gonbaduy Patricia Sokol Nectarias Porals Jones Catherie Gorbeton John michel Finnigas Lali Utarashvili | May 20 , 2005 Somerville 47-20005 Civil marringe of 8/23/2003 in state of Georgis , blessed Sept. Bridgewater 77 # 2006-147 Oct. 20 # p MC 78-2008 Manville Aug 24 # 34-09 Berkey Heights

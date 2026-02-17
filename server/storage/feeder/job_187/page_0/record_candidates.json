@@ -1,0 +1,41 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "groom_name": "Stanley Bozinte Orthodox",
+        "bride_name": "Valerie Ruhe",
+        "date_of_marriage": "Oct 27",
+        "officiant": "Fr. Jares",
+        "witnesses": "Dariz Porsells",
+        "notes": "number: 1; groom_parents: Stanley; bride_parents: Paul; license: 234-84 Oct. 16 , 1989"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.84,
+      "fields": {
+        "bride_name": "Orthodox",
+        "date_of_marriage": "1984",
+        "officiant": "Parsells",
+        "notes": "groom_parents: ману; bride_parents: Viola; license: Certificate of Remarriage Furnkliia Township"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:06.141Z"
+}

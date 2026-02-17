@@ -1,0 +1,43 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.76,
+      "fields": {
+        "groom_name": "Robert Cruz Rangel No. Brunswick , N.J. 34 Roman Catholic and manlega",
+        "bride_name": "Rebecca Oliver No. Bruwer , N.J. 29 Orthoder 1st Mentage",
+        "date_of_marriage": "1 5/23",
+        "officiant": "Fr. Jans Parsells",
+        "witnesses": "Robert Mc Guire Catalin Chetryed",
+        "notes": "groom_parents: Cormin Thetsz; bride_parents: Neil Panela; license: May 05 , 2081 No. Bonsuck 21-046"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.79,
+      "fields": {
+        "groom_name": "Alexarden Richard Torvisi Ringoes , N.J. 27 0174000x 1st Marriage",
+        "bride_name": "Anne Catherine Burcz New Brunswick , N.J. 26 Ronen Catholic 1st . mariage",
+        "date_of_marriage": "2 5/30",
+        "officiant": "FL , Jaes Parsells",
+        "witnesses": "Nicholes Torrisi Kristine Hopkins .",
+        "notes": "groom_parents: Daniel Marla; bride_parents: Berjanin Chrutie; license: ту 25 , 2021 Erst Amwell Township 21-06"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:26.863Z"
+}

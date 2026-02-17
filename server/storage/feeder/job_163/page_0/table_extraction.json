@@ -1,0 +1,81 @@
+{
+  "layout_id": "generic_table_v1",
+  "page_number": 1,
+  "page_dimensions": {
+    "width": 4160,
+    "height": 3120
+  },
+  "tables": [
+    {
+      "row_count": 2,
+      "column_count": 2,
+      "table_number": 1,
+      "has_header_row": true,
+      "rows": [
+        {
+          "row_index": 0,
+          "type": "header",
+          "cells": [
+            {
+              "row_index": 0,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": ""
+            },
+            {
+              "row_index": 0,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": ", 18099 Susko ) ) RECTOR SUSKO 1965 , 30 20,1965 . MANVILLE N.S. . ) ST ) ) SUSKO STATE ( STATE , BAPTISMS Νο MICHAEL FATHER'S ( 1 PART RECORD PETER STEPHEN NAME GRANTHER NAME CITY , J. Pol MOTHER'S STREET N. ( ( KNOPF ) Nov FEB PAUL BY ) of ( CITY GRENTHER SHARYK AND ( AND CHURCH NUMBER ( CHILD PARISH OF PARENTS OF ANNA 1314 . NAME NAME AND ADDRESS MANVILLE BIRTH PETER JA . BIRTH OF BAPTISM MARY PERFORMED OF SS OF thunder DATE DATE CONFIRMATION . AT PLACE PARENTS GOD SACRAMENTS Father"
+            }
+          ]
+        },
+        {
+          "row_index": 1,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 1,
+              "column_index": 0,
+              "column_key": "col_1",
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null
+            },
+            {
+              "row_index": 1,
+              "column_index": 1,
+              "column_key": "col_2",
+              "content": "T",
+              "confidence": 0.48,
+              "token_count": 1,
+              "bbox": [
+                0.5764423076923076,
+                0.5769230769230769,
+                0.5795673076923077,
+                0.5814102564102565
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "column_bands": {
+    "col_1": [
+      0,
+      0.2875
+    ],
+    "col_2": [
+      0.2875,
+      1
+    ]
+  },
+  "columns_detected": 2,
+  "header_y_threshold": 0.5441025641025641,
+  "total_tokens": 101,
+  "data_tokens": 1,
+  "data_rows": 1,
+  "extracted_at": "2026-02-17T01:51:18.349Z"
+}

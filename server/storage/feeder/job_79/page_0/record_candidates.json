@@ -1,0 +1,45 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "performed_by": "PR . EVGENG D. TARRES CERT # 75 -1",
+        "notes": "| 12/31/772/19/18 KRISTINA ANN GEORGE BARNOSKY LAURA PIETROCHA SOMERVILLEN.J . ( ORTHODOX ) ( R.c. ) | THEODORE S. PIETRUCHA OLGA ( R.c. ) PISCADLO ( ORTHODOX )"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.79,
+      "fields": {
+        "performed_by": "FR . EUGENE D. TARRU Секти 28-2 FR , EUGENE D. TARRIS CERT # 78-3",
+        "notes": "2 . 7/15/788/21/78 ALLA ALISON PAIGE ALAN BEATTY PATRICIAMSOFK O SOMERVILLE , N.J. ( METHODIST ) ( ORTHODOX ) 3 7/31/78/9/10/18 REBECCA ANN SOMERVILLE N.J. PETER SIBILIA , BARBARA ORTHOOOK A. SOFRO ( R.C. ) ( ) | JAMES ( e.c. BEATTY NATALIE ) BREYAN ( OR THE Dox ) DENICE SALERNO ( R.C. ) ROBERT STEINKOPF ( R.C. PATRICIA ) M. BEATTY ( ORTANDOX )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.8,
+      "fields": {
+        "performed_by": "Fr. James Parsells",
+        "notes": "4 8/25/18 1/27/78 Richard Lawrence Richard Kloss New Brunswick N..J Orth Sharon ( ) Sudol , . ( orth ) | Robert Sudol Katherine Sudol"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_4": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:48:31.691Z"
+}

@@ -1,0 +1,41 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.76,
+      "fields": {
+        "notes": "4/15 4/07 Sophie Vasilisa Ronald Avelan | 2009/2012 New Brunsutck , Prulina Nasledysheva N.J. | Andrey Betzlete | Fr. J Paulle"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.72,
+      "fields": {
+        "notes": "2 4 / 19 / 6 / 09 / Kristabelle Timothy Ganbroduk 2012 Anna 2012 Brunswich Rebecce Maнe Воусе New N.J | Dolly Сомбо Theodorn Couts Syneon | Fr. Jon Pall"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.74,
+      "fields": {
+        "notes": "Maria Andrew Watson 3 7/23 / 22 Sonevnile NJ от Eugeniz watson"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {},
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:49:35.766Z"
+}

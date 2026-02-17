@@ -1,0 +1,40 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.87,
+      "fields": {
+        "groom_name": "Michael John Lewis Warrington Bucks , Pa .",
+        "bride_name": "Kyız Kulick Manville , N.J.",
+        "date_of_marriage": "8-17",
+        "officiant": "Fr. Janes Parsells",
+        "witnesses": "Anthony Уггде Larissa Kulick",
+        "notes": "number: 1; groom_parents: John; bride_parents: Basil B216212; license: 61-86 8-2-86 Manville , N.J."
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.81,
+      "fields": {
+        "groom_name": "23 Orthodox 1st Marriage",
+        "bride_name": "25 Orthodox 1st marriage",
+        "notes": "groom_parents: Irenz"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:08.584Z"
+}

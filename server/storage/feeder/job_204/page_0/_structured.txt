@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+ |  | JULY 20 , 1963 ANDREW H. 54226 A NDREW L. AGE 25 - RES 121 ANASTASIA ( THEODORG RES - UNION BORN AGE SACRAMENT OF | PHILLIPS PHILLIPS AND BORN MERCAR NANCY ) ADAM CHAK , N. J. 19- HORY Father Futbol | SON OF THERESA ( WADLAND ) NEWARK N.J. ST . , APT ZA ADAMCHAK DAUGHTER AND ANNA ( MACKK A DAN BORN - JERSEY CITY MATRIMONY de Fal | FORCE Of ) CHAK , HJ . only .
+ |  |  |  |  | 5 +
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+SEPTEMBER 54235- REB | 5,1964 STEPHEN SUDIA SON MICHAEL SUDIA AND ANNA ( RES . - 428 - B CEDAR GROVE , AGE 23 BIRTHPLACE LINDASMATTIOLI - DAUGHTER ANTHONY MATTION & . 135 GARDEN TERRACE , NIXON AGE 20 NEW SACRAMENT BY Father | OF ой STUBIAK ) SUDIA NEW SOMERSET , YORK N.J. CITY об JENNIE ( KATZ ) MATTION , N.J. YORK Theodorl Theodore CITY Sabawky
+SEPTEMBER OCTOBER 3 , 1964 74737 236 AND | JOHN KULINA , JR- JOHN RULINA , SR . AND NATALIE RES . - 1115 W. CAMPLAIN RD AGE 22 BORN - VICTORIA RICCARDI ANTHONY RICCARDI , AND JULIA Res . 919 BOSEL AVE . , AGE - Father 19 JERSEY Theodore CITY , - | SON F ( BAYKOWSKI ) KUGING , MANVILLE , N.J MANVILLE , N.J DAUGHTER OF DUDA PRESCOTT MANVILLE , N.J Labouch N.J.

@@ -1,0 +1,76 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.81,
+      "fields": {
+        "performed_by": "FR . EUGENE D. TARRIS CERTIL 76-1",
+        "notes": "11/6/95/1/18/16 ALYSE ANN PETER JOHN JEGOU ROMAN CATHOLIC JECOU SOMERVILLE , NJ . CAROL ANN KULINA ORTHODOX | ( JOHN NANCY JECOO JOAN ) ( R.C. KULINA ) ( OFTHNOG )"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.75,
+      "fields": {
+        "performed_by": "Fie EUGENE D , FARRIS",
+        "notes": "2 | 10/31/75/3/14/76 JOHN HENRY JOHN ROSOCHA ORTHODOX SOMERVILLE ROSOCHA , NJ . JOAN LECHINSKY ROMAN CATHOLIC | VINCENT ZAKARZEWSKI OR THUD of MAUREEN ZAKARZEWSKI OR TINDEX"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.87,
+      "fields": {
+        "performed_by": "CERT # 76--2 FR EUGENE D. TARRIS",
+        "notes": "3 | 4/13/765/22/76 JAMES MICHAEL PETER P. ZEBAN ZEBAN ORTHODOX SOMERVILLE , NJ . PHYLLIS J. JEWELL REFORMED | ( DONALD WILLIAM MACLEOD ) PROT . THERESA ANN MACLEOD ORTHODOX ."
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "performed_by": "FR . EUGENE D. TARRis",
+        "notes": "4 | 6/21/76/8/1/76 NICHOLAS KUCHAREWSKI , NICHOLAS KUCHAREWSKI OR THUQOX SOMERVILLE , N.J. SUZANNE ZEMRE PROTESTANT | ( RONALO ZEMKE ) R. CATHOLIC PATRICIA GOODWIN ORTHODOX"
+      },
+      "sourceRowIndex": 4,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.85,
+      "fields": {
+        "performed_by": "CERT # 76-4 FR . EUGENE D. TARRIS CERT # 76-5-",
+        "notes": "5 | 8/12/76/9/19/76 CHRISTOPHER EROH KULINA ROBERT JOSEPH KULINA OR THE D PRINCETON , NJ . SUE THOMPSON PROTESTANT | MARK PRIBISH ORTHODOX ( OCE LANGE ) PROTESTANT"
+      },
+      "sourceRowIndex": 5,
+      "needsReview": true
+    },
+    {
+      "recordType": "baptism",
+      "confidence": 0.84,
+      "fields": {
+        "performed_by": "FR . EUGENE D. TARRIS CERT # 76-6",
+        "notes": "6 9/25/16/10/3/76 EMILY SORRENTINO IRENE JAMES THELMA MICHAEL DALE PETERSON SORRENTING R.C. ORTHODOX | PETER JAMES PAMELA PETERSON ORTHODOX ECKERSLEY ORTHODOX"
+      },
+      "sourceRowIndex": 6,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_5": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:48:24.814Z"
+}

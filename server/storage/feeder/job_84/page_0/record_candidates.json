@@ -1,0 +1,26 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.78,
+      "fields": {
+        "performed_by": "Fr. Jana Parsells F .. Jas Parall",
+        "notes": "3 19 = , S1 Timothy - - 1 IS Somerville 2 9 \" Larissa 10 12 Somerville | Peter Gorbetuk , Susan Binkowski Michzel Fetchko , Cavol Lynn Mayver | Frederick Gorbatur Gorbeduk ( Orthodox ) Claire Helen Russo ( Orthodox )"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_5": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3",
+    "col_4"
+  ],
+  "parsedAt": "2026-02-17T01:48:39.709Z"
+}

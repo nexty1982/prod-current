@@ -1,0 +1,16 @@
+=== Structured Table Extraction (marriage_ledger_v1) ===
+Columns: ? | Rows: 2
+
+--- Table 1 (6 columns, 4 rows) ---
+GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
+1 | 1992 | Frank Mito ; Th 27 Ravida B. ( thotic | Frank Filipps | Larissa Kylick 27 Mancille D. Ardex | Basil Briberz
+1 1 1 1 >> | July 25 1993 June 22 1997 June 6 1999 Feb 20 2000 Oct 08 / 2000 | Victor Lindholm Jr. 41 Belle Mead Presbyterian Eric Eugene Kupersmith 27 Cherry Hill 1st Patrick J. Carroll 30 Somerville Robert Charles Erkman 50 Flemington 3rd Dig 7th Adventist Todd Alan Peterson 29 Butler 1st | victor La Mave Carl Judith / Jares Evelyn Donald Carole | Kristinz Aydzaj 37 Hillsborough Orthoday and marriage 29 Nicole Helene De Lanto Cherry Hill Orthodox 1st Mary B Kelly Yackovich Somerville Baubauz Lohsen 40 Bridgewater Orthday 1st Jill Ann Filippini 35 / Manville Orthodox and | John Olga Nicholas Jacquette Floyd mergent Atopere Jozn
+
+--- Table 2 (3 columns, 4 rows) ---
+Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
+------------------------------------------------------------------------------------------
+PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
+Jones | Opeke | # MC 67-92
+Fr. Jomes Parsells F. Jaes Parsells F. Janez Panels F. J Jas Райеве Fr. Jas Pandh | Johannz Rydzzj Terry Ash Eric Kristen Lupen De Laizto Deacon Paul Sokol Daviz Parsells Dezcon Paul Sokol Kathryn motorsloff Mark Applegit Teresz Filippini | # 93-98 Hillsborough # Cherry 97-136 Hill Civil Maige Blessed Babylon , NY Local District Register 5150 9703172 # 7-00 Bridgewate #mc 48-2000

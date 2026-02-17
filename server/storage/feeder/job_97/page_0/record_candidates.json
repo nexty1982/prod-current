@@ -1,0 +1,25 @@
+{
+  "candidates": [
+    {
+      "recordType": "baptism",
+      "confidence": 0.75,
+      "fields": {
+        "performed_by": "FA . Jas Parsells Fr. Jour Parnells",
+        "notes": "1 % Brian Justin Frederick i : a 210/30/17/28 Anna Gorbunov Vladimir Gorbunov Somerville Larisa Kovalenko | Aite of episcopaliza Holy Chrismation the confession . fron Sponsors : Austin Kachek / John Zehodnick viteli Gulco Tatiane koy коз Gulco"
+      },
+      "sourceRowIndex": 1,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "baptism",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "col_4": "performed_by"
+  },
+  "unmappedColumns": [
+    "col_1",
+    "col_2",
+    "col_3"
+  ],
+  "parsedAt": "2026-02-17T01:49:03.650Z"
+}

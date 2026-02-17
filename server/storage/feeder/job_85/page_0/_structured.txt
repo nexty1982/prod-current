@@ -1,0 +1,9 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 5 | Rows: 3
+
+--- Table 1 (5 columns, 4 rows) ---
+ | BIRTHS HISTPH4SCHOй GHACH NA Счета родив : Mecaus шнуса . и день Званіе , имя , отчество и . фамнала родителей Имена родившихс ' B - kρonenoɛ * дAHÍA . Kρetpe- WIH NUMBER DATES F XALE M NAME OF CHILD . MOTHER'S PENALE BIRTH NAME BAPETSM CITY OF BIRTH FATHER'S FULL | YEA R ГОДА , ЧИСТЬ , и какого Званіе , нам , MAIDEN NAME FULL NAMES | 84 ПЕРВАЯ , И отчетко и фамилі воспріблинкова . OF SPONSORS | РОДИВШИХСЯ . Кто совершаль таинство кроенім . PRIEST'S NAME
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | June Oct. Valerie ( Auhe ) Bozinta Paul Ruhe . - 28 2827 1954 1984 Viola Lunak Proviz , Ill . | Daria Parsells | ( Orthodox ) | Fr. Janes Parell
+ | July Oct. Natalia Stanley Bozintz | Dariz Parsells | ( Orthodox ) | Fr. Jones Parsells
+ | a 19 28 1984 1984 ( Natasha Noel ) Valerie Auhe Bozinta |  |  | 

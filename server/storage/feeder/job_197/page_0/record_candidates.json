@@ -1,0 +1,43 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.8,
+      "fields": {
+        "groom_name": "Scott Michael Kloss Lawrence Township 33 1st Marriege Orthodox",
+        "bride_name": "Catherine Ause Welssman Lzwverve Township 27 1st marrin8 Orthodox",
+        "date_of_marriage": "1 June 7",
+        "officiant": "Fr. Paniel Skvin",
+        "witnesses": "Richard Kloss Emily Perryman",
+        "notes": "groom_parents: Lawrence Shavon; bride_parents: Mentin Patelly; license: My 14 , 2015 # 9201 Township of Lawrence Aug 10 , 2015"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": false
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.85,
+      "fields": {
+        "groom_name": "Stephen Holland Tewksbury , N.J. Varney 51 1st marriage",
+        "bride_name": "Svetlana Malenkora Tewksbury , N.J. 39",
+        "date_of_marriage": "Aug 16",
+        "officiant": "Fr. Jaes Parsells",
+        "witnesses": "Alexanda Alvarado Irina Staina",
+        "notes": "number: 2; groom_parents: Eugene Auth; bride_parents: Leonif Tamara; license: # 16-2015 Township of Tewksbury"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": false
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 1,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:22.528Z"
+}

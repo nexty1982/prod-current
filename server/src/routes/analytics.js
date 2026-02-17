@@ -95,4 +95,27 @@ router.get('/us-churches', requireAuth, async (req, res) => {
   }
 });
 
+// GET /api/analytics/om-churches
+// Returns list of active OrthodoxMetrics churches with coordinates (for map pins)
+router.get('/om-churches', requireAuth, async (req, res) => {
+  try {
+    const { promisePool } = require('../config/db');
+
+    const [rows] = await promisePool.query(`
+      SELECT id, name, church_name, address, city, state, latitude, longitude
+      FROM churches 
+      WHERE is_active = 1 AND latitude IS NOT NULL AND longitude IS NOT NULL
+      ORDER BY state, city, name
+    `);
+
+    res.json({
+      total: rows.length,
+      churches: rows,
+    });
+  } catch (error) {
+    console.error('❌ Error fetching OM churches:', error);
+    res.status(500).json({ error: 'Failed to fetch OM churches' });
+  }
+});
+
 module.exports = router;

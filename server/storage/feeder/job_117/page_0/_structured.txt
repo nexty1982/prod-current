@@ -1,0 +1,14 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 5 | Rows: 8
+
+--- Table 1 (5 columns, 9 rows) ---
+ | Lussian Ortzales HM | Granaria HOHI htt BIRTHS МЕТРИЧЕСКОЙ КНИГИ Н | YEAR 2019 ГОДЪ , ЧАСТЬ ПЕРВАМ , О | РОДИВШИХСЯ .
+------------------------------------------------------------------------------------------------------------------------
+ | Счета родив : Месца шихся . и день | штчество и . Фамнага родителей , И Званіе , има , какого вероисповедания . | Званіе , имя , отчество и фамил воспрієминкова . | Кто совершаль таниство крашенім
+ | Мужеска Имена родившихся PVOU Женска ΠΟΛΑ рожда - . HIA забя . " . HIA |  |  | 
+ | NUMBER DATES NAME OF CHILD | FATHER'S FULL NAME . MOTHER'S MAIDEN NAME | FULL NAMES OF SPONSORS | PRIEST'S NAME
+ | M XALE FEMALE BIRTH BAPIESO CITY OF BIRTH M | " | Timothy is adult | Fr. Janez Parsells
+ | 5/25 Timothy - Zelinski |  | Daniel is adult | Fr. Jaes Pausells
+ | 5/25 Daniel 2 Donnelly |  |  | Received by Confession Eucharist / and
+ | 3 101 . Steven 15 Parlacoski |  |  | Chrismation from Fn R. C. Joes church . Parsells
+ | 8/09 492812 Genevieve Jith Scranton , PA | Robert Smith Stephanie Coleman | Marin Torris Austin Recher | .Fu . Jues Parselle

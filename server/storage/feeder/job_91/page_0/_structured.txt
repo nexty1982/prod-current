@@ -1,0 +1,10 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 3 | Rows: 4
+
+--- Table 1 (3 columns, 5 rows) ---
+ | 7- > > BIRTHS Han KRIPALEPHISH - TAVEMALTAY HISTPHчеCKSÅ KNHгA HA YEAR 90 1912 годъ , , YACTL NOPEAM , W и . , H KAK Счет родив : MkCaus родителей , Шихса . и день Званіе , има отчество замна Званіе , има , отчетко и фамил Имена родившихся B'kponeпORAAHIA . воспріємникова . . KOELPE- HIA NUMBER DATES FEMALE . SPONSORS M BIRTH BAPTISM NAME OF CHILD FATHER'S FULL NAME MOTHER'S MAIDEN NAME FULL NAMES OF XALE CITY OF BIRTH Kulick Larissa Kulick | I POZHEWHXCA . Кто совершаль таинство KOILUJEHIA .. PRIEST'S NAME Fr. Jas Parsells
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ | 12-8-891-27-90 Mark Mark New Brunswick Barbare ( Fetzko ) Kulick Nevitt | FA . Joe Parsells
+ | Matthew Robert Kitz s - a9 / 6-21 Anastasia ( Nevitt ) Kita Alexander 2 90 90 90 Somerville | Fr. Jas Panel Parsells
+ | Alpangy ( Adult Beption + Chrismation ) 3 8 - as John Tatiana ( Michel ) Hanse Stephen Mickel 90 | Fr. Jas
+ | 7-16 9-16 Elizabeth Hansen Robert Hansen 4 Somerville | 

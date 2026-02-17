@@ -1,0 +1,10 @@
+=== Structured Table Extraction (generic_table_v1) ===
+Columns: 3 | Rows: 4
+
+--- Table 1 (3 columns, 5 rows) ---
+ | - > - > BIRTHS YEAR 91 KMAHULLEPH036-18VERMEISTEN ГОДЪ ЧАСТЬ , KYAR HUTE PHOGH - МЕТРИЧЕСКОЙ КНИГИ НА , ПЕРВАМ О EN | I- РОДИВШИХСМ .
+----------------------------------------------------------------------------------------------------------------------------------------
+ | Счета родив Мксац Званіе има штчество и рамна родителей . , шихся . и день , , вкроисповедания . Званіе , има , отчество и фамилі Имена родившихся воспріємникова . | Кто совершаль таинство крашені ..
+ | Мужеска . . пола Женска . пола рожда HIA KOELPE- ні | 
+ | NUMBER FEMALE DATES MALE BIRTH BAPTISM NAME OF CHILD FATHER'S FULL NAME MOTHER'S . MAIDEN В NAME А FULL NAMES OF SPONSORS CITY OF BIRTH | PRIEST'S NAME
+ | дыа Mauk ( Tyler ) Mark Ryan - Ayan Ryan Samuel Fede Morristonn N.J. Linda Cowell al , Lisa Ann Ayan 91 | Fr. Jans Parselk

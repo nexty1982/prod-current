@@ -1,0 +1,37 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.88,
+      "fields": {
+        "officiant": "PLACE AGE OF NUMBER NAME FULL RESIDENCE PLACE AGE OF NUMBER NAME MARRIED 1 ( FULL 2 (",
+        "witnesses": "BIRTH GROOM . 18 Washington App арг , 1917 , OF PREVIOUS MARRIAGES Farming PARENTS and Joseph first OF Elizabeth Dum Lacricio Helen инт NAME OF BRIDE Manville . ( NUMBER AND STREET ) ( CITY ) OF BIRTH BRIDE March 30 , 1921 first OF PREVIOUS MARRIAGES OF Marchuk PARENTS . Michael and and Bethsa IN PRESENCE OF WITNESSES : NAME ) ( FULL NAME ) ( ( RECTOR )",
+        "notes": "license: DC . Marchuck N ( STATE ) Eva RESIDENCE ) RESIDENCE )"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.82,
+      "fields": {
+        "officiant": "FULL RESIDENCE AGE PLACE NUMBER NAME and FULL RESIDENCE PLACE AGE NAME NUMBER char MARRIED 1 ( 2 (",
+        "witnesses": "PART II - MARRIAGES PARISH RECORD N : NAME OF GROOK GROOM Harry W. Peck 106 Fairview ave . Somers ( NUMBER AND STREET Elizabeth ) ( CITY ) OF OF GROOM BIRTH May 28 Katherine Harry , 1913 . OF PREVIOUS MARRIAGES First OF PARENTS , Freund Peck NAME OF 106 BRIDE Olga Fairview are ( NUMBER AND Jersey STREET ) OF BIRTH City ( CITY ) OF BRIDE . J OF OF PARENTS PREVIOUS MARRIAGES and first and Ama ka IN PRESENCE OF WITNESSES : FULL NAME ) ( FULL NAME ) ( ( RECTOR )",
+        "notes": "license: 40975 . M .. NJ ( STATE ) , Kuchary somer . n . 7.1 ( STATE ) Ru- RESIDENCE ) RESIDENCE )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 0.8,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:57.118Z"
+}

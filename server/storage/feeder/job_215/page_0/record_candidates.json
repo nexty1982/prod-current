@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "recordType": "marriage",
+      "confidence": 0.81,
+      "fields": {
+        "bride_name": "BIRTH S. Plainfield GROOM PARENTS PREVIOUS Teresia Jamse MARRIAGES A NAME OF BRIDE v ( NUMBER AND STREET ) OF BIRTH 18 BRIDE OF PREVIOUS MARRIAGES Mary La Steve OF PARENTS le Anthony IN PRESENCE OF Pattone FULL NAME ) mage man For FULL NAME ) ( RECTOR ) PART II - Febr . 11. 194/3 . PARISH RECORD",
+        "officiant": ") . ) )",
+        "witnesses": "PLACE 20 NUMBER OF PREVIOUS MARRIAGES Andrew NAME 4 OF PARENTS Ekaterina . RESIDENCE al Ama FULL NAME OF BRIDE PLACE OF BIRTH ( NUMBER AND STREET Vintonia ) 18 AGE OF BRIDE PREVIOUS MARRIAGES NUMBER OF Mohe NAME OF Helen PARENTS Resko MARRIED Back IN PRESENCE OF WITNESSES 1 ( FULL Hi NAME ) Lerinsha 2 ( FULL NAME ) ( RECTOR ) PART II - PARISH RECORD",
+        "notes": "groom_parents: PLACE AGE OF NAME NUMBER and OF OF FULL RESIDENCE PLACE AGE OF NUMBER NAME MARRIED 2 ( (; bride_parents: Pellegrind .. ( CITY ) ( STATE Max WITNESSES : son ( vill RESIDENCE ) ( RESIDENCE MARRIAGES No 40963; license: none Oles Hiniak .. Rusoche n ( CITY ) PORTATE ) punche каке : ( RESIDENCE ) RESIDENCE ) MARRIAGES No 40962"
+      },
+      "sourceRowIndex": 2,
+      "needsReview": true
+    },
+    {
+      "recordType": "marriage",
+      "confidence": 0.84,
+      "fields": {
+        "bride_name": "RESIDENCE NAME OF SOUTH GROOM 11. ( NUMBER AND PLACE OF Manville STREET BIRTH 24 OF GROOM NUMBER OF PREVIOUS MARRIAGES NAME OF PARENTS Frank Seria FULL RESIDENCE NAME OF BRIDE BRIDE .cond Alice ( NUMBER AND PLACE OF BIRTH Clune AGE BRIDE 22 OF NUMBER OF PREVIOUS MARRIAGES NAME OF Julia PARENTS Andrew Julia Sabo MARRIED IN мето Joseph PRESENCE OF 1 2 ( FULL Julia NAME ) Galamba ( FULL NAME ) (",
+        "officiant": ", N. ( STATE ) Dalambs Manville , n . ) . ( STATE ) Dalambos n RESIDENCE ) RESIDENCE )",
+        "witnesses": "FULL NAME OF Smar GROOM St RESIDENCE ( NUMBER AND STREET Passaic ) PLACE OF BIRTH 38 AGE OF GROOM NUMBER OF PREVIOUS J MARRIAGES NAME + OF Elena PARENTS Hatt Mac FULL NAME OF BRIDE Island RESIDENCE ( NUMBER AND STREET PLACE OF BIRTH land 36 AGE OF BRIDE NUMBER OF PREVIOUS Augusta MARRIAGES NAME * OF PARENTS August MARRIED IN PRESENCE OF 1 ( FULL NAME ) 2 ( FULL NAME ) ( RECTOR",
+        "notes": "groom_parents: FULL AGE; bride_parents: A Dor , Manville ) ( , CITY ) N. none Semin Chikyalo an . Elizaber abeth STREET , ) ( Penn CITY ) . поне Semeruk WITNESSES : ( ( RECTORY; license: Manille n ( CITY ) n ( J STATE ) none machons Irons Heights Cuppers N ) ( CITY ) Alghts ( STATE R ) none Ачоно Cuppers WITNESSES : ( RESIDENCE ) ( RESIDENCE ) )"
+      },
+      "sourceRowIndex": 3,
+      "needsReview": true
+    }
+  ],
+  "detectedType": "marriage",
+  "typeConfidence": 0.805,
+  "columnMapping": {
+    "groom": "groom_name",
+    "bride": "bride_name",
+    "date": "date_of_marriage",
+    "priest": "officiant",
+    "witnesses": "witnesses"
+  },
+  "unmappedColumns": [],
+  "parsedAt": "2026-02-17T01:52:54.323Z"
+}
