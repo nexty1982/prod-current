@@ -262,14 +262,54 @@ elif ! validate_branch_name "$GIT_BRANCH"; then
   fi
 fi
 
-# 3. Working tree must be clean (no uncommitted changes)
+# 3. Working tree must be clean — prompt to commit if dirty
 if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
-  echo -e "${RED}✗ Deploy blocked: uncommitted changes detected.${NC}" >&2
-  echo -e "  Commit your work before deploying:" >&2
-  echo -e "    ${CYAN}git add -A && git commit -m \"description of changes\"${NC}" >&2
+  echo -e "${YELLOW}═══════════════════════════════════════════════════════════════${NC}"
+  echo -e "${YELLOW}  Uncommitted Changes Detected${NC}"
+  echo -e "${YELLOW}═══════════════════════════════════════════════════════════════${NC}"
   echo ""
-  git status --short >&2
-  exit 1
+  echo -e "Branch: ${BOLD}${GIT_BRANCH}${NC}"
+  echo ""
+
+  # Show a compact summary of changes
+  ADDED=$(git status --porcelain 2>/dev/null | grep -c '^??' || true)
+  MODIFIED=$(git status --porcelain 2>/dev/null | grep -c '^ M\|^M ' || true)
+  DELETED=$(git status --porcelain 2>/dev/null | grep -c '^ D\|^D ' || true)
+  echo -e "  ${GREEN}+${ADDED} added${NC}  ${CYAN}~${MODIFIED} modified${NC}  ${RED}-${DELETED} deleted${NC}"
+  echo ""
+  git status --short | head -20
+  TOTAL_CHANGES=$(git status --porcelain 2>/dev/null | wc -l)
+  if [[ $TOTAL_CHANGES -gt 20 ]]; then
+    echo -e "  ${BLUE}... and $((TOTAL_CHANGES - 20)) more${NC}"
+  fi
+  echo ""
+
+  read -p "$(echo -e "${CYAN}Commit all changes and deploy? [y/N]: ${NC}")" DO_COMMIT
+
+  if [[ "$DO_COMMIT" =~ ^[Yy]$ ]]; then
+    read -p "$(echo -e "${CYAN}Commit message: ${NC}")" COMMIT_MSG
+
+    if [[ -z "$COMMIT_MSG" ]]; then
+      echo -e "${RED}✗ Commit message is required.${NC}" >&2
+      exit 1
+    fi
+
+    echo ""
+    echo -e "${CYAN}→${NC} Staging all changes..."
+    git add -A
+    echo -e "${CYAN}→${NC} Committing..."
+    git commit -m "$COMMIT_MSG"
+    echo -e "${GREEN}✓${NC} Changes committed: ${BOLD}$(git rev-parse --short HEAD)${NC}"
+    echo ""
+
+    # Update commit hash for telemetry
+    GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+  else
+    echo ""
+    echo -e "${RED}✗ Deploy cancelled.${NC}" >&2
+    echo -e "  Commit manually and re-run, or choose 'y' to commit inline." >&2
+    exit 1
+  fi
 fi
 
 log_info "Git branch: ${BOLD}$GIT_BRANCH${NC} (${GIT_COMMIT})"
@@ -575,11 +615,28 @@ if $BUILD_BE; then
 fi
 
 # ============================================================================
-# Mark build as successful
+# Mark build as successful & increment build number
 # ============================================================================
 BUILD_SUCCESS=true
 stop_heartbeat
 emit_build_event "build_completed"
+
+# Track build number (resets after push to origin)
+BUILD_INFO_FILE="$ROOT/.build-info"
+APP_VERSION=$(grep '"version"' "$ROOT/package.json" | head -1 | sed 's/.*"version": *"\([^"]*\)".*/\1/')
+CURRENT_BUILD=0
+if [[ -f "$BUILD_INFO_FILE" ]]; then
+  CURRENT_BUILD=$(grep '^BUILD_NUMBER=' "$BUILD_INFO_FILE" | cut -d'=' -f2 || echo "0")
+fi
+NEW_BUILD=$((CURRENT_BUILD + 1))
+cat > "$BUILD_INFO_FILE" << EOF
+APP_VERSION=$APP_VERSION
+BUILD_NUMBER=$NEW_BUILD
+BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+GIT_BRANCH=$GIT_BRANCH
+GIT_COMMIT=$GIT_COMMIT
+EOF
+log_info "Build number: $APP_VERSION.$NEW_BUILD"
 
 # ============================================================================
 # Deployment Complete

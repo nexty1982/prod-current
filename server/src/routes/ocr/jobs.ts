@@ -462,7 +462,18 @@ function createRouters(upload: any) {
     try {
       const churchId = parseInt(req.params.churchId);
       const jobId = parseInt(req.params.jobId);
-      console.log(`[OCR Jobs] GET /api/church/${churchId}/ocr/jobs/${jobId}/image`);
+      const wantOriginal = req.query.original === 'true';
+      console.log(`[OCR Jobs] GET /api/church/${churchId}/ocr/jobs/${jobId}/image${wantOriginal ? ' (original)' : ''}`);
+
+      // Prefer preprocessed version unless ?original=true
+      if (!wantOriginal) {
+        const preprocPath = path.join(__dirname, '..', '..', '..', 'storage', 'feeder', `job_${jobId}`, 'page_0', 'preprocessed.jpg');
+        if (fs.existsSync(preprocPath)) {
+          res.setHeader('Content-Type', 'image/jpeg');
+          res.setHeader('Cache-Control', 'public, max-age=3600');
+          return fs.createReadStream(preprocPath).pipe(res);
+        }
+      }
 
       // Query PLATFORM DB — ocr_jobs lives in orthodoxmetrics_db
       const [rows] = await promisePool.query('SELECT filename FROM ocr_jobs WHERE id = ? AND church_id = ?', [jobId, churchId]);
@@ -1552,6 +1563,199 @@ function createRouters(upload: any) {
     } catch (error: any) {
       console.error('[ReextractRow] Error:', error);
       res.status(500).json({ error: 'Re-extract row failed', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // POST /jobs/:jobId/crop-reocr — Crop a region and re-OCR with Vision API
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/crop-reocr', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const { bbox } = req.body;
+
+      if (!jobId) return res.status(400).json({ error: 'jobId required' });
+      if (!bbox || typeof bbox.x_min !== 'number' || typeof bbox.y_min !== 'number'
+        || typeof bbox.x_max !== 'number' || typeof bbox.y_max !== 'number') {
+        return res.status(400).json({ error: 'bbox with x_min, y_min, x_max, y_max (fractional 0..1) required' });
+      }
+
+      console.log(`[CropReOCR] Job ${jobId}, bbox: ${JSON.stringify(bbox)}`);
+
+      // 1. Locate source image (same resolution logic as /jobs/:jobId/image)
+      const [rows] = await promisePool.query('SELECT filename, record_type FROM ocr_jobs WHERE id = ? AND church_id = ?', [jobId, churchId]);
+      if (!(rows as any[]).length) return res.status(404).json({ error: 'Job not found' });
+
+      const jobFilename = (rows as any[])[0].filename;
+      const recordType = (rows as any[])[0].record_type || 'unknown';
+
+      // Try preprocessed image first
+      let imagePath: string | null = null;
+      const preprocPath = path.join(__dirname, '..', '..', '..', 'storage', 'feeder', `job_${jobId}`, 'page_0', 'preprocessed.jpg');
+      if (fs.existsSync(preprocPath)) {
+        imagePath = preprocPath;
+      }
+
+      if (!imagePath) {
+        // Search standard upload locations
+        if (jobFilename.startsWith('/') && !jobFilename.startsWith('/uploads/') && !jobFilename.startsWith('/server/uploads/')) {
+          if (fs.existsSync(jobFilename)) imagePath = jobFilename;
+        }
+        if (!imagePath && (jobFilename.startsWith('/uploads/') || jobFilename.startsWith('/server/uploads/'))) {
+          const abs = path.join('/var/www/orthodoxmetrics/prod', jobFilename);
+          if (fs.existsSync(abs)) imagePath = abs;
+        }
+        if (!imagePath) {
+          const baseDirs = [
+            path.join('/var/www/orthodoxmetrics/prod/uploads', `om_church_${churchId}`),
+            path.join('/var/www/orthodoxmetrics/prod/server/uploads', `om_church_${churchId}`),
+          ];
+          for (const base of baseDirs) {
+            for (const sub of ['uploaded', 'processed']) {
+              const candidate = path.join(base, sub, jobFilename);
+              if (fs.existsSync(candidate)) { imagePath = candidate; break; }
+            }
+            if (imagePath) break;
+          }
+          if (!imagePath) {
+            const ocrCandidate = path.join('/var/www/orthodoxmetrics/prod/server/uploads', 'ocr', `church_${churchId}`, jobFilename);
+            if (fs.existsSync(ocrCandidate)) imagePath = ocrCandidate;
+          }
+        }
+      }
+
+      if (!imagePath) {
+        return res.status(404).json({ error: 'Source image not found on disk' });
+      }
+
+      // 2. Crop the image using sharp
+      const sharp = require('sharp');
+      const metadata = await sharp(imagePath).metadata();
+      const imgW = metadata.width!;
+      const imgH = metadata.height!;
+
+      const left = Math.round(Math.max(0, bbox.x_min) * imgW);
+      const top = Math.round(Math.max(0, bbox.y_min) * imgH);
+      const cropW = Math.round(Math.min(1, bbox.x_max) * imgW) - left;
+      const cropH = Math.round(Math.min(1, bbox.y_max) * imgH) - top;
+
+      if (cropW < 10 || cropH < 10) {
+        return res.status(400).json({ error: 'Crop region too small (min 10px)' });
+      }
+
+      const croppedBuffer = await sharp(imagePath)
+        .extract({ left, top, width: cropW, height: cropH })
+        .toBuffer();
+
+      console.log(`[CropReOCR] Cropped ${imgW}x${imgH} → ${cropW}x${cropH} from (${left},${top})`);
+
+      // 3. Send cropped image to Google Vision API
+      const vision = require('@google-cloud/vision');
+      const visionConfig: any = { projectId: process.env.GOOGLE_CLOUD_PROJECT_ID };
+      if (process.env.GOOGLE_VISION_KEY_PATH) visionConfig.keyFilename = process.env.GOOGLE_VISION_KEY_PATH;
+      else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) visionConfig.keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+      const client = new vision.ImageAnnotatorClient(visionConfig);
+
+      const VISION_TIMEOUT_MS = 60000;
+      const visionPromise = client.annotateImage({
+        image: { content: croppedBuffer },
+        imageContext: { languageHints: ['el', 'ru', 'en'] },
+        features: [{ type: 'DOCUMENT_TEXT_DETECTION' }],
+      });
+      const timeoutPromise = new Promise((_: any, reject: any) =>
+        setTimeout(() => reject(new Error(`Vision API timed out after ${VISION_TIMEOUT_MS / 1000}s`)), VISION_TIMEOUT_MS)
+      );
+      const [visionResult] = await Promise.race([visionPromise, timeoutPromise]) as any[];
+
+      const document = visionResult.fullTextAnnotation;
+      const fullText = document?.text || '';
+
+      // 4. Extract word-level tokens with positions relative to crop
+      const visionPages = document?.pages || [];
+      const tokens: Array<{ text: string; x_frac: number; y_frac: number }> = [];
+      for (const page of visionPages) {
+        for (const block of (page.blocks || [])) {
+          for (const para of (block.paragraphs || [])) {
+            for (const word of (para.words || [])) {
+              const wordText = (word.symbols || []).map((s: any) => s.text).join('');
+              const verts = word.boundingBox?.vertices || [];
+              if (verts.length >= 4) {
+                const cx = (verts[0].x + verts[2].x) / 2;
+                const cy = (verts[0].y + verts[2].y) / 2;
+                tokens.push({
+                  text: wordText,
+                  x_frac: cx / cropW,
+                  y_frac: cy / cropH,
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // 5. Map tokens to column bands if available
+      const fields: Record<string, string> = {};
+
+      // Load table_extraction.json for column bands
+      const tePath = path.join(
+        '/var/www/orthodoxmetrics/prod/server/storage/feeder',
+        `job_${jobId}`, 'page_0', 'table_extraction.json'
+      );
+      let columnBands: Record<string, number[]> = {};
+      if (fs.existsSync(tePath)) {
+        try {
+          const teJson = JSON.parse(fs.readFileSync(tePath, 'utf8'));
+          columnBands = teJson.column_bands || {};
+        } catch {}
+      }
+
+      if (Object.keys(columnBands).length > 0) {
+        // Map crop-relative x positions back to full-image x positions
+        for (const [colKey, band] of Object.entries(columnBands)) {
+          const [bandStart, bandEnd] = band as unknown as [number, number];
+          const colTokens = tokens.filter((t) => {
+            // Convert crop-relative x_frac to full-image fractional x
+            const fullX = bbox.x_min + t.x_frac * (bbox.x_max - bbox.x_min);
+            return fullX >= bandStart && fullX <= bandEnd;
+          });
+          colTokens.sort((a, b) => a.y_frac - b.y_frac || a.x_frac - b.x_frac);
+          const cellText = colTokens.map((t) => t.text).join(' ').trim();
+          if (cellText) fields[colKey] = cellText;
+        }
+      }
+
+      // 6. Save result to storage
+      const timestamp = Date.now();
+      const storageDir = path.join(
+        '/var/www/orthodoxmetrics/prod/server/storage/feeder',
+        `job_${jobId}`, 'page_0'
+      );
+      fs.mkdirSync(storageDir, { recursive: true });
+
+      const cropResultPath = path.join(storageDir, `crop_vision_${timestamp}.json`);
+      const cropResult = {
+        bbox,
+        text: fullText,
+        fields,
+        tokenCount: tokens.length,
+        cropDimensions: { width: cropW, height: cropH },
+        timestamp: new Date().toISOString(),
+      };
+      fs.writeFileSync(cropResultPath, JSON.stringify(cropResult, null, 2));
+
+      console.log(`[CropReOCR] Done. ${tokens.length} tokens, ${Object.keys(fields).length} fields mapped, saved to ${cropResultPath}`);
+
+      res.json({
+        success: true,
+        text: fullText,
+        fields,
+        bbox,
+        tokenCount: tokens.length,
+      });
+    } catch (error: any) {
+      console.error('[CropReOCR] Error:', error);
+      res.status(500).json({ error: 'Crop re-OCR failed', message: error.message });
     }
   });
 

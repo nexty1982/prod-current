@@ -10,29 +10,26 @@
  * - menu: Advanced settings menu with theme colors
  */
 
-import React, { useContext, useState } from 'react';
-import {
-  IconButton,
-  Tooltip,
-  Box,
-  Switch,
-  FormControlLabel,
-  Menu,
-  MenuItem,
-  Typography,
-  Divider,
-  Paper,
-  Stack,
-  Chip,
-} from '@mui/material';
-import {
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon,
-  Palette as PaletteIcon,
-  Settings as SettingsIcon,
-  Church as ChurchIcon,
-} from '@mui/icons-material';
 import { CustomizerContext } from '@/context/CustomizerContext';
+import {
+    DarkMode as DarkModeIcon,
+    LightMode as LightModeIcon,
+    Palette as PaletteIcon
+} from '@mui/icons-material';
+import {
+    Box,
+    Chip,
+    Divider,
+    FormControlLabel,
+    IconButton,
+    Menu,
+    MenuItem,
+    Stack,
+    Switch,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import React, { useContext, useState } from 'react';
 
 interface OrthodoxThemeToggleProps {
   showText?: boolean;
@@ -68,11 +65,12 @@ const OrthodoxThemeToggle: React.FC<OrthodoxThemeToggleProps> = ({
   };
 
   const themes = [
-    { key: 'BLUE_THEME', name: 'Traditional Blue', color: '#1976d2' },
-    { key: 'GREEN_THEME', name: 'Orthodox Green', color: '#1d442d' },
-    { key: 'PURPLE_THEME', name: 'Episcopal Purple', color: '#7b1fa2' },
-    { key: 'ORANGE_THEME', name: 'Warm Gold', color: '#f57c00' },
-    { key: 'AQUA_THEME', name: 'Peaceful Aqua', color: '#00acc1' },
+    { key: 'WHITE_THEME', name: 'Resurrection White', color: '#F5F5F0' },
+    { key: 'GREEN_THEME', name: 'Ordinary Time Green', color: '#A4C639' },
+    { key: 'PURPLE_THEME', name: 'Lenten Purple', color: '#6B2D75' },
+    { key: 'RED_THEME', name: 'Martyrs Red', color: '#B22234' },
+    { key: 'BLUE_THEME', name: 'Theotokos Blue', color: '#1E6B8C' },
+    { key: 'GOLD_THEME', name: 'Royal Gold', color: '#C9A227' },
   ];
 
   // Icon variant - simple toggle button

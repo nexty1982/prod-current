@@ -23,6 +23,7 @@
 import * as fs from 'fs';
 import type { Pool, RowDataPacket } from 'mysql2/promise';
 import * as path from 'path';
+import sharp from 'sharp';
 import { promisify } from 'util';
 import { classifyRecordType } from '../utils/ocrClassifier';
 
@@ -160,10 +161,119 @@ async function preprocessPage(
   const preprocPath = path.join(pageDir, 'preprocessed.jpg');
   mkdirp(pageDir);
 
+  let qualityScore = 0.85;
+
   if (fs.existsSync(page.input_path)) {
-    fs.copyFileSync(page.input_path, preprocPath);
+    try {
+      const meta = await sharp(page.input_path).metadata();
+      const origW = meta.width!;
+      const origH = meta.height!;
+
+      // Downscale for analysis (max 800px wide)
+      const analysisWidth = Math.min(origW, 800);
+      const scale = origW / analysisWidth;
+      const analysisHeight = Math.round(origH / scale);
+
+      const { data, info } = await sharp(page.input_path)
+        .resize(analysisWidth, analysisHeight, { fit: 'fill' })
+        .greyscale()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+
+      const pixels = data;
+      const w = info.width;
+      const h = info.height;
+      const THRESHOLD = 40;
+
+      // Row brightness profile
+      const rowAvg = new Float32Array(h);
+      for (let y = 0; y < h; y++) {
+        let sum = 0;
+        const offset = y * w;
+        for (let x = 0; x < w; x++) {
+          sum += pixels[offset + x];
+        }
+        rowAvg[y] = sum / w;
+      }
+
+      // Column brightness profile
+      const colAvg = new Float32Array(w);
+      for (let x = 0; x < w; x++) {
+        let sum = 0;
+        for (let y = 0; y < h; y++) {
+          sum += pixels[y * w + x];
+        }
+        colAvg[x] = sum / h;
+      }
+
+      // Find content bounds
+      let yMin = 0, yMax = h - 1, xMin = 0, xMax = w - 1;
+      while (yMin < h && rowAvg[yMin] < THRESHOLD) yMin++;
+      while (yMax > yMin && rowAvg[yMax] < THRESHOLD) yMax--;
+      while (xMin < w && colAvg[xMin] < THRESHOLD) xMin++;
+      while (xMax > xMin && colAvg[xMax] < THRESHOLD) xMax--;
+
+      // Scale back to original coordinates
+      let cropLeft = Math.floor(xMin * scale);
+      let cropTop = Math.floor(yMin * scale);
+      let cropRight = Math.ceil(xMax * scale);
+      let cropBottom = Math.ceil(yMax * scale);
+
+      // Add 2% padding
+      const padX = Math.round(origW * 0.02);
+      const padY = Math.round(origH * 0.02);
+      cropLeft = Math.max(0, cropLeft - padX);
+      cropTop = Math.max(0, cropTop - padY);
+      cropRight = Math.min(origW - 1, cropRight + padX);
+      cropBottom = Math.min(origH - 1, cropBottom + padY);
+
+      const cropW = cropRight - cropLeft + 1;
+      const cropH = cropBottom - cropTop + 1;
+      const areaRatio = (cropW * cropH) / (origW * origH);
+
+      // Compute quality score from mean brightness of detected region
+      let brightSum = 0, brightCount = 0;
+      for (let y = yMin; y <= yMax; y++) {
+        const offset = y * w;
+        for (let x = xMin; x <= xMax; x++) {
+          brightSum += pixels[offset + x];
+          brightCount++;
+        }
+      }
+      const meanBrightness = brightCount > 0 ? brightSum / brightCount : 128;
+      // Map brightness to quality: [60..100]=low, [100..200]=good, [200..240]=ok, [240+]=washed
+      if (meanBrightness < 60) {
+        qualityScore = 0.4;
+      } else if (meanBrightness < 100) {
+        qualityScore = 0.4 + (meanBrightness - 60) * (0.4 / 40); // 0.4 → 0.8
+      } else if (meanBrightness <= 200) {
+        qualityScore = 0.8 + (meanBrightness - 100) * (0.15 / 100); // 0.8 → 0.95
+      } else if (meanBrightness <= 240) {
+        qualityScore = 0.95 - (meanBrightness - 200) * (0.15 / 40); // 0.95 → 0.8
+      } else {
+        qualityScore = 0.6;
+      }
+      qualityScore = Math.max(0.3, Math.min(0.99, qualityScore));
+
+      const pipeline = sharp(page.input_path);
+      if (areaRatio > 0.10 && areaRatio < 0.95) {
+        console.log(`[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: cropping to ${Math.round(areaRatio * 100)}% of original (${cropW}x${cropH})`);
+        pipeline.extract({ left: cropLeft, top: cropTop, width: cropW, height: cropH });
+      } else {
+        console.log(`[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: area ratio ${Math.round(areaRatio * 100)}%, skipping crop`);
+      }
+
+      await pipeline
+        .normalize()
+        .sharpen()
+        .jpeg({ quality: 90 })
+        .toFile(preprocPath);
+
+    } catch (err: any) {
+      console.error(`[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: sharp failed, falling back to copy:`, err.message);
+      fs.copyFileSync(page.input_path, preprocPath);
+    }
   }
-  const qualityScore = 0.85; // placeholder until image quality analysis
 
   await tenantPool.execute(
     `UPDATE ocr_feeder_pages SET preproc_path = ?, quality_score = ?, updated_at = NOW() WHERE id = ?`,

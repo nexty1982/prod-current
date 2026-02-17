@@ -1,16 +1,16 @@
 const ThemeColors = [
   {
-    name: 'BLUE_THEME',
+    name: 'WHITE_THEME',
     palette: {
       primary: {
-        main: '#0074BA',
-        light: '#EFF9FF',
-        dark: '#006DAF',
+        main: '#F5F5F0',
+        light: '#FFFFFF',
+        dark: '#E8E8E3',
       },
       secondary: {
-        main: '#47D7BC',
-        light: '#EDFBF7',
-        dark: '#39C7AD',
+        main: '#C9A227',
+        light: '#F5EED6',
+        dark: '#B8931F',
       },
     },
   },
@@ -18,19 +18,14 @@ const ThemeColors = [
     name: 'GREEN_THEME',
     palette: {
       primary: {
-        main: '#0A7EA4',
-        light: '#F4F9FB',
-        dark: '#06769A',
+        main: '#A4C639',
+        light: '#E8F5C8',
+        dark: '#8DB32E',
       },
       secondary: {
-        main: '#CCDA4E',
-        light: '#FAFBEF',
-        dark: '#C3D046',
-      },
-      background: {
-        default: '#f8fffc',
-        dark: '#ffffff',
-        paper: '#ffffff',
+        main: '#F5F5F0',
+        light: '#FFFFFF',
+        dark: '#E8E8E3',
       },
     },
   },
@@ -38,44 +33,59 @@ const ThemeColors = [
     name: 'PURPLE_THEME',
     palette: {
       primary: {
-        main: '#763EBD',
-        light: '#F2ECF9',
-        dark: '#6E35B7',
+        main: '#6B2D75',
+        light: '#E8D6EB',
+        dark: '#5A2563',
       },
       secondary: {
-        main: '#95CFD5',
-        light: '#EDF8FA',
-        dark: '#8BC8CE',
+        main: '#C9A227',
+        light: '#F5EED6',
+        dark: '#B8931F',
       },
     },
   },
   {
-    name: 'ORANGE_THEME',
+    name: 'RED_THEME',
     palette: {
       primary: {
-        main: '#FA896B',
-        light: '#FBF2EF',
-        dark: '#F48162',
+        main: '#B22234',
+        light: '#F5D6DA',
+        dark: '#9E1E2E',
       },
       secondary: {
-        main: '#0074BA',
-        light: '#EFF9FF',
-        dark: '#006FB1',
+        main: '#C9A227',
+        light: '#F5EED6',
+        dark: '#B8931F',
       },
     },
   },
   {
-    name: 'CYAN_THEME',
+    name: 'BLUE_THEME',
     palette: {
       primary: {
-        main: '#01C0C8',
-        light: '#EBF9FA',
-        dark: '#00B9C0',
+        main: '#1E6B8C',
+        light: '#D6E8F0',
+        dark: '#1A5C7A',
       },
       secondary: {
-        main: '#FB9678',
-        light: '#FFF5F2',
-        dark: '#F48B6C',
+        main: '#C9A227',
+        light: '#F5EED6',
+        dark: '#B8931F',
+      },
+    },
+  },
+  {
+    name: 'GOLD_THEME',
+    palette: {
+      primary: {
+        main: '#C9A227',
+        light: '#F5EED6',
+        dark: '#B8931F',
+      },
+      secondary: {
+        main: '#1E6B8C',
+        light: '#D6E8F0',
+        dark: '#1A5C7A',
       },
     },
   },

@@ -202,30 +202,29 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
         position: 'relative',
       }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-          {/* Left: Title and Badge */}
+          {/* Left: Title and Name */}
           <Box sx={{ flex: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-              <ViewIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
-              <Typography variant={isMobile ? 'h6' : 'h5'} component="span" fontWeight="700">
-                {getRecordTypeDisplay()}
-              </Typography>
-              <Chip 
-                icon={<VerifiedIcon sx={{ fontSize: 16 }} />}
-                label="VERIFIED"
-                size="small"
-                sx={{ 
-                  bgcolor: 'rgba(76, 175, 80, 0.9)',
-                  color: 'white',
-                  fontWeight: 700,
-                  fontSize: '0.7rem',
-                  height: 24,
-                  '& .MuiChip-icon': { color: 'white' }
-                }}
-              />
-            </Box>
-            <Typography variant={isMobile ? 'body1' : 'h6'} sx={{ opacity: 0.95, fontWeight: 500 }}>
-              {getPersonName() || 'Unknown'}
+            <Typography variant="caption" component="div" sx={{ opacity: 0.8, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', fontSize: '0.7rem', mb: 0.5 }}>
+              {getRecordTypeDisplay()}
             </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ fontWeight: 700 }}>
+                {getPersonName() || 'Unknown'}
+              </Typography>
+              <Tooltip title={mode === 'view' ? 'Switch to Edit' : 'Switch to View'}>
+                <IconButton
+                  size="small"
+                  onClick={mode === 'view' ? handleEditClick : handleCancelEdit}
+                  sx={{
+                    bgcolor: 'rgba(255,255,255,0.15)',
+                    color: 'white',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' },
+                  }}
+                >
+                  {mode === 'view' ? <EditIcon sx={{ fontSize: 18 }} /> : <ViewIcon sx={{ fontSize: 18 }} />}
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
 
           {/* Right: Record Counter and Navigation */}

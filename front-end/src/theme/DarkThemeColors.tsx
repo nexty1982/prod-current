@@ -1,40 +1,40 @@
 const DarkThemeColors = [
   {
-    name: 'BLUE_THEME',
+    name: 'WHITE_THEME',
     palette: {
       primary: {
-        main: '#5D87FF',
-        light: '#253662',
-        dark: '#4570EA',
-        contrastText: '#ffffff',
+        main: '#F5F5F0',
+        light: '#3a3a3a',
+        dark: '#E8E8E3',
+        contrastText: '#1a1a1a',
       },
       secondary: {
-        main: '#49BEFF',
-        light: '#1C455D',
-        dark: '#23afdb',
+        main: '#C9A227',
+        light: '#3d3520',
+        dark: '#B8931F',
         contrastText: '#ffffff',
       },
       background: {
-        default: '#2A3447',
-        dark: '#2A3547',
-        paper: '#2A3447',
+        default: '#1a1a1a',
+        dark: '#1a1a1a',
+        paper: '#252525',
       },
     },
   },
   {
-    name: 'AQUA_THEME',
+    name: 'GREEN_THEME',
     palette: {
       primary: {
-        main: '#0074BA',
-        light: '#103247',
-        dark: '#006DAF',
+        main: '#A4C639',
+        light: '#2d3518',
+        dark: '#8DB32E',
         contrastText: '#ffffff',
       },
       secondary: {
-        main: '#47D7BC',
-        light: '#0C4339',
-        dark: '#39C7AD',
-        contrastText: '#ffffff',
+        main: '#F5F5F0',
+        light: '#3a3a3a',
+        dark: '#E8E8E3',
+        contrastText: '#1a1a1a',
       },
       background: {
         default: '#171c23',
@@ -47,15 +47,15 @@ const DarkThemeColors = [
     name: 'PURPLE_THEME',
     palette: {
       primary: {
-        main: '#763EBD',
-        light: '#26153C',
-        dark: '#6E35B7',
+        main: '#6B2D75',
+        light: '#2a1530',
+        dark: '#5A2563',
         contrastText: '#ffffff',
       },
       secondary: {
-        main: '#95CFD5',
-        light: '#09454B',
-        dark: '#8BC8CE',
+        main: '#C9A227',
+        light: '#3d3520',
+        dark: '#B8931F',
         contrastText: '#ffffff',
       },
       background: {
@@ -66,18 +66,18 @@ const DarkThemeColors = [
     },
   },
   {
-    name: 'GREEN_THEME',
+    name: 'RED_THEME',
     palette: {
       primary: {
-        main: '#0A7EA4',
-        light: '#05313F',
-        dark: '#06769A',
+        main: '#B22234',
+        light: '#3d1520',
+        dark: '#9E1E2E',
         contrastText: '#ffffff',
       },
       secondary: {
-        main: '#CCDA4E',
-        light: '#282917',
-        dark: '#C3D046',
+        main: '#C9A227',
+        light: '#3d3520',
+        dark: '#B8931F',
         contrastText: '#ffffff',
       },
       background: {
@@ -88,18 +88,18 @@ const DarkThemeColors = [
     },
   },
   {
-    name: 'CYAN_THEME',
+    name: 'BLUE_THEME',
     palette: {
       primary: {
-        main: '#01C0C8',
-        light: '#003638',
-        dark: '#00B9C0',
+        main: '#1E6B8C',
+        light: '#152535',
+        dark: '#1A5C7A',
         contrastText: '#ffffff',
       },
       secondary: {
-        main: '#FB9678',
-        light: '#40241C',
-        dark: '#F48B6C',
+        main: '#C9A227',
+        light: '#3d3520',
+        dark: '#B8931F',
         contrastText: '#ffffff',
       },
       background: {
@@ -110,18 +110,18 @@ const DarkThemeColors = [
     },
   },
   {
-    name: 'ORANGE_THEME',
+    name: 'GOLD_THEME',
     palette: {
       primary: {
-        main: '#FA896B',
-        light: '#402E32',
-        dark: '#F48162',
+        main: '#C9A227',
+        light: '#3d3520',
+        dark: '#B8931F',
         contrastText: '#ffffff',
       },
       secondary: {
-        main: '#0074BA',
-        light: '#082E45',
-        dark: '#006FB1',
+        main: '#1E6B8C',
+        light: '#152535',
+        dark: '#1A5C7A',
         contrastText: '#ffffff',
       },
       background: {
@@ -134,3 +134,4 @@ const DarkThemeColors = [
 ];
 
 export { DarkThemeColors };
+

@@ -105,7 +105,8 @@ router.put('/', requireAuth, async (req, res) => {
             church_affiliation,
             job_title,
             company,
-            phone
+            phone,
+            currency
         } = req.body;
 
         // Check if profile exists
@@ -121,7 +122,7 @@ router.put('/', requireAuth, async (req, res) => {
             const fieldMap = {
                 display_name, bio, location, website, birthday, status_message,
                 profile_theme, profile_image_url, cover_image_url,
-                church_affiliation, job_title, company, phone
+                church_affiliation, job_title, company, phone, currency
             };
 
             for (const [key, value] of Object.entries(fieldMap)) {
@@ -158,7 +159,7 @@ router.put('/', requireAuth, async (req, res) => {
             const fieldMap = {
                 display_name, bio, location, website, birthday, status_message,
                 profile_theme, profile_image_url, cover_image_url,
-                church_affiliation, job_title, company, phone
+                church_affiliation, job_title, company, phone, currency
             };
 
             // Map view column names to users table column names
@@ -266,6 +267,82 @@ router.put('/images', requireAuth, async (req, res) => {
     } catch (error) {
         console.error('Error updating profile images:', error);
         res.status(500).json({ success: false, message: 'Failed to update profile images' });
+    }
+});
+
+// Change password (self-service)
+router.put('/password', requireAuth, async (req, res) => {
+    try {
+        const userId = req.session?.user?.id || req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'User not authenticated' });
+        }
+
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+
+        // Validate inputs
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Current password, new password, and confirm password are required' 
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'New password and confirm password do not match' 
+            });
+        }
+
+        if (newPassword.length < 8) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'New password must be at least 8 characters long' 
+            });
+        }
+
+        // Get user's current password hash
+        const [users] = await getAppPool().query(
+            'SELECT password_hash FROM orthodoxmetrics_db.users WHERE id = ?',
+            [userId]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Verify current password
+        const bcrypt = require('bcrypt');
+        const isValidPassword = await bcrypt.compare(currentPassword, users[0].password_hash);
+        
+        if (!isValidPassword) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Current password is incorrect' 
+            });
+        }
+
+        // Hash new password
+        const saltRounds = 12;
+        const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+
+        // Update password
+        await getAppPool().query(
+            'UPDATE orthodoxmetrics_db.users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [newPasswordHash, userId]
+        );
+
+        console.log(`🔐 Password changed for user ${userId}`);
+
+        res.json({
+            success: true,
+            message: 'Password changed successfully'
+        });
+
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ success: false, message: 'Failed to change password' });
     }
 });
 

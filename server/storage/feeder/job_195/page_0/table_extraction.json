@@ -7,7 +7,7 @@
   },
   "tables": [
     {
-      "row_count": 4,
+      "row_count": 8,
       "column_count": 6,
       "table_number": 1,
       "has_header_row": true,
@@ -188,34 +188,30 @@
             {
               "row_index": 3,
               "column_index": 0,
-              "content": "1 r 1 1",
-              "confidence": 0.77,
-              "confidence_min": 0.47,
-              "token_count": 4,
+              "content": "1",
+              "confidence": 0.8,
+              "confidence_min": 0.8,
+              "token_count": 1,
               "bbox": [
-                0.03942307692307692,
+                0.04783653846153846,
                 0.4044871794871795,
-                0.05264423076923077,
-                0.7483974358974359
+                0.05096153846153846,
+                0.4205128205128205
               ],
-              "needs_review": true,
-              "reasons": [
-                "low_confidence",
-                "expected_integer"
-              ]
+              "needs_review": false
             },
             {
               "row_index": 3,
               "column_index": 1,
-              "content": "6/12 200S 11/26 2005 10/01 2006 1/2 2008 9/20 2009",
-              "confidence": 0.91,
-              "confidence_min": 0.6,
-              "token_count": 10,
+              "content": "6/12 200S",
+              "confidence": 0.89,
+              "confidence_min": 0.81,
+              "token_count": 2,
               "bbox": [
-                0.07427884615384615,
+                0.08269230769230769,
                 0.3971153846153846,
                 0.12115384615384615,
-                0.8836538461538461
+                0.43974358974358974
               ],
               "needs_review": true,
               "reasons": [
@@ -225,66 +221,60 @@
             {
               "row_index": 3,
               "column_index": 2,
-              "content": "John Parsells 27 Manville 1st Orthodox Janes Holot R.C. 43 Jerome c Stone Bc . Bridgewater and Timothy Gorbetur 25 / Manville 1st Onthodox John Finnigan 41 Berkey Heights R.C. 1st",
-              "confidence": 0.8,
-              "confidence_min": 0.31,
-              "token_count": 31,
+              "content": "John Parsells 27 Manville 1st Orthodox Janes Holot R.C.",
+              "confidence": 0.87,
+              "confidence_min": 0.66,
+              "token_count": 9,
               "bbox": [
-                0.13221153846153846,
+                0.1389423076923077,
                 0.39775641025641023,
-                0.29375,
-                0.903525641025641
+                0.2814903846153846,
+                0.5262820512820513
               ],
-              "needs_review": true,
-              "reasons": [
-                "low_confidence"
-              ]
+              "needs_review": false
             },
             {
               "row_index": 3,
               "column_index": 3,
-              "content": "Janes Daria Jerome Shirley Peter Susan John Herther",
-              "confidence": 0.83,
+              "content": "Janes Daria",
+              "confidence": 0.74,
               "confidence_min": 0.68,
-              "token_count": 8,
+              "token_count": 2,
               "bbox": [
-                0.28701923076923075,
+                0.3021634615384615,
                 0.40673076923076923,
                 0.33990384615384617,
-                0.8701923076923077
+                0.4391025641025641
               ],
               "needs_review": false
             },
             {
               "row_index": 3,
               "column_index": 4,
-              "content": "Emily Joyce Strant 85 Somerville +51 Orthodox Natalie Trushova Orthodox Panela Marie Oliver 41 Bridgenoten Orthodox and Rebecca Morse Boyce Monmouth Junctia 26 Orthodox 15t Nino Kanchaveli Berkey Heights 36 2nd",
-              "confidence": 0.78,
-              "confidence_min": 0.45,
-              "token_count": 31,
+              "content": "Emily Joyce Strant 85 Somerville +51 Orthodox Natalie Trushova",
+              "confidence": 0.74,
+              "confidence_min": 0.56,
+              "token_count": 9,
               "bbox": [
-                0.34326923076923077,
+                0.35384615384615387,
                 0.39455128205128204,
                 0.47836538461538464,
-                0.8778846153846154
+                0.5233974358974359
               ],
-              "needs_review": true,
-              "reasons": [
-                "low_confidence"
-              ]
+              "needs_review": false
             },
             {
               "row_index": 3,
               "column_index": 5,
-              "content": "David DITOS Nicholzs eleme Jaes maria Nemo Neli",
-              "confidence": 0.76,
+              "content": "David DITOS",
+              "confidence": 0.59,
               "confidence_min": 0.36,
-              "token_count": 8,
+              "token_count": 2,
               "bbox": [
-                0.4774038461538462,
+                0.4908653846153846,
                 0.4092948717948718,
                 0.520673076923077,
-                0.8560897435897435
+                0.44551282051282054
               ],
               "needs_review": true,
               "reasons": [
@@ -292,11 +282,420 @@
               ]
             }
           ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "content": "r",
+              "confidence": 0.47,
+              "confidence_min": 0.47,
+              "token_count": 1,
+              "bbox": [
+                0.03942307692307692,
+                0.5282051282051282,
+                0.05264423076923077,
+                0.5423076923076923
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence",
+                "expected_integer"
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "content": "11/26 2005",
+              "confidence": 0.96,
+              "confidence_min": 0.94,
+              "token_count": 2,
+              "bbox": [
+                0.08221153846153846,
+                0.5221153846153846,
+                0.11586538461538462,
+                0.5615384615384615
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "content": "43 Bc .",
+              "confidence": 0.63,
+              "confidence_min": 0.31,
+              "token_count": 3,
+              "bbox": [
+                0.2586538461538462,
+                0.5907051282051282,
+                0.284375,
+                0.6176282051282052
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 3,
+              "content": "Jerome",
+              "confidence": 0.85,
+              "confidence_min": 0.85,
+              "token_count": 1,
+              "bbox": [
+                0.2915865384615385,
+                0.5971153846153846,
+                0.3331730769230769,
+                0.6150641025641026
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 4,
+              "content": "Orthodox Panela Marie Oliver 41",
+              "confidence": 0.76,
+              "confidence_min": 0.49,
+              "token_count": 5,
+              "bbox": [
+                0.34423076923076923,
+                0.5301282051282051,
+                0.47307692307692306,
+                0.6112179487179488
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 5,
+              "content": "Nicholzs",
+              "confidence": 0.78,
+              "confidence_min": 0.78,
+              "token_count": 1,
+              "bbox": [
+                0.4810096153846154,
+                0.5887820512820513,
+                0.5132211538461539,
+                0.6048076923076923
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "content": "1",
+              "confidence": 0.88,
+              "confidence_min": 0.88,
+              "token_count": 1,
+              "bbox": [
+                0.04278846153846154,
+                0.6298076923076923,
+                0.04855769230769231,
+                0.6490384615384616
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "content": "10/01 2006",
+              "confidence": 0.94,
+              "confidence_min": 0.89,
+              "token_count": 2,
+              "bbox": [
+                0.07836538461538461,
+                0.6195512820512821,
+                0.11033653846153846,
+                0.6682692307692307
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "content": "Jerome c Stone Bridgewater and Timothy Gorbetur 25 /",
+              "confidence": 0.77,
+              "confidence_min": 0.42,
+              "token_count": 9,
+              "bbox": [
+                0.13221153846153846,
+                0.607051282051282,
+                0.29375,
+                0.7400641025641026
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 3,
+              "content": "Shirley Peter",
+              "confidence": 0.85,
+              "confidence_min": 0.78,
+              "token_count": 2,
+              "bbox": [
+                0.2899038461538462,
+                0.6243589743589744,
+                0.33076923076923076,
+                0.7211538461538461
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 5,
+              "column_index": 4,
+              "content": "Bridgenoten Orthodox and Rebecca Morse Boyce",
+              "confidence": 0.77,
+              "confidence_min": 0.45,
+              "token_count": 6,
+              "bbox": [
+                0.34326923076923077,
+                0.6141025641025641,
+                0.4704326923076923,
+                0.7205128205128205
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 5,
+              "content": "eleme Jaes",
+              "confidence": 0.77,
+              "confidence_min": 0.67,
+              "token_count": 2,
+              "bbox": [
+                0.4790865384615385,
+                0.6115384615384616,
+                0.5120192307692307,
+                0.7201923076923077
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "content": "1",
+              "confidence": 0.91,
+              "confidence_min": 0.91,
+              "token_count": 1,
+              "bbox": [
+                0.04639423076923077,
+                0.7317307692307692,
+                0.052403846153846155,
+                0.7483974358974359
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "content": "1/2 2008",
+              "confidence": 0.8,
+              "confidence_min": 0.6,
+              "token_count": 2,
+              "bbox": [
+                0.07956730769230769,
+                0.7189102564102564,
+                0.11466346153846153,
+                0.775
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "content": "Manville 1st Onthodox",
+              "confidence": 0.7,
+              "confidence_min": 0.56,
+              "token_count": 3,
+              "bbox": [
+                0.14471153846153847,
+                0.7288461538461538,
+                0.28125,
+                0.778525641025641
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 6,
+              "column_index": 3,
+              "content": "Susan",
+              "confidence": 0.89,
+              "confidence_min": 0.89,
+              "token_count": 1,
+              "bbox": [
+                0.2899038461538462,
+                0.7272435897435897,
+                0.3235576923076923,
+                0.7416666666666667
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 6,
+              "column_index": 4,
+              "content": "Monmouth Junctia 26 Orthodox 15t",
+              "confidence": 0.77,
+              "confidence_min": 0.64,
+              "token_count": 5,
+              "bbox": [
+                0.3435096153846154,
+                0.721474358974359,
+                0.4668269230769231,
+                0.771474358974359
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 6,
+              "column_index": 5,
+              "content": "maria",
+              "confidence": 0.63,
+              "confidence_min": 0.63,
+              "token_count": 1,
+              "bbox": [
+                0.4774038461538462,
+                0.7304487179487179,
+                0.5084134615384616,
+                0.7439102564102564
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 1,
+              "content": "9/20 2009",
+              "confidence": 0.98,
+              "confidence_min": 0.98,
+              "token_count": 2,
+              "bbox": [
+                0.07427884615384615,
+                0.8371794871794872,
+                0.11201923076923077,
+                0.8836538461538461
+              ],
+              "needs_review": true,
+              "reasons": [
+                "expected_date_md"
+              ]
+            },
+            {
+              "row_index": 7,
+              "column_index": 2,
+              "content": "John Finnigan 41 Berkey Heights R.C. 1st",
+              "confidence": 0.83,
+              "confidence_min": 0.57,
+              "token_count": 7,
+              "bbox": [
+                0.1326923076923077,
+                0.825,
+                0.2783653846153846,
+                0.903525641025641
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 7,
+              "column_index": 3,
+              "content": "John Herther",
+              "confidence": 0.86,
+              "confidence_min": 0.74,
+              "token_count": 2,
+              "bbox": [
+                0.28701923076923075,
+                0.8246794871794871,
+                0.3228365384615385,
+                0.8701923076923077
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 7,
+              "column_index": 4,
+              "content": "Nino Kanchaveli Berkey Heights 36 2nd",
+              "confidence": 0.86,
+              "confidence_min": 0.73,
+              "token_count": 6,
+              "bbox": [
+                0.3451923076923077,
+                0.8108974358974359,
+                0.4625,
+                0.8778846153846154
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 7,
+              "column_index": 5,
+              "content": "Nemo Neli",
+              "confidence": 0.98,
+              "confidence_min": 0.98,
+              "token_count": 2,
+              "bbox": [
+                0.4790865384615385,
+                0.8211538461538461,
+                0.505048076923077,
+                0.8560897435897435
+              ],
+              "needs_review": false
+            }
+          ]
         }
       ]
     },
     {
-      "row_count": 4,
+      "row_count": 8,
       "column_count": 3,
       "table_number": 2,
       "has_header_row": true,
@@ -411,14 +810,221 @@
             {
               "row_index": 3,
               "column_index": 0,
-              "content": "Bishop Tikhon F.Jas Parsells F₁₂ for Panels F. Panele Fr. Jon Parels",
-              "confidence": 0.59,
+              "content": "Bishop Tikhon F.Jas Parsells",
+              "confidence": 0.69,
+              "confidence_min": 0.59,
+              "token_count": 4,
+              "bbox": [
+                0.5504807692307693,
+                0.3996794871794872,
+                0.6170673076923077,
+                0.5246794871794872
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 1,
+              "content": "Gregoy Parnells Anna Strent Daria Parsells John Zahodnich",
+              "confidence": 0.74,
+              "confidence_min": 0.66,
+              "token_count": 8,
+              "bbox": [
+                0.6483173076923077,
+                0.38846153846153847,
+                0.7516826923076924,
+                0.5246794871794872
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 3,
+              "column_index": 2,
+              "content": "May 20 , 2005 Somerville 47-20005 Civil marringe of 8/23/2003 in state of Georgis , blessed",
+              "confidence": 0.81,
+              "confidence_min": 0.57,
+              "token_count": 16,
+              "bbox": [
+                0.8348557692307692,
+                0.378525641025641,
+                0.9699519230769231,
+                0.5102564102564102
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 4,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 4,
+              "column_index": 0,
+              "content": "F₁₂ Panels",
+              "confidence": 0.65,
+              "confidence_min": 0.59,
+              "token_count": 2,
+              "bbox": [
+                0.5509615384615385,
+                0.5884615384615385,
+                0.6141826923076923,
+                0.6240384615384615
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 4,
+              "column_index": 1,
+              "content": "Petar Gonbaduy",
+              "confidence": 0.61,
+              "confidence_min": 0.39,
+              "token_count": 2,
+              "bbox": [
+                0.6427884615384616,
+                0.5842948717948718,
+                0.721875,
+                0.6099358974358975
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 4,
+              "column_index": 2,
+              "content": "Sept. Bridgewater 77 # 2006-147",
+              "confidence": 0.9,
+              "confidence_min": 0.73,
+              "token_count": 5,
+              "bbox": [
+                0.8394230769230769,
+                0.5567307692307693,
+                0.9512019230769231,
+                0.6096153846153847
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 5,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 5,
+              "column_index": 0,
+              "content": "for F. Panele",
+              "confidence": 0.49,
+              "confidence_min": 0.46,
+              "token_count": 3,
+              "bbox": [
+                0.5507211538461538,
+                0.6019230769230769,
+                0.6240384615384615,
+                0.7198717948717949
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            },
+            {
+              "row_index": 5,
+              "column_index": 1,
+              "content": "Patricia Sokol Jones Nectarias Porals Catherie Gorbeton",
+              "confidence": 0.65,
+              "confidence_min": 0.5,
+              "token_count": 7,
+              "bbox": [
+                0.6403846153846153,
+                0.6105769230769231,
+                0.7769230769230769,
+                0.735897435897436
+              ],
+              "needs_review": false
+            },
+            {
+              "row_index": 5,
+              "column_index": 2,
+              "content": "Oct. 20 # p MC 78-2008 Manville",
+              "confidence": 0.7,
+              "confidence_min": 0.43,
+              "token_count": 7,
+              "bbox": [
+                0.8307692307692308,
+                0.6397435897435897,
+                0.9653846153846154,
+                0.7028846153846153
+              ],
+              "needs_review": true,
+              "reasons": [
+                "low_confidence"
+              ]
+            }
+          ]
+        },
+        {
+          "row_index": 6,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 6,
+              "column_index": 0,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 1,
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
+              "needs_review": true,
+              "reasons": [
+                "empty"
+              ]
+            },
+            {
+              "row_index": 6,
+              "column_index": 2,
+              "content": "Aug 24 # 34-09 Berkey Heights",
+              "confidence": 0.86,
+              "confidence_min": 0.66,
+              "token_count": 6,
+              "bbox": [
+                0.833173076923077,
+                0.7391025641025641,
+                0.9478365384615385,
+                0.7990384615384616
+              ],
+              "needs_review": false
+            }
+          ]
+        },
+        {
+          "row_index": 7,
+          "type": "row",
+          "cells": [
+            {
+              "row_index": 7,
+              "column_index": 0,
+              "content": "Fr. Jon Parels",
+              "confidence": 0.51,
               "confidence_min": 0.44,
-              "token_count": 12,
+              "token_count": 3,
               "bbox": [
                 0.5461538461538461,
-                0.3996794871794872,
-                0.6240384615384615,
+                0.8153846153846154,
+                0.6122596153846154,
                 0.8391025641025641
               ],
               "needs_review": true,
@@ -427,39 +1033,30 @@
               ]
             },
             {
-              "row_index": 3,
+              "row_index": 7,
               "column_index": 1,
-              "content": "Gregoy Parnells Anna Strent Daria Parsells John Zahodnich Petar Gonbaduy Patricia Sokol Nectarias Porals Jones Catherie Gorbeton John michel Finnigas Lali Utarashvili",
-              "confidence": 0.73,
-              "confidence_min": 0.39,
-              "token_count": 22,
+              "content": "John michel Finnigas Lali Utarashvili",
+              "confidence": 0.86,
+              "confidence_min": 0.67,
+              "token_count": 5,
               "bbox": [
-                0.6403846153846153,
-                0.38846153846153847,
-                0.7769230769230769,
+                0.640625,
+                0.7830128205128205,
+                0.7757211538461538,
                 0.8487179487179487
               ],
-              "needs_review": true,
-              "reasons": [
-                "low_confidence"
-              ]
+              "needs_review": false
             },
             {
-              "row_index": 3,
+              "row_index": 7,
               "column_index": 2,
-              "content": "May 20 , 2005 Somerville 47-20005 Civil marringe of 8/23/2003 in state of Georgis , blessed Sept. Bridgewater 77 # 2006-147 Oct. 20 # p MC 78-2008 Manville Aug 24 # 34-09 Berkey Heights",
-              "confidence": 0.81,
-              "confidence_min": 0.43,
-              "token_count": 34,
-              "bbox": [
-                0.8307692307692308,
-                0.378525641025641,
-                0.9699519230769231,
-                0.7990384615384616
-              ],
+              "content": "",
+              "confidence": null,
+              "token_count": 0,
+              "bbox": null,
               "needs_review": true,
               "reasons": [
-                "low_confidence"
+                "empty"
               ]
             }
           ]
@@ -508,6 +1105,6 @@
   "header_y_threshold": 0.295,
   "total_tokens": 339,
   "data_tokens": 188,
-  "data_rows": 2,
-  "extracted_at": "2026-02-17T01:52:19.871Z"
+  "data_rows": 6,
+  "extracted_at": "2026-02-17T02:51:55.745Z"
 }

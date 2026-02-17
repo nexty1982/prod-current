@@ -102,10 +102,10 @@ router.get('/om-churches', requireAuth, async (req, res) => {
     const { promisePool } = require('../config/db');
 
     const [rows] = await promisePool.query(`
-      SELECT id, name, church_name, address, city, state, latitude, longitude
+      SELECT id, name, church_name, address, city, state_province AS state, latitude, longitude
       FROM churches 
       WHERE is_active = 1 AND latitude IS NOT NULL AND longitude IS NOT NULL
-      ORDER BY state, city, name
+      ORDER BY state_province, city, name
     `);
 
     res.json({

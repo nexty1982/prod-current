@@ -6,7 +6,10 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   Box,
+  CircularProgress,
+  IconButton,
   Paper,
+  Stack,
   Tab,
   Tabs,
   ToggleButton,
@@ -23,6 +26,7 @@ import {
   IconHighlight,
   IconHandClick,
   IconMarquee2,
+  IconSquarePlus,
 } from '@tabler/icons-react';
 import { useOcrJobs } from '../../hooks/useOcrJobs';
 import { useWorkbench } from '../../context/WorkbenchContext';
@@ -101,7 +105,9 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
   // Record highlighting & interaction state
   const [selectedRecordIndex, setSelectedRecordIndex] = useState<number | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [editMode, setEditMode] = useState<'highlight' | 'click-select' | 'drag-select'>('highlight');
+  const [editMode, setEditMode] = useState<'highlight' | 'click-select' | 'drag-select' | 'draw-record'>('highlight');
+  const [cropReOcrResult, setCropReOcrResult] = useState<{ text: string; fields: Record<string, string>; bbox: any; tokenCount: number } | null>(null);
+  const [cropReOcrLoading, setCropReOcrLoading] = useState(false);
   const [externalFieldUpdate, setExternalFieldUpdate] = useState<{
     fieldKey: string;
     text: string;
@@ -363,6 +369,37 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
       setExternalFieldUpdate({ fieldKey: focusedField, text, mode: 'replace' });
     },
     [focusedField, selectedRecordIndex],
+  );
+
+  // Handle draw-record: crop + re-OCR
+  const handleDrawRecord = useCallback(
+    async (bbox: { x_min: number; y_min: number; x_max: number; y_max: number }) => {
+      if (!selectedJobId || !churchId) return;
+      setCropReOcrLoading(true);
+      setCropReOcrResult(null);
+      try {
+        const res: any = await apiClient.post(
+          `/api/church/${churchId}/ocr/jobs/${selectedJobId}/crop-reocr`,
+          { bbox }
+        );
+        const data = res?.data ?? res;
+        if (data?.success) {
+          setCropReOcrResult({
+            text: data.text || '',
+            fields: data.fields || {},
+            bbox: data.bbox,
+            tokenCount: data.tokenCount || 0,
+          });
+          showToast(`Crop OCR: ${data.tokenCount} tokens extracted`, 'success');
+        }
+      } catch (err: any) {
+        console.error('[OcrWorkbench] Crop re-OCR failed:', err);
+        showToast('Crop re-OCR failed: ' + (err?.response?.data?.message || err?.message || 'Unknown error'), 'error');
+      } finally {
+        setCropReOcrLoading(false);
+      }
+    },
+    [selectedJobId, churchId, showToast],
   );
 
   // Handle reject record (not a record)
@@ -773,6 +810,7 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
                 interactionMode={editMode}
                 onTokenSelect={handleTokenSelect}
                 onDragSelect={handleDragSelect}
+                onDrawRecord={handleDrawRecord}
                 tablePageDims={tableExtractionJson?.page_dimensions || null}
               />
             </Box>
@@ -812,8 +850,65 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
                       <IconMarquee2 size={18} />
                     </Tooltip>
                   </ToggleButton>
+                  <ToggleButton value="draw-record">
+                    <Tooltip title="Draw record box for crop + re-OCR">
+                      <IconSquarePlus size={18} />
+                    </Tooltip>
+                  </ToggleButton>
                 </ToggleButtonGroup>
               </Box>
+            )}
+            {/* Crop Re-OCR Results Panel */}
+            {(cropReOcrLoading || cropReOcrResult) && (
+              <Paper
+                elevation={4}
+                sx={{
+                  position: 'absolute',
+                  bottom: 60,
+                  left: 16,
+                  zIndex: 25,
+                  maxWidth: '45%',
+                  maxHeight: 300,
+                  overflow: 'auto',
+                  p: 1.5,
+                  bgcolor: 'background.paper',
+                  borderLeft: '3px solid',
+                  borderColor: 'warning.main',
+                }}
+              >
+                {cropReOcrLoading ? (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <CircularProgress size={16} />
+                    <Typography variant="body2">Running crop OCR...</Typography>
+                  </Stack>
+                ) : cropReOcrResult ? (
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                      <Typography variant="subtitle2" fontWeight={700} fontSize="0.75rem">
+                        Crop OCR Result ({cropReOcrResult.tokenCount} tokens)
+                      </Typography>
+                      <IconButton size="small" onClick={() => setCropReOcrResult(null)} sx={{ p: 0.25 }}>
+                        <Typography variant="caption" color="text.secondary">×</Typography>
+                      </IconButton>
+                    </Stack>
+                    {cropReOcrResult.text && (
+                      <Typography variant="body2" fontSize="0.7rem" sx={{ mb: 0.5, whiteSpace: 'pre-wrap', bgcolor: 'action.hover', p: 0.5, borderRadius: 0.5 }}>
+                        {cropReOcrResult.text}
+                      </Typography>
+                    )}
+                    {Object.keys(cropReOcrResult.fields).length > 0 && (
+                      <Box>
+                        <Typography variant="caption" fontWeight={600} color="text.secondary">Fields:</Typography>
+                        {Object.entries(cropReOcrResult.fields).map(([key, val]) => (
+                          <Typography key={key} variant="body2" fontSize="0.65rem">
+                            <strong>{key}:</strong> {val}
+                          </Typography>
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+                ) : null}
+              </Paper>
             )}
             {/* Right: Tabbed Panel (Transcription / Field Mapping) */}
             <Box sx={{ width: '50%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>

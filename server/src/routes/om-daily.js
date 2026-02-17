@@ -1287,6 +1287,107 @@ router.get('/github/status', requireAuth, async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// BUILD INFO & PUSH TO ORIGIN
+// ═══════════════════════════════════════════════════════════════
+
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const ROOT_PATH = '/var/www/orthodoxmetrics/prod';
+const BUILD_INFO_FILE = path.join(ROOT_PATH, '.build-info');
+
+/**
+ * GET /api/om-daily/build-info
+ * Returns version and build number
+ */
+router.get('/build-info', requireAuth, async (req, res) => {
+  try {
+    let buildInfo = {
+      version: '1.0.0',
+      buildNumber: 0,
+      buildDate: null,
+      branch: 'unknown',
+      commit: 'unknown',
+      fullVersion: '1.0.0.0'
+    };
+
+    // Read from .build-info file if it exists
+    if (fs.existsSync(BUILD_INFO_FILE)) {
+      const content = fs.readFileSync(BUILD_INFO_FILE, 'utf8');
+      const lines = content.split('\n');
+      for (const line of lines) {
+        const [key, value] = line.split('=');
+        if (key === 'APP_VERSION') buildInfo.version = value;
+        if (key === 'BUILD_NUMBER') buildInfo.buildNumber = parseInt(value, 10) || 0;
+        if (key === 'BUILD_DATE') buildInfo.buildDate = value;
+        if (key === 'GIT_BRANCH') buildInfo.branch = value;
+        if (key === 'GIT_COMMIT') buildInfo.commit = value;
+      }
+    } else {
+      // Fallback: read version from package.json
+      const pkgPath = path.join(ROOT_PATH, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        buildInfo.version = pkg.version || '1.0.0';
+      }
+    }
+
+    buildInfo.fullVersion = `${buildInfo.version}.${buildInfo.buildNumber}`;
+
+    res.json(buildInfo);
+  } catch (err) {
+    console.error('[Build Info] Error:', err);
+    res.status(500).json({ error: 'Failed to get build info' });
+  }
+});
+
+/**
+ * POST /api/om-daily/push-to-origin
+ * Pushes current branch to origin and resets build number
+ */
+router.post('/push-to-origin', requireAuth, requireRole(['super_admin']), async (req, res) => {
+  try {
+    // Get current branch
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: ROOT_PATH, encoding: 'utf8' }).trim();
+    
+    // Get status before push
+    const status = execSync('git status --porcelain', { cwd: ROOT_PATH, encoding: 'utf8' }).trim();
+    const hasUncommitted = status.length > 0;
+
+    if (hasUncommitted) {
+      return res.status(400).json({ 
+        error: 'Cannot push: uncommitted changes exist',
+        status: status.split('\n').slice(0, 10) // Show first 10 changed files
+      });
+    }
+
+    // Push to origin
+    const pushResult = execSync(`git push origin ${branch}`, { cwd: ROOT_PATH, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+
+    // Reset build number after successful push
+    if (fs.existsSync(BUILD_INFO_FILE)) {
+      const content = fs.readFileSync(BUILD_INFO_FILE, 'utf8');
+      const newContent = content.replace(/BUILD_NUMBER=\d+/, 'BUILD_NUMBER=0');
+      fs.writeFileSync(BUILD_INFO_FILE, newContent);
+    }
+
+    res.json({ 
+      success: true, 
+      branch,
+      message: `Successfully pushed to origin/${branch}`,
+      buildNumberReset: true
+    });
+  } catch (err) {
+    console.error('[Push to Origin] Error:', err);
+    res.status(500).json({ 
+      error: 'Push failed: ' + (err.message || 'Unknown error'),
+      stderr: err.stderr?.toString() || ''
+    });
+  }
+});
+
 // Export cron functions on the router for access from index.ts
 router.generateAndEmailChangelog = generateAndEmailChangelog;
 router.fullSync = fullSync;

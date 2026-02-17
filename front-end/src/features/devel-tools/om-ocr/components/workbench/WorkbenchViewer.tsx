@@ -33,11 +33,13 @@ interface WorkbenchViewerProps {
   /** Record highlight boxes from table extraction (computed in OcrWorkbench) */
   recordHighlightBoxes?: OverlayBox[];
   /** Current interaction mode */
-  interactionMode?: 'highlight' | 'click-select' | 'drag-select';
+  interactionMode?: 'highlight' | 'click-select' | 'drag-select' | 'draw-record';
   /** Callback when user clicks a token in click-select mode */
   onTokenSelect?: (text: string, bbox: BBox) => void;
   /** Callback when user drag-selects tokens */
   onDragSelect?: (text: string, bbox: BBox) => void;
+  /** Callback when user draws a record bounding box (fractional 0..1 coords) */
+  onDrawRecord?: (bbox: { x_min: number; y_min: number; x_max: number; y_max: number }) => void;
   /** Page dimensions from table extraction (fallback for Vision page dims) */
   tablePageDims?: { width: number; height: number } | null;
 }
@@ -49,6 +51,7 @@ const WorkbenchViewer: React.FC<WorkbenchViewerProps> = ({
   interactionMode = 'highlight',
   onTokenSelect,
   onDragSelect,
+  onDrawRecord,
   tablePageDims,
 }) => {
   const theme = useTheme();
@@ -146,11 +149,11 @@ const WorkbenchViewer: React.FC<WorkbenchViewerProps> = ({
   // Drag selection state
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [dragEnd, setDragEnd] = useState<{ x: number; y: number } | null>(null);
-  const isDragging = interactionMode === 'drag-select' && dragStart !== null;
+  const isDragging = (interactionMode === 'drag-select' || interactionMode === 'draw-record') && dragStart !== null;
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (interactionMode !== 'drag-select') return;
+      if (interactionMode !== 'drag-select' && interactionMode !== 'draw-record') return;
       const rect = e.currentTarget.getBoundingClientRect();
       setDragStart({ x: e.clientX - rect.left, y: e.clientY - rect.top });
       setDragEnd(null);
@@ -168,7 +171,34 @@ const WorkbenchViewer: React.FC<WorkbenchViewerProps> = ({
   );
 
   const handleMouseUp = useCallback(() => {
-    if (!isDragging || !dragStart || !dragEnd || !onDragSelect) {
+    if (!isDragging || !dragStart || !dragEnd) {
+      setDragStart(null);
+      setDragEnd(null);
+      return;
+    }
+
+    // draw-record mode: convert screen rect to fractional image coords
+    if (interactionMode === 'draw-record' && onDrawRecord) {
+      const img = imageRef.current;
+      if (img) {
+        const scaledW = img.clientWidth * (zoom / 100);
+        const scaledH = img.clientHeight * (zoom / 100);
+        if (scaledW > 0 && scaledH > 0) {
+          const x_min = Math.max(0, Math.min(dragStart.x, dragEnd.x) / scaledW);
+          const y_min = Math.max(0, Math.min(dragStart.y, dragEnd.y) / scaledH);
+          const x_max = Math.min(1, Math.max(dragStart.x, dragEnd.x) / scaledW);
+          const y_max = Math.min(1, Math.max(dragStart.y, dragEnd.y) / scaledH);
+          if (x_max - x_min > 0.01 && y_max - y_min > 0.01) {
+            onDrawRecord({ x_min, y_min, x_max, y_max });
+          }
+        }
+      }
+      setDragStart(null);
+      setDragEnd(null);
+      return;
+    }
+
+    if (!onDragSelect) {
       setDragStart(null);
       setDragEnd(null);
       return;
@@ -229,7 +259,7 @@ const WorkbenchViewer: React.FC<WorkbenchViewerProps> = ({
 
     setDragStart(null);
     setDragEnd(null);
-  }, [isDragging, dragStart, dragEnd, onDragSelect, ocrTokens, visionPageSize, zoom]);
+  }, [isDragging, dragStart, dragEnd, interactionMode, onDrawRecord, onDragSelect, ocrTokens, visionPageSize, zoom]);
 
   const handleZoomIn = useCallback(() => {
     setZoom(prev => Math.min(prev + 25, 300));
@@ -330,7 +360,7 @@ const WorkbenchViewer: React.FC<WorkbenchViewerProps> = ({
               position: 'relative',
               display: 'inline-block',
               overflow: 'hidden',
-              cursor: interactionMode === 'drag-select' ? 'crosshair' : undefined,
+              cursor: (interactionMode === 'drag-select' || interactionMode === 'draw-record') ? 'crosshair' : undefined,
             }}
           >
             <img
@@ -386,9 +416,12 @@ const WorkbenchViewer: React.FC<WorkbenchViewerProps> = ({
                   top: Math.min(dragStart.y, dragEnd.y),
                   width: Math.abs(dragEnd.x - dragStart.x),
                   height: Math.abs(dragEnd.y - dragStart.y),
-                  border: '2px dashed',
-                  borderColor: 'primary.main',
-                  bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
+                  border: interactionMode === 'draw-record' ? '2px solid' : '2px dashed',
+                  borderColor: interactionMode === 'draw-record' ? 'warning.main' : 'primary.main',
+                  bgcolor: (t) => alpha(
+                    interactionMode === 'draw-record' ? t.palette.warning.main : t.palette.primary.main,
+                    0.1,
+                  ),
                   pointerEvents: 'none',
                   zIndex: 15,
                 }}

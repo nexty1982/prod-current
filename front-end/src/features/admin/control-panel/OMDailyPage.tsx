@@ -7,51 +7,51 @@
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
-  Add as AddIcon,
-  SmartToy as AgentIcon,
-  Check as CheckIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Email as EmailIcon,
-  ExpandMore as ExpandMoreIcon,
-  History as HistoryIcon,
-  OpenInNew as OpenInNewIcon,
-  Refresh as RefreshIcon,
-  Search as SearchIcon,
-  Sync as SyncIcon
+    Add as AddIcon,
+    SmartToy as AgentIcon,
+    Check as CheckIcon,
+    Delete as DeleteIcon,
+    Edit as EditIcon,
+    Email as EmailIcon,
+    ExpandMore as ExpandMoreIcon,
+    History as HistoryIcon,
+    OpenInNew as OpenInNewIcon,
+    Refresh as RefreshIcon,
+    Search as SearchIcon,
+    Sync as SyncIcon
 } from '@mui/icons-material';
 import {
-  Alert,
-  alpha,
-  Badge,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  List,
-  ListItemButton,
-  ListItemText,
-  MenuItem,
-  Paper,
-  Select,
-  Snackbar,
-  Stack,
-  Tab,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography,
-  useTheme,
+    Alert,
+    alpha,
+    Badge,
+    Box,
+    Button,
+    Chip,
+    CircularProgress,
+    Collapse,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    LinearProgress,
+    List,
+    ListItemButton,
+    ListItemText,
+    MenuItem,
+    Paper,
+    Select,
+    Snackbar,
+    Stack,
+    Tab,
+    Tabs,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme,
 } from '@mui/material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -89,6 +89,15 @@ interface GitHubSyncStatus {
   lastSync: string | null;
   repoUrl: string;
   issuesUrl: string;
+}
+
+interface BuildInfo {
+  version: string;
+  buildNumber: number;
+  buildDate: string | null;
+  branch: string;
+  commit: string;
+  fullVersion: string;
 }
 
 interface DashboardData {
@@ -185,6 +194,10 @@ const OMDailyPage: React.FC = () => {
   const [ghSyncing, setGhSyncing] = useState(false);
   const [ghSyncProgress, setGhSyncProgress] = useState<{ phase: string; current: number; total: number; summary: any; error: string | null } | null>(null);
   const syncPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Build info state
+  const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null);
+  const [pushing, setPushing] = useState(false);
 
   const BCrumb = [
     { to: '/', title: 'Home' },
@@ -337,13 +350,36 @@ const OMDailyPage: React.FC = () => {
     } catch { showToast('Failed to start sync', 'error'); setGhSyncing(false); }
   }, [pollSyncProgress]);
 
+  // Build info API calls
+  const fetchBuildInfo = useCallback(async () => {
+    try {
+      const resp = await fetch('/api/om-daily/build-info', { credentials: 'include' });
+      if (resp.ok) setBuildInfo(await resp.json());
+    } catch {}
+  }, []);
+
+  const pushToOrigin = useCallback(async () => {
+    setPushing(true);
+    try {
+      const resp = await fetch('/api/om-daily/push-to-origin', { method: 'POST', credentials: 'include' });
+      const data = await resp.json();
+      if (resp.ok && data.success) {
+        showToast(`Pushed to origin/${data.branch}`);
+        fetchBuildInfo(); // Refresh build info after push
+      } else {
+        showToast(data.error || 'Push failed', 'error');
+      }
+    } catch { showToast('Push failed', 'error'); }
+    finally { setPushing(false); }
+  }, [fetchBuildInfo]);
+
   // Cleanup polling on unmount
   useEffect(() => () => stopSyncPolling(), [stopSyncPolling]);
 
   // Initial load
   useEffect(() => {
     setLoading(true);
-    Promise.all([fetchDashboard(), fetchCategories(), fetchGhStatus()]).finally(() => setLoading(false));
+    Promise.all([fetchDashboard(), fetchCategories(), fetchGhStatus(), fetchBuildInfo()]).finally(() => setLoading(false));
   }, []);
 
   // Fetch items when tab or filters change
@@ -743,6 +779,28 @@ const OMDailyPage: React.FC = () => {
                 disabled={!detail || !!detail.email_sent_at}>
                 {detail?.email_sent_at ? 'Email Sent' : 'Send Email'}
               </Button>
+              {buildInfo && (
+                <Chip 
+                  label={`v${buildInfo.fullVersion}`} 
+                  size="small" 
+                  color="secondary"
+                  sx={{ fontWeight: 600, fontFamily: 'monospace' }}
+                />
+              )}
+              <Tooltip title={`Push current branch to origin${buildInfo?.branch ? ` (${buildInfo.branch})` : ''}`}>
+                <span>
+                  <Button 
+                    variant="outlined" 
+                    size="small" 
+                    color="success"
+                    startIcon={pushing ? <CircularProgress size={16} /> : <CloudUploadIcon />}
+                    onClick={pushToOrigin}
+                    disabled={pushing}
+                  >
+                    Push to Origin
+                  </Button>
+                </span>
+              </Tooltip>
               {changelogLoading && <CircularProgress size={20} />}
             </Box>
           </Paper>

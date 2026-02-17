@@ -114,7 +114,7 @@ const FullLayout: FC = () => {
       {/* ------------------------------------------- */}
       {/* Admin Floating HUD - Super Admin Only */}
       {/* ------------------------------------------- */}
-      {isSuperAdmin() && <AdminFloatingHUD />}
+      {/* {isSuperAdmin() && <AdminFloatingHUD />} */}
     </>
   );
 };

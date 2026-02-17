@@ -47,6 +47,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import OcrStudioNav from '../components/OcrStudioNav';
 import ColumnBoundaryEditor, {
   type ColumnBand,
+  type FractionalBBox,
   boundariesToBands,
 } from '../components/ColumnBoundaryEditor';
 
@@ -70,6 +71,7 @@ interface LayoutTemplate {
   preview_job_id: number | null;
   is_default: number;
   church_id: number | null;
+  record_regions: FractionalBBox[] | null;
   fields?: TemplateField[];
   field_count?: number;
   created_at: string;
@@ -112,6 +114,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
   const [headerY, setHeaderY] = useState(0.15);
   const [isDefault, setIsDefault] = useState(false);
   const [fields, setFields] = useState<TemplateField[]>([]);
+  const [recordRegions, setRecordRegions] = useState<FractionalBBox[]>([]);
 
   // Reference job
   const [refJobId, setRefJobId] = useState<number | null>(null);
@@ -200,6 +203,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
         setHeaderY(0.15);
         setIsDefault(false);
         setFields([]);
+        setRecordRegions([]);
         setRefJobId(null);
         setDirty(false);
         return;
@@ -216,6 +220,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
         setHeaderY(tpl.header_y_threshold || 0.15);
         setIsDefault(!!tpl.is_default);
         setFields(tpl.fields || []);
+        setRecordRegions(tpl.record_regions || []);
         setRefJobId(tpl.preview_job_id || null);
         setDirty(false);
       } catch (e: any) {
@@ -255,6 +260,11 @@ const LayoutTemplateEditorPage: React.FC = () => {
     setDirty(true);
   }, []);
 
+  const handleRecordRegionsChange = useCallback((regions: FractionalBBox[]) => {
+    setRecordRegions(regions);
+    setDirty(true);
+  }, []);
+
   const handleFieldNameChange = useCallback((index: number, newName: string) => {
     setFields((prev) =>
       prev.map((f, i) =>
@@ -287,6 +297,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
         preview_job_id: refJobId,
         is_default: isDefault,
         fields,
+        record_regions: recordRegions.length > 0 ? recordRegions : null,
       };
 
       if (selectedId) {
@@ -306,7 +317,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
     } finally {
       setSaving(false);
     }
-  }, [name, description, recordType, columnBands, headerY, refJobId, isDefault, fields, selectedId, fetchTemplates]);
+  }, [name, description, recordType, columnBands, headerY, refJobId, isDefault, fields, recordRegions, selectedId, fetchTemplates]);
 
   // ── Delete ─────────────────────────────────────────────────────────────────
 
@@ -459,6 +470,8 @@ const LayoutTemplateEditorPage: React.FC = () => {
                   headerY={headerY}
                   onBandsChange={handleBandsChange}
                   onHeaderYChange={handleHeaderYChange}
+                  recordRegions={recordRegions}
+                  onRecordRegionsChange={handleRecordRegionsChange}
                 />
               ) : (
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', p: 4 }}>

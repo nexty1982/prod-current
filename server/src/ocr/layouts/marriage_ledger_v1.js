@@ -187,7 +187,9 @@ function clusterIntoRows(tokens) {
  * The date column approach is critical because marriage ledger entries
  * can be densely packed vertically with no visible gap between them.
  */
-const DATE_PATTERN = /^\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}$/;
+// Match full date (M/D/YYYY), or partial date (M/D without year).
+// Vision API often splits "6/12/2005" into two tokens: "6/12" + "2005".
+const DATE_PATTERN = /^\d{1,2}[-\/]\d{1,2}([-\/]\d{2,4})?$/;
 const DATE_COL_BAND = TABLE1_COLUMNS.date; // [0.060, 0.125]
 
 function rowHasDateToken(tokenRow) {

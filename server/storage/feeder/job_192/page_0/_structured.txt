@@ -1,16 +1,22 @@
 === Structured Table Extraction (marriage_ledger_v1) ===
-Columns: ? | Rows: 2
+Columns: ? | Rows: 5
 
---- Table 1 (6 columns, 4 rows) ---
+--- Table 1 (6 columns, 7 rows) ---
 GurTZ BOAKORZ. | M.kcalz H Allb. | Al.keronponexoastatis, nata, samsaid H .kponchon.k panie Kemxa, CROAKKO AKTZ 0TZ 00A8 H KOTOOKIAIZ BOAKOMIZ. | H MATEOH. | M. keroportis Haun, pasHain W KkpoucoR.k MAHie HERKETKI, CKOAKKO AKTZ OTZ 00,48 H κοτόρκΙΛΙΖ ΒΡΑΚΟΛΙΖ. | HALEHA OTILA H MATEOH.
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 NUMBER | DATE | FULL NAME OF GROOM, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF GROOM' S PARENTS | FULL NAME OF BRIDE, RESIDENCE, AGE, RELIGION, Ist or 2nd MARRIAGE | FIRST NAMES OF BRIDE'S PARENTS
 1 | 5-27 | Robert Lawrence Porchik Manville | Albert | Jill Ann Filippini Manville | Atopere
-2 3 4 | 6-25 9-03 10-22 | 25 Roman Catholic 1st Marriage Peter John Kulina Manville ад Orthodox 1st Marriege John Bridgeuzten A. ward 32 A. C. ist Robert Michel Pellitto River Edge as Orthodox 1st | Ivene John Netelie John Jennie Robert Kathryn | ач Orthodox 1st Marriage shirley Jarkowski Manville ач R. 1st C. Marriage Stephanie Huztuk Hillsborough 32 Orthodox 1st Martha Laura Melendz River Edge 24 R. C. 1st | Joan Агунога Margaret Peta Helen Jose Ana
+ |  | 25 Roman Catholic 1st Marriage | Ivene | ач Orthodox 1st Marriage | Joan
+2 | 6-25 | Peter John Kulina Manville ад Orthodox 1st Marriege John A. ward | John Netelie John Jennie | shirley Jarkowski Manville ач R. 1st C. Marriage Stephanie Huztuk Hillsborough 32 | Агунога Margaret Peta Helen
+3 | 9-03 | Bridgeuzten 32 A. C. ist Michel Pellitto | Robert Kathryn | Orthodox 1st Martha Laura Melendz River Edge 24 | Jose Ana
+4 | 10-22 | River Robert Edge as Orthodox 1st |  | R. C. 1st | 
 
---- Table 2 (3 columns, 4 rows) ---
+--- Table 2 (3 columns, 7 rows) ---
 Kro COREpINAAZ. TAHHCTEO. | KTO RMAH HO084HTEAH. | От какого числа и за какими No License.
 ------------------------------------------------------------------------------------------
 PRIEST'S NAME | WITNESSES NAMES | DATE AND NUMBER OF LICENSE
 Fr. James Parsells | Theresa Filippini Mark Porchik | May 19,89 # 31-89
-Fr. Jones Parcell Fr. Janes Parsells Fr. Jas Parale | Paul Kuling Sharyn Foster Puibish Susan Greyoug Rohzus John Pellitto Christina Melendz | June 23 , 89 # 46-89 Aug. 22,89 # 89-123 Oct. 20 , 89 # 61-89
+Jones | Paul Kuling Foster | June 23 , 89 # 46-89
+Fr. Parcell Fr. Janes Parsells | Sharyn Puibish Susan Greyoug Rohzus John Pellitto Melendz | Aug. 22,89 # 89-123 Oct. 20 , 89 # 61-89
+Fr. Jas Parale | Christina | 
+ |  | 

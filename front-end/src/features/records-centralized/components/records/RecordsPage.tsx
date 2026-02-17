@@ -1981,35 +1981,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
           {/* Records Table - Only show when record type is selected */}
             {selectedRecordType && (
               <>
-                {/* Row Highlighting Legend */}
                 <Box sx={{ mb: 1, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Chip
-                    size="small"
-                    label="New (24h)"
-                    sx={{
-                      backgroundColor: 'rgba(76, 175, 80, 0.15)',
-                      borderLeft: '3px solid #4caf50',
-                      fontWeight: 500,
-                    }}
-                  />
-                  <Chip
-                    size="small"
-                    label="Updated (24h)"
-                    sx={{
-                      backgroundColor: 'rgba(255, 193, 7, 0.15)',
-                      borderLeft: '3px solid #ffc107',
-                      fontWeight: 500,
-                    }}
-                  />
-                  <Chip
-                    size="small"
-                    label="Selected"
-                    sx={{
-                      backgroundColor: `${theme.palette.primary.main}26`,
-                      borderLeft: `3px solid ${theme.palette.primary.main}`,
-                      fontWeight: 500,
-                    }}
-                  />
                   {debouncedSearch && (
                     <Chip
                       size="small"

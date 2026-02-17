@@ -34,7 +34,7 @@ async function listTemplates(req, res) {
     let sql = `
       SELECT e.id, e.name, e.description, e.record_type, e.column_bands,
              e.header_y_threshold, e.preview_job_id, e.is_default, e.church_id,
-             e.created_at, e.updated_at,
+             e.record_regions, e.created_at, e.updated_at,
              (SELECT COUNT(*) FROM ocr_extractor_fields f WHERE f.extractor_id = e.id) AS field_count
       FROM ocr_extractors e
       WHERE e.column_bands IS NOT NULL
@@ -54,10 +54,13 @@ async function listTemplates(req, res) {
 
     const [rows] = await pool.query(sql, params);
 
-    // Parse column_bands JSON for each row
+    // Parse JSON fields for each row
     for (const row of rows) {
       if (row.column_bands && typeof row.column_bands === 'string') {
         try { row.column_bands = JSON.parse(row.column_bands); } catch (_) {}
+      }
+      if (row.record_regions && typeof row.record_regions === 'string') {
+        try { row.record_regions = JSON.parse(row.record_regions); } catch (_) {}
       }
     }
 
@@ -80,7 +83,7 @@ async function getTemplate(req, res) {
     const [rows] = await pool.query(`
       SELECT e.id, e.name, e.description, e.record_type, e.column_bands,
              e.header_y_threshold, e.preview_job_id, e.is_default, e.church_id,
-             e.page_mode, e.created_at, e.updated_at
+             e.page_mode, e.record_regions, e.created_at, e.updated_at
       FROM ocr_extractors e
       WHERE e.id = ?
     `, [id]);
@@ -90,6 +93,9 @@ async function getTemplate(req, res) {
     const template = rows[0];
     if (template.column_bands && typeof template.column_bands === 'string') {
       try { template.column_bands = JSON.parse(template.column_bands); } catch (_) {}
+    }
+    if (template.record_regions && typeof template.record_regions === 'string') {
+      try { template.record_regions = JSON.parse(template.record_regions); } catch (_) {}
     }
 
     // Load fields
@@ -124,6 +130,7 @@ async function createTemplate(req, res) {
       is_default,
       church_id,
       fields,
+      record_regions,
     } = req.body;
 
     if (!name || !record_type) {
@@ -143,8 +150,8 @@ async function createTemplate(req, res) {
     }
 
     const [result] = await pool.query(`
-      INSERT INTO ocr_extractors (name, description, record_type, column_bands, header_y_threshold, preview_job_id, is_default, church_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO ocr_extractors (name, description, record_type, column_bands, header_y_threshold, preview_job_id, is_default, church_id, record_regions)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       name,
       description || null,
@@ -154,6 +161,7 @@ async function createTemplate(req, res) {
       preview_job_id || null,
       is_default ? 1 : 0,
       church_id || null,
+      record_regions ? JSON.stringify(record_regions) : null,
     ]);
 
     const templateId = result.insertId;
@@ -203,6 +211,7 @@ async function updateTemplate(req, res) {
       is_default,
       church_id,
       fields,
+      record_regions,
     } = req.body;
 
     // Verify exists
@@ -230,6 +239,7 @@ async function updateTemplate(req, res) {
     if (preview_job_id !== undefined) { updates.push('preview_job_id = ?'); params.push(preview_job_id); }
     if (is_default !== undefined) { updates.push('is_default = ?'); params.push(is_default ? 1 : 0); }
     if (church_id !== undefined) { updates.push('church_id = ?'); params.push(church_id); }
+    if (record_regions !== undefined) { updates.push('record_regions = ?'); params.push(record_regions ? JSON.stringify(record_regions) : null); }
 
     if (updates.length > 0) {
       params.push(id);

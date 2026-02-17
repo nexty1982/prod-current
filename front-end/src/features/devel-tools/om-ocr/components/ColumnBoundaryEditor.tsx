@@ -14,6 +14,8 @@ import {
   IconButton,
   Slider,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
   alpha,
@@ -25,6 +27,8 @@ import {
   IconZoomIn,
   IconZoomOut,
   IconMaximize,
+  IconColumns,
+  IconSquarePlus,
 } from '@tabler/icons-react';
 
 export interface ColumnBand {
@@ -32,6 +36,13 @@ export interface ColumnBand {
   start: number;
   /** Fractional x end (0..1) */
   end: number;
+}
+
+export interface FractionalBBox {
+  x_min: number;
+  y_min: number;
+  x_max: number;
+  y_max: number;
 }
 
 interface ColumnBoundaryEditorProps {
@@ -45,6 +56,10 @@ interface ColumnBoundaryEditorProps {
   onBandsChange: (bands: ColumnBand[]) => void;
   /** Called when header Y changes */
   onHeaderYChange: (y: number) => void;
+  /** Record regions (fractional bounding boxes) */
+  recordRegions?: FractionalBBox[];
+  /** Called when record regions change */
+  onRecordRegionsChange?: (regions: FractionalBBox[]) => void;
 }
 
 /** Convert boundary positions (sorted X fractions) to column bands */
@@ -86,6 +101,8 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
   headerY,
   onBandsChange,
   onHeaderYChange,
+  recordRegions = [],
+  onRecordRegionsChange,
 }) => {
   const theme = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -96,6 +113,9 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
     type: 'boundary' | 'headerY';
     index?: number;
   } | null>(null);
+  const [drawingMode, setDrawingMode] = useState<'columns' | 'records'>('columns');
+  const [regionDragStart, setRegionDragStart] = useState<{ x: number; y: number } | null>(null);
+  const [regionDragEnd, setRegionDragEnd] = useState<{ x: number; y: number } | null>(null);
 
   // Boundary positions (inner edges between columns)
   const [positions, setPositions] = useState<number[]>(() => bandsToPositions(columnBands));
@@ -196,6 +216,54 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
     setDragging(null);
   }, [dragging, positions, emitBands]);
 
+  // Record region drawing handlers
+  const handleRegionMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (drawingMode !== 'records' || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      setRegionDragStart({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      setRegionDragEnd(null);
+    },
+    [drawingMode],
+  );
+
+  const handleRegionMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!regionDragStart || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      setRegionDragEnd({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    },
+    [regionDragStart],
+  );
+
+  const handleRegionMouseUp = useCallback(() => {
+    if (!regionDragStart || !regionDragEnd || !onRecordRegionsChange) {
+      setRegionDragStart(null);
+      setRegionDragEnd(null);
+      return;
+    }
+    if (scaledWidth > 0 && scaledHeight > 0) {
+      const x_min = Math.max(0, Math.min(regionDragStart.x, regionDragEnd.x) / scaledWidth);
+      const y_min = Math.max(0, Math.min(regionDragStart.y, regionDragEnd.y) / scaledHeight);
+      const x_max = Math.min(1, Math.max(regionDragStart.x, regionDragEnd.x) / scaledWidth);
+      const y_max = Math.min(1, Math.max(regionDragStart.y, regionDragEnd.y) / scaledHeight);
+      if (x_max - x_min > 0.01 && y_max - y_min > 0.01) {
+        onRecordRegionsChange([...recordRegions, { x_min, y_min, x_max, y_max }]);
+      }
+    }
+    setRegionDragStart(null);
+    setRegionDragEnd(null);
+  }, [regionDragStart, regionDragEnd, scaledWidth, scaledHeight, recordRegions, onRecordRegionsChange]);
+
+  const handleRemoveRegion = useCallback(
+    (idx: number) => {
+      if (onRecordRegionsChange) {
+        onRecordRegionsChange(recordRegions.filter((_, i) => i !== idx));
+      }
+    },
+    [recordRegions, onRecordRegionsChange],
+  );
+
   // Compute display bands for coloring
   const displayBands = useMemo(() => boundariesToBands(positions), [positions]);
 
@@ -203,17 +271,46 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Toolbar */}
       <Stack direction="row" spacing={1} sx={{ p: 1, borderBottom: '1px solid', borderColor: 'divider' }} alignItems="center">
-        <Tooltip title="Add Column Boundary">
-          <Button size="small" startIcon={<IconPlus size={16} />} onClick={handleAddBoundary} variant="outlined">
-            Add Column
-          </Button>
-        </Tooltip>
+        {onRecordRegionsChange && (
+          <ToggleButtonGroup
+            value={drawingMode}
+            exclusive
+            onChange={(_, val) => val && setDrawingMode(val)}
+            size="small"
+          >
+            <ToggleButton value="columns">
+              <Tooltip title="Edit column boundaries">
+                <IconColumns size={16} />
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="records">
+              <Tooltip title="Draw record regions">
+                <IconSquarePlus size={16} />
+              </Tooltip>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        )}
+        {drawingMode === 'columns' && (
+          <Tooltip title="Add Column Boundary">
+            <Button size="small" startIcon={<IconPlus size={16} />} onClick={handleAddBoundary} variant="outlined">
+              Add Column
+            </Button>
+          </Tooltip>
+        )}
         <Chip
           label={`${displayBands.length} columns`}
           size="small"
           color="primary"
           variant="outlined"
         />
+        {recordRegions.length > 0 && (
+          <Chip
+            label={`${recordRegions.length} regions`}
+            size="small"
+            color="warning"
+            variant="outlined"
+          />
+        )}
         <Chip
           label={`Header Y: ${(headerY * 100).toFixed(1)}%`}
           size="small"
@@ -246,9 +343,10 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
       {/* Image + overlays */}
       <Box
         sx={{ flex: 1, overflow: 'auto', position: 'relative' }}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseDown={drawingMode === 'records' ? handleRegionMouseDown : undefined}
+        onMouseMove={drawingMode === 'records' ? handleRegionMouseMove : handleMouseMove}
+        onMouseUp={drawingMode === 'records' ? handleRegionMouseUp : handleMouseUp}
+        onMouseLeave={drawingMode === 'records' ? handleRegionMouseUp : handleMouseUp}
       >
         <Box
           ref={containerRef}
@@ -256,6 +354,7 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
             position: 'relative',
             display: 'inline-block',
             userSelect: 'none',
+            cursor: drawingMode === 'records' ? 'crosshair' : undefined,
           }}
         >
           <img
@@ -448,6 +547,83 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
                   Header Y: {(headerY * 100).toFixed(1)}%
                 </Typography>
               </Box>
+
+              {/* Record region overlays */}
+              {recordRegions.map((region, i) => (
+                <Box
+                  key={`region-${i}`}
+                  sx={{
+                    position: 'absolute',
+                    left: region.x_min * scaledWidth,
+                    top: region.y_min * scaledHeight,
+                    width: (region.x_max - region.x_min) * scaledWidth,
+                    height: (region.y_max - region.y_min) * scaledHeight,
+                    border: '2px solid',
+                    borderColor: 'warning.main',
+                    bgcolor: alpha(theme.palette.warning.main, 0.1),
+                    pointerEvents: 'auto',
+                    zIndex: 4,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      position: 'absolute',
+                      top: 2,
+                      left: 4,
+                      bgcolor: alpha(theme.palette.warning.main, 0.85),
+                      color: '#fff',
+                      px: 0.5,
+                      py: 0.1,
+                      borderRadius: 0.5,
+                      fontSize: '0.6rem',
+                      fontWeight: 700,
+                    }}
+                  >
+                    R{i + 1}
+                  </Typography>
+                  <Tooltip title={`Remove region ${i + 1}`}>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveRegion(i);
+                      }}
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bgcolor: alpha(theme.palette.error.main, 0.9),
+                        color: '#fff',
+                        width: 16,
+                        height: 16,
+                        zIndex: 6,
+                        '&:hover': { bgcolor: theme.palette.error.main },
+                      }}
+                    >
+                      <IconTrash size={10} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              ))}
+
+              {/* Region drag rectangle */}
+              {drawingMode === 'records' && regionDragStart && regionDragEnd && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    left: Math.min(regionDragStart.x, regionDragEnd.x),
+                    top: Math.min(regionDragStart.y, regionDragEnd.y),
+                    width: Math.abs(regionDragEnd.x - regionDragStart.x),
+                    height: Math.abs(regionDragEnd.y - regionDragStart.y),
+                    border: '2px solid',
+                    borderColor: 'warning.main',
+                    bgcolor: alpha(theme.palette.warning.main, 0.15),
+                    pointerEvents: 'none',
+                    zIndex: 10,
+                  }}
+                />
+              )}
             </>
           )}
         </Box>
@@ -458,3 +634,4 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
 
 export default ColumnBoundaryEditor;
 export { boundariesToBands, bandsToPositions };
+export type { FractionalBBox };
