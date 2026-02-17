@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Package, Loader2, CheckCircle, AlertCircle } from '@/ui/icons';
 import { FeatureBundle } from '@/types/refactorConsole';
 import { RestorationStatusBadge, calculateRestorationStatus } from './RestorationStatusBadge';
 import refactorConsoleClient from '../api/refactorConsoleClient';

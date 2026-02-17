@@ -39,7 +39,7 @@ import {
   FileText,
   HardDrive,
   RefreshCw
-} from 'lucide-react';
+} from '@/ui/icons';
 import { RestoreHistoryEntry, RestoreHistoryStats } from '@/types/refactorConsole';
 import refactorConsoleClient from '../api/refactorConsoleClient';
 

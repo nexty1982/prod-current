@@ -491,8 +491,8 @@ const OcrUploadDrawer: React.FC<UploadDrawerProps> = ({ open, onClose, churchId,
     const poll = async () => {
       try {
         // Use platform-only endpoint — fast, no tenant DB, safe to poll
-        const res: any = await apiClient.get(`/api/ocr/jobs?church_id=${churchId}`);
-        const jobs: any[] = res?.data?.jobs || res?.jobs || [];
+        const res: any = await apiClient.get(`/api/church/${churchId}/ocr/jobs`);
+        const jobs: any[] = res?.data?.jobs || res?.data || res?.jobs || [];
         if (jobs.length === 0) return;
 
         // Build lookup by job id → status
@@ -581,8 +581,8 @@ const OcrUploadDrawer: React.FC<UploadDrawerProps> = ({ open, onClose, churchId,
     if (!churchId || queue.length === 0) return;
     setIsUploading(true);
 
-    // Same endpoint as EnhancedOCRUploader — single source of truth
-    const endpoint = '/api/ocr/jobs/upload';
+    // Platform upload endpoint — inserts into platform DB where feeder worker polls
+    const endpoint = `/api/ocr/jobs/upload`;
 
     for (const item of queue) {
       if (item.status !== 'pending') continue;
@@ -995,8 +995,8 @@ const ImageHistoryPanel: React.FC<ImageHistoryPanelProps> = ({ churchId, refresh
     if (!churchId) return;
     setLoading(true);
     try {
-      const res: any = await apiClient.get(`/api/ocr/jobs?church_id=${churchId}`);
-      const all: OcrJob[] = res?.data?.jobs || res?.jobs || [];
+      const res: any = await apiClient.get(`/api/church/${churchId}/ocr/jobs`);
+      const all: OcrJob[] = res?.data?.jobs || res?.data || res?.jobs || [];
       setJobs(all);
     } catch { setJobs([]); }
     setLoading(false);

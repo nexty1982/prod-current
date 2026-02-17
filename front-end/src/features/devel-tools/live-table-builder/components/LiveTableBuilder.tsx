@@ -26,6 +26,7 @@ import type { TableColumn, TableRow, TableData } from '../types';
 import { parseClipboardData } from '../utils/clipboard';
 import { EditableHeader } from './EditableHeader';
 import { normalizeTableData, validateDimensions } from '../utils/normalize';
+import { agGridIconMap } from '@/ui/agGridIcons';
 
 interface LiveTableBuilderProps {
   data: TableData;
@@ -574,7 +575,7 @@ export const LiveTableBuilder: React.FC<LiveTableBuilderProps> = ({
               filter: false,
               resizable: true,
             }}
-            theme="legacy"
+            icons={agGridIconMap}
             suppressClipboardPaste={false}
             animateRows={false}
             getRowId={(params) => params.data.id}

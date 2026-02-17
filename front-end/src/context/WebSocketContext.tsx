@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
@@ -116,7 +116,13 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       console.log('🎉 WebSocket connection successful:', data);
     });
 
-    // Error handling
+    // Bridge server-side "app:new_build" to a DOM CustomEvent so
+    // useVersionCheck can react regardless of auth state
+    newSocket.on('app:new_build', (data) => {
+      console.log('🔄 New build notification received via WebSocket', data);
+      window.dispatchEvent(new CustomEvent('app:new_build', { detail: data }));
+    });
+
     newSocket.on('error', (error) => {
       console.error('🚨 WebSocket error:', error);
     });

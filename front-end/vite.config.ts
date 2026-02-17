@@ -1,13 +1,34 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import svgr from 'vite-plugin-svgr';
-import { resolve } from 'path';
 import { execSync } from 'child_process';
+import crypto from 'crypto';
 import fs from 'fs';
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
+import svgr from 'vite-plugin-svgr';
 
 // Read version from package.json
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 const baseVersion = packageJson.version || '1.0.0';
+
+// Generate a unique build hash for cache-busting version checks
+const buildHash = crypto.randomBytes(8).toString('hex');
+const gitSha = (() => { try { return execSync('git rev-parse --short HEAD').toString().trim(); } catch { return 'unknown'; } })();
+const buildTime = new Date().toISOString();
+
+// Vite plugin: write build-info.json into dist/ after build
+function buildInfoPlugin() {
+    return {
+        name: 'build-info',
+        closeBundle() {
+            const info = { hash: buildHash, version: baseVersion, gitSha, buildTime };
+            const outDir = resolve(__dirname, 'dist');
+            if (fs.existsSync(outDir)) {
+                fs.writeFileSync(resolve(outDir, 'build-info.json'), JSON.stringify(info));
+                console.log(`[build-info] wrote dist/build-info.json  hash=${buildHash}`);
+            }
+        },
+    };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -81,6 +102,7 @@ export default defineConfig(({ mode }) => {
             // Only transform SVGs with ?react suffix, let plain imports return URLs
         }),
         react(),
+        buildInfoPlugin(),
     ],
     build: {
         minify: 'esbuild', // esbuild minifier is ~20-40x faster than terser

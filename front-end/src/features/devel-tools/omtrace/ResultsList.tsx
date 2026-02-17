@@ -1,6 +1,6 @@
 import { Box, Chip } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
-import { AlertCircle, CheckCircle, ChevronRight, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, ChevronRight, XCircle } from '@/ui/icons';
 import React from 'react';
 import { OmtraceRunResult } from './types.ts';
 

@@ -11,11 +11,13 @@
     "clean": "rm -rf dist",
     "clean:cache": "rm -rf node_modules/.vite dist .vite",
     "clean:all": "rm -rf node_modules dist package-lock.json && npm install --legacy-peer-deps --loglevel=error",
-    "prebuild": "npm run clean",
+    "prebuild": "touch /var/www/orthodoxmetrics/maintenance.on",
     "build": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
+    "postbuild": "rm -f /var/www/orthodoxmetrics/maintenance.on",
     "build:dev": "vite build --mode development",
     "preview": "vite preview --port 5175 --host 0.0.0.0",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "check-icons": "bash -c 'HITS=$(grep -rn \"from .lucide-react.\" src/features/ --include=\"*.tsx\" --include=\"*.ts\" 2>/dev/null || true); if [ -n \"$HITS\" ]; then echo \"❌ Direct lucide-react imports found in feature code:\"; echo \"$HITS\"; echo \"\"; echo \"Use @/ui/icons or @/shared/ui/icons instead.\"; exit 1; fi; echo \"✅ Icon imports OK\"'"
   },
   "dependencies": {
     "@casl/ability": "^6.7.3",

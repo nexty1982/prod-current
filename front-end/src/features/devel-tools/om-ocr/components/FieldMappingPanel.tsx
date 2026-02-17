@@ -251,7 +251,7 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
     // Update all records' recordType
     setRecords((prev) => prev.map((r) => ({ ...r, recordType: newType })));
     try {
-      await apiClient.patch(`/api/ocr/jobs/${jobId}`, { record_type: newType });
+      await apiClient.patch(`/api/church/${churchId}/ocr/jobs/${jobId}`, { record_type: newType });
     } catch {
       // non-fatal
     }

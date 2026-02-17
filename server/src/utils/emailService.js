@@ -907,6 +907,86 @@ const sendContactEmail = async ({ firstName, lastName, phone, email, enquiryType
   }
 };
 
+// Send password reset email with temporary password
+const sendPasswordResetEmail = async (toEmail, tempPassword, firstName) => {
+  try {
+    const transporter = await createTransporter();
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'Orthodox Metrics';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
+    const displayName = firstName || 'User';
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .header { background: linear-gradient(135deg, #5d87ff 0%, #8c249d 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { margin: 0 0 5px 0; font-size: 24px; }
+        .header p { margin: 0; opacity: 0.9; }
+        .content { padding: 30px; }
+        .password-box { background: #f0f4ff; border: 2px solid #5d87ff; border-radius: 10px; padding: 20px; text-align: center; margin: 25px 0; }
+        .password-box .temp-password { font-size: 28px; font-weight: bold; color: #5d87ff; letter-spacing: 2px; font-family: monospace; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Password Reset</h1>
+        <p>Orthodox Metrics</p>
+    </div>
+    <div class="content">
+        <p>Hello ${displayName},</p>
+        <p>We received a request to reset your password. A temporary password has been generated for your account.</p>
+        
+        <div class="password-box">
+            <p style="margin: 0 0 10px 0; color: #555;">Your Temporary Password</p>
+            <div class="temp-password">${tempPassword}</div>
+        </div>
+        
+        <div class="warning">
+            <strong>Important:</strong> You will be required to change this password immediately after logging in. 
+            This temporary password should not be shared with anyone.
+        </div>
+        
+        <h3>Next Steps:</h3>
+        <ol>
+            <li>Go to <a href="https://orthodoxmetrics.com/auth/login2">orthodoxmetrics.com/auth/login2</a></li>
+            <li>Log in with your email and the temporary password above</li>
+            <li>You will be prompted to create a new password</li>
+        </ol>
+        
+        <p>If you did not request this password reset, please contact your administrator immediately.</p>
+    </div>
+    <div class="footer">
+        <p>&copy; ${new Date().getFullYear()} Orthodox Metrics &mdash; Digital Church Metrics</p>
+        <p>This is an automated message. Please do not reply to this email.</p>
+    </div>
+</body>
+</html>
+    `;
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: toEmail,
+      subject: 'Password Reset - Orthodox Metrics',
+      html: htmlContent,
+      text: `Hello ${displayName},\n\nYour temporary password is: ${tempPassword}\n\nPlease log in at https://orthodoxmetrics.com/auth/login2 and change your password immediately.\n\nIf you did not request this, contact your administrator.\n\n- Orthodox Metrics`
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Password reset email sent to ${toEmail}:`, info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error(`❌ Failed to send password reset email to ${toEmail}:`, error.message);
+    throw error;
+  }
+};
+
 module.exports = {
   sendOCRReceipt,
   sendSessionVerification,
@@ -916,5 +996,6 @@ module.exports = {
   sendTaskSubmissionEmail,
   sendTaskCreationEmail,
   sendBackupNotification,
-  sendContactEmail
+  sendContactEmail,
+  sendPasswordResetEmail
 };

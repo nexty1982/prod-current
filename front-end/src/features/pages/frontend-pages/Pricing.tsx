@@ -1,28 +1,17 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React from 'react';
-import { Typography, Box, List, ListItem, ListItemText, Button, CardContent, ListItemIcon, Chip, Switch, Grid } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import { styled } from '@mui/material/styles';
-import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
+import { Box, Button, CardContent, Chip, Grid, List, ListItem, ListItemIcon, ListItemText, Switch, Typography } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
+import React from 'react';
 
-import { IconCheck, IconX } from '@tabler/icons-react';
 import BlankCard from '@/shared/ui/BlankCard';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
-import pck1 from '@/assets/images/backgrounds/silver.png';
 import pck2 from '@/assets/images/backgrounds/bronze.png';
 import pck3 from '@/assets/images/backgrounds/gold.png';
+import pck1 from '@/assets/images/backgrounds/silver.png';
 
-const BCrumb = [
-  {
-    to: '/',
-    title: 'Home',
-  },
-  {
-    title: 'Pricing',
-  },
-];
 
 interface PricingPlan {
   id: number;
@@ -152,136 +141,140 @@ const Pricing = () => {
   });
 
   return (
-    (<PageContainer title="Pricing" description="this is Pricing page">
-      {/* breadcrumb */}
-      <Breadcrumb title="Pricing" items={BCrumb} />
-      {/* end breadcrumb */}
-      <Grid container spacing={3} justifyContent="center" sx={{ mt: 3 }}>
-        <Grid
-          item
-          xs={12}
-          sm={10}
-          lg={8}
-          sx={{ textAlign: 'center' }}
-        >
-          <Typography variant="h2">
+    <PageContainer title="Pricing" description="this is Pricing page">
+      <HeaderAlert />
+      <HpHeader />
+
+      {/* Banner */}
+      <Box sx={{ backgroundColor: 'primary.light', py: { xs: 4, lg: 6 }, textAlign: 'center' }}>
+        <Container maxWidth="lg">
+          <Typography variant="h2" fontWeight={700} mb={1}>
+            Pricing
+          </Typography>
+          <Typography variant="body1" color="text.secondary" fontSize="16px">
             Flexible Plans Tailored to Fit Your Community's Unique Needs!
           </Typography>
-          <Box display="flex" alignItems="center" mt={3} justifyContent="center">
-            <Typography variant="subtitle1">Monthly</Typography>
-            <Switch onChange={() => setShow(!show)} />
-            <Typography variant="subtitle1">Yearly</Typography>
-          </Box>
+        </Container>
+      </Box>
+
+      {/* Pricing Cards */}
+      <Container maxWidth="lg" sx={{ py: { xs: 4, lg: 8 } }}>
+        <Grid container spacing={3} justifyContent="center">
+          <Grid item xs={12} sm={10} lg={8} sx={{ textAlign: 'center' }}>
+            <Box display="flex" alignItems="center" mt={3} justifyContent="center">
+              <Typography variant="subtitle1">Monthly</Typography>
+              <Switch onChange={() => setShow(!show)} />
+              <Typography variant="subtitle1">Yearly</Typography>
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
-      <Grid container spacing={3} sx={{ mt: 5 }}>
-        {pricing.map((price, i) => (
-          <Grid
-            item
-            key={i}
-            xs={12}
-            lg={4}
-            sm={6}
-          >
-            <BlankCard>
-              <CardContent sx={{ p: '30px' }}>
-                {price.badge ? <StyledChip label="Popular" size="small"></StyledChip> : null}
+        <Grid container spacing={3} sx={{ mt: 5 }}>
+          {pricing.map((price, i) => (
+            <Grid item key={i} xs={12} lg={4} sm={6}>
+              <BlankCard>
+                <CardContent sx={{ p: '30px' }}>
+                  {price.badge ? <StyledChip label="Popular" size="small"></StyledChip> : null}
 
-                <Typography
-                  variant="subtitle1"
-                  fontSize="12px"
-                  mb={3}
-                  color="textSecondary"
-                  textTransform="uppercase"
-                >
-                  {price.package}
-                </Typography>
-                <img src={price.avatar} alt={price.avatar} width={90} />
-                <Box my={4}>
-                  {price.plan == 'Free' ? (
-                    <Box fontSize="50px" mt={5} fontWeight="600">
-                      {price.plan}
-                    </Box>
-                  ) : (
-                    <Box display="flex">
-                      <Typography variant="h6" mr="8px" mt="-12px">
-                        $
-                      </Typography>
-                      {show ? (
-                        <>
-                          <Typography fontSize="48px" fontWeight="600">
-                            {yearlyPrice(`${price.monthlyplan}`, 12)}
-                          </Typography>
-                          <Typography
-                            fontSize="15px"
-                            fontWeight={400}
-                            ml={1}
-                            color="textSecondary"
-                            mt={1}
-                          >
-                            /yr
-                          </Typography>
-                        </>
-                      ) : (
-                        <>
-                          <Typography fontSize="48px" fontWeight="600">
-                            {price.monthlyplan}
-                          </Typography>
-                          <Typography
-                            fontSize="15px"
-                            fontWeight={400}
-                            ml={1}
-                            color="textSecondary"
-                            mt={1}
-                          >
-                            /mo
-                          </Typography>
-                        </>
-                      )}
-                    </Box>
-                  )}
-                </Box>
-
-                <Box mt={3}>
-                  <List>
-                    {price.rules.map((rule, i) => (
-                      <Box key={i}>
-                        {rule.limit ? (
+                  <Typography
+                    variant="subtitle1"
+                    fontSize="12px"
+                    mb={3}
+                    color="textSecondary"
+                    textTransform="uppercase"
+                  >
+                    {price.package}
+                  </Typography>
+                  <img src={price.avatar} alt={price.avatar} width={90} />
+                  <Box my={4}>
+                    {price.plan == 'Free' ? (
+                      <Box fontSize="50px" mt={5} fontWeight="600">
+                        {price.plan}
+                      </Box>
+                    ) : (
+                      <Box display="flex">
+                        <Typography variant="h6" mr="8px" mt="-12px">
+                          $
+                        </Typography>
+                        {show ? (
                           <>
-                            <ListItem disableGutters>
-                              <ListItemIcon sx={{ color: 'primary.main', minWidth: '32px' }}>
-                                <IconCheck width={18} />
+                            <Typography fontSize="48px" fontWeight="600">
+                              {yearlyPrice(`${price.monthlyplan}`, 12)}
+                            </Typography>
+                            <Typography
+                              fontSize="15px"
+                              fontWeight={400}
+                              ml={1}
+                              color="textSecondary"
+                              mt={1}
+                            >
+                              /yr
+                            </Typography>
+                          </>
+                        ) : (
+                          <>
+                            <Typography fontSize="48px" fontWeight="600">
+                              {price.monthlyplan}
+                            </Typography>
+                            <Typography
+                              fontSize="15px"
+                              fontWeight={400}
+                              ml={1}
+                              color="textSecondary"
+                              mt={1}
+                            >
+                              /mo
+                            </Typography>
+                          </>
+                        )}
+                      </Box>
+                    )}
+                  </Box>
+
+                  <Box mt={3}>
+                    <List>
+                      {price.rules.map((rule, i) => (
+                        <Box key={i}>
+                          {rule.limit ? (
+                            <>
+                              <ListItem disableGutters>
+                                <ListItemIcon sx={{ color: 'primary.main', minWidth: '32px' }}>
+                                  <IconCheck width={18} />
+                                </ListItemIcon>
+                                <ListItemText>{rule.title}</ListItemText>
+                              </ListItem>
+                            </>
+                          ) : (
+                            <ListItem disableGutters sx={{ color: 'grey.400' }}>
+                              <ListItemIcon sx={{ color: 'grey.400', minWidth: '32px' }}>
+                                <IconX width={18} />
                               </ListItemIcon>
                               <ListItemText>{rule.title}</ListItemText>
                             </ListItem>
-                          </>
-                        ) : (
-                          <ListItem disableGutters sx={{ color: 'grey.400' }}>
-                            <ListItemIcon sx={{ color: 'grey.400', minWidth: '32px' }}>
-                              <IconX width={18} />
-                            </ListItemIcon>
-                            <ListItemText>{rule.title}</ListItemText>
-                          </ListItem>
-                        )}
-                      </Box>
-                    ))}
-                  </List>
-                </Box>
+                          )}
+                        </Box>
+                      ))}
+                    </List>
+                  </Box>
 
-                <Button
-                  sx={{ width: '100%', mt: 3 }}
-                  variant="contained"
-                  size="large"
-                  color="primary"
-                >
-                  {price.btntext}
-                </Button>
-              </CardContent>
-            </BlankCard>
-          </Grid>
-        ))}
-      </Grid>
-    </PageContainer>)
+                  <Button
+                    sx={{ width: '100%', mt: 3 }}
+                    variant="contained"
+                    size="large"
+                    color="primary"
+                  >
+                    {price.btntext}
+                  </Button>
+                </CardContent>
+              </BlankCard>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+
+      <C2a />
+      <Footer />
+      <ScrollToTop />
+    </PageContainer>
   );
 };
 

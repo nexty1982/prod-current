@@ -117,14 +117,14 @@ const CATEGORIES: Category[] = [
   {
     key: 'daily',
     title: 'OM Daily',
-    description: 'Work pipelines and task planning — 7, 14, 30, 60, 90 day horizons',
+    description: 'Work pipelines — 24hr, 48hr, 7/14/30/60/90 day horizons + conversation integration',
     icon: <DailyIcon sx={{ fontSize: 48 }} />,
     color: '#00897b',
     href: '/admin/control-panel/om-daily',
     quickLinks: [
+      { label: '24-Hour Plan', href: '/admin/control-panel/om-daily?horizon=1' },
+      { label: '48-Hour Plan', href: '/admin/control-panel/om-daily?horizon=2' },
       { label: '7-Day Plan', href: '/admin/control-panel/om-daily?horizon=7' },
-      { label: '30-Day Plan', href: '/admin/control-panel/om-daily?horizon=30' },
-      { label: '90-Day Plan', href: '/admin/control-panel/om-daily?horizon=90' },
     ],
   },
 ];

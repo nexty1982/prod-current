@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, CheckCircle, XCircle, AlertCircle, Code, FileCode, ExternalLink } from 'lucide-react';
+import { X, CheckCircle, XCircle, AlertCircle, Code, FileCode, ExternalLink } from '@/ui/icons';
 import { FileAnalysis, EndpointReference, ASTIntegrationPoint } from '@/types/refactorConsole';
 
 // Browser-compatible path utilities

@@ -977,9 +977,14 @@ async function processOcrJobAsync(db, jobId, imagePath, options = {}) {
     
     // Update job status to processing in DB (best-effort)
     try {
-      await db.query('UPDATE ocr_jobs SET status = ? WHERE id = ?', ['processing', jobId]);
+      await db.query('UPDATE ocr_jobs SET status = ?, processing_started_at = NOW() WHERE id = ?', ['processing', jobId]);
     } catch (dbError) {
-      console.warn(`[OCR Processing] DB status update to 'processing' failed (non-blocking):`, dbError.message);
+      // Fallback without processing_started_at for older schemas
+      try {
+        await db.query('UPDATE ocr_jobs SET status = ? WHERE id = ?', ['processing', jobId]);
+      } catch (dbError2) {
+        console.warn(`[OCR Processing] DB status update to 'processing' failed (non-blocking):`, dbError2.message);
+      }
     }
     
     // Update Job Bundle manifest to processing (best-effort, non-blocking)
@@ -1881,3 +1886,4 @@ router.post('/jobs/:jobId/draft-record', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.processOcrJobAsync = processOcrJobAsync;

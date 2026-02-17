@@ -7,27 +7,32 @@
  * Route: /tour
  */
 
-import React, { useState } from 'react';
+import C2a from '@/components/frontend-pages/shared/c2a';
+import Footer from '@/components/frontend-pages/shared/footer';
+import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
+import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
+import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import {
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Button,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-  Card,
-  CardContent,
-  IconButton,
-} from '@mui/material';
-import {
-  NavigateNext as NextIcon,
-  NavigateBefore as PrevIcon,
-  Close as CloseIcon,
-  CheckCircle as CheckIcon,
+    CheckCircle as CheckIcon,
+    Close as CloseIcon,
+    NavigateNext as NextIcon,
+    NavigateBefore as PrevIcon,
 } from '@mui/icons-material';
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Container,
+    IconButton,
+    Paper,
+    Step,
+    StepContent,
+    StepLabel,
+    Stepper,
+    Typography,
+} from '@mui/material';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface TourStep {
@@ -91,90 +96,111 @@ const Tour: React.FC = () => {
   };
 
   return (
-    <Box sx={{ py: 8, minHeight: '100vh', bgcolor: 'background.default' }}>
-      <Container maxWidth="md">
-        <Paper sx={{ p: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-            <Typography variant="h4" gutterBottom>
-              Application Tour
-            </Typography>
-            <IconButton onClick={handleSkip} color="inherit">
-              <CloseIcon />
-            </IconButton>
-          </Box>
+    <Box>
+      <HeaderAlert />
+      <HpHeader />
 
-          <Stepper activeStep={activeStep} orientation="vertical">
-            {tourSteps.map((step, index) => (
-              <Step key={step.title}>
-                <StepLabel
-                  optional={
-                    index === tourSteps.length - 1 ? (
-                      <Typography variant="caption">Last step</Typography>
-                    ) : null
-                  }
+      {/* Banner */}
+      <Box sx={{ backgroundColor: 'primary.light', py: { xs: 4, lg: 6 }, textAlign: 'center' }}>
+        <Container maxWidth="lg">
+          <Typography variant="h2" fontWeight={700} mb={1}>
+            Application Tour
+          </Typography>
+          <Typography variant="body1" color="text.secondary" fontSize="16px">
+            A step-by-step walkthrough of Orthodox Metrics
+          </Typography>
+        </Container>
+      </Box>
+
+      <Box sx={{ py: 8, minHeight: '60vh', bgcolor: 'background.default' }}>
+        <Container maxWidth="md">
+          <Paper sx={{ p: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+              <Typography variant="h4" gutterBottom>
+                Application Tour
+              </Typography>
+              <IconButton onClick={handleSkip} color="inherit">
+                <CloseIcon />
+              </IconButton>
+            </Box>
+
+            <Stepper activeStep={activeStep} orientation="vertical">
+              {tourSteps.map((step, index) => (
+                <Step key={step.title}>
+                  <StepLabel
+                    optional={
+                      index === tourSteps.length - 1 ? (
+                        <Typography variant="caption">Last step</Typography>
+                      ) : null
+                    }
+                  >
+                    <Typography variant="h6">{step.title}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {step.description}
+                    </Typography>
+                  </StepLabel>
+                  <StepContent>
+                    <Card sx={{ mb: 2 }}>
+                      <CardContent>
+                        <Typography variant="body1" paragraph>
+                          {step.content}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                    <Box sx={{ mb: 2 }}>
+                      <Button
+                        variant="contained"
+                        onClick={handleNext}
+                        sx={{ mt: 1, mr: 1 }}
+                        endIcon={activeStep === tourSteps.length - 1 ? <CheckIcon /> : <NextIcon />}
+                      >
+                        {activeStep === tourSteps.length - 1 ? 'Complete Tour' : 'Next'}
+                      </Button>
+                      <Button
+                        disabled={activeStep === 0}
+                        onClick={handleBack}
+                        sx={{ mt: 1, mr: 1 }}
+                        startIcon={<PrevIcon />}
+                      >
+                        Back
+                      </Button>
+                      <Button
+                        onClick={handleSkip}
+                        sx={{ mt: 1 }}
+                      >
+                        Skip Tour
+                      </Button>
+                    </Box>
+                  </StepContent>
+                </Step>
+              ))}
+            </Stepper>
+
+            {activeStep === tourSteps.length && (
+              <Paper sx={{ p: 3, mt: 2, bgcolor: 'success.light', color: 'success.contrastText' }}>
+                <Typography variant="h6" gutterBottom>
+                  Tour Complete!
+                </Typography>
+                <Typography variant="body2">
+                  You're all set to start using OrthodoxMetrics. Click the button below to go to your dashboard.
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/dashboards/super')}
+                  sx={{ mt: 2 }}
+                  endIcon={<CheckIcon />}
                 >
-                  <Typography variant="h6">{step.title}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {step.description}
-                  </Typography>
-                </StepLabel>
-                <StepContent>
-                  <Card sx={{ mb: 2 }}>
-                    <CardContent>
-                      <Typography variant="body1" paragraph>
-                        {step.content}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                  <Box sx={{ mb: 2 }}>
-                    <Button
-                      variant="contained"
-                      onClick={handleNext}
-                      sx={{ mt: 1, mr: 1 }}
-                      endIcon={activeStep === tourSteps.length - 1 ? <CheckIcon /> : <NextIcon />}
-                    >
-                      {activeStep === tourSteps.length - 1 ? 'Complete Tour' : 'Next'}
-                    </Button>
-                    <Button
-                      disabled={activeStep === 0}
-                      onClick={handleBack}
-                      sx={{ mt: 1, mr: 1 }}
-                      startIcon={<PrevIcon />}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      onClick={handleSkip}
-                      sx={{ mt: 1 }}
-                    >
-                      Skip Tour
-                    </Button>
-                  </Box>
-                </StepContent>
-              </Step>
-            ))}
-          </Stepper>
+                  Go to Dashboard
+                </Button>
+              </Paper>
+            )}
+          </Paper>
+        </Container>
+      </Box>
 
-          {activeStep === tourSteps.length && (
-            <Paper sx={{ p: 3, mt: 2, bgcolor: 'success.light', color: 'success.contrastText' }}>
-              <Typography variant="h6" gutterBottom>
-                Tour Complete!
-              </Typography>
-              <Typography variant="body2">
-                You're all set to start using OrthodoxMetrics. Click the button below to go to your dashboard.
-              </Typography>
-              <Button
-                variant="contained"
-                onClick={() => navigate('/dashboards/super')}
-                sx={{ mt: 2 }}
-                endIcon={<CheckIcon />}
-              >
-                Go to Dashboard
-              </Button>
-            </Paper>
-          )}
-        </Paper>
-      </Container>
+      <C2a />
+      <Footer />
+      <ScrollToTop />
     </Box>
   );
 };

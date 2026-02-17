@@ -3,7 +3,7 @@
  */
 
 export type OCRJobStatus = 'queued' | 'uploading' | 'processing' | 'completed' | 'failed';
-export type RecordType = 'baptism' | 'marriage' | 'funeral';
+export type RecordType = 'baptism' | 'marriage' | 'funeral' | 'unknown';
 
 export type WorkflowStatus = 'draft' | 'in_review' | 'finalized' | 'committed';
 
@@ -24,6 +24,22 @@ export interface OCRJobRow {
   // Workflow status from fusion drafts
   workflow_status?: WorkflowStatus | null;
   draft_count?: number;
+  // Classifier results
+  classifier_suggested_type?: string | null;
+  classifier_confidence?: number | null;
+}
+
+export interface FeederPage {
+  pageId: number;
+  pageIndex: number;
+  sourceImagePath?: string | null;
+  rawText: string | null;
+  rawTextArtifactId: number | null;
+  recordCandidates?: any | null;
+  tableExtractionJson?: any | null;
+  meta?: any | null;
+  ocrConfidence?: number | null;
+  status?: string;
 }
 
 export interface OCRJobDetail extends OCRJobRow {
@@ -31,5 +47,8 @@ export interface OCRJobDetail extends OCRJobRow {
   ocr_result: any | null;
   file_path?: string;
   mapping?: any | null;
+  // Feeder artifact data
+  pages?: FeederPage[];
+  feeder_source?: boolean;
 }
 

@@ -9,7 +9,7 @@ import {
     GitBranch,
     Shield,
     XCircle
-} from 'lucide-react';
+} from '@/ui/icons';
 import React from 'react';
 
 interface LegendProps {

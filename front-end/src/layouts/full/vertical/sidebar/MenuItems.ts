@@ -4,14 +4,10 @@ import {
     IconBell,
     IconBorderAll,
     IconBug,
-    IconCalendar,
-    IconChartHistogram,
     IconCheckbox,
-    IconComponents,
     IconDatabase,
     IconEdit,
     IconFileDescription,
-    IconForms,
     IconGitBranch,
     IconLayout,
     IconLayoutDashboard,
@@ -27,7 +23,7 @@ import {
     IconTool,
     IconUserPlus,
     IconUsers,
-    IconWriting
+    IconWriting,
 } from '@tabler/icons-react';
 import { uniqueId } from 'lodash';
 
@@ -45,142 +41,6 @@ interface MenuitemsType {
   variant?: string;
   external?: boolean;
 }
-
-// Icon mapping function for refactored routes
-const getIconComponent = (iconName?: string) => {
-  switch (iconName) {
-    case 'Shield':
-      return IconShield;
-    case 'List':
-      return IconBorderAll;
-    case 'User':
-      return IconUserPlus;
-    case 'UserCheck':
-      return IconUserPlus;
-    case 'Users':
-      return IconUsers;
-    case 'FileCode':
-      return IconFileDescription;
-    case 'Sliders':
-      return IconEdit;
-    case 'Table':
-      return IconBorderAll;
-    case 'Lock':
-      return IconShield;
-    case 'Wrench':
-      return IconSettings;
-    case 'Edit':
-      return IconEdit;
-    case 'Bug':
-      return IconBug;
-    case 'Git':
-      return IconGitBranch;
-    case 'Sitemap':
-      return IconSitemap;
-    case 'Search':
-      return IconEdit; // Using Edit as placeholder for Search
-    case 'Server':
-      return IconShield; // Using Shield as placeholder for Server
-    case 'Wand':
-      return IconEdit; // Using Edit as placeholder for Wand
-    case 'Test':
-      return IconBug; // Using Bug as placeholder for Test
-    case 'Alert':
-      return IconEdit; // Using Edit as placeholder for Alert
-    case 'Fallback':
-      return IconEdit; // Using Edit as placeholder for Fallback
-    case 'Key':
-      return IconShield; // Using Shield as placeholder for Key
-    case 'Toggle':
-      return IconEdit; // Using Edit as placeholder for Toggle
-    case 'Dashboard':
-      return IconLayoutDashboard;
-    case 'Terminal':
-      return IconTerminal;
-    case 'Build':
-      return IconEdit; // Using Edit as placeholder for Build
-    case 'Monitor':
-      return IconEdit; // Using Edit as placeholder for Monitor
-    case 'Memory':
-      return IconEdit; // Using Edit as placeholder for Memory
-    case 'Bell':
-      return IconBell;
-    case 'Book':
-      return IconFileDescription;
-    case 'Settings':
-      return IconSettings;
-    case 'Eye':
-      return IconEdit; // Using Edit as placeholder for Eye
-    case 'Sync':
-      return IconEdit; // Using Edit as placeholder for Sync
-    case 'Route':
-      return IconEdit; // Using Edit as placeholder for Route
-    case 'Brain':
-      return IconEdit; // Using Edit as placeholder for Brain
-    case 'Logs':
-      return IconEdit; // Using Edit as placeholder for Logs
-    case 'Translate':
-      return IconEdit; // Using Edit as placeholder for Translate
-    case 'Generate':
-      return IconEdit; // Using Edit as placeholder for Generate
-    case 'Deploy':
-      return IconEdit; // Using Edit as placeholder for Deploy
-    case 'Chart':
-      return IconChartHistogram;
-    case 'Grid':
-      return IconBorderAll;
-    case 'Dialog':
-      return IconEdit; // Using Edit as placeholder for Dialog
-    case 'Import':
-      return IconEdit; // Using Edit as placeholder for Import
-    case 'Token':
-      return IconEdit; // Using Edit as placeholder for Token
-    case 'Records':
-      return IconFileDescription;
-    case 'Demo':
-      return IconEdit; // Using Edit as placeholder for Demo
-    case 'Board':
-      return IconBorderAll;
-    case 'Column':
-      return IconBorderAll;
-    case 'Card':
-      return IconBorderAll;
-    case 'Modal':
-      return IconEdit; // Using Edit as placeholder for Modal
-    case 'Palette':
-      return IconPalette;
-    case 'Control':
-      return IconEdit; // Using Edit as placeholder for Control
-    case 'Color':
-      return IconPalette;
-    case 'Inspect':
-      return IconBug;
-    case 'Regression':
-      return IconEdit; // Using Edit as placeholder for Regression
-    case 'Upload':
-      return IconEdit; // Using Edit as placeholder for Upload
-    case 'Scan':
-      return IconEdit; // Using Edit as placeholder for Scan
-    case 'Backup':
-      return IconEdit; // Using Edit as placeholder for Backup
-    case 'Registry':
-      return IconEdit; // Using Edit as placeholder for Registry
-    case 'Form':
-      return IconForms;
-    case 'Install':
-      return IconEdit; // Using Edit as placeholder for Install
-    case 'Files':
-      return IconFileDescription;
-    case 'View':
-      return IconEdit; // Using Edit as placeholder for View
-    case 'Discovery':
-      return IconEdit; // Using Edit as placeholder for Discovery
-    case 'Mobile':
-      return IconEdit; // Using Edit as placeholder for Mobile
-    default:
-      return IconComponents;
-  }
-};
 
 const Menuitems: MenuitemsType[] = [
   // DASHBOARDS SECTION
@@ -305,11 +165,22 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
+        title: 'Log Search',
+        icon: IconDatabase,
+        href: '/admin/log-search',
+      },
+      {
+        id: uniqueId(),
         title: 'Session Management',
         icon: IconShield,
         href: '/admin/sessions',
       },
-
+      {
+        id: uniqueId(),
+        title: 'Admin Settings',
+        icon: IconSettings,
+        href: '/admin/settings',
+      },
     ],
   },
 
@@ -352,31 +223,9 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
-        title: 'Dynamic Records Manager',
-        icon: IconDatabase,
-        href: '/apps/records/manager',
-        chip: 'NEW',
-        chipColor: 'primary',
-      },
-      {
-        id: uniqueId(),
-        title: 'Modern Records Manager',
-        icon: IconRocket,
-        href: '/apps/records/modern-manager',
-        chip: 'NEW',
-        chipColor: 'secondary',
-      },
-      {
-        id: uniqueId(),
         title: 'Editable Records',
         icon: IconEdit,
         href: '/apps/records/editable',
-      },
-      {
-        id: uniqueId(),
-        title: 'OCR Enhanced Uploader',
-        icon: IconFileDescription,
-        href: '/devel/enhanced-ocr-uploader',
       },
     ],
   },
@@ -388,15 +237,26 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: 'Gallery',
-    icon: IconPalette,
-    href: '/apps/gallery',
-  },
-  {
-    id: uniqueId(),
     title: 'OM-Spec',
     icon: IconFileDescription,
     href: '/church/om-spec',
+  },
+  // DEVELOPER TOOLS SECTION
+  {
+    navlabel: true,
+    subheader: '🛠️ Developer Tools',
+  },
+  {
+    id: uniqueId(),
+    title: 'OM Daily',
+    icon: IconCheckbox,
+    href: '/admin/control-panel/om-daily',
+  },
+  {
+    id: uniqueId(),
+    title: 'Daily Tasks',
+    icon: IconCheckbox,
+    href: '/devel-tools/daily-tasks',
   },
   {
     id: uniqueId(),
@@ -412,28 +272,10 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: 'OMAI Ultimate Logger',
-    icon: IconBug,
-    href: '/church/omai-logger',
-  },
-  // DEVELOPER TOOLS SECTION
-  {
-    navlabel: true,
-    subheader: '🛠️ Developer Tools',
-  },
-  {
-    id: uniqueId(),
-    title: 'OM Spec / Tasks',
-    icon: IconFileDescription,
-    href: '/church/om-spec',
-  },
-  {
-    id: uniqueId(),
     title: 'Development Console',
     icon: IconTerminal,
     href: '#',
     children: [
-
       {
         id: uniqueId(),
         title: 'Router/Menu Studio',
@@ -454,12 +296,6 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
-        title: 'Site Structure Visualizer',
-        icon: IconSitemap,
-        href: '/tools/site-structure',
-      },
-      {
-        id: uniqueId(),
         title: 'OMTrace Console',
         icon: IconSitemap,
         href: '/devel-tools/omtrace',
@@ -469,12 +305,6 @@ const Menuitems: MenuitemsType[] = [
         title: 'Refactor Console',
         icon: IconTool,
         href: '/devel-tools/refactor-console',
-      },
-      {
-        id: uniqueId(),
-        title: 'Daily Tasks',
-        icon: IconCheckbox,
-        href: '/devel-tools/daily-tasks',
       },
       {
         id: uniqueId(),
@@ -490,36 +320,6 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
-        title: 'Loading Demo',
-        icon: IconComponents,
-        href: '/apps/devel/loading-demo',
-      },
-      {
-        id: uniqueId(),
-        title: 'OCR Studio',
-        icon: IconFileDescription,
-        href: '/devel/ocr-studio',
-      },
-      {
-        id: uniqueId(),
-        title: 'OCR Setup Wizard',
-        icon: IconSettings,
-        href: '/devel/ocr-setup-wizard',
-      },
-      {
-        id: uniqueId(),
-        title: 'Enhanced OCR Uploader',
-        icon: IconFileDescription,
-        href: '/devel/enhanced-ocr-uploader',
-      },
-      {
-        id: uniqueId(),
-        title: 'OCR Settings',
-        icon: IconFileDescription,
-        href: '/devel/ocr-settings',
-      },
-      {
-        id: uniqueId(),
         title: 'OM Permission Center',
         icon: IconShield,
         href: '/devel-tools/om-permission-center',
@@ -532,29 +332,72 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
+        title: 'Git Operations',
+        icon: IconGitBranch,
+        href: '/devel-tools/git-operations',
+      },
+      {
+        id: uniqueId(),
         title: 'Build Info',
         icon: IconGitBranch,
         href: '/devel-tools/build-info',
       },
       {
         id: uniqueId(),
-        title: 'Component Library',
+        title: 'Conversation Log',
+        icon: IconMessage,
+        href: '/devel-tools/conversation-log',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'OCR Studio',
+    icon: IconFileDescription,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'OCR Studio',
+        icon: IconFileDescription,
+        href: '/devel/ocr-studio',
+      },
+      {
+        id: uniqueId(),
+        title: 'Upload',
+        icon: IconFileDescription,
+        href: '/devel/ocr-studio/upload',
+      },
+      {
+        id: uniqueId(),
+        title: 'Job Monitor',
+        icon: IconActivity,
+        href: '/devel/ocr-studio/jobs',
+      },
+      {
+        id: uniqueId(),
+        title: 'Table Extractor',
         icon: IconBorderAll,
-        href: '/sandbox/component-library',
+        href: '/devel/ocr-studio/table-extractor',
       },
       {
         id: uniqueId(),
-        title: 'Core Components',
-        icon: IconComponents,
-        href: '/sandbox/component-preview/core',
+        title: 'Layout Templates',
+        icon: IconLayout,
+        href: '/devel/ocr-studio/layout-templates',
       },
       {
         id: uniqueId(),
-        title: 'Modernize Components',
-        icon: IconLayoutDashboard,
-        href: '/sandbox/component-preview/modernize',
+        title: 'Activity Monitor',
+        icon: IconActivity,
+        href: '/devel/ocr-activity-monitor',
       },
-
+      {
+        id: uniqueId(),
+        title: 'OCR Settings',
+        icon: IconSettings,
+        href: '/devel/ocr-studio/settings',
+      },
     ],
   },
 
@@ -598,62 +441,6 @@ const Menuitems: MenuitemsType[] = [
       },
     ],
   },
-
-  // BROKEN LINKS SECTION
-  {
-    navlabel: true,
-    subheader: '🔗 Broken Links',
-  },
-  {
-    id: uniqueId(),
-    title: 'Broken Links',
-    icon: IconBug,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'User Profile',
-        icon: IconUsers,
-        href: '/user-profile',
-      },
-      {
-        id: uniqueId(),
-        title: 'Gallery',
-        icon: IconPoint,
-        href: '/apps/gallery',
-      },
-      {
-        id: uniqueId(),
-        title: 'OM Permission Center',
-        icon: IconShield,
-        href: '/devel-tools/om-permission-center',
-      },
-      {
-        id: uniqueId(),
-        title: 'Admin Settings',
-        icon: IconSettings,
-        href: '/admin/settings',
-      },
-      {
-        id: uniqueId(),
-        title: 'Task Assignment',
-        icon: IconEdit,
-        href: '/admin/settings',
-      },
-      {
-        id: uniqueId(),
-        title: 'Build Console',
-        icon: IconTerminal,
-        href: '/admin/build',
-      },
-      {
-        id: uniqueId(),
-        title: 'JIT Terminal',
-        icon: IconTerminal,
-        href: '/admin/jit-terminal',
-      },
-    ],
-  },
 ];
 
 export const getMenuItems = (user: any) => {
@@ -667,18 +454,6 @@ export const getMenuItems = (user: any) => {
           ...item,
           children: item.children.map(child => {
             switch (child.title) {
-              case 'Dynamic Explorer':
-                return { ...child, href: `/apps/records/dynamic/${churchId}` };
-              case 'Enhanced AG Grid':
-                return { ...child, href: `/apps/records/enhanced/${churchId}` };
-              case 'Simple Records System':
-                return { ...child, href: `/apps/records-simple/${churchId}` };
-              case 'Dynamic Manager':
-                return { ...child, href: `/apps/records/manager` };
-              case 'Modern Manager':
-                return { ...child, href: `/apps/records/modern-manager` };
-              case 'Editable Records':
-                return { ...child, href: `/apps/records/editable` };
               default:
                 return child;
             }
@@ -725,12 +500,6 @@ export const getMenuItems = (user: any) => {
       },
       {
         id: uniqueId(),
-        title: 'Orthodox Calendar',
-        icon: IconCalendar,
-        href: '/apps/liturgical-calendar',
-      },
-      {
-        id: uniqueId(),
         title: 'Records System',
         icon: IconFileDescription,
         href: '#',
@@ -748,7 +517,7 @@ export const getMenuItems = (user: any) => {
             id: uniqueId(),
             title: 'OCR Uploads',
             icon: IconFileDescription,
-            href: `/devel/enhanced-ocr-uploader?church_id=${churchId}`,
+            href: `/devel/ocr-studio/upload`,
           },
         ],
       },
@@ -807,17 +576,10 @@ export const getMenuItems = (user: any) => {
     },
     {
       id: uniqueId(),
-      title: 'Orthodox Calendar',
-      icon: IconCalendar,
-      href: '/apps/liturgical-calendar',
-    },
-    {
-      id: uniqueId(),
       title: 'Records System',
       icon: IconFileDescription,
       href: '#',
       children: [
-        // Modern Enhanced Records
         {
           id: uniqueId(),
           title: 'Records',
@@ -830,13 +592,7 @@ export const getMenuItems = (user: any) => {
           id: uniqueId(),
           title: 'OCR Uploads',
           icon: IconFileDescription,
-          href: `/devel/enhanced-ocr-uploader?church_id=${churchId}`,
-        },
-        {
-          id: uniqueId(),
-          title: 'OCR Setup Wizard',
-          icon: IconSettings,
-          href: `/devel/ocr-setup-wizard?church_id=${churchId}`,
+          href: `/devel/ocr-studio/upload`,
         },
       ],
     },

@@ -33,7 +33,7 @@ import {
   FileText,
   GitCompare,
   Package
-} from 'lucide-react';
+} from '@/ui/icons';
 import { FilePreview, DependencyCheckResult } from '@/types/refactorConsole';
 
 interface DiffViewModalProps {

@@ -18,7 +18,6 @@ const AppLinks = () => {
   // Map dropdown app hrefs to menu IDs
   const appIdMap: { [href: string]: string } = {
     '/apps/notes': 'app-notes',
-    '/apps/liturgical-calendar': 'app-calendar',
     '/apps/email': 'app-email',
     '/apps/kanban': 'app-kanban',
     '/apps/ocr-upload': 'app-ocr-upload',

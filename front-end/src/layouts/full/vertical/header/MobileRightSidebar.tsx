@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import {
   IconApps,
-  IconCalendarEvent,
   IconChevronDown,
   IconChevronUp,
   IconGridDots,
@@ -53,16 +52,6 @@ const MobileRightSidebar = () => {
             <ListItemText>
               <Typography variant="subtitle2" fontWeight={600}>
                 Chats
-              </Typography>
-            </ListItemText>
-          </ListItemButton>
-          <ListItemButton component={Link} to="/apps/liturgical-calendar">
-            <ListItemIcon sx={{ minWidth: 35 }}>
-              <IconCalendarEvent size="21" stroke="1.5" />
-            </ListItemIcon>
-            <ListItemText>
-              <Typography variant="subtitle2" fontWeight={600}>
-                Liturgical Calendar
               </Typography>
             </ListItemText>
           </ListItemButton>

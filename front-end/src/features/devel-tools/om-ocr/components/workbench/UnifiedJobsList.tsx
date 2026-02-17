@@ -1,9 +1,10 @@
 /**
- * UnifiedJobsList - Clean, modern table layout matching redesigned OCR interface
- * Shows processed files with simple columns: File name, Pages, Added, Status
+ * UnifiedJobsList - OCR jobs table with full lifecycle actions
+ * Columns: File name, Type, Started, Age, Status, Error, Actions
+ * Actions: Open, Re-process, Delete (page-only or page+DB), Auto-archive 7+ days
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -25,12 +26,25 @@ import {
   Typography,
   useTheme,
   LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  alpha,
+  Alert,
 } from '@mui/material';
 import {
   IconTrash,
-  IconDownload,
   IconChevronDown,
   IconChevronUp,
+  IconRefresh,
+  IconRotateClockwise,
+  IconEye,
+  IconArchive,
+  IconAlertTriangle,
 } from '@tabler/icons-react';
 import type { OCRJobRow } from '../../types/ocrJob';
 
@@ -41,8 +55,12 @@ interface UnifiedJobsListProps {
   onJobSelect: (jobId: number) => void;
   onRefresh: () => void | Promise<void>;
   onDeleteJobs?: (jobIds: number[]) => void | Promise<void>;
+  onRetryJob?: (jobId: number) => Promise<boolean>;
+  onHideJobs?: (jobIds: number[]) => void;
   churchId: number;
 }
+
+const AUTO_ARCHIVE_DAYS = 7;
 
 const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
   jobs,
@@ -51,6 +69,8 @@ const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
   onJobSelect,
   onRefresh,
   onDeleteJobs,
+  onRetryJob,
+  onHideJobs,
   churchId,
 }) => {
   const theme = useTheme();
@@ -58,12 +78,35 @@ const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
   const [itemsPerPage, setItemsPerPage] = useState<number>(20);
   const [sortBy, setSortBy] = useState<'added' | 'filename'>('added');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  
-  // Sort and filter jobs
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteMode, setDeleteMode] = useState<'page' | 'database'>('database');
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<number[]>([]);
+  const [archivedCount, setArchivedCount] = useState(0);
+
+  // Auto-archive: hide jobs older than 7 days on mount
+  useEffect(() => {
+    if (!onHideJobs || jobs.length === 0) return;
+    const now = Date.now();
+    const oldJobIds = jobs
+      .filter(j => {
+        if (!j.created_at) return false;
+        const age = now - new Date(j.created_at).getTime();
+        const days = age / (1000 * 60 * 60 * 24);
+        const isTerminal = ['completed', 'complete', 'failed', 'error'].includes(j.status);
+        return days >= AUTO_ARCHIVE_DAYS && isTerminal;
+      })
+      .map(j => j.id);
+
+    if (oldJobIds.length > 0) {
+      onHideJobs(oldJobIds);
+      setArchivedCount(oldJobIds.length);
+    }
+  }, []); // Run once on mount
+
+  // Filtered and sorted jobs (exclude active auto-archive candidates that haven't been hidden yet)
   const sortedJobs = useMemo(() => {
     const sorted = [...jobs].sort((a, b) => {
       let comparison = 0;
-      
       if (sortBy === 'added') {
         const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
         const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
@@ -73,49 +116,39 @@ const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
         const nameB = (b.original_filename || '').toLowerCase();
         comparison = nameA.localeCompare(nameB);
       }
-      
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-    
     return sorted.slice(0, itemsPerPage);
   }, [jobs, sortBy, sortOrder, itemsPerPage]);
-  
-  // Calculate retention days (6 days from now, or based on created_at)
-  const getRetentionDays = useCallback((createdAt: string | undefined) => {
-    if (!createdAt) return 6;
-    const created = new Date(createdAt);
-    const now = new Date();
-    const daysSince = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
-    return Math.max(0, 6 - daysSince);
-  }, []);
-  
-  // Format "X minutes/hours/days ago"
-  const formatTimeAgo = useCallback((dateString: string | undefined) => {
+
+  // Format date as "Feb 13, 2:45 PM"
+  const formatStarted = useCallback((dateString: string | undefined) => {
     if (!dateString) return '-';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    const d = new Date(dateString);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' +
+           d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   }, []);
-  
+
+  // Format age as "Xm", "Xh", "Xd"
+  const formatAge = useCallback((dateString: string | undefined) => {
+    if (!dateString) return '-';
+    const diffMs = Date.now() - new Date(dateString).getTime();
+    const mins = Math.floor(diffMs / 60000);
+    const hours = Math.floor(diffMs / 3600000);
+    const days = Math.floor(diffMs / 86400000);
+    if (mins < 60) return `${mins}m`;
+    if (hours < 24) return `${hours}h`;
+    return `${days}d`;
+  }, []);
+
   const toggleSelection = useCallback((jobId: number) => {
     setSelectedJobs(prev => {
       const next = new Set(prev);
-      if (next.has(jobId)) {
-        next.delete(jobId);
-      } else {
-        next.add(jobId);
-      }
+      next.has(jobId) ? next.delete(jobId) : next.add(jobId);
       return next;
     });
   }, []);
-  
+
   const toggleSelectAll = useCallback(() => {
     if (selectedJobs.size === sortedJobs.length) {
       setSelectedJobs(new Set());
@@ -123,159 +156,196 @@ const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
       setSelectedJobs(new Set(sortedJobs.map(j => j.id)));
     }
   }, [sortedJobs, selectedJobs.size]);
-  
+
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'completed':
-      case 'complete':
-        return 'success';
-      case 'processing':
-        return 'info';
-      case 'failed':
-      case 'error':
-        return 'error';
-      case 'queued':
-        return 'default';
-      default:
-        return 'default';
+      case 'completed': case 'complete': return 'success';
+      case 'processing': return 'info';
+      case 'failed': case 'error': return 'error';
+      case 'queued': case 'pending': return 'warning';
+      default: return 'default';
     }
   };
-  
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return 'success';
-    if (confidence >= 0.5) return 'warning';
-    return 'error';
+
+  const getStatusLabel = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'completed': case 'complete': return 'Completed';
+      case 'processing': return 'Processing';
+      case 'failed': case 'error': return 'Failed';
+      case 'queued': case 'pending': return 'Queued';
+      default: return status || 'Unknown';
+    }
   };
-  
+
   const handleSort = useCallback((column: 'added' | 'filename') => {
     if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(column);
       setSortOrder('desc');
     }
-  }, [sortBy, sortOrder]);
+  }, [sortBy]);
+
+  // Open delete dialog for selected or specific jobs
+  const openDeleteDialog = useCallback((jobIds: number[]) => {
+    setPendingDeleteIds(jobIds);
+    setDeleteMode('database');
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    setDeleteDialogOpen(false);
+    if (pendingDeleteIds.length === 0) return;
+
+    if (deleteMode === 'page') {
+      // Remove from page only (hide)
+      onHideJobs?.(pendingDeleteIds);
+    } else {
+      // Delete from database AND page
+      await onDeleteJobs?.(pendingDeleteIds);
+    }
+    setSelectedJobs(prev => {
+      const next = new Set(prev);
+      pendingDeleteIds.forEach(id => next.delete(id));
+      return next;
+    });
+    setPendingDeleteIds([]);
+  }, [deleteMode, pendingDeleteIds, onDeleteJobs, onHideJobs]);
+
+  const handleRetry = useCallback(async (jobId: number) => {
+    if (onRetryJob) {
+      await onRetryJob(jobId);
+    }
+  }, [onRetryJob]);
+
+  const isRetryable = (status: string) => {
+    return ['failed', 'error', 'completed', 'complete'].includes(status?.toLowerCase());
+  };
+
+  const isClickable = (status: string) => {
+    return ['completed', 'complete'].includes(status?.toLowerCase());
+  };
+
+  const colCount = 8; // checkbox + filename + type + started + age + status + error + actions
 
   return (
     <Paper variant="outlined" sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Top Controls */}
-      <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <Select
-            value={itemsPerPage}
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            sx={{ 
-              '& .MuiSelect-select': { 
-                py: 1,
-                display: 'flex',
-                alignItems: 'center',
-              }
-            }}
-          >
-            <MenuItem value={10}>10 per page</MenuItem>
-            <MenuItem value={20}>20 per page</MenuItem>
-            <MenuItem value={50}>50 per page</MenuItem>
-            <MenuItem value={100}>100 per page</MenuItem>
-          </Select>
-        </FormControl>
-        
-        <Stack direction="row" spacing={1}>
-          <Tooltip title="Delete Selected">
-            <span>
-              <IconButton
-                size="small"
-                disabled={selectedJobs.size === 0}
-                onClick={() => {
-                  if (onDeleteJobs && selectedJobs.size > 0) {
-                    onDeleteJobs(Array.from(selectedJobs));
-                    setSelectedJobs(new Set());
-                  }
-                }}
-                sx={{ 
-                  opacity: selectedJobs.size === 0 ? 0.5 : 1,
-                  color: selectedJobs.size === 0 ? 'text.disabled' : 'text.secondary'
-                }}
-              >
-                <IconTrash size={18} />
-              </IconButton>
-            </span>
-          </Tooltip>
-          <Tooltip title="Download Selected">
-            <span>
-              <Button
-                size="small"
-                variant="outlined"
-                startIcon={<IconDownload size={16} />}
-                disabled={selectedJobs.size === 0}
-                sx={{ 
-                  opacity: selectedJobs.size === 0 ? 0.5 : 1,
-                }}
-              >
-                Download
-              </Button>
-            </span>
+      <Box sx={{ p: 1.5, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <FormControl size="small" sx={{ minWidth: 110 }}>
+            <Select
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              sx={{ '& .MuiSelect-select': { py: 0.75 } }}
+            >
+              <MenuItem value={10}>10 per page</MenuItem>
+              <MenuItem value={20}>20 per page</MenuItem>
+              <MenuItem value={50}>50 per page</MenuItem>
+              <MenuItem value={100}>100 per page</MenuItem>
+            </Select>
+          </FormControl>
+          <Typography variant="caption" color="text.secondary">
+            {jobs.length} job{jobs.length !== 1 ? 's' : ''}
+            {archivedCount > 0 && ` (${archivedCount} auto-archived)`}
+          </Typography>
+        </Stack>
+
+        <Stack direction="row" spacing={1} alignItems="center">
+          {selectedJobs.size > 0 && (
+            <>
+              <Tooltip title="Re-process selected">
+                <span>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="info"
+                    startIcon={<IconRotateClockwise size={16} />}
+                    onClick={async () => {
+                      for (const id of selectedJobs) {
+                        const job = jobs.find(j => j.id === id);
+                        if (job && isRetryable(job.status)) {
+                          await handleRetry(id);
+                        }
+                      }
+                      setSelectedJobs(new Set());
+                    }}
+                    sx={{ textTransform: 'none', height: 32 }}
+                  >
+                    Re-process ({[...selectedJobs].filter(id => { const j = jobs.find(x => x.id === id); return j && isRetryable(j.status); }).length})
+                  </Button>
+                </span>
+              </Tooltip>
+              <Tooltip title="Delete selected">
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  startIcon={<IconTrash size={16} />}
+                  onClick={() => openDeleteDialog(Array.from(selectedJobs))}
+                  sx={{ textTransform: 'none', height: 32 }}
+                >
+                  Delete ({selectedJobs.size})
+                </Button>
+              </Tooltip>
+            </>
+          )}
+          <Tooltip title="Refresh">
+            <IconButton size="small" onClick={() => onRefresh()}>
+              <IconRefresh size={18} />
+            </IconButton>
           </Tooltip>
         </Stack>
       </Box>
-      
+
       {/* Table */}
       <TableContainer sx={{ flex: 1, overflow: 'auto' }}>
-        <Table stickyHeader>
+        <Table size="small" stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox" sx={{ width: 50 }}>
+              <TableCell padding="checkbox" sx={{ width: 42 }}>
                 <Checkbox
+                  size="small"
                   checked={sortedJobs.length > 0 && selectedJobs.size === sortedJobs.length}
                   indeterminate={selectedJobs.size > 0 && selectedJobs.size < sortedJobs.length}
                   onChange={toggleSelectAll}
                 />
               </TableCell>
-              <TableCell 
-                sx={{ 
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                  textDecoration: sortBy === 'filename' ? 'underline' : 'none',
-                  textDecorationStyle: 'dotted',
-                }}
+              <TableCell
+                sx={{ cursor: 'pointer', userSelect: 'none' }}
                 onClick={() => handleSort('filename')}
               >
                 <Stack direction="row" spacing={0.5} alignItems="center">
                   <span>File name</span>
-                  {sortBy === 'filename' && (
-                    sortOrder === 'asc' ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />
-                  )}
+                  {sortBy === 'filename' && (sortOrder === 'asc' ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />)}
                 </Stack>
               </TableCell>
-              <TableCell>Pages</TableCell>
-              <TableCell 
-                sx={{ 
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                  textDecoration: sortBy === 'added' ? 'underline' : 'none',
-                  textDecorationStyle: 'dotted',
-                }}
+              <TableCell sx={{ width: 80 }}>Type</TableCell>
+              <TableCell
+                sx={{ width: 140, cursor: 'pointer', userSelect: 'none' }}
                 onClick={() => handleSort('added')}
               >
                 <Stack direction="row" spacing={0.5} alignItems="center">
-                  <span>Added</span>
-                  {sortBy === 'added' && (
-                    sortOrder === 'asc' ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />
-                  )}
+                  <span>Started</span>
+                  {sortBy === 'added' && (sortOrder === 'asc' ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />)}
                 </Stack>
               </TableCell>
-              <TableCell>Status</TableCell>
+              <TableCell sx={{ width: 55 }}>Age</TableCell>
+              <TableCell sx={{ width: 100 }}>Status</TableCell>
+              <TableCell sx={{ minWidth: 120 }}>Error</TableCell>
+              <TableCell sx={{ width: 120 }} align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {loading ? (
+            {loading && jobs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={colCount} align="center" sx={{ py: 4 }}>
                   <LinearProgress />
                 </TableCell>
               </TableRow>
             ) : sortedJobs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={colCount} align="center" sx={{ py: 4 }}>
                   <Typography variant="body2" color="text.secondary">
                     {jobs.length === 0 ? 'No processed images yet' : 'No jobs to display'}
                   </Typography>
@@ -283,79 +353,114 @@ const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
               </TableRow>
             ) : (
               sortedJobs.map((job) => {
-                const retentionDays = getRetentionDays(job.created_at);
-                const isProcessed = job.status === 'completed' || job.status === 'complete';
-                
+                const isFailed = job.status === 'failed' || job.status === 'error';
+                const isCompleted = job.status === 'completed' || job.status === 'complete';
+                const canClick = isClickable(job.status);
+                const canRetry = isRetryable(job.status);
+                const ageDays = job.created_at
+                  ? Math.floor((Date.now() - new Date(job.created_at).getTime()) / 86400000)
+                  : 0;
+
                 return (
                   <TableRow
                     key={job.id}
                     hover
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => isProcessed && onJobSelect(job.id)}
+                    selected={selectedJobs.has(job.id)}
+                    sx={{
+                      cursor: canClick ? 'pointer' : 'default',
+                      bgcolor: isFailed ? alpha(theme.palette.error.main, 0.04) : undefined,
+                      opacity: ageDays >= AUTO_ARCHIVE_DAYS ? 0.6 : 1,
+                    }}
+                    onClick={() => canClick && onJobSelect(job.id)}
                   >
                     <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
                       <Checkbox
+                        size="small"
                         checked={selectedJobs.has(job.id)}
                         onChange={() => toggleSelection(job.id)}
                       />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" noWrap sx={{ maxWidth: 400 }}>
+                      <Typography variant="body2" noWrap sx={{ maxWidth: 350 }}>
                         {job.original_filename || 'Unknown'}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {job.pages || 1}
+                      <Chip
+                        size="small"
+                        label={job.record_type || 'unknown'}
+                        variant="outlined"
+                        sx={{ height: 22, fontSize: '0.7rem', textTransform: 'capitalize' }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption" color="text.secondary">
+                        {formatStarted(job.created_at)}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {formatTimeAgo(job.created_at)}
+                      <Typography
+                        variant="caption"
+                        fontWeight={500}
+                        color={ageDays >= AUTO_ARCHIVE_DAYS ? 'warning.main' : 'text.secondary'}
+                      >
+                        {formatAge(job.created_at)}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        {isProcessed && (
-                          <>
-                            <Chip
-                              size="small"
-                              label="Processed"
-                              color="success"
-                              sx={{ height: 24, fontSize: '0.75rem' }}
-                            />
-                            <Stack direction="row" spacing={0.5} alignItems="center" sx={{ color: 'text.secondary' }}>
-                              <IconTrash size={14} />
-                              <Typography variant="caption">
-                                {retentionDays} day{retentionDays !== 1 ? 's' : ''}
-                              </Typography>
-                            </Stack>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onJobSelect(job.id);
-                              }}
-                              sx={{ 
-                                ml: 1,
-                                minWidth: 60,
-                                height: 28,
-                                fontSize: '0.75rem',
-                                textTransform: 'none',
-                              }}
-                            >
-                              Open
-                            </Button>
-                          </>
+                      <Chip
+                        size="small"
+                        label={getStatusLabel(job.status)}
+                        color={getStatusColor(job.status) as any}
+                        sx={{ height: 22, fontSize: '0.7rem' }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {isFailed && job.error_message ? (
+                        <Tooltip title={job.error_message}>
+                          <Typography
+                            variant="caption"
+                            color="error"
+                            noWrap
+                            sx={{ maxWidth: 200, display: 'block' }}
+                          >
+                            {job.error_message}
+                          </Typography>
+                        </Tooltip>
+                      ) : (
+                        <Typography variant="caption" color="text.disabled">-</Typography>
+                      )}
+                    </TableCell>
+                    <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                      <Stack direction="row" spacing={0} justifyContent="flex-end">
+                        {canClick && (
+                          <Tooltip title="Open">
+                            <IconButton size="small" onClick={() => onJobSelect(job.id)}>
+                              <IconEye size={16} />
+                            </IconButton>
+                          </Tooltip>
                         )}
-                        {!isProcessed && (
-                          <Chip
-                            size="small"
-                            label={job.status || 'Processing'}
-                            color={getStatusColor(job.status || '')}
-                            sx={{ height: 24, fontSize: '0.75rem', textTransform: 'capitalize' }}
-                          />
+                        {canRetry && (
+                          <Tooltip title={isFailed ? 'Retry' : 'Re-process'}>
+                            <IconButton
+                              size="small"
+                              color="info"
+                              onClick={() => handleRetry(job.id)}
+                            >
+                              <IconRotateClockwise size={16} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {(isFailed || isCompleted) && (
+                          <Tooltip title="Delete">
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => openDeleteDialog([job.id])}
+                            >
+                              <IconTrash size={16} />
+                            </IconButton>
+                          </Tooltip>
                         )}
                       </Stack>
                     </TableCell>
@@ -366,10 +471,59 @@ const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
           </TableBody>
         </Table>
       </TableContainer>
-      
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <IconAlertTriangle size={22} color={theme.palette.warning.main} />
+            <Typography variant="h6">Delete {pendingDeleteIds.length} Job{pendingDeleteIds.length !== 1 ? 's' : ''}</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <RadioGroup value={deleteMode} onChange={(e) => setDeleteMode(e.target.value as any)}>
+            <FormControlLabel
+              value="page"
+              control={<Radio size="small" />}
+              label={
+                <Box>
+                  <Typography variant="body2" fontWeight={500}>Remove from page only</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Hides from this view. Data stays in the database and can be restored.
+                  </Typography>
+                </Box>
+              }
+            />
+            <FormControlLabel
+              value="database"
+              control={<Radio size="small" />}
+              label={
+                <Box>
+                  <Typography variant="body2" fontWeight={500} color="error.main">
+                    Delete from database
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Permanently removes job data and uploaded image. Cannot be undone.
+                  </Typography>
+                </Box>
+              }
+            />
+          </RadioGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)} size="small">Cancel</Button>
+          <Button
+            variant="contained"
+            color={deleteMode === 'database' ? 'error' : 'primary'}
+            onClick={handleDeleteConfirm}
+            size="small"
+          >
+            {deleteMode === 'database' ? 'Delete Permanently' : 'Hide from Page'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };
 
 export default UnifiedJobsList;
-

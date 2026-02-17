@@ -19,6 +19,7 @@ import {
   IconCopy,
   IconDownload,
   IconWand,
+  IconRefresh,
 } from '@tabler/icons-react';
 import { normalizeOcrText, enhanceOcrTextStructure } from '../utils/displayNormalizer';
 import { isServerNormalizationEnabled } from '../utils/useServerNormalization';
@@ -31,6 +32,9 @@ interface TranscriptionPanelProps {
   onCopy?: () => void;
   onDownload?: () => void;
   onNormalize?: () => void; // Callback for normalize button
+  onRerunOcr?: () => void; // Re-run OCR on source image
+  rerunning?: boolean; // Re-run in progress
+  onDownloadArtifact?: () => void; // Download from feeder artifact
 }
 
 const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
@@ -41,6 +45,9 @@ const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
   onCopy,
   onDownload,
   onNormalize,
+  onRerunOcr,
+  rerunning = false,
+  onDownloadArtifact,
 }) => {
   const serverNormalizationEnabled = isServerNormalizationEnabled();
   
@@ -112,6 +119,18 @@ const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
           Transcription
         </Typography>
         <Stack direction="row" spacing={0.5} alignItems="center">
+          {onRerunOcr && (
+            <Tooltip title="Re-run OCR on source image (no re-upload needed)">
+              <IconButton
+                size="small"
+                onClick={onRerunOcr}
+                disabled={loading || rerunning}
+                color="primary"
+              >
+                {rerunning ? <CircularProgress size={18} /> : <IconRefresh size={18} />}
+              </IconButton>
+            </Tooltip>
+          )}
           {serverNormalizationEnabled && onNormalize && (
             <Tooltip title="Normalize transcription (server-side)">
               <Button
@@ -135,10 +154,10 @@ const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
               <IconCopy size={18} />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Download transcription">
+          <Tooltip title={onDownloadArtifact ? "Download OCR text (artifact)" : "Download transcription"}>
             <IconButton
               size="small"
-              onClick={handleDownload}
+              onClick={onDownloadArtifact || handleDownload}
               disabled={!normalizedText || loading}
             >
               <IconDownload size={18} />

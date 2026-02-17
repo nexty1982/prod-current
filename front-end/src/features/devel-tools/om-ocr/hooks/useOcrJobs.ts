@@ -22,6 +22,7 @@ interface UseOcrJobsReturn {
   retryJob: (jobId: number) => Promise<boolean>;
   deleteJobs: (jobIds: number[]) => Promise<boolean>;
   reprocessJobs: (jobIds: number[]) => Promise<boolean>;
+  hideJobs: (jobIds: number[]) => void;
   completedCount: number;
   failedCount: number;
   processingCount: number;
@@ -34,6 +35,12 @@ export function useOcrJobs({
   pollInterval = 3000
 }: UseOcrJobsOptions): UseOcrJobsReturn {
   const [jobs, setJobs] = useState<OCRJobRow[]>([]);
+  const [hiddenJobIds, setHiddenJobIds] = useState<Set<number>>(() => {
+    try {
+      const stored = localStorage.getItem('om.ocr.hiddenJobs');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch { return new Set(); }
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const detailCache = useRef<Map<number, OCRJobDetail>>(new Map());
@@ -84,17 +91,21 @@ export function useOcrJobs({
         original_filename: job.original_filename || job.filename || '',
         filename: job.filename || '',
         status: job.status || 'queued',
-        record_type: job.record_type || 'baptism',
+        record_type: job.record_type || 'unknown',
         confidence_score: job.confidence_score != null ? Number(job.confidence_score) : null,
         language: job.language || 'en',
         created_at: job.created_at,
         updated_at: job.updated_at,
         ocr_text_preview: job.ocr_text_preview || null,
         has_ocr_text: !!job.ocr_text_preview || !!job.has_ocr_text,
-        error_message: job.error_message || job.error || null
+        error_message: job.error_message || job.error || null,
+        classifier_suggested_type: job.classifier_suggested_type || null,
+        classifier_confidence: job.classifier_confidence != null ? Number(job.classifier_confidence) : null,
       }));
 
-      setJobs(mappedJobs);
+      // Filter out hidden jobs (removed from page but not from DB)
+      const visibleJobs = mappedJobs.filter(j => !hiddenJobIds.has(j.id));
+      setJobs(visibleJobs);
       setError(null);
     } catch (err: any) {
       if (err.name !== 'AbortError') {
@@ -102,7 +113,7 @@ export function useOcrJobs({
         setError(err.message || 'Failed to fetch jobs');
       }
     }
-  }, [churchId, limit]);
+  }, [churchId, limit, hiddenJobIds]);
 
   // Initial load
   const refresh = useCallback(async () => {
@@ -137,7 +148,7 @@ export function useOcrJobs({
         original_filename: data.original_filename || data.filename,
         filename: data.filename,
         status: data.status,
-        record_type: data.record_type || 'baptism',
+        record_type: data.record_type || 'unknown',
         confidence_score: data.confidence_score,
         language: data.language,
         created_at: data.created_at,
@@ -146,7 +157,9 @@ export function useOcrJobs({
         ocr_result: data.ocr_result || null,
         file_path: data.file_path,
         mapping: data.mapping,
-        has_ocr_text: !!data.ocr_text
+        has_ocr_text: !!data.ocr_text,
+        pages: data.pages || undefined,
+        feeder_source: data.feeder_source || undefined,
       };
 
       detailCache.current.set(jobId, detail);
@@ -182,19 +195,19 @@ export function useOcrJobs({
     }
   }, [churchId, fetchJobs]);
 
-  // Retry failed job (only works for failed jobs)
+  // Retry job (works for failed and completed jobs — re-process without re-upload)
   const retryJob = useCallback(async (jobId: number): Promise<boolean> => {
     if (!churchId) return false;
 
-    // Check job status - only retry failed jobs
     const job = jobs.find(j => j.id === jobId);
     if (!job) {
       console.warn(`[useOcrJobs] Job ${jobId} not found in current jobs list`);
       return false;
     }
 
-    if (job.status !== 'failed') {
-      console.warn(`[useOcrJobs] Cannot retry job ${jobId}: status is '${job.status}', only 'failed' jobs can be retried`);
+    const retryableStatuses = ['failed', 'completed', 'complete', 'error'];
+    if (!retryableStatuses.includes(job.status)) {
+      console.warn(`[useOcrJobs] Cannot retry job ${jobId}: status is '${job.status}'`);
       return false;
     }
 
@@ -246,24 +259,22 @@ export function useOcrJobs({
     }
   }, [churchId]);
 
-  // Bulk reprocess jobs (retry multiple - only works for failed jobs)
+  // Bulk reprocess jobs (retry multiple — works for failed and completed jobs)
   const reprocessJobs = useCallback(async (jobIds: number[]): Promise<boolean> => {
     if (!churchId || jobIds.length === 0) return false;
 
-    // Filter to only failed jobs - /retry endpoint only works for failed jobs
-    const failedJobIds = jobIds.filter(id => {
+    const retryableStatuses = ['failed', 'completed', 'complete', 'error'];
+    const retryableJobIds = jobIds.filter(id => {
       const job = jobs.find(j => j.id === id);
-      return job && job.status === 'failed';
+      return job && retryableStatuses.includes(job.status);
     });
 
-    if (failedJobIds.length === 0) {
-      console.warn('[useOcrJobs] No failed jobs to retry - reprocessJobs only works for failed jobs');
+    if (retryableJobIds.length === 0) {
+      console.warn('[useOcrJobs] No retryable jobs found');
       return false;
     }
 
-    if (failedJobIds.length < jobIds.length) {
-      console.warn(`[useOcrJobs] Filtered ${jobIds.length - failedJobIds.length} non-failed jobs from reprocess list`);
-    }
+    const failedJobIds = retryableJobIds;
 
     try {
       // Retry each failed job (handle individual failures gracefully)
@@ -309,6 +320,17 @@ export function useOcrJobs({
       return false;
     }
   }, [churchId, jobs]);
+
+  // Hide jobs from page (remove from view without deleting from DB)
+  const hideJobs = useCallback((jobIds: number[]) => {
+    setHiddenJobIds(prev => {
+      const next = new Set(prev);
+      jobIds.forEach(id => next.add(id));
+      localStorage.setItem('om.ocr.hiddenJobs', JSON.stringify([...next]));
+      return next;
+    });
+    setJobs(prev => prev.filter(j => !jobIds.includes(j.id)));
+  }, []);
 
   // Polling logic
   useEffect(() => {
@@ -361,6 +383,7 @@ export function useOcrJobs({
     retryJob,
     deleteJobs,
     reprocessJobs,
+    hideJobs,
     completedCount,
     failedCount,
     processingCount,

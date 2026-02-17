@@ -739,6 +739,19 @@ class WebSocketService {
     }
 
     /**
+     * Broadcast new build notification to ALL connected clients
+     * Triggers the frontend UpdateAvailableBanner via custom DOM event
+     */
+    broadcastNewBuild(buildInfo = {}) {
+        if (!this.io) return;
+        this.io.emit('app:new_build', {
+            ...buildInfo,
+            timestamp: new Date().toISOString(),
+        });
+        console.log(`[WebSocket] Broadcasted app:new_build to all connected clients`);
+    }
+
+    /**
      * Get user's socket instances
      */
     getUserSockets(userId) {

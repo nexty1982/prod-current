@@ -9,20 +9,20 @@
  * - /frontend-pages/blog/detail/:id
  */
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowBack as ArrowBackIcon, CalendarToday as CalendarIcon, Person as PersonIcon } from '@mui/icons-material';
 import {
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Button,
-  Chip,
-  Divider,
-  CircularProgress,
-  Alert,
+    Alert,
+    Box,
+    Button,
+    Chip,
+    CircularProgress,
+    Container,
+    Divider,
+    Paper,
+    Typography,
 } from '@mui/material';
-import { CalendarToday as CalendarIcon, Person as PersonIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface BlogPostData {
   id: number;
@@ -122,79 +122,97 @@ const BlogPost: React.FC = () => {
   }
 
   return (
-    <Box sx={{ py: 8 }}>
-      <Container maxWidth="md">
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(-1)}
-          sx={{ mb: 4 }}
-        >
-          Back to Blog
-        </Button>
+    <Box>
+      <HeaderAlert />
+      <HpHeader />
 
-        <Paper sx={{ p: 4 }}>
-          <Box sx={{ mb: 3 }}>
-            <Chip
-              label={post.category}
-              size="small"
-              color="primary"
-              sx={{ mb: 2 }}
-            />
-            <Typography variant="h3" gutterBottom>
-              {post.title}
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <PersonIcon fontSize="small" color="action" />
-                <Typography variant="body2" color="text.secondary">
-                  {post.author}
-                </Typography>
+      {/* Banner */}
+      <Box sx={{ backgroundColor: 'primary.light', py: { xs: 4, lg: 6 }, textAlign: 'center' }}>
+        <Container maxWidth="lg">
+          <Typography variant="h2" fontWeight={700} mb={1}>
+            Blog
+          </Typography>
+        </Container>
+      </Box>
+
+      <Box sx={{ py: 8 }}>
+        <Container maxWidth="md">
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{ mb: 4 }}
+          >
+            Back to Blog
+          </Button>
+
+          <Paper sx={{ p: 4 }}>
+            <Box sx={{ mb: 3 }}>
+              <Chip
+                label={post.category}
+                size="small"
+                color="primary"
+                sx={{ mb: 2 }}
+              />
+              <Typography variant="h3" gutterBottom>
+                {post.title}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <PersonIcon fontSize="small" color="action" />
+                  <Typography variant="body2" color="text.secondary">
+                    {post.author}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <CalendarIcon fontSize="small" color="action" />
+                  <Typography variant="body2" color="text.secondary">
+                    {new Date(post.date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </Typography>
+                </Box>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <CalendarIcon fontSize="small" color="action" />
-                <Typography variant="body2" color="text.secondary">
-                  {new Date(post.date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </Typography>
-              </Box>
+              <Divider sx={{ mb: 3 }} />
             </Box>
-            <Divider sx={{ mb: 3 }} />
-          </Box>
 
-          <Box
-            sx={{
-              '& h2': {
-                mt: 4,
-                mb: 2,
-                fontSize: '1.75rem',
-                fontWeight: 600,
-              },
-              '& h3': {
-                mt: 3,
-                mb: 1.5,
-                fontSize: '1.5rem',
-                fontWeight: 600,
-              },
-              '& p': {
-                mb: 2,
-                lineHeight: 1.8,
-              },
-              '& ul, & ol': {
-                mb: 2,
-                pl: 3,
-              },
-              '& li': {
-                mb: 1,
-                lineHeight: 1.8,
-              },
-            }}
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-        </Paper>
-      </Container>
+            <Box
+              sx={{
+                '& h2': {
+                  mt: 4,
+                  mb: 2,
+                  fontSize: '1.75rem',
+                  fontWeight: 600,
+                },
+                '& h3': {
+                  mt: 3,
+                  mb: 1.5,
+                  fontSize: '1.5rem',
+                  fontWeight: 600,
+                },
+                '& p': {
+                  mb: 2,
+                  lineHeight: 1.8,
+                },
+                '& ul, & ol': {
+                  mb: 2,
+                  pl: 3,
+                },
+                '& li': {
+                  mb: 1,
+                  lineHeight: 1.8,
+                },
+              }}
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
+          </Paper>
+        </Container>
+      </Box>
+
+      <C2a />
+      <Footer />
+      <ScrollToTop />
     </Box>
   );
 };

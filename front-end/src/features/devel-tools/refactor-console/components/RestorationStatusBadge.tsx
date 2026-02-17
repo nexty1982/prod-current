@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, AlertTriangle, XCircle, Package } from 'lucide-react';
+import { CheckCircle, AlertTriangle, XCircle, Package } from '@/ui/icons';
 import { FileAnalysis } from '@/types/refactorConsole';
 
 export type RestorationStatus = 'ready' | 'missing_deps' | 'server_blocker' | 'unknown';

@@ -162,6 +162,10 @@ function transformBaptismRecord(record) {
     updatedAt: formatDateTime(record.updated_at),
     createdBy: record.created_by || 'admin@church.org',
     entryType: entryType,
+    // Search relevance metadata (present when search is active)
+    _matchScore: record._matchScore != null ? record._matchScore : null,
+    _matchedFields: record._matchedFields || null,
+    _topMatchReason: record._topMatchReason || null,
     // Keep original database fields for reference
     originalRecord: originalRecord
   };
@@ -223,6 +227,10 @@ function transformMarriageRecord(record) {
     createdAt: formatDateTime(record.created_at),
     updatedAt: formatDateTime(record.updated_at),
     createdBy: record.created_by || 'admin@church.org',
+    // Search relevance metadata (present when search is active)
+    _matchScore: record.relevance_score != null ? record.relevance_score : null,
+    _matchedFields: record._matchedFields || null,
+    _topMatchReason: record._topMatchReason || null,
     // Keep original database fields for reference
     originalRecord: originalRecord
   };
@@ -292,6 +300,10 @@ function transformFuneralRecord(record) {
     burialDate: formattedBurialDate,
     funeralDate: formattedBurialDate,
     deathDate: formattedDeceasedDate,
+    // Search relevance metadata (present when search is active)
+    _matchScore: record.relevance_score != null ? record.relevance_score : null,
+    _matchedFields: record._matchedFields || null,
+    _topMatchReason: record._topMatchReason || null,
     // Keep original database fields for reference
     originalRecord: originalRecord
   };

@@ -46,7 +46,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
        FROM om_daily_items
        WHERE status != 'cancelled'
        GROUP BY horizon, status
-       ORDER BY FIELD(horizon,'7','14','30','60','90'), FIELD(status,'backlog','todo','in_progress','review','done')`
+       ORDER BY FIELD(horizon,'1','2','7','14','30','60','90'), FIELD(status,'backlog','todo','in_progress','review','done')`
     );
 
     const [overdue] = await pool.query(
@@ -122,7 +122,7 @@ router.get('/items', requireAuth, async (req, res) => {
     const orderBy = allowedSorts[sort] || allowedSorts.priority;
 
     const [rows] = await pool.query(
-      `SELECT * FROM om_daily_items ${whereClause} ORDER BY ${orderBy}, created_at DESC`,
+      `SELECT * FROM om_daily_items ${whereClause} ORDER BY FIELD(status,'in_progress','todo','review','backlog','done','cancelled'), ${orderBy}, created_at DESC`,
       params
     );
 
@@ -140,13 +140,13 @@ router.get('/items', requireAuth, async (req, res) => {
 router.post('/items', requireAuth, async (req, res) => {
   try {
     const pool = getPool();
-    const { title, description, horizon = '7', status = 'todo', priority = 'medium', category, due_date, tags, task_type, source, metadata } = req.body;
+    const { title, description, horizon = '7', status = 'todo', priority = 'medium', category, due_date, tags, task_type, source, metadata, agent_tool, branch_type, conversation_ref } = req.body;
 
     if (!title) return res.status(400).json({ error: 'title required' });
 
     const [result] = await pool.query(
-      `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, due_date, tags, source, metadata, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, due_date, tags, source, agent_tool, branch_type, conversation_ref, metadata, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title,
         task_type || 'task',
@@ -158,13 +158,30 @@ router.post('/items', requireAuth, async (req, res) => {
         due_date || null,
         tags ? JSON.stringify(tags) : null,
         source || 'human',
+        agent_tool || null,
+        branch_type || null,
+        conversation_ref || null,
         metadata ? JSON.stringify(metadata) : null,
         req.session?.user?.id || null,
       ]
     );
 
     const [item] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [result.insertId]);
-    res.status(201).json({ item: item[0] });
+    const createdItem = item[0];
+
+    // Auto-sync to GitHub and create branch when agent_tool + branch_type are set
+    let syncResult = null;
+    if (createdItem.agent_tool && createdItem.branch_type) {
+      try {
+        syncResult = await syncItemToGitHub(createdItem);
+      } catch (syncErr) {
+        console.error('[Auto-sync] Failed on create:', syncErr.message);
+      }
+    }
+
+    // Re-read to get updated github fields
+    const [final] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [result.insertId]);
+    res.status(201).json({ item: final[0], sync: syncResult });
   } catch (err) {
     console.error('OM Daily create error:', err);
     res.status(500).json({ error: 'Failed to create item' });
@@ -179,7 +196,7 @@ router.put('/items/:id', requireAuth, async (req, res) => {
   try {
     const pool = getPool();
     const { id } = req.params;
-    const { title, description, horizon, status, priority, category, due_date, tags, progress, task_type, source, metadata } = req.body;
+    const { title, description, horizon, status, priority, category, due_date, tags, progress, task_type, source, metadata, agent_tool, branch_type, conversation_ref } = req.body;
 
     const updates = [];
     const params = [];
@@ -200,6 +217,9 @@ router.put('/items/:id', requireAuth, async (req, res) => {
     if (progress !== undefined) { updates.push('progress = ?'); params.push(Math.min(100, Math.max(0, parseInt(progress) || 0))); }
     if (task_type !== undefined) { updates.push('task_type = ?'); params.push(task_type); }
     if (source !== undefined) { updates.push('source = ?'); params.push(source); }
+    if (agent_tool !== undefined) { updates.push('agent_tool = ?'); params.push(agent_tool || null); }
+    if (branch_type !== undefined) { updates.push('branch_type = ?'); params.push(branch_type || null); }
+    if (conversation_ref !== undefined) { updates.push('conversation_ref = ?'); params.push(conversation_ref || null); }
     if (metadata !== undefined) { updates.push('metadata = ?'); params.push(JSON.stringify(metadata)); }
 
     if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' });
@@ -209,7 +229,38 @@ router.put('/items/:id', requireAuth, async (req, res) => {
 
     const [item] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [id]);
     if (!item.length) return res.status(404).json({ error: 'Item not found' });
-    res.json({ item: item[0] });
+
+    const updatedItem = item[0];
+    // Auto-create branch if agent_tool + branch_type are now set but no branch exists yet
+    let syncResult = null;
+    if (updatedItem.agent_tool && updatedItem.branch_type && !updatedItem.github_branch) {
+      try {
+        if (!updatedItem.github_issue_number) {
+          syncResult = await syncItemToGitHub(updatedItem);
+        } else {
+          const branchName = await createTaskBranch(updatedItem);
+          if (branchName) {
+            syncResult = { action: 'branch_created', branch: branchName };
+            // Update issue body with branch info
+            const [refreshed] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [id]);
+            if (refreshed.length) {
+              const updatedBody = buildIssueBody(refreshed[0]);
+              try {
+                execSync(
+                  `gh issue edit ${updatedItem.github_issue_number} --repo ${GITHUB_REPO} --body "${updatedBody.replace(/"/g, '\\"')}"`,
+                  { encoding: 'utf-8', cwd: REPO_DIR }
+                );
+              } catch { /* non-critical */ }
+            }
+          }
+        }
+      } catch (syncErr) {
+        console.error('[Auto-sync] Failed on update:', syncErr.message);
+      }
+    }
+
+    const [final] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [id]);
+    res.json({ item: final[0], sync: syncResult });
   } catch (err) {
     console.error('OM Daily update error:', err);
     res.status(500).json({ error: 'Failed to update item' });
@@ -776,7 +827,468 @@ router.post('/changelog/email/:date', requireAuth, async (req, res) => {
   }
 });
 
-// Export cron function on the router for access from index.ts
+// ═══════════════════════════════════════════════════════════════
+// GITHUB ISSUE SYNC — bi-directional sync with GitHub Issues
+// ═══════════════════════════════════════════════════════════════
+
+const GITHUB_REPO = 'nexty1982/prod-current';
+
+const PRIORITY_LABELS = { critical: 'P:critical', high: 'P:high', medium: 'P:medium', low: 'P:low' };
+const HORIZON_LABELS_GH = { '1': 'H:24hr', '2': 'H:48hr', '7': 'H:7day', '14': 'H:14day', '30': 'H:30day', '60': 'H:60day', '90': 'H:90day' };
+const SOURCE_LABELS = { agent: 'source:agent', human: 'source:human' };
+const STATUS_LABELS_GH = { in_progress: 'status:in_progress', review: 'status:review', backlog: 'status:backlog', todo: 'status:todo' };
+const BRANCH_TYPE_LABELS = { bugfix: 'type:bugfix', new_feature: 'type:new-feature', existing_feature: 'type:existing-feature', patch: 'type:patch' };
+const BRANCH_TYPE_PREFIXES = { bugfix: 'BF', new_feature: 'NF', existing_feature: 'EF', patch: 'PA' };
+const AGENT_TOOL_SHORT = { windsurf: 'windsurf', claude_cli: 'claude-cli', cursor: 'cursor' };
+
+function buildLabels(item) {
+  const labels = [];
+  if (PRIORITY_LABELS[item.priority]) labels.push(PRIORITY_LABELS[item.priority]);
+  if (HORIZON_LABELS_GH[item.horizon]) labels.push(HORIZON_LABELS_GH[item.horizon]);
+  if (SOURCE_LABELS[item.source]) labels.push(SOURCE_LABELS[item.source]);
+  if (STATUS_LABELS_GH[item.status]) labels.push(STATUS_LABELS_GH[item.status]);
+  if (item.category) labels.push(`cat:${item.category}`);
+  if (BRANCH_TYPE_LABELS[item.branch_type]) labels.push(BRANCH_TYPE_LABELS[item.branch_type]);
+  return labels;
+}
+
+function buildIssueBody(item) {
+  const meta = parseMeta(item.metadata);
+  let body = '';
+  if (item.description) body += item.description + '\n\n';
+  body += '---\n';
+  body += `**OM Daily ID:** ${item.id}\n`;
+  body += `**Status:** ${item.status}\n`;
+  body += `**Priority:** ${item.priority}\n`;
+  body += `**Horizon:** ${item.horizon} day\n`;
+  if (item.category) body += `**Category:** ${item.category}\n`;
+  if (item.source) body += `**Source:** ${item.source}\n`;
+  if (meta.agent) body += `**Agent:** ${meta.agent}\n`;
+  if (meta.commitHash) body += `**Commit:** ${meta.commitHash}\n`;
+  if (item.agent_tool) body += `**Agent Tool:** ${item.agent_tool}\n`;
+  if (item.branch_type) body += `**Branch Type:** ${item.branch_type}\n`;
+  if (item.github_branch) body += `**Branch:** \`${item.github_branch}\`\n`;
+  if (item.conversation_ref) body += `**Conversation:** ${item.conversation_ref}\n`;
+  return body;
+}
+
+/**
+ * Ensure the monthly dev branch exists: om-dev-MM-YYYY
+ * Creates from main if it doesn't exist yet.
+ * Returns the branch name.
+ */
+function ensureMonthlyBranch(date) {
+  const d = date ? new Date(date) : new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  const branchName = `om-dev-${mm}-${yyyy}`;
+
+  try {
+    // Check if branch exists on remote
+    const check = execSync(
+      `gh api repos/${GITHUB_REPO}/branches/${branchName} --jq '.name' 2>/dev/null`,
+      { encoding: 'utf-8', cwd: REPO_DIR }
+    ).trim();
+    if (check === branchName) {
+      console.log(`[Branch] Monthly branch ${branchName} already exists`);
+      return branchName;
+    }
+  } catch {
+    // Branch doesn't exist, create it
+  }
+
+  try {
+    // Get main branch SHA
+    const mainSha = execSync(
+      `gh api repos/${GITHUB_REPO}/git/ref/heads/main --jq '.object.sha'`,
+      { encoding: 'utf-8', cwd: REPO_DIR }
+    ).trim();
+
+    // Create the branch via API
+    execSync(
+      `gh api repos/${GITHUB_REPO}/git/refs -f ref="refs/heads/${branchName}" -f sha="${mainSha}"`,
+      { encoding: 'utf-8', cwd: REPO_DIR }
+    );
+    console.log(`[Branch] Created monthly branch ${branchName} from main (${mainSha.slice(0, 8)})`);
+    return branchName;
+  } catch (err) {
+    console.error(`[Branch] Failed to create monthly branch ${branchName}:`, err.message);
+    return null;
+  }
+}
+
+/**
+ * Create a task branch from the monthly dev branch.
+ * Naming: PREFIX_AGENT_DATE  e.g. BF_windsurf_2026-02-16
+ * Returns the branch name or null on failure.
+ */
+async function createTaskBranch(item) {
+  if (!item.branch_type || !item.agent_tool) return null;
+  if (item.github_branch) return item.github_branch; // already created
+
+  const prefix = BRANCH_TYPE_PREFIXES[item.branch_type];
+  if (!prefix) return null;
+
+  const agent = AGENT_TOOL_SHORT[item.agent_tool] || item.agent_tool;
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const taskBranch = `${prefix}_${agent}_${today}`;
+
+  // Ensure monthly branch exists first
+  const monthlyBranch = ensureMonthlyBranch();
+  if (!monthlyBranch) {
+    console.error(`[Branch] Cannot create task branch — monthly branch failed`);
+    return null;
+  }
+
+  try {
+    // Check if task branch already exists
+    try {
+      const check = execSync(
+        `gh api repos/${GITHUB_REPO}/branches/${taskBranch} --jq '.name' 2>/dev/null`,
+        { encoding: 'utf-8', cwd: REPO_DIR }
+      ).trim();
+      if (check === taskBranch) {
+        // Branch exists — might be same agent same day, append issue number
+        const uniqueBranch = `${taskBranch}_${item.github_issue_number || item.id}`;
+        const monthlySha = execSync(
+          `gh api repos/${GITHUB_REPO}/git/ref/heads/${monthlyBranch} --jq '.object.sha'`,
+          { encoding: 'utf-8', cwd: REPO_DIR }
+        ).trim();
+        execSync(
+          `gh api repos/${GITHUB_REPO}/git/refs -f ref="refs/heads/${uniqueBranch}" -f sha="${monthlySha}"`,
+          { encoding: 'utf-8', cwd: REPO_DIR }
+        );
+        console.log(`[Branch] Created task branch ${uniqueBranch} from ${monthlyBranch}`);
+
+        // Save to DB
+        const pool = getPool();
+        await pool.query('UPDATE om_daily_items SET github_branch = ? WHERE id = ?', [uniqueBranch, item.id]);
+        return uniqueBranch;
+      }
+    } catch {
+      // Branch doesn't exist, proceed to create
+    }
+
+    // Get monthly branch SHA
+    const monthlySha = execSync(
+      `gh api repos/${GITHUB_REPO}/git/ref/heads/${monthlyBranch} --jq '.object.sha'`,
+      { encoding: 'utf-8', cwd: REPO_DIR }
+    ).trim();
+
+    // Create task branch
+    execSync(
+      `gh api repos/${GITHUB_REPO}/git/refs -f ref="refs/heads/${taskBranch}" -f sha="${monthlySha}"`,
+      { encoding: 'utf-8', cwd: REPO_DIR }
+    );
+    console.log(`[Branch] Created task branch ${taskBranch} from ${monthlyBranch} (${monthlySha.slice(0, 8)})`);
+
+    // Save to DB
+    const pool = getPool();
+    await pool.query('UPDATE om_daily_items SET github_branch = ? WHERE id = ?', [taskBranch, item.id]);
+    return taskBranch;
+  } catch (err) {
+    console.error(`[Branch] Failed to create task branch ${taskBranch}:`, err.message);
+    return null;
+  }
+}
+
+/**
+ * Sync a single OM Daily item → GitHub Issue
+ */
+async function syncItemToGitHub(item) {
+  const pool = getPool();
+
+  if (!item.github_issue_number) {
+    // Create new issue
+    const labels = buildLabels(item);
+    const body = buildIssueBody(item);
+    const labelArg = labels.length > 0 ? `--label "${labels.join(',')}"` : '';
+
+    try {
+      const title = item.title.replace(/"/g, '\\"');
+      const result = execSync(
+        `gh issue create --repo ${GITHUB_REPO} --title "${title}" --body "${body.replace(/"/g, '\\"')}" ${labelArg}`,
+        { encoding: 'utf-8', cwd: REPO_DIR }
+      ).trim();
+
+      // gh issue create returns the URL, extract issue number
+      const issueNumMatch = result.match(/\/issues\/(\d+)/);
+      if (issueNumMatch) {
+        const issueNum = parseInt(issueNumMatch[1], 10);
+        await pool.query(
+          'UPDATE om_daily_items SET github_issue_number = ?, github_synced_at = NOW() WHERE id = ?',
+          [issueNum, item.id]
+        );
+        console.log(`[GitHub Sync] Created issue #${issueNum} for item #${item.id}`);
+
+        // Auto-create task branch if agent_tool and branch_type are set
+        let branchName = null;
+        if (item.agent_tool && item.branch_type && !item.github_branch) {
+          item.github_issue_number = issueNum; // needed for unique branch naming
+          branchName = await createTaskBranch(item);
+          if (branchName) {
+            // Re-read item to get updated github_branch, then update issue body with branch info
+            const [updated] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [item.id]);
+            if (updated.length) {
+              const updatedBody = buildIssueBody(updated[0]);
+              try {
+                execSync(
+                  `gh issue edit ${issueNum} --repo ${GITHUB_REPO} --body "${updatedBody.replace(/"/g, '\\"')}"`,
+                  { encoding: 'utf-8', cwd: REPO_DIR }
+                );
+              } catch { /* non-critical */ }
+            }
+          }
+        }
+
+        return { action: 'created', issueNumber: issueNum, branch: branchName };
+      }
+    } catch (err) {
+      console.error(`[GitHub Sync] Failed to create issue for item #${item.id}:`, err.message);
+      return { action: 'error', error: err.message };
+    }
+  } else {
+    // Update existing issue
+    const issueNum = item.github_issue_number;
+    try {
+      // Close/reopen based on status
+      if (item.status === 'done' || item.status === 'cancelled') {
+        execSync(`gh issue close ${issueNum} --repo ${GITHUB_REPO}`, { encoding: 'utf-8', cwd: REPO_DIR });
+      } else {
+        // Try reopening (ignore error if already open)
+        try {
+          execSync(`gh issue reopen ${issueNum} --repo ${GITHUB_REPO}`, { encoding: 'utf-8', cwd: REPO_DIR });
+        } catch { /* already open */ }
+      }
+
+      // Update labels
+      const labels = buildLabels(item);
+      if (labels.length > 0) {
+        // Remove old managed labels first, then add new ones
+        const allManagedPrefixes = ['P:', 'H:', 'source:', 'status:', 'cat:'];
+        try {
+          const existingJson = execSync(
+            `gh issue view ${issueNum} --repo ${GITHUB_REPO} --json labels`,
+            { encoding: 'utf-8', cwd: REPO_DIR }
+          );
+          const existing = JSON.parse(existingJson);
+          const toRemove = (existing.labels || [])
+            .filter(l => allManagedPrefixes.some(p => l.name.startsWith(p)))
+            .map(l => l.name);
+          for (const label of toRemove) {
+            try {
+              execSync(`gh issue edit ${issueNum} --repo ${GITHUB_REPO} --remove-label "${label}"`, { encoding: 'utf-8', cwd: REPO_DIR });
+            } catch { /* ignore */ }
+          }
+        } catch { /* ignore */ }
+
+        execSync(
+          `gh issue edit ${issueNum} --repo ${GITHUB_REPO} --add-label "${labels.join(',')}"`,
+          { encoding: 'utf-8', cwd: REPO_DIR }
+        );
+      }
+
+      await pool.query('UPDATE om_daily_items SET github_synced_at = NOW() WHERE id = ?', [item.id]);
+      console.log(`[GitHub Sync] Updated issue #${issueNum} for item #${item.id}`);
+      return { action: 'updated', issueNumber: issueNum };
+    } catch (err) {
+      console.error(`[GitHub Sync] Failed to update issue #${issueNum}:`, err.message);
+      return { action: 'error', error: err.message };
+    }
+  }
+  return { action: 'noop' };
+}
+
+/**
+ * Pull GitHub state changes back to DB
+ */
+async function syncGitHubToItems() {
+  const pool = getPool();
+  let changes = 0;
+
+  try {
+    const issuesJson = execSync(
+      `gh issue list --repo ${GITHUB_REPO} --state all --json number,title,state,labels,closedAt --limit 100`,
+      { encoding: 'utf-8', cwd: REPO_DIR }
+    );
+    const issues = JSON.parse(issuesJson);
+
+    // Get all items with github_issue_number
+    const [items] = await pool.query(
+      'SELECT id, status, github_issue_number FROM om_daily_items WHERE github_issue_number IS NOT NULL'
+    );
+    const itemsByIssue = {};
+    for (const item of items) {
+      itemsByIssue[item.github_issue_number] = item;
+    }
+
+    for (const issue of issues) {
+      const item = itemsByIssue[issue.number];
+      if (!item) continue;
+
+      if (issue.state === 'CLOSED' && item.status !== 'done' && item.status !== 'cancelled') {
+        await pool.query(
+          'UPDATE om_daily_items SET status = ?, completed_at = NOW(), github_synced_at = NOW() WHERE id = ?',
+          ['done', item.id]
+        );
+        console.log(`[GitHub Sync] Issue #${issue.number} closed on GitHub → item #${item.id} marked done`);
+        changes++;
+      } else if (issue.state === 'OPEN' && (item.status === 'done' || item.status === 'cancelled')) {
+        await pool.query(
+          'UPDATE om_daily_items SET status = ?, completed_at = NULL, github_synced_at = NOW() WHERE id = ?',
+          ['in_progress', item.id]
+        );
+        console.log(`[GitHub Sync] Issue #${issue.number} reopened on GitHub → item #${item.id} marked in_progress`);
+        changes++;
+      }
+    }
+  } catch (err) {
+    console.error('[GitHub Sync] Error pulling from GitHub:', err.message);
+  }
+
+  return changes;
+}
+
+// ── Sync progress tracking ──────────────────────────────────
+let syncProgress = {
+  running: false,
+  phase: '',        // 'creating' | 'updating' | 'pulling' | 'done'
+  current: 0,
+  total: 0,
+  summary: { created: 0, updated: 0, pulled: 0, errors: 0 },
+  startedAt: null,
+  completedAt: null,
+  error: null,
+};
+
+/**
+ * Full bi-directional sync — exported for cron
+ */
+async function fullSync() {
+  console.log('[GitHub Sync] Starting full sync...');
+  const pool = getPool();
+  syncProgress.summary = { created: 0, updated: 0, pulled: 0, errors: 0 };
+  syncProgress.error = null;
+  syncProgress.completedAt = null;
+  syncProgress.startedAt = new Date().toISOString();
+  syncProgress.running = true;
+
+  try {
+    // 1. Create issues for items without github_issue_number
+    const [unsynced] = await pool.query(
+      'SELECT * FROM om_daily_items WHERE github_issue_number IS NULL AND status != ?',
+      ['cancelled']
+    );
+    syncProgress.phase = 'creating';
+    syncProgress.total = unsynced.length;
+    syncProgress.current = 0;
+
+    for (const item of unsynced) {
+      const result = await syncItemToGitHub(item);
+      if (result.action === 'created') syncProgress.summary.created++;
+      else if (result.action === 'error') syncProgress.summary.errors++;
+      syncProgress.current++;
+    }
+
+    // 2. Update issues where status changed since last sync
+    const [needsUpdate] = await pool.query(
+      `SELECT * FROM om_daily_items
+       WHERE github_issue_number IS NOT NULL
+         AND (github_synced_at IS NULL OR updated_at > github_synced_at)`
+    );
+    syncProgress.phase = 'updating';
+    syncProgress.total = needsUpdate.length;
+    syncProgress.current = 0;
+
+    for (const item of needsUpdate) {
+      const result = await syncItemToGitHub(item);
+      if (result.action === 'updated') syncProgress.summary.updated++;
+      else if (result.action === 'error') syncProgress.summary.errors++;
+      syncProgress.current++;
+    }
+
+    // 3. Pull GitHub state back
+    syncProgress.phase = 'pulling';
+    syncProgress.current = 0;
+    syncProgress.total = 0;
+    syncProgress.summary.pulled = await syncGitHubToItems();
+
+    syncProgress.phase = 'done';
+    syncProgress.completedAt = new Date().toISOString();
+    console.log(`[GitHub Sync] Complete: ${syncProgress.summary.created} created, ${syncProgress.summary.updated} updated, ${syncProgress.summary.pulled} pulled, ${syncProgress.summary.errors} errors`);
+  } catch (err) {
+    syncProgress.error = err.message;
+    syncProgress.phase = 'done';
+    syncProgress.completedAt = new Date().toISOString();
+    console.error('[GitHub Sync] Fatal error:', err.message);
+  } finally {
+    syncProgress.running = false;
+  }
+
+  return syncProgress.summary;
+}
+
+// ── GitHub Sync Routes ──────────────────────────────────────────
+
+router.post('/github/sync', requireAuth, async (req, res) => {
+  if (syncProgress.running) {
+    return res.json({ ok: true, already_running: true, progress: syncProgress });
+  }
+  // Fire and forget — run in background
+  fullSync().catch(err => console.error('[GitHub Sync] Background sync error:', err));
+  // Return immediately
+  res.json({ ok: true, started: true, message: 'Sync started in background' });
+});
+
+router.get('/github/sync/progress', requireAuth, (req, res) => {
+  res.json({
+    running: syncProgress.running,
+    phase: syncProgress.phase,
+    current: syncProgress.current,
+    total: syncProgress.total,
+    summary: syncProgress.summary,
+    startedAt: syncProgress.startedAt,
+    completedAt: syncProgress.completedAt,
+    error: syncProgress.error,
+  });
+});
+
+router.post('/github/sync/:id', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [rows] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Item not found' });
+    const result = await syncItemToGitHub(rows[0]);
+    res.json({ ok: true, result });
+  } catch (err) {
+    console.error('[GitHub Sync] POST /github/sync/:id error:', err);
+    res.status(500).json({ error: 'Sync failed: ' + err.message });
+  }
+});
+
+router.get('/github/status', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [unsynced] = await pool.query(
+      'SELECT COUNT(*) as count FROM om_daily_items WHERE github_issue_number IS NULL AND status != ?',
+      ['cancelled']
+    );
+    const [lastSync] = await pool.query(
+      'SELECT MAX(github_synced_at) as last_sync FROM om_daily_items WHERE github_synced_at IS NOT NULL'
+    );
+    res.json({
+      unsyncedCount: unsynced[0].count,
+      lastSync: lastSync[0].last_sync,
+      repoUrl: `https://github.com/${GITHUB_REPO}`,
+      issuesUrl: `https://github.com/${GITHUB_REPO}/issues`,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get sync status' });
+  }
+});
+
+// Export cron functions on the router for access from index.ts
 router.generateAndEmailChangelog = generateAndEmailChangelog;
+router.fullSync = fullSync;
 
 module.exports = router;

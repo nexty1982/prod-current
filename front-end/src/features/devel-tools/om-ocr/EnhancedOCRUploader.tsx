@@ -863,10 +863,10 @@ const EnhancedOCRUploader: React.FC = () => {
           }));
         }, 200);
 
-        // Use different endpoint for simulation mode
+        // Use different endpoint for simulation mode vs real upload
         const endpoint = (simulationMode && isSimulationModeAvailable)
           ? `/api/church/${selectedChurchId}/ocr/enhanced/process?ocr_mode=simulate`
-          : '/api/ocr/jobs/upload';
+          : `/api/ocr/jobs/upload`;
         
         const response: any = await apiClient.post(endpoint, formData);
 

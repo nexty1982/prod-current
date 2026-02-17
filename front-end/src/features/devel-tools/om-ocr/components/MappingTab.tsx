@@ -435,13 +435,16 @@ const MappingTab: React.FC<MappingTabProps> = ({
         mapping_json: mapping
       });
 
-      // Then create the draft record (uses the old endpoint for now)
-      await apiClient.post(`/api/ocr/jobs/${jobId}/draft-record`, {
-        churchId,
-        recordType,
-        mappingJson: Object.fromEntries(
-          Object.entries(mapping).map(([k, v]) => [k, v.value])
-        )
+      // Create fusion draft via church-scoped endpoint
+      await apiClient.post(`/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts`, {
+        record_type: recordType,
+        drafts: [{
+          entry_index: 0,
+          record_type: recordType,
+          payload_json: Object.fromEntries(
+            Object.entries(mapping).map(([k, v]) => [k, v.value])
+          )
+        }]
       });
 
       setDraftSuccess(true);

@@ -9,28 +9,31 @@
  * - /frontend-pages/samples
  */
 
+import C2a from '@/components/frontend-pages/shared/c2a';
+import Footer from '@/components/frontend-pages/shared/footer';
+import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
+import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
+import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
+import {
+    MenuBook as MenuIcon,
+    TableChart as TableIcon
+} from '@mui/icons-material';
+import {
+    Box,
+    Card,
+    CardActionArea,
+    CardContent,
+    Chip,
+    Container,
+    Divider,
+    Grid,
+    List,
+    ListItem,
+    ListItemText,
+    Typography,
+} from '@mui/material';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Container,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardActionArea,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  Chip,
-} from '@mui/material';
-import {
-  Science as ScienceIcon,
-  TableChart as TableIcon,
-  Language as LanguageIcon,
-  MenuBook as MenuIcon,
-} from '@mui/icons-material';
 
 interface SampleItem {
   title: string;
@@ -87,17 +90,24 @@ const Samples: React.FC = () => {
   }, {} as Record<string, SampleItem[]>);
 
   return (
-    <Box sx={{ py: 8 }}>
-      <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <ScienceIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
-          <Typography variant="h3" gutterBottom>
+    <Box>
+      <HeaderAlert />
+      <HpHeader />
+
+      {/* Banner */}
+      <Box sx={{ backgroundColor: 'primary.light', py: { xs: 4, lg: 6 }, textAlign: 'center' }}>
+        <Container maxWidth="lg">
+          <Typography variant="h2" fontWeight={700} mb={1}>
             Samples & Demos
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Explore sample pages and demonstrations
+          <Typography variant="body1" color="text.secondary" fontSize="16px">
+            Explore sample pages and demonstrations of Orthodox Metrics
           </Typography>
-        </Box>
+        </Container>
+      </Box>
+
+      <Box sx={{ py: 8 }}>
+        <Container maxWidth="lg">
 
         {Object.entries(groupedSamples).map(([category, items]) => (
           <Box key={category} sx={{ mb: 6 }}>
@@ -178,6 +188,11 @@ const Samples: React.FC = () => {
           </List>
         </Box>
       </Container>
+      </Box>
+
+      <C2a />
+      <Footer />
+      <ScrollToTop />
     </Box>
   );
 };

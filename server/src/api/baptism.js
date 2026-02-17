@@ -6,6 +6,7 @@ const { cleanRecords, cleanRecord, transformBaptismRecords, transformBaptismReco
 const { promisePool } = require('../config/db-compat');
 const { safeRequire } = require('../utils/safeRequire');
 const { requireAuth } = require('../middleware/auth');
+const { getEffectiveSetting } = require('../utils/settingsHelper');
 
 // Safe require for writeSacramentHistory - handles missing module gracefully
 const writeSacramentHistoryModule = safeRequire(
@@ -22,6 +23,41 @@ const writeSacramentHistoryModule = safeRequire(
 
 const { writeSacramentHistory, generateRequestId } = writeSacramentHistoryModule;
 const router = express.Router();
+
+/**
+ * Default search weights for baptism records.
+ * Higher weight = higher ranking when that field matches a search term.
+ */
+const DEFAULT_SEARCH_WEIGHTS = {
+  last_name: 12,
+  first_name: 9,
+  parents: 7,
+  sponsors: 6,
+  birthplace: 4,
+  entry_type: 2,
+  clergy: 1
+};
+
+/**
+ * Load effective search weights for a church from the settings registry.
+ * Falls back to DEFAULT_SEARCH_WEIGHTS for any key that isn't in the registry.
+ * @param {number|string|null} churchId
+ * @returns {Promise<object>} effective weights
+ */
+async function getEffectiveSearchWeights(churchId) {
+  const weights = { ...DEFAULT_SEARCH_WEIGHTS };
+  try {
+    const fields = Object.keys(DEFAULT_SEARCH_WEIGHTS);
+    const opts = churchId && churchId !== '0' ? { churchId } : {};
+    await Promise.all(fields.map(async (field) => {
+      const val = await getEffectiveSetting(`records.search.baptism.${field}`, opts);
+      if (val !== undefined) weights[field] = Number(val);
+    }));
+  } catch (e) {
+    console.warn('Failed to load search weights from registry for church', churchId, e.message);
+  }
+  return weights;
+}
 
 /**
  * Get church database name by church_id
@@ -178,6 +214,9 @@ router.get('/', requireAuth, async (req, res) => {
             sortDirection = 'desc' 
         } = req.query;
 
+        // Clamp limit to 1..200 for safety
+        const clampedLimit = Math.max(1, Math.min(200, parseInt(limit) || 10));
+
         // Get church_id from session if not provided in query
         const finalChurchId = church_id || req.session?.user?.church_id || req.user?.church_id || null;
         
@@ -191,11 +230,10 @@ router.get('/', requireAuth, async (req, res) => {
         // Get church database connection
         const churchDbPool = await getChurchDbConnection(databaseName);
 
-        let query = 'SELECT * FROM baptism_records';
-        let countQuery = 'SELECT COUNT(*) as total FROM baptism_records';
         const queryParams = [];
         const countParams = [];
         let whereConditions = [];
+        const isSearchActive = search && search.trim();
 
         // Add church filtering
         if (church_id && church_id !== '0') {
@@ -208,7 +246,7 @@ router.get('/', requireAuth, async (req, res) => {
         }
 
         // Add search functionality
-        if (search && search.trim()) {
+        if (isSearchActive) {
             const searchCondition = `(first_name LIKE ? 
                 OR last_name LIKE ? 
                 OR clergy LIKE ? 
@@ -226,41 +264,97 @@ router.get('/', requireAuth, async (req, res) => {
             console.log(`🔍 Searching for: "${search.trim()}"`);
         }
         
-        // Apply WHERE conditions if any exist
-        if (whereConditions.length > 0) {
-            const whereClause = ` WHERE ${whereConditions.join(' AND ')}`;
-            query += whereClause;
-            countQuery += whereClause;
+        // Build WHERE clause
+        const whereClause = whereConditions.length > 0
+            ? ` WHERE ${whereConditions.join(' AND ')}`
+            : '';
+
+        // Count query (unchanged shape)
+        const countQuery = `SELECT COUNT(*) as total FROM baptism_records${whereClause}`;
+
+        // Build main query — add relevance_score when searching
+        let query;
+        let mainQueryParams; // separate from queryParams to get correct placeholder order
+        const pageOffset = (parseInt(page) - 1) * clampedLimit;
+
+        if (isSearchActive) {
+            const searchRaw = search.trim();
+
+            // Tiered relevance: exact → prefix → contains (per field, highest tier wins)
+            // Exact match on name fields scores highest so true matches always beat partials
+            const relevanceExpr = `(
+              (CASE WHEN LOWER(first_name) = LOWER(?) THEN 1000 WHEN LOWER(first_name) LIKE CONCAT(LOWER(?), '%') THEN 400 WHEN LOWER(first_name) LIKE CONCAT('%', LOWER(?), '%') THEN 80 ELSE 0 END) +
+              (CASE WHEN LOWER(last_name)  = LOWER(?) THEN 900  WHEN LOWER(last_name)  LIKE CONCAT(LOWER(?), '%') THEN 350 WHEN LOWER(last_name)  LIKE CONCAT('%', LOWER(?), '%') THEN 70 ELSE 0 END) +
+              (CASE WHEN LOWER(clergy)     = LOWER(?) THEN 300  WHEN LOWER(clergy)     LIKE CONCAT(LOWER(?), '%') THEN 150 WHEN LOWER(clergy)     LIKE CONCAT('%', LOWER(?), '%') THEN 30 ELSE 0 END) +
+              (CASE WHEN LOWER(parents)    = LOWER(?) THEN 200  WHEN LOWER(parents)    LIKE CONCAT(LOWER(?), '%') THEN 100 WHEN LOWER(parents)    LIKE CONCAT('%', LOWER(?), '%') THEN 20 ELSE 0 END) +
+              (CASE WHEN LOWER(sponsors)   = LOWER(?) THEN 150  WHEN LOWER(sponsors)   LIKE CONCAT(LOWER(?), '%') THEN 75  WHEN LOWER(sponsors)   LIKE CONCAT('%', LOWER(?), '%') THEN 15 ELSE 0 END) +
+              (CASE WHEN LOWER(birthplace) = LOWER(?) THEN 100  WHEN LOWER(birthplace) LIKE CONCAT(LOWER(?), '%') THEN 50  WHEN LOWER(birthplace) LIKE CONCAT('%', LOWER(?), '%') THEN 10 ELSE 0 END)
+            ) AS _matchScore`;
+
+            query = `SELECT *, ${relevanceExpr} FROM baptism_records${whereClause}`;
+            query += ` ORDER BY _matchScore DESC, reception_date DESC, id DESC`;
+            query += ` LIMIT ? OFFSET ?`;
+
+            // 6 fields × 3 tiers = 18 params (all same value: raw search term)
+            const scoreParams = Array(18).fill(searchRaw);
+            const whereParams = [...queryParams];
+            mainQueryParams = [...scoreParams, ...whereParams, clampedLimit, pageOffset];
+        } else {
+            query = `SELECT * FROM baptism_records${whereClause}`;
+
+            // Standard sorting when no search
+            const validSortFields = ['id', 'first_name', 'last_name', 'birth_date', 'reception_date', 'clergy', 'birthplace', 'entry_type', 'sponsors', 'parents', 'created_at', 'updated_at'];
+            const validSortDirections = ['asc', 'desc'];
+            if (sortField && !validSortFields.includes(sortField)) {
+                console.warn(`⚠️ baptism-records: invalid sortField "${sortField}" rejected, defaulting to "id"`);
+            }
+            const finalSortField = validSortFields.includes(sortField) ? sortField : 'id';
+            const finalSortDirection = validSortDirections.includes(sortDirection.toLowerCase()) ? sortDirection.toUpperCase() : 'DESC';
+            query += ` ORDER BY ${finalSortField} ${finalSortDirection}`;
+            query += ` LIMIT ? OFFSET ?`;
+            mainQueryParams = [...queryParams, clampedLimit, pageOffset];
         }
 
-        // Add sorting
-        const validSortFields = ['id', 'first_name', 'last_name', 'birth_date', 'reception_date', 'clergy'];
-        const validSortDirections = ['asc', 'desc'];
-        
-        const finalSortField = validSortFields.includes(sortField) ? sortField : 'id';
-        const finalSortDirection = validSortDirections.includes(sortDirection.toLowerCase()) ? sortDirection.toUpperCase() : 'DESC';
-        
-        query += ` ORDER BY ${finalSortField} ${finalSortDirection}`;
-
-        // Add pagination
-        const offset = (parseInt(page) - 1) * parseInt(limit);
-        query += ` LIMIT ? OFFSET ?`;
-        queryParams.push(parseInt(limit), offset);
-
         console.log('📊 Executing query:', query);
-        console.log('🔧 Query params:', queryParams);
+        console.log('🔧 Query params:', mainQueryParams);
 
         // Execute queries
-        const [rows] = await churchDbPool.query(query, queryParams);
+        const [rows] = await churchDbPool.query(query, mainQueryParams);
         const [countResult] = await churchDbPool.query(countQuery, countParams);
         
         const totalRecords = countResult[0].total;
+        
+        // Post-process: compute _matchedFields for search results
+        if (isSearchActive && rows.length > 0) {
+            const termLower = search.trim().toLowerCase();
+            rows.forEach(row => {
+                const matched = [];
+                if (row.last_name && row.last_name.toLowerCase().includes(termLower)) matched.push('last_name');
+                if (row.first_name && row.first_name.toLowerCase().includes(termLower)) matched.push('first_name');
+                if (row.parents && row.parents.toLowerCase().includes(termLower)) matched.push('parents');
+                if (row.sponsors && row.sponsors.toLowerCase().includes(termLower)) matched.push('sponsors');
+                if (row.clergy && row.clergy.toLowerCase().includes(termLower)) matched.push('clergy');
+                if (row.birthplace && row.birthplace.toLowerCase().includes(termLower)) matched.push('birthplace');
+                row._matchedFields = matched;
+            });
+            // Annotate top result with match reason for "Top match" UI
+            const top = rows[0];
+            if (top.first_name && top.first_name.toLowerCase() === termLower) {
+                top._topMatchReason = 'exact first name';
+            } else if (top.last_name && top.last_name.toLowerCase() === termLower) {
+                top._topMatchReason = 'exact last name';
+            } else if (top.first_name && top.first_name.toLowerCase().startsWith(termLower)) {
+                top._topMatchReason = 'prefix first name';
+            } else if (top.last_name && top.last_name.toLowerCase().startsWith(termLower)) {
+                top._topMatchReason = 'prefix last name';
+            }
+        }
         
         console.log(`✅ Found ${rows.length} baptism records (${totalRecords} total) in database: ${databaseName}`);
         
         // Debug: Log first few records if any exist
         if (rows.length > 0) {
-            console.log(`📄 Sample records:`, rows.slice(0, 2).map(r => ({ id: r.id, first_name: r.first_name, last_name: r.last_name, church_id: r.church_id })));
+            console.log(`📄 Sample records:`, rows.slice(0, 2).map(r => ({ id: r.id, first_name: r.first_name, last_name: r.last_name, church_id: r.church_id, _matchScore: r._matchScore, _matchedFields: r._matchedFields })));
         } else {
             console.log(`📄 No records found in database: ${databaseName}`);
         }
@@ -269,7 +363,7 @@ router.get('/', requireAuth, async (req, res) => {
             records: transformBaptismRecords(rows),
             totalRecords,
             currentPage: parseInt(page),
-            totalPages: Math.ceil(totalRecords / parseInt(limit))
+            totalPages: Math.ceil(totalRecords / clampedLimit)
         });
     } catch (err) {
         console.error('fetch baptism-records error:', err);
@@ -813,6 +907,49 @@ router.get('/dropdown-options/:column', async (req, res) => {
     } catch (err) {
         console.error('fetch dropdown-options error:', err);
         res.status(500).json({ error: 'Could not fetch dropdown options' });
+    }
+});
+
+// GET /api/baptism-records/autocomplete - Frequency-based autocomplete for text fields
+router.get('/autocomplete', requireAuth, async (req, res) => {
+    const { column, prefix = '', church_id } = req.query;
+
+    // Whitelist of columns allowed for autocomplete (text fields only, no dates/IDs)
+    const ALLOWED_COLUMNS = ['first_name', 'last_name', 'birthplace', 'entry_type', 'sponsors', 'parents', 'clergy'];
+
+    if (!column || !ALLOWED_COLUMNS.includes(column)) {
+        return res.status(400).json({ error: `Invalid column. Allowed: ${ALLOWED_COLUMNS.join(', ')}` });
+    }
+
+    try {
+        const databaseName = await getChurchDatabaseName(church_id);
+        const churchDbPool = await getChurchDbConnection(databaseName);
+
+        let sql, params;
+        if (prefix.trim()) {
+            sql = `SELECT \`${column}\` AS value, COUNT(*) AS freq
+                   FROM baptism_records
+                   WHERE \`${column}\` IS NOT NULL AND TRIM(\`${column}\`) != ''
+                     AND \`${column}\` LIKE ?
+                   GROUP BY \`${column}\`
+                   ORDER BY freq DESC, \`${column}\` ASC
+                   LIMIT 20`;
+            params = [`${prefix.trim()}%`];
+        } else {
+            sql = `SELECT \`${column}\` AS value, COUNT(*) AS freq
+                   FROM baptism_records
+                   WHERE \`${column}\` IS NOT NULL AND TRIM(\`${column}\`) != ''
+                   GROUP BY \`${column}\`
+                   ORDER BY freq DESC, \`${column}\` ASC
+                   LIMIT 20`;
+            params = [];
+        }
+
+        const [rows] = await churchDbPool.query(sql, params);
+        res.json({ suggestions: rows.map(r => ({ value: r.value, count: r.freq })) });
+    } catch (err) {
+        console.error('autocomplete error (baptism):', err);
+        res.status(500).json({ error: 'Could not fetch autocomplete suggestions' });
     }
 });
 

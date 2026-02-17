@@ -1,53 +1,49 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Card,
-  Stack,
-  IconButton,
-  keyframes,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  Tabs,
-  Tab,
-  useTheme,
-  Menu,
-  MenuItem,
-  Divider,
-} from '@mui/material';
-import {
-  IconShield,
-  IconWorld,
-  IconDatabase,
-  IconFile,
-  IconUsers,
-  IconHistory,
-  IconSearch,
-  IconPlus,
-  IconSettings,
-  IconArchive,
-  IconDownload,
-  IconEye,
-  IconEye as IconView,
-  IconCheck,
-  IconTrash,
-  IconChevronDown,
-  IconSparkles,
-  IconArrowLeft,
-  IconArrowRight,
-} from '@tabler/icons-react';
-import { styled } from '@mui/material/styles';
-import Footer from './Footer';
+import C2a from '@/components/frontend-pages/shared/c2a';
+import SharedFooter from '@/components/frontend-pages/shared/footer';
+import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
+import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
+import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import QuickContactSidebar from '@/features/devel-tools/contactbar/QuickContactSidebar';
+import {
+    Box,
+    Button,
+    Card,
+    Container,
+    Divider,
+    Grid,
+    keyframes,
+    Menu,
+    MenuItem,
+    Stack,
+    Tab,
+    Tabs,
+    Typography,
+    useTheme
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import {
+    IconArchive,
+    IconArrowLeft,
+    IconArrowRight,
+    IconCheck,
+    IconChevronDown,
+    IconDatabase,
+    IconDownload,
+    IconEye,
+    IconFile,
+    IconHistory,
+    IconPlus,
+    IconSearch,
+    IconSettings,
+    IconShield,
+    IconSparkles,
+    IconTrash,
+    IconUsers,
+    IconEye as IconView,
+    IconWorld,
+} from '@tabler/icons-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import LeftSideMenu from './LeftSideMenu';
 
 // Add keyframes to the global styles
@@ -1227,6 +1223,10 @@ const HomePage: React.FC = () => {
 
   return (
     <Box>
+      {/* Shared Header */}
+      <HeaderAlert />
+      <HpHeader />
+
       {/* Left Side Popout Menu */}
       <LeftSideMenu
         activeSection={activeSection}
@@ -1242,6 +1242,23 @@ const HomePage: React.FC = () => {
           position: 'relative',
         }}
       >
+        {/* Logo positioned on the left side */}
+        <Box
+          component="img"
+          src="/images/logos/om-logo.png"
+          alt="Orthodox Metrics"
+          sx={{
+            position: 'absolute',
+            left: { xs: 16, sm: 32, md: 48 },
+            top: { xs: '3rem', sm: '4rem', md: '5rem' },
+            width: { xs: 60, sm: 70, md: 80 },
+            height: { xs: 60, sm: 70, md: 80 },
+            borderRadius: '50%',
+            objectFit: 'cover',
+            opacity: 0.85,
+            display: { xs: 'none', md: 'block' },
+          }}
+        />
         <Container maxWidth="lg">
           <Box sx={{ textAlign: 'center', maxWidth: '900px', mx: 'auto' }}>
             <Typography
@@ -1297,162 +1314,484 @@ const HomePage: React.FC = () => {
         </Container>
       </Box>
 
-      {/* Additional Orthodox Metrics Sections */}
-      <Box
-        sx={{
-          background: theme.palette.background.default,
-          padding: { xs: '3rem 0', sm: '4rem 0', md: '5rem 0' },
-          position: 'relative',
-        }}
-      >
+      {/* ============================================================ */}
+      {/* SECTION: See OrthodoxMetrics in Action (Screenshot 1)        */}
+      {/* ============================================================ */}
+      <Box sx={{ py: { xs: 6, md: 10 }, backgroundColor: theme.palette.background.default }}>
         <Container maxWidth="lg">
-          <Box
+          <Typography
+            variant="h4"
             sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
-              gap: { xs: 2, md: 3 },
-              maxWidth: '1200px',
-              mx: 'auto',
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontWeight: 600,
+              color: '#7B4F9E',
+              textAlign: 'center',
+              mb: 1,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
             }}
           >
-            {/* Church Metrics OCA Timeline */}
-            <Box
-              sx={{
-                textAlign: 'center',
-                padding: { xs: '2rem', sm: '2.5rem' },
-                borderRadius: '12px',
-                backgroundColor: theme.palette.mode === 'dark' 
-                  ? 'rgba(255, 255, 255, 0.05)' 
-                  : 'rgba(200, 162, 75, 0.08)',
-                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(200, 162, 75, 0.2)' : 'rgba(200, 162, 75, 0.3)'}`,
-                transition: 'all 0.3s ease',
-                cursor: 'pointer',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: theme.palette.mode === 'dark'
-                    ? '0 8px 24px rgba(200, 162, 75, 0.2)'
-                    : '0 8px 24px rgba(200, 162, 75, 0.15)',
-                },
-              }}
-              onClick={() => navigate('/frontend-pages/oca-timeline')}
-            >
-              <Typography
-                variant="h5"
-                component="h2"
-                sx={{
-                  fontFamily: '"Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
-                  fontWeight: 700,
-                  color: theme.palette.mode === 'dark' ? '#ffffff' : '#2E0F46',
-                  mb: 2,
-                  fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
-                }}
-              >
-                Church Metrics OCA Timeline
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666666',
-                  fontSize: { xs: '0.9rem', sm: '1rem' },
-                  lineHeight: 1.6,
-                }}
-              >
-                Explore the evolution of Orthodox Church record books from the Russian Mission era to the modern OCA metrical book.
-              </Typography>
-            </Box>
+            See OrthodoxMetrics in Action
+          </Typography>
+          <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mb: 6 }}>
+            Experience the interface in your preferred language
+          </Typography>
 
-            {/* Pricing */}
-            <Box
-              sx={{
-                textAlign: 'center',
-                padding: { xs: '2rem', sm: '2.5rem' },
-                borderRadius: '12px',
-                backgroundColor: theme.palette.mode === 'dark' 
-                  ? 'rgba(255, 255, 255, 0.05)' 
-                  : 'rgba(200, 162, 75, 0.08)',
-                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(200, 162, 75, 0.2)' : 'rgba(200, 162, 75, 0.3)'}`,
-                transition: 'all 0.3s ease',
-                cursor: 'pointer',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: theme.palette.mode === 'dark'
-                    ? '0 8px 24px rgba(200, 162, 75, 0.2)'
-                    : '0 8px 24px rgba(200, 162, 75, 0.15)',
-                },
-              }}
-              onClick={() => navigate('/frontend-pages/pricing')}
-            >
-              <Typography
-                variant="h5"
-                component="h2"
-                sx={{
-                  fontFamily: '"Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
-                  fontWeight: 700,
-                  color: theme.palette.mode === 'dark' ? '#ffffff' : '#2E0F46',
-                  mb: 2,
-                  fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
-                }}
-              >
-                Pricing
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666666',
-                  fontSize: { xs: '0.9rem', sm: '1rem' },
-                  lineHeight: 1.6,
-                }}
-              >
-                Discover our flexible pricing plans designed to support parishes of all sizes with modern record management solutions.
-              </Typography>
-            </Box>
+          <Grid container spacing={4} alignItems="flex-start">
+            {/* Language selector */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Stack spacing={2}>
+                {[
+                  { lang: 'Greek (\u0395\u03BB\u03BB\u03B7\u03BD\u03B9\u03BA\u03AC)', desc: 'Full Greek interface with proper Orthodox terminology', color: '#D4AF37' },
+                  { lang: 'Russian (\u0420\u0443\u0441\u0441\u043A\u0438\u0439)', desc: 'Complete Russian localization for Slavic Orthodox communities', color: '#4CAF50' },
+                  { lang: 'Romanian (Rom\u00E2n\u0103)', desc: 'Romanian interface for Orthodox parishes in Romania and diaspora', color: '#4CAF50' },
+                  { lang: 'Georgian (\u10E5\u10D0\u10E0\u10D7\u10E3\u10DA\u10D8)', desc: 'Georgian language support for the Georgian Orthodox Church', color: '#4CAF50' },
+                ].map((item, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      p: 2,
+                      borderRadius: '10px',
+                      border: i === 0 ? '2px solid #D4AF37' : '1px solid',
+                      borderColor: i === 0 ? '#D4AF37' : 'divider',
+                      backgroundColor: i === 0 ? 'rgba(212,175,55,0.06)' : 'transparent',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      '&:hover': { borderColor: '#D4AF37', backgroundColor: 'rgba(212,175,55,0.04)' },
+                    }}
+                  >
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: item.color }} />
+                      <Typography variant="subtitle2" fontWeight={600}>{item.lang}</Typography>
+                    </Stack>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', ml: 2.5 }}>{item.desc}</Typography>
+                  </Box>
+                ))}
+              </Stack>
+            </Grid>
 
-            {/* Contact Us */}
-            <Box
-              sx={{
-                textAlign: 'center',
-                padding: { xs: '2rem', sm: '2.5rem' },
-                borderRadius: '12px',
-                backgroundColor: theme.palette.mode === 'dark' 
-                  ? 'rgba(255, 255, 255, 0.05)' 
-                  : 'rgba(200, 162, 75, 0.08)',
-                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(200, 162, 75, 0.2)' : 'rgba(200, 162, 75, 0.3)'}`,
-                transition: 'all 0.3s ease',
-                cursor: 'pointer',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: theme.palette.mode === 'dark'
-                    ? '0 8px 24px rgba(200, 162, 75, 0.2)'
-                    : '0 8px 24px rgba(200, 162, 75, 0.15)',
-                },
-              }}
-              onClick={() => navigate('/frontend-pages/contact')}
-            >
-              <Typography
-                variant="h5"
-                component="h2"
+            {/* Mock dashboard preview */}
+            <Grid size={{ xs: 12, md: 8 }}>
+              <Box
                 sx={{
-                  fontFamily: '"Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
-                  fontWeight: 700,
-                  color: theme.palette.mode === 'dark' ? '#ffffff' : '#2E0F46',
-                  mb: 2,
-                  fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+                  borderRadius: '12px',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  backgroundColor: theme.palette.background.paper,
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
                 }}
               >
-                Contact Us
+                {/* Browser bar */}
+                <Box sx={{ px: 2, py: 1, display: 'flex', alignItems: 'center', gap: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#ff5f57' }} />
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#ffbd2e' }} />
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#28c840' }} />
+                  <Typography variant="caption" sx={{ ml: 2, color: 'text.secondary' }}>dashboard.orthodoxmetrics.com</Typography>
+                </Box>
+                {/* Dashboard content */}
+                <Box sx={{ p: 3 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                    <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>OrthodoxMetrics</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>EL</Typography>
+                  </Stack>
+                  <Grid container spacing={2} mb={3}>
+                    {[
+                      { label: 'Records', value: '1,247' },
+                      { label: 'Pending', value: '23' },
+                      { label: 'Recent', value: '45' },
+                    ].map((stat, i) => (
+                      <Grid key={i} size={{ xs: 4 }}>
+                        <Box sx={{ p: 1.5, borderRadius: '8px', backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid', borderColor: 'divider' }}>
+                          <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+                          <Typography variant="h6" fontWeight={700}>{stat.value}</Typography>
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                  <Stack spacing={1}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <IconUsers size={16} color="#999" />
+                      <Typography variant="body2" color="text.secondary">New baptism record added</Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <IconFile size={16} color="#e74c3c" />
+                      <Typography variant="body2" color="text.secondary">Marriage certificate uploaded</Typography>
+                    </Stack>
+                  </Stack>
+                </Box>
+              </Box>
+              {/* Try Interactive Demo button */}
+              <Box sx={{ textAlign: 'center', mt: 3 }}>
+                <Button
+                  variant="contained"
+                  href="/samples"
+                  sx={{
+                    background: 'linear-gradient(135deg, #D4AF37, #F4D03F)',
+                    color: '#1a0a2e',
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    px: 4,
+                    borderRadius: '24px',
+                    '&:hover': { background: 'linear-gradient(135deg, #c9a430, #e6c52e)' },
+                  }}
+                >
+                  <IconEye size={18} style={{ marginRight: 8 }} /> Try Interactive Demo
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* ============================================================ */}
+      {/* SECTION: Built for Orthodox Communities (Screenshot 2)        */}
+      {/* ============================================================ */}
+      <Box sx={{ py: { xs: 6, md: 10 }, backgroundColor: theme.palette.background.paper }}>
+        <Container maxWidth="lg">
+          <Typography
+            variant="h4"
+            sx={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontWeight: 600,
+              color: '#7B4F9E',
+              textAlign: 'center',
+              mb: 1,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
+            }}
+          >
+            Built for Orthodox Communities
+          </Typography>
+          <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mb: 6 }}>
+            Every feature designed with Orthodox tradition and practicality in mind
+          </Typography>
+
+          {/* Liturgical Calendar Integration */}
+          <Grid container spacing={6} alignItems="center" mb={8}>
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Typography variant="h5" sx={{ fontFamily: '"Cormorant Garamond", Georgia, serif', color: '#7B4F9E', fontWeight: 600, mb: 1.5 }}>
+                Liturgical Calendar Integration
               </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666666',
-                  fontSize: { xs: '0.9rem', sm: '1rem' },
-                  lineHeight: 1.6,
-                }}
-              >
-                Get in touch with our team to learn more about how Orthodox Metrics can serve your parish's record management needs.
+              <Typography variant="body2" color="text.secondary" mb={2}>
+                Automatic feast day recognition and liturgical color coding to keep your records connected to the Church calendar.
               </Typography>
-            </Box>
+              {['Automatic feast day tagging', 'Liturgical color indicators', 'Fasting period notifications', 'Saints day commemorations'].map((item, i) => (
+                <Stack key={i} direction="row" spacing={1} alignItems="center" mb={0.8}>
+                  <IconCheck size={16} color="#4CAF50" />
+                  <Typography variant="body2">{item}</Typography>
+                </Stack>
+              ))}
+            </Grid>
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Box sx={{ p: 3, borderRadius: '12px', border: '1px solid', borderColor: 'divider', backgroundColor: theme.palette.background.default }}>
+                <Typography variant="subtitle2" fontWeight={600} mb={2}>This Week's Liturgical Colors</Typography>
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
+                    <Box key={i} sx={{
+                      flex: 1, minWidth: 50, textAlign: 'center', py: 1.5, px: 1, borderRadius: '8px',
+                      backgroundColor: i === 3 ? '#7B4F9E' : i === 0 || i === 6 ? '#D4AF37' : 'rgba(0,0,0,0.04)',
+                      color: (i === 3 || i === 0 || i === 6) ? '#fff' : 'text.primary',
+                    }}>
+                      <Typography variant="caption" fontWeight={600}>{15 + i}</Typography>
+                      <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem' }}>{day}</Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {/* Multilingual OCR Recognition */}
+          <Grid container spacing={6} alignItems="center" mb={8}>
+            <Grid size={{ xs: 12, md: 5 }} sx={{ order: { xs: 1, md: 2 } }}>
+              <Typography variant="h5" sx={{ fontFamily: '"Cormorant Garamond", Georgia, serif', color: '#7B4F9E', fontWeight: 600, mb: 1.5 }}>
+                Multilingual OCR Recognition
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mb={2}>
+                Advanced text recognition that understands Orthodox terminology in Greek, Cyrillic, and Latin scripts.
+              </Typography>
+              {['Greek text recognition', 'Cyrillic script support', 'Orthodox terminology detection', 'Historical document processing'].map((item, i) => (
+                <Stack key={i} direction="row" spacing={1} alignItems="center" mb={0.8}>
+                  <IconCheck size={16} color="#4CAF50" />
+                  <Typography variant="body2">{item}</Typography>
+                </Stack>
+              ))}
+            </Grid>
+            <Grid size={{ xs: 12, md: 7 }} sx={{ order: { xs: 2, md: 1 } }}>
+              <Box sx={{ p: 3, borderRadius: '12px', border: '1px solid', borderColor: 'divider', backgroundColor: theme.palette.background.default }}>
+                <Typography variant="subtitle2" fontWeight={600} mb={2}>OCR Processing</Typography>
+                <Box sx={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'text.secondary', lineHeight: 1.8, p: 2, backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '8px' }}>
+                  Detected: &quot;{'\u0392\u03AC\u03C0\u03C4\u03B9\u03C3\u03B9\u03C2 \u039C\u03B1\u03C1\u03AF\u03B1\u03C2 \u0393\u03B5\u03C9\u03C1\u03B3\u03AF\u03BF\u03C5'}&quot;<br />
+                  Date: &quot;15 \u0391\u03C5\u03B3\u03BF\u03CD\u03C3\u03C4\u03BF\u03C5 2023&quot;<br />
+                  Priest: &quot;\u03C0. \u0394\u03B7\u03BC\u03AE\u03C4\u03C1\u03B9\u03BF\u03C2 \u03A0\u03B1\u03C0\u03B1\u03B4\u03CC\u03C0\u03BF\u03C5\u03BB\u03BF\u03C2&quot;
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {/* Smart Record Linking */}
+          <Grid container spacing={6} alignItems="center">
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Typography variant="h5" sx={{ fontFamily: '"Cormorant Garamond", Georgia, serif', color: '#7B4F9E', fontWeight: 600, mb: 1.5 }}>
+                Smart Record Linking
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mb={2}>
+                Automatically connect related sacramental records across a person's spiritual journey in your parish.
+              </Typography>
+            </Grid>
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Box sx={{ p: 3, borderRadius: '12px', border: '1px solid', borderColor: 'divider', backgroundColor: theme.palette.background.default }}>
+                <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+                  <IconUsers size={18} color="#7B4F9E" />
+                  <Typography variant="subtitle2" fontWeight={600}>Family Connections</Typography>
+                </Stack>
+                <Stack spacing={1} sx={{ pl: 1 }}>
+                  <Typography variant="body2">&bull; Maria Georgiadou (Baptism)</Typography>
+                  <Typography variant="body2">&bull; Nikolaos Georgiadou (Marriage)</Typography>
+                  <Typography variant="body2">&bull; Anna Georgiadou (Chrismation)</Typography>
+                </Stack>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* ============================================================ */}
+      {/* SECTION: Trusted by Orthodox Clergy (Screenshot 3)           */}
+      {/* ============================================================ */}
+      <Box sx={{ py: { xs: 6, md: 10 }, backgroundColor: theme.palette.background.default }}>
+        <Container maxWidth="lg">
+          <Typography
+            variant="h4"
+            sx={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontWeight: 600,
+              color: theme.palette.mode === 'dark' ? '#fff' : '#1a1a1a',
+              textAlign: 'center',
+              mb: 1,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
+            }}
+          >
+            Trusted by Orthodox Clergy Worldwide
+          </Typography>
+          <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mb: 6 }}>
+            Hear from priests who've transformed their parish record-keeping
+          </Typography>
+
+          <Grid container spacing={3}>
+            {[
+              {
+                stars: 5,
+                text: 'OrthodoxMetrics helped our parish transition from paper records to digital while preserving the reverence and accuracy we need for sacramental documentation. The Greek interface is perfectly localized.',
+                name: 'Fr. Dimitrios Papadopoulos',
+                role: 'Parish Priest',
+                church: 'St. Nicholas Greek Orthodox Church, Athens',
+              },
+              {
+                stars: 5,
+                text: 'The multilingual support has been invaluable for our diverse community. We can maintain records in both Russian and English, and the liturgical calendar integration keeps us connected to Church tradition.',
+                name: 'Fr. Sergei Volkov',
+                role: 'Rector',
+                church: 'Holy Trinity Russian Orthodox Cathedral, New York',
+              },
+              {
+                stars: 5,
+                text: 'As a diocesan administrator, I appreciate how OrthodoxMetrics standardizes record-keeping across our parishes while respecting each community\'s language and customs. The reporting features are excellent.',
+                name: 'Archdeacon Michael Popescu',
+                role: 'Diocesan Administrator',
+                church: 'Romanian Orthodox Archdiocese of the Americas',
+              },
+            ].map((testimonial, i) => (
+              <Grid key={i} size={{ xs: 12, md: 4 }}>
+                <Box
+                  sx={{
+                    p: 3,
+                    borderRadius: '12px',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    backgroundColor: theme.palette.background.paper,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <Stack direction="row" spacing={0.5} mb={2}>
+                    {Array.from({ length: testimonial.stars }).map((_, j) => (
+                      <Typography key={j} sx={{ color: '#D4AF37', fontSize: '1.1rem' }}>{'\u2605'}</Typography>
+                    ))}
+                  </Stack>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.7, mb: 3, flex: 1, fontStyle: 'italic' }}>
+                    &ldquo;{testimonial.text}&rdquo;
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Box sx={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: '#D4AF37', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>{testimonial.name.charAt(0)}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600}>{testimonial.name}</Typography>
+                      <Typography variant="caption" color="text.secondary">{testimonial.role}</Typography>
+                      <Typography variant="caption" display="block" color="text.secondary" sx={{ fontSize: '0.7rem' }}>{testimonial.church}</Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* ============================================================ */}
+      {/* SECTION: Free for Most Parishes (Screenshot 4)               */}
+      {/* ============================================================ */}
+      <Box sx={{ py: { xs: 6, md: 10 }, backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : '#faf8f5' }}>
+        <Container maxWidth="md">
+          <Typography
+            variant="h4"
+            sx={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontWeight: 600,
+              color: '#7B4F9E',
+              textAlign: 'center',
+              mb: 1,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
+            }}
+          >
+            Free for Most Parishes
+          </Typography>
+          <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mb: 5 }}>
+            Our mission is to serve the Orthodox Church, not profit from it
+          </Typography>
+
+          <Box
+            sx={{
+              p: { xs: 3, md: 4 },
+              borderRadius: '16px',
+              backgroundColor: theme.palette.background.paper,
+              border: '1px solid',
+              borderColor: 'divider',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+            }}
+          >
+            <Grid container spacing={4}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Stack spacing={2.5}>
+                  <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                    <IconCheck size={22} color="#4CAF50" style={{ marginTop: 2 }} />
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#2E7D32' }}>
+                        Complete access to all features at no cost for parishes under 500 active members
+                      </Typography>
+                    </Box>
+                  </Stack>
+                  <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                    <IconShield size={20} color="#D4AF37" style={{ marginTop: 2 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      Supported by voluntary donations from parishes who can contribute
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                    <IconDatabase size={20} color="#5C6BC0" style={{ marginTop: 2 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      Special diocesan licensing available for administrative oversight
+                    </Typography>
+                  </Stack>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    href="/auth/register"
+                    sx={{
+                      mt: 1,
+                      background: 'linear-gradient(135deg, #D4AF37, #F4D03F)',
+                      color: '#1a0a2e',
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      '&:hover': { background: 'linear-gradient(135deg, #c9a430, #e6c52e)' },
+                    }}
+                  >
+                    Get Started Free &rarr;
+                  </Button>
+                </Stack>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="subtitle2" fontWeight={700} mb={2}>Included Features:</Typography>
+                {[
+                  'Unlimited sacramental records',
+                  'All language interfaces',
+                  'OCR document processing',
+                  'Certificate generation',
+                  'Liturgical calendar',
+                  'Email support',
+                  'Data export tools',
+                  'Secure cloud storage',
+                ].map((feature, i) => (
+                  <Stack key={i} direction="row" spacing={1} alignItems="center" mb={0.8}>
+                    <IconCheck size={16} color="#4CAF50" />
+                    <Typography variant="body2" fontWeight={500}>{feature}</Typography>
+                  </Stack>
+                ))}
+              </Grid>
+            </Grid>
           </Box>
+        </Container>
+      </Box>
+
+      {/* ============================================================ */}
+      {/* SECTION: Ready to Preserve Your Parish Records? (Screenshot 5) */}
+      {/* ============================================================ */}
+      <Box sx={{ py: { xs: 6, md: 10 }, backgroundColor: theme.palette.background.default }}>
+        <Container maxWidth="sm" sx={{ textAlign: 'center' }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontWeight: 600,
+              color: '#7B4F9E',
+              mb: 1,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
+            }}
+          >
+            Ready to Preserve Your Parish Records?
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary', mb: 1 }}>
+            Let us help you get started with a personalized onboarding session
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.disabled', mb: 4, fontSize: '0.85rem' }}>
+            Our team will guide you through setting up OrthodoxMetrics for your parish, including data migration from existing records and training for your staff.
+          </Typography>
+
+          <Button
+            variant="contained"
+            size="large"
+            href="/frontend-pages/contact"
+            fullWidth
+            sx={{
+              background: 'linear-gradient(135deg, #D4AF37, #F4D03F)',
+              color: '#1a0a2e',
+              fontWeight: 700,
+              textTransform: 'none',
+              borderRadius: '8px',
+              py: 1.5,
+              mb: 4,
+              '&:hover': { background: 'linear-gradient(135deg, #c9a430, #e6c52e)' },
+            }}
+          >
+            Schedule Free Consultation
+          </Button>
+
+          <Grid container spacing={4} justifyContent="center">
+            {[
+              { icon: '\u2709', label: 'Email Support', value: 'support@orthodoxmetrics.com' },
+              { icon: '\uD83D\uDCAC', label: 'Telegram', value: '@OrthodoxMetrics' },
+              { icon: '\uD83D\uDCDE', label: 'WhatsApp', value: '+1 305 ORTHODOX' },
+            ].map((contact, i) => (
+              <Grid key={i} size={{ xs: 12, sm: 4 }}>
+                <Typography sx={{ fontSize: '1.5rem', mb: 0.5 }}>{contact.icon}</Typography>
+                <Typography variant="subtitle2" fontWeight={600}>{contact.label}</Typography>
+                <Typography variant="caption" color="text.secondary">{contact.value}</Typography>
+              </Grid>
+            ))}
+          </Grid>
         </Container>
       </Box>
 
@@ -4033,7 +4372,10 @@ const HomePage: React.FC = () => {
       {/* FAQ Section - original position when header is not collapsed */}
       {!isHeaderCollapsed && renderFAQSection()}
 
-      <Footer />
+      {/* Shared Call-to-Action + Footer */}
+      <C2a />
+      <SharedFooter />
+      <ScrollToTop />
       
       {/* Quick Contact Sidebar */}
       <QuickContactSidebar />

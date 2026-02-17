@@ -127,3 +127,21 @@ tools/audit.js
 # Local backups and scratch
 backups/
 copies/
+
+# --- Agent / IDE workspace artifacts ---
+c0/
+c1/
+c2/
+c3/
+cursor/
+ws/
+.windsurf/
+.mcp.json
+WS-tasks.md
+conversation-tasks.json
+config/agenttasks-*.json
+followup.txt
+reports/
+prod-backup/
+front-end/server/
+server/scripts/

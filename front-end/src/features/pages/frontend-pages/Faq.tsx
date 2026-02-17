@@ -1,30 +1,37 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React from 'react';
-import PageContainer from '@/shared/ui/PageContainer';
-import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
-import { Grid } from '@mui/material';
 import FAQ from '@/components/frontend-pages/homepage/faq';
-
-const BCrumb = [
-  {
-    to: '/',
-    title: 'Home',
-  },
-  {
-    title: 'FAQ',
-  },
-];
+import C2a from '@/components/frontend-pages/shared/c2a';
+import Footer from '@/components/frontend-pages/shared/footer';
+import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
+import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
+import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
+import PageContainer from '@/shared/ui/PageContainer';
+import { Box, Container, Typography } from '@mui/material';
 
 const Faq = () => {
   return (
     <PageContainer title="Faq" description="this is Faq page">
-      <Breadcrumb title="FAQ" items={BCrumb} />
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <FAQ />
-        </Grid>
-      </Grid>
+      <HeaderAlert />
+      <HpHeader />
+
+      {/* Banner */}
+      <Box sx={{ backgroundColor: 'primary.light', py: { xs: 4, lg: 6 }, textAlign: 'center' }}>
+        <Container maxWidth="lg">
+          <Typography variant="h2" fontWeight={700} mb={1}>
+            Frequently Asked Questions
+          </Typography>
+          <Typography variant="body1" color="text.secondary" fontSize="16px">
+            Find answers to common questions about Orthodox Metrics
+          </Typography>
+        </Container>
+      </Box>
+
+      <FAQ />
+
+      <C2a />
+      <Footer />
+      <ScrollToTop />
     </PageContainer>
   );
 };

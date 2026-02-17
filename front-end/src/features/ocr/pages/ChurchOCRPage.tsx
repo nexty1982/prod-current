@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ScanLine, Settings as SettingsIcon, RefreshCw, ArrowLeft, Church } from 'lucide-react';
+import { ScanLine, Settings as SettingsIcon, RefreshCw, ArrowLeft, Church } from '@/ui/icons';
 import { Box, Typography, Button, Paper, useTheme, CircularProgress, Alert } from '@mui/material';
 import UploadZone from '../components/UploadZone';
 import JobList from '../components/JobList';

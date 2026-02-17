@@ -3,31 +3,32 @@
  * Document processing and deletion settings matching redesigned OCR interface
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Tabs,
-  Tab,
-  Stack,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Button,
-  Alert,
-  Chip,
-  Divider,
-} from '@mui/material';
-import {
-  IconFileDescription,
-  IconCode,
-  IconUser,
-} from '@tabler/icons-react';
 import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/shared/lib/axiosInstance';
+import {
+    Alert,
+    Box,
+    Button,
+    Chip,
+    Divider,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    Tab,
+    Tabs,
+    TextField,
+    Typography,
+} from '@mui/material';
+import {
+    IconCode,
+    IconFileDescription,
+    IconUser,
+} from '@tabler/icons-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import OcrStudioNav from '../components/OcrStudioNav';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -67,6 +68,7 @@ interface OCRSettingsData {
 }
 
 const OCRSettingsPage: React.FC = () => {
+  const { isLayout } = useContext(CustomizerContext);
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -172,7 +174,8 @@ const OCRSettingsPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <Box sx={{ p: 3, maxWidth: isLayout === 'full' ? '100%' : 1200, mx: 'auto' }}>
+      <OcrStudioNav />
       {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
         <Stack direction="row" spacing={1} alignItems="center">

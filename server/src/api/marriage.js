@@ -6,6 +6,7 @@ const { cleanRecords, cleanRecord, transformMarriageRecords, transformMarriageRe
 const { promisePool } = require('../config/db-compat');
 const { safeRequire } = require('../utils/safeRequire');
 const { requireAuth } = require('../middleware/auth');
+const { getEffectiveSetting } = require('../utils/settingsHelper');
 
 // Safe require for writeSacramentHistory - handles missing module gracefully
 const writeSacramentHistoryModule = safeRequire(
@@ -22,6 +23,40 @@ const writeSacramentHistoryModule = safeRequire(
 
 const { writeSacramentHistory, generateRequestId } = writeSacramentHistoryModule;
 const router = express.Router();
+
+/**
+ * Default search weights for marriage records.
+ * Keys match actual marriage_records table columns.
+ */
+const DEFAULT_SEARCH_WEIGHTS = {
+  lname_groom: 12,
+  lname_bride: 12,
+  fname_groom: 9,
+  fname_bride: 9,
+  parentsg: 7,
+  parentsb: 7,
+  witness: 6,
+  clergy: 4
+};
+
+/**
+ * Load effective search weights for a church from the settings registry.
+ * Falls back to DEFAULT_SEARCH_WEIGHTS for any key that isn't in the registry.
+ */
+async function getEffectiveSearchWeights(churchId) {
+  const weights = { ...DEFAULT_SEARCH_WEIGHTS };
+  try {
+    const fields = Object.keys(DEFAULT_SEARCH_WEIGHTS);
+    const opts = churchId && churchId !== '0' ? { churchId } : {};
+    await Promise.all(fields.map(async (field) => {
+      const val = await getEffectiveSetting(`records.search.marriage.${field}`, opts);
+      if (val !== undefined) weights[field] = Number(val);
+    }));
+  } catch (e) {
+    console.warn('Failed to load search weights from registry for church', churchId, e.message);
+  }
+  return weights;
+}
 
 /**
  * Get church database name by church_id
@@ -186,11 +221,10 @@ router.get('/', requireAuth, async (req, res) => {
         const databaseName = await getChurchDatabaseName(finalChurchId);
         console.log(`🏛️ Using database: ${databaseName} for church_id: ${finalChurchId}`);
 
-        let query = 'SELECT * FROM marriage_records';
-        let countQuery = 'SELECT COUNT(*) as total FROM marriage_records';
         const queryParams = [];
         const countParams = [];
         let whereConditions = [];
+        const isSearchActive = search && search.trim();
 
         // Add church filtering
         if (church_id && church_id !== '0') {
@@ -201,7 +235,7 @@ router.get('/', requireAuth, async (req, res) => {
         }
 
         // Add search functionality
-        if (search && search.trim()) {
+        if (isSearchActive) {
             const searchCondition = `(fname_groom LIKE ? 
                 OR lname_groom LIKE ? 
                 OR fname_bride LIKE ? 
@@ -214,43 +248,97 @@ router.get('/', requireAuth, async (req, res) => {
             
             whereConditions.push(searchCondition);
             
-            // Add search parameters for main query (8 parameters now)
             queryParams.push(searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam);
-            // Add search parameters for count query (8 parameters now)
             countParams.push(searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam);
             console.log(`🔍 Searching marriage records for: "${search.trim()}"`);
         }
         
-        // Apply WHERE conditions if any exist
-        if (whereConditions.length > 0) {
-            const whereClause = ` WHERE ${whereConditions.join(' AND ')}`;
-            query += whereClause;
-            countQuery += whereClause;
+        // Build WHERE clause
+        const whereClause = whereConditions.length > 0
+            ? ` WHERE ${whereConditions.join(' AND ')}`
+            : '';
+
+        // Count query (unchanged shape)
+        const countQuery = `SELECT COUNT(*) as total FROM marriage_records${whereClause}`;
+
+        // Build main query — add relevance_score when searching
+        let query;
+        let mainQueryParams;
+        const pageOffset = (parseInt(page) - 1) * parseInt(limit);
+
+        if (isSearchActive) {
+            const searchRaw = search.trim();
+
+            // Tiered relevance: exact → prefix → contains (per field, highest tier wins)
+            const relevanceExpr = `(
+              (CASE WHEN LOWER(lname_groom) = LOWER(?) THEN 900  WHEN LOWER(lname_groom) LIKE CONCAT(LOWER(?), '%') THEN 350 WHEN LOWER(lname_groom) LIKE CONCAT('%', LOWER(?), '%') THEN 70 ELSE 0 END) +
+              (CASE WHEN LOWER(lname_bride) = LOWER(?) THEN 900  WHEN LOWER(lname_bride) LIKE CONCAT(LOWER(?), '%') THEN 350 WHEN LOWER(lname_bride) LIKE CONCAT('%', LOWER(?), '%') THEN 70 ELSE 0 END) +
+              (CASE WHEN LOWER(fname_groom) = LOWER(?) THEN 800  WHEN LOWER(fname_groom) LIKE CONCAT(LOWER(?), '%') THEN 300 WHEN LOWER(fname_groom) LIKE CONCAT('%', LOWER(?), '%') THEN 60 ELSE 0 END) +
+              (CASE WHEN LOWER(fname_bride) = LOWER(?) THEN 800  WHEN LOWER(fname_bride) LIKE CONCAT(LOWER(?), '%') THEN 300 WHEN LOWER(fname_bride) LIKE CONCAT('%', LOWER(?), '%') THEN 60 ELSE 0 END) +
+              (CASE WHEN LOWER(clergy)      = LOWER(?) THEN 300  WHEN LOWER(clergy)      LIKE CONCAT(LOWER(?), '%') THEN 150 WHEN LOWER(clergy)      LIKE CONCAT('%', LOWER(?), '%') THEN 30 ELSE 0 END) +
+              (CASE WHEN LOWER(parentsg)    = LOWER(?) THEN 200  WHEN LOWER(parentsg)    LIKE CONCAT(LOWER(?), '%') THEN 100 WHEN LOWER(parentsg)    LIKE CONCAT('%', LOWER(?), '%') THEN 20 ELSE 0 END) +
+              (CASE WHEN LOWER(parentsb)    = LOWER(?) THEN 200  WHEN LOWER(parentsb)    LIKE CONCAT(LOWER(?), '%') THEN 100 WHEN LOWER(parentsb)    LIKE CONCAT('%', LOWER(?), '%') THEN 20 ELSE 0 END) +
+              (CASE WHEN LOWER(witness)     = LOWER(?) THEN 150  WHEN LOWER(witness)     LIKE CONCAT(LOWER(?), '%') THEN 75  WHEN LOWER(witness)     LIKE CONCAT('%', LOWER(?), '%') THEN 15 ELSE 0 END)
+            ) AS relevance_score`;
+
+            query = `SELECT *, ${relevanceExpr} FROM marriage_records${whereClause}`;
+            query += ` ORDER BY relevance_score DESC, mdate DESC, id DESC`;
+            query += ` LIMIT ? OFFSET ?`;
+
+            // 8 fields × 3 tiers = 24 params (all same value: raw search term)
+            const scoreParams = Array(24).fill(searchRaw);
+            const whereParams = [...queryParams];
+            mainQueryParams = [...scoreParams, ...whereParams, parseInt(limit), pageOffset];
+        } else {
+            query = `SELECT * FROM marriage_records${whereClause}`;
+
+            const validSortFields = ['id', 'fname_groom', 'lname_groom', 'fname_bride', 'lname_bride', 'mdate', 'clergy', 'parentsg', 'parentsb', 'witness', 'mlicense', 'created_at', 'updated_at'];
+            const validSortDirections = ['asc', 'desc'];
+            if (sortField && !validSortFields.includes(sortField)) {
+                console.warn(`⚠️ marriage-records: invalid sortField "${sortField}" rejected, defaulting to "id"`);
+            }
+            const finalSortField = validSortFields.includes(sortField) ? sortField : 'id';
+            const finalSortDirection = validSortDirections.includes(sortDirection.toLowerCase()) ? sortDirection.toUpperCase() : 'DESC';
+            query += ` ORDER BY ${finalSortField} ${finalSortDirection}`;
+            query += ` LIMIT ? OFFSET ?`;
+            mainQueryParams = [...queryParams, parseInt(limit), pageOffset];
         }
 
-        // Add sorting
-        const validSortFields = ['id', 'fname_groom', 'lname_groom', 'fname_bride', 'lname_bride', 'mdate', 'clergy'];
-        const validSortDirections = ['asc', 'desc'];
-        
-        const finalSortField = validSortFields.includes(sortField) ? sortField : 'id';
-        const finalSortDirection = validSortDirections.includes(sortDirection.toLowerCase()) ? sortDirection.toUpperCase() : 'DESC';
-        
-        query += ` ORDER BY ${finalSortField} ${finalSortDirection}`;
-
-        // Add pagination
-        const offset = (parseInt(page) - 1) * parseInt(limit);
-        query += ` LIMIT ? OFFSET ?`;
-        queryParams.push(parseInt(limit), offset);
-
         // Execute queries
-        // Get church database connection using the dynamically resolved database name
         const churchDbPool = await getChurchDbConnection(databaseName);
         
-        const [rows] = await churchDbPool.query(query, queryParams);
+        const [rows] = await churchDbPool.query(query, mainQueryParams);
         const [countResult] = await churchDbPool.query(countQuery, countParams);
         
         const totalRecords = countResult[0].total;
         
+        // Post-process: compute _matchedFields and _topMatchReason for search results
+        if (isSearchActive && rows.length > 0) {
+            const termLower = search.trim().toLowerCase();
+            rows.forEach(row => {
+                const matched = [];
+                if (row.lname_groom && row.lname_groom.toLowerCase().includes(termLower)) matched.push('lname_groom');
+                if (row.lname_bride && row.lname_bride.toLowerCase().includes(termLower)) matched.push('lname_bride');
+                if (row.fname_groom && row.fname_groom.toLowerCase().includes(termLower)) matched.push('fname_groom');
+                if (row.fname_bride && row.fname_bride.toLowerCase().includes(termLower)) matched.push('fname_bride');
+                if (row.clergy && row.clergy.toLowerCase().includes(termLower)) matched.push('clergy');
+                if (row.parentsg && row.parentsg.toLowerCase().includes(termLower)) matched.push('parentsg');
+                if (row.parentsb && row.parentsb.toLowerCase().includes(termLower)) matched.push('parentsb');
+                if (row.witness && row.witness.toLowerCase().includes(termLower)) matched.push('witness');
+                row._matchedFields = matched;
+            });
+            const top = rows[0];
+            if (top.fname_groom && top.fname_groom.toLowerCase() === termLower) {
+                top._topMatchReason = 'exact groom first name';
+            } else if (top.lname_groom && top.lname_groom.toLowerCase() === termLower) {
+                top._topMatchReason = 'exact groom last name';
+            } else if (top.fname_bride && top.fname_bride.toLowerCase() === termLower) {
+                top._topMatchReason = 'exact bride first name';
+            } else if (top.lname_bride && top.lname_bride.toLowerCase() === termLower) {
+                top._topMatchReason = 'exact bride last name';
+            }
+        }
+
         res.json({ 
             records: transformMarriageRecords(rows),
             totalRecords,
@@ -717,6 +805,49 @@ router.get('/dropdown-options/:column', async (req, res) => {
     } catch (err) {
         console.error('fetch dropdown-options error:', err);
         res.status(500).json({ error: 'Could not fetch dropdown options' });
+    }
+});
+
+// GET /api/marriage-records/autocomplete - Frequency-based autocomplete for text fields
+router.get('/autocomplete', requireAuth, async (req, res) => {
+    const { column, prefix = '', church_id } = req.query;
+
+    // Whitelist of columns allowed for autocomplete (text fields only, no dates/IDs)
+    const ALLOWED_COLUMNS = ['fname_groom', 'lname_groom', 'fname_bride', 'lname_bride', 'parentsg', 'parentsb', 'witness', 'mlicense', 'clergy'];
+
+    if (!column || !ALLOWED_COLUMNS.includes(column)) {
+        return res.status(400).json({ error: `Invalid column. Allowed: ${ALLOWED_COLUMNS.join(', ')}` });
+    }
+
+    try {
+        const databaseName = await getChurchDatabaseName(church_id);
+        const churchDbPool = await getChurchDbConnection(databaseName);
+
+        let sql, params;
+        if (prefix.trim()) {
+            sql = `SELECT \`${column}\` AS value, COUNT(*) AS freq
+                   FROM marriage_records
+                   WHERE \`${column}\` IS NOT NULL AND TRIM(\`${column}\`) != ''
+                     AND \`${column}\` LIKE ?
+                   GROUP BY \`${column}\`
+                   ORDER BY freq DESC, \`${column}\` ASC
+                   LIMIT 20`;
+            params = [`${prefix.trim()}%`];
+        } else {
+            sql = `SELECT \`${column}\` AS value, COUNT(*) AS freq
+                   FROM marriage_records
+                   WHERE \`${column}\` IS NOT NULL AND TRIM(\`${column}\`) != ''
+                   GROUP BY \`${column}\`
+                   ORDER BY freq DESC, \`${column}\` ASC
+                   LIMIT 20`;
+            params = [];
+        }
+
+        const [rows] = await churchDbPool.query(sql, params);
+        res.json({ suggestions: rows.map(r => ({ value: r.value, count: r.freq })) });
+    } catch (err) {
+        console.error('autocomplete error (marriage):', err);
+        res.status(500).json({ error: 'Could not fetch autocomplete suggestions' });
     }
 });
 

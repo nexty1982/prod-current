@@ -1,230 +1,122 @@
-import React from 'react';
-import { Box, Grid, Typography, Container, Divider, Stack, Tooltip } from '@mui/material';
-import { Link, NavLink } from 'react-router-dom';
+import { Box, Container, Divider, Grid, IconButton, Stack, Typography, useTheme } from '@mui/material';
+import { IconBrandFacebook, IconBrandLinkedin, IconBrandTwitter } from '@tabler/icons-react';
+import { Link } from 'react-router-dom';
 
-import IconFacebook from '@/assets/images/frontend-pages/icons/icon-facebook.svg';
-import IconTwitter from '@/assets/images/frontend-pages/icons/icon-twitter.svg';
-import IconInstagram from '@/assets/images/frontend-pages/icons/icon-instagram.svg';
-
-import LogoIcon from '@/assets/images/logos/logoIcon.svg';
-
-const footerLinks = [
+const footerColumns = [
   {
-    id: 1,
-    children: [
-      {
-        title: true,
-        titleText: 'Baptism',
-      },
-      {
-        title: false,
-        titleText: 'View Baptism Templates',
-        link: '/apps/church-management',
-      },
-      {
-        title: false,
-        titleText: 'Features',
-        link: '/apps/notes',
-      },
-      {
-        title: false,
-        titleText: 'Record display features',
-        link: '/apps/calendar',
-      },
-      {
-        title: false,
-        titleText: 'iUpdating Records',
-        link: '/apps/contacts',
-      },
-      {
-        title: false,
-        titleText: 'Historical Data',
-        link: '/dashboards/modern',
-      },
-      {
-        title: false,
-        titleText: 'Trends and Forecasts',
-        link: '/support',
-      },
+    title: 'About',
+    links: [
+      { text: 'Our Mission', to: '/frontend-pages/about' },
+      { text: 'How It Works', to: '/tour' },
+      { text: 'Security', to: '/frontend-pages/about' },
+      { text: 'Careers', to: '/frontend-pages/contact' },
     ],
   },
   {
-    id: 2,
-    children: [
-      {
-        title: true,
-        titleText: 'Marriage',
-      },
-      {
-        title: false,
-        titleText: 'Certificate Availability',
-        link: '/forms/settings',
-      },
-      {
-        title: false,
-        titleText: 'Growth in the Parish',
-        link: '/forms/user-profile',
-      },
-      {
-        title: false,
-        titleText: 'Demographics',
-        link: '/forms/church-setup',
-      },
-      {
-        title: false,
-        titleText: 'Parish timelines',
-        link: '/forms/member-forms',
-      },
-      {
-        title: false,
-        titleText: 'Orthodox themes',
-        link: '/forms/event-forms',
-      },
+    title: 'Support',
+    links: [
+      { text: 'Documentation', to: '/frontend-pages/blog' },
+      { text: 'Help Center', to: '/frontend-pages/faq' },
+      { text: 'Contact Us', to: '/frontend-pages/contact' },
+      { text: 'System Status', to: '/frontend-pages/about' },
     ],
   },
   {
-    id: 3,
-    children: [
-      {
-        title: true,
-        titleText: 'Other Record Types',
-      },
-      {
-        title: false,
-        titleText: 'Funeral Records',
-        link: '/tables/members',
-      },
-      {
-        title: false,
-        titleText: 'Church Records',
-        link: '/tables/events',
-      },
-      {
-        title: false,
-        titleText: 'Parish Community',
-        link: '/tables/donations',
-      },
-      {
-        title: false,
-        titleText: 'Charts and Data',
-        link: '/tables/reports',
-      },
-      {
-        title: false,
-        titleText: 'Analytics',
-        link: '/tables/analytics',
-      },
-      {
-        title: false,
-        titleText: 'Activity Log',
-        link: '/tables/activity-log',
-      },
+    title: 'Legal',
+    links: [
+      { text: 'Privacy Policy', to: '/frontend-pages/about' },
+      { text: 'Terms of Service', to: '/frontend-pages/about' },
+      { text: 'Cookie Policy', to: '/frontend-pages/about' },
+      { text: 'GDPR', to: '/frontend-pages/about' },
     ],
   },
 ];
 
 const Footer = () => {
-  return (<>
-    <Container
-      maxWidth="lg"
-      sx={{
-        pt: {
-          xs: '30px',
-          lg: '60px',
-        },
-      }}
-    >
-      <Grid container spacing={3} justifyContent="space-between" mb={7}>
-        {footerLinks.map((footerlink, i) => (
-          <Grid
-            key={i}
-            size={{
-              xs: 6,
-              sm: 4,
-              lg: 2
-            }}>
-            {footerlink.children.map((child, i) => (
-              <React.Fragment key={i}>
-                {child.title ? (
-                  <Typography fontSize="17px" fontWeight="600" mb="22px">
-                    {child.titleText}
-                  </Typography>
-                ) : (
-                  <Link to={`${child.link}`}>
-                    <Typography
-                      sx={{
-                        display: 'block',
-                        padding: '10px 0',
-                        fontSize: '15px',
-                        color: (theme) => theme.palette.text.primary,
-                        '&:hover': {
-                          color: (theme) => theme.palette.primary.main,
-                        },
-                      }}
-                      component="span"
-                    >
-                      {child.titleText}
-                    </Typography>
-                  </Link>
-                )}
-              </React.Fragment>
-            ))}
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
+  const bgColor = isDark ? '#0d0519' : '#f5f3f8';
+  const textPrimary = isDark ? '#ffffff' : '#1a1a1a';
+  const textSecondary = isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.5)';
+  const linkColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)';
+  const iconColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)';
+  const dividerColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+  const mutedColor = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)';
+
+  return (
+    <Box sx={{ backgroundColor: bgColor, color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }}>
+      <Container maxWidth="lg" sx={{ pt: { xs: 5, lg: 8 }, pb: { xs: 3, lg: 4 } }}>
+        <Grid container spacing={4}>
+          {/* Brand column */}
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+              <Box
+                component="img"
+                src="/images/logos/om-logo.png"
+                alt="OrthodoxMetrics"
+                sx={{ width: 28, height: 28, borderRadius: '50%' }}
+              />
+              <Typography variant="subtitle1" fontWeight={700} sx={{ color: textPrimary }}>
+                OrthodoxMetrics
+              </Typography>
+            </Stack>
+            <Typography variant="body2" sx={{ color: textSecondary, lineHeight: 1.7, mb: 2, fontSize: '0.85rem' }}>
+              Digitizing Orthodox records and empowering the Church with secure, multilingual record-keeping solutions.
+            </Typography>
+            <Stack direction="row" spacing={0.5}>
+              <IconButton size="small" sx={{ color: iconColor, '&:hover': { color: '#D4AF37' } }}>
+                <IconBrandTwitter size={18} />
+              </IconButton>
+              <IconButton size="small" sx={{ color: iconColor, '&:hover': { color: '#D4AF37' } }}>
+                <IconBrandFacebook size={18} />
+              </IconButton>
+              <IconButton size="small" sx={{ color: iconColor, '&:hover': { color: '#D4AF37' } }}>
+                <IconBrandLinkedin size={18} />
+              </IconButton>
+            </Stack>
           </Grid>
-        ))}
-        <Grid
-          size={{
-            xs: 6,
-            sm: 6,
-            lg: 2
-          }}>
-          <Typography fontSize="17px" fontWeight="600" mb="22px">
-            Follow us
-          </Typography>
 
-          <Stack direction="row" gap="20px">
-            <Tooltip title="Facebook">
-              <NavLink to="#">
-                <img src={IconFacebook} alt="facebook" width={22} height={22} />
-              </NavLink>
-            </Tooltip>
-            <Tooltip title="Twitter">
-              <NavLink to="#">
-                <img src={IconTwitter} alt="twitter" width={22} height={22} />
-              </NavLink>
-            </Tooltip>
-            <Tooltip title="Instagram">
-              <NavLink to="#">
-                <img src={IconInstagram} alt="instagram" width={22} height={22} />
-              </NavLink>
-            </Tooltip>
-          </Stack>
+          {/* Link columns */}
+          {footerColumns.map((col, i) => (
+            <Grid key={i} size={{ xs: 6, sm: 4, md: 3 }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ color: textPrimary, mb: 2 }}>
+                {col.title}
+              </Typography>
+              {col.links.map((link, j) => (
+                <Typography
+                  key={j}
+                  component={Link}
+                  to={link.to}
+                  sx={{
+                    display: 'block',
+                    color: linkColor,
+                    fontSize: '0.85rem',
+                    py: 0.6,
+                    textDecoration: 'none',
+                    '&:hover': { color: '#D4AF37' },
+                  }}
+                >
+                  {link.text}
+                </Typography>
+              ))}
+            </Grid>
+          ))}
         </Grid>
-      </Grid>
 
-      <Divider />
+        <Divider sx={{ borderColor: dividerColor, my: 4 }} />
 
-      <Box
-        py="40px"
-        flexWrap="wrap"
-        display="flex"
-        justifyContent="space-between"
-      >
-        <Stack direction="row" gap={1} alignItems="center">
-          <img src={LogoIcon} width={20} height={20} alt="logo" />
-          <Typography variant="body1" fontSize="15px">
-            All rights reserved by Orthodox Metrics.{' '}
+        <Box display="flex" flexWrap="wrap" justifyContent="space-between" alignItems="center">
+          <Typography variant="caption" sx={{ color: mutedColor }}>
+            &copy; {new Date().getFullYear()} OrthodoxMetrics. All rights reserved.
           </Typography>
-        </Stack>
-        <Typography variant="body1" fontSize="15px">
-          Powered by{' '}
-          <Typography component={Link} color="primary.main" to="/">
-            Orthodox Metrics
+          <Typography variant="caption" sx={{ color: mutedColor }}>
+            Made with &hearts; for the Orthodox community
           </Typography>
-          .
-        </Typography>
-      </Box>
-    </Container>
-  </>);
+        </Box>
+      </Container>
+    </Box>
+  );
 };
 
 export default Footer;

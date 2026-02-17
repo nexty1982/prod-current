@@ -8,16 +8,17 @@ import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
   Add as AddIcon,
-  CalendarMonth as DailyIcon,
+  SmartToy as AgentIcon,
   Check as CheckIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
   Email as EmailIcon,
   ExpandMore as ExpandMoreIcon,
-  FilterList as FilterIcon,
   History as HistoryIcon,
+  OpenInNew as OpenInNewIcon,
   Refresh as RefreshIcon,
   Search as SearchIcon,
+  Sync as SyncIcon
 } from '@mui/icons-material';
 import {
   Alert,
@@ -52,7 +53,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 // ─── Types ──────────────────────────────────────────────────────────
@@ -73,6 +74,21 @@ interface DailyItem {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  source?: string;
+  metadata?: any;
+  github_issue_number?: number | null;
+  github_synced_at?: string | null;
+  agent_tool?: string | null;
+  branch_type?: string | null;
+  github_branch?: string | null;
+  conversation_ref?: string | null;
+}
+
+interface GitHubSyncStatus {
+  unsyncedCount: number;
+  lastSync: string | null;
+  repoUrl: string;
+  issuesUrl: string;
 }
 
 interface DashboardData {
@@ -107,8 +123,14 @@ interface ChangelogEntry {
 
 // ─── Constants ──────────────────────────────────────────────────────
 
-const HORIZONS = ['7', '14', '30', '60', '90'];
-const HORIZON_LABELS: Record<string, string> = { '7': '7 Day', '14': '14 Day', '30': '30 Day', '60': '60 Day', '90': '90 Day' };
+const HORIZONS = ['1', '2', '7', '14', '30', '60', '90'];
+const HORIZON_LABELS: Record<string, string> = { '1': '24 Hour', '2': '48 Hour', '7': '7 Day', '14': '14 Day', '30': '30 Day', '60': '60 Day', '90': '90 Day' };
+const AGENT_TOOLS = ['windsurf', 'claude_cli', 'cursor'] as const;
+const AGENT_TOOL_LABELS: Record<string, string> = { windsurf: 'Windsurf', claude_cli: 'Claude CLI', cursor: 'Cursor' };
+const AGENT_TOOL_COLORS: Record<string, string> = { windsurf: '#00b4d8', claude_cli: '#d4a574', cursor: '#7c3aed' };
+const BRANCH_TYPES = ['bugfix', 'new_feature', 'existing_feature', 'patch'] as const;
+const BRANCH_TYPE_LABELS: Record<string, string> = { bugfix: 'Bug Fix', new_feature: 'New Feature', existing_feature: 'Existing Feature', patch: 'Patch' };
+const BRANCH_TYPE_COLORS: Record<string, string> = { bugfix: '#d73a4a', new_feature: '#0e8a16', existing_feature: '#1d76db', patch: '#fbca04' };
 const STATUSES = ['backlog', 'todo', 'in_progress', 'review', 'done', 'cancelled'];
 const STATUS_LABELS: Record<string, string> = { backlog: 'Backlog', todo: 'To Do', in_progress: 'In Progress', review: 'Review', done: 'Done', cancelled: 'Cancelled' };
 const STATUS_COLORS: Record<string, string> = { backlog: '#9e9e9e', todo: '#2196f3', in_progress: '#ff9800', review: '#9c27b0', done: '#4caf50', cancelled: '#f44336' };
@@ -145,7 +167,7 @@ const OMDailyPage: React.FC = () => {
   // Dialog
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<DailyItem | null>(null);
-  const [form, setForm] = useState({ title: '', description: '', horizon: '7', status: 'todo', priority: 'medium', category: '', due_date: '' });
+  const [form, setForm] = useState({ title: '', description: '', horizon: '7', status: 'todo', priority: 'medium', category: '', due_date: '', agent_tool: '', branch_type: '' });
 
   // Toast
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
@@ -157,6 +179,12 @@ const OMDailyPage: React.FC = () => {
   const [changelogLoading, setChangelogLoading] = useState(false);
   const [selectedChangelogDate, setSelectedChangelogDate] = useState(new Date().toISOString().split('T')[0]);
   const [expandedCommit, setExpandedCommit] = useState<string | null>(null);
+
+  // GitHub sync state
+  const [ghStatus, setGhStatus] = useState<GitHubSyncStatus | null>(null);
+  const [ghSyncing, setGhSyncing] = useState(false);
+  const [ghSyncProgress, setGhSyncProgress] = useState<{ phase: string; current: number; total: number; summary: any; error: string | null } | null>(null);
+  const syncPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const BCrumb = [
     { to: '/', title: 'Home' },
@@ -253,10 +281,69 @@ const OMDailyPage: React.FC = () => {
     } catch { showToast('Failed to send email', 'error'); }
   }, []);
 
+  // GitHub sync API calls
+  const fetchGhStatus = useCallback(async () => {
+    try {
+      const resp = await fetch('/api/om-daily/github/status', { credentials: 'include' });
+      if (resp.ok) setGhStatus(await resp.json());
+    } catch {}
+  }, []);
+
+  const stopSyncPolling = useCallback(() => {
+    if (syncPollRef.current) {
+      clearInterval(syncPollRef.current);
+      syncPollRef.current = null;
+    }
+  }, []);
+
+  const pollSyncProgress = useCallback(() => {
+    stopSyncPolling();
+    syncPollRef.current = setInterval(async () => {
+      try {
+        const resp = await fetch('/api/om-daily/github/sync/progress', { credentials: 'include' });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        setGhSyncProgress({ phase: data.phase, current: data.current, total: data.total, summary: data.summary, error: data.error });
+        if (!data.running) {
+          stopSyncPolling();
+          setGhSyncing(false);
+          if (data.error) {
+            showToast(`Sync error: ${data.error}`, 'error');
+          } else {
+            showToast(`Sync complete: ${data.summary.created} created, ${data.summary.updated} updated, ${data.summary.pulled} pulled`);
+          }
+          fetchGhStatus();
+          fetchItems(activeTab === 0 ? undefined : HORIZONS[activeTab - 1]);
+          fetchDashboard();
+        }
+      } catch { /* ignore poll errors */ }
+    }, 2000);
+  }, [activeTab, stopSyncPolling]);
+
+  const triggerGhSync = useCallback(async () => {
+    setGhSyncing(true);
+    setGhSyncProgress(null);
+    try {
+      const resp = await fetch('/api/om-daily/github/sync', { method: 'POST', credentials: 'include' });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.already_running) {
+          showToast('Sync already in progress');
+        } else {
+          showToast('GitHub sync started...');
+        }
+        pollSyncProgress();
+      } else { showToast('Failed to start sync', 'error'); setGhSyncing(false); }
+    } catch { showToast('Failed to start sync', 'error'); setGhSyncing(false); }
+  }, [pollSyncProgress]);
+
+  // Cleanup polling on unmount
+  useEffect(() => () => stopSyncPolling(), [stopSyncPolling]);
+
   // Initial load
   useEffect(() => {
     setLoading(true);
-    Promise.all([fetchDashboard(), fetchCategories()]).finally(() => setLoading(false));
+    Promise.all([fetchDashboard(), fetchCategories(), fetchGhStatus()]).finally(() => setLoading(false));
   }, []);
 
   // Fetch items when tab or filters change
@@ -330,7 +417,7 @@ const OMDailyPage: React.FC = () => {
   const openNewDialog = () => {
     const defaultHorizon = activeTab === 0 ? '7' : HORIZONS[activeTab - 1];
     setEditingItem(null);
-    setForm({ title: '', description: '', horizon: defaultHorizon, status: 'todo', priority: 'medium', category: '', due_date: '' });
+    setForm({ title: '', description: '', horizon: defaultHorizon, status: 'todo', priority: 'medium', category: '', due_date: '', agent_tool: '', branch_type: '' });
     setDialogOpen(true);
   };
 
@@ -344,6 +431,8 @@ const OMDailyPage: React.FC = () => {
       priority: item.priority,
       category: item.category || '',
       due_date: item.due_date ? item.due_date.split('T')[0] : '',
+      agent_tool: item.agent_tool || '',
+      branch_type: item.branch_type || '',
     });
     setDialogOpen(true);
   };
@@ -359,6 +448,16 @@ const OMDailyPage: React.FC = () => {
     <Chip size="small" label={priority}
       sx={{ bgcolor: alpha(PRIORITY_COLORS[priority] || '#999', 0.15), color: PRIORITY_COLORS[priority] || '#999', fontWeight: 600, fontSize: '0.68rem', height: 20, textTransform: 'capitalize' }} />
   );
+
+  const renderAgentChip = (agentTool: string) => {
+    const color = AGENT_TOOL_COLORS[agentTool] || '#666';
+    return (
+      <Tooltip title={`Agent: ${AGENT_TOOL_LABELS[agentTool] || agentTool}`}>
+        <Chip size="small" icon={<AgentIcon sx={{ fontSize: 13 }} />} label={AGENT_TOOL_LABELS[agentTool] || agentTool}
+          sx={{ bgcolor: alpha(color, 0.12), color, fontWeight: 600, fontSize: '0.65rem', height: 20, '& .MuiChip-icon': { color } }} />
+      </Tooltip>
+    );
+  };
 
   // ─── Overview Tab ────────────────────────────────────────────────
 
@@ -383,6 +482,49 @@ const OMDailyPage: React.FC = () => {
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h3" color="success.main">{dashboard.recentlyCompleted}</Typography>
             <Typography variant="body2" color="text.secondary">Completed (7d)</Typography>
+          </Paper>
+          <Paper sx={{ p: 2, textAlign: 'center' }}>
+            <Typography variant="h3" sx={{ color: '#8c249d' }}>{ghStatus?.unsyncedCount ?? '—'}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>Unsynced Issues</Typography>
+            <Button
+              size="small" variant="outlined" startIcon={ghSyncing ? <CircularProgress size={14} /> : <SyncIcon />}
+              onClick={triggerGhSync} disabled={ghSyncing}
+              sx={{ fontSize: '0.7rem', py: 0.25 }}
+            >
+              {ghSyncing ? 'Syncing...' : 'Sync Now'}
+            </Button>
+            {ghSyncing && ghSyncProgress && (
+              <Box sx={{ mt: 1, width: '100%' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.3 }}>
+                  {ghSyncProgress.phase === 'creating' ? 'Creating issues' : ghSyncProgress.phase === 'updating' ? 'Updating issues' : ghSyncProgress.phase === 'pulling' ? 'Pulling from GitHub' : 'Working'}
+                  {ghSyncProgress.total > 0 ? ` (${ghSyncProgress.current}/${ghSyncProgress.total})` : '...'}
+                </Typography>
+                <LinearProgress
+                  variant={ghSyncProgress.total > 0 ? 'determinate' : 'indeterminate'}
+                  value={ghSyncProgress.total > 0 ? Math.round((ghSyncProgress.current / ghSyncProgress.total) * 100) : 0}
+                  sx={{ height: 4, borderRadius: 2 }}
+                />
+                {(ghSyncProgress.summary.created > 0 || ghSyncProgress.summary.errors > 0) && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.3, fontSize: '0.6rem' }}>
+                    {ghSyncProgress.summary.created > 0 && `${ghSyncProgress.summary.created} created `}
+                    {ghSyncProgress.summary.updated > 0 && `${ghSyncProgress.summary.updated} updated `}
+                    {ghSyncProgress.summary.errors > 0 && `${ghSyncProgress.summary.errors} errors`}
+                  </Typography>
+                )}
+              </Box>
+            )}
+            {!ghSyncing && ghStatus?.lastSync && (
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                Last: {formatDate(ghStatus.lastSync)}
+              </Typography>
+            )}
+            {ghStatus?.issuesUrl && (
+              <Typography variant="caption" sx={{ display: 'block', mt: 0.3 }}>
+                <a href={ghStatus.issuesUrl} target="_blank" rel="noreferrer" style={{ color: '#8c249d', textDecoration: 'none' }}>
+                  GitHub Issues <OpenInNewIcon sx={{ fontSize: 10, verticalAlign: 'middle' }} />
+                </a>
+              </Typography>
+            )}
           </Paper>
         </Box>
 
@@ -503,6 +645,42 @@ const OMDailyPage: React.FC = () => {
 
                 {/* Meta chips */}
                 <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
+                  {item.agent_tool && renderAgentChip(item.agent_tool)}
+                  {item.branch_type && (
+                    <Tooltip title={`Branch Type: ${BRANCH_TYPE_LABELS[item.branch_type] || item.branch_type}`}>
+                      <Chip size="small" label={BRANCH_TYPE_LABELS[item.branch_type] || item.branch_type}
+                        sx={{ fontSize: '0.6rem', height: 18, bgcolor: alpha(BRANCH_TYPE_COLORS[item.branch_type] || '#666', 0.12), color: BRANCH_TYPE_COLORS[item.branch_type] || '#666', fontWeight: 600 }} />
+                    </Tooltip>
+                  )}
+                  {item.github_branch && (
+                    <Tooltip title={`Branch: ${item.github_branch}`}>
+                      <Chip size="small" label={item.github_branch} variant="outlined"
+                        sx={{ fontSize: '0.58rem', height: 18, fontFamily: 'monospace', maxWidth: 180, borderColor: alpha('#24292e', 0.3), color: '#24292e' }} />
+                    </Tooltip>
+                  )}
+                  {item.conversation_ref && (
+                    <Tooltip title={`Linked: ${item.conversation_ref}`}>
+                      <Chip size="small" label="Conv" variant="outlined"
+                        sx={{ fontSize: '0.6rem', height: 18, borderColor: alpha('#8c249d', 0.4), color: '#8c249d' }} />
+                    </Tooltip>
+                  )}
+                  {!item.agent_tool && item.source === 'agent' && (() => {
+                    const meta = typeof item.metadata === 'string' ? (() => { try { return JSON.parse(item.metadata); } catch { return {}; } })() : (item.metadata || {});
+                    return (
+                      <Tooltip title={`Agent: ${meta.agent || 'unknown'}`}>
+                        <Chip size="small" icon={<AgentIcon sx={{ fontSize: 14 }} />} label={meta.agent || 'agent'}
+                          sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#9c27b0', 0.1), color: '#9c27b0' }} />
+                      </Tooltip>
+                    );
+                  })()}
+                  {item.github_issue_number && (
+                    <Tooltip title={`GitHub Issue #${item.github_issue_number}`}>
+                      <Chip size="small" label={`#${item.github_issue_number}`} component="a"
+                        href={`https://github.com/nexty1982/prod-current/issues/${item.github_issue_number}`}
+                        target="_blank" rel="noreferrer" clickable
+                        sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#24292e', 0.08), color: '#24292e', textDecoration: 'none' }} />
+                    </Tooltip>
+                  )}
                   {activeTab === 0 && (
                     <Chip size="small" label={HORIZON_LABELS[item.horizon]} sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#00897b', 0.1), color: '#00897b' }} />
                   )}
@@ -754,7 +932,44 @@ const OMDailyPage: React.FC = () => {
               </FormControl>
               <TextField label="Category" size="small" fullWidth value={form.category} onChange={(e) => setForm(prev => ({ ...prev, category: e.target.value }))} placeholder="e.g. Frontend, Backend" />
             </Stack>
-            <TextField label="Due Date" type="date" size="small" fullWidth value={form.due_date} onChange={(e) => setForm(prev => ({ ...prev, due_date: e.target.value }))} InputLabelProps={{ shrink: true }} />
+            <Stack direction="row" spacing={1}>
+              <TextField label="Due Date" type="date" size="small" fullWidth value={form.due_date} onChange={(e) => setForm(prev => ({ ...prev, due_date: e.target.value }))} InputLabelProps={{ shrink: true }} />
+              <FormControl size="small" fullWidth>
+                <InputLabel>Agent Tool</InputLabel>
+                <Select value={form.agent_tool} label="Agent Tool" onChange={(e) => setForm(prev => ({ ...prev, agent_tool: e.target.value }))}>
+                  <MenuItem value="">None</MenuItem>
+                  {AGENT_TOOLS.map(a => (
+                    <MenuItem key={a} value={a}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: AGENT_TOOL_COLORS[a] }} />
+                        {AGENT_TOOL_LABELS[a]}
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Stack>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Branch Type</InputLabel>
+              <Select value={form.branch_type} label="Branch Type" onChange={(e) => setForm(prev => ({ ...prev, branch_type: e.target.value }))}>
+                <MenuItem value="">None</MenuItem>
+                {BRANCH_TYPES.map(b => (
+                  <MenuItem key={b} value={b}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: BRANCH_TYPE_COLORS[b] }} />
+                      {BRANCH_TYPE_LABELS[b]}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {form.agent_tool && form.branch_type && (
+              <Alert severity="info" sx={{ fontSize: '0.75rem', py: 0.5 }}>
+                A GitHub issue and branch will be auto-created when saved. Branch: <strong>{
+                  ({ bugfix: 'BF', new_feature: 'NF', existing_feature: 'EF', patch: 'PA' } as Record<string, string>)[form.branch_type]
+                }_{(AGENT_TOOL_LABELS[form.agent_tool] || form.agent_tool).toLowerCase().replace(' ', '-')}_{new Date().toISOString().split('T')[0]}</strong>
+              </Alert>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>

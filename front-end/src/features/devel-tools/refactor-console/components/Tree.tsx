@@ -17,7 +17,7 @@ import {
     Shield,
     ShieldOff,
     XCircle
-} from 'lucide-react';
+} from '@/ui/icons';
 import React, { memo, useEffect, useState } from 'react';
 
 // Browser-compatible path utilities

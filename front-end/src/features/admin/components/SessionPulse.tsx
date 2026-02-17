@@ -13,7 +13,7 @@ import {
   alpha
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { Activity, Users, RefreshCw, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Activity, Users, RefreshCw, CheckCircle, AlertTriangle } from '@/ui/icons';
 
 interface SessionStats {
   totalSessions: number;

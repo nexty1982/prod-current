@@ -28,7 +28,7 @@ import {
   RefreshCw, 
   Settings,
   ChevronRight
-} from 'lucide-react';
+} from '@/ui/icons';
 
 const ButtonShowcase: React.FC = () => {
   const theme = useTheme();

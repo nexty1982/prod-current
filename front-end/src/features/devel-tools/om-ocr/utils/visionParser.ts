@@ -252,18 +252,20 @@ function parseBlock(block: VisionBlock, blockIndex: number, pageIndex: number = 
  * Parse full Vision response into lines with bboxes and stable IDs
  */
 export function parseVisionResponse(vision: VisionResponse | null): (FusionLine & { id: string })[] {
-  if (!vision?.fullTextAnnotation?.pages) {
+  // Support both standard fullTextAnnotation structure and alternative root-level pages
+  const pages = vision?.fullTextAnnotation?.pages || (vision as any)?.pages;
+  if (!pages) {
     return [];
   }
-  
+
   const lines: (FusionLine & { id: string })[] = [];
-  
-  vision.fullTextAnnotation.pages.forEach((page, pageIndex) => {
-    (page.blocks || []).forEach((block, blockIndex) => {
+
+  pages.forEach((page: any, pageIndex: number) => {
+    (page.blocks || []).forEach((block: any, blockIndex: number) => {
       lines.push(...parseBlock(block, blockIndex, pageIndex));
     });
   });
-  
+
   return lines;
 }
 
@@ -271,15 +273,25 @@ export function parseVisionResponse(vision: VisionResponse | null): (FusionLine 
  * Get page dimensions from Vision response
  */
 export function getVisionPageSize(vision: VisionResponse | null): { width: number; height: number } {
-  if (!vision?.fullTextAnnotation?.pages?.[0]) {
-    return { width: 0, height: 0 };
+  // Check standard fullTextAnnotation structure
+  if (vision?.fullTextAnnotation?.pages?.[0]) {
+    const page = vision.fullTextAnnotation.pages[0];
+    return {
+      width: page.width || 0,
+      height: page.height || 0,
+    };
   }
-  
-  const page = vision.fullTextAnnotation.pages[0];
-  return {
-    width: page.width || 0,
-    height: page.height || 0,
-  };
+
+  // Check alternative structure where pages are at root level (feeder pipeline)
+  const alt = vision as any;
+  if (alt?.pages?.[0]?.width) {
+    return {
+      width: alt.pages[0].width || 0,
+      height: alt.pages[0].height || 0,
+    };
+  }
+
+  return { width: 0, height: 0 };
 }
 
 // ============================================================================

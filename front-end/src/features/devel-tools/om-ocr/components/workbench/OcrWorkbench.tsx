@@ -3,10 +3,15 @@
  * Two-phase UI: (1) Jobs List, (2) Workbench for selected job
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   Box,
   Paper,
+  Tab,
+  Tabs,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
   Typography,
   Divider,
   alpha,
@@ -14,18 +19,29 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
+import {
+  IconHighlight,
+  IconHandClick,
+  IconMarquee2,
+} from '@tabler/icons-react';
 import { useOcrJobs } from '../../hooks/useOcrJobs';
 import { useWorkbench } from '../../context/WorkbenchContext';
 import WorkbenchHeader from './WorkbenchHeader';
-import WorkbenchStepper from './WorkbenchStepper';
+
 import WorkbenchViewer from './WorkbenchViewer';
 import UnifiedJobsList from './UnifiedJobsList';
 import TranscriptionPanel from '../TranscriptionPanel';
+import FieldMappingPanel from '../FieldMappingPanel';
+import LayoutLearningWizard from '../LayoutLearningWizard';
+import RecordReviewWizard from '../RecordReviewWizard';
 import { extractTextFromVisionResponse } from '../../utils/displayNormalizer';
 import { detectMetadata } from '../../utils/recordTypeDetector';
 import { useServerNormalization } from '../../utils/useServerNormalization';
+import { apiClient } from '@/shared/lib/axiosInstance';
 import type { JobDetail } from '../../types/inspection';
-import type { VisionResponse } from '../../types/fusion';
+import type { BBox, VisionResponse } from '../../types/fusion';
+import type { OverlayBox } from '../FusionOverlay';
+import { computeFieldSuggestions, getCellsForRecord, FIELD_ENTITY_MAP, type SuggestionResult } from '../../utils/fieldSuggestions';
 
 interface OcrWorkbenchProps {
   churchId: number;
@@ -64,9 +80,65 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
   
   // Track selected job ID locally (workbench state will be updated when job data loads)
   const [selectedJobId, setSelectedJobId] = useState<number | null>(initialJobId || null);
-  
+
+  // Right panel tab state
+  const [rightTab, setRightTab] = useState(0);
+
+  // Feeder artifact state for download/rerun buttons
+  const [feederPageId, setFeederPageId] = useState<number | null>(null);
+  const [feederArtifactId, setFeederArtifactId] = useState<number | null>(null);
+  const [rerunning, setRerunning] = useState(false);
+
+  // Job detail data for FieldMappingPanel
+  const [tableExtraction, setTableExtraction] = useState<any>(null);
+  const [tableExtractionJson, setTableExtractionJson] = useState<any>(null);
+  const [recordCandidates, setRecordCandidates] = useState<any>(null);
+  const [jobOcrResult, setJobOcrResult] = useState<any>(null);
+  const [jobIsFinalized, setJobIsFinalized] = useState(false);
+  const [jobFinalizedMeta, setJobFinalizedMeta] = useState<{ finalizedAt: string; createdRecordId: number } | null>(null);
+
+  // Record highlighting & interaction state
+  const [selectedRecordIndex, setSelectedRecordIndex] = useState<number | null>(null);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState<'highlight' | 'click-select' | 'drag-select'>('highlight');
+  const [externalFieldUpdate, setExternalFieldUpdate] = useState<{
+    fieldKey: string;
+    text: string;
+    mode: 'append' | 'replace';
+  } | null>(null);
+
+  // Auto-extract state
+  const [autoExtracting, setAutoExtracting] = useState(false);
+
+  // Field suggestions state (intelligent entity detection)
+  const [fieldSuggestions, setFieldSuggestions] = useState<SuggestionResult | null>(null);
+
+  // Layout wizard state
+  const [showLayoutWizard, setShowLayoutWizard] = useState(false);
+
+  const handleOpenLayoutWizard = useCallback(() => {
+    setShowLayoutWizard(true);
+  }, []);
+
+  const handleTemplateApplied = useCallback((templateId: number, newCandidates: any) => {
+    setRecordCandidates(newCandidates);
+    setShowLayoutWizard(false);
+    setRightTab(1); // Switch to Field Mapping tab
+  }, []);
+
+  const handleReviewComplete = useCallback((updatedCandidates: any, updatedTableExtraction: any, templateId?: number) => {
+    setRecordCandidates(updatedCandidates);
+    if (updatedTableExtraction) {
+      setTableExtractionJson(updatedTableExtraction);
+    }
+    setShowLayoutWizard(false);
+    setRightTab(1); // Switch to Field Mapping tab
+    showToast(`Review complete: ${updatedCandidates?.candidates?.length || 0} records confirmed`, 'success');
+  }, [showToast]);
+
   // Fetch jobs list
-  const { jobs, loading, error, refresh, fetchJobDetail, deleteJobs } = useOcrJobs({ churchId });
+  const { jobs, loading, error, refresh, fetchJobDetail, deleteJobs, retryJob, hideJobs, detailCache } = useOcrJobs({ churchId });
+  const detailCacheRef = useRef(detailCache);
   
   // Auto-refresh jobs list periodically to catch new uploads
   useEffect(() => {
@@ -89,6 +161,265 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
     return jobs.find(j => j.id === selectedJobId) || null;
   }, [jobs, selectedJobId]);
   
+  // Handle record bbox adjustment (drag-resize) — calls reextract-row endpoint
+  const handleRecordBboxAdjusted = useCallback(
+    async (idx: number, newVisionBbox: BBox) => {
+      if (!tableExtractionJson?.page_dimensions || !selectedJobId || !churchId) return;
+      const pageDims = tableExtractionJson.page_dimensions;
+
+      // Convert Vision-pixel bbox back to fractional coords
+      const fractionalBbox = {
+        x_min: newVisionBbox.x / pageDims.width,
+        y_min: newVisionBbox.y / pageDims.height,
+        x_max: (newVisionBbox.x + newVisionBbox.w) / pageDims.width,
+        y_max: (newVisionBbox.y + newVisionBbox.h) / pageDims.height,
+      };
+
+      try {
+        const res: any = await apiClient.post(
+          `/api/church/${churchId}/ocr/jobs/${selectedJobId}/reextract-row`,
+          { recordIndex: idx, bbox: fractionalBbox }
+        );
+        const data = res?.data ?? res;
+        if (data?.success && data.fields) {
+          // Update the candidate's fields in recordCandidates
+          setRecordCandidates((prev: any) => {
+            if (!prev?.candidates?.[idx]) return prev;
+            const updated = { ...prev, candidates: [...prev.candidates] };
+            updated.candidates[idx] = {
+              ...updated.candidates[idx],
+              fields: { ...updated.candidates[idx].fields, ...data.fields },
+            };
+            return updated;
+          });
+          showToast(`Record ${idx + 1} area updated (${data.tokenCount} tokens)`, 'success');
+        }
+      } catch (err: any) {
+        console.error('[OcrWorkbench] Reextract-row failed:', err);
+        showToast('Failed to re-extract record area', 'error');
+      }
+    },
+    [tableExtractionJson, selectedJobId, churchId, showToast],
+  );
+
+  // Convert fractional bbox [x_min, y_min, x_max, y_max] to Vision pixel BBox
+  const cellBboxToVision = useCallback(
+    (fractionalBbox: number[], pageDims: { width: number; height: number }): BBox => {
+      const [x_min, y_min, x_max, y_max] = fractionalBbox;
+      return {
+        x: x_min * pageDims.width,
+        y: y_min * pageDims.height,
+        w: (x_max - x_min) * pageDims.width,
+        h: (y_max - y_min) * pageDims.height,
+      };
+    },
+    [],
+  );
+
+  // Compute record highlight boxes from table extraction + selected record
+  const recordHighlightBoxes: OverlayBox[] = useMemo(() => {
+    if (!tableExtractionJson || !recordCandidates?.candidates?.length) return [];
+
+    const pageDims = tableExtractionJson.page_dimensions;
+    if (!pageDims?.width || !pageDims?.height) return [];
+
+    const tables = tableExtractionJson.tables;
+    if (!tables || tables.length === 0) return [];
+
+    // Get columnMapping to reverse-map focusedField -> column_index
+    const columnMapping = recordCandidates.columnMapping || {};
+    // Reverse: fieldKey -> columnKey(s)
+    const fieldToColumns: Record<string, string[]> = {};
+    for (const [colKey, fieldKey] of Object.entries(columnMapping)) {
+      if (!fieldToColumns[fieldKey as string]) fieldToColumns[fieldKey as string] = [];
+      fieldToColumns[fieldKey as string].push(colKey);
+    }
+
+    const HUES = [210, 30, 120, 280, 60, 330, 180, 0];
+    const boxes: OverlayBox[] = [];
+
+    recordCandidates.candidates.forEach((candidate: any, idx: number) => {
+      const rowIndex = candidate.sourceRowIndex;
+      if (rowIndex < 0) return;
+
+      const isSelected = idx === selectedRecordIndex;
+      const hue = HUES[idx % HUES.length];
+
+      // Collect all cells at this row_index across all tables
+      let unionXMin = Infinity, unionYMin = Infinity, unionXMax = -Infinity, unionYMax = -Infinity;
+      let hasBbox = false;
+
+      for (const table of tables) {
+        for (const row of table.rows || []) {
+          if (row.row_index !== rowIndex) continue;
+          for (const cell of row.cells || []) {
+            if (cell.bbox && cell.bbox.length === 4) {
+              hasBbox = true;
+              unionXMin = Math.min(unionXMin, cell.bbox[0]);
+              unionYMin = Math.min(unionYMin, cell.bbox[1]);
+              unionXMax = Math.max(unionXMax, cell.bbox[2]);
+              unionYMax = Math.max(unionYMax, cell.bbox[3]);
+            }
+          }
+        }
+      }
+
+      if (!hasBbox) return;
+
+      const unionBbox = cellBboxToVision([unionXMin, unionYMin, unionXMax, unionYMax], pageDims);
+      boxes.push({
+        bbox: unionBbox,
+        color: `hsl(${hue}, 70%, 50%)`,
+        label: `Record ${idx + 1}`,
+        selected: isSelected,
+        emphasized: false,
+        onClick: () => setSelectedRecordIndex(idx),
+        editable: isSelected,
+        onBboxChangeEnd: isSelected
+          ? (newBbox: BBox) => handleRecordBboxAdjusted(idx, newBbox)
+          : undefined,
+      });
+
+      // If this record is selected and a field is focused, add emphasized cell highlight
+      if (isSelected && focusedField && fieldToColumns[focusedField]) {
+        const targetColKeys = fieldToColumns[focusedField];
+        for (const table of tables) {
+          // Map column_key or column_index to find matching cells
+          const headerRow = table.rows?.find((r: any) => r.type === 'header');
+          const headerColKeys = headerRow?.cells?.map((c: any) => c.column_key || `col_${c.column_index}`) || [];
+
+          for (const row of table.rows || []) {
+            if (row.row_index !== rowIndex) continue;
+            for (const cell of row.cells || []) {
+              const cellColKey = cell.column_key || `col_${cell.column_index}`;
+              if (targetColKeys.includes(cellColKey) && cell.bbox?.length === 4) {
+                const cellBbox = cellBboxToVision(cell.bbox, pageDims);
+                boxes.push({
+                  bbox: cellBbox,
+                  color: `hsl(${hue}, 90%, 60%)`,
+                  label: focusedField,
+                  selected: true,
+                  emphasized: true,
+                });
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Add gold dashed suggestion highlight boxes
+    if (fieldSuggestions?.suggestions && tableExtractionJson?.page_dimensions) {
+      const pd = tableExtractionJson.page_dimensions;
+      const expectedType = focusedField ? FIELD_ENTITY_MAP[focusedField] : undefined;
+      for (const suggestion of fieldSuggestions.suggestions) {
+        if (!suggestion.bbox || suggestion.entityType === 'text') continue;
+        // Only show boxes for suggestions that match the expected entity type
+        if (expectedType && suggestion.entityType !== expectedType) continue;
+        if (suggestion.score < 0.4) continue;
+        const visionBbox = cellBboxToVision(suggestion.bbox, pd);
+        boxes.push({
+          bbox: visionBbox,
+          color: '#FFD700', // gold
+          label: suggestion.text.substring(0, 30),
+          selected: false,
+          emphasized: true,
+          dashed: true,
+          onClick: () => {
+            // Fill the focused field with this suggestion
+            if (focusedField) {
+              setExternalFieldUpdate({ fieldKey: focusedField, text: suggestion.text, mode: 'replace' });
+            }
+          },
+        });
+      }
+    }
+
+    return boxes;
+  }, [tableExtractionJson, recordCandidates, selectedRecordIndex, focusedField, cellBboxToVision, handleRecordBboxAdjusted, fieldSuggestions]);
+
+  // Check if bbox data is available for interactive modes
+  const hasBboxData = useMemo(() => {
+    if (!tableExtractionJson?.page_dimensions) return false;
+    const tables = tableExtractionJson.tables;
+    if (!tables?.length) return false;
+    return tables.some((t: any) => t.rows?.some((r: any) => r.cells?.some((c: any) => c.bbox?.length === 4)));
+  }, [tableExtractionJson]);
+
+  // Handle token select (click-select mode)
+  const handleTokenSelect = useCallback(
+    (text: string) => {
+      if (!focusedField || selectedRecordIndex === null) return;
+      setExternalFieldUpdate({ fieldKey: focusedField, text, mode: 'append' });
+    },
+    [focusedField, selectedRecordIndex],
+  );
+
+  // Handle drag select
+  const handleDragSelect = useCallback(
+    (text: string) => {
+      if (!focusedField || selectedRecordIndex === null) return;
+      setExternalFieldUpdate({ fieldKey: focusedField, text, mode: 'replace' });
+    },
+    [focusedField, selectedRecordIndex],
+  );
+
+  // Handle reject record (not a record)
+  const handleRejectRecord = useCallback(async (sourceRowIndex: number) => {
+    if (!selectedJobId || !churchId) return;
+    try {
+      const recordType = workbench.state.jobMetadata?.recordType || 'baptism';
+      const res: any = await apiClient.post(
+        `/api/church/${churchId}/ocr/jobs/${selectedJobId}/reject-row`,
+        { rowIndex: sourceRowIndex, recordType }
+      );
+      const data = res?.data ?? res;
+      if (data?.success) {
+        if (data.recordCandidates) setRecordCandidates(data.recordCandidates);
+        if (data.tableExtraction) setTableExtractionJson(data.tableExtraction);
+        setSelectedRecordIndex(0);
+        showToast(`Row rejected. Now showing ${data.recordCandidates?.candidates?.length || 0} records`, 'success');
+      }
+    } catch (err: any) {
+      console.error('[OcrWorkbench] Reject-row failed:', err);
+      showToast('Failed to reject record: ' + (err?.message || 'Unknown error'), 'error');
+    }
+  }, [selectedJobId, churchId, workbench.state.jobMetadata?.recordType, showToast]);
+
+  // Compute field suggestions when focused field or selected record changes
+  useEffect(() => {
+    if (!focusedField || selectedRecordIndex === null || !tableExtractionJson || !recordCandidates?.candidates) {
+      setFieldSuggestions(null);
+      return;
+    }
+
+    const candidate = recordCandidates.candidates[selectedRecordIndex];
+    if (!candidate) {
+      setFieldSuggestions(null);
+      return;
+    }
+
+    const recordType = workbench.state.jobMetadata?.recordType || 'baptism';
+    const columnMapping = recordCandidates.columnMapping || {};
+
+    // Get source row index(es) for this record
+    const sourceRowIndex = candidate.sourceRowIndex;
+    const cells = getCellsForRecord(tableExtractionJson, sourceRowIndex);
+
+    if (cells.length === 0) {
+      setFieldSuggestions(null);
+      return;
+    }
+
+    // Collect values already assigned to other fields (exclude the focused field)
+    const usedValues = Object.entries(candidate.fields || {})
+      .filter(([key, val]) => key !== focusedField && typeof val === 'string' && val.trim())
+      .map(([, val]) => val as string);
+
+    const result = computeFieldSuggestions(focusedField, recordType, cells, columnMapping, usedValues);
+    setFieldSuggestions(result);
+  }, [focusedField, selectedRecordIndex, tableExtractionJson, recordCandidates, workbench.state.jobMetadata?.recordType]);
+
   // Load job data into workbench when job is selected
   useEffect(() => {
     if (!selectedJobId || !churchId) {
@@ -107,6 +438,18 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
           return;
         }
         
+        // Store table extraction & finalized state for FieldMappingPanel
+        setTableExtraction(jobDetail.table_extraction || null);
+        const rawOcrResult = jobDetail.ocr_result_json || jobDetail.ocrResultJson || jobDetail.ocr_result || null;
+        let parsedRawResult: any = null;
+        try {
+          parsedRawResult = rawOcrResult && typeof rawOcrResult === 'string' ? JSON.parse(rawOcrResult) : rawOcrResult;
+        } catch { parsedRawResult = rawOcrResult; }
+        setJobOcrResult(parsedRawResult);
+        const finalized = parsedRawResult?.finalizedAt;
+        setJobIsFinalized(!!finalized);
+        setJobFinalizedMeta(finalized ? { finalizedAt: parsedRawResult.finalizedAt, createdRecordId: parsedRawResult.createdRecordId } : null);
+
         // Parse OCR result
         let ocrResult: VisionResponse | null = null;
         try {
@@ -128,13 +471,70 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
           ? `/api/church/${churchId}/ocr/jobs/${selectedJobId}/image`
           : null;
         
-        // Extract OCR text - prefer stored text, fallback to extracting from Vision response
-        // Use structured extraction for better formatting
-        let ocrTextForDetection = jobDetail.ocr_text || jobDetail.ocrText || null;
+        // Extract OCR text - prefer feeder page data, then stored text, then Vision response
+        let ocrTextForDetection: string | null = null;
+
+        // Check for feeder pages (source of truth)
+        if (jobDetail.pages && jobDetail.pages.length > 0) {
+          const firstPage = jobDetail.pages[0];
+          if (firstPage.rawText) {
+            ocrTextForDetection = firstPage.rawText;
+          }
+          setFeederPageId(firstPage.pageId);
+          setFeederArtifactId(firstPage.rawTextArtifactId);
+          // Extract record candidates for multi-record field mapping
+          if (firstPage.recordCandidates) {
+            setRecordCandidates(firstPage.recordCandidates);
+          } else {
+            setRecordCandidates(null);
+          }
+          // Extract table extraction JSON (contains cell bboxes for highlighting)
+          if (firstPage.tableExtractionJson) {
+            setTableExtractionJson(
+              typeof firstPage.tableExtractionJson === 'string'
+                ? JSON.parse(firstPage.tableExtractionJson)
+                : firstPage.tableExtractionJson,
+            );
+          } else {
+            setTableExtractionJson(null);
+          }
+        } else {
+          setFeederPageId(null);
+          setFeederArtifactId(null);
+          setRecordCandidates(null);
+        }
+
+        // Auto-extract: if no recordCandidates but we have Vision data, trigger auto-extraction
+        const hasVisionData = ocrResult || (jobDetail as any).ocr_text || (jobDetail as any).ocrText || ocrTextForDetection;
+        if (!recordCandidates && hasVisionData) {
+          setAutoExtracting(true);
+          try {
+            const autoRes: any = await apiClient.post(
+              `/api/church/${churchId}/ocr/jobs/${selectedJobId}/auto-extract`
+            );
+            const autoData = autoRes?.data ?? autoRes;
+            if (autoData?.success && autoData.recordCandidates?.candidates?.length > 0) {
+              setRecordCandidates(autoData.recordCandidates);
+              if (autoData.tableExtraction) {
+                setTableExtractionJson(autoData.tableExtraction);
+              }
+              console.log(`[OcrWorkbench] Auto-extracted ${autoData.recordCandidates.candidates.length} records (cached=${autoData.cached})`);
+            }
+          } catch (autoErr) {
+            console.warn('[OcrWorkbench] Auto-extract failed, falling back to manual layout:', autoErr);
+          } finally {
+            setAutoExtracting(false);
+          }
+        }
+
+        // Fall back to stored text or Vision response
+        if (!ocrTextForDetection) {
+          ocrTextForDetection = (jobDetail as any).ocr_text || (jobDetail as any).ocrText || null;
+        }
         if (!ocrTextForDetection && ocrResult) {
           ocrTextForDetection = extractTextFromVisionResponse(ocrResult);
         }
-        let detectedRecordType = jobDetail.record_type || jobDetail.recordType || 'baptism';
+        let detectedRecordType = jobDetail.record_type || jobDetail.recordType || 'unknown';
         
         if (ocrTextForDetection) {
           try {
@@ -207,8 +607,55 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
   const handleCloseWorkbench = useCallback(() => {
     setSelectedJobId(null);
     workbench.reset();
-    setNormalizedText(null); // Clear normalized text when closing
+    setNormalizedText(null);
+    setFeederPageId(null);
+    setFeederArtifactId(null);
+    setRightTab(0);
+    setTableExtraction(null);
+    setTableExtractionJson(null);
+    setRecordCandidates(null);
+    setJobOcrResult(null);
+    setJobIsFinalized(false);
+    setJobFinalizedMeta(null);
+    setSelectedRecordIndex(null);
+    setFocusedField(null);
+    setEditMode('highlight');
+    setExternalFieldUpdate(null);
+    setFieldSuggestions(null);
   }, [workbench]);
+
+  // Handle artifact download
+  const handleDownloadArtifact = useCallback(() => {
+    if (feederArtifactId && churchId) {
+      window.open(`/api/church/${churchId}/ocr/feeder/artifacts/${feederArtifactId}/download`, '_blank');
+    }
+  }, [feederArtifactId, churchId]);
+
+  // Handle re-run OCR
+  const handleRerunOcr = useCallback(async () => {
+    if (!feederPageId || !churchId) return;
+    setRerunning(true);
+    try {
+      const response = await apiClient.post(`/api/church/${churchId}/ocr/feeder/pages/${feederPageId}/rerun`);
+      const data = (response as any)?.data ?? response;
+      showToast(`OCR re-run complete (confidence: ${((data.confidence || 0) * 100).toFixed(1)}%)`, 'success');
+      // Clear detail cache and reload
+      if (selectedJobId) {
+        // Force re-fetch by clearing cache
+        const cache = detailCacheRef.current;
+        if (cache) cache.delete(selectedJobId);
+        // Re-trigger loadJobData by toggling selectedJobId
+        const jid = selectedJobId;
+        setSelectedJobId(null);
+        setTimeout(() => setSelectedJobId(jid), 50);
+      }
+    } catch (err: any) {
+      console.error('[OcrWorkbench] Re-run OCR failed:', err);
+      showToast('Re-run OCR failed: ' + (err.message || 'Unknown error'), 'error');
+    } finally {
+      setRerunning(false);
+    }
+  }, [feederPageId, churchId, selectedJobId, showToast]);
 
   // Expose normalized text globally for FusionTab access (when not using WorkbenchContext)
   useEffect(() => {
@@ -288,28 +735,140 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
             }}
             onClose={handleCloseWorkbench}
           />
-          <Box sx={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          <Box sx={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
             {/* Left: Image Viewer */}
             <Box sx={{ width: '50%', borderRight: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
-              <WorkbenchViewer />
-            </Box>
-            {/* Right: Transcription Panel (Phase 1 - transcription-first) */}
-            <Box sx={{ width: '50%', overflow: 'hidden', p: 2 }}>
-              <TranscriptionPanel
-                ocrText={
-                  workbench.state.ocrText || 
-                  (workbench.state.ocrResult ? extractTextFromVisionResponse(workbench.state.ocrResult) : null)
-                }
-                serverNormalizedText={normalizedText}
-                loading={!workbench.state.ocrResult && !workbench.state.ocrText}
-                normalizing={normalizing}
-                onCopy={() => showToast('Copied to clipboard', 'success')}
-                onDownload={() => showToast('Transcription downloaded', 'success')}
-                onNormalize={serverNormalizationEnabled ? handleNormalize : undefined}
+              <WorkbenchViewer
+                recordHighlightBoxes={recordHighlightBoxes}
+                interactionMode={editMode}
+                onTokenSelect={handleTokenSelect}
+                onDragSelect={handleDragSelect}
+                tablePageDims={tableExtractionJson?.page_dimensions || null}
               />
+            </Box>
+            {/* Mode Toggle - shown when Field Mapping tab is active and we have bbox data */}
+            {rightTab === 1 && hasBboxData && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: 16,
+                  left: '25%',
+                  transform: 'translateX(-50%)',
+                  zIndex: 20,
+                  bgcolor: 'background.paper',
+                  borderRadius: 2,
+                  boxShadow: 4,
+                  p: 0.5,
+                }}
+              >
+                <ToggleButtonGroup
+                  value={editMode}
+                  exclusive
+                  onChange={(_, val) => val && setEditMode(val)}
+                  size="small"
+                >
+                  <ToggleButton value="highlight">
+                    <Tooltip title="Highlight Only">
+                      <IconHighlight size={18} />
+                    </Tooltip>
+                  </ToggleButton>
+                  <ToggleButton value="click-select" disabled={!focusedField}>
+                    <Tooltip title="Click tokens to append to focused field">
+                      <IconHandClick size={18} />
+                    </Tooltip>
+                  </ToggleButton>
+                  <ToggleButton value="drag-select" disabled={!focusedField}>
+                    <Tooltip title="Draw rectangle to select tokens">
+                      <IconMarquee2 size={18} />
+                    </Tooltip>
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+            )}
+            {/* Right: Tabbed Panel (Transcription / Field Mapping) */}
+            <Box sx={{ width: '50%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              <Tabs
+                value={rightTab}
+                onChange={(_, v) => setRightTab(v)}
+                variant="fullWidth"
+                sx={{
+                  minHeight: 40,
+                  borderBottom: '1px solid',
+                  borderColor: 'divider',
+                  '& .MuiTab-root': { minHeight: 40, fontSize: '0.8rem', textTransform: 'none', fontWeight: 600 },
+                }}
+              >
+                <Tab label="Transcription" />
+                <Tab label="Field Mapping" />
+              </Tabs>
+              <Box sx={{ flex: 1, overflow: 'hidden', p: 2 }}>
+                {rightTab === 0 && (
+                  <TranscriptionPanel
+                    ocrText={
+                      workbench.state.ocrText ||
+                      (workbench.state.ocrResult ? extractTextFromVisionResponse(workbench.state.ocrResult) : null)
+                    }
+                    serverNormalizedText={normalizedText}
+                    loading={!workbench.state.ocrResult && !workbench.state.ocrText}
+                    normalizing={normalizing}
+                    onCopy={() => showToast('Copied to clipboard', 'success')}
+                    onDownload={() => showToast('Transcription downloaded', 'success')}
+                    onNormalize={serverNormalizationEnabled ? handleNormalize : undefined}
+                    onRerunOcr={feederPageId ? handleRerunOcr : undefined}
+                    rerunning={rerunning}
+                    onDownloadArtifact={feederArtifactId ? handleDownloadArtifact : undefined}
+                  />
+                )}
+                {rightTab === 1 && selectedJobId && (
+                  <FieldMappingPanel
+                    jobId={selectedJobId}
+                    churchId={churchId}
+                    ocrText={workbench.state.ocrText}
+                    ocrResult={jobOcrResult}
+                    tableExtraction={tableExtraction}
+                    recordCandidates={recordCandidates}
+                    initialRecordType={workbench.state.jobMetadata?.recordType || 'unknown'}
+                    isFinalized={jobIsFinalized}
+                    finalizedMeta={jobFinalizedMeta}
+                    selectedRecordIndex={selectedRecordIndex}
+                    onRecordSelect={setSelectedRecordIndex}
+                    focusedField={focusedField}
+                    onFieldFocus={setFocusedField}
+                    externalFieldUpdate={externalFieldUpdate}
+                    onExternalFieldUpdateHandled={() => setExternalFieldUpdate(null)}
+                    onOpenLayoutWizard={handleOpenLayoutWizard}
+                    autoExtracting={autoExtracting}
+                    fieldSuggestions={fieldSuggestions}
+                    onRejectRecord={handleRejectRecord}
+                    onFinalized={(result: any) => {
+                      if (result.created_count) {
+                        showToast(`${result.created_count} record(s) created`, 'success');
+                      } else {
+                        showToast(`Record #${result.recordId} created (${result.recordType})`, 'success');
+                      }
+                      setJobIsFinalized(true);
+                    }}
+                  />
+                )}
+              </Box>
             </Box>
           </Box>
           
+          {/* Record Review Wizard (guided step-by-step with learning) */}
+          {selectedJobId && (
+            <RecordReviewWizard
+              open={showLayoutWizard}
+              onClose={() => setShowLayoutWizard(false)}
+              jobId={selectedJobId}
+              churchId={churchId}
+              imageUrl={`/api/church/${churchId}/ocr/jobs/${selectedJobId}/image`}
+              recordType={workbench.state.jobMetadata?.recordType || 'baptism'}
+              initialRecordCandidates={recordCandidates}
+              initialTableExtraction={tableExtractionJson}
+              onReviewComplete={handleReviewComplete}
+            />
+          )}
+
           {/* Toast Notifications */}
           <Snackbar
             open={toast.open}
@@ -340,6 +899,8 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
             onJobSelect={handleJobSelect}
             onRefresh={refresh}
             onDeleteJobs={handleDeleteJobs}
+            onRetryJob={retryJob}
+            onHideJobs={hideJobs}
             churchId={churchId}
           />
         </Box>

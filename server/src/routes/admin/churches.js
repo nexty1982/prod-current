@@ -96,6 +96,20 @@ router.get('/:id/field-mapper', requireAuth, requireChurchAccess, async (req, re
       [databaseName, tableName]
     );
 
+    // Ensure settings table exists
+    await getAppPool().query(`
+      CREATE TABLE IF NOT EXISTS orthodoxmetrics_db.field_mapper_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        church_id INT NOT NULL,
+        table_name VARCHAR(255) NOT NULL,
+        mappings JSON,
+        field_settings JSON,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_church_table (church_id, table_name)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
     // Get existing field mapper settings from the settings table
     const [settings] = await getAppPool().query(
       `SELECT mappings, field_settings 

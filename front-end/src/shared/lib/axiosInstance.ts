@@ -40,6 +40,12 @@ class ApiClient {
           config.url = `/api${config.url}`;
         }
 
+        // When sending FormData, remove Content-Type so the browser
+        // sets multipart/form-data with the correct boundary automatically
+        if (config.data instanceof FormData) {
+          delete config.headers['Content-Type'];
+        }
+
         const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
         console.log(`🌐 API Request: ${config.method?.toUpperCase()} ${fullUrl}`);
         console.log(`🔧 BaseURL: "${config.baseURL || 'none'}", URL: "${config.url}"`);

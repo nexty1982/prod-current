@@ -223,6 +223,7 @@ const globalOmaiRouter = require('./routes/globalOmai');
 const versionRouter = require('./routes/version');
 const systemStatusRouter = require('./api/systemStatus');
 const dailyTasksRouter = require('./api/dailyTasks');
+const omDailyRouter = require('./routes/om-daily');
 const { routesRouter: apiExplorerRoutesRouter, testsRouter: apiExplorerTestsRouter } = require('./api/apiExplorer');
 // Add missing router imports
 const churchRecordsRouter = require('./routes/records'); // Church records functionality
@@ -394,9 +395,10 @@ const { registerRouterMenuStudio } = require("./features/routerMenuStudio");
 const app = express();
 const server = http.createServer(app);
 
-// Initialize Socket.IO for real-time admin log monitoring
-socketService.initialize(server, serverConfig.cors.allowedOrigins);
-console.log('✅ [Server] Socket.IO initialized for admin log monitoring');
+// NOTE: Socket.IO is initialized once by websocketService (at server startup below).
+// socketService was previously initialized here too, causing duplicate Socket.IO servers
+// on the same HTTP server → "Invalid frame header" WebSocket errors.
+// websocketService already handles admin log streaming via broadcastLogEntry().
 
 // Trust proxy configuration (from centralized config)
 app.set('trust proxy', serverConfig.server.trustProxy ? 1 : 0);
@@ -610,6 +612,9 @@ app.use('/api/admin/templates', adminTemplatesRouter);
 console.log('✅ [Server] Mounted /api/admin/templates route');
 app.use('/api/admin/logs', adminLogsRouter);
 console.log('✅ [Server] Mounted /api/admin/logs route (log monitoring)');
+const logSearchRouter = require('./routes/admin/log-search');
+app.use('/api/admin/log-search', logSearchRouter);
+console.log('✅ [Server] Mounted /api/admin/log-search route');
 app.use('/api/admin/global-images', globalImagesRouter);
 // Build status endpoint for admins
 const buildStatusRouter = require('./routes/admin/buildStatus');
@@ -745,6 +750,8 @@ app.use('/api/system', apiExplorerRoutesRouter); // API Explorer route introspec
 app.use('/api/admin/api-tests', apiExplorerTestsRouter); // API Explorer test cases CRUD + runner (super_admin)
 console.log('✅ [Server] Mounted /api/system/routes and /api/admin/api-tests (API Explorer)');
 app.use('/api/admin/tasks', dailyTasksRouter); // Daily tasks management
+app.use('/api/om-daily', omDailyRouter); // OM Daily work pipelines
+console.log('✅ [Server] Mounted /api/om-daily routes (Work Pipelines)');
 
 // Other authenticated routes
 app.use('/api/user', userRouter);
@@ -896,6 +903,11 @@ console.log('👤 Registering /api/user-files routes');
 app.use('/api/user-files', userFilesRouter);
 console.log('✅ /api/user-files routes registered');
 
+// Conversation Log Routes (super_admin only)
+const conversationLogRouter = require('./routes/conversation-log');
+app.use('/api/conversation-log', requireAuthForRoutes, requireAdminForRoutes, conversationLogRouter);
+console.log('✅ [Server] Mounted /api/conversation-log routes');
+
 // OCR Routes - Legacy /api/ocr routes (DISABLED by default)
 // ⚠️  DEPRECATED: Legacy /api/ocr/* routes are disabled in favor of church-scoped routes
 // Set ENABLE_LEGACY_OCR_ROUTES=true to enable (not recommended)
@@ -909,10 +921,25 @@ if (ENABLE_LEGACY_OCR_ROUTES) {
   console.log('🚫 [OCR] Legacy /api/ocr routes disabled (use /api/church/:churchId/ocr/* instead)');
 }
 
-// Church-specific OCR routes - Router loader DISABLED
-// DISABLED: Router loader causes circular dependency issues
-// All OCR routes are now defined directly below using app.get/app.post/etc.
-// This ensures routes work without router loading complexity
+// OCR Admin Monitor + Layout Templates + Table Extractor
+try {
+  const ocrAdminMonitorRouter = require('./routes/ocr/adminMonitor');
+  app.use('/api', ocrAdminMonitorRouter);
+  console.log('✅ [OCR] Admin monitor + layout templates + table extractor routes mounted');
+} catch (e: any) {
+  console.warn('⚠️  [OCR] Failed to load admin monitor routes:', e.message);
+}
+
+// OCR Feeder Worker — polls platform DB for pending jobs
+try {
+  const { workerLoop } = require('./workers/ocrFeederWorker');
+  workerLoop().catch((err: any) => console.error('[OCR Worker] Fatal error:', err));
+  console.log('✅ [OCR] Feeder worker started');
+} catch (e: any) {
+  console.warn('⚠️  [OCR] Failed to start feeder worker:', e.message);
+}
+
+// Church-specific OCR routes - hardwired (DB source of truth)
 console.log('✅ [OCR] Church OCR routes: hardwired (DB source of truth)');
 
 // Church-specific OCR settings routes (keep for backward compatibility)
@@ -2057,6 +2084,28 @@ app.post('/api/ocr/jobs/upload', upload.array('files', 10), async (req, res) => 
 
         const jobId = result.insertId;
 
+        // Also insert into platform DB so the feeder worker picks it up
+        try {
+          await promisePool.query(
+            `INSERT INTO ocr_jobs (church_id, filename, status, record_type, language, created_at, source_pipeline)
+             VALUES (?, ?, 'pending', ?, ?, NOW(), 'studio')`,
+            [churchId, uniqueFilename, recordType, language]
+          );
+          console.log(`[OCR Upload] Also inserted into platform DB for worker pickup`);
+        } catch (platformErr: any) {
+          console.warn(`[OCR Upload] Platform DB insert failed (non-blocking): ${platformErr.message}`);
+        }
+
+        // Copy file to worker's expected upload location
+        try {
+          const workerUploadDir = `/var/www/orthodoxmetrics/prod/uploads/om_church_${churchId}/uploaded`;
+          if (!fs.existsSync(workerUploadDir)) fs.mkdirSync(workerUploadDir, { recursive: true });
+          fs.copyFileSync(finalPath, path.join(workerUploadDir, uniqueFilename));
+          console.log(`[OCR Upload] Copied file to worker upload dir`);
+        } catch (copyErr: any) {
+          console.warn(`[OCR Upload] File copy to worker dir failed (non-blocking): ${copyErr.message}`);
+        }
+
         createdJobs.push({
           id: jobId,
           church_id: churchId,
@@ -2066,7 +2115,7 @@ app.post('/api/ocr/jobs/upload', upload.array('files', 10), async (req, res) => 
           file_size: fileSize,
           mime_type: mimeType,
           status: 'queued',
-          record_type: recordType, // Return the stored recordType
+          record_type: recordType,
           language: language,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -4591,6 +4640,17 @@ cron.schedule('0 23 * * *', async () => {
 });
 console.log('Daily changelog cron scheduled (11 PM)');
 
+// GitHub issue sync at 11:15 PM
+cron.schedule('15 23 * * *', async () => {
+  try {
+    const omDaily = require('./routes/om-daily');
+    await omDaily.fullSync();
+  } catch (err) {
+    console.error('[GitHub Sync] Cron error:', err);
+  }
+});
+console.log('GitHub issue sync cron scheduled (11:15 PM)');
+
 // --- WEBSOCKET INTEGRATION -----------------------------------------
 const websocketService = require('./services/websocketService');
 
@@ -4625,6 +4685,18 @@ omaiLoggerWss.on('connection', (ws, req) => {
 });
 
 console.log('🔌 OMAI Logger WebSocket initialized on /ws/omai-logger');
+
+// --- BROADCAST NEW BUILD (triggers UpdateAvailableBanner on all connected clients) -----------
+app.post('/api/admin/broadcast-new-build', requireAuthForRoutes, requireAdminForRoutes, (req, res) => {
+  try {
+    const buildInfo = req.body || {};
+    websocketService.broadcastNewBuild(buildInfo);
+    res.json({ ok: true, message: 'New build notification broadcast to all connected clients' });
+  } catch (err) {
+    console.error('[broadcast-new-build] Error:', err);
+    res.status(500).json({ ok: false, message: 'Failed to broadcast' });
+  }
+});
 
 // --- GLOBAL ERROR HANDLER (MUST be after all routes, before server starts) -------------------
 const apiErrorHandler = require('./middleware/apiErrorHandler');

@@ -28,7 +28,7 @@ const Tickets = Loadable(lazy(() => import('../features/apps/tickets/Tickets')))
 const ImageAI = Loadable(lazy(() => import('../features/apps/image-ai/ImageAI')));
 
 /* ****Developer Tools***** */
-const SiteStructureVisualizer = Loadable(lazy(() => import('../features/devel-tools/site-structure/SiteStructureVisualizer')));
+// Removed: SiteStructureVisualizer
 const LoadingDemo = Loadable(lazy(() => import('../features/devel-tools/loading-demo/LoadingDemo')));
 const OmtraceConsole = Loadable(lazy(() => import('../features/devel-tools/omtrace/OmtraceConsole')));
 const MenuEditor = Loadable(lazy(() => import('../features/devel-tools/menu-editor/MenuEditor')));
@@ -37,8 +37,7 @@ const InvoiceList = Loadable(lazy(() => import('../features/apps/invoice/List'))
 const InvoiceCreate = Loadable(lazy(() => import('../features/apps/invoice/Create')));
 const InvoiceDetail = Loadable(lazy(() => import('../features/apps/invoice/Detail')));
 const InvoiceEdit = Loadable(lazy(() => import('../features/apps/invoice/Edit')));
-const LiturgicalCalendarPage = Loadable(lazy(() => import('../features/apps/liturgical-calendar/LiturgicalCalendarPage')));
-const OrthodoxLiturgicalCalendar = Loadable(lazy(() => import('../features/apps/liturgical-calendar/OrthodoxLiturgicalCalendar')));
+// Removed: LiturgicalCalendarPage, OrthodoxLiturgicalCalendar
 const DynamicRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsPage')));
 const AnalyticsDashboard = Loadable(lazy(() => import('../features/admin/AnalyticsDashboard')));
 const Logs = Loadable(lazy(() => import('../features/system/apps/logs/Logs')));
@@ -93,7 +92,7 @@ const EditableRecordPage = Loadable(lazy(() => import('../features/records-centr
 
 // Settings
 // Removed: MenuSettings from misc-legacy
-const JITTerminalAccess = Loadable(lazy(() => import('../features/security/settings/JITTerminalAccess')));
+// Removed: JITTerminalAccess
 
 // Notifications
 // Removed: NotificationList, NotificationPreferences from misc-legacy
@@ -120,6 +119,23 @@ const OrthodMetricsAdmin = Loadable(lazy(() => import('../features/admin/admin/O
 const AIAdminPanel = Loadable(lazy(() => import('../features/admin/ai/AIAdminPanel')));
 const OMAIUltimateLogger = Loadable(lazy(() => import('../features/devel-tools/om-ultimatelogger/LoggerDashboard')));
 const ScriptRunner = Loadable(lazy(() => import('../features/admin/admin/ScriptRunner')));
+const AdminControlPanel = Loadable(lazy(() => import('../features/admin/control-panel/AdminControlPanel')));
+const ChurchManagementPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchManagementPage')));
+const RecordsOCRPage = Loadable(lazy(() => import('../features/admin/control-panel/RecordsOCRPage')));
+const CRMOutreachPage = Loadable(lazy(() => import('../features/admin/control-panel/CRMOutreachPage')));
+const SystemServerPage = Loadable(lazy(() => import('../features/admin/control-panel/SystemServerPage')));
+const AIAutomationPage = Loadable(lazy(() => import('../features/admin/control-panel/AIAutomationPage')));
+const OMDailyPage = Loadable(lazy(() => import('../features/admin/control-panel/OMDailyPage')));
+const SDLCPage = Loadable(lazy(() => import('../features/admin/control-panel/SDLCPage')));
+const UsersSecurityPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/UsersSecurityPage')));
+const ContentMediaPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/ContentMediaPage')));
+const SocialCommsPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/SocialCommsPage')));
+const ServerDevOpsPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/ServerDevOpsPage')));
+const PlatformConfigPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/PlatformConfigPage')));
+const CRMPage = Loadable(lazy(() => import('../features/devel-tools/crm/CRMPage')));
+const USChurchMapPage = Loadable(lazy(() => import('../features/devel-tools/us-church-map/USChurchMapPage')));
+const LogSearch = Loadable(lazy(() => import('../features/admin/dashboard/LogSearch')));
+const OmOcrStudioPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OmOcrStudioPage')));
 const SuperDashboard = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/SuperDashboard')));
 const SuperDashboardCustomizer = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/SuperDashboardCustomizer')));
 const UserDashboard = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/UserDashboard')));
@@ -127,22 +143,26 @@ const RouterMenuStudio = Loadable(lazy(() => import('../features/devel-tools/Rou
 const DynamicRecordsInspector = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsInspector')));
 const RefactorConsole = Loadable(lazy(() => import('../features/devel-tools/refactor-console/RefactorConsole')));
 const ButtonShowcase = Loadable(lazy(() => import('../features/devel-tools/button-showcase/ButtonShowcase')));
+const BasicRefactor = Loadable(lazy(() => import('../features/devel-tools/basic-refactor/BasicRefactor')));
 const OMLibrary = Loadable(lazy(() => import('../features/devel-tools/system-documentation/om-library/OMLibrary')));
 const OMMagicImage = Loadable(lazy(() => import('../features/devel-tools/om-magic-image/om-magic-image')));
 const OCRStudioPage = Loadable(lazy(() => import('../features/ocr/pages/OCRStudioPage')));
 const OcrUploader = Loadable(lazy(() => import('../features/ocr/OcrUploader')));
 const ChurchOCRPage = Loadable(lazy(() => import('../features/ocr/pages/ChurchOCRPage')));
-const EnhancedOCRUploader = Loadable(lazy(() => import('../features/devel-tools/om-ocr/EnhancedOCRUploader')));
 const OCRSettingsPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OCRSettingsPage')));
 const OcrSetupWizardPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrSetupWizardPage')));
+const OcrReviewPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrReviewPage')));
+const OcrTableExtractorPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrTableExtractorPage')));
+const LayoutTemplateEditorPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/LayoutTemplateEditorPage')));
+const OcrActivityMonitor = Loadable(lazy(() => import('../features/admin/OcrActivityMonitor')));
 const OMTasksPage = Loadable(lazy(() => import('../features/devel-tools/om-tasks/OMTasksPage')));
 const DailyTasks = Loadable(lazy(() => import('../features/devel-tools/DailyTasks')));
 const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-explorer/ApiExplorerPage')));
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
 const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-operations/GitOperations')));
+const ConversationLogPage = Loadable(lazy(() => import('../features/devel-tools/conversation-log/ConversationLogPage')));
 
-// Removed: JITTerminal from misc-legacy
-const JITTerminalConsole = Loadable(lazy(() => import('../features/admin/admin/JITTerminalConsole')));
+// Removed: JITTerminal, JITTerminalConsole
 
 // AI Lab
 // Removed: All sandbox components from misc-legacy
@@ -260,6 +280,7 @@ const HTMLViewer = Loadable(lazy(() => import('../features/pages/frontend-pages/
 const GreekRecordsViewer = Loadable(lazy(() => import('../features/pages/frontend-pages/GreekRecordsViewer')));
 const Samples = Loadable(lazy(() => import('../features/pages/frontend-pages/Samples')));
 const Gallery = Loadable(lazy(() => import('../features/devel-tools/om-gallery/Gallery')));
+const PageImageIndex = Loadable(lazy(() => import('../features/devel-tools/PageImageIndex')));
 const OCATimeline = Loadable(lazy(() => import('../features/pages/frontend-pages/OCATimeline')));
 const PublicTasksListPage = Loadable(lazy(() => import('../features/pages/frontend-pages/PublicTasksListPage')));
 const PublicTaskDetailPage = Loadable(lazy(() => import('../features/pages/frontend-pages/PublicTaskDetailPage')));
@@ -348,15 +369,7 @@ const Router = [
       // { path: '/frontend-pages/blog/detail/:id', element: <BlogDetail /> },
       // Removed: /apps/chats route (misc-legacy)
 
-      // Developer Tools
-      {
-        path: '/tools/site-structure',
-        element: (
-          <ProtectedRoute requiredPermission="admin">
-            <SiteStructureVisualizer />
-          </ProtectedRoute>
-        )
-      },
+      // Removed: /tools/site-structure route
        {
         path: '/devel-tools/omtrace',
         element: (
@@ -457,6 +470,14 @@ const Router = [
             <Gallery />
           </ProtectedRoute>
         ) 
+      },
+      {
+        path: '/apps/gallery/page-index',
+        element: (
+          <ProtectedRoute>
+            <PageImageIndex />
+          </ProtectedRoute>
+        )
       },
       {
         path: '/apps/kanban',
@@ -609,17 +630,7 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      // Removed: /settings/menu route (misc-legacy)
-      {
-        path: '/settings/jit-terminal',
-        element: (
-          <ProtectedRoute>
-            <AdminErrorBoundary>
-              <JITTerminalAccess />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
+      // Removed: /settings/menu, /settings/jit-terminal routes
       {
         path: '/admin/users',
         element: (
@@ -728,16 +739,7 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/admin/jit-terminal',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <JITTerminalConsole />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
+      // Removed: /admin/jit-terminal route
       {
         path: '/admin/headlines-config',
         element: (
@@ -753,6 +755,136 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin']}>
             <AdminPageFallback />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <AdminControlPanel />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/church-management',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ChurchManagementPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/records-ocr',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <RecordsOCRPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/crm-outreach',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <CRMOutreachPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/system-server',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <SystemServerPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/ai-automation',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <AIAutomationPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/om-daily',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OMDailyPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/sdlc',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <SDLCPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/system-server/users-security',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <UsersSecurityPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/system-server/content-media',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ContentMediaPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/system-server/social-comms',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <SocialCommsPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/system-server/server-devops',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ServerDevOpsPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/system-server/platform-config',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <PlatformConfigPage />
+            </AdminErrorBoundary>
           </ProtectedRoute>
         )
       },
@@ -870,11 +1002,71 @@ const Router = [
         )
       },
       {
+        path: '/devel-tools/basic-refactor',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <BasicRefactor />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/devel-tools/om-magic-image',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin']}>
             <AdminErrorBoundary>
               <OMMagicImage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/crm',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <CRMPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/us-church-map',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <USChurchMapPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/log-search',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <AdminErrorBoundary>
+              <LogSearch />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/git-operations',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <GitOperations />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/conversation-log',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ConversationLogPage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -1032,11 +1224,71 @@ const Router = [
         )
       },
       {
-        path: '/devel/enhanced-ocr-uploader',
+        path: '/devel/ocr-studio/upload',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
             <AdminErrorBoundary>
-              <EnhancedOCRUploader />
+              <OmOcrStudioPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/ocr-studio/review/:churchId/:jobId',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <OcrReviewPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/ocr-studio/jobs',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OcrActivityMonitor />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/ocr-studio/table-extractor',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OcrTableExtractorPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/ocr-studio/layout-templates',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <LayoutTemplateEditorPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/ocr-studio/settings',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <OCRSettingsPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/om-ocr-studio',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <OmOcrStudioPage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -1047,6 +1299,16 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
             <AdminErrorBoundary>
               <OCRSettingsPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/ocr-activity-monitor',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OcrActivityMonitor />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -1133,23 +1395,7 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      // Removed: /notifications, /settings/notifications routes (misc-legacy)
-      {
-        path: '/apps/liturgical-calendar',
-        element: (
-          <ProtectedRoute>
-            <LiturgicalCalendarPage />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/apps/orthodox-calendar',
-        element: (
-          <ProtectedRoute>
-            <OrthodoxLiturgicalCalendar />
-          </ProtectedRoute>
-        )
-      },
+      // Removed: /notifications, /settings/notifications, /apps/liturgical-calendar, /apps/orthodox-calendar routes
       {
         path: '/apps/records/dynamic',
         element: (

@@ -6,6 +6,7 @@ const { cleanRecords, cleanRecord, transformFuneralRecords, transformFuneralReco
 const { promisePool } = require('../config/db-compat');
 const { safeRequire } = require('../utils/safeRequire');
 const { requireAuth } = require('../middleware/auth');
+const { getEffectiveSetting } = require('../utils/settingsHelper');
 
 // Safe require for writeSacramentHistory - handles missing module gracefully
 const writeSacramentHistoryModule = safeRequire(
@@ -22,6 +23,36 @@ const writeSacramentHistoryModule = safeRequire(
 
 const { writeSacramentHistory, generateRequestId } = writeSacramentHistoryModule;
 const router = express.Router();
+
+/**
+ * Default search weights for funeral records.
+ * Keys match actual funeral_records table columns: lastname, name, clergy, burial_location.
+ */
+const DEFAULT_SEARCH_WEIGHTS = {
+  lastname: 12,
+  name: 9,
+  clergy: 6,
+  burial_location: 4
+};
+
+/**
+ * Load effective search weights for a church from the settings registry.
+ * Falls back to DEFAULT_SEARCH_WEIGHTS for any key that isn't in the registry.
+ */
+async function getEffectiveSearchWeights(churchId) {
+  const weights = { ...DEFAULT_SEARCH_WEIGHTS };
+  try {
+    const fields = Object.keys(DEFAULT_SEARCH_WEIGHTS);
+    const opts = churchId && churchId !== '0' ? { churchId } : {};
+    await Promise.all(fields.map(async (field) => {
+      const val = await getEffectiveSetting(`records.search.funeral.${field}`, opts);
+      if (val !== undefined) weights[field] = Number(val);
+    }));
+  } catch (e) {
+    console.warn('Failed to load search weights from registry for church', churchId, e.message);
+  }
+  return weights;
+}
 
 /**
  * Get church database name by church_id
@@ -114,11 +145,10 @@ async function getChurchDatabaseName(churchId) {
         const databaseName = await getChurchDatabaseName(finalChurchId);
         console.log(`🏛️ Using database: ${databaseName} for church_id: ${finalChurchId}`);
 
-        let query = 'SELECT * FROM funeral_records';
-        let countQuery = 'SELECT COUNT(*) as total FROM funeral_records';
         const queryParams = [];
         const countParams = [];
         let whereConditions = [];
+        const isSearchActive = search && search.trim();
 
         // Add church filtering
         if (church_id && church_id !== '0') {
@@ -129,7 +159,7 @@ async function getChurchDatabaseName(churchId) {
         }
 
         // Add search functionality
-        if (search && search.trim()) {
+        if (isSearchActive) {
             const searchCondition = `(name LIKE ? 
                 OR lastname LIKE ? 
                 OR clergy LIKE ? 
@@ -138,43 +168,91 @@ async function getChurchDatabaseName(churchId) {
             
             whereConditions.push(searchCondition);
             
-            // Add search parameters for main query (4 parameters now)
             queryParams.push(searchParam, searchParam, searchParam, searchParam);
-            // Add search parameters for count query (4 parameters now)
             countParams.push(searchParam, searchParam, searchParam, searchParam);
             console.log(`🔍 Searching funeral records for: "${search.trim()}"`);
         }
         
-        // Apply WHERE conditions if any exist
-        if (whereConditions.length > 0) {
-            const whereClause = ` WHERE ${whereConditions.join(' AND ')}`;
-            query += whereClause;
-            countQuery += whereClause;
+        // Build WHERE clause
+        const whereClause = whereConditions.length > 0
+            ? ` WHERE ${whereConditions.join(' AND ')}`
+            : '';
+
+        // Count query (unchanged shape)
+        const countQuery = `SELECT COUNT(*) as total FROM funeral_records${whereClause}`;
+
+        // Build main query — add relevance_score when searching
+        let query;
+        let mainQueryParams;
+        const pageOffset = (parseInt(page) - 1) * parseInt(limit);
+
+        if (isSearchActive) {
+            const searchRaw = search.trim();
+
+            // Tiered relevance: exact → prefix → contains (per field, highest tier wins)
+            const relevanceExpr = `(
+              (CASE WHEN LOWER(name)            = LOWER(?) THEN 1000 WHEN LOWER(name)            LIKE CONCAT(LOWER(?), '%') THEN 400 WHEN LOWER(name)            LIKE CONCAT('%', LOWER(?), '%') THEN 80 ELSE 0 END) +
+              (CASE WHEN LOWER(lastname)        = LOWER(?) THEN 900  WHEN LOWER(lastname)        LIKE CONCAT(LOWER(?), '%') THEN 350 WHEN LOWER(lastname)        LIKE CONCAT('%', LOWER(?), '%') THEN 70 ELSE 0 END) +
+              (CASE WHEN LOWER(clergy)          = LOWER(?) THEN 300  WHEN LOWER(clergy)          LIKE CONCAT(LOWER(?), '%') THEN 150 WHEN LOWER(clergy)          LIKE CONCAT('%', LOWER(?), '%') THEN 30 ELSE 0 END) +
+              (CASE WHEN LOWER(burial_location) = LOWER(?) THEN 200  WHEN LOWER(burial_location) LIKE CONCAT(LOWER(?), '%') THEN 100 WHEN LOWER(burial_location) LIKE CONCAT('%', LOWER(?), '%') THEN 20 ELSE 0 END)
+            ) AS relevance_score`;
+
+            query = `SELECT *, ${relevanceExpr} FROM funeral_records${whereClause}`;
+            query += ` ORDER BY relevance_score DESC, burial_date DESC, id DESC`;
+            query += ` LIMIT ? OFFSET ?`;
+
+            // 4 fields × 3 tiers = 12 params (all same value: raw search term)
+            const scoreParams = Array(12).fill(searchRaw);
+            const whereParams = [...queryParams];
+            mainQueryParams = [...scoreParams, ...whereParams, parseInt(limit), pageOffset];
+        } else {
+            query = `SELECT * FROM funeral_records${whereClause}`;
+
+            const validSortFields = ['id', 'name', 'lastname', 'deceased_date', 'burial_date', 'age', 'clergy', 'burial_location', 'created_at', 'updated_at'];
+            const validSortDirections = ['asc', 'desc'];
+            if (sortField && !validSortFields.includes(sortField)) {
+                console.warn(`⚠️ funeral-records: invalid sortField "${sortField}" rejected, defaulting to "id"`);
+            }
+            const finalSortField = validSortFields.includes(sortField) ? sortField : 'id';
+            const finalSortDirection = validSortDirections.includes(sortDirection.toLowerCase()) ? sortDirection.toUpperCase() : 'DESC';
+            // Sort age numerically (CAST handles string-stored numbers)
+            const orderExpr = finalSortField === 'age' ? `CAST(${finalSortField} AS UNSIGNED)` : finalSortField;
+            query += ` ORDER BY ${orderExpr} ${finalSortDirection}`;
+            query += ` LIMIT ? OFFSET ?`;
+            mainQueryParams = [...queryParams, parseInt(limit), pageOffset];
         }
 
-        // Add sorting
-        const validSortFields = ['id', 'name', 'lastname', 'deceased_date', 'funeral_date', 'clergy'];
-        const validSortDirections = ['asc', 'desc'];
-        
-        const finalSortField = validSortFields.includes(sortField) ? sortField : 'id';
-        const finalSortDirection = validSortDirections.includes(sortDirection.toLowerCase()) ? sortDirection.toUpperCase() : 'DESC';
-        
-        query += ` ORDER BY ${finalSortField} ${finalSortDirection}`;
-
-        // Add pagination
-        const offset = (parseInt(page) - 1) * parseInt(limit);
-        query += ` LIMIT ? OFFSET ?`;
-        queryParams.push(parseInt(limit), offset);
-
         // Execute queries
-        // Get church database connection using the dynamically resolved database name
         const churchDbPool = await getChurchDbConnection(databaseName);
         
-        const [rows] = await churchDbPool.query(query, queryParams);
+        const [rows] = await churchDbPool.query(query, mainQueryParams);
         const [countResult] = await churchDbPool.query(countQuery, countParams);
         
         const totalRecords = countResult[0].total;
         
+        // Post-process: compute _matchedFields and _topMatchReason for search results
+        if (isSearchActive && rows.length > 0) {
+            const termLower = search.trim().toLowerCase();
+            rows.forEach(row => {
+                const matched = [];
+                if (row.name && row.name.toLowerCase().includes(termLower)) matched.push('name');
+                if (row.lastname && row.lastname.toLowerCase().includes(termLower)) matched.push('lastname');
+                if (row.clergy && row.clergy.toLowerCase().includes(termLower)) matched.push('clergy');
+                if (row.burial_location && row.burial_location.toLowerCase().includes(termLower)) matched.push('burial_location');
+                row._matchedFields = matched;
+            });
+            const top = rows[0];
+            if (top.name && top.name.toLowerCase() === termLower) {
+                top._topMatchReason = 'exact first name';
+            } else if (top.lastname && top.lastname.toLowerCase() === termLower) {
+                top._topMatchReason = 'exact last name';
+            } else if (top.name && top.name.toLowerCase().startsWith(termLower)) {
+                top._topMatchReason = 'prefix first name';
+            } else if (top.lastname && top.lastname.toLowerCase().startsWith(termLower)) {
+                top._topMatchReason = 'prefix last name';
+            }
+        }
+
         res.json({ 
             records: transformFuneralRecords(rows),
             totalRecords,
@@ -652,6 +730,49 @@ async function getChurchInfo(churchIdFromRequest) {
     } catch (err) {
         console.error('fetch dropdown-options error:', err);
         res.status(500).json({ error: 'Could not fetch dropdown options' });
+    }
+});
+
+// GET /api/funeral-records/autocomplete - Frequency-based autocomplete for text fields
+router.get('/autocomplete', requireAuth, async (req, res) => {
+    const { column, prefix = '', church_id } = req.query;
+
+    // Whitelist of columns allowed for autocomplete (text fields only, no dates/age/IDs)
+    const ALLOWED_COLUMNS = ['name', 'lastname', 'clergy', 'burial_location'];
+
+    if (!column || !ALLOWED_COLUMNS.includes(column)) {
+        return res.status(400).json({ error: `Invalid column. Allowed: ${ALLOWED_COLUMNS.join(', ')}` });
+    }
+
+    try {
+        const databaseName = await getChurchDatabaseName(church_id);
+        const churchDbPool = await getChurchDbConnection(databaseName);
+
+        let sql, params;
+        if (prefix.trim()) {
+            sql = `SELECT \`${column}\` AS value, COUNT(*) AS freq
+                   FROM funeral_records
+                   WHERE \`${column}\` IS NOT NULL AND TRIM(\`${column}\`) != ''
+                     AND \`${column}\` LIKE ?
+                   GROUP BY \`${column}\`
+                   ORDER BY freq DESC, \`${column}\` ASC
+                   LIMIT 20`;
+            params = [`${prefix.trim()}%`];
+        } else {
+            sql = `SELECT \`${column}\` AS value, COUNT(*) AS freq
+                   FROM funeral_records
+                   WHERE \`${column}\` IS NOT NULL AND TRIM(\`${column}\`) != ''
+                   GROUP BY \`${column}\`
+                   ORDER BY freq DESC, \`${column}\` ASC
+                   LIMIT 20`;
+            params = [];
+        }
+
+        const [rows] = await churchDbPool.query(sql, params);
+        res.json({ suggestions: rows.map(r => ({ value: r.value, count: r.freq })) });
+    } catch (err) {
+        console.error('autocomplete error (funeral):', err);
+        res.status(500).json({ error: 'Could not fetch autocomplete suggestions' });
     }
 });
 

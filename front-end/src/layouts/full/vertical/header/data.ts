@@ -11,7 +11,6 @@ import iconRelax from '@/assets/images/svgs/icon-briefcase.svg';
 import ddIcon1 from '@/assets/images/svgs/icon-dd-chat.svg';
 import ddIcon2 from '@/assets/images/svgs/icon-dd-cart.svg';
 import ddIcon3 from '@/assets/images/svgs/icon-dd-invoice.svg';
-import ddIcon4 from '@/assets/images/svgs/icon-dd-date.svg';
 import ddIcon5 from '@/assets/images/svgs/icon-dd-mobile.svg';
 import ddIcon6 from '@/assets/images/svgs/icon-dd-lifebuoy.svg';
 import ddIcon7 from '@/assets/images/svgs/icon-dd-message-box.svg';
@@ -197,12 +196,6 @@ export const getAppsLink = (user) => {
       title: 'Notes App',
       subtext: 'To-do and Daily tasks',
       avatar: ddIcon3,
-    },
-    {
-      href: '/apps/liturgical-calendar',
-      title: 'Orthodox Liturgical Calendar',
-      subtext: 'Saints, Feasts, Readings & Fasting',
-      avatar: ddIcon4,
     },
   ];
 };

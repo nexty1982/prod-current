@@ -430,13 +430,13 @@ async function runStaleCleanup(maxAgeSeconds = 90, killedBy = 0) {
   try {
     const pool = getPool();
 
-    // Use created_at for stale detection (no processing_started_at column)
+    // Use processing_started_at for stale detection, fall back to created_at for legacy jobs
     const [result] = await pool.query(`
       UPDATE ocr_jobs SET
         status = 'error',
         error_regions = CONCAT('Timed out (stale cleanup after ', ?, 's)')
       WHERE status = 'processing'
-        AND created_at <= DATE_SUB(NOW(), INTERVAL ? SECOND)
+        AND COALESCE(processing_started_at, created_at) <= DATE_SUB(NOW(), INTERVAL ? SECOND)
     `, [maxAgeSeconds, maxAgeSeconds]);
 
     const totalCleaned = result.affectedRows || 0;

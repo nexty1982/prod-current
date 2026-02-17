@@ -1,28 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { CustomizerContext } from '@/context/CustomizerContext';
+import { ArrowForward, CheckCircle } from '@mui/icons-material';
 import {
-  Box,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-  Button,
-  Paper,
-  Typography,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Checkbox,
-  FormGroup,
-  Slider,
-  Alert,
-  CircularProgress,
-  Card,
-  CardContent
+    Alert,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Checkbox,
+    CircularProgress,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    FormLabel,
+    Paper,
+    Radio,
+    RadioGroup,
+    Slider,
+    Step,
+    StepContent,
+    StepLabel,
+    Stepper,
+    Typography
 } from '@mui/material';
-import { CheckCircle, ArrowForward } from '@mui/icons-material';
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface SetupState {
   step1?: {
@@ -79,6 +80,7 @@ const steps = [
 ];
 
 export default function OcrSetupWizardPage() {
+  const { isLayout } = useContext(CustomizerContext);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const churchId = parseInt(searchParams.get('church_id') || '46');
@@ -559,7 +561,7 @@ export default function OcrSetupWizardPage() {
             <Button
               variant="contained"
               size="large"
-              onClick={() => navigate(`/devel/enhanced-ocr-uploader?church_id=${churchId}`)}
+              onClick={() => navigate(`/devel/ocr-studio/upload?church_id=${churchId}`)}
               sx={{ mt: 2 }}
               startIcon={<ArrowForward />}
             >
@@ -582,7 +584,7 @@ export default function OcrSetupWizardPage() {
   }
 
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
+    <Box sx={{ maxWidth: isLayout === 'full' ? '100%' : 900, mx: 'auto', p: 3 }}>
       <Typography variant="h4" gutterBottom>
         OCR Setup Wizard
       </Typography>

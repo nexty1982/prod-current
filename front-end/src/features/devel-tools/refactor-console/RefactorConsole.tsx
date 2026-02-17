@@ -21,7 +21,7 @@ import {
     History,
     RefreshCw,
     Settings
-} from 'lucide-react';
+} from '@/ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 

@@ -105,12 +105,6 @@ const Menuitems = [
       },
       {
         id: uniqueId(),
-        title: 'Orthodox Calendar',
-        icon: IconPoint,
-        href: '/apps/liturgical-calendar',
-      },
-      {
-        id: uniqueId(),
         title: 'Email',
         icon: IconPoint,
         href: '/apps/email',

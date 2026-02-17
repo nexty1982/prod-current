@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, Chip, FormControlLabel, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { Play, X } from 'lucide-react';
+import { Play, X } from '@/ui/icons';
 import React, { useEffect, useState } from 'react';
 import { OmtraceRunFlags } from './types.ts';
 

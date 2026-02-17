@@ -15,7 +15,7 @@ import {
   Archive,
   RotateCcw,
   Shield
-} from 'lucide-react';
+} from '@/ui/icons';
 import { useTheme, alpha } from '@mui/material/styles';
 import { Paper, Box, TextField, Select, MenuItem, FormControl, InputLabel, Chip, Button } from '@mui/material';
 import { FilterState, SortOption } from '@/types/refactorConsole';

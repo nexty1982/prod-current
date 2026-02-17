@@ -1,253 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, Checkbox, FormControlLabel, styled } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
+import { Box, Button, Checkbox, Container, FormControlLabel, Grid, Stack, TextField, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// Styled components to match the original design
-const LoginContainer = styled(Box)(() => ({
-    fontFamily: 'Georgia, Times New Roman, serif',
-    height: '100vh',
-    background: 'linear-gradient(135deg, #f7f5ff 0%, #f0ebff 100%)',
-    display: 'flex',
-    overflow: 'hidden',
-    position: 'relative',
-}));
-
-const MainContainer = styled(Box)({
-    display: 'flex',
-    width: '100%',
-    height: '100vh',
-    position: 'relative',
-    zIndex: 2,
-});
-
-const LeftSection = styled(Box)({
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '3rem',
-    position: 'relative',
-});
-
-const OrthodoxCross = styled(Box)({
-    width: '120px',
-    height: '140px',
-    marginBottom: '2rem',
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    // Main vertical beam
-    '&::before': {
-        content: '""',
-        position: 'absolute',
-        width: '8px',
-        height: '120px',
-        background: '#D4AF37',
-        borderRadius: '4px',
-        zIndex: 1,
-    },
-
-    // Main horizontal crossbar
-    '&::after': {
-        content: '""',
-        position: 'absolute',
-        top: '50px',
-        width: '70px',
-        height: '7px',
-        background: '#D4AF37',
-        borderRadius: '3px',
-        zIndex: 2,
-    },
-
-    // Upper titulus bar (INRI bar)
-    '& .upper-bar': {
-        position: 'absolute',
-        top: '25px',
-        width: '45px',
-        height: '5px',
-        background: '#D4AF37',
-        borderRadius: '2px',
-        zIndex: 2,
-    },
-
-    // Lower slanted footrest bar
-    '& .lower-bar': {
-        position: 'absolute',
-        top: '95px',
-        width: '50px',
-        height: '6px',
-        background: '#D4AF37',
-        borderRadius: '3px',
-        transform: 'rotate(-15deg)',
-        zIndex: 2,
-    },
-});
-
-const BrandTitle = styled(Typography)({
-    color: '#9A7FC7',
-    fontSize: '2.5rem',
-    fontWeight: 400,
-    marginBottom: '0.5rem',
-    textAlign: 'center',
-});
-
-const BrandSubtitle = styled(Typography)({
-    color: '#D4AF37',
-    fontSize: '1.2rem',
-    fontWeight: 300,
-    marginBottom: '1rem',
-    textAlign: 'center',
-});
-
-const BrandDescription = styled(Typography)({
-    color: '#666',
-    fontSize: '1rem',
-    textAlign: 'center',
-    maxWidth: '500px',
-    lineHeight: 1.6,
-    marginBottom: '2rem',
-});
-
-const RightSection = styled(Box)({
-    flex: '0 0 450px',
-    background: 'rgba(255, 255, 255, 0.95)',
-    backdropFilter: 'blur(10px)',
-    borderLeft: '1px solid rgba(154, 127, 199, 0.15)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '3rem',
-    boxShadow: '-5px 0 20px rgba(0,0,0,0.05)',
-});
-
-const LoginFormContainer = styled(Box)({
-    width: '100%',
-    maxWidth: '350px',
-});
-
-const LoginTitle = styled(Typography)({
-    color: '#9A7FC7',
-    fontSize: '2rem',
-    fontWeight: 400,
-    marginBottom: '0.5rem',
-    textAlign: 'center',
-});
-
-const LoginSubtitle = styled(Typography)({
-    color: '#666',
-    fontSize: '1rem',
-    marginBottom: '2.5rem',
-    textAlign: 'center',
-});
-
-const StyledTextField = styled(TextField)({
-    marginBottom: '1.5rem',
-    '& .MuiOutlinedInput-root': {
-        borderRadius: '8px',
-        '& fieldset': {
-            borderColor: 'rgba(154, 127, 199, 0.3)',
-        },
-        '&:hover fieldset': {
-            borderColor: '#9A7FC7',
-        },
-        '&.Mui-focused fieldset': {
-            borderColor: '#9A7FC7',
-        },
-    },
-    '& .MuiInputLabel-root': {
-        color: '#333',
-        fontWeight: 500,
-    },
-});
-
-const FormOptions = styled(Box)({
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '2rem',
-});
-
-const SignInButton = styled(Button)({
-    width: '100%',
-    padding: '1rem',
-    background: 'linear-gradient(135deg, #D4AF37, #F4D03F)',
-    color: 'white',
-    borderRadius: '8px',
-    fontWeight: 600,
-    fontSize: '1rem',
-    textShadow: '1px 1px 2px rgba(0,0,0,0.2)',
-    '&:hover': {
-        background: 'linear-gradient(135deg, #B8941F, #D4AF37)',
-        transform: 'translateY(-2px)',
-        boxShadow: '0 5px 15px rgba(212, 175, 55, 0.4)',
-    },
-});
-
-const CreateAccount = styled(Box)({
-    textAlign: 'center',
-    marginTop: '2rem',
-    color: '#666',
-    fontSize: '0.95rem',
-    '& a': {
-        color: '#9A7FC7',
-        textDecoration: 'none',
-        fontWeight: 500,
-        '&:hover': {
-            textDecoration: 'underline',
-        },
-    },
-});
-
-// Add keyframes for animations
-const globalStyles = `
-  @keyframes float-right {
-    0% { transform: translateX(-100px); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { transform: translateX(calc(100vw + 100px)); opacity: 0; }
-  }
-  
-  @keyframes float-left {
-    0% { transform: translateX(calc(100vw + 100px)); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { transform: translateX(-100px); opacity: 0; }
-  }
-  
-  @keyframes float-up {
-    0% { transform: translateY(100vh); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { transform: translateY(-100px); opacity: 0; }
-  }
-  
-  @keyframes float-down {
-    0% { transform: translateY(-100px); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { transform: translateY(100vh); opacity: 0; }
-  }
-  
-  @media (max-width: 768px) {
-    .login-container {
-      flex-direction: column;
-    }
-    .right-section {
-      flex: none !important;
-      border-left: none !important;
-      border-top: 1px solid rgba(154, 127, 199, 0.15) !important;
-    }
-  }
-`;
 
 const OrthodoxLogin: React.FC = () => {
     const { user, authenticated, loading: authLoading, login } = useAuth();
     
-    // Get display name for welcome message
     const displayName = user?.full_name || (user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : null);
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -256,96 +14,19 @@ const OrthodoxLogin: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [alreadyLoggedIn, setAlreadyLoggedIn] = useState(false);
-    const [floatingTexts, setFloatingTexts] = useState<Array<{ id: number, text: string, style: any }>>([]);
 
-    // Check if user is already logged in and redirect
     useEffect(() => {
         if (!authLoading && authenticated && user) {
             setAlreadyLoggedIn(true);
-            // Redirect priests to baptism records, others to Super Dashboard
             setTimeout(() => {
                 if (user.role === 'priest' && user.church_id) {
                     navigate(`/apps/records/baptism?church_id=${user.church_id}`);
                 } else {
                     navigate('/dashboards/super');
                 }
-            }, 2000); // Show message for 2 seconds before redirect
+            }, 2000);
         }
     }, [authenticated, user, authLoading, navigate]);
-
-    // Orthodox phrases for floating text
-    const phrases = [
-        'Ἅγιος ὁ Θεός', 'Православная', 'Κύριε ἐλέησον', 'Монастир', 'Mănăstire',
-        'Αγιογραφία', 'Света Литургија', 'Παναγία', 'Άγιος Νικόλαος', 'Преподобный',
-        'Θεοτόκος', 'Патриарх', 'Εκκλησία', 'Χριστός ἀνέστη', 'Воскресе Христос',
-        'Hristos a înviat', 'Κύριος μετὰ σοῦ', 'Бог с вами', 'Domnul să fie cu tine',
-        'Ἀμήν', 'Слава Богу', 'Slavă Domnului', 'Ἅγιος Ἅγιος', 'Святый Святый',
-        'Sfânt Sfânt', 'Εἰρήνη πᾶσι', 'Мир всем', 'Pace tuturor'
-    ];
-
-    const animations = ['right', 'left', 'up', 'down'];
-    const sizes = ['small', '', 'large'];
-
-    // Create floating text effect
-    useEffect(() => {
-        // Insert global styles
-        const styleSheet = document.createElement('style');
-        styleSheet.textContent = globalStyles;
-        document.head.appendChild(styleSheet);
-
-        // Initial floating texts
-        const initialTexts = [
-            { text: 'Ἅγιος ὁ Θεός', top: '10%', animation: 'float-right 25s infinite linear' },
-            { text: 'Православная', top: '20%', animation: 'float-left 30s infinite linear', size: 'large', delay: '-5s' },
-            { text: 'Κύριε ἐλέησον', top: '30%', animation: 'float-right 20s infinite linear', size: 'small', delay: '-10s' },
-            { text: 'Монастир', top: '40%', animation: 'float-up 28s infinite linear', delay: '-3s' },
-            { text: 'Mănăstire', top: '50%', animation: 'float-left 35s infinite linear', size: 'large', delay: '-15s' },
-            { text: 'Αγιογραφία', top: '60%', animation: 'float-down 22s infinite linear', size: 'small', delay: '-8s' },
-            { text: 'Света Литургија', top: '70%', animation: 'float-right 26s infinite linear', delay: '-12s' },
-            { text: 'Παναγία', top: '80%', animation: 'float-left 32s infinite linear', size: 'large', delay: '-18s' },
-        ];
-
-        setFloatingTexts(initialTexts.map((item, index) => ({
-            id: index,
-            text: item.text,
-            style: {
-                top: item.top,
-                animation: item.animation,
-                animationDelay: item.delay || '0s',
-                fontSize: item.size === 'large' ? '2rem' : item.size === 'small' ? '0.9rem' : '1.2rem',
-                color: item.size === 'large' ? 'rgba(212, 175, 55, 0.12)' : 'rgba(154, 127, 199, 0.15)',
-            }
-        })));
-
-        // Create new floating text periodically
-        const interval = setInterval(() => {
-            const newText = {
-                id: Date.now(),
-                text: phrases[Math.floor(Math.random() * phrases.length)],
-                style: {
-                    top: Math.random() * 80 + 10 + '%',
-                    left: Math.random() * 80 + 10 + '%',
-                    animation: `float-${animations[Math.floor(Math.random() * animations.length)]} ${20 + Math.random() * 20}s infinite linear`,
-                    animationDelay: `-${Math.random() * 20}s`,
-                    fontSize: sizes[Math.floor(Math.random() * sizes.length)] === 'large' ? '2rem' :
-                        sizes[Math.floor(Math.random() * sizes.length)] === 'small' ? '0.9rem' : '1.2rem',
-                    color: 'rgba(154, 127, 199, 0.15)',
-                }
-            };
-
-            setFloatingTexts(prev => [...prev, newText]);
-
-            // Remove after animation
-            setTimeout(() => {
-                setFloatingTexts(prev => prev.filter(item => item.id !== newText.id));
-            }, 40000);
-        }, 3000);
-
-        return () => {
-            clearInterval(interval);
-            document.head.removeChild(styleSheet);
-        };
-    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -359,11 +40,9 @@ const OrthodoxLogin: React.FC = () => {
             console.log('🔑 User email:', email);
             console.log('🔑 Redirect URL:', result.redirectUrl);
 
-            // Get the user from localStorage (set by AuthService.login)
             const storedUserStr = localStorage.getItem('auth_user');
             const currentUser = storedUserStr ? JSON.parse(storedUserStr) : null;
 
-            // Check if user is a priest and redirect to baptism records
             if (currentUser?.role === 'priest' && currentUser?.church_id) {
                 const redirectPath = `/apps/records/baptism?church_id=${currentUser.church_id}`;
                 console.log('🔑 Priest user detected, redirecting to:', redirectPath);
@@ -371,12 +50,10 @@ const OrthodoxLogin: React.FC = () => {
                 return;
             }
 
-            // Use the redirect URL from the server response if provided
             if (result.redirectUrl) {
                 console.log('🔑 Redirecting to:', result.redirectUrl);
                 navigate(result.redirectUrl);
             } else {
-                // Fallback to default redirect
                 console.log('🔑 No redirect URL provided, using default navigation to "/"');
                 navigate('/');
             }
@@ -387,143 +64,241 @@ const OrthodoxLogin: React.FC = () => {
         }
     };
 
+    const features = [
+        { title: 'Digital Records Management', desc: 'Comprehensive digitization of baptisms, marriages, funerals, and other sacred records' },
+        { title: 'Liturgical Calendar Integration', desc: 'Seamlessly integrate with Orthodox liturgical calendar and feast days' },
+        { title: 'Multi-language Support', desc: 'Full support for Greek, Russian, Romanian, and English text recognition' },
+        { title: 'Secure Cloud Storage', desc: 'Enterprise-grade security for your most precious parish documents' },
+    ];
+
     return (
-        <LoginContainer className="login-container">
-            {/* Floating Background Text */}
-            {floatingTexts.map((item) => (
-                <Box
-                    key={item.id}
-                    sx={{
-                        position: 'absolute',
-                        fontWeight: 300,
-                        pointerEvents: 'none',
-                        whiteSpace: 'nowrap',
-                        zIndex: 1,
-                        ...item.style
-                    }}
-                >
-                    {item.text}
-                </Box>
-            ))}
+        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#faf8f5' }}>
+            <Container maxWidth="lg" sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', py: 4 }}>
+                <Grid container spacing={6} alignItems="center">
+                    {/* Left: Branding + Features */}
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        {/* Logo + Brand */}
+                        <Stack direction="row" alignItems="center" spacing={1.5} mb={3}>
+                            <Box
+                                component="img"
+                                src="/images/logos/om-logo.png"
+                                alt="OrthodoxMetrics"
+                                sx={{ width: 40, height: 40, borderRadius: '50%' }}
+                            />
+                            <Typography variant="h6" sx={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontWeight: 700, color: '#D4AF37' }}>
+                                OrthodoxMetrics
+                            </Typography>
+                        </Stack>
 
-            <MainContainer>
-                <LeftSection>
-                    <OrthodoxCross>
-                        <Box className="upper-bar" />
-                        <Box className="lower-bar" />
-                    </OrthodoxCross>
+                        <Typography variant="caption" sx={{ color: '#7B4F9E', fontWeight: 500, letterSpacing: 0.5, mb: 1, display: 'block' }}>
+                            Sacred Records Management for Orthodox Communities
+                        </Typography>
 
-                    <BrandTitle>Orthodox Metrics LLC.</BrandTitle>
-                    <BrandSubtitle>Recording the Saints Among Us</BrandSubtitle>
+                        <Typography
+                            variant="h4"
+                            sx={{
+                                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                                fontWeight: 600,
+                                color: '#1a1a1a',
+                                lineHeight: 1.3,
+                                mb: 2,
+                                fontSize: { xs: '1.5rem', md: '2rem' },
+                            }}
+                        >
+                            Digitize, preserve, and manage your parish records with reverence and precision.
+                        </Typography>
 
-                    <BrandDescription>
-                        Google vision powered OCR with intelligent text recognition and data extraction, topped off with versatile digital reporting and analytics. Preserving our sacred heritage for future generations through cutting-edge technology. digitization of handwritten Orthodox records in Greek, Russian, Romanian,
-                        and more.
-                    </BrandDescription>
-                </LeftSection>
+                        <Typography variant="body1" sx={{ color: '#555', mb: 3, lineHeight: 1.7 }}>
+                            Supporting the canonical traditions of the Orthodox Church worldwide.
+                        </Typography>
 
-                <RightSection className="right-section">
-                    <LoginFormContainer>
-                        {alreadyLoggedIn ? (
-                            <>
-                                <LoginTitle>
-                                    Already Logged In
-                                </LoginTitle>
-                                <LoginSubtitle>
-                                    {user?.church_id 
-                                        ? 'Redirecting to Records UI...' 
-                                        : 'Redirecting to dashboard...'}
-                                </LoginSubtitle>
-                                <Box sx={{ mt: 3, textAlign: 'center' }}>
-                                    <Typography variant="body2" color="textSecondary">
+                        {/* Feature bullets */}
+                        <Stack spacing={1.5} mb={4}>
+                            {features.map((f, i) => (
+                                <Stack key={i} direction="row" spacing={1.5} alignItems="flex-start">
+                                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#D4AF37', mt: 0.8, flexShrink: 0 }} />
+                                    <Box>
+                                        <Typography variant="subtitle2" fontWeight={700}>{f.title}</Typography>
+                                        <Typography variant="caption" color="text.secondary">{f.desc}</Typography>
+                                    </Box>
+                                </Stack>
+                            ))}
+                        </Stack>
+
+                        {/* Action buttons */}
+                        {!alreadyLoggedIn && (
+                            <Stack direction="row" spacing={2} flexWrap="wrap">
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    onClick={() => document.getElementById('login-email')?.focus()}
+                                    sx={{
+                                        background: 'linear-gradient(135deg, #D4AF37, #F4D03F)',
+                                        color: '#1a0a2e',
+                                        fontWeight: 700,
+                                        textTransform: 'none',
+                                        borderRadius: '8px',
+                                        px: 3,
+                                        '&:hover': { background: 'linear-gradient(135deg, #c9a430, #e6c52e)' },
+                                    }}
+                                >
+                                    Sign In
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    href="/auth/register"
+                                    sx={{
+                                        backgroundColor: '#e74c3c',
+                                        color: '#fff',
+                                        fontWeight: 700,
+                                        textTransform: 'none',
+                                        borderRadius: '8px',
+                                        px: 3,
+                                        '&:hover': { backgroundColor: '#c0392b' },
+                                    }}
+                                >
+                                    Register Church
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    size="large"
+                                    href="/tour"
+                                    sx={{
+                                        borderColor: '#ccc',
+                                        color: '#555',
+                                        fontWeight: 600,
+                                        textTransform: 'none',
+                                        borderRadius: '8px',
+                                        px: 3,
+                                        '&:hover': { borderColor: '#999', backgroundColor: 'rgba(0,0,0,0.02)' },
+                                    }}
+                                >
+                                    How it Works
+                                </Button>
+                            </Stack>
+                        )}
+                    </Grid>
+
+                    {/* Right: Login form / decorative card */}
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <Box
+                            sx={{
+                                p: 4,
+                                borderRadius: '16px',
+                                backgroundColor: '#fff',
+                                boxShadow: '0 8px 40px rgba(0,0,0,0.08)',
+                                border: '1px solid rgba(0,0,0,0.06)',
+                                maxWidth: 420,
+                                mx: 'auto',
+                            }}
+                        >
+                            {alreadyLoggedIn ? (
+                                <Box sx={{ textAlign: 'center', py: 4 }}>
+                                    <Typography variant="h5" sx={{ color: '#7B4F9E', fontWeight: 600, mb: 1 }}>
+                                        Already Logged In
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" mb={2}>
+                                        {user?.church_id ? 'Redirecting to Records UI...' : 'Redirecting to dashboard...'}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
                                         {displayName ? `Welcome back, ${displayName}` : 'Welcome back'}
                                     </Typography>
                                 </Box>
-                            </>
-                        ) : (
-                            <>
-                                <LoginTitle>
-                                    {displayName ? `Welcome back, ${displayName}` : 'Welcome'}
-                                </LoginTitle>
-                                <LoginSubtitle>Sign in to your dashboard</LoginSubtitle>
+                            ) : (
+                                <>
+                                    <Typography variant="h5" sx={{ fontWeight: 600, color: '#1a1a1a', mb: 0.5, textAlign: 'center' }}>
+                                        {displayName ? `Welcome back, ${displayName}` : 'Welcome'}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: '#888', mb: 3, textAlign: 'center' }}>
+                                        Sign in to your dashboard
+                                    </Typography>
 
-                                <form onSubmit={handleSubmit}>
-                            <StyledTextField
-                                fullWidth
-                                type="email"
-                                label="Email Address"
-                                placeholder="Enter your email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                variant="outlined"
-                                inputProps={{ autoComplete: "username" }}
-                            />
-
-                            <StyledTextField
-                                fullWidth
-                                type="password"
-                                label="Password"
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                variant="outlined"
-                                inputProps={{ autoComplete: "current-password" }}
-                            />
-
-                            {error && (
-                                <Typography color="error" sx={{ mb: 2, textAlign: 'center' }}>
-                                    {error}
-                                </Typography>
-                            )}
-
-
-
-                            <FormOptions>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={rememberMe}
-                                            onChange={(e) => setRememberMe(e.target.checked)}
-                                            sx={{ color: '#9A7FC7' }}
+                                    <form onSubmit={handleSubmit}>
+                                        <TextField
+                                            id="login-email"
+                                            fullWidth
+                                            type="email"
+                                            label="Email Address"
+                                            placeholder="Enter your email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                            variant="outlined"
+                                            size="small"
+                                            inputProps={{ autoComplete: 'username' }}
+                                            sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
                                         />
-                                    }
-                                    label="Remember me"
-                                    sx={{ color: '#666' }}
-                                />
-                                <Typography
-                                    component="a"
-                                    href="#"
-                                    sx={{
-                                        color: '#9A7FC7',
-                                        textDecoration: 'none',
-                                        fontSize: '0.9rem',
-                                        '&:hover': { textDecoration: 'underline' }
-                                    }}
-                                >
-                                    Forgot password?
-                                </Typography>
-                            </FormOptions>
+                                        <TextField
+                                            fullWidth
+                                            type="password"
+                                            label="Password"
+                                            placeholder="Enter your password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                            variant="outlined"
+                                            size="small"
+                                            inputProps={{ autoComplete: 'current-password' }}
+                                            sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+                                        />
 
-                            <SignInButton
-                                type="submit"
-                                disabled={loading}
-                                variant="contained"
-                            >
-                                {loading ? 'Signing In...' : 'Sign In'}
-                            </SignInButton>
-                        </form>
+                                        {error && (
+                                            <Typography color="error" sx={{ mb: 2, textAlign: 'center', fontSize: '0.85rem' }}>
+                                                {error}
+                                            </Typography>
+                                        )}
 
-                        <CreateAccount>
-                            Don't have an account? <a href="#">Create one here</a>
-                        </CreateAccount>
-                            </>
-                        )}
-                    </LoginFormContainer>
-                </RightSection>
-            </MainContainer>
-        </LoginContainer>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                                            <FormControlLabel
+                                                control={<Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} size="small" sx={{ color: '#D4AF37' }} />}
+                                                label={<Typography variant="caption">Remember me</Typography>}
+                                            />
+                                            <Typography component="a" href="#" variant="caption" sx={{ color: '#7B4F9E', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                                                Forgot password?
+                                            </Typography>
+                                        </Box>
+
+                                        <Button
+                                            type="submit"
+                                            fullWidth
+                                            disabled={loading}
+                                            variant="contained"
+                                            sx={{
+                                                background: 'linear-gradient(135deg, #D4AF37, #F4D03F)',
+                                                color: '#1a0a2e',
+                                                fontWeight: 700,
+                                                py: 1.2,
+                                                borderRadius: '8px',
+                                                textTransform: 'none',
+                                                fontSize: '0.95rem',
+                                                '&:hover': { background: 'linear-gradient(135deg, #c9a430, #e6c52e)', boxShadow: '0 4px 12px rgba(212,175,55,0.3)' },
+                                            }}
+                                        >
+                                            {loading ? 'Signing In...' : 'Sign In'}
+                                        </Button>
+                                    </form>
+
+                                    <Typography variant="body2" sx={{ textAlign: 'center', mt: 2, color: '#888' }}>
+                                        Don't have an account?{' '}
+                                        <Typography component="a" href="/auth/register" sx={{ color: '#7B4F9E', textDecoration: 'none', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}>
+                                            Create one here
+                                        </Typography>
+                                    </Typography>
+                                </>
+                            )}
+                        </Box>
+                    </Grid>
+                </Grid>
+            </Container>
+
+            {/* Bottom bar */}
+            <Box sx={{ py: 2, textAlign: 'center', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                <Typography variant="caption" color="text.secondary">
+                    Trusted by Orthodox communities worldwide
+                </Typography>
+            </Box>
+        </Box>
     );
 };
 
