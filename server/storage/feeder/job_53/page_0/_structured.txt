@@ -1,7 +1,0 @@
-=== Structured Table Extraction (generic_table_v1) ===
-Columns: 4 | Rows: 1
-
---- Table 1 (4 columns, 2 rows) ---
- | Ha BIRTHS RISTPHчеCKÓй KHHIN NA Счеть родив : M'kcauz и день | ГОДА 1978 , ЧАСТЬ ПЕРЕНА , ПО РОДИВШИХСЯ Званіе , има , | .
------------------------------------------------------------------------------------------------------------------------------
- | шихся . Званіе , имя , отчество и . Замнала родителей , и какого Мужеска Имена родившихся вероисповеданім . полд . Женска ΠΟΛΑ . рожде . HIA HIA . MALE NUMBER FEMALE BIRTH DATES BAPTIS А NAME OF CHILD CITY OF BIRTH FATHER'S FULL NAME . MOTHER'S MAIDEN NAME S : M | 12/31/772/19/18 KRISTINA ANN GEORGE BARNOSKY LAURA PIETROCHA SOMERVILLEN.J . ( ORTHODOX ) ( R.c. ) 2 . 7/15/788/21/78 ALLA ALISON PAIGE ALAN BEATTY PATRICIAMSOFK O SOMERVILLE , N.J. ( METHODIST ) ( ORTHODOX ) 3 7/31/78/9/10/18 REBECCA ANN SOMERVILLE N.J. PETER SIBILIA , BARBARA ( R.C. ) ORTHOOOK A. SOFRO ( ) 4 8/25/18 1/27/78 Richard Lawrence Richard Kloss Orth Sharon New Brunswick , N..J . ( ) Sudol ( orth ) | отчетко и фамил воспріємникова . FULL NAMES OF SPONSORS THEODORE S. PIETRUCHA OLGA ( R.c. ) PISCADLO ( ORTHODOX ) JAMES e.c. ) BEATTY NATALIE ( BREYAN ( OR THE Dox ) DENICE SALERNO ( R.C. ) ROBERT STEINKOPF ( R.C. PATRICIA ) M. ORTANDOX BEATTY ( ) Robert Sudol Katherine Sudol | Кто совершали таниство крошені . PRIEST'S NAME PR . EVGENG D. TARRES CERT # 75 -1 FR . EUGENE D. TARRU Секти 28-2 FR , EUGENE D. TARRIS CERT # 78-3 Fr. James Parsells

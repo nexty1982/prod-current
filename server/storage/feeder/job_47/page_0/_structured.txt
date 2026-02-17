@@ -1,8 +1,0 @@
-=== Structured Table Extraction (generic_table_v1) ===
-Columns: 4 | Rows: 2
-
---- Table 1 (4 columns, 3 rows) ---
-МЕТРИЧЕСКОЙ Книги DEATHS GчITS набрашнув . Мемця й день . И кстопроисхожденіє , имя , отчество й фамилім о . | на мёршагw . обмершаги AKTÁ . | 2004 года YEAR , часть | H HOHI NP : not треТІМ parishione , И ОМЕРШИХА .
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Женска смерти . погребенім . UMBER FEMALE DEATH DATE OF BURIAL FULL Н NAME OF DECEDENT 1 Jan. S Jan. 9 Anna Sudiz 2 / Mar . 19 Mar. 22 Anna Lesneski ( NP ) 3 June 7 Junelo Helen Kuling 4 July 19 July 26 Annz Lebedz ( NP ) 5 / July 24 July 28 Elizabeth ( Pletos ) Tyerech ( NP | Мужеска . Женска . MALO AGE N E E 96 81 89 91 ) 86 | С чего отмеря . CAUSE OF DEATH 12t4-21 respirator frilue Breast Cancer | Кто исповедываля й проваля . Кто совершали погрованіе , и гдѣ погревены . NAME ADMINISTERED OF PRIEST SACRAMENTS WHO NAME OF BURIAL PRIEST AND WHO PLACE OFFICIATED OF INTERNMENT AT F. Ss . Janes Petant Paul Parsells Corety Plot 894 для B F .. Somerset Jues Pawells Hills Cemet Fr. Jaes Parsells Ss . petent Paul Cenety Plot 899 gre драв B
-6 Nov. 12 Nov , IS Olga Skopak 7 Nov. 21 Nov.27 Ann Zeban 8 Dec. 10 Dee . 15 Ann Marie Krzlorich | 87 88 81 | cardiputrony arrest acute myoczodid inforatin | F. Jaes Parsells ss . Petard Paul сед cemety Fr. Jues Parsels Rosehill Cemety , Linden Fr. Jas Panels St. Usadini's Cerety Jackson , NJ Fr. Jaes Parfells Ss . Peta + Pau ) corety F. , Jaes Panella Ss . Peter & Paul centy
