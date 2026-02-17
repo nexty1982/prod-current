@@ -637,6 +637,7 @@ const BasicInformationStep: React.FC<{ formik: any }> = ({ formik }) => (
         <InputLabel>Country</InputLabel>
         <Select
           name="country"
+          label="Country"
           value={formik.values.country}
           onChange={formik.handleChange}
           error={formik.touched.country && Boolean(formik.errors.country)}
@@ -657,6 +658,7 @@ const BasicInformationStep: React.FC<{ formik: any }> = ({ formik }) => (
         <InputLabel>Language</InputLabel>
         <Select
           name="preferred_language"
+          label="Language"
           value={formik.values.preferred_language}
           onChange={formik.handleChange}
         >
@@ -674,6 +676,7 @@ const BasicInformationStep: React.FC<{ formik: any }> = ({ formik }) => (
         <InputLabel>Currency</InputLabel>
         <Select
           name="currency"
+          label="Currency"
           value={formik.values.currency}
           onChange={formik.handleChange}
         >
@@ -1185,6 +1188,7 @@ const CustomFieldDialog: React.FC<{
             <FormControl fullWidth>
               <InputLabel>Table</InputLabel>
               <Select
+                label="Table"
                 value={fieldData.table_name || ''}
                 onChange={(e) => setFieldData({ ...fieldData, table_name: e.target.value })}
               >
@@ -1209,6 +1213,7 @@ const CustomFieldDialog: React.FC<{
             <FormControl fullWidth>
               <InputLabel>Field Type</InputLabel>
               <Select
+                label="Field Type"
                 value={fieldData.field_type || 'VARCHAR'}
                 onChange={(e) => setFieldData({ ...fieldData, field_type: e.target.value as any })}
               >
@@ -1347,6 +1352,7 @@ const UserDialog: React.FC<{
             <FormControl fullWidth>
               <InputLabel>Role</InputLabel>
               <Select
+                label="Role"
                 value={userData.role || 'user'}
                 onChange={(e) => setUserData({ ...userData, role: e.target.value as any })}
               >

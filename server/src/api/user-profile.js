@@ -12,63 +12,52 @@ router.get('/', requireAuth, async (req, res) => {
             return res.status(401).json({ success: false, message: 'User not authenticated' });
         }
 
-        // Get user profile data
-        const [profiles] = await getAppPool().query(`
-            SELECT 
-                up.*,
-                u.first_name,
-                u.last_name,
-                u.email,
-                u.role
-            FROM user_profiles up
-            RIGHT JOIN orthodoxmetrics_db.users u ON up.user_id = u.id
-            WHERE u.id = ?
+        // Get user data with profile_attributes from users table
+        const [users] = await getAppPool().query(`
+            SELECT id, first_name, last_name, email, role, profile_attributes
+            FROM orthodoxmetrics_db.users 
+            WHERE id = ?
         `, [userId]);
 
         let profileData = {};
-        if (profiles.length > 0) {
-            const profile = profiles[0];
-            profileData = {
-                id: profile.id,
-                user_id: profile.user_id,
-                display_name: profile.display_name || `${profile.first_name} ${profile.last_name}`,
-                bio: profile.bio,
-                location: profile.location,
-                website: profile.website,
-                birthday: profile.birthday,
-                status_message: profile.status_message,
-                profile_theme: profile.profile_theme || 'default',
-                profile_image_url: profile.profile_image_url,
-                cover_image_url: profile.cover_image_url,
-                is_online: profile.is_online,
-                last_seen: profile.last_seen,
-                privacy_settings: profile.privacy_settings,
-                social_links: profile.social_links,
-                job_title: profile.job_title,
-                company: profile.company,
-                phone: profile.phone,
-                // User basic info
-                first_name: profile.first_name,
-                last_name: profile.last_name,
-                email: profile.email,
-                role: profile.role
-            };
-        } else {
-            // Return basic user info if no profile exists
-            const [users] = await getAppPool().query('SELECT * FROM orthodoxmetrics_db.users WHERE id = ?', [userId]);
-            if (users.length > 0) {
-                const user = users[0];
-                profileData = {
-                    user_id: user.id,
-                    display_name: `${user.first_name} ${user.last_name}`,
-                    first_name: user.first_name,
-                    last_name: user.last_name,
-                    email: user.email,
-                    role: user.role,
-                    profile_image_url: null,
-                    cover_image_url: null
-                };
+        if (users.length > 0) {
+            const user = users[0];
+            // Parse profile_attributes JSON
+            let attrs = {};
+            if (user.profile_attributes) {
+                try {
+                    attrs = typeof user.profile_attributes === 'string' 
+                        ? JSON.parse(user.profile_attributes) 
+                        : user.profile_attributes;
+                } catch (e) {
+                    attrs = {};
+                }
             }
+
+            profileData = {
+                user_id: user.id,
+                display_name: attrs.display_name || `${user.first_name} ${user.last_name}`,
+                bio: attrs.bio,
+                location: attrs.location,
+                website: attrs.website,
+                birthday: attrs.birthday,
+                status_message: attrs.status_message,
+                profile_theme: attrs.profile_theme || 'default',
+                profile_image_url: attrs.profile_image_url,
+                cover_image_url: attrs.cover_image_url,
+                privacy_settings: attrs.privacy_settings,
+                social_links: attrs.social_links,
+                job_title: attrs.job_title,
+                company: attrs.company,
+                phone: attrs.phone,
+                currency: attrs.currency,
+                church_affiliation: attrs.church_affiliation,
+                // User basic info
+                first_name: user.first_name,
+                last_name: user.last_name,
+                email: user.email,
+                role: user.role
+            };
         }
 
         res.json({
@@ -109,94 +98,38 @@ router.put('/', requireAuth, async (req, res) => {
             currency
         } = req.body;
 
-        // Check if profile exists
-        const [existingProfiles] = await getAppPool().query(
-            'SELECT id FROM user_profiles WHERE user_id = ?',
-            [userId]
-        );
+        // Build profile attributes object to store in JSON column
+        const profileAttrs = {};
+        const fieldMap = {
+            display_name, bio, location, website, birthday, status_message,
+            profile_theme, profile_image_url, cover_image_url,
+            church_affiliation, job_title, company, phone, currency
+        };
 
-        if (existingProfiles.length > 0) {
-            // Build dynamic update - only update fields that were provided
-            const updateFields = [];
-            const updateValues = [];
-            const fieldMap = {
-                display_name, bio, location, website, birthday, status_message,
-                profile_theme, profile_image_url, cover_image_url,
-                church_affiliation, job_title, company, phone, currency
-            };
-
-            for (const [key, value] of Object.entries(fieldMap)) {
-                if (value !== undefined) {
-                    updateFields.push(`${key} = ?`);
-                    updateValues.push(value);
-                }
+        for (const [key, value] of Object.entries(fieldMap)) {
+            if (value !== undefined) {
+                profileAttrs[key] = value;
             }
-
-            // Handle JSON fields separately
-            if (privacy_settings !== undefined) {
-                updateFields.push('privacy_settings = ?');
-                updateValues.push(JSON.stringify(privacy_settings));
-            }
-            if (social_links !== undefined) {
-                updateFields.push('social_links = ?');
-                updateValues.push(JSON.stringify(social_links));
-            }
-
-            if (updateFields.length > 0) {
-                updateFields.push('updated_at = CURRENT_TIMESTAMP');
-                updateValues.push(userId);
-                await getAppPool().query(`
-                    UPDATE user_profiles SET ${updateFields.join(', ')}
-                    WHERE user_id = ?
-                `, updateValues);
-            }
-
-            console.log(`📸 User profile updated for user ${userId}`);
-        } else {
-            // user_profiles is a view on users, so update users table directly
-            const updateFields = [];
-            const updateValues = [];
-            const fieldMap = {
-                display_name, bio, location, website, birthday, status_message,
-                profile_theme, profile_image_url, cover_image_url,
-                church_affiliation, job_title, company, phone, currency
-            };
-
-            // Map view column names to users table column names
-            const columnMap = {
-                profile_theme: 'ui_theme',
-                profile_image_url: 'avatar_url',
-                cover_image_url: 'banner_url'
-            };
-
-            for (const [key, value] of Object.entries(fieldMap)) {
-                if (value !== undefined) {
-                    const col = columnMap[key] || key;
-                    updateFields.push(`${col} = ?`);
-                    updateValues.push(value);
-                }
-            }
-
-            if (privacy_settings !== undefined) {
-                updateFields.push('privacy_settings = ?');
-                updateValues.push(JSON.stringify(privacy_settings));
-            }
-            if (social_links !== undefined) {
-                updateFields.push('social_links = ?');
-                updateValues.push(JSON.stringify(social_links));
-            }
-
-            if (updateFields.length > 0) {
-                updateFields.push('updated_at = CURRENT_TIMESTAMP');
-                updateValues.push(userId);
-                await getAppPool().query(`
-                    UPDATE orthodoxmetrics_db.users SET ${updateFields.join(', ')}
-                    WHERE id = ?
-                `, updateValues);
-            }
-
-            console.log(`📸 User profile created/updated for user ${userId}`);
         }
+
+        if (privacy_settings !== undefined) {
+            profileAttrs.privacy_settings = privacy_settings;
+        }
+        if (social_links !== undefined) {
+            profileAttrs.social_links = social_links;
+        }
+
+        if (Object.keys(profileAttrs).length > 0) {
+            // Merge with existing profile_attributes
+            await getAppPool().query(`
+                UPDATE orthodoxmetrics_db.users 
+                SET profile_attributes = JSON_MERGE_PATCH(COALESCE(profile_attributes, '{}'), ?),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            `, [JSON.stringify(profileAttrs), userId]);
+        }
+
+        console.log(`📸 User profile updated for user ${userId}`);
 
         res.json({
             success: true,
@@ -219,42 +152,22 @@ router.put('/images', requireAuth, async (req, res) => {
 
         const { profile_image_url, cover_image_url } = req.body;
 
-        // Check if profile exists
-        const [existingProfiles] = await getAppPool().query(
-            'SELECT id FROM user_profiles WHERE user_id = ?',
-            [userId]
-        );
+        // Build profile attributes for images
+        const profileAttrs = {};
+        if (profile_image_url !== undefined) {
+            profileAttrs.profile_image_url = profile_image_url;
+        }
+        if (cover_image_url !== undefined) {
+            profileAttrs.cover_image_url = cover_image_url;
+        }
 
-        if (existingProfiles.length > 0) {
-            // Update existing profile images
-            const updateFields = [];
-            const updateValues = [];
-
-            if (profile_image_url !== undefined) {
-                updateFields.push('profile_image_url = ?');
-                updateValues.push(profile_image_url);
-            }
-
-            if (cover_image_url !== undefined) {
-                updateFields.push('cover_image_url = ?');
-                updateValues.push(cover_image_url);
-            }
-
-            if (updateFields.length > 0) {
-                updateFields.push('updated_at = CURRENT_TIMESTAMP');
-                updateValues.push(userId);
-
-                await getAppPool().query(`
-                    UPDATE user_profiles SET ${updateFields.join(', ')}
-                    WHERE user_id = ?
-                `, updateValues);
-            }
-        } else {
-            // Create new profile with just the images
+        if (Object.keys(profileAttrs).length > 0) {
             await getAppPool().query(`
-                INSERT INTO user_profiles (user_id, profile_image_url, cover_image_url, created_at, updated_at)
-                VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            `, [userId, profile_image_url || null, cover_image_url || null]);
+                UPDATE orthodoxmetrics_db.users 
+                SET profile_attributes = JSON_MERGE_PATCH(COALESCE(profile_attributes, '{}'), ?),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            `, [JSON.stringify(profileAttrs), userId]);
         }
 
         console.log(`📸 Profile images updated for user ${userId}: profile=${profile_image_url || 'unchanged'}, cover=${cover_image_url || 'unchanged'}`);

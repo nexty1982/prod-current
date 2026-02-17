@@ -2023,8 +2023,49 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
 
                   {/* Conditional Table Rendering */}
                 {useAgGrid ? (
-                  // AG Grid View
-                  <Box sx={{ height: 600, width: '100%' }} className={isDarkMode ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'}>
+                  // AG Grid View — inherits table theme colors
+                  <Box
+                    sx={{
+                      height: 600,
+                      width: '100%',
+                      // Override AG Grid CSS variables to match the table theme
+                      '& .ag-header': {
+                        backgroundColor: `${tableTheme.headerColor} !important`,
+                        color: `${tableTheme.headerTextColor} !important`,
+                      },
+                      '& .ag-header-cell': {
+                        color: `${tableTheme.headerTextColor} !important`,
+                      },
+                      '& .ag-header-cell-label': {
+                        color: `${tableTheme.headerTextColor} !important`,
+                      },
+                      '& .ag-icon': {
+                        color: `${tableTheme.headerTextColor} !important`,
+                      },
+                      '& .ag-row-even': {
+                        backgroundColor: tableTheme.rowColor,
+                      },
+                      '& .ag-row-odd': {
+                        backgroundColor: tableTheme.rowAlternateColor,
+                      },
+                      '& .ag-row:hover': {
+                        backgroundColor: `${tableTheme.hoverColor} !important`,
+                      },
+                      '& .ag-row-selected': {
+                        backgroundColor: `${tableTheme.selectedColor} !important`,
+                      },
+                      '& .ag-cell': {
+                        color: tableTheme.cellTextColor,
+                        fontSize: `${tableTheme.fontSize}px`,
+                        fontFamily: tableTheme.fontFamily,
+                      },
+                      '& .ag-root-wrapper': {
+                        borderRadius: `${tableTheme.borderRadius}px`,
+                        border: `${tableTheme.borderWidth}px solid ${tableTheme.borderColor}`,
+                      },
+                    }}
+                    className={isDarkMode ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'}
+                  >
                     <AgGridReact
                       rowData={filteredAndSortedRecords}
                       columnDefs={agGridColumnDefs}

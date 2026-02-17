@@ -162,6 +162,16 @@ const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools
 const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-operations/GitOperations')));
 const ConversationLogPage = Loadable(lazy(() => import('../features/devel-tools/conversation-log/ConversationLogPage')));
 
+/* ****Berry Components***** */
+const BerryLeadManagementPage = Loadable(lazy(() => import('../features/berry-crm/BerryLeadManagementPage')));
+const BerryContactManagementPage = Loadable(lazy(() => import('../features/berry-crm/BerryContactManagementPage')));
+const BerrySalesManagementPage = Loadable(lazy(() => import('../features/berry-crm/BerrySalesManagementPage')));
+const BerryCalendarPage = Loadable(lazy(() => import('../features/berry-calendar/BerryCalendarPage')));
+const BerryMapPage = Loadable(lazy(() => import('../features/berry-map/BerryMapPage')));
+const BerryCardGalleryPage = Loadable(lazy(() => import('../features/berry-cards/BerryCardGalleryPage')));
+const BerryAccountSettingsPage = Loadable(lazy(() => import('../features/berry-profile-02/BerryAccountSettingsPage')));
+const BerryAccountProfilePage = Loadable(lazy(() => import('../features/berry-profile-03/BerryAccountProfilePage')));
+
 // Removed: JITTerminal, JITTerminalConsole
 
 // AI Lab
@@ -1441,6 +1451,91 @@ const Router = [
 
       // Removed: All UI component routes (misc-legacy)
       // Removed: All page routes (misc-legacy)
+
+      // =====================================================
+      // BERRY COMPONENT ROUTES (Stage 1 - Prototype)
+      // =====================================================
+      {
+        path: '/berry/crm/leads',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="berry-crm-leads" priority={1} featureName="Berry CRM Leads">
+              <BerryLeadManagementPage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/berry/crm/contacts',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="berry-crm-contacts" priority={1} featureName="Berry CRM Contacts">
+              <BerryContactManagementPage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/berry/crm/sales',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="berry-crm-sales" priority={1} featureName="Berry CRM Sales">
+              <BerrySalesManagementPage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/berry/calendar',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="berry-calendar" priority={1} featureName="Berry Calendar">
+              <BerryCalendarPage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/berry/map',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="berry-map" priority={1} featureName="Berry Map">
+              <BerryMapPage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/berry/cards',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="berry-cards" priority={1} featureName="Berry Card Gallery">
+              <BerryCardGalleryPage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/berry/profile/settings',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="berry-profile-02" priority={1} featureName="Berry Account Settings">
+              <BerryAccountSettingsPage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/berry/profile/account',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="berry-profile-03" priority={1} featureName="Berry Account Profile">
+              <BerryAccountProfilePage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+
       { path: '/tables/basic', element: <BasicTable /> },
       { path: '/tables/enhanced', element: <EnhanceTable /> },
       { path: '/tables/pagination', element: <PaginationTable /> },

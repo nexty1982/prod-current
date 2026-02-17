@@ -4,6 +4,8 @@ import {
     IconBell,
     IconBorderAll,
     IconBug,
+    IconCalendar,
+    IconCards,
     IconCheckbox,
     IconDatabase,
     IconEdit,
@@ -11,6 +13,7 @@ import {
     IconGitBranch,
     IconLayout,
     IconLayoutDashboard,
+    IconMap,
     IconMessage,
     IconNotes,
     IconPalette,
@@ -21,6 +24,7 @@ import {
     IconSitemap,
     IconTerminal,
     IconTool,
+    IconUser,
     IconUserPlus,
     IconUsers,
     IconWriting,
@@ -395,6 +399,78 @@ const Menuitems: MenuitemsType[] = [
     title: 'OM Tasks',
     icon: IconEdit,
     href: '/devel-tools/om-tasks',
+  },
+
+  // ========================================================================
+  // BERRY COMPONENTS (super_admin only, stage 1 prototypes)
+  // ========================================================================
+  {
+    navlabel: true,
+    subheader: 'Berry Components',
+  },
+  {
+    id: uniqueId(),
+    title: 'CRM',
+    icon: IconUsers,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Lead Management',
+        icon: IconPoint,
+        href: '/berry/crm/leads',
+      },
+      {
+        id: uniqueId(),
+        title: 'Contact Management',
+        icon: IconPoint,
+        href: '/berry/crm/contacts',
+      },
+      {
+        id: uniqueId(),
+        title: 'Sales Management',
+        icon: IconPoint,
+        href: '/berry/crm/sales',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Calendar',
+    icon: IconCalendar,
+    href: '/berry/calendar',
+  },
+  {
+    id: uniqueId(),
+    title: 'Map',
+    icon: IconMap,
+    href: '/berry/map',
+  },
+  {
+    id: uniqueId(),
+    title: 'Card Gallery',
+    icon: IconCards,
+    href: '/berry/cards',
+  },
+  {
+    id: uniqueId(),
+    title: 'Profiles',
+    icon: IconUser,
+    href: '#',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Account Settings',
+        icon: IconPoint,
+        href: '/berry/profile/settings',
+      },
+      {
+        id: uniqueId(),
+        title: 'Account Profile',
+        icon: IconPoint,
+        href: '/berry/profile/account',
+      },
+    ],
   },
 
   // ========================================================================

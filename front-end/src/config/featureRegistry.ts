@@ -68,6 +68,14 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   // ── Stage 1: Prototype ─────────────────────────────────────
   { id: 'us-church-map', name: 'US Church Map', stage: 1, route: '/devel-tools/us-church-map', since: '2026-02-01' },
   { id: 'live-table-builder', name: 'Live Table Builder', stage: 1, route: '/devel-tools/live-table-builder', since: '2026-01-20' },
+  { id: 'berry-crm-leads', name: 'Berry CRM Leads', stage: 1, route: '/berry/crm/leads', since: '2026-02-17' },
+  { id: 'berry-crm-contacts', name: 'Berry CRM Contacts', stage: 1, route: '/berry/crm/contacts', since: '2026-02-17' },
+  { id: 'berry-crm-sales', name: 'Berry CRM Sales', stage: 1, route: '/berry/crm/sales', since: '2026-02-17' },
+  { id: 'berry-calendar', name: 'Berry Calendar', stage: 1, route: '/berry/calendar', since: '2026-02-17' },
+  { id: 'berry-map', name: 'Berry Map', stage: 1, route: '/berry/map', since: '2026-02-17' },
+  { id: 'berry-cards', name: 'Berry Card Gallery', stage: 1, route: '/berry/cards', since: '2026-02-17' },
+  { id: 'berry-profile-02', name: 'Berry Account Settings', stage: 1, route: '/berry/profile/settings', since: '2026-02-17' },
+  { id: 'berry-profile-03', name: 'Berry Account Profile', stage: 1, route: '/berry/profile/account', since: '2026-02-17' },
 ];
 
 // ────────────────────────────────────────────────────────────
