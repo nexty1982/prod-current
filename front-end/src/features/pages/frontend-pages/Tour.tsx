@@ -9,7 +9,6 @@
 
 import C2a from '@/components/frontend-pages/shared/c2a';
 import Footer from '@/components/frontend-pages/shared/footer';
-import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
 import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import {
@@ -47,9 +46,9 @@ const Tour: React.FC = () => {
 
   const tourSteps: TourStep[] = [
     {
-      title: 'Welcome to OrthodoxMetrics',
+      title: 'Welcome to Orthodox Metrics',
       description: 'Get started with your church record management',
-      content: 'OrthodoxMetrics is a comprehensive platform designed to help you manage and organize your church records efficiently. This tour will guide you through the key features.',
+      content: 'Orthodox Metrics is a comprehensive platform designed to help you manage and organize your church records efficiently. This tour will guide you through the key features.',
     },
     {
       title: 'Dashboard Overview',
@@ -97,7 +96,6 @@ const Tour: React.FC = () => {
 
   return (
     <Box>
-      <HeaderAlert />
       <HpHeader />
 
       {/* Banner */}
@@ -182,7 +180,7 @@ const Tour: React.FC = () => {
                   Tour Complete!
                 </Typography>
                 <Typography variant="body2">
-                  You're all set to start using OrthodoxMetrics. Click the button below to go to your dashboard.
+                  You're all set to start using Orthodox Metrics. Click the button below to go to your dashboard.
                 </Typography>
                 <Button
                   variant="contained"

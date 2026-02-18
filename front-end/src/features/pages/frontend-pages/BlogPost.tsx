@@ -55,9 +55,9 @@ const BlogPost: React.FC = () => {
         const mockPost: BlogPostData = {
           id: id ? parseInt(id) : 1,
           slug: slug || `post-${id || 1}`,
-          title: 'Getting Started with OrthodoxMetrics',
+          title: 'Getting Started with Orthodox Metrics',
           content: `
-            <p>Welcome to OrthodoxMetrics! This comprehensive guide will help you get started with managing your church records.</p>
+            <p>Welcome to Orthodox Metrics! This comprehensive guide will help you get started with managing your church records.</p>
             
             <h2>Setting Up Your Account</h2>
             <p>First, you'll need to create an account and set up your church profile. Navigate to the settings page and fill in your church information.</p>
@@ -66,7 +66,7 @@ const BlogPost: React.FC = () => {
             <p>Once your account is set up, you can start adding records. Use the "Add Record" button to create new entries for baptisms, marriages, and other important events.</p>
             
             <h2>Using OCR</h2>
-            <p>OrthodoxMetrics includes powerful OCR (Optical Character Recognition) technology that can help you digitize paper records. Simply upload scanned documents and let the system extract the information automatically.</p>
+            <p>Orthodox Metrics includes powerful OCR (Optical Character Recognition) technology that can help you digitize paper records. Simply upload scanned documents and let the system extract the information automatically.</p>
             
             <h2>Best Practices</h2>
             <ul>
@@ -78,7 +78,7 @@ const BlogPost: React.FC = () => {
             
             <p>For more information, please contact our support team or check out our other blog posts.</p>
           `,
-          excerpt: 'Learn how to set up your church on OrthodoxMetrics and start managing records.',
+          excerpt: 'Learn how to set up your church on Orthodox Metrics and start managing records.',
           author: 'Admin',
           date: '2024-01-15',
           category: 'Getting Started',
@@ -123,7 +123,6 @@ const BlogPost: React.FC = () => {
 
   return (
     <Box>
-      <HeaderAlert />
       <HpHeader />
 
       {/* Banner */}

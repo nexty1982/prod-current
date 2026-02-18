@@ -62,7 +62,7 @@ const C2a = () => {
             lineHeight: 1.7,
           }}
         >
-          Join hundreds of Orthodox parishes who trust OrthodoxMetrics to preserve
+          Join hundreds of Orthodox parishes who trust Orthodox Metrics to preserve
           their sacred history for future generations.
         </Typography>
 

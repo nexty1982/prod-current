@@ -21,7 +21,7 @@ const Landingpage: React.FC = () => {
       {/* Features Section */}
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          OrthodoxMetrics
+          Orthodox Metrics
         </Typography>
         <Typography variant="h5" align="center" color="text.secondary" sx={{ mb: 6 }}>
           Comprehensive church management and records system

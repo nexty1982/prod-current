@@ -52,11 +52,11 @@ export const WelcomeMessage: React.FC<Props> = ({
     // Use a default configuration instead of fetching from API
     // This prevents the network error and provides a working onboarding experience
     const defaultConfig: OnboardingConfig = {
-      modalTitle: "Welcome to OrthodoxMetrics",
+      modalTitle: "Welcome to Orthodox Metrics",
       requireCompletionToDismiss: false,
       steps: [
         {
-          title: "Welcome to OrthodoxMetrics",
+          title: "Welcome to Orthodox Metrics",
           description: "Your comprehensive platform for managing Orthodox church records and sacraments.",
           primaryLabel: "Next"
         },
@@ -129,7 +129,7 @@ export const WelcomeMessage: React.FC<Props> = ({
     <div style={styles.overlay}>
       <div style={styles.modal}>
         <div style={styles.header}>
-          <h2 style={{ margin: 0 }}>{config.modalTitle || "Welcome to OrthodoxMetrics"}</h2>
+          <h2 style={{ margin: 0 }}>{config.modalTitle || "Welcome to Orthodox Metrics"}</h2>
           {(!config.requireCompletionToDismiss || isSuperAdmin) && (
             <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.5rem" }}>×</button>
           )}

@@ -54,11 +54,11 @@ const Footer = () => {
               <Box
                 component="img"
                 src="/images/logos/om-logo.png"
-                alt="OrthodoxMetrics"
+                alt="Orthodox Metrics"
                 sx={{ width: 28, height: 28, borderRadius: '50%' }}
               />
               <Typography variant="subtitle1" fontWeight={700} sx={{ color: textPrimary }}>
-                OrthodoxMetrics
+                Orthodox Metrics
               </Typography>
             </Stack>
             <Typography variant="body2" sx={{ color: textSecondary, lineHeight: 1.7, mb: 2, fontSize: '0.85rem' }}>
@@ -108,7 +108,7 @@ const Footer = () => {
 
         <Box display="flex" flexWrap="wrap" justifyContent="space-between" alignItems="center">
           <Typography variant="caption" sx={{ color: mutedColor }}>
-            &copy; {new Date().getFullYear()} OrthodoxMetrics. All rights reserved.
+            &copy; {new Date().getFullYear()} Orthodox Metrics. All rights reserved.
           </Typography>
           <Typography variant="caption" sx={{ color: mutedColor }}>
             Made with &hearts; for the Orthodox community

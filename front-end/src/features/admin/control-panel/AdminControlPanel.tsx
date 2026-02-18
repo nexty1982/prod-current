@@ -142,13 +142,13 @@ const AdminControlPanel: React.FC = () => {
   ];
 
   return (
-    <PageContainer title="Admin Control Panel" description="OrthodoxMetrics Administration Hub">
+    <PageContainer title="Admin Control Panel" description="Orthodox Metrics Administration Hub">
       <Breadcrumb title="Admin Control Panel" items={BCrumb} />
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" fontWeight={700} gutterBottom>
-            OrthodoxMetrics Administration
+            Orthodox Metrics Administration
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Manage your Orthodox community platform. Select a category to get started.

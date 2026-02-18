@@ -57,5 +57,5 @@ export const getPageTitle = (pathname: string): string => {
   }
   
   // Default fallback
-  return 'OrthodoxMetrics';
+  return 'Orthodox Metrics';
 };

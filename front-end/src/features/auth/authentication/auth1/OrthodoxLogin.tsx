@@ -82,11 +82,11 @@ const OrthodoxLogin: React.FC = () => {
                             <Box
                                 component="img"
                                 src="/images/logos/om-logo.png"
-                                alt="OrthodoxMetrics"
+                                alt="Orthodox Metrics"
                                 sx={{ width: 40, height: 40, borderRadius: '50%' }}
                             />
                             <Typography variant="h6" sx={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontWeight: 700, color: '#D4AF37' }}>
-                                OrthodoxMetrics
+                                Orthodox Metrics
                             </Typography>
                         </Stack>
 

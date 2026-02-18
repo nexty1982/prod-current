@@ -4,7 +4,6 @@ import CustomSelect from '@/components/forms/theme-elements/CustomSelect';
 import CustomTextField from '@/components/forms/theme-elements/CustomTextField';
 import C2a from '@/components/frontend-pages/shared/c2a';
 import Footer from '@/components/frontend-pages/shared/footer';
-import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
 import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import Address from '@/features/records-centralized/components/Address';
@@ -71,7 +70,6 @@ const Form = () => {
 
   return (
     <PageContainer title="Contact" description="Contact Orthodox Metrics">
-      <HeaderAlert />
       <HpHeader />
 
       {/* Banner */}

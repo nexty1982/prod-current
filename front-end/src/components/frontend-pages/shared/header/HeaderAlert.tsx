@@ -46,7 +46,7 @@ const HeaderAlert = () => {
               sx={{ opacity: '0.9' }}
               fontSize="13px"
             >
-              Orthodox Metrics — Modern Church Record Management for Orthodox Parishes
+              Orthodox Metrics — Sacred Records Management for Orthodox Communities
             </Typography>
           </Stack>
           <IconButton

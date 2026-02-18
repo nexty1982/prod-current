@@ -1,6 +1,6 @@
 /**
  * Church Publishing Guide Page
- * Instructions for churches on how to publish announcements for OrthodoxMetrics import
+ * Instructions for churches on how to publish announcements for Orthodox Metrics import
  */
 
 import React from 'react';
@@ -43,10 +43,10 @@ const ChurchPublishingGuide: React.FC = () => {
         {/* Header */}
         <Box>
           <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
-            Publishing Announcements for OrthodoxMetrics Import
+            Publishing Announcements for Orthodox Metrics Import
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            This guide explains how to format your church announcements so they can be automatically imported into OrthodoxMetrics.
+            This guide explains how to format your church announcements so they can be automatically imported into Orthodox Metrics.
           </Typography>
           <Button
             variant="outlined"
@@ -289,7 +289,7 @@ PARENTS: John Doe Sr., Mary Doe
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2" component="div">
               <strong>Recommended:</strong> Include a stable <code>event_id</code> field in your announcements.
-              This allows OrthodoxMetrics to:
+              This allows Orthodox Metrics to:
               <ul style={{ marginTop: 8, marginBottom: 0 }}>
                 <li>Detect and update existing records when corrections are made</li>
                 <li>Prevent duplicate imports of the same event</li>
@@ -299,7 +299,7 @@ PARENTS: John Doe Sr., Mary Doe
           </Alert>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
             When you need to correct an announcement, republish it with the same <code>event_id</code> but updated information.
-            OrthodoxMetrics will automatically update the existing record instead of creating a duplicate.
+            Orthodox Metrics will automatically update the existing record instead of creating a duplicate.
           </Typography>
         </Paper>
 
@@ -344,9 +344,9 @@ PARENTS: John Doe Sr., Mary Doe
  * Generate markdown content for download
  */
 function generateMarkdownGuide(): string {
-  return `# Publishing Announcements for OrthodoxMetrics Import
+  return `# Publishing Announcements for Orthodox Metrics Import
 
-This guide explains how to format your church announcements so they can be automatically imported into OrthodoxMetrics.
+This guide explains how to format your church announcements so they can be automatically imported into Orthodox Metrics.
 
 ## Supported Formats
 
@@ -439,12 +439,12 @@ PARENTS: John Doe Sr., Mary Doe
 
 ## Corrections and Updates
 
-**Recommended:** Include a stable \`event_id\` field in your announcements. This allows OrthodoxMetrics to:
+**Recommended:** Include a stable \`event_id\` field in your announcements. This allows Orthodox Metrics to:
 - Detect and update existing records when corrections are made
 - Prevent duplicate imports of the same event
 - Track changes over time
 
-When you need to correct an announcement, republish it with the same \`event_id\` but updated information. OrthodoxMetrics will automatically update the existing record instead of creating a duplicate.
+When you need to correct an announcement, republish it with the same \`event_id\` but updated information. Orthodox Metrics will automatically update the existing record instead of creating a duplicate.
 
 ## Best Practices
 
@@ -455,7 +455,7 @@ When you need to correct an announcement, republish it with the same \`event_id\
 
 ## Support
 
-For questions or assistance, contact your OrthodoxMetrics administrator or refer to the admin documentation.
+For questions or assistance, contact your Orthodox Metrics administrator or refer to the admin documentation.
 `;
 }
 

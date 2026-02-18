@@ -7,10 +7,10 @@ import { useEffect } from 'react';
 
 export const usePageTitle = (title: string) => {
   useEffect(() => {
-    document.title = `${title} | OrthodoxMetrics`;
+    document.title = `${title} | Orthodox Metrics`;
     
     return () => {
-      document.title = 'OrthodoxMetrics';
+      document.title = 'Orthodox Metrics';
     };
   }, [title]);
 };

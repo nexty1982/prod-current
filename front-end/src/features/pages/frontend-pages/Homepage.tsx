@@ -1,6 +1,5 @@
 import C2a from '@/components/frontend-pages/shared/c2a';
 import SharedFooter from '@/components/frontend-pages/shared/footer';
-import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
 import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import QuickContactSidebar from '@/features/devel-tools/contactbar/QuickContactSidebar';
@@ -44,7 +43,6 @@ import {
 } from '@tabler/icons-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import LeftSideMenu from './LeftSideMenu';
 
 // Add keyframes to the global styles
 const GlobalStyles = styled('style')(`
@@ -622,7 +620,7 @@ const HomePage: React.FC = () => {
       answer: 'Your data is protected with strong encryption and stored securely. Only authorized users can access it. We use bank-level security protocols, encrypted data transmission, and secure cloud storage to ensure your parish records remain private and protected at all times.'
     },
     {
-      question: 'Which languages does OrthodoxMetrics support?',
+      question: 'Which languages does Orthodox Metrics support?',
       answer: 'We support English, Greek, Russian, Romanian, and more for both viewing and record processing. Our advanced OCR technology can recognize text in multiple Orthodox languages, including Church Slavonic script, ensuring accurate digitization of historical documents.'
     },
     {
@@ -1083,7 +1081,7 @@ const HomePage: React.FC = () => {
             variant="h6"
             sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666' }}
           >
-            Common questions about OrthodoxMetrics and how it can help your parish.
+            Common questions about Orthodox Metrics and how it can help your parish.
           </Typography>
         </Box>
         
@@ -1232,15 +1230,7 @@ const HomePage: React.FC = () => {
   return (
     <Box>
       {/* Shared Header */}
-      <HeaderAlert />
       <HpHeader />
-
-      {/* Left Side Popout Menu */}
-      <LeftSideMenu
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        onSubmenuItemClick={handleSubmenuItemClick}
-      />
 
       {/* Orthodox Metrics Welcome Section */}
       <Box
@@ -1250,23 +1240,6 @@ const HomePage: React.FC = () => {
           position: 'relative',
         }}
       >
-        {/* Logo positioned on the left side */}
-        <Box
-          component="img"
-          src="/images/logos/om-logo.png"
-          alt="Orthodox Metrics"
-          sx={{
-            position: 'absolute',
-            left: { xs: 16, sm: 32, md: 48 },
-            top: { xs: '3rem', sm: '4rem', md: '5rem' },
-            width: { xs: 60, sm: 70, md: 80 },
-            height: { xs: 60, sm: 70, md: 80 },
-            borderRadius: '50%',
-            objectFit: 'cover',
-            opacity: 0.85,
-            display: { xs: 'none', md: 'block' },
-          }}
-        />
         <Container maxWidth="lg">
           <Box sx={{ textAlign: 'center', maxWidth: '900px', mx: 'auto' }}>
             <Typography
@@ -1323,7 +1296,7 @@ const HomePage: React.FC = () => {
       </Box>
 
       {/* ============================================================ */}
-      {/* SECTION: See OrthodoxMetrics in Action (Screenshot 1)        */}
+      {/* SECTION: See Orthodox Metrics in Action (Screenshot 1)        */}
       {/* ============================================================ */}
       <Box sx={{ py: { xs: 6, md: 10 }, backgroundColor: theme.palette.background.default }}>
         <Container maxWidth="lg">
@@ -1338,7 +1311,7 @@ const HomePage: React.FC = () => {
               fontSize: { xs: '1.75rem', md: '2.25rem' },
             }}
           >
-            See OrthodoxMetrics in Action
+            See Orthodox Metrics in Action
           </Typography>
           <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mb: 6 }}>
             Experience the interface in your preferred language
@@ -1400,7 +1373,7 @@ const HomePage: React.FC = () => {
                 {/* Dashboard content */}
                 <Box sx={{ p: 3 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-                    <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>OrthodoxMetrics</Typography>
+                    <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>Orthodox Metrics</Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>EL</Typography>
                   </Stack>
                   <Grid container spacing={2} mb={3}>
@@ -1587,18 +1560,18 @@ const HomePage: React.FC = () => {
 {`{
   "status": "complete",
   "confidence": 0.96,
-  "language": "el",
+  "language": "en",
   "record_type": "baptism",
   "extracted_fields": {
-    "first_name": "Μαρία",
-    "last_name": "Γεωργίου",
-    "date_of_baptism": "15 Αυγούστου 2023",
-    "birthplace": "Αθήνα, Ελλάδα",
-    "sponsors": "Ελένη Παπαδοπούλου",
-    "parents": "Ιωάννης & Φωτεινή Γεωργίου",
-    "priest": "π. Δημήτριος Παπαδόπουλος"
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "date_of_baptism": "Date of Baptism",
+    "birthplace": "",
+    "sponsors": "",
+    "parents": "",
+    "priest": "Rev. James Parsells"
   },
-  "pages_processed": 1,
+  "records_processed": 1,
   "processing_time_ms": 2340
 }`}
                 </Box>
@@ -1630,30 +1603,6 @@ const HomePage: React.FC = () => {
               </Box>
             </Grid>
           </Grid>
-        </Container>
-      </Box>
-
-      {/* ============================================================ */}
-      {/* SECTION: Trusted by Orthodox Clergy (Screenshot 3)           */}
-      {/* ============================================================ */}
-      <Box sx={{ py: { xs: 6, md: 10 }, backgroundColor: theme.palette.background.default }}>
-        <Container maxWidth="lg">
-          <Typography
-            variant="h4"
-            sx={{
-              fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontWeight: 600,
-              color: theme.palette.mode === 'dark' ? '#fff' : '#1a1a1a',
-              textAlign: 'center',
-              mb: 1,
-              fontSize: { xs: '1.75rem', md: '2.25rem' },
-            }}
-          >
-            Trusted by Orthodox Clergy Worldwide
-          </Typography>
-          <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mb: 3 }}>
-            Built by Orthodox Christians, for Orthodox Christians
-          </Typography>
         </Container>
       </Box>
 
@@ -1692,14 +1641,6 @@ const HomePage: React.FC = () => {
             <Grid container spacing={4}>
               <Grid size={{ xs: 12, md: 6 }}>
                 <Stack spacing={2.5}>
-                  <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                    <IconCheck size={22} color="#4CAF50" style={{ marginTop: 2 }} />
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#2E7D32' }}>
-                        Complete access to all features at no cost for parishes under 500 active members
-                      </Typography>
-                    </Box>
-                  </Stack>
                   <Stack direction="row" spacing={1.5} alignItems="flex-start">
                     <IconShield size={20} color="#D4AF37" style={{ marginTop: 2 }} />
                     <Typography variant="body2" color="text.secondary">
@@ -1758,16 +1699,24 @@ const HomePage: React.FC = () => {
       {/* ============================================================ */}
       <Box sx={{ py: { xs: 6, md: 10 }, backgroundColor: theme.palette.background.default }}>
         <Container maxWidth="sm" sx={{ textAlign: 'center' }}>
-          <SectionHeaderBox sx={{ mb: 4 }}>
-            <SectionHeaderTitle component="h3">
-              Ready to Preserve Your Parish Records?
-            </SectionHeaderTitle>
-          </SectionHeaderBox>
+          <Typography
+            variant="h4"
+            sx={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontWeight: 600,
+              color: '#7B4F9E',
+              textAlign: 'center',
+              mb: 4,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
+            }}
+          >
+            Ready to Preserve Your Parish Records?
+          </Typography>
           <Typography variant="body1" sx={{ color: 'text.secondary', mb: 1 }}>
             Let us help you get started with a personalized onboarding session
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.disabled', mb: 4, fontSize: '0.85rem' }}>
-            Our team will guide you through setting up OrthodoxMetrics for your parish, including data migration from existing records and training for your staff.
+            Our team will guide you through setting up Orthodox Metrics for your parish, including data migration from existing records and training for your staff.
           </Typography>
 
           <Button
@@ -3959,7 +3908,7 @@ const HomePage: React.FC = () => {
                 mb: 4 
               }}
             >
-              OrthodoxMetrics supports any record type your parish may need — 
+              Orthodox Metrics supports any record type your parish may need — 
               beyond baptisms, marriages, and funerals. Each community is 
               unique. We're here to help you capture that uniqueness.
             </Typography>

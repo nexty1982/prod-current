@@ -3,7 +3,6 @@ import KeyMetric from '@/components/frontend-pages/about/key-metric';
 import Process from '@/components/frontend-pages/about/process';
 import C2a from '@/components/frontend-pages/shared/c2a';
 import Footer from '@/components/frontend-pages/shared/footer';
-import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
 import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import Leadership from '@/components/frontend-pages/shared/leadership';
 import Pricing from '@/components/frontend-pages/shared/pricing';
@@ -14,7 +13,6 @@ import PageContainer from '@/shared/ui/PageContainer';
 const About = () => {
   return (
     <PageContainer title="About Us" description="this is About Us page">
-      <HeaderAlert />
       <HpHeader />
       <Banner />
       <Process />

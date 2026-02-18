@@ -1,7 +1,11 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import PageContainer from '@/shared/ui/PageContainer';
-import { Box, Button, CardContent, Chip, Grid, List, ListItem, ListItemIcon, ListItemText, Switch, Typography } from '@mui/material';
+import C2a from '@/components/frontend-pages/shared/c2a';
+import Footer from '@/components/frontend-pages/shared/footer';
+import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
+import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
+import { Box, Button, CardContent, Chip, Container, Grid, List, ListItem, ListItemIcon, ListItemText, Switch, Typography } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 import React from 'react';
 
@@ -142,7 +146,6 @@ const Pricing = () => {
 
   return (
     <PageContainer title="Pricing" description="this is Pricing page">
-      <HeaderAlert />
       <HpHeader />
 
       {/* Banner */}

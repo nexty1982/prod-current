@@ -11,7 +11,6 @@
 
 import C2a from '@/components/frontend-pages/shared/c2a';
 import Footer from '@/components/frontend-pages/shared/footer';
-import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
 import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import {
@@ -91,7 +90,6 @@ const Samples: React.FC = () => {
 
   return (
     <Box>
-      <HeaderAlert />
       <HpHeader />
 
       {/* Banner */}
