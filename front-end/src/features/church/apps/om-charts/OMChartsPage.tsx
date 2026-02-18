@@ -54,7 +54,9 @@ const OMChartsPage: React.FC = () => {
       setLoadingChurches(true);
       try {
         const res = await apiClient.get('/my/churches');
-        const list = (res.data?.churches || res.data || [])
+        // Response shape: { success, data: { churches: [...] } }
+        const raw = res.data?.data?.churches || res.data?.churches || res.data || [];
+        const list = (Array.isArray(raw) ? raw : [])
           .filter((c: any) => c.is_active !== false)
           .map((c: any) => ({ id: c.id, name: c.name || c.church_name || `Church ${c.id}` }));
         setChurches(list);
