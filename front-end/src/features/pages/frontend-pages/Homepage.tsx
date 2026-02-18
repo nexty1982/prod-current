@@ -735,7 +735,7 @@ const HomePage: React.FC = () => {
       title: 'What We Offer',
       image: '/images/sections/what-we-offer.png',
       crossesImage: '/images/incode/dune-crosses.png',
-      content: 'At Orthodox Metrics, we provide a complete ecosystem designed to modernize and simplify how churches manage their records, communications, and digital presence. From baptism, marriage, and funeral records to parish directories, donation management, and multilingual reports, our platform brings clarity and organization to the most essential areas of church life. We also assist with website integration, secure data hosting, and tailored solutions for each jurisdiction and language — all while maintaining the reverence and integrity of Orthodox tradition.'
+      content: 'At Orthodox Metrics, we provide a complete ecosystem designed to organize and simplify how churches manage their records, communications, and digital presence. From baptism, marriage, and funeral records to parish directories, donation management, and multilingual reports, our platform brings clarity and organization to the most essential areas of church life. We also assist with website integration, secure data hosting, and tailored solutions for each jurisdiction and language — all while maintaining the reverence and integrity of Orthodox tradition.'
     },
     {
       title: 'Why Orthodox Metrics?',
@@ -1065,11 +1065,19 @@ const HomePage: React.FC = () => {
   const renderFAQSection = () => (
     <Box ref={faqSectionRef} sx={{ backgroundColor: theme.palette.background.default, padding: '5rem 0' }}>
       <Container maxWidth="md">
-        <SectionHeaderBox sx={{ mb: 6 }}>
-          <SectionHeaderTitle component="h3">
-            Frequently Asked Questions
-          </SectionHeaderTitle>
-        </SectionHeaderBox>
+        <Typography
+          variant="h4"
+          sx={{
+            fontFamily: '"Cormorant Garamond", Georgia, serif',
+            fontWeight: 600,
+            color: '#7B4F9E',
+            textAlign: 'center',
+            mb: 1,
+            fontSize: { xs: '1.75rem', md: '2.25rem' },
+          }}
+        >
+          Frequently Asked Questions
+        </Typography>
         <Box textAlign="center" mb={6}>
           <Typography
             variant="h6"
@@ -1341,7 +1349,8 @@ const HomePage: React.FC = () => {
             <Grid size={{ xs: 12, md: 4 }}>
               <Stack spacing={2}>
                 {[
-                  { lang: 'Greek (\u0395\u03BB\u03BB\u03B7\u03BD\u03B9\u03BA\u03AC)', desc: 'Full Greek interface with proper Orthodox terminology', color: '#D4AF37' },
+                  { lang: 'English', desc: 'Full English interface for North American and global parishes', color: '#D4AF37' },
+                  { lang: 'Greek (\u0395\u03BB\u03BB\u03B7\u03BD\u03B9\u03BA\u03AC)', desc: 'Full Greek interface with proper Orthodox terminology', color: '#4CAF50' },
                   { lang: 'Russian (\u0420\u0443\u0441\u0441\u043A\u0438\u0439)', desc: 'Complete Russian localization for Slavic Orthodox communities', color: '#4CAF50' },
                   { lang: 'Romanian (Rom\u00E2n\u0103)', desc: 'Romanian interface for Orthodox parishes in Romania and diaspora', color: '#4CAF50' },
                   { lang: 'Georgian (\u10E5\u10D0\u10E0\u10D7\u10E3\u10DA\u10D8)', desc: 'Georgian language support for the Georgian Orthodox Church', color: '#4CAF50' },
@@ -1574,10 +1583,24 @@ const HomePage: React.FC = () => {
             <Grid size={{ xs: 12, md: 7 }} sx={{ order: { xs: 2, md: 1 } }}>
               <Box sx={{ p: 3, borderRadius: '12px', border: '1px solid', borderColor: 'divider', backgroundColor: theme.palette.background.default }}>
                 <Typography variant="subtitle2" fontWeight={600} mb={2}>OCR Processing</Typography>
-                <Box sx={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'text.secondary', lineHeight: 1.8, p: 2, backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '8px' }}>
-                  Detected: &quot;{'\u0392\u03AC\u03C0\u03C4\u03B9\u03C3\u03B9\u03C2 \u039C\u03B1\u03C1\u03AF\u03B1\u03C2 \u0393\u03B5\u03C9\u03C1\u03B3\u03AF\u03BF\u03C5'}&quot;<br />
-                  Date: &quot;15 \u0391\u03C5\u03B3\u03BF\u03CD\u03C3\u03C4\u03BF\u03C5 2023&quot;<br />
-                  Priest: &quot;\u03C0. \u0394\u03B7\u03BC\u03AE\u03C4\u03C1\u03B9\u03BF\u03C2 \u03A0\u03B1\u03C0\u03B1\u03B4\u03CC\u03C0\u03BF\u03C5\u03BB\u03BF\u03C2&quot;
+                <Box sx={{ fontFamily: '"Fira Code", "Consolas", monospace', fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.6, p: 2, backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '8px', overflowX: 'auto', whiteSpace: 'pre' }}>
+{`{
+  "status": "complete",
+  "confidence": 0.96,
+  "language": "el",
+  "record_type": "baptism",
+  "extracted_fields": {
+    "first_name": "Μαρία",
+    "last_name": "Γεωργίου",
+    "date_of_baptism": "15 Αυγούστου 2023",
+    "birthplace": "Αθήνα, Ελλάδα",
+    "sponsors": "Ελένη Παπαδοπούλου",
+    "parents": "Ιωάννης & Φωτεινή Γεωργίου",
+    "priest": "π. Δημήτριος Παπαδόπουλος"
+  },
+  "pages_processed": 1,
+  "processing_time_ms": 2340
+}`}
                 </Box>
               </Box>
             </Grid>
@@ -1628,70 +1651,9 @@ const HomePage: React.FC = () => {
           >
             Trusted by Orthodox Clergy Worldwide
           </Typography>
-          <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mb: 6 }}>
-            Hear from priests who've transformed their parish record-keeping
+          <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mb: 3 }}>
+            Built by Orthodox Christians, for Orthodox Christians
           </Typography>
-
-          <Grid container spacing={3}>
-            {[
-              {
-                stars: 5,
-                text: 'OrthodoxMetrics helped our parish transition from paper records to digital while preserving the reverence and accuracy we need for sacramental documentation. The Greek interface is perfectly localized.',
-                name: 'Fr. Dimitrios Papadopoulos',
-                role: 'Parish Priest',
-                church: 'St. Nicholas Greek Orthodox Church, Athens',
-              },
-              {
-                stars: 5,
-                text: 'The multilingual support has been invaluable for our diverse community. We can maintain records in both Russian and English, and the liturgical calendar integration keeps us connected to Church tradition.',
-                name: 'Fr. Sergei Volkov',
-                role: 'Rector',
-                church: 'Holy Trinity Russian Orthodox Cathedral, New York',
-              },
-              {
-                stars: 5,
-                text: 'As a diocesan administrator, I appreciate how OrthodoxMetrics standardizes record-keeping across our parishes while respecting each community\'s language and customs. The reporting features are excellent.',
-                name: 'Archdeacon Michael Popescu',
-                role: 'Diocesan Administrator',
-                church: 'Romanian Orthodox Archdiocese of the Americas',
-              },
-            ].map((testimonial, i) => (
-              <Grid key={i} size={{ xs: 12, md: 4 }}>
-                <Box
-                  sx={{
-                    p: 3,
-                    borderRadius: '12px',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    backgroundColor: theme.palette.background.paper,
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Stack direction="row" spacing={0.5} mb={2}>
-                    {Array.from({ length: testimonial.stars }).map((_, j) => (
-                      <Typography key={j} sx={{ color: '#D4AF37', fontSize: '1.1rem' }}>{'\u2605'}</Typography>
-                    ))}
-                  </Stack>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.7, mb: 3, flex: 1, fontStyle: 'italic' }}>
-                    &ldquo;{testimonial.text}&rdquo;
-                  </Typography>
-                  <Divider sx={{ mb: 2 }} />
-                  <Stack direction="row" spacing={1.5} alignItems="center">
-                    <Box sx={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: '#D4AF37', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>{testimonial.name.charAt(0)}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="subtitle2" fontWeight={600}>{testimonial.name}</Typography>
-                      <Typography variant="caption" color="text.secondary">{testimonial.role}</Typography>
-                      <Typography variant="caption" display="block" color="text.secondary" sx={{ fontSize: '0.7rem' }}>{testimonial.church}</Typography>
-                    </Box>
-                  </Stack>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
         </Container>
       </Box>
 
@@ -1711,10 +1673,10 @@ const HomePage: React.FC = () => {
               fontSize: { xs: '1.75rem', md: '2.25rem' },
             }}
           >
-            Free for Most Parishes
+            Affordable Pricing
           </Typography>
           <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mb: 5 }}>
-            Our mission is to serve the Orthodox Church, not profit from it
+            Certain churches may qualify for eligibility of free records management
           </Typography>
 
           <Box
@@ -1796,18 +1758,11 @@ const HomePage: React.FC = () => {
       {/* ============================================================ */}
       <Box sx={{ py: { xs: 6, md: 10 }, backgroundColor: theme.palette.background.default }}>
         <Container maxWidth="sm" sx={{ textAlign: 'center' }}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontWeight: 600,
-              color: '#7B4F9E',
-              mb: 1,
-              fontSize: { xs: '1.75rem', md: '2.25rem' },
-            }}
-          >
-            Ready to Preserve Your Parish Records?
-          </Typography>
+          <SectionHeaderBox sx={{ mb: 4 }}>
+            <SectionHeaderTitle component="h3">
+              Ready to Preserve Your Parish Records?
+            </SectionHeaderTitle>
+          </SectionHeaderBox>
           <Typography variant="body1" sx={{ color: 'text.secondary', mb: 1 }}>
             Let us help you get started with a personalized onboarding session
           </Typography>
@@ -1836,11 +1791,9 @@ const HomePage: React.FC = () => {
 
           <Grid container spacing={4} justifyContent="center">
             {[
-              { icon: '\u2709', label: 'Email Support', value: 'support@orthodoxmetrics.com' },
-              { icon: '\uD83D\uDCAC', label: 'Telegram', value: '@OrthodoxMetrics' },
-              { icon: '\uD83D\uDCDE', label: 'WhatsApp', value: '+1 305 ORTHODOX' },
+              { icon: '\u2709', label: 'Email Support', value: 'info@orthodoxmetrics.com' },
             ].map((contact, i) => (
-              <Grid key={i} size={{ xs: 12, sm: 4 }}>
+              <Grid key={i} size={{ xs: 12 }}>
                 <Typography sx={{ fontSize: '1.5rem', mb: 0.5 }}>{contact.icon}</Typography>
                 <Typography variant="subtitle2" fontWeight={600}>{contact.label}</Typography>
                 <Typography variant="caption" color="text.secondary">{contact.value}</Typography>
@@ -4224,11 +4177,19 @@ const HomePage: React.FC = () => {
       {/* How It Works Section */}
       <Box sx={{ backgroundColor: '#fafafa', padding: '5rem 0' }}>
         <Container maxWidth="lg">
-          <SectionHeaderBox sx={{ mb: 6 }}>
-            <SectionHeaderTitle component="h3">
-              How It Works
-            </SectionHeaderTitle>
-          </SectionHeaderBox>
+          <Typography
+            variant="h4"
+            sx={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontWeight: 600,
+              color: '#7B4F9E',
+              textAlign: 'center',
+              mb: 1,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
+            }}
+          >
+            How It Works
+          </Typography>
           <Box textAlign="center" mb={6}>
             <Typography
               variant="h6"

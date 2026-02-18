@@ -91,6 +91,61 @@ router.get('/dashboard', requireAuth, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// SYNC COMMITS → 24-hour items  (auto-import today's git commits)
+// ═══════════════════════════════════════════════════════════════
+
+router.post('/sync-commits', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const dateStr = req.body.date || new Date().toISOString().split('T')[0];
+
+    // Get commits for the day
+    let logOutput = '';
+    try {
+      logOutput = execSync(
+        `git log --since="${dateStr} 00:00:00" --until="${dateStr} 23:59:59" --pretty=format:"%H|%an|%s|%aI" --no-merges`,
+        { cwd: REPO_DIR, encoding: 'utf-8' }
+      ).trim();
+    } catch { logOutput = ''; }
+
+    if (!logOutput) return res.json({ synced: 0, total: 0 });
+
+    const lines = logOutput.split('\n').filter(Boolean);
+    let synced = 0;
+
+    for (const line of lines) {
+      const [hash, author, message] = line.split('|');
+      if (!hash || !message) continue;
+      const shortHash = hash.substring(0, 8);
+
+      // Skip if we already have an item for this commit
+      const [existing] = await pool.query(
+        `SELECT id FROM om_daily_items WHERE JSON_EXTRACT(metadata, '$.commitHash') = ?`,
+        [shortHash]
+      );
+      if (existing.length > 0) continue;
+
+      // Create a 24-hour item from the commit
+      await pool.query(
+        `INSERT INTO om_daily_items (title, description, horizon, status, priority, category, source, metadata, created_by)
+         VALUES (?, ?, '1', 'done', 'medium', 'Commits', 'system', ?, NULL)`,
+        [
+          message.length > 200 ? message.substring(0, 200) + '...' : message,
+          `Git commit ${shortHash} by ${author}`,
+          JSON.stringify({ commitHash: shortHash, author, date: dateStr }),
+        ]
+      );
+      synced++;
+    }
+
+    res.json({ synced, total: lines.length });
+  } catch (err) {
+    console.error('[OM Daily] sync-commits error:', err);
+    res.status(500).json({ error: 'Failed to sync commits' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
 // LIST — get items, filtered by horizon, status, date, task_type, etc.
 // ═══════════════════════════════════════════════════════════════
 
@@ -841,6 +896,57 @@ const BRANCH_TYPE_LABELS = { bugfix: 'type:bugfix', new_feature: 'type:new-featu
 const BRANCH_TYPE_PREFIXES = { bugfix: 'BF', new_feature: 'NF', existing_feature: 'EF', patch: 'PA' };
 const AGENT_TOOL_SHORT = { windsurf: 'windsurf', claude_cli: 'claude-cli', cursor: 'cursor' };
 
+// Cache of labels known to exist in the repo (populated lazily)
+let _knownLabels = null;
+let _knownLabelsAt = 0;
+
+async function getKnownLabels() {
+  // Refresh every 5 minutes
+  if (_knownLabels && Date.now() - _knownLabelsAt < 300000) return _knownLabels;
+  try {
+    const json = execSync(
+      `gh api repos/${GITHUB_REPO}/labels --paginate --jq '.[].name'`,
+      { encoding: 'utf-8', cwd: REPO_DIR }
+    );
+    _knownLabels = new Set(json.trim().split('\n').filter(Boolean));
+    _knownLabelsAt = Date.now();
+  } catch {
+    _knownLabels = _knownLabels || new Set();
+  }
+  return _knownLabels;
+}
+
+async function ensureLabel(name, color = 'ededed') {
+  const known = await getKnownLabels();
+  if (known.has(name)) return;
+  try {
+    execSync(
+      `gh api repos/${GITHUB_REPO}/labels -f name="${name}" -f color="${color}" -f description=""`,
+      { encoding: 'utf-8', cwd: REPO_DIR }
+    );
+    known.add(name);
+    console.log(`[GitHub Sync] Created label: ${name}`);
+  } catch (err) {
+    // Label might already exist (race condition) — that's fine
+    if (!err.message.includes('already_exists')) {
+      console.warn(`[GitHub Sync] Could not create label '${name}':`, err.message);
+    } else {
+      known.add(name);
+    }
+  }
+}
+
+const LABEL_COLORS = {
+  'P:': 'e11d48', 'H:': '0ea5e9', 'source:': '8b5cf6',
+  'status:': 'f59e0b', 'cat:': '6366f1', 'type:': '10b981',
+};
+function labelColor(name) {
+  for (const [prefix, color] of Object.entries(LABEL_COLORS)) {
+    if (name.startsWith(prefix)) return color;
+  }
+  return 'ededed';
+}
+
 function buildLabels(item) {
   const labels = [];
   if (PRIORITY_LABELS[item.priority]) labels.push(PRIORITY_LABELS[item.priority]);
@@ -1002,6 +1108,12 @@ async function syncItemToGitHub(item) {
     // Create new issue
     const labels = buildLabels(item);
     const body = buildIssueBody(item);
+
+    // Ensure all labels exist in the repo before using them
+    for (const label of labels) {
+      await ensureLabel(label, labelColor(label));
+    }
+
     const labelArg = labels.length > 0 ? `--label "${labels.join(',')}"` : '';
 
     try {
@@ -1064,6 +1176,11 @@ async function syncItemToGitHub(item) {
       // Update labels
       const labels = buildLabels(item);
       if (labels.length > 0) {
+        // Ensure all labels exist in the repo
+        for (const label of labels) {
+          await ensureLabel(label, labelColor(label));
+        }
+
         // Remove old managed labels first, then add new ones
         const allManagedPrefixes = ['P:', 'H:', 'source:', 'status:', 'cat:'];
         try {

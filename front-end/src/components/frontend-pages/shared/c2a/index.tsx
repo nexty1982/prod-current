@@ -116,7 +116,7 @@ const C2a = () => {
           variant="caption"
           sx={{ color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(26,10,46,0.4)', fontSize: '0.8rem' }}
         >
-          30-day free trial &bull; No credit card required &bull; Setup in minutes
+          Setup in minutes
         </Typography>
       </Container>
     </Box>

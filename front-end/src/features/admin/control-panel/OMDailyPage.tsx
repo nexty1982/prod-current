@@ -8,6 +8,7 @@ import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
     Add as AddIcon,
+    CloudUpload as CloudUploadIcon,
     SmartToy as AgentIcon,
     Check as CheckIcon,
     Delete as DeleteIcon,
@@ -381,6 +382,28 @@ const OMDailyPage: React.FC = () => {
     setLoading(true);
     Promise.all([fetchDashboard(), fetchCategories(), fetchGhStatus(), fetchBuildInfo()]).finally(() => setLoading(false));
   }, []);
+
+  // Auto-sync today's commits into the 24-hour plan when that tab is selected
+  const commitsSyncedRef = useRef(false);
+  useEffect(() => {
+    if (activeTab === 1 && !commitsSyncedRef.current) {
+      // horizon '1' = 24 Hour tab (index 1 in HORIZONS)
+      commitsSyncedRef.current = true;
+      fetch('/api/om-daily/sync-commits', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: new Date().toISOString().split('T')[0] }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.synced > 0) {
+            fetchItems('1');
+            fetchDashboard();
+          }
+        })
+        .catch(() => {});
+    }
+  }, [activeTab]);
 
   // Fetch items when tab or filters change
   useEffect(() => {

@@ -88,7 +88,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       if (result && typeof result === 'object' && 'redirectUrl' in result && result.redirectUrl) {
         window.location.href = result.redirectUrl;
       } else {
-        navigate('/dashboards/super');
+        navigate('/admin/control-panel');
       }
     } catch (err) {
       // Error is handled by the auth context

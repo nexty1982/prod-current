@@ -438,8 +438,8 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
         href: '/sandbox/component-preview/core',
       },
       {
-        id: 'devel.modernize-components',
-        title: 'Modernize Components',
+        id: 'devel.orthodoxmetrics-components',
+        title: 'Orthodox Metrics Components',
         icon: IconLayoutDashboard,
         href: '/sandbox/component-preview/modernize',
       },

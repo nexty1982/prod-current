@@ -69,7 +69,7 @@ const Register = () => (
         alignItems="center">
         <Box p={4}>
           <AuthRegister
-            title="Welcome to Modernize"
+            title="Welcome to Orthodox Metrics"
             subtext={
               <Typography variant="subtitle1" color="textSecondary" mb={1}>
                 Your Admin Dashboard
