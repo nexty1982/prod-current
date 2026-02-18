@@ -161,6 +161,7 @@ const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
 const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-operations/GitOperations')));
 const ConversationLogPage = Loadable(lazy(() => import('../features/devel-tools/conversation-log/ConversationLogPage')));
+const OMChartsPage = Loadable(lazy(() => import('../features/church/apps/om-charts/OMChartsPage')));
 
 /* ****Berry Components***** */
 const BerryLeadManagementPage = Loadable(lazy(() => import('../features/berry-crm/BerryLeadManagementPage')));
@@ -560,6 +561,27 @@ const Router = [
         element: (
           <ProtectedRoute requiredPermission="manage_churches">
             <ChurchForm />
+          </ProtectedRoute>
+        )
+      },
+      // OM Charts — graphical charts from church sacramental records
+      {
+        path: '/apps/om-charts',
+        element: (
+          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
+            <EnvironmentAwarePage featureId="om-charts" priority={2} featureName="OM Charts">
+              <OMChartsPage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/church-management/:churchId/charts',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="om-charts" priority={2} featureName="OM Charts">
+              <OMChartsPage />
+            </EnvironmentAwarePage>
           </ProtectedRoute>
         )
       },

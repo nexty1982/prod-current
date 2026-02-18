@@ -127,7 +127,8 @@ const ChurchForm: React.FC = () => {
     effective: {
       ag_grid_enabled: false,
       power_search_enabled: false,
-      custom_field_mapping_enabled: false
+      custom_field_mapping_enabled: false,
+      om_charts_enabled: true
     }
   });
   const [loadingFeatures, setLoadingFeatures] = useState(false);
@@ -1263,8 +1264,42 @@ const ChurchForm: React.FC = () => {
                         </Typography>
                         {hasRole(['super_admin']) && featureData.globalDefaults && (
                           <Typography variant="caption" color="textSecondary">
-                            Global: {featureData.globalDefaults.custom_field_mapping_enabled ? 'ON' : 'OFF'} | 
+                            Global: {featureData.globalDefaults.custom_field_mapping_enabled ? 'ON' : 'OFF'} |
                             Override: {featureData.overrides?.custom_field_mapping_enabled !== undefined ? (featureData.overrides.custom_field_mapping_enabled ? 'ON' : 'OFF') : 'None'}
+                          </Typography>
+                        )}
+                      </Paper>
+                    </Grid>
+
+                    {/* OM Charts */}
+                    <Grid item xs={12} md={6}>
+                      <Paper variant="outlined" sx={{ p: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                          <Typography variant="subtitle1" fontWeight={600}>
+                            OM Charts
+                          </Typography>
+                          {hasRole(['super_admin']) ? (
+                            <Switch
+                              checked={featureData.effective.om_charts_enabled}
+                              onChange={(e) => updateFeature('om_charts_enabled', e.target.checked)}
+                              disabled={updatingFeatures}
+                              size="small"
+                            />
+                          ) : (
+                            <Chip
+                              label={featureData.effective.om_charts_enabled ? 'Enabled' : 'Disabled'}
+                              color={featureData.effective.om_charts_enabled ? 'success' : 'default'}
+                              size="small"
+                            />
+                          )}
+                        </Stack>
+                        <Typography variant="body2" color="textSecondary" mb={1}>
+                          Graphical charts from church sacramental records
+                        </Typography>
+                        {hasRole(['super_admin']) && featureData.globalDefaults && (
+                          <Typography variant="caption" color="textSecondary">
+                            Global: {featureData.globalDefaults.om_charts_enabled ? 'ON' : 'OFF'} |
+                            Override: {featureData.overrides?.om_charts_enabled !== undefined ? (featureData.overrides.om_charts_enabled ? 'ON' : 'OFF') : 'None'}
                           </Typography>
                         )}
                       </Paper>

@@ -37,6 +37,12 @@ VALUES
         'false',
         'boolean',
         'Global default for Custom Field Mapping feature. Enables OCR and record field mapping tools for data import. Per-church overrides stored in churches.settings.features.custom_field_mapping_enabled'
+    ),
+    (
+        'features.om_charts_enabled',
+        'true',
+        'boolean',
+        'Global default for OM Charts feature. Enables graphical charts from church sacramental records. Defaults to ENABLED. Per-church overrides stored in churches.settings.features.om_charts_enabled'
     )
 ON DUPLICATE KEY UPDATE
     value = VALUES(value),

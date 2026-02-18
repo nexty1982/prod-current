@@ -60,6 +60,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'funeral-records-v2', name: 'Funeral Records', stage: 3, route: '/apps/records/funeral', since: '2026-02-01' },
 
   // ── Stage 2: Development ───────────────────────────────────
+  { id: 'om-charts', name: 'OM Charts', stage: 2, route: '/apps/om-charts', description: 'Graphical charts from church sacramental records', since: '2026-02-18' },
   { id: 'marriage-records-v2', name: 'Marriage Records', stage: 2, route: '/apps/records/marriage', since: '2026-02-01' },
   { id: 'enhanced-ocr-uploader', name: 'Enhanced OCR Uploader', stage: 2, route: '/devel/ocr-studio/upload', since: '2026-01-15' },
   { id: 'dynamic-records-inspector', name: 'Dynamic Records Inspector', stage: 2, route: '/devel/dynamic-records', since: '2026-01-20' },
