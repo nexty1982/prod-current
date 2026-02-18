@@ -16,6 +16,10 @@ export interface User {
     last_login?: string;
     email_verified?: boolean;
     timezone?: string;
+    is_locked?: boolean;
+    locked_at?: string;
+    locked_by?: string;
+    lockout_reason?: string;
 }
 
 export interface NewUser {
@@ -246,6 +250,56 @@ class UserService {
             return {
                 success: false,
                 message: error instanceof Error ? error.message : 'Failed to reset password'
+            };
+        }
+    }
+
+    // Lock user account
+    async lockUser(userId: number, reason: string): Promise<ApiResponse> {
+        try {
+            const response = await fetch(`${this.baseUrl}/users/${userId}/lockout`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ reason })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to lock user');
+            }
+
+            return { success: data.success, message: data.message };
+        } catch (error) {
+            console.error('Error locking user:', error);
+            return {
+                success: false,
+                message: error instanceof Error ? error.message : 'Failed to lock user'
+            };
+        }
+    }
+
+    // Unlock user account
+    async unlockUser(userId: number): Promise<ApiResponse> {
+        try {
+            const response = await fetch(`${this.baseUrl}/users/${userId}/unlock`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to unlock user');
+            }
+
+            return { success: data.success, message: data.message };
+        } catch (error) {
+            console.error('Error unlocking user:', error);
+            return {
+                success: false,
+                message: error instanceof Error ? error.message : 'Failed to unlock user'
             };
         }
     }

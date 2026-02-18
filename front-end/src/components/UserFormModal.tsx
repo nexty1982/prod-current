@@ -29,7 +29,7 @@ import {
     IconRefresh,
     IconCopy
 } from '@tabler/icons-react';
-import { User, UpdateUser, Church, ResetPasswordData } from '../services/userService.ts';
+import { User, UpdateUser, Church, ResetPasswordData } from '@/shared/lib/userService';
 import SocialPermissionsToggle from './SocialPermissionsToggle.tsx';
 
 interface UserFormModalProps {
@@ -340,6 +340,23 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 InputProps={{ readOnly: true }}
                 variant="outlined"
             />
+
+            {user?.is_locked && (
+                <Box sx={{ p: 2, bgcolor: 'error.light', borderRadius: 1, color: 'error.contrastText' }}>
+                    <Typography variant="subtitle2" gutterBottom>Account Locked</Typography>
+                    <Stack spacing={0.5}>
+                        {user.locked_at && (
+                            <Typography variant="body2">Locked at: {new Date(user.locked_at).toLocaleString()}</Typography>
+                        )}
+                        {user.locked_by && (
+                            <Typography variant="body2">Locked by: {user.locked_by}</Typography>
+                        )}
+                        {user.lockout_reason && (
+                            <Typography variant="body2">Reason: {user.lockout_reason}</Typography>
+                        )}
+                    </Stack>
+                </Box>
+            )}
         </Box>
     );
 

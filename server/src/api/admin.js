@@ -565,7 +565,7 @@ router.get('/churches', requireAdmin, async (req, res) => {
         
         res.json({
             success: true,
-            data: churches
+            churches: churches
         });
     } catch (err) {
         console.error('❌ Error fetching church list:', err);

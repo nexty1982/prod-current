@@ -16,13 +16,26 @@ router.get('/', requireRole(['super_admin', 'admin']), async (req, res) => {
     
     // Build the query
     let query = `
-      SELECT 
+      SELECT
         u.id,
         u.email,
         u.full_name,
+        u.first_name,
+        u.last_name,
+        u.role,
         u.role_id,
+        u.church_id,
         u.is_active,
+        u.is_locked,
+        u.locked_at,
+        u.locked_by,
+        u.lockout_reason,
+        u.phone,
+        u.preferred_language,
+        u.timezone,
+        u.email_verified,
         u.created_at,
+        u.updated_at,
         u.last_login,
         COALESCE(c.church_name, c.name) AS church_name
       FROM orthodoxmetrics_db.users u
@@ -201,10 +214,22 @@ router.patch('/:userId/reset-password', requireRole(['super_admin', 'admin']), a
     }
     
     const user = userData[0];
-    
-    // Generate new password
-    const newPassword = Math.random().toString(36).slice(-12);
+
+    // Use custom password if provided, otherwise auto-generate
     const bcrypt = require('bcrypt');
+    let newPassword;
+    if (req.body.new_password) {
+      if (req.body.new_password.length < 8) {
+        return res.status(400).json({
+          success: false,
+          error: 'Password too short',
+          message: 'Password must be at least 8 characters long'
+        });
+      }
+      newPassword = req.body.new_password;
+    } else {
+      newPassword = Math.random().toString(36).slice(-12);
+    }
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     
     // Update password

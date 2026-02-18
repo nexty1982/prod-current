@@ -43,7 +43,9 @@ import {
     IconEdit,
     IconTrash,
     IconCrown,
-    IconEye
+    IconEye,
+    IconLock,
+    IconLockOpen
 } from '@tabler/icons-react';
 
 import PageContainer from '@/shared/ui/PageContainer';
@@ -94,6 +96,11 @@ const UserManagement: React.FC = () => {
     const [modalMode, setModalMode] = useState<'view' | 'edit' | 'reset-password' | 'delete-confirm'>('edit');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [modalLoading, setModalLoading] = useState(false);
+
+    // Lockout dialog state
+    const [lockDialogOpen, setLockDialogOpen] = useState(false);
+    const [lockTargetUser, setLockTargetUser] = useState<User | null>(null);
+    const [lockReason, setLockReason] = useState('');
 
     // Form state for creating users
     const [newUser, setNewUser] = useState<NewUser>({
@@ -327,6 +334,44 @@ const UserManagement: React.FC = () => {
         }
     };
 
+    const handleLockUser = (userData: User) => {
+        setLockTargetUser(userData);
+        setLockReason('');
+        setLockDialogOpen(true);
+    };
+
+    const handleConfirmLock = async () => {
+        if (!lockTargetUser) return;
+        try {
+            const response = await userService.lockUser(lockTargetUser.id, lockReason || 'Administrative action');
+            if (response.success) {
+                setSuccess(response.message || `User ${lockTargetUser.email} has been locked`);
+                setLockDialogOpen(false);
+                await loadData();
+            } else {
+                setError(response.message || 'Failed to lock user');
+            }
+        } catch (err) {
+            setError('An error occurred while locking the user');
+            console.error('Error locking user:', err);
+        }
+    };
+
+    const handleUnlockUser = async (userData: User) => {
+        try {
+            const response = await userService.unlockUser(userData.id);
+            if (response.success) {
+                setSuccess(response.message || `User ${userData.email} has been unlocked`);
+                await loadData();
+            } else {
+                setError(response.message || 'Failed to unlock user');
+            }
+        } catch (err) {
+            setError('An error occurred while unlocking the user');
+            console.error('Error unlocking user:', err);
+        }
+    };
+
     // Filter users based on search and filters
     const filteredUsers = users.filter((userData: User) => {
         const matchesSearch =
@@ -338,8 +383,9 @@ const UserManagement: React.FC = () => {
         const matchesRole = roleFilter === 'all' || userData.role === roleFilter;
         const matchesChurch = churchFilter === 'all' || (userData.church_id && userData.church_id.toString() === churchFilter);
         const matchesStatus = activeFilter === 'all' ||
-            (activeFilter === 'active' && userData.is_active) ||
-            (activeFilter === 'inactive' && !userData.is_active);
+            (activeFilter === 'active' && userData.is_active && !userData.is_locked) ||
+            (activeFilter === 'inactive' && !userData.is_active) ||
+            (activeFilter === 'locked' && userData.is_locked);
 
         // Role-based access: Regular admins can't see super_admin or other admin users
         const hasRoleAccess = isSuperAdmin() ||
@@ -466,6 +512,7 @@ const UserManagement: React.FC = () => {
                                             <MenuItem value="all">All Status</MenuItem>
                                             <MenuItem value="active">Active</MenuItem>
                                             <MenuItem value="inactive">Inactive</MenuItem>
+                                            <MenuItem value="locked">Locked</MenuItem>
                                         </Select>
                                     </FormControl>
                                     <Button
@@ -557,11 +604,19 @@ const UserManagement: React.FC = () => {
                                                                         size="small"
                                                                         disabled={!canPerformDestructiveOperation(toAuthUser(userData))}
                                                                     />
-                                                                    <Chip
-                                                                        label={userData.is_active ? 'Active' : 'Inactive'}
-                                                                        size="small"
-                                                                        color={userData.is_active ? 'success' : 'default'}
-                                                                    />
+                                                                    {userData.is_locked ? (
+                                                                        <Chip
+                                                                            label="Locked"
+                                                                            size="small"
+                                                                            color="error"
+                                                                        />
+                                                                    ) : (
+                                                                        <Chip
+                                                                            label={userData.is_active ? 'Active' : 'Inactive'}
+                                                                            size="small"
+                                                                            color={userData.is_active ? 'success' : 'default'}
+                                                                        />
+                                                                    )}
                                                                 </Stack>
                                                             </TableCell>
                                                             <TableCell>
@@ -612,6 +667,29 @@ const UserManagement: React.FC = () => {
                                                                                 <IconTrash size={16} />
                                                                             </IconButton>
                                                                         </Tooltip>
+                                                                    )}
+                                                                    {canPerformDestructiveOperation(toAuthUser(userData)) && (
+                                                                        userData.is_locked ? (
+                                                                            <Tooltip title="Unlock User">
+                                                                                <IconButton
+                                                                                    size="small"
+                                                                                    onClick={() => handleUnlockUser(userData)}
+                                                                                    color="success"
+                                                                                >
+                                                                                    <IconLockOpen size={16} />
+                                                                                </IconButton>
+                                                                            </Tooltip>
+                                                                        ) : (
+                                                                            <Tooltip title="Lock User">
+                                                                                <IconButton
+                                                                                    size="small"
+                                                                                    onClick={() => handleLockUser(userData)}
+                                                                                    color="error"
+                                                                                >
+                                                                                    <IconLock size={16} />
+                                                                                </IconButton>
+                                                                            </Tooltip>
+                                                                        )
                                                                     )}
                                                                 </Stack>
                                                             </TableCell>
@@ -758,6 +836,34 @@ const UserManagement: React.FC = () => {
                         startIcon={loading ? <CircularProgress size={20} /> : undefined}
                     >
                         {loading ? 'Creating...' : 'Create User'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Lock User Dialog */}
+            <Dialog open={lockDialogOpen} onClose={() => setLockDialogOpen(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>Lock User Account</DialogTitle>
+                <DialogContent>
+                    <Alert severity="warning" sx={{ mb: 2, mt: 1 }}>
+                        Locking this account will terminate all active sessions and prevent the user from logging in.
+                    </Alert>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                        User: <strong>{lockTargetUser?.email}</strong>
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        label="Lockout Reason"
+                        value={lockReason}
+                        onChange={(e) => setLockReason(e.target.value)}
+                        multiline
+                        rows={2}
+                        placeholder="Enter reason for locking this account..."
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setLockDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={handleConfirmLock} variant="contained" color="error">
+                        Lock Account
                     </Button>
                 </DialogActions>
             </Dialog>
