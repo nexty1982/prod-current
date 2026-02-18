@@ -6,6 +6,7 @@ import {
     IconBug,
     IconCalendar,
     IconCards,
+    IconChartBar,
     IconCheckbox,
     IconDatabase,
     IconEdit,
@@ -151,6 +152,14 @@ const Menuitems: MenuitemsType[] = [
         href: '/devel-tools/live-table-builder',
       },
     ],
+  },
+  {
+    id: uniqueId(),
+    title: 'OM Charts',
+    icon: IconChartBar,
+    href: '/apps/om-charts',
+    chip: 'NEW',
+    chipColor: 'primary',
   },
   {
     id: uniqueId(),
@@ -655,6 +664,12 @@ export const getMenuItems = (user: any) => {
         ],
       },
       {
+        id: uniqueId(),
+        title: 'OM Charts',
+        icon: IconChartBar,
+        href: '/apps/om-charts',
+      },
+      {
         navlabel: true,
         subheader: '💬 Social',
       },
@@ -684,7 +699,7 @@ export const getMenuItems = (user: any) => {
       },
     ];
   }
-  
+
   // For other non-admin users, show simplified menu with basic functionality
   return [
     {
@@ -728,6 +743,12 @@ export const getMenuItems = (user: any) => {
           href: `/devel/ocr-studio/upload`,
         },
       ],
+    },
+    {
+      id: uniqueId(),
+      title: 'OM Charts',
+      icon: IconChartBar,
+      href: '/apps/om-charts',
     },
     {
       navlabel: true,
