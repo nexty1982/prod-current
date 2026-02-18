@@ -13,6 +13,51 @@ const { getAppPool } = require('../config/db-compat');
 const { getEffectiveFeatures } = require('../utils/featureFlags');
 
 /**
+ * Detect which date columns exist in each table.
+ * Churches have different schemas (mdate vs marriage_date, burial_date vs funeral_date, etc.)
+ */
+async function detectColumns(pool) {
+  const getColNames = async (table) => {
+    try {
+      const [cols] = await pool.query(`SHOW COLUMNS FROM ${table}`);
+      return cols.map(c => c.Field);
+    } catch {
+      return [];
+    }
+  };
+
+  const [bCols, mCols, fCols] = await Promise.all([
+    getColNames('baptism_records'),
+    getColNames('marriage_records'),
+    getColNames('funeral_records'),
+  ]);
+
+  // Baptism date: reception_date > baptism_date
+  const baptismDate = bCols.includes('reception_date') ? 'reception_date'
+    : bCols.includes('baptism_date') ? 'baptism_date' : null;
+
+  // Birth date for age calc
+  const birthDate = bCols.includes('birth_date') ? 'birth_date' : null;
+
+  // Marriage date: mdate > marriage_date
+  const marriageDate = mCols.includes('mdate') ? 'mdate'
+    : mCols.includes('marriage_date') ? 'marriage_date' : null;
+
+  // Funeral/burial date: burial_date > funeral_date > deceased_date > death_date
+  const funeralDate = fCols.includes('burial_date') ? 'burial_date'
+    : fCols.includes('funeral_date') ? 'funeral_date'
+    : fCols.includes('deceased_date') ? 'deceased_date'
+    : fCols.includes('death_date') ? 'death_date' : null;
+
+  // Clergy columns
+  const baptismClergy = bCols.includes('clergy') ? 'clergy' : null;
+  const marriageClergy = mCols.includes('clergy') ? 'clergy' : null;
+  const funeralClergy = fCols.includes('clergy') ? 'clergy' : null;
+
+  return { baptismDate, birthDate, marriageDate, funeralDate, baptismClergy, marriageClergy, funeralClergy };
+}
+
+/**
  * GET /summary
  * Returns 6 chart datasets from the church's sacramental records
  */
@@ -34,63 +79,59 @@ router.get('/summary', requireAuth, async (req, res) => {
     }
 
     const pool = getTenantPool(churchId);
+    const cols = await detectColumns(pool);
 
-    // Run all 6 queries in parallel
-    const [
-      sacramentsByYear,
-      monthlyTrends,
-      byPriest,
-      baptismAge,
-      typeDistribution,
-      seasonalPatterns
-    ] = await Promise.all([
-      // 1. Sacraments by Year
-      pool.query(`
-        SELECT year_val AS year, type, COUNT(*) AS count FROM (
-          SELECT YEAR(reception_date) AS year_val, 'baptism' AS type FROM baptism_records WHERE reception_date IS NOT NULL
-          UNION ALL
-          SELECT YEAR(mdate) AS year_val, 'marriage' AS type FROM marriage_records WHERE mdate IS NOT NULL
-          UNION ALL
-          SELECT YEAR(burial_date) AS year_val, 'funeral' AS type FROM funeral_records WHERE burial_date IS NOT NULL
-        ) combined
-        WHERE year_val IS NOT NULL
-        GROUP BY year_val, type
-        ORDER BY year_val
-      `),
+    // Build UNION parts only for tables that have the right columns
+    const yearParts = [];
+    const monthParts = [];
+    const seasonParts = [];
+    const clergyParts = [];
 
-      // 2. Monthly Trends
-      pool.query(`
-        SELECT month_val AS month, type, COUNT(*) AS count FROM (
-          SELECT DATE_FORMAT(reception_date, '%Y-%m') AS month_val, 'baptism' AS type FROM baptism_records WHERE reception_date IS NOT NULL
-          UNION ALL
-          SELECT DATE_FORMAT(mdate, '%Y-%m') AS month_val, 'marriage' AS type FROM marriage_records WHERE mdate IS NOT NULL
-          UNION ALL
-          SELECT DATE_FORMAT(burial_date, '%Y-%m') AS month_val, 'funeral' AS type FROM funeral_records WHERE burial_date IS NOT NULL
-        ) combined
-        WHERE month_val IS NOT NULL
-        GROUP BY month_val, type
-        ORDER BY month_val
-      `),
+    if (cols.baptismDate) {
+      yearParts.push(`SELECT YEAR(${cols.baptismDate}) AS year_val, 'baptism' AS type FROM baptism_records WHERE ${cols.baptismDate} IS NOT NULL`);
+      monthParts.push(`SELECT DATE_FORMAT(${cols.baptismDate}, '%Y-%m') AS month_val, 'baptism' AS type FROM baptism_records WHERE ${cols.baptismDate} IS NOT NULL`);
+      seasonParts.push(`SELECT MONTH(${cols.baptismDate}) AS month_num, 'baptism' AS type FROM baptism_records WHERE ${cols.baptismDate} IS NOT NULL`);
+    }
+    if (cols.marriageDate) {
+      yearParts.push(`SELECT YEAR(${cols.marriageDate}) AS year_val, 'marriage' AS type FROM marriage_records WHERE ${cols.marriageDate} IS NOT NULL`);
+      monthParts.push(`SELECT DATE_FORMAT(${cols.marriageDate}, '%Y-%m') AS month_val, 'marriage' AS type FROM marriage_records WHERE ${cols.marriageDate} IS NOT NULL`);
+      seasonParts.push(`SELECT MONTH(${cols.marriageDate}) AS month_num, 'marriage' AS type FROM marriage_records WHERE ${cols.marriageDate} IS NOT NULL`);
+    }
+    if (cols.funeralDate) {
+      yearParts.push(`SELECT YEAR(${cols.funeralDate}) AS year_val, 'funeral' AS type FROM funeral_records WHERE ${cols.funeralDate} IS NOT NULL`);
+      monthParts.push(`SELECT DATE_FORMAT(${cols.funeralDate}, '%Y-%m') AS month_val, 'funeral' AS type FROM funeral_records WHERE ${cols.funeralDate} IS NOT NULL`);
+      seasonParts.push(`SELECT MONTH(${cols.funeralDate}) AS month_num, 'funeral' AS type FROM funeral_records WHERE ${cols.funeralDate} IS NOT NULL`);
+    }
+    if (cols.baptismClergy) {
+      clergyParts.push(`SELECT TRIM(${cols.baptismClergy}) AS clergy_name FROM baptism_records WHERE ${cols.baptismClergy} IS NOT NULL AND TRIM(${cols.baptismClergy}) != ''`);
+    }
+    if (cols.marriageClergy) {
+      clergyParts.push(`SELECT TRIM(${cols.marriageClergy}) AS clergy_name FROM marriage_records WHERE ${cols.marriageClergy} IS NOT NULL AND TRIM(${cols.marriageClergy}) != ''`);
+    }
+    if (cols.funeralClergy) {
+      clergyParts.push(`SELECT TRIM(${cols.funeralClergy}) AS clergy_name FROM funeral_records WHERE ${cols.funeralClergy} IS NOT NULL AND TRIM(${cols.funeralClergy}) != ''`);
+    }
 
-      // 3. By Priest
-      pool.query(`
-        SELECT clergy_name, COUNT(*) AS count FROM (
-          SELECT TRIM(clergy) AS clergy_name FROM baptism_records WHERE clergy IS NOT NULL AND TRIM(clergy) != ''
-          UNION ALL
-          SELECT TRIM(clergy) AS clergy_name FROM marriage_records WHERE clergy IS NOT NULL AND TRIM(clergy) != ''
-          UNION ALL
-          SELECT TRIM(clergy) AS clergy_name FROM funeral_records WHERE clergy IS NOT NULL AND TRIM(clergy) != ''
-        ) combined
-        GROUP BY clergy_name
-        ORDER BY count DESC
-        LIMIT 15
-      `),
+    // Build queries (return empty results if no date columns found)
+    const yearQuery = yearParts.length > 0
+      ? `SELECT year_val AS year, type, COUNT(*) AS count FROM (${yearParts.join(' UNION ALL ')}) combined WHERE year_val IS NOT NULL GROUP BY year_val, type ORDER BY year_val`
+      : null;
 
-      // 4. Baptism Age Distribution
-      pool.query(`
-        SELECT
+    const monthQuery = monthParts.length > 0
+      ? `SELECT month_val AS month, type, COUNT(*) AS count FROM (${monthParts.join(' UNION ALL ')}) combined WHERE month_val IS NOT NULL GROUP BY month_val, type ORDER BY month_val`
+      : null;
+
+    const seasonQuery = seasonParts.length > 0
+      ? `SELECT month_num, type, COUNT(*) AS count FROM (${seasonParts.join(' UNION ALL ')}) combined WHERE month_num IS NOT NULL GROUP BY month_num, type ORDER BY month_num`
+      : null;
+
+    const clergyQuery = clergyParts.length > 0
+      ? `SELECT clergy_name, COUNT(*) AS count FROM (${clergyParts.join(' UNION ALL ')}) combined GROUP BY clergy_name ORDER BY count DESC LIMIT 15`
+      : null;
+
+    const ageQuery = (cols.baptismDate && cols.birthDate)
+      ? `SELECT
           CASE
-            WHEN age_days < 0 THEN 'Invalid'
             WHEN age_days <= 90 THEN '0-3 months'
             WHEN age_days <= 180 THEN '3-6 months'
             WHEN age_days <= 365 THEN '6-12 months'
@@ -100,16 +141,28 @@ router.get('/summary', requireAuth, async (req, res) => {
           END AS age_range,
           COUNT(*) AS count
         FROM (
-          SELECT DATEDIFF(reception_date, birth_date) AS age_days
+          SELECT DATEDIFF(${cols.baptismDate}, ${cols.birthDate}) AS age_days
           FROM baptism_records
-          WHERE reception_date IS NOT NULL AND birth_date IS NOT NULL
+          WHERE ${cols.baptismDate} IS NOT NULL AND ${cols.birthDate} IS NOT NULL
         ) ages
         WHERE age_days >= 0
         GROUP BY age_range
-        ORDER BY MIN(age_days)
-      `),
+        ORDER BY MIN(age_days)`
+      : null;
 
-      // 5. Type Distribution (pie chart)
+    // Run all queries in parallel
+    const [
+      sacramentsByYear,
+      monthlyTrends,
+      byPriest,
+      baptismAge,
+      typeDistribution,
+      seasonalPatterns
+    ] = await Promise.all([
+      yearQuery ? pool.query(yearQuery) : [[]],
+      monthQuery ? pool.query(monthQuery) : [[]],
+      clergyQuery ? pool.query(clergyQuery) : [[]],
+      ageQuery ? pool.query(ageQuery) : [[]],
       pool.query(`
         SELECT 'Baptisms' AS type, COUNT(*) AS count FROM baptism_records
         UNION ALL
@@ -117,20 +170,7 @@ router.get('/summary', requireAuth, async (req, res) => {
         UNION ALL
         SELECT 'Funerals' AS type, COUNT(*) AS count FROM funeral_records
       `),
-
-      // 6. Seasonal Patterns
-      pool.query(`
-        SELECT month_num, type, COUNT(*) AS count FROM (
-          SELECT MONTH(reception_date) AS month_num, 'baptism' AS type FROM baptism_records WHERE reception_date IS NOT NULL
-          UNION ALL
-          SELECT MONTH(mdate) AS month_num, 'marriage' AS type FROM marriage_records WHERE mdate IS NOT NULL
-          UNION ALL
-          SELECT MONTH(burial_date) AS month_num, 'funeral' AS type FROM funeral_records WHERE burial_date IS NOT NULL
-        ) combined
-        WHERE month_num IS NOT NULL
-        GROUP BY month_num, type
-        ORDER BY month_num
-      `)
+      seasonQuery ? pool.query(seasonQuery) : [[]],
     ]);
 
     // Extract rows (mysql2 returns [rows, fields])
