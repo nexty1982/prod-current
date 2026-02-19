@@ -21,10 +21,10 @@ import {
   Stack,
 } from '@mui/material';
 
-import img1 from '@/assets/images/products/s6.jpg';
-import img2 from '@/assets/images/products/s9.jpg';
-import img3 from '@/assets/images/products/s7.jpg';
-import img4 from '@/assets/images/products/s4.jpg';
+const img1 = '';
+const img2 = '';
+const img3 = '';
+const img4 = '';
 
 const ProductPerformances = () => {
   // for select
