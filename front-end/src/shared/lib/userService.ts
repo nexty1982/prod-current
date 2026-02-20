@@ -369,6 +369,50 @@ class UserService {
         }
     }
 
+    // Create an invite
+    async createInvite(data: { email: string; role: string; church_id: string | null; expiration_days: number }): Promise<ApiResponse> {
+        try {
+            const response = await fetch(`${this.baseUrl}/invites`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Failed to create invite');
+            return { success: true, message: result.message, data: result };
+        } catch (error) {
+            return { success: false, message: error instanceof Error ? error.message : 'Failed to create invite' };
+        }
+    }
+
+    // Get all invites
+    async getInvites(): Promise<ApiResponse> {
+        try {
+            const response = await fetch(`${this.baseUrl}/invites`, { credentials: 'include' });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to fetch invites');
+            return { success: true, data: data.invites };
+        } catch (error) {
+            return { success: false, message: error instanceof Error ? error.message : 'Failed to fetch invites' };
+        }
+    }
+
+    // Revoke an invite
+    async revokeInvite(inviteId: number): Promise<ApiResponse> {
+        try {
+            const response = await fetch(`${this.baseUrl}/invites/${inviteId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to revoke invite');
+            return { success: true, message: data.message };
+        } catch (error) {
+            return { success: false, message: error instanceof Error ? error.message : 'Failed to revoke invite' };
+        }
+    }
+
     generateSecurePassword(): string {
         const length = 16;
         const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';

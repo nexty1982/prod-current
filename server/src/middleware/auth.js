@@ -50,12 +50,22 @@ const authMiddleware = (req, res, next) => {
       });
     }
 
+    // Check account expiration
+    if (req.session.user.account_expires_at && new Date(req.session.user.account_expires_at) < new Date()) {
+      console.log('❌ Account expired for:', req.session.user.email);
+      return res.status(401).json({
+        error: 'Account expired',
+        code: 'ACCOUNT_EXPIRED',
+        message: 'Your account has expired. Please contact an administrator.'
+      });
+    }
+
     // Update last activity
     req.session.lastActivity = new Date();
-    
+
     // Set req.user from session for compatibility with routes expecting req.user
     req.user = req.session.user;
-    
+
     console.log('✅ Session authentication successful for:', req.session.user.email);
     return next();
   }

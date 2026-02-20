@@ -987,6 +987,84 @@ const sendPasswordResetEmail = async (toEmail, tempPassword, firstName) => {
   }
 };
 
+// Send invite email to a new user
+const sendInviteEmail = async (toEmail, inviteUrl, role, accountExpiresAt) => {
+  try {
+    const transporter = await createTransporter();
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'Orthodox Metrics';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
+    const expiresDate = new Date(accountExpiresAt).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    const roleLabel = role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .header { background: linear-gradient(135deg, #5d87ff 0%, #8c249d 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { margin: 0 0 5px 0; font-size: 24px; }
+        .header p { margin: 0; opacity: 0.9; }
+        .content { padding: 30px; }
+        .invite-box { background: #f0f4ff; border: 2px solid #5d87ff; border-radius: 10px; padding: 20px; text-align: center; margin: 25px 0; }
+        .button { display: inline-block; background: #5d87ff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; }
+        .detail { background: #f9f9f9; border-left: 4px solid #8c249d; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>You're Invited!</h1>
+        <p>Orthodox Metrics</p>
+    </div>
+    <div class="content">
+        <p>Hello,</p>
+        <p>You've been invited to join Orthodox Metrics as a <strong>${roleLabel}</strong>.</p>
+
+        <div class="detail">
+            <p><strong>Role:</strong> ${roleLabel}</p>
+            <p><strong>Account valid until:</strong> ${expiresDate}</p>
+        </div>
+
+        <div class="invite-box">
+            <p style="margin: 0 0 15px 0; color: #555;">Click below to set up your account:</p>
+            <a href="${inviteUrl}" class="button">Accept Invitation</a>
+        </div>
+
+        <p><strong>Direct link:</strong> <a href="${inviteUrl}">${inviteUrl}</a></p>
+
+        <p style="color: #888; font-size: 14px;">This invite link expires in 7 days. If you did not expect this invitation, you can safely ignore this email.</p>
+    </div>
+    <div class="footer">
+        <p>&copy; ${new Date().getFullYear()} Orthodox Metrics &mdash; Digital Church Metrics</p>
+    </div>
+</body>
+</html>
+    `;
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: toEmail,
+      subject: `You're invited to Orthodox Metrics as ${roleLabel}`,
+      html: htmlContent,
+      text: `You've been invited to join Orthodox Metrics as a ${roleLabel}.\n\nAccept your invitation: ${inviteUrl}\n\nThis link expires in 7 days. Your account will be valid until ${expiresDate}.`
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Invite email sent to ${toEmail}:`, info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error(`Failed to send invite email to ${toEmail}:`, error.message);
+    throw error;
+  }
+};
+
 module.exports = {
   sendOCRReceipt,
   sendSessionVerification,
@@ -997,5 +1075,6 @@ module.exports = {
   sendTaskCreationEmail,
   sendBackupNotification,
   sendContactEmail,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendInviteEmail
 };

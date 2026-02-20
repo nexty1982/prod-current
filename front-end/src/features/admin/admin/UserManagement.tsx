@@ -45,12 +45,14 @@ import {
     IconCrown,
     IconEye,
     IconLock,
-    IconLockOpen
+    IconLockOpen,
+    IconSend
 } from '@tabler/icons-react';
 
 import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import UserFormModal from '@/components/UserFormModal';
+import InviteUserDialog from '@/components/InviteUserDialog';
 
 // contexts
 import { useAuth } from '@/context/AuthContext';
@@ -92,6 +94,7 @@ const UserManagement: React.FC = () => {
 
     // Dialog states
     const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
+    const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<'view' | 'edit' | 'reset-password' | 'delete-confirm'>('edit');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -516,6 +519,13 @@ const UserManagement: React.FC = () => {
                                         </Select>
                                     </FormControl>
                                     <Button
+                                        variant="outlined"
+                                        startIcon={<IconSend size={18} />}
+                                        onClick={() => setInviteDialogOpen(true)}
+                                    >
+                                        Invite User
+                                    </Button>
+                                    <Button
                                         variant="contained"
                                         startIcon={<IconUserPlus />}
                                         onClick={() => setCreateUserDialogOpen(true)}
@@ -878,6 +888,14 @@ const UserManagement: React.FC = () => {
                 onSubmit={handleModalSubmit}
                 loading={modalLoading}
                 currentUserRole={user?.role}
+            />
+
+            {/* Invite User Dialog */}
+            <InviteUserDialog
+                open={inviteDialogOpen}
+                onClose={() => setInviteDialogOpen(false)}
+                churches={churches}
+                currentUserRole={user?.role || ''}
             />
         </PageContainer>
     );

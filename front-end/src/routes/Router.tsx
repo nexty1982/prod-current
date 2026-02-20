@@ -266,6 +266,7 @@ const OrthodoxLogin = Loadable(lazy(() => import('../features/auth/authenticatio
 const Login2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/Login2')));
 const Register = Loadable(lazy(() => import('../features/auth/authentication/auth1/Register')));
 const Register2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/Register2')));
+const AcceptInvite = Loadable(lazy(() => import('../features/auth/AcceptInvite')));
 const ForgotPassword = Loadable(lazy(() => import('../features/auth/authentication/auth1/ForgotPassword')));
 const ForgotPassword2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/ForgotPassword2')));
 const TwoSteps = Loadable(lazy(() => import('../features/auth/authentication/auth1/TwoSteps')));
@@ -1734,6 +1735,7 @@ const Router = [
           { path: 'two-steps', element: <TwoSteps /> },
           { path: 'two-steps2', element: <TwoSteps2 /> },
           { path: 'maintenance', element: <Maintenance /> },
+          { path: 'accept-invite/:token', element: <AcceptInvite /> },
           { path: '*', element: <NotFound404 /> },
         ]
       },

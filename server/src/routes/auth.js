@@ -164,7 +164,8 @@ router.post('/login', async (req, res) => {
       first_name: user.first_name,
       last_name: user.last_name,
       role: user.role,
-      church_id: user.church_id
+      church_id: user.church_id,
+      account_expires_at: user.account_expires_at || null
     };
 
     await new Promise((resolve, reject) => {
