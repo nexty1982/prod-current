@@ -490,19 +490,19 @@ const UserManagement: React.FC = () => {
 
                         {/* Search and Filters */}
                         <Card sx={{ mb: 3 }}>
-                            <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
-                                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
+                            <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
                                     <TextField
                                         size="small"
-                                        sx={{ flex: 1, minWidth: 220 }}
+                                        sx={{ minWidth: 180, flex: '1 1 180px' }}
                                         placeholder="Search users..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         InputProps={{
-                                            startAdornment: <IconSearch size={18} style={{ marginRight: 8, opacity: 0.5 }} />,
+                                            startAdornment: <IconSearch size={16} style={{ marginRight: 6, opacity: 0.5 }} />,
                                         }}
                                     />
-                                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                                    <FormControl size="small" sx={{ minWidth: 100 }}>
                                         <InputLabel>Role</InputLabel>
                                         <Select
                                             value={roleFilter}
@@ -521,7 +521,7 @@ const UserManagement: React.FC = () => {
                                             <MenuItem value="viewer">Viewer</MenuItem>
                                         </Select>
                                     </FormControl>
-                                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                                    <FormControl size="small" sx={{ minWidth: 120 }}>
                                         <InputLabel>Church</InputLabel>
                                         <Select
                                             value={churchFilter}
@@ -536,38 +536,40 @@ const UserManagement: React.FC = () => {
                                             ))}
                                         </Select>
                                     </FormControl>
-                                    <Box sx={{ flex: 1 }} />
+                                    <Box sx={{ ml: 'auto' }} />
                                     <Button
                                         size="small"
                                         variant="outlined"
-                                        startIcon={<IconSend size={16} />}
+                                        startIcon={<IconSend size={14} />}
                                         onClick={() => setInviteDialogOpen(true)}
+                                        sx={{ whiteSpace: 'nowrap' }}
                                     >
                                         Invite
                                     </Button>
                                     <Button
                                         size="small"
                                         variant="contained"
-                                        startIcon={<IconUserPlus size={16} />}
+                                        startIcon={<IconUserPlus size={14} />}
                                         onClick={() => setCreateUserDialogOpen(true)}
+                                        sx={{ whiteSpace: 'nowrap' }}
                                     >
                                         Add User
                                     </Button>
-                                </Stack>
+                                </Box>
                             </CardContent>
                         </Card>
 
                         {/* Users Table */}
                         <Card>
-                            <CardContent sx={{ p: 0 }}>
+                            <CardContent sx={{ p: 0, overflow: 'auto' }}>
                                 {loading ? (
                                     <Box display="flex" justifyContent="center" p={4}>
                                         <CircularProgress />
                                     </Box>
                                 ) : (
                                     <>
-                                        <TableContainer>
-                                            <Table size="small">
+                                        <TableContainer sx={{ overflowX: 'auto' }}>
+                                            <Table size="small" sx={{ minWidth: 800 }}>
                                                 <TableHead>
                                                     <TableRow>
                                                         <TableCell>User</TableCell>
