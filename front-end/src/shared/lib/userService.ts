@@ -20,6 +20,7 @@ export interface User {
     locked_at?: string;
     locked_by?: string;
     lockout_reason?: string;
+    account_expires_at?: string;
 }
 
 export interface NewUser {
@@ -395,6 +396,20 @@ class UserService {
             return { success: true, data: data.invites };
         } catch (error) {
             return { success: false, message: error instanceof Error ? error.message : 'Failed to fetch invites' };
+        }
+    }
+
+    // Get invite user activity
+    async getInviteActivity(userId: number, limit = 50, offset = 0): Promise<ApiResponse> {
+        try {
+            const response = await fetch(`${this.baseUrl}/invites/${userId}/activity?limit=${limit}&offset=${offset}`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to fetch activity');
+            return { success: true, data: { activity: data.activity, total: data.total } };
+        } catch (error) {
+            return { success: false, message: error instanceof Error ? error.message : 'Failed to fetch activity' };
         }
     }
 

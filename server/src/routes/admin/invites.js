@@ -123,6 +123,38 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+// GET /api/admin/invites/:userId/activity — Get invite user activity log
+router.get('/:userId/activity', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { limit = 50, offset = 0 } = req.query;
+    const pool = getAppPool();
+
+    const [rows] = await pool.query(
+      `SELECT id, user_id, action, details, ip_address, user_agent, created_at
+       FROM activity_log
+       WHERE user_id = ? AND action = 'invite_user_access'
+       ORDER BY created_at DESC
+       LIMIT ? OFFSET ?`,
+      [userId, parseInt(limit), parseInt(offset)]
+    );
+
+    const [countResult] = await pool.query(
+      `SELECT COUNT(*) AS total FROM activity_log WHERE user_id = ? AND action = 'invite_user_access'`,
+      [userId]
+    );
+
+    res.json({
+      success: true,
+      activity: rows,
+      total: countResult[0]?.total || 0
+    });
+  } catch (error) {
+    console.error('Error fetching invite activity:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch activity log.' });
+  }
+});
+
 // DELETE /api/admin/invites/:id — Revoke a pending invite
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {

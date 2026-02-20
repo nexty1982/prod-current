@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Box,
     Card,
@@ -32,7 +32,8 @@ import {
     Tabs,
     Tab,
     Snackbar,
-    CircularProgress
+    CircularProgress,
+    Grid
 } from '@mui/material';
 import {
     IconKey,
@@ -46,13 +47,18 @@ import {
     IconEye,
     IconLock,
     IconLockOpen,
-    IconSend
+    IconSend,
+    IconActivity,
+    IconUserCheck,
+    IconUserOff,
+    IconClockHour4
 } from '@tabler/icons-react';
 
 import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import UserFormModal from '@/components/UserFormModal';
 import InviteUserDialog from '@/components/InviteUserDialog';
+import InviteActivityDialog from '@/components/InviteActivityDialog';
 
 // contexts
 import { useAuth } from '@/context/AuthContext';
@@ -61,18 +67,32 @@ import { User as AuthUser } from '@/types/orthodox-metrics.types';
 // services
 import userService, { User, Church, NewUser, UpdateUser, ResetPasswordData } from '@/shared/lib/userService';
 
+// Helper: get expiration info for invite accounts
+const getExpirationInfo = (expiresAt?: string): { label: string; color: 'success' | 'warning' | 'error' | 'default'; expired: boolean; daysLeft: number } | null => {
+    if (!expiresAt) return null;
+    const now = new Date();
+    const expires = new Date(expiresAt);
+    const diffMs = expires.getTime() - now.getTime();
+    const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    if (daysLeft < 0) return { label: 'Expired', color: 'default', expired: true, daysLeft };
+    if (daysLeft <= 7) return { label: `${daysLeft}d left`, color: 'error', expired: false, daysLeft };
+    if (daysLeft <= 30) return { label: `${daysLeft}d left`, color: 'warning', expired: false, daysLeft };
+    return { label: `${daysLeft}d left`, color: 'success', expired: false, daysLeft };
+};
+
 const UserManagement: React.FC = () => {
-    const { 
-        user, 
-        canCreateAdmins, 
-        canManageAllUsers, 
+    const {
+        user,
+        canCreateAdmins,
+        canManageAllUsers,
         isSuperAdmin,
         isRootSuperAdmin,
         canManageUser,
         canPerformDestructiveOperation,
         canChangeRole
     } = useAuth();
-    
+
     const [users, setUsers] = useState<User[]>([]);
     const [churches, setChurches] = useState<Church[]>([]);
     const [loading, setLoading] = useState(false);
@@ -105,6 +125,10 @@ const UserManagement: React.FC = () => {
     const [lockTargetUser, setLockTargetUser] = useState<User | null>(null);
     const [lockReason, setLockReason] = useState('');
 
+    // Activity dialog state
+    const [activityDialogOpen, setActivityDialogOpen] = useState(false);
+    const [activityUser, setActivityUser] = useState<User | null>(null);
+
     // Form state for creating users
     const [newUser, setNewUser] = useState<NewUser>({
         email: '',
@@ -123,11 +147,11 @@ const UserManagement: React.FC = () => {
     // Helper function to convert userService User to AuthUser for permission checks
     const toAuthUser = (userData: User): AuthUser => ({
         ...userData,
-        username: userData.email, // Use email as username since it's missing from userService User
-        role: userData.role as any, // Type assertion for role compatibility
+        username: userData.email,
+        role: userData.role as any,
         preferred_language: (userData.preferred_language || 'en') as any,
         timezone: userData.timezone || undefined,
-        church_id: userData.church_id || undefined // Convert null to undefined
+        church_id: userData.church_id || undefined
     });
 
     // Root super admin email constant
@@ -142,60 +166,23 @@ const UserManagement: React.FC = () => {
     const loadData = async () => {
         setLoading(true);
         try {
-            console.log('📊 Frontend: Loading data...');
-            console.log('🔐 Current user:', user);
-            console.log('🔐 User role:', user?.role);
-            console.log('🔐 Is admin?', isAdmin);
-            
-            // Debug: Test direct API call
-            try {
-                const testResponse = await fetch('/api/admin/users', {
-                    credentials: 'include'
-                });
-                console.log('🔍 Direct API test response status:', testResponse.status);
-                console.log('🔍 Direct API test response headers:', Object.fromEntries(testResponse.headers.entries()));
-                if (!testResponse.ok) {
-                    const errorText = await testResponse.text();
-                    console.log('🔍 Direct API test error body:', errorText);
-                }
-            } catch (directErr) {
-                console.log('🔍 Direct API test failed:', directErr);
-            }
-            
             const [usersResponse, churchesResponse] = await Promise.all([
                 userService.getUsers(),
                 userService.getChurches()
             ]);
 
-            console.log('📊 Frontend: Users response:', usersResponse);
             if (usersResponse.success) {
-                console.log('📊 Frontend: Setting users to:', usersResponse.users?.length, 'users');
-                // Debug: Log each user's is_active status
-                usersResponse.users?.forEach((u, i) => {
-                    console.log(`👤 User ${i+1}: ${u.email} - is_active: ${u.is_active} (type: ${typeof u.is_active})`);
-                });
                 setUsers(usersResponse.users || []);
             } else {
-                console.error('❌ Users API failed:', usersResponse);
                 setError(usersResponse.message || 'Failed to load users');
             }
 
             if (churchesResponse.success) {
-                console.log('✅ Churches loaded:', churchesResponse.churches);
-                console.log('🔍 Looking for Saints Peter and Paul:', 
-                    churchesResponse.churches?.find(ch => ch.name && ch.name.includes('Saints Peter and Paul')));
                 setChurches(churchesResponse.churches || []);
             } else {
-                console.error('❌ Churches API failed:', churchesResponse);
-                console.error('❌ Failed to load churches:', churchesResponse.message);
-                if (churchesResponse.message === undefined) {
-                    setError('Failed to load churches: API returned undefined message (possible 401 error)');
-                } else {
-                    setError('Failed to load churches: ' + churchesResponse.message);
-                }
+                setError('Failed to load churches');
             }
-        } catch (err) {
-            console.error('❌ Error loading data:', err);
+        } catch {
             setError('Failed to load data');
         } finally {
             setLoading(false);
@@ -203,24 +190,10 @@ const UserManagement: React.FC = () => {
     };
 
     const handleCreateUser = async () => {
-        // Validate required fields
-        if (!newUser.email.trim()) {
-            setError('Email is required');
-            return;
-        }
-        if (!newUser.first_name.trim()) {
-            setError('First name is required');
-            return;
-        }
-        if (!newUser.last_name.trim()) {
-            setError('Last name is required');
-            return;
-        }
-        if (!newUser.role) {
-            setError('Role is required');
-            return;
-        }
-        // Church selection is only required for non-global roles
+        if (!newUser.email.trim()) { setError('Email is required'); return; }
+        if (!newUser.first_name.trim()) { setError('First name is required'); return; }
+        if (!newUser.last_name.trim()) { setError('Last name is required'); return; }
+        if (!newUser.role) { setError('Role is required'); return; }
         if (!newUser.church_id && !['super_admin', 'admin'].includes(newUser.role)) {
             setError('Church selection is required for this role');
             return;
@@ -234,22 +207,15 @@ const UserManagement: React.FC = () => {
                 setSuccess(`User created successfully! ${response.tempPassword ? `Temporary password: ${response.tempPassword}` : ''}`);
                 setCreateUserDialogOpen(false);
                 setNewUser({
-                    email: '',
-                    first_name: '',
-                    last_name: '',
-                    role: 'viewer',
-                    church_id: '',
-                    phone: '',
-                    preferred_language: 'en',
-                    send_welcome_email: true
+                    email: '', first_name: '', last_name: '', role: 'viewer',
+                    church_id: '', phone: '', preferred_language: 'en', send_welcome_email: true
                 });
                 await loadData();
             } else {
                 setError(response.message || 'Failed to create user');
             }
-        } catch (err) {
+        } catch {
             setError('An error occurred while creating the user');
-            console.error('Error creating user:', err);
         } finally {
             setLoading(false);
         }
@@ -262,9 +228,6 @@ const UserManagement: React.FC = () => {
     };
 
     const handleEditUser = (userData: User) => {
-        console.log('🔍 EDIT USER CLICKED - userData received:', JSON.stringify(userData, null, 2));
-        console.log('🔍 userData.church_id:', userData.church_id, 'type:', typeof userData.church_id);
-        console.log('🔍 Current churches state:', churches.length, 'churches loaded');
         setSelectedUser(userData);
         setModalMode('edit');
         setModalOpen(true);
@@ -309,9 +272,8 @@ const UserManagement: React.FC = () => {
             } else {
                 setError(response?.message || 'Operation failed');
             }
-        } catch (err) {
+        } catch {
             setError('An error occurred during the operation');
-            console.error('Error in modal operation:', err);
         } finally {
             setModalLoading(false);
         }
@@ -319,21 +281,15 @@ const UserManagement: React.FC = () => {
 
     const handleToggleUserStatus = async (userId: number, currentStatus: boolean) => {
         try {
-            console.log(`🔄 Frontend: Toggling user ${userId} from ${currentStatus} to ${!currentStatus}`);
             const response = await userService.toggleUserStatus(userId);
-            console.log('🔄 Frontend: Toggle response:', response);
-
             if (response.success) {
                 setSuccess(response.message || `User ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
-                console.log('🔄 Frontend: Calling loadData to refresh users list...');
                 await loadData();
-                console.log('🔄 Frontend: loadData completed');
             } else {
                 setError(response.message || 'Failed to update user status');
             }
-        } catch (err) {
+        } catch {
             setError('An error occurred while updating user status');
-            console.error('Error toggling user status:', err);
         }
     };
 
@@ -354,9 +310,8 @@ const UserManagement: React.FC = () => {
             } else {
                 setError(response.message || 'Failed to lock user');
             }
-        } catch (err) {
+        } catch {
             setError('An error occurred while locking the user');
-            console.error('Error locking user:', err);
         }
     };
 
@@ -369,10 +324,14 @@ const UserManagement: React.FC = () => {
             } else {
                 setError(response.message || 'Failed to unlock user');
             }
-        } catch (err) {
+        } catch {
             setError('An error occurred while unlocking the user');
-            console.error('Error unlocking user:', err);
         }
+    };
+
+    const handleViewActivity = (userData: User) => {
+        setActivityUser(userData);
+        setActivityDialogOpen(true);
     };
 
     // Filter users based on search and filters
@@ -388,14 +347,23 @@ const UserManagement: React.FC = () => {
         const matchesStatus = activeFilter === 'all' ||
             (activeFilter === 'active' && userData.is_active && !userData.is_locked) ||
             (activeFilter === 'inactive' && !userData.is_active) ||
-            (activeFilter === 'locked' && userData.is_locked);
+            (activeFilter === 'locked' && userData.is_locked) ||
+            (activeFilter === 'invited' && !!userData.account_expires_at);
 
-        // Role-based access: Regular admins can't see super_admin or other admin users
         const hasRoleAccess = isSuperAdmin() ||
             (userData.role !== 'super_admin' && userData.role !== 'admin' && userData.role !== 'church_admin');
 
         return matchesSearch && matchesRole && matchesChurch && matchesStatus && hasRoleAccess;
     });
+
+    // Summary stats
+    const stats = useMemo(() => {
+        const total = users.length;
+        const active = users.filter(u => u.is_active && !u.is_locked).length;
+        const locked = users.filter(u => u.is_locked).length;
+        const invited = users.filter(u => !!u.account_expires_at).length;
+        return { total, active, locked, invited };
+    }, [users]);
 
     // Paginate filtered users
     const paginatedUsers = filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -425,10 +393,6 @@ const UserManagement: React.FC = () => {
         <PageContainer title="User Management" description="Manage users in the Orthodox Metrics system">
             <Breadcrumb title="User Management" items={BCrumb} />
             <Box p={3}>
-                <Typography variant="h4" gutterBottom>
-                    User Management
-                </Typography>
-
                 <Snackbar
                     open={!!error}
                     autoHideDuration={6000}
@@ -452,26 +416,67 @@ const UserManagement: React.FC = () => {
                 </Snackbar>
 
                 <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
-                    <Tab icon={<IconUsers />} label="User Management" />
-                    <Tab icon={<IconBuilding />} label="Church Management" />
+                    <Tab icon={<IconUsers size={18} />} iconPosition="start" label="Users" />
+                    <Tab icon={<IconBuilding size={18} />} iconPosition="start" label="Churches" />
                 </Tabs>
 
                 {tabValue === 0 && (
                     <>
+                        {/* Summary Stat Cards */}
+                        <Grid container spacing={2} sx={{ mb: 3 }}>
+                            <Grid item xs={6} sm={3}>
+                                <Card sx={{ textAlign: 'center', cursor: 'pointer', border: activeFilter === 'all' ? 2 : 0, borderColor: 'primary.main' }} onClick={() => setActiveFilter('all')}>
+                                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+                                        <IconUsers size={24} color="#5D87FF" />
+                                        <Typography variant="h4" sx={{ mt: 0.5 }}>{stats.total}</Typography>
+                                        <Typography variant="body2" color="text.secondary">Total Users</Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={6} sm={3}>
+                                <Card sx={{ textAlign: 'center', cursor: 'pointer', border: activeFilter === 'active' ? 2 : 0, borderColor: 'success.main' }} onClick={() => setActiveFilter('active')}>
+                                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+                                        <IconUserCheck size={24} color="#13DEB9" />
+                                        <Typography variant="h4" sx={{ mt: 0.5 }}>{stats.active}</Typography>
+                                        <Typography variant="body2" color="text.secondary">Active</Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={6} sm={3}>
+                                <Card sx={{ textAlign: 'center', cursor: 'pointer', border: activeFilter === 'locked' ? 2 : 0, borderColor: 'error.main' }} onClick={() => setActiveFilter('locked')}>
+                                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+                                        <IconUserOff size={24} color="#FA896B" />
+                                        <Typography variant="h4" sx={{ mt: 0.5 }}>{stats.locked}</Typography>
+                                        <Typography variant="body2" color="text.secondary">Locked</Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={6} sm={3}>
+                                <Card sx={{ textAlign: 'center', cursor: 'pointer', border: activeFilter === 'invited' ? 2 : 0, borderColor: 'warning.main' }} onClick={() => setActiveFilter('invited')}>
+                                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+                                        <IconClockHour4 size={24} color="#FFAE1F" />
+                                        <Typography variant="h4" sx={{ mt: 0.5 }}>{stats.invited}</Typography>
+                                        <Typography variant="body2" color="text.secondary">Invite Accounts</Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </Grid>
+
                         {/* Search and Filters */}
                         <Card sx={{ mb: 3 }}>
-                            <CardContent>
+                            <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
                                 <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
                                     <TextField
-                                        sx={{ flex: 1, minWidth: 250 }}
+                                        size="small"
+                                        sx={{ flex: 1, minWidth: 220 }}
                                         placeholder="Search users..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         InputProps={{
-                                            startAdornment: <IconSearch size={20} />,
+                                            startAdornment: <IconSearch size={18} style={{ marginRight: 8, opacity: 0.5 }} />,
                                         }}
                                     />
-                                    <FormControl sx={{ minWidth: 120 }}>
+                                    <FormControl size="small" sx={{ minWidth: 120 }}>
                                         <InputLabel>Role</InputLabel>
                                         <Select
                                             value={roleFilter}
@@ -490,7 +495,7 @@ const UserManagement: React.FC = () => {
                                             <MenuItem value="viewer">Viewer</MenuItem>
                                         </Select>
                                     </FormControl>
-                                    <FormControl sx={{ minWidth: 150 }}>
+                                    <FormControl size="small" sx={{ minWidth: 150 }}>
                                         <InputLabel>Church</InputLabel>
                                         <Select
                                             value={churchFilter}
@@ -505,29 +510,19 @@ const UserManagement: React.FC = () => {
                                             ))}
                                         </Select>
                                     </FormControl>
-                                    <FormControl sx={{ minWidth: 120 }}>
-                                        <InputLabel>Status</InputLabel>
-                                        <Select
-                                            value={activeFilter}
-                                            onChange={(e) => setActiveFilter(e.target.value)}
-                                            label="Status"
-                                        >
-                                            <MenuItem value="all">All Status</MenuItem>
-                                            <MenuItem value="active">Active</MenuItem>
-                                            <MenuItem value="inactive">Inactive</MenuItem>
-                                            <MenuItem value="locked">Locked</MenuItem>
-                                        </Select>
-                                    </FormControl>
+                                    <Box sx={{ flex: 1 }} />
                                     <Button
+                                        size="small"
                                         variant="outlined"
-                                        startIcon={<IconSend size={18} />}
+                                        startIcon={<IconSend size={16} />}
                                         onClick={() => setInviteDialogOpen(true)}
                                     >
-                                        Invite User
+                                        Invite
                                     </Button>
                                     <Button
+                                        size="small"
                                         variant="contained"
-                                        startIcon={<IconUserPlus />}
+                                        startIcon={<IconUserPlus size={16} />}
                                         onClick={() => setCreateUserDialogOpen(true)}
                                     >
                                         Add User
@@ -538,15 +533,15 @@ const UserManagement: React.FC = () => {
 
                         {/* Users Table */}
                         <Card>
-                            <CardContent>
+                            <CardContent sx={{ p: 0 }}>
                                 {loading ? (
-                                    <Box display="flex" justifyContent="center" p={3}>
+                                    <Box display="flex" justifyContent="center" p={4}>
                                         <CircularProgress />
                                     </Box>
                                 ) : (
                                     <>
                                         <TableContainer>
-                                            <Table>
+                                            <Table size="small">
                                                 <TableHead>
                                                     <TableRow>
                                                         <TableCell>User</TableCell>
@@ -558,56 +553,78 @@ const UserManagement: React.FC = () => {
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
-                                                    {paginatedUsers.map((userData) => (
-                                                        <TableRow key={userData.id}>
+                                                    {paginatedUsers.length === 0 && (
+                                                        <TableRow>
+                                                            <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                                                                <Typography color="text.secondary">No users found</Typography>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )}
+                                                    {paginatedUsers.map((userData) => {
+                                                        const expInfo = getExpirationInfo(userData.account_expires_at);
+                                                        return (
+                                                        <TableRow key={userData.id} hover>
                                                             <TableCell>
-                                                                <Stack direction="row" spacing={2} alignItems="center">
-                                                                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                                                <Stack direction="row" spacing={1.5} alignItems="center">
+                                                                    <Avatar sx={{ bgcolor: expInfo ? 'warning.main' : 'primary.main', width: 36, height: 36, fontSize: '0.85rem' }}>
                                                                         {(userData.first_name?.charAt(0) || '') + (userData.last_name?.charAt(0) || '')}
                                                                     </Avatar>
                                                                     <Box>
-                                                                        <Stack direction="row" spacing={1} alignItems="center">
-                                                                            <Typography variant="subtitle2">
+                                                                        <Stack direction="row" spacing={0.5} alignItems="center">
+                                                                            <Typography variant="subtitle2" sx={{ lineHeight: 1.3 }}>
                                                                                 {userData.full_name || `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || userData.email}
                                                                             </Typography>
                                                                             {isUserRootSuperAdmin(userData) && (
                                                                                 <Tooltip title="Root Super Admin">
-                                                                                    <IconCrown size={16} style={{ color: '#FFD700' }} />
+                                                                                    <IconCrown size={14} style={{ color: '#FFD700' }} />
                                                                                 </Tooltip>
                                                                             )}
+                                                                            {expInfo && (
+                                                                                <Chip
+                                                                                    label="Invited"
+                                                                                    size="small"
+                                                                                    variant="outlined"
+                                                                                    color="warning"
+                                                                                    sx={{ height: 20, fontSize: '0.65rem', ml: 0.5 }}
+                                                                                />
+                                                                            )}
                                                                         </Stack>
-                                                                        <Typography variant="body2" color="text.secondary">
+                                                                        <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>
                                                                             {userData.email}
                                                                         </Typography>
                                                                     </Box>
                                                                 </Stack>
                                                             </TableCell>
                                                             <TableCell>
-                                                                <Stack direction="row" spacing={1} alignItems="center">
+                                                                <Stack direction="row" spacing={0.5} alignItems="center">
                                                                     <Chip
                                                                         label={userData.role}
                                                                         size="small"
                                                                         color={userService.getRoleBadgeColor(userData.role)}
+                                                                        sx={{ height: 22, fontSize: '0.75rem' }}
                                                                     />
                                                                     {isUserRootSuperAdmin(userData) && (
                                                                         <Chip
                                                                             label="ROOT"
                                                                             size="small"
-                                                                            sx={{ 
-                                                                                bgcolor: '#FFD700', 
+                                                                            sx={{
+                                                                                bgcolor: '#FFD700',
                                                                                 color: '#000',
                                                                                 fontWeight: 'bold',
-                                                                                fontSize: '0.7rem'
+                                                                                fontSize: '0.65rem',
+                                                                                height: 20
                                                                             }}
                                                                         />
                                                                     )}
                                                                 </Stack>
                                                             </TableCell>
                                                             <TableCell>
-                                                                {userData.church_name || 'No Church'}
+                                                                <Typography variant="body2">
+                                                                    {userData.church_name || '—'}
+                                                                </Typography>
                                                             </TableCell>
                                                             <TableCell>
-                                                                <Stack direction="row" spacing={1} alignItems="center">
+                                                                <Stack direction="row" spacing={0.5} alignItems="center" flexWrap="wrap">
                                                                     <Switch
                                                                         checked={userData.is_active}
                                                                         onChange={() => handleToggleUserStatus(userData.id, userData.is_active)}
@@ -615,28 +632,36 @@ const UserManagement: React.FC = () => {
                                                                         disabled={!canPerformDestructiveOperation(toAuthUser(userData))}
                                                                     />
                                                                     {userData.is_locked ? (
-                                                                        <Chip
-                                                                            label="Locked"
-                                                                            size="small"
-                                                                            color="error"
-                                                                        />
+                                                                        <Chip label="Locked" size="small" color="error" sx={{ height: 22 }} />
                                                                     ) : (
                                                                         <Chip
                                                                             label={userData.is_active ? 'Active' : 'Inactive'}
                                                                             size="small"
                                                                             color={userData.is_active ? 'success' : 'default'}
+                                                                            sx={{ height: 22 }}
                                                                         />
+                                                                    )}
+                                                                    {expInfo && (
+                                                                        <Tooltip title={`Account ${expInfo.expired ? 'expired' : 'expires'}: ${new Date(userData.account_expires_at!).toLocaleDateString()}`}>
+                                                                            <Chip
+                                                                                label={expInfo.label}
+                                                                                size="small"
+                                                                                color={expInfo.color}
+                                                                                variant="outlined"
+                                                                                sx={{ height: 20, fontSize: '0.7rem' }}
+                                                                            />
+                                                                        </Tooltip>
                                                                     )}
                                                                 </Stack>
                                                             </TableCell>
                                                             <TableCell>
-                                                                <Typography variant="body2">
+                                                                <Typography variant="body2" color="text.secondary">
                                                                     {userService.formatLastLogin(userData.last_login)}
                                                                 </Typography>
                                                             </TableCell>
                                                             <TableCell align="right">
-                                                                <Stack direction="row" spacing={1}>
-                                                                    <Tooltip title="View User">
+                                                                <Stack direction="row" spacing={0} justifyContent="flex-end">
+                                                                    <Tooltip title="View">
                                                                         <IconButton
                                                                             size="small"
                                                                             onClick={() => handleViewUser(userData)}
@@ -646,7 +671,7 @@ const UserManagement: React.FC = () => {
                                                                         </IconButton>
                                                                     </Tooltip>
                                                                     {canManageUser(toAuthUser(userData)) && (
-                                                                        <Tooltip title="Edit User">
+                                                                        <Tooltip title="Edit">
                                                                             <IconButton
                                                                                 size="small"
                                                                                 onClick={() => handleEditUser(userData)}
@@ -667,8 +692,19 @@ const UserManagement: React.FC = () => {
                                                                             </IconButton>
                                                                         </Tooltip>
                                                                     )}
+                                                                    {userData.account_expires_at && isSuperAdmin() && (
+                                                                        <Tooltip title="View Activity">
+                                                                            <IconButton
+                                                                                size="small"
+                                                                                onClick={() => handleViewActivity(userData)}
+                                                                                sx={{ color: '#FFAE1F' }}
+                                                                            >
+                                                                                <IconActivity size={16} />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    )}
                                                                     {canPerformDestructiveOperation(toAuthUser(userData)) && (
-                                                                        <Tooltip title="Delete User">
+                                                                        <Tooltip title="Delete">
                                                                             <IconButton
                                                                                 size="small"
                                                                                 onClick={() => handleDeleteUser(userData)}
@@ -680,7 +716,7 @@ const UserManagement: React.FC = () => {
                                                                     )}
                                                                     {canPerformDestructiveOperation(toAuthUser(userData)) && (
                                                                         userData.is_locked ? (
-                                                                            <Tooltip title="Unlock User">
+                                                                            <Tooltip title="Unlock">
                                                                                 <IconButton
                                                                                     size="small"
                                                                                     onClick={() => handleUnlockUser(userData)}
@@ -690,7 +726,7 @@ const UserManagement: React.FC = () => {
                                                                                 </IconButton>
                                                                             </Tooltip>
                                                                         ) : (
-                                                                            <Tooltip title="Lock User">
+                                                                            <Tooltip title="Lock">
                                                                                 <IconButton
                                                                                     size="small"
                                                                                     onClick={() => handleLockUser(userData)}
@@ -704,13 +740,13 @@ const UserManagement: React.FC = () => {
                                                                 </Stack>
                                                             </TableCell>
                                                         </TableRow>
-                                                    ))}
+                                                    )})}
                                                 </TableBody>
                                             </Table>
                                         </TableContainer>
 
                                         <TablePagination
-                                            rowsPerPageOptions={[5, 10, 25, 50]}
+                                            rowsPerPageOptions={[10, 25, 50]}
                                             component="div"
                                             count={filteredUsers.length}
                                             rowsPerPage={rowsPerPage}
@@ -794,21 +830,21 @@ const UserManagement: React.FC = () => {
                                     )}
                                 </Select>
                             </FormControl>
-                            <FormControl 
-                                fullWidth 
+                            <FormControl
+                                fullWidth
                                 required={!['super_admin', 'admin'].includes(newUser.role)}
                             >
                                 <InputLabel>
-                                    Church {['super_admin', 'admin'].includes(newUser.role) ? '(Optional - Global Access)' : '*'}
+                                    Church {['super_admin', 'admin'].includes(newUser.role) ? '(Optional)' : '*'}
                                 </InputLabel>
                                 <Select
                                     value={newUser.church_id}
                                     onChange={(e) => setNewUser({ ...newUser, church_id: e.target.value })}
-                                    label={`Church ${['super_admin', 'admin'].includes(newUser.role) ? '(Optional - Global Access)' : '*'}`}
+                                    label={`Church ${['super_admin', 'admin'].includes(newUser.role) ? '(Optional)' : '*'}`}
                                 >
                                     <MenuItem value="">
-                                        {['super_admin', 'admin'].includes(newUser.role) 
-                                            ? 'No specific church (Global Access)' 
+                                        {['super_admin', 'admin'].includes(newUser.role)
+                                            ? 'No specific church (Global Access)'
                                             : 'Select a church...'
                                         }
                                     </MenuItem>
@@ -839,8 +875,8 @@ const UserManagement: React.FC = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setCreateUserDialogOpen(false)}>Cancel</Button>
-                    <Button 
-                        onClick={handleCreateUser} 
+                    <Button
+                        onClick={handleCreateUser}
                         variant="contained"
                         disabled={loading}
                         startIcon={loading ? <CircularProgress size={20} /> : undefined}
@@ -897,6 +933,16 @@ const UserManagement: React.FC = () => {
                 churches={churches}
                 currentUserRole={user?.role || ''}
             />
+
+            {/* Invite Activity Dialog */}
+            {activityUser && (
+                <InviteActivityDialog
+                    open={activityDialogOpen}
+                    onClose={() => setActivityDialogOpen(false)}
+                    userId={activityUser.id}
+                    userEmail={activityUser.email}
+                />
+            )}
         </PageContainer>
     );
 };

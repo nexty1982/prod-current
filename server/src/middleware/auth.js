@@ -1,5 +1,6 @@
 // server/middleware/auth.js - Enhanced Session and JWT Authentication Middleware
 const jwt = require("jsonwebtoken");
+const { getAppPool } = require('../config/db');
 
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || "change_me_access_256bit";
 
@@ -65,6 +66,25 @@ const authMiddleware = (req, res, next) => {
 
     // Set req.user from session for compatibility with routes expecting req.user
     req.user = req.session.user;
+
+    // Log activity for invite users (non-blocking)
+    if (req.session.user.account_expires_at) {
+      try {
+        const pool = getAppPool();
+        pool.query(
+          `INSERT INTO activity_log (user_id, action, details, ip_address, user_agent, created_at)
+           VALUES (?, 'invite_user_access', ?, ?, ?, NOW())`,
+          [
+            req.session.user.id,
+            JSON.stringify({ method: req.method, path: req.originalUrl }),
+            req.ip || 'unknown',
+            (req.get('User-Agent') || 'unknown').substring(0, 255)
+          ]
+        ).catch(err => console.error('Failed to log invite user activity:', err.message));
+      } catch (logErr) {
+        // Non-blocking — don't fail the request
+      }
+    }
 
     console.log('✅ Session authentication successful for:', req.session.user.email);
     return next();

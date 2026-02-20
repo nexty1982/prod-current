@@ -37,6 +37,7 @@ router.get('/', requireRole(['super_admin', 'admin']), async (req, res) => {
         u.created_at,
         u.updated_at,
         u.last_login,
+        u.account_expires_at,
         COALESCE(c.church_name, c.name) AS church_name
       FROM orthodoxmetrics_db.users u
       LEFT JOIN orthodoxmetrics_db.churches c ON u.church_id = c.id
@@ -65,11 +66,8 @@ router.get('/', requireRole(['super_admin', 'admin']), async (req, res) => {
     query += ` LIMIT ? OFFSET ?`;
     params.push(parseInt(limit), parseInt(offset));
     
-    console.log('🔍 Executing users query:', query);
-    console.log('🔍 Query params:', params);
     const usersResult = await DatabaseService.queryPlatform(query, params);
     const users = usersResult[0] || [];
-    console.log('🔍 Raw users from DB:', users.slice(0, 2)); // Log first 2 users
     
     // Get total count for pagination
     let countQuery = `
