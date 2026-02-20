@@ -1,4 +1,4 @@
-import { Avatar, Box, IconButton, Tooltip, Typography, useMediaQuery } from '@mui/material';
+import { Box, IconButton, Tooltip, Typography, useMediaQuery } from '@mui/material';
 
 import { IconPower } from '@tabler/icons-react';
 
@@ -6,11 +6,9 @@ import { useAuth } from '@/context/AuthContext';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import { UserDataContext } from '@/context/UserDataContext';
 import { getBuildVersionString } from '@/shared/lib/buildInfo';
+import { RoleAvatar } from '@/utils/roleAvatars';
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
-
-// Default profile image fallback (using Orthodox default)
-const defaultImg = '/assets/images/orthodox/avatars/default.png';
 
 export const Profile = () => {
   const { isSidebarHover, isCollapse } = useContext(CustomizerContext);
@@ -19,9 +17,6 @@ export const Profile = () => {
   // Use UserDataContext for profile data synchronization
   const userDataContext = useContext(UserDataContext);
   const profileData = userDataContext?.profileData;
-  
-  // Use profile avatar from context, fallback to default
-  const profileImage = profileData?.avatar || defaultImg;
 
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const hideMenu = lgUp ? isCollapse == 'mini-sidebar' && !isSidebarHover : '';
@@ -41,7 +36,7 @@ export const Profile = () => {
     >
       {!hideMenu ? (
         <>
-          <Avatar alt="User Profile" src={profileImage} />
+          <RoleAvatar role={user?.role} size={40} />
 
           <Box>
             <Typography variant="h6">

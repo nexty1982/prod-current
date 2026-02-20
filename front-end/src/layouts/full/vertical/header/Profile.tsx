@@ -14,12 +14,10 @@ import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import { UserDataContext } from '../../../../context/UserDataContext';
+import { RoleAvatar, getRoleLabel } from '../../../../utils/roleAvatars';
 import * as dropdownData from './data';
 
 import { IconMail, IconUserOff } from '@tabler/icons-react';
-
-// Default profile image fallback (using Orthodox default)
-const defaultProfileImg = '/assets/images/orthodox/avatars/default.png';
 
 const Profile = () => {
   const { user, authenticated, logout } = useAuth();
@@ -30,8 +28,7 @@ const Profile = () => {
   const context = useContext(UserDataContext);
   const profileData = context?.profileData;
   
-  // Use profile avatar from context, fallback to default
-  const profileImage = profileData?.avatar || defaultProfileImg;
+  // Role from auth context
 
   const handleClick2 = (event: any) => {
     setAnchorEl2(event.currentTarget);
@@ -81,19 +78,7 @@ const Profile = () => {
           onClick={authenticated ? handleClick2 : undefined}
         >
           {authenticated ? (
-            <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Avatar
-                src={profileImage}
-                alt="Profile"
-                sx={{
-                  width: 35,
-                  height: 35,
-                  border: '2.5px solid #22c55e',
-                  boxShadow: '0 0 0 2px rgba(34, 197, 94, 0.2)',
-                  transition: 'all 0.3s ease',
-                }}
-              />
-            </Box>
+            <RoleAvatar role={user?.role} size={35} />
           ) : (
             <IconUserOff 
               size={35} 
@@ -125,7 +110,7 @@ const Profile = () => {
       >
         <Typography variant="h5">User Profile</Typography>
         <Stack direction="row" py={3} spacing={2} alignItems="center">
-          <Avatar src={profileImage} alt="Profile" sx={{ width: 95, height: 95 }} />
+          <RoleAvatar role={user?.role} size={80} />
           <Box>
             <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
               {user?.nick || 
