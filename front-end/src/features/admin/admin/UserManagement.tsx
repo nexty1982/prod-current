@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import {
     Box,
     Card,
@@ -33,7 +33,10 @@ import {
     Tab,
     Snackbar,
     CircularProgress,
-    Grid
+    Grid,
+    Divider,
+    ToggleButtonGroup,
+    ToggleButton
 } from '@mui/material';
 import {
     IconKey,
@@ -51,7 +54,9 @@ import {
     IconActivity,
     IconUserCheck,
     IconUserOff,
-    IconClockHour4
+    IconClockHour4,
+    IconLayoutDistributeHorizontal,
+    IconLayoutDistributeVertical
 } from '@tabler/icons-react';
 
 import PageContainer from '@/shared/ui/PageContainer';
@@ -62,6 +67,7 @@ import InviteActivityDialog from '@/components/InviteActivityDialog';
 
 // contexts
 import { useAuth } from '@/context/AuthContext';
+import { CustomizerContext } from '@/context/CustomizerContext';
 import { User as AuthUser } from '@/types/orthodox-metrics.types';
 
 // services
@@ -92,6 +98,8 @@ const UserManagement: React.FC = () => {
         canPerformDestructiveOperation,
         canChangeRole
     } = useAuth();
+
+    const { isLayout, setIsLayout } = useContext(CustomizerContext);
 
     const [users, setUsers] = useState<User[]>([]);
     const [churches, setChurches] = useState<Church[]>([]);
@@ -391,7 +399,25 @@ const UserManagement: React.FC = () => {
 
     return (
         <PageContainer title="User Management" description="Manage users in the Orthodox Metrics system">
-            <Breadcrumb title="User Management" items={BCrumb} />
+            <Breadcrumb title="User Management" items={BCrumb}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                    <Typography variant="caption" color="text.secondary">Layout:</Typography>
+                    <ToggleButtonGroup
+                        value={isLayout}
+                        exclusive
+                        onChange={(_, val) => val && setIsLayout(val)}
+                        size="small"
+                        sx={{ height: 30 }}
+                    >
+                        <ToggleButton value="boxed" sx={{ px: 1, py: 0 }}>
+                            <Tooltip title="Boxed"><IconLayoutDistributeVertical size={16} /></Tooltip>
+                        </ToggleButton>
+                        <ToggleButton value="full" sx={{ px: 1, py: 0 }}>
+                            <Tooltip title="Full Width"><IconLayoutDistributeHorizontal size={16} /></Tooltip>
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </Stack>
+            </Breadcrumb>
             <Box p={3}>
                 <Snackbar
                     open={!!error}
@@ -779,38 +805,83 @@ const UserManagement: React.FC = () => {
             </Box>
 
             {/* Create User Dialog */}
-            <Dialog open={createUserDialogOpen} onClose={() => setCreateUserDialogOpen(false)} maxWidth="md" fullWidth>
-                <DialogTitle>Create New User</DialogTitle>
-                <DialogContent>
-                    <Stack spacing={3} sx={{ mt: 1 }}>
-                        {error && (
-                            <Alert severity="error" onClose={() => setError(null)}>
-                                {error}
-                            </Alert>
-                        )}
-                        <Stack direction="row" spacing={2}>
+            <Dialog open={createUserDialogOpen} onClose={() => setCreateUserDialogOpen(false)} maxWidth="sm" fullWidth>
+                <DialogTitle sx={{ pb: 1 }}>
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                        <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+                            <IconUserPlus size={22} />
+                        </Avatar>
+                        <Box>
+                            <Typography variant="h6" sx={{ lineHeight: 1.2 }}>Create New User</Typography>
+                            <Typography variant="caption" color="text.secondary">Add a user to the platform with a temporary password</Typography>
+                        </Box>
+                    </Stack>
+                </DialogTitle>
+                <Divider />
+                <DialogContent sx={{ pt: 2.5 }}>
+                    {error && (
+                        <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
+
+                    {/* Personal Information */}
+                    <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                        Personal Information
+                    </Typography>
+                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                        <Grid item xs={6}>
                             <TextField
                                 fullWidth
+                                size="small"
                                 label="First Name"
+                                required
                                 value={newUser.first_name}
                                 onChange={(e) => setNewUser({ ...newUser, first_name: e.target.value })}
                             />
+                        </Grid>
+                        <Grid item xs={6}>
                             <TextField
                                 fullWidth
+                                size="small"
                                 label="Last Name"
+                                required
                                 value={newUser.last_name}
                                 onChange={(e) => setNewUser({ ...newUser, last_name: e.target.value })}
                             />
-                        </Stack>
-                        <TextField
-                            fullWidth
-                            label="Email"
-                            type="email"
-                            value={newUser.email}
-                            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                        />
-                        <Stack direction="row" spacing={2}>
-                            <FormControl fullWidth>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                label="Email Address"
+                                type="email"
+                                required
+                                value={newUser.email}
+                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                label="Phone"
+                                value={newUser.phone}
+                                onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                                placeholder="Optional"
+                            />
+                        </Grid>
+                    </Grid>
+
+                    <Divider sx={{ mb: 2 }} />
+
+                    {/* Role & Assignment */}
+                    <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                        Role & Assignment
+                    </Typography>
+                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                        <Grid item xs={12}>
+                            <FormControl fullWidth size="small" required>
                                 <InputLabel>Role</InputLabel>
                                 <Select
                                     value={newUser.role}
@@ -830,17 +901,20 @@ const UserManagement: React.FC = () => {
                                     )}
                                 </Select>
                             </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
                             <FormControl
                                 fullWidth
+                                size="small"
                                 required={!['super_admin', 'admin'].includes(newUser.role)}
                             >
                                 <InputLabel>
-                                    Church {['super_admin', 'admin'].includes(newUser.role) ? '(Optional)' : '*'}
+                                    Church {['super_admin', 'admin'].includes(newUser.role) ? '(Optional)' : ''}
                                 </InputLabel>
                                 <Select
                                     value={newUser.church_id}
                                     onChange={(e) => setNewUser({ ...newUser, church_id: e.target.value })}
-                                    label={`Church ${['super_admin', 'admin'].includes(newUser.role) ? '(Optional)' : '*'}`}
+                                    label={`Church ${['super_admin', 'admin'].includes(newUser.role) ? '(Optional)' : ''}`}
                                 >
                                     <MenuItem value="">
                                         {['super_admin', 'admin'].includes(newUser.role)
@@ -855,31 +929,42 @@ const UserManagement: React.FC = () => {
                                     ))}
                                 </Select>
                             </FormControl>
-                        </Stack>
-                        <TextField
-                            fullWidth
-                            label="Phone"
-                            value={newUser.phone}
-                            onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-                        />
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={newUser.send_welcome_email}
-                                    onChange={(e) => setNewUser({ ...newUser, send_welcome_email: e.target.checked })}
-                                />
-                            }
-                            label="Send welcome email with temporary password"
-                        />
-                    </Stack>
+                            {['super_admin', 'admin'].includes(newUser.role) && (
+                                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                                    This role has global access across all churches.
+                                </Typography>
+                            )}
+                        </Grid>
+                    </Grid>
+
+                    <Divider sx={{ mb: 2 }} />
+
+                    {/* Options */}
+                    <Typography variant="overline" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                        Options
+                    </Typography>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={newUser.send_welcome_email}
+                                onChange={(e) => setNewUser({ ...newUser, send_welcome_email: e.target.checked })}
+                                size="small"
+                            />
+                        }
+                        label={<Typography variant="body2">Send welcome email with temporary password</Typography>}
+                    />
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setCreateUserDialogOpen(false)}>Cancel</Button>
+                <Divider />
+                <DialogActions sx={{ px: 3, py: 2 }}>
+                    <Button onClick={() => setCreateUserDialogOpen(false)} size="small">
+                        Cancel
+                    </Button>
                     <Button
                         onClick={handleCreateUser}
                         variant="contained"
                         disabled={loading}
-                        startIcon={loading ? <CircularProgress size={20} /> : undefined}
+                        size="small"
+                        startIcon={loading ? <CircularProgress size={16} /> : <IconUserPlus size={16} />}
                     >
                         {loading ? 'Creating...' : 'Create User'}
                     </Button>
