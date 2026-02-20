@@ -53,9 +53,9 @@ const OMChartsPage: React.FC = () => {
     const fetchChurches = async () => {
       setLoadingChurches(true);
       try {
-        const res = await apiClient.get('/my/churches');
-        // Response shape: { success, data: { churches: [...] } }
-        const raw = res.data?.data?.churches || res.data?.churches || res.data || [];
+        const res: any = await apiClient.get('/my/churches');
+        // apiClient unwraps response.data, so res is already { success, data: { churches } }
+        const raw = res.data?.churches || res.churches || [];
         const list = (Array.isArray(raw) ? raw : [])
           .filter((c: any) => c.is_active !== false)
           .map((c: any) => ({ id: c.id, name: c.name || c.church_name || `Church ${c.id}` }));
@@ -81,17 +81,17 @@ const OMChartsPage: React.FC = () => {
       setLoading(true);
       setError(null);
       setData(null);
-      const res = await apiClient.get(`/churches/${churchId}/charts/summary`);
-      if (res.data.success) {
-        setData(res.data.data);
+      const res: any = await apiClient.get(`/churches/${churchId}/charts/summary`);
+      if (res.success) {
+        setData(res.data);
       } else {
-        setError(res.data.error || 'Failed to load chart data');
+        setError(res.error?.message || res.error || 'Failed to load chart data');
       }
     } catch (err: any) {
-      if (err.response?.status === 403) {
+      if (err.status === 403) {
         setError('OM Charts is not enabled for this church. Ask an administrator to enable it.');
       } else {
-        setError(err.response?.data?.error || err.message || 'Failed to load chart data');
+        setError(err.message || 'Failed to load chart data');
       }
     } finally {
       setLoading(false);
