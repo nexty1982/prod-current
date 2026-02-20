@@ -43,7 +43,8 @@ import {
     IconEdit,
     IconTrash,
     IconCrown,
-    IconEye
+    IconEye,
+    IconLogin
 } from '@tabler/icons-react';
 
 import PageContainer from '@/shared/ui/PageContainer';
@@ -327,6 +328,27 @@ const UserManagement: React.FC = () => {
         }
     };
 
+    const handleImpersonate = async (userData: User) => {
+        try {
+            const response = await fetch('/api/admin/impersonate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ userId: userData.id })
+            });
+            const data = await response.json();
+            if (data.success) {
+                localStorage.setItem('auth_user', JSON.stringify(data.user));
+                window.location.href = '/dashboards/modern';
+            } else {
+                setError(data.error || 'Failed to impersonate user');
+            }
+        } catch (err) {
+            console.error('Impersonation error:', err);
+            setError('Failed to impersonate user');
+        }
+    };
+
     // Filter users based on search and filters
     const filteredUsers = users.filter((userData: User) => {
         const matchesSearch =
@@ -580,6 +602,17 @@ const UserManagement: React.FC = () => {
                                                                             <IconEye size={16} />
                                                                         </IconButton>
                                                                     </Tooltip>
+                                                                    {isSuperAdmin() && userData.id !== user?.id && (
+                                                                        <Tooltip title="Login As">
+                                                                            <IconButton
+                                                                                size="small"
+                                                                                onClick={() => handleImpersonate(userData)}
+                                                                                color="secondary"
+                                                                            >
+                                                                                <IconLogin size={16} />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    )}
                                                                     {canManageUser(toAuthUser(userData)) && (
                                                                         <Tooltip title="Edit User">
                                                                             <IconButton

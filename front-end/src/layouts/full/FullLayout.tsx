@@ -14,6 +14,7 @@ import { CustomizerContext } from '@/context/CustomizerContext';
 import config from '@/context/config';
 import { useAuth } from '@/context/AuthContext';
 import AdminFloatingHUD from '../../components/AdminFloatingHUD';
+import ImpersonationBanner from '../../components/ImpersonationBanner';
 import { getPageTitle } from '../../config/pageTitles';
 // import SiteEditorOverlay from '../../components/SiteEditorOverlay';
 // import GlobalOMAI from '../../components/global/GlobalOMAI';
@@ -52,6 +53,7 @@ const FullLayout: FC = () => {
   return (
     <>
       {/* <LoadingBar /> */}
+      <ImpersonationBanner />
       <MainWrapper className={activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}>
 
         {/* ------------------------------------------- */}

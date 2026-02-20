@@ -741,6 +741,11 @@ app.use('/api/server', backendDiagnosticsRouter);
 app.use('/api/admin/church-users', churchUsersRouter);
 app.use('/api/admin/church-database', churchDatabaseRouter);
 
+// Impersonation ("Login As") routes (auth checked inside each handler)
+const impersonateRouter = require('./api/impersonate');
+app.use('/api/admin/impersonate', impersonateRouter);
+console.log('✅ [Server] Mounted /api/admin/impersonate route');
+
 // General admin routes (AFTER specific routes to prevent conflicts)
 app.use('/api/admin', adminRoutes);
 console.log(`✅ Admin routes mounted at /api/admin from ${require.resolve('./api/admin')}`);
