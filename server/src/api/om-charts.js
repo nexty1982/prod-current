@@ -11,51 +11,7 @@ const { requireAuth } = require('../middleware/auth');
 const { getTenantPool } = require('../config/db');
 const { getAppPool } = require('../config/db-compat');
 const { getEffectiveFeatures } = require('../utils/featureFlags');
-
-/**
- * Detect which date columns exist in each table.
- * Churches have different schemas (mdate vs marriage_date, burial_date vs funeral_date, etc.)
- */
-async function detectColumns(pool) {
-  const getColNames = async (table) => {
-    try {
-      const [cols] = await pool.query(`SHOW COLUMNS FROM ${table}`);
-      return cols.map(c => c.Field);
-    } catch {
-      return [];
-    }
-  };
-
-  const [bCols, mCols, fCols] = await Promise.all([
-    getColNames('baptism_records'),
-    getColNames('marriage_records'),
-    getColNames('funeral_records'),
-  ]);
-
-  // Baptism date: reception_date > baptism_date
-  const baptismDate = bCols.includes('reception_date') ? 'reception_date'
-    : bCols.includes('baptism_date') ? 'baptism_date' : null;
-
-  // Birth date for age calc
-  const birthDate = bCols.includes('birth_date') ? 'birth_date' : null;
-
-  // Marriage date: mdate > marriage_date
-  const marriageDate = mCols.includes('mdate') ? 'mdate'
-    : mCols.includes('marriage_date') ? 'marriage_date' : null;
-
-  // Funeral/burial date: burial_date > funeral_date > deceased_date > death_date
-  const funeralDate = fCols.includes('burial_date') ? 'burial_date'
-    : fCols.includes('funeral_date') ? 'funeral_date'
-    : fCols.includes('deceased_date') ? 'deceased_date'
-    : fCols.includes('death_date') ? 'death_date' : null;
-
-  // Clergy columns
-  const baptismClergy = bCols.includes('clergy') ? 'clergy' : null;
-  const marriageClergy = mCols.includes('clergy') ? 'clergy' : null;
-  const funeralClergy = fCols.includes('clergy') ? 'clergy' : null;
-
-  return { baptismDate, birthDate, marriageDate, funeralDate, baptismClergy, marriageClergy, funeralClergy };
-}
+const { detectColumns } = require('../utils/detectColumns');
 
 /**
  * GET /summary

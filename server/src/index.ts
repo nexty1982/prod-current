@@ -227,6 +227,7 @@ const omDailyRouter = require('./routes/om-daily');
 const crmRouter = require('./routes/crm');
 const analyticsRouter = require('./routes/analytics'); // US Church Map analytics
 const omChartsRouter = require('./api/om-charts'); // OM Charts: graphical charts from church records
+const dashboardHomeRouter = require('./api/dashboard-home'); // Dashboard Home: summary data for church dashboard
 const { routesRouter: apiExplorerRoutesRouter, testsRouter: apiExplorerTestsRouter } = require('./api/apiExplorer');
 // Add missing router imports
 const churchRecordsRouter = require('./routes/records'); // Church records functionality
@@ -772,6 +773,8 @@ app.use('/api/analytics', analyticsRouter); // US Church Map analytics
 console.log('✅ [Server] Mounted /api/analytics routes (US Church Map)');
 app.use('/api/churches/:churchId/charts', omChartsRouter); // OM Charts
 console.log('✅ [Server] Mounted /api/churches/:churchId/charts routes (OM Charts)');
+app.use('/api/churches/:churchId/dashboard', dashboardHomeRouter); // Dashboard Home
+console.log('✅ [Server] Mounted /api/churches/:churchId/dashboard routes (Dashboard Home)');
 
 // Other authenticated routes
 app.use('/api/user', userRouter);

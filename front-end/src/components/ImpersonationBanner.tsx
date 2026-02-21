@@ -41,45 +41,49 @@ const ImpersonationBanner = () => {
   if (!impersonating) return null;
 
   return (
-    <Box
-      sx={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999,
-        bgcolor: '#d32f2f',
-        color: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 2,
-        py: 0.75,
-        px: 2,
-        fontSize: '0.875rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-      }}
-    >
-      <Typography variant="body2" sx={{ color: 'inherit', fontWeight: 500 }}>
-        Viewing as <strong>{currentEmail}</strong>
-      </Typography>
-      <Button
-        size="small"
-        variant="outlined"
-        startIcon={<IconArrowBack size={16} />}
-        onClick={handleReturn}
-        disabled={returning}
+    <>
+      <Box
         sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          bgcolor: '#d32f2f',
           color: '#fff',
-          borderColor: 'rgba(255,255,255,0.5)',
-          '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' },
-          textTransform: 'none',
-          py: 0.25
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 2,
+          py: 0.75,
+          px: 2,
+          fontSize: '0.875rem',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
         }}
       >
-        Return to Admin
-      </Button>
-    </Box>
+        <Typography variant="body2" sx={{ color: 'inherit', fontWeight: 500 }}>
+          Viewing as <strong>{currentEmail}</strong>
+        </Typography>
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<IconArrowBack size={16} />}
+          onClick={handleReturn}
+          disabled={returning}
+          sx={{
+            color: '#fff',
+            borderColor: 'rgba(255,255,255,0.5)',
+            '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' },
+            textTransform: 'none',
+            py: 0.25
+          }}
+        >
+          Return to Admin
+        </Button>
+      </Box>
+      {/* Spacer to push page content below the fixed banner */}
+      <Box sx={{ height: '40px', flexShrink: 0 }} />
+    </>
   );
 };
 

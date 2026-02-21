@@ -53,7 +53,6 @@ const FullLayout: FC = () => {
   return (
     <>
       {/* <LoadingBar /> */}
-      <ImpersonationBanner />
       <MainWrapper className={activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}>
 
         {/* ------------------------------------------- */}
@@ -71,6 +70,10 @@ const FullLayout: FC = () => {
             }),
           }}
         >
+          {/* ------------------------------------------- */}
+          {/* Impersonation Banner (pushes content down when active) */}
+          {/* ------------------------------------------- */}
+          <ImpersonationBanner />
           {/* ------------------------------------------- */}
           {/* Header */}
           {/* ------------------------------------------- */}
