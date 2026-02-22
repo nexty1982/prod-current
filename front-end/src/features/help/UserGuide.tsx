@@ -41,7 +41,7 @@ import {
   CheckCircleOutline as CheckIcon,
   ArrowForward as ArrowIcon,
 } from '@mui/icons-material';
-import { useSelector } from 'react-redux';
+import { useAuth } from '@/context/AuthContext';
 import PageContainer from '@/shared/ui/PageContainer';
 
 // ── Types ───────────────────────────────────────────────────
@@ -342,7 +342,7 @@ const UserGuide: React.FC = () => {
   const [expanded, setExpanded] = useState<string | false>(false);
 
   // Get current user role for filtering
-  const user = useSelector((state: any) => state.auth?.user);
+  const { user } = useAuth();
   const userRole = user?.role || '';
 
   const isRoleVisible = (roles: string[]) => {
