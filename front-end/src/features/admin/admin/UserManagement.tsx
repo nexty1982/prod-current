@@ -57,7 +57,10 @@ import {
     IconClockHour4,
     IconLayoutDistributeHorizontal,
     IconLayoutDistributeVertical,
-    IconLogin
+    IconLogin,
+    IconMail,
+    IconRefresh,
+    IconX
 } from '@tabler/icons-react';
 
 import PageContainer from '@/shared/ui/PageContainer';
@@ -137,6 +140,12 @@ const UserManagement: React.FC = () => {
     // Activity dialog state
     const [activityDialogOpen, setActivityDialogOpen] = useState(false);
     const [activityUser, setActivityUser] = useState<User | null>(null);
+
+    // Invites tab state
+    const [invites, setInvites] = useState<any[]>([]);
+    const [invitesLoading, setInvitesLoading] = useState(false);
+    const [inviteSearchTerm, setInviteSearchTerm] = useState('');
+    const [inviteStatusFilter, setInviteStatusFilter] = useState('all');
 
     // Form state for creating users
     const [newUser, setNewUser] = useState<NewUser>({
@@ -343,6 +352,58 @@ const UserManagement: React.FC = () => {
         setActivityDialogOpen(true);
     };
 
+    // Invite management
+    const loadInvites = async () => {
+        setInvitesLoading(true);
+        try {
+            const response = await userService.getInvites();
+            if (response.success) {
+                setInvites(response.data || []);
+            }
+        } catch {
+            setError('Failed to load invites');
+        } finally {
+            setInvitesLoading(false);
+        }
+    };
+
+    const handleRevokeInvite = async (inviteId: number) => {
+        try {
+            const response = await userService.revokeInvite(inviteId);
+            if (response.success) {
+                setSuccess('Invite revoked successfully');
+                loadInvites();
+            } else {
+                setError(response.message || 'Failed to revoke invite');
+            }
+        } catch {
+            setError('Failed to revoke invite');
+        }
+    };
+
+    // Load invites when switching to the invites tab
+    useEffect(() => {
+        if (tabValue === 2 && isAdmin) {
+            loadInvites();
+        }
+    }, [tabValue, isAdmin]);
+
+    // Filter invites
+    const filteredInvites = invites.filter((inv: any) => {
+        const matchesSearch = !inviteSearchTerm ||
+            inv.email?.toLowerCase().includes(inviteSearchTerm.toLowerCase()) ||
+            inv.church_name?.toLowerCase().includes(inviteSearchTerm.toLowerCase());
+        const matchesStatus = inviteStatusFilter === 'all' || inv.status === inviteStatusFilter;
+        return matchesSearch && matchesStatus;
+    });
+
+    const inviteStats = useMemo(() => {
+        const pending = invites.filter(i => i.status === 'pending').length;
+        const used = invites.filter(i => i.status === 'used').length;
+        const expired = invites.filter(i => i.status === 'expired').length;
+        return { total: invites.length, pending, used, expired };
+    }, [invites]);
+
     const handleImpersonate = async (userData: User) => {
         try {
             const response = await fetch('/api/admin/impersonate', {
@@ -465,6 +526,7 @@ const UserManagement: React.FC = () => {
                 <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
                     <Tab icon={<IconUsers size={18} />} iconPosition="start" label="Users" />
                     <Tab icon={<IconBuilding size={18} />} iconPosition="start" label="Churches" />
+                    <Tab icon={<IconMail size={18} />} iconPosition="start" label={`Invites${inviteStats.pending > 0 ? ` (${inviteStats.pending})` : ''}`} />
                 </Tabs>
 
                 {tabValue === 0 && (
@@ -836,6 +898,181 @@ const UserManagement: React.FC = () => {
                         </CardContent>
                     </Card>
                 )}
+
+                {tabValue === 2 && (
+                    <>
+                        {/* Invite Stats */}
+                        <Grid container spacing={2} sx={{ mb: 3 }}>
+                            <Grid item xs={6} sm={3}>
+                                <Card sx={{ textAlign: 'center', cursor: 'pointer', border: inviteStatusFilter === 'all' ? 2 : 0, borderColor: 'primary.main' }} onClick={() => setInviteStatusFilter('all')}>
+                                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+                                        <IconMail size={24} color="#5D87FF" />
+                                        <Typography variant="h4" sx={{ mt: 0.5 }}>{inviteStats.total}</Typography>
+                                        <Typography variant="body2" color="text.secondary">Total Invites</Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={6} sm={3}>
+                                <Card sx={{ textAlign: 'center', cursor: 'pointer', border: inviteStatusFilter === 'pending' ? 2 : 0, borderColor: 'warning.main' }} onClick={() => setInviteStatusFilter('pending')}>
+                                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+                                        <IconClockHour4 size={24} color="#FFAE1F" />
+                                        <Typography variant="h4" sx={{ mt: 0.5 }}>{inviteStats.pending}</Typography>
+                                        <Typography variant="body2" color="text.secondary">Pending</Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={6} sm={3}>
+                                <Card sx={{ textAlign: 'center', cursor: 'pointer', border: inviteStatusFilter === 'used' ? 2 : 0, borderColor: 'success.main' }} onClick={() => setInviteStatusFilter('used')}>
+                                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+                                        <IconUserCheck size={24} color="#13DEB9" />
+                                        <Typography variant="h4" sx={{ mt: 0.5 }}>{inviteStats.used}</Typography>
+                                        <Typography variant="body2" color="text.secondary">Accepted</Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={6} sm={3}>
+                                <Card sx={{ textAlign: 'center', cursor: 'pointer', border: inviteStatusFilter === 'expired' ? 2 : 0, borderColor: 'error.main' }} onClick={() => setInviteStatusFilter('expired')}>
+                                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+                                        <IconUserOff size={24} color="#FA896B" />
+                                        <Typography variant="h4" sx={{ mt: 0.5 }}>{inviteStats.expired}</Typography>
+                                        <Typography variant="body2" color="text.secondary">Expired</Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </Grid>
+
+                        {/* Search and Actions */}
+                        <Card sx={{ mb: 3 }}>
+                            <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
+                                    <TextField
+                                        size="small"
+                                        sx={{ minWidth: 180, flex: '1 1 180px' }}
+                                        placeholder="Search invites..."
+                                        value={inviteSearchTerm}
+                                        onChange={(e) => setInviteSearchTerm(e.target.value)}
+                                        InputProps={{
+                                            startAdornment: <IconSearch size={16} style={{ marginRight: 6, opacity: 0.5 }} />,
+                                        }}
+                                    />
+                                    <Box sx={{ ml: 'auto' }} />
+                                    <Button
+                                        size="small"
+                                        variant="outlined"
+                                        startIcon={<IconRefresh size={14} />}
+                                        onClick={loadInvites}
+                                        disabled={invitesLoading}
+                                    >
+                                        Refresh
+                                    </Button>
+                                    <Button
+                                        size="small"
+                                        variant="contained"
+                                        startIcon={<IconSend size={14} />}
+                                        onClick={() => setInviteDialogOpen(true)}
+                                    >
+                                        New Invite
+                                    </Button>
+                                </Box>
+                            </CardContent>
+                        </Card>
+
+                        {/* Invites Table */}
+                        <Card>
+                            <CardContent sx={{ p: 0, overflow: 'auto' }}>
+                                {invitesLoading ? (
+                                    <Box display="flex" justifyContent="center" p={4}>
+                                        <CircularProgress />
+                                    </Box>
+                                ) : (
+                                    <TableContainer sx={{ overflowX: 'auto' }}>
+                                        <Table size="small" sx={{ minWidth: 700 }}>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>Email</TableCell>
+                                                    <TableCell>Role</TableCell>
+                                                    <TableCell>Church</TableCell>
+                                                    <TableCell>Status</TableCell>
+                                                    <TableCell>Invited By</TableCell>
+                                                    <TableCell>Created</TableCell>
+                                                    <TableCell>Expires</TableCell>
+                                                    <TableCell align="right">Actions</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {filteredInvites.length === 0 && (
+                                                    <TableRow>
+                                                        <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                                                            <Typography color="text.secondary">
+                                                                {invites.length === 0 ? 'No invites sent yet' : 'No invites match your filters'}
+                                                            </Typography>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                                {filteredInvites.map((inv: any) => (
+                                                    <TableRow key={inv.id} hover>
+                                                        <TableCell>
+                                                            <Typography variant="body2" fontWeight={500}>
+                                                                {inv.email}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Chip
+                                                                label={inv.role?.replace(/_/g, ' ')}
+                                                                size="small"
+                                                                color={userService.getRoleBadgeColor(inv.role)}
+                                                                sx={{ height: 22, fontSize: '0.75rem', textTransform: 'capitalize' }}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="body2">{inv.church_name || '—'}</Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Chip
+                                                                label={inv.status}
+                                                                size="small"
+                                                                color={inv.status === 'pending' ? 'warning' : inv.status === 'used' ? 'success' : 'default'}
+                                                                sx={{ height: 22, fontSize: '0.75rem', textTransform: 'capitalize' }}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {inv.created_by_name || inv.created_by_email || '—'}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {new Date(inv.created_at).toLocaleDateString()}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {new Date(inv.expires_at).toLocaleDateString()}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align="right">
+                                                            {inv.status === 'pending' && (
+                                                                <Tooltip title="Revoke Invite">
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        color="error"
+                                                                        onClick={() => handleRevokeInvite(inv.id)}
+                                                                    >
+                                                                        <IconX size={16} />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            )}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </>
+                )}
             </Box>
 
             {/* Create User Dialog */}
@@ -1048,7 +1285,10 @@ const UserManagement: React.FC = () => {
             {/* Invite User Dialog */}
             <InviteUserDialog
                 open={inviteDialogOpen}
-                onClose={() => setInviteDialogOpen(false)}
+                onClose={() => {
+                    setInviteDialogOpen(false);
+                    if (tabValue === 2) loadInvites();
+                }}
                 churches={churches}
                 currentUserRole={user?.role || ''}
             />

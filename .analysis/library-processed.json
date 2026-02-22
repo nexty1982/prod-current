@@ -1,5 +1,12 @@
 {
-  "/var/www/orthodoxmetrics/prod/CLAUDE.md": "2026-02-16T01:13:00.364Z",
-  "/var/www/orthodoxmetrics/prod/README.md": "2026-02-16T04:39:46.342Z",
-  "/var/www/orthodoxmetrics/prod/WS-tasks.md": "2026-02-16T08:26:53.811Z"
+  "/var/www/orthodoxmetrics/prod/CLAUDE.md": "2026-02-21T23:45:40.197Z",
+  "/var/www/orthodoxmetrics/prod/README.md": "2026-02-21T23:45:40.197Z",
+  "/var/www/orthodoxmetrics/prod/WS-tasks.md": "2026-02-16T08:26:53.811Z",
+  "/var/www/orthodoxmetrics/prod/.analysis/refactor-console-diff-history-implementation-summary.md": "2026-02-21T23:45:40.189Z",
+  "/var/www/orthodoxmetrics/prod/.analysis/refactor-console-multi-source-implementation-summary.md": "2026-02-21T23:45:40.189Z",
+  "/var/www/orthodoxmetrics/prod/.analysis/refactor-console-multi-source-plan.md": "2026-02-21T23:45:40.189Z",
+  "/var/www/orthodoxmetrics/prod/.analysis/om-library-implementation-summary.md": "2026-02-21T23:45:40.189Z",
+  "/var/www/orthodoxmetrics/prod/.analysis/om-library-complete-summary.md": "2026-02-21T23:45:40.189Z",
+  "/var/www/orthodoxmetrics/prod/scripts/README-directory-verification.md": "2026-02-21T23:45:41.489Z",
+  "/var/www/orthodoxmetrics/prod/scripts/README-git-templates.md": "2026-02-21T23:45:41.489Z"
 }
