@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Stepper,
   Step,
   StepLabel,
   StepContent,
+  StepConnector,
   Button,
   Typography,
   Card,
@@ -34,8 +35,13 @@ import {
   Stack,
   Autocomplete,
   FormGroup,
-  Checkbox
+  Checkbox,
+  Tabs,
+  Tab,
+  Tooltip,
+  Snackbar,
 } from '@mui/material';
+import { alpha, styled } from '@mui/material/styles';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -50,12 +56,18 @@ import {
   Settings as SettingsIcon,
   Web as WebIcon,
   Storage as StorageIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  ContentCopy as CopyIcon,
+  VpnKey as TokenIcon,
+  TableChart as TableIcon,
+  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { LiveTableBuilder } from '@/features/devel-tools/live-table-builder/components/LiveTableBuilder';
+import type { TableData } from '@/features/devel-tools/live-table-builder/types';
 
 // Types
 interface ChurchWizardData {
@@ -73,17 +85,17 @@ interface ChurchWizardData {
   timezone: string;
   currency: string;
   is_active: boolean;
-  
+
   // Template Selection
   template_church_id: number | null;
   selected_tables: string[];
-  
+
   // Custom Fields
   custom_fields: CustomField[];
-  
+
   // User Management
   initial_users: ChurchUser[];
-  
+
   // Landing Page
   custom_landing_page: {
     enabled: boolean;
@@ -93,6 +105,12 @@ interface ChurchWizardData {
     logo_url: string;
     default_app: 'liturgical_calendar' | 'church_records' | 'notes_app';
   };
+
+  // Custom Table Builder data
+  custom_table_builder?: {
+    table_name: string;
+    data: TableData;
+  } | null;
 }
 
 interface CustomField {
@@ -124,14 +142,18 @@ interface TemplateChurch {
   available_tables: string[];
 }
 
-const steps = [
-  'Basic Information',
-  'Template Selection',
-  'Record Tables & Custom Fields',
-  'User Management',
-  'Landing Page Configuration',
-  'Review & Create'
+// Step configuration with icons and descriptions
+const STEP_CONFIG = [
+  { label: 'Church Information', icon: <ChurchIcon />, description: 'Basic details about your church' },
+  { label: 'Template Selection', icon: <DashboardIcon />, description: 'Clone from an existing church or start fresh' },
+  { label: 'Record Tables', icon: <TableIcon />, description: 'Configure database tables and custom fields' },
+  { label: 'User Management', icon: <PeopleIcon />, description: 'Add initial users and set permissions' },
+  { label: 'Landing Page', icon: <WebIcon />, description: 'Customize the church landing page' },
+  { label: 'Review & Create', icon: <CheckIcon />, description: 'Review all settings before creating' },
+  { label: 'Registration Token', icon: <TokenIcon />, description: 'Share this token so members can register' },
 ];
+
+const steps = STEP_CONFIG.map(s => s.label);
 
 const AVAILABLE_RECORD_TABLES = [
   { key: 'baptism_records', label: 'Baptism Records', description: 'Track baptism ceremonies and certificates' },
@@ -168,22 +190,31 @@ const AVAILABLE_PERMISSIONS = [
 ];
 
 const DEFAULT_APP_OPTIONS = [
-  { 
-    value: 'liturgical_calendar', 
-    label: '📅 Liturgical Calendar', 
-    description: 'Orthodox liturgical calendar with feast days and fasting periods' 
+  {
+    value: 'liturgical_calendar',
+    label: 'Liturgical Calendar',
+    description: 'Orthodox liturgical calendar with feast days and fasting periods'
   },
-  { 
-    value: 'church_records', 
-    label: '📋 Church Records', 
-    description: 'Manage baptism, marriage, and funeral records' 
+  {
+    value: 'church_records',
+    label: 'Church Records',
+    description: 'Manage baptism, marriage, and funeral records'
   },
-  { 
-    value: 'notes_app', 
-    label: '📝 Notes App', 
-    description: 'Personal notes and task management' 
+  {
+    value: 'notes_app',
+    label: 'Notes App',
+    description: 'Personal notes and task management'
   }
 ];
+
+// Styled step connector for professional look
+const StyledStepConnector = styled(StepConnector)(({ theme }) => ({
+  '& .MuiStepConnector-line': {
+    borderColor: theme.palette.divider,
+    borderLeftWidth: 2,
+    minHeight: 20,
+  },
+}));
 
 const ChurchSetupWizard: React.FC = () => {
   const navigate = useNavigate();
@@ -193,12 +224,24 @@ const ChurchSetupWizard: React.FC = () => {
   const [templateChurches, setTemplateChurches] = useState<TemplateChurch[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateChurch | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Dialog states
   const [customFieldDialog, setCustomFieldDialog] = useState(false);
   const [userDialog, setUserDialog] = useState(false);
   const [editingField, setEditingField] = useState<CustomField | null>(null);
   const [editingUser, setEditingUser] = useState<ChurchUser | null>(null);
+
+  // Completion state
+  const [wizardResult, setWizardResult] = useState<{
+    church_id: number;
+    db_name: string;
+    registration_token: string;
+    church_name: string;
+  } | null>(null);
+  const [tokenCopied, setTokenCopied] = useState(false);
+
+  // Toast state
+  const [toast, setToast] = useState<{ message: string; severity: 'success' | 'error' | 'warning' | 'info' } | null>(null);
 
   // Validation schemas for each step
   const validationSchemas = [
@@ -211,7 +254,6 @@ const ChurchSetupWizard: React.FC = () => {
       country: Yup.string().required('Country is required'),
       preferred_language: Yup.string().required('Language is required'),
     }),
-    // Additional schemas for other steps can be added as needed
   ];
 
   // Formik setup
@@ -241,7 +283,8 @@ const ChurchSetupWizard: React.FC = () => {
         primary_color: '#1976d2',
         logo_url: '',
         default_app: 'liturgical_calendar'
-      }
+      },
+      custom_table_builder: null,
     },
     validationSchema: validationSchemas[0],
     onSubmit: async (values) => {
@@ -257,12 +300,11 @@ const ChurchSetupWizard: React.FC = () => {
         const response = await fetch('/api/admin/churches?preferred_language=en', {
           credentials: 'include'
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           const templatesWithTables = await Promise.all(
             data.churches.map(async (church: any) => {
-              // Fetch available tables for each template
               try {
                 const tablesResponse = await fetch(`/api/admin/churches/${church.id}/tables`, {
                   credentials: 'include'
@@ -297,9 +339,8 @@ const ChurchSetupWizard: React.FC = () => {
     const template = templateChurches.find(t => t.id === templateId) || null;
     setSelectedTemplate(template);
     formik.setFieldValue('template_church_id', templateId);
-    
+
     if (template) {
-      // Pre-populate with template's available tables
       formik.setFieldValue('selected_tables', template.available_tables);
     }
   };
@@ -308,12 +349,10 @@ const ChurchSetupWizard: React.FC = () => {
   const handleAddCustomField = (field: CustomField) => {
     const currentFields = formik.values.custom_fields;
     if (editingField) {
-      // Update existing field
       const updatedFields = currentFields.map(f => f.id === field.id ? field : f);
       formik.setFieldValue('custom_fields', updatedFields);
       setEditingField(null);
     } else {
-      // Add new field
       formik.setFieldValue('custom_fields', [...currentFields, { ...field, id: Date.now().toString() }]);
     }
     setCustomFieldDialog(false);
@@ -323,12 +362,10 @@ const ChurchSetupWizard: React.FC = () => {
   const handleAddUser = (user: ChurchUser) => {
     const currentUsers = formik.values.initial_users;
     if (editingUser) {
-      // Update existing user
       const updatedUsers = currentUsers.map(u => u.id === user.id ? user : u);
       formik.setFieldValue('initial_users', updatedUsers);
       setEditingUser(null);
     } else {
-      // Add new user
       formik.setFieldValue('initial_users', [...currentUsers, { ...user, id: Date.now().toString() }]);
     }
     setUserDialog(false);
@@ -345,11 +382,32 @@ const ChurchSetupWizard: React.FC = () => {
     setActiveStep(activeStep - 1);
   };
 
+  // Copy token to clipboard
+  const handleCopyToken = async () => {
+    if (wizardResult?.registration_token) {
+      try {
+        await navigator.clipboard.writeText(wizardResult.registration_token);
+        setTokenCopied(true);
+        setTimeout(() => setTokenCopied(false), 2000);
+      } catch {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = wizardResult.registration_token;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        setTokenCopied(true);
+        setTimeout(() => setTokenCopied(false), 2000);
+      }
+    }
+  };
+
   // Handle final submission
   const handleFinalSubmit = async (values: ChurchWizardData) => {
     try {
       setIsSubmitting(true);
-      
+
       const response = await fetch('/api/admin/churches/wizard', {
         method: 'POST',
         headers: {
@@ -361,37 +419,40 @@ const ChurchSetupWizard: React.FC = () => {
 
       if (response.ok) {
         const result = await response.json();
-        // Show success and redirect
-        navigate(`/apps/church-management/edit/${result.church.id}`, {
-          state: { 
-            message: `Church "${values.name}" created successfully with wizard setup!`,
-            severity: 'success'
-          }
+        // Store result and advance to token step
+        setWizardResult({
+          church_id: result.church_id,
+          db_name: result.db_name,
+          registration_token: result.registration_token,
+          church_name: values.name,
         });
+        setActiveStep(steps.length - 1); // Go to Registration Token step
       } else {
         const errorData = await response.json();
-        
-        // Handle 400 validation errors by showing specific missing fields
+
         if (response.status === 400 && errorData.required) {
-          const missingFields = errorData.required.join(", ");
-          alert(`Please fill in all required fields: ${missingFields}`);
+          const missingFields = errorData.required.join(', ');
+          setToast({ message: `Please fill in all required fields: ${missingFields}`, severity: 'error' });
         } else {
-          alert(errorData.message || "Failed to create church");
+          setToast({ message: errorData.message || 'Failed to create church', severity: 'error' });
         }
-        
-        throw new Error(errorData.message || "Failed to create church");
+
+        throw new Error(errorData.message || 'Failed to create church');
       }
-    } catch (error) {
-      console.error("Error creating church:", error);
-      // Error is already handled above for API responses
-      // This catch handles network errors or other unexpected issues
-      if (!error.message.includes("required fields")) {
-        alert("Network error or unexpected issue occurred. Please try again.");
+    } catch (error: any) {
+      console.error('Error creating church:', error);
+      if (!error.message?.includes('required fields')) {
+        setToast({ message: 'An unexpected error occurred. Please try again.', severity: 'error' });
       }
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Handle table builder toast
+  const handleBuilderToast = useCallback((message: string, severity?: 'success' | 'error' | 'warning' | 'info') => {
+    setToast({ message, severity: severity || 'info' });
+  }, []);
 
   // Render step content
   const renderStepContent = (step: number) => {
@@ -400,7 +461,7 @@ const ChurchSetupWizard: React.FC = () => {
         return <BasicInformationStep formik={formik} />;
       case 1:
         return (
-          <TemplateSelectionStep 
+          <TemplateSelectionStep
             formik={formik}
             templateChurches={templateChurches}
             selectedTemplate={selectedTemplate}
@@ -410,7 +471,7 @@ const ChurchSetupWizard: React.FC = () => {
         );
       case 2:
         return (
-          <RecordTablesStep 
+          <RecordTablesStep
             formik={formik}
             selectedTemplate={selectedTemplate}
             onAddCustomField={() => setCustomFieldDialog(true)}
@@ -422,11 +483,12 @@ const ChurchSetupWizard: React.FC = () => {
               const updatedFields = formik.values.custom_fields.filter(f => f.id !== fieldId);
               formik.setFieldValue('custom_fields', updatedFields);
             }}
+            onToast={handleBuilderToast}
           />
         );
       case 3:
         return (
-          <UserManagementStep 
+          <UserManagementStep
             formik={formik}
             onAddUser={() => setUserDialog(true)}
             onEditUser={(user) => {
@@ -443,6 +505,14 @@ const ChurchSetupWizard: React.FC = () => {
         return <LandingPageStep formik={formik} />;
       case 5:
         return <ReviewStep formik={formik} selectedTemplate={selectedTemplate} />;
+      case 6:
+        return wizardResult ? (
+          <RegistrationTokenStep
+            result={wizardResult}
+            onCopyToken={handleCopyToken}
+            tokenCopied={tokenCopied}
+          />
+        ) : null;
       default:
         return null;
     }
@@ -460,57 +530,121 @@ const ChurchSetupWizard: React.FC = () => {
   }
 
   return (
-    <Box p={3}>
-      <Card>
-        <CardContent>
-          <Box mb={3}>
-            <Typography variant="h4" gutterBottom>
-              <ChurchIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-              Church Setup Wizard
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Create a new church with comprehensive setup including templates, custom fields, users, and landing page configuration.
-            </Typography>
+    <Box p={3} maxWidth={1100} mx="auto">
+      <Card elevation={3}>
+        <CardContent sx={{ p: { xs: 2, md: 4 } }}>
+          {/* Header */}
+          <Box mb={4}>
+            <Stack direction="row" alignItems="center" spacing={2} mb={1}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 2,
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ChurchIcon color="primary" fontSize="large" />
+              </Box>
+              <Box>
+                <Typography variant="h4" fontWeight={700}>
+                  Church Setup Wizard
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Step {activeStep + 1} of {steps.length} &mdash; {STEP_CONFIG[activeStep].description}
+                </Typography>
+              </Box>
+            </Stack>
           </Box>
 
-          <Stepper activeStep={activeStep} orientation="vertical">
+          <Stepper
+            activeStep={activeStep}
+            orientation="vertical"
+            connector={<StyledStepConnector />}
+          >
             {steps.map((label, index) => (
-              <Step key={label}>
-                <StepLabel>
-                  <Typography variant="h6">{label}</Typography>
+              <Step key={label} completed={wizardResult ? index < steps.length - 1 : undefined}>
+                <StepLabel
+                  StepIconProps={{
+                    sx: {
+                      '&.Mui-active': { color: 'primary.main' },
+                      '&.Mui-completed': { color: 'success.main' },
+                    }
+                  }}
+                >
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Typography variant="subtitle1" fontWeight={activeStep === index ? 700 : 500}>
+                      {label}
+                    </Typography>
+                    {activeStep === index && (
+                      <Chip
+                        label="Current"
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                        sx={{ height: 20, fontSize: '0.7rem' }}
+                      />
+                    )}
+                  </Stack>
                 </StepLabel>
                 <StepContent>
                   <Box my={2}>
                     {renderStepContent(index)}
                   </Box>
-                  
-                  <Box mt={3}>
-                    <Button
-                      disabled={activeStep === 0}
-                      onClick={handleBack}
-                      sx={{ mr: 1 }}
-                    >
-                      Back
-                    </Button>
-                    
-                    {activeStep === steps.length - 1 ? (
+
+                  {/* Navigation buttons - don't show on token step */}
+                  {index < steps.length - 1 && (
+                    <Box mt={3} display="flex" gap={1}>
+                      <Button
+                        disabled={activeStep === 0}
+                        onClick={handleBack}
+                        variant="outlined"
+                        size="small"
+                      >
+                        Back
+                      </Button>
+
+                      {activeStep === steps.length - 2 ? (
+                        <Button
+                          variant="contained"
+                          onClick={() => formik.handleSubmit()}
+                          disabled={isSubmitting}
+                          startIcon={isSubmitting ? <CircularProgress size={18} /> : <SaveIcon />}
+                        >
+                          {isSubmitting ? 'Creating Church...' : 'Create Church'}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          onClick={handleNext}
+                        >
+                          Continue
+                        </Button>
+                      )}
+                    </Box>
+                  )}
+
+                  {/* Token step - show finish button */}
+                  {index === steps.length - 1 && wizardResult && (
+                    <Box mt={3}>
                       <Button
                         variant="contained"
-                        onClick={() => formik.handleSubmit()}
-                        disabled={isSubmitting}
-                        startIcon={isSubmitting ? <CircularProgress size={20} /> : <SaveIcon />}
+                        color="success"
+                        onClick={() => navigate(`/apps/church-management/edit/${wizardResult.church_id}`, {
+                          state: {
+                            message: `Church "${wizardResult.church_name}" created successfully!`,
+                            severity: 'success'
+                          }
+                        })}
+                        startIcon={<CheckIcon />}
                       >
-                        {isSubmitting ? 'Creating Church...' : 'Create Church'}
+                        Go to Church Management
                       </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        onClick={handleNext}
-                      >
-                        Next
-                      </Button>
-                    )}
-                  </Box>
+                    </Box>
+                  )}
                 </StepContent>
               </Step>
             ))}
@@ -540,11 +674,28 @@ const ChurchSetupWizard: React.FC = () => {
         onSave={handleAddUser}
         editingUser={editingUser}
       />
+
+      {/* Toast */}
+      <Snackbar
+        open={!!toast}
+        autoHideDuration={4000}
+        onClose={() => setToast(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        {toast ? (
+          <Alert severity={toast.severity} onClose={() => setToast(null)} variant="filled">
+            {toast.message}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
     </Box>
   );
 };
 
+// ============================================================================
 // Step Components
+// ============================================================================
+
 const BasicInformationStep: React.FC<{ formik: any }> = ({ formik }) => (
   <Grid container spacing={3}>
     <Grid item xs={12} md={6}>
@@ -682,10 +833,10 @@ const BasicInformationStep: React.FC<{ formik: any }> = ({ formik }) => (
         >
           <MenuItem value="USD">USD ($)</MenuItem>
           <MenuItem value="CAD">CAD ($)</MenuItem>
-          <MenuItem value="EUR">EUR (€)</MenuItem>
-          <MenuItem value="GBP">GBP (£)</MenuItem>
+          <MenuItem value="EUR">EUR</MenuItem>
+          <MenuItem value="GBP">GBP</MenuItem>
           <MenuItem value="RON">RON (lei)</MenuItem>
-          <MenuItem value="RUB">RUB (₽)</MenuItem>
+          <MenuItem value="RUB">RUB</MenuItem>
         </Select>
       </FormControl>
     </Grid>
@@ -700,11 +851,8 @@ const TemplateSelectionStep: React.FC<{
   loading: boolean;
 }> = ({ formik, templateChurches, selectedTemplate, onTemplateSelect, loading }) => (
   <Box>
-    <Typography variant="h6" gutterBottom>
-      Choose a Template Church (Optional)
-    </Typography>
     <Typography variant="body2" color="text.secondary" paragraph>
-      Select an existing English-language church to use as a template. This will copy its structure, pages, themes, and settings.
+      Select an existing church to use as a template. This will copy its table structure and settings.
     </Typography>
 
     {loading ? (
@@ -715,19 +863,25 @@ const TemplateSelectionStep: React.FC<{
     ) : (
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              mb: 1,
+              cursor: 'pointer',
+              borderColor: formik.values.template_church_id === null ? 'primary.main' : 'divider',
+              borderWidth: formik.values.template_church_id === null ? 2 : 1,
+              bgcolor: formik.values.template_church_id === null ? (theme: any) => alpha(theme.palette.primary.main, 0.04) : 'transparent',
+            }}
+            onClick={() => onTemplateSelect(null)}
+          >
             <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formik.values.template_church_id === null}
-                  onChange={() => onTemplateSelect(null)}
-                />
-              }
+              control={<Checkbox checked={formik.values.template_church_id === null} onChange={() => onTemplateSelect(null)} />}
               label={
                 <Box>
-                  <Typography variant="subtitle1">Start from Scratch</Typography>
+                  <Typography variant="subtitle1" fontWeight={600}>Start from Scratch</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Create a new church without using any template
+                    Create a new church with default table structures
                   </Typography>
                 </Box>
               }
@@ -737,32 +891,28 @@ const TemplateSelectionStep: React.FC<{
 
         {templateChurches.map((church) => (
           <Grid item xs={12} md={6} key={church.id}>
-            <Paper 
-              variant="outlined" 
-              sx={{ 
-                p: 2, 
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
                 cursor: 'pointer',
-                border: selectedTemplate?.id === church.id ? 2 : 1,
-                borderColor: selectedTemplate?.id === church.id ? 'primary.main' : 'divider'
+                borderWidth: selectedTemplate?.id === church.id ? 2 : 1,
+                borderColor: selectedTemplate?.id === church.id ? 'primary.main' : 'divider',
+                bgcolor: selectedTemplate?.id === church.id ? (theme: any) => alpha(theme.palette.primary.main, 0.04) : 'transparent',
+                transition: 'all 0.2s',
+                '&:hover': { borderColor: 'primary.light' },
               }}
               onClick={() => onTemplateSelect(church.id)}
             >
               <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={selectedTemplate?.id === church.id}
-                    onChange={() => onTemplateSelect(church.id)}
-                  />
-                }
+                control={<Checkbox checked={selectedTemplate?.id === church.id} onChange={() => onTemplateSelect(church.id)} />}
                 label={
                   <Box>
-                    <Typography variant="subtitle1">{church.name}</Typography>
+                    <Typography variant="subtitle1" fontWeight={600}>{church.name}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       {church.city}, {church.country}
                     </Typography>
-                    <Typography variant="caption" display="block">
-                      {church.available_tables.length} available table(s)
-                    </Typography>
+                    <Chip label={`${church.available_tables.length} tables`} size="small" sx={{ mt: 0.5 }} />
                   </Box>
                 }
               />
@@ -770,14 +920,6 @@ const TemplateSelectionStep: React.FC<{
           </Grid>
         ))}
       </Grid>
-    )}
-
-    {selectedTemplate && (
-      <Alert severity="info" sx={{ mt: 2 }}>
-        <strong>Template Selected:</strong> {selectedTemplate.name}
-        <br />
-        This church's structure and settings will be copied to your new church.
-      </Alert>
     )}
   </Box>
 );
@@ -788,87 +930,146 @@ const RecordTablesStep: React.FC<{
   onAddCustomField: () => void;
   onEditCustomField: (field: CustomField) => void;
   onDeleteCustomField: (fieldId: string) => void;
-}> = ({ formik, selectedTemplate, onAddCustomField, onEditCustomField, onDeleteCustomField }) => (
-  <Box>
-    <Typography variant="h6" gutterBottom>
-      Select Record Tables
-    </Typography>
-    <Typography variant="body2" color="text.secondary" paragraph>
-      Choose which record tables to create in your church database. Standard tables are always created, 
-      but you can select additional specialized tables.
-    </Typography>
+  onToast: (message: string, severity?: 'success' | 'error' | 'warning' | 'info') => void;
+}> = ({ formik, selectedTemplate, onAddCustomField, onEditCustomField, onDeleteCustomField, onToast }) => {
+  const [tabValue, setTabValue] = useState(0);
 
-    <Grid container spacing={2}>
-      {AVAILABLE_RECORD_TABLES.map((table) => (
-        <Grid item xs={12} md={6} key={table.key}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formik.values.selected_tables.includes(table.key)}
-                  onChange={(e) => {
-                    const currentTables = formik.values.selected_tables;
-                    if (e.target.checked) {
-                      formik.setFieldValue('selected_tables', [...currentTables, table.key]);
-                    } else {
-                      formik.setFieldValue('selected_tables', currentTables.filter(t => t !== table.key));
-                    }
+  return (
+    <Box>
+      <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} sx={{ mb: 3 }}>
+        <Tab label="Standard Tables" icon={<StorageIcon />} iconPosition="start" />
+        <Tab label="Custom Table Builder" icon={<TableIcon />} iconPosition="start" />
+      </Tabs>
+
+      {tabValue === 0 && (
+        <>
+          <Typography variant="body2" color="text.secondary" paragraph>
+            Choose which record tables to create in the church database.
+          </Typography>
+
+          <Grid container spacing={2}>
+            {AVAILABLE_RECORD_TABLES.map((table) => (
+              <Grid item xs={12} md={6} key={table.key}>
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    borderColor: formik.values.selected_tables.includes(table.key) ? 'primary.main' : 'divider',
+                    borderWidth: formik.values.selected_tables.includes(table.key) ? 2 : 1,
+                    bgcolor: formik.values.selected_tables.includes(table.key) ? (theme: any) => alpha(theme.palette.primary.main, 0.04) : 'transparent',
+                    transition: 'all 0.2s',
                   }}
-                />
-              }
-              label={
-                <Box>
-                  <Typography variant="subtitle1">{table.label}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {table.description}
-                  </Typography>
-                </Box>
-              }
+                >
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formik.values.selected_tables.includes(table.key)}
+                        onChange={(e) => {
+                          const currentTables = formik.values.selected_tables;
+                          if (e.target.checked) {
+                            formik.setFieldValue('selected_tables', [...currentTables, table.key]);
+                          } else {
+                            formik.setFieldValue('selected_tables', currentTables.filter((t: string) => t !== table.key));
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography variant="subtitle2" fontWeight={600}>{table.label}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {table.description}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="subtitle1" fontWeight={600}>Custom Fields</Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={onAddCustomField}
+            >
+              Add Custom Field
+            </Button>
+          </Box>
+
+          {formik.values.custom_fields.length === 0 ? (
+            <Alert severity="info" variant="outlined">
+              No custom fields added. You can extend any table with additional columns.
+            </Alert>
+          ) : (
+            <List dense>
+              {formik.values.custom_fields.map((field: CustomField) => (
+                <ListItem key={field.id} divider>
+                  <ListItemText
+                    primary={`${field.field_name} (${field.field_type})`}
+                    secondary={`Table: ${field.table_name} - ${field.description}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton size="small" onClick={() => onEditCustomField(field)}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" onClick={() => onDeleteCustomField(field.id)} color="error">
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </>
+      )}
+
+      {tabValue === 1 && (
+        <Box>
+          <Typography variant="body2" color="text.secondary" paragraph>
+            Use the interactive table builder to design a custom record table. Define columns and optionally pre-populate rows.
+          </Typography>
+
+          <TextField
+            fullWidth
+            label="Custom Table Name"
+            placeholder="e.g., special_services"
+            value={formik.values.custom_table_builder?.table_name || ''}
+            onChange={(e) => {
+              const sanitized = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+              formik.setFieldValue('custom_table_builder', {
+                ...formik.values.custom_table_builder,
+                table_name: sanitized,
+                data: formik.values.custom_table_builder?.data || { columns: [], rows: [] },
+              });
+            }}
+            helperText="Use lowercase letters, numbers, and underscores only"
+            sx={{ mb: 2 }}
+          />
+
+          <Paper variant="outlined" sx={{ p: 2, minHeight: 300 }}>
+            <LiveTableBuilder
+              data={formik.values.custom_table_builder?.data || { columns: [{ id: 'col_0', label: 'Column A' }], rows: [{ id: 'row_0', cells: { col_0: '' } }] }}
+              onDataChange={(data: TableData) => {
+                formik.setFieldValue('custom_table_builder', {
+                  ...formik.values.custom_table_builder,
+                  table_name: formik.values.custom_table_builder?.table_name || '',
+                  data,
+                });
+              }}
+              onToast={onToast}
             />
           </Paper>
-        </Grid>
-      ))}
-    </Grid>
-
-    <Divider sx={{ my: 3 }} />
-
-    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-      <Typography variant="h6">Custom Fields</Typography>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={onAddCustomField}
-      >
-        Add Custom Field
-      </Button>
+        </Box>
+      )}
     </Box>
-
-    {formik.values.custom_fields.length === 0 ? (
-      <Alert severity="info">
-        No custom fields added yet. You can add custom fields to extend the functionality of your record tables.
-      </Alert>
-    ) : (
-      <List>
-        {formik.values.custom_fields.map((field) => (
-          <ListItem key={field.id} divider>
-            <ListItemText
-              primary={`${field.field_name} (${field.field_type})`}
-              secondary={`Table: ${field.table_name} - ${field.description}`}
-            />
-            <ListItemSecondaryAction>
-              <IconButton onClick={() => onEditCustomField(field)}>
-                <EditIcon />
-              </IconButton>
-              <IconButton onClick={() => onDeleteCustomField(field.id)} color="error">
-                <DeleteIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
-    )}
-  </Box>
-);
+  );
+};
 
 const UserManagementStep: React.FC<{
   formik: any;
@@ -877,17 +1078,17 @@ const UserManagementStep: React.FC<{
   onDeleteUser: (userId: string) => void;
 }> = ({ formik, onAddUser, onEditUser, onDeleteUser }) => (
   <Box>
-    <Typography variant="h6" gutterBottom>
-      Initial Users
-    </Typography>
     <Typography variant="body2" color="text.secondary" paragraph>
       Add users who will have access to the new church's records. They will receive email invitations.
     </Typography>
 
     <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-      <Typography variant="subtitle1">Users</Typography>
+      <Typography variant="subtitle1" fontWeight={600}>
+        Users ({formik.values.initial_users.length})
+      </Typography>
       <Button
-        variant="contained"
+        variant="outlined"
+        size="small"
         startIcon={<AddIcon />}
         onClick={onAddUser}
       >
@@ -896,12 +1097,12 @@ const UserManagementStep: React.FC<{
     </Box>
 
     {formik.values.initial_users.length === 0 ? (
-      <Alert severity="info">
-        No users added yet. You can add users after church creation from the church management panel.
+      <Alert severity="info" variant="outlined">
+        No users added yet. Users can also be added after church creation, or they can self-register using the church's registration token.
       </Alert>
     ) : (
-      <List>
-        {formik.values.initial_users.map((user) => (
+      <List dense>
+        {formik.values.initial_users.map((user: ChurchUser) => (
           <ListItem key={user.id} divider>
             <ListItemText
               primary={`${user.first_name} ${user.last_name}`}
@@ -909,16 +1110,17 @@ const UserManagementStep: React.FC<{
             />
             <ListItemSecondaryAction>
               <Chip
-                label={user.send_invite ? 'Will send invite' : 'No invite'}
+                label={user.send_invite ? 'Invite' : 'No invite'}
                 color={user.send_invite ? 'success' : 'default'}
                 size="small"
+                variant="outlined"
                 sx={{ mr: 1 }}
               />
-              <IconButton onClick={() => onEditUser(user)}>
-                <EditIcon />
+              <IconButton size="small" onClick={() => onEditUser(user)}>
+                <EditIcon fontSize="small" />
               </IconButton>
-              <IconButton onClick={() => onDeleteUser(user.id)} color="error">
-                <DeleteIcon />
+              <IconButton size="small" onClick={() => onDeleteUser(user.id)} color="error">
+                <DeleteIcon fontSize="small" />
               </IconButton>
             </ListItemSecondaryAction>
           </ListItem>
@@ -930,18 +1132,15 @@ const UserManagementStep: React.FC<{
 
 const LandingPageStep: React.FC<{ formik: any }> = ({ formik }) => (
   <Box>
-    <Typography variant="h6" gutterBottom>
-      Custom Landing Page
-    </Typography>
     <Typography variant="body2" color="text.secondary" paragraph>
-      Configure a custom landing page that new users will see when they first access the church system.
+      Configure a custom landing page for church members.
     </Typography>
 
     <FormControlLabel
       control={
         <Switch
           checked={formik.values.custom_landing_page.enabled}
-          onChange={(e) => 
+          onChange={(e) =>
             formik.setFieldValue('custom_landing_page.enabled', e.target.checked)
           }
         />
@@ -957,7 +1156,7 @@ const LandingPageStep: React.FC<{ formik: any }> = ({ formik }) => (
             fullWidth
             label="Landing Page Title"
             value={formik.values.custom_landing_page.title}
-            onChange={(e) => 
+            onChange={(e) =>
               formik.setFieldValue('custom_landing_page.title', e.target.value)
             }
             placeholder="Welcome to Our Church"
@@ -969,7 +1168,7 @@ const LandingPageStep: React.FC<{ formik: any }> = ({ formik }) => (
             label="Primary Color"
             type="color"
             value={formik.values.custom_landing_page.primary_color}
-            onChange={(e) => 
+            onChange={(e) =>
               formik.setFieldValue('custom_landing_page.primary_color', e.target.value)
             }
           />
@@ -978,13 +1177,13 @@ const LandingPageStep: React.FC<{ formik: any }> = ({ formik }) => (
           <TextField
             fullWidth
             multiline
-            rows={4}
+            rows={3}
             label="Welcome Message"
             value={formik.values.custom_landing_page.welcome_message}
-            onChange={(e) => 
+            onChange={(e) =>
               formik.setFieldValue('custom_landing_page.welcome_message', e.target.value)
             }
-            placeholder="Enter a welcome message for new users..."
+            placeholder="Enter a welcome message for members..."
           />
         </Grid>
         <Grid item xs={12}>
@@ -992,7 +1191,7 @@ const LandingPageStep: React.FC<{ formik: any }> = ({ formik }) => (
             fullWidth
             label="Logo URL"
             value={formik.values.custom_landing_page.logo_url}
-            onChange={(e) => 
+            onChange={(e) =>
               formik.setFieldValue('custom_landing_page.logo_url', e.target.value)
             }
             placeholder="https://example.com/logo.png"
@@ -1003,7 +1202,7 @@ const LandingPageStep: React.FC<{ formik: any }> = ({ formik }) => (
             <InputLabel>Default Application</InputLabel>
             <Select
               value={formik.values.custom_landing_page.default_app}
-              onChange={(e) => 
+              onChange={(e) =>
                 formik.setFieldValue('custom_landing_page.default_app', e.target.value)
               }
               label="Default Application"
@@ -1015,45 +1214,28 @@ const LandingPageStep: React.FC<{ formik: any }> = ({ formik }) => (
               ))}
             </Select>
           </FormControl>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Select which application users will see by default when they access the church system.
-          </Typography>
-          {formik.values.custom_landing_page.default_app && (
-            <Alert severity="info" sx={{ mt: 2 }}>
-              <Typography variant="body2">
-                <strong>Selected:</strong> {
-                  DEFAULT_APP_OPTIONS.find(option => 
-                    option.value === formik.values.custom_landing_page.default_app
-                  )?.description
-                }
-              </Typography>
-            </Alert>
-          )}
         </Grid>
       </Grid>
     )}
   </Box>
 );
 
-const ReviewStep: React.FC<{ 
-  formik: any; 
+const ReviewStep: React.FC<{
+  formik: any;
   selectedTemplate: TemplateChurch | null;
 }> = ({ formik, selectedTemplate }) => (
   <Box>
-    <Typography variant="h6" gutterBottom>
-      Review Church Configuration
-    </Typography>
     <Typography variant="body2" color="text.secondary" paragraph>
       Please review all settings before creating the church.
     </Typography>
 
-    <Grid container spacing={3}>
+    <Grid container spacing={2}>
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 2 }}>
-          <Typography variant="subtitle1" gutterBottom>
-            <ChurchIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-            Basic Information
-          </Typography>
+        <Paper sx={{ p: 2, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.03) }}>
+          <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+            <ChurchIcon fontSize="small" color="primary" />
+            <Typography variant="subtitle2" fontWeight={700}>Church Information</Typography>
+          </Stack>
           <Typography variant="body2"><strong>Name:</strong> {formik.values.name}</Typography>
           <Typography variant="body2"><strong>Email:</strong> {formik.values.email}</Typography>
           <Typography variant="body2"><strong>Location:</strong> {formik.values.city}, {formik.values.country}</Typography>
@@ -1062,39 +1244,44 @@ const ReviewStep: React.FC<{
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 2 }}>
-          <Typography variant="subtitle1" gutterBottom>
-            <SettingsIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-            Template & Tables
+        <Paper sx={{ p: 2, bgcolor: (theme) => alpha(theme.palette.info.main, 0.03) }}>
+          <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+            <StorageIcon fontSize="small" color="info" />
+            <Typography variant="subtitle2" fontWeight={700}>Database Setup</Typography>
+          </Stack>
+          <Typography variant="body2">
+            <strong>Template:</strong> {selectedTemplate ? selectedTemplate.name : 'Default'}
           </Typography>
           <Typography variant="body2">
-            <strong>Template:</strong> {selectedTemplate ? selectedTemplate.name : 'None (Start from scratch)'}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Selected Tables:</strong> {formik.values.selected_tables.length}
+            <strong>Tables:</strong> {formik.values.selected_tables.length} selected
           </Typography>
           <Typography variant="body2">
             <strong>Custom Fields:</strong> {formik.values.custom_fields.length}
           </Typography>
+          {formik.values.custom_table_builder?.table_name && (
+            <Typography variant="body2">
+              <strong>Custom Table:</strong> {formik.values.custom_table_builder.table_name}
+            </Typography>
+          )}
         </Paper>
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 2 }}>
-          <Typography variant="subtitle1" gutterBottom>
-            <PeopleIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-            Users
-          </Typography>
+        <Paper sx={{ p: 2, bgcolor: (theme) => alpha(theme.palette.success.main, 0.03) }}>
+          <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+            <PeopleIcon fontSize="small" color="success" />
+            <Typography variant="subtitle2" fontWeight={700}>Users</Typography>
+          </Stack>
           <Typography variant="body2">
             <strong>Initial Users:</strong> {formik.values.initial_users.length}
           </Typography>
-          {formik.values.initial_users.slice(0, 3).map((user) => (
+          {formik.values.initial_users.slice(0, 3).map((user: ChurchUser) => (
             <Typography key={user.id} variant="body2">
-              • {user.first_name} {user.last_name} ({user.role})
+              &bull; {user.first_name} {user.last_name} ({user.role})
             </Typography>
           ))}
           {formik.values.initial_users.length > 3 && (
-            <Typography variant="body2">
+            <Typography variant="body2" color="text.secondary">
               ... and {formik.values.initial_users.length - 3} more
             </Typography>
           )}
@@ -1102,13 +1289,13 @@ const ReviewStep: React.FC<{
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 2 }}>
-          <Typography variant="subtitle1" gutterBottom>
-            <WebIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-            Landing Page
-          </Typography>
+        <Paper sx={{ p: 2, bgcolor: (theme) => alpha(theme.palette.warning.main, 0.03) }}>
+          <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+            <WebIcon fontSize="small" color="warning" />
+            <Typography variant="subtitle2" fontWeight={700}>Landing Page</Typography>
+          </Stack>
           <Typography variant="body2">
-            <strong>Custom Landing:</strong> {formik.values.custom_landing_page.enabled ? 'Yes' : 'No'}
+            <strong>Enabled:</strong> {formik.values.custom_landing_page.enabled ? 'Yes' : 'No'}
           </Typography>
           {formik.values.custom_landing_page.enabled && (
             <>
@@ -1116,11 +1303,8 @@ const ReviewStep: React.FC<{
                 <strong>Title:</strong> {formik.values.custom_landing_page.title || 'Not set'}
               </Typography>
               <Typography variant="body2">
-                <strong>Has Welcome Message:</strong> {formik.values.custom_landing_page.welcome_message ? 'Yes' : 'No'}
-              </Typography>
-              <Typography variant="body2">
                 <strong>Default App:</strong> {
-                  DEFAULT_APP_OPTIONS.find(option => 
+                  DEFAULT_APP_OPTIONS.find(option =>
                     option.value === formik.values.custom_landing_page.default_app
                   )?.label || 'Not set'
                 }
@@ -1131,14 +1315,132 @@ const ReviewStep: React.FC<{
       </Grid>
     </Grid>
 
-    <Alert severity="warning" sx={{ mt: 3 }}>
-      <strong>Important:</strong> Once created, some settings like the database structure cannot be easily changed. 
-      Please ensure all information is correct before proceeding.
+    <Alert severity="info" variant="outlined" sx={{ mt: 3 }}>
+      A unique <strong>registration token</strong> will be generated after creation. Share it with church members so they can self-register.
     </Alert>
   </Box>
 );
 
+// ============================================================================
+// Registration Token Step (Post-Creation)
+// ============================================================================
+
+const RegistrationTokenStep: React.FC<{
+  result: {
+    church_id: number;
+    db_name: string;
+    registration_token: string;
+    church_name: string;
+  };
+  onCopyToken: () => void;
+  tokenCopied: boolean;
+}> = ({ result, onCopyToken, tokenCopied }) => (
+  <Box>
+    <Alert severity="success" sx={{ mb: 3 }}>
+      <Typography variant="subtitle1" fontWeight={700}>
+        Church created successfully!
+      </Typography>
+      <Typography variant="body2">
+        "{result.church_name}" has been set up with database <code>{result.db_name}</code>.
+      </Typography>
+    </Alert>
+
+    <Paper
+      elevation={2}
+      sx={{
+        p: 3,
+        mb: 3,
+        border: '2px solid',
+        borderColor: 'primary.main',
+        borderRadius: 2,
+        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04),
+      }}
+    >
+      <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+        <TokenIcon color="primary" />
+        <Typography variant="h6" fontWeight={700}>
+          Registration Token
+        </Typography>
+      </Stack>
+
+      <Typography variant="body2" color="text.secondary" paragraph>
+        Share this token with church members. They can use it along with the church name to register at:
+      </Typography>
+
+      <Paper
+        variant="outlined"
+        sx={{ p: 1.5, mb: 2, bgcolor: 'grey.50', borderRadius: 1 }}
+      >
+        <Typography variant="body2" color="primary.main" fontWeight={500} sx={{ fontFamily: 'monospace' }}>
+          {window.location.origin}/auth/register
+        </Typography>
+      </Paper>
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          p: 2,
+          bgcolor: 'grey.900',
+          borderRadius: 1,
+          mb: 2,
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{
+            fontFamily: 'monospace',
+            color: '#4caf50',
+            wordBreak: 'break-all',
+            flex: 1,
+            fontSize: '0.85rem',
+          }}
+        >
+          {result.registration_token}
+        </Typography>
+        <Tooltip title={tokenCopied ? 'Copied!' : 'Copy to clipboard'}>
+          <IconButton
+            onClick={onCopyToken}
+            size="small"
+            sx={{ color: tokenCopied ? 'success.main' : 'grey.400' }}
+          >
+            {tokenCopied ? <CheckIcon /> : <CopyIcon />}
+          </IconButton>
+        </Tooltip>
+      </Box>
+
+      <Alert severity="warning" variant="outlined">
+        <Typography variant="body2">
+          <strong>Important:</strong> Save this token securely. Users who register with this token will have their accounts locked by default until a super admin reviews and assigns them a role.
+        </Typography>
+      </Alert>
+    </Paper>
+
+    <Paper variant="outlined" sx={{ p: 2 }}>
+      <Typography variant="subtitle2" gutterBottom fontWeight={600}>
+        Registration Details
+      </Typography>
+      <Typography variant="body2">
+        <strong>Church Name:</strong> {result.church_name}
+      </Typography>
+      <Typography variant="body2">
+        <strong>Church ID:</strong> {result.church_id}
+      </Typography>
+      <Typography variant="body2">
+        <strong>Database:</strong> {result.db_name}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        Members will need both the <strong>church name</strong> (exactly as shown above) and the <strong>registration token</strong> to create their accounts.
+      </Typography>
+    </Paper>
+  </Box>
+);
+
+// ============================================================================
 // Dialog Components
+// ============================================================================
+
 const CustomFieldDialog: React.FC<{
   open: boolean;
   onClose: () => void;
@@ -1262,8 +1564,8 @@ const CustomFieldDialog: React.FC<{
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button 
-          onClick={handleSave} 
+        <Button
+          onClick={handleSave}
           variant="contained"
           disabled={!fieldData.table_name || !fieldData.field_name || !fieldData.field_type}
         >
@@ -1389,14 +1691,14 @@ const UserDialog: React.FC<{
                       onChange={(e) => {
                         const currentPermissions = userData.permissions || [];
                         if (e.target.checked) {
-                          setUserData({ 
-                            ...userData, 
-                            permissions: [...currentPermissions, permission] 
+                          setUserData({
+                            ...userData,
+                            permissions: [...currentPermissions, permission]
                           });
                         } else {
-                          setUserData({ 
-                            ...userData, 
-                            permissions: currentPermissions.filter(p => p !== permission) 
+                          setUserData({
+                            ...userData,
+                            permissions: currentPermissions.filter(p => p !== permission)
                           });
                         }
                       }}
@@ -1411,8 +1713,8 @@ const UserDialog: React.FC<{
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button 
-          onClick={handleSave} 
+        <Button
+          onClick={handleSave}
           variant="contained"
           disabled={!userData.email || !userData.first_name || !userData.last_name}
         >
@@ -1423,4 +1725,4 @@ const UserDialog: React.FC<{
   );
 };
 
-export default ChurchSetupWizard; 
+export default ChurchSetupWizard;

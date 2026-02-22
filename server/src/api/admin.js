@@ -1220,6 +1220,16 @@ router.post('/churches/wizard', requireSuperAdmin, async (req, res) => {
             `, [dbName, dbUser, dbPassword, church_id]);
             console.log('✅ Database credentials stored in churches table');
 
+            // Step 5: Generate registration token for the new church
+            const crypto = require('crypto');
+            const registrationToken = crypto.randomBytes(32).toString('hex');
+            const currentUser = req.user || req.session?.user;
+            await getAppPool().query(
+                'INSERT INTO church_registration_tokens (church_id, token, created_by) VALUES (?, ?, ?)',
+                [church_id, registrationToken, currentUser?.id || 0]
+            );
+            console.log('✅ Registration token generated for church:', registrationToken.substring(0, 8) + '...');
+
             console.log('🎉 Church Setup Wizard completed successfully!');
 
         } catch (dbError) {
@@ -1251,6 +1261,7 @@ router.post('/churches/wizard', requireSuperAdmin, async (req, res) => {
             db_name: dbName,
             db_user: dbUser,
             church: newChurch[0],
+            registration_token: registrationToken,
             wizard_summary: {
                 template_used: templateDatabaseName,
                 tables_created: selected_tables.length,

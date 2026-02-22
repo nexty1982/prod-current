@@ -69,10 +69,10 @@ const Register = () => (
         alignItems="center">
         <Box p={4}>
           <AuthRegister
-            title="Welcome to Orthodox Metrics"
+            title="Create Your Account"
             subtext={
               <Typography variant="subtitle1" color="textSecondary" mb={1}>
-                Your Admin Dashboard
+                Register with your church's registration token
               </Typography>
             }
             subtitle={

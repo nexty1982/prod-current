@@ -9,7 +9,7 @@ import Logo from '@/layouts/full/shared/logo/Logo';
 import AuthRegister from '@/features/auth/authentication/authForms/AuthRegister';
 
 const Register2 = () => (
-  <PageContainer title="Register" description="this is Register page">
+  <PageContainer title="Register" description="Register for Orthodox Metrics">
     <Box
       sx={{
         position: 'relative',
@@ -25,30 +25,32 @@ const Register2 = () => (
         },
       }}
     >
-      <Grid container spacing={0} justifyContent="center" sx={{ height: '100vh' }}>
+      <Grid container spacing={0} justifyContent="center" sx={{ minHeight: '100vh' }}>
         <Grid
           item
           xs={12}
           sm={12}
-          lg={5}
-          xl={4}
+          lg={6}
+          xl={5}
           display="flex"
           justifyContent="center"
-          alignItems="center">
-          <Card elevation={9} sx={{ p: 4, zIndex: 1, width: '100%', maxWidth: '450px' }}>
+          alignItems="center"
+          py={4}
+        >
+          <Card elevation={9} sx={{ p: 4, zIndex: 1, width: '100%', maxWidth: '520px' }}>
             <Box display="flex" alignItems="center" justifyContent="center">
               <Logo />
             </Box>
             <AuthRegister
               subtext={
                 <Typography variant="subtitle1" textAlign="center" color="textSecondary" mb={1}>
-                  Your Social Campaigns
+                  Register with your church's registration token
                 </Typography>
               }
               subtitle={
-                <Stack direction="row" spacing={1} mt={3}>
+                <Stack direction="row" spacing={1} mt={3} justifyContent="center">
                   <Typography color="textSecondary" variant="h6" fontWeight="400">
-                    Already have an Account?
+                    Already have an account?
                   </Typography>
                   <Typography
                     component={Link}

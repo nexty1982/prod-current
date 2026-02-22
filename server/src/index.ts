@@ -283,6 +283,7 @@ const sessionsRouter = require('./routes/admin/sessions');
 const usersRouter = require('./routes/admin/users');
 const adminInvitesRouter = require('./routes/admin/invites');
 const inviteRegisterRouter = require('./routes/invite-register');
+const churchRegisterRouter = require('./routes/church-register');
 const activityLogsRouter = require('./routes/admin/activity-logs');
 // Import new modular admin route files (extracted from monolithic admin.js)
 const churchUsersRouter = require('./routes/admin/church-users');
@@ -588,6 +589,9 @@ app.get('/__debug/session', (req, res) => {
 // Public routes first (no authentication required)
 app.use('/api/invite', inviteRegisterRouter); // Public invite validation + registration
 console.log('✅ [Server] Mounted /api/invite route (public invite registration)');
+app.use('/api/auth', churchRegisterRouter); // Public church token registration
+app.use('/api', churchRegisterRouter); // Admin token management endpoints
+console.log('✅ [Server] Mounted church registration token routes');
 app.use('/api/churches', churchesRouter);
 // Mount churches router at /api/my to handle /api/my/churches
 app.use('/api/my', churchesRouter);
