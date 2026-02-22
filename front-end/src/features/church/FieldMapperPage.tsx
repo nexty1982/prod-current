@@ -722,7 +722,7 @@ const FieldMapperPage: React.FC = () => {
             break;
           } else {
             const e = await res.json().catch(() => ({}));
-            lastErr = new Error(e?.error || `HTTP ${res.status}: ${res.statusText}`);
+            lastErr = new Error(e?.error?.message || e?.message || e?.error || `HTTP ${res.status}: ${res.statusText}`);
           }
         } catch (e) {
           lastErr = e;

@@ -187,8 +187,7 @@ router.post('/:id/field-mapper', requireAuth, requireChurchAccess, async (req, r
         field_settings JSON,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        UNIQUE KEY unique_church_table (church_id, table_name),
-        -- FOREIGN KEY removed - table stores both global (church_id=0) and church-specific themes
+        UNIQUE KEY unique_church_table (church_id, table_name)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
 

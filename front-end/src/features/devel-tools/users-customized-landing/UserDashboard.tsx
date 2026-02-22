@@ -26,19 +26,17 @@ import {
   Chip,
   Divider,
   Skeleton,
+  IconButton,
 } from '@mui/material';
 import {
-  Person as ProfileIcon,
-  BarChart as MetricsIcon,
-  CloudUpload as UploadIcon,
-  Translate as LanguageIcon,
-  StickyNote2 as NotesIcon,
   ExpandMore as ExpandMoreIcon,
   ChildCare as BaptismIcon,
   Favorite as MarriageIcon,
   LocalFlorist as FuneralIcon,
   Church as ChurchIcon,
   Add as AddIcon,
+  KeyboardArrowUp as ArrowUpIcon,
+  KeyboardArrowDown as ArrowDownIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -46,7 +44,6 @@ import { useChurch } from '@/context/ChurchContext';
 import { metricsAPI } from '@/api/metrics.api';
 
 interface ModuleCard {
-  icon: React.ReactNode;
   label: string;
   description: string;
   to: string;
@@ -134,10 +131,76 @@ export const UserDashboard: React.FC = () => {
   const [recentFuneral, setRecentFuneral] = useState<RecentRecord[]>([]);
   const [recordsLoading, setRecordsLoading] = useState(true);
 
+  // Section order — persisted to localStorage
+  type SectionId = 'quickAdd' | 'allModules' | 'recentRecords';
+  const defaultOrder: SectionId[] = ['quickAdd', 'allModules', 'recentRecords'];
+  const [sectionOrder, setSectionOrder] = useState<SectionId[]>(() => {
+    try {
+      const saved = localStorage.getItem('om_dashboard_section_order');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length === 3 && defaultOrder.every(s => parsed.includes(s))) {
+          return parsed;
+        }
+      }
+    } catch {}
+    return defaultOrder;
+  });
+
+  const moveSectionUp = (id: SectionId) => {
+    setSectionOrder(prev => {
+      const idx = prev.indexOf(id);
+      if (idx <= 0) return prev;
+      const next = [...prev];
+      [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+      localStorage.setItem('om_dashboard_section_order', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const moveSectionDown = (id: SectionId) => {
+    setSectionOrder(prev => {
+      const idx = prev.indexOf(id);
+      if (idx >= prev.length - 1) return prev;
+      const next = [...prev];
+      [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+      localStorage.setItem('om_dashboard_section_order', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const SectionHeader: React.FC<{ id: SectionId; children: React.ReactNode }> = ({ id, children }) => {
+    const idx = sectionOrder.indexOf(id);
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}>
+        <Typography variant="h5" sx={sectionHeadingSx}>
+          {children}
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <IconButton
+            size="small"
+            disabled={idx === 0}
+            onClick={() => moveSectionUp(id)}
+            sx={{ opacity: idx === 0 ? 0.3 : 0.6, '&:hover': { opacity: 1 } }}
+          >
+            <ArrowUpIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            disabled={idx === sectionOrder.length - 1}
+            onClick={() => moveSectionDown(id)}
+            sx={{ opacity: idx === sectionOrder.length - 1 ? 0.3 : 0.6, '&:hover': { opacity: 1 } }}
+          >
+            <ArrowDownIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      </Box>
+    );
+  };
+
   // User modules — Calendar removed, OCR upload URL updated
   const modules: ModuleCard[] = [
     {
-      icon: <ProfileIcon sx={{ fontSize: 48 }} />,
       label: 'My Profile',
       description: 'View and edit your profile',
       to: '/user-profile',
@@ -145,7 +208,6 @@ export const UserDashboard: React.FC = () => {
       gradient: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
     },
     {
-      icon: <MetricsIcon sx={{ fontSize: 48 }} />,
       label: 'Church Metrics',
       description: 'Baptism, marriage & funeral records',
       to: '/apps/records/baptism',
@@ -153,7 +215,6 @@ export const UserDashboard: React.FC = () => {
       gradient: 'linear-gradient(135deg, #7b1fa2 0%, #ba68c8 100%)',
     },
     {
-      icon: <UploadIcon sx={{ fontSize: 48 }} />,
       label: 'OM Record Uploads',
       description: 'Upload & process church documents',
       to: '/devel/ocr-studio/upload',
@@ -161,7 +222,6 @@ export const UserDashboard: React.FC = () => {
       gradient: 'linear-gradient(135deg, #00897b 0%, #4db6ac 100%)',
     },
     {
-      icon: <LanguageIcon sx={{ fontSize: 48 }} />,
       label: 'Multi Language',
       description: 'Language samples & translations',
       to: '/samples',
@@ -169,7 +229,6 @@ export const UserDashboard: React.FC = () => {
       gradient: 'linear-gradient(135deg, #f57c00 0%, #ffb74d 100%)',
     },
     {
-      icon: <NotesIcon sx={{ fontSize: 48 }} />,
       label: 'Sticky Notes',
       description: 'Personal notes & reminders',
       to: '/apps/notes',
@@ -288,7 +347,7 @@ export const UserDashboard: React.FC = () => {
 
   const sectionHeadingSx = {
     fontWeight: 600,
-    mb: 2,
+    mb: 0,
     color: 'text.primary',
     display: 'flex',
     alignItems: 'center',
@@ -475,380 +534,365 @@ export const UserDashboard: React.FC = () => {
         </Typography>
       </Box>
 
-      {/* Quick Add Section */}
-      <Box mb={5}>
-        <Typography variant="h5" sx={{ ...sectionHeadingSx, mb: 2.5 }}>
-          <AddIcon sx={{ fontSize: '1.3em', color: 'primary.main' }} /> Quick Add Record
-        </Typography>
+      {sectionOrder.map((sectionId) => {
+        if (sectionId === 'quickAdd') return (
+          <Box mb={5} key="quickAdd">
+            <SectionHeader id="quickAdd">
+              <AddIcon sx={{ fontSize: '1.3em', color: 'primary.main' }} /> Quick Add Record
+            </SectionHeader>
 
-        {/* Baptism Accordion */}
-        <Accordion sx={accordionSx} disableGutters>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '8px',
-                  background: 'linear-gradient(135deg, #1565c0 0%, #42a5f5 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <BaptismIcon sx={{ fontSize: 18, color: '#fff' }} />
-              </Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Baptism Record
-              </Typography>
-              <Chip label="Quick Entry" size="small" sx={{ ml: 0.5, fontSize: '0.7rem' }} />
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
-              <TextField
-                sx={fieldSx}
-                label="Child's Name *"
-                size="small"
-                value={baptismForm.child_name}
-                onChange={(e) => setBaptismForm((f) => ({ ...f, child_name: e.target.value }))}
-              />
-              <TextField
-                sx={fieldSx}
-                label="Baptism Date *"
-                size="small"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={baptismForm.baptism_date}
-                onChange={(e) => setBaptismForm((f) => ({ ...f, baptism_date: e.target.value }))}
-              />
-              <TextField
-                sx={fieldSx}
-                label="Father's Name"
-                size="small"
-                value={baptismForm.father_name}
-                onChange={(e) => setBaptismForm((f) => ({ ...f, father_name: e.target.value }))}
-              />
-              <TextField
-                sx={fieldSx}
-                label="Mother's Name"
-                size="small"
-                value={baptismForm.mother_name}
-                onChange={(e) => setBaptismForm((f) => ({ ...f, mother_name: e.target.value }))}
-              />
-              <TextField
-                sx={fieldSx}
-                label="Priest's Name"
-                size="small"
-                value={baptismForm.priest_name}
-                onChange={(e) => setBaptismForm((f) => ({ ...f, priest_name: e.target.value }))}
-              />
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
-              <Button
-                size="small"
-                onClick={() => navigate('/apps/records/baptism/new')}
-                sx={{ textTransform: 'none' }}
-              >
-                Full Form
-              </Button>
-              <Button
-                variant="contained"
-                size="small"
-                disabled={!baptismForm.child_name || !baptismForm.baptism_date || submitting === 'baptism'}
-                onClick={handleBaptismSubmit}
-                startIcon={submitting === 'baptism' ? <CircularProgress size={14} color="inherit" /> : <AddIcon />}
-                sx={{ textTransform: 'none' }}
-              >
-                Save Baptism
-              </Button>
-            </Box>
-          </AccordionDetails>
-        </Accordion>
+            {/* Baptism Accordion */}
+            <Accordion sx={accordionSx} disableGutters>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '8px',
+                      background: 'linear-gradient(135deg, #1565c0 0%, #42a5f5 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <BaptismIcon sx={{ fontSize: 18, color: '#fff' }} />
+                  </Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    Baptism Record
+                  </Typography>
+                  <Chip label="Quick Entry" size="small" sx={{ ml: 0.5, fontSize: '0.7rem' }} />
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+                  <TextField
+                    sx={fieldSx}
+                    label="Child's Name *"
+                    size="small"
+                    value={baptismForm.child_name}
+                    onChange={(e) => setBaptismForm((f) => ({ ...f, child_name: e.target.value }))}
+                  />
+                  <TextField
+                    sx={fieldSx}
+                    label="Baptism Date *"
+                    size="small"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={baptismForm.baptism_date}
+                    onChange={(e) => setBaptismForm((f) => ({ ...f, baptism_date: e.target.value }))}
+                  />
+                  <TextField
+                    sx={fieldSx}
+                    label="Father's Name"
+                    size="small"
+                    value={baptismForm.father_name}
+                    onChange={(e) => setBaptismForm((f) => ({ ...f, father_name: e.target.value }))}
+                  />
+                  <TextField
+                    sx={fieldSx}
+                    label="Mother's Name"
+                    size="small"
+                    value={baptismForm.mother_name}
+                    onChange={(e) => setBaptismForm((f) => ({ ...f, mother_name: e.target.value }))}
+                  />
+                  <TextField
+                    sx={fieldSx}
+                    label="Priest's Name"
+                    size="small"
+                    value={baptismForm.priest_name}
+                    onChange={(e) => setBaptismForm((f) => ({ ...f, priest_name: e.target.value }))}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
+                  <Button
+                    size="small"
+                    onClick={() => navigate('/apps/records/baptism/new')}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Full Form
+                  </Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    disabled={!baptismForm.child_name || !baptismForm.baptism_date || submitting === 'baptism'}
+                    onClick={handleBaptismSubmit}
+                    startIcon={submitting === 'baptism' ? <CircularProgress size={14} color="inherit" /> : <AddIcon />}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Save Baptism
+                  </Button>
+                </Box>
+              </AccordionDetails>
+            </Accordion>
 
-        {/* Marriage Accordion */}
-        <Accordion sx={accordionSx} disableGutters>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '8px',
-                  background: 'linear-gradient(135deg, #c62828 0%, #ef9a9a 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <MarriageIcon sx={{ fontSize: 18, color: '#fff' }} />
-              </Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Marriage Record
-              </Typography>
-              <Chip label="Quick Entry" size="small" sx={{ ml: 0.5, fontSize: '0.7rem' }} />
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
-              <TextField
-                sx={fieldSx}
-                label="Groom's Name *"
-                size="small"
-                value={marriageForm.groom_name}
-                onChange={(e) => setMarriageForm((f) => ({ ...f, groom_name: e.target.value }))}
-              />
-              <TextField
-                sx={fieldSx}
-                label="Bride's Name *"
-                size="small"
-                value={marriageForm.bride_name}
-                onChange={(e) => setMarriageForm((f) => ({ ...f, bride_name: e.target.value }))}
-              />
-              <TextField
-                sx={fieldSx}
-                label="Marriage Date *"
-                size="small"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={marriageForm.marriage_date}
-                onChange={(e) => setMarriageForm((f) => ({ ...f, marriage_date: e.target.value }))}
-              />
-              <TextField
-                sx={fieldSx}
-                label="Priest's Name"
-                size="small"
-                value={marriageForm.priest_name}
-                onChange={(e) => setMarriageForm((f) => ({ ...f, priest_name: e.target.value }))}
-              />
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
-              <Button
-                size="small"
-                onClick={() => navigate('/apps/records/marriage/new')}
-                sx={{ textTransform: 'none' }}
-              >
-                Full Form
-              </Button>
-              <Button
-                variant="contained"
-                size="small"
-                color="error"
-                disabled={!marriageForm.groom_name || !marriageForm.bride_name || !marriageForm.marriage_date || submitting === 'marriage'}
-                onClick={handleMarriageSubmit}
-                startIcon={submitting === 'marriage' ? <CircularProgress size={14} color="inherit" /> : <AddIcon />}
-                sx={{ textTransform: 'none' }}
-              >
-                Save Marriage
-              </Button>
-            </Box>
-          </AccordionDetails>
-        </Accordion>
+            {/* Marriage Accordion */}
+            <Accordion sx={accordionSx} disableGutters>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '8px',
+                      background: 'linear-gradient(135deg, #c62828 0%, #ef9a9a 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <MarriageIcon sx={{ fontSize: 18, color: '#fff' }} />
+                  </Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    Marriage Record
+                  </Typography>
+                  <Chip label="Quick Entry" size="small" sx={{ ml: 0.5, fontSize: '0.7rem' }} />
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+                  <TextField
+                    sx={fieldSx}
+                    label="Groom's Name *"
+                    size="small"
+                    value={marriageForm.groom_name}
+                    onChange={(e) => setMarriageForm((f) => ({ ...f, groom_name: e.target.value }))}
+                  />
+                  <TextField
+                    sx={fieldSx}
+                    label="Bride's Name *"
+                    size="small"
+                    value={marriageForm.bride_name}
+                    onChange={(e) => setMarriageForm((f) => ({ ...f, bride_name: e.target.value }))}
+                  />
+                  <TextField
+                    sx={fieldSx}
+                    label="Marriage Date *"
+                    size="small"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={marriageForm.marriage_date}
+                    onChange={(e) => setMarriageForm((f) => ({ ...f, marriage_date: e.target.value }))}
+                  />
+                  <TextField
+                    sx={fieldSx}
+                    label="Priest's Name"
+                    size="small"
+                    value={marriageForm.priest_name}
+                    onChange={(e) => setMarriageForm((f) => ({ ...f, priest_name: e.target.value }))}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
+                  <Button
+                    size="small"
+                    onClick={() => navigate('/apps/records/marriage/new')}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Full Form
+                  </Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    color="error"
+                    disabled={!marriageForm.groom_name || !marriageForm.bride_name || !marriageForm.marriage_date || submitting === 'marriage'}
+                    onClick={handleMarriageSubmit}
+                    startIcon={submitting === 'marriage' ? <CircularProgress size={14} color="inherit" /> : <AddIcon />}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Save Marriage
+                  </Button>
+                </Box>
+              </AccordionDetails>
+            </Accordion>
 
-        {/* Funeral Accordion */}
-        <Accordion sx={accordionSx} disableGutters>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '8px',
-                  background: 'linear-gradient(135deg, #4a148c 0%, #9c27b0 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <FuneralIcon sx={{ fontSize: 18, color: '#fff' }} />
-              </Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Funeral Record
-              </Typography>
-              <Chip label="Quick Entry" size="small" sx={{ ml: 0.5, fontSize: '0.7rem' }} />
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
-              <TextField
-                sx={fieldSx}
-                label="Deceased Name *"
-                size="small"
-                value={funeralForm.deceased_name}
-                onChange={(e) => setFuneralForm((f) => ({ ...f, deceased_name: e.target.value }))}
-              />
-              <TextField
-                sx={fieldSx}
-                label="Date of Death *"
-                size="small"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={funeralForm.death_date}
-                onChange={(e) => setFuneralForm((f) => ({ ...f, death_date: e.target.value }))}
-              />
-              <TextField
-                sx={fieldSx}
-                label="Funeral Date"
-                size="small"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={funeralForm.funeral_date}
-                onChange={(e) => setFuneralForm((f) => ({ ...f, funeral_date: e.target.value }))}
-              />
-              <TextField
-                sx={fieldSx}
-                label="Priest's Name"
-                size="small"
-                value={funeralForm.priest_name}
-                onChange={(e) => setFuneralForm((f) => ({ ...f, priest_name: e.target.value }))}
-              />
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
-              <Button
-                size="small"
-                onClick={() => navigate('/apps/records/funeral/new')}
-                sx={{ textTransform: 'none' }}
-              >
-                Full Form
-              </Button>
-              <Button
-                variant="contained"
-                size="small"
-                color="secondary"
-                disabled={!funeralForm.deceased_name || !funeralForm.death_date || submitting === 'funeral'}
-                onClick={handleFuneralSubmit}
-                startIcon={submitting === 'funeral' ? <CircularProgress size={14} color="inherit" /> : <AddIcon />}
-                sx={{ textTransform: 'none' }}
-              >
-                Save Funeral
-              </Button>
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
+            {/* Funeral Accordion */}
+            <Accordion sx={accordionSx} disableGutters>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '8px',
+                      background: 'linear-gradient(135deg, #4a148c 0%, #9c27b0 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <FuneralIcon sx={{ fontSize: 18, color: '#fff' }} />
+                  </Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    Funeral Record
+                  </Typography>
+                  <Chip label="Quick Entry" size="small" sx={{ ml: 0.5, fontSize: '0.7rem' }} />
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+                  <TextField
+                    sx={fieldSx}
+                    label="Deceased Name *"
+                    size="small"
+                    value={funeralForm.deceased_name}
+                    onChange={(e) => setFuneralForm((f) => ({ ...f, deceased_name: e.target.value }))}
+                  />
+                  <TextField
+                    sx={fieldSx}
+                    label="Date of Death *"
+                    size="small"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={funeralForm.death_date}
+                    onChange={(e) => setFuneralForm((f) => ({ ...f, death_date: e.target.value }))}
+                  />
+                  <TextField
+                    sx={fieldSx}
+                    label="Funeral Date"
+                    size="small"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={funeralForm.funeral_date}
+                    onChange={(e) => setFuneralForm((f) => ({ ...f, funeral_date: e.target.value }))}
+                  />
+                  <TextField
+                    sx={fieldSx}
+                    label="Priest's Name"
+                    size="small"
+                    value={funeralForm.priest_name}
+                    onChange={(e) => setFuneralForm((f) => ({ ...f, priest_name: e.target.value }))}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
+                  <Button
+                    size="small"
+                    onClick={() => navigate('/apps/records/funeral/new')}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Full Form
+                  </Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    color="secondary"
+                    disabled={!funeralForm.deceased_name || !funeralForm.death_date || submitting === 'funeral'}
+                    onClick={handleFuneralSubmit}
+                    startIcon={submitting === 'funeral' ? <CircularProgress size={14} color="inherit" /> : <AddIcon />}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Save Funeral
+                  </Button>
+                </Box>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        );
 
-      {/* All Modules Section */}
-      <Box mb={6}>
-        <Typography variant="h5" sx={sectionHeadingSx}>
-          <span style={{ fontSize: '1.2em' }}>🏠</span> All Modules
-        </Typography>
+        if (sectionId === 'allModules') return (
+          <Box mb={6} key="allModules">
+            <SectionHeader id="allModules">
+              <span style={{ fontSize: '1.2em' }}>🏠</span> All Modules
+            </SectionHeader>
 
-        {/* Modules Grid */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: {
-              xs: '1fr',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
-            },
-            gap: 3,
-          }}
-        >
-          {modules.map((module, index) => (
-            <Fade in={true} timeout={400 + index * 100} key={module.label}>
-              <Card
-                sx={{
-                  height: '100%',
-                  borderRadius: 4,
-                  overflow: 'hidden',
-                  border: `1px solid ${theme.palette.divider}`,
-                  bgcolor: 'background.paper',
-                  transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  cursor: 'pointer',
-                  '&:hover': {
-                    transform: 'translateY(-12px) scale(1.02)',
-                    boxShadow: isDark
-                      ? `0 20px 40px ${alpha(module.color, 0.3)}, 0 0 0 1px ${alpha(module.color, 0.2)}`
-                      : `0 20px 40px ${alpha(module.color, 0.25)}, 0 0 0 1px ${alpha(module.color, 0.1)}`,
-                    '& .module-icon-container': {
-                      transform: 'scale(1.1) rotate(-5deg)',
-                    },
-                  },
-                  '&:active': {
-                    transform: 'translateY(-8px) scale(0.98)',
-                  },
-                }}
-                onClick={() => handleNavigate(module.to)}
-              >
-                <CardActionArea sx={{ height: '100%' }}>
-                  <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                    <Box
-                      className="module-icon-container"
-                      sx={{
-                        width: 90,
-                        height: 90,
-                        borderRadius: '24px',
-                        background: module.gradient,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        mx: 'auto',
-                        mb: 3,
-                        boxShadow: `0 8px 24px ${alpha(module.color, 0.35)}`,
-                        transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                      }}
-                    >
-                      <Box sx={{ color: '#fff' }}>{module.icon}</Box>
-                    </Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
-                      {module.label}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5 }}>
-                      {module.description}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Fade>
-          ))}
-        </Box>
-      </Box>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: '1fr',
+                  sm: 'repeat(2, 1fr)',
+                  md: 'repeat(3, 1fr)',
+                },
+                gap: 3,
+              }}
+            >
+              {modules.map((module, index) => (
+                <Fade in={true} timeout={400 + index * 100} key={module.label}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      borderRadius: 4,
+                      overflow: 'hidden',
+                      border: `1px solid ${theme.palette.divider}`,
+                      bgcolor: 'background.paper',
+                      transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        transform: 'translateY(-12px) scale(1.02)',
+                        boxShadow: isDark
+                          ? `0 20px 40px ${alpha(module.color, 0.3)}, 0 0 0 1px ${alpha(module.color, 0.2)}`
+                          : `0 20px 40px ${alpha(module.color, 0.25)}, 0 0 0 1px ${alpha(module.color, 0.1)}`,
+                      },
+                      '&:active': {
+                        transform: 'translateY(-8px) scale(0.98)',
+                      },
+                    }}
+                    onClick={() => handleNavigate(module.to)}
+                  >
+                    <CardActionArea sx={{ height: '100%' }}>
+                      <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
+                          {module.label}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5 }}>
+                          {module.description}
+                        </Typography>
+                      </CardContent>
+                    </CardActionArea>
+                  </Card>
+                </Fade>
+              ))}
+            </Box>
+          </Box>
+        );
 
-      {/* Recent Records Section */}
-      <Box mb={4}>
-        <Typography variant="h5" sx={sectionHeadingSx}>
-          <span style={{ fontSize: '1.2em' }}>📋</span> Recent Records
-        </Typography>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
-            gap: 3,
-          }}
-        >
-          {renderRecentRecords(
-            recentBaptism,
-            recordsLoading,
-            '#1565c0',
-            'linear-gradient(135deg, #1565c0 0%, #42a5f5 100%)',
-            <BaptismIcon sx={{ fontSize: 20 }} />,
-            'Baptisms',
-            '/apps/records/baptism',
-            '/apps/records/baptism/new'
-          )}
-          {renderRecentRecords(
-            recentMarriage,
-            recordsLoading,
-            '#c62828',
-            'linear-gradient(135deg, #c62828 0%, #ef9a9a 100%)',
-            <MarriageIcon sx={{ fontSize: 20 }} />,
-            'Marriages',
-            '/apps/records/marriage',
-            '/apps/records/marriage/new'
-          )}
-          {renderRecentRecords(
-            recentFuneral,
-            recordsLoading,
-            '#4a148c',
-            'linear-gradient(135deg, #4a148c 0%, #9c27b0 100%)',
-            <FuneralIcon sx={{ fontSize: 20 }} />,
-            'Funerals',
-            '/apps/records/funeral',
-            '/apps/records/funeral/new'
-          )}
-        </Box>
-      </Box>
+        if (sectionId === 'recentRecords') return (
+          <Box mb={4} key="recentRecords">
+            <SectionHeader id="recentRecords">
+              <span style={{ fontSize: '1.2em' }}>📋</span> Recent Records
+            </SectionHeader>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+                gap: 3,
+              }}
+            >
+              {renderRecentRecords(
+                recentBaptism,
+                recordsLoading,
+                '#1565c0',
+                'linear-gradient(135deg, #1565c0 0%, #42a5f5 100%)',
+                <BaptismIcon sx={{ fontSize: 20 }} />,
+                'Baptisms',
+                '/apps/records/baptism',
+                '/apps/records/baptism/new'
+              )}
+              {renderRecentRecords(
+                recentMarriage,
+                recordsLoading,
+                '#c62828',
+                'linear-gradient(135deg, #c62828 0%, #ef9a9a 100%)',
+                <MarriageIcon sx={{ fontSize: 20 }} />,
+                'Marriages',
+                '/apps/records/marriage',
+                '/apps/records/marriage/new'
+              )}
+              {renderRecentRecords(
+                recentFuneral,
+                recordsLoading,
+                '#4a148c',
+                'linear-gradient(135deg, #4a148c 0%, #9c27b0 100%)',
+                <FuneralIcon sx={{ fontSize: 20 }} />,
+                'Funerals',
+                '/apps/records/funeral',
+                '/apps/records/funeral/new'
+              )}
+            </Box>
+          </Box>
+        );
+
+        return null;
+      })}
 
       {/* Toast notification */}
       <Snackbar
