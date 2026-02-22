@@ -164,6 +164,9 @@ const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-op
 const ConversationLogPage = Loadable(lazy(() => import('../features/devel-tools/conversation-log/ConversationLogPage')));
 const OMChartsPage = Loadable(lazy(() => import('../features/church/apps/om-charts/OMChartsPage')));
 
+/* ****Help & Documentation***** */
+const UserGuide = Loadable(lazy(() => import('../features/help/UserGuide')));
+
 /* ****Berry Components***** */
 const BerryLeadManagementPage = Loadable(lazy(() => import('../features/berry-crm/BerryLeadManagementPage')));
 const BerryContactManagementPage = Loadable(lazy(() => import('../features/berry-crm/BerryContactManagementPage')));
@@ -619,6 +622,15 @@ const Router = [
             <AdminErrorBoundary>
               <OMAIUltimateLogger />
             </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      // Help & Documentation
+      {
+        path: '/help/user-guide',
+        element: (
+          <ProtectedRoute>
+            <UserGuide />
           </ProtectedRoute>
         )
       },

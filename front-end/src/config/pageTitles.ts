@@ -34,6 +34,9 @@ export const PAGE_TITLES: Record<string, string> = {
   '/admin/users': 'User Management',
   '/admin/settings': 'Settings',
   
+  // Help
+  '/help/user-guide': 'User Guide',
+
   // Profile
   '/profile': 'Profile',
   '/settings': 'Settings',

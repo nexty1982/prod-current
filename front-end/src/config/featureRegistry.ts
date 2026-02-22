@@ -50,6 +50,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'notifications', name: 'Notifications', stage: 5, route: '/notifications' },
   { id: 'baptism-records-v2', name: 'Baptism Records', stage: 5, route: '/apps/records/baptism', since: '2026-02-15' },
   { id: 'certificates', name: 'Certificate Generator', stage: 5, route: '/apps/certificates/generate' },
+  { id: 'user-guide', name: 'User Guide', stage: 5, route: '/help/user-guide', description: 'Documentation knowledge base for all users', since: '2026-02-21' },
 
   // ── Stage 4: Stabilizing ───────────────────────────────────
   { id: 'ocr-studio', name: 'OCR Studio', stage: 4, route: '/devel/ocr-studio', since: '2026-02-01' },

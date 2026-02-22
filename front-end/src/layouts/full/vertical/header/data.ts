@@ -175,8 +175,8 @@ interface LinkType {
 
 const pageLinks: LinkType[] = [
   {
-    href: '/docs/ADMINISTRATION_GUIDE.md',
-    title: 'Users Guide',
+    href: '/help/user-guide',
+    title: 'User Guide',
   },
   {
     href: '/auth/login',
