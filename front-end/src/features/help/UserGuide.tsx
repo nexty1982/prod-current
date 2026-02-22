@@ -42,7 +42,7 @@ import {
   ArrowForward as ArrowIcon,
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
-import PageContainer from '@/components/container/PageContainer';
+import PageContainer from '@/shared/ui/PageContainer';
 
 // ── Types ───────────────────────────────────────────────────
 
