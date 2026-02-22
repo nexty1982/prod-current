@@ -104,6 +104,7 @@ const AdminSettings = Loadable(lazy(() => import('../features/admin/admin/AdminS
 const OMSiteSurvey = Loadable(lazy(() => import('../features/admin/admin/tools/OMSiteSurvey')));
 // Removed: BlogFeed from misc-legacy
 const BlogAdmin = Loadable(lazy(() => import('../features/admin/admin/BlogAdmin')));
+const TutorialManagement = Loadable(lazy(() => import('../features/admin/tutorials/TutorialManagement')));
 const SessionManagement = Loadable(lazy(() => import('../features/auth/admin/SessionManagement')));
 const AdminLogs = Loadable(lazy(() => import('../features/admin/admin/AdminLogs')));
 const ActivityLogs = Loadable(lazy(() => import('../features/admin/admin/ActivityLogs')));
@@ -727,6 +728,14 @@ const Router = [
             <AdminErrorBoundary>
               <BlogAdmin />
             </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/tutorials',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <TutorialManagement />
           </ProtectedRoute>
         )
       },

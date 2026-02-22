@@ -189,6 +189,7 @@ try {
     });
     churchCertificatesRouter = stubRouter;
 }
+const tutorialsRouter = require('./routes/tutorials');
 const calendarRouter = require('./routes/calendar');
 const dashboardRouter = require('./routes/dashboard');
 const invoicesRouter = require('./routes/invoices');
@@ -703,6 +704,7 @@ app.use('/api/admin/components', componentsRouter);
 // OMAI-Spin environment mirroring routes
 const omaiSpinRouter = require('./routes/admin/omaiSpin');
 app.use('/api/admin/omai-spin', omaiSpinRouter);
+app.use('/api/tutorials', tutorialsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/system', systemUpdateRouter); // System update routes (super_admin only, with safe fallback)
 console.log('✅ [Server] Mounted /api/system route (updates, build-info)');
