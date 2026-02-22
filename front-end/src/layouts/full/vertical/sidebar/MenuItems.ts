@@ -63,9 +63,9 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: 'Admin Dashboard',
+    title: 'Church User Dashboard',
     icon: IconShield,
-    href: '/dashboards/orthodmetrics',
+    href: '/dashboards/modern',
   },
   {
     id: uniqueId(),
