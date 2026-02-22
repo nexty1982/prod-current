@@ -453,6 +453,14 @@ const components: any = (theme: Theme) => {
         },
       },
     },
+    MuiFormControl: {
+      styleOverrides: {
+        root: {
+          // Prevent Select/dropdown labels from truncating on narrow layouts
+          minWidth: 140,
+        },
+      },
+    },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {

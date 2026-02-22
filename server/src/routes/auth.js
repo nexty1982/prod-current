@@ -239,6 +239,18 @@ router.post('/login', async (req, res) => {
       });
     });
 
+    // Log login activity (non-blocking)
+    pool.execute(
+      `INSERT INTO activity_log (user_id, action, details, ip_address, user_agent, created_at)
+       VALUES (?, 'login', ?, ?, ?, NOW())`,
+      [
+        user.id,
+        JSON.stringify({ email: user.email, role: user.role }),
+        req.ip || 'unknown',
+        (req.get('User-Agent') || 'unknown').substring(0, 255)
+      ]
+    ).catch(err => console.error('Failed to log login activity:', err.message));
+
     console.log(`✅ JWT Authentication successful for: ${loginEmail} Role: ${user.role}`);
     console.log(`✅ Session ID: ${req.sessionID}, User ID: ${user.id}`);
     console.log(`✅ Session cookie will be sent with name: orthodoxmetrics.sid`);
@@ -481,6 +493,18 @@ router.post('/logout', async (req, res) => {
         'UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = ? AND revoked_at IS NULL',
         [userId]
       );
+
+      // Log logout activity (non-blocking)
+      pool.execute(
+        `INSERT INTO activity_log (user_id, action, details, ip_address, user_agent, created_at)
+         VALUES (?, 'logout', ?, ?, ?, NOW())`,
+        [
+          userId,
+          JSON.stringify({ email: req.session?.user?.email || 'unknown' }),
+          req.ip || 'unknown',
+          (req.get('User-Agent') || 'unknown').substring(0, 255)
+        ]
+      ).catch(err => console.error('Failed to log logout activity:', err.message));
     }
 
     // Clear cookies

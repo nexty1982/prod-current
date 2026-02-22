@@ -1,7 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { promisePool } = require('../../config/db');
+const { getAppPool } = require('../../config/db-compat');
 const { requireAuth, requireRole } = require('../../middleware/auth');
+
+// Safe JSON parse helper
+function safeJsonParse(value) {
+  if (!value) return null;
+  if (typeof value === 'object') return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
 
 // Get all activity logs with filtering and pagination
 router.get('/', requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
@@ -21,7 +32,7 @@ router.get('/', requireAuth, requireRole(['super_admin', 'admin']), async (req, 
 
     // Build WHERE conditions
     if (search) {
-      whereConditions.push('(u.email LIKE ? OR al.action LIKE ? OR al.changes LIKE ?)');
+      whereConditions.push('(u.email LIKE ? OR al.action LIKE ? OR COALESCE(al.details, al.changes) LIKE ?)');
       queryParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
 
@@ -55,16 +66,16 @@ router.get('/', requireAuth, requireRole(['super_admin', 'admin']), async (req, 
       ${whereClause}
     `;
 
-    const [countResult] = await promisePool.query(countQuery, queryParams);
+    const [countResult] = await getAppPool().query(countQuery, queryParams);
     const total = countResult[0].total;
 
-    // Get activity logs with user details
+    // Get activity logs with user details - use COALESCE to handle both details and changes columns
     const query = `
-      SELECT 
+      SELECT
         al.id,
         al.user_id,
         al.action,
-        al.changes,
+        COALESCE(al.details, al.changes) as changes,
         al.ip_address,
         al.user_agent,
         al.created_at,
@@ -80,11 +91,11 @@ router.get('/', requireAuth, requireRole(['super_admin', 'admin']), async (req, 
     `;
 
     queryParams.push(parseInt(limit), parseInt(offset));
-    const [activities] = await promisePool.query(query, queryParams);
+    const [activities] = await getAppPool().query(query, queryParams);
 
     // Get activity stats
     const statsQuery = `
-      SELECT 
+      SELECT
         COUNT(*) as total_activities,
         COUNT(DISTINCT al.user_id) as unique_users,
         COUNT(DISTINCT DATE(al.created_at)) as active_days,
@@ -93,12 +104,12 @@ router.get('/', requireAuth, requireRole(['super_admin', 'admin']), async (req, 
       WHERE al.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
     `;
 
-    const [statsResult] = await promisePool.query(statsQuery);
+    const [statsResult] = await getAppPool().query(statsQuery);
     const stats = statsResult[0];
 
     // Get top actions
     const topActionsQuery = `
-      SELECT 
+      SELECT
         al.action,
         COUNT(*) as count
       FROM activity_log al
@@ -108,12 +119,12 @@ router.get('/', requireAuth, requireRole(['super_admin', 'admin']), async (req, 
       LIMIT 10
     `;
 
-    const [topActions] = await promisePool.query(topActionsQuery);
+    const [topActions] = await getAppPool().query(topActionsQuery);
 
     res.json({
       activities: activities.map(activity => ({
         ...activity,
-        changes: activity.changes ? JSON.parse(activity.changes) : null,
+        changes: safeJsonParse(activity.changes),
       })),
       pagination: {
         total,
@@ -127,9 +138,9 @@ router.get('/', requireAuth, requireRole(['super_admin', 'admin']), async (req, 
 
   } catch (error) {
     console.error('Error fetching activity logs:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to fetch activity logs',
-      details: error.message 
+      details: error.message
     });
   }
 });
@@ -140,11 +151,11 @@ router.get('/:id', requireAuth, requireRole(['super_admin', 'admin']), async (re
     const { id } = req.params;
 
     const query = `
-      SELECT 
+      SELECT
         al.id,
         al.user_id,
         al.action,
-        al.changes,
+        COALESCE(al.details, al.changes) as changes,
         al.ip_address,
         al.user_agent,
         al.created_at,
@@ -157,22 +168,22 @@ router.get('/:id', requireAuth, requireRole(['super_admin', 'admin']), async (re
       WHERE al.id = ?
     `;
 
-    const [result] = await promisePool.query(query, [id]);
+    const [result] = await getAppPool().query(query, [id]);
 
     if (result.length === 0) {
       return res.status(404).json({ error: 'Activity log not found' });
     }
 
     const activity = result[0];
-    activity.changes = activity.changes ? JSON.parse(activity.changes) : null;
+    activity.changes = safeJsonParse(activity.changes);
 
     res.json(activity);
 
   } catch (error) {
     console.error('Error fetching activity log:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to fetch activity log',
-      details: error.message 
+      details: error.message
     });
   }
 });
@@ -183,22 +194,25 @@ router.delete('/cleanup', requireAuth, requireRole(['super_admin']), async (req,
     const { days_old = 90 } = req.body;
 
     const query = `
-      DELETE FROM activity_log 
+      DELETE FROM activity_log
       WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY)
     `;
 
-    const [result] = await promisePool.query(query, [parseInt(days_old)]);
+    const [result] = await getAppPool().query(query, [parseInt(days_old)]);
 
     // Log this cleanup action
-    await promisePool.query(
-      'INSERT INTO activity_log (user_id, action, changes, ip_address, user_agent, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
+    const userId = req.user?.id || req.session?.user?.id;
+    const userEmail = req.user?.email || req.session?.user?.email || 'unknown';
+
+    await getAppPool().query(
+      'INSERT INTO activity_log (user_id, action, details, ip_address, user_agent, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
       [
-        req.session.user.id,
+        userId,
         'cleanup_activity_logs',
         JSON.stringify({
           days_old: parseInt(days_old),
           records_deleted: result.affectedRows,
-          performed_by: req.session.user.email,
+          performed_by: userEmail,
         }),
         req.ip,
         req.get('User-Agent'),
@@ -213,9 +227,9 @@ router.delete('/cleanup', requireAuth, requireRole(['super_admin']), async (req,
 
   } catch (error) {
     console.error('Error cleaning up activity logs:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to cleanup activity logs',
-      details: error.message 
+      details: error.message
     });
   }
 });

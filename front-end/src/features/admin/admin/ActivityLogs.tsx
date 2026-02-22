@@ -208,9 +208,10 @@ const ActivityLogs: React.FC = () => {
   const getActionColor = (action: string) => {
     if (action.includes('login') || action.includes('authenticate')) return 'success';
     if (action.includes('logout') || action.includes('terminate')) return 'warning';
-    if (action.includes('delete') || action.includes('remove')) return 'error';
+    if (action.includes('locked') || action.includes('lockout')) return 'error';
+    if (action.includes('delete') || action.includes('remove') || action.includes('cleanup')) return 'error';
     if (action.includes('create') || action.includes('add')) return 'primary';
-    if (action.includes('update') || action.includes('modify')) return 'info';
+    if (action.includes('update') || action.includes('modify') || action.includes('unlocked')) return 'info';
     return 'default';
   };
 
@@ -339,7 +340,7 @@ const ActivityLogs: React.FC = () => {
           </AccordionSummary>
           <AccordionDetails>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   fullWidth
                   label="Search"
@@ -352,7 +353,7 @@ const ActivityLogs: React.FC = () => {
                 />
               </Grid>
               
-              <Grid item xs={12} md={2}>
+              <Grid item xs={12} sm={6} md={3}>
                 <FormControl fullWidth>
                   <InputLabel>Action Filter</InputLabel>
                   <Select
@@ -366,7 +367,10 @@ const ActivityLogs: React.FC = () => {
                     <MenuItem value="terminate_session">Terminate Session</MenuItem>
                     <MenuItem value="create_user">Create User</MenuItem>
                     <MenuItem value="update_user">Update User</MenuItem>
-                    <MenuItem value="lockout_user">Lockout User</MenuItem>
+                    <MenuItem value="user_locked">Lockout User</MenuItem>
+                    <MenuItem value="user_unlocked">Unlock User</MenuItem>
+                    <MenuItem value="cleanup_activity_logs">Cleanup Logs</MenuItem>
+                    <MenuItem value="invite_user_access">Invite User Access</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -513,13 +517,17 @@ const ActivityLogs: React.FC = () => {
                         </TableCell>
                         
                         <TableCell>
-                          <Typography variant="body2" sx={{ maxWidth: 200 }}>
+                          <Typography variant="body2" sx={{ maxWidth: 300 }}>
                             {activity.changes && typeof activity.changes === 'object' ? (
                               Object.keys(activity.changes).length > 0 ? (
-                                `${Object.keys(activity.changes).length} changes`
+                                Object.entries(activity.changes).slice(0, 2).map(([k, v]) =>
+                                  `${k}: ${String(v).substring(0, 30)}`
+                                ).join(', ') + (Object.keys(activity.changes).length > 2 ? '...' : '')
                               ) : (
                                 'No details'
                               )
+                            ) : activity.changes ? (
+                              String(activity.changes).substring(0, 60)
                             ) : (
                               'No details'
                             )}

@@ -158,7 +158,19 @@ router.post('/', requireRole(['super_admin', 'admin']), async (req, res) => {
     const userId = createResult[0].insertId;
     
     console.log(`✅ User created: ${email} (ID: ${userId}) by ${req.user?.email}`);
-    
+
+    // Log create user activity (non-blocking)
+    DatabaseService.queryPlatform(
+      `INSERT INTO activity_log (user_id, action, details, ip_address, user_agent, created_at)
+       VALUES (?, 'create_user', ?, ?, ?, NOW())`,
+      [
+        req.user?.id || 0,
+        JSON.stringify({ created_user_email: email, created_user_id: userId, role, created_by: req.user?.email }),
+        req.ip || 'unknown',
+        (req.get('User-Agent') || 'unknown').substring(0, 255)
+      ]
+    ).catch(err => console.error('Failed to log create_user activity:', err.message));
+
     res.json({
       success: true,
       message: 'User created successfully',
@@ -661,7 +673,19 @@ router.put('/:id', requireRole(['super_admin', 'admin']), async (req, res) => {
     const updatedUser = updatedUserResult[0][0];
     
     console.log(`✅ User updated successfully: ${existingUser.email}`);
-    
+
+    // Log update user activity (non-blocking)
+    DatabaseService.queryPlatform(
+      `INSERT INTO activity_log (user_id, action, details, ip_address, user_agent, created_at)
+       VALUES (?, 'update_user', ?, ?, ?, NOW())`,
+      [
+        req.user?.id || 0,
+        JSON.stringify({ updated_user_email: existingUser.email, updated_user_id: id, fields_changed: Object.keys(updateFields), updated_by: req.user?.email }),
+        req.ip || 'unknown',
+        (req.get('User-Agent') || 'unknown').substring(0, 255)
+      ]
+    ).catch(err => console.error('Failed to log update_user activity:', err.message));
+
     res.json({
       success: true,
       message: 'User updated successfully',

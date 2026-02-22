@@ -222,11 +222,24 @@ router.post('/user/:userId/terminate-all', requireRole(['super_admin', 'admin'])
       [userId]
     );
     
+    // Log terminate_session activity (non-blocking)
+    const { getAppPool } = require('../../config/db-compat');
+    getAppPool().query(
+      `INSERT INTO activity_log (user_id, action, details, ip_address, user_agent, created_at)
+       VALUES (?, 'terminate_session', ?, ?, ?, NOW())`,
+      [
+        req.user?.id || 0,
+        JSON.stringify({ target_user_id: userId, sessions_terminated: result.affectedRows, performed_by: req.user?.email }),
+        req.ip || 'unknown',
+        (req.get('User-Agent') || 'unknown').substring(0, 255)
+      ]
+    ).catch(err => console.error('Failed to log terminate_session activity:', err.message));
+
     res.json({
       success: true,
       message: `Terminated ${result.affectedRows} session(s) for user ${userId}`
     });
-    
+
   } catch (error) {
     console.error('Error terminating user sessions:', error);
     res.status(500).json({

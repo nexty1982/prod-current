@@ -224,12 +224,15 @@ import { apiClient } from './utils/axiosInstance';
     activityLogs = {
       getAll: (filters?: any): Promise<PaginatedResponse<ActivityLog>> =>
         apiClient.get(`/admin/activity-logs${apiClient.buildQueryString(filters)}`),
-  
+
       getById: (id: number): Promise<ActivityLog> =>
         apiClient.get(`/admin/activity-logs/${id}`),
-  
+
       getStats: (): Promise<any> =>
         apiClient.get('/admin/activity-logs/stats'),
+
+      cleanup: (daysOld: number): Promise<any> =>
+        apiClient.delete('/admin/activity-logs/cleanup', { data: { days_old: daysOld } }),
     };
   
     // ===== PROVISIONING APIs =====
