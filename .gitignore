@@ -1,3 +1,9 @@
+# --- Screenshots & Playwright artifacts ---
+*.png
+*.jpeg
+*.jpg
+.playwright-mcp/
+
 node_modules/
 **/node_modules/
 dist/
