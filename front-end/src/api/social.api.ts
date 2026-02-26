@@ -182,8 +182,8 @@ export class SocialAPI {
     if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
 
     const queryString = params.toString();
-    const url = queryString ? `${this.baseUrl}/posts?${queryString}` : `${this.baseUrl}/posts`;
-    
+    const url = queryString ? `${this.baseUrl}/blog/posts?${queryString}` : `${this.baseUrl}/blog/posts`;
+
     return apiJson<BlogPostResponse>(url);
   }
 
@@ -191,14 +191,14 @@ export class SocialAPI {
    * Get blog post by ID or slug
    */
   async getBlogPost(idOrSlug: string | number): Promise<BlogPost> {
-    return apiJson<BlogPost>(`${this.baseUrl}/posts/${idOrSlug}`);
+    return apiJson<BlogPost>(`${this.baseUrl}/blog/posts/${idOrSlug}`);
   }
 
   /**
    * Create new blog post
    */
   async createBlogPost(post: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt' | 'viewCount' | 'likeCount' | 'commentCount' | 'isLiked' | 'isBookmarked'>): Promise<BlogPost> {
-    return apiJson<BlogPost>(`${this.baseUrl}/posts`, {
+    return apiJson<BlogPost>(`${this.baseUrl}/blog/posts`, {
       method: 'POST',
       body: JSON.stringify(post)
     });
@@ -208,7 +208,7 @@ export class SocialAPI {
    * Update blog post
    */
   async updateBlogPost(id: number, post: Partial<BlogPost>): Promise<BlogPost> {
-    return apiJson<BlogPost>(`${this.baseUrl}/posts/${id}`, {
+    return apiJson<BlogPost>(`${this.baseUrl}/blog/posts/${id}`, {
       method: 'PUT',
       body: JSON.stringify(post)
     });
@@ -218,7 +218,7 @@ export class SocialAPI {
    * Delete blog post
    */
   async deleteBlogPost(id: number): Promise<void> {
-    return apiJson<void>(`${this.baseUrl}/posts/${id}`, {
+    return apiJson<void>(`${this.baseUrl}/blog/posts/${id}`, {
       method: 'DELETE'
     });
   }
@@ -227,17 +227,18 @@ export class SocialAPI {
    * Like/unlike blog post
    */
   async toggleLikePost(postId: number): Promise<{ isLiked: boolean; likeCount: number }> {
-    return apiJson<{ isLiked: boolean; likeCount: number }>(`${this.baseUrl}/posts/${postId}/like`, {
-      method: 'POST'
+    return apiJson<{ isLiked: boolean; likeCount: number }>(`${this.baseUrl}/blog/posts/${postId}/react`, {
+      method: 'POST',
+      body: JSON.stringify({ reaction_type: 'like' })
     });
   }
 
   /**
-   * Bookmark/unbookmark blog post
+   * Remove reaction from blog post
    */
-  async toggleBookmarkPost(postId: number): Promise<{ isBookmarked: boolean }> {
-    return apiJson<{ isBookmarked: boolean }>(`${this.baseUrl}/posts/${postId}/bookmark`, {
-      method: 'POST'
+  async removePostReaction(postId: number): Promise<void> {
+    return apiJson<void>(`${this.baseUrl}/blog/posts/${postId}/react`, {
+      method: 'DELETE'
     });
   }
 
@@ -245,10 +246,9 @@ export class SocialAPI {
   /**
    * Get comments for a post
    */
-  async getComments(filters: CommentFilters = {}): Promise<CommentResponse> {
+  async getComments(postId: number, filters: Omit<CommentFilters, 'postId'> = {}): Promise<CommentResponse> {
     const params = new URLSearchParams();
-    
-    if (filters.postId) params.append('postId', filters.postId.toString());
+
     if (filters.parentId) params.append('parentId', filters.parentId.toString());
     if (filters.authorId) params.append('authorId', filters.authorId.toString());
     if (filters.page) params.append('page', filters.page.toString());
@@ -257,46 +257,20 @@ export class SocialAPI {
     if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
 
     const queryString = params.toString();
-    const url = queryString ? `${this.baseUrl}/comments?${queryString}` : `${this.baseUrl}/comments`;
-    
+    const url = queryString
+      ? `${this.baseUrl}/blog/posts/${postId}/comments?${queryString}`
+      : `${this.baseUrl}/blog/posts/${postId}/comments`;
+
     return apiJson<CommentResponse>(url);
   }
 
   /**
-   * Create new comment
+   * Create new comment on a post
    */
-  async createComment(comment: Omit<Comment, 'id' | 'replies' | 'likeCount' | 'isLiked' | 'createdAt' | 'updatedAt'>): Promise<Comment> {
-    return apiJson<Comment>(`${this.baseUrl}/comments`, {
+  async createComment(postId: number, data: { content: string; parent_id?: number }): Promise<Comment> {
+    return apiJson<Comment>(`${this.baseUrl}/blog/posts/${postId}/comments`, {
       method: 'POST',
-      body: JSON.stringify(comment)
-    });
-  }
-
-  /**
-   * Update comment
-   */
-  async updateComment(id: number, content: string): Promise<Comment> {
-    return apiJson<Comment>(`${this.baseUrl}/comments/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ content })
-    });
-  }
-
-  /**
-   * Delete comment
-   */
-  async deleteComment(id: number): Promise<void> {
-    return apiJson<void>(`${this.baseUrl}/comments/${id}`, {
-      method: 'DELETE'
-    });
-  }
-
-  /**
-   * Like/unlike comment
-   */
-  async toggleLikeComment(commentId: number): Promise<{ isLiked: boolean; likeCount: number }> {
-    return apiJson<{ isLiked: boolean; likeCount: number }>(`${this.baseUrl}/comments/${commentId}/like`, {
-      method: 'POST'
+      body: JSON.stringify(data)
     });
   }
 
@@ -362,7 +336,7 @@ export class SocialAPI {
    */
   async markNotificationAsRead(id: number): Promise<void> {
     return apiJson<void>(`${this.baseUrl}/notifications/${id}/read`, {
-      method: 'POST'
+      method: 'PUT'
     });
   }
 
@@ -370,8 +344,8 @@ export class SocialAPI {
    * Mark all notifications as read
    */
   async markAllNotificationsAsRead(): Promise<void> {
-    return apiJson<void>(`${this.baseUrl}/notifications/read-all`, {
-      method: 'POST'
+    return apiJson<void>(`${this.baseUrl}/notifications/mark-all-read`, {
+      method: 'PUT'
     });
   }
 
@@ -389,21 +363,21 @@ export class SocialAPI {
    * Get blog categories
    */
   async getCategories(): Promise<Array<{ id: number; name: string; slug: string; postCount: number }>> {
-    return apiJson(`${this.baseUrl}/categories`);
+    return apiJson(`${this.baseUrl}/blog/categories`);
   }
 
   /**
    * Get popular tags
    */
   async getPopularTags(limit: number = 20): Promise<Array<{ name: string; count: number }>> {
-    return apiJson(`${this.baseUrl}/tags/popular?limit=${limit}`);
+    return apiJson(`${this.baseUrl}/blog/tags/popular?limit=${limit}`);
   }
 
   /**
    * Search tags
    */
   async searchTags(query: string): Promise<Array<{ name: string; count: number }>> {
-    return apiJson(`${this.baseUrl}/tags/search?q=${encodeURIComponent(query)}`);
+    return apiJson(`${this.baseUrl}/blog/tags/search?q=${encodeURIComponent(query)}`);
   }
 
   // Chat
@@ -425,14 +399,14 @@ export class SocialAPI {
     /**
      * Get messages for a conversation
      */
-    getMessages: async (conversationId: number, page: number = 1, limit: number = 50): Promise<any> => {
-      return apiJson<any>(`${this.baseUrl}/chat/conversations/${conversationId}/messages?page=${page}&limit=${limit}`);
+    getMessages: async (conversationId: number, offset: number = 0, limit: number = 50): Promise<any> => {
+      return apiJson<any>(`${this.baseUrl}/chat/conversations/${conversationId}/messages?offset=${offset}&limit=${limit}`);
     },
 
     /**
      * Send a message
      */
-    sendMessage: async (conversationId: number, data: { content: string; messageType?: string; replyToId?: number }): Promise<any> => {
+    sendMessage: async (conversationId: number, data: { content: string; message_type?: string; reply_to_id?: number }): Promise<any> => {
       return apiJson<any>(`${this.baseUrl}/chat/conversations/${conversationId}/messages`, {
         method: 'POST',
         body: JSON.stringify(data)
@@ -463,14 +437,14 @@ export class SocialAPI {
      */
     markAsRead: async (conversationId: number): Promise<void> => {
       return apiJson<void>(`${this.baseUrl}/chat/conversations/${conversationId}/read`, {
-        method: 'POST'
+        method: 'PUT'
       });
     },
 
     /**
      * React to a message
      */
-    reactToMessage: async (messageId: number, data: { emoji: string }): Promise<any> => {
+    reactToMessage: async (messageId: number, data: { reaction_type: string }): Promise<any> => {
       return apiJson<any>(`${this.baseUrl}/chat/messages/${messageId}/react`, {
         method: 'POST',
         body: JSON.stringify(data)
@@ -480,7 +454,7 @@ export class SocialAPI {
     /**
      * Create a new conversation
      */
-    createConversation: async (data: { participantIds: number[]; title?: string }): Promise<any> => {
+    createConversation: async (data: { type: string; participant_ids: number[]; name?: string }): Promise<any> => {
       return apiJson<any>(`${this.baseUrl}/chat/conversations`, {
         method: 'POST',
         body: JSON.stringify(data)
@@ -488,12 +462,11 @@ export class SocialAPI {
     },
 
     /**
-     * Start a conversation with a user
+     * Start a direct conversation with a friend
      */
     startConversation: async (userId: number): Promise<any> => {
-      return apiJson<any>(`${this.baseUrl}/chat/conversations`, {
-        method: 'POST',
-        body: JSON.stringify({ participantIds: [userId] })
+      return apiJson<any>(`${this.baseUrl}/chat/start/${userId}`, {
+        method: 'POST'
       });
     },
   };
@@ -582,7 +555,7 @@ export class SocialAPI {
      */
     markAsRead: async (notificationId: number): Promise<void> => {
       return apiJson<void>(`${this.baseUrl}/notifications/${notificationId}/read`, {
-        method: 'POST'
+        method: 'PUT'
       });
     },
 
@@ -590,8 +563,8 @@ export class SocialAPI {
      * Mark all notifications as read
      */
     markAllAsRead: async (): Promise<void> => {
-      return apiJson<void>(`${this.baseUrl}/notifications/read-all`, {
-        method: 'POST'
+      return apiJson<void>(`${this.baseUrl}/notifications/mark-all-read`, {
+        method: 'PUT'
       });
     },
 

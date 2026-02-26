@@ -852,4 +852,106 @@ router.post('/request-access/:userId', requireAuth, async (req, res) => {
     }
 });
 
-module.exports = router; 
+// =============================================================================
+// CATEGORIES & TAGS
+// =============================================================================
+
+// GET /api/social/blog/categories - Get blog categories
+router.get('/categories', requireAuth, async (req, res) => {
+    try {
+        const userId = getUserId(req);
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'User ID not found' });
+        }
+
+        const [categories] = await promisePool.query(`
+            SELECT id, name, description, color, icon, post_count,
+                   LOWER(REPLACE(name, ' ', '-')) as slug
+            FROM blog_categories
+            WHERE user_id = ?
+            ORDER BY name ASC
+        `, [userId]);
+
+        res.json({ success: true, categories });
+
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch categories', error: error.message });
+    }
+});
+
+// GET /api/social/blog/tags/popular - Get popular tags
+router.get('/tags/popular', requireAuth, async (req, res) => {
+    try {
+        const { limit = 20 } = req.query;
+
+        const [posts] = await promisePool.query(`
+            SELECT tags FROM blog_posts
+            WHERE status = 'published' AND tags IS NOT NULL
+        `);
+
+        // Aggregate tags from JSON arrays
+        const tagCounts = {};
+        for (const post of posts) {
+            let tags = post.tags;
+            if (typeof tags === 'string') {
+                try { tags = JSON.parse(tags); } catch { continue; }
+            }
+            if (Array.isArray(tags)) {
+                for (const tag of tags) {
+                    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                }
+            }
+        }
+
+        const sorted = Object.entries(tagCounts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, parseInt(limit));
+
+        res.json({ success: true, tags: sorted });
+
+    } catch (error) {
+        console.error('Error fetching popular tags:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch popular tags', error: error.message });
+    }
+});
+
+// GET /api/social/blog/tags/search - Search tags
+router.get('/tags/search', requireAuth, async (req, res) => {
+    try {
+        const { q = '' } = req.query;
+
+        const [posts] = await promisePool.query(`
+            SELECT tags FROM blog_posts
+            WHERE status = 'published' AND tags IS NOT NULL
+        `);
+
+        const tagCounts = {};
+        for (const post of posts) {
+            let tags = post.tags;
+            if (typeof tags === 'string') {
+                try { tags = JSON.parse(tags); } catch { continue; }
+            }
+            if (Array.isArray(tags)) {
+                for (const tag of tags) {
+                    if (tag.toLowerCase().includes(q.toLowerCase())) {
+                        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                    }
+                }
+            }
+        }
+
+        const results = Object.entries(tagCounts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count);
+
+        res.json({ success: true, tags: results });
+
+    } catch (error) {
+        console.error('Error searching tags:', error);
+        res.status(500).json({ success: false, message: 'Failed to search tags', error: error.message });
+    }
+});
+
+module.exports = router;

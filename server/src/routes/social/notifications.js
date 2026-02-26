@@ -263,6 +263,38 @@ router.put('/mark-all-read', requireAuth, async (req, res) => {
     }
 });
 
+// DELETE /api/social/notifications/clear-read - Delete all read notifications
+// NOTE: Must be defined before /:id to prevent Express matching "clear-read" as an id
+router.delete('/clear-read', requireAuth, async (req, res) => {
+    try {
+        const userId = getUserId(req);
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User ID not found'
+            });
+        }
+
+        const [result] = await promisePool.query(`
+            DELETE FROM notifications
+            WHERE user_id = ? AND is_read = 1
+        `, [userId]);
+
+        res.json({
+            success: true,
+            message: `${result.affectedRows} read notifications cleared`
+        });
+
+    } catch (error) {
+        console.error('Error clearing read notifications:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to clear read notifications',
+            error: error.message
+        });
+    }
+});
+
 // DELETE /api/social/notifications/:id - Delete notification
 router.delete('/:id', requireAuth, async (req, res) => {
     try {
@@ -276,7 +308,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
         const { id: notificationId } = req.params;
 
         const [result] = await promisePool.query(`
-            DELETE FROM notifications 
+            DELETE FROM notifications
             WHERE id = ? AND user_id = ?
         `, [notificationId, userId]);
 
@@ -297,37 +329,6 @@ router.delete('/:id', requireAuth, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to delete notification',
-            error: error.message
-        });
-    }
-});
-
-// DELETE /api/social/notifications/clear-read - Delete all read notifications
-router.delete('/clear-read', requireAuth, async (req, res) => {
-    try {
-        const userId = getUserId(req);
-        if (!userId) {
-            return res.status(401).json({
-                success: false,
-                message: 'User ID not found'
-            });
-        }
-
-        const [result] = await promisePool.query(`
-            DELETE FROM notifications 
-            WHERE user_id = ? AND is_read = 1
-        `, [userId]);
-
-        res.json({
-            success: true,
-            message: `${result.affectedRows} read notifications cleared`
-        });
-
-    } catch (error) {
-        console.error('Error clearing read notifications:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to clear read notifications',
             error: error.message
         });
     }
