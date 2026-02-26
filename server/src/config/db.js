@@ -179,9 +179,51 @@ async function assertTenantOcrTablesExist(churchId) {
   if (!found.has('ocr_feeder_pages'))    missing.push('ocr_feeder_pages');
   if (!found.has('ocr_feeder_artifacts')) missing.push('ocr_feeder_artifacts');
   if (missing.length > 0) {
-    const msg = `[OCR Worker] FATAL: Missing tenant tables in ${schema}: ${missing.join(', ')}. churchId=${churchId}`;
-    console.error(msg);
-    throw new Error(msg);
+    console.warn(`[assertTenantOcrTablesExist] ${schema}: missing ${missing.join(', ')} — creating now`);
+    const pool = getTenantPool(churchId);
+    if (!found.has('ocr_feeder_pages')) {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ocr_feeder_pages (
+          id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          job_id          BIGINT UNSIGNED NOT NULL,
+          page_index      INT UNSIGNED NOT NULL DEFAULT 0,
+          status          VARCHAR(32) NOT NULL DEFAULT 'queued',
+          input_path      VARCHAR(500) NULL,
+          preproc_path    VARCHAR(500) NULL,
+          thumb_path      VARCHAR(500) NULL,
+          rotation        INT NULL DEFAULT 0,
+          dpi             INT NULL,
+          bbox_crop_json  JSON NULL,
+          quality_score   DECIMAL(5,3) NULL,
+          ocr_confidence  DECIMAL(5,3) NULL,
+          retry_count     INT UNSIGNED NOT NULL DEFAULT 0,
+          last_error      TEXT NULL,
+          created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (id),
+          KEY idx_job_page (job_id, page_index),
+          KEY idx_status_updated (status, updated_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      `);
+      console.log(`[assertTenantOcrTablesExist] ${schema}: created ocr_feeder_pages`);
+    }
+    if (!found.has('ocr_feeder_artifacts')) {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ocr_feeder_artifacts (
+          id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          page_id         BIGINT UNSIGNED NOT NULL,
+          type            VARCHAR(64) NOT NULL,
+          storage_path    VARCHAR(500) NOT NULL,
+          json_blob       LONGTEXT NULL,
+          meta_json       JSON NULL,
+          created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (id),
+          KEY idx_page_type (page_id, type),
+          KEY idx_type (type)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      `);
+      console.log(`[assertTenantOcrTablesExist] ${schema}: created ocr_feeder_artifacts`);
+    }
   }
 
   // Ensure composite index and extra columns exist (idempotent)

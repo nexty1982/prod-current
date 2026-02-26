@@ -4124,7 +4124,7 @@ const HomePage: React.FC = () => {
       )}
 
       {/* How It Works Section */}
-      <Box sx={{ backgroundColor: '#fafafa', padding: '5rem 0' }}>
+      <Box sx={{ backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.default : '#fafafa', padding: '5rem 0' }}>
         <Container maxWidth="lg">
           <Typography
             variant="h4"
@@ -4139,97 +4139,121 @@ const HomePage: React.FC = () => {
           >
             How It Works
           </Typography>
-          <Box textAlign="center" mb={6}>
+          <Box textAlign="center" mb={8}>
             <Typography
               variant="h6"
-              color="#666666"
-              sx={{ maxWidth: 600, mx: 'auto' }}
+              sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', maxWidth: 600, mx: 'auto' }}
             >
-              Transform your parish records in five simple steps, from upload to 
+              Transform your parish records in five simple steps, from upload to
               searchable digital archive.
             </Typography>
           </Box>
-          
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(5, 1fr)',
-              },
-              gap: 3,
-              justifyContent: 'center',
-            }}
-          >
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 6, md: 8 } }}>
             {[
               {
                 step: 1,
                 title: 'Upload Records',
-                description: 'Simply scan or photograph existing records using any device.',
-                icon: <IconDownload size={32} color="#F5B800" />
+                description: 'Scan or photograph your existing parish ledgers and upload them through our guided workflow. Our step-by-step process walks you through image preparation, church selection, and batch uploading with quality checks built in.',
+                image: '/images/how-it-works/step1-upload.png',
+                icon: <IconDownload size={28} color="#F5B800" />
               },
               {
                 step: 2,
                 title: 'AI Processing',
-                description: 'Our advanced OCR technology reads and digitizes text in multiple languages.',
-                icon: <IconEye size={32} color="#F5B800" />
+                description: 'Our advanced OCR engine automatically processes your uploads, identifying record types (baptism, marriage, funeral), detecting languages (English, Greek, Cyrillic), and extracting structured data with confidence scores for every field.',
+                image: '/images/how-it-works/step2-processing.png',
+                icon: <IconEye size={28} color="#F5B800" />
               },
               {
                 step: 3,
                 title: 'Review & Approve',
-                description: 'Verify the digitized content and make any necessary corrections.',
-                icon: <IconView size={32} color="#F5B800" />
+                description: 'View the original scanned image side-by-side with the OCR transcription. The workbench highlights detected records with bounding boxes on the source image, shows confidence scores, and lets you re-run OCR or copy text as needed.',
+                image: '/images/how-it-works/step3-review.png',
+                icon: <IconView size={28} color="#F5B800" />
               },
               {
                 step: 4,
                 title: 'Validate & Store',
-                description: 'Confirm accuracy and securely store in your parish database.',
-                icon: <IconCheck size={32} color="#F5B800" />
+                description: 'Map extracted text to structured database fields like Groom Name, Bride Name, Date, Witnesses, and Officiant. Smart Fill auto-populates fields from OCR tokens. Confirm accuracy and finalize records directly into your private church database.',
+                image: '/images/how-it-works/step4-validate.png',
+                icon: <IconCheck size={28} color="#F5B800" />
               },
               {
                 step: 5,
                 title: 'Access & Search',
-                description: 'Instantly search and access your digitized records from anywhere.',
-                icon: <IconTrash size={32} color="#F5B800" />
+                description: 'Instantly search and browse your digitized records from anywhere. Filter by record type, sort by any column, and access multilingual records spanning decades. Export data, generate certificates, and manage your complete parish archive.',
+                image: '/images/how-it-works/step5-access.png',
+                icon: <IconSearch size={28} color="#F5B800" />
               }
             ].map((item, index) => (
-              <Box key={index}>
-                <Card
-                  sx={{
-                    padding: '2rem 1rem',
-                    borderRadius: '16px',
-                    border: '2px solid #F5B800',
-                    textAlign: 'center',
-                    height: '100%',
-                    backgroundColor: 'white',
-                  }}
-                >
+              <Box
+                key={index}
+                sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', md: index % 2 === 0 ? 'row' : 'row-reverse' },
+                  alignItems: 'center',
+                  gap: { xs: 3, md: 5 },
+                }}
+              >
+                <Box sx={{ flex: { xs: '1 1 auto', md: '0 0 55%' }, width: '100%' }}>
                   <Box
                     sx={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: '50%',
-                      backgroundColor: '#FFF9E6',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      mx: 'auto',
-                      mb: 2,
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      border: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e0e0e0',
+                      boxShadow: theme.palette.mode === 'dark'
+                        ? '0 8px 32px rgba(0,0,0,0.4)'
+                        : '0 8px 32px rgba(0,0,0,0.08)',
                     }}
                   >
-                    {item.icon}
+                    <img
+                      src={item.image}
+                      alt={`Step ${item.step}: ${item.title}`}
+                      style={{ width: '100%', display: 'block' }}
+                    />
                   </Box>
-                  <Typography variant="h6" fontWeight={700} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
-                    Step {item.step}
-                  </Typography>
-                  <Typography variant="h6" fontWeight={700} sx={{ color: '#F5B800' }} gutterBottom>
+                </Box>
+                <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 45%' } }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                    <Box
+                      sx={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '50%',
+                        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 249, 230, 0.1)' : '#FFF9E6',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {item.icon}
+                    </Box>
+                    <Typography
+                      variant="overline"
+                      sx={{ color: '#F5B800', fontWeight: 700, fontSize: '0.8rem', letterSpacing: 1.5 }}
+                    >
+                      Step {item.step}
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="h5"
+                    fontWeight={700}
+                    sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a', mb: 1.5 }}
+                  >
                     {item.title}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666' }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.8)' : '#666666',
+                      lineHeight: 1.7,
+                    }}
+                  >
                     {item.description}
                   </Typography>
-                </Card>
+                </Box>
               </Box>
             ))}
           </Box>

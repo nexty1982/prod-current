@@ -14,6 +14,8 @@ import Loadable from '../layouts/full/shared/loadable/Loadable';
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
+const ChurchPortalLayout = Loadable(lazy(() => import('../layouts/portal/ChurchPortalLayout')));
+const ChurchPortalHub = Loadable(lazy(() => import('../features/portal/ChurchPortalHub')));
 
 /* ****Pages***** */
 const ModernDash = Loadable(lazy(() => import('../features/dashboard/ModernDashboard')));
@@ -114,6 +116,7 @@ const ChurchPublishingGuide = Loadable(lazy(() => import('../features/admin/comp
 const InteractiveReportReview = Loadable(lazy(() => import('../features/records-centralized/components/interactiveReport/InteractiveReportReview')));
 const CertificateGeneratorPage = Loadable(lazy(() => import('../features/certificates/CertificateGeneratorPage')));
 const RecipientSubmissionPage = Loadable(lazy(() => import('../features/records-centralized/components/interactiveReport/RecipientSubmissionPage')));
+const PublicCollaborationPage = Loadable(lazy(() => import('../features/records-centralized/components/collaborationLinks/PublicCollaborationPage')));
 const InteractiveReportJobsPage = Loadable(lazy(() => import('../features/devel-tools/interactive-reports/InteractiveReportJobsPage')));
 const BuildInfoPage = Loadable(lazy(() => import('../features/devel-tools/build-info/BuildInfoPage')));
 const OrthodMetricsAdmin = Loadable(lazy(() => import('../features/admin/admin/OrthodoxMetricsAdmin')));
@@ -137,6 +140,7 @@ const CRMPage = Loadable(lazy(() => import('../features/devel-tools/crm/CRMPage'
 const USChurchMapPage = Loadable(lazy(() => import('../features/devel-tools/us-church-map/USChurchMapPage')));
 const LogSearch = Loadable(lazy(() => import('../features/admin/dashboard/LogSearch')));
 const OmOcrStudioPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OmOcrStudioPage')));
+const UploadRecordsPage = Loadable(lazy(() => import('../features/records-centralized/apps/upload-records/UploadRecordsPage')));
 const SuperDashboard = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/SuperDashboard')));
 const SuperDashboardCustomizer = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/SuperDashboardCustomizer')));
 const UserDashboard = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/UserDashboard')));
@@ -396,6 +400,12 @@ const Router = [
           </ProtectedRoute>
         )
        },
+
+      // Chat redirect from legacy route
+      {
+        path: '/apps/chats',
+        element: <Navigate to="/social/chat" replace />
+      },
 
       // Social Features Routes
       {
@@ -1216,6 +1226,22 @@ const Router = [
         )
       },
       {
+        path: '/apps/upload-records',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <EnvironmentAwarePage
+                featureId="upload-records"
+                priority={4}
+                featureName="Upload Records"
+              >
+                <UploadRecordsPage />
+              </EnvironmentAwarePage>
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/apps/ocr-upload',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
@@ -1289,6 +1315,16 @@ const Router = [
       },
       {
         path: '/devel/ocr-studio/review/:churchId/:jobId',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <AdminErrorBoundary>
+              <OcrReviewPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel/ocr-studio/review/:churchId',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
             <AdminErrorBoundary>
@@ -1735,6 +1771,138 @@ const Router = [
       { path: '/apps/records/editable', element: <EditableRecordPage /> },
     ],
   },
+  // ── Church Portal (public-style layout for church staff) ──
+  {
+    path: '/portal',
+    element: <ChurchPortalLayout />,
+    children: [
+      { index: true, element: <ChurchPortalHub /> },
+      // Records — all church staff
+      {
+        path: 'records/baptism',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <RecordsRouteErrorBoundary>
+              <BaptismRecordsPage />
+            </RecordsRouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'records/baptism/new',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <BaptismRecordEntryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'records/baptism/edit/:id',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <BaptismRecordEntryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'records/marriage',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <RecordsRouteErrorBoundary>
+              <MarriageRecordsPage />
+            </RecordsRouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'records/marriage/new',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <MarriageRecordEntryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'records/marriage/edit/:id',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <MarriageRecordEntryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'records/funeral',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <RecordsRouteErrorBoundary>
+              <FuneralRecordsPage />
+            </RecordsRouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'records/funeral/new',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <FuneralRecordEntryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'records/funeral/edit/:id',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <FuneralRecordEntryPage />
+          </ProtectedRoute>
+        ),
+      },
+      // Certificates
+      {
+        path: 'certificates',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <CertificateGeneratorPage />
+          </ProtectedRoute>
+        ),
+      },
+      // Upload Records (church_admin + priest)
+      {
+        path: 'upload',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <UploadRecordsPage />
+          </ProtectedRoute>
+        ),
+      },
+      // Charts (church_admin + priest)
+      {
+        path: 'charts',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <OMChartsPage />
+          </ProtectedRoute>
+        ),
+      },
+      // User Profile
+      {
+        path: 'profile',
+        element: (
+          <ProtectedRoute>
+            <UserProfile />
+          </ProtectedRoute>
+        ),
+      },
+      // User Guide
+      {
+        path: 'guide',
+        element: (
+          <ProtectedRoute>
+            <UserGuide />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
   {
     path: '/',
     element: <BlankLayout />,
@@ -1795,7 +1963,9 @@ const Router = [
       ...(isInteractiveReportRecipientsEnabled() ? [
         { path: '/r/interactive/:token', element: <RecipientSubmissionPage /> },
       ] : []),
-      
+      // Collaboration Links (public, token-based)
+      { path: '/c/:token', element: <PublicCollaborationPage /> },
+
       { path: '*', element: <NotFound404 /> },
     ],
   },

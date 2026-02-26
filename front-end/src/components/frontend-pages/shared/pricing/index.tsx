@@ -32,7 +32,7 @@ const Pricing = () => {
                 },
               }}
             >
-               Trusted developers providing features and updates.
+               Dedicated staff to provide the solution that you want!
             </Typography>
           </Grid>
         </Grid>

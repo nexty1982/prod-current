@@ -30,6 +30,7 @@ interface User {
   phone?: string;
   landing_page?: string;
   church_id?: number | null;
+  email_intake_authorized?: boolean;
 }
 
 interface UserManagementDialogProps {
@@ -87,6 +88,7 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
       landing_page: user?.landing_page || '/dashboards/modern',
       password: '',
       church_id: user?.church_id ?? (churchId ? parseInt(churchId) : null),
+      email_intake_authorized: user?.email_intake_authorized || false,
     },
     validationSchema: action === 'add'
       ? baseValidation.shape({
@@ -121,6 +123,7 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
         landing_page: user.landing_page || '/dashboards/modern',
         password: '',
         church_id: user.church_id ?? (churchId ? parseInt(churchId) : null),
+        email_intake_authorized: user.email_intake_authorized || false,
       });
     }
   }, [user]);
@@ -312,6 +315,24 @@ const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
           />
           <Typography variant="caption" color="text.secondary" display="block">
             Inactive users cannot log in to the system
+          </Typography>
+        </Grid>
+
+        {/* Email Intake Authorization */}
+        <Grid item xs={12} md={6}>
+          <FormControlLabel
+            control={
+              <Switch
+                name="email_intake_authorized"
+                checked={formik.values.email_intake_authorized}
+                onChange={(e) => formik.setFieldValue('email_intake_authorized', e.target.checked)}
+                disabled={loading}
+              />
+            }
+            label="Email Intake Authorized"
+          />
+          <Typography variant="caption" color="text.secondary" display="block">
+            Allow this user to submit records or queries via email to records@orthodoxmetrics.com
           </Typography>
         </Grid>
       </Grid>

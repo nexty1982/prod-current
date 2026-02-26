@@ -69,7 +69,7 @@ function getFeatures(settings) {
     power_search_enabled: features.power_search_enabled === true,
     custom_field_mapping_enabled: features.custom_field_mapping_enabled === true,
     om_charts_enabled: features.om_charts_enabled === true,
-    email_records_enabled: features.email_records_enabled === true
+    om_assistant_enabled: features.om_assistant_enabled === true
   };
 }
 
@@ -89,7 +89,7 @@ function mergeFeatures(currentSettings, newFeatures) {
   }
 
   // Merge only valid boolean feature flags
-  const validFeatureKeys = ['ag_grid_enabled', 'power_search_enabled', 'custom_field_mapping_enabled', 'om_charts_enabled', 'email_records_enabled'];
+  const validFeatureKeys = ['ag_grid_enabled', 'power_search_enabled', 'custom_field_mapping_enabled', 'om_charts_enabled', 'om_assistant_enabled'];
   
   validFeatureKeys.forEach(key => {
     if (newFeatures.hasOwnProperty(key) && typeof newFeatures[key] === 'boolean') {
@@ -113,7 +113,7 @@ function validateFeatures(features) {
     return { isValid: false, errors };
   }
 
-  const validKeys = ['ag_grid_enabled', 'power_search_enabled', 'custom_field_mapping_enabled', 'om_charts_enabled', 'email_records_enabled'];
+  const validKeys = ['ag_grid_enabled', 'power_search_enabled', 'custom_field_mapping_enabled', 'om_charts_enabled', 'om_assistant_enabled'];
   const providedKeys = Object.keys(features);
 
   // Check for unknown keys

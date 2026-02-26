@@ -1,4 +1,5 @@
 const { getAppPool } = require('../config/db-compat');
+const { getTenantPool } = require('../config/db');
 const express = require('express');
 const router = express.Router();
 const fs = require('fs').promises;
@@ -157,20 +158,93 @@ router.post('/fix', async (req, res) => {
   }
 });
 
-// POST /api/omai/ask - Main query execution
+/**
+ * Build record context for dashboard queries.
+ * Queries tenant DB for record counts and optional search results.
+ */
+async function buildRecordContext(churchId, prompt) {
+  try {
+    const pool = getTenantPool(churchId);
+    const parts = [];
+
+    // Get record counts
+    const tables = ['baptism_records', 'marriage_records', 'funeral_records'];
+    for (const table of tables) {
+      try {
+        const [rows] = await pool.query(`SELECT COUNT(*) as cnt FROM \`${table}\``);
+        const label = table.replace('_records', '');
+        parts.push(`${label}: ${rows[0].cnt} records`);
+      } catch (_) {
+        // Table may not exist
+      }
+    }
+
+    // If prompt looks like a search, query across tables
+    const searchTerms = prompt.replace(/show|find|search|get|list|me|my|recent|records?|all/gi, '').trim();
+    if (searchTerms.length >= 2) {
+      const searchResults = [];
+      for (const table of tables) {
+        try {
+          const [rows] = await pool.query(
+            `SELECT * FROM \`${table}\` WHERE
+              CONCAT_WS(' ', COALESCE(first_name,''), COALESCE(last_name,''), COALESCE(notes,''))
+              LIKE ? ORDER BY created_at DESC LIMIT 10`,
+            [`%${searchTerms}%`]
+          );
+          if (rows.length > 0) {
+            const label = table.replace('_records', '');
+            searchResults.push(`${label} matches (${rows.length}):\n${rows.map(r =>
+              `  - ${r.first_name || ''} ${r.last_name || ''} (ID: ${r.id}, created: ${r.created_at})`
+            ).join('\n')}`);
+          }
+        } catch (_) {
+          // Table may not exist or missing columns
+        }
+      }
+      if (searchResults.length > 0) {
+        parts.push('\nSearch results for "' + searchTerms + '":\n' + searchResults.join('\n'));
+      }
+    }
+
+    return parts.length > 0 ? 'Church record data:\n' + parts.join('\n') : '';
+  } catch (err) {
+    console.error('[OMAI] buildRecordContext error:', err.message);
+    return '';
+  }
+}
+
+// POST /api/omai/ask - Main query execution (context-aware)
 router.post('/ask', async (req, res) => {
   try {
     const { prompt, context, securityContext } = req.body;
-    
+
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    // Log the request
-    console.log(`[OMAI] Query request: ${prompt.substring(0, 100)}...`);
+    const contextType = context?.type || 'global';
+    console.log(`[OMAI] Query request (${contextType}): ${prompt.substring(0, 100)}...`);
 
-    const response = await askOMAIWithMetadata(prompt, securityContext);
-    
+    // Build augmented prompt based on context type
+    let augmentedPrompt = prompt;
+
+    if (contextType === 'user-guide' && context.guideContent) {
+      augmentedPrompt = `You are a helpful assistant for Orthodox Metrics, a church management platform. Answer the user's question based on the following documentation:\n\n${context.guideContent}\n\nUser question: ${prompt}`;
+    } else if (contextType === 'dashboard' && context.churchId) {
+      const recordContext = await buildRecordContext(context.churchId, prompt);
+      if (recordContext) {
+        augmentedPrompt = `You are a helpful assistant for Orthodox Metrics. The user is viewing their church dashboard${context.churchName ? ` for "${context.churchName}"` : ''}. Here is relevant data:\n\n${recordContext}\n\nUser question: ${prompt}\n\nProvide a helpful response based on the data above. Format any record results clearly.`;
+      }
+    }
+
+    // Merge churchId into security context so OMAI services can query records directly
+    const secContext = {
+      ...securityContext,
+      churchId: context?.churchId || req.session?.user?.church_id,
+    };
+
+    const response = await askOMAIWithMetadata(augmentedPrompt, secContext);
+
     res.json({
       success: true,
       response: response.response,

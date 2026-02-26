@@ -1,4 +1,5 @@
 import { CustomizerContext } from '@/context/CustomizerContext';
+import { useAuth } from '@/context/AuthContext';
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
@@ -14,8 +15,11 @@ import { IconMenu2, IconMoon, IconSun } from '@tabler/icons-react';
 import React, { useContext } from 'react';
 import MobileSidebar from './MobileSidebar';
 import Navigations from './Navigations';
+import PortalNavigations from './PortalNavigations';
 
 const HpHeader = () => {
+  const { authenticated, user } = useAuth();
+  const isChurchStaff = authenticated && user && !['super_admin', 'admin'].includes(user.role);
   const { activeMode, setActiveMode } = useContext(CustomizerContext);
   const toggleMode = () => setActiveMode(activeMode === 'light' ? 'dark' : 'light');
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
@@ -73,19 +77,32 @@ const HpHeader = () => {
           ) : null}
 
           {lgUp ? (
-            <>
-              <Stack spacing={1} direction="row" alignItems="center">
-                <Navigations />
-              </Stack>
-              <Tooltip title={`Switch to ${activeMode === 'light' ? 'dark' : 'light'} mode`}>
-                <IconButton onClick={toggleMode} size="small" sx={{ color: 'text.primary' }}>
-                  {activeMode === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
-                </IconButton>
-              </Tooltip>
-              <Button color="primary" variant="contained" href="/auth/login">
-                Church Login
-              </Button>
-            </>
+            isChurchStaff ? (
+              <>
+                <Stack spacing={1} direction="row" alignItems="center">
+                  <PortalNavigations />
+                </Stack>
+                <Tooltip title={`Switch to ${activeMode === 'light' ? 'dark' : 'light'} mode`}>
+                  <IconButton onClick={toggleMode} size="small" sx={{ color: 'text.primary' }}>
+                    {activeMode === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
+                  </IconButton>
+                </Tooltip>
+              </>
+            ) : (
+              <>
+                <Stack spacing={1} direction="row" alignItems="center">
+                  <Navigations />
+                </Stack>
+                <Tooltip title={`Switch to ${activeMode === 'light' ? 'dark' : 'light'} mode`}>
+                  <IconButton onClick={toggleMode} size="small" sx={{ color: 'text.primary' }}>
+                    {activeMode === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
+                  </IconButton>
+                </Tooltip>
+                <Button color="primary" variant="contained" href="/auth/login">
+                  Church Login
+                </Button>
+              </>
+            )
           ) : null}
         </ToolbarStyled>
       </Container>
@@ -102,7 +119,7 @@ const HpHeader = () => {
           },
         }}
       >
-        <MobileSidebar />
+        <MobileSidebar isPortal={!!isChurchStaff} />
       </Drawer>
     </AppBarStyled>
   );

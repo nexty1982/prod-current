@@ -37,7 +37,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Helper function to get redirect path for non-superadmin users
   const getNonSuperAdminRedirect = (): string | null => {
     if (user && user.role !== 'super_admin' && user.church_id) {
-      return `/apps/records/baptism?church_id=${user.church_id}`;
+      return '/portal';
     }
     return null;
   };

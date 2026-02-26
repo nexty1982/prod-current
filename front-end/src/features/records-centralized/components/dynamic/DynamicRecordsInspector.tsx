@@ -1,314 +1,681 @@
 /**
- * DynamicRecordsInspector Component
- * 
- * Inspector tool for dynamically examining and analyzing records across all record types.
- * Provides advanced inspection capabilities for super_admin and admin users.
- * 
- * Route: /apps/records/dynamic-inspector
+ * DynamicRecordsInspector — Dev tool for creating test churches and seeding records.
+ * Route: /devel/dynamic-records
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
+  Alert,
   Box,
-  Typography,
-  Paper,
-  Grid,
+  Button,
   Card,
   CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
   FormControl,
+  IconButton,
   InputLabel,
-  Select,
+  LinearProgress,
   MenuItem,
-  TextField,
-  Button,
+  Select,
+  Slider,
+  Snackbar,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
-  Chip,
-  Alert,
-  CircularProgress,
-  Tabs,
-  Tab,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  TextField,
+  Tooltip,
+  Typography,
 } from '@mui/material';
 import {
-  Search as SearchIcon,
+  Add as AddIcon,
+  Church as ChurchIcon,
+  Delete as DeleteIcon,
+  PlayArrow as SeedIcon,
   Refresh as RefreshIcon,
-  ExpandMore as ExpandMoreIcon,
-  TableChart as TableChartIcon,
-  Assessment as AssessmentIcon,
+  Search as SearchIcon,
+  Storage as DatabaseIcon,
 } from '@mui/icons-material';
+import { apiClient } from '@/shared/lib/axiosInstance';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface Church {
+  id: number;
+  name: string;
+  church_name?: string;
+  database_name?: string;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`inspector-tabpanel-${index}`}
-      aria-labelledby={`inspector-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
+interface Stats {
+  totalRecords: number;
+  byType: { baptism: number; marriage: number; funeral: number };
+  byChurch: Record<string, { name: string; counts: Record<string, number> }>;
 }
+
+const RECORD_TYPES = [
+  { key: 'baptism', label: 'Baptism', color: '#1976d2' },
+  { key: 'marriage', label: 'Marriage', color: '#9c27b0' },
+  { key: 'funeral', label: 'Funeral', color: '#546e7a' },
+] as const;
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 const DynamicRecordsInspector: React.FC = () => {
-  const [selectedRecordType, setSelectedRecordType] = useState<string>('all');
-  const [selectedChurch, setSelectedChurch] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [tabValue, setTabValue] = useState(0);
-  const [stats, setStats] = useState<any>(null);
+  // ── Church state ──
+  const [churches, setChurches] = useState<Church[]>([]);
+  const [churchId, setChurchId] = useState<string>('');
+  const [loadingChurches, setLoadingChurches] = useState(true);
+
+  // ── Create church dialog ──
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newChurchName, setNewChurchName] = useState('');
+  const [newChurchEmail, setNewChurchEmail] = useState('');
+  const [creating, setCreating] = useState(false);
+
+  // ── Stats ──
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
+
+  // ── Seeding ──
+  const [seedCounts, setSeedCounts] = useState({ baptism: 100, marriage: 50, funeral: 50 });
+  const [yearRange, setYearRange] = useState<[number, number]>([1940, 2024]);
+  const [seeding, setSeeding] = useState(false);
+  const [seedProgress, setSeedProgress] = useState<{ current: number; total: number; type: string } | null>(null);
+
+  // ── Records browser ──
   const [records, setRecords] = useState<any[]>([]);
+  const [recordsTotal, setRecordsTotal] = useState(0);
+  const [recordsPage, setRecordsPage] = useState(0);
+  const [recordsPerPage, setRecordsPerPage] = useState(50);
+  const [recordsFilter, setRecordsFilter] = useState('all');
+  const [recordsSearch, setRecordsSearch] = useState('');
+  const [loadingRecords, setLoadingRecords] = useState(false);
+  const [showRecords, setShowRecords] = useState(false);
 
-  const recordTypes = [
-    { value: 'all', label: 'All Records' },
-    { value: 'baptism', label: 'Baptism' },
-    { value: 'marriage', label: 'Marriage' },
-    { value: 'funeral', label: 'Funeral' },
-  ];
+  // ── Purge ──
+  const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
+  const [purging, setPurging] = useState(false);
 
-  const fetchStats = async () => {
+  // ── Toast ──
+  const [toast, setToast] = useState<{ msg: string; sev: 'success' | 'error' | 'warning' | 'info' } | null>(null);
+
+  const searchDebounce = useRef<ReturnType<typeof setTimeout>>();
+
+  // ── Helpers ──
+  const notify = useCallback((msg: string, sev: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+    setToast({ msg, sev });
+  }, []);
+
+  const selectedChurch = churches.find((c) => String(c.id) === churchId);
+  const churchDisplayName = selectedChurch?.church_name || selectedChurch?.name || '';
+
+  // ── Load churches ──
+  const loadChurches = useCallback(async () => {
+    setLoadingChurches(true);
     try {
-      setLoading(true);
-      setError(null);
-      
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/records/stats?type=${selectedRecordType}&church=${selectedChurch}`);
-      // const data = await response.json();
-      // setStats(data);
-      
-      // Placeholder stats
+      const res: any = await apiClient.get('/api/admin/records-inspector/churches');
+      const list = res?.data?.churches || [];
+      setChurches(Array.isArray(list) ? list : []);
+    } catch {
+      setChurches([]);
+    }
+    setLoadingChurches(false);
+  }, []);
+
+  useEffect(() => {
+    loadChurches();
+  }, [loadChurches]);
+
+  // ── Load stats when church changes ──
+  const loadStats = useCallback(async () => {
+    if (!churchId) { setStats(null); return; }
+    setLoadingStats(true);
+    try {
+      const res: any = await apiClient.get(`/api/admin/records-inspector/summary?church_id=${churchId}`);
+      const d = res?.data || {};
       setStats({
-        totalRecords: 0,
-        byType: { baptism: 0, marriage: 0, funeral: 0 },
-        byChurch: {},
-        recentActivity: [],
+        totalRecords: d.totalRecords || 0,
+        byType: d.byType || { baptism: 0, marriage: 0, funeral: 0 },
+        byChurch: d.byChurch || {},
       });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load statistics');
-    } finally {
-      setLoading(false);
+    } catch {
+      setStats(null);
     }
-  };
+    setLoadingStats(false);
+  }, [churchId]);
 
-  const fetchRecords = async () => {
+  useEffect(() => {
+    loadStats();
+    setShowRecords(false);
+    setRecords([]);
+  }, [churchId, loadStats]);
+
+  // ── Load records ──
+  const loadRecords = useCallback(async () => {
+    if (!churchId) return;
+    setLoadingRecords(true);
     try {
-      setLoading(true);
-      setError(null);
-      
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/records/inspect?type=${selectedRecordType}&church=${selectedChurch}&search=${searchTerm}`);
-      // const data = await response.json();
-      // setRecords(data.records || []);
-      
-      // Placeholder
+      const params = new URLSearchParams({ church_id: churchId, page: String(recordsPage + 1), limit: String(recordsPerPage) });
+      if (recordsFilter !== 'all') params.set('type', recordsFilter);
+      if (recordsSearch) params.set('search', recordsSearch);
+      const res: any = await apiClient.get(`/api/admin/records-inspector/records?${params}`);
+      const d = res?.data || {};
+      setRecords(d.records || []);
+      setRecordsTotal(d.totalCount || 0);
+    } catch {
       setRecords([]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load records');
-    } finally {
-      setLoading(false);
+      setRecordsTotal(0);
     }
-  };
+    setLoadingRecords(false);
+  }, [churchId, recordsPage, recordsPerPage, recordsFilter, recordsSearch]);
 
   useEffect(() => {
-    fetchStats();
-  }, [selectedRecordType, selectedChurch]);
+    if (showRecords) loadRecords();
+  }, [showRecords, loadRecords]);
 
-  useEffect(() => {
-    if (tabValue === 1) {
-      fetchRecords();
+  // ── Create church ──
+  const handleCreateChurch = async () => {
+    if (!newChurchName.trim()) { notify('Enter a church name', 'warning'); return; }
+    setCreating(true);
+    try {
+      const res: any = await apiClient.post('/api/admin/records-inspector/provision-church', {
+        name: newChurchName.trim(),
+        email: newChurchEmail.trim() || undefined,
+      });
+      const d = res?.data || {};
+      notify(`Created "${d.name}" → ${d.database_name}`, 'success');
+      setCreateDialogOpen(false);
+      setNewChurchName('');
+      setNewChurchEmail('');
+      await loadChurches();
+      // Select the new church
+      if (d.church_id) setChurchId(String(d.church_id));
+    } catch (err: any) {
+      notify(err?.response?.data?.error || 'Failed to create church', 'error');
     }
-  }, [tabValue, selectedRecordType, selectedChurch, searchTerm]);
-
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+    setCreating(false);
   };
 
+  // ── Seed all 3 types ──
+  const handleSeedAll = async () => {
+    if (!churchId) { notify('Select a church first', 'warning'); return; }
+    const types = RECORD_TYPES.filter((t) => seedCounts[t.key] > 0);
+    if (types.length === 0) { notify('Set at least one record count > 0', 'warning'); return; }
+
+    setSeeding(true);
+    const totalTypes = types.length;
+    let completed = 0;
+    const results: string[] = [];
+
+    for (const t of types) {
+      setSeedProgress({ current: completed + 1, total: totalTypes, type: t.label });
+      try {
+        const res: any = await apiClient.post('/api/admin/seed-records', {
+          church_id: parseInt(churchId),
+          record_type: t.key,
+          count: seedCounts[t.key],
+          year_start: yearRange[0],
+          year_end: yearRange[1],
+        });
+        const d = res?.data || res;
+        results.push(`${t.label}: ${d.inserted}`);
+      } catch (err: any) {
+        results.push(`${t.label}: FAILED`);
+      }
+      completed++;
+    }
+
+    setSeedProgress(null);
+    setSeeding(false);
+    notify(`Seeded records — ${results.join(', ')}`, 'success');
+    loadStats();
+    if (showRecords) loadRecords();
+  };
+
+  // ── Purge all records from church ──
+  const handlePurgeAll = async () => {
+    if (!churchId) return;
+    setPurging(true);
+    const results: string[] = [];
+    for (const t of RECORD_TYPES) {
+      try {
+        const res: any = await apiClient.post('/api/admin/seed-records', {
+          church_id: parseInt(churchId),
+          record_type: t.key,
+          count: 0,
+          purge: true,
+        });
+        const d = res?.data || res;
+        results.push(`${t.label}: ${d.deleted || 0} deleted`);
+      } catch {
+        results.push(`${t.label}: failed`);
+      }
+    }
+    setPurging(false);
+    setPurgeDialogOpen(false);
+    notify(`Purged — ${results.join(', ')}`, 'success');
+    loadStats();
+    if (showRecords) loadRecords();
+  };
+
+  // ── Debounced search ──
+  const handleSearchChange = (val: string) => {
+    setRecordsSearch(val);
+    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    searchDebounce.current = setTimeout(() => {
+      setRecordsPage(0);
+    }, 400);
+  };
+
+  // ── Render ──
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <TableChartIcon sx={{ fontSize: 40 }} />
-            <Box>
-              <Typography variant="h4" gutterBottom>
-                Dynamic Records Inspector
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Advanced inspection and analysis tool for records
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, md: 3 } }}>
+      {/* ── Header ── */}
+      <Box sx={{ mb: 3 }}>
+        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 0.5 }}>
+          <DatabaseIcon sx={{ fontSize: 28, color: 'primary.main' }} />
+          <Typography variant="h5" fontWeight={700}>Records Inspector</Typography>
+          <Chip label="Dev Tool" size="small" color="warning" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
+        </Stack>
+        <Typography variant="body2" color="text.secondary">
+          Create test churches, seed records, inspect data.
+        </Typography>
+      </Box>
 
-        {/* Filters */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} md={4}>
-            <FormControl fullWidth>
-              <InputLabel>Record Type</InputLabel>
+      {/* ── Church Selector ── */}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 320, flex: 1 }}>
+              <InputLabel>Select Church</InputLabel>
               <Select
-                value={selectedRecordType}
-                label="Record Type"
-                onChange={(e) => setSelectedRecordType(e.target.value)}
+                value={churchId}
+                label="Select Church"
+                onChange={(e) => setChurchId(e.target.value)}
+                disabled={loadingChurches}
               >
-                {recordTypes.map((type) => (
-                  <MenuItem key={type.value} value={type.value}>
-                    {type.label}
-                  </MenuItem>
+                {loadingChurches ? (
+                  <MenuItem disabled>Loading...</MenuItem>
+                ) : churches.length === 0 ? (
+                  <MenuItem disabled>No churches found</MenuItem>
+                ) : (
+                  churches.map((c) => (
+                    <MenuItem key={c.id} value={String(c.id)}>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Chip label={c.id} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem', minWidth: 32 }} />
+                        <span>{c.church_name || c.name}</span>
+                        {c.database_name && (
+                          <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5 }}>
+                            {c.database_name}
+                          </Typography>
+                        )}
+                      </Stack>
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => setCreateDialogOpen(true)}
+              sx={{ whiteSpace: 'nowrap' }}
+              size="small"
+            >
+              New Church
+            </Button>
+            <Tooltip title="Refresh churches">
+              <IconButton size="small" onClick={loadChurches} disabled={loadingChurches}>
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      {/* ── Main content: only show when a church is selected ── */}
+      {!churchId ? (
+        <Card variant="outlined" sx={{ p: 6, textAlign: 'center' }}>
+          <ChurchIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+          <Typography variant="body1" color="text.secondary">
+            Select a church above or create a new one to get started.
+          </Typography>
+        </Card>
+      ) : (
+        <Stack spacing={3}>
+          {/* ── Stats Cards ── */}
+          <Box>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+              <Typography variant="subtitle2" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.75rem' }}>
+                Record Counts — {churchDisplayName}
+              </Typography>
+              <Tooltip title="Refresh stats">
+                <IconButton size="small" onClick={loadStats} disabled={loadingStats}>
+                  <RefreshIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+            {loadingStats ? (
+              <LinearProgress sx={{ borderRadius: 1 }} />
+            ) : stats ? (
+              <Stack direction="row" spacing={2}>
+                {RECORD_TYPES.map((t) => (
+                  <Card key={t.key} variant="outlined" sx={{ flex: 1, borderLeft: `4px solid ${t.color}` }}>
+                    <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+                      <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                        {t.label}
+                      </Typography>
+                      <Typography variant="h4" fontWeight={700} sx={{ color: t.color }}>
+                        {(stats.byType[t.key] || 0).toLocaleString()}
+                      </Typography>
+                    </CardContent>
+                  </Card>
                 ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <FormControl fullWidth>
-              <InputLabel>Church</InputLabel>
-              <Select
-                value={selectedChurch}
-                label="Church"
-                onChange={(e) => setSelectedChurch(e.target.value)}
-              >
-                <MenuItem value="all">All Churches</MenuItem>
-                {/* TODO: Load churches dynamically */}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={4}>
+                <Card variant="outlined" sx={{ flex: 1, borderLeft: '4px solid #333', bgcolor: 'action.hover' }}>
+                  <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                      Total
+                    </Typography>
+                    <Typography variant="h4" fontWeight={700}>
+                      {(stats.totalRecords || 0).toLocaleString()}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Stack>
+            ) : (
+              <Alert severity="info" variant="outlined">Unable to load statistics.</Alert>
+            )}
+          </Box>
+
+          {/* ── Seed Controls ── */}
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="subtitle2" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.75rem', mb: 2 }}>
+                Seed Records
+              </Typography>
+
+              {/* Count inputs per type */}
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+                {RECORD_TYPES.map((t) => (
+                  <TextField
+                    key={t.key}
+                    label={t.label}
+                    type="number"
+                    size="small"
+                    value={seedCounts[t.key]}
+                    onChange={(e) =>
+                      setSeedCounts((prev) => ({
+                        ...prev,
+                        [t.key]: Math.min(5000, Math.max(0, parseInt(e.target.value) || 0)),
+                      }))
+                    }
+                    inputProps={{ min: 0, max: 5000 }}
+                    sx={{ flex: 1 }}
+                    InputProps={{
+                      startAdornment: (
+                        <Box sx={{ width: 4, height: 24, borderRadius: 1, bgcolor: t.color, mr: 1, flexShrink: 0 }} />
+                      ),
+                    }}
+                  />
+                ))}
+              </Stack>
+
+              {/* Year range slider */}
+              <Box sx={{ px: 1, mb: 2 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  Year Range: {yearRange[0]} — {yearRange[1]}
+                </Typography>
+                <Slider
+                  value={yearRange}
+                  onChange={(_, v) => setYearRange(v as [number, number])}
+                  min={1800}
+                  max={2026}
+                  valueLabelDisplay="auto"
+                  sx={{ mt: 0.5 }}
+                />
+              </Box>
+
+              {/* Action buttons */}
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Button
+                  variant="contained"
+                  startIcon={seeding ? <CircularProgress size={16} color="inherit" /> : <SeedIcon />}
+                  onClick={handleSeedAll}
+                  disabled={seeding || Object.values(seedCounts).every((v) => v === 0)}
+                  size="medium"
+                >
+                  {seeding ? 'Seeding...' : `Seed ${Object.values(seedCounts).reduce((a, b) => a + b, 0).toLocaleString()} Records`}
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => setPurgeDialogOpen(true)}
+                  disabled={seeding}
+                  size="medium"
+                >
+                  Purge All
+                </Button>
+              </Stack>
+
+              {/* Progress indicator */}
+              {seedProgress && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Seeding {seedProgress.type} ({seedProgress.current}/{seedProgress.total})...
+                  </Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={(seedProgress.current / seedProgress.total) * 100}
+                    sx={{ mt: 0.5, borderRadius: 1 }}
+                  />
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* ── Records Browser ── */}
+          <Card variant="outlined">
+            <CardContent>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: showRecords ? 2 : 0 }}>
+                <Typography variant="subtitle2" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.75rem' }}>
+                  Records Browser
+                </Typography>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => setShowRecords(!showRecords)}
+                >
+                  {showRecords ? 'Hide' : 'Show Records'}
+                </Button>
+              </Stack>
+
+              {showRecords && (
+                <>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+                    <FormControl size="small" sx={{ minWidth: 140 }}>
+                      <InputLabel>Type</InputLabel>
+                      <Select
+                        value={recordsFilter}
+                        label="Type"
+                        onChange={(e) => { setRecordsFilter(e.target.value); setRecordsPage(0); }}
+                      >
+                        <MenuItem value="all">All Types</MenuItem>
+                        {RECORD_TYPES.map((t) => (
+                          <MenuItem key={t.key} value={t.key}>{t.label}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <TextField
+                      size="small"
+                      placeholder="Search by name..."
+                      value={recordsSearch}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      InputProps={{
+                        startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.disabled', fontSize: 18 }} />,
+                      }}
+                      sx={{ flex: 1 }}
+                    />
+                    <Tooltip title="Refresh">
+                      <IconButton size="small" onClick={loadRecords} disabled={loadingRecords}>
+                        <RefreshIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+
+                  {loadingRecords ? (
+                    <LinearProgress sx={{ borderRadius: 1 }} />
+                  ) : records.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>
+                      No records found.
+                    </Typography>
+                  ) : (
+                    <>
+                      <TableContainer sx={{ maxHeight: 400 }}>
+                        <Table size="small" stickyHeader>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell sx={{ fontWeight: 700, width: 60 }}>ID</TableCell>
+                              <TableCell sx={{ fontWeight: 700, width: 100 }}>Type</TableCell>
+                              <TableCell sx={{ fontWeight: 700 }}>Church</TableCell>
+                              <TableCell sx={{ fontWeight: 700, width: 120 }}>Created</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {records.map((r, i) => (
+                              <TableRow key={`${r.churchId}-${r.type}-${r.id}-${i}`} hover>
+                                <TableCell>{r.id}</TableCell>
+                                <TableCell>
+                                  <Chip
+                                    label={r.type}
+                                    size="small"
+                                    sx={{
+                                      height: 20,
+                                      fontSize: '0.65rem',
+                                      bgcolor: RECORD_TYPES.find((t) => t.key === r.type)?.color + '18',
+                                      color: RECORD_TYPES.find((t) => t.key === r.type)?.color,
+                                      fontWeight: 600,
+                                    }}
+                                  />
+                                </TableCell>
+                                <TableCell sx={{ fontSize: '0.8rem' }}>{r.churchName || 'N/A'}</TableCell>
+                                <TableCell sx={{ fontSize: '0.8rem' }}>
+                                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                      <TablePagination
+                        component="div"
+                        count={recordsTotal}
+                        page={recordsPage}
+                        onPageChange={(_, p) => setRecordsPage(p)}
+                        rowsPerPage={recordsPerPage}
+                        onRowsPerPageChange={(e) => { setRecordsPerPage(parseInt(e.target.value)); setRecordsPage(0); }}
+                        rowsPerPageOptions={[25, 50, 100]}
+                      />
+                    </>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </Stack>
+      )}
+
+      {/* ── Create Church Dialog ── */}
+      <Dialog open={createDialogOpen} onClose={() => !creating && setCreateDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <ChurchIcon color="primary" />
+            <span>Create Test Church</span>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            This will create a new church database with baptism, marriage, and funeral record tables ready for seeding.
+          </Typography>
+          <Stack spacing={2}>
             <TextField
+              label="Church Name"
               fullWidth
-              label="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-              }}
+              size="small"
+              value={newChurchName}
+              onChange={(e) => setNewChurchName(e.target.value)}
+              placeholder="e.g. Holy Trinity Test Church"
+              autoFocus
+              disabled={creating}
             />
-          </Grid>
-        </Grid>
+            <TextField
+              label="Admin Email (optional)"
+              fullWidth
+              size="small"
+              value={newChurchEmail}
+              onChange={(e) => setNewChurchEmail(e.target.value)}
+              placeholder="admin@example.com"
+              disabled={creating}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreateDialogOpen(false)} disabled={creating}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleCreateChurch}
+            disabled={creating || !newChurchName.trim()}
+            startIcon={creating ? <CircularProgress size={16} color="inherit" /> : <AddIcon />}
+          >
+            {creating ? 'Creating...' : 'Create Church'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-            {error}
+      {/* ── Purge Confirmation Dialog ── */}
+      <Dialog open={purgeDialogOpen} onClose={() => !purging && setPurgeDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Purge All Records?</DialogTitle>
+        <DialogContent>
+          <Alert severity="error" sx={{ mb: 1 }}>
+            This will permanently delete <strong>all</strong> baptism, marriage, and funeral records from <strong>{churchDisplayName}</strong>.
           </Alert>
-        )}
+          <Typography variant="body2" color="text.secondary">
+            This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPurgeDialogOpen(false)} disabled={purging}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handlePurgeAll}
+            disabled={purging}
+            startIcon={purging ? <CircularProgress size={16} color="inherit" /> : <DeleteIcon />}
+          >
+            {purging ? 'Purging...' : 'Purge All Records'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        {/* Tabs */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab icon={<AssessmentIcon />} label="Statistics" />
-            <Tab icon={<TableChartIcon />} label="Records" />
-          </Tabs>
-        </Box>
-
-        {/* Statistics Tab */}
-        <TabPanel value={tabValue} index={0}>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-              <CircularProgress />
-            </Box>
-          ) : stats ? (
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Total Records
-                    </Typography>
-                    <Typography variant="h3">
-                      {stats.totalRecords || 0}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={8}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Records by Type
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                      <Chip
-                        label={`Baptism: ${stats.byType?.baptism || 0}`}
-                        color="primary"
-                      />
-                      <Chip
-                        label={`Marriage: ${stats.byType?.marriage || 0}`}
-                        color="secondary"
-                      />
-                      <Chip
-                        label={`Funeral: ${stats.byType?.funeral || 0}`}
-                        color="default"
-                      />
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          ) : (
-            <Alert severity="info">No statistics available</Alert>
-          )}
-        </TabPanel>
-
-        {/* Records Tab */}
-        <TabPanel value={tabValue} index={1}>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-              <CircularProgress />
-            </Box>
-          ) : records.length === 0 ? (
-            <Alert severity="info">
-              No records found. Try adjusting your filters.
-            </Alert>
-          ) : (
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Church</TableCell>
-                    <TableCell>Created</TableCell>
-                    <TableCell>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {records.map((record) => (
-                    <TableRow key={record.id}>
-                      <TableCell>{record.id}</TableCell>
-                      <TableCell>
-                        <Chip label={record.type} size="small" />
-                      </TableCell>
-                      <TableCell>{record.churchName || 'N/A'}</TableCell>
-                      <TableCell>
-                        {new Date(record.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <Button size="small" variant="outlined">
-                          View Details
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </TabPanel>
-      </Paper>
+      {/* ── Toast ── */}
+      <Snackbar open={!!toast} autoHideDuration={5000} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        {toast ? (
+          <Alert severity={toast.sev} onClose={() => setToast(null)} variant="filled" sx={{ width: '100%' }}>
+            {toast.msg}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
     </Box>
   );
 };

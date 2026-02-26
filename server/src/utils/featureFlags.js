@@ -16,7 +16,7 @@ const KNOWN_FEATURES = [
   'power_search_enabled',
   'custom_field_mapping_enabled',
   'om_charts_enabled',
-  'email_records_enabled'
+  'om_assistant_enabled'
 ];
 
 // In-memory cache for global defaults (60 second TTL)

@@ -618,6 +618,61 @@ router.get('/validate-session', (req, res) => {
   }
 });
 
+// POST /forgot-password — generate temp password and email it
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Look up user (always return success to avoid user enumeration)
+    const [rows] = await pool.query(
+      'SELECT id, email, first_name, role FROM users WHERE LOWER(email) = ? AND is_active = 1',
+      [normalizedEmail]
+    );
+
+    if (rows.length === 0) {
+      // Don't reveal that the email doesn't exist
+      console.log(`[forgot-password] No active user found for: ${normalizedEmail}`);
+      return res.json({ success: true, message: 'If an account exists with that email, a password reset link has been sent.' });
+    }
+
+    const user = rows[0];
+
+    // Generate a secure temporary password
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let tempPassword = '';
+    tempPassword += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+    tempPassword += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+    tempPassword += '0123456789'[Math.floor(Math.random() * 10)];
+    tempPassword += '!@#$%^&*'[Math.floor(Math.random() * 8)];
+    for (let i = 4; i < 16; i++) {
+      tempPassword += charset[Math.floor(Math.random() * charset.length)];
+    }
+    tempPassword = tempPassword.split('').sort(() => Math.random() - 0.5).join('');
+
+    // Hash and store
+    const passwordHash = await bcrypt.hash(tempPassword, 12);
+    await pool.query(
+      'UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [passwordHash, user.id]
+    );
+
+    // Send email
+    const { sendPasswordResetEmail } = require('../utils/emailService');
+    await sendPasswordResetEmail(user.email, tempPassword, user.first_name);
+
+    console.log(`✅ [forgot-password] Password reset email sent to ${user.email}`);
+    return res.json({ success: true, message: 'If an account exists with that email, a password reset link has been sent.' });
+  } catch (err) {
+    console.error('[forgot-password] Error:', err.message);
+    return res.status(500).json({ success: false, message: 'An error occurred. Please try again later.' });
+  }
+});
+
 // Environment info endpoint
 router.get('/environment', (req, res) => {
   const session = req.session;

@@ -349,6 +349,9 @@ const legacyBackupRouter = require('./routes/admin/backups'); // Legacy backup r
 const originalBackupRouter = require('./routes/backup');
 // Import NFS backup configuration router
 const nfsBackupRouter = require('./routes/admin/nfs-backup');
+const recordsInspectorRouter = require('./routes/admin/records-inspector');
+const seedRecordsRouter = require('./routes/admin/seedRecords');
+const aiAdminRouter = require('./routes/admin/ai-admin');
 // Import Big Book system router
 const bigBookRouter = require('./routes/bigbook');
 const libraryRouter = require('./routes/library');
@@ -601,6 +604,11 @@ app.use('/api/my', churchesRouter);
 // Register Router/Menu Studio feature (requires authentication)
 app.use('/api/auth', authRoutes);
 
+// Email intake webhook (webhook-secret protected, no auth middleware)
+const emailIntakeRouter = require('./routes/email-intake');
+app.use('/api/email-intake', emailIntakeRouter);
+console.log('✅ [Server] Mounted /api/email-intake routes (inbound email webhook)');
+
 // Internal build events endpoint (token-protected, no auth middleware)
 const buildEventsRouter = require('./routes/internal/buildEvents');
 app.use('/api/internal', buildEventsRouter);
@@ -771,6 +779,10 @@ app.use('/api/system', apiExplorerRoutesRouter); // API Explorer route introspec
 app.use('/api/admin/api-tests', apiExplorerTestsRouter); // API Explorer test cases CRUD + runner (super_admin)
 console.log('✅ [Server] Mounted /api/system/routes and /api/admin/api-tests (API Explorer)');
 app.use('/api/admin/tasks', dailyTasksRouter); // Daily tasks management
+app.use('/api/admin/records-inspector', recordsInspectorRouter); // Dynamic Records Inspector
+app.use('/api/admin', seedRecordsRouter); // Seed Records (POST /api/admin/seed-records)
+app.use('/api/admin/ai', aiAdminRouter); // AI Admin Panel (commands + training)
+console.log('✅ [Server] Mounted records-inspector, seed-records, and ai-admin routes');
 app.use('/api/om-daily', omDailyRouter); // OM Daily work pipelines
 console.log('✅ [Server] Mounted /api/om-daily routes (Work Pipelines)');
 app.use('/api/crm', crmRouter); // CRM pipeline & outreach
@@ -994,6 +1006,17 @@ try {
   });
   app.use('/api/records/interactive-reports', interactiveReportsRouter);
   app.use('/r/interactive', interactiveReportsRouter);
+}
+
+// Collaboration Links routes
+let collaborationLinksRouter;
+try {
+  collaborationLinksRouter = require('./routes/collaborationLinks');
+  console.log('✅ [Server] Collaboration links router loaded successfully');
+  app.use('/api/collaboration-links', collaborationLinksRouter);
+  app.use('/c', collaborationLinksRouter); // Public routes
+} catch (error) {
+  console.error('❌ [Server] Failed to load collaboration links router:', error.message);
 }
 
 // Additional utility routes expected by frontend

@@ -20,6 +20,8 @@ import { getPageTitle } from '../../config/pageTitles';
 // import SiteEditorOverlay from '../../components/SiteEditorOverlay';
 // import GlobalOMAI from '../../components/global/GlobalOMAI';
 // import ErrorNotificationToast from '../../components/global/ErrorNotificationToast';
+import { OmAssistant } from '../../components/OmAssistant';
+import ChurchContext from '@/context/ChurchContext';
 
 const MainWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -42,6 +44,7 @@ const FullLayout: FC = () => {
   const { activeLayout, isLayout, activeMode, isCollapse } = useContext(CustomizerContext);
   const theme = useTheme();
   const { isSuperAdmin } = useAuth();
+  const churchCtx = useContext(ChurchContext);
   const location = useLocation();
   const MiniSidebarWidth = config.miniSidebarWidth;
 
@@ -110,9 +113,15 @@ const FullLayout: FC = () => {
       </MainWrapper>
       
       {/* ------------------------------------------- */}
-      {/* Global OMAI Assistant - DISABLED */}
+      {/* Global OM Assistant (floating chat bubble) */}
       {/* ------------------------------------------- */}
-      {/* <GlobalOMAI /> */}
+      <OmAssistant
+        pageContext={{
+          type: 'global',
+          churchId: churchCtx?.activeChurchId ?? undefined,
+          churchName: churchCtx?.churchMetadata?.church_name,
+        }}
+      />
       {/* <SuperadminSourcePathOverlay /> TEMPORARILY DISABLED */}
       {/* <VersionSwitcher /> TEMPORARILY DISABLED */}
       {/* <ErrorNotificationToast /> */}

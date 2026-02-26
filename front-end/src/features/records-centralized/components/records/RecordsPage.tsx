@@ -18,6 +18,7 @@ import { THEME_TO_ACCENT_MAP, useDarkAwareTableStyles, useTableStyleStore } from
 import { ChurchRecord } from '@/types/church-records-advanced.types';
 import { agGridIconMap } from '@/ui/agGridIcons';
 import { formatRecordDate } from '@/utils/formatDate';
+import CollaborationWizardDialog from '@/features/records-centralized/components/collaborationLinks/CollaborationWizardDialog';
 import {
     Alert,
     Autocomplete,
@@ -488,6 +489,9 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     setSelectedRecordType
   );
   
+  // Collaboration wizard dialog
+  const [collaborationWizardOpen, setCollaborationWizardOpen] = useState(false);
+
   // Auto-refresh when records change (create/update/delete)
   useRecordsEvents((event) => {
     if (event.churchId === selectedChurch && event.recordType === selectedRecordType) {
@@ -1079,12 +1083,10 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     window.open(certUrl, '_blank');
   }, [viewingRecord, selectedChurch, selectedRecordType, churches]);
 
-  // Collaborative Report handler
+  // Collaboration Link wizard handler
   const handleCollaborativeReport = useCallback(() => {
-    // Navigate to interactive report page with selected records context
-    window.open(`/apps/interactive-reports?type=${selectedRecordType}&churchId=${selectedChurch}`, '_blank');
-    showToast('Opening Collaborative Report tool', 'info');
-  }, [selectedRecordType, selectedChurch, showToast]);
+    setCollaborationWizardOpen(true);
+  }, []);
 
   // Build a display name from a record based on the current record type
   const getRecordDisplayName = useCallback((record: any): string => {
@@ -1905,7 +1907,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                                 </IconButton>
                               </Tooltip>
                               
-                              <Tooltip title="Collaborative Report">
+                              <Tooltip title="Collaboration Link">
                                 <IconButton
                                   onClick={handleCollaborativeReport}
                                   disabled={loading}
@@ -3096,6 +3098,14 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                 fetchRecords(selectedRecordType, selectedChurch);
                 showToast('Records refreshed successfully!', 'success');
               }}
+            />
+
+            {/* Collaboration Link Wizard */}
+            <CollaborationWizardDialog
+              open={collaborationWizardOpen}
+              onClose={() => setCollaborationWizardOpen(false)}
+              defaultRecordType={selectedRecordType}
+              churchId={selectedChurch}
             />
           </Box>
     );

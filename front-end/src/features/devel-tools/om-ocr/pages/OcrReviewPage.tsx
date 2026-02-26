@@ -1,6 +1,7 @@
 /**
- * OcrReviewPage — Full-page workbench route for reviewing a specific OCR job.
- * Route: /devel/ocr-studio/review/:churchId/:jobId
+ * OcrReviewPage — Full-page workbench route for reviewing OCR jobs.
+ * Routes: /devel/ocr-studio/review/:churchId        (jobs list)
+ *         /devel/ocr-studio/review/:churchId/:jobId  (specific job)
  */
 
 import React, { useMemo } from 'react';
@@ -28,11 +29,11 @@ const OcrReviewPage: React.FC = () => {
 
   const jobId = jobIdParam ? Number(jobIdParam) : null;
 
-  if (!churchId || !jobId) {
+  if (!churchId) {
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-          Missing church or job ID
+          Missing church ID
         </Typography>
         <Button component={Link} to="/devel/ocr-studio/upload" startIcon={<IconArrowLeft size={18} />}>
           Back to Upload
@@ -56,10 +57,10 @@ const OcrReviewPage: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Workbench */}
+      {/* Workbench — shows jobs list when jobId is null, specific job when provided */}
       <Box sx={{ flex: 1, overflow: 'hidden' }}>
         <WorkbenchProvider>
-          <OcrWorkbench churchId={churchId} initialJobId={jobId} />
+          <OcrWorkbench churchId={churchId} initialJobId={jobId ?? undefined} />
         </WorkbenchProvider>
       </Box>
     </Box>

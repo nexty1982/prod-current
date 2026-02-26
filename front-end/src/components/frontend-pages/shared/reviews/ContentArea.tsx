@@ -1,7 +1,5 @@
 import { Typography } from '@mui/material';
 
-import LogoIcon from '@/assets/images/logos/logoIcon.svg';
-
 const ContentArea = () => {
   return (
     <>
@@ -21,15 +19,7 @@ const ContentArea = () => {
           },
         }}
       >
-        What our clients think{' '}
-        <img
-          src={LogoIcon}
-          alt="logo"
-          width={40}
-          height={40}
-          style={{ margin: '0 8px', verticalAlign: 'middle' }}
-        />{' '}
-        about us?
+        What Our Clients Think About Us
       </Typography>
       <Typography variant="body1" lineHeight={1.8}>
         Our users' feedback is a testament to our commitment to quality and user satisfaction. Read

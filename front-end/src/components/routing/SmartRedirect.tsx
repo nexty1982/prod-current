@@ -67,15 +67,15 @@ const SmartRedirect: React.FC = () => {
 
             // Special case: frjames@ssppoc.org always goes to user dashboard
             if (contextUser.email === 'frjames@ssppoc.org') {
-              safeNavigate('/dashboards/user', { replace: true });
+              safeNavigate('/portal', { replace: true });
             }
             // Redirect based on role: super_admin/admin to Super Dashboard, priest and others to User Dashboard
             else if (contextUser.role === 'super_admin' || contextUser.role === 'admin') {
               safeNavigate('/dashboards/super', { replace: true });
             } else if (contextUser.role === 'priest') {
-              safeNavigate('/dashboards/user', { replace: true });
+              safeNavigate('/portal', { replace: true });
             } else {
-              safeNavigate('/dashboards/user', { replace: true });
+              safeNavigate('/portal', { replace: true });
             }
           } else {
             debugLog('Context auth - user not authenticated');
@@ -113,15 +113,15 @@ const SmartRedirect: React.FC = () => {
 
             // Special case: frjames@ssppoc.org always goes to user dashboard
             if (currentUser.email === 'frjames@ssppoc.org') {
-              safeNavigate('/dashboards/user', { replace: true });
+              safeNavigate('/portal', { replace: true });
             }
             // Redirect based on role: super_admin/admin to Super Dashboard, priest and others to User Dashboard
             else if (currentUser.role === 'super_admin' || currentUser.role === 'admin') {
               safeNavigate('/admin/control-panel', { replace: true });
             } else if (currentUser.role === 'priest') {
-              safeNavigate('/dashboards/user', { replace: true });
+              safeNavigate('/portal', { replace: true });
             } else {
-              safeNavigate('/dashboards/user', { replace: true });
+              safeNavigate('/portal', { replace: true });
             }
           } else {
             // Authenticated but no user data - try to refresh auth
@@ -134,15 +134,15 @@ const SmartRedirect: React.FC = () => {
                 if (refreshedUser) {
                   // Special case: frjames@ssppoc.org always goes to user dashboard
                   if (refreshedUser.email === 'frjames@ssppoc.org') {
-                    safeNavigate('/dashboards/user', { replace: true });
+                    safeNavigate('/portal', { replace: true });
                   }
                   // Redirect based on role: super_admin/admin to Super Dashboard, priest and others to User Dashboard
                   else if (refreshedUser.role === 'super_admin' || refreshedUser.role === 'admin') {
                     safeNavigate('/admin/control-panel', { replace: true });
                   } else if (refreshedUser.role === 'priest') {
-                    safeNavigate('/dashboards/user', { replace: true });
+                    safeNavigate('/portal', { replace: true });
                   } else {
-                    safeNavigate('/dashboards/user', { replace: true });
+                    safeNavigate('/portal', { replace: true });
                   }
                 } else {
                   // Still no user data after refresh

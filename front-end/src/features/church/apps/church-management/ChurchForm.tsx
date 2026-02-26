@@ -1305,35 +1305,35 @@ const ChurchForm: React.FC = () => {
                       </Paper>
                     </Grid>
 
-                    {/* Email Records */}
+                    {/* OM Assistant */}
                     <Grid item xs={12} md={6}>
                       <Paper variant="outlined" sx={{ p: 2 }}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
                           <Typography variant="subtitle1" fontWeight={600}>
-                            Email Records
+                            OM Assistant
                           </Typography>
                           {hasRole(['super_admin']) ? (
                             <Switch
-                              checked={featureData.effective.email_records_enabled}
-                              onChange={(e) => updateFeature('email_records_enabled', e.target.checked)}
+                              checked={featureData.effective.om_assistant_enabled}
+                              onChange={(e) => updateFeature('om_assistant_enabled', e.target.checked)}
                               disabled={updatingFeatures}
                               size="small"
                             />
                           ) : (
                             <Chip
-                              label={featureData.effective.email_records_enabled ? 'Enabled' : 'Disabled'}
-                              color={featureData.effective.email_records_enabled ? 'success' : 'default'}
+                              label={featureData.effective.om_assistant_enabled ? 'Enabled' : 'Disabled'}
+                              color={featureData.effective.om_assistant_enabled ? 'success' : 'default'}
                               size="small"
                             />
                           )}
                         </Stack>
                         <Typography variant="body2" color="textSecondary" mb={1}>
-                          Create and search sacramental records via email intake
+                          AI assistant for chat, email intake, and record queries
                         </Typography>
                         {hasRole(['super_admin']) && featureData.globalDefaults && (
                           <Typography variant="caption" color="textSecondary">
-                            Global: {featureData.globalDefaults.email_records_enabled ? 'ON' : 'OFF'} |
-                            Override: {featureData.overrides?.email_records_enabled !== undefined ? (featureData.overrides.email_records_enabled ? 'ON' : 'OFF') : 'None'}
+                            Global: {featureData.globalDefaults.om_assistant_enabled ? 'ON' : 'OFF'} |
+                            Override: {featureData.overrides?.om_assistant_enabled !== undefined ? (featureData.overrides.om_assistant_enabled ? 'ON' : 'OFF') : 'None'}
                           </Typography>
                         )}
                       </Paper>

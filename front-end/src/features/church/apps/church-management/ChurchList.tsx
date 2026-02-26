@@ -258,8 +258,8 @@ const ChurchList: React.FC = () => {
       </Box>
 
       {/* Controls */}
-      <BlankCard sx={{ mb: 3 }}>
-        <CardContent>
+      <BlankCard sx={{ mb: 3, overflow: 'hidden' }}>
+        <CardContent sx={{ overflow: 'hidden' }}>
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }} justifyContent="space-between">
             <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" flexGrow={1}>
               <TextField
@@ -327,8 +327,8 @@ const ChurchList: React.FC = () => {
       </BlankCard>
 
       {/* Church List */}
-      <BlankCard>
-            <CardContent>
+      <BlankCard sx={{ overflow: 'hidden' }}>
+            <CardContent sx={{ overflow: 'hidden' }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h6">
                   Churches ({filteredChurches.length})
@@ -337,7 +337,7 @@ const ChurchList: React.FC = () => {
 
               {loading ? (
                 viewMode === 'grid' ? (
-                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' }, gap: 3 }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' }, gap: 3, minWidth: 0 }}>
                     {[1, 2, 3, 4, 5, 6].map((item) => (
                       <Card key={item}>
                         <CardContent>
@@ -469,9 +469,9 @@ const ChurchList: React.FC = () => {
                 </TableContainer>
               ) : (
                 /* Card Grid View */
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' }, gap: 3 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' }, gap: 3, minWidth: 0 }}>
                   {filteredChurches.map((church) => (
-                    <Box key={church.id}>
+                    <Box key={church.id} sx={{ minWidth: 0 }}>
                       <Card
                         sx={{
                           height: '100%',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -46,6 +46,7 @@ import {
 } from '@tabler/icons-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { useWebSocket } from '../../../context/WebSocketContext';
 import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '../../../layouts/full/shared/breadcrumb/Breadcrumb';
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
@@ -111,7 +112,17 @@ const SocialChat: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+  const {
+    isConnected,
+    joinConversation,
+    leaveConversation,
+    startTyping,
+    stopTyping,
+    onNewMessage,
+    onUserTyping,
+    onFriendPresenceUpdate,
+  } = useWebSocket();
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -119,7 +130,7 @@ const SocialChat: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Message actions
   const [editingMessage, setEditingMessage] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
@@ -129,9 +140,20 @@ const SocialChat: React.FC = () => {
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Typing indicator state
+  const [typingUsers, setTypingUsers] = useState<Map<number, string>>(new Map());
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isTypingRef = useRef(false);
+
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
+  const selectedConversationRef = useRef<Conversation | null>(null);
+
+  // Keep ref in sync with state for use in callbacks
+  useEffect(() => {
+    selectedConversationRef.current = selectedConversation;
+  }, [selectedConversation]);
 
   const BCrumb = [
     { to: '/', title: 'Home' },
@@ -159,6 +181,143 @@ const SocialChat: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Join/leave WebSocket conversation rooms
+  useEffect(() => {
+    if (!selectedConversation || !isConnected) return;
+
+    joinConversation(selectedConversation.id);
+
+    return () => {
+      leaveConversation(selectedConversation.id);
+    };
+  }, [selectedConversation?.id, isConnected, joinConversation, leaveConversation]);
+
+  // Listen for incoming messages via WebSocket
+  useEffect(() => {
+    const cleanup = onNewMessage((message: any) => {
+      const currentConv = selectedConversationRef.current;
+
+      // Update conversation list with latest message
+      setConversations(prev => prev.map(conv =>
+        conv.id === message.conversation_id
+          ? {
+              ...conv,
+              last_message_content: message.content,
+              last_message_time: message.created_at,
+              last_message_sender_id: message.sender_id,
+              last_message_sender_name: message.sender?.display_name || `${message.sender?.first_name || ''} ${message.sender?.last_name || ''}`.trim(),
+              last_activity: message.created_at,
+              unread_count: currentConv?.id === message.conversation_id ? conv.unread_count : conv.unread_count + 1,
+            }
+          : conv
+      ));
+
+      // If this message is for the currently selected conversation, add it
+      if (currentConv && message.conversation_id === currentConv.id) {
+        // Don't add duplicates (e.g. if we sent it ourselves via REST)
+        setMessages(prev => {
+          if (prev.some(m => m.id === message.id)) return prev;
+          return [...prev, message];
+        });
+
+        // Clear typing indicator for this sender
+        setTypingUsers(prev => {
+          const next = new Map(prev);
+          next.delete(message.sender_id);
+          return next;
+        });
+      }
+    });
+
+    return cleanup;
+  }, [onNewMessage]);
+
+  // Listen for typing indicators
+  useEffect(() => {
+    const cleanup = onUserTyping((data: any) => {
+      const currentConv = selectedConversationRef.current;
+      if (!currentConv || data.conversationId !== currentConv.id) return;
+      if (data.userId === user?.id) return;
+
+      setTypingUsers(prev => {
+        const next = new Map(prev);
+        if (data.isTyping) {
+          next.set(data.userId, data.displayName || 'Someone');
+          // Auto-clear after 5s in case stop event is missed
+          setTimeout(() => {
+            setTypingUsers(p => {
+              const n = new Map(p);
+              n.delete(data.userId);
+              return n;
+            });
+          }, 5000);
+        } else {
+          next.delete(data.userId);
+        }
+        return next;
+      });
+    });
+
+    return cleanup;
+  }, [onUserTyping, user?.id]);
+
+  // Listen for friend presence updates
+  useEffect(() => {
+    const cleanup = onFriendPresenceUpdate((data: any) => {
+      setConversations(prev => prev.map(conv => {
+        if (conv.other_participant?.id === data.userId) {
+          return {
+            ...conv,
+            other_participant: {
+              ...conv.other_participant,
+              is_online: data.isOnline,
+              last_seen: data.lastSeen || conv.other_participant.last_seen,
+            },
+          };
+        }
+        return conv;
+      }));
+
+      // Also update selected conversation
+      setSelectedConversation(prev => {
+        if (prev?.other_participant?.id === data.userId) {
+          return {
+            ...prev,
+            other_participant: {
+              ...prev.other_participant,
+              is_online: data.isOnline,
+              last_seen: data.lastSeen || prev.other_participant.last_seen,
+            },
+          };
+        }
+        return prev;
+      });
+    });
+
+    return cleanup;
+  }, [onFriendPresenceUpdate]);
+
+  // Handle typing emission
+  const handleTypingStart = useCallback(() => {
+    if (!selectedConversation || !isConnected) return;
+
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
+      startTyping(selectedConversation.id);
+    }
+
+    // Reset the stop-typing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    typingTimeoutRef.current = setTimeout(() => {
+      if (selectedConversation) {
+        stopTyping(selectedConversation.id);
+      }
+      isTypingRef.current = false;
+    }, 2000);
+  }, [selectedConversation, isConnected, startTyping, stopTyping]);
 
   const fetchConversations = async () => {
     try {
@@ -224,9 +383,19 @@ const SocialChat: React.FC = () => {
   const sendMessage = async () => {
     if (!selectedConversation || !messageText.trim()) return;
 
+    // Stop typing indicator when sending
+    if (isTypingRef.current) {
+      stopTyping(selectedConversation.id);
+      isTypingRef.current = false;
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+    }
+
     try {
       setSendingMessage(true);
-      
+
       const response = await socialAPI.chat.sendMessage(selectedConversation.id, {
         content: messageText.trim(),
         message_type: 'text'
@@ -671,6 +840,15 @@ const SocialChat: React.FC = () => {
                 </Stack>
               </Box>
 
+              {/* Typing Indicator */}
+              {typingUsers.size > 0 && (
+                <Box sx={{ px: 2, py: 0.5 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                    {Array.from(typingUsers.values()).join(', ')} {typingUsers.size === 1 ? 'is' : 'are'} typing...
+                  </Typography>
+                </Box>
+              )}
+
               {/* Message Input */}
               <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
                 <Stack direction="row" spacing={1} alignItems="flex-end">
@@ -680,7 +858,12 @@ const SocialChat: React.FC = () => {
                     maxRows={4}
                     placeholder="Type a message..."
                     value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
+                    onChange={(e) => {
+                      setMessageText(e.target.value);
+                      if (e.target.value.trim()) {
+                        handleTypingStart();
+                      }
+                    }}
                     onKeyPress={handleKeyPress}
                     disabled={sendingMessage}
                     ref={messageInputRef}

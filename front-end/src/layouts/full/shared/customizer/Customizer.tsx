@@ -26,7 +26,20 @@ import SwipeRightAltTwoToneIcon from '@mui/icons-material/SwipeRightAltTwoTone';
 import ViewSidebarTwoToneIcon from '@mui/icons-material/ViewSidebarTwoTone';
 import WbSunnyTwoToneIcon from '@mui/icons-material/WbSunnyTwoTone';
 import WebAssetTwoToneIcon from '@mui/icons-material/WebAssetTwoTone';
-import { IconCheck, IconSettings, IconX } from '@tabler/icons-react';
+import { IconCheck, IconX } from '@tabler/icons-react';
+import SvgIcon from '@mui/material/SvgIcon';
+
+const ThreeBarCross: FC<{ stroke?: number }> = () => (
+  <SvgIcon viewBox="0 0 24 24" sx={{ fontSize: 24 }}>
+    <path
+      d="M12 1v22M8 4h8M6 8h12M9 18h6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+    />
+  </SvgIcon>
+);
 
 const SidebarWidth = "320px";
 interface colors {
@@ -123,7 +136,7 @@ const Customizer: FC = () => {
           sx={{ position: "fixed", right: "25px", bottom: "15px" }}
           onClick={() => setShowDrawer(true)}
         >
-          <IconSettings stroke={1.5} />
+          <ThreeBarCross />
         </Fab>
       </Tooltip>
       <Drawer

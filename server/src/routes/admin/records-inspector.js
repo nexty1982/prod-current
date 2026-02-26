@@ -188,4 +188,113 @@ router.get('/records', requireAuth, requireAdmin, async (req, res) => {
     }
 });
 
+// POST /api/admin/records-inspector/provision-church — create a new test church with record tables
+router.post('/provision-church', requireAuth, requireAdmin, async (req, res) => {
+    const mysql = require('mysql2/promise');
+    const { name, email } = req.body;
+    if (!name) return res.status(400).json(apiResponse(false, null, 'name is required'));
+
+    // Generate safe database name
+    const dbSuffix = name.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').substring(0, 40);
+
+    let connection;
+    try {
+        // Find next church ID from the churches table
+        const [maxRow] = await promisePool.query('SELECT MAX(id) AS maxId FROM churches');
+        const nextId = (maxRow[0].maxId || 50) + 1;
+        const dbName = `om_church_${nextId}`;
+        const churchIdStr = `PROV_${nextId}`;
+
+        // Create database using a direct connection (needs multipleStatements for schema creation)
+        connection = await mysql.createConnection({
+            host: process.env.DB_HOST || 'localhost',
+            user: process.env.DB_USER || 'root',
+            password: process.env.DB_PASSWORD || '',
+            multipleStatements: true,
+        });
+
+        await connection.execute(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+        await connection.execute(`USE \`${dbName}\``);
+
+        // Create the 3 core record tables
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS baptism_records (
+                id INT NOT NULL AUTO_INCREMENT,
+                source_scan_id VARCHAR(255) DEFAULT NULL,
+                first_name VARCHAR(100) DEFAULT NULL,
+                last_name VARCHAR(100) DEFAULT NULL,
+                birth_date DATE DEFAULT NULL,
+                reception_date DATE DEFAULT NULL,
+                birthplace VARCHAR(150) DEFAULT NULL,
+                entry_type VARCHAR(50) NOT NULL DEFAULT 'Baptism',
+                sponsors TEXT DEFAULT NULL,
+                parents TEXT DEFAULT NULL,
+                clergy VARCHAR(150) DEFAULT NULL,
+                church_id INT NOT NULL DEFAULT ${nextId},
+                ocr_confidence DECIMAL(5,2) DEFAULT 0.00,
+                verified_by INT DEFAULT NULL,
+                verified_at DATETIME DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                KEY idx_church_id (church_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+            CREATE TABLE IF NOT EXISTS marriage_records (
+                id INT NOT NULL AUTO_INCREMENT,
+                mdate DATE DEFAULT NULL,
+                fname_groom VARCHAR(100) DEFAULT NULL,
+                lname_groom VARCHAR(100) DEFAULT NULL,
+                parentsg VARCHAR(200) DEFAULT NULL,
+                fname_bride VARCHAR(100) DEFAULT NULL,
+                lname_bride VARCHAR(100) DEFAULT NULL,
+                parentsb VARCHAR(200) DEFAULT NULL,
+                witness TEXT DEFAULT NULL,
+                mlicense TEXT DEFAULT NULL,
+                clergy VARCHAR(150) DEFAULT NULL,
+                church_id INT NOT NULL DEFAULT ${nextId},
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                KEY idx_church_id (church_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+            CREATE TABLE IF NOT EXISTS funeral_records (
+                id INT NOT NULL AUTO_INCREMENT,
+                deceased_date DATE DEFAULT NULL,
+                burial_date DATE DEFAULT NULL,
+                name VARCHAR(100) DEFAULT NULL,
+                lastname VARCHAR(100) DEFAULT NULL,
+                age INT DEFAULT NULL,
+                clergy VARCHAR(150) DEFAULT NULL,
+                burial_location TEXT DEFAULT NULL,
+                church_id INT NOT NULL DEFAULT ${nextId},
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                KEY idx_church_id (church_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+        `);
+
+        // Register in global churches table
+        await promisePool.query(
+            `INSERT INTO churches (name, church_name, email, database_name, is_active) VALUES (?, ?, ?, ?, 1)`,
+            [name, name, email || `admin@${dbSuffix}.test`, dbName]
+        );
+
+        // Get the auto-incremented id
+        const [inserted] = await promisePool.query('SELECT id, database_name FROM churches WHERE database_name = ?', [dbName]);
+
+        console.log(`✅ Provisioned test church: ${name} → ${dbName} (id=${inserted[0]?.id})`);
+        res.json(apiResponse(true, {
+            church_id: inserted[0]?.id,
+            name,
+            database_name: dbName,
+            tables: ['baptism_records', 'marriage_records', 'funeral_records'],
+        }));
+    } catch (error) {
+        console.error('❌ Error provisioning church:', error);
+        res.status(500).json(apiResponse(false, null, error.message));
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
 module.exports = router;

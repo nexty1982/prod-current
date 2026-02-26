@@ -62,8 +62,7 @@ const C2a = () => {
             lineHeight: 1.7,
           }}
         >
-          Join hundreds of Orthodox parishes who trust Orthodox Metrics to preserve
-          their sacred history for future generations.
+          Become an early adopter and assist in building an Orthodox Church Metrics platform!
         </Typography>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" mb={3}>
@@ -112,12 +111,6 @@ const C2a = () => {
           </Button>
         </Stack>
 
-        <Typography
-          variant="caption"
-          sx={{ color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(26,10,46,0.4)', fontSize: '0.8rem' }}
-        >
-          Setup in minutes
-        </Typography>
       </Container>
     </Box>
   );

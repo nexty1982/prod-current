@@ -263,6 +263,79 @@ router.post('/conversations', requireAuth, async (req, res) => {
     }
 });
 
+// GET /api/social/chat/conversations/:id - Get a single conversation
+router.get('/conversations/:id', requireAuth, async (req, res) => {
+    try {
+        const userId = getUserId(req);
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'User ID not found' });
+        }
+        const { id: conversationId } = req.params;
+
+        const [conversations] = await promisePool.query(`
+            SELECT
+                c.id,
+                c.type,
+                c.name,
+                c.avatar_url,
+                c.last_activity,
+                cm.content as last_message_content,
+                cm.created_at as last_message_time,
+                cm.sender_id as last_message_sender_id,
+                sender.first_name as last_message_sender_name,
+                p.last_read_at,
+                (
+                    SELECT COUNT(*)
+                    FROM chat_messages
+                    WHERE conversation_id = c.id
+                    AND created_at > COALESCE(p.last_read_at, '1970-01-01')
+                    AND sender_id != ?
+                ) as unread_count,
+                CASE
+                    WHEN c.type = 'direct' THEN (
+                        SELECT JSON_OBJECT(
+                            'id', other_user.id,
+                            'first_name', other_user.first_name,
+                            'last_name', other_user.last_name,
+                            'display_name', other_profile.display_name,
+                            'profile_image_url', other_profile.profile_image_url,
+                            'is_online', other_profile.is_online,
+                            'last_seen', other_profile.last_seen
+                        )
+                        FROM chat_participants other_p
+                        JOIN orthodoxmetrics_db.users other_user ON other_user.id = other_p.user_id
+                        LEFT JOIN user_profiles other_profile ON other_profile.user_id = other_user.id
+                        WHERE other_p.conversation_id = c.id
+                        AND other_p.user_id != ?
+                        LIMIT 1
+                    )
+                    ELSE NULL
+                END as other_participant
+            FROM chat_conversations c
+            JOIN chat_participants p ON c.id = p.conversation_id
+            LEFT JOIN chat_messages cm ON c.last_message_id = cm.id
+            LEFT JOIN orthodoxmetrics_db.users sender ON cm.sender_id = sender.id
+            WHERE c.id = ? AND p.user_id = ? AND c.is_active = 1
+        `, [userId, userId, conversationId, userId]);
+
+        if (conversations.length === 0) {
+            return res.status(404).json({ success: false, message: 'Conversation not found' });
+        }
+
+        const conv = conversations[0];
+        const conversation = {
+            ...conv,
+            other_participant: conv.other_participant ? JSON.parse(conv.other_participant) : null,
+        };
+
+        res.json({ success: true, conversation });
+
+    } catch (error) {
+        console.error('Error fetching conversation:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch conversation', error: error.message });
+    }
+});
+
 // =============================================================================
 // CHAT MESSAGES
 // =============================================================================
@@ -425,14 +498,18 @@ router.post('/conversations/:id/messages', requireAuth, async (req, res) => {
             WHERE conversation_id = ? AND user_id != ?
         `, [conversationId, userId]);
 
+        // Get sender info for the response
+        const [senderRows] = await promisePool.query(`
+            SELECT u.id, u.first_name, u.last_name, up.display_name, up.profile_image_url
+            FROM orthodoxmetrics_db.users u
+            LEFT JOIN user_profiles up ON up.user_id = u.id
+            WHERE u.id = ?
+        `, [userId]);
+
+        const senderInfo = senderRows[0];
+        const senderName = senderInfo.display_name || `${senderInfo.first_name} ${senderInfo.last_name}`.trim();
+
         // Create notifications for other participants
-        const [sender] = await promisePool.query(
-            'SELECT first_name, last_name FROM orthodoxmetrics_db.users WHERE id = ?',
-            [userId]
-        );
-
-        const senderName = `${sender[0].first_name} ${sender[0].last_name}`.trim();
-
         for (const participant of otherParticipants) {
             await promisePool.query(`
                 INSERT INTO notifications (user_id, type, title, message, sender_id, data)
@@ -448,10 +525,33 @@ router.post('/conversations/:id/messages', requireAuth, async (req, res) => {
             ]);
         }
 
+        // Update conversation last_message_id and last_activity
+        await promisePool.query(`
+            UPDATE chat_conversations SET last_message_id = ?, last_activity = NOW() WHERE id = ?
+        `, [messageId, conversationId]);
+
+        // Return full message object
         res.status(201).json({
             success: true,
-            message: 'Message sent successfully',
-            message_id: messageId
+            message: {
+                id: messageId,
+                conversation_id: parseInt(conversationId),
+                sender_id: userId,
+                content,
+                message_type,
+                reply_to_id: reply_to_id || null,
+                is_edited: false,
+                is_deleted: false,
+                reactions: {},
+                created_at: new Date().toISOString(),
+                sender: {
+                    id: senderInfo.id,
+                    first_name: senderInfo.first_name,
+                    last_name: senderInfo.last_name,
+                    display_name: senderInfo.display_name,
+                    profile_image_url: senderInfo.profile_image_url
+                }
+            }
         });
 
     } catch (error) {

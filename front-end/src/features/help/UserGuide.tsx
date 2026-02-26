@@ -621,6 +621,7 @@ const UserGuide: React.FC = () => {
             Contact your church administrator for account-related questions, or reach out to the Orthodox Metrics support team for technical assistance.
           </Typography>
         </Paper>
+
       </Box>
     </PageContainer>
   );

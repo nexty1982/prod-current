@@ -27,6 +27,7 @@ import {
     IconTool,
     IconUser,
     IconUserPlus,
+    IconUpload,
     IconUsers,
     IconWriting,
 } from '@tabler/icons-react';
@@ -126,6 +127,12 @@ const Menuitems: MenuitemsType[] = [
   {
     navlabel: true,
     subheader: '📋 Records & OCR',
+  },
+  {
+    id: uniqueId(),
+    title: 'Upload Records',
+    icon: IconUpload,
+    href: '/apps/upload-records',
   },
   {
     id: uniqueId(),
@@ -657,9 +664,9 @@ export const getMenuItems = (user: any) => {
           },
           {
             id: uniqueId(),
-            title: 'OCR Uploads',
-            icon: IconFileDescription,
-            href: `/devel/ocr-studio/upload`,
+            title: 'Upload Records',
+            icon: IconUpload,
+            href: '/apps/upload-records',
           },
         ],
       },

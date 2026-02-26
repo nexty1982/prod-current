@@ -62,17 +62,18 @@ router.get('/:churchId', requireAuth, requireAdmin, async (req, res) => {
 
         // Get users assigned to this church via junction table
         const [users] = await promisePool.query(`
-            SELECT 
-                u.id, 
-                u.email, 
-                u.first_name, 
-                u.last_name, 
-                u.role as system_role, 
-                u.is_active, 
-                u.last_login, 
-                u.created_at, 
+            SELECT
+                u.id,
+                u.email,
+                u.first_name,
+                u.last_name,
+                u.role as system_role,
+                u.is_active,
+                u.last_login,
+                u.created_at,
                 u.updated_at,
-                cu.role as church_role
+                cu.role as church_role,
+                cu.email_intake_authorized
             FROM church_users cu
             JOIN orthodoxmetrics_db.users u ON cu.user_id = u.id
             WHERE cu.church_id = ?
@@ -161,8 +162,8 @@ router.put('/:churchId/:userId', requireAuth, requireAdmin, async (req, res) => 
     try {
         const churchId = parseInt(req.params.churchId);
         const userId = parseInt(req.params.userId);
-        const { email, first_name, last_name, role, is_active, phone, landing_page, password } = req.body;
-        
+        const { email, first_name, last_name, role, is_active, phone, landing_page, password, email_intake_authorized } = req.body;
+
         console.log('👤 Updating user ID:', userId, 'in church ID:', churchId);
 
         // Validate church exists
@@ -237,6 +238,14 @@ router.put('/:churchId/:userId', requireAuth, requireAdmin, async (req, res) => 
             await promisePool.query(
                 'UPDATE church_users SET role = ? WHERE church_id = ? AND user_id = ?',
                 [role, churchId, userId]
+            );
+        }
+
+        // Update email intake authorization (stored in church_users, not users)
+        if (typeof email_intake_authorized === 'boolean') {
+            await promisePool.query(
+                'UPDATE church_users SET email_intake_authorized = ? WHERE church_id = ? AND user_id = ?',
+                [email_intake_authorized ? 1 : 0, churchId, userId]
             );
         }
 
@@ -354,4 +363,57 @@ router.post('/:churchId/:userId/unlock', requireAuth, requireAdmin, async (req, 
     }
 });
 
-module.exports = router; 
+// GET /api/admin/church-users/:churchId/email-intake-authorized - List authorized email senders
+router.get('/:churchId/email-intake-authorized', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const churchId = parseInt(req.params.churchId);
+        await validateChurchAccess(churchId);
+
+        const [users] = await promisePool.query(`
+            SELECT u.id, u.email, u.first_name, u.last_name, cu.role as church_role,
+                   cu.email_intake_authorized
+            FROM church_users cu
+            JOIN orthodoxmetrics_db.users u ON cu.user_id = u.id
+            WHERE cu.church_id = ? AND cu.email_intake_authorized = 1 AND u.is_active = 1
+            ORDER BY u.last_name, u.first_name
+        `, [churchId]);
+
+        res.json(apiResponse(true, { authorized_senders: users, total: users.length }));
+    } catch (error) {
+        console.error('❌ Error getting authorized senders:', error);
+        res.status(error.message.includes('not found') ? 404 : 500).json(
+            apiResponse(false, null, error.message)
+        );
+    }
+});
+
+// PUT /api/admin/church-users/:churchId/:userId/email-intake - Toggle email intake authorization
+router.put('/:churchId/:userId/email-intake', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const churchId = parseInt(req.params.churchId);
+        const userId = parseInt(req.params.userId);
+        const { authorized } = req.body;
+
+        if (typeof authorized !== 'boolean') {
+            return res.status(400).json(apiResponse(false, null, 'authorized must be a boolean'));
+        }
+
+        await validateChurchAccess(churchId);
+        await validateUserChurchAssignment(userId, churchId);
+
+        await promisePool.query(
+            'UPDATE church_users SET email_intake_authorized = ? WHERE church_id = ? AND user_id = ?',
+            [authorized ? 1 : 0, churchId, userId]
+        );
+
+        console.log(`📧 Email intake ${authorized ? 'enabled' : 'disabled'} for user ${userId} in church ${churchId}`);
+        res.json(apiResponse(true, { message: `Email intake ${authorized ? 'enabled' : 'disabled'} for user` }));
+    } catch (error) {
+        console.error('❌ Error toggling email intake:', error);
+        res.status(error.message.includes('not found') ? 404 : 500).json(
+            apiResponse(false, null, error.message)
+        );
+    }
+});
+
+module.exports = router;

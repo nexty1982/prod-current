@@ -68,32 +68,8 @@ const Reviews = [
   {
     id: 1,
     img: user1,
-    name: 'Jenny Wilson',
-    text: 'This template is great, UI-rich and up-to-date. Although it is pretty much complete, I suggest to improve a bit of documentation. Thanks & Highly recommended!',
-  },
-  {
-    id: 2,
-    img: user2,
-    name: 'Jenny Wilson',
-    text: 'This template is great, UI-rich and up-to-date. Although it is pretty much complete, I suggest to improve a bit of documentation. Thanks & Highly recommended!',
-  },
-  {
-    id: 3,
-    img: user3,
-    name: 'Jenny Wilson',
-    text: 'This template is great, UI-rich and up-to-date. Although it is pretty much complete, I suggest to improve a bit of documentation. Thanks & Highly recommended!',
-  },
-  {
-    id: 4,
-    img: user4,
-    name: 'Jenny Wilson',
-    text: 'This template is great, UI-rich and up-to-date. Although it is pretty much complete, I suggest to improve a bit of documentation. Thanks & Highly recommended!',
-  },
-  {
-    id: 5,
-    img: user5,
-    name: 'Jenny Wilson',
-    text: 'This template is great, UI-rich and up-to-date. Although it is pretty much complete, I suggest to improve a bit of documentation. Thanks & Highly recommended!',
+    name: '',
+    text: 'Waiting for official review from client',
   },
 ];
 
