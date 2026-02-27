@@ -1204,6 +1204,44 @@ function createRouters(upload: any) {
   });
 
   // -----------------------------------------------------------------------
+  // GET /jobs/:jobId/review/corrections — Retrieve field correction log
+  // -----------------------------------------------------------------------
+  churchJobsRouter.get('/jobs/:jobId/review/corrections', async (req: any, res: any) => {
+    try {
+      const jobId = parseInt(req.params.jobId);
+      const limit = Math.min(parseInt(req.query.limit as string) || 100, 1000);
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      console.log(`[OCR Corrections] GET /jobs/${jobId}/review/corrections limit=${limit} offset=${offset}`);
+
+      const { loadCorrections, buildCorrectionsSummary, correctionsLogPath } = require('../../ocr/preprocessing/correctionLog');
+      const logPath = correctionsLogPath(jobId);
+      const allEvents = loadCorrections(logPath);
+      const summary = buildCorrectionsSummary(jobId, allEvents);
+
+      // Paginate (most recent first)
+      const reversed = [...allEvents].reverse();
+      const page = reversed.slice(offset, offset + limit);
+
+      res.json({
+        ok: true,
+        job_id: jobId,
+        summary,
+        events: page,
+        pagination: {
+          total: allEvents.length,
+          offset,
+          limit,
+          has_more: offset + limit < allEvents.length,
+        },
+      });
+    } catch (error: any) {
+      console.error('[OCR Corrections] Error:', error);
+      res.status(500).json({ error: 'Failed to load corrections', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // GET /jobs/:jobId/review/commit-batches — List commit batches for a job
   // (super_admin only)
   // -----------------------------------------------------------------------

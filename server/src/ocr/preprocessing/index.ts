@@ -124,6 +124,20 @@ export type {
   RollbackResult,
 } from './rollback';
 
+export {
+  buildCorrectionEvent,
+  appendCorrection,
+  loadCorrections,
+  buildCorrectionsSummary,
+  correctionsLogPath,
+  correctionLogStats,
+} from './correctionLog';
+export type {
+  CorrectionEvent,
+  CorrectionProvenance,
+  CorrectionsSummary,
+} from './correctionLog';
+
 export type {
   OcrProfile,
   RegionProfileAssignment,
