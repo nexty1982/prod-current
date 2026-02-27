@@ -344,36 +344,36 @@ const ChurchPortalHub: React.FC = () => {
     setRecordsLoading(true);
     try {
       const [baptismRes, marriageRes, funeralRes] = await Promise.allSettled([
-        metricsAPI.records.getBaptismRecords({ limit: 3, sortField: 'id', sortDirection: 'desc' }),
-        metricsAPI.records.getMarriageRecords({ limit: 3, sortField: 'id', sortDirection: 'desc' }),
-        metricsAPI.records.getFuneralRecords({ limit: 3, sortField: 'id', sortDirection: 'desc' }),
+        metricsAPI.records.getBaptismRecords({ limit: 3, sortField: 'reception_date', sortDirection: 'desc' }),
+        metricsAPI.records.getMarriageRecords({ limit: 3, sortField: 'mdate', sortDirection: 'desc' }),
+        metricsAPI.records.getFuneralRecords({ limit: 3, sortField: 'burial_date', sortDirection: 'desc' }),
       ]);
 
       if (baptismRes.status === 'fulfilled') {
         const rows = baptismRes.value?.records ?? baptismRes.value?.data ?? [];
         setRecentBaptism(rows.slice(0, 3).map((r: any) => ({
           id: r.id,
-          label: r.child_name || r.first_name || '—',
-          date: r.baptism_date || r.date_entered || '',
-          sub: r.priest_name ? `Fr. ${r.priest_name}` : undefined,
+          label: r.child_name || r.first_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || '—',
+          date: r.reception_date || r.baptism_date || r.date_entered || '',
+          sub: r.clergy ? `Fr. ${r.clergy}` : r.priest_name ? `Fr. ${r.priest_name}` : undefined,
         })));
       }
       if (marriageRes.status === 'fulfilled') {
         const rows = marriageRes.value?.records ?? marriageRes.value?.data ?? [];
         setRecentMarriage(rows.slice(0, 3).map((r: any) => ({
           id: r.id,
-          label: [r.groom_name, r.bride_name].filter(Boolean).join(' & ') || '—',
-          date: r.marriage_date || r.date_entered || '',
-          sub: r.priest_name ? `Fr. ${r.priest_name}` : undefined,
+          label: [r.fname_groom || r.groom_name, r.fname_bride || r.bride_name].filter(Boolean).join(' & ') || '—',
+          date: r.mdate || r.marriage_date || r.date_entered || '',
+          sub: r.clergy ? `Fr. ${r.clergy}` : r.priest_name ? `Fr. ${r.priest_name}` : undefined,
         })));
       }
       if (funeralRes.status === 'fulfilled') {
         const rows = funeralRes.value?.records ?? funeralRes.value?.data ?? [];
         setRecentFuneral(rows.slice(0, 3).map((r: any) => ({
           id: r.id,
-          label: r.deceased_name || r.first_name || '—',
-          date: r.funeral_date || r.death_date || r.date_entered || '',
-          sub: r.priest_name ? `Fr. ${r.priest_name}` : undefined,
+          label: r.name || r.deceased_name || [r.name, r.lastname].filter(Boolean).join(' ') || '—',
+          date: r.burial_date || r.funeral_date || r.deceased_date || '',
+          sub: r.clergy ? `Fr. ${r.clergy}` : r.priest_name ? `Fr. ${r.priest_name}` : undefined,
         })));
       }
     } catch {
@@ -688,9 +688,23 @@ const ChurchPortalHub: React.FC = () => {
       {/* ── Eastern Orthodox Church Records ── */}
       <Box sx={{ mb: 5 }}>
         <SectionHeading>Eastern Orthodox Church Records</SectionHeading>
+        {churchName && (
+          <Typography
+            variant="h6"
+            sx={{
+              fontFamily: '"Cormorant Garamond", "Palatino Linotype", Georgia, serif',
+              fontWeight: 600,
+              color: 'text.primary',
+              mb: 2.5,
+              fontSize: { xs: '1.1rem', sm: '1.25rem' },
+            }}
+          >
+            {churchName}
+          </Typography>
+        )}
         <Grid container spacing={3}>
           {RECORDS.map((feature) => (
-            <Grid item xs={12} sm={6} md={4} key={feature.to}>
+            <Grid item xs={12} sm={4} key={feature.to}>
               <FeatureCardItem feature={feature} large />
             </Grid>
           ))}
@@ -705,7 +719,7 @@ const ChurchPortalHub: React.FC = () => {
         <Accordion sx={accordionSx} disableGutters>
           <AccordionSummary expandIcon={<IconChevronDown size={20} />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ width: 32, height: 32, borderRadius: '8px', background: 'linear-gradient(135deg, #1565c0 0%, #42a5f5 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Box sx={{ width: 32, height: 32, borderRadius: '8px', background: 'linear-gradient(135deg, #1a1a1a 0%, #444444 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <BaptismIcon sx={{ fontSize: 18, color: '#fff' }} />
               </Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Baptism Record</Typography>
@@ -739,7 +753,7 @@ const ChurchPortalHub: React.FC = () => {
         <Accordion sx={accordionSx} disableGutters>
           <AccordionSummary expandIcon={<IconChevronDown size={20} />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ width: 32, height: 32, borderRadius: '8px', background: 'linear-gradient(135deg, #c62828 0%, #ef9a9a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Box sx={{ width: 32, height: 32, borderRadius: '8px', background: 'linear-gradient(135deg, #333333 0%, #5a5a5a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <MarriageIcon sx={{ fontSize: 18, color: '#fff' }} />
               </Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Marriage Record</Typography>
@@ -756,7 +770,7 @@ const ChurchPortalHub: React.FC = () => {
             <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
               <Button size="small" onClick={() => navigate('/portal/records/marriage/new')} sx={{ textTransform: 'none' }}>Full Form</Button>
               <Button
-                variant="contained" size="small" color="error"
+                variant="contained" size="small"
                 disabled={!marriageForm.groom_name || !marriageForm.bride_name || !marriageForm.marriage_date || submitting === 'marriage'}
                 onClick={handleMarriageSubmit}
                 startIcon={submitting === 'marriage' ? <CircularProgress size={14} color="inherit" /> : <IconPlus size={16} />}
@@ -772,7 +786,7 @@ const ChurchPortalHub: React.FC = () => {
         <Accordion sx={accordionSx} disableGutters>
           <AccordionSummary expandIcon={<IconChevronDown size={20} />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ width: 32, height: 32, borderRadius: '8px', background: 'linear-gradient(135deg, #4a148c 0%, #9c27b0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Box sx={{ width: 32, height: 32, borderRadius: '8px', background: 'linear-gradient(135deg, #4a4a4a 0%, #6e6e6e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <FuneralIcon sx={{ fontSize: 18, color: '#fff' }} />
               </Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Funeral Record</Typography>
@@ -789,7 +803,7 @@ const ChurchPortalHub: React.FC = () => {
             <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
               <Button size="small" onClick={() => navigate('/portal/records/funeral/new')} sx={{ textTransform: 'none' }}>Full Form</Button>
               <Button
-                variant="contained" size="small" color="secondary"
+                variant="contained" size="small"
                 disabled={!funeralForm.deceased_name || !funeralForm.death_date || submitting === 'funeral'}
                 onClick={handleFuneralSubmit}
                 startIcon={submitting === 'funeral' ? <CircularProgress size={14} color="inherit" /> : <IconPlus size={16} />}
@@ -833,24 +847,15 @@ const ChurchPortalHub: React.FC = () => {
         </Grid>
       </Box>
 
-      {/* ── Tools & Services ── */}
-      {visibleTools.length > 0 && (
-        <Box sx={{ mb: 5 }}>
-          <SectionHeading>Tools & Services</SectionHeading>
-          <Grid container spacing={3}>
-            {visibleTools.map((feature) => (
-              <Grid item xs={12} sm={6} md={4} key={feature.to}>
-                <FeatureCardItem feature={feature} />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )}
-
-      {/* ── Account ── */}
+      {/* ── Tools, Services & Account ── */}
       <Box sx={{ mb: 3 }}>
-        <SectionHeading>Account</SectionHeading>
+        <SectionHeading>Tools, Services & Account</SectionHeading>
         <Grid container spacing={3}>
+          {visibleTools.map((feature) => (
+            <Grid item xs={12} sm={6} md={4} key={feature.to}>
+              <FeatureCardItem feature={feature} />
+            </Grid>
+          ))}
           {ACCOUNT.map((feature) => (
             <Grid item xs={12} sm={6} md={4} key={feature.to}>
               <FeatureCardItem feature={feature} />
