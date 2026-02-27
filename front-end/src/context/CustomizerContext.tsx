@@ -88,9 +88,9 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
         // Otherwise, default to dark mode and use time-based logic
         return isDarkModeTime() ? 'dark' : 'light';
     });
-    const [activeTheme, setActiveThemeState] = useState<string>(() => 
-        getStoredValue('activeTheme', config.activeTheme)
-    );
+    // Always use config.activeTheme — the site-wide theme is controlled centrally
+    // (e.g., LENT_THEME during Great Lent) and should not be overridden by localStorage
+    const [activeTheme, setActiveThemeState] = useState<string>(config.activeTheme);
     const [activeLayout, setActiveLayoutState] = useState<string>(() => 
         getStoredValue('activeLayout', config.activeLayout)
     );
