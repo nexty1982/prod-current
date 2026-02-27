@@ -952,14 +952,10 @@ const conversationLogRouter = require('./routes/conversation-log');
 app.use('/api/conversation-log', requireAuthForRoutes, requireAdminForRoutes, conversationLogRouter);
 console.log('✅ [Server] Mounted /api/conversation-log routes');
 
-// OCR Feeder Worker — polls platform DB for pending jobs
-try {
-  const { workerLoop } = require('./workers/ocrFeederWorker');
-  workerLoop().catch((err: any) => console.error('[OCR Worker] Fatal error:', err));
-  console.log('✅ [OCR] Feeder worker started');
-} catch (e: any) {
-  console.warn('⚠️  [OCR] Failed to start feeder worker:', e.message);
-}
+// OCR Feeder Worker — now runs as a dedicated systemd service (om-ocr-worker)
+// Removed from in-process boot in Phase 7.1. To start the worker:
+//   sudo systemctl start om-ocr-worker
+console.log('ℹ️  [OCR] Feeder worker runs as separate service (om-ocr-worker)');
 
 // OCR Routes — modular routers (admin + church-scoped)
 try {

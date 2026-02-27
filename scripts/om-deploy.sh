@@ -605,6 +605,16 @@ if $BUILD_BE; then
     sudo journalctl -u "$SERVICE_NAME" -n 200 --no-pager || true
     exit 1
   fi
+
+  # Restart OCR worker service if installed
+  if systemctl is-enabled om-ocr-worker &>/dev/null; then
+    log_step "Restarting OCR worker service: om-ocr-worker..."
+    if sudo systemctl restart om-ocr-worker 2>&1; then
+      log_success "OCR worker restarted successfully"
+    else
+      log_error "Failed to restart om-ocr-worker (non-fatal)"
+    fi
+  fi
   stage_done
 else
   log_info "Frontend-only deployment — skipping backend service restart"

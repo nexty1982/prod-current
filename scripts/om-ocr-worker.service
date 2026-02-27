@@ -1,0 +1,23 @@
+[Unit]
+Description=OrthodoxMetrics OCR Feeder Worker
+After=network.target mariadb.service orthodox-backend.service
+Wants=orthodox-backend.service
+
+[Service]
+Type=simple
+User=next
+Group=next
+WorkingDirectory=/var/www/orthodoxmetrics/prod/server
+Environment="NODE_ENV=production"
+EnvironmentFile=/var/www/orthodoxmetrics/prod/server/.env
+ExecStart=/usr/bin/node /var/www/orthodoxmetrics/prod/server/dist/workers/ocrFeederWorkerMain.js
+Restart=always
+RestartSec=2
+KillSignal=SIGTERM
+TimeoutStopSec=35
+SyslogIdentifier=om-ocr-worker
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

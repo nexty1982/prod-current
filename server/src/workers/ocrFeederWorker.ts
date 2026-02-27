@@ -59,6 +59,20 @@ const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const mkdirp = (dir: string) => fs.mkdirSync(dir, { recursive: true });
 
+// ── Graceful shutdown support ───────────────────────────────────────────────
+let _shutdownRequested = false;
+
+/** Request the worker loop to stop after the current job completes. */
+function requestShutdown(): void {
+  _shutdownRequested = true;
+  console.log('OCR_WORKER_SHUTDOWN_REQUESTED');
+}
+
+/** Check if shutdown has been requested (used in workerLoop). */
+function isShutdownRequested(): boolean {
+  return _shutdownRequested;
+}
+
 // ── Resolve upload dir (canonical path outside server/) ─────────────────────
 const UPLOADS_ROOT = '/var/www/orthodoxmetrics/prod/uploads';
 function resolveUploadDir(churchId: number): string {
@@ -2526,7 +2540,7 @@ async function workerLoop(): Promise<void> {
 
   let heartbeatCounter = 0;
 
-  while (true) {
+  while (!isShutdownRequested()) {
     try {
       // Poll pending jobs from PLATFORM DB — only valid columns
       const [rows] = await platformPool.query(
@@ -2589,6 +2603,8 @@ async function workerLoop(): Promise<void> {
       await new Promise(r => setTimeout(r, POLL_IDLE_MS));
     }
   }
+
+  console.log('OCR_WORKER_SHUTDOWN_COMPLETE');
 }
 
 // Start worker if run directly
@@ -2599,5 +2615,5 @@ if (require.main === module) {
   });
 }
 
-export { processJob, processPage, workerLoop };
+export { processJob, processPage, workerLoop, requestShutdown };
 
