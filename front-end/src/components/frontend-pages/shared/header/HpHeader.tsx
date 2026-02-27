@@ -71,7 +71,7 @@ const HpHeader = () => {
           </Stack>
 
           {mdDown ? (
-            <IconButton color="inherit" aria-label="menu" onClick={handleDrawerOpen}>
+            <IconButton aria-label="menu" onClick={handleDrawerOpen} sx={{ color: 'text.primary' }}>
               <IconMenu2 size="20" />
             </IconButton>
           ) : null}

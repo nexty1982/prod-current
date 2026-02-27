@@ -138,12 +138,12 @@ export const ORTHODOX_PRESETS: OrthodoxPreset[] = [
  * sync with the site-wide Settings → Theme Colors selection.
  */
 export const THEME_TO_ACCENT_MAP: Record<string, string> = {
-  PURPLE_THEME: '#bd56fa',
-  AQUA_THEME:   '#E6E8EB',
+  WHITE_THEME:  '#E6E8EB',
   GREEN_THEME:  '#2E7D32',
-  ORANGE_THEME: '#6E0E1A',
+  PURPLE_THEME: '#bd56fa',
+  RED_THEME:    '#B22234',
   BLUE_THEME:   '#6EC6FF',
-  CYAN_THEME:   '#E0B84A',
+  GOLD_THEME:   '#E0B84A',
   LENT_THEME:   '#1a1a1a',
 };
 
@@ -352,33 +352,32 @@ export const useTableStyleStore = (): TableStyleState => {
  */
 export const useDarkAwareTableStyles = (isDarkMode: boolean) => {
   const { getTableHeaderStyle, getTableRowStyle, getTableCellStyle } = useTableStyleStore();
-  const dk = isDarkMode ? orthodoxThemeDark : null;
+  const modeDefaults = isDarkMode ? orthodoxThemeDark : orthodoxTheme;
 
   const darkHeaderStyle = useCallback(() => {
     const base = getTableHeaderStyle();
-    if (!dk) return base;
-    return { ...base, backgroundColor: dk.headerColor, color: dk.headerTextColor, borderColor: dk.borderColor };
-  }, [getTableHeaderStyle, dk]);
+    // Header color comes from the store (synced with site theme via THEME_TO_ACCENT_MAP)
+    // but text/border colors should match the current mode
+    return { ...base, color: modeDefaults.headerTextColor, borderColor: modeDefaults.borderColor };
+  }, [getTableHeaderStyle, modeDefaults]);
 
   const darkRowStyle = useCallback((type: 'even' | 'odd') => {
     const base = getTableRowStyle(type);
-    if (!dk) return base;
     return {
       ...base,
-      backgroundColor: type === 'even' ? dk.rowColor : dk.rowAlternateColor,
-      borderColor: dk.borderColor,
-      '&:hover': { backgroundColor: dk.hoverColor },
+      backgroundColor: type === 'even' ? modeDefaults.rowColor : modeDefaults.rowAlternateColor,
+      borderColor: modeDefaults.borderColor,
+      '&:hover': { backgroundColor: modeDefaults.hoverColor },
     };
-  }, [getTableRowStyle, dk]);
+  }, [getTableRowStyle, modeDefaults]);
 
   const darkCellStyle = useCallback((type: 'header' | 'body') => {
     const base = getTableCellStyle(type);
-    if (!dk) return base;
     if (type === 'header') {
-      return { ...base, backgroundColor: dk.headerColor, color: dk.headerTextColor, borderColor: dk.borderColor };
+      return { ...base, color: modeDefaults.headerTextColor, borderColor: modeDefaults.borderColor };
     }
-    return { ...base, backgroundColor: dk.cellColor, color: dk.cellTextColor, borderColor: dk.borderColor };
-  }, [getTableCellStyle, dk]);
+    return { ...base, backgroundColor: modeDefaults.cellColor, color: modeDefaults.cellTextColor, borderColor: modeDefaults.borderColor };
+  }, [getTableCellStyle, modeDefaults]);
 
   return { darkHeaderStyle, darkRowStyle, darkCellStyle };
 };
