@@ -1,8 +1,5 @@
 import { registerAgGridModulesOnce } from '@/agGridModules';
 import AdvancedGridDialog from '@/components/AdvancedGridDialog';
-import ColorPaletteSelector from '@/components/ColorPaletteSelector';
-import TableControlPanel from '@/components/TableControlPanel';
-import { CustomizerContext } from '@/context/CustomizerContext';
 import { recordsEvents, useRecordsEvents } from '@/events/recordsEvents';
 import ModernRecordViewerModal from '@/features/records-centralized/common/ModernRecordViewerModal';
 import { getAgGridRowClassRules, getRecordRowStyle, isRecordNewWithin24Hours, isRecordUpdatedWithin24Hours, useNowReference } from '@/features/records-centralized/common/recordsHighlighting';
@@ -13,8 +10,7 @@ import { FIELD_DEFINITIONS, RECORD_TYPES } from '@/features/records-centralized/
 import { getPersistedChurchId, getPersistedLastView, useRecordsPersistence } from '@/hooks/useRecordsPersistence';
 import churchService, { Church } from '@/shared/lib/churchService';
 import LookupService from '@/shared/lib/lookupService';
-import { ChevronUp, Download, Eye, FileBarChart, FileText, LayoutGrid, Lock, Palette, Pencil, Plus, Search, Trash2, Unlock, Upload, Users, X } from '@/shared/ui/icons';
-import { THEME_TO_ACCENT_MAP, useDarkAwareTableStyles, useTableStyleStore } from '@/store/useTableStyleStore';
+import { ChevronUp, Download, Eye, FileBarChart, FileText, LayoutGrid, Lock, Pencil, Plus, Search, Trash2, Unlock, Upload, Users, X } from '@/shared/ui/icons';
 import { ChurchRecord } from '@/types/church-records-advanced.types';
 import { agGridIconMap } from '@/ui/agGridIcons';
 import { formatRecordDate } from '@/utils/formatDate';
@@ -621,8 +617,6 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
   }, [selectedRecordType, selectedChurch]);
 
   // Theme Editor States
-  const [themeDrawerOpen, setThemeDrawerOpen] = useState(false);
-  const [selectedElement, setSelectedElement] = useState<'header' | 'row' | 'cell' | null>(null);
   
   // Table View Mode State
   const [useAgGrid, setUseAgGrid] = useState(false);
@@ -844,33 +838,6 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     customPriest: false,
   });
 
-  // Theme store integration
-  const { 
-    currentTheme, 
-    isLiturgicalMode,
-    tableTheme,
-    setHeaderColor,
-    getTableHeaderStyle,
-    getTableRowStyle,
-    getTableCellStyle 
-  } = useTableStyleStore();
-
-  // Site-wide theme sync — keep records accent in sync with Customizer theme
-  const { activeTheme: customizerTheme } = useContext(CustomizerContext);
-  useEffect(() => {
-    const mapped = THEME_TO_ACCENT_MAP[customizerTheme];
-    if (mapped && mapped !== tableTheme.headerColor) {
-      setHeaderColor(mapped);
-    }
-  }, [customizerTheme]);
-
-  // Dark-mode-aware style getters — overlay dark palette when isDarkMode
-  const { darkHeaderStyle, darkRowStyle, darkCellStyle } = useDarkAwareTableStyles(isDarkMode);
-
-  // Shared accent color — single source of truth for all modal headers, matching the table header
-  const recordsAccentColor = isDarkMode
-    ? (darkHeaderStyle() as Record<string, string>).backgroundColor || tableTheme.headerColor
-    : tableTheme.headerColor;
 
   // Convert records to ChurchRecord format for AG Grid
   const convertToChurchRecords = useCallback((inputRecords: BaptismRecord[]): ChurchRecord[] => {
@@ -1637,27 +1604,6 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   </Box>
                   
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {/* Theme Status Chips */}
-                    <Chip
-                      icon={<Palette size={18} />}
-                      label={currentTheme}
-                      size="small"
-                      variant="outlined"
-                      sx={{ 
-                        borderColor: tableTheme.headerColor,
-                        color: tableTheme.headerColor,
-                        '& .MuiChip-icon': { color: tableTheme.headerColor },
-                        fontWeight: 600
-                      }}
-                    />
-                    {isLiturgicalMode && (
-                      <Chip
-                        label="Liturgical"
-                        size="small"
-                        color="secondary"
-                        sx={{ fontWeight: 600 }}
-                      />
-                    )}
                     <IconButton
                       onClick={() => setIsFiltersCollapsed(true)}
                       size="small"
@@ -1820,23 +1766,6 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                                   }}
                                 >
                                   <Upload size={18} strokeWidth={1.5} />
-                                </IconButton>
-                              </Tooltip>
-                              
-                              <Tooltip title="Customize Table Theme">
-                                <IconButton
-                                  onClick={() => setThemeDrawerOpen(true)}
-                                  disabled={loading}
-                                  sx={{ 
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    color: 'text.secondary',
-                                    bgcolor: 'transparent',
-                                    '&:hover': { bgcolor: 'action.hover', color: 'text.primary' },
-                                    '&:disabled': { bgcolor: 'action.disabledBackground', color: 'text.disabled' }
-                                  }}
-                                >
-                                  <Palette size={18} strokeWidth={1.5} />
                                 </IconButton>
                               </Tooltip>
                               
@@ -2030,40 +1959,12 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                     sx={{
                       height: 600,
                       width: '100%',
-                      // Override AG Grid CSS variables to match the table theme
                       '& .ag-header': {
-                        backgroundColor: `${tableTheme.headerColor} !important`,
-                        color: `${tableTheme.headerTextColor} !important`,
+                        backgroundColor: 'primary.main',
+                        color: 'primary.contrastText',
                       },
-                      '& .ag-header-cell': {
-                        color: `${tableTheme.headerTextColor} !important`,
-                      },
-                      '& .ag-header-cell-label': {
-                        color: `${tableTheme.headerTextColor} !important`,
-                      },
-                      '& .ag-icon': {
-                        color: `${tableTheme.headerTextColor} !important`,
-                      },
-                      '& .ag-row-even': {
-                        backgroundColor: tableTheme.rowColor,
-                      },
-                      '& .ag-row-odd': {
-                        backgroundColor: tableTheme.rowAlternateColor,
-                      },
-                      '& .ag-row:hover': {
-                        backgroundColor: `${tableTheme.hoverColor} !important`,
-                      },
-                      '& .ag-row-selected': {
-                        backgroundColor: `${tableTheme.selectedColor} !important`,
-                      },
-                      '& .ag-cell': {
-                        color: tableTheme.cellTextColor,
-                        fontSize: `${tableTheme.fontSize}px`,
-                        fontFamily: tableTheme.fontFamily,
-                      },
-                      '& .ag-root-wrapper': {
-                        borderRadius: `${tableTheme.borderRadius}px`,
-                        border: `${tableTheme.borderWidth}px solid ${tableTheme.borderColor}`,
+                      '& .ag-header-cell, & .ag-header-cell-label, & .ag-icon': {
+                        color: 'inherit',
                       },
                     }}
                     className={isDarkMode ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'}
@@ -2111,16 +2012,14 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   }}>
                   <Table stickyHeader sx={{ minWidth: 650 }}>
                     <TableHead>
-                      <TableRow 
+                      <TableRow
                         sx={{
-                          ...darkHeaderStyle(),
-                          border: selectedElement === 'header' ? `2px solid ${theme.palette.primary.main}` : 'none',
-                          cursor: 'pointer',
+                          bgcolor: 'primary.main',
+                          '& th': { color: 'primary.contrastText' },
                         }}
-                        title="Click to customize header appearance"
                       >
                         {getColumnDefinitions(selectedRecordType).map((column: any, index: number) => (
-                          <TableCell key={index} sx={{ ...darkCellStyle('header'), fontWeight: 'bold', '& .MuiTableSortLabel-root': { color: 'inherit' }, '& .MuiTableSortLabel-root.Mui-active': { color: 'inherit' }, '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}>
+                          <TableCell key={index} sx={{ fontWeight: 'bold', '& .MuiTableSortLabel-root': { color: 'inherit' }, '& .MuiTableSortLabel-root.Mui-active': { color: 'inherit' }, '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}>
                             <TableSortLabel
                               active={sortConfig.key === column.field}
                               direction={sortConfig.direction}
@@ -2130,12 +2029,11 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                             </TableSortLabel>
                           </TableCell>
                         ))}
-                        <TableCell sx={{ 
-                          ...darkCellStyle('header'), 
+                        <TableCell sx={{
                           minWidth: '150px',
                           position: 'sticky',
                           right: 0,
-                          backgroundColor: darkHeaderStyle().backgroundColor,
+                          bgcolor: 'primary.main',
                           zIndex: 2,
                         }} align="center">
                           Actions
@@ -2167,24 +2065,13 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                         paginatedRecords.map((record, index) => (
                           <TableRow
                             key={record.id}
-                            onClick={(e) => {
-                              // Handle row selection
-                              handleRowSelect(record.id);
-                              
-                              // Only trigger theme customization if not clicking on action buttons
-                              if (!(e.target as HTMLElement).closest('.record-actions')) {
-                                setSelectedElement('row');
-                                setThemeDrawerOpen(true);
-                              }
-                            }}
+                            onClick={() => handleRowSelect(record.id)}
                             sx={{
-                              ...darkRowStyle(index % 2 === 0 ? 'even' : 'odd'),
+                              bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper',
                               ...getRecordRowStyle(record, isRecordSelected(record.id), nowReference, isDarkMode),
-                              border: selectedElement === 'row' ? `2px solid ${theme.palette.primary.main}` : 'none',
                               cursor: 'pointer',
                               '&:hover': {
                                 backgroundColor: 'action.hover',
-                                border: `1px solid ${theme.palette.primary.main}`,
                               }
                             }}
                             title={record._matchSummary || 'Click to select row'}
@@ -2193,17 +2080,16 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               const cellVal = getCellValue(record, column);
                               const cellText = typeof cellVal === 'string' ? cellVal : String(cellVal ?? '');
                               return (
-                                <TableCell key={colIndex} sx={{ ...darkCellStyle('body'), backgroundColor: 'transparent' }}>
+                                <TableCell key={colIndex}>
                                   {debouncedSearch ? highlightSearchMatch(cellText, debouncedSearch) : cellVal}
                                 </TableCell>
                               );
                             })}
-                            <TableCell sx={{ 
-                              ...darkCellStyle('body'), 
+                            <TableCell sx={{
                               minWidth: '150px',
                               position: 'sticky',
                               right: 0,
-                              backgroundColor: darkRowStyle(index % 2 === 0 ? 'even' : 'odd').backgroundColor,
+                              bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper',
                               zIndex: 1,
                             }} align="center">
                               <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }} className="record-actions">
@@ -2273,7 +2159,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
             >
               <DialogTitle
                 sx={{
-                  background: `linear-gradient(135deg, ${recordsAccentColor} 0%, rgba(0,0,0,0.25) 100%), ${recordsAccentColor}`,
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, rgba(0,0,0,0.25) 100%), ${theme.palette.primary.main}`,
                   color: 'white',
                   py: 3,
                   px: 3,
@@ -2853,7 +2739,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                     textTransform: 'none',
                     fontSize: '1rem',
                     fontWeight: 600,
-                    background: `linear-gradient(135deg, ${recordsAccentColor} 0%, rgba(0,0,0,0.25) 100%), ${recordsAccentColor}`,
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, rgba(0,0,0,0.25) 100%), ${theme.palette.primary.main}`,
                     boxShadow: theme.shadows[4],
                     '&:hover': {
                       boxShadow: theme.shadows[8],
@@ -2887,7 +2773,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
               isDarkMode={isDarkMode}
               formatDate={formatRecordDate}
               displayJsonField={displayJsonField}
-              accentColor={recordsAccentColor}
+              accentColor={theme.palette.primary.main}
               mode={viewEditMode}
               onModeChange={setViewEditMode}
               onSave={handleSaveRecord}
@@ -2939,124 +2825,6 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
               </DialogActions>
             </Dialog>
 
-            {/* Orthodox Table Theme Editor Drawer */}
-            <Drawer
-              anchor="right"
-              open={themeDrawerOpen}
-              onClose={() => setThemeDrawerOpen(false)}
-              sx={{
-                '& .MuiDrawer-paper': {
-                  width: { xs: '100%', sm: 400, md: 450 },
-                  p: 2,
-                },
-              }}
-            >
-              <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Palette size={24} />
-                  Orthodox Table Theme Editor
-                </Typography>
-                
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Customize the appearance of your records table with Orthodox and liturgical themes.
-                </Typography>
-
-                {/* Quick Start Guide */}
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  <Typography variant="caption" component="div">
-                    <strong>Quick Start:</strong> Choose a liturgical theme below, then click table elements to customize colors and styling.
-                  </Typography>
-                </Alert>
-
-                <Divider sx={{ mb: 2 }} />
-
-                {/* Quick Theme Selector */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Quick Themes
-                  </Typography>
-                  <ColorPaletteSelector 
-                    selectedColor={tableTheme.headerColor}
-                    onColorChange={(color) => setHeaderColor(color)}
-                    liturgicalMode={isLiturgicalMode}
-                  />
-                </Box>
-
-                <Divider sx={{ mb: 2 }} />
-
-                {/* Element Selection Instructions */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Customize Elements
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Click on table elements below to customize:
-                  </Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap">
-                    <Chip 
-                      label="Header" 
-                      variant={selectedElement === 'header' ? 'filled' : 'outlined'}
-                      onClick={() => setSelectedElement('header')}
-                      size="small"
-                    />
-                    <Chip 
-                      label="Row" 
-                      variant={selectedElement === 'row' ? 'filled' : 'outlined'}
-                      onClick={() => setSelectedElement('row')}
-                      size="small"
-                    />
-                    <Chip 
-                      label="Cell" 
-                      variant={selectedElement === 'cell' ? 'filled' : 'outlined'}
-                      onClick={() => setSelectedElement('cell')}
-                      size="small"
-                    />
-                  </Stack>
-                </Box>
-
-                {/* Table Control Panel */}
-                <Box sx={{ flex: 1, overflow: 'auto' }}>
-                  {selectedElement && (
-                    <TableControlPanel 
-                      selectedElement={selectedElement}
-                      onElementSelect={(element) => setSelectedElement(element as 'header' | 'row' | 'cell')}
-                      tableTheme={tableTheme}
-                      onBorderStyleChange={(color, width, radius) => {
-                        // Handle border style changes
-                        console.log('Border style changed:', color, width, radius);
-                      }}
-                    />
-                  )}
-                  {!selectedElement && (
-                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-                      Click on a table element above to customize its appearance
-                    </Typography>
-                  )}
-                </Box>
-
-                {/* Actions */}
-                <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
-                  <Stack direction="row" spacing={2} justifyContent="flex-end">
-                    <Button
-                      variant="outlined"
-                      onClick={() => setThemeDrawerOpen(false)}
-                    >
-                      Done
-                    </Button>
-                    <Button
-                      variant="contained"
-                      onClick={() => {
-                        // Apply theme and close
-                        setThemeDrawerOpen(false);
-                        showToast('Table theme applied successfully!', 'success');
-                      }}
-                    >
-                      Apply Theme
-                    </Button>
-                  </Stack>
-                </Box>
-              </Box>
-            </Drawer>
 
             {/* Toast Snackbar — centered on screen */}
             <Snackbar
