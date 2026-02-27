@@ -2012,14 +2012,9 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   }}>
                   <Table stickyHeader sx={{ minWidth: 650 }}>
                     <TableHead>
-                      <TableRow
-                        sx={{
-                          bgcolor: 'primary.main',
-                          '& th': { color: 'primary.contrastText' },
-                        }}
-                      >
+                      <TableRow>
                         {getColumnDefinitions(selectedRecordType).map((column: any, index: number) => (
-                          <TableCell key={index} sx={{ fontWeight: 'bold', '& .MuiTableSortLabel-root': { color: 'inherit' }, '& .MuiTableSortLabel-root.Mui-active': { color: 'inherit' }, '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}>
+                          <TableCell key={index} sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', fontWeight: 'bold', '& .MuiTableSortLabel-root': { color: 'inherit' }, '& .MuiTableSortLabel-root.Mui-active': { color: 'inherit' }, '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}>
                             <TableSortLabel
                               active={sortConfig.key === column.field}
                               direction={sortConfig.direction}
@@ -2034,6 +2029,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           position: 'sticky',
                           right: 0,
                           bgcolor: 'primary.main',
+                          color: 'primary.contrastText',
                           zIndex: 2,
                         }} align="center">
                           Actions
