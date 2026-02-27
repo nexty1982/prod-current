@@ -43,6 +43,7 @@ import type { RetryPlan } from '../ocr/preprocessing/structureRetry';
 import { selectTemplate, resolveTemplate, extractWithTemplate } from '../ocr/preprocessing/templateSpec';
 import type { TemplateMatchResult } from '../ocr/preprocessing/templateSpec';
 import { normalizeTokens, buildTableProvenance, buildRecordCandidatesProvenance } from '../ocr/preprocessing/provenance';
+import { computeScoringV2 } from '../ocr/preprocessing/scoringV2';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -2071,6 +2072,70 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
     const finalStatus = await scoreAndRoute(page, oc, qs);
     await updatePageStatus(tenantPool, page.id, finalStatus, 'scoring');
     console.log(`  Page ${page.id} -> ${finalStatus}`);
+
+    // Step 4.1: Scoring v2 — field-level scoring with provenance
+    try {
+      const pageDir = getPageStorageDir(page.job_id, page.page_index);
+      const tokensPath = path.join(pageDir, 'tokens_normalized.json');
+      const tableProvPath = path.join(pageDir, 'table_provenance.json');
+      const recordCandPath = path.join(pageDir, 'record_candidates.json');
+      const candProvPath = path.join(pageDir, 'record_candidates_provenance.json');
+
+      if (fs.existsSync(recordCandPath)) {
+        const recordCandData = JSON.parse(fs.readFileSync(recordCandPath, 'utf8'));
+        const candProvData = fs.existsSync(candProvPath) ? JSON.parse(fs.readFileSync(candProvPath, 'utf8')) : null;
+        const tableProvData = fs.existsSync(tableProvPath) ? JSON.parse(fs.readFileSync(tableProvPath, 'utf8')) : null;
+        const tokensData = fs.existsSync(tokensPath) ? JSON.parse(fs.readFileSync(tokensPath, 'utf8')) : null;
+
+        // Determine record type
+        let scoringRecordType = recordCandData?.detectedType ?? 'unknown';
+        if (scoringRecordType === 'unknown' || scoringRecordType === 'custom') {
+          try {
+            const [jobRows] = await platformPool.query(
+              `SELECT record_type FROM ocr_jobs WHERE id = ?`, [page.job_id]
+            ) as any[];
+            if (jobRows[0]?.record_type) scoringRecordType = jobRows[0].record_type;
+          } catch {}
+        }
+
+        const scoringResult = computeScoringV2(recordCandData, candProvData, tableProvData, tokensData, {
+          recordType: scoringRecordType,
+        });
+
+        const scoringPath = path.join(pageDir, 'scoring_v2.json');
+        const scoringJson = JSON.stringify(scoringResult, null, 2);
+        const scoringTmp = scoringPath + '.tmp';
+        fs.writeFileSync(scoringTmp, scoringJson);
+        fs.renameSync(scoringTmp, scoringPath);
+
+        const scoringSha = crypto.createHash('sha256').update(scoringJson).digest('hex');
+        await tenantPool.execute(
+          `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, sha256, bytes, mime_type)
+           VALUES (?, 'scoring_v2', ?, ?, ?, 'application/json')`,
+          [page.id, scoringPath, scoringSha, Buffer.byteLength(scoringJson)]
+        );
+
+        // Merge scoring v2 metrics
+        const metricsPath = path.join(pageDir, 'metrics.json');
+        let metrics: Record<string, any> = {};
+        if (fs.existsSync(metricsPath)) {
+          try { metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8')); } catch {}
+        }
+        Object.assign(metrics, {
+          page_score_v2: scoringResult.page_score_v2,
+          rows_need_review: scoringResult.summary.rows_need_review,
+          fields_flagged: scoringResult.summary.fields_flagged,
+          routing_recommendation_v2: scoringResult.routing_recommendation,
+        });
+        const metricsTmp = metricsPath + '.tmp';
+        fs.writeFileSync(metricsTmp, JSON.stringify(metrics, null, 2));
+        fs.renameSync(metricsTmp, metricsPath);
+
+        console.log(`  [ScoringV2] Page ${page.id}: score=${scoringResult.page_score_v2}, review_rows=${scoringResult.summary.rows_need_review}/${scoringResult.summary.total_rows}, flagged=${scoringResult.summary.fields_flagged}, route=${scoringResult.routing_recommendation}`);
+      }
+    } catch (scoringErr: any) {
+      console.warn(`  [ScoringV2] Page ${page.id}: Scoring v2 failed (non-blocking): ${scoringErr.message}`);
+    }
   }
 
   if (page.status === 'retry') {

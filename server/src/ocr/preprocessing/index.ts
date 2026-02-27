@@ -92,6 +92,15 @@ export type {
   NormalizedTokensResult,
 } from './provenance';
 
+export { computeScoringV2 } from './scoringV2';
+export type {
+  ScoringV2Result,
+  ScoringV2Options,
+  RowScore,
+  FieldScore,
+  ReasonCode,
+} from './scoringV2';
+
 export type {
   OcrProfile,
   RegionProfileAssignment,
