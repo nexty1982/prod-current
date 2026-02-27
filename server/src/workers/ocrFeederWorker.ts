@@ -36,6 +36,8 @@ import { gridPreserveDenoise } from '../ocr/preprocessing/denoise';
 import { generateRedactionMask } from '../ocr/preprocessing/redaction';
 import { generateOcrPlan } from '../ocr/preprocessing/ocrPlan';
 import type { OcrRegion } from '../ocr/preprocessing/ocrPlan';
+import { selectRegionProfiles, getProfile } from '../ocr/preprocessing/ocrProfiles';
+import type { RegionProfileAssignment, ProfilePlanResult } from '../ocr/preprocessing/ocrProfiles';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -931,6 +933,7 @@ async function runRegionScopedOCR(
   tenantPool: Pool,
   page: PageRow,
   regions: OcrRegion[],
+  profilePlan?: ProfilePlanResult,
 ): Promise<{ rawText: string; confidence: number; visionResultJson: any; regionResults: any[] }> {
   const pageDir = getPageStorageDir(page.job_id, page.page_index);
   mkdirp(pageDir);
@@ -941,6 +944,7 @@ async function runRegionScopedOCR(
   }
 
   const imageBuffer = fs.readFileSync(imagePath);
+  const retryConfThreshold = profilePlan?.thresholds?.retryConfidenceThreshold ?? 0.70;
 
   // Set up Vision client once
   const vision = require('@google-cloud/vision');
@@ -954,13 +958,23 @@ async function runRegionScopedOCR(
   const allPages: any[] = [];
   let totalConfidence = 0;
   let successCount = 0;
+  let retryCount = 0;
 
   for (const region of regions) {
     const { x, y, w, h } = region.box;
     const regionLabel = `region_${region.index}`;
 
+    // Resolve profile for this region
+    const profileAssignment = profilePlan?.regions?.find(r => r.regionIndex === region.index);
+    const languageHints = profileAssignment?.languageHints ?? LANGUAGE_HINTS_CFG;
+    const visionFeature = profileAssignment?.visionFeature ?? 'DOCUMENT_TEXT_DETECTION';
+    const timeoutMs = (profileAssignment ? getProfile(profileAssignment.profile).timeoutMs : null) ?? VISION_TIMEOUT_MS_CFG;
+    const fallbackEnabled = profileAssignment?.fallback?.enabled ?? false;
+    const alternateHints = profileAssignment?.fallback?.alternateHints ?? [];
+    const profileName = profileAssignment?.profile ?? 'unknown';
+
     try {
-      console.log(`  [RegionOCR] Page ${page.id} ${regionLabel}: crop (${x},${y},${w},${h})`);
+      console.log(`  [RegionOCR] Page ${page.id} ${regionLabel}: crop (${x},${y},${w},${h}) profile=${profileName}`);
 
       // Crop region from preprocessed image
       const croppedBuffer = await sharp(imageBuffer)
@@ -972,23 +986,63 @@ async function runRegionScopedOCR(
       const cropPath = path.join(pageDir, `ocr_${regionLabel}.jpg`);
       fs.writeFileSync(cropPath, croppedBuffer);
 
-      // Call Vision API on cropped region
-      const visionPromise = client.annotateImage({
-        image: { content: croppedBuffer },
-        imageContext: { languageHints: LANGUAGE_HINTS_CFG },
-        features: [{ type: 'DOCUMENT_TEXT_DETECTION' }],
-      });
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Vision API timed out for ${regionLabel}`)), VISION_TIMEOUT_MS_CFG)
-      );
-      const [result] = await Promise.race([visionPromise, timeoutPromise]) as any[];
+      // ── Primary Vision call with profile settings ──────────────────────
+      const callVision = async (hints: string[], feature: string, label: string) => {
+        const visionPromise = client.annotateImage({
+          image: { content: croppedBuffer },
+          imageContext: { languageHints: hints },
+          features: [{ type: feature }],
+        });
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error(`Vision API timed out for ${label}`)), timeoutMs)
+        );
+        return Promise.race([visionPromise, timeoutPromise]) as Promise<any[]>;
+      };
 
-      const document = result.fullTextAnnotation;
-      const regionText = document?.text || '';
+      let [result] = await callVision(languageHints, visionFeature, regionLabel);
+
+      let document = result.fullTextAnnotation;
+      let regionText = document?.text || '';
+      let visionPages = document?.pages || [];
       let regionConfidence = 0;
-      const visionPages = document?.pages || [];
       if (visionPages.length > 0 && visionPages[0].confidence !== undefined) {
         regionConfidence = visionPages[0].confidence;
+      }
+
+      let usedRetry = false;
+      let retryAttemptText = '';
+      let retryAttemptConf = 0;
+
+      // ── Retry with alternate hints if confidence below threshold ──────
+      if (fallbackEnabled && alternateHints.length > 0 && regionConfidence < retryConfThreshold) {
+        console.log(`  [RegionOCR] ${regionLabel}: conf=${(regionConfidence * 100).toFixed(1)}% < ${(retryConfThreshold * 100).toFixed(0)}% → retrying with alternate hints [${alternateHints.join(',')}]`);
+        try {
+          const [retryResult] = await callVision(alternateHints, visionFeature, `${regionLabel}_retry`);
+          const retryDoc = retryResult.fullTextAnnotation;
+          retryAttemptText = retryDoc?.text || '';
+          const retryPages = retryDoc?.pages || [];
+          retryAttemptConf = 0;
+          if (retryPages.length > 0 && retryPages[0].confidence !== undefined) {
+            retryAttemptConf = retryPages[0].confidence;
+          }
+
+          // Use retry result only if it's better
+          if (retryAttemptConf > regionConfidence) {
+            console.log(`  [RegionOCR] ${regionLabel}: retry better (${(retryAttemptConf * 100).toFixed(1)}% > ${(regionConfidence * 100).toFixed(1)}%) → using retry`);
+            result = retryResult;
+            document = retryDoc;
+            regionText = retryAttemptText;
+            visionPages = retryPages;
+            regionConfidence = retryAttemptConf;
+            usedRetry = true;
+          } else {
+            console.log(`  [RegionOCR] ${regionLabel}: retry not better (${(retryAttemptConf * 100).toFixed(1)}% <= ${(regionConfidence * 100).toFixed(1)}%) → keeping original`);
+          }
+          retryCount++;
+        } catch (retryErr: any) {
+          console.warn(`  [RegionOCR] ${regionLabel}: retry failed (keeping original): ${retryErr.message}`);
+          retryCount++;
+        }
       }
 
       // Adjust bounding boxes: offset all vertices by region origin (x, y)
@@ -998,6 +1052,7 @@ async function runRegionScopedOCR(
         height: vp.height,
         _region: region.index,
         _regionBox: region.box,
+        _profile: profileName,
         blocks: (vp.blocks || []).map((block: any) => ({
           blockType: block.blockType,
           confidence: block.confidence,
@@ -1022,19 +1077,24 @@ async function runRegionScopedOCR(
       regionResults.push({
         index: region.index,
         box: region.box,
+        profile: profileName,
         status: 'ok',
         confidence: regionConfidence,
         textLength: regionText.length,
         cropPath,
+        usedRetry,
+        ...(usedRetry ? { primaryConfidence: retryAttemptConf > regionConfidence ? regionConfidence : retryAttemptConf } : {}),
+        ...(retryCount > 0 && !usedRetry ? { retryAttempted: true, retryConfidence: retryAttemptConf } : {}),
       });
 
-      console.log(`  [RegionOCR] ${regionLabel}: ${regionText.length} chars, conf=${(regionConfidence * 100).toFixed(1)}%`);
+      console.log(`  [RegionOCR] ${regionLabel}: ${regionText.length} chars, conf=${(regionConfidence * 100).toFixed(1)}%, profile=${profileName}${usedRetry ? ' (RETRY)' : ''}`);
 
     } catch (err: any) {
       console.warn(`  [RegionOCR] ${regionLabel} FAILED (non-fatal): ${err.message}`);
       regionResults.push({
         index: region.index,
         box: region.box,
+        profile: profileName,
         status: 'error',
         error: err.message,
       });
@@ -1090,7 +1150,7 @@ async function runRegionScopedOCR(
 
   // Save region results artifact
   const regionResultsPath = path.join(pageDir, 'vision_regions.json');
-  atomicWriteFileSync(regionResultsPath, JSON.stringify({ regions: regionResults }, null, 2));
+  atomicWriteFileSync(regionResultsPath, JSON.stringify({ regions: regionResults, retryCount }, null, 2));
   await tenantPool.execute(
     `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json)
      VALUES (?, 'vision_regions', ?, ?)`,
@@ -1098,10 +1158,11 @@ async function runRegionScopedOCR(
       regionCount: regions.length,
       successCount,
       failedCount: regions.length - successCount,
+      retryCount,
     })]
   );
 
-  console.log(`  [RegionOCR] Page ${page.id}: ${successCount}/${regions.length} regions, ${fullText.length} chars total, avg conf=${(avgConfidence * 100).toFixed(1)}%`);
+  console.log(`  [RegionOCR] Page ${page.id}: ${successCount}/${regions.length} regions, ${fullText.length} chars total, avg conf=${(avgConfidence * 100).toFixed(1)}%${retryCount > 0 ? `, ${retryCount} retries` : ''}`);
 
   await tenantPool.execute(
     `UPDATE ocr_feeder_pages SET ocr_confidence = ?, updated_at = NOW() WHERE id = ?`,
@@ -1323,16 +1384,70 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
 
             if (plan.useRegions && plan.regions.length > 0) {
               console.log(`  [OCR Plan] Page ${page.id}: region-scoped OCR with ${plan.regions.length} regions (content ${(plan.contentFrac * 100).toFixed(1)}%)`);
-              const regionResult = await runRegionScopedOCR(tenantPool, page, plan.regions);
+
+              // ── Step 2.2: Generate profile plan for regions ──────────────
+              let jobRecordType = 'unknown';
+              let jobLayoutTemplateId: number | null = null;
+              try {
+                const [jobRows] = await platformPool.query(
+                  `SELECT record_type, layout_template_id FROM ocr_jobs WHERE id = ?`, [page.job_id]
+                ) as any[];
+                if (jobRows.length > 0) {
+                  jobRecordType = jobRows[0].record_type || 'unknown';
+                  jobLayoutTemplateId = jobRows[0].layout_template_id || null;
+                }
+              } catch (_: any) { /* best effort */ }
+
+              const profilePlan = selectRegionProfiles(plan.regions, {
+                recordType: jobRecordType,
+                layoutTemplateId: jobLayoutTemplateId,
+              });
+
+              // Persist profile plan artifact (always, atomic)
+              const profilePlanPath = path.join(pageDir, 'ocr_profile_plan.json');
+              const profilePlanJson = JSON.stringify(profilePlan, null, 2);
+              atomicWriteFileSync(profilePlanPath, profilePlanJson);
+              const profilePlanSha256 = crypto.createHash('sha256').update(profilePlanJson).digest('hex');
+              await tenantPool.execute(
+                `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type)
+                 VALUES (?, 'ocr_profile_plan', ?, ?, ?, ?, 'application/json')`,
+                [
+                  page.id,
+                  profilePlanPath,
+                  JSON.stringify({
+                    method: profilePlan.method,
+                    regionCount: profilePlan.regions.length,
+                    reasons: profilePlan.reasons,
+                  }),
+                  profilePlanSha256,
+                  Buffer.byteLength(profilePlanJson),
+                ]
+              );
+
+              // Merge profile metrics
+              const profileCounts: Record<string, number> = {};
+              for (const pa of profilePlan.regions) {
+                profileCounts[pa.profile] = (profileCounts[pa.profile] || 0) + 1;
+              }
+              mergeMetrics(metricsPath, {
+                ocr_profiles_used: profileCounts,
+              });
+
+              console.log(`  [OCR Profiles] Page ${page.id}: ${profilePlan.regions.map(r => `r${r.regionIndex}=${r.profile}`).join(', ')}`);
+
+              // Pass profile plan to region-scoped OCR
+              const regionResult = await runRegionScopedOCR(tenantPool, page, plan.regions, profilePlan);
               ocrRawText = regionResult.rawText;
               confidence = regionResult.confidence;
               visionResultJson = regionResult.visionResultJson;
               usedRegionOCR = true;
 
-              // Update metrics with region results
+              // Update metrics with region results + fallback count
+              const fallbackCount = regionResult.regionResults.filter((r: any) => r.usedRetry || r.retryAttempted).length;
               mergeMetrics(metricsPath, {
                 ocr_region_success_count: regionResult.regionResults.filter((r: any) => r.status === 'ok').length,
                 ocr_region_fail_count: regionResult.regionResults.filter((r: any) => r.status === 'error').length,
+                ocr_profile_fallbacks: fallbackCount,
               });
             } else {
               console.log(`  [OCR Plan] Page ${page.id}: no regions (${plan.reasons.join(', ')}), using standard OCR`);

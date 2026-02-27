@@ -50,3 +50,11 @@ export type {
   OcrPlanResult,
   OcrRegion,
 } from './ocrPlan';
+
+export { selectRegionProfiles, getProfile, getProfileNames } from './ocrProfiles';
+export type {
+  OcrProfile,
+  RegionProfileAssignment,
+  ProfilePlanResult,
+  ProfilePlanOptions,
+} from './ocrProfiles';
