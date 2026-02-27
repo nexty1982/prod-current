@@ -52,6 +52,8 @@ export type {
 } from './ocrPlan';
 
 export { selectRegionProfiles, getProfile, getProfileNames } from './ocrProfiles';
+
+export { computeStructureScore, selectRetryStrategy, extractSignals, buildRetryPlan } from './structureRetry';
 export type {
   OcrProfile,
   RegionProfileAssignment,

@@ -38,6 +38,8 @@ import { generateOcrPlan } from '../ocr/preprocessing/ocrPlan';
 import type { OcrRegion } from '../ocr/preprocessing/ocrPlan';
 import { selectRegionProfiles, getProfile } from '../ocr/preprocessing/ocrProfiles';
 import type { RegionProfileAssignment, ProfilePlanResult } from '../ocr/preprocessing/ocrProfiles';
+import { buildRetryPlan, extractSignals, computeStructureScore } from '../ocr/preprocessing/structureRetry';
+import type { RetryPlan } from '../ocr/preprocessing/structureRetry';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -1469,9 +1471,13 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
     console.log(`  OCR page ${page.id}, confidence: ${(confidence * 100).toFixed(1)}%`);
 
     // ── Table Extraction (runs between OCR and parsing) ──────────────────
+    // Hoist these for use in both table extraction and structure retry
+    let recordType = 'unknown';
+    let templateBands: any = null;
+    let templateHeaderY: number | null = null;
+
     try {
       // Look up job's record_type from platform DB
-      let recordType = 'unknown';
       try {
         const [jobRows] = await platformPool.query(
           `SELECT record_type FROM ocr_jobs WHERE id = ?`, [page.job_id]
@@ -1498,8 +1504,6 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
       }
 
       // Check for layout template (explicit on job, or default for record_type)
-      let templateBands: any = null;
-      let templateHeaderY: number | null = null;
       let templateId: number | null = null;
       let extractionMode: string = 'tabular';
       let extractorRow: any = null;
@@ -1636,6 +1640,221 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
     } catch (tableErr: any) {
       console.warn(`  [TableExtract] Page ${page.id}: Table extraction failed (non-blocking): ${tableErr.message}`);
       // Non-blocking — continue with raw text
+    }
+
+    // ── Step 2.3: Structure-aware OCR retry ────────────────────────────────
+    try {
+      const pageDir = getPageStorageDir(page.job_id, page.page_index);
+      const tableJsonPath = path.join(pageDir, 'table_extraction.json');
+
+      // Load initial table extraction (if it exists)
+      let initialTableResult: any = null;
+      if (fs.existsSync(tableJsonPath)) {
+        try {
+          initialTableResult = JSON.parse(fs.readFileSync(tableJsonPath, 'utf8'));
+        } catch {}
+      }
+
+      // Check if Step 2.2 already used alt hints
+      let altHintsAlreadyUsed = false;
+      const visionRegionsPath = path.join(pageDir, 'vision_regions.json');
+      if (fs.existsSync(visionRegionsPath)) {
+        try {
+          const vr = JSON.parse(fs.readFileSync(visionRegionsPath, 'utf8'));
+          altHintsAlreadyUsed = (vr.retryCount ?? 0) > 0 ||
+            (vr.regions || []).some((r: any) => r.usedRetry || r.retryAttempted);
+        } catch {}
+      }
+
+      // Check if binarized input exists
+      const binarizedPath = path.join(pageDir, 'cleaned_bin.jpg');
+      const binarizedAvailable = fs.existsSync(binarizedPath);
+
+      const retryPlan = buildRetryPlan(initialTableResult, null, {
+        altHintsAlreadyUsed,
+        binarizedInputAvailable: binarizedAvailable,
+      });
+
+      if (retryPlan.retry.shouldRetry) {
+        console.log(`  [StructRetry] Page ${page.id}: score=${retryPlan.initial.structureScore.toFixed(3)}, strategy=${retryPlan.retry.strategy}, reasons=${retryPlan.initial.reasons.join(',')}`);
+
+        let retryVisionResult: any = null;
+        let retryRawText = '';
+        let retryConfidence = 0;
+
+        // Execute retry strategy
+        if (retryPlan.retry.strategy === 'ALT_HINTS') {
+          // Swap language hint order and re-OCR
+          const origHints = LANGUAGE_HINTS_CFG;
+          const altHints = [...origHints].reverse();
+          LANGUAGE_HINTS_CFG = altHints;
+          try {
+            const retryOcr = await runOCR(tenantPool, page);
+            retryVisionResult = retryOcr.visionResultJson;
+            retryRawText = retryOcr.rawText;
+            retryConfidence = retryOcr.confidence;
+          } finally {
+            LANGUAGE_HINTS_CFG = origHints;
+          }
+
+        } else if (retryPlan.retry.strategy === 'BINARIZED_INPUT' && binarizedAvailable) {
+          // Re-OCR using binarized input
+          const origPreprocPath = page.preproc_path;
+          page.preproc_path = binarizedPath;
+          try {
+            const retryOcr = await runOCR(tenantPool, page);
+            retryVisionResult = retryOcr.visionResultJson;
+            retryRawText = retryOcr.rawText;
+            retryConfidence = retryOcr.confidence;
+          } finally {
+            page.preproc_path = origPreprocPath;
+          }
+
+        } else if (retryPlan.retry.strategy === 'DROP_HEADER_STRIP') {
+          // Re-OCR excluding top header strip
+          const headerStripFrac = retryPlan.retry.details?.headerStripFrac ?? 0.12;
+          const imagePath = page.preproc_path || page.input_path;
+          const imgMeta = await sharp(imagePath).metadata();
+          const imgW = imgMeta.width!;
+          const imgH = imgMeta.height!;
+          const stripPx = Math.round(imgH * headerStripFrac);
+
+          // Create a cropped version excluding the header strip
+          const strippedPath = path.join(pageDir, 'ocr_header_stripped.jpg');
+          await sharp(imagePath)
+            .extract({ left: 0, top: stripPx, width: imgW, height: imgH - stripPx })
+            .jpeg({ quality: 92 })
+            .toFile(strippedPath);
+
+          const origPreprocPath = page.preproc_path;
+          page.preproc_path = strippedPath;
+          try {
+            const retryOcr = await runOCR(tenantPool, page);
+            retryVisionResult = retryOcr.visionResultJson;
+            retryRawText = retryOcr.rawText;
+            retryConfidence = retryOcr.confidence;
+          } finally {
+            page.preproc_path = origPreprocPath;
+          }
+        }
+
+        if (retryVisionResult) {
+          // Save retry vision outputs as separate files
+          const retryVisionPath = path.join(pageDir, 'vision_result_retry_1.json');
+          const retryVisionStr = JSON.stringify(retryVisionResult);
+          atomicWriteFileSync(retryVisionPath, retryVisionStr);
+          await tenantPool.execute(
+            `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json)
+             VALUES (?, 'vision_json_retry', ?, ?)`,
+            [page.id, retryVisionPath, JSON.stringify({
+              strategy: retryPlan.retry.strategy,
+              confidence: retryConfidence,
+              extractedAt: new Date().toISOString(),
+            })]
+          );
+
+          // Re-run table extraction on retry vision result
+          let retryTableResult: any = null;
+          try {
+            if (templateBands) {
+              const { extractGenericTable } = require('../ocr/layouts/generic_table');
+              const exOpts: any = {
+                pageIndex: 0,
+                columnBands: templateBands.map((b: any) => Array.isArray(b) ? b : [b.start, b.end]),
+              };
+              if (templateHeaderY != null) exOpts.headerYThreshold = templateHeaderY;
+              retryTableResult = extractGenericTable(retryVisionResult, exOpts);
+            } else if (recordType === 'marriage') {
+              const { extractMarriageLedgerTable } = require('../ocr/layouts/marriage_ledger_v1');
+              retryTableResult = extractMarriageLedgerTable(retryVisionResult, { pageIndex: 0 });
+            } else {
+              const { extractGenericTable } = require('../ocr/layouts/generic_table');
+              retryTableResult = extractGenericTable(retryVisionResult, { pageIndex: 0 });
+            }
+          } catch (retryExErr: any) {
+            console.warn(`  [StructRetry] Page ${page.id}: Retry extraction failed: ${retryExErr.message}`);
+          }
+
+          // Compute retry structure score
+          const retrySignals = extractSignals(retryTableResult, null);
+          const retryAssessment = computeStructureScore(retrySignals);
+
+          console.log(`  [StructRetry] Page ${page.id}: initial=${retryPlan.initial.structureScore.toFixed(3)}, retry=${retryAssessment.structureScore.toFixed(3)}`);
+
+          // Pick winner (tie goes to initial)
+          if (retryAssessment.structureScore > retryPlan.initial.structureScore) {
+            retryPlan.winner = 'retry';
+            retryPlan.final = retryAssessment;
+
+            // Overwrite canonical outputs with retry versions
+            const canonVisionPath = path.join(pageDir, 'vision_result.json');
+            atomicWriteFileSync(canonVisionPath, retryVisionStr);
+            visionResultJson = retryVisionResult;
+            ocrRawText = retryRawText;
+            confidence = retryConfidence;
+
+            // Overwrite raw_text.txt
+            const canonRawTextPath = path.join(pageDir, 'raw_text.txt');
+            await writeFile(canonRawTextPath, retryRawText);
+
+            // Overwrite table_extraction.json if retry had a result
+            if (retryTableResult) {
+              atomicWriteFileSync(tableJsonPath, JSON.stringify(retryTableResult, null, 2));
+              const { tableToStructuredText } = require('../ocr/layouts/generic_table');
+              const retryStructuredText = tableToStructuredText(retryTableResult);
+              if (retryStructuredText) {
+                const structuredTxtPath = path.join(pageDir, '_structured.txt');
+                await writeFile(structuredTxtPath, retryStructuredText);
+              }
+            }
+
+            console.log(`  [StructRetry] Page ${page.id}: RETRY WINS (${retryAssessment.structureScore.toFixed(3)} > ${retryPlan.initial.structureScore.toFixed(3)})`);
+          } else {
+            retryPlan.winner = 'initial';
+            retryPlan.final = retryPlan.initial;
+            console.log(`  [StructRetry] Page ${page.id}: INITIAL WINS (${retryPlan.initial.structureScore.toFixed(3)} >= ${retryAssessment.structureScore.toFixed(3)})`);
+          }
+        }
+      } else {
+        console.log(`  [StructRetry] Page ${page.id}: score=${retryPlan.initial.structureScore.toFixed(3)} >= threshold, no retry needed`);
+      }
+
+      // Persist retry_plan.json (ALWAYS)
+      const retryPlanPath = path.join(pageDir, 'retry_plan.json');
+      const retryPlanJson = JSON.stringify(retryPlan, null, 2);
+      atomicWriteFileSync(retryPlanPath, retryPlanJson);
+      const retryPlanSha256 = crypto.createHash('sha256').update(retryPlanJson).digest('hex');
+      await tenantPool.execute(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type)
+         VALUES (?, 'retry_plan', ?, ?, ?, ?, 'application/json')`,
+        [
+          page.id,
+          retryPlanPath,
+          JSON.stringify({
+            method: retryPlan.method,
+            initial_score: retryPlan.initial.structureScore,
+            final_score: retryPlan.final.structureScore,
+            shouldRetry: retryPlan.retry.shouldRetry,
+            strategy: retryPlan.retry.strategy,
+            winner: retryPlan.winner,
+          }),
+          retryPlanSha256,
+          Buffer.byteLength(retryPlanJson),
+        ]
+      );
+
+      // Merge metrics
+      const metricsPath = path.join(pageDir, 'metrics.json');
+      mergeMetrics(metricsPath, {
+        structure_score_initial: retryPlan.initial.structureScore,
+        structure_score_final: retryPlan.final.structureScore,
+        ocr_retry_performed: retryPlan.retry.shouldRetry,
+        ocr_retry_strategy: retryPlan.retry.strategy,
+        ocr_retry_improved: retryPlan.winner === 'retry',
+      });
+
+    } catch (retryErr: any) {
+      console.warn(`  [StructRetry] Page ${page.id}: Structure retry failed (non-blocking): ${retryErr.message}`);
     }
 
     page.status = 'ocr';
