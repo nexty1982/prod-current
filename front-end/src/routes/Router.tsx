@@ -1856,15 +1856,6 @@ const Router = [
           </ProtectedRoute>
         ),
       },
-      // Certificates
-      {
-        path: 'certificates',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <CertificateGeneratorPage />
-          </ProtectedRoute>
-        ),
-      },
       // Upload Records (church_admin + priest)
       {
         path: 'upload',

@@ -101,6 +101,23 @@ const LightThemeColors = [
       },
     },
   },
+  {
+    name: 'LENT_THEME',
+    palette: {
+      primary: {
+        main: '#1a1a1a',
+        light: '#f5f5f5',
+        dark: '#000000',
+        contrastText: '#ffffff',
+      },
+      secondary: {
+        main: '#616161',
+        light: '#eeeeee',
+        dark: '#424242',
+        contrastText: '#ffffff',
+      },
+    },
+  },
 ];
 
 export { LightThemeColors };

@@ -496,6 +496,27 @@ button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):focus-visib
   filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
 }
 
+/* AG Grid — Lent Theme (Black & White) Overrides */
+[data-color-theme="LENT_THEME"] .ag-theme-alpine {
+  --ag-header-background-color: #f5f5f5;
+  --ag-odd-row-background-color: #fafafa;
+  --ag-row-hover-color: #eeeeee;
+  --ag-selected-row-background-color: #e0e0e0;
+  --ag-border-color: #e0e0e0;
+  --ag-header-foreground-color: #1a1a1a;
+  --ag-foreground-color: #1a1a1a;
+}
+[data-color-theme="LENT_THEME"] .ag-theme-alpine-dark {
+  --ag-header-background-color: #1a1a1a;
+  --ag-odd-row-background-color: #111111;
+  --ag-row-hover-color: #222222;
+  --ag-selected-row-background-color: #333333;
+  --ag-border-color: #333333;
+  --ag-header-foreground-color: #e0e0e0;
+  --ag-foreground-color: #e0e0e0;
+  --ag-background-color: #0a0a0a;
+}
+
 .liturgical-gradient {
   background: linear-gradient(
     135deg,

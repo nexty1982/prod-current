@@ -45,12 +45,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 import { useChurch } from '@/context/ChurchContext';
-import { apiClient } from '@/api/utils/axiosInstance';
 import { metricsAPI } from '@/api/metrics.api';
-
-import SacramentCountCards from '@/features/dashboard/widgets/SacramentCountCards';
-import SacramentsByYearChart from '@/features/dashboard/widgets/SacramentsByYearChart';
-import TypeDistributionChart from '@/features/dashboard/widgets/TypeDistributionChart';
 
 /* ─── Types ─── */
 
@@ -62,16 +57,6 @@ interface FeatureCard {
   roles?: string[];
   color: string;
   gradient: string;
-}
-
-interface DashboardData {
-  counts: { baptisms: number; marriages: number; funerals: number; total: number };
-  recentActivity: { name: string; type: 'baptism' | 'marriage' | 'funeral'; date: string }[];
-  typeDistribution: { name: string; value: number }[];
-  monthlyActivity: { month: string; baptism: number; marriage: number; funeral: number }[];
-  yearOverYear: { currentYear: number; previousYear: number; current: number; previous: number; changePercent: number };
-  completeness: number;
-  dateRange: { earliest: number | null; latest: number | null };
 }
 
 interface RecentRecord {
@@ -115,24 +100,24 @@ const RECORDS: FeatureCard[] = [
     description: 'Browse, search, and manage all baptism records for your parish',
     to: '/portal/records/baptism',
     icon: IconBook2,
-    color: '#1565c0',
-    gradient: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+    color: '#1a1a1a',
+    gradient: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
   },
   {
     title: 'Marriage Records',
     description: 'View and manage marriage sacrament records and related documents',
     to: '/portal/records/marriage',
     icon: IconHeart,
-    color: '#c2185b',
-    gradient: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%)',
+    color: '#333333',
+    gradient: 'linear-gradient(135deg, #f0f0f0 0%, #d9d9d9 100%)',
   },
   {
     title: 'Funeral Records',
     description: 'Access funeral and memorial service records for your community',
     to: '/portal/records/funeral',
     icon: IconCross,
-    color: '#5d4037',
-    gradient: 'linear-gradient(135deg, #efebe9 0%, #d7ccc8 100%)',
+    color: '#4a4a4a',
+    gradient: 'linear-gradient(135deg, #ebebeb 0%, #d4d4d4 100%)',
   },
 ];
 
@@ -143,8 +128,8 @@ const TOOLS: FeatureCard[] = [
     to: '/portal/upload',
     icon: IconUpload,
     roles: ['super_admin', 'admin', 'church_admin', 'priest'],
-    color: '#e65100',
-    gradient: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+    color: '#555555',
+    gradient: 'linear-gradient(135deg, #e8e8e8 0%, #cfcfcf 100%)',
   },
   {
     title: 'Parish Charts',
@@ -152,8 +137,8 @@ const TOOLS: FeatureCard[] = [
     to: '/portal/charts',
     icon: IconChartBar,
     roles: ['super_admin', 'admin', 'church_admin', 'priest'],
-    color: '#7b1fa2',
-    gradient: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
+    color: '#2d2d2d',
+    gradient: 'linear-gradient(135deg, #f2f2f2 0%, #dcdcdc 100%)',
   },
 ];
 
@@ -163,16 +148,16 @@ const ACCOUNT: FeatureCard[] = [
     description: 'View and update your account settings',
     to: '/portal/profile',
     icon: IconUser,
-    color: '#0277bd',
-    gradient: 'linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%)',
+    color: '#3a3a3a',
+    gradient: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
   },
   {
     title: 'User Guide',
     description: 'Documentation and help for all features',
     to: '/portal/guide',
     icon: IconHelp,
-    color: '#546e7a',
-    gradient: 'linear-gradient(135deg, #eceff1 0%, #cfd8dc 100%)',
+    color: '#616161',
+    gradient: 'linear-gradient(135deg, #eeeeee 0%, #d6d6d6 100%)',
   },
 ];
 
@@ -312,7 +297,7 @@ const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) =
   <Typography
     variant="overline"
     sx={{
-      color: 'rgba(200,162,75,0.9)',
+      color: 'text.secondary',
       fontWeight: 700,
       letterSpacing: 2,
       fontSize: '0.75rem',
@@ -330,7 +315,7 @@ const ChurchPortalHub: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { activeChurchId, churchMetadata } = useChurch();
+  const { churchMetadata } = useChurch();
   const role = user?.role || '';
   const isDark = theme.palette.mode === 'dark';
   const sessionTimeLeft = useSessionTimer();
@@ -339,28 +324,6 @@ const ChurchPortalHub: React.FC = () => {
   const greeting = user?.first_name ? `Welcome back, ${user.first_name}` : 'Welcome';
   const churchName = churchMetadata?.church_name_display || churchMetadata?.church_name;
   const roleLabel = ROLE_LABELS[role] || role;
-
-  /* ── Dashboard data ── */
-  const [dashData, setDashData] = useState<DashboardData | null>(null);
-  const [dashLoading, setDashLoading] = useState(false);
-
-  useEffect(() => {
-    if (!activeChurchId) return;
-    let cancelled = false;
-    const fetchDash = async () => {
-      setDashLoading(true);
-      try {
-        const res = await apiClient.get<any>(`/churches/${activeChurchId}/dashboard`);
-        if (!cancelled) setDashData(res.data || res);
-      } catch {
-        // Non-critical
-      } finally {
-        if (!cancelled) setDashLoading(false);
-      }
-    };
-    fetchDash();
-    return () => { cancelled = true; };
-  }, [activeChurchId]);
 
   /* ── Quick Add state ── */
   const [baptismForm, setBaptismForm] = useState<BaptismFormData>(emptyBaptism);
@@ -588,8 +551,8 @@ const ChurchPortalHub: React.FC = () => {
           position: 'relative',
           overflow: 'hidden',
           background: isDark
-            ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%)'
-            : 'linear-gradient(135deg, #f8f6f1 0%, #eee9df 30%, #f5f0e8 60%, #ece7dd 100%)',
+            ? 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)'
+            : 'linear-gradient(135deg, #fafafa 0%, #f0f0f0 30%, #f5f5f5 60%, #ebebeb 100%)',
           borderRadius: 4,
           mb: 5,
           '&::before': {
@@ -608,7 +571,9 @@ const ChurchPortalHub: React.FC = () => {
             left: '10%',
             right: '10%',
             height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(200,162,75,0.4) 50%, transparent 100%)',
+            background: isDark
+              ? 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)'
+              : 'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.12) 50%, transparent 100%)',
           },
         }}
       >
@@ -636,7 +601,7 @@ const ChurchPortalHub: React.FC = () => {
               flexShrink: 0,
               boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 20px rgba(0,0,0,0.08)',
               border: '3px solid',
-              borderColor: isDark ? 'rgba(200,162,75,0.3)' : 'rgba(200,162,75,0.25)',
+              borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
             }}
           />
 
@@ -671,10 +636,10 @@ const ChurchPortalHub: React.FC = () => {
                   size="small"
                   variant="outlined"
                   sx={{
-                    borderColor: isDark ? 'rgba(200,162,75,0.3)' : 'rgba(200,162,75,0.4)',
+                    borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
                     color: 'text.primary',
                     fontWeight: 500,
-                    '& .MuiChip-icon': { color: 'rgba(200,162,75,0.8)' },
+                    '& .MuiChip-icon': { color: 'text.secondary' },
                   }}
                 />
               )}
@@ -720,43 +685,9 @@ const ChurchPortalHub: React.FC = () => {
         </Box>
       </Box>
 
-      {/* ── Dashboard Overview ── */}
+      {/* ── Eastern Orthodox Church Records ── */}
       <Box sx={{ mb: 5 }}>
-        <SectionHeading>Dashboard Overview</SectionHeading>
-        {dashLoading ? (
-          <Box>
-            <Grid container spacing={3}>
-              {[1, 2, 3, 4].map((i) => (
-                <Grid item xs={12} sm={6} md={3} key={i}>
-                  <Skeleton variant="rounded" height={100} />
-                </Grid>
-              ))}
-              <Grid item xs={12} md={8}><Skeleton variant="rounded" height={350} /></Grid>
-              <Grid item xs={12} md={4}><Skeleton variant="rounded" height={350} /></Grid>
-            </Grid>
-          </Box>
-        ) : dashData ? (
-          <Box>
-            <Box sx={{ mb: 3 }}>
-              <SacramentCountCards counts={dashData.counts} yearOverYear={dashData.yearOverYear} />
-            </Box>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={8}>
-                <SacramentsByYearChart data={dashData.monthlyActivity} />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <TypeDistributionChart data={dashData.typeDistribution} />
-              </Grid>
-            </Grid>
-          </Box>
-        ) : !activeChurchId ? (
-          <Alert severity="info">Select a church to view dashboard data.</Alert>
-        ) : null}
-      </Box>
-
-      {/* ── Sacramental Records ── */}
-      <Box sx={{ mb: 5 }}>
-        <SectionHeading>Sacramental Records</SectionHeading>
+        <SectionHeading>Eastern Orthodox Church Records</SectionHeading>
         <Grid container spacing={3}>
           {RECORDS.map((feature) => (
             <Grid item xs={12} sm={6} md={4} key={feature.to}>
@@ -877,24 +808,24 @@ const ChurchPortalHub: React.FC = () => {
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
             {renderRecentRecords(
-              recentBaptism, recordsLoading, '#1565c0',
-              'linear-gradient(135deg, #1565c0 0%, #42a5f5 100%)',
+              recentBaptism, recordsLoading, '#1a1a1a',
+              'linear-gradient(135deg, #1a1a1a 0%, #444444 100%)',
               <BaptismIcon sx={{ fontSize: 20 }} />, 'Baptisms',
               '/portal/records/baptism', '/portal/records/baptism/new',
             )}
           </Grid>
           <Grid item xs={12} md={4}>
             {renderRecentRecords(
-              recentMarriage, recordsLoading, '#c62828',
-              'linear-gradient(135deg, #c62828 0%, #ef9a9a 100%)',
+              recentMarriage, recordsLoading, '#333333',
+              'linear-gradient(135deg, #333333 0%, #5a5a5a 100%)',
               <MarriageIcon sx={{ fontSize: 20 }} />, 'Marriages',
               '/portal/records/marriage', '/portal/records/marriage/new',
             )}
           </Grid>
           <Grid item xs={12} md={4}>
             {renderRecentRecords(
-              recentFuneral, recordsLoading, '#4a148c',
-              'linear-gradient(135deg, #4a148c 0%, #9c27b0 100%)',
+              recentFuneral, recordsLoading, '#4a4a4a',
+              'linear-gradient(135deg, #4a4a4a 0%, #6e6e6e 100%)',
               <FuneralIcon sx={{ fontSize: 20 }} />, 'Funerals',
               '/portal/records/funeral', '/portal/records/funeral/new',
             )}
