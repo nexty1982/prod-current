@@ -1,12 +1,12 @@
-import React, { useContext } from 'react';
-import { Outlet, Navigate, useLocation } from 'react-router-dom';
-import { Box, CircularProgress } from '@mui/material';
-import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import SharedFooter from '@/components/frontend-pages/shared/footer';
+import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
-import Customizer from '@/layouts/full/shared/customizer/Customizer';
 import { useAuth } from '@/context/AuthContext';
 import { CustomizerContext } from '@/context/CustomizerContext';
+import Customizer from '@/layouts/full/shared/customizer/Customizer';
+import { Box, CircularProgress, Container } from '@mui/material';
+import React, { useContext } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 const ChurchPortalLayout: React.FC = () => {
   const { authenticated, loading } = useAuth();
@@ -28,20 +28,19 @@ const ChurchPortalLayout: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <HpHeader />
-      <Box
-        component="main"
+      <Container
         sx={{
-          flexGrow: 1,
-          pt: '32px',
+          pt: '30px',
           pb: '64px',
-          px: { xs: 2, sm: 3, md: 4 },
-          maxWidth: isLayout === 'full' ? '100%' : '1400px',
+          maxWidth: isLayout === 'boxed' ? 'lg' : '100%!important',
           mx: 'auto',
-          width: '100%',
+          px: { xs: 2, sm: 3, md: 4 },
         }}
       >
-        <Outlet />
-      </Box>
+        <Box sx={{ minHeight: 'calc(100vh - 170px)' }}>
+          <Outlet />
+        </Box>
+      </Container>
       <SharedFooter />
       <ScrollToTop />
       <Customizer />

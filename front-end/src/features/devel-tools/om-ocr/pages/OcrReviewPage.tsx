@@ -4,18 +4,22 @@
  *         /devel/ocr-studio/review/:churchId/:jobId  (specific job)
  */
 
-import React, { useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { IconArrowLeft } from '@tabler/icons-react';
-import { WorkbenchProvider } from '../context/WorkbenchContext';
+import React, { useMemo } from 'react';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import OcrWorkbench from '../components/workbench/OcrWorkbench';
-import { useAuth } from '@/context/AuthContext';
+import { WorkbenchProvider } from '../context/WorkbenchContext';
 
 const OcrReviewPage: React.FC = () => {
   const theme = useTheme();
+  const location = useLocation();
+  const isPortal = location.pathname.startsWith('/portal');
   const { churchId: churchIdParam, jobId: jobIdParam } = useParams<{ churchId: string; jobId: string }>();
   const { user } = useAuth();
+
+  const backToUploadPath = isPortal ? '/portal/upload' : '/devel/ocr-studio/upload';
 
   // Resolve churchId: URL param → localStorage → user's church_id
   const churchId = useMemo(() => {
@@ -35,7 +39,7 @@ const OcrReviewPage: React.FC = () => {
         <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
           Missing church ID
         </Typography>
-        <Button component={Link} to="/devel/ocr-studio/upload" startIcon={<IconArrowLeft size={18} />}>
+        <Button component={Link} to={backToUploadPath} startIcon={<IconArrowLeft size={18} />}>
           Back to Upload
         </Button>
       </Box>
@@ -48,7 +52,7 @@ const OcrReviewPage: React.FC = () => {
       <Box sx={{ px: 2, py: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
         <Button
           component={Link}
-          to="/devel/ocr-studio/upload"
+          to={backToUploadPath}
           startIcon={<IconArrowLeft size={16} />}
           size="small"
           sx={{ fontWeight: 600, color: 'text.secondary', textTransform: 'none' }}

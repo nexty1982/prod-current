@@ -1,11 +1,13 @@
 import { Box, Stack, Typography, Container, Grid, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
+import IlluminationFlow from './IlluminationFlow';
 
 const Banner = () => {
   return (
     (<Box
       bgcolor="primary.light"
       sx={{
+        position: 'relative',  // Anchor for IlluminationFlow overlay
         paddingTop: {
           xs: '40px',
           lg: '100px',
@@ -16,7 +18,9 @@ const Banner = () => {
         },
       }}
     >
-      <Container maxWidth="lg">
+      {/* Ambient warm-gold glow + dust particles — behind content */}
+      <IlluminationFlow />
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Grid container spacing={3} justifyContent="space-between">
           <Grid
             alignItems="center"
@@ -31,8 +35,8 @@ const Banner = () => {
               fontWeight={700}
               sx={{
                 fontSize: {
-                  xs: '34px',
-                  sm: '48px',
+                  xs: '26px',
+                  sm: '36px',
                 },
               }}
             >

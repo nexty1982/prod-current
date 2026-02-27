@@ -13,6 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { IconMenu2, IconMoon, IconSun } from '@tabler/icons-react';
 import React, { useContext } from 'react';
+import HeaderAmbience from './HeaderAmbience';
 import MobileSidebar from './MobileSidebar';
 import Navigations from './Navigations';
 import PortalNavigations from './PortalNavigations';
@@ -52,8 +53,9 @@ const HpHeader = () => {
   };
 
   return (
-    <AppBarStyled position="sticky" elevation={0}>
-      <Container sx={{ maxWidth: '1400px !important' }}>
+    <AppBarStyled position="sticky" elevation={0} sx={{ position: 'sticky', overflow: 'hidden' }}>
+      <HeaderAmbience />
+      <Container sx={{ maxWidth: '1400px !important', position: 'relative', zIndex: 1 }}>
         <ToolbarStyled>
           {/* Brand */}
           <Stack direction="row" alignItems="center" spacing={1.5} component="a" href="/frontend-pages/homepage" sx={{ textDecoration: 'none' }}>

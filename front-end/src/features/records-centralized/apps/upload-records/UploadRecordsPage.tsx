@@ -9,17 +9,16 @@
 
 import { useAuth } from '@/context/AuthContext';
 import OcrPipelineJob from '@/features/ocr/components/OcrPipelineJob';
+import OcrPipelineOverview from '@/features/ocr/components/OcrPipelineOverview';
 import { apiClient } from '@/shared/lib/axiosInstance';
 import {
     Alert,
     alpha,
     Box,
     Button,
-    Checkbox,
     Chip,
     Divider,
     FormControl,
-    FormControlLabel,
     IconButton,
     InputLabel,
     LinearProgress,
@@ -34,7 +33,9 @@ import {
 import {
     IconCheck,
     IconCloudUpload,
+    IconHistory,
     IconPhoto,
+    IconScan,
     IconUpload,
     IconX
 } from '@tabler/icons-react';
@@ -89,9 +90,6 @@ const UploadRecordsPage: React.FC = () => {
   const { user } = useAuth();
 
   const isAdmin = user?.role === 'super_admin' || user?.role === 'admin';
-
-  // Phase 1 state
-  const [guidelinesAccepted, setGuidelinesAccepted] = useState(false);
 
   // Church selection (admin only)
   const [churches, setChurches] = useState<Church[]>([]);
@@ -280,7 +278,7 @@ const UploadRecordsPage: React.FC = () => {
   // =====================================================================
 
   return (
-    <Box sx={{ maxWidth: 760, mx: 'auto', py: 4, px: 2 }}>
+    <Box sx={{ py: 4, px: 2 }}>
       {/* Page header */}
       <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
         Upload Records
@@ -289,73 +287,103 @@ const UploadRecordsPage: React.FC = () => {
         Upload scanned images of church records for automated OCR processing.
       </Typography>
 
-      {/* Pipeline overview diagram */}
-      <OcrPipelineOverview />
+      {/* ── Before You Upload guidelines ── */}
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>
+          Before You Upload
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Ensure your scanned images meet quality standards for accurate OCR processing.
+        </Typography>
 
-      {/* ── Phase 1: Guidelines ── */}
-      {!guidelinesAccepted && (
-        <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>
-            Before You Upload
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Ensure your scanned images meet quality standards for accurate OCR processing.
-            Following these guidelines will improve text recognition and reduce manual corrections.
-          </Typography>
+        <Stack spacing={1.2}>
+          {[
+            'Scan pages at 300 DPI or higher for optimal OCR accuracy',
+            'Ensure images are well-lit with minimal shadows or glare',
+            'Capture full page edges and avoid cropping any text',
+            'Use JPEG or PNG format (TIFF supported for archival)',
+            'Organize files by book or volume before uploading',
+          ].map((text, i) => (
+            <Stack key={i} direction="row" alignItems="center" spacing={1.5}>
+              <Box
+                sx={{
+                  width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                  bgcolor: alpha(theme.palette.success.main, 0.12),
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <IconCheck size={14} color={theme.palette.success.main} />
+              </Box>
+              <Typography variant="body2" color="text.secondary">{text}</Typography>
+            </Stack>
+          ))}
+        </Stack>
+      </Paper>
 
-          <Stack spacing={1.2} sx={{ mb: 2.5 }}>
-            {[
-              'Scan pages at 300 DPI or higher for optimal OCR accuracy',
-              'Ensure images are well-lit with minimal shadows or glare',
-              'Capture full page edges and avoid cropping any text',
-              'Use JPEG or PNG format (TIFF supported for archival)',
-              'Organize files by book or volume before uploading',
-            ].map((text, i) => (
-              <Stack key={i} direction="row" alignItems="center" spacing={1.5}>
-                <Box
-                  sx={{
-                    width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                    bgcolor: alpha(theme.palette.success.main, 0.12),
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}
-                >
-                  <IconCheck size={14} color={theme.palette.success.main} />
-                </Box>
-                <Typography variant="body2" color="text.secondary">{text}</Typography>
-              </Stack>
-            ))}
+      {/* Quick actions for existing jobs */}
+      {effectiveChurchId && (
+        <Paper 
+          variant="outlined" 
+          sx={{ 
+            p: 2.5, 
+            mb: 3, 
+            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.03)} 0%, ${alpha(theme.palette.secondary.main, 0.03)} 100%)`,
+            borderColor: alpha(theme.palette.primary.main, 0.15),
+          }}
+        >
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" justifyContent="space-between">
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Box
+                sx={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor: alpha(theme.palette.info.main, 0.1),
+                  color: theme.palette.info.main,
+                }}
+              >
+                <IconPhoto size={22} />
+              </Box>
+              <Box>
+                <Typography variant="subtitle1" fontWeight={700}>
+                  Work on Existing Images
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Process uploaded images or view job history
+                </Typography>
+              </Box>
+            </Stack>
+            <Stack direction="row" spacing={1.5}>
+              <Button
+                variant="contained"
+                size="small"
+                href={`/portal/ocr?church=${effectiveChurchId}`}
+                startIcon={<IconScan size={16} />}
+                sx={{ whiteSpace: 'nowrap' }}
+              >
+                OCR Studio
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                href="/portal/ocr/jobs"
+                startIcon={<IconHistory size={16} />}
+                sx={{ whiteSpace: 'nowrap' }}
+              >
+                Job History
+              </Button>
+            </Stack>
           </Stack>
-
-          <Divider sx={{ my: 2.5 }} />
-
-          <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5 }}>
-            What to Expect
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            <strong>Automated Processing:</strong> Once uploaded, images are automatically processed
-            using optical character recognition to extract names, dates, and record details.
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-            <strong>Admin Review:</strong> All processed records are reviewed by your church
-            administrator before being made available. This typically takes 24-72 hours.
-          </Typography>
-
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={guidelinesAccepted}
-                onChange={(e) => setGuidelinesAccepted(e.target.checked)}
-                sx={{ color: theme.palette.primary.main, '&.Mui-checked': { color: theme.palette.primary.main } }}
-              />
-            }
-            label={<Typography variant="body2" fontWeight={500}>I understand these guidelines and I'm ready to upload.</Typography>}
-          />
         </Paper>
       )}
 
-      {/* ── Phase 2: Upload ── */}
-      {guidelinesAccepted && (
-        <>
+      {/* Pipeline overview diagram - active with real-time job status */}
+      <OcrPipelineOverview churchId={effectiveChurchId} />
+
+      {/* ── Upload Section ── */}
           {/* Admin church selector */}
           {isAdmin && (
             <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
@@ -511,25 +539,23 @@ const UploadRecordsPage: React.FC = () => {
             </Stack>
           )}
 
-          {/* Completion message */}
-          {allDone && (
-            <Box sx={{ mt: 1 }}>
-              <Alert
-                severity={failedCount === 0 ? 'success' : failedCount === queue.length ? 'error' : 'warning'}
-                sx={{ mb: 2 }}
-              >
-                {failedCount === 0
-                  ? 'Your records have been submitted for processing. Your church administrator will review them, typically within 24-72 hours.'
-                  : failedCount === queue.length
-                    ? 'All uploads failed. Please check your files and try again.'
-                    : `${completedCount} of ${queue.length} files uploaded successfully. ${failedCount} failed.`}
-              </Alert>
-              <Button variant="outlined" startIcon={<IconUpload size={18} />} onClick={resetForMore}>
-                Upload More
-              </Button>
-            </Box>
-          )}
-        </>
+      {/* Completion message */}
+      {allDone && (
+        <Box sx={{ mt: 1 }}>
+          <Alert
+            severity={failedCount === 0 ? 'success' : failedCount === queue.length ? 'error' : 'warning'}
+            sx={{ mb: 2 }}
+          >
+            {failedCount === 0
+              ? 'Your records have been submitted for processing. Your church administrator will review them, typically within 24-72 hours.'
+              : failedCount === queue.length
+                ? 'All uploads failed. Please check your files and try again.'
+                : `${completedCount} of ${queue.length} files uploaded successfully. ${failedCount} failed.`}
+          </Alert>
+          <Button variant="outlined" startIcon={<IconUpload size={18} />} onClick={resetForMore}>
+            Upload More
+          </Button>
+        </Box>
       )}
     </Box>
   );

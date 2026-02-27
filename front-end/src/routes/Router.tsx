@@ -1923,6 +1923,24 @@ const Router = [
           </ProtectedRoute>
         ),
       },
+      // OCR Studio (portal version)
+      {
+        path: 'ocr',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <OCRStudioPage />
+          </ProtectedRoute>
+        ),
+      },
+      // OCR Jobs History (portal version)
+      {
+        path: 'ocr/jobs',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <OcrReviewPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
   {
