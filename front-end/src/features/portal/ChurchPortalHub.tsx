@@ -36,6 +36,7 @@ import {
   IconShieldCheck,
   IconBuildingChurch,
   IconLogin,
+  IconCertificate,
 } from '@tabler/icons-react';
 import {
   ChildCare as BaptismIcon,
@@ -140,6 +141,14 @@ const TOOLS: FeatureCard[] = [
     roles: ['super_admin', 'admin', 'church_admin', 'priest'],
     color: '#2d2d2d',
     gradient: 'linear-gradient(135deg, #f2f2f2 0%, #dcdcdc 100%)',
+  },
+  {
+    title: 'Certificates',
+    description: 'Generate baptism and marriage certificates from your records',
+    to: '/portal/certificates/generate',
+    icon: IconCertificate,
+    color: '#1a1a1a',
+    gradient: 'linear-gradient(135deg, #e8e8e8 0%, #cfcfcf 100%)',
   },
 ];
 

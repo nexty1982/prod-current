@@ -1874,6 +1874,15 @@ const Router = [
           </ProtectedRoute>
         ),
       },
+      // Certificates
+      {
+        path: 'certificates/generate',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <CertificateGeneratorPage />
+          </ProtectedRoute>
+        ),
+      },
       // User Profile
       {
         path: 'profile',

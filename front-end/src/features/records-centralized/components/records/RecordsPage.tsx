@@ -1079,7 +1079,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       // Fallback to first available church from the churches list
       churchId = churches.length > 0 ? churches[0].id : 46;
     }
-    const certUrl = `/apps/certificates/generate?recordType=${selectedRecordType}&recordId=${viewingRecord.id}&churchId=${churchId}`;
+    const certUrl = `/portal/certificates/generate?recordType=${selectedRecordType}&recordId=${viewingRecord.id}&churchId=${churchId}`;
     window.open(certUrl, '_blank');
   }, [viewingRecord, selectedChurch, selectedRecordType, churches]);
 
