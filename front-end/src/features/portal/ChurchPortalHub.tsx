@@ -1,53 +1,53 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { metricsAPI } from '@/api/metrics.api';
+import { apiClient } from '@/api/utils/axiosInstance';
+import { useAuth } from '@/context/AuthContext';
+import { useChurch } from '@/context/ChurchContext';
 import {
+  Add as AddIcon,
+  ChildCare as BaptismIcon,
+  LocalFlorist as FuneralIcon,
+  Favorite as MarriageIcon,
+} from '@mui/icons-material';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
   Box,
+  Button,
   Card,
   CardActionArea,
   CardContent,
-  Grid,
-  Typography,
-  useTheme,
   Chip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  TextField,
-  Button,
   CircularProgress,
-  Alert,
-  Snackbar,
   Divider,
+  Grid,
   Skeleton,
+  Snackbar,
+  TextField,
+  Typography,
   alpha,
+  useTheme,
 } from '@mui/material';
 import {
-  IconBook2,
-  IconHeart,
-  IconCross,
-  IconUpload,
-  IconChartBar,
-  IconUser,
-  IconHelp,
   IconArrowRight,
-  IconChevronDown,
-  IconPlus,
-  IconClock,
-  IconShieldCheck,
+  IconBook2,
   IconBuildingChurch,
-  IconLogin,
   IconCertificate,
+  IconChartBar,
+  IconChevronDown,
+  IconClock,
+  IconCross,
+  IconHeart,
+  IconHelp,
+  IconLogin,
+  IconPlus,
+  IconShieldCheck,
+  IconUpload,
+  IconUser,
 } from '@tabler/icons-react';
-import {
-  ChildCare as BaptismIcon,
-  Favorite as MarriageIcon,
-  LocalFlorist as FuneralIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
-import { useAuth } from '@/context/AuthContext';
-import { useChurch } from '@/context/ChurchContext';
-import { apiClient } from '@/api/utils/axiosInstance';
-import { metricsAPI } from '@/api/metrics.api';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 /* ─── Types ─── */
 
@@ -615,144 +615,222 @@ const ChurchPortalHub: React.FC = () => {
   return (
     <Box sx={{ minHeight: '60vh' }}>
       {/* ── Hero Section ── */}
-      <Box
-        sx={{
-          position: 'relative',
-          overflow: 'hidden',
-          background: isDark
-            ? 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)'
-            : 'linear-gradient(135deg, #fafafa 0%, #f0f0f0 30%, #f5f5f5 60%, #ebebeb 100%)',
-          borderRadius: 4,
-          mb: 5,
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            opacity: isDark ? 0.06 : 0.04,
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23000000' fill-opacity='0'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23000000' fill-opacity='0.4'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23000000' fill-opacity='0.25'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat',
-            pointerEvents: 'none',
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: 0,
-            left: '10%',
-            right: '10%',
-            height: '1px',
-            background: isDark
-              ? 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)'
-              : 'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.12) 50%, transparent 100%)',
-          },
-        }}
-      >
-        <Box
-          sx={{
-            position: 'relative',
-            zIndex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: { xs: 3, md: 4 },
-            px: { xs: 3, sm: 4, md: 5 },
-            py: { xs: 4, sm: 5, md: 6 },
-          }}
-        >
-          {/* Logo */}
+      {activeChurchId === 46 ? (
+        /* ── Church 46: Header image + info bar ── */
+        <Box sx={{ mb: 5 }}>
+          {/* Church header image — natural size, centered, no stretch */}
           <Box
-            component="img"
-            src="/images/logos/om-logo.png"
-            alt="Orthodox Metrics"
             sx={{
-              width: { xs: 64, sm: 80, md: 96 },
-              height: { xs: 64, sm: 80, md: 96 },
-              borderRadius: '50%',
-              objectFit: 'cover',
-              flexShrink: 0,
-              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 20px rgba(0,0,0,0.08)',
-              border: '3px solid',
-              borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+              display: 'flex',
+              justifyContent: 'center',
+              bgcolor: isDark ? '#111' : '#f5f4f0',
+              borderRadius: '16px 16px 0 0',
+              overflow: 'hidden',
             }}
-          />
-
-          {/* Text + info chips */}
-          <Box sx={{ flex: 1 }}>
+          >
+            <Box
+              component="img"
+              src="/uploads/om_church_46/custom_images/46-header-latest.png"
+              alt="SS Peter & Paul Orthodox Church"
+              sx={{
+                maxWidth: '100%',
+                height: 'auto',
+                display: 'block',
+                objectFit: 'contain',
+              }}
+            />
+          </Box>
+          {/* Info bar below the image */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: { xs: 1.5, md: 2.5 },
+              px: { xs: 2.5, sm: 3, md: 4 },
+              py: { xs: 1.5, sm: 2 },
+              bgcolor: isDark ? 'rgba(255,255,255,0.04)' : '#fff',
+              borderRadius: '0 0 16px 16px',
+              border: '1px solid',
+              borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+              borderTop: 'none',
+            }}
+          >
             <Typography
-              variant="h3"
+              variant="h6"
               component="h1"
               sx={{
                 fontFamily: '"Cormorant Garamond", "Palatino Linotype", Georgia, serif',
                 fontWeight: 700,
-                fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
+                fontSize: { xs: '1.1rem', sm: '1.25rem' },
                 color: 'text.primary',
-                lineHeight: 1.2,
+                mr: 'auto',
               }}
             >
               {greeting}
             </Typography>
-            <Typography
-              variant="h6"
-              sx={{ mt: 1, fontWeight: 400, color: 'text.secondary', fontSize: { xs: '0.95rem', sm: '1.1rem' } }}
-            >
-              Your parish management portal
-            </Typography>
-
-            {/* Info chips row */}
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mt: 2 }}>
-              {churchName && (
+            <Chip
+              icon={<IconShieldCheck size={14} />}
+              label={roleLabel}
+              size="small"
+              variant="outlined"
+              sx={{
+                borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+                color: 'text.primary',
+                fontWeight: 500,
+                '& .MuiChip-icon': { color: 'text.secondary' },
+              }}
+            />
+            <Chip
+              icon={<IconClock size={14} />}
+              label={`Session: ${sessionTimeLeft}`}
+              size="small"
+              variant="outlined"
+              sx={{
+                borderColor: isDark ? 'rgba(76,175,80,0.3)' : 'rgba(76,175,80,0.4)',
+                color: isDark ? 'rgba(129,199,132,0.9)' : '#2e7d32',
+                fontWeight: 500,
+                '& .MuiChip-icon': { color: isDark ? 'rgba(129,199,132,0.9)' : '#2e7d32' },
+              }}
+            />
+          </Box>
+        </Box>
+      ) : (
+        /* ── Default Hero (non-church-46) ── */
+        <Box
+          sx={{
+            position: 'relative',
+            overflow: 'hidden',
+            background: isDark
+              ? 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)'
+              : 'linear-gradient(135deg, #fafafa 0%, #f0f0f0 30%, #f5f5f5 60%, #ebebeb 100%)',
+            borderRadius: 4,
+            mb: 5,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              inset: 0,
+              opacity: isDark ? 0.06 : 0.04,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23000000' fill-opacity='0'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23000000' fill-opacity='0.4'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23000000' fill-opacity='0.25'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'repeat',
+              pointerEvents: 'none',
+            },
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: 0,
+              left: '10%',
+              right: '10%',
+              height: '1px',
+              background: isDark
+                ? 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)'
+                : 'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.12) 50%, transparent 100%)',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              position: 'relative',
+              zIndex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: { xs: 3, md: 4 },
+              px: { xs: 3, sm: 4, md: 5 },
+              py: { xs: 4, sm: 5, md: 6 },
+            }}
+          >
+            <Box
+              component="img"
+              src="/images/logos/om-logo.png"
+              alt="Orthodox Metrics"
+              sx={{
+                width: { xs: 64, sm: 80, md: 96 },
+                height: { xs: 64, sm: 80, md: 96 },
+                borderRadius: '50%',
+                objectFit: 'cover',
+                flexShrink: 0,
+                boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 20px rgba(0,0,0,0.08)',
+                border: '3px solid',
+                borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+              }}
+            />
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                variant="h3"
+                component="h1"
+                sx={{
+                  fontFamily: '"Cormorant Garamond", "Palatino Linotype", Georgia, serif',
+                  fontWeight: 700,
+                  fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
+                  color: 'text.primary',
+                  lineHeight: 1.2,
+                }}
+              >
+                {greeting}
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{ mt: 1, fontWeight: 400, color: 'text.secondary', fontSize: { xs: '0.95rem', sm: '1.1rem' } }}
+              >
+                Your parish management portal
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mt: 2 }}>
+                {churchName && (
+                  <Chip
+                    icon={<IconBuildingChurch size={16} />}
+                    label={churchName}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
+                      color: 'text.primary',
+                      fontWeight: 500,
+                      '& .MuiChip-icon': { color: 'text.secondary' },
+                    }}
+                  />
+                )}
                 <Chip
-                  icon={<IconBuildingChurch size={16} />}
-                  label={churchName}
+                  icon={<IconShieldCheck size={16} />}
+                  label={roleLabel}
                   size="small"
                   variant="outlined"
                   sx={{
-                    borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
+                    borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
                     color: 'text.primary',
                     fontWeight: 500,
                     '& .MuiChip-icon': { color: 'text.secondary' },
                   }}
                 />
-              )}
-              <Chip
-                icon={<IconShieldCheck size={16} />}
-                label={roleLabel}
-                size="small"
-                variant="outlined"
-                sx={{
-                  borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
-                  color: 'text.primary',
-                  fontWeight: 500,
-                  '& .MuiChip-icon': { color: 'text.secondary' },
-                }}
-              />
-              {user?.last_login && (
+                {user?.last_login && (
+                  <Chip
+                    icon={<IconLogin size={16} />}
+                    label={`Last login: ${formatLastLogin(user.last_login)}`}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+                      color: 'text.secondary',
+                      '& .MuiChip-icon': { color: 'text.secondary' },
+                    }}
+                  />
+                )}
                 <Chip
-                  icon={<IconLogin size={16} />}
-                  label={`Last login: ${formatLastLogin(user.last_login)}`}
+                  icon={<IconClock size={16} />}
+                  label={`Session: ${sessionTimeLeft}`}
                   size="small"
                   variant="outlined"
                   sx={{
-                    borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
-                    color: 'text.secondary',
-                    '& .MuiChip-icon': { color: 'text.secondary' },
+                    borderColor: isDark ? 'rgba(76,175,80,0.3)' : 'rgba(76,175,80,0.4)',
+                    color: isDark ? 'rgba(129,199,132,0.9)' : '#2e7d32',
+                    fontWeight: 500,
+                    '& .MuiChip-icon': { color: isDark ? 'rgba(129,199,132,0.9)' : '#2e7d32' },
                   }}
                 />
-              )}
-              <Chip
-                icon={<IconClock size={16} />}
-                label={`Session: ${sessionTimeLeft}`}
-                size="small"
-                variant="outlined"
-                sx={{
-                  borderColor: isDark ? 'rgba(76,175,80,0.3)' : 'rgba(76,175,80,0.4)',
-                  color: isDark ? 'rgba(129,199,132,0.9)' : '#2e7d32',
-                  fontWeight: 500,
-                  '& .MuiChip-icon': { color: isDark ? 'rgba(129,199,132,0.9)' : '#2e7d32' },
-                }}
-              />
+              </Box>
             </Box>
           </Box>
         </Box>
-      </Box>
+      )}
 
       {/* ── Eastern Orthodox Church Records ── */}
       <Box sx={{ mb: 5 }}>
