@@ -45,6 +45,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 import { useChurch } from '@/context/ChurchContext';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { metricsAPI } from '@/api/metrics.api';
 
 /* ─── Types ─── */
@@ -315,15 +316,43 @@ const ChurchPortalHub: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { churchMetadata } = useChurch();
+  const { activeChurchId, churchMetadata } = useChurch();
   const role = user?.role || '';
   const isDark = theme.palette.mode === 'dark';
   const sessionTimeLeft = useSessionTimer();
 
   const visibleTools = TOOLS.filter((f) => !f.roles || f.roles.includes(role));
   const greeting = user?.first_name ? `Welcome back, ${user.first_name}` : 'Welcome';
-  const churchName = churchMetadata?.church_name_display || churchMetadata?.church_name;
   const roleLabel = ROLE_LABELS[role] || role;
+
+  /* ── Church name resolution ── */
+  const metaChurchName = churchMetadata?.church_name_display || churchMetadata?.church_name;
+  const [resolvedChurchName, setResolvedChurchName] = useState<string | null>(null);
+
+  useEffect(() => {
+    // If metadata has a real name, use it
+    if (metaChurchName && metaChurchName !== 'System Admin') {
+      setResolvedChurchName(metaChurchName);
+      return;
+    }
+    // Fallback: fetch from /my/churches
+    if (!activeChurchId) return;
+    let cancelled = false;
+    const fetchName = async () => {
+      try {
+        const res: any = await apiClient.get('/my/churches');
+        const raw = res.data?.churches || res.churches || [];
+        const match = (Array.isArray(raw) ? raw : []).find((c: any) => c.id === activeChurchId);
+        if (!cancelled && match) {
+          setResolvedChurchName(match.name || match.church_name || null);
+        }
+      } catch { /* non-critical */ }
+    };
+    fetchName();
+    return () => { cancelled = true; };
+  }, [activeChurchId, metaChurchName]);
+
+  const churchName = resolvedChurchName;
 
   /* ── Quick Add state ── */
   const [baptismForm, setBaptismForm] = useState<BaptismFormData>(emptyBaptism);
