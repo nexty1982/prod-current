@@ -33,6 +33,7 @@ import { detectAndCropROI } from '../ocr/preprocessing/roiCrop';
 import { detectAndSplitSpread } from '../ocr/preprocessing/splitSpread';
 import { normalizeBackground } from '../ocr/preprocessing/bgNormalize';
 import { gridPreserveDenoise } from '../ocr/preprocessing/denoise';
+import { generateRedactionMask } from '../ocr/preprocessing/redaction';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -644,10 +645,95 @@ async function preprocessPage(
         }
       }
 
-      // ── Quality score: compute from post-denoise image ──────────────
+      // ── Step 1B.3: Conservative redaction mask ─────────────────────
+      // Non-destructive: produces a mask but does NOT alter the image.
       const postDenoiseInput = denoiseResult.applied && denoiseResult.denoisedBuffer
         ? denoiseResult.denoisedBuffer
         : postBgInput;
+
+      const redactionResult = await generateRedactionMask(postDenoiseInput);
+
+      // Write redaction_geometry.json (always, atomic)
+      const redactionGeometryPath = path.join(pageDir, 'redaction_geometry.json');
+      const redactionPayload: Record<string, any> = {
+        method: redactionResult.method,
+        applied: redactionResult.applied,
+        confidence: redactionResult.confidence,
+        reasons: redactionResult.reasons,
+        redacted_area_frac: redactionResult.redactedAreaFrac,
+        tile_stats: redactionResult.tileStats,
+        thresholds: redactionResult.thresholds,
+        input_dimensions: redactionResult.inputDimensions,
+      };
+
+      // Write redaction_mask.png (always, atomic)
+      const redactionMaskPath = path.join(pageDir, 'redaction_mask.png');
+      atomicWriteFileSync(redactionMaskPath, redactionResult.maskBuffer);
+      redactionPayload.mask_image_path = redactionMaskPath;
+
+      if (redactionResult.applied) {
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: redaction mask ` +
+          `(conf=${redactionResult.confidence.toFixed(3)}, ${(redactionResult.redactedAreaFrac * 100).toFixed(1)}% redacted, ` +
+          `${redactionResult.tileStats.redactedTiles} tiles)`
+        );
+      } else {
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+          `no redaction (reasons=${redactionResult.reasons.join(',')}, conf=${redactionResult.confidence.toFixed(3)})`
+        );
+      }
+
+      const redactionGeometryJson = JSON.stringify(redactionPayload, null, 2);
+      atomicWriteFileSync(redactionGeometryPath, redactionGeometryJson);
+
+      // Merge redaction metrics
+      mergeMetrics(metricsPath, {
+        redaction_applied: redactionResult.applied,
+        redaction_confidence: redactionResult.confidence,
+        redaction_method: redactionResult.method,
+        redaction_area_frac: redactionResult.redactedAreaFrac,
+      });
+
+      // Insert redaction_geometry artifact into DB
+      const redactionGeoBytes = Buffer.byteLength(redactionGeometryJson, 'utf8');
+      const redactionGeoSha256 = crypto.createHash('sha256').update(redactionGeometryJson).digest('hex');
+      await tenantPool.execute(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type)
+         VALUES (?, 'redaction_geometry', ?, ?, ?, ?, 'application/json')`,
+        [
+          page.id,
+          redactionGeometryPath,
+          JSON.stringify({
+            applied: redactionResult.applied,
+            confidence: redactionResult.confidence,
+            method: redactionResult.method,
+            redacted_area_frac: redactionResult.redactedAreaFrac,
+          }),
+          redactionGeoSha256,
+          redactionGeoBytes,
+        ]
+      );
+
+      // Insert redaction_mask artifact into DB
+      const maskBytes = redactionResult.maskBuffer.length;
+      const maskSha256 = crypto.createHash('sha256').update(redactionResult.maskBuffer).digest('hex');
+      await tenantPool.execute(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type)
+         VALUES (?, 'redaction_mask', ?, ?, ?, ?, 'image/png')`,
+        [
+          page.id,
+          redactionMaskPath,
+          JSON.stringify({
+            applied: redactionResult.applied,
+            redacted_area_frac: redactionResult.redactedAreaFrac,
+          }),
+          maskSha256,
+          maskBytes,
+        ]
+      );
+
+      // ── Quality score: compute from post-denoise image ──────────────
 
       const meta = await sharp(postDenoiseInput).metadata();
       const origW = meta.width!;

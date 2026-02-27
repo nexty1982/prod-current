@@ -37,3 +37,9 @@ export type {
   DenoiseResult,
   DenoiseMetrics,
 } from './denoise';
+
+export { generateRedactionMask } from './redaction';
+export type {
+  RedactionOptions,
+  RedactionResult,
+} from './redaction';
