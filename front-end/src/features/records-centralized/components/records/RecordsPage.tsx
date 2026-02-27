@@ -53,7 +53,7 @@ import {
     Typography
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { ColDef, ICellRendererParams } from 'ag-grid-community';
+import { ColDef, ICellRendererParams, themeQuartz } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -641,6 +641,28 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
   // Theme hook for dark mode detection
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
+
+  // AG Grid theme using Theming API (v34+) — matches MUI palette colors
+  const agGridTheme = useMemo(() => {
+    return themeQuartz.withParams(isDarkMode ? {
+      backgroundColor: '#0a0a0a',
+      headerBackgroundColor: theme.palette.primary.main,
+      headerTextColor: theme.palette.primary.contrastText,
+      foregroundColor: '#e0e0e0',
+      oddRowBackgroundColor: '#111111',
+      rowHoverColor: '#222222',
+      selectedRowBackgroundColor: '#333333',
+      borderColor: '#333333',
+    } : {
+      headerBackgroundColor: theme.palette.primary.main,
+      headerTextColor: theme.palette.primary.contrastText,
+      foregroundColor: '#1a1a1a',
+      oddRowBackgroundColor: '#fafafa',
+      rowHoverColor: '#eeeeee',
+      selectedRowBackgroundColor: '#e0e0e0',
+      borderColor: '#e0e0e0',
+    });
+  }, [isDarkMode, theme.palette.primary.main, theme.palette.primary.contrastText]);
 
   // Toast helper functions
   const showToast = useCallback((message: string, severity: 'success' | 'error' | 'info' = 'success') => {
@@ -1954,22 +1976,10 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
 
                   {/* Conditional Table Rendering */}
                 {useAgGrid ? (
-                  // AG Grid View — inherits table theme colors
-                  <Box
-                    sx={{
-                      height: 600,
-                      width: '100%',
-                      '& .ag-header': {
-                        backgroundColor: 'primary.main',
-                        color: 'primary.contrastText',
-                      },
-                      '& .ag-header-cell, & .ag-header-cell-label, & .ag-icon': {
-                        color: 'inherit',
-                      },
-                    }}
-                    className={isDarkMode ? 'ag-theme-quartz-dark' : 'ag-theme-quartz'}
-                  >
+                  // AG Grid View — uses Theming API (v34+) for consistent styling
+                  <Box sx={{ height: 600, width: '100%' }}>
                     <AgGridReact
+                      theme={agGridTheme}
                       rowData={filteredAndSortedRecords}
                       columnDefs={agGridColumnDefs}
                       icons={agGridIconMap}
