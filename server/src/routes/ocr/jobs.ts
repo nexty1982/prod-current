@@ -1204,6 +1204,375 @@ function createRouters(upload: any) {
   });
 
   // -----------------------------------------------------------------------
+  // GET /jobs/:jobId/review/commit-batches — List commit batches for a job
+  // (super_admin only)
+  // -----------------------------------------------------------------------
+  churchJobsRouter.get('/jobs/:jobId/review/commit-batches', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const user = req.session?.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'super_admin required' });
+      }
+
+      console.log(`[OCR Batches] GET /jobs/${jobId}/review/commit-batches (church ${churchId})`);
+
+      const resolved = await resolveChurchDb(churchId);
+      if (!resolved) return res.status(404).json({ error: 'Church not found' });
+      const { db: tenantPool } = resolved;
+
+      // Find all autocommit_plan + autocommit_results artifacts for this job
+      const [artifacts] = await tenantPool.query(
+        `SELECT a.id, a.type, a.storage_path, a.json_blob, a.created_at, a.sha256, a.bytes
+         FROM ocr_feeder_artifacts a
+         JOIN ocr_feeder_pages p ON a.page_id = p.id
+         WHERE p.job_id = ? AND a.type IN ('autocommit_plan', 'autocommit_results', 'rollback_results')
+         ORDER BY a.created_at ASC`,
+        [jobId],
+      );
+
+      // Group by batch_id
+      const batchMap = new Map<string, any>();
+
+      for (const art of artifacts as any[]) {
+        let data: any = null;
+        try {
+          if (art.storage_path && fs.existsSync(art.storage_path)) {
+            data = JSON.parse(fs.readFileSync(art.storage_path, 'utf8'));
+          } else if (art.json_blob) {
+            data = typeof art.json_blob === 'string' ? JSON.parse(art.json_blob) : art.json_blob;
+          }
+        } catch (_) {}
+
+        if (!data?.batch_id) continue;
+        const batchId = data.batch_id;
+
+        if (!batchMap.has(batchId)) {
+          batchMap.set(batchId, {
+            batch_id: batchId,
+            created_at: null,
+            plan: null,
+            results: null,
+            rollback: null,
+            rolled_back: false,
+          });
+        }
+
+        const entry = batchMap.get(batchId)!;
+
+        if (art.type === 'autocommit_plan') {
+          entry.plan = {
+            eligible_count: data.eligible_count ?? 0,
+            skipped_count: data.skipped_count ?? 0,
+            total_candidates: data.total_candidates ?? 0,
+            thresholds: data.thresholds ?? null,
+            structure_score: data.structure_score ?? null,
+            template_used: data.template_used ?? false,
+            method: data.method ?? 'unknown',
+          };
+          entry.created_at = data.created_at || art.created_at;
+        } else if (art.type === 'autocommit_results') {
+          entry.results = {
+            committed_count: data.committed_count ?? 0,
+            skipped_count: data.skipped_count ?? 0,
+            error_count: data.error_count ?? 0,
+            rows: (data.rows || []).map((r: any) => ({
+              candidateIndex: r.candidateIndex,
+              outcome: r.outcome,
+              recordId: r.recordId,
+              recordType: r.recordType,
+              table: r.table,
+            })),
+          };
+        } else if (art.type === 'rollback_results') {
+          entry.rollback = {
+            deleted: data.deleted ?? {},
+            missing: data.missing ?? {},
+            rolled_back_at: data.rolled_back_at ?? art.created_at,
+            rolled_back_by: data.rolled_back_by ?? 'unknown',
+          };
+          entry.rolled_back = true;
+        }
+      }
+
+      const batches = Array.from(batchMap.values()).sort(
+        (a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime(),
+      );
+
+      res.json({ ok: true, job_id: jobId, church_id: churchId, batches });
+    } catch (error: any) {
+      console.error('[OCR Batches] Error:', error);
+      res.status(500).json({ error: 'Failed to list batches', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // POST /jobs/:jobId/review/rollback-batch — Rollback an autocommit batch
+  // (super_admin only)
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/review/rollback-batch', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const user = req.session?.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'super_admin required' });
+      }
+
+      const { batch_id, dry_run, force } = req.body || {};
+      if (!batch_id || typeof batch_id !== 'string') {
+        return res.status(400).json({ error: 'batch_id is required' });
+      }
+
+      const isDryRun = dry_run === true;
+      const userEmail = user.email || 'system';
+
+      console.log(`[OCR Rollback] POST /jobs/${jobId}/review/rollback-batch batch=${batch_id} dry_run=${isDryRun}`);
+
+      const resolved = await resolveChurchDb(churchId);
+      if (!resolved) return res.status(404).json({ error: 'Church not found' });
+      const { db: tenantPool } = resolved;
+
+      // 1. Locate autocommit_results artifact for this batch
+      const [resultArts] = await tenantPool.query(
+        `SELECT a.id, a.storage_path, a.json_blob, a.page_id
+         FROM ocr_feeder_artifacts a
+         JOIN ocr_feeder_pages p ON a.page_id = p.id
+         WHERE p.job_id = ? AND a.type = 'autocommit_results'
+         ORDER BY a.created_at DESC`,
+        [jobId],
+      );
+
+      let resultsData: any = null;
+      let artifactPageId: number | null = null;
+      for (const art of resultArts as any[]) {
+        let data: any = null;
+        try {
+          if (art.storage_path && fs.existsSync(art.storage_path)) {
+            data = JSON.parse(fs.readFileSync(art.storage_path, 'utf8'));
+          } else if (art.json_blob) {
+            data = typeof art.json_blob === 'string' ? JSON.parse(art.json_blob) : art.json_blob;
+          }
+        } catch (_) {}
+        if (data?.batch_id === batch_id) {
+          resultsData = data;
+          artifactPageId = art.page_id;
+          break;
+        }
+      }
+
+      if (!resultsData) {
+        return res.status(404).json({ error: `No autocommit_results found for batch_id=${batch_id}` });
+      }
+
+      // 2. Check if already rolled back
+      const [rollbackArts] = await tenantPool.query(
+        `SELECT a.id FROM ocr_feeder_artifacts a
+         JOIN ocr_feeder_pages p ON a.page_id = p.id
+         WHERE p.job_id = ? AND a.type = 'rollback_results'`,
+        [jobId],
+      );
+      for (const ra of rollbackArts as any[]) {
+        // Check if this rollback is for our batch
+        // We'll check by artifact content — but since we're here, just check existence
+      }
+      // More precise: check rollback artifact content
+      let alreadyRolledBack = false;
+      for (const ra of rollbackArts as any[]) {
+        // We'd need to read each one — but for efficiency, we'll use a simpler approach
+        // The rollback_results artifact stores batch_id in its content
+      }
+      // Simplified: check via audit history
+      const [historyRows] = await promisePool.query(
+        `SELECT message FROM ocr_job_history WHERE job_id = ? AND stage = 'rollback' AND status = 'completed'`,
+        [jobId],
+      );
+      for (const hr of historyRows as any[]) {
+        try {
+          const msg = typeof hr.message === 'string' ? JSON.parse(hr.message) : hr.message;
+          if (msg?.batch_id === batch_id) {
+            alreadyRolledBack = true;
+            break;
+          }
+        } catch (_) {}
+      }
+
+      if (alreadyRolledBack && !force) {
+        return res.status(409).json({
+          error: 'Batch already rolled back',
+          hint: 'Pass force=true to rollback again (may find 0 rows to delete)',
+        });
+      }
+
+      // 3. Parse committed rows from results
+      const committedRows: Array<{ recordId: number; table: string; recordType: string }> = [];
+      for (const row of resultsData.rows || []) {
+        if (row.outcome === 'committed' && row.recordId && row.table) {
+          committedRows.push({
+            recordId: row.recordId,
+            table: row.table,
+            recordType: row.recordType || 'unknown',
+          });
+        }
+      }
+
+      if (committedRows.length === 0) {
+        return res.json({
+          ok: true,
+          dry_run: isDryRun,
+          batch_id,
+          deleted: {},
+          missing: {},
+          message: 'No committed rows found in batch — nothing to rollback',
+        });
+      }
+
+      // 4. Group by table for batch deletion
+      const byTable = new Map<string, number[]>();
+      for (const r of committedRows) {
+        if (!byTable.has(r.table)) byTable.set(r.table, []);
+        byTable.get(r.table)!.push(r.recordId);
+      }
+
+      // 5. Verify which rows still exist (for both dry run and real rollback)
+      const deleted: Record<string, number> = {};
+      const missing: Record<string, number> = {};
+      const existingIds: Map<string, number[]> = new Map();
+      const missingIds: Map<string, number[]> = new Map();
+
+      for (const [table, ids] of byTable) {
+        const placeholders = ids.map(() => '?').join(',');
+        const [rows] = await tenantPool.query(
+          `SELECT id FROM \`${table}\` WHERE id IN (${placeholders}) AND church_id = ?`,
+          [...ids, churchId],
+        );
+        const foundIds = new Set((rows as any[]).map((r: any) => r.id));
+        const found = ids.filter(id => foundIds.has(id));
+        const notFound = ids.filter(id => !foundIds.has(id));
+
+        existingIds.set(table, found);
+        missingIds.set(table, notFound);
+        deleted[table] = found.length;
+        missing[table] = notFound.length;
+      }
+
+      // 6. Dry run — just return counts
+      if (isDryRun) {
+        return res.json({
+          ok: true,
+          dry_run: true,
+          batch_id,
+          deleted,
+          missing,
+          total_would_delete: Object.values(deleted).reduce((a, b) => a + b, 0),
+          total_missing: Object.values(missing).reduce((a, b) => a + b, 0),
+          details: {
+            existing_ids: Object.fromEntries(existingIds),
+            missing_ids: Object.fromEntries(missingIds),
+          },
+        });
+      }
+
+      // 7. Real rollback — delete in transaction
+      const conn = await tenantPool.getConnection();
+      try {
+        await conn.beginTransaction();
+
+        for (const [table, ids] of existingIds) {
+          if (ids.length === 0) continue;
+          const placeholders = ids.map(() => '?').join(',');
+          await conn.query(
+            `DELETE FROM \`${table}\` WHERE id IN (${placeholders}) AND church_id = ?`,
+            [...ids, churchId],
+          );
+        }
+
+        await conn.commit();
+      } catch (txErr: any) {
+        await conn.rollback();
+        throw txErr;
+      } finally {
+        conn.release();
+      }
+
+      // 8. Write rollback_results.json artifact
+      const rollbackResult = {
+        method: 'autocommit_rollback_v1',
+        batch_id,
+        job_id: jobId,
+        church_id: churchId,
+        deleted,
+        missing,
+        deleted_ids: Object.fromEntries(existingIds),
+        missing_ids: Object.fromEntries(missingIds),
+        total_deleted: Object.values(deleted).reduce((a, b) => a + b, 0),
+        total_missing: Object.values(missing).reduce((a, b) => a + b, 0),
+        rolled_back_by: userEmail,
+        rolled_back_at: new Date().toISOString(),
+        force: !!force,
+      };
+
+      // Find page dir from artifact path
+      let pageDir: string | null = null;
+      if (artifactPageId) {
+        const [pageRows] = await tenantPool.query(
+          `SELECT page_index FROM ocr_feeder_pages WHERE id = ?`, [artifactPageId],
+        );
+        if ((pageRows as any[]).length > 0) {
+          const pageIndex = (pageRows as any[])[0].page_index;
+          pageDir = path.join(__dirname, '../../../storage/feeder', `job_${jobId}`, `page_${pageIndex}`);
+        }
+      }
+
+      if (pageDir && fs.existsSync(pageDir)) {
+        const rollbackJson = JSON.stringify(rollbackResult, null, 2);
+        const rollbackPath = path.join(pageDir, 'rollback_results.json');
+        const tmpPath = rollbackPath + '.tmp';
+        fs.writeFileSync(tmpPath, rollbackJson);
+        fs.renameSync(tmpPath, rollbackPath);
+
+        const rollbackSha = crypto.createHash('sha256').update(rollbackJson).digest('hex');
+        await tenantPool.query(
+          `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, sha256, bytes, mime_type, created_at)
+           VALUES (?, 'rollback_results', ?, ?, ?, 'application/json', NOW())`,
+          [artifactPageId, rollbackPath, rollbackSha, Buffer.byteLength(rollbackJson)],
+        );
+      }
+
+      // 9. Audit history
+      await promisePool.query(
+        `INSERT INTO ocr_job_history (job_id, stage, status, message, created_at)
+         VALUES (?, 'rollback', 'completed', ?, NOW())`,
+        [jobId, JSON.stringify({
+          action: 'AUTOCOMMIT_ROLLBACK',
+          batch_id,
+          deleted,
+          missing,
+          total_deleted: rollbackResult.total_deleted,
+          rolled_back_by: userEmail,
+          force: !!force,
+        })],
+      );
+
+      console.log(`[OCR Rollback] Batch ${batch_id} rolled back: ${rollbackResult.total_deleted} deleted, ${rollbackResult.total_missing} missing`);
+
+      res.json({
+        ok: true,
+        dry_run: false,
+        batch_id,
+        deleted,
+        missing,
+        total_deleted: rollbackResult.total_deleted,
+        total_missing: rollbackResult.total_missing,
+      });
+    } catch (error: any) {
+      console.error('[OCR Rollback] Error:', error);
+      res.status(500).json({ error: 'Rollback failed', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // POST /jobs/:jobId/save-draft — Auto-save field edits without finalizing
   // -----------------------------------------------------------------------
   churchJobsRouter.post('/jobs/:jobId/save-draft', async (req: any, res: any) => {

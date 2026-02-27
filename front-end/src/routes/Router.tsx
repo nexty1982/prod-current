@@ -161,6 +161,7 @@ const OcrTableExtractorPage = Loadable(lazy(() => import('../features/devel-tool
 const LayoutTemplateEditorPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/LayoutTemplateEditorPage')));
 const OcrActivityMonitor = Loadable(lazy(() => import('../features/admin/OcrActivityMonitor')));
 const OcrOperationsDashboard = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrOperationsDashboard')));
+const OcrBatchManager = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrBatchManager')));
 const OMTasksPage = Loadable(lazy(() => import('../features/devel-tools/om-tasks/OMTasksPage')));
 const DailyTasks = Loadable(lazy(() => import('../features/devel-tools/DailyTasks')));
 const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-explorer/ApiExplorerPage')));
@@ -1143,6 +1144,16 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
               <OcrOperationsDashboard />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/ocr-batch-manager',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OcrBatchManager />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )

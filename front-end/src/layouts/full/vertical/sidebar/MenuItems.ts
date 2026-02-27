@@ -581,6 +581,12 @@ const Menuitems: MenuitemsType[] = [
         icon: IconScan,
         href: '/devel-tools/ocr-operations',
       },
+      {
+        id: uniqueId(),
+        title: 'OCR Batch Manager',
+        icon: IconDatabase,
+        href: '/devel-tools/ocr-batch-manager',
+      },
     ],
   },
   {

@@ -116,6 +116,14 @@ export type {
   AutocommitResults,
 } from './autocommit';
 
+export { extractRollbackTargets, verifyTargets, buildRollbackResult } from './rollback';
+export type {
+  RollbackTarget,
+  RollbackPlan,
+  RollbackVerification,
+  RollbackResult,
+} from './rollback';
+
 export type {
   OcrProfile,
   RegionProfileAssignment,
