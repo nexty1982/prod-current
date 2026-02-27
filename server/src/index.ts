@@ -718,6 +718,9 @@ const omaiSpinRouter = require('./routes/admin/omaiSpin');
 app.use('/api/admin/omai-spin', omaiSpinRouter);
 app.use('/api/tutorials', tutorialsRouter);
 app.use('/api/settings', settingsRouter);
+const lookupRouter = require('./routes/lookup');
+app.use('/api/lookup', lookupRouter);
+console.log('✅ [Server] Mounted /api/lookup routes (clergy dropdowns)');
 app.use('/api/system', systemUpdateRouter); // System update routes (super_admin only, with safe fallback)
 console.log('✅ [Server] Mounted /api/system route (updates, build-info)');
 // Import unified backup routes
