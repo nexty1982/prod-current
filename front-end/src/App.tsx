@@ -22,6 +22,7 @@ import RTL from './layouts/full/shared/customizer/RTL';
 import router from './routes/Router';
 import { ThemeSettings } from './theme/Theme';
 import { setupAxiosInterceptors } from './utils/axiosInterceptor';
+import { LiturgicalThemeSync } from './features/liturgical-calendar/LiturgicalThemeSync';
 
 // Import Orthodox Theme System
 //import { ThemeProvider as OrthodoxThemeProvider } from './context/ThemeContext';
@@ -77,6 +78,7 @@ function App() {
                       >
                         <ErrorBoundary>
                           <FilterErrorBoundary>
+                            <LiturgicalThemeSync />
                             <AdminMessageNotification />
                             <UpdateAvailableBanner />
                             <RouterProvider router={router} />

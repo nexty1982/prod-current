@@ -48,6 +48,7 @@ import {
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import HeroBanner from './HeroBanner';
 
 /* ─── Types ─── */
 
@@ -615,86 +616,13 @@ const ChurchPortalHub: React.FC = () => {
   return (
     <Box sx={{ minHeight: '60vh' }}>
       {/* ── Hero Section ── */}
-      {activeChurchId === 46 ? (
-        /* ── Church 46: Header image + info bar ── */
-        <Box sx={{ mb: 5 }}>
-          {/* Church header image — natural size, centered, no stretch */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              bgcolor: isDark ? '#111' : '#f5f4f0',
-              borderRadius: '16px 16px 0 0',
-              overflow: 'hidden',
-            }}
-          >
-            <Box
-              component="img"
-              src="/uploads/om_church_46/custom_images/46-header-latest.png"
-              alt="SS Peter & Paul Orthodox Church"
-              sx={{
-                maxWidth: '100%',
-                height: 'auto',
-                display: 'block',
-                objectFit: 'contain',
-              }}
-            />
-          </Box>
-          {/* Info bar below the image */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: { xs: 1.5, md: 2.5 },
-              px: { xs: 2.5, sm: 3, md: 4 },
-              py: { xs: 1.5, sm: 2 },
-              bgcolor: isDark ? 'rgba(255,255,255,0.04)' : '#fff',
-              borderRadius: '0 0 16px 16px',
-              border: '1px solid',
-              borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-              borderTop: 'none',
-            }}
-          >
-            <Typography
-              variant="h6"
-              component="h1"
-              sx={{
-                fontFamily: '"Cormorant Garamond", "Palatino Linotype", Georgia, serif',
-                fontWeight: 700,
-                fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                color: 'text.primary',
-                mr: 'auto',
-              }}
-            >
-              {greeting}
-            </Typography>
-            <Chip
-              icon={<IconShieldCheck size={14} />}
-              label={roleLabel}
-              size="small"
-              variant="outlined"
-              sx={{
-                borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
-                color: 'text.primary',
-                fontWeight: 500,
-                '& .MuiChip-icon': { color: 'text.secondary' },
-              }}
-            />
-            <Chip
-              icon={<IconClock size={14} />}
-              label={`Session: ${sessionTimeLeft}`}
-              size="small"
-              variant="outlined"
-              sx={{
-                borderColor: isDark ? 'rgba(76,175,80,0.3)' : 'rgba(76,175,80,0.4)',
-                color: isDark ? 'rgba(129,199,132,0.9)' : '#2e7d32',
-                fontWeight: 500,
-                '& .MuiChip-icon': { color: isDark ? 'rgba(129,199,132,0.9)' : '#2e7d32' },
-              }}
-            />
-          </Box>
-        </Box>
+      {activeChurchId && [46].includes(activeChurchId) ? (
+        <HeroBanner
+          churchId={activeChurchId}
+          greeting={greeting}
+          roleLabel={roleLabel}
+          sessionTimeLeft={sessionTimeLeft}
+        />
       ) : (
         /* ── Default Hero (non-church-46) ── */
         <Box
@@ -741,7 +669,7 @@ const ChurchPortalHub: React.FC = () => {
           >
             <Box
               component="img"
-              src="/images/logos/om-logo.png"
+              src="/uploads/global/om-logo-latest.png"
               alt="Orthodox Metrics"
               sx={{
                 width: { xs: 64, sm: 80, md: 96 },

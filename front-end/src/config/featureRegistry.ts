@@ -76,6 +76,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'berry-crm-leads', name: 'Berry CRM Leads', stage: 1, route: '/berry/crm/leads', since: '2026-02-17' },
   { id: 'berry-crm-contacts', name: 'Berry CRM Contacts', stage: 1, route: '/berry/crm/contacts', since: '2026-02-17' },
   { id: 'berry-crm-sales', name: 'Berry CRM Sales', stage: 1, route: '/berry/crm/sales', since: '2026-02-17' },
+  { id: 'liturgical-calendar', name: 'Liturgical Calendar', stage: 5, route: '/apps/liturgical-calendar', description: 'Eastern Orthodox liturgical calendar with auto-theme', since: '2026-02-27' },
   { id: 'berry-calendar', name: 'Berry Calendar', stage: 1, route: '/berry/calendar', since: '2026-02-17' },
   { id: 'berry-map', name: 'Berry Map', stage: 1, route: '/berry/map', since: '2026-02-17' },
   { id: 'berry-cards', name: 'Berry Card Gallery', stage: 1, route: '/berry/cards', since: '2026-02-17' },

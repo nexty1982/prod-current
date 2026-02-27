@@ -1,6 +1,7 @@
-import { CustomizerContext } from '@/context/CustomizerContext';
 import { useAuth } from '@/context/AuthContext';
+import { CustomizerContext } from '@/context/CustomizerContext';
 import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Drawer from '@mui/material/Drawer';
@@ -9,7 +10,6 @@ import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { IconMenu2, IconMoon, IconSun } from '@tabler/icons-react';
 import React, { useContext } from 'react';
@@ -57,17 +57,16 @@ const HpHeader = () => {
         <ToolbarStyled>
           {/* Brand */}
           <Stack direction="row" alignItems="center" spacing={1.5} component="a" href="/frontend-pages/homepage" sx={{ textDecoration: 'none' }}>
-            <Typography
-              variant="h6"
-              fontWeight={700}
+            <Box
+              component="img"
+              src="/uploads/global/om-logo-latest.png"
+              alt="Orthodox Metrics"
               sx={{
-                fontFamily: '"Cormorant Garamond", "Palatino Linotype", Georgia, serif',
-                color: 'text.primary',
-                fontSize: '1.25rem',
+                height: { xs: 140, sm: 160 },
+                width: 'auto',
+                objectFit: 'contain',
               }}
-            >
-              Orthodox Metrics
-            </Typography>
+            />
           </Stack>
 
           {mdDown ? (

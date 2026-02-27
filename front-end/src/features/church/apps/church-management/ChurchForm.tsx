@@ -387,6 +387,7 @@ const ChurchForm: React.FC = () => {
       preferred_language: 'en',
       timezone: 'America/New_York',
       currency: 'USD',
+      calendar_type: 'Revised Julian' as 'Julian' | 'Revised Julian',
       tax_id: '',
       website: '',
       description_multilang: '',
@@ -470,6 +471,7 @@ const ChurchForm: React.FC = () => {
           preferred_language: church?.preferred_language || 'en',
           timezone: church?.timezone || 'America/New_York',
           currency: church?.currency || 'USD',
+          calendar_type: church?.calendar_type || 'Revised Julian',
           tax_id: church?.tax_id || '',
           website: church?.website || '',
           description_multilang: church?.description_multilang || '',
@@ -822,6 +824,16 @@ const ChurchForm: React.FC = () => {
                                 <MenuItem value="CAD">CAD</MenuItem>
                                 <MenuItem value="RON">RON</MenuItem>
                                 <MenuItem value="RUB">RUB</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <FormControl fullWidth size="small">
+                              <InputLabel>Calendar Type</InputLabel>
+                              <Select name="calendar_type" value={formik.values.calendar_type} onChange={formik.handleChange} label="Calendar Type"
+                                sx={{ borderRadius: 2 }}>
+                                <MenuItem value="Revised Julian">New Calendar (Revised Julian)</MenuItem>
+                                <MenuItem value="Julian">Old Calendar (Julian)</MenuItem>
                               </Select>
                             </FormControl>
                           </Grid>

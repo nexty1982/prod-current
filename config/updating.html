@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="30">
-    <title>Updating - Orthodox Metrics</title>
+    <title>Receiving Updates - Orthodox Metrics</title>
     <style>
         * {
             margin: 0;
@@ -47,6 +46,7 @@
             font-size: 2.2rem;
             margin-bottom: 1rem;
             font-weight: 600;
+            color: #ffffff;
         }
 
         p {
@@ -54,16 +54,6 @@
             margin-bottom: 1.5rem;
             opacity: 0.85;
             line-height: 1.6;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: #e94560;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 2rem auto;
         }
 
         .status-box {
@@ -74,10 +64,34 @@
             margin-top: 2rem;
         }
 
+        .status-box h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #e94560;
+            margin-bottom: 0.5rem;
+        }
+
         .status-box p {
             font-size: 0.95rem;
             margin-bottom: 0;
             opacity: 0.9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 30%;
+            background: linear-gradient(90deg, #e94560, #0f3460);
+            animation: loading 2s ease-in-out infinite;
         }
 
         @keyframes pulse {
@@ -85,8 +99,9 @@
             50% { transform: scale(1.05); }
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
         }
 
         .footer {
@@ -94,29 +109,44 @@
             font-size: 0.85rem;
             opacity: 0.6;
         }
+
+        .contact-link {
+            color: #e94560;
+            text-decoration: none;
+        }
+
+        .contact-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="icon">☦️</div>
         <div class="logo">Orthodox Metrics</div>
-        <h1>System Update in Progress</h1>
+        <h1>Receiving Updates</h1>
         <p>
-            We are currently deploying updates to improve your experience.
-            This page will automatically refresh in 30 seconds.
+            Orthodox Metrics is receiving updates and will be back online shortly.
+            Thank you for your patience.
         </p>
 
-        <div class="spinner"></div>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
 
         <div class="status-box">
+            <h3>What is Happening</h3>
             <p>
-                Our systems are being updated with the latest improvements.
-                Thank you for your patience.
+                We are deploying improvements and new features.
+                This typically takes less than two minutes.
             </p>
         </div>
 
         <div class="footer">
-            <p>This page will refresh automatically when the update is complete.</p>
+            <p>
+                Questions? Contact us at 
+                <a href="mailto:support@orthodoxmetrics.com" class="contact-link">support@orthodoxmetrics.com</a>
+            </p>
         </div>
     </div>
 </body>

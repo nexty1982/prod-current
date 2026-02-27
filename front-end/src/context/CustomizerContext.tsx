@@ -88,9 +88,12 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
         // Otherwise, default to dark mode and use time-based logic
         return isDarkModeTime() ? 'dark' : 'light';
     });
-    // Always use config.activeTheme — the site-wide theme is controlled centrally
-    // (e.g., LENT_THEME during Great Lent) and should not be overridden by localStorage
-    const [activeTheme, setActiveThemeState] = useState<string>(config.activeTheme);
+    // Theme is initialized from localStorage if available (set by liturgical auto-theme),
+    // falling back to config.activeTheme for first-time visitors.
+    // This prevents a flash of the wrong theme on page reload.
+    const [activeTheme, setActiveThemeState] = useState<string>(() =>
+        getStoredValue('activeTheme', config.activeTheme)
+    );
     const [activeLayout, setActiveLayoutState] = useState<string>(() => 
         getStoredValue('activeLayout', config.activeLayout)
     );

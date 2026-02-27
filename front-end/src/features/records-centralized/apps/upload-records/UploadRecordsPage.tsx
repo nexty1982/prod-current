@@ -7,40 +7,38 @@
  *   Phase 2: Upload images (church auto-detected for non-admins)
  */
 
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import OcrPipelineJob from '@/features/ocr/components/OcrPipelineJob';
+import { apiClient } from '@/shared/lib/axiosInstance';
 import {
-  Alert,
-  alpha,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme,
+    Alert,
+    alpha,
+    Box,
+    Button,
+    Checkbox,
+    Chip,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputLabel,
+    LinearProgress,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    Tooltip,
+    Typography,
+    useTheme,
 } from '@mui/material';
 import {
-  IconCheck,
-  IconCloudUpload,
-  IconFile,
-  IconPhoto,
-  IconRefresh,
-  IconTrash,
-  IconUpload,
-  IconX,
+    IconCheck,
+    IconCloudUpload,
+    IconPhoto,
+    IconUpload,
+    IconX
 } from '@tabler/icons-react';
-import { useAuth } from '@/context/AuthContext';
-import { apiClient } from '@/shared/lib/axiosInstance';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -287,9 +285,12 @@ const UploadRecordsPage: React.FC = () => {
       <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
         Upload Records
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Upload scanned images of church records for automated OCR processing.
       </Typography>
+
+      {/* Pipeline overview diagram */}
+      <OcrPipelineOverview />
 
       {/* ── Phase 1: Guidelines ── */}
       {!guidelinesAccepted && (
@@ -432,34 +433,54 @@ const UploadRecordsPage: React.FC = () => {
               <Stack divider={<Divider />}>
                 {queue.map((f) => {
                   const sc = STATUS_CONFIG[f.status] || STATUS_CONFIG.pending;
+                  const showPipeline = f.jobId && effectiveChurchId && (f.status === 'queued' || f.status === 'processing' || f.status === 'completed' || f.status === 'failed');
                   return (
                     <Box key={f.id} sx={{ px: 2, py: 1.5 }}>
-                      <Stack direction="row" alignItems="center" spacing={1.5}>
+                      {/* File header */}
+                      <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: showPipeline ? 1.5 : 0 }}>
                         <IconPhoto size={20} color={theme.palette.text.secondary} />
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography variant="body2" fontWeight={500} noWrap>{f.name}</Typography>
                           <Typography variant="caption" color="text.secondary">{fmtSize(f.size)}</Typography>
                         </Box>
-                        <Chip label={sc.label} color={sc.color} size="small" variant="outlined" />
+                        {!showPipeline && (
+                          <Chip label={sc.label} color={sc.color} size="small" variant="outlined" />
+                        )}
                         {f.status === 'pending' && (
                           <Tooltip title="Remove">
                             <IconButton size="small" onClick={() => removeFile(f.id)}><IconX size={16} /></IconButton>
                           </Tooltip>
                         )}
-                        {(f.status === 'failed' || f.status === 'error') && f.jobId && (
-                          <Tooltip title="Retry">
-                            <IconButton size="small" onClick={() => retryJob(f.id, f.jobId!)}><IconRefresh size={16} /></IconButton>
-                          </Tooltip>
-                        )}
                       </Stack>
-                      {f.error && (
+                      {/* Pipeline visualization for submitted jobs */}
+                      {showPipeline && (
+                        <OcrPipelineJob
+                          jobId={Number(f.jobId)}
+                          churchId={effectiveChurchId!}
+                          compact
+                          onStatusChange={(status) => {
+                            setQueue((q) => q.map((qf) => {
+                              if (qf.id !== f.id) return qf;
+                              let uiStatus = qf.status;
+                              if (status === 'pending' || status === 'queued') uiStatus = 'queued';
+                              else if (status === 'processing') uiStatus = 'processing';
+                              else if (status === 'completed' || status === 'complete') uiStatus = 'completed';
+                              else if (status === 'failed' || status === 'error') uiStatus = 'failed';
+                              return { ...qf, status: uiStatus };
+                            }));
+                          }}
+                        />
+                      )}
+                      {/* Legacy error display for non-pipeline jobs */}
+                      {!showPipeline && f.error && (
                         <Typography variant="caption" color="error.main" sx={{ mt: 0.5, display: 'block' }}>
                           {f.error}
                         </Typography>
                       )}
-                      {(f.status === 'uploading' || f.status === 'processing') && (
+                      {/* Upload progress */}
+                      {f.status === 'uploading' && (
                         <LinearProgress
-                          variant={f.status === 'processing' ? 'indeterminate' : 'determinate'}
+                          variant="determinate"
                           value={f.progress}
                           sx={{ mt: 1, borderRadius: 1 }}
                         />

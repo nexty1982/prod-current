@@ -315,6 +315,35 @@ fi
 log_info "Git branch: ${BOLD}$GIT_BRANCH${NC} (${GIT_COMMIT})"
 
 # ============================================================================
+# Maintenance Mode — show updating page to users during build
+# ============================================================================
+MAINTENANCE_FLAG="/var/www/orthodoxmetrics/maintenance.on"
+
+enable_maintenance() {
+  log_step "Enabling maintenance mode..."
+  echo "deploy pid=$$ started=$(date '+%Y-%m-%d %H:%M:%S')" > "$MAINTENANCE_FLAG"
+  log_success "Maintenance mode enabled — users see updating page"
+}
+
+disable_maintenance() {
+  if [[ -f "$MAINTENANCE_FLAG" ]]; then
+    rm -f "$MAINTENANCE_FLAG"
+    log_success "Maintenance mode disabled — site is live"
+  fi
+}
+
+# Always disable maintenance on exit (success or failure)
+cleanup_maintenance() {
+  disable_maintenance
+  stop_heartbeat
+  if [[ "$BUILD_SUCCESS" != "true" ]]; then
+    sleep 1
+    emit_build_event "build_failed" "${CURRENT_STAGE:-unknown}" "Build failed at stage: ${CURRENT_STAGE:-unknown}"
+  fi
+}
+trap cleanup_maintenance EXIT
+
+# ============================================================================
 # Start
 # ============================================================================
 LABEL="all"
@@ -328,14 +357,6 @@ log_info "Root: $ROOT"
 
 emit_build_event "build_started"
 start_heartbeat
-on_exit() {
-  stop_heartbeat
-  if [[ "$BUILD_SUCCESS" != "true" ]]; then
-    sleep 1
-    emit_build_event "build_failed" "${CURRENT_STAGE:-unknown}" "Build failed at stage: ${CURRENT_STAGE:-unknown}"
-  fi
-}
-trap on_exit EXIT
 
 # ============================================================================
 # Backend Build & Deployment
@@ -533,6 +554,9 @@ if $BUILD_FE; then
   fi
   stage_done
 
+  # Enable maintenance mode before cleaning dist/ — users see the updating page
+  enable_maintenance
+
   stage_begin "Frontend Clean"
   log_step "Cleaning previous build artifacts..."
   npm run clean 2>&1
@@ -551,6 +575,9 @@ if $BUILD_FE; then
   fi
   stage_done
 
+  # Disable maintenance mode — new dist/ is ready to serve
+  disable_maintenance
+
   log_success "${BOLD}Frontend build pipeline complete${NC}"
 fi
 
@@ -560,6 +587,10 @@ fi
 if $BUILD_BE; then
   stage_begin "Service Restart"
   log_section "Backend Service Restart"
+
+  # Enable maintenance mode during restart window
+  enable_maintenance
+
   log_step "Restarting systemd service: $SERVICE_NAME..."
 
   if sudo systemctl restart "$SERVICE_NAME" 2>&1; then
@@ -591,6 +622,7 @@ if $BUILD_BE; then
     if curl -fsS "$HEALTH_URL" >/dev/null 2>&1; then
       log_success "Backend is healthy and responding (${i}s elapsed)"
       log_info "Health endpoint: $HEALTH_URL"
+      disable_maintenance
       break
     fi
 

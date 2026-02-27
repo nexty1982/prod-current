@@ -160,6 +160,7 @@ const OcrReviewPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr
 const OcrTableExtractorPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrTableExtractorPage')));
 const LayoutTemplateEditorPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/LayoutTemplateEditorPage')));
 const OcrActivityMonitor = Loadable(lazy(() => import('../features/admin/OcrActivityMonitor')));
+const OcrOperationsDashboard = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrOperationsDashboard')));
 const OMTasksPage = Loadable(lazy(() => import('../features/devel-tools/om-tasks/OMTasksPage')));
 const DailyTasks = Loadable(lazy(() => import('../features/devel-tools/DailyTasks')));
 const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-explorer/ApiExplorerPage')));
@@ -176,6 +177,7 @@ const BerryLeadManagementPage = Loadable(lazy(() => import('../features/berry-cr
 const BerryContactManagementPage = Loadable(lazy(() => import('../features/berry-crm/BerryContactManagementPage')));
 const BerrySalesManagementPage = Loadable(lazy(() => import('../features/berry-crm/BerrySalesManagementPage')));
 const BerryCalendarPage = Loadable(lazy(() => import('../features/berry-calendar/BerryCalendarPage')));
+const LiturgicalCalendarPage = Loadable(lazy(() => import('../features/liturgical-calendar/LiturgicalCalendarPage')));
 const BerryMapPage = Loadable(lazy(() => import('../features/berry-map/BerryMapPage')));
 const BerryCardGalleryPage = Loadable(lazy(() => import('../features/berry-cards/BerryCardGalleryPage')));
 const BerryAccountSettingsPage = Loadable(lazy(() => import('../features/berry-profile-02/BerryAccountSettingsPage')));
@@ -1136,6 +1138,16 @@ const Router = [
         )
       },
       {
+        path: '/devel-tools/ocr-operations',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OcrOperationsDashboard />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/devel-tools/om-tasks',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin']}>
@@ -1561,6 +1573,16 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin']}>
             <EnvironmentAwarePage featureId="berry-crm-sales" priority={1} featureName="Berry CRM Sales">
               <BerrySalesManagementPage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/liturgical-calendar',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="liturgical-calendar" priority={1} featureName="Liturgical Calendar">
+              <LiturgicalCalendarPage />
             </EnvironmentAwarePage>
           </ProtectedRoute>
         )

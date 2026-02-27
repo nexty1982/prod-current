@@ -19,6 +19,11 @@ router.post('/admin/ocr/jobs/cleanup-stale', requireRole('super_admin'), ocrMoni
 router.post('/admin/ocr/jobs/:churchId/:jobId/kill', requireRole('super_admin'), ocrMonitor.killJob);
 router.post('/admin/ocr/jobs/:churchId/:jobId/reprocess', requireRole('super_admin'), ocrMonitor.reprocessJob);
 router.post('/admin/ocr/jobs/:churchId/:jobId/clear', requireRole('super_admin'), ocrMonitor.clearJob);
+// New pipeline workflow routes
+router.get('/admin/ocr/dashboard', requireRole('super_admin'), ocrMonitor.getDashboard);
+router.get('/admin/ocr/jobs/:churchId/:jobId/history', requireRole('super_admin'), ocrMonitor.getJobHistory);
+router.post('/admin/ocr/jobs/:churchId/:jobId/resume', requireRole('super_admin'), ocrMonitor.resumeJob);
+router.delete('/admin/ocr/jobs/:churchId/:jobId', requireRole('super_admin'), ocrMonitor.archiveJob);
 
 // OCR Table Extractor (Marriage Ledger v1)
 router.get('/admin/ocr/table-jobs', requireRole('super_admin'), ocrTable.listTableJobs);
@@ -60,6 +65,11 @@ router.post('/ocr/monitor/jobs/cleanup-stale', requireRole('super_admin'), ocrMo
 router.post('/ocr/monitor/jobs/:churchId/:jobId/kill', requireRole('super_admin'), ocrMonitor.killJob);
 router.post('/ocr/monitor/jobs/:churchId/:jobId/reprocess', requireRole('super_admin'), ocrMonitor.reprocessJob);
 router.post('/ocr/monitor/jobs/:churchId/:jobId/clear', requireRole('super_admin'), ocrMonitor.clearJob);
+// Canonical aliases for new pipeline workflow routes
+router.get('/ocr/dashboard', requireRole('super_admin'), ocrMonitor.getDashboard);
+router.get('/ocr/monitor/jobs/:churchId/:jobId/history', requireRole('super_admin'), ocrMonitor.getJobHistory);
+router.post('/ocr/monitor/jobs/:churchId/:jobId/resume', requireRole('super_admin'), ocrMonitor.resumeJob);
+router.delete('/ocr/monitor/jobs/:churchId/:jobId', requireRole('super_admin'), ocrMonitor.archiveJob);
 
 router.get('/ocr/layout-templates', requireRole('super_admin'), ocrLayout.listTemplates);
 router.get('/ocr/layout-templates/:id', requireRole('super_admin'), ocrLayout.getTemplate);
@@ -95,4 +105,5 @@ ocrMonitor.startStaleSweeper(30000, 90);
 console.log('✅ [OCR Monitor] Admin OCR monitor routes registered (8 + 13 canonical aliases)');
 
 module.exports = router;
-export {};
+export { };
+
