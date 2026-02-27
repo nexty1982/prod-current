@@ -151,3 +151,4 @@ reports/
 prod-backup/
 front-end/server/
 server/scripts/
+server/storage/feeder/job_220/
