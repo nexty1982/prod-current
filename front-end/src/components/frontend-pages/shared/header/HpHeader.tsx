@@ -38,8 +38,8 @@ const HpHeader = () => {
     justifyContent: 'space-between',
   }));
 
-  const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
-  const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
+  const mdUp = useMediaQuery((theme: any) => theme.breakpoints.up('md'));
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const [open, setOpen] = React.useState(false);
 
@@ -70,13 +70,13 @@ const HpHeader = () => {
             </Typography>
           </Stack>
 
-          {lgDown ? (
+          {mdDown ? (
             <IconButton color="inherit" aria-label="menu" onClick={handleDrawerOpen}>
               <IconMenu2 size="20" />
             </IconButton>
           ) : null}
 
-          {lgUp ? (
+          {mdUp ? (
             isChurchStaff ? (
               <>
                 <Stack spacing={1} direction="row" alignItems="center">

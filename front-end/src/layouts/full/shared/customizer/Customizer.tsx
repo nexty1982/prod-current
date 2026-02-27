@@ -119,6 +119,11 @@ const Customizer: FC = () => {
       bgColor: "#C9A227",
       disp: "GOLD_THEME",
     },
+    {
+      id: 7,
+      bgColor: "#1a1a1a",
+      disp: "LENT_THEME",
+    },
   ];
 
 
