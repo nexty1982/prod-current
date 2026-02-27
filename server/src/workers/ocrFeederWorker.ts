@@ -31,6 +31,8 @@ import { detectAndRemoveBorder } from '../ocr/preprocessing/borderDetection';
 import { detectAndCorrectSkew } from '../ocr/preprocessing/deskew';
 import { detectAndCropROI } from '../ocr/preprocessing/roiCrop';
 import { detectAndSplitSpread } from '../ocr/preprocessing/splitSpread';
+import { normalizeBackground } from '../ocr/preprocessing/bgNormalize';
+import { gridPreserveDenoise } from '../ocr/preprocessing/denoise';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -467,19 +469,194 @@ async function preprocessPage(
         ]
       );
 
-      // ── Quality score: compute from post-split image ──────────────────
-      // Use the full (unsplit) image for quality score; split halves get
-      // their own normalize+sharpen below.
-      const analysisInput = postRoiInput;
+      // ── Step 1B.1: Background normalization ─────────────────────────
+      // Runs on the main image (postRoiInput). If split, also runs on each half.
+      const bgResult = await normalizeBackground(postRoiInput);
 
-      const meta = await sharp(analysisInput).metadata();
+      // Write bg_geometry.json (always, atomic)
+      const bgGeometryPath = path.join(pageDir, 'bg_geometry.json');
+      const bgPayload: Record<string, any> = {
+        method: bgResult.method,
+        applied: bgResult.applied,
+        confidence: bgResult.confidence,
+        reasons: bgResult.reasons,
+        thresholds: bgResult.thresholds,
+        input_dimensions: bgResult.inputDimensions,
+        output_dimensions: bgResult.outputDimensions,
+        metrics_before: bgResult.metricsBefore,
+        metrics_after: bgResult.metricsAfter,
+      };
+
+      // Write bg_normalized.jpg (only when applied, atomic)
+      if (bgResult.applied && bgResult.normalizedBuffer) {
+        const bgNormalizedPath = path.join(pageDir, 'bg_normalized.jpg');
+        atomicWriteFileSync(bgNormalizedPath, bgResult.normalizedBuffer);
+        bgPayload.normalized_image_path = bgNormalizedPath;
+
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: bg normalized ` +
+          `(conf=${bgResult.confidence.toFixed(3)}, nonunif ${bgResult.metricsBefore.bgNonuniformity.toFixed(1)} → ${bgResult.metricsAfter.bgNonuniformity.toFixed(1)})`
+        );
+      } else {
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+          `no bg normalization (reasons=${bgResult.reasons.join(',')}, conf=${bgResult.confidence.toFixed(3)})`
+        );
+      }
+
+      const bgGeometryJson = JSON.stringify(bgPayload, null, 2);
+      atomicWriteFileSync(bgGeometryPath, bgGeometryJson);
+
+      // Merge bg metrics
+      mergeMetrics(metricsPath, {
+        bg_applied: bgResult.applied,
+        bg_confidence: bgResult.confidence,
+        bg_method: bgResult.method,
+        bg_metrics_before: bgResult.metricsBefore,
+        bg_metrics_after: bgResult.metricsAfter,
+      });
+
+      // Insert bg_geometry artifact into DB
+      const bgGeometryBytes = Buffer.byteLength(bgGeometryJson, 'utf8');
+      const bgGeometrySha256 = crypto.createHash('sha256').update(bgGeometryJson).digest('hex');
+      await tenantPool.execute(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type)
+         VALUES (?, 'bg_geometry', ?, ?, ?, ?, 'application/json')`,
+        [
+          page.id,
+          bgGeometryPath,
+          JSON.stringify({
+            applied: bgResult.applied,
+            confidence: bgResult.confidence,
+            method: bgResult.method,
+          }),
+          bgGeometrySha256,
+          bgGeometryBytes,
+        ]
+      );
+
+      // For split halves: run bg normalization on each half independently
+      let bgLeftBuffer = splitResult.leftBuffer;
+      let bgRightBuffer = splitResult.rightBuffer;
+
+      if (splitPaths && splitResult.leftBuffer && splitResult.rightBuffer) {
+        const bgLeftResult = await normalizeBackground(splitResult.leftBuffer);
+        if (bgLeftResult.applied && bgLeftResult.normalizedBuffer) {
+          bgLeftBuffer = bgLeftResult.normalizedBuffer;
+          const bgLeftPath = path.join(pageDir, 'bg_normalized_left.jpg');
+          atomicWriteFileSync(bgLeftPath, bgLeftResult.normalizedBuffer);
+        }
+
+        const bgRightResult = await normalizeBackground(splitResult.rightBuffer);
+        if (bgRightResult.applied && bgRightResult.normalizedBuffer) {
+          bgRightBuffer = bgRightResult.normalizedBuffer;
+          const bgRightPath = path.join(pageDir, 'bg_normalized_right.jpg');
+          atomicWriteFileSync(bgRightPath, bgRightResult.normalizedBuffer);
+        }
+      }
+
+      // ── Step 1B.2: Grid-preserving denoise ─────────────────────────
+      const postBgInput = bgResult.applied && bgResult.normalizedBuffer
+        ? bgResult.normalizedBuffer
+        : postRoiInput;
+
+      const denoiseResult = await gridPreserveDenoise(postBgInput);
+
+      // Write denoise_geometry.json (always, atomic)
+      const denoiseGeometryPath = path.join(pageDir, 'denoise_geometry.json');
+      const denoisePayload: Record<string, any> = {
+        method: denoiseResult.method,
+        applied: denoiseResult.applied,
+        confidence: denoiseResult.confidence,
+        reasons: denoiseResult.reasons,
+        thresholds: denoiseResult.thresholds,
+        input_dimensions: denoiseResult.inputDimensions,
+        output_dimensions: denoiseResult.outputDimensions,
+        metrics_before: denoiseResult.metricsBefore,
+        metrics_after: denoiseResult.metricsAfter,
+      };
+
+      // Write denoised.jpg (only when applied, atomic)
+      if (denoiseResult.applied && denoiseResult.denoisedBuffer) {
+        const denoisedPath = path.join(pageDir, 'denoised.jpg');
+        atomicWriteFileSync(denoisedPath, denoiseResult.denoisedBuffer);
+        denoisePayload.denoised_image_path = denoisedPath;
+
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: denoised ` +
+          `(conf=${denoiseResult.confidence.toFixed(3)}, speckle ${denoiseResult.metricsBefore.speckleCount} → ${denoiseResult.metricsAfter.speckleCount})`
+        );
+      } else {
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+          `no denoise (reasons=${denoiseResult.reasons.join(',')}, conf=${denoiseResult.confidence.toFixed(3)})`
+        );
+      }
+
+      const denoiseGeometryJson = JSON.stringify(denoisePayload, null, 2);
+      atomicWriteFileSync(denoiseGeometryPath, denoiseGeometryJson);
+
+      // Merge denoise metrics
+      mergeMetrics(metricsPath, {
+        denoise_applied: denoiseResult.applied,
+        denoise_confidence: denoiseResult.confidence,
+        denoise_method: denoiseResult.method,
+        denoise_metrics_before: denoiseResult.metricsBefore,
+        denoise_metrics_after: denoiseResult.metricsAfter,
+      });
+
+      // Insert denoise_geometry artifact into DB
+      const denoiseGeometryBytes = Buffer.byteLength(denoiseGeometryJson, 'utf8');
+      const denoiseGeometrySha256 = crypto.createHash('sha256').update(denoiseGeometryJson).digest('hex');
+      await tenantPool.execute(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type)
+         VALUES (?, 'denoise_geometry', ?, ?, ?, ?, 'application/json')`,
+        [
+          page.id,
+          denoiseGeometryPath,
+          JSON.stringify({
+            applied: denoiseResult.applied,
+            confidence: denoiseResult.confidence,
+            method: denoiseResult.method,
+          }),
+          denoiseGeometrySha256,
+          denoiseGeometryBytes,
+        ]
+      );
+
+      // For split halves: run denoise on each half independently
+      let denoiseLeftBuffer = bgLeftBuffer;
+      let denoiseRightBuffer = bgRightBuffer;
+
+      if (splitPaths && bgLeftBuffer && bgRightBuffer) {
+        const denoiseLeftResult = await gridPreserveDenoise(bgLeftBuffer);
+        if (denoiseLeftResult.applied && denoiseLeftResult.denoisedBuffer) {
+          denoiseLeftBuffer = denoiseLeftResult.denoisedBuffer;
+          const denoiseLeftPath = path.join(pageDir, 'denoised_left.jpg');
+          atomicWriteFileSync(denoiseLeftPath, denoiseLeftResult.denoisedBuffer);
+        }
+
+        const denoiseRightResult = await gridPreserveDenoise(bgRightBuffer);
+        if (denoiseRightResult.applied && denoiseRightResult.denoisedBuffer) {
+          denoiseRightBuffer = denoiseRightResult.denoisedBuffer;
+          const denoiseRightPath = path.join(pageDir, 'denoised_right.jpg');
+          atomicWriteFileSync(denoiseRightPath, denoiseRightResult.denoisedBuffer);
+        }
+      }
+
+      // ── Quality score: compute from post-denoise image ──────────────
+      const postDenoiseInput = denoiseResult.applied && denoiseResult.denoisedBuffer
+        ? denoiseResult.denoisedBuffer
+        : postBgInput;
+
+      const meta = await sharp(postDenoiseInput).metadata();
       const origW = meta.width!;
       const origH = meta.height!;
       const analysisWidth = Math.min(origW, 800);
       const scaleQS = origW / analysisWidth;
       const analysisHeight = Math.round(origH / scaleQS);
 
-      const { data: pixels, info } = await sharp(analysisInput)
+      const { data: pixels, info } = await sharp(postDenoiseInput)
         .resize(analysisWidth, analysisHeight, { fit: 'fill' })
         .greyscale()
         .raw()
@@ -510,23 +687,24 @@ async function preprocessPage(
 
       // ── Normalize + sharpen → preprocessed.jpg ────────────────────────
       // When split: also produce preprocessed_left.jpg and preprocessed_right.jpg
-      await sharp(analysisInput)
+      // Input: post-denoise buffer (or bg-normalized, or postRoiInput)
+      await sharp(postDenoiseInput)
         .normalize()
         .sharpen()
         .jpeg({ quality: 90 })
         .toFile(preprocPath);
 
-      if (splitPaths && splitResult.leftBuffer && splitResult.rightBuffer) {
+      if (splitPaths && denoiseLeftBuffer && denoiseRightBuffer) {
         const leftPreprocPath = path.join(pageDir, 'preprocessed_left.jpg');
         const rightPreprocPath = path.join(pageDir, 'preprocessed_right.jpg');
 
-        await sharp(splitResult.leftBuffer)
+        await sharp(denoiseLeftBuffer)
           .normalize()
           .sharpen()
           .jpeg({ quality: 90 })
           .toFile(leftPreprocPath);
 
-        await sharp(splitResult.rightBuffer)
+        await sharp(denoiseRightBuffer)
           .normalize()
           .sharpen()
           .jpeg({ quality: 90 })

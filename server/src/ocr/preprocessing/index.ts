@@ -23,3 +23,17 @@ export type {
   SplitSpreadOptions,
   SplitSpreadResult,
 } from './splitSpread';
+
+export { normalizeBackground } from './bgNormalize';
+export type {
+  BgNormalizeOptions,
+  BgNormalizeResult,
+  BgNormalizeMetrics,
+} from './bgNormalize';
+
+export { gridPreserveDenoise } from './denoise';
+export type {
+  DenoiseOptions,
+  DenoiseResult,
+  DenoiseMetrics,
+} from './denoise';
