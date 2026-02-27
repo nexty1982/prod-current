@@ -54,6 +54,26 @@ export type {
 export { selectRegionProfiles, getProfile, getProfileNames } from './ocrProfiles';
 
 export { computeStructureScore, selectRetryStrategy, extractSignals, buildRetryPlan } from './structureRetry';
+
+export {
+  extractWithTemplate,
+  selectTemplate,
+  resolveTemplate,
+  templateFromExtractorRow,
+  getBuiltinTemplate,
+  getBuiltinTemplates,
+  extractTokens,
+  clusterRows,
+} from './templateSpec';
+export type {
+  TemplateSpec,
+  TemplateColumn,
+  TemplateMatchResult,
+  TemplateExtractionResult,
+  WordToken,
+  RowModel,
+} from './templateSpec';
+
 export type {
   OcrProfile,
   RegionProfileAssignment,

@@ -40,6 +40,8 @@ import { selectRegionProfiles, getProfile } from '../ocr/preprocessing/ocrProfil
 import type { RegionProfileAssignment, ProfilePlanResult } from '../ocr/preprocessing/ocrProfiles';
 import { buildRetryPlan, extractSignals, computeStructureScore } from '../ocr/preprocessing/structureRetry';
 import type { RetryPlan } from '../ocr/preprocessing/structureRetry';
+import { selectTemplate, resolveTemplate, extractWithTemplate } from '../ocr/preprocessing/templateSpec';
+import type { TemplateMatchResult } from '../ocr/preprocessing/templateSpec';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -1588,24 +1590,48 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
       }
 
       // Tabular extraction (default, or auto-mode fallback)
+      // Phase 3.1: Try template-locked extraction first
+      let templateMatchResult: TemplateMatchResult | null = null;
       if (!tableExtractionResult) {
-        if (templateBands) {
-          const { extractGenericTable } = require('../ocr/layouts/generic_table');
-          const opts: any = {
-            pageIndex: 0,
-            columnBands: templateBands.map((b: any) => Array.isArray(b) ? b : [b.start, b.end]),
-          };
-          if (templateHeaderY != null) opts.headerYThreshold = templateHeaderY;
-          tableExtractionResult = extractGenericTable(visionResultJson, opts);
-          console.log(`  [TableExtract] Page ${page.id}: Template ${templateId} → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.columns_detected} columns`);
-        } else if (recordType === 'marriage') {
-          const { extractMarriageLedgerTable } = require('../ocr/layouts/marriage_ledger_v1');
-          tableExtractionResult = extractMarriageLedgerTable(visionResultJson, { pageIndex: 0 });
-          console.log(`  [TableExtract] Page ${page.id}: Marriage ledger → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.tables?.length || 0} tables`);
-        } else {
-          const { extractGenericTable } = require('../ocr/layouts/generic_table');
-          tableExtractionResult = extractGenericTable(visionResultJson, { pageIndex: 0 });
-          console.log(`  [TableExtract] Page ${page.id}: Generic extraction → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.columns_detected} columns`);
+        try {
+          templateMatchResult = selectTemplate(recordType, extractorRow);
+          const resolvedTemplate = resolveTemplate(templateMatchResult, extractorRow, recordType);
+
+          if (resolvedTemplate) {
+            tableExtractionResult = extractWithTemplate(visionResultJson, resolvedTemplate, { pageIndex: 0 });
+            console.log(`  [TemplateExtract] Page ${page.id}: Template ${resolvedTemplate.templateId} → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.columns_detected} columns, ambig=${tableExtractionResult._ambiguous_tokens}`);
+          }
+        } catch (tmplErr: any) {
+          console.warn(`  [TemplateExtract] Page ${page.id}: Template extraction failed (falling back): ${tmplErr.message}`);
+          templateMatchResult = templateMatchResult || { method: 'template_selector_v1', selectedTemplateId: null, confidence: 0, reasons: ['TEMPLATE_ERROR'], candidates: [] };
+        }
+
+        // Fallback to generic/marriage extraction if no template or template produced no data
+        if (!tableExtractionResult || tableExtractionResult.data_rows === 0) {
+          const prevResult = tableExtractionResult; // keep for comparison
+          if (templateBands) {
+            const { extractGenericTable } = require('../ocr/layouts/generic_table');
+            const opts: any = {
+              pageIndex: 0,
+              columnBands: templateBands.map((b: any) => Array.isArray(b) ? b : [b.start, b.end]),
+            };
+            if (templateHeaderY != null) opts.headerYThreshold = templateHeaderY;
+            tableExtractionResult = extractGenericTable(visionResultJson, opts);
+            console.log(`  [TableExtract] Page ${page.id}: Template ${templateId} → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.columns_detected} columns`);
+          } else if (recordType === 'marriage') {
+            const { extractMarriageLedgerTable } = require('../ocr/layouts/marriage_ledger_v1');
+            tableExtractionResult = extractMarriageLedgerTable(visionResultJson, { pageIndex: 0 });
+            console.log(`  [TableExtract] Page ${page.id}: Marriage ledger → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.tables?.length || 0} tables`);
+          } else {
+            const { extractGenericTable } = require('../ocr/layouts/generic_table');
+            tableExtractionResult = extractGenericTable(visionResultJson, { pageIndex: 0 });
+            console.log(`  [TableExtract] Page ${page.id}: Generic extraction → ${tableExtractionResult.data_rows} rows, ${tableExtractionResult.columns_detected} columns`);
+          }
+          // If template had data but generic has more, keep generic; otherwise keep whatever has data
+          if (prevResult && prevResult.data_rows > 0 && prevResult.data_rows >= (tableExtractionResult?.data_rows ?? 0)) {
+            tableExtractionResult = prevResult;
+            console.log(`  [TemplateExtract] Page ${page.id}: Keeping template result (${prevResult.data_rows} rows vs generic ${tableExtractionResult?.data_rows ?? 0})`);
+          }
         }
       }
 
@@ -1636,6 +1662,51 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
         );
 
         console.log(`  [TableExtract] Page ${page.id}: Structured text saved (${structuredText.length} chars)`);
+      }
+
+      // Phase 3.1: Write template_match.json artifact (always)
+      if (templateMatchResult) {
+        const pageDir = getPageStorageDir(page.job_id, page.page_index);
+        mkdirp(pageDir);
+        const tmplMatchPath = path.join(pageDir, 'template_match.json');
+        const tmplMatchJson = JSON.stringify({
+          ...templateMatchResult,
+          template_locked: tableExtractionResult?._template_locked ?? false,
+          ambiguous_tokens: tableExtractionResult?._ambiguous_tokens ?? 0,
+          total_assigned_tokens: tableExtractionResult?._total_assigned_tokens ?? 0,
+          recorded_at: new Date().toISOString(),
+        }, null, 2);
+        const tmplTmp = tmplMatchPath + '.tmp';
+        fs.writeFileSync(tmplTmp, tmplMatchJson);
+        fs.renameSync(tmplTmp, tmplMatchPath);
+
+        const tmplSha = crypto.createHash('sha256').update(tmplMatchJson).digest('hex');
+        await tenantPool.execute(
+          `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, json_blob, sha256, bytes, mime_type)
+           VALUES (?, 'template_match', ?, ?, ?, ?, 'application/json')`,
+          [page.id, tmplMatchPath, tmplMatchJson, tmplSha, Buffer.byteLength(tmplMatchJson)]
+        );
+
+        // Merge template metrics into metrics.json
+        const metricsPath = path.join(pageDir, 'metrics.json');
+        let metrics: Record<string, any> = {};
+        if (fs.existsSync(metricsPath)) {
+          try { metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8')); } catch {}
+        }
+        Object.assign(metrics, {
+          template_used: templateMatchResult.selectedTemplateId,
+          template_confidence: templateMatchResult.confidence,
+          template_locked: tableExtractionResult?._template_locked ?? false,
+          column_ambiguity_rate: (tableExtractionResult?._total_assigned_tokens ?? 0) > 0
+            ? (tableExtractionResult?._ambiguous_tokens ?? 0) / (tableExtractionResult._total_assigned_tokens ?? 1)
+            : 0,
+          rows_extracted: tableExtractionResult?.data_rows ?? 0,
+        });
+        const metricsTmp = metricsPath + '.tmp';
+        fs.writeFileSync(metricsTmp, JSON.stringify(metrics, null, 2));
+        fs.renameSync(metricsTmp, metricsPath);
+
+        console.log(`  [TemplateMatch] Page ${page.id}: template=${templateMatchResult.selectedTemplateId}, conf=${templateMatchResult.confidence}, locked=${tableExtractionResult?._template_locked ?? false}`);
       }
     } catch (tableErr: any) {
       console.warn(`  [TableExtract] Page ${page.id}: Table extraction failed (non-blocking): ${tableErr.message}`);
