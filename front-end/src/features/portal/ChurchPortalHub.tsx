@@ -764,7 +764,7 @@ const ChurchPortalHub: React.FC = () => {
         )}
         <Grid container spacing={2}>
           {RECORDS.map((feature) => (
-            <Grid item xs={12} sm={4} key={feature.to}>
+            <Grid size={{ xs: 12, sm: 4 }} key={feature.to}>
               <FeatureCardItem feature={feature} compact />
             </Grid>
           ))}
@@ -880,7 +880,7 @@ const ChurchPortalHub: React.FC = () => {
       <Box sx={{ mb: 5 }}>
         <SectionHeading>Recent Records</SectionHeading>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             {renderRecentRecords(
               recentBaptism, recordsLoading, '#1a1a1a',
               'linear-gradient(135deg, #1a1a1a 0%, #444444 100%)',
@@ -888,7 +888,7 @@ const ChurchPortalHub: React.FC = () => {
               '/portal/records/baptism', '/portal/records/baptism/new',
             )}
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             {renderRecentRecords(
               recentMarriage, recordsLoading, '#333333',
               'linear-gradient(135deg, #333333 0%, #5a5a5a 100%)',
@@ -896,7 +896,7 @@ const ChurchPortalHub: React.FC = () => {
               '/portal/records/marriage', '/portal/records/marriage/new',
             )}
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             {renderRecentRecords(
               recentFuneral, recordsLoading, '#4a4a4a',
               'linear-gradient(135deg, #4a4a4a 0%, #6e6e6e 100%)',
@@ -912,12 +912,12 @@ const ChurchPortalHub: React.FC = () => {
         <SectionHeading>Tools, Services & Account</SectionHeading>
         <Grid container spacing={3}>
           {visibleTools.map((feature) => (
-            <Grid item xs={12} sm={6} md={4} key={feature.to}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={feature.to}>
               <FeatureCardItem feature={feature} />
             </Grid>
           ))}
           {ACCOUNT.map((feature) => (
-            <Grid item xs={12} sm={6} md={4} key={feature.to}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={feature.to}>
               <FeatureCardItem feature={feature} />
             </Grid>
           ))}
