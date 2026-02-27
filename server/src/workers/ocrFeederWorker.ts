@@ -34,6 +34,8 @@ import { detectAndSplitSpread } from '../ocr/preprocessing/splitSpread';
 import { normalizeBackground } from '../ocr/preprocessing/bgNormalize';
 import { gridPreserveDenoise } from '../ocr/preprocessing/denoise';
 import { generateRedactionMask } from '../ocr/preprocessing/redaction';
+import { generateOcrPlan } from '../ocr/preprocessing/ocrPlan';
+import type { OcrRegion } from '../ocr/preprocessing/ocrPlan';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -916,6 +918,212 @@ async function runOCR(
   return { rawText: fullText, confidence, visionResultJson };
 }
 
+// ── Step 2b: Region-scoped OCR using mask plan ──────────────────────────────
+
+/**
+ * Runs OCR on individual regions derived from the redaction mask plan.
+ * Each region is cropped from the preprocessed image, sent to Vision API
+ * independently, and bounding boxes are adjusted back to full-image coords.
+ *
+ * Region failures are non-fatal — other regions continue.
+ */
+async function runRegionScopedOCR(
+  tenantPool: Pool,
+  page: PageRow,
+  regions: OcrRegion[],
+): Promise<{ rawText: string; confidence: number; visionResultJson: any; regionResults: any[] }> {
+  const pageDir = getPageStorageDir(page.job_id, page.page_index);
+  mkdirp(pageDir);
+
+  const imagePath = page.preproc_path || page.input_path;
+  if (!fs.existsSync(imagePath)) {
+    throw new Error(`Image file not found: ${imagePath}`);
+  }
+
+  const imageBuffer = fs.readFileSync(imagePath);
+
+  // Set up Vision client once
+  const vision = require('@google-cloud/vision');
+  const visionConfig: any = { projectId: process.env.GOOGLE_CLOUD_PROJECT_ID };
+  if (process.env.GOOGLE_VISION_KEY_PATH) visionConfig.keyFilename = process.env.GOOGLE_VISION_KEY_PATH;
+  else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) visionConfig.keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  const client = new vision.ImageAnnotatorClient(visionConfig);
+
+  const regionResults: any[] = [];
+  const allTexts: string[] = [];
+  const allPages: any[] = [];
+  let totalConfidence = 0;
+  let successCount = 0;
+
+  for (const region of regions) {
+    const { x, y, w, h } = region.box;
+    const regionLabel = `region_${region.index}`;
+
+    try {
+      console.log(`  [RegionOCR] Page ${page.id} ${regionLabel}: crop (${x},${y},${w},${h})`);
+
+      // Crop region from preprocessed image
+      const croppedBuffer = await sharp(imageBuffer)
+        .extract({ left: x, top: y, width: w, height: h })
+        .jpeg({ quality: 92 })
+        .toBuffer();
+
+      // Save cropped region artifact (for debugging)
+      const cropPath = path.join(pageDir, `ocr_${regionLabel}.jpg`);
+      fs.writeFileSync(cropPath, croppedBuffer);
+
+      // Call Vision API on cropped region
+      const visionPromise = client.annotateImage({
+        image: { content: croppedBuffer },
+        imageContext: { languageHints: LANGUAGE_HINTS_CFG },
+        features: [{ type: 'DOCUMENT_TEXT_DETECTION' }],
+      });
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`Vision API timed out for ${regionLabel}`)), VISION_TIMEOUT_MS_CFG)
+      );
+      const [result] = await Promise.race([visionPromise, timeoutPromise]) as any[];
+
+      const document = result.fullTextAnnotation;
+      const regionText = document?.text || '';
+      let regionConfidence = 0;
+      const visionPages = document?.pages || [];
+      if (visionPages.length > 0 && visionPages[0].confidence !== undefined) {
+        regionConfidence = visionPages[0].confidence;
+      }
+
+      // Adjust bounding boxes: offset all vertices by region origin (x, y)
+      const adjustedPages = visionPages.map((vp: any, vpIdx: number) => ({
+        pageIndex: vpIdx,
+        width: vp.width,
+        height: vp.height,
+        _region: region.index,
+        _regionBox: region.box,
+        blocks: (vp.blocks || []).map((block: any) => ({
+          blockType: block.blockType,
+          confidence: block.confidence,
+          boundingBox: offsetBoundingBox(block.boundingBox, x, y),
+          paragraphs: (block.paragraphs || []).map((p: any) => ({
+            confidence: p.confidence,
+            boundingBox: offsetBoundingBox(p.boundingBox, x, y),
+            words: (p.words || []).map((wrd: any) => ({
+              text: (wrd.symbols || []).map((s: any) => s.text).join(''),
+              confidence: wrd.confidence,
+              boundingBox: offsetBoundingBox(wrd.boundingBox, x, y),
+            })),
+          })),
+        })),
+      }));
+
+      allTexts.push(regionText);
+      allPages.push(...adjustedPages);
+      totalConfidence += regionConfidence;
+      successCount++;
+
+      regionResults.push({
+        index: region.index,
+        box: region.box,
+        status: 'ok',
+        confidence: regionConfidence,
+        textLength: regionText.length,
+        cropPath,
+      });
+
+      console.log(`  [RegionOCR] ${regionLabel}: ${regionText.length} chars, conf=${(regionConfidence * 100).toFixed(1)}%`);
+
+    } catch (err: any) {
+      console.warn(`  [RegionOCR] ${regionLabel} FAILED (non-fatal): ${err.message}`);
+      regionResults.push({
+        index: region.index,
+        box: region.box,
+        status: 'error',
+        error: err.message,
+      });
+    }
+  }
+
+  if (successCount === 0) {
+    throw new Error(`All ${regions.length} OCR regions failed`);
+  }
+
+  const fullText = allTexts.join('\n\n');
+  const avgConfidence = totalConfidence / successCount;
+
+  // Build merged vision result with coordinate-adjusted bounding boxes
+  const visionResultJson: any = {
+    text: fullText,
+    pages: allPages,
+    _regionScoped: true,
+    _regionCount: regions.length,
+    _successCount: successCount,
+  };
+
+  // Save raw text artifact
+  const artifactPath = path.join(pageDir, 'raw_text.txt');
+  await writeFile(artifactPath, fullText);
+  await tenantPool.execute(
+    `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json)
+     VALUES (?, 'raw_text', ?, ?)`,
+    [page.id, artifactPath, JSON.stringify({
+      confidence: avgConfidence,
+      regionScoped: true,
+      regionCount: regions.length,
+      successCount,
+      extractedAt: new Date().toISOString(),
+    })]
+  );
+
+  // Save vision JSON
+  const visionJsonPath = path.join(pageDir, 'vision_result.json');
+  const visionJsonStr = JSON.stringify(visionResultJson);
+  await writeFile(visionJsonPath, visionJsonStr);
+  await tenantPool.execute(
+    `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json)
+     VALUES (?, 'vision_json', ?, ?)`,
+    [page.id, visionJsonPath, JSON.stringify({
+      pages: allPages.length,
+      totalChars: fullText.length,
+      regionScoped: true,
+      regionCount: regions.length,
+      extractedAt: new Date().toISOString(),
+    })]
+  );
+
+  // Save region results artifact
+  const regionResultsPath = path.join(pageDir, 'vision_regions.json');
+  atomicWriteFileSync(regionResultsPath, JSON.stringify({ regions: regionResults }, null, 2));
+  await tenantPool.execute(
+    `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json)
+     VALUES (?, 'vision_regions', ?, ?)`,
+    [page.id, regionResultsPath, JSON.stringify({
+      regionCount: regions.length,
+      successCount,
+      failedCount: regions.length - successCount,
+    })]
+  );
+
+  console.log(`  [RegionOCR] Page ${page.id}: ${successCount}/${regions.length} regions, ${fullText.length} chars total, avg conf=${(avgConfidence * 100).toFixed(1)}%`);
+
+  await tenantPool.execute(
+    `UPDATE ocr_feeder_pages SET ocr_confidence = ?, updated_at = NOW() WHERE id = ?`,
+    [avgConfidence, page.id]
+  );
+
+  return { rawText: fullText, confidence: avgConfidence, visionResultJson, regionResults };
+}
+
+/** Offset all vertices in a Vision API boundingBox by (dx, dy). */
+function offsetBoundingBox(bb: any, dx: number, dy: number): any {
+  if (!bb || !bb.vertices) return bb;
+  return {
+    ...bb,
+    vertices: bb.vertices.map((v: any) => ({
+      x: (v.x || 0) + dx,
+      y: (v.y || 0) + dy,
+    })),
+    normalizedVertices: bb.normalizedVertices, // keep original normalized coords (region-relative)
+  };
+}
+
 // ── Step 3: Parse ───────────────────────────────────────────────────────────
 
 async function parsePage(
@@ -1070,11 +1278,78 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
         `right=${(rightOcr.confidence * 100).toFixed(1)}%, avg=${(confidence * 100).toFixed(1)}%`
       );
     } else {
-      // Standard single-image OCR
-      const ocrResult = await runOCR(tenantPool, page);
-      ocrRawText = ocrResult.rawText;
-      confidence = ocrResult.confidence;
-      visionResultJson = ocrResult.visionResultJson;
+      // ── Check for region-scoped OCR via redaction mask plan ──────────
+      const pageDir = getPageStorageDir(page.job_id, page.page_index);
+      const redactionMaskPath = path.join(pageDir, 'redaction_mask.png');
+      const redactionGeoPath = path.join(pageDir, 'redaction_geometry.json');
+      let usedRegionOCR = false;
+
+      if (fs.existsSync(redactionMaskPath) && fs.existsSync(redactionGeoPath)) {
+        try {
+          const redactionGeo = JSON.parse(fs.readFileSync(redactionGeoPath, 'utf8'));
+
+          // Only attempt region-scoped OCR if redaction was applied
+          if (redactionGeo.applied) {
+            const maskBuf = fs.readFileSync(redactionMaskPath);
+            const imagePath = page.preproc_path || page.input_path;
+            const imgMeta = await sharp(imagePath).metadata();
+            const imgW = imgMeta.width!;
+            const imgH = imgMeta.height!;
+
+            const plan = await generateOcrPlan(maskBuf, imgW, imgH);
+
+            // Save OCR plan artifact (always)
+            const planPath = path.join(pageDir, 'ocr_input_plan.json');
+            atomicWriteFileSync(planPath, JSON.stringify(plan, null, 2));
+            await tenantPool.execute(
+              `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json)
+               VALUES (?, 'ocr_input_plan', ?, ?)`,
+              [page.id, planPath, JSON.stringify({
+                useRegions: plan.useRegions,
+                regionCount: plan.regions.length,
+                contentFrac: plan.contentFrac,
+                method: plan.method,
+              })]
+            );
+
+            // Merge plan metrics
+            const metricsPath = path.join(pageDir, 'metrics.json');
+            mergeMetrics(metricsPath, {
+              ocr_mask_applied: true,
+              ocr_plan_use_regions: plan.useRegions,
+              ocr_regions_count: plan.regions.length,
+              ocr_content_frac: plan.contentFrac,
+            });
+
+            if (plan.useRegions && plan.regions.length > 0) {
+              console.log(`  [OCR Plan] Page ${page.id}: region-scoped OCR with ${plan.regions.length} regions (content ${(plan.contentFrac * 100).toFixed(1)}%)`);
+              const regionResult = await runRegionScopedOCR(tenantPool, page, plan.regions);
+              ocrRawText = regionResult.rawText;
+              confidence = regionResult.confidence;
+              visionResultJson = regionResult.visionResultJson;
+              usedRegionOCR = true;
+
+              // Update metrics with region results
+              mergeMetrics(metricsPath, {
+                ocr_region_success_count: regionResult.regionResults.filter((r: any) => r.status === 'ok').length,
+                ocr_region_fail_count: regionResult.regionResults.filter((r: any) => r.status === 'error').length,
+              });
+            } else {
+              console.log(`  [OCR Plan] Page ${page.id}: no regions (${plan.reasons.join(', ')}), using standard OCR`);
+            }
+          }
+        } catch (planErr: any) {
+          console.warn(`  [OCR Plan] Page ${page.id}: Plan failed (falling back to standard OCR): ${planErr.message}`);
+        }
+      }
+
+      if (!usedRegionOCR) {
+        // Standard single-image OCR (fallback or no mask)
+        const ocrResult = await runOCR(tenantPool, page);
+        ocrRawText = ocrResult.rawText;
+        confidence = ocrResult.confidence;
+        visionResultJson = ocrResult.visionResultJson;
+      }
     }
     console.log(`  OCR page ${page.id}, confidence: ${(confidence * 100).toFixed(1)}%`);
 

@@ -43,3 +43,10 @@ export type {
   RedactionOptions,
   RedactionResult,
 } from './redaction';
+
+export { generateOcrPlan } from './ocrPlan';
+export type {
+  OcrPlanOptions,
+  OcrPlanResult,
+  OcrRegion,
+} from './ocrPlan';
