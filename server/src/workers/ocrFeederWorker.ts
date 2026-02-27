@@ -42,6 +42,7 @@ import { buildRetryPlan, extractSignals, computeStructureScore } from '../ocr/pr
 import type { RetryPlan } from '../ocr/preprocessing/structureRetry';
 import { selectTemplate, resolveTemplate, extractWithTemplate } from '../ocr/preprocessing/templateSpec';
 import type { TemplateMatchResult } from '../ocr/preprocessing/templateSpec';
+import { normalizeTokens, buildTableProvenance, buildRecordCandidatesProvenance } from '../ocr/preprocessing/provenance';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -1713,6 +1714,74 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
       // Non-blocking — continue with raw text
     }
 
+    // ── Step 3.2: Provenance — tokens_normalized + table_provenance ───────
+    try {
+      const pageDir = getPageStorageDir(page.job_id, page.page_index);
+      mkdirp(pageDir);
+
+      // 1. Normalize tokens from vision result
+      const visionPath = path.join(pageDir, 'vision_result.json');
+      if (fs.existsSync(visionPath)) {
+        const visionData = JSON.parse(fs.readFileSync(visionPath, 'utf8'));
+        const tokensResult = normalizeTokens(visionData);
+
+        // Write tokens_normalized.json (atomic)
+        const tokensPath = path.join(pageDir, 'tokens_normalized.json');
+        const tokensJson = JSON.stringify(tokensResult, null, 2);
+        const tokensTmp = tokensPath + '.tmp';
+        fs.writeFileSync(tokensTmp, tokensJson);
+        fs.renameSync(tokensTmp, tokensPath);
+
+        const tokensSha = crypto.createHash('sha256').update(tokensJson).digest('hex');
+        await tenantPool.execute(
+          `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, sha256, bytes, mime_type)
+           VALUES (?, 'tokens_normalized', ?, ?, ?, 'application/json')`,
+          [page.id, tokensPath, tokensSha, Buffer.byteLength(tokensJson)]
+        );
+
+        console.log(`  [Provenance] Page ${page.id}: ${tokensResult.tokens.length} tokens normalized`);
+
+        // 2. Build table provenance (if table extraction exists)
+        const tableJsonPath = path.join(pageDir, 'table_extraction.json');
+        if (fs.existsSync(tableJsonPath)) {
+          const tableData = JSON.parse(fs.readFileSync(tableJsonPath, 'utf8'));
+          const tableProvResult = buildTableProvenance(tokensResult.tokens, tableData);
+
+          const tableProvPath = path.join(pageDir, 'table_provenance.json');
+          const tableProvJson = JSON.stringify(tableProvResult, null, 2);
+          const tableProvTmp = tableProvPath + '.tmp';
+          fs.writeFileSync(tableProvTmp, tableProvJson);
+          fs.renameSync(tableProvTmp, tableProvPath);
+
+          const tableProvSha = crypto.createHash('sha256').update(tableProvJson).digest('hex');
+          await tenantPool.execute(
+            `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, sha256, bytes, mime_type)
+             VALUES (?, 'table_provenance', ?, ?, ?, 'application/json')`,
+            [page.id, tableProvPath, tableProvSha, Buffer.byteLength(tableProvJson)]
+          );
+
+          console.log(`  [Provenance] Page ${page.id}: table provenance — coverage=${tableProvResult.cell_coverage_rate}, orphans=${tableProvResult.token_orphans_count}`);
+
+          // Merge provenance metrics
+          const metricsPath = path.join(pageDir, 'metrics.json');
+          let metrics: Record<string, any> = {};
+          if (fs.existsSync(metricsPath)) {
+            try { metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8')); } catch {}
+          }
+          Object.assign(metrics, {
+            provenance_tokens_count: tokensResult.tokens.length,
+            provenance_cell_coverage_rate: tableProvResult.cell_coverage_rate,
+            provenance_token_orphans: tableProvResult.token_orphans_count,
+          });
+          const metricsTmp = metricsPath + '.tmp';
+          fs.writeFileSync(metricsTmp, JSON.stringify(metrics, null, 2));
+          fs.renameSync(metricsTmp, metricsPath);
+        }
+      }
+    } catch (provErr: any) {
+      console.warn(`  [Provenance] Page ${page.id}: Token/table provenance failed (non-blocking): ${provErr.message}`);
+    }
+
     // ── Step 2.3: Structure-aware OCR retry ────────────────────────────────
     try {
       const pageDir = getPageStorageDir(page.job_id, page.page_index);
@@ -1944,6 +2013,51 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
     }
     await parsePage(tenantPool, page, rawText);
     console.log(`  Parsed page ${page.id}`);
+
+    // Step 3.2: Record candidates provenance
+    try {
+      const pageDir = getPageStorageDir(page.job_id, page.page_index);
+      const tableProvPath = path.join(pageDir, 'table_provenance.json');
+      const recordCandPath = path.join(pageDir, 'record_candidates.json');
+
+      if (fs.existsSync(tableProvPath) && fs.existsSync(recordCandPath)) {
+        const tableProvData = JSON.parse(fs.readFileSync(tableProvPath, 'utf8'));
+        const recordCandData = JSON.parse(fs.readFileSync(recordCandPath, 'utf8'));
+
+        const candProvResult = buildRecordCandidatesProvenance(tableProvData, recordCandData);
+
+        const candProvPath = path.join(pageDir, 'record_candidates_provenance.json');
+        const candProvJson = JSON.stringify(candProvResult, null, 2);
+        const candProvTmp = candProvPath + '.tmp';
+        fs.writeFileSync(candProvTmp, candProvJson);
+        fs.renameSync(candProvTmp, candProvPath);
+
+        const candProvSha = crypto.createHash('sha256').update(candProvJson).digest('hex');
+        await tenantPool.execute(
+          `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, sha256, bytes, mime_type)
+           VALUES (?, 'record_candidates_provenance', ?, ?, ?, 'application/json')`,
+          [page.id, candProvPath, candProvSha, Buffer.byteLength(candProvJson)]
+        );
+
+        // Merge field coverage metric
+        const metricsPath = path.join(pageDir, 'metrics.json');
+        let metrics: Record<string, any> = {};
+        if (fs.existsSync(metricsPath)) {
+          try { metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8')); } catch {}
+        }
+        Object.assign(metrics, {
+          provenance_field_coverage_rate: candProvResult.field_coverage_rate,
+        });
+        const metricsTmp = metricsPath + '.tmp';
+        fs.writeFileSync(metricsTmp, JSON.stringify(metrics, null, 2));
+        fs.renameSync(metricsTmp, metricsPath);
+
+        console.log(`  [Provenance] Page ${page.id}: record candidates provenance — field_coverage=${candProvResult.field_coverage_rate}, fields=${candProvResult.fields.length}`);
+      }
+    } catch (provErr: any) {
+      console.warn(`  [Provenance] Page ${page.id}: Record candidates provenance failed (non-blocking): ${(provErr as Error).message}`);
+    }
+
     page.status = 'parsing';
   }
 

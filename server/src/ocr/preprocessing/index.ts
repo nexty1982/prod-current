@@ -74,6 +74,24 @@ export type {
   RowModel,
 } from './templateSpec';
 
+export {
+  normalizeTokens,
+  buildTableProvenance,
+  buildRecordCandidatesProvenance,
+  aggregateConfidence,
+  bboxUnion,
+  buildBundle,
+} from './provenance';
+export type {
+  NormalizedToken,
+  ProvenanceBundle,
+  CellProvenance,
+  TableProvenanceResult,
+  FieldProvenance,
+  RecordCandidatesProvenanceResult,
+  NormalizedTokensResult,
+} from './provenance';
+
 export type {
   OcrProfile,
   RegionProfileAssignment,
