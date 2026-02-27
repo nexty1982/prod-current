@@ -1967,7 +1967,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                         color: 'inherit',
                       },
                     }}
-                    className={isDarkMode ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'}
+                    className={isDarkMode ? 'ag-theme-quartz-dark' : 'ag-theme-quartz'}
                   >
                     <AgGridReact
                       rowData={filteredAndSortedRecords}

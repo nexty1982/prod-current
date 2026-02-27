@@ -41,26 +41,26 @@
 }
 
 /* Dark mode adjustments */
-.ag-theme-alpine-dark .row-last-selected {
+.ag-theme-quartz-dark .row-last-selected {
   background-color: rgba(255, 255, 255, 0.1) !important;
   border-left-color: #e0e0e0 !important;
 }
 
-.ag-theme-alpine-dark .row-new-24h {
+.ag-theme-quartz-dark .row-new-24h {
   background-color: rgba(255, 255, 255, 0.06) !important;
   border-left-color: #9e9e9e !important;
 }
 
-.ag-theme-alpine-dark .row-updated-24h {
+.ag-theme-quartz-dark .row-updated-24h {
   background-color: rgba(255, 255, 255, 0.04) !important;
   border-left-color: #757575 !important;
 }
 
-.ag-theme-alpine-dark .row-last-selected.row-new-24h {
+.ag-theme-quartz-dark .row-last-selected.row-new-24h {
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-.ag-theme-alpine-dark .row-last-selected.row-updated-24h {
+.ag-theme-quartz-dark .row-last-selected.row-updated-24h {
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
 

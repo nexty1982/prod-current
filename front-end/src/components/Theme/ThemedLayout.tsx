@@ -53,7 +53,7 @@ export const ThemedAGGridWrapper: React.FC<ThemedLayoutProps> = ({
       sx={{
         width: '100%',
         height: '100%',
-        '& .ag-theme-alpine': {
+        '& .ag-theme-quartz, & .ag-theme-quartz-dark': {
           '--ag-background-color': 'var(--color-surface)',
           '--ag-foreground-color': 'var(--color-text-primary)',
           '--ag-border-color': 'var(--color-border)',

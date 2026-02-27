@@ -497,7 +497,7 @@ button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):focus-visib
 }
 
 /* AG Grid — Lent Theme (Black & White) Overrides */
-[data-color-theme="LENT_THEME"] .ag-theme-alpine {
+[data-color-theme="LENT_THEME"] .ag-theme-quartz {
   --ag-header-background-color: #f5f5f5;
   --ag-odd-row-background-color: #fafafa;
   --ag-row-hover-color: #eeeeee;
@@ -506,7 +506,7 @@ button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):focus-visib
   --ag-header-foreground-color: #1a1a1a;
   --ag-foreground-color: #1a1a1a;
 }
-[data-color-theme="LENT_THEME"] .ag-theme-alpine-dark {
+[data-color-theme="LENT_THEME"] .ag-theme-quartz-dark {
   --ag-header-background-color: #1a1a1a;
   --ag-odd-row-background-color: #111111;
   --ag-row-hover-color: #222222;
