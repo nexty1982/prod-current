@@ -101,6 +101,21 @@ export type {
   ReasonCode,
 } from './scoringV2';
 
+export {
+  isRowAutoCommittable,
+  buildAutocommitPlan,
+  buildAutocommitResults,
+  generateBatchId,
+  DEFAULT_THRESHOLDS,
+} from './autocommit';
+export type {
+  AutocommitThresholds,
+  RowEligibility,
+  AutocommitPlan,
+  AutocommitRowResult,
+  AutocommitResults,
+} from './autocommit';
+
 export type {
   OcrProfile,
   RegionProfileAssignment,

@@ -930,6 +930,280 @@ function createRouters(upload: any) {
   });
 
   // -----------------------------------------------------------------------
+  // POST /jobs/:jobId/autocommit — Partial auto-commit of eligible rows
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/autocommit', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const { forceIndices, thresholdOverrides } = req.body || {};
+
+      console.log(`[OCR Autocommit] POST /api/church/${churchId}/ocr/jobs/${jobId}/autocommit`);
+
+      const resolved = await resolveChurchDb(churchId);
+      if (!resolved) return res.status(404).json({ error: 'Church not found' });
+      const { db: tenantPool } = resolved;
+
+      const userEmail = req.session?.user?.email || req.user?.email || 'system';
+
+      // 1. Locate feeder page for this job
+      const [pageRows] = await tenantPool.query(
+        `SELECT id, page_index, job_id FROM ocr_feeder_pages WHERE job_id = ? ORDER BY page_index ASC LIMIT 1`,
+        [jobId],
+      );
+      if (!pageRows.length) {
+        return res.status(404).json({ error: 'No feeder page found for this job' });
+      }
+      const page = pageRows[0];
+      const pageDir = path.join(__dirname, '../../../storage/feeder', `job_${jobId}`, `page_${page.page_index}`);
+
+      // 2. Load artifacts from disk
+      const loadJson = (filename: string): any => {
+        const p = path.join(pageDir, filename);
+        if (fs.existsSync(p)) {
+          try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; }
+        }
+        return null;
+      };
+
+      const scoringV2 = loadJson('scoring_v2.json');
+      const recordCandidates = loadJson('record_candidates.json');
+      const candProvenance = loadJson('record_candidates_provenance.json');
+      const metricsData = loadJson('metrics.json');
+
+      if (!recordCandidates?.candidates?.length) {
+        return res.status(400).json({ error: 'No record candidates found for this job' });
+      }
+
+      const recordType = recordCandidates.detectedType || 'unknown';
+      if (!['baptism', 'marriage', 'funeral'].includes(recordType)) {
+        return res.status(400).json({ error: `Cannot auto-commit: unsupported record type "${recordType}"` });
+      }
+
+      const structureScore = metricsData?.structure_score ?? null;
+      const templateUsed = !!(metricsData?.template_id || recordCandidates?.template_id);
+
+      // 3. Build artifact SHA256 refs
+      const sha256File = (filename: string): string | null => {
+        const p = path.join(pageDir, filename);
+        if (!fs.existsSync(p)) return null;
+        return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+      };
+      const artifactRefs: Record<string, string | null> = {
+        scoring_v2: sha256File('scoring_v2.json'),
+        record_candidates: sha256File('record_candidates.json'),
+        record_candidates_provenance: sha256File('record_candidates_provenance.json'),
+        metrics: sha256File('metrics.json'),
+      };
+
+      // 4. Build autocommit plan
+      // Import eligibility gate
+      const { buildAutocommitPlan, buildAutocommitResults } = require('../../ocr/preprocessing/autocommit');
+
+      const plan = buildAutocommitPlan(
+        scoringV2,
+        candProvenance,
+        structureScore,
+        templateUsed,
+        artifactRefs,
+        thresholdOverrides,
+      );
+
+      // Allow user-forced indices to override eligibility
+      const forceSet = new Set<number>(forceIndices || []);
+      const eligibleIndices = new Set<number>(plan.eligible_rows.map((r: any) => r.candidateIndex));
+
+      // Merge: eligible + forced
+      for (const fi of forceSet) {
+        if (!eligibleIndices.has(fi)) {
+          eligibleIndices.add(fi);
+          // Move from skipped to eligible in plan
+          const skippedIdx = plan.skipped_rows.findIndex((r: any) => r.candidateIndex === fi);
+          if (skippedIdx >= 0) {
+            const moved = plan.skipped_rows.splice(skippedIdx, 1)[0];
+            moved.reasons = ['USER_FORCED'];
+            plan.eligible_rows.push(moved);
+          }
+        }
+      }
+
+      plan.eligible_count = plan.eligible_rows.length;
+      plan.skipped_count = plan.skipped_rows.length;
+
+      // 5. Write autocommit_plan.json artifact (ALWAYS, before commit)
+      const planJson = JSON.stringify(plan, null, 2);
+      const planPath = path.join(pageDir, 'autocommit_plan.json');
+      const planTmp = planPath + '.tmp';
+      fs.writeFileSync(planTmp, planJson);
+      fs.renameSync(planTmp, planPath);
+
+      const planSha = crypto.createHash('sha256').update(planJson).digest('hex');
+      await tenantPool.query(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, sha256, bytes, mime_type, created_at)
+         VALUES (?, 'autocommit_plan', ?, ?, ?, 'application/json', NOW())`,
+        [page.id, planPath, planSha, Buffer.byteLength(planJson)],
+      );
+
+      // 6. Execute partial commit
+      const tableMap: Record<string, string> = {
+        baptism: 'baptism_records',
+        marriage: 'marriage_records',
+        funeral: 'funeral_records',
+      };
+      const table = tableMap[recordType];
+      const candidates: any[] = recordCandidates.candidates;
+
+      const rowResults: any[] = [];
+      const conn = await tenantPool.getConnection();
+
+      try {
+        await conn.beginTransaction();
+
+        for (let ci = 0; ci < candidates.length; ci++) {
+          if (!eligibleIndices.has(ci)) {
+            // Skip this row
+            rowResults.push({
+              candidateIndex: ci,
+              sourceRowIndex: candidates[ci].sourceRowIndex ?? -1,
+              outcome: 'skipped',
+              recordId: null,
+              recordType: null,
+              table: null,
+              error: null,
+            });
+            continue;
+          }
+
+          try {
+            const cand = candidates[ci];
+            const mapped = mapFieldsToDbColumns(recordType, cand.fields || {});
+            const { sql, params } = buildInsertQuery(table, churchId, mapped);
+            const [result] = await conn.query(sql, params);
+            rowResults.push({
+              candidateIndex: ci,
+              sourceRowIndex: cand.sourceRowIndex ?? -1,
+              outcome: 'committed',
+              recordId: result.insertId,
+              recordType,
+              table,
+              error: null,
+            });
+          } catch (rowErr: any) {
+            rowResults.push({
+              candidateIndex: ci,
+              sourceRowIndex: candidates[ci].sourceRowIndex ?? -1,
+              outcome: 'error',
+              recordId: null,
+              recordType,
+              table,
+              error: rowErr.message,
+            });
+          }
+        }
+
+        await conn.commit();
+      } catch (txErr: any) {
+        await conn.rollback();
+        throw txErr;
+      } finally {
+        conn.release();
+      }
+
+      // 7. Build and write autocommit_results.json
+      const results = buildAutocommitResults(plan.batch_id, jobId, churchId, rowResults);
+      const resultsJson = JSON.stringify(results, null, 2);
+      const resultsPath = path.join(pageDir, 'autocommit_results.json');
+      const resultsTmp = resultsPath + '.tmp';
+      fs.writeFileSync(resultsTmp, resultsJson);
+      fs.renameSync(resultsTmp, resultsPath);
+
+      const resultsSha = crypto.createHash('sha256').update(resultsJson).digest('hex');
+      await tenantPool.query(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, sha256, bytes, mime_type, created_at)
+         VALUES (?, 'autocommit_results', ?, ?, ?, 'application/json', NOW())`,
+        [page.id, resultsPath, resultsSha, Buffer.byteLength(resultsJson)],
+      );
+
+      // 8. Update ocr_jobs finalization metadata (non-blocking)
+      const committedRows = rowResults.filter((r: any) => r.outcome === 'committed');
+      if (committedRows.length > 0) {
+        const finalizeMeta = {
+          finalizedAt: new Date().toISOString(),
+          finalizedBy: userEmail,
+          method: 'autocommit_v1',
+          batch_id: plan.batch_id,
+          batchSize: committedRows.length,
+          totalCandidates: candidates.length,
+          records: committedRows.map((r: any) => ({ recordId: r.recordId, recordType: r.recordType })),
+          skippedCount: results.skipped_count,
+        };
+        try {
+          await promisePool.query(
+            `UPDATE ocr_jobs SET ocr_result = ? WHERE id = ? AND church_id = ?`,
+            [JSON.stringify(finalizeMeta), jobId, churchId],
+          );
+        } catch (_: any) { /* non-blocking */ }
+      }
+
+      // 9. Append to audit history (ocr_job_history in platform DB)
+      try {
+        await promisePool.query(
+          `INSERT INTO ocr_job_history (job_id, stage, status, message, created_at)
+           VALUES (?, 'autocommit', 'completed', ?, NOW())`,
+          [jobId, JSON.stringify({
+            action: 'AUTOCOMMIT_PARTIAL',
+            batch_id: plan.batch_id,
+            committed: results.committed_count,
+            skipped: results.skipped_count,
+            errors: results.error_count,
+            page_score: scoringV2?.page_score_v2 ?? null,
+          })],
+        );
+      } catch (_: any) { /* non-blocking */ }
+
+      // 10. Merge metrics
+      try {
+        const metricsPath = path.join(pageDir, 'metrics.json');
+        let metrics: Record<string, any> = {};
+        if (fs.existsSync(metricsPath)) {
+          try { metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8')); } catch {}
+        }
+        Object.assign(metrics, {
+          autocommit_batch_id: plan.batch_id,
+          autocommit_committed: results.committed_count,
+          autocommit_skipped: results.skipped_count,
+          autocommit_at: results.created_at,
+        });
+        const mTmp = metricsPath + '.tmp';
+        fs.writeFileSync(mTmp, JSON.stringify(metrics, null, 2));
+        fs.renameSync(mTmp, metricsPath);
+      } catch (_: any) { /* non-blocking */ }
+
+      console.log(`OCR_AUTOCOMMIT_OK ${JSON.stringify({
+        jobId, churchId, batch_id: plan.batch_id,
+        committed: results.committed_count, skipped: results.skipped_count,
+      })}`);
+
+      res.json({
+        ok: true,
+        batch_id: plan.batch_id,
+        committed_count: results.committed_count,
+        skipped_count: results.skipped_count,
+        error_count: results.error_count,
+        committed_records: committedRows.map((r: any) => ({ recordId: r.recordId, recordType: r.recordType })),
+        plan_summary: {
+          eligible: plan.eligible_count,
+          skipped: plan.skipped_count,
+          thresholds: plan.thresholds,
+        },
+      });
+    } catch (error: any) {
+      console.error('[OCR Autocommit] Error:', error);
+      res.status(500).json({ error: 'Autocommit failed', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // POST /jobs/:jobId/save-draft — Auto-save field edits without finalizing
   // -----------------------------------------------------------------------
   churchJobsRouter.post('/jobs/:jobId/save-draft', async (req: any, res: any) => {
