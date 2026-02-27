@@ -20,12 +20,17 @@
  * Managed via systemctl, NOT pm2.
  */
 
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import type { Pool, RowDataPacket } from 'mysql2/promise';
 import * as path from 'path';
 import sharp from 'sharp';
 import { promisify } from 'util';
 import { classifyRecordType } from '../utils/ocrClassifier';
+import { detectAndRemoveBorder } from '../ocr/preprocessing/borderDetection';
+import { detectAndCorrectSkew } from '../ocr/preprocessing/deskew';
+import { detectAndCropROI } from '../ocr/preprocessing/roiCrop';
+import { detectAndSplitSpread } from '../ocr/preprocessing/splitSpread';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -151,123 +156,384 @@ async function updatePageStatus(
   }
 }
 
+// ── Atomic file write helper ────────────────────────────────────────────────
+
+function atomicWriteFileSync(targetPath: string, data: string | Buffer): void {
+  const tmpPath = targetPath + '.tmp';
+  fs.writeFileSync(tmpPath, data);
+  fs.renameSync(tmpPath, targetPath);
+}
+
+// ── Metrics merge helper ────────────────────────────────────────────────────
+
+function mergeMetrics(metricsPath: string, newData: Record<string, any>): void {
+  let metrics: Record<string, any> = {};
+  if (fs.existsSync(metricsPath)) {
+    try { metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8')); } catch {}
+  }
+  Object.assign(metrics, newData);
+  atomicWriteFileSync(metricsPath, JSON.stringify(metrics, null, 2));
+}
+
 // ── Step 1: Preprocess ──────────────────────────────────────────────────────
 
 async function preprocessPage(
   tenantPool: Pool,
   page: PageRow
-): Promise<{ preprocPath: string; qualityScore: number }> {
+): Promise<{ preprocPath: string; qualityScore: number; splitPaths?: { left: string; right: string } }> {
   const pageDir = getPageStorageDir(page.job_id, page.page_index);
   const preprocPath = path.join(pageDir, 'preprocessed.jpg');
   mkdirp(pageDir);
 
   let qualityScore = 0.85;
+  let splitPaths: { left: string; right: string } | undefined;
 
   if (fs.existsSync(page.input_path)) {
     try {
-      const meta = await sharp(page.input_path).metadata();
+      // ── Step 1A.1: Border detection + removal ─────────────────────────
+      const imageBuffer = fs.readFileSync(page.input_path);
+      const borderResult = await detectAndRemoveBorder(imageBuffer);
+
+      // Write border_geometry.json (always, atomic)
+      const geometryPath = path.join(pageDir, 'border_geometry.json');
+      const geometryPayload: Record<string, any> = {
+        method: borderResult.method,
+        applied: borderResult.applied,
+        cropBoxPx: borderResult.cropBoxPx,
+        cropBoxNorm: borderResult.cropBoxNorm,
+        confidence: borderResult.confidence,
+        reasons: borderResult.reasons,
+        thresholds: borderResult.thresholds,
+        trimPx: borderResult.trimPx,
+        originalDimensions: borderResult.originalDimensions,
+      };
+      const geometryJson = JSON.stringify(geometryPayload, null, 2);
+      atomicWriteFileSync(geometryPath, geometryJson);
+
+      // Write border_trimmed.jpg (only when applied, atomic)
+      const borderTrimmedPath = path.join(pageDir, 'border_trimmed.jpg');
+      if (borderResult.applied && borderResult.croppedBuffer) {
+        atomicWriteFileSync(borderTrimmedPath, borderResult.croppedBuffer);
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: border trimmed ` +
+          `(conf=${borderResult.confidence.toFixed(3)}, trim L=${borderResult.trimPx.left} R=${borderResult.trimPx.right} ` +
+          `T=${borderResult.trimPx.top} B=${borderResult.trimPx.bottom})`
+        );
+      } else {
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+          `no border crop (reasons=${borderResult.reasons.join(',')}, conf=${borderResult.confidence.toFixed(3)})`
+        );
+      }
+
+      // Write metrics.json (merge/append, atomic)
+      const metricsPath = path.join(pageDir, 'metrics.json');
+      mergeMetrics(metricsPath, {
+        border_black_detected: borderResult.applied,
+        border_black_trim_px: borderResult.trimPx,
+        border_confidence: borderResult.confidence,
+      });
+
+      // Insert border_geometry artifact into DB
+      const geometryBytes = Buffer.byteLength(geometryJson, 'utf8');
+      const geometrySha256 = crypto.createHash('sha256').update(geometryJson).digest('hex');
+      await tenantPool.execute(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type)
+         VALUES (?, 'border_geometry', ?, ?, ?, ?, 'application/json')`,
+        [
+          page.id,
+          geometryPath,
+          JSON.stringify({
+            applied: borderResult.applied,
+            confidence: borderResult.confidence,
+            method: borderResult.method,
+            trimPx: borderResult.trimPx,
+          }),
+          geometrySha256,
+          geometryBytes,
+        ]
+      );
+
+      // ── Step 1A.2: Deskew ──────────────────────────────────────────────
+      const postBorderInput = borderResult.applied && borderResult.croppedBuffer
+        ? borderResult.croppedBuffer
+        : imageBuffer;
+
+      const deskewResult = await detectAndCorrectSkew(postBorderInput);
+
+      // Write deskew_geometry.json (always, atomic)
+      const deskewGeometryPath = path.join(pageDir, 'deskew_geometry.json');
+      const deskewPayload: Record<string, any> = {
+        method: deskewResult.method,
+        applied: deskewResult.applied,
+        angle_deg: deskewResult.angleDeg,
+        confidence: deskewResult.confidence,
+        reasons: deskewResult.reasons,
+        thresholds: deskewResult.thresholds,
+        input_dimensions: deskewResult.inputDimensions,
+        output_dimensions: deskewResult.outputDimensions,
+        line_count: deskewResult.lineCount,
+        angle_variance: deskewResult.angleVariance,
+      };
+      const deskewGeometryJson = JSON.stringify(deskewPayload, null, 2);
+      atomicWriteFileSync(deskewGeometryPath, deskewGeometryJson);
+
+      // Write deskewed.jpg (only when applied, atomic)
+      if (deskewResult.applied && deskewResult.deskewedBuffer) {
+        const deskewedPath = path.join(pageDir, 'deskewed.jpg');
+        atomicWriteFileSync(deskewedPath, deskewResult.deskewedBuffer);
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: deskewed ` +
+          `(angle=${deskewResult.angleDeg.toFixed(3)}°, conf=${deskewResult.confidence.toFixed(3)}, lines=${deskewResult.lineCount})`
+        );
+      } else {
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+          `no deskew (reasons=${deskewResult.reasons.join(',')}, angle=${deskewResult.angleDeg.toFixed(3)}°, conf=${deskewResult.confidence.toFixed(3)})`
+        );
+      }
+
+      // Merge deskew metrics
+      mergeMetrics(metricsPath, {
+        deskew_applied: deskewResult.applied,
+        deskew_angle_deg: deskewResult.angleDeg,
+        deskew_confidence: deskewResult.confidence,
+        deskew_line_count: deskewResult.lineCount,
+      });
+
+      // Insert deskew_geometry artifact into DB
+      const deskewGeometryBytes = Buffer.byteLength(deskewGeometryJson, 'utf8');
+      const deskewGeometrySha256 = crypto.createHash('sha256').update(deskewGeometryJson).digest('hex');
+      await tenantPool.execute(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type)
+         VALUES (?, 'deskew_geometry', ?, ?, ?, ?, 'application/json')`,
+        [
+          page.id,
+          deskewGeometryPath,
+          JSON.stringify({
+            applied: deskewResult.applied,
+            confidence: deskewResult.confidence,
+            method: deskewResult.method,
+            angle_deg: deskewResult.angleDeg,
+          }),
+          deskewGeometrySha256,
+          deskewGeometryBytes,
+        ]
+      );
+
+      // ── Step 1A.3: Ledger ROI crop ────────────────────────────────────
+      const postDeskewInput = deskewResult.applied && deskewResult.deskewedBuffer
+        ? deskewResult.deskewedBuffer
+        : postBorderInput;
+
+      const roiResult = await detectAndCropROI(postDeskewInput);
+
+      // Write roi_geometry.json (always, atomic)
+      const roiGeometryPath = path.join(pageDir, 'roi_geometry.json');
+      const roiPayload: Record<string, any> = {
+        method: roiResult.method,
+        applied: roiResult.applied,
+        roi_box_px: roiResult.roiBoxPx,
+        roi_box_norm: roiResult.roiBoxNorm,
+        confidence: roiResult.confidence,
+        reasons: roiResult.reasons,
+        thresholds: roiResult.thresholds,
+        input_dimensions: roiResult.inputDimensions,
+        output_dimensions: roiResult.outputDimensions,
+      };
+      const roiGeometryJson = JSON.stringify(roiPayload, null, 2);
+      atomicWriteFileSync(roiGeometryPath, roiGeometryJson);
+
+      // Write roi_cropped.jpg (only when applied, atomic)
+      if (roiResult.applied && roiResult.croppedBuffer) {
+        const roiCroppedPath = path.join(pageDir, 'roi_cropped.jpg');
+        atomicWriteFileSync(roiCroppedPath, roiResult.croppedBuffer);
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ROI cropped ` +
+          `(method=${roiResult.method}, conf=${roiResult.confidence.toFixed(3)}, ` +
+          `${roiResult.outputDimensions.w}x${roiResult.outputDimensions.h})`
+        );
+      } else {
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+          `no ROI crop (reasons=${roiResult.reasons.join(',')}, conf=${roiResult.confidence.toFixed(3)})`
+        );
+      }
+
+      // Merge ROI metrics
+      mergeMetrics(metricsPath, {
+        roi_applied: roiResult.applied,
+        roi_confidence: roiResult.confidence,
+        roi_box_px: roiResult.roiBoxPx,
+        roi_box_norm: roiResult.roiBoxNorm,
+        roi_method: roiResult.method,
+      });
+
+      // Insert roi_geometry artifact into DB
+      const roiGeometryBytes = Buffer.byteLength(roiGeometryJson, 'utf8');
+      const roiGeometrySha256 = crypto.createHash('sha256').update(roiGeometryJson).digest('hex');
+      await tenantPool.execute(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type)
+         VALUES (?, 'roi_geometry', ?, ?, ?, ?, 'application/json')`,
+        [
+          page.id,
+          roiGeometryPath,
+          JSON.stringify({
+            applied: roiResult.applied,
+            confidence: roiResult.confidence,
+            method: roiResult.method,
+            roi_box_px: roiResult.roiBoxPx,
+          }),
+          roiGeometrySha256,
+          roiGeometryBytes,
+        ]
+      );
+
+      // ── Step 1A.4: Split spread detection ────────────────────────────
+      const postRoiInput = roiResult.applied && roiResult.croppedBuffer
+        ? roiResult.croppedBuffer
+        : postDeskewInput;
+
+      const splitResult = await detectAndSplitSpread(postRoiInput);
+
+      // Write split_geometry.json (always, atomic)
+      const splitGeometryPath = path.join(pageDir, 'split_geometry.json');
+      const splitPayload: Record<string, any> = {
+        method: splitResult.method,
+        applied: splitResult.applied,
+        split_x_px: splitResult.splitXPx,
+        split_x_norm: splitResult.splitXNorm,
+        confidence: splitResult.confidence,
+        reasons: splitResult.reasons,
+        thresholds: splitResult.thresholds,
+        input_dimensions: splitResult.inputDimensions,
+        left_box: splitResult.leftBox,
+        right_box: splitResult.rightBox,
+      };
+
+      // Write page_left.jpg + page_right.jpg (only when applied, atomic)
+      if (splitResult.applied && splitResult.leftBuffer && splitResult.rightBuffer) {
+        const leftPath = path.join(pageDir, 'page_left.jpg');
+        const rightPath = path.join(pageDir, 'page_right.jpg');
+        atomicWriteFileSync(leftPath, splitResult.leftBuffer);
+        atomicWriteFileSync(rightPath, splitResult.rightBuffer);
+        splitPaths = { left: leftPath, right: rightPath };
+
+        // Add paths to geometry for downstream consumers
+        splitPayload.left_image_path = leftPath;
+        splitPayload.right_image_path = rightPath;
+
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: split spread ` +
+          `(x=${splitResult.splitXPx}, conf=${splitResult.confidence.toFixed(3)}, ` +
+          `left=${splitResult.leftBox.w}x${splitResult.leftBox.h}, ` +
+          `right=${splitResult.rightBox.w}x${splitResult.rightBox.h})`
+        );
+      } else {
+        console.log(
+          `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+          `no split (reasons=${splitResult.reasons.join(',')}, conf=${splitResult.confidence.toFixed(3)})`
+        );
+      }
+
+      const splitGeometryJson = JSON.stringify(splitPayload, null, 2);
+      atomicWriteFileSync(splitGeometryPath, splitGeometryJson);
+
+      // Merge split metrics
+      mergeMetrics(metricsPath, {
+        split_applied: splitResult.applied,
+        split_confidence: splitResult.confidence,
+        split_x_px: splitResult.splitXPx,
+        split_method: splitResult.method,
+      });
+
+      // Insert split_geometry artifact into DB
+      const splitGeometryBytes = Buffer.byteLength(splitGeometryJson, 'utf8');
+      const splitGeometrySha256 = crypto.createHash('sha256').update(splitGeometryJson).digest('hex');
+      await tenantPool.execute(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json, sha256, bytes, mime_type)
+         VALUES (?, 'split_geometry', ?, ?, ?, ?, 'application/json')`,
+        [
+          page.id,
+          splitGeometryPath,
+          JSON.stringify({
+            applied: splitResult.applied,
+            confidence: splitResult.confidence,
+            method: splitResult.method,
+            split_x_px: splitResult.splitXPx,
+          }),
+          splitGeometrySha256,
+          splitGeometryBytes,
+        ]
+      );
+
+      // ── Quality score: compute from post-split image ──────────────────
+      // Use the full (unsplit) image for quality score; split halves get
+      // their own normalize+sharpen below.
+      const analysisInput = postRoiInput;
+
+      const meta = await sharp(analysisInput).metadata();
       const origW = meta.width!;
       const origH = meta.height!;
-
-      // Downscale for analysis (max 800px wide)
       const analysisWidth = Math.min(origW, 800);
-      const scale = origW / analysisWidth;
-      const analysisHeight = Math.round(origH / scale);
+      const scaleQS = origW / analysisWidth;
+      const analysisHeight = Math.round(origH / scaleQS);
 
-      const { data, info } = await sharp(page.input_path)
+      const { data: pixels, info } = await sharp(analysisInput)
         .resize(analysisWidth, analysisHeight, { fit: 'fill' })
         .greyscale()
         .raw()
         .toBuffer({ resolveWithObject: true });
 
-      const pixels = data;
       const w = info.width;
       const h = info.height;
-      const THRESHOLD = 40;
 
-      // Row brightness profile
-      const rowAvg = new Float32Array(h);
-      for (let y = 0; y < h; y++) {
-        let sum = 0;
-        const offset = y * w;
-        for (let x = 0; x < w; x++) {
-          sum += pixels[offset + x];
-        }
-        rowAvg[y] = sum / w;
+      let brightSum = 0;
+      const totalPixels = w * h;
+      for (let i = 0; i < totalPixels; i++) {
+        brightSum += pixels[i];
       }
+      const meanBrightness = totalPixels > 0 ? brightSum / totalPixels : 128;
 
-      // Column brightness profile
-      const colAvg = new Float32Array(w);
-      for (let x = 0; x < w; x++) {
-        let sum = 0;
-        for (let y = 0; y < h; y++) {
-          sum += pixels[y * w + x];
-        }
-        colAvg[x] = sum / h;
-      }
-
-      // Find content bounds
-      let yMin = 0, yMax = h - 1, xMin = 0, xMax = w - 1;
-      while (yMin < h && rowAvg[yMin] < THRESHOLD) yMin++;
-      while (yMax > yMin && rowAvg[yMax] < THRESHOLD) yMax--;
-      while (xMin < w && colAvg[xMin] < THRESHOLD) xMin++;
-      while (xMax > xMin && colAvg[xMax] < THRESHOLD) xMax--;
-
-      // Scale back to original coordinates
-      let cropLeft = Math.floor(xMin * scale);
-      let cropTop = Math.floor(yMin * scale);
-      let cropRight = Math.ceil(xMax * scale);
-      let cropBottom = Math.ceil(yMax * scale);
-
-      // Add 2% padding
-      const padX = Math.round(origW * 0.02);
-      const padY = Math.round(origH * 0.02);
-      cropLeft = Math.max(0, cropLeft - padX);
-      cropTop = Math.max(0, cropTop - padY);
-      cropRight = Math.min(origW - 1, cropRight + padX);
-      cropBottom = Math.min(origH - 1, cropBottom + padY);
-
-      const cropW = cropRight - cropLeft + 1;
-      const cropH = cropBottom - cropTop + 1;
-      const areaRatio = (cropW * cropH) / (origW * origH);
-
-      // Compute quality score from mean brightness of detected region
-      let brightSum = 0, brightCount = 0;
-      for (let y = yMin; y <= yMax; y++) {
-        const offset = y * w;
-        for (let x = xMin; x <= xMax; x++) {
-          brightSum += pixels[offset + x];
-          brightCount++;
-        }
-      }
-      const meanBrightness = brightCount > 0 ? brightSum / brightCount : 128;
-      // Map brightness to quality: [60..100]=low, [100..200]=good, [200..240]=ok, [240+]=washed
       if (meanBrightness < 60) {
         qualityScore = 0.4;
       } else if (meanBrightness < 100) {
-        qualityScore = 0.4 + (meanBrightness - 60) * (0.4 / 40); // 0.4 → 0.8
+        qualityScore = 0.4 + (meanBrightness - 60) * (0.4 / 40);
       } else if (meanBrightness <= 200) {
-        qualityScore = 0.8 + (meanBrightness - 100) * (0.15 / 100); // 0.8 → 0.95
+        qualityScore = 0.8 + (meanBrightness - 100) * (0.15 / 100);
       } else if (meanBrightness <= 240) {
-        qualityScore = 0.95 - (meanBrightness - 200) * (0.15 / 40); // 0.95 → 0.8
+        qualityScore = 0.95 - (meanBrightness - 200) * (0.15 / 40);
       } else {
         qualityScore = 0.6;
       }
       qualityScore = Math.max(0.3, Math.min(0.99, qualityScore));
 
-      const pipeline = sharp(page.input_path);
-      if (areaRatio > 0.10 && areaRatio < 0.95) {
-        console.log(`[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: cropping to ${Math.round(areaRatio * 100)}% of original (${cropW}x${cropH})`);
-        pipeline.extract({ left: cropLeft, top: cropTop, width: cropW, height: cropH });
-      } else {
-        console.log(`[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: area ratio ${Math.round(areaRatio * 100)}%, skipping crop`);
-      }
-
-      await pipeline
+      // ── Normalize + sharpen → preprocessed.jpg ────────────────────────
+      // When split: also produce preprocessed_left.jpg and preprocessed_right.jpg
+      await sharp(analysisInput)
         .normalize()
         .sharpen()
         .jpeg({ quality: 90 })
         .toFile(preprocPath);
+
+      if (splitPaths && splitResult.leftBuffer && splitResult.rightBuffer) {
+        const leftPreprocPath = path.join(pageDir, 'preprocessed_left.jpg');
+        const rightPreprocPath = path.join(pageDir, 'preprocessed_right.jpg');
+
+        await sharp(splitResult.leftBuffer)
+          .normalize()
+          .sharpen()
+          .jpeg({ quality: 90 })
+          .toFile(leftPreprocPath);
+
+        await sharp(splitResult.rightBuffer)
+          .normalize()
+          .sharpen()
+          .jpeg({ quality: 90 })
+          .toFile(rightPreprocPath);
+
+        splitPaths = { left: leftPreprocPath, right: rightPreprocPath };
+      }
 
     } catch (err: any) {
       console.error(`[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: sharp failed, falling back to copy:`, err.message);
@@ -280,7 +546,7 @@ async function preprocessPage(
     [preprocPath, qualityScore, page.id]
   );
 
-  return { preprocPath, qualityScore };
+  return { preprocPath, qualityScore, splitPaths };
 }
 
 // ── Step 2: OCR via Google Vision ───────────────────────────────────────────
@@ -469,16 +735,83 @@ async function scoreAndRoute(page: PageRow, ocrConfidence: number, qualityScore:
 // ── Process a single page through the pipeline ─────────────────────────────
 
 async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
+  let splitPaths: { left: string; right: string } | undefined;
+
   if (page.status === 'queued' || page.status === 'preprocessing') {
     if (!(await updatePageStatus(tenantPool, page.id, 'preprocessing', page.status))) return;
-    const { qualityScore } = await preprocessPage(tenantPool, page);
-    console.log(`  Preprocessed page ${page.id}, quality: ${qualityScore}`);
+    const preprocResult = await preprocessPage(tenantPool, page);
+    splitPaths = preprocResult.splitPaths;
+    console.log(`  Preprocessed page ${page.id}, quality: ${preprocResult.qualityScore}${splitPaths ? ' (SPLIT)' : ''}`);
     page.status = 'preprocessing';
   }
 
   if (page.status === 'preprocessing' || page.status === 'ocr') {
     if (!(await updatePageStatus(tenantPool, page.id, 'ocr', page.status))) return;
-    const { rawText: ocrRawText, confidence, visionResultJson } = await runOCR(tenantPool, page);
+
+    // If split paths exist but weren't set (resuming from a previous run), check disk
+    if (!splitPaths) {
+      const pageDir = getPageStorageDir(page.job_id, page.page_index);
+      const splitGeoPath = path.join(pageDir, 'split_geometry.json');
+      if (fs.existsSync(splitGeoPath)) {
+        try {
+          const splitGeo = JSON.parse(fs.readFileSync(splitGeoPath, 'utf8'));
+          if (splitGeo.applied && splitGeo.left_image_path && splitGeo.right_image_path) {
+            const leftPreproc = path.join(pageDir, 'preprocessed_left.jpg');
+            const rightPreproc = path.join(pageDir, 'preprocessed_right.jpg');
+            if (fs.existsSync(leftPreproc) && fs.existsSync(rightPreproc)) {
+              splitPaths = { left: leftPreproc, right: rightPreproc };
+            }
+          }
+        } catch {}
+      }
+    }
+
+    let ocrRawText: string;
+    let confidence: number;
+    let visionResultJson: any;
+
+    if (splitPaths && fs.existsSync(splitPaths.left) && fs.existsSync(splitPaths.right)) {
+      // OCR each half separately and merge results
+      console.log(`  Running split OCR for page ${page.id}: left + right`);
+
+      // Temporarily override preproc_path for left half
+      const origPreprocPath = page.preproc_path;
+      page.preproc_path = splitPaths.left;
+      const leftOcr = await runOCR(tenantPool, page);
+
+      page.preproc_path = splitPaths.right;
+      const rightOcr = await runOCR(tenantPool, page);
+
+      // Restore original preproc_path
+      page.preproc_path = origPreprocPath;
+
+      // Merge: concatenate text with separator, average confidence, merge vision JSON
+      ocrRawText = leftOcr.rawText + '\n\n--- PAGE SPLIT ---\n\n' + rightOcr.rawText;
+      confidence = (leftOcr.confidence + rightOcr.confidence) / 2;
+
+      // Merge vision result: combine pages arrays
+      visionResultJson = {
+        text: ocrRawText,
+        pages: [
+          ...(leftOcr.visionResultJson.pages || []),
+          ...(rightOcr.visionResultJson.pages || []),
+        ],
+        _split: true,
+        _leftText: leftOcr.rawText,
+        _rightText: rightOcr.rawText,
+      };
+
+      console.log(
+        `  Split OCR complete: left=${(leftOcr.confidence * 100).toFixed(1)}%, ` +
+        `right=${(rightOcr.confidence * 100).toFixed(1)}%, avg=${(confidence * 100).toFixed(1)}%`
+      );
+    } else {
+      // Standard single-image OCR
+      const ocrResult = await runOCR(tenantPool, page);
+      ocrRawText = ocrResult.rawText;
+      confidence = ocrResult.confidence;
+      visionResultJson = ocrResult.visionResultJson;
+    }
     console.log(`  OCR page ${page.id}, confidence: ${(confidence * 100).toFixed(1)}%`);
 
     // ── Table Extraction (runs between OCR and parsing) ──────────────────
