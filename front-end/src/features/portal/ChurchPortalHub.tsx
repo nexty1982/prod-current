@@ -217,7 +217,7 @@ function useSessionTimer() {
 
 /* ─── Feature Card Component ─── */
 
-const FeatureCardItem: React.FC<{ feature: FeatureCard; large?: boolean }> = ({ feature, large }) => {
+const FeatureCardItem: React.FC<{ feature: FeatureCard; compact?: boolean }> = ({ feature, compact }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const Icon = feature.icon;
@@ -228,17 +228,17 @@ const FeatureCardItem: React.FC<{ feature: FeatureCard; large?: boolean }> = ({ 
       elevation={0}
       sx={{
         height: '100%',
-        borderRadius: 3,
+        borderRadius: compact ? 2.5 : 3,
         border: '1px solid',
         borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
         backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#fff',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         overflow: 'hidden',
         '&:hover': {
-          transform: 'translateY(-4px)',
+          transform: 'translateY(-3px)',
           boxShadow: isDark
-            ? `0 12px 40px rgba(0,0,0,0.4)`
-            : `0 12px 40px ${feature.color}18`,
+            ? `0 8px 30px rgba(0,0,0,0.4)`
+            : `0 8px 30px ${feature.color}18`,
           borderColor: `${feature.color}40`,
           '& .card-arrow': { opacity: 1, transform: 'translateX(0)' },
           '& .card-icon-bg': { transform: 'scale(1.05)' },
@@ -249,43 +249,74 @@ const FeatureCardItem: React.FC<{ feature: FeatureCard; large?: boolean }> = ({ 
         onClick={() => navigate(feature.to)}
         sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
       >
-        <Box sx={{ height: 4, background: `linear-gradient(90deg, ${feature.color}, ${feature.color}88)` }} />
-        <CardContent sx={{ p: large ? 3.5 : 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-            <Box
-              className="card-icon-bg"
-              sx={{
-                width: large ? 56 : 48,
-                height: large ? 56 : 48,
-                borderRadius: 2.5,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: isDark ? `${feature.color}20` : feature.gradient,
-                transition: 'transform 0.3s ease',
-              }}
-            >
-              <Icon size={large ? 28 : 24} color={feature.color} stroke={1.5} />
-            </Box>
-            <Box
-              className="card-arrow"
-              sx={{
-                opacity: 0,
-                transform: 'translateX(-8px)',
-                transition: 'all 0.3s ease',
-                color: feature.color,
-                mt: 0.5,
-              }}
-            >
-              <IconArrowRight size={20} />
-            </Box>
-          </Box>
-          <Typography variant={large ? 'h6' : 'subtitle1'} fontWeight={700} sx={{ mb: 0.75, color: 'text.primary' }}>
-            {feature.title}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6, flex: 1 }}>
-            {feature.description}
-          </Typography>
+        <Box sx={{ height: compact ? 3 : 4, background: `linear-gradient(90deg, ${feature.color}, ${feature.color}88)` }} />
+        <CardContent sx={{ p: compact ? 2 : 3, flex: 1, display: 'flex', flexDirection: compact ? 'row' : 'column', alignItems: compact ? 'center' : 'stretch', gap: compact ? 1.5 : 0 }}>
+          {compact ? (
+            <>
+              <Box
+                className="card-icon-bg"
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: isDark ? `${feature.color}20` : feature.gradient,
+                  flexShrink: 0,
+                  transition: 'transform 0.3s ease',
+                }}
+              >
+                <Icon size={20} color={isDark ? '#e0e0e0' : feature.color} stroke={1.5} />
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ color: 'text.primary', lineHeight: 1.3 }}>
+                  {feature.title}
+                </Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.4, display: { xs: 'none', md: 'block' } }}>
+                  {feature.description}
+                </Typography>
+              </Box>
+              <Box
+                className="card-arrow"
+                sx={{ opacity: 0, transform: 'translateX(-8px)', transition: 'all 0.3s ease', color: feature.color, flexShrink: 0 }}
+              >
+                <IconArrowRight size={18} />
+              </Box>
+            </>
+          ) : (
+            <>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                <Box
+                  className="card-icon-bg"
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: isDark ? `${feature.color}20` : feature.gradient,
+                    transition: 'transform 0.3s ease',
+                  }}
+                >
+                  <Icon size={24} color={feature.color} stroke={1.5} />
+                </Box>
+                <Box
+                  className="card-arrow"
+                  sx={{ opacity: 0, transform: 'translateX(-8px)', transition: 'all 0.3s ease', color: feature.color, mt: 0.5 }}
+                >
+                  <IconArrowRight size={20} />
+                </Box>
+              </Box>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.75, color: 'text.primary' }}>
+                {feature.title}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6, flex: 1 }}>
+                {feature.description}
+              </Typography>
+            </>
+          )}
         </CardContent>
       </CardActionArea>
     </Card>
@@ -731,10 +762,10 @@ const ChurchPortalHub: React.FC = () => {
             {churchName}
           </Typography>
         )}
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {RECORDS.map((feature) => (
             <Grid item xs={12} sm={4} key={feature.to}>
-              <FeatureCardItem feature={feature} large />
+              <FeatureCardItem feature={feature} compact />
             </Grid>
           ))}
         </Grid>
