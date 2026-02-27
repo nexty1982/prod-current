@@ -98,7 +98,7 @@ const highlightSearchMatch = (text: string, searchTerm: string): React.ReactNode
   if (parts.length === 1) return text;
   return parts.map((part, i) =>
     regex.test(part)
-      ? React.createElement('mark', { key: i, style: { backgroundColor: 'rgba(255, 241, 118, 0.5)', color: 'inherit', borderRadius: 2, padding: '0 2px', fontWeight: 600 } }, part)
+      ? React.createElement('mark', { key: i, style: { backgroundColor: 'rgba(0, 0, 0, 0.12)', color: 'inherit', borderRadius: 2, padding: '0 2px', fontWeight: 600 } }, part)
       : part
   );
 };
@@ -2925,12 +2925,12 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   variant="contained"
                   sx={{
                     background: isDarkMode 
-                      ? 'linear-gradient(135deg, #1a237e 0%, #3949ab 100%)'
-                      : 'linear-gradient(135deg, #5e35b1 0%, #9575cd 100%)',
+                      ? 'linear-gradient(135deg, #0a0a0a 0%, #2a2a2a 100%)'
+                      : 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
                     '&:hover': {
                       background: isDarkMode 
-                        ? 'linear-gradient(135deg, #3949ab 0%, #1a237e 100%)'
-                        : 'linear-gradient(135deg, #9575cd 0%, #5e35b1 100%)',
+                        ? 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)'
+                        : 'linear-gradient(135deg, #4a4a4a 0%, #1a1a1a 100%)',
                     }
                   }}
                 >
@@ -3078,8 +3078,8 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   minWidth: 300, 
                   boxShadow: 6,
                   background: isDarkMode 
-                    ? 'linear-gradient(135deg, #1a237e 0%, #3949ab 100%)'
-                    : 'linear-gradient(135deg, #5e35b1 0%, #9575cd 100%)',
+                    ? 'linear-gradient(135deg, #0a0a0a 0%, #2a2a2a 100%)'
+                    : 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
                   color: '#fff',
                   '& .MuiAlert-icon': { color: '#fff' },
                 }}

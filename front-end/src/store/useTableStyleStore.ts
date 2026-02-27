@@ -66,7 +66,7 @@ export interface TableStyleState {
 }
 
 const orthodoxTheme: TableTheme = {
-  headerColor: '#bd56fa',
+  headerColor: '#1a1a1a',
   headerTextColor: '#ffffff',
   cellColor: '#ffffff',
   cellTextColor: '#333333',
@@ -75,8 +75,8 @@ const orthodoxTheme: TableTheme = {
   borderColor: '#e0e0e0',
   borderWidth: 1,
   borderRadius: 4,
-  hoverColor: '#f5f5f5',
-  selectedColor: '#e3f2fd',
+  hoverColor: '#f0f0f0',
+  selectedColor: '#e8e8e8',
   shadowStyle: '0 2px 4px rgba(0,0,0,0.1)',
   fontFamily: 'Roboto, Arial, sans-serif',
   fontSize: 14,
@@ -88,17 +88,17 @@ const orthodoxTheme: TableTheme = {
  * user-customised theme has been persisted to localStorage.
  */
 export const orthodoxThemeDark: TableTheme = {
-  headerColor: '#7b1fa2',
-  headerTextColor: '#ffffff',
-  cellColor: '#1e1e2e',
+  headerColor: '#1a1a1a',
+  headerTextColor: '#e0e0e0',
+  cellColor: '#141414',
   cellTextColor: '#e0e0e0',
-  rowColor: '#252538',
-  rowAlternateColor: '#1e1e2e',
-  borderColor: '#424242',
+  rowColor: '#1a1a1a',
+  rowAlternateColor: '#141414',
+  borderColor: '#333333',
   borderWidth: 1,
   borderRadius: 4,
-  hoverColor: '#2a2a3d',
-  selectedColor: '#1a3a5c',
+  hoverColor: '#252525',
+  selectedColor: '#2a2a2a',
   shadowStyle: '0 2px 4px rgba(0,0,0,0.3)',
   fontFamily: 'Roboto, Arial, sans-serif',
   fontSize: 14,
@@ -144,6 +144,7 @@ export const THEME_TO_ACCENT_MAP: Record<string, string> = {
   ORANGE_THEME: '#6E0E1A',
   BLUE_THEME:   '#6EC6FF',
   CYAN_THEME:   '#E0B84A',
+  LENT_THEME:   '#1a1a1a',
 };
 
 /** Backward-compat export — maps preset labels to simple theme objects. */

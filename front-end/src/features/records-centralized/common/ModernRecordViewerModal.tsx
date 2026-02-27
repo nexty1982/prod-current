@@ -91,7 +91,7 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
 
   if (!record) return null;
 
-  const accent = accentColor || (isDarkMode ? '#7c4dff' : '#5e35b1');
+  const accent = accentColor || (isDarkMode ? '#333333' : '#1a1a1a');
 
   // --- Data helpers ---
   const getPersonName = () => {
