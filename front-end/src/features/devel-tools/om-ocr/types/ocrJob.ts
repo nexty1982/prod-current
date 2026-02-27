@@ -37,6 +37,7 @@ export interface FeederPage {
   rawTextArtifactId: number | null;
   recordCandidates?: any | null;
   tableExtractionJson?: any | null;
+  scoringV2?: any | null;
   meta?: any | null;
   ocrConfidence?: number | null;
   status?: string;

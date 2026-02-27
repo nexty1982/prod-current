@@ -98,6 +98,7 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
   const [tableExtraction, setTableExtraction] = useState<any>(null);
   const [tableExtractionJson, setTableExtractionJson] = useState<any>(null);
   const [recordCandidates, setRecordCandidates] = useState<any>(null);
+  const [scoringV2, setScoringV2] = useState<any>(null);
   const [jobOcrResult, setJobOcrResult] = useState<any>(null);
   const [jobIsFinalized, setJobIsFinalized] = useState(false);
   const [jobFinalizedMeta, setJobFinalizedMeta] = useState<{ finalizedAt: string; createdRecordId: number } | null>(null);
@@ -288,26 +289,51 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
       });
 
       // If this record is selected and a field is focused, add emphasized cell highlight
-      if (isSelected && focusedField && fieldToColumns[focusedField]) {
-        const targetColKeys = fieldToColumns[focusedField];
-        for (const table of tables) {
-          // Map column_key or column_index to find matching cells
-          const headerRow = table.rows?.find((r: any) => r.type === 'header');
-          const headerColKeys = headerRow?.cells?.map((c: any) => c.column_key || `col_${c.column_index}`) || [];
+      if (isSelected && focusedField) {
+        // Try scoring_v2 provenance first (bbox_union from token-level provenance)
+        const scoringRow = scoringV2?.rows?.find((r: any) => r.candidate_index === idx);
+        const scoringField = scoringRow?.fields?.find((sf: any) => sf.field_name === focusedField);
+        const fieldScore = scoringField?.field_score;
 
-          for (const row of table.rows || []) {
-            if (row.row_index !== rowIndex) continue;
-            for (const cell of row.cells || []) {
-              const cellColKey = cell.column_key || `col_${cell.column_index}`;
-              if (targetColKeys.includes(cellColKey) && cell.bbox?.length === 4) {
-                const cellBbox = cellBboxToVision(cell.bbox, pageDims);
-                boxes.push({
-                  bbox: cellBbox,
-                  color: `hsl(${hue}, 90%, 60%)`,
-                  label: focusedField,
-                  selected: true,
-                  emphasized: true,
-                });
+        // Color by field_score: green for good, orange for medium, red for bad
+        const highlightColor = fieldScore !== undefined
+          ? (fieldScore >= 0.85 ? `hsl(120, 80%, 45%)` : fieldScore >= 0.60 ? `hsl(40, 90%, 55%)` : `hsl(0, 80%, 55%)`)
+          : `hsl(${hue}, 90%, 60%)`;
+
+        if (scoringField?.bbox_union) {
+          // Use scoring_v2 provenance bbox_union (normalized [x, y, w, h] — convert to pixel coords)
+          const [nx, ny, nw, nh] = scoringField.bbox_union;
+          const provBbox: BBox = {
+            x: nx * pageDims.width,
+            y: ny * pageDims.height,
+            w: nw * pageDims.width,
+            h: nh * pageDims.height,
+          };
+          boxes.push({
+            bbox: provBbox,
+            color: highlightColor,
+            label: `${focusedField}${fieldScore !== undefined ? ` (${Math.round(fieldScore * 100)}%)` : ''}`,
+            selected: true,
+            emphasized: true,
+          });
+        } else if (fieldToColumns[focusedField]) {
+          // Fallback to table extraction cell bbox
+          const targetColKeys = fieldToColumns[focusedField];
+          for (const table of tables) {
+            for (const row of table.rows || []) {
+              if (row.row_index !== rowIndex) continue;
+              for (const cell of row.cells || []) {
+                const cellColKey = cell.column_key || `col_${cell.column_index}`;
+                if (targetColKeys.includes(cellColKey) && cell.bbox?.length === 4) {
+                  const cellBbox = cellBboxToVision(cell.bbox, pageDims);
+                  boxes.push({
+                    bbox: cellBbox,
+                    color: highlightColor,
+                    label: focusedField,
+                    selected: true,
+                    emphasized: true,
+                  });
+                }
               }
             }
           }
@@ -343,7 +369,7 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
     }
 
     return boxes;
-  }, [tableExtractionJson, recordCandidates, selectedRecordIndex, focusedField, cellBboxToVision, handleRecordBboxAdjusted, fieldSuggestions]);
+  }, [tableExtractionJson, recordCandidates, selectedRecordIndex, focusedField, cellBboxToVision, handleRecordBboxAdjusted, fieldSuggestions, scoringV2]);
 
   // Check if bbox data is available for interactive modes
   const hasBboxData = useMemo(() => {
@@ -536,10 +562,21 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
           } else {
             setTableExtractionJson(null);
           }
+          // Extract scoring_v2 data (field-level scoring with provenance)
+          if (firstPage.scoringV2) {
+            setScoringV2(
+              typeof firstPage.scoringV2 === 'string'
+                ? JSON.parse(firstPage.scoringV2)
+                : firstPage.scoringV2,
+            );
+          } else {
+            setScoringV2(null);
+          }
         } else {
           setFeederPageId(null);
           setFeederArtifactId(null);
           setRecordCandidates(null);
+          setScoringV2(null);
         }
 
         // Auto-extract: if no recordCandidates but we have Vision data, trigger auto-extraction
@@ -652,6 +689,7 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
     setTableExtraction(null);
     setTableExtractionJson(null);
     setRecordCandidates(null);
+    setScoringV2(null);
     setJobOcrResult(null);
     setJobIsFinalized(false);
     setJobFinalizedMeta(null);
@@ -965,6 +1003,7 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
                     onOpenLayoutWizard={handleOpenLayoutWizard}
                     autoExtracting={autoExtracting}
                     fieldSuggestions={fieldSuggestions}
+                    scoringV2={scoringV2}
                     onRejectRecord={handleRejectRecord}
                     onFinalized={(result: any) => {
                       if (result.created_count) {

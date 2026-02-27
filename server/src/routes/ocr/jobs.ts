@@ -346,6 +346,7 @@ function createRouters(upload: any) {
             let structuredArtifactId: number | null = null;
             let recordCandidates: any = null;
             let tableExtractionJson: any = null;
+            let scoringV2: any = null;
             let meta: any = null;
             let sourceImagePath: string | null = null;
 
@@ -388,6 +389,15 @@ function createRouters(upload: any) {
                     : null;
                 } catch (_) {}
               }
+              if (art.type === 'scoring_v2' && !scoringV2) {
+                try {
+                  if (art.storage_path && fs.existsSync(art.storage_path)) {
+                    scoringV2 = JSON.parse(fs.readFileSync(art.storage_path, 'utf8'));
+                  } else if (art.json_blob) {
+                    scoringV2 = typeof art.json_blob === 'string' ? JSON.parse(art.json_blob) : art.json_blob;
+                  }
+                } catch (_) {}
+              }
               if (art.type === 'source_image' && !sourceImagePath) {
                 sourceImagePath = art.storage_path || null;
               }
@@ -412,6 +422,7 @@ function createRouters(upload: any) {
               rawTextArtifactId: bestArtifactId || rawTextArtifactId,
               recordCandidates,
               tableExtractionJson,
+              scoringV2,
               meta,
               ocrConfidence: page.ocr_confidence,
               status: page.status,
