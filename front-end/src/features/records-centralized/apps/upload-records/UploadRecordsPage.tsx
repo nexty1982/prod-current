@@ -7,40 +7,35 @@
  *   Phase 2: Upload images (church auto-detected for non-admins)
  */
 
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import {
-  Alert,
-  alpha,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import {
-  IconCheck,
-  IconCloudUpload,
-  IconFile,
-  IconPhoto,
-  IconRefresh,
-  IconTrash,
-  IconUpload,
-  IconX,
-} from '@tabler/icons-react';
 import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/shared/lib/axiosInstance';
+import {
+    Alert,
+    alpha,
+    Box,
+    Button,
+    Chip,
+    Divider,
+    FormControl,
+    IconButton,
+    InputLabel,
+    LinearProgress,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    Tooltip,
+    Typography,
+    useTheme,
+} from '@mui/material';
+import {
+    IconCloudUpload,
+    IconPhoto,
+    IconRefresh,
+    IconUpload,
+    IconX
+} from '@tabler/icons-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -91,9 +86,6 @@ const UploadRecordsPage: React.FC = () => {
   const { user } = useAuth();
 
   const isAdmin = user?.role === 'super_admin' || user?.role === 'admin';
-
-  // Phase 1 state
-  const [guidelinesAccepted, setGuidelinesAccepted] = useState(false);
 
   // Church selection (admin only)
   const [churches, setChurches] = useState<Church[]>([]);
@@ -291,70 +283,8 @@ const UploadRecordsPage: React.FC = () => {
         Upload scanned images of church records for automated OCR processing.
       </Typography>
 
-      {/* ── Phase 1: Guidelines ── */}
-      {!guidelinesAccepted && (
-        <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>
-            Before You Upload
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Ensure your scanned images meet quality standards for accurate OCR processing.
-            Following these guidelines will improve text recognition and reduce manual corrections.
-          </Typography>
-
-          <Stack spacing={1.2} sx={{ mb: 2.5 }}>
-            {[
-              'Scan pages at 300 DPI or higher for optimal OCR accuracy',
-              'Ensure images are well-lit with minimal shadows or glare',
-              'Capture full page edges and avoid cropping any text',
-              'Use JPEG or PNG format (TIFF supported for archival)',
-              'Organize files by book or volume before uploading',
-            ].map((text, i) => (
-              <Stack key={i} direction="row" alignItems="center" spacing={1.5}>
-                <Box
-                  sx={{
-                    width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                    bgcolor: alpha(theme.palette.success.main, 0.12),
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}
-                >
-                  <IconCheck size={14} color={theme.palette.success.main} />
-                </Box>
-                <Typography variant="body2" color="text.secondary">{text}</Typography>
-              </Stack>
-            ))}
-          </Stack>
-
-          <Divider sx={{ my: 2.5 }} />
-
-          <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5 }}>
-            What to Expect
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            <strong>Automated Processing:</strong> Once uploaded, images are automatically processed
-            using optical character recognition to extract names, dates, and record details.
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-            <strong>Admin Review:</strong> All processed records are reviewed by your church
-            administrator before being made available. This typically takes 24-72 hours.
-          </Typography>
-
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={guidelinesAccepted}
-                onChange={(e) => setGuidelinesAccepted(e.target.checked)}
-                sx={{ color: theme.palette.primary.main, '&.Mui-checked': { color: theme.palette.primary.main } }}
-              />
-            }
-            label={<Typography variant="body2" fontWeight={500}>I understand these guidelines and I'm ready to upload.</Typography>}
-          />
-        </Paper>
-      )}
-
-      {/* ── Phase 2: Upload ── */}
-      {guidelinesAccepted && (
-        <>
+      {/* ── Upload ── */}
+      <>
           {/* Admin church selector */}
           {isAdmin && (
             <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
@@ -508,8 +438,7 @@ const UploadRecordsPage: React.FC = () => {
               </Button>
             </Box>
           )}
-        </>
-      )}
+      </>
     </Box>
   );
 };

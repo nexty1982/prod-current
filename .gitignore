@@ -114,6 +114,7 @@ front-end/dist-backup/
 front-end/dupes/
 
 # --- Server Backups & Temp Storage ---
+server/storage/
 server/temp-backups/
 server/webhooks/
 server/integrations/
