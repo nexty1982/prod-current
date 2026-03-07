@@ -1,6 +1,7 @@
 /**
  * OMDailyPage.tsx
- * Work pipeline management with 7/14/30/60/90 day planning horizons.
+ * Enhanced work pipeline management with rich overview, graphs,
+ * phase tracking, and 7/14/30/60/90 day planning horizons.
  * Located at /admin/control-panel/om-daily
  */
 
@@ -8,6 +9,9 @@ import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
     Add as AddIcon,
+    ArrowForward as ArrowForwardIcon,
+    Assignment as AssignmentIcon,
+    CheckCircle as CheckCircleIcon,
     CloudUpload as CloudUploadIcon,
     SmartToy as AgentIcon,
     Check as CheckIcon,
@@ -15,11 +19,16 @@ import {
     Edit as EditIcon,
     Email as EmailIcon,
     ExpandMore as ExpandMoreIcon,
+    Flag as FlagIcon,
     History as HistoryIcon,
     OpenInNew as OpenInNewIcon,
+    PlayArrow as PlayArrowIcon,
     Refresh as RefreshIcon,
+    Schedule as ScheduleIcon,
     Search as SearchIcon,
-    Sync as SyncIcon
+    Sync as SyncIcon,
+    TrendingUp as TrendingUpIcon,
+    Warning as WarningIcon,
 } from '@mui/icons-material';
 import {
     Alert,
@@ -109,6 +118,18 @@ interface DashboardData {
   totalActive: number;
 }
 
+interface ExtendedDashboard {
+  statusDistribution: { status: string; count: number }[];
+  priorityDistribution: { priority: string; count: number }[];
+  categoryBreakdown: { category: string; count: number; done_count: number }[];
+  recentCompleted: { id: number; title: string; category: string | null; horizon: string; completed_at: string; priority: string }[];
+  inProgressItems: { id: number; title: string; description: string | null; category: string | null; horizon: string; priority: string; due_date: string | null; agent_tool: string | null; branch_type: string | null; updated_at: string }[];
+  dueSoon: { id: number; title: string; status: string; priority: string; due_date: string; horizon: string; category: string | null }[];
+  velocity: { date: string; count: number }[];
+  created: { date: string; count: number }[];
+  phaseGroups: { source: string; category: string | null; total: number; done_count: number; active_count: number; items_summary: string }[];
+}
+
 interface ChangelogCommit {
   hash: string;
   fullHash: string;
@@ -152,6 +173,56 @@ function formatDate(d: string | null) {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function formatShortDate(d: string | null) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function timeAgo(d: string) {
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+// ─── Bar Chart Component ─────────────────────────────────────────
+
+const HBar: React.FC<{ label: string; value: number; max: number; color: string; isDark: boolean; suffix?: string }> = ({ label, value, max, color, isDark, suffix }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.8 }}>
+    <Typography variant="caption" sx={{ width: 80, textAlign: 'right', color: 'text.secondary', fontSize: '0.72rem', flexShrink: 0 }}>{label}</Typography>
+    <Box sx={{ flex: 1, height: 18, bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', borderRadius: 1, overflow: 'hidden', position: 'relative' }}>
+      <Box sx={{ width: max > 0 ? `${Math.max((value / max) * 100, 2)}%` : '0%', height: '100%', bgcolor: alpha(color, 0.7), borderRadius: 1, transition: 'width 0.4s ease' }} />
+    </Box>
+    <Typography variant="caption" sx={{ width: 32, fontWeight: 700, color, fontSize: '0.75rem', flexShrink: 0 }}>{value}{suffix}</Typography>
+  </Box>
+);
+
+// ─── Spark Line (mini chart) ─────────────────────────────────────
+
+const SparkLine: React.FC<{ data: { date: string; count: number }[]; color: string; height?: number }> = ({ data, color, height = 40 }) => {
+  if (data.length < 2) return null;
+  const max = Math.max(...data.map(d => d.count), 1);
+  const points = data.map((d, i) => {
+    const x = (i / (data.length - 1)) * 100;
+    const y = height - (d.count / max) * (height - 4);
+    return `${x},${y}`;
+  }).join(' ');
+  return (
+    <svg width="100%" height={height} viewBox={`0 0 100 ${height}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+      <polyline points={points} fill="none" stroke={color} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+      {data.map((d, i) => {
+        const x = (i / (data.length - 1)) * 100;
+        const y = height - (d.count / max) * (height - 4);
+        return <circle key={i} cx={x} cy={y} r="2" fill={color} vectorEffect="non-scaling-stroke" />;
+      })}
+    </svg>
+  );
+};
+
 // ─── Component ──────────────────────────────────────────────────────
 
 const OMDailyPage: React.FC = () => {
@@ -161,11 +232,14 @@ const OMDailyPage: React.FC = () => {
   const initialHorizon = searchParams.get('horizon') || '';
 
   // State
-  const [activeTab, setActiveTab] = useState(0); // 0=overview, 1-5=horizons
+  const [activeTab, setActiveTab] = useState(0);
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [extended, setExtended] = useState<ExtendedDashboard | null>(null);
   const [items, setItems] = useState<DailyItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
+  const [expandedItem, setExpandedItem] = useState<number | null>(null);
 
   // Filters
   const [filterStatus, setFilterStatus] = useState('');
@@ -219,6 +293,13 @@ const OMDailyPage: React.FC = () => {
     try {
       const resp = await fetch('/api/om-daily/dashboard', { credentials: 'include' });
       if (resp.ok) { setDashboard(await resp.json()); }
+    } catch {}
+  }, []);
+
+  const fetchExtended = useCallback(async () => {
+    try {
+      const resp = await fetch('/api/om-daily/dashboard/extended', { credentials: 'include' });
+      if (resp.ok) { setExtended(await resp.json()); }
     } catch {}
   }, []);
 
@@ -330,7 +411,7 @@ const OMDailyPage: React.FC = () => {
           fetchItems(activeTab === 0 ? undefined : HORIZONS[activeTab - 1]);
           fetchDashboard();
         }
-      } catch { /* ignore poll errors */ }
+      } catch {}
     }, 2000);
   }, [activeTab, stopSyncPolling]);
 
@@ -366,7 +447,7 @@ const OMDailyPage: React.FC = () => {
       const data = await resp.json();
       if (resp.ok && data.success) {
         showToast(`Pushed to origin/${data.branch}`);
-        fetchBuildInfo(); // Refresh build info after push
+        fetchBuildInfo();
       } else {
         showToast(data.error || 'Push failed', 'error');
       }
@@ -380,14 +461,13 @@ const OMDailyPage: React.FC = () => {
   // Initial load
   useEffect(() => {
     setLoading(true);
-    Promise.all([fetchDashboard(), fetchCategories(), fetchGhStatus(), fetchBuildInfo()]).finally(() => setLoading(false));
+    Promise.all([fetchDashboard(), fetchExtended(), fetchCategories(), fetchGhStatus(), fetchBuildInfo()]).finally(() => setLoading(false));
   }, []);
 
-  // Auto-sync today's commits into the 24-hour plan when that tab is selected
+  // Auto-sync today's commits when 24-hour tab selected
   const commitsSyncedRef = useRef(false);
   useEffect(() => {
     if (activeTab === 1 && !commitsSyncedRef.current) {
-      // horizon '1' = 24 Hour tab (index 1 in HORIZONS)
       commitsSyncedRef.current = true;
       fetch('/api/om-daily/sync-commits', {
         method: 'POST', credentials: 'include',
@@ -445,6 +525,7 @@ const OMDailyPage: React.FC = () => {
         showToast(editingItem ? 'Item updated' : 'Item created');
         fetchItems(activeTab === 0 ? undefined : HORIZONS[activeTab - 1]);
         fetchDashboard();
+        fetchExtended();
         fetchCategories();
         setDialogOpen(false);
         setEditingItem(null);
@@ -458,6 +539,7 @@ const OMDailyPage: React.FC = () => {
       showToast('Item deleted');
       fetchItems(activeTab === 0 ? undefined : HORIZONS[activeTab - 1]);
       fetchDashboard();
+      fetchExtended();
     } catch { showToast('Failed to delete', 'error'); }
   };
 
@@ -470,6 +552,7 @@ const OMDailyPage: React.FC = () => {
       });
       fetchItems(activeTab === 0 ? undefined : HORIZONS[activeTab - 1]);
       fetchDashboard();
+      fetchExtended();
     } catch {}
   };
 
@@ -518,33 +601,311 @@ const OMDailyPage: React.FC = () => {
     );
   };
 
-  // ─── Overview Tab ────────────────────────────────────────────────
+  // ─── Enhanced Overview Tab ─────────────────────────────────────
 
   const renderOverview = () => {
     if (!dashboard) return <CircularProgress />;
+
+    const totalAll = Object.values(dashboard.horizons).reduce((sum, h) => sum + h.total, 0);
+    const totalDone = Object.values(dashboard.horizons).reduce((sum, h) => sum + (h.statuses?.done || 0), 0);
+    const overallPct = totalAll > 0 ? Math.round((totalDone / totalAll) * 100) : 0;
+
     return (
       <Box>
-        {/* KPI Cards */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 2, mb: 3 }}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="h3" color="primary">{dashboard.totalActive}</Typography>
-            <Typography variant="body2" color="text.secondary">Active Items</Typography>
+        {/* ── Top KPI Row ── */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 2, mb: 3 }}>
+          {[
+            { value: dashboard.totalActive, label: 'Active Items', color: '#1976d2', icon: <AssignmentIcon sx={{ fontSize: 20 }} /> },
+            { value: dashboard.overdue, label: 'Overdue', color: '#f44336', icon: <WarningIcon sx={{ fontSize: 20 }} /> },
+            { value: dashboard.dueToday, label: 'Due Today', color: '#ff9800', icon: <ScheduleIcon sx={{ fontSize: 20 }} /> },
+            { value: dashboard.recentlyCompleted, label: 'Done (7d)', color: '#4caf50', icon: <CheckCircleIcon sx={{ fontSize: 20 }} /> },
+            { value: `${overallPct}%`, label: 'Overall Progress', color: '#8c249d', icon: <TrendingUpIcon sx={{ fontSize: 20 }} /> },
+          ].map((kpi, i) => (
+            <Paper key={i} sx={{ p: 2, textAlign: 'center', border: `1px solid ${isDark ? '#333' : '#e8e8e8'}` }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5, color: kpi.color }}>
+                {kpi.icon}
+              </Box>
+              <Typography variant="h3" sx={{ color: kpi.color, fontWeight: 700 }}>{kpi.value}</Typography>
+              <Typography variant="caption" color="text.secondary">{kpi.label}</Typography>
+            </Paper>
+          ))}
+        </Box>
+
+        {/* ── Two-column layout: Focus + Charts ── */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2, mb: 3 }}>
+
+          {/* LEFT: Currently In Progress */}
+          <Paper sx={{ p: 2.5, border: `1px solid ${isDark ? '#333' : '#e8e8e8'}` }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <PlayArrowIcon sx={{ color: '#ff9800', fontSize: 20 }} />
+              <Typography variant="subtitle1" fontWeight={700}>In Progress</Typography>
+              <Chip size="small" label={extended?.inProgressItems?.length || 0} sx={{ height: 20, fontSize: '0.7rem', bgcolor: alpha('#ff9800', 0.12), color: '#ff9800', fontWeight: 700 }} />
+            </Box>
+            {extended?.inProgressItems && extended.inProgressItems.length > 0 ? (
+              <Box>
+                {extended.inProgressItems.slice(0, 8).map((item) => (
+                  <Box key={item.id} sx={{
+                    display: 'flex', alignItems: 'center', gap: 1, py: 1,
+                    borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`,
+                    '&:last-child': { borderBottom: 'none' },
+                  }}>
+                    <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: PRIORITY_COLORS[item.priority] || '#999', flexShrink: 0 }} />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" fontWeight={600} noWrap sx={{ fontSize: '0.84rem' }}>{item.title}</Typography>
+                      <Box sx={{ display: 'flex', gap: 0.5, mt: 0.3 }}>
+                        {item.category && <Chip size="small" label={item.category} sx={{ height: 16, fontSize: '0.6rem' }} />}
+                        <Chip size="small" label={HORIZON_LABELS[item.horizon]} sx={{ height: 16, fontSize: '0.6rem', bgcolor: alpha('#00897b', 0.1), color: '#00897b' }} />
+                        {item.agent_tool && (
+                          <Chip size="small" label={AGENT_TOOL_LABELS[item.agent_tool] || item.agent_tool}
+                            sx={{ height: 16, fontSize: '0.6rem', bgcolor: alpha(AGENT_TOOL_COLORS[item.agent_tool] || '#666', 0.12), color: AGENT_TOOL_COLORS[item.agent_tool] || '#666' }} />
+                        )}
+                      </Box>
+                    </Box>
+                    {item.due_date && (
+                      <Typography variant="caption" color={new Date(item.due_date) < new Date() ? 'error.main' : 'text.secondary'} sx={{ fontSize: '0.68rem', flexShrink: 0 }}>
+                        {formatShortDate(item.due_date)}
+                      </Typography>
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary">No items currently in progress</Typography>
+            )}
           </Paper>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="h3" color="error.main">{dashboard.overdue}</Typography>
-            <Typography variant="body2" color="text.secondary">Overdue</Typography>
+
+          {/* RIGHT: Status & Priority Charts */}
+          <Paper sx={{ p: 2.5, border: `1px solid ${isDark ? '#333' : '#e8e8e8'}` }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>Status Distribution</Typography>
+            {extended?.statusDistribution ? (
+              <Box sx={{ mb: 2.5 }}>
+                {(() => {
+                  const maxVal = Math.max(...extended.statusDistribution.map(s => s.count), 1);
+                  return extended.statusDistribution.map((s) => (
+                    <HBar key={s.status} label={STATUS_LABELS[s.status] || s.status} value={s.count} max={maxVal} color={STATUS_COLORS[s.status] || '#999'} isDark={isDark} />
+                  ));
+                })()}
+              </Box>
+            ) : <CircularProgress size={20} />}
+
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>Priority (Active)</Typography>
+            {extended?.priorityDistribution ? (
+              <Box>
+                {(() => {
+                  const maxVal = Math.max(...extended.priorityDistribution.map(p => p.count), 1);
+                  return extended.priorityDistribution.map((p) => (
+                    <HBar key={p.priority} label={p.priority} value={p.count} max={maxVal} color={PRIORITY_COLORS[p.priority] || '#999'} isDark={isDark} />
+                  ));
+                })()}
+              </Box>
+            ) : <CircularProgress size={20} />}
           </Paper>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="h3" color="warning.main">{dashboard.dueToday}</Typography>
-            <Typography variant="body2" color="text.secondary">Due Today</Typography>
+        </Box>
+
+        {/* ── Velocity + Due Soon Row ── */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2, mb: 3 }}>
+
+          {/* Velocity chart */}
+          <Paper sx={{ p: 2.5, border: `1px solid ${isDark ? '#333' : '#e8e8e8'}` }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>Completion Velocity (14d)</Typography>
+            {extended?.velocity && extended.velocity.length > 1 ? (
+              <Box>
+                <SparkLine data={extended.velocity} color="#4caf50" height={50} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                  <Typography variant="caption" color="text.secondary">{formatShortDate(extended.velocity[0]?.date)}</Typography>
+                  <Typography variant="caption" color="text.secondary">{formatShortDate(extended.velocity[extended.velocity.length - 1]?.date)}</Typography>
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                  Avg: {(extended.velocity.reduce((s, v) => s + v.count, 0) / extended.velocity.length).toFixed(1)} items/day
+                </Typography>
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary">Not enough data yet</Typography>
+            )}
           </Paper>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="h3" color="success.main">{dashboard.recentlyCompleted}</Typography>
-            <Typography variant="body2" color="text.secondary">Completed (7d)</Typography>
+
+          {/* Due Soon */}
+          <Paper sx={{ p: 2.5, border: `1px solid ${isDark ? '#333' : '#e8e8e8'}` }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <ScheduleIcon sx={{ color: '#ff9800', fontSize: 20 }} />
+              <Typography variant="subtitle1" fontWeight={700}>Due This Week</Typography>
+            </Box>
+            {extended?.dueSoon && extended.dueSoon.length > 0 ? (
+              <Box>
+                {extended.dueSoon.slice(0, 6).map((item) => (
+                  <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.8, borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`, '&:last-child': { borderBottom: 'none' } }}>
+                    <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: PRIORITY_COLORS[item.priority] || '#999', flexShrink: 0 }} />
+                    <Typography variant="body2" sx={{ flex: 1, fontSize: '0.82rem' }} noWrap>{item.title}</Typography>
+                    {renderStatusChip(item.status)}
+                    <Typography variant="caption" sx={{ color: new Date(item.due_date) <= new Date() ? '#f44336' : '#ff9800', fontWeight: 600, fontSize: '0.7rem', flexShrink: 0 }}>
+                      {formatShortDate(item.due_date)}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary">No items due this week</Typography>
+            )}
           </Paper>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="h3" sx={{ color: '#8c249d' }}>{ghStatus?.unsyncedCount ?? '—'}</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>Unsynced Issues</Typography>
+        </Box>
+
+        {/* ── Phase Tracking ── */}
+        {extended?.phaseGroups && extended.phaseGroups.length > 0 && (
+          <Paper sx={{ p: 2.5, mb: 3, border: `1px solid ${isDark ? '#333' : '#e8e8e8'}` }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <FlagIcon sx={{ color: '#8c249d', fontSize: 20 }} />
+              <Typography variant="subtitle1" fontWeight={700}>Phase Tracking</Typography>
+              <Typography variant="caption" color="text.secondary">Multi-step projects</Typography>
+            </Box>
+            {extended.phaseGroups.map((group) => {
+              const pct = group.total > 0 ? Math.round((group.done_count / group.total) * 100) : 0;
+              const key = `${group.source}-${group.category}`;
+              const isExpanded = expandedPhase === key;
+              const phaseItems = group.items_summary ? group.items_summary.split('||').map(s => {
+                const [id, title, status, priority] = s.split(':');
+                return { id: Number(id), title, status, priority };
+              }) : [];
+
+              return (
+                <Box key={key} sx={{ mb: 1.5, '&:last-child': { mb: 0 } }}>
+                  <Box
+                    onClick={() => setExpandedPhase(isExpanded ? null : key)}
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', py: 1, px: 1, borderRadius: 1, '&:hover': { bgcolor: alpha('#8c249d', 0.04) } }}
+                  >
+                    <ExpandMoreIcon sx={{ fontSize: 18, transform: isExpanded ? 'rotate(180deg)' : 'none', transition: '0.2s', color: 'text.secondary' }} />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" fontWeight={700} sx={{ fontSize: '0.88rem' }}>
+                        {group.category || group.source}
+                        <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                          via {group.source}
+                        </Typography>
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                        <LinearProgress variant="determinate" value={pct} sx={{ flex: 1, height: 6, borderRadius: 3, maxWidth: 200 }} />
+                        <Typography variant="caption" fontWeight={600} sx={{ color: pct === 100 ? '#4caf50' : '#ff9800' }}>{pct}%</Typography>
+                      </Box>
+                    </Box>
+                    <Chip size="small" label={`${group.done_count}/${group.total} done`} sx={{ height: 22, fontSize: '0.7rem', bgcolor: alpha(pct === 100 ? '#4caf50' : '#ff9800', 0.12), color: pct === 100 ? '#4caf50' : '#ff9800', fontWeight: 600 }} />
+                    {group.active_count > 0 && (
+                      <Chip size="small" label={`${group.active_count} active`} sx={{ height: 22, fontSize: '0.7rem', bgcolor: alpha('#2196f3', 0.12), color: '#2196f3', fontWeight: 600 }} />
+                    )}
+                  </Box>
+                  <Collapse in={isExpanded}>
+                    <Box sx={{ pl: 5, pr: 1, py: 1 }}>
+                      {phaseItems.map((pi, idx) => (
+                        <Box key={pi.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.6, borderBottom: idx < phaseItems.length - 1 ? `1px solid ${isDark ? '#222' : '#f0f0f0'}` : 'none' }}>
+                          {pi.status === 'done' ? (
+                            <CheckCircleIcon sx={{ fontSize: 16, color: '#4caf50' }} />
+                          ) : pi.status === 'in_progress' ? (
+                            <PlayArrowIcon sx={{ fontSize: 16, color: '#ff9800' }} />
+                          ) : (
+                            <Box sx={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${isDark ? '#555' : '#ccc'}` }} />
+                          )}
+                          <Typography variant="body2" sx={{
+                            flex: 1, fontSize: '0.82rem',
+                            textDecoration: pi.status === 'done' ? 'line-through' : 'none',
+                            opacity: pi.status === 'done' ? 0.6 : 1,
+                          }}>
+                            {pi.title}
+                          </Typography>
+                          {renderStatusChip(pi.status)}
+                          {renderPriorityChip(pi.priority)}
+                        </Box>
+                      ))}
+                    </Box>
+                  </Collapse>
+                </Box>
+              );
+            })}
+          </Paper>
+        )}
+
+        {/* ── Category Breakdown + Recent Activity Row ── */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2, mb: 3 }}>
+
+          {/* Category Breakdown */}
+          <Paper sx={{ p: 2.5, border: `1px solid ${isDark ? '#333' : '#e8e8e8'}` }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>Categories</Typography>
+            {extended?.categoryBreakdown && extended.categoryBreakdown.length > 0 ? (
+              <Box>
+                {(() => {
+                  const maxVal = Math.max(...extended.categoryBreakdown.map(c => c.count), 1);
+                  return extended.categoryBreakdown.slice(0, 10).map((c) => (
+                    <Box key={c.category} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.8 }}>
+                      <Typography variant="caption" sx={{ width: 100, textAlign: 'right', color: 'text.secondary', fontSize: '0.72rem', flexShrink: 0 }} noWrap>{c.category}</Typography>
+                      <Box sx={{ flex: 1, height: 18, bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', borderRadius: 1, overflow: 'hidden', position: 'relative' }}>
+                        <Box sx={{ position: 'absolute', width: maxVal > 0 ? `${(c.count / maxVal) * 100}%` : '0%', height: '100%', bgcolor: alpha('#8c249d', 0.15), borderRadius: 1 }} />
+                        <Box sx={{ position: 'absolute', width: maxVal > 0 ? `${(c.done_count / maxVal) * 100}%` : '0%', height: '100%', bgcolor: alpha('#4caf50', 0.5), borderRadius: 1 }} />
+                      </Box>
+                      <Typography variant="caption" sx={{ width: 50, fontWeight: 600, fontSize: '0.7rem', color: 'text.secondary', flexShrink: 0 }}>
+                        {c.done_count}/{c.count}
+                      </Typography>
+                    </Box>
+                  ));
+                })()}
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary">No categories yet</Typography>
+            )}
+          </Paper>
+
+          {/* Recent Completions */}
+          <Paper sx={{ p: 2.5, border: `1px solid ${isDark ? '#333' : '#e8e8e8'}` }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 20 }} />
+              <Typography variant="subtitle1" fontWeight={700}>Recently Completed</Typography>
+            </Box>
+            {extended?.recentCompleted && extended.recentCompleted.length > 0 ? (
+              <Box>
+                {extended.recentCompleted.slice(0, 8).map((item) => (
+                  <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.7, borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`, '&:last-child': { borderBottom: 'none' } }}>
+                    <CheckCircleIcon sx={{ fontSize: 14, color: '#4caf50', flexShrink: 0 }} />
+                    <Typography variant="body2" sx={{ flex: 1, fontSize: '0.82rem', opacity: 0.85 }} noWrap>{item.title}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.68rem', flexShrink: 0 }}>
+                      {item.completed_at ? timeAgo(item.completed_at) : ''}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary">No recent completions</Typography>
+            )}
+          </Paper>
+        </Box>
+
+        {/* ── Horizon Cards + GitHub Row ── */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 2 }}>
+          {HORIZONS.map((h, idx) => {
+            const data = dashboard.horizons[h];
+            const total = data?.total || 0;
+            const done = data?.statuses?.done || 0;
+            const inProgress = data?.statuses?.in_progress || 0;
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+            return (
+              <Paper
+                key={h}
+                sx={{ p: 2, cursor: 'pointer', border: `1px solid ${isDark ? '#333' : '#e0e0e0'}`, '&:hover': { borderColor: '#00897b', bgcolor: alpha('#00897b', 0.03) } }}
+                onClick={() => setActiveTab(idx + 1)}
+              >
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#00897b' }}>{HORIZON_LABELS[h]}</Typography>
+                  <ArrowForwardIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{total} items</Typography>
+                <LinearProgress variant="determinate" value={pct} sx={{ height: 6, borderRadius: 3, mb: 0.5 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="caption" color="text.secondary">{done} done</Typography>
+                  <Typography variant="caption" color="text.secondary">{inProgress} active</Typography>
+                </Box>
+              </Paper>
+            );
+          })}
+
+          {/* GitHub Sync Card */}
+          <Paper sx={{ p: 2, border: `1px solid ${isDark ? '#333' : '#e0e0e0'}` }}>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#8c249d', mb: 1 }}>GitHub Sync</Typography>
+            <Typography variant="h4" sx={{ color: '#8c249d' }}>{ghStatus?.unsyncedCount ?? '—'}</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Unsynced Issues</Typography>
             <Button
               size="small" variant="outlined" startIcon={ghSyncing ? <CircularProgress size={14} /> : <SyncIcon />}
               onClick={triggerGhSync} disabled={ghSyncing}
@@ -563,19 +924,10 @@ const OMDailyPage: React.FC = () => {
                   value={ghSyncProgress.total > 0 ? Math.round((ghSyncProgress.current / ghSyncProgress.total) * 100) : 0}
                   sx={{ height: 4, borderRadius: 2 }}
                 />
-                {(ghSyncProgress.summary.created > 0 || ghSyncProgress.summary.errors > 0) && (
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.3, fontSize: '0.6rem' }}>
-                    {ghSyncProgress.summary.created > 0 && `${ghSyncProgress.summary.created} created `}
-                    {ghSyncProgress.summary.updated > 0 && `${ghSyncProgress.summary.updated} updated `}
-                    {ghSyncProgress.summary.errors > 0 && `${ghSyncProgress.summary.errors} errors`}
-                  </Typography>
-                )}
               </Box>
             )}
             {!ghSyncing && ghStatus?.lastSync && (
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                Last: {formatDate(ghStatus.lastSync)}
-              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>Last: {formatDate(ghStatus.lastSync)}</Typography>
             )}
             {ghStatus?.issuesUrl && (
               <Typography variant="caption" sx={{ display: 'block', mt: 0.3 }}>
@@ -586,37 +938,11 @@ const OMDailyPage: React.FC = () => {
             )}
           </Paper>
         </Box>
-
-        {/* Horizon cards */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: 'repeat(5, 1fr)' }, gap: 2 }}>
-          {HORIZONS.map((h, idx) => {
-            const data = dashboard.horizons[h];
-            const total = data?.total || 0;
-            const done = data?.statuses?.done || 0;
-            const inProgress = data?.statuses?.in_progress || 0;
-            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-            return (
-              <Paper
-                key={h}
-                sx={{ p: 2, cursor: 'pointer', border: `1px solid ${isDark ? '#333' : '#e0e0e0'}`, '&:hover': { borderColor: '#00897b', bgcolor: alpha('#00897b', 0.03) } }}
-                onClick={() => setActiveTab(idx + 1)}
-              >
-                <Typography variant="h6" fontWeight={700} sx={{ color: '#00897b' }}>{HORIZON_LABELS[h]}</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{total} items</Typography>
-                <LinearProgress variant="determinate" value={pct} sx={{ height: 6, borderRadius: 3, mb: 0.5 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="caption" color="text.secondary">{done} done</Typography>
-                  <Typography variant="caption" color="text.secondary">{inProgress} active</Typography>
-                </Box>
-              </Paper>
-            );
-          })}
-        </Box>
       </Box>
     );
   };
 
-  // ─── Item List ───────────────────────────────────────────────────
+  // ─── Item List (horizon tabs) ──────────────────────────────────
 
   const renderItemList = () => (
     <Box>
@@ -667,93 +993,116 @@ const OMDailyPage: React.FC = () => {
         <Paper>
           {items.map(item => {
             const isOverdue = item.due_date && item.status !== 'done' && item.status !== 'cancelled' && new Date(item.due_date) < new Date(new Date().toDateString());
+            const isItemExpanded = expandedItem === item.id;
             return (
-              <Box
-                key={item.id}
-                sx={{
-                  display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.5,
-                  borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`,
-                  bgcolor: isOverdue ? alpha('#f44336', 0.04) : item.status === 'done' ? alpha('#4caf50', 0.03) : 'transparent',
-                  '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.04) },
-                }}
-              >
-                {/* Quick status toggle */}
-                {item.status !== 'done' && item.status !== 'cancelled' ? (
-                  <IconButton size="small" color="success" onClick={() => handleStatusChange(item, 'done')}>
-                    <CheckIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
-                ) : (
-                  <CheckIcon sx={{ fontSize: 18, color: 'success.main', mx: 1 }} />
-                )}
+              <Box key={item.id}>
+                <Box
+                  sx={{
+                    display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.5,
+                    borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`,
+                    bgcolor: isOverdue ? alpha('#f44336', 0.04) : item.status === 'done' ? alpha('#4caf50', 0.03) : 'transparent',
+                    '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.04) },
+                    cursor: item.description ? 'pointer' : 'default',
+                  }}
+                  onClick={() => item.description && setExpandedItem(isItemExpanded ? null : item.id)}
+                >
+                  {/* Quick status toggle */}
+                  {item.status !== 'done' && item.status !== 'cancelled' ? (
+                    <IconButton size="small" color="success" onClick={(e) => { e.stopPropagation(); handleStatusChange(item, 'done'); }}>
+                      <CheckIcon sx={{ fontSize: 18 }} />
+                    </IconButton>
+                  ) : (
+                    <CheckIcon sx={{ fontSize: 18, color: 'success.main', mx: 1 }} />
+                  )}
 
-                {/* Content */}
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="body2" fontWeight={600} sx={{
-                    fontSize: '0.88rem',
-                    textDecoration: item.status === 'done' ? 'line-through' : 'none',
-                    opacity: item.status === 'done' ? 0.6 : 1,
-                  }}>
-                    {item.title}
-                  </Typography>
+                  {/* Expand arrow for items with description */}
                   {item.description && (
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.2 }}>
-                      {item.description.length > 120 ? item.description.slice(0, 120) + '...' : item.description}
+                    <ExpandMoreIcon sx={{ fontSize: 16, transform: isItemExpanded ? 'rotate(180deg)' : 'none', transition: '0.2s', color: 'text.disabled' }} />
+                  )}
+
+                  {/* Content */}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body2" fontWeight={600} sx={{
+                      fontSize: '0.88rem',
+                      textDecoration: item.status === 'done' ? 'line-through' : 'none',
+                      opacity: item.status === 'done' ? 0.6 : 1,
+                    }}>
+                      {item.title}
                     </Typography>
-                  )}
-                </Box>
+                    {!isItemExpanded && item.description && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.2 }}>
+                        {item.description.length > 100 ? item.description.slice(0, 100) + '...' : item.description}
+                      </Typography>
+                    )}
+                  </Box>
 
-                {/* Meta chips */}
-                <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
-                  {item.agent_tool && renderAgentChip(item.agent_tool)}
-                  {item.branch_type && (
-                    <Tooltip title={`Branch Type: ${BRANCH_TYPE_LABELS[item.branch_type] || item.branch_type}`}>
-                      <Chip size="small" label={BRANCH_TYPE_LABELS[item.branch_type] || item.branch_type}
-                        sx={{ fontSize: '0.6rem', height: 18, bgcolor: alpha(BRANCH_TYPE_COLORS[item.branch_type] || '#666', 0.12), color: BRANCH_TYPE_COLORS[item.branch_type] || '#666', fontWeight: 600 }} />
-                    </Tooltip>
-                  )}
-                  {item.github_branch && (
-                    <Tooltip title={`Branch: ${item.github_branch}`}>
-                      <Chip size="small" label={item.github_branch} variant="outlined"
-                        sx={{ fontSize: '0.58rem', height: 18, fontFamily: 'monospace', maxWidth: 180, borderColor: alpha('#24292e', 0.3), color: '#24292e' }} />
-                    </Tooltip>
-                  )}
-                  {item.conversation_ref && (
-                    <Tooltip title={`Linked: ${item.conversation_ref}`}>
-                      <Chip size="small" label="Conv" variant="outlined"
-                        sx={{ fontSize: '0.6rem', height: 18, borderColor: alpha('#8c249d', 0.4), color: '#8c249d' }} />
-                    </Tooltip>
-                  )}
-                  {!item.agent_tool && item.source === 'agent' && (() => {
-                    const meta = typeof item.metadata === 'string' ? (() => { try { return JSON.parse(item.metadata); } catch { return {}; } })() : (item.metadata || {});
-                    return (
-                      <Tooltip title={`Agent: ${meta.agent || 'unknown'}`}>
-                        <Chip size="small" icon={<AgentIcon sx={{ fontSize: 14 }} />} label={meta.agent || 'agent'}
-                          sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#9c27b0', 0.1), color: '#9c27b0' }} />
+                  {/* Meta chips */}
+                  <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
+                    {item.agent_tool && renderAgentChip(item.agent_tool)}
+                    {item.branch_type && (
+                      <Tooltip title={`Branch Type: ${BRANCH_TYPE_LABELS[item.branch_type] || item.branch_type}`}>
+                        <Chip size="small" label={BRANCH_TYPE_LABELS[item.branch_type] || item.branch_type}
+                          sx={{ fontSize: '0.6rem', height: 18, bgcolor: alpha(BRANCH_TYPE_COLORS[item.branch_type] || '#666', 0.12), color: BRANCH_TYPE_COLORS[item.branch_type] || '#666', fontWeight: 600 }} />
                       </Tooltip>
-                    );
-                  })()}
-                  {item.github_issue_number && (
-                    <Tooltip title={`GitHub Issue #${item.github_issue_number}`}>
-                      <Chip size="small" label={`#${item.github_issue_number}`} component="a"
-                        href={`https://github.com/nexty1982/prod-current/issues/${item.github_issue_number}`}
-                        target="_blank" rel="noreferrer" clickable
-                        sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#24292e', 0.08), color: '#24292e', textDecoration: 'none' }} />
-                    </Tooltip>
-                  )}
-                  {activeTab === 0 && (
-                    <Chip size="small" label={HORIZON_LABELS[item.horizon]} sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#00897b', 0.1), color: '#00897b' }} />
-                  )}
-                  {renderStatusChip(item.status)}
-                  {renderPriorityChip(item.priority)}
-                  {item.category && <Chip size="small" label={item.category} variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />}
-                  {item.due_date && (
-                    <Chip size="small" label={formatDate(item.due_date)} color={isOverdue ? 'error' : 'default'} sx={{ fontSize: '0.65rem', height: 20 }} />
-                  )}
+                    )}
+                    {item.github_branch && (
+                      <Tooltip title={`Branch: ${item.github_branch}`}>
+                        <Chip size="small" label={item.github_branch} variant="outlined"
+                          sx={{ fontSize: '0.58rem', height: 18, fontFamily: 'monospace', maxWidth: 180, borderColor: alpha('#24292e', 0.3), color: '#24292e' }} />
+                      </Tooltip>
+                    )}
+                    {item.conversation_ref && (
+                      <Tooltip title={`Linked: ${item.conversation_ref}`}>
+                        <Chip size="small" label="Conv" variant="outlined"
+                          sx={{ fontSize: '0.6rem', height: 18, borderColor: alpha('#8c249d', 0.4), color: '#8c249d' }} />
+                      </Tooltip>
+                    )}
+                    {!item.agent_tool && item.source === 'agent' && (() => {
+                      const meta = typeof item.metadata === 'string' ? (() => { try { return JSON.parse(item.metadata); } catch { return {}; } })() : (item.metadata || {});
+                      return (
+                        <Tooltip title={`Agent: ${meta.agent || 'unknown'}`}>
+                          <Chip size="small" icon={<AgentIcon sx={{ fontSize: 14 }} />} label={meta.agent || 'agent'}
+                            sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#9c27b0', 0.1), color: '#9c27b0' }} />
+                        </Tooltip>
+                      );
+                    })()}
+                    {item.github_issue_number && (
+                      <Tooltip title={`GitHub Issue #${item.github_issue_number}`}>
+                        <Chip size="small" label={`#${item.github_issue_number}`} component="a"
+                          href={`https://github.com/nexty1982/prod-current/issues/${item.github_issue_number}`}
+                          target="_blank" rel="noreferrer" clickable
+                          sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#24292e', 0.08), color: '#24292e', textDecoration: 'none' }} />
+                      </Tooltip>
+                    )}
+                    {activeTab === 0 && (
+                      <Chip size="small" label={HORIZON_LABELS[item.horizon]} sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#00897b', 0.1), color: '#00897b' }} />
+                    )}
+                    {renderStatusChip(item.status)}
+                    {renderPriorityChip(item.priority)}
+                    {item.category && <Chip size="small" label={item.category} variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />}
+                    {item.due_date && (
+                      <Chip size="small" label={formatDate(item.due_date)} color={isOverdue ? 'error' : 'default'} sx={{ fontSize: '0.65rem', height: 20 }} />
+                    )}
+                  </Box>
+
+                  {/* Actions */}
+                  <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEditDialog(item); }}><EditIcon sx={{ fontSize: 16 }} /></IconButton>
+                  <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}><DeleteIcon sx={{ fontSize: 16 }} /></IconButton>
                 </Box>
 
-                {/* Actions */}
-                <IconButton size="small" onClick={() => openEditDialog(item)}><EditIcon sx={{ fontSize: 16 }} /></IconButton>
-                <IconButton size="small" color="error" onClick={() => handleDelete(item.id)}><DeleteIcon sx={{ fontSize: 16 }} /></IconButton>
+                {/* Expanded description */}
+                <Collapse in={isItemExpanded}>
+                  <Box sx={{ px: 7, py: 2, bgcolor: isDark ? alpha('#000', 0.2) : alpha('#f5f5f5', 0.5), borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}` }}>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                      {item.description}
+                    </Typography>
+                    {item.created_at && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                        Created {formatDate(item.created_at)} {item.completed_at ? ` | Completed ${formatDate(item.completed_at)}` : ''}
+                      </Typography>
+                    )}
+                  </Box>
+                </Collapse>
               </Box>
             );
           })}
@@ -803,18 +1152,18 @@ const OMDailyPage: React.FC = () => {
                 {detail?.email_sent_at ? 'Email Sent' : 'Send Email'}
               </Button>
               {buildInfo && (
-                <Chip 
-                  label={`v${buildInfo.fullVersion}`} 
-                  size="small" 
+                <Chip
+                  label={`v${buildInfo.fullVersion}`}
+                  size="small"
                   color="secondary"
                   sx={{ fontWeight: 600, fontFamily: 'monospace' }}
                 />
               )}
               <Tooltip title={`Push current branch to origin${buildInfo?.branch ? ` (${buildInfo.branch})` : ''}`}>
                 <span>
-                  <Button 
-                    variant="outlined" 
-                    size="small" 
+                  <Button
+                    variant="outlined"
+                    size="small"
                     color="success"
                     startIcon={pushing ? <CircularProgress size={16} /> : <CloudUploadIcon />}
                     onClick={pushToOrigin}
