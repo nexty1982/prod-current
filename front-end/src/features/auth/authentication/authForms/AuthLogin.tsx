@@ -84,11 +84,19 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
 
     try {
       const result = await login(formData.username, formData.password, formData.rememberMe);
-      // Use redirectUrl from login response if available, otherwise redirect to Super Dashboard
+      // Use redirectUrl from login response if available, otherwise route based on role
       if (result && typeof result === 'object' && 'redirectUrl' in result && result.redirectUrl) {
         window.location.href = result.redirectUrl;
       } else {
-        navigate('/');
+        // Navigate directly to the correct layout based on role
+        // This avoids a flash of FullLayout when SmartRedirect runs at '/'
+        const userData = JSON.parse(localStorage.getItem('auth_user') || '{}');
+        const role = userData?.role;
+        if (role === 'super_admin' || role === 'admin') {
+          navigate('/admin/control-panel', { replace: true });
+        } else {
+          navigate('/portal', { replace: true });
+        }
       }
     } catch (err) {
       // Error is handled by the auth context

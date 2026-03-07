@@ -91,7 +91,7 @@ const OrthodoxLogin: React.FC = () => {
                         </Stack>
 
                         <Typography variant="caption" sx={{ color: '#7B4F9E', fontWeight: 500, letterSpacing: 0.5, mb: 1, display: 'block' }}>
-                            Sacred Records Management for Orthodox Communities
+                            Orthodox Christian Record Translation + Management
                         </Typography>
 
                         <Typography
