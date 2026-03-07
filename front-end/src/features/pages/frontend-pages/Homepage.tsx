@@ -1656,7 +1656,7 @@ const HomePage: React.FC = () => {
                   <Button
                     variant="contained"
                     size="large"
-                    href="/auth/register"
+                    href="/frontend-pages/contact"
                     sx={{
                       mt: 1,
                       background: 'linear-gradient(135deg, #D4AF37, #F4D03F)',
@@ -1667,7 +1667,23 @@ const HomePage: React.FC = () => {
                       '&:hover': { background: 'linear-gradient(135deg, #c9a430, #e6c52e)' },
                     }}
                   >
-                    Get Started Free &rarr;
+                    Register Your Church &rarr;
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    href="/auth/register"
+                    sx={{
+                      mt: 0.5,
+                      color: 'text.secondary',
+                      borderColor: 'divider',
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      fontSize: '0.82rem',
+                      '&:hover': { borderColor: '#D4AF37', color: '#D4AF37' },
+                    }}
+                  >
+                    Already have a token? Join your church
                   </Button>
                 </Stack>
               </Grid>

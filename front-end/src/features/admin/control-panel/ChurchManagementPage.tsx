@@ -6,7 +6,7 @@ import {
   Business as ChurchIcon,
   Settings as WizardIcon,
   TableChart as FieldIcon,
-  Rocket as ProvisionIcon,
+  HowToReg as PendingIcon,
 } from '@mui/icons-material';
 import React from 'react';
 import CategoryPage, { CategorySection } from './CategoryPage';
@@ -17,6 +17,12 @@ const sections: CategorySection[] = [
     tools: [
       { title: 'All Churches', description: 'View and manage all registered churches in the system', href: '/apps/church-management', icon: <ChurchIcon /> },
       { title: 'Church Setup Wizard', description: 'Step-by-step wizard to onboard and configure a new church', href: '/apps/church-management/wizard', icon: <WizardIcon /> },
+    ],
+  },
+  {
+    sectionTitle: 'Member Management',
+    tools: [
+      { title: 'Pending Members', description: 'Review and approve users who registered via church token', href: '/admin/control-panel/pending-members', icon: <PendingIcon />, chip: 'New', chipColor: 'success' as const },
     ],
   },
   {

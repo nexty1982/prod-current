@@ -69,7 +69,7 @@ const C2a = () => {
           <Button
             variant="contained"
             size="large"
-            href="/auth/register"
+            href="/frontend-pages/contact"
             sx={{
               background: 'linear-gradient(135deg, #D4AF37, #F4D03F)',
               color: '#1a0a2e',
@@ -86,7 +86,7 @@ const C2a = () => {
               },
             }}
           >
-            Get Started Free &rarr;
+            Register Your Church &rarr;
           </Button>
           <Button
             variant="outlined"

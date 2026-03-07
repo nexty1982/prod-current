@@ -136,6 +136,7 @@ const ContentMediaPage = Loadable(lazy(() => import('../features/admin/control-p
 const SocialCommsPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/SocialCommsPage')));
 const ServerDevOpsPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/ServerDevOpsPage')));
 const PlatformConfigPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/PlatformConfigPage')));
+const PendingMembersPage = Loadable(lazy(() => import('../features/admin/control-panel/PendingMembersPage')));
 const CRMPage = Loadable(lazy(() => import('../features/devel-tools/crm/CRMPage')));
 const USChurchMapPage = Loadable(lazy(() => import('../features/devel-tools/us-church-map/USChurchMapPage')));
 const LogSearch = Loadable(lazy(() => import('../features/admin/dashboard/LogSearch')));
@@ -838,6 +839,16 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
               <ChurchManagementPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/pending-members',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <PendingMembersPage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
