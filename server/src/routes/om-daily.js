@@ -222,7 +222,7 @@ router.post('/sync-commits', requireAuth, async (req, res) => {
 router.get('/items', requireAuth, async (req, res) => {
   try {
     const pool = getPool();
-    const { horizon, status, priority, category, search, sort = 'priority', direction = 'asc', date, task_type } = req.query;
+    const { horizon, status, priority, category, search, sort = 'priority', direction = 'asc', date, task_type, due } = req.query;
 
     const conditions = [];
     const params = [];
@@ -234,6 +234,9 @@ router.get('/items', requireAuth, async (req, res) => {
     if (task_type) { conditions.push('task_type = ?'); params.push(task_type); }
     if (date) { conditions.push('DATE(created_at) = ?'); params.push(date); }
     if (search) { conditions.push('(title LIKE ? OR description LIKE ?)'); params.push(`%${search}%`, `%${search}%`); }
+    if (due === 'overdue') { conditions.push("due_date < CURDATE() AND status NOT IN ('done','cancelled')"); }
+    if (due === 'today') { conditions.push("due_date = CURDATE() AND status NOT IN ('done','cancelled')"); }
+    if (due === 'soon') { conditions.push("due_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND status NOT IN ('done','cancelled')"); }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 

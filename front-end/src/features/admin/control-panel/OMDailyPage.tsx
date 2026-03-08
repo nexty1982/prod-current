@@ -257,6 +257,7 @@ const OMDailyPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  const [filterDue, setFilterDue] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -411,13 +412,14 @@ const OMDailyPage: React.FC = () => {
       if (filterStatus) params.set('status', filterStatus);
       if (filterPriority) params.set('priority', filterPriority);
       if (filterCategory) params.set('category', filterCategory);
+      if (filterDue) params.set('due', filterDue);
       if (searchTerm) params.set('search', searchTerm);
       params.set('sort', 'priority');
 
       const resp = await fetch(`/api/om-daily/items?${params}`, { credentials: 'include' });
       if (resp.ok) { const data = await resp.json(); setItems(data.items); }
     } catch {}
-  }, [filterStatus, filterPriority, filterCategory, searchTerm]);
+  }, [filterStatus, filterPriority, filterCategory, filterDue, searchTerm]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -716,13 +718,13 @@ const OMDailyPage: React.FC = () => {
         {/* ── Top KPI Row ── */}
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 2, mb: 3 }}>
           {[
-            { value: dashboard.totalActive, label: 'Active Items', color: '#1976d2', icon: <AssignmentIcon sx={{ fontSize: 20 }} /> },
-            { value: dashboard.overdue, label: 'Overdue', color: '#f44336', icon: <WarningIcon sx={{ fontSize: 20 }} /> },
-            { value: dashboard.dueToday, label: 'Due Today', color: '#ff9800', icon: <ScheduleIcon sx={{ fontSize: 20 }} /> },
-            { value: dashboard.recentlyCompleted, label: 'Done (7d)', color: '#4caf50', icon: <CheckCircleIcon sx={{ fontSize: 20 }} /> },
+            { value: dashboard.totalActive, label: 'Active Items', color: '#1976d2', icon: <AssignmentIcon sx={{ fontSize: 20 }} />, action: () => { setFilterStatus(''); setFilterDue(''); setActiveTab(1); } },
+            { value: dashboard.overdue, label: 'Overdue', color: '#f44336', icon: <WarningIcon sx={{ fontSize: 20 }} />, action: dashboard.overdue > 0 ? () => { setFilterStatus(''); setFilterDue('overdue'); setActiveTab(1); } : undefined },
+            { value: dashboard.dueToday, label: 'Due Today', color: '#ff9800', icon: <ScheduleIcon sx={{ fontSize: 20 }} />, action: dashboard.dueToday > 0 ? () => { setFilterStatus(''); setFilterDue('today'); setActiveTab(1); } : undefined },
+            { value: dashboard.recentlyCompleted, label: 'Done (7d)', color: '#4caf50', icon: <CheckCircleIcon sx={{ fontSize: 20 }} />, action: () => { setFilterDue(''); setFilterStatus('done'); setActiveTab(1); } },
             { value: `${overallPct}%`, label: 'Overall Progress', color: '#8c249d', icon: <TrendingUpIcon sx={{ fontSize: 20 }} /> },
           ].map((kpi, i) => (
-            <Paper key={i} sx={{ p: 2, textAlign: 'center', border: `1px solid ${isDark ? '#333' : '#e8e8e8'}` }}>
+            <Paper key={i} onClick={kpi.action} sx={{ p: 2, textAlign: 'center', border: `1px solid ${isDark ? '#333' : '#e8e8e8'}`, cursor: kpi.action ? 'pointer' : 'default', transition: 'all 0.15s', '&:hover': kpi.action ? { borderColor: kpi.color, transform: 'translateY(-1px)' } : {} }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5, color: kpi.color }}>
                 {kpi.icon}
               </Box>
@@ -745,10 +747,11 @@ const OMDailyPage: React.FC = () => {
             {extended?.inProgressItems && extended.inProgressItems.length > 0 ? (
               <Box>
                 {extended.inProgressItems.slice(0, 8).map((item) => (
-                  <Box key={item.id} sx={{
-                    display: 'flex', alignItems: 'center', gap: 1, py: 1,
+                  <Box key={item.id} onClick={() => { setFilterStatus('in_progress'); setFilterDue(''); setActiveTab(1); }} sx={{
+                    display: 'flex', alignItems: 'center', gap: 1, py: 1, cursor: 'pointer',
                     borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`,
                     '&:last-child': { borderBottom: 'none' },
+                    '&:hover': { bgcolor: alpha('#ff9800', 0.06) },
                   }}>
                     <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: PRIORITY_COLORS[item.priority] || '#999', flexShrink: 0 }} />
                     <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -834,7 +837,7 @@ const OMDailyPage: React.FC = () => {
             {extended?.dueSoon && extended.dueSoon.length > 0 ? (
               <Box>
                 {extended.dueSoon.slice(0, 6).map((item) => (
-                  <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.8, borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`, '&:last-child': { borderBottom: 'none' } }}>
+                  <Box key={item.id} onClick={() => { setFilterDue('soon'); setFilterStatus(''); setActiveTab(1); }} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.8, cursor: 'pointer', borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`, '&:last-child': { borderBottom: 'none' }, '&:hover': { bgcolor: alpha('#ff9800', 0.06) } }}>
                     <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: PRIORITY_COLORS[item.priority] || '#999', flexShrink: 0 }} />
                     <Typography variant="body2" sx={{ flex: 1, fontSize: '0.82rem' }} noWrap>{item.title}</Typography>
                     {renderStatusChip(item.status)}
@@ -1077,6 +1080,15 @@ const OMDailyPage: React.FC = () => {
                 {categories.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
               </Select>
             </FormControl>
+          )}
+          {filterDue && (
+            <Chip
+              label={filterDue === 'overdue' ? 'Overdue' : filterDue === 'today' ? 'Due Today' : 'Due Soon'}
+              color={filterDue === 'overdue' ? 'error' : 'warning'}
+              size="small"
+              onDelete={() => setFilterDue('')}
+              sx={{ fontWeight: 600 }}
+            />
           )}
           <Box sx={{ flex: 1 }} />
           <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={openNewDialog}>
