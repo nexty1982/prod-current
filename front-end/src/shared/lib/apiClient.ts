@@ -221,5 +221,31 @@ export async function uploadFile<T = any>(
   });
 }
 
+// Axios-style wrapper — returns { data } response shape for compatibility
+export const apiClient = {
+  get: async <T = any>(endpoint: string, config?: { params?: Record<string, string> } & RequestConfig) => {
+    const { params, ...rest } = config || {};
+    let url = endpoint;
+    if (params) {
+      const qs = new URLSearchParams(params).toString();
+      url = qs ? `${endpoint}?${qs}` : endpoint;
+    }
+    const data = await apiJson<T>(url, { ...rest, method: 'GET' });
+    return { data };
+  },
+  post: async <T = any>(endpoint: string, body?: any, config?: RequestConfig) => {
+    const data = await apiJson<T>(endpoint, { ...config, method: 'POST', body: body ? JSON.stringify(body) : undefined });
+    return { data };
+  },
+  put: async <T = any>(endpoint: string, body?: any, config?: RequestConfig) => {
+    const data = await apiJson<T>(endpoint, { ...config, method: 'PUT', body: body ? JSON.stringify(body) : undefined });
+    return { data };
+  },
+  delete: async <T = any>(endpoint: string, config?: RequestConfig) => {
+    const data = await apiJson<T>(endpoint, { ...config, method: 'DELETE' });
+    return { data };
+  },
+};
+
 // Export default
 export default apiJson;
