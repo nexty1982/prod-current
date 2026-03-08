@@ -407,6 +407,14 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
+    title: 'Change Sets',
+    icon: IconGitBranch,
+    href: '/admin/control-panel/om-daily/change-sets',
+    chip: 'SDLC',
+    chipColor: 'secondary',
+  },
+  {
+    id: uniqueId(),
     title: 'Daily Tasks',
     icon: IconCheckbox,
     href: '/devel-tools/daily-tasks',
@@ -496,14 +504,6 @@ const Menuitems: MenuitemsType[] = [
   {
     navlabel: true,
     subheader: '🛠️ Developer Tools',
-  },
-  {
-    id: uniqueId(),
-    title: 'Change Sets',
-    icon: IconGitBranch,
-    href: '/devel-tools/change-sets',
-    chip: 'SDLC',
-    chipColor: 'secondary',
   },
   {
     id: uniqueId(),

@@ -119,6 +119,7 @@ const ChangeSetsDashboard: React.FC = () => {
   const BCrumb = [
     { to: '/', title: 'Home' },
     { to: '/admin/control-panel', title: 'Control Panel' },
+    { to: '/admin/control-panel/om-daily', title: 'OM Daily' },
     { title: 'Change Sets' },
   ];
 
@@ -155,7 +156,7 @@ const ChangeSetsDashboard: React.FC = () => {
       setCreateOpen(false);
       setNewTitle('');
       setNewBranch('');
-      navigate(`/devel-tools/change-sets/${res.data.change_set.id}`);
+      navigate(`/admin/control-panel/om-daily/change-sets/${res.data.change_set.id}`);
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to create change set');
     } finally {
@@ -190,7 +191,7 @@ const ChangeSetsDashboard: React.FC = () => {
               variant="outlined"
               size="small"
               startIcon={<HistoryIcon />}
-              onClick={() => navigate('/devel-tools/change-sets/releases')}
+              onClick={() => navigate('/admin/control-panel/om-daily/change-sets/releases')}
             >
               Release History
             </Button>
@@ -304,7 +305,7 @@ const ChangeSetsDashboard: React.FC = () => {
                       key={cs.id}
                       hover
                       sx={{ cursor: 'pointer', '&:hover': { bgcolor: alpha(sc.color, 0.04) } }}
-                      onClick={() => navigate(`/devel-tools/change-sets/${cs.id}`)}
+                      onClick={() => navigate(`/admin/control-panel/om-daily/change-sets/${cs.id}`)}
                     >
                       <TableCell>
                         <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>

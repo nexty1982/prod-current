@@ -229,7 +229,7 @@ This ensures migration files are explicitly acknowledged during review.
 
 ## Release History
 
-Navigate to `/devel-tools/change-sets/releases` or click "Release History" from the dashboard.
+Navigate to `/admin/control-panel/om-daily/change-sets/releases` or click "Release History" from the dashboard.
 
 The release history shows all change_sets that have reached `promoted` or `rolled_back` status, ordered by promotion date descending. Each entry shows:
 

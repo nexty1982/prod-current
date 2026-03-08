@@ -184,7 +184,8 @@ const ChangeSetDetailPage: React.FC = () => {
   const BCrumb = [
     { to: '/', title: 'Home' },
     { to: '/admin/control-panel', title: 'Control Panel' },
-    { to: '/devel-tools/change-sets', title: 'Change Sets' },
+    { to: '/admin/control-panel/om-daily', title: 'OM Daily' },
+    { to: '/admin/control-panel/om-daily/change-sets', title: 'Change Sets' },
     { title: cs?.code || `#${id}` },
   ];
 

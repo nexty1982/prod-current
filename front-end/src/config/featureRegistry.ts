@@ -74,7 +74,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'dynamic-records-inspector', name: 'Dynamic Records Inspector', stage: 2, route: '/devel/dynamic-records', since: '2026-01-20' },
   { id: 'crm', name: 'CRM', stage: 2, route: '/devel-tools/crm', since: '2026-02-01' },
   { id: 'tutorial-management', name: 'Tutorial Management', stage: 2, route: '/admin/tutorials', description: 'Super admin tutorial/welcome system management', since: '2026-02-21' },
-  { id: 'change-sets', name: 'Change Sets', stage: 3, route: '/devel-tools/change-sets', description: 'SDLC delivery container for grouping, staging, reviewing, and promoting work items', since: '2026-03-08' },
+  { id: 'change-sets', name: 'Change Sets', stage: 3, route: '/admin/control-panel/om-daily/change-sets', description: 'SDLC delivery container for grouping, staging, reviewing, and promoting work items', since: '2026-03-08' },
 
   // ── Stage 1: Prototype ─────────────────────────────────────
   { id: 'us-church-map', name: 'US Church Map', stage: 1, route: '/devel-tools/us-church-map', since: '2026-02-01' },

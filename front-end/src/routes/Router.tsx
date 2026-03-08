@@ -1227,7 +1227,7 @@ const Router = [
         )
       },
       {
-        path: '/devel-tools/change-sets',
+        path: '/admin/control-panel/om-daily/change-sets',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
@@ -1237,7 +1237,7 @@ const Router = [
         )
       },
       {
-        path: '/devel-tools/change-sets/releases',
+        path: '/admin/control-panel/om-daily/change-sets/releases',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
@@ -1247,7 +1247,7 @@ const Router = [
         )
       },
       {
-        path: '/devel-tools/change-sets/:id',
+        path: '/admin/control-panel/om-daily/change-sets/:id',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>

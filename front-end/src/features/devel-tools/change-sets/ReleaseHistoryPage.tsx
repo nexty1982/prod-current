@@ -52,7 +52,8 @@ const ReleaseHistoryPage: React.FC = () => {
   const BCrumb = [
     { to: '/', title: 'Home' },
     { to: '/admin/control-panel', title: 'Control Panel' },
-    { to: '/devel-tools/change-sets', title: 'Change Sets' },
+    { to: '/admin/control-panel/om-daily', title: 'OM Daily' },
+    { to: '/admin/control-panel/om-daily/change-sets', title: 'Change Sets' },
     { title: 'Release History' },
   ];
 
@@ -125,7 +126,7 @@ const ReleaseHistoryPage: React.FC = () => {
                     key={rel.id}
                     hover
                     sx={{ cursor: 'pointer' }}
-                    onClick={() => navigate(`/devel-tools/change-sets/${rel.id}`)}
+                    onClick={() => navigate(`/admin/control-panel/om-daily/change-sets/${rel.id}`)}
                   >
                     <TableCell>
                       <Typography variant="body2" fontWeight={600} sx={{ fontFamily: 'monospace' }}>{rel.code}</Typography>

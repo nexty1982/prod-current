@@ -357,7 +357,7 @@ const OMDailyPage: React.FC = () => {
         showToast(`Created ${res.data.change_set.code} with ${selectedIds.size} items`);
         setCsDialogOpen(false);
         clearSelection();
-        navigate(`/devel-tools/change-sets/${csId}`);
+        navigate(`/admin/control-panel/om-daily/change-sets/${csId}`);
       } else {
         if (!csSelectedId) return;
         for (const itemId of selectedIds) {
@@ -1186,7 +1186,7 @@ const OMDailyPage: React.FC = () => {
                       <Tooltip title={`${item.change_set.code}: ${item.change_set.title} (${item.change_set.status})`}>
                         <Chip size="small" icon={<PackageIcon sx={{ fontSize: '14px !important' }} />}
                           label={item.change_set.code}
-                          onClick={(e) => { e.stopPropagation(); navigate(`/devel-tools/change-sets/${item.change_set!.change_set_id}`); }}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/admin/control-panel/om-daily/change-sets/${item.change_set!.change_set_id}`); }}
                           clickable
                           sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#9c27b0', 0.1), color: '#9c27b0', fontWeight: 600, fontFamily: 'monospace' }}
                         />
