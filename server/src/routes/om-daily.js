@@ -233,7 +233,47 @@ router.get('/items', requireAuth, async (req, res) => {
     if (category) { conditions.push('category = ?'); params.push(category); }
     if (task_type) { conditions.push('task_type = ?'); params.push(task_type); }
     if (date) { conditions.push('DATE(created_at) = ?'); params.push(date); }
-    if (search) { conditions.push('(title LIKE ? OR description LIKE ?)'); params.push(`%${search}%`, `%${search}%`); }
+    if (search) {
+      // Sophisticated search: supports #ID, CS-XXXX, field:value, -exclude, and free text
+      const tokens = search.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+      for (const raw of tokens) {
+        const token = raw.replace(/^"|"$/g, '');
+        // #ID or bare number → exact item ID
+        if (/^#?\d+$/.test(token)) {
+          conditions.push('id = ?');
+          params.push(parseInt(token.replace('#', ''), 10));
+        }
+        // CS-XXXX → search by change set code (handled in post-query enrichment)
+        else if (/^CS-\d+$/i.test(token)) {
+          // Will be filtered client-side via enrichment; add a loose title match as fallback
+          conditions.push('(title LIKE ? OR description LIKE ?)');
+          params.push(`%${token}%`, `%${token}%`);
+        }
+        // field:value filters
+        else if (/^(status|priority|category|horizon|source|type):(.+)$/i.test(token)) {
+          const m = token.match(/^(status|priority|category|horizon|source|type):(.+)$/i);
+          const field = m[1].toLowerCase();
+          const val = m[2];
+          if (field === 'type') { conditions.push('task_type = ?'); params.push(val); }
+          else if (field === 'status') { conditions.push('status = ?'); params.push(val); }
+          else if (field === 'priority') { conditions.push('priority = ?'); params.push(val); }
+          else if (field === 'category') { conditions.push('LOWER(category) = LOWER(?)'); params.push(val); }
+          else if (field === 'horizon') { conditions.push('horizon = ?'); params.push(val); }
+          else if (field === 'source') { conditions.push('source = ?'); params.push(val); }
+        }
+        // -term → exclude from title/description
+        else if (token.startsWith('-') && token.length > 1) {
+          const exclude = token.substring(1);
+          conditions.push('(title NOT LIKE ? AND (description IS NULL OR description NOT LIKE ?))');
+          params.push(`%${exclude}%`, `%${exclude}%`);
+        }
+        // Free text → title OR description match
+        else {
+          conditions.push('(title LIKE ? OR description LIKE ?)');
+          params.push(`%${token}%`, `%${token}%`);
+        }
+      }
+    }
     if (due === 'overdue') { conditions.push("due_date < CURDATE() AND status NOT IN ('done','cancelled')"); }
     if (due === 'today') { conditions.push("due_date = CURDATE() AND status NOT IN ('done','cancelled')"); }
     if (due === 'soon') { conditions.push("due_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND status NOT IN ('done','cancelled')"); }

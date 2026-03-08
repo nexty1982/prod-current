@@ -1096,11 +1096,13 @@ const OMDailyPage: React.FC = () => {
       {/* Filters */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
-          <TextField size="small" placeholder="Search..." value={searchTerm}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }}
-            sx={{ minWidth: 200 }}
-          />
+          <Tooltip title={<span style={{ whiteSpace: 'pre-line' }}>{'Search by text, #ID, CS-XXXX\nFilters: status:done priority:high category:OCR horizon:7\nExclude: -keyword\nQuote phrases: "exact match"'}</span>} arrow placement="bottom-start">
+            <TextField size="small" placeholder="Search: text, #ID, status:done, -exclude..." value={searchTerm}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }}
+              sx={{ minWidth: 280 }}
+            />
+          </Tooltip>
           <FormControl size="small" sx={{ minWidth: 130 }}>
             <InputLabel>Horizon</InputLabel>
             <Select value={selectedHorizon} label="Horizon" onChange={(e) => setSelectedHorizon(e.target.value)}>
