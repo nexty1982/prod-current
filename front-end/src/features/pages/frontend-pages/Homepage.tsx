@@ -1656,7 +1656,7 @@ const HomePage: React.FC = () => {
                   <Button
                     variant="contained"
                     size="large"
-                    href="/frontend-pages/contact"
+                    href="/auth/register"
                     sx={{
                       mt: 1,
                       background: 'linear-gradient(135deg, #D4AF37, #F4D03F)',
@@ -1667,23 +1667,7 @@ const HomePage: React.FC = () => {
                       '&:hover': { background: 'linear-gradient(135deg, #c9a430, #e6c52e)' },
                     }}
                   >
-                    Register Your Church &rarr;
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    href="/auth/register"
-                    sx={{
-                      mt: 0.5,
-                      color: 'text.secondary',
-                      borderColor: 'divider',
-                      textTransform: 'none',
-                      borderRadius: '8px',
-                      fontSize: '0.82rem',
-                      '&:hover': { borderColor: '#D4AF37', color: '#D4AF37' },
-                    }}
-                  >
-                    Already have a token? Join your church
+                    Get Started Free &rarr;
                   </Button>
                 </Stack>
               </Grid>
@@ -4155,123 +4139,272 @@ const HomePage: React.FC = () => {
           >
             How It Works
           </Typography>
-          <Box textAlign="center" mb={8}>
+          <Box textAlign="center" mb={6}>
             <Typography
               variant="h6"
-              sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', maxWidth: 600, mx: 'auto' }}
+              sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', maxWidth: 650, mx: 'auto' }}
             >
-              Transform your parish records in five simple steps, from upload to
-              searchable digital archive.
+              From handwritten ledger to searchable digital archive — powered by AI.
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 6, md: 8 } }}>
-            {[
-              {
-                step: 1,
-                title: 'Upload Records',
-                description: 'Scan or photograph your existing parish ledgers and upload them through our guided workflow. Our step-by-step process walks you through image preparation, church selection, and batch uploading with quality checks built in.',
-                image: '/images/how-it-works/step1-upload.png',
-                icon: <IconDownload size={28} color="#F5B800" />
-              },
-              {
-                step: 2,
-                title: 'AI Processing',
-                description: 'Our advanced OCR engine automatically processes your uploads, identifying record types (baptism, marriage, funeral), detecting languages (English, Greek, Cyrillic), and extracting structured data with confidence scores for every field.',
-                image: '/images/how-it-works/step2-processing.png',
-                icon: <IconEye size={28} color="#F5B800" />
-              },
-              {
-                step: 3,
-                title: 'Review & Approve',
-                description: 'View the original scanned image side-by-side with the OCR transcription. The workbench highlights detected records with bounding boxes on the source image, shows confidence scores, and lets you re-run OCR or copy text as needed.',
-                image: '/images/how-it-works/step3-review.png',
-                icon: <IconView size={28} color="#F5B800" />
-              },
-              {
-                step: 4,
-                title: 'Validate & Store',
-                description: 'Map extracted text to structured database fields like Groom Name, Bride Name, Date, Witnesses, and Officiant. Smart Fill auto-populates fields from OCR tokens. Confirm accuracy and finalize records directly into your private church database.',
-                image: '/images/how-it-works/step4-validate.png',
-                icon: <IconCheck size={28} color="#F5B800" />
-              },
-              {
-                step: 5,
-                title: 'Access & Search',
-                description: 'Instantly search and browse your digitized records from anywhere. Filter by record type, sort by any column, and access multilingual records spanning decades. Export data, generate certificates, and manage your complete parish archive.',
-                image: '/images/how-it-works/step5-access.png',
-                icon: <IconSearch size={28} color="#F5B800" />
-              }
-            ].map((item, index) => (
-              <Box
-                key={index}
-                sx={{
-                  display: 'flex',
-                  flexDirection: { xs: 'column', md: index % 2 === 0 ? 'row' : 'row-reverse' },
-                  alignItems: 'center',
-                  gap: { xs: 3, md: 5 },
-                }}
-              >
-                <Box sx={{ flex: { xs: '1 1 auto', md: '0 0 55%' }, width: '100%' }}>
+          {/* 6-Step Animated Pipeline */}
+          <Box sx={{ mb: 6 }}>
+            <Stack
+              direction="row"
+              sx={{
+                overflowX: 'auto',
+                pt: 2,
+                pb: 2,
+                px: 0.5,
+                justifyContent: { md: 'center' },
+                '&::-webkit-scrollbar': { height: 6 },
+                '&::-webkit-scrollbar-thumb': { bgcolor: 'divider', borderRadius: 3 },
+              }}
+            >
+              {[
+                { icon: IconDownload, title: 'IMAGE INTAKE', bullets: ['Church Upload', 'Archive Import', 'Batch Processing'] },
+                { icon: IconSettings, title: 'PREPROCESSING', bullets: ['Deskew', 'Noise Reduction', 'Segmentation'] },
+                { icon: IconEye, title: 'OCR RECOGNITION', bullets: ['Google Vision AI', 'Multi-Language', 'Handwriting'] },
+                { icon: IconFile, title: 'FIELD EXTRACTION', bullets: ['Record Classification', 'Column Mapping', 'Structured Data'] },
+                { icon: IconShield, title: 'VALIDATION', bullets: ['Confidence Scoring', 'Human Review', 'Quality Checks'] },
+                { icon: IconDatabase, title: 'DATABASE COMMIT', bullets: ['Private Church DB', 'Audit Trail', 'Instant Access'] },
+              ].map((stage, index, arr) => {
+                const Icon = stage.icon;
+                const isLast = index === arr.length - 1;
+                const stageColor = '#7B4F9E';
+                return (
+                  <React.Fragment key={index}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 800,
+                          fontSize: '0.75rem',
+                          letterSpacing: '0.1em',
+                          color: stageColor,
+                          mb: 1,
+                        }}
+                      >
+                        STEP {index + 1}
+                      </Typography>
+                      <Box
+                        sx={{
+                          width: 170,
+                          p: 2.5,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          textAlign: 'center',
+                          borderRadius: 2.5,
+                          bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : '#fff',
+                          border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#e0e0e0'}`,
+                          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&:hover': {
+                            transform: 'translateY(-8px) scale(1.05)',
+                            boxShadow: theme.palette.mode === 'dark'
+                              ? '0 16px 32px rgba(0,0,0,0.5)'
+                              : `0 16px 32px rgba(123, 79, 158, 0.15)`,
+                            borderColor: stageColor,
+                          },
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 52,
+                            height: 52,
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(123, 79, 158, 0.12)' : 'rgba(123, 79, 158, 0.08)',
+                            mb: 1.5,
+                          }}
+                        >
+                          <Icon size={26} color={stageColor} />
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: '0.72rem',
+                            letterSpacing: '0.02em',
+                            lineHeight: 1.3,
+                            mb: 1,
+                            minHeight: 32,
+                            display: 'flex',
+                            alignItems: 'center',
+                            color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a',
+                          }}
+                        >
+                          {stage.title}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.6)' : '#888',
+                            fontSize: '0.66rem',
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {stage.bullets.join(' · ')}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    {!isLast && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          px: 0.75,
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : '#ccc',
+                          flexShrink: 0,
+                          mt: 3,
+                        }}
+                      >
+                        <Typography sx={{ fontSize: '1.4rem', fontWeight: 300 }}>→</Typography>
+                      </Box>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </Stack>
+          </Box>
+
+          {/* Two-column: What We Need / What We Provide */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+              gap: 4,
+            }}
+          >
+            {/* What We Need From Your Church */}
+            <Box
+              sx={{
+                p: { xs: 3, md: 4 },
+                borderRadius: 3,
+                bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : '#fff',
+                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#e0e0e0'}`,
+              }}
+            >
+              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+                <Box
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(245, 184, 0, 0.12)' : '#FFF9E6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <IconArchive size={24} color="#F5B800" />
+                </Box>
+                <Typography variant="h5" fontWeight={700} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }}>
+                  What We Need From Your Church
+                </Typography>
+              </Stack>
+
+              {[
+                { num: '1', text: 'Scan or photograph your sacramental ledgers (baptism, marriage, funeral)' },
+                { num: '2', text: 'Upload the images through our secure, guided workflow' },
+                { num: '3', text: 'Provide basic context — record type, approximate year range, and language' },
+                { num: '4', text: 'Review flagged records when our AI needs a human eye on low-confidence fields' },
+              ].map((item) => (
+                <Stack key={item.num} direction="row" spacing={2} sx={{ mb: 2.5, alignItems: 'flex-start' }}>
                   <Box
                     sx={{
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      border: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e0e0e0',
-                      boxShadow: theme.palette.mode === 'dark'
-                        ? '0 8px 32px rgba(0,0,0,0.4)'
-                        : '0 8px 32px rgba(0,0,0,0.08)',
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(245, 184, 0, 0.12)' : '#FFF9E6',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      mt: 0.25,
                     }}
                   >
-                    <img
-                      src={item.image}
-                      alt={`Step ${item.step}: ${item.title}`}
-                      style={{ width: '100%', display: 'block' }}
-                    />
+                    <Typography sx={{ fontWeight: 700, fontSize: '0.8rem', color: '#F5B800' }}>{item.num}</Typography>
                   </Box>
-                </Box>
-                <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 45%' } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-                    <Box
-                      sx={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: '50%',
-                        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 249, 230, 0.1)' : '#FFF9E6',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {item.icon}
-                    </Box>
-                    <Typography
-                      variant="overline"
-                      sx={{ color: '#F5B800', fontWeight: 700, fontSize: '0.8rem', letterSpacing: 1.5 }}
-                    >
-                      Step {item.step}
-                    </Typography>
-                  </Box>
-                  <Typography
-                    variant="h5"
-                    fontWeight={700}
-                    sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a', mb: 1.5 }}
-                  >
-                    {item.title}
-                  </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.8)' : '#666666',
-                      lineHeight: 1.7,
+                      color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.85)' : '#555',
+                      lineHeight: 1.6,
                     }}
                   >
-                    {item.description}
+                    {item.text}
                   </Typography>
+                </Stack>
+              ))}
+            </Box>
+
+            {/* What We Provide Within 60 Days */}
+            <Box
+              sx={{
+                p: { xs: 3, md: 4 },
+                borderRadius: 3,
+                bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : '#fff',
+                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#e0e0e0'}`,
+              }}
+            >
+              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+                <Box
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(123, 79, 158, 0.12)' : 'rgba(123, 79, 158, 0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <IconSparkles size={24} color="#7B4F9E" />
                 </Box>
-              </Box>
-            ))}
+                <Typography variant="h5" fontWeight={700} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }}>
+                  What We Provide Within 60 Days
+                </Typography>
+              </Stack>
+
+              {[
+                { icon: <IconDatabase size={18} color="#7B4F9E" />, text: 'Fully digitized, searchable sacramental records in your private church database' },
+                { icon: <IconSearch size={18} color="#7B4F9E" />, text: 'Instant search and filtering by name, date, record type, and any field' },
+                { icon: <IconWorld size={18} color="#7B4F9E" />, text: 'Multi-language support — English, Greek, Church Slavonic, Romanian, and Russian' },
+                { icon: <IconShield size={18} color="#7B4F9E" />, text: 'Complete audit trail linking every digital record back to the original scanned image' },
+                { icon: <IconFile size={18} color="#7B4F9E" />, text: 'Certificate generation and data export for baptism, marriage, and funeral records' },
+                { icon: <IconUsers size={18} color="#7B4F9E" />, text: 'Role-based portal access for clergy, staff, and authorized volunteers' },
+              ].map((item, idx) => (
+                <Stack key={idx} direction="row" spacing={2} sx={{ mb: 2.5, alignItems: 'flex-start' }}>
+                  <Box
+                    sx={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(123, 79, 158, 0.12)' : 'rgba(123, 79, 158, 0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      mt: 0.25,
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.85)' : '#555',
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {item.text}
+                  </Typography>
+                </Stack>
+              ))}
+            </Box>
           </Box>
         </Container>
       </Box>

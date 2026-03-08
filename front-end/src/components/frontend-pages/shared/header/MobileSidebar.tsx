@@ -15,8 +15,8 @@ const UPLOAD_ROLES = ['super_admin', 'admin', 'church_admin', 'priest'];
 const portalMobileLinks = [
   { title: 'Portal', to: '/portal' },
   { title: 'Records', to: '/portal/records/baptism' },
-  { title: 'Certificates', to: '/portal/certificates' },
   { title: 'Upload Records', to: '/portal/upload', roles: UPLOAD_ROLES },
+  { title: 'OCR Pipeline', to: '/portal/ocr', roles: UPLOAD_ROLES },
   { title: 'Help', to: '/portal/guide' },
   { title: 'My Profile', to: '/portal/profile' },
 ];

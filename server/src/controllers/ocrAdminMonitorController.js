@@ -466,6 +466,227 @@ function stopStaleSweeper() {
   if (_sweeperInterval) { clearInterval(_sweeperInterval); _sweeperInterval = null; console.log('[OCR Monitor] Sweeper stopped'); }
 }
 
+// ── Pipeline stage constants ──────────────────────────────────────────────────
+
+const PIPELINE_STAGES = ['intake', 'preprocessing', 'ocr_processing', 'extracting', 'validating', 'committing'];
+const STAGE_PROGRESS = { intake: 10, preprocessing: 25, ocr_processing: 50, extracting: 70, validating: 85, committing: 95 };
+
+// ── Log job history ───────────────────────────────────────────────────────────
+
+async function logJobHistory(jobId, stage, status, message = null, durationMs = null) {
+  try {
+    const pool = getPool();
+    await pool.query(
+      `INSERT INTO ocr_job_history (job_id, stage, status, message, duration_ms) VALUES (?, ?, ?, ?, ?)`,
+      [jobId, stage, status, message, durationMs]
+    );
+  } catch (err) {
+    console.error(`[OCR Monitor] Failed to log history for job ${jobId}:`, err.message);
+  }
+}
+
+// ── Update job stage ──────────────────────────────────────────────────────────
+
+async function updateJobStage(jobId, stage, status = 'processing') {
+  try {
+    const pool = getPool();
+    const progress = STAGE_PROGRESS[stage] || 0;
+    const now = new Date();
+    
+    const updates = ['current_stage = ?', 'progress_percent = ?', 'last_activity_at = ?'];
+    const params = [stage, progress, now];
+    
+    if (status === 'processing' && stage === 'intake') {
+      updates.push('started_at = COALESCE(started_at, ?)');
+      params.push(now);
+    }
+    if (status === 'completed') {
+      updates.push('completed_at = ?', 'progress_percent = 100');
+      params.push(now);
+    }
+    if (status === 'failed') {
+      updates.push('completed_at = ?');
+      params.push(now);
+    }
+    
+    params.push(jobId);
+    await pool.query(`UPDATE ocr_jobs SET ${updates.join(', ')} WHERE id = ?`, params);
+    await logJobHistory(jobId, stage, status);
+  } catch (err) {
+    console.error(`[OCR Monitor] Failed to update stage for job ${jobId}:`, err.message);
+  }
+}
+
+// ── GET /api/admin/ocr/jobs/:churchId/:jobId/history ──────────────────────────
+
+async function getJobHistory(req, res) {
+  try {
+    const jobId = parseInt(req.params.jobId);
+    if (!jobId) return res.status(400).json({ error: 'jobId is required' });
+    
+    const pool = getPool();
+    const [rows] = await pool.query(
+      `SELECT id, job_id, stage, status, message, duration_ms, created_at 
+       FROM ocr_job_history WHERE job_id = ? ORDER BY created_at ASC`,
+      [jobId]
+    );
+    
+    res.json({ history: rows });
+  } catch (error) {
+    console.error('[OCR Monitor] getJobHistory error:', error);
+    res.status(500).json({ error: 'Failed to fetch job history', message: error.message });
+  }
+}
+
+// ── POST /api/admin/ocr/jobs/:churchId/:jobId/resume ──────────────────────────
+
+async function resumeJob(req, res) {
+  try {
+    const churchId = parseInt(req.params.churchId);
+    const jobId = parseInt(req.params.jobId);
+    if (!churchId || !jobId) return res.status(400).json({ error: 'churchId and jobId are required' });
+    
+    const pool = getPool();
+    
+    // Get job details including last completed stage
+    const [jobs] = await pool.query(
+      `SELECT j.id, j.status, j.current_stage, j.filename, j.church_id
+       FROM ocr_jobs j WHERE j.id = ? AND j.church_id = ?`,
+      [jobId, churchId]
+    );
+    if (!jobs.length) return res.status(404).json({ error: 'Job not found' });
+    
+    const job = jobs[0];
+    
+    // Only allow resume for failed jobs
+    if (job.status !== 'failed' && job.status !== 'error') {
+      return res.status(400).json({ error: `Cannot resume job with status '${job.status}'. Only failed jobs can be resumed.` });
+    }
+    
+    // Find last completed stage from history
+    const [historyRows] = await pool.query(
+      `SELECT stage FROM ocr_job_history 
+       WHERE job_id = ? AND status = 'completed' 
+       ORDER BY created_at DESC LIMIT 1`,
+      [jobId]
+    );
+    
+    const lastCompletedStage = historyRows.length > 0 ? historyRows[0].stage : null;
+    const resumeFromIndex = lastCompletedStage ? PIPELINE_STAGES.indexOf(lastCompletedStage) + 1 : 0;
+    const resumeStage = PIPELINE_STAGES[resumeFromIndex] || 'intake';
+    
+    // Generate resume token
+    const crypto = require('crypto');
+    const resumeToken = crypto.randomBytes(16).toString('hex');
+    
+    // Update job to pending with resume info
+    await pool.query(
+      `UPDATE ocr_jobs SET 
+        status = 'pending', 
+        current_stage = ?, 
+        resume_token = ?,
+        error_regions = NULL,
+        last_activity_at = NOW()
+       WHERE id = ?`,
+      [resumeStage, resumeToken, jobId]
+    );
+    
+    await logJobHistory(jobId, resumeStage, 'resumed', `Resuming from stage: ${resumeStage}`);
+    
+    console.log(`[OCR Monitor] Job ${churchId}/${jobId} resumed from stage '${resumeStage}'`);
+    res.json({ 
+      success: true, 
+      message: `Job resumed from '${resumeStage}'`, 
+      resumeStage,
+      resumeToken 
+    });
+  } catch (error) {
+    console.error('[OCR Monitor] resumeJob error:', error);
+    res.status(500).json({ error: 'Failed to resume job', message: error.message });
+  }
+}
+
+// ── DELETE /api/admin/ocr/jobs/:churchId/:jobId (soft delete) ─────────────────
+
+async function archiveJob(req, res) {
+  try {
+    const churchId = parseInt(req.params.churchId);
+    const jobId = parseInt(req.params.jobId);
+    if (!churchId || !jobId) return res.status(400).json({ error: 'churchId and jobId are required' });
+    
+    const pool = getPool();
+    
+    const [jobs] = await pool.query('SELECT id, status FROM ocr_jobs WHERE id = ? AND church_id = ?', [jobId, churchId]);
+    if (!jobs.length) return res.status(404).json({ error: 'Job not found' });
+    
+    // Soft delete by setting archived_at
+    await pool.query(`UPDATE ocr_jobs SET archived_at = NOW() WHERE id = ?`, [jobId]);
+    
+    console.log(`[OCR Monitor] Job ${churchId}/${jobId} archived (soft delete)`);
+    res.json({ success: true, message: `Job ${jobId} archived` });
+  } catch (error) {
+    console.error('[OCR Monitor] archiveJob error:', error);
+    res.status(500).json({ error: 'Failed to archive job', message: error.message });
+  }
+}
+
+// ── GET /api/admin/ocr/dashboard ──────────────────────────────────────────────
+
+async function getDashboard(req, res) {
+  try {
+    const pool = getPool();
+    const churchId = req.query.church_id ? parseInt(req.query.church_id) : null;
+    
+    const whereClause = churchId ? 'WHERE j.church_id = ? AND j.archived_at IS NULL' : 'WHERE j.archived_at IS NULL';
+    const params = churchId ? [churchId] : [];
+    
+    // Status counts
+    const [countRows] = await pool.query(`
+      SELECT
+        SUM(j.status IN ('queued','pending')) AS queued,
+        SUM(j.status = 'processing') AS processing,
+        SUM(j.status IN ('completed','complete')) AS completed,
+        SUM(j.status IN ('failed','error')) AS failed,
+        COUNT(*) AS total
+      FROM ocr_jobs j ${whereClause}
+    `, params);
+    
+    // Recent activity (last 24h)
+    const [recentRows] = await pool.query(`
+      SELECT COUNT(*) AS count_24h,
+             AVG(TIMESTAMPDIFF(SECOND, started_at, completed_at)) AS avg_duration_sec
+      FROM ocr_jobs j
+      ${whereClause} ${churchId ? 'AND' : 'WHERE'} j.completed_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+    `, params);
+    
+    // Stage distribution for active jobs
+    const [stageRows] = await pool.query(`
+      SELECT current_stage, COUNT(*) AS count
+      FROM ocr_jobs j
+      ${whereClause} ${churchId ? 'AND' : 'WHERE'} j.status = 'processing'
+      GROUP BY current_stage
+    `, params);
+    
+    res.json({
+      counts: {
+        queued: Number(countRows[0]?.queued) || 0,
+        processing: Number(countRows[0]?.processing) || 0,
+        completed: Number(countRows[0]?.completed) || 0,
+        failed: Number(countRows[0]?.failed) || 0,
+        total: Number(countRows[0]?.total) || 0,
+      },
+      activity24h: {
+        count: Number(recentRows[0]?.count_24h) || 0,
+        avgDurationSec: Math.round(Number(recentRows[0]?.avg_duration_sec) || 0),
+      },
+      stageDistribution: stageRows.reduce((acc, r) => ({ ...acc, [r.current_stage || 'unknown']: r.count }), {}),
+    });
+  } catch (error) {
+    console.error('[OCR Monitor] getDashboard error:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard', message: error.message });
+  }
+}
+
 module.exports = {
   listAllJobs,
   getJobDetail,
@@ -478,4 +699,13 @@ module.exports = {
   runStaleCleanup,
   startStaleSweeper,
   stopStaleSweeper,
+  // New pipeline workflow functions
+  getJobHistory,
+  resumeJob,
+  archiveJob,
+  getDashboard,
+  logJobHistory,
+  updateJobStage,
+  PIPELINE_STAGES,
+  STAGE_PROGRESS,
 };

@@ -226,7 +226,20 @@ const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
     return ['completed', 'complete'].includes(status?.toLowerCase());
   };
 
-  const colCount = 8; // checkbox + filename + type + started + age + status + error + actions
+  // Score color based on confidence
+  const getScoreColor = (score: number | null | undefined): 'success' | 'warning' | 'error' | 'default' => {
+    if (score == null) return 'default';
+    if (score >= 0.85) return 'success';
+    if (score >= 0.65) return 'warning';
+    return 'error';
+  };
+
+  const formatScore = (score: number | null | undefined): string => {
+    if (score == null) return '-';
+    return `${Math.round(score * 100)}%`;
+  };
+
+  const colCount = 9; // checkbox + filename + type + started + age + status + score + error + actions
 
   return (
     <Paper variant="outlined" sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -332,6 +345,7 @@ const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
               </TableCell>
               <TableCell sx={{ width: 55 }}>Age</TableCell>
               <TableCell sx={{ width: 100 }}>Status</TableCell>
+              <TableCell sx={{ width: 65 }}>Score</TableCell>
               <TableCell sx={{ minWidth: 120 }}>Error</TableCell>
               <TableCell sx={{ width: 120 }} align="right">Actions</TableCell>
             </TableRow>
@@ -414,6 +428,19 @@ const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
                         color={getStatusColor(job.status) as any}
                         sx={{ height: 22, fontSize: '0.7rem' }}
                       />
+                    </TableCell>
+                    <TableCell>
+                      {isCompleted && job.confidence_score != null ? (
+                        <Chip
+                          size="small"
+                          label={formatScore(job.confidence_score)}
+                          color={getScoreColor(job.confidence_score)}
+                          variant="outlined"
+                          sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }}
+                        />
+                      ) : (
+                        <Typography variant="caption" color="text.disabled">-</Typography>
+                      )}
                     </TableCell>
                     <TableCell>
                       {isFailed && job.error_message ? (

@@ -83,8 +83,10 @@ const WorkbenchStepper: React.FC = () => {
                     onBack={handleBack}
                   />
                 )}
-                {index === 3 && (
+                {index === 3 && workbench.state.activeJobId && workbench.state.jobMetadata?.churchId && (
                   <ReviewCommitStep
+                    churchId={workbench.state.jobMetadata.churchId}
+                    jobId={workbench.state.activeJobId}
                     onBack={handleBack}
                   />
                 )}

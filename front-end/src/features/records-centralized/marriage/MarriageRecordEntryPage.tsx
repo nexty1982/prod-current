@@ -9,7 +9,7 @@
  *   /apps/records/marriage/edit/:id?church_id={id}
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -25,6 +25,7 @@ import {
 } from '@mui/material';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { useAuth } from '../../../context/AuthContext';
+import { getMarriageDateRestriction } from '../../../shared/lib/sacramentalDateRestrictions';
 
 interface MarriageRecordFormData {
   groom_first_name: string;
@@ -63,6 +64,12 @@ const MarriageRecordEntryPage: React.FC = () => {
     marriage_place: '',
     notes: ''
   });
+
+  // Date restriction check
+  const dateRestriction = useMemo(
+    () => getMarriageDateRestriction(formData.marriage_date),
+    [formData.marriage_date],
+  );
 
   // Load record data for edit mode
   useEffect(() => {
@@ -138,7 +145,13 @@ const MarriageRecordEntryPage: React.FC = () => {
       setError(`Please fill in the following required fields: ${missingFields.join(', ')}`);
       return;
     }
-    
+
+    // Marriage date restriction — hard block for new records only
+    if (!isEditMode && dateRestriction?.severity === 'error') {
+      setError(dateRestriction.message);
+      return;
+    }
+
     setSaving(true);
     setError(null);
     setSuccess(false);
@@ -292,9 +305,19 @@ const MarriageRecordEntryPage: React.FC = () => {
                 value={formData.marriage_date}
                 onChange={handleChange('marriage_date')}
                 required
+                error={!isEditMode && dateRestriction?.severity === 'error'}
                 InputLabelProps={{ shrink: true }}
                 margin="normal"
               />
+              {dateRestriction && (
+                <Alert
+                  severity={isEditMode ? 'warning' : dateRestriction.severity}
+                  sx={{ mt: 0.5 }}
+                >
+                  {dateRestriction.message}
+                  {isEditMode && ' This is allowed in edit mode for historical records.'}
+                </Alert>
+              )}
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField

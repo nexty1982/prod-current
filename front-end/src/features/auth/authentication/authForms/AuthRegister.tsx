@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -10,7 +10,7 @@ import {
   IconButton,
   CircularProgress,
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { IconEye, IconEyeOff, IconCheck, IconBuilding, IconKey } from '@tabler/icons-react';
 import CustomTextField from '@/components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '@/components/forms/theme-elements/CustomFormLabel';
@@ -38,6 +38,7 @@ interface AuthRegisterProps {
 }
 
 const AuthRegister = ({ title, subtitle, subtext }: AuthRegisterProps) => {
+  const [searchParams] = useSearchParams();
   const [churchName, setChurchName] = useState('');
   const [registrationToken, setRegistrationToken] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -50,6 +51,20 @@ const AuthRegister = ({ title, subtitle, subtext }: AuthRegisterProps) => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
+
+  // Auto-fill from URL params (e.g., /auth/register?token=XXX&church=Church+Name)
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const church = searchParams.get('church');
+    if (token) {
+      setRegistrationToken(token);
+      setPrefilled(true);
+    }
+    if (church) {
+      setChurchName(church);
+    }
+  }, [searchParams]);
 
   const passwordStrength = getPasswordStrength(password);
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
@@ -155,6 +170,11 @@ const AuthRegister = ({ title, subtitle, subtext }: AuthRegisterProps) => {
 
       <Box component="form" onSubmit={handleSubmit}>
         <Stack spacing={0}>
+          {prefilled && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Your church and registration token have been pre-filled from your invitation link. Please complete the form below.
+            </Alert>
+          )}
           <Box sx={{ bgcolor: 'action.hover', borderRadius: 1, p: 2, mb: 2 }}>
             <Typography variant="subtitle2" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
               <IconBuilding size={18} /> Church Verification

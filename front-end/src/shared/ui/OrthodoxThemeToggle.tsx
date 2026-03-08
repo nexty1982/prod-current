@@ -71,6 +71,7 @@ const OrthodoxThemeToggle: React.FC<OrthodoxThemeToggleProps> = ({
     { key: 'RED_THEME', name: 'Martyrs Red', color: '#B22234' },
     { key: 'BLUE_THEME', name: 'Theotokos Blue', color: '#1E6B8C' },
     { key: 'GOLD_THEME', name: 'Royal Gold', color: '#C9A227' },
+    { key: 'LENT_THEME', name: 'Great Lent', color: '#1a1a1a' },
   ];
 
   // Icon variant - simple toggle button

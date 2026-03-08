@@ -16,6 +16,8 @@ const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
 const ChurchPortalLayout = Loadable(lazy(() => import('../layouts/portal/ChurchPortalLayout')));
 const ChurchPortalHub = Loadable(lazy(() => import('../features/portal/ChurchPortalHub')));
+const PortalSacramentalRestrictionsPage = Loadable(lazy(() => import('../features/portal/PortalSacramentalRestrictionsPage')));
+const PortalRecordsPage = Loadable(lazy(() => import('../features/portal/PortalRecordsPage')));
 
 /* ****Pages***** */
 const ModernDash = Loadable(lazy(() => import('../features/dashboard/ModernDashboard')));
@@ -125,18 +127,24 @@ const OMAIUltimateLogger = Loadable(lazy(() => import('../features/devel-tools/o
 const ScriptRunner = Loadable(lazy(() => import('../features/admin/admin/ScriptRunner')));
 const AdminControlPanel = Loadable(lazy(() => import('../features/admin/control-panel/AdminControlPanel')));
 const ChurchManagementPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchManagementPage')));
+const SacramentalRestrictionsPage = Loadable(lazy(() => import('../features/admin/control-panel/SacramentalRestrictionsPage')));
+const PendingMembersPage = Loadable(lazy(() => import('../features/admin/control-panel/PendingMembersPage')));
+const ChurchOnboardingPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchOnboardingPage')));
+const ChurchOnboardingDetailPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchOnboardingDetailPage')));
 const RecordsOCRPage = Loadable(lazy(() => import('../features/admin/control-panel/RecordsOCRPage')));
 const CRMOutreachPage = Loadable(lazy(() => import('../features/admin/control-panel/CRMOutreachPage')));
 const SystemServerPage = Loadable(lazy(() => import('../features/admin/control-panel/SystemServerPage')));
 const AIAutomationPage = Loadable(lazy(() => import('../features/admin/control-panel/AIAutomationPage')));
 const OMDailyPage = Loadable(lazy(() => import('../features/admin/control-panel/OMDailyPage')));
+const OMAppSuitePage = Loadable(lazy(() => import('../features/admin/control-panel/OMAppSuitePage')));
 const SDLCPage = Loadable(lazy(() => import('../features/admin/control-panel/SDLCPage')));
 const UsersSecurityPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/UsersSecurityPage')));
 const ContentMediaPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/ContentMediaPage')));
 const SocialCommsPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/SocialCommsPage')));
 const ServerDevOpsPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/ServerDevOpsPage')));
 const PlatformConfigPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/PlatformConfigPage')));
-const PendingMembersPage = Loadable(lazy(() => import('../features/admin/control-panel/PendingMembersPage')));
+const CodeSafetyPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/CodeSafetyPage')));
+const SiteMapPage = Loadable(lazy(() => import('../features/admin/SiteMapPage')));
 const CRMPage = Loadable(lazy(() => import('../features/devel-tools/crm/CRMPage')));
 const USChurchMapPage = Loadable(lazy(() => import('../features/devel-tools/us-church-map/USChurchMapPage')));
 const LogSearch = Loadable(lazy(() => import('../features/admin/dashboard/LogSearch')));
@@ -161,12 +169,17 @@ const OcrReviewPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr
 const OcrTableExtractorPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrTableExtractorPage')));
 const LayoutTemplateEditorPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/LayoutTemplateEditorPage')));
 const OcrActivityMonitor = Loadable(lazy(() => import('../features/admin/OcrActivityMonitor')));
+const OcrOperationsDashboard = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrOperationsDashboard')));
+const OcrBatchManager = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrBatchManager')));
 const OMTasksPage = Loadable(lazy(() => import('../features/devel-tools/om-tasks/OMTasksPage')));
 const DailyTasks = Loadable(lazy(() => import('../features/devel-tools/DailyTasks')));
 const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-explorer/ApiExplorerPage')));
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
 const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-operations/GitOperations')));
 const ConversationLogPage = Loadable(lazy(() => import('../features/devel-tools/conversation-log/ConversationLogPage')));
+const ChangeSetsDashboard = Loadable(lazy(() => import('../features/devel-tools/change-sets/ChangeSetsDashboard')));
+const ChangeSetDetailPage = Loadable(lazy(() => import('../features/devel-tools/change-sets/ChangeSetDetailPage')));
+const ReleaseHistoryPage = Loadable(lazy(() => import('../features/devel-tools/change-sets/ReleaseHistoryPage')));
 const OMChartsPage = Loadable(lazy(() => import('../features/church/apps/om-charts/OMChartsPage')));
 
 /* ****Help & Documentation***** */
@@ -177,6 +190,7 @@ const BerryLeadManagementPage = Loadable(lazy(() => import('../features/berry-cr
 const BerryContactManagementPage = Loadable(lazy(() => import('../features/berry-crm/BerryContactManagementPage')));
 const BerrySalesManagementPage = Loadable(lazy(() => import('../features/berry-crm/BerrySalesManagementPage')));
 const BerryCalendarPage = Loadable(lazy(() => import('../features/berry-calendar/BerryCalendarPage')));
+const LiturgicalCalendarPage = Loadable(lazy(() => import('../features/liturgical-calendar/LiturgicalCalendarPage')));
 const BerryMapPage = Loadable(lazy(() => import('../features/berry-map/BerryMapPage')));
 const BerryCardGalleryPage = Loadable(lazy(() => import('../features/berry-cards/BerryCardGalleryPage')));
 const BerryAccountSettingsPage = Loadable(lazy(() => import('../features/berry-profile-02/BerryAccountSettingsPage')));
@@ -308,6 +322,7 @@ const PublicTaskDetailPage = Loadable(lazy(() => import('../features/pages/front
 const WelcomeMessage = Loadable(lazy(() => import('../features/pages/frontend-pages/WelcomeMessage')));
 const Tour = Loadable(lazy(() => import('../features/pages/frontend-pages/Tour')));
 const Faq = Loadable(lazy(() => import('../features/pages/frontend-pages/Faq')));
+const SacramentalRestrictionsPublicPage = Loadable(lazy(() => import('../features/pages/frontend-pages/SacramentalRestrictionsPublicPage')));
 
 const Router = [
   {
@@ -645,6 +660,15 @@ const Router = [
           </ProtectedRoute>
         )
       },
+      // Site Map — full navigation tree with "you are here"
+      {
+        path: '/site-map',
+        element: (
+          <ProtectedRoute>
+            <SiteMapPage />
+          </ProtectedRoute>
+        )
+      },
       // Modernize User Profile Routes
       {
         path: '/apps/user-profile',
@@ -844,11 +868,47 @@ const Router = [
         )
       },
       {
+        path: '/admin/control-panel/church-management/sacramental-restrictions',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <SacramentalRestrictionsPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/admin/control-panel/pending-members',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin']}>
             <AdminErrorBoundary>
-              <PendingMembersPage />
+              <EnvironmentAwarePage featureId="pending-members" priority={4} featureName="Pending Members">
+                <PendingMembersPage />
+              </EnvironmentAwarePage>
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/church-onboarding',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <EnvironmentAwarePage featureId="church-onboarding" priority={4} featureName="Church Onboarding Pipeline">
+                <ChurchOnboardingPage />
+              </EnvironmentAwarePage>
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/church-onboarding/:churchId',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <EnvironmentAwarePage featureId="church-onboarding-detail" priority={4} featureName="Church Onboarding Detail">
+                <ChurchOnboardingDetailPage />
+              </EnvironmentAwarePage>
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -899,6 +959,16 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
               <OMDailyPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/om-app-suite',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OMAppSuitePage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -959,6 +1029,16 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
               <PlatformConfigPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/system-server/code-safety',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <CodeSafetyPage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -1147,6 +1227,56 @@ const Router = [
         )
       },
       {
+        path: '/devel-tools/change-sets',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ChangeSetsDashboard />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/change-sets/releases',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ReleaseHistoryPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/change-sets/:id',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ChangeSetDetailPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/ocr-operations',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OcrOperationsDashboard />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/ocr-batch-manager',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OcrBatchManager />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/devel-tools/om-tasks',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin']}>
@@ -1319,7 +1449,13 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
             <AdminErrorBoundary>
-              <OmOcrStudioPage />
+              <EnvironmentAwarePage
+                featureId="enhanced-ocr-uploader"
+                priority={2}
+                featureName="OCR Upload"
+              >
+                <UploadRecordsPage />
+              </EnvironmentAwarePage>
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -1389,7 +1525,7 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
             <AdminErrorBoundary>
-              <OmOcrStudioPage />
+              <UploadRecordsPage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -1572,6 +1708,16 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin']}>
             <EnvironmentAwarePage featureId="berry-crm-sales" priority={1} featureName="Berry CRM Sales">
               <BerrySalesManagementPage />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/apps/liturgical-calendar',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="liturgical-calendar" priority={1} featureName="Liturgical Calendar">
+              <LiturgicalCalendarPage />
             </EnvironmentAwarePage>
           </ProtectedRoute>
         )
@@ -1788,6 +1934,15 @@ const Router = [
     element: <ChurchPortalLayout />,
     children: [
       { index: true, element: <ChurchPortalHub /> },
+      // Records hub — all church staff
+      {
+        path: 'records',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <PortalRecordsPage />
+          </ProtectedRoute>
+        ),
+      },
       // Records — all church staff
       {
         path: 'records/baptism',
@@ -1867,15 +2022,6 @@ const Router = [
           </ProtectedRoute>
         ),
       },
-      // Certificates
-      {
-        path: 'certificates',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <CertificateGeneratorPage />
-          </ProtectedRoute>
-        ),
-      },
       // Upload Records (church_admin + priest)
       {
         path: 'upload',
@@ -1894,6 +2040,15 @@ const Router = [
           </ProtectedRoute>
         ),
       },
+      // Certificates
+      {
+        path: 'certificates/generate',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <CertificateGeneratorPage />
+          </ProtectedRoute>
+        ),
+      },
       // User Profile
       {
         path: 'profile',
@@ -1909,6 +2064,42 @@ const Router = [
         element: (
           <ProtectedRoute>
             <UserGuide />
+          </ProtectedRoute>
+        ),
+      },
+      // OCR Studio (portal version)
+      {
+        path: 'ocr',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <OCRStudioPage />
+          </ProtectedRoute>
+        ),
+      },
+      // OCR Jobs History (portal version)
+      {
+        path: 'ocr/jobs',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <OcrReviewPage />
+          </ProtectedRoute>
+        ),
+      },
+      // Sacramental Restrictions (portal version)
+      {
+        path: 'sacramental-restrictions',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <PortalSacramentalRestrictionsPage />
+          </ProtectedRoute>
+        ),
+      },
+      // Site Map (portal version)
+      {
+        path: 'site-map',
+        element: (
+          <ProtectedRoute>
+            <SiteMapPage />
           </ProtectedRoute>
         ),
       },
@@ -1963,6 +2154,7 @@ const Router = [
       { path: '/frontend-pages/blog', element: <BlogPage /> },
       { path: '/frontend-pages/blog/detail/:id', element: <BlogPost /> },
       { path: '/frontend-pages/gallery', element: <Gallery /> },
+      { path: '/frontend-pages/sacramental-restrictions', element: <SacramentalRestrictionsPublicPage /> },
       { path: '/greek_baptism_table_demo.html', element: <GreekRecordsViewer /> },
       { path: '/russian_wedding_table_demo.html', element: <HTMLViewer htmlFile="/russian_wedding_table_demo.html" /> },
       { path: '/romanian_funeral_table_demo.html', element: <HTMLViewer htmlFile="/romanian_funeral_table_demo.html" /> },

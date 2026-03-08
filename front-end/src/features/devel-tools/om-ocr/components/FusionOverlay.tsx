@@ -292,14 +292,13 @@ export const FusionOverlay: React.FC<FusionOverlayProps> = ({
           );
         }
 
-        // Guard against undefined container offset
-        const offsetX = containerOffsetRef.current?.x ?? 0;
-        const offsetY = containerOffsetRef.current?.y ?? 0;
-
-        // Adjust screenBbox position relative to overlay container (subtract container offset)
+        // Convert viewport-space screenBbox to overlay-container-relative coordinates.
+        // The overlay container is positioned at (offsetX, offsetY) from its parent,
+        // giving it a viewport position of (containerParent.left + offsetX, containerParent.top + offsetY)
+        // = (metrics.left, metrics.top). So to get container-relative coords, subtract metrics.left/top.
         const adjustedBbox = {
-          x: screenBbox.x - offsetX,
-          y: screenBbox.y - offsetY,
+          x: screenBbox.x - (metrics?.left ?? 0),
+          y: screenBbox.y - (metrics?.top ?? 0),
           w: screenBbox.w,
           h: screenBbox.h,
         };

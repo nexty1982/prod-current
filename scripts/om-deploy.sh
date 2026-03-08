@@ -58,25 +58,118 @@ BUILD_SUCCESS=false
 
 # Parse target
 TARGET="${1:-all}"
+CS_ARG="${2:-}"  # Change set code or ID for stage/promote/hotfix
+
+# ── Change set helper: call backend API ────────────────────────────────────
+cs_api_call() {
+  local method="$1" path="$2" body="${3:-}"
+  local url="http://127.0.0.1:3001${path}"
+  # Use internal token auth — change-sets API checks session, so we use a
+  # direct DB approach via node for script-initiated transitions
+  if [[ -n "$body" ]]; then
+    node -e "
+      const svc = require('$SERVER/dist/services/changeSetService');
+      (async () => {
+        const result = await svc.${method}(${body});
+        console.log(JSON.stringify(result, null, 2));
+        process.exit(0);
+      })().catch(e => { console.error(e.message); process.exit(1); });
+    " 2>&1
+  fi
+}
+
+cs_get_by_ref() {
+  # Resolve a change_set code (CS-0042) or numeric ID to full object
+  local ref="$1"
+  node -e "
+    const svc = require('$SERVER/dist/services/changeSetService');
+    (async () => {
+      let cs;
+      if (/^CS-/.test('$ref')) {
+        cs = await svc.getByCode('$ref');
+      } else if (/^\d+\$/.test('$ref')) {
+        cs = await svc.getById(parseInt('$ref'));
+      } else {
+        console.error('Invalid change_set reference: $ref');
+        process.exit(1);
+      }
+      if (!cs) { console.error('Change set not found: $ref'); process.exit(1); }
+      console.log(JSON.stringify(cs));
+      process.exit(0);
+    })().catch(e => { console.error(e.message); process.exit(1); });
+  " 2>&1
+}
+
+cs_transition() {
+  local cs_id="$1" target_status="$2"
+  shift 2
+  # Remaining args are key=value pairs for extra fields
+  local extra_args=""
+  for arg in "$@"; do
+    extra_args="$extra_args, $arg"
+  done
+  node -e "
+    const svc = require('$SERVER/dist/services/changeSetService');
+    (async () => {
+      const result = await svc.transition(${cs_id}, '${target_status}', 1 ${extra_args});
+      console.log(JSON.stringify({ success: true, code: result.code, status: result.status }));
+      process.exit(0);
+    })().catch(e => { console.error(e.message); process.exit(1); });
+  " 2>&1
+}
+
 case "$TARGET" in
   be)       BUILD_BE=true;  BUILD_FE=false; DEPLOY_ORIGIN="server"   ;;
   fe)       BUILD_BE=false; BUILD_FE=true;  DEPLOY_ORIGIN="frontend" ;;
   all|"")   BUILD_BE=true;  BUILD_FE=true;  DEPLOY_ORIGIN="server"   ;;
+  stage)
+    # ── STAGE: Build to staging for review ─────────────────────────────
+    BUILD_BE=true; BUILD_FE=true; DEPLOY_ORIGIN="server"
+    DEPLOY_MODE="stage"
+    if [[ -z "$CS_ARG" ]]; then
+      echo -e "${RED}✗ Usage: om-deploy.sh stage <CS-CODE or ID>${NC}" >&2
+      exit 1
+    fi
+    ;;
+  promote)
+    # ── PROMOTE: Deploy approved staging to production ─────────────────
+    BUILD_BE=true; BUILD_FE=true; DEPLOY_ORIGIN="server"
+    DEPLOY_MODE="promote"
+    if [[ -z "$CS_ARG" ]]; then
+      echo -e "${RED}✗ Usage: om-deploy.sh promote <CS-CODE or ID>${NC}" >&2
+      exit 1
+    fi
+    ;;
+  hotfix)
+    # ── HOTFIX: Direct-to-production bypass ────────────────────────────
+    BUILD_BE=true; BUILD_FE=true; DEPLOY_ORIGIN="server"
+    DEPLOY_MODE="hotfix"
+    if [[ -z "$CS_ARG" ]]; then
+      echo -e "${RED}✗ Usage: om-deploy.sh hotfix <CS-CODE or ID>${NC}" >&2
+      exit 1
+    fi
+    ;;
   -h|--help)
     echo -e "${BOLD}OrthodoxMetrics Deployment Script${NC}"
     echo ""
     echo -e "${BOLD}Usage:${NC}"
-    echo -e "  om-deploy.sh        Build backend + frontend (full deploy)"
-    echo -e "  om-deploy.sh ${GREEN}be${NC}     Build and deploy backend only"
-    echo -e "  om-deploy.sh ${GREEN}fe${NC}     Build and deploy frontend only"
+    echo -e "  om-deploy.sh              Build backend + frontend (full deploy)"
+    echo -e "  om-deploy.sh ${GREEN}be${NC}           Build and deploy backend only"
+    echo -e "  om-deploy.sh ${GREEN}fe${NC}           Build and deploy frontend only"
+    echo -e ""
+    echo -e "${BOLD}Change Set Workflow:${NC}"
+    echo -e "  om-deploy.sh ${CYAN}stage${NC}   CS-0042   Build to staging for review"
+    echo -e "  om-deploy.sh ${GREEN}promote${NC} CS-0042   Promote approved staging to production"
+    echo -e "  om-deploy.sh ${YELLOW}hotfix${NC}  CS-0042   Direct-to-production (emergency only)"
     exit 0
     ;;
   *)
     echo -e "${RED}✗ Unknown target: $TARGET${NC}" >&2
-    echo -e "  Usage: om-deploy.sh [be|fe]" >&2
+    echo -e "  Usage: om-deploy.sh [be|fe|stage|promote|hotfix]" >&2
     exit 1
     ;;
 esac
+DEPLOY_MODE="${DEPLOY_MODE:-legacy}"
 
 emit_build_event() {
   local event="$1" stage="${2:-}" message="${3:-}" duration_ms="${4:-}"
@@ -315,14 +408,90 @@ fi
 log_info "Git branch: ${BOLD}$GIT_BRANCH${NC} (${GIT_COMMIT})"
 
 # ============================================================================
+# Change Set Validation (stage/promote/hotfix modes)
+# ============================================================================
+CS_ID=""
+CS_CODE=""
+CS_STATUS=""
+FULL_GIT_COMMIT=$(cd "$ROOT" && git rev-parse HEAD 2>/dev/null || echo "unknown")
+
+if [[ "$DEPLOY_MODE" == "stage" || "$DEPLOY_MODE" == "promote" || "$DEPLOY_MODE" == "hotfix" ]]; then
+  log_section "Change Set Validation"
+  log_step "Resolving change set: $CS_ARG..."
+
+  CS_JSON=$(cs_get_by_ref "$CS_ARG" 2>&1)
+  if [[ $? -ne 0 ]]; then
+    log_error "$CS_JSON"
+    exit 1
+  fi
+
+  CS_ID=$(echo "$CS_JSON" | node -e "process.stdin.on('data',d=>{try{console.log(JSON.parse(d).id)}catch(e){process.exit(1)}})")
+  CS_CODE=$(echo "$CS_JSON" | node -e "process.stdin.on('data',d=>{try{console.log(JSON.parse(d).code)}catch(e){process.exit(1)}})")
+  CS_STATUS=$(echo "$CS_JSON" | node -e "process.stdin.on('data',d=>{try{console.log(JSON.parse(d).status)}catch(e){process.exit(1)}})")
+  CS_BRANCH=$(echo "$CS_JSON" | node -e "process.stdin.on('data',d=>{try{console.log(JSON.parse(d).git_branch||'')}catch(e){process.exit(1)}})")
+  CS_STRATEGY=$(echo "$CS_JSON" | node -e "process.stdin.on('data',d=>{try{console.log(JSON.parse(d).deployment_strategy||'stage_then_promote')}catch(e){process.exit(1)}})")
+  CS_APPROVED_SHA=$(echo "$CS_JSON" | node -e "process.stdin.on('data',d=>{try{console.log(JSON.parse(d).approved_commit_sha||'')}catch(e){process.exit(1)}})")
+
+  log_success "Found: $CS_CODE (status: $CS_STATUS)"
+
+  # Validate mode-specific preconditions
+  case "$DEPLOY_MODE" in
+    stage)
+      if [[ "$CS_STATUS" != "ready_for_staging" ]]; then
+        log_error "Change set $CS_CODE is '$CS_STATUS' — must be 'ready_for_staging' to stage"
+        exit 1
+      fi
+      if [[ -n "$CS_BRANCH" && "$CS_BRANCH" != "$GIT_BRANCH" ]]; then
+        log_error "Branch mismatch: change set expects '$CS_BRANCH' but current branch is '$GIT_BRANCH'"
+        exit 1
+      fi
+      ;;
+    promote)
+      if [[ "$CS_STATUS" != "approved" ]]; then
+        log_error "Change set $CS_CODE is '$CS_STATUS' — must be 'approved' to promote"
+        exit 1
+      fi
+      if [[ -n "$CS_APPROVED_SHA" && "$CS_APPROVED_SHA" != "$FULL_GIT_COMMIT" ]]; then
+        log_error "Commit SHA drift: approved '$CS_APPROVED_SHA' but HEAD is '$FULL_GIT_COMMIT'"
+        log_error "The branch has changed since approval. Re-stage and re-approve required."
+        exit 1
+      fi
+      ;;
+    hotfix)
+      if [[ "$CS_STRATEGY" != "hotfix_direct" ]]; then
+        log_warning "Change set $CS_CODE uses 'stage_then_promote' strategy"
+        read -p "$(echo -e "${YELLOW}Override and deploy as hotfix? [y/N]: ${NC}")" HOTFIX_CONFIRM
+        if [[ ! "$HOTFIX_CONFIRM" =~ ^[Yy]$ ]]; then
+          log_error "Hotfix cancelled"
+          exit 1
+        fi
+      fi
+      ;;
+  esac
+
+  log_success "Change set validation passed"
+fi
+
+# ============================================================================
 # Start
 # ============================================================================
 LABEL="all"
 $BUILD_BE && ! $BUILD_FE && LABEL="backend"
 ! $BUILD_BE && $BUILD_FE && LABEL="frontend"
 
-log_header "OrthodoxMetrics Production Deployment"
+if [[ "$DEPLOY_MODE" == "stage" ]]; then
+  DEPLOY_LABEL="STAGING ($CS_CODE)"
+elif [[ "$DEPLOY_MODE" == "promote" ]]; then
+  DEPLOY_LABEL="PROMOTE ($CS_CODE)"
+elif [[ "$DEPLOY_MODE" == "hotfix" ]]; then
+  DEPLOY_LABEL="HOTFIX ($CS_CODE)"
+else
+  DEPLOY_LABEL="Production"
+fi
+
+log_header "OrthodoxMetrics Deployment — $DEPLOY_LABEL"
 log_info "Target: ${BOLD}$LABEL${NC}"
+log_info "Mode: ${BOLD}$DEPLOY_MODE${NC}"
 log_info "Started: $(date '+%Y-%m-%d %H:%M:%S %Z')"
 log_info "Root: $ROOT"
 
@@ -551,6 +720,17 @@ if $BUILD_FE; then
   fi
   stage_done
 
+  # For staging mode: copy dist → dist-staging so version switcher can serve it
+  if [[ "$DEPLOY_MODE" == "stage" ]]; then
+    stage_begin "Staging Copy"
+    log_step "Copying build to dist-staging for version switcher..."
+    rm -rf "$FRONT/dist-staging"
+    cp -r "$FRONT/dist" "$FRONT/dist-staging"
+    STAGING_SIZE=$(du -sh "$FRONT/dist-staging" 2>/dev/null | cut -f1 || echo "unknown")
+    log_success "Staging copy complete (dist-staging size: $STAGING_SIZE)"
+    stage_done
+  fi
+
   log_success "${BOLD}Frontend build pipeline complete${NC}"
 fi
 
@@ -637,6 +817,94 @@ GIT_BRANCH=$GIT_BRANCH
 GIT_COMMIT=$GIT_COMMIT
 EOF
 log_info "Build number: $APP_VERSION.$NEW_BUILD"
+
+# ============================================================================
+# Change Set Post-Deploy Finalization
+# ============================================================================
+if [[ -n "$CS_ID" ]]; then
+  log_section "Change Set Finalization"
+
+  case "$DEPLOY_MODE" in
+    stage)
+      log_step "Transitioning $CS_CODE to 'staged'..."
+      CS_RESULT=$(cs_transition "$CS_ID" "staged" \
+        "{ staging_build_run_id: '$RUN_ID', staging_commit_sha: '$FULL_GIT_COMMIT' }" 2>&1)
+      if [[ $? -eq 0 ]]; then
+        log_success "Change set $CS_CODE is now STAGED"
+        log_info "Staging commit: $FULL_GIT_COMMIT"
+        log_info "Review via version switcher: switch to 'staging' version"
+        log_info "Next step: review in UI then run 'om-deploy.sh promote $CS_CODE'"
+      else
+        log_error "Failed to transition change set: $CS_RESULT"
+      fi
+      ;;
+    promote)
+      log_step "Transitioning $CS_CODE to 'promoted'..."
+      CS_RESULT=$(cs_transition "$CS_ID" "promoted" \
+        "{ prod_build_run_id: '$RUN_ID', prod_commit_sha: '$FULL_GIT_COMMIT' }" 2>&1)
+      if [[ $? -eq 0 ]]; then
+        log_success "Change set $CS_CODE is now PROMOTED to production"
+        log_info "Production commit: $FULL_GIT_COMMIT"
+      else
+        log_error "Failed to transition change set: $CS_RESULT"
+      fi
+      ;;
+    hotfix)
+      log_step "Recording hotfix deployment for $CS_CODE..."
+      # For hotfix: transition through the full chain rapidly
+      # First ensure it's in the right state — try to fast-track it
+      CS_RESULT=$(node -e "
+        const svc = require('$SERVER/dist/services/changeSetService');
+        (async () => {
+          const cs = await svc.getById($CS_ID);
+
+          // Guard: refuse to hotfix an empty change_set
+          const items = await svc.getItems($CS_ID);
+          if (!items.length) {
+            console.error('Cannot hotfix an empty change_set — add at least one OM Daily item');
+            process.exit(1);
+          }
+
+          // Fast-track: draft→active→ready_for_staging→staged→in_review→approved→promoted
+          const chain = [];
+          if (cs.status === 'draft') chain.push('active');
+          if (cs.status === 'active' || chain.includes('active')) chain.push('ready_for_staging');
+
+          for (const s of chain) {
+            try { await svc.transition($CS_ID, s, 1); } catch(e) { /* skip if already past */ }
+          }
+
+          // Now do staged with build data
+          try {
+            await svc.transition($CS_ID, 'staged', 1, {
+              staging_build_run_id: '$RUN_ID',
+              staging_commit_sha: '$FULL_GIT_COMMIT'
+            });
+          } catch(e) { /* may already be past staged */ }
+
+          try { await svc.transition($CS_ID, 'in_review', 1); } catch(e) {}
+          try { await svc.transition($CS_ID, 'approved', 1, { review_notes: 'Hotfix auto-approved' }); } catch(e) {}
+          try {
+            await svc.transition($CS_ID, 'promoted', 1, {
+              prod_build_run_id: '$RUN_ID',
+              prod_commit_sha: '$FULL_GIT_COMMIT'
+            });
+          } catch(e) {}
+
+          const final = await svc.getById($CS_ID);
+          console.log(JSON.stringify({ status: final.status }));
+          process.exit(0);
+        })().catch(e => { console.error(e.message); process.exit(1); });
+      " 2>&1)
+      if [[ $? -eq 0 ]]; then
+        log_success "Hotfix $CS_CODE fast-tracked to production"
+        log_warning "Hotfix bypass recorded in event log"
+      else
+        log_error "Hotfix finalization error: $CS_RESULT"
+      fi
+      ;;
+  esac
+fi
 
 # ============================================================================
 # Deployment Complete

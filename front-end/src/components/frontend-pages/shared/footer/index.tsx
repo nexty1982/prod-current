@@ -47,9 +47,16 @@ const Footer = () => {
   return (
     <Box sx={{ backgroundColor: bgColor, color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }}>
       <Container maxWidth="lg" sx={{ pt: { xs: 5, lg: 8 }, pb: { xs: 3, lg: 4 } }}>
-        <Grid container spacing={4}>
-          {/* Brand column */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        {/* ── Top section: Brand left, Link columns right ── */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: { xs: 4, md: 6 },
+          }}
+        >
+          {/* Brand column — wider on desktop for breathing room */}
+          <Box sx={{ flex: { md: '0 0 280px' }, maxWidth: { md: 280 } }}>
             <Stack direction="row" alignItems="center" spacing={1} mb={2}>
               <Box
                 component="img"
@@ -75,34 +82,44 @@ const Footer = () => {
                 <IconBrandLinkedin size={18} />
               </IconButton>
             </Stack>
-          </Grid>
+          </Box>
 
-          {/* Link columns */}
-          {footerColumns.map((col, i) => (
-            <Grid key={i} size={{ xs: 6, sm: 4, md: 3 }}>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ color: textPrimary, mb: 2 }}>
-                {col.title}
-              </Typography>
-              {col.links.map((link, j) => (
-                <Typography
-                  key={j}
-                  component={Link}
-                  to={link.to}
-                  sx={{
-                    display: 'block',
-                    color: linkColor,
-                    fontSize: '0.85rem',
-                    py: 0.6,
-                    textDecoration: 'none',
-                    '&:hover': { color: '#D4AF37' },
-                  }}
-                >
-                  {link.text}
+          {/* Link columns — evenly distributed in a single row */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexWrap: { xs: 'wrap', sm: 'nowrap' },
+              gap: { xs: 3, sm: 4, md: 6 },
+              justifyContent: { sm: 'space-between' },
+            }}
+          >
+            {footerColumns.map((col, i) => (
+              <Box key={i} sx={{ minWidth: { xs: '40%', sm: 'auto' }, flex: { sm: 1 } }}>
+                <Typography variant="subtitle2" fontWeight={600} sx={{ color: textPrimary, mb: 2 }}>
+                  {col.title}
                 </Typography>
-              ))}
-            </Grid>
-          ))}
-        </Grid>
+                {col.links.map((link, j) => (
+                  <Typography
+                    key={j}
+                    component={Link}
+                    to={link.to}
+                    sx={{
+                      display: 'block',
+                      color: linkColor,
+                      fontSize: '0.85rem',
+                      py: 0.6,
+                      textDecoration: 'none',
+                      '&:hover': { color: '#D4AF37' },
+                    }}
+                  >
+                    {link.text}
+                  </Typography>
+                ))}
+              </Box>
+            ))}
+          </Box>
+        </Box>
 
         <Divider sx={{ borderColor: dividerColor, my: 4 }} />
 

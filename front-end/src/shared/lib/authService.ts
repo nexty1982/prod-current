@@ -35,7 +35,7 @@ export class AuthService {
 
         // Store access token if provided (for JWT auth)
         if (response.access_token) {
-          localStorage.setItem('auth_token', response.access_token);
+          localStorage.setItem('access_token', response.access_token);
         }
 
         return response;
@@ -96,7 +96,7 @@ export class AuthService {
     } finally {
       // Clear local storage (user data and tokens)
       localStorage.removeItem('auth_user');
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('access_token');
     }
   }
 

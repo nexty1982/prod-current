@@ -12,11 +12,9 @@ import './index.css';
 // Temporarily commented out to avoid conflicts with Tailwind CSS
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
-// Import AG Grid styles globally (required for CSS theme approach)
-// This must be imported exactly once to avoid error #239 (Theming API and CSS both used)
-// Using ag-theme-quartz as the base theme (legacy CSS approach only)
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-quartz.css';
+// AG Grid v34+ uses the Theming API (theme prop on AgGridReact).
+// Do NOT import legacy CSS files (ag-grid.css, ag-theme-*.css) — they conflict with the
+// Theming API and cause error #239.
 
 import { setupGlobalErrorHandlers } from './shared/lib/globalErrorHandler';
 import './shared/lib/debugLogger'; // Initialize debug logger

@@ -1,6 +1,7 @@
-import { CustomizerContext } from '@/context/CustomizerContext';
 import { useAuth } from '@/context/AuthContext';
+import { CustomizerContext } from '@/context/CustomizerContext';
 import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Drawer from '@mui/material/Drawer';
@@ -9,10 +10,10 @@ import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { IconMenu2, IconMoon, IconSun } from '@tabler/icons-react';
 import React, { useContext } from 'react';
+import HeaderAmbience from './HeaderAmbience';
 import MobileSidebar from './MobileSidebar';
 import Navigations from './Navigations';
 import PortalNavigations from './PortalNavigations';
@@ -38,8 +39,8 @@ const HpHeader = () => {
     justifyContent: 'space-between',
   }));
 
-  const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
-  const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
+  const mdUp = useMediaQuery((theme: any) => theme.breakpoints.up('md'));
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const [open, setOpen] = React.useState(false);
 
@@ -52,31 +53,31 @@ const HpHeader = () => {
   };
 
   return (
-    <AppBarStyled position="sticky" elevation={0}>
-      <Container sx={{ maxWidth: '1400px !important' }}>
+    <AppBarStyled position="sticky" elevation={0} sx={{ position: 'sticky', overflow: 'hidden' }}>
+      <HeaderAmbience />
+      <Container sx={{ maxWidth: '1400px !important', position: 'relative', zIndex: 1 }}>
         <ToolbarStyled>
           {/* Brand */}
           <Stack direction="row" alignItems="center" spacing={1.5} component="a" href="/frontend-pages/homepage" sx={{ textDecoration: 'none' }}>
-            <Typography
-              variant="h6"
-              fontWeight={700}
+            <Box
+              component="img"
+              src="/uploads/global/om-logo-latest.png"
+              alt="Orthodox Metrics"
               sx={{
-                fontFamily: '"Cormorant Garamond", "Palatino Linotype", Georgia, serif',
-                color: 'text.primary',
-                fontSize: '1.25rem',
+                height: { xs: 140, sm: 160 },
+                width: 'auto',
+                objectFit: 'contain',
               }}
-            >
-              Orthodox Metrics
-            </Typography>
+            />
           </Stack>
 
-          {lgDown ? (
-            <IconButton color="inherit" aria-label="menu" onClick={handleDrawerOpen}>
+          {mdDown ? (
+            <IconButton aria-label="menu" onClick={handleDrawerOpen} sx={{ color: 'text.primary' }}>
               <IconMenu2 size="20" />
             </IconButton>
           ) : null}
 
-          {lgUp ? (
+          {mdUp ? (
             isChurchStaff ? (
               <>
                 <Stack spacing={1} direction="row" alignItems="center">

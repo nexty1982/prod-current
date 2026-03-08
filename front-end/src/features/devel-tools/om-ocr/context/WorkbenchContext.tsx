@@ -6,6 +6,7 @@
 import React, { createContext, useContext, useReducer, useCallback, useMemo } from 'react';
 import type { BBox, VisionResponse, DetectedLabel, FusionEntry, EntryArea } from '../types/fusion';
 import type { RecordType } from '@/shared/recordSchemas/registry';
+import type { ScoringV2Result } from '../types/pipeline';
 
 // ============================================================================
 // State Shape
@@ -42,6 +43,10 @@ export interface WorkbenchState {
   fieldValues: Record<string, { value: string; confidence?: number; source?: string }>; // keyed by canonical schema key
   fieldExtractions: Record<string, Record<string, any>>; // keyed by entryId, then fieldKey
   
+  // Pipeline artifacts (loaded from job detail)
+  scoringV2: ScoringV2Result | null;
+  recordCandidates: any | null;
+
   // Step 4: Review/Commit
   drafts: Array<{
     id?: number;
@@ -83,6 +88,8 @@ export type WorkbenchAction =
   | { type: 'SET_FIELD_VALUE'; payload: { key: string; value: string; confidence?: number; source?: string } }
   | { type: 'SET_FIELD_VALUES'; payload: Record<string, { value: string; confidence?: number; source?: string }> }
   | { type: 'SET_FIELD_EXTRACTIONS'; payload: Record<string, Record<string, any>> }
+  | { type: 'SET_SCORING_V2'; payload: ScoringV2Result | null }
+  | { type: 'SET_RECORD_CANDIDATES'; payload: any | null }
   | { type: 'SET_DRAFTS'; payload: WorkbenchState['drafts'] }
   | { type: 'ADD_DRAFT'; payload: WorkbenchState['drafts'][0] }
   | { type: 'UPDATE_DRAFT'; payload: { index: number; draft: Partial<WorkbenchState['drafts'][0]> } }
@@ -111,6 +118,8 @@ const initialState: WorkbenchState = {
   labelCandidates: [],
   fieldValues: {},
   fieldExtractions: {},
+  scoringV2: null,
+  recordCandidates: null,
   drafts: [],
   stepStatus: {
     detectEntries: { complete: false },
@@ -142,6 +151,8 @@ function workbenchReducer(state: WorkbenchState, action: WorkbenchAction): Workb
         labelCandidates: [],
         fieldValues: {},
         fieldExtractions: {},
+        scoringV2: null,
+        recordCandidates: null,
         drafts: [],
         activeStep: 0,
       };
@@ -198,6 +209,12 @@ function workbenchReducer(state: WorkbenchState, action: WorkbenchAction): Workb
     case 'SET_FIELD_EXTRACTIONS':
       return { ...state, fieldExtractions: action.payload };
     
+    case 'SET_SCORING_V2':
+      return { ...state, scoringV2: action.payload };
+
+    case 'SET_RECORD_CANDIDATES':
+      return { ...state, recordCandidates: action.payload };
+
     case 'SET_DRAFTS':
       return { ...state, drafts: action.payload };
     
@@ -258,6 +275,8 @@ interface WorkbenchContextValue {
   setSelectedEntry: (index: number | null) => void;
   setFieldValue: (key: string, value: string, confidence?: number, source?: string) => void;
   setFieldValues: (values: Record<string, { value: string; confidence?: number; source?: string }>) => void;
+  setScoringV2: (scoring: ScoringV2Result | null) => void;
+  setRecordCandidates: (candidates: any | null) => void;
   setDrafts: (drafts: WorkbenchState['drafts']) => void;
   setActiveStep: (step: number) => void;
   reset: () => void;
@@ -296,6 +315,14 @@ export const WorkbenchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     dispatch({ type: 'SET_FIELD_VALUES', payload: values });
   }, []);
   
+  const setScoringV2 = useCallback((scoring: ScoringV2Result | null) => {
+    dispatch({ type: 'SET_SCORING_V2', payload: scoring });
+  }, []);
+
+  const setRecordCandidates = useCallback((candidates: any | null) => {
+    dispatch({ type: 'SET_RECORD_CANDIDATES', payload: candidates });
+  }, []);
+
   const setDrafts = useCallback((drafts: WorkbenchState['drafts']) => {
     dispatch({ type: 'SET_DRAFTS', payload: drafts });
   }, []);
@@ -317,10 +344,12 @@ export const WorkbenchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setSelectedEntry,
     setFieldValue,
     setFieldValues,
+    setScoringV2,
+    setRecordCandidates,
     setDrafts,
     setActiveStep,
     reset,
-  }), [state, setJob, setEntries, updateEntryArea, setSelectedEntry, setFieldValue, setFieldValues, setDrafts, setActiveStep, reset]);
+  }), [state, setJob, setEntries, updateEntryArea, setSelectedEntry, setFieldValue, setFieldValues, setScoringV2, setRecordCandidates, setDrafts, setActiveStep, reset]);
   
   return (
     <WorkbenchContext.Provider value={value}>

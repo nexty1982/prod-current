@@ -31,8 +31,8 @@ interface PortalNavLink {
 const portalLinks: PortalNavLink[] = [
   { title: 'Portal', to: '/portal' },
   { title: 'Records', to: '/portal/records/baptism' },
-  { title: 'Certificates', to: '/portal/certificates' },
   { title: 'Upload', to: '/portal/upload', roles: UPLOAD_ROLES },
+  { title: 'OCR Pipeline', to: '/portal/ocr', roles: UPLOAD_ROLES },
   { title: 'Help', to: '/portal/guide' },
 ];
 

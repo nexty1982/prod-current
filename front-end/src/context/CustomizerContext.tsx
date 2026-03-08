@@ -88,7 +88,10 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
         // Otherwise, default to dark mode and use time-based logic
         return isDarkModeTime() ? 'dark' : 'light';
     });
-    const [activeTheme, setActiveThemeState] = useState<string>(() => 
+    // Theme is initialized from localStorage if available (set by liturgical auto-theme),
+    // falling back to config.activeTheme for first-time visitors.
+    // This prevents a flash of the wrong theme on page reload.
+    const [activeTheme, setActiveThemeState] = useState<string>(() =>
         getStoredValue('activeTheme', config.activeTheme)
     );
     const [activeLayout, setActiveLayoutState] = useState<string>(() => 

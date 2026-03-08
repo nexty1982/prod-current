@@ -3,13 +3,14 @@
  * Windows Control Panel-style admin hub for super_admin users.
  * Located at /admin/control-panel
  *
- * 6 major categories:
+ * 7 major categories:
  * 1. Church Management
  * 2. Records & OCR
  * 3. CRM & Outreach
  * 4. System & Server
  * 5. AI & Automation
  * 6. OM Daily
+ * 7. OM App Suite
  */
 
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
@@ -21,6 +22,7 @@ import {
     Campaign as OutreachIcon,
     Description as RecordsIcon,
     Dns as ServerIcon,
+    Widgets as SuiteIcon,
 } from '@mui/icons-material';
 import {
     alpha,
@@ -60,7 +62,8 @@ const CATEGORIES: Category[] = [
     href: '/admin/control-panel/church-management',
     quickLinks: [
       { label: 'All Churches', href: '/apps/church-management' },
-      { label: 'Church Setup Wizard', href: '/apps/church-management/wizard' },
+      { label: 'Church Onboarding Pipeline', href: '/admin/control-panel/church-onboarding' },
+      { label: 'Sacramental Restrictions', href: '/admin/control-panel/church-management/sacramental-restrictions' },
     ],
   },
   {
@@ -97,8 +100,8 @@ const CATEGORIES: Category[] = [
     href: '/admin/control-panel/system-server',
     quickLinks: [
       { label: 'User Management', href: '/admin/users' },
-      { label: 'Session Management', href: '/admin/sessions' },
-      { label: 'Activity Logs', href: '/admin/logs' },
+      { label: 'Code Safety System', href: '/admin/control-panel/system-server/code-safety' },
+      { label: 'Site Map', href: '/site-map' },
       { label: 'API Explorer', href: '/devel-tools/api-explorer' },
     ],
   },
@@ -125,6 +128,19 @@ const CATEGORIES: Category[] = [
       { label: '24-Hour Plan', href: '/admin/control-panel/om-daily?horizon=1' },
       { label: '48-Hour Plan', href: '/admin/control-panel/om-daily?horizon=2' },
       { label: '7-Day Plan', href: '/admin/control-panel/om-daily?horizon=7' },
+    ],
+  },
+  {
+    key: 'suite',
+    title: 'OM App Suite',
+    description: 'Internal productivity tools, analytics, documentation, and learning',
+    icon: <SuiteIcon sx={{ fontSize: 48 }} />,
+    color: '#0277bd',
+    href: '/admin/control-panel/om-app-suite',
+    quickLinks: [
+      { label: 'OM Tasks', href: '/devel-tools/om-tasks' },
+      { label: 'OM Charts', href: '/apps/om-charts' },
+      { label: 'OM Library', href: '/church/om-spec' },
     ],
   },
 ];

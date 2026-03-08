@@ -64,7 +64,7 @@ async function fetchWithTimeout(
 
 // Get auth token from localStorage
 function getAuthToken(): string | null {
-  return localStorage.getItem('authToken');
+  return localStorage.getItem('access_token');
 }
 
 // Get CSRF token from meta tag

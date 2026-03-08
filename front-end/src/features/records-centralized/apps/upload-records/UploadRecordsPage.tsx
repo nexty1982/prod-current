@@ -8,6 +8,10 @@
  */
 
 import { useAuth } from '@/context/AuthContext';
+import OcrWorkbench from '@/features/devel-tools/om-ocr/components/workbench/OcrWorkbench';
+import { WorkbenchProvider } from '@/features/devel-tools/om-ocr/context/WorkbenchContext';
+import OcrPipelineJob from '@/features/ocr/components/OcrPipelineJob';
+import OcrPipelineOverview from '@/features/ocr/components/OcrPipelineOverview';
 import { apiClient } from '@/shared/lib/axiosInstance';
 import {
     Alert,
@@ -29,9 +33,11 @@ import {
     useTheme,
 } from '@mui/material';
 import {
+    IconCheck,
     IconCloudUpload,
+    IconHistory,
     IconPhoto,
-    IconRefresh,
+    IconScan,
     IconUpload,
     IconX
 } from '@tabler/icons-react';
@@ -274,17 +280,112 @@ const UploadRecordsPage: React.FC = () => {
   // =====================================================================
 
   return (
-    <Box sx={{ maxWidth: 760, mx: 'auto', py: 4, px: 2 }}>
+    <Box sx={{ py: 4, px: 2 }}>
       {/* Page header */}
       <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
         Upload Records
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Upload scanned images of church records for automated OCR processing.
       </Typography>
 
-      {/* ── Upload ── */}
-      <>
+      {/* ── Before You Upload guidelines ── */}
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>
+          Before You Upload
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Ensure your scanned images meet quality standards for accurate OCR processing.
+        </Typography>
+
+        <Stack spacing={1.2}>
+          {[
+            'Scan pages at 300 DPI or higher for optimal OCR accuracy',
+            'Ensure images are well-lit with minimal shadows or glare',
+            'Capture full page edges and avoid cropping any text',
+            'Use JPEG or PNG format (TIFF supported for archival)',
+            'Organize files by book or volume before uploading',
+          ].map((text, i) => (
+            <Stack key={i} direction="row" alignItems="center" spacing={1.5}>
+              <Box
+                sx={{
+                  width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                  bgcolor: alpha(theme.palette.success.main, 0.12),
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <IconCheck size={14} color={theme.palette.success.main} />
+              </Box>
+              <Typography variant="body2" color="text.secondary">{text}</Typography>
+            </Stack>
+          ))}
+        </Stack>
+      </Paper>
+
+      {/* Quick actions for existing jobs */}
+      {effectiveChurchId && (
+        <Paper 
+          variant="outlined" 
+          sx={{ 
+            p: 2.5, 
+            mb: 3, 
+            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.03)} 0%, ${alpha(theme.palette.secondary.main, 0.03)} 100%)`,
+            borderColor: alpha(theme.palette.primary.main, 0.15),
+          }}
+        >
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" justifyContent="space-between">
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Box
+                sx={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor: alpha(theme.palette.info.main, 0.1),
+                  color: theme.palette.info.main,
+                }}
+              >
+                <IconPhoto size={22} />
+              </Box>
+              <Box>
+                <Typography variant="subtitle1" fontWeight={700}>
+                  Work on Existing Images
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Process uploaded images or view job history
+                </Typography>
+              </Box>
+            </Stack>
+            <Stack direction="row" spacing={1.5}>
+              <Button
+                variant="contained"
+                size="small"
+                href={`/portal/ocr?church=${effectiveChurchId}`}
+                startIcon={<IconScan size={16} />}
+                sx={{ whiteSpace: 'nowrap' }}
+              >
+                OCR Studio
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                href="/portal/ocr/jobs"
+                startIcon={<IconHistory size={16} />}
+                sx={{ whiteSpace: 'nowrap' }}
+              >
+                Job History
+              </Button>
+            </Stack>
+          </Stack>
+        </Paper>
+      )}
+
+      {/* Pipeline overview diagram - active with real-time job status */}
+      <OcrPipelineOverview churchId={effectiveChurchId} />
+
+      {/* ── Upload Section ── */}
           {/* Admin church selector */}
           {isAdmin && (
             <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
@@ -362,34 +463,54 @@ const UploadRecordsPage: React.FC = () => {
               <Stack divider={<Divider />}>
                 {queue.map((f) => {
                   const sc = STATUS_CONFIG[f.status] || STATUS_CONFIG.pending;
+                  const showPipeline = f.jobId && effectiveChurchId && (f.status === 'queued' || f.status === 'processing' || f.status === 'completed' || f.status === 'failed');
                   return (
                     <Box key={f.id} sx={{ px: 2, py: 1.5 }}>
-                      <Stack direction="row" alignItems="center" spacing={1.5}>
+                      {/* File header */}
+                      <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: showPipeline ? 1.5 : 0 }}>
                         <IconPhoto size={20} color={theme.palette.text.secondary} />
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography variant="body2" fontWeight={500} noWrap>{f.name}</Typography>
                           <Typography variant="caption" color="text.secondary">{fmtSize(f.size)}</Typography>
                         </Box>
-                        <Chip label={sc.label} color={sc.color} size="small" variant="outlined" />
+                        {!showPipeline && (
+                          <Chip label={sc.label} color={sc.color} size="small" variant="outlined" />
+                        )}
                         {f.status === 'pending' && (
                           <Tooltip title="Remove">
                             <IconButton size="small" onClick={() => removeFile(f.id)}><IconX size={16} /></IconButton>
                           </Tooltip>
                         )}
-                        {(f.status === 'failed' || f.status === 'error') && f.jobId && (
-                          <Tooltip title="Retry">
-                            <IconButton size="small" onClick={() => retryJob(f.id, f.jobId!)}><IconRefresh size={16} /></IconButton>
-                          </Tooltip>
-                        )}
                       </Stack>
-                      {f.error && (
+                      {/* Pipeline visualization for submitted jobs */}
+                      {showPipeline && (
+                        <OcrPipelineJob
+                          jobId={Number(f.jobId)}
+                          churchId={effectiveChurchId!}
+                          compact
+                          onStatusChange={(status) => {
+                            setQueue((q) => q.map((qf) => {
+                              if (qf.id !== f.id) return qf;
+                              let uiStatus = qf.status;
+                              if (status === 'pending' || status === 'queued') uiStatus = 'queued';
+                              else if (status === 'processing') uiStatus = 'processing';
+                              else if (status === 'completed' || status === 'complete') uiStatus = 'completed';
+                              else if (status === 'failed' || status === 'error') uiStatus = 'failed';
+                              return { ...qf, status: uiStatus };
+                            }));
+                          }}
+                        />
+                      )}
+                      {/* Legacy error display for non-pipeline jobs */}
+                      {!showPipeline && f.error && (
                         <Typography variant="caption" color="error.main" sx={{ mt: 0.5, display: 'block' }}>
                           {f.error}
                         </Typography>
                       )}
-                      {(f.status === 'uploading' || f.status === 'processing') && (
+                      {/* Upload progress */}
+                      {f.status === 'uploading' && (
                         <LinearProgress
-                          variant={f.status === 'processing' ? 'indeterminate' : 'determinate'}
+                          variant="determinate"
                           value={f.progress}
                           sx={{ mt: 1, borderRadius: 1 }}
                         />
@@ -420,25 +541,50 @@ const UploadRecordsPage: React.FC = () => {
             </Stack>
           )}
 
-          {/* Completion message */}
-          {allDone && (
-            <Box sx={{ mt: 1 }}>
-              <Alert
-                severity={failedCount === 0 ? 'success' : failedCount === queue.length ? 'error' : 'warning'}
-                sx={{ mb: 2 }}
-              >
-                {failedCount === 0
-                  ? 'Your records have been submitted for processing. Your church administrator will review them, typically within 24-72 hours.'
-                  : failedCount === queue.length
-                    ? 'All uploads failed. Please check your files and try again.'
-                    : `${completedCount} of ${queue.length} files uploaded successfully. ${failedCount} failed.`}
-              </Alert>
-              <Button variant="outlined" startIcon={<IconUpload size={18} />} onClick={resetForMore}>
-                Upload More
-              </Button>
-            </Box>
-          )}
-      </>
+      {/* Completion message */}
+      {allDone && (
+        <Box sx={{ mt: 1 }}>
+          <Alert
+            severity={failedCount === 0 ? 'success' : failedCount === queue.length ? 'error' : 'warning'}
+            sx={{ mb: 2 }}
+          >
+            {failedCount === 0
+              ? 'Your records have been submitted for processing. Your church administrator will review them, typically within 24-72 hours.'
+              : failedCount === queue.length
+                ? 'All uploads failed. Please check your files and try again.'
+                : `${completedCount} of ${queue.length} files uploaded successfully. ${failedCount} failed.`}
+          </Alert>
+          <Button variant="outlined" startIcon={<IconUpload size={18} />} onClick={resetForMore}>
+            Upload More
+          </Button>
+        </Box>
+      )}
+
+      {/* OCR Workbench — review results, map fields, commit records */}
+      {effectiveChurchId && (
+        <Box sx={{ mt: 4 }}>
+          <Divider sx={{ mb: 2 }} />
+          <Typography variant="h5" fontWeight={700} sx={{ mb: 0.5 }}>
+            OCR Workbench
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Select a job below to review OCR results, map fields, and commit records.
+          </Typography>
+          <Paper
+            variant="outlined"
+            sx={{
+              height: 'calc(100vh - 200px)',
+              minHeight: 500,
+              overflow: 'hidden',
+              borderRadius: 2,
+            }}
+          >
+            <WorkbenchProvider>
+              <OcrWorkbench churchId={effectiveChurchId} />
+            </WorkbenchProvider>
+          </Paper>
+        </Box>
+      )}
     </Box>
   );
 };

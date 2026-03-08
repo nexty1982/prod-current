@@ -99,28 +99,34 @@ router.post('/login', async (req, res) => {
     const refreshTokenHash = hashToken(refreshToken);
     const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL * 1000);
 
-    // Enforce session limits: super_admin = 3 sessions, others = 1 session
-    const maxSessions = user.role === 'super_admin' ? 3 : 1;
-    
-    // Get current active sessions for this user (excluding revoked tokens)
+    // Housekeeping: purge revoked and expired tokens for this user
+    await pool.execute(
+      `DELETE FROM refresh_tokens WHERE user_id = ? AND (revoked_at IS NOT NULL OR expires_at <= NOW())`,
+      [user.id]
+    ).catch(err => console.error('[AUTH] Token cleanup failed:', err.message));
+
+    // Enforce session limits: super_admin = 5 sessions, others = 3 sessions
+    const maxSessions = user.role === 'super_admin' ? 5 : 3;
+
+    // Get current active sessions for this user
     const [activeSessions] = await pool.execute(
-      `SELECT id FROM refresh_tokens 
+      `SELECT id FROM refresh_tokens
        WHERE user_id = ? AND expires_at > NOW() AND revoked_at IS NULL
        ORDER BY expires_at ASC`,
       [user.id]
     );
-    
+
     // Delete oldest sessions if limit exceeded
     if (activeSessions.length >= maxSessions) {
-      const sessionsToDelete = activeSessions.length - maxSessions + 1; // +1 for the new session we're about to create
+      const sessionsToDelete = activeSessions.length - maxSessions + 1;
       const idsToDelete = activeSessions.slice(0, sessionsToDelete).map(s => s.id);
-      
+
       if (idsToDelete.length > 0) {
         await pool.execute(
           `DELETE FROM refresh_tokens WHERE id IN (${idsToDelete.map(() => '?').join(',')})`,
           idsToDelete
         );
-        console.log(`[AUTH] Deleted ${idsToDelete.length} old session(s) for user ${user.email} (limit: ${maxSessions})`);
+        console.log(`[AUTH] Evicted ${idsToDelete.length} oldest session(s) for user ${user.email} (limit: ${maxSessions})`);
       }
     }
 
@@ -329,11 +335,17 @@ router.post('/refresh', async (req, res) => {
       });
     }
 
-    // Revoke old token
+    // Delete the consumed token (not just revoke — keep the table clean)
     await pool.execute(
-      'UPDATE refresh_tokens SET revoked_at = NOW() WHERE id = ?',
+      'DELETE FROM refresh_tokens WHERE id = ?',
       [storedToken.id]
     );
+
+    // Housekeeping: purge revoked and expired tokens for this user
+    await pool.execute(
+      `DELETE FROM refresh_tokens WHERE user_id = ? AND (revoked_at IS NOT NULL OR expires_at <= NOW())`,
+      [user.id]
+    ).catch(err => console.error('[AUTH] Token cleanup failed:', err.message));
 
     // Generate new tokens
     const tokenPayload = {
@@ -351,28 +363,26 @@ router.post('/refresh', async (req, res) => {
     const newRefreshTokenHash = hashToken(newRefreshToken);
     const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL * 1000);
 
-    // Enforce session limits: super_admin = 3 sessions, others = 1 session
-    const maxSessions = user.role === 'super_admin' ? 3 : 1;
-    
-    // Get current active sessions for this user (excluding the one we're about to revoke and revoked tokens)
+    // Enforce session limits: super_admin = 5, others = 3
+    const maxSessions = user.role === 'super_admin' ? 5 : 3;
+
     const [activeSessions] = await pool.execute(
-      `SELECT id FROM refresh_tokens 
-       WHERE user_id = ? AND expires_at > NOW() AND id != ? AND revoked_at IS NULL
+      `SELECT id FROM refresh_tokens
+       WHERE user_id = ? AND expires_at > NOW() AND revoked_at IS NULL
        ORDER BY expires_at ASC`,
-      [user.id, storedToken.id]
+      [user.id]
     );
-    
-    // Delete oldest sessions if limit exceeded
+
     if (activeSessions.length >= maxSessions) {
-      const sessionsToDelete = activeSessions.length - maxSessions + 1; // +1 for the new session we're about to create
+      const sessionsToDelete = activeSessions.length - maxSessions + 1;
       const idsToDelete = activeSessions.slice(0, sessionsToDelete).map(s => s.id);
-      
+
       if (idsToDelete.length > 0) {
         await pool.execute(
           `DELETE FROM refresh_tokens WHERE id IN (${idsToDelete.map(() => '?').join(',')})`,
           idsToDelete
         );
-        console.log(`[AUTH] Deleted ${idsToDelete.length} old session(s) for user ${user.email} during token refresh (limit: ${maxSessions})`);
+        console.log(`[AUTH] Evicted ${idsToDelete.length} oldest session(s) for ${user.email} during refresh (limit: ${maxSessions})`);
       }
     }
 
@@ -415,7 +425,7 @@ router.get('/check', async (req, res) => {
       const token = authHeader.substring(7);
       
       try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_ACCESS_SECRET);
         
         // Get fresh user data from database
         const [users] = await pool.execute(

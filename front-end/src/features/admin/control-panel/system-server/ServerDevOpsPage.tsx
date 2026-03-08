@@ -38,6 +38,7 @@ const TOOLS = [
   { title: 'Refactor Console', description: 'Code refactoring tools and analysis', href: '/devel-tools/refactor-console', icon: <RefactorIcon /> },
   { title: 'Site Survey', description: 'Automated testing and quality assurance checks', href: '/admin/tools/survey', icon: <SurveyIcon /> },
   { title: 'Feature Lifecycle (SDLC)', description: 'Five-stage feature pipeline, registry status, and promotion workflow', href: '/admin/control-panel/sdlc', icon: <SDLCIcon /> },
+  { title: 'Code Safety System', description: 'Snapshot management, backup verification, and change tracking for uncommitted work', href: '/admin/control-panel/system-server/code-safety', icon: <BackupIcon /> },
 ];
 
 const ServerDevOpsPage: React.FC = () => {

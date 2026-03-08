@@ -44,9 +44,7 @@ class ApiClient {
         // Skip for auth endpoints
         const isAuthEndpoint = config.url?.includes('/auth/') || config.url?.includes('/api/auth');
         if (!isAuthEndpoint && typeof window !== 'undefined') {
-          const accessToken = localStorage.getItem('access_token') || 
-                             sessionStorage.getItem('access_token') ||
-                             (localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') || '{}')?.access_token : null);
+          const accessToken = localStorage.getItem('access_token');
           if (accessToken && !config.headers['Authorization']) {
             config.headers['Authorization'] = `Bearer ${accessToken}`;
           }
@@ -178,13 +176,28 @@ class ApiClient {
         console.log(`✅ API Response: ${response.status} ${response.config.url}`);
         return response;
       },
-      (error) => {
-        console.error('❌ Response Error:', error.response?.status, error.response?.data);
+      async (error) => {
+        console.error('Response Error:', error.response?.status, error.response?.data);
 
-        // Handle 401 via centralized auth error handler
-        if (error.response?.status === 401) {
-          if (!window.location.pathname.includes('/auth/login')) {
-            handle401Error(error, 'api_axiosInstance');
+        // Handle 401 via token refresh, then retry the original request
+        if (error.response?.status === 401 && !window.location.pathname.includes('/auth/login')) {
+          // Avoid infinite retry loops — only retry once per request
+          if (!error.config._retried) {
+            try {
+              await handle401Error(error, 'api_axiosInstance');
+            } catch (refreshError: any) {
+              if (refreshError.tokenRefreshed) {
+                // Token was refreshed — retry the original request with the new token
+                error.config._retried = true;
+                const newToken = localStorage.getItem('access_token');
+                if (newToken) {
+                  error.config.headers['Authorization'] = `Bearer ${newToken}`;
+                }
+                return this.instance.request(error.config);
+              }
+              // Refresh failed and user is being redirected to login
+              throw refreshError;
+            }
           }
         }
 

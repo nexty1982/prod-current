@@ -4,6 +4,8 @@
  * Mounted at /api/church/:churchId/ocr
  */
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router({ mergeParams: true });
 import { resolveChurchDb, promisePool } from './helpers';
 
@@ -220,6 +222,20 @@ router.put('/jobs/:jobId/fusion/drafts/:entryIndex', async (req: any, res: any) 
     // Ensure table exists
     await db.query(CREATE_FUSED_DRAFTS_TABLE);
 
+    // ── Fetch BEFORE values for correction logging ──
+    let beforePayload: Record<string, any> | null = null;
+    try {
+      const [existing]: any = await db.query(
+        'SELECT payload_json FROM ocr_fused_drafts WHERE ocr_job_id = ? AND entry_index = ?',
+        [jobId, entryIndex],
+      );
+      if (existing.length > 0 && existing[0].payload_json) {
+        beforePayload = typeof existing[0].payload_json === 'string'
+          ? JSON.parse(existing[0].payload_json)
+          : existing[0].payload_json;
+      }
+    } catch (_) { /* first save — no prior draft */ }
+
     // Upsert on (ocr_job_id, entry_index)
     await db.query(
       `INSERT INTO ocr_fused_drafts
@@ -234,6 +250,98 @@ router.put('/jobs/:jobId/fusion/drafts/:entryIndex', async (req: any, res: any) 
          updated_at = CURRENT_TIMESTAMP`,
       [jobId, entryIndex, record_type || 'baptism', record_number || null, payloadStr, bboxStr, churchId, workflow_status || 'draft', userEmail]
     );
+
+    // ── Non-blocking: log field corrections ──
+    try {
+      const afterPayload: Record<string, any> = typeof payload_json === 'string'
+        ? JSON.parse(payload_json)
+        : (payload_json || {});
+
+      if (beforePayload) {
+        const { buildCorrectionEvent, appendCorrection, correctionsLogPath } = require('../../ocr/preprocessing/correctionLog');
+
+        // Lazy-load provenance/scoring artifacts for this job
+        let scoringV2: any = null;
+        let provenance: any = null;
+        let pageId: number | null = null;
+        let templateId: string | null = null;
+        try {
+          const jobDir = path.join(__dirname, '../../../storage/feeder', `job_${jobId}`);
+          const page0Dir = path.join(jobDir, 'page_0');
+          const scoringPath = path.join(page0Dir, 'scoring_v2.json');
+          const provPath = path.join(page0Dir, 'record_candidates_provenance.json');
+          const metricsPath = path.join(page0Dir, 'metrics.json');
+
+          if (fs.existsSync(scoringPath)) scoringV2 = JSON.parse(fs.readFileSync(scoringPath, 'utf8'));
+          if (fs.existsSync(provPath)) provenance = JSON.parse(fs.readFileSync(provPath, 'utf8'));
+          if (fs.existsSync(metricsPath)) {
+            const metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8'));
+            templateId = metrics.template_id || null;
+          }
+
+          // Get page_id from DB (non-blocking best-effort)
+          const [pageRows]: any = await db.query(
+            'SELECT id FROM ocr_feeder_pages WHERE job_id = ? ORDER BY page_index ASC LIMIT 1',
+            [jobId],
+          );
+          if (pageRows.length > 0) pageId = pageRows[0].id;
+        } catch (_) { /* provenance not available — log without it */ }
+
+        const logPath = correctionsLogPath(jobId);
+        const allFields = new Set([...Object.keys(beforePayload), ...Object.keys(afterPayload)]);
+        let logged = 0;
+
+        for (const fieldName of allFields) {
+          const bv = beforePayload[fieldName] ?? null;
+          const av = afterPayload[fieldName] ?? null;
+          const before = bv === null || bv === undefined ? '' : String(bv);
+          const after = av === null || av === undefined ? '' : String(av);
+
+          if (before === after) continue; // No change
+
+          // Find provenance for this field+candidate
+          let scoringField: any = null;
+          let provField: any = null;
+          if (scoringV2?.rows) {
+            const row = scoringV2.rows.find((r: any) => r.candidate_index === entryIndex);
+            if (row?.fields) {
+              scoringField = row.fields.find((f: any) => f.field_name === fieldName) || null;
+            }
+          }
+          if (provenance?.fields) {
+            const pf = provenance.fields.find(
+              (f: any) => f.candidate_index === entryIndex && f.field_name === fieldName,
+            );
+            if (pf) provField = pf.provenance || null;
+          }
+
+          const event = buildCorrectionEvent({
+            jobId,
+            pageId,
+            candidateIndex: entryIndex,
+            rowIndex: entryIndex,
+            recordType: record_type || 'baptism',
+            templateId,
+            userId: userEmail,
+            fieldName,
+            beforeValue: before,
+            afterValue: after,
+            editSource: 'autosave' as const,
+            scoringField,
+            provenanceField: provField,
+          });
+
+          if (appendCorrection(logPath, event)) logged++;
+        }
+
+        if (logged > 0) {
+          console.log(`[OCR Correction] Logged ${logged} field correction(s) for job=${jobId} entry=${entryIndex}`);
+        }
+      }
+    } catch (corrErr: any) {
+      // Non-blocking: never fail the autosave due to correction logging
+      console.error('[OCR Correction] Error logging corrections:', corrErr.message);
+    }
 
     // Fetch the saved row
     const [saved]: any = await db.query(

@@ -9,7 +9,7 @@
  *   /apps/records/funeral/edit/:id?church_id={id}
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { useAuth } from '../../../context/AuthContext';
+import { getFuneralDateRestriction } from '../../../shared/lib/sacramentalDateRestrictions';
 
 interface FuneralRecordFormData {
   first_name: string;
@@ -60,6 +61,12 @@ const FuneralRecordEntryPage: React.FC = () => {
     priest_name: '',
     notes: ''
   });
+
+  // Date restriction check
+  const dateRestriction = useMemo(
+    () => getFuneralDateRestriction(formData.death_date, formData.burial_date),
+    [formData.death_date, formData.burial_date],
+  );
 
   // Load record data for edit mode
   useEffect(() => {
@@ -132,7 +139,13 @@ const FuneralRecordEntryPage: React.FC = () => {
       setError(`Please fill in the following required fields: ${missingFields.join(', ')}`);
       return;
     }
-    
+
+    // Funeral date restriction — burial before death is always blocked
+    if (dateRestriction?.severity === 'error') {
+      setError(dateRestriction.message);
+      return;
+    }
+
     setSaving(true);
     setError(null);
     setSuccess(false);
@@ -263,9 +276,15 @@ const FuneralRecordEntryPage: React.FC = () => {
                 type="date"
                 value={formData.burial_date}
                 onChange={handleChange('burial_date')}
+                error={dateRestriction?.severity === 'error'}
                 InputLabelProps={{ shrink: true }}
                 margin="normal"
               />
+              {dateRestriction && (
+                <Alert severity={dateRestriction.severity} sx={{ mt: 0.5 }}>
+                  {dateRestriction.message}
+                </Alert>
+              )}
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField

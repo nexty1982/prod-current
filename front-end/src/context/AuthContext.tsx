@@ -148,9 +148,9 @@ function AuthProvider({ children }: AuthProviderProps) {
       console.log('🔑 AuthContext: Setting user data after successful login and session verification');
       setUser(userData);
       
-      // Store access token if available
-      if (response.token) {
-        localStorage.setItem('access_token', response.token);
+      // Store access token if available (authService already stores it, but ensure it's set)
+      if ((response as any).access_token) {
+        localStorage.setItem('access_token', (response as any).access_token);
       }
 
       return { redirectUrl: (response as any).redirectUrl };

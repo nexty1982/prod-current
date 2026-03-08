@@ -781,7 +781,17 @@ const ChurchPortalHub: React.FC = () => {
 
       {/* ── Eastern Orthodox Church Records ── */}
       <Box sx={{ mb: 5 }}>
-        <SectionHeading>Eastern Orthodox Church Records</SectionHeading>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <SectionHeading>Eastern Orthodox Church Records</SectionHeading>
+          <Button
+            size="small"
+            onClick={() => navigate('/portal/records')}
+            endIcon={<IconArrowRight size={16} />}
+            sx={{ textTransform: 'none', fontWeight: 600, color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
+          >
+            Records Hub
+          </Button>
+        </Box>
         {churchName && (
           <Typography
             variant="h6"

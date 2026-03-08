@@ -15,12 +15,15 @@ import {
     CloudUpload as CloudUploadIcon,
     SmartToy as AgentIcon,
     Check as CheckIcon,
+    CheckBoxOutlineBlank as CheckBoxBlankIcon,
+    CheckBox as CheckBoxIcon,
     Delete as DeleteIcon,
     Edit as EditIcon,
     Email as EmailIcon,
     ExpandMore as ExpandMoreIcon,
     Flag as FlagIcon,
     History as HistoryIcon,
+    Inventory2 as PackageIcon,
     OpenInNew as OpenInNewIcon,
     PlayArrow as PlayArrowIcon,
     Refresh as RefreshIcon,
@@ -64,9 +67,17 @@ import {
     useTheme,
 } from '@mui/material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { apiClient } from '@/shared/lib/apiClient';
 
 // ─── Types ──────────────────────────────────────────────────────────
+
+interface ChangeSetMembership {
+  change_set_id: number;
+  code: string;
+  title: string;
+  status: string;
+}
 
 interface DailyItem {
   id: number;
@@ -92,6 +103,7 @@ interface DailyItem {
   branch_type?: string | null;
   github_branch?: string | null;
   conversation_ref?: string | null;
+  change_set?: ChangeSetMembership | null;
 }
 
 interface GitHubSyncStatus {
@@ -273,6 +285,95 @@ const OMDailyPage: React.FC = () => {
   // Build info state
   const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null);
   const [pushing, setPushing] = useState(false);
+
+  // Multi-select & change set state
+  const navigate = useNavigate();
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [csDialogOpen, setCsDialogOpen] = useState(false);
+  const [csDialogMode, setCsDialogMode] = useState<'create' | 'add'>('create');
+  const [csNewTitle, setCsNewTitle] = useState('');
+  const [csNewBranch, setCsNewBranch] = useState('');
+  const [csNewPriority, setCsNewPriority] = useState('medium');
+  const [csNewType, setCsNewType] = useState('feature');
+  const [csNewStrategy, setCsNewStrategy] = useState('stage_then_promote');
+  const [csExistingList, setCsExistingList] = useState<{ id: number; code: string; title: string; status: string }[]>([]);
+  const [csSelectedId, setCsSelectedId] = useState<number | null>(null);
+  const [csCreating, setCsCreating] = useState(false);
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const selectAll = () => {
+    const eligible = items.filter(i => !i.change_set);
+    if (eligible.every(i => selectedIds.has(i.id))) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(eligible.map(i => i.id)));
+    }
+  };
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const openCreateCsDialog = () => {
+    setCsDialogMode('create');
+    setCsNewTitle('');
+    setCsNewBranch('');
+    setCsNewPriority('medium');
+    setCsNewType('feature');
+    setCsNewStrategy('stage_then_promote');
+    setCsDialogOpen(true);
+  };
+
+  const openAddToCsDialog = async () => {
+    setCsDialogMode('add');
+    setCsSelectedId(null);
+    try {
+      const res = await apiClient.get('/admin/change-sets', { params: { status: 'draft,active' } });
+      setCsExistingList(res.data.items || []);
+    } catch { setCsExistingList([]); }
+    setCsDialogOpen(true);
+  };
+
+  const handleCsAction = async () => {
+    if (selectedIds.size === 0) return;
+    setCsCreating(true);
+    try {
+      if (csDialogMode === 'create') {
+        // Create change set then add items
+        const res = await apiClient.post('/admin/change-sets', {
+          title: csNewTitle.trim(),
+          change_type: csNewType,
+          priority: csNewPriority,
+          git_branch: csNewBranch.trim() || undefined,
+          deployment_strategy: csNewStrategy,
+        });
+        const csId = res.data.change_set.id;
+        for (const itemId of selectedIds) {
+          await apiClient.post(`/admin/change-sets/${csId}/items`, { om_daily_item_id: itemId });
+        }
+        showToast(`Created ${res.data.change_set.code} with ${selectedIds.size} items`);
+        setCsDialogOpen(false);
+        clearSelection();
+        navigate(`/devel-tools/change-sets/${csId}`);
+      } else {
+        if (!csSelectedId) return;
+        for (const itemId of selectedIds) {
+          await apiClient.post(`/admin/change-sets/${csSelectedId}/items`, { om_daily_item_id: itemId });
+        }
+        showToast(`Added ${selectedIds.size} items to change set`);
+        setCsDialogOpen(false);
+        clearSelection();
+        fetchItems(activeTab > 0 ? HORIZONS[activeTab - 1] : undefined);
+      }
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed', 'error');
+    } finally {
+      setCsCreating(false);
+    }
+  };
 
   const BCrumb = [
     { to: '/', title: 'Home' },
@@ -984,6 +1085,25 @@ const OMDailyPage: React.FC = () => {
         </Box>
       </Paper>
 
+      {/* Multi-select action bar */}
+      {selectedIds.size > 0 && (
+        <Paper sx={{ p: 1.5, mb: 2, display: 'flex', alignItems: 'center', gap: 1.5, bgcolor: alpha(theme.palette.primary.main, 0.06), border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` }}>
+          <Typography variant="body2" fontWeight={600} sx={{ ml: 1 }}>
+            {selectedIds.size} item{selectedIds.size > 1 ? 's' : ''} selected
+          </Typography>
+          <Box sx={{ flex: 1 }} />
+          <Button size="small" variant="contained" startIcon={<PackageIcon />} onClick={openCreateCsDialog}>
+            Create Change Set
+          </Button>
+          <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={openAddToCsDialog}>
+            Add to Existing
+          </Button>
+          <Button size="small" color="inherit" onClick={clearSelection}>
+            Clear
+          </Button>
+        </Paper>
+      )}
+
       {/* Items */}
       {items.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
@@ -991,21 +1111,45 @@ const OMDailyPage: React.FC = () => {
         </Paper>
       ) : (
         <Paper>
+          {/* Select all header */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 0.75, borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`, bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}>
+            <IconButton size="small" onClick={selectAll} sx={{ p: 0.5 }}>
+              {items.filter(i => !i.change_set).length > 0 && items.filter(i => !i.change_set).every(i => selectedIds.has(i.id))
+                ? <CheckBoxIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                : <CheckBoxBlankIcon sx={{ fontSize: 18, color: 'text.disabled' }} />}
+            </IconButton>
+            <Typography variant="caption" color="text.secondary">{items.length} items</Typography>
+          </Box>
           {items.map(item => {
             const isOverdue = item.due_date && item.status !== 'done' && item.status !== 'cancelled' && new Date(item.due_date) < new Date(new Date().toDateString());
             const isItemExpanded = expandedItem === item.id;
+            const isSelected = selectedIds.has(item.id);
+            const hasCsAssignment = !!item.change_set;
             return (
               <Box key={item.id}>
                 <Box
                   sx={{
                     display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.5,
                     borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`,
-                    bgcolor: isOverdue ? alpha('#f44336', 0.04) : item.status === 'done' ? alpha('#4caf50', 0.03) : 'transparent',
-                    '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.04) },
+                    bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.08) : isOverdue ? alpha('#f44336', 0.04) : item.status === 'done' ? alpha('#4caf50', 0.03) : 'transparent',
+                    '&:hover': { bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.primary.main, 0.04) },
                     cursor: item.description ? 'pointer' : 'default',
                   }}
                   onClick={() => item.description && setExpandedItem(isItemExpanded ? null : item.id)}
                 >
+                  {/* Multi-select checkbox */}
+                  <IconButton size="small" sx={{ p: 0.5 }} onClick={(e) => { e.stopPropagation(); if (!hasCsAssignment) toggleSelect(item.id); }}>
+                    {hasCsAssignment ? (
+                      <Tooltip title={`In ${item.change_set!.code}: ${item.change_set!.title}`}>
+                        <PackageIcon sx={{ fontSize: 18, color: '#9c27b0' }} />
+                      </Tooltip>
+                    ) : isSelected ? (
+                      <CheckBoxIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                    ) : (
+                      <CheckBoxBlankIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
+                    )}
+                  </IconButton>
+
                   {/* Quick status toggle */}
                   {item.status !== 'done' && item.status !== 'cancelled' ? (
                     <IconButton size="small" color="success" onClick={(e) => { e.stopPropagation(); handleStatusChange(item, 'done'); }}>
@@ -1038,6 +1182,16 @@ const OMDailyPage: React.FC = () => {
 
                   {/* Meta chips */}
                   <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
+                    {item.change_set && (
+                      <Tooltip title={`${item.change_set.code}: ${item.change_set.title} (${item.change_set.status})`}>
+                        <Chip size="small" icon={<PackageIcon sx={{ fontSize: '14px !important' }} />}
+                          label={item.change_set.code}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/devel-tools/change-sets/${item.change_set!.change_set_id}`); }}
+                          clickable
+                          sx={{ fontSize: '0.65rem', height: 20, bgcolor: alpha('#9c27b0', 0.1), color: '#9c27b0', fontWeight: 600, fontFamily: 'monospace' }}
+                        />
+                      </Tooltip>
+                    )}
                     {item.agent_tool && renderAgentChip(item.agent_tool)}
                     {item.branch_type && (
                       <Tooltip title={`Branch Type: ${BRANCH_TYPE_LABELS[item.branch_type] || item.branch_type}`}>
@@ -1411,6 +1565,79 @@ const OMDailyPage: React.FC = () => {
       <Snackbar open={toast.open} autoHideDuration={3000} onClose={() => setToast(prev => ({ ...prev, open: false }))}>
         <Alert severity={toast.severity} onClose={() => setToast(prev => ({ ...prev, open: false }))}>{toast.message}</Alert>
       </Snackbar>
+
+      {/* ── Change Set Dialog ─────────────────────────────────────────── */}
+      <Dialog open={csDialogOpen} onClose={() => setCsDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          {csDialogMode === 'create' ? 'Create Change Set from Selection' : 'Add Selection to Change Set'}
+        </DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
+          <Alert severity="info" sx={{ mb: 1 }}>
+            {selectedIds.size} item{selectedIds.size > 1 ? 's' : ''} selected
+          </Alert>
+
+          {csDialogMode === 'create' ? (
+            <>
+              <TextField label="Title" value={csNewTitle} onChange={(e) => setCsNewTitle(e.target.value)} fullWidth required autoFocus placeholder="e.g. Portal Q1 Polish" />
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Type</InputLabel>
+                  <Select value={csNewType} label="Type" onChange={(e) => setCsNewType(e.target.value)}>
+                    <MenuItem value="feature">Feature</MenuItem>
+                    <MenuItem value="bugfix">Bugfix</MenuItem>
+                    <MenuItem value="hotfix">Hotfix</MenuItem>
+                    <MenuItem value="refactor">Refactor</MenuItem>
+                    <MenuItem value="infra">Infra</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Priority</InputLabel>
+                  <Select value={csNewPriority} label="Priority" onChange={(e) => setCsNewPriority(e.target.value)}>
+                    <MenuItem value="critical">Critical</MenuItem>
+                    <MenuItem value="high">High</MenuItem>
+                    <MenuItem value="medium">Medium</MenuItem>
+                    <MenuItem value="low">Low</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+              <TextField label="Git Branch (optional)" value={csNewBranch} onChange={(e) => setCsNewBranch(e.target.value)} fullWidth size="small" placeholder="feature/username/2026-03-08/description" />
+              <FormControl fullWidth size="small">
+                <InputLabel>Deployment Strategy</InputLabel>
+                <Select value={csNewStrategy} label="Deployment Strategy" onChange={(e) => setCsNewStrategy(e.target.value)}>
+                  <MenuItem value="stage_then_promote">Stage then Promote</MenuItem>
+                  <MenuItem value="hotfix_direct">Hotfix Direct</MenuItem>
+                </Select>
+              </FormControl>
+            </>
+          ) : (
+            <FormControl fullWidth>
+              <InputLabel>Change Set</InputLabel>
+              <Select value={csSelectedId || ''} label="Change Set" onChange={(e) => setCsSelectedId(Number(e.target.value))}>
+                {csExistingList.map(cs => (
+                  <MenuItem key={cs.id} value={cs.id}>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <Typography sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{cs.code}</Typography>
+                      <Typography variant="body2">{cs.title}</Typography>
+                      <Chip size="small" label={cs.status} sx={{ fontSize: '0.6rem', height: 16 }} />
+                    </Box>
+                  </MenuItem>
+                ))}
+                {csExistingList.length === 0 && <MenuItem disabled>No draft/active change sets</MenuItem>}
+              </Select>
+            </FormControl>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCsDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleCsAction}
+            disabled={csCreating || (csDialogMode === 'create' && !csNewTitle.trim()) || (csDialogMode === 'add' && !csSelectedId)}
+          >
+            {csCreating ? 'Processing...' : csDialogMode === 'create' ? 'Create & Add Items' : 'Add Items'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </PageContainer>
   );
 };

@@ -33,9 +33,10 @@ interface WorkbenchHeaderProps {
   onNext?: () => void;
   hasPrev?: boolean;
   hasNext?: boolean;
+  templateId?: string | number | null;
 }
 
-const WorkbenchHeader: React.FC<WorkbenchHeaderProps> = ({ job, onClose, onPrev, onNext, hasPrev, hasNext }) => {
+const WorkbenchHeader: React.FC<WorkbenchHeaderProps> = ({ job, onClose, onPrev, onNext, hasPrev, hasNext, templateId }) => {
   const theme = useTheme();
   
   const jobFilename = job?.original_filename || job?.originalFilename || job?.filename || 'Unknown';
@@ -118,6 +119,16 @@ const WorkbenchHeader: React.FC<WorkbenchHeaderProps> = ({ job, onClose, onPrev,
               label={`${Math.round(jobConfidence * 100)}% confidence`}
               color={getConfidenceColor(jobConfidence)}
             />
+          )}
+          {templateId && (
+            <Tooltip title={`Template ID: ${templateId}`}>
+              <Chip
+                size="small"
+                label="Template Locked"
+                color="secondary"
+                variant="outlined"
+              />
+            </Tooltip>
           )}
         </Stack>
         

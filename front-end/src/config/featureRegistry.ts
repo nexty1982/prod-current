@@ -52,10 +52,14 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'certificates', name: 'Certificate Generator', stage: 5, route: '/apps/certificates/generate' },
   { id: 'user-guide', name: 'User Guide', stage: 5, route: '/help/user-guide', description: 'Documentation knowledge base for all users', since: '2026-02-21' },
   { id: 'church-portal', name: 'Church Portal', stage: 5, route: '/portal', description: 'Hub for church staff', since: '2026-02-26' },
+  { id: 'portal-records', name: 'Portal Records Hub', stage: 5, route: '/portal/records', description: 'Unified records hub with onboarding flow', since: '2026-03-07' },
 
   // ── Stage 4: Stabilizing ───────────────────────────────────
+  { id: 'church-onboarding', name: 'Church Onboarding Pipeline', stage: 4, route: '/admin/control-panel/church-onboarding', description: 'Token-based church registration pipeline with onboarding tracking', since: '2026-03-07' },
+  { id: 'church-onboarding-detail', name: 'Church Onboarding Detail', stage: 4, route: '/admin/control-panel/church-onboarding/:churchId', description: 'Per-church onboarding detail view with members and tokens', since: '2026-03-07' },
+  { id: 'pending-members', name: 'Pending Members', stage: 4, route: '/admin/control-panel/pending-members', description: 'Review and approve users who registered via church token', since: '2026-03-07' },
   { id: 'upload-records', name: 'Upload Records', stage: 4, route: '/apps/upload-records', description: 'Simplified OCR upload for church staff', since: '2026-02-26' },
-  { id: 'ocr-studio', name: 'OCR Studio', stage: 4, route: '/devel/ocr-studio', since: '2026-02-01' },
+  { id: 'ocr-studio', name: 'OCR Studio', stage: 5, route: '/portal/ocr', since: '2026-02-01' },
   { id: 'interactive-reports', name: 'Interactive Reports', stage: 4, route: '/apps/records/interactive-reports', since: '2026-02-01' },
   { id: 'interactive-report-jobs', name: 'Interactive Report Jobs', stage: 4, route: '/devel-tools/interactive-reports/jobs', since: '2026-02-01' },
 
@@ -64,11 +68,13 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
 
   // ── Stage 2: Development ───────────────────────────────────
   { id: 'om-charts', name: 'OM Charts', stage: 2, route: '/apps/om-charts', description: 'Graphical charts from church sacramental records', since: '2026-02-18' },
+  { id: 'sacramental-restrictions', name: 'Sacramental Date Restrictions', stage: 2, route: '/admin/control-panel/church-management/sacramental-restrictions', description: 'Calendar viewer for Orthodox sacramental date restrictions', since: '2026-02-28' },
   { id: 'marriage-records-v2', name: 'Marriage Records', stage: 2, route: '/apps/records/marriage', since: '2026-02-01' },
   { id: 'enhanced-ocr-uploader', name: 'Enhanced OCR Uploader', stage: 2, route: '/devel/ocr-studio/upload', since: '2026-01-15' },
   { id: 'dynamic-records-inspector', name: 'Dynamic Records Inspector', stage: 2, route: '/devel/dynamic-records', since: '2026-01-20' },
   { id: 'crm', name: 'CRM', stage: 2, route: '/devel-tools/crm', since: '2026-02-01' },
   { id: 'tutorial-management', name: 'Tutorial Management', stage: 2, route: '/admin/tutorials', description: 'Super admin tutorial/welcome system management', since: '2026-02-21' },
+  { id: 'change-sets', name: 'Change Sets', stage: 3, route: '/devel-tools/change-sets', description: 'SDLC delivery container for grouping, staging, reviewing, and promoting work items', since: '2026-03-08' },
 
   // ── Stage 1: Prototype ─────────────────────────────────────
   { id: 'us-church-map', name: 'US Church Map', stage: 1, route: '/devel-tools/us-church-map', since: '2026-02-01' },
@@ -76,6 +82,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'berry-crm-leads', name: 'Berry CRM Leads', stage: 1, route: '/berry/crm/leads', since: '2026-02-17' },
   { id: 'berry-crm-contacts', name: 'Berry CRM Contacts', stage: 1, route: '/berry/crm/contacts', since: '2026-02-17' },
   { id: 'berry-crm-sales', name: 'Berry CRM Sales', stage: 1, route: '/berry/crm/sales', since: '2026-02-17' },
+  { id: 'liturgical-calendar', name: 'Liturgical Calendar', stage: 5, route: '/apps/liturgical-calendar', description: 'Eastern Orthodox liturgical calendar with auto-theme', since: '2026-02-27' },
   { id: 'berry-calendar', name: 'Berry Calendar', stage: 1, route: '/berry/calendar', since: '2026-02-17' },
   { id: 'berry-map', name: 'Berry Map', stage: 1, route: '/berry/map', since: '2026-02-17' },
   { id: 'berry-cards', name: 'Berry Card Gallery', stage: 1, route: '/berry/cards', since: '2026-02-17' },

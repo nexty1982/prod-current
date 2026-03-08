@@ -346,6 +346,7 @@ function createRouters(upload: any) {
             let structuredArtifactId: number | null = null;
             let recordCandidates: any = null;
             let tableExtractionJson: any = null;
+            let scoringV2: any = null;
             let meta: any = null;
             let sourceImagePath: string | null = null;
 
@@ -388,6 +389,15 @@ function createRouters(upload: any) {
                     : null;
                 } catch (_) {}
               }
+              if (art.type === 'scoring_v2' && !scoringV2) {
+                try {
+                  if (art.storage_path && fs.existsSync(art.storage_path)) {
+                    scoringV2 = JSON.parse(fs.readFileSync(art.storage_path, 'utf8'));
+                  } else if (art.json_blob) {
+                    scoringV2 = typeof art.json_blob === 'string' ? JSON.parse(art.json_blob) : art.json_blob;
+                  }
+                } catch (_) {}
+              }
               if (art.type === 'source_image' && !sourceImagePath) {
                 sourceImagePath = art.storage_path || null;
               }
@@ -412,6 +422,7 @@ function createRouters(upload: any) {
               rawTextArtifactId: bestArtifactId || rawTextArtifactId,
               recordCandidates,
               tableExtractionJson,
+              scoringV2,
               meta,
               ocrConfidence: page.ocr_confidence,
               status: page.status,
@@ -530,6 +541,240 @@ function createRouters(upload: any) {
     } catch (error: any) {
       console.error('[OCR Image] Error:', error);
       res.status(500).json({ error: 'Failed to serve image' });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // 4b. GET /jobs/:jobId/record-crop/:recordIndex — Serve per-record crop image
+  // -----------------------------------------------------------------------
+  churchJobsRouter.get('/jobs/:jobId/record-crop/:recordIndex', async (req: any, res: any) => {
+    try {
+      const jobId = parseInt(req.params.jobId);
+      const recordIndex = parseInt(req.params.recordIndex);
+      const pageIndex = parseInt(req.query.page as string) || 0;
+
+      const pageDir = path.resolve(__dirname, '../../storage/feeder', `job_${jobId}`, `page_${pageIndex}`);
+      const cropPath = path.join(pageDir, `record_${recordIndex}.png`);
+
+      if (!fs.existsSync(cropPath)) {
+        return res.status(404).json({ error: 'Record crop not found' });
+      }
+
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      fs.createReadStream(cropPath).pipe(res);
+    } catch (error: any) {
+      console.error('[OCR RecordCrop] Error:', error);
+      res.status(500).json({ error: 'Failed to serve record crop' });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // 4c. GET /jobs/:jobId/debug — Debug endpoint for pipeline artifacts
+  // -----------------------------------------------------------------------
+  churchJobsRouter.get('/jobs/:jobId/debug', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const pageIndex = parseInt(req.query.page as string) || 0;
+
+      // Require super_admin or admin role
+      if (!req.session?.user || !['super_admin', 'admin'].includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Insufficient permissions' });
+      }
+
+      const pageDir = path.resolve(__dirname, '../../storage/feeder', `job_${jobId}`, `page_${pageIndex}`);
+      if (!fs.existsSync(pageDir)) {
+        return res.status(404).json({ error: 'Page directory not found' });
+      }
+
+      const debug: any = { jobId, pageIndex, pageDir, artifacts: {} };
+
+      // Load each artifact if it exists
+      const artifactFiles: Record<string, string> = {
+        vision_result: 'vision_result.json',
+        table_extraction: 'table_extraction.json',
+        record_candidates: 'record_candidates.json',
+        header_metrics: 'header_metrics.json',
+        record_crops_manifest: 'record_crops_manifest.json',
+        metrics: 'metrics.json',
+        deskew_geometry: 'deskew_geometry.json',
+        border_geometry: 'border_geometry.json',
+        roi_geometry: 'roi_geometry.json',
+        scoring_v2: 'scoring_v2.json',
+        tokens_normalized: 'tokens_normalized.json',
+        table_provenance: 'table_provenance.json',
+      };
+
+      for (const [key, filename] of Object.entries(artifactFiles)) {
+        const filePath = path.join(pageDir, filename);
+        if (fs.existsSync(filePath)) {
+          try {
+            debug.artifacts[key] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+          } catch {
+            debug.artifacts[key] = { error: 'Failed to parse' };
+          }
+        }
+      }
+
+      // Add canonical dims info from vision result
+      if (debug.artifacts.vision_result?.pages?.[0]) {
+        const vp = debug.artifacts.vision_result.pages[0];
+        debug.canonicalDims = { width: vp.width, height: vp.height };
+      }
+
+      // List per-record crop files
+      const recordCrops: string[] = [];
+      try {
+        const files = fs.readdirSync(pageDir);
+        for (const f of files) {
+          if (f.match(/^record_\d+\.(png|ocr\.json|extract\.json)$/)) {
+            recordCrops.push(f);
+          }
+        }
+      } catch {}
+      debug.recordCropFiles = recordCrops;
+
+      res.json(debug);
+    } catch (error: any) {
+      console.error('[OCR Debug] Error:', error);
+      res.status(500).json({ error: 'Failed to load debug info' });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // 4d. POST /jobs/:jobId/replay — Re-run extraction from stored artifacts
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/replay', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const pageIndex = parseInt(req.query.page as string) || 0;
+
+      // Require super_admin
+      if (!req.session?.user || req.session.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'super_admin required' });
+      }
+
+      const pageDir = path.resolve(__dirname, '../../storage/feeder', `job_${jobId}`, `page_${pageIndex}`);
+      const visionPath = path.join(pageDir, 'vision_result.json');
+
+      if (!fs.existsSync(visionPath)) {
+        return res.status(404).json({ error: 'No vision_result.json found — cannot replay without Vision data' });
+      }
+
+      // Re-read vision result and apply canonical dims override
+      const visionResultJson = JSON.parse(fs.readFileSync(visionPath, 'utf8'));
+
+      // Find preprocessed image to get canonical dims
+      const preprocPath = path.join(pageDir, '..', 'preprocessed.jpg');
+      const altPreprocPath = path.join(pageDir, 'preprocessed.jpg');
+      let imagePath = fs.existsSync(preprocPath) ? preprocPath : (fs.existsSync(altPreprocPath) ? altPreprocPath : null);
+
+      // Try to find preprocessed image from page DB record
+      if (!imagePath) {
+        const { resolveChurchDb: rcd } = require('./helpers');
+        const pool = rcd(churchId);
+        const [pages] = await pool.execute(
+          `SELECT preproc_path, input_path FROM ocr_feeder_pages WHERE job_id = ? AND page_index = ? LIMIT 1`,
+          [jobId, pageIndex]
+        );
+        if ((pages as any[]).length > 0) {
+          const pp = (pages as any[])[0];
+          imagePath = pp.preproc_path || pp.input_path;
+        }
+      }
+
+      if (imagePath && fs.existsSync(imagePath)) {
+        const { getCanonicalDims, overrideVisionDims } = require('../../ocr/preprocessing/canonicalDims');
+        const canonical = await getCanonicalDims(imagePath);
+        const overridden = overrideVisionDims(visionResultJson, canonical);
+
+        // Save corrected vision result back to disk
+        if (overridden) {
+          fs.writeFileSync(visionPath, JSON.stringify(visionResultJson, null, 2));
+          console.log(`[OCR Replay] Job ${jobId} page ${pageIndex}: Corrected vision dims to ${canonical.width}x${canonical.height}`);
+        }
+      }
+
+      // Re-run template extraction
+      const { selectTemplate, resolveTemplate, extractWithTemplate } = require('../../ocr/preprocessing/templateSpec');
+      const { extractGenericTable, autoDetectHeaderY, extractWordTokens, clusterIntoRows } = require('../../ocr/layouts/generic_table');
+      const { extractRecordCandidates } = require('../../ocr/columnMapper');
+
+      // Determine record type from job
+      const { getAppPool } = require('../../config/db');
+      const appPool = getAppPool();
+      const [jobRows] = await appPool.execute(
+        `SELECT record_type, extractor_id FROM ocr_jobs WHERE id = ?`, [jobId]
+      );
+      const recordType = (jobRows as any[])[0]?.record_type || 'baptism';
+      const extractorId = (jobRows as any[])[0]?.extractor_id;
+
+      let extractorRow = null;
+      if (extractorId) {
+        const [extRows] = await appPool.execute(`SELECT * FROM ocr_extractors WHERE id = ?`, [extractorId]);
+        if ((extRows as any[]).length > 0) extractorRow = (extRows as any[])[0];
+      }
+
+      // Template extraction
+      const templateMatchResult = selectTemplate(recordType, extractorRow);
+      const resolvedTemplate = resolveTemplate(templateMatchResult, extractorRow, recordType);
+
+      let tableExtractionResult;
+      if (resolvedTemplate) {
+        // Adaptive header detection
+        try {
+          const allTokens = extractWordTokens(visionResultJson, 0);
+          const textRows = clusterIntoRows(allTokens);
+          const detectedHeaderY = autoDetectHeaderY(textRows);
+          if (detectedHeaderY != null && detectedHeaderY > resolvedTemplate.headerCutNorm) {
+            resolvedTemplate.headerCutNorm = detectedHeaderY;
+          }
+        } catch {}
+
+        tableExtractionResult = extractWithTemplate(visionResultJson, resolvedTemplate, { pageIndex: 0 });
+      } else {
+        tableExtractionResult = extractGenericTable(visionResultJson, { pageIndex: 0 });
+      }
+
+      // Save updated table extraction
+      const tableExtPath = path.join(pageDir, 'table_extraction.json');
+      fs.writeFileSync(tableExtPath, JSON.stringify(tableExtractionResult, null, 2));
+
+      // Re-run record candidates extraction
+      let recordCandidates;
+      try {
+        recordCandidates = extractRecordCandidates(tableExtractionResult, recordType);
+      } catch {
+        recordCandidates = {
+          candidates: [],
+          detectedType: recordType,
+          typeConfidence: 0,
+          parsedAt: new Date().toISOString(),
+        };
+      }
+
+      const recordCandPath = path.join(pageDir, 'record_candidates.json');
+      fs.writeFileSync(recordCandPath, JSON.stringify(recordCandidates, null, 2));
+
+      res.json({
+        success: true,
+        jobId,
+        pageIndex,
+        tableExtraction: {
+          dataRows: tableExtractionResult.data_rows,
+          columnsDetected: tableExtractionResult.columns_detected,
+        },
+        recordCandidates: {
+          count: recordCandidates.candidates?.length || 0,
+          detectedType: recordCandidates.detectedType,
+        },
+        replayedAt: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      console.error('[OCR Replay] Error:', error);
+      res.status(500).json({ error: 'Replay failed', details: error.message });
     }
   });
 
@@ -659,6 +904,97 @@ function createRouters(upload: any) {
   });
 
   // -----------------------------------------------------------------------
+  // 6b. GET /jobs/:jobId/history — Job pipeline stage history
+  // -----------------------------------------------------------------------
+  churchJobsRouter.get('/jobs/:jobId/history', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+
+      // Verify job belongs to this church
+      const [jobs] = await promisePool.query(
+        'SELECT id FROM ocr_jobs WHERE id = ? AND church_id = ?',
+        [jobId, churchId]
+      );
+      if (!(jobs as any[]).length) {
+        return res.status(404).json({ error: 'Job not found' });
+      }
+
+      const [rows] = await promisePool.query(
+        `SELECT id, job_id, stage, status, message, duration_ms, created_at
+         FROM ocr_job_history WHERE job_id = ? ORDER BY created_at ASC`,
+        [jobId]
+      );
+
+      res.json({ history: rows });
+    } catch (error: any) {
+      console.error('[OCR Jobs] getJobHistory error:', error);
+      res.status(500).json({ error: 'Failed to fetch job history', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // 6c. POST /jobs/:jobId/resume — Resume a failed job from last completed stage
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/resume', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+
+      const [jobs] = await promisePool.query(
+        `SELECT id, status, current_stage, filename, church_id
+         FROM ocr_jobs WHERE id = ? AND church_id = ?`,
+        [jobId, churchId]
+      );
+      if (!(jobs as any[]).length) {
+        return res.status(404).json({ error: 'Job not found' });
+      }
+
+      const job = (jobs as any[])[0];
+      if (job.status !== 'failed' && job.status !== 'error') {
+        return res.status(400).json({ error: `Cannot resume job with status '${job.status}'. Only failed jobs can be resumed.` });
+      }
+
+      // Find last completed stage from history
+      const PIPELINE_STAGES = ['intake', 'preprocessing', 'ocr_processing', 'extracting', 'validating', 'committing'];
+      const [historyRows] = await promisePool.query(
+        `SELECT stage FROM ocr_job_history
+         WHERE job_id = ? AND status = 'completed'
+         ORDER BY created_at DESC LIMIT 1`,
+        [jobId]
+      );
+
+      const lastCompletedStage = (historyRows as any[]).length > 0 ? (historyRows as any[])[0].stage : null;
+      const resumeFromIndex = lastCompletedStage ? PIPELINE_STAGES.indexOf(lastCompletedStage) + 1 : 0;
+      const resumeStage = PIPELINE_STAGES[resumeFromIndex] || 'intake';
+
+      const resumeToken = crypto.randomBytes(16).toString('hex');
+
+      await promisePool.query(
+        `UPDATE ocr_jobs SET
+          status = 'pending',
+          current_stage = ?,
+          resume_token = ?,
+          error_regions = NULL,
+          last_activity_at = NOW()
+         WHERE id = ?`,
+        [resumeStage, resumeToken, jobId]
+      );
+
+      console.log(`[OCR Jobs] Job ${churchId}/${jobId} resumed from stage '${resumeStage}'`);
+      res.json({
+        success: true,
+        message: `Job resumed from '${resumeStage}'`,
+        resumeStage,
+        resumeToken
+      });
+    } catch (error: any) {
+      console.error('[OCR Jobs] resumeJob error:', error);
+      res.status(500).json({ error: 'Failed to resume job', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // 7. DELETE /jobs — Bulk delete jobs
   // -----------------------------------------------------------------------
   churchJobsRouter.delete('/jobs', async (req: any, res: any) => {
@@ -674,15 +1010,18 @@ function createRouters(upload: any) {
       if (!resolved) {
         return res.status(404).json({ error: 'Church not found' });
       }
-      const { db } = resolved;
+      const { db: tenantDb } = resolved;
 
       const fsPromises = require('fs').promises;
-
-      // Get filenames before deleting
       const placeholders = jobIds.map(() => '?').join(',');
-      const [jobs] = await db.query(`SELECT id, filename, church_id FROM ocr_jobs WHERE id IN (${placeholders})`, jobIds);
 
-      // Delete files from disk
+      // Get filenames from PLATFORM DB (that's where jobs are listed from)
+      const [jobs] = await promisePool.query(
+        `SELECT id, filename, church_id FROM ocr_jobs WHERE id IN (${placeholders}) AND church_id = ?`,
+        [...jobIds, churchId]
+      );
+
+      // Delete uploaded files from disk
       const UPLOADS_ROOT = '/var/www/orthodoxmetrics/prod/uploads';
       for (const job of (jobs as any[])) {
         if (job.filename) {
@@ -706,18 +1045,80 @@ function createRouters(upload: any) {
             // File may not exist
           }
         }
+
+        // Delete feeder storage directory (server/storage/feeder/job_{id}/)
+        try {
+          const storageDir = path.resolve(__dirname, '../../storage/feeder', `job_${job.id}`);
+          if (fs.existsSync(storageDir)) {
+            await fsPromises.rm(storageDir, { recursive: true, force: true });
+          }
+        } catch (e) {
+          // Non-blocking
+        }
       }
 
-      // Delete from database
-      await db.query(`DELETE FROM ocr_jobs WHERE id IN (${placeholders})`, jobIds);
+      // Delete from PLATFORM DB (where GET /jobs reads from)
+      await promisePool.query(
+        `DELETE FROM ocr_jobs WHERE id IN (${placeholders}) AND church_id = ?`,
+        [...jobIds, churchId]
+      );
 
-      // Also delete any mappings
+      // Delete from platform ocr_job_history
       try {
-        await db.query(`DELETE FROM ocr_mappings WHERE ocr_job_id IN (${placeholders})`, jobIds);
+        await promisePool.query(
+          `DELETE FROM ocr_job_history WHERE job_id IN (${placeholders})`,
+          jobIds
+        );
+      } catch (e) {
+        // Table may not exist or no rows
+      }
+
+      // Delete feeder data from TENANT DB
+      try {
+        // Get page IDs for these jobs
+        const [pages] = await tenantDb.query(
+          `SELECT id FROM ocr_feeder_pages WHERE job_id IN (${placeholders})`,
+          jobIds
+        );
+        const pageIds = (pages as any[]).map((p: any) => p.id);
+
+        if (pageIds.length > 0) {
+          const pagePlaceholders = pageIds.map(() => '?').join(',');
+          await tenantDb.query(
+            `DELETE FROM ocr_feeder_artifacts WHERE page_id IN (${pagePlaceholders})`,
+            pageIds
+          );
+          await tenantDb.query(
+            `DELETE FROM ocr_feeder_pages WHERE id IN (${pagePlaceholders})`,
+            pageIds
+          );
+        }
+      } catch (e) {
+        // Tables may not exist
+      }
+
+      // Delete from tenant ocr_jobs (if it exists there too)
+      try {
+        await tenantDb.query(`DELETE FROM ocr_jobs WHERE id IN (${placeholders})`, jobIds);
+      } catch (e) {
+        // May not exist in tenant DB
+      }
+
+      // Delete tenant mappings
+      try {
+        await tenantDb.query(`DELETE FROM ocr_mappings WHERE ocr_job_id IN (${placeholders})`, jobIds);
       } catch (e) {
         // Table may not exist
       }
 
+      // Delete tenant draft records
+      try {
+        await tenantDb.query(`DELETE FROM ocr_draft_records WHERE job_id IN (${placeholders})`, jobIds);
+      } catch (e) {
+        // Table may not exist
+      }
+
+      console.log(`[OCR Delete] Deleted ${jobIds.length} jobs for church ${churchId}: [${jobIds.join(', ')}]`);
       res.json({ success: true, deleted: jobIds.length });
     } catch (error: any) {
       console.error('[OCR Bulk Delete] Error:', error);
@@ -915,6 +1316,687 @@ function createRouters(upload: any) {
     } catch (error: any) {
       console.error('[OCR Finalize-Batch] Error:', error);
       res.status(500).json({ error: 'Batch finalize failed', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // POST /jobs/:jobId/autocommit — Partial auto-commit of eligible rows
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/autocommit', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const { forceIndices, thresholdOverrides } = req.body || {};
+
+      console.log(`[OCR Autocommit] POST /api/church/${churchId}/ocr/jobs/${jobId}/autocommit`);
+
+      const resolved = await resolveChurchDb(churchId);
+      if (!resolved) return res.status(404).json({ error: 'Church not found' });
+      const { db: tenantPool } = resolved;
+
+      const userEmail = req.session?.user?.email || req.user?.email || 'system';
+
+      // 1. Locate feeder page for this job
+      const [pageRows] = await tenantPool.query(
+        `SELECT id, page_index, job_id FROM ocr_feeder_pages WHERE job_id = ? ORDER BY page_index ASC LIMIT 1`,
+        [jobId],
+      );
+      if (!pageRows.length) {
+        return res.status(404).json({ error: 'No feeder page found for this job' });
+      }
+      const page = pageRows[0];
+      const pageDir = path.join(__dirname, '../../../storage/feeder', `job_${jobId}`, `page_${page.page_index}`);
+
+      // 2. Load artifacts from disk
+      const loadJson = (filename: string): any => {
+        const p = path.join(pageDir, filename);
+        if (fs.existsSync(p)) {
+          try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; }
+        }
+        return null;
+      };
+
+      const scoringV2 = loadJson('scoring_v2.json');
+      const recordCandidates = loadJson('record_candidates.json');
+      const candProvenance = loadJson('record_candidates_provenance.json');
+      const metricsData = loadJson('metrics.json');
+
+      if (!recordCandidates?.candidates?.length) {
+        return res.status(400).json({ error: 'No record candidates found for this job' });
+      }
+
+      const recordType = recordCandidates.detectedType || 'unknown';
+      if (!['baptism', 'marriage', 'funeral'].includes(recordType)) {
+        return res.status(400).json({ error: `Cannot auto-commit: unsupported record type "${recordType}"` });
+      }
+
+      const structureScore = metricsData?.structure_score ?? null;
+      const templateUsed = !!(metricsData?.template_id || recordCandidates?.template_id);
+
+      // 3. Build artifact SHA256 refs
+      const sha256File = (filename: string): string | null => {
+        const p = path.join(pageDir, filename);
+        if (!fs.existsSync(p)) return null;
+        return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+      };
+      const artifactRefs: Record<string, string | null> = {
+        scoring_v2: sha256File('scoring_v2.json'),
+        record_candidates: sha256File('record_candidates.json'),
+        record_candidates_provenance: sha256File('record_candidates_provenance.json'),
+        metrics: sha256File('metrics.json'),
+      };
+
+      // 4. Build autocommit plan
+      // Import eligibility gate
+      const { buildAutocommitPlan, buildAutocommitResults } = require('../../ocr/preprocessing/autocommit');
+
+      const plan = buildAutocommitPlan(
+        scoringV2,
+        candProvenance,
+        structureScore,
+        templateUsed,
+        artifactRefs,
+        thresholdOverrides,
+      );
+
+      // Allow user-forced indices to override eligibility
+      const forceSet = new Set<number>(forceIndices || []);
+      const eligibleIndices = new Set<number>(plan.eligible_rows.map((r: any) => r.candidateIndex));
+
+      // Merge: eligible + forced
+      for (const fi of forceSet) {
+        if (!eligibleIndices.has(fi)) {
+          eligibleIndices.add(fi);
+          // Move from skipped to eligible in plan
+          const skippedIdx = plan.skipped_rows.findIndex((r: any) => r.candidateIndex === fi);
+          if (skippedIdx >= 0) {
+            const moved = plan.skipped_rows.splice(skippedIdx, 1)[0];
+            moved.reasons = ['USER_FORCED'];
+            plan.eligible_rows.push(moved);
+          }
+        }
+      }
+
+      plan.eligible_count = plan.eligible_rows.length;
+      plan.skipped_count = plan.skipped_rows.length;
+
+      // 5. Write autocommit_plan.json artifact (ALWAYS, before commit)
+      const planJson = JSON.stringify(plan, null, 2);
+      const planPath = path.join(pageDir, 'autocommit_plan.json');
+      const planTmp = planPath + '.tmp';
+      fs.writeFileSync(planTmp, planJson);
+      fs.renameSync(planTmp, planPath);
+
+      const planSha = crypto.createHash('sha256').update(planJson).digest('hex');
+      await tenantPool.query(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, sha256, bytes, mime_type, created_at)
+         VALUES (?, 'autocommit_plan', ?, ?, ?, 'application/json', NOW())`,
+        [page.id, planPath, planSha, Buffer.byteLength(planJson)],
+      );
+
+      // 6. Execute partial commit
+      const tableMap: Record<string, string> = {
+        baptism: 'baptism_records',
+        marriage: 'marriage_records',
+        funeral: 'funeral_records',
+      };
+      const table = tableMap[recordType];
+      const candidates: any[] = recordCandidates.candidates;
+
+      const rowResults: any[] = [];
+      const conn = await tenantPool.getConnection();
+
+      try {
+        await conn.beginTransaction();
+
+        for (let ci = 0; ci < candidates.length; ci++) {
+          if (!eligibleIndices.has(ci)) {
+            // Skip this row
+            rowResults.push({
+              candidateIndex: ci,
+              sourceRowIndex: candidates[ci].sourceRowIndex ?? -1,
+              outcome: 'skipped',
+              recordId: null,
+              recordType: null,
+              table: null,
+              error: null,
+            });
+            continue;
+          }
+
+          try {
+            const cand = candidates[ci];
+            const mapped = mapFieldsToDbColumns(recordType, cand.fields || {});
+            const { sql, params } = buildInsertQuery(table, churchId, mapped);
+            const [result] = await conn.query(sql, params);
+            rowResults.push({
+              candidateIndex: ci,
+              sourceRowIndex: cand.sourceRowIndex ?? -1,
+              outcome: 'committed',
+              recordId: result.insertId,
+              recordType,
+              table,
+              error: null,
+            });
+          } catch (rowErr: any) {
+            rowResults.push({
+              candidateIndex: ci,
+              sourceRowIndex: candidates[ci].sourceRowIndex ?? -1,
+              outcome: 'error',
+              recordId: null,
+              recordType,
+              table,
+              error: rowErr.message,
+            });
+          }
+        }
+
+        await conn.commit();
+      } catch (txErr: any) {
+        await conn.rollback();
+        throw txErr;
+      } finally {
+        conn.release();
+      }
+
+      // 7. Build and write autocommit_results.json
+      const results = buildAutocommitResults(plan.batch_id, jobId, churchId, rowResults);
+      const resultsJson = JSON.stringify(results, null, 2);
+      const resultsPath = path.join(pageDir, 'autocommit_results.json');
+      const resultsTmp = resultsPath + '.tmp';
+      fs.writeFileSync(resultsTmp, resultsJson);
+      fs.renameSync(resultsTmp, resultsPath);
+
+      const resultsSha = crypto.createHash('sha256').update(resultsJson).digest('hex');
+      await tenantPool.query(
+        `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, sha256, bytes, mime_type, created_at)
+         VALUES (?, 'autocommit_results', ?, ?, ?, 'application/json', NOW())`,
+        [page.id, resultsPath, resultsSha, Buffer.byteLength(resultsJson)],
+      );
+
+      // 8. Update ocr_jobs finalization metadata (non-blocking)
+      const committedRows = rowResults.filter((r: any) => r.outcome === 'committed');
+      if (committedRows.length > 0) {
+        const finalizeMeta = {
+          finalizedAt: new Date().toISOString(),
+          finalizedBy: userEmail,
+          method: 'autocommit_v1',
+          batch_id: plan.batch_id,
+          batchSize: committedRows.length,
+          totalCandidates: candidates.length,
+          records: committedRows.map((r: any) => ({ recordId: r.recordId, recordType: r.recordType })),
+          skippedCount: results.skipped_count,
+        };
+        try {
+          await promisePool.query(
+            `UPDATE ocr_jobs SET ocr_result = ? WHERE id = ? AND church_id = ?`,
+            [JSON.stringify(finalizeMeta), jobId, churchId],
+          );
+        } catch (_: any) { /* non-blocking */ }
+      }
+
+      // 9. Append to audit history (ocr_job_history in platform DB)
+      try {
+        await promisePool.query(
+          `INSERT INTO ocr_job_history (job_id, stage, status, message, created_at)
+           VALUES (?, 'autocommit', 'completed', ?, NOW())`,
+          [jobId, JSON.stringify({
+            action: 'AUTOCOMMIT_PARTIAL',
+            batch_id: plan.batch_id,
+            committed: results.committed_count,
+            skipped: results.skipped_count,
+            errors: results.error_count,
+            page_score: scoringV2?.page_score_v2 ?? null,
+          })],
+        );
+      } catch (_: any) { /* non-blocking */ }
+
+      // 10. Merge metrics
+      try {
+        const metricsPath = path.join(pageDir, 'metrics.json');
+        let metrics: Record<string, any> = {};
+        if (fs.existsSync(metricsPath)) {
+          try { metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8')); } catch {}
+        }
+        Object.assign(metrics, {
+          autocommit_batch_id: plan.batch_id,
+          autocommit_committed: results.committed_count,
+          autocommit_skipped: results.skipped_count,
+          autocommit_at: results.created_at,
+        });
+        const mTmp = metricsPath + '.tmp';
+        fs.writeFileSync(mTmp, JSON.stringify(metrics, null, 2));
+        fs.renameSync(mTmp, metricsPath);
+      } catch (_: any) { /* non-blocking */ }
+
+      console.log(`OCR_AUTOCOMMIT_OK ${JSON.stringify({
+        jobId, churchId, batch_id: plan.batch_id,
+        committed: results.committed_count, skipped: results.skipped_count,
+      })}`);
+
+      res.json({
+        ok: true,
+        batch_id: plan.batch_id,
+        committed_count: results.committed_count,
+        skipped_count: results.skipped_count,
+        error_count: results.error_count,
+        committed_records: committedRows.map((r: any) => ({ recordId: r.recordId, recordType: r.recordType })),
+        plan_summary: {
+          eligible: plan.eligible_count,
+          skipped: plan.skipped_count,
+          thresholds: plan.thresholds,
+        },
+      });
+    } catch (error: any) {
+      console.error('[OCR Autocommit] Error:', error);
+      res.status(500).json({ error: 'Autocommit failed', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // GET /jobs/:jobId/review/corrections — Retrieve field correction log
+  // -----------------------------------------------------------------------
+  churchJobsRouter.get('/jobs/:jobId/review/corrections', async (req: any, res: any) => {
+    try {
+      const jobId = parseInt(req.params.jobId);
+      const limit = Math.min(parseInt(req.query.limit as string) || 100, 1000);
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      console.log(`[OCR Corrections] GET /jobs/${jobId}/review/corrections limit=${limit} offset=${offset}`);
+
+      const { loadCorrections, buildCorrectionsSummary, correctionsLogPath } = require('../../ocr/preprocessing/correctionLog');
+      const logPath = correctionsLogPath(jobId);
+      const allEvents = loadCorrections(logPath);
+      const summary = buildCorrectionsSummary(jobId, allEvents);
+
+      // Paginate (most recent first)
+      const reversed = [...allEvents].reverse();
+      const page = reversed.slice(offset, offset + limit);
+
+      res.json({
+        ok: true,
+        job_id: jobId,
+        summary,
+        events: page,
+        pagination: {
+          total: allEvents.length,
+          offset,
+          limit,
+          has_more: offset + limit < allEvents.length,
+        },
+      });
+    } catch (error: any) {
+      console.error('[OCR Corrections] Error:', error);
+      res.status(500).json({ error: 'Failed to load corrections', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // GET /jobs/:jobId/review/commit-batches — List commit batches for a job
+  // (super_admin only)
+  // -----------------------------------------------------------------------
+  churchJobsRouter.get('/jobs/:jobId/review/commit-batches', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const user = req.session?.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'super_admin required' });
+      }
+
+      console.log(`[OCR Batches] GET /jobs/${jobId}/review/commit-batches (church ${churchId})`);
+
+      const resolved = await resolveChurchDb(churchId);
+      if (!resolved) return res.status(404).json({ error: 'Church not found' });
+      const { db: tenantPool } = resolved;
+
+      // Find all autocommit_plan + autocommit_results artifacts for this job
+      const [artifacts] = await tenantPool.query(
+        `SELECT a.id, a.type, a.storage_path, a.json_blob, a.created_at, a.sha256, a.bytes
+         FROM ocr_feeder_artifacts a
+         JOIN ocr_feeder_pages p ON a.page_id = p.id
+         WHERE p.job_id = ? AND a.type IN ('autocommit_plan', 'autocommit_results', 'rollback_results')
+         ORDER BY a.created_at ASC`,
+        [jobId],
+      );
+
+      // Group by batch_id
+      const batchMap = new Map<string, any>();
+
+      for (const art of artifacts as any[]) {
+        let data: any = null;
+        try {
+          if (art.storage_path && fs.existsSync(art.storage_path)) {
+            data = JSON.parse(fs.readFileSync(art.storage_path, 'utf8'));
+          } else if (art.json_blob) {
+            data = typeof art.json_blob === 'string' ? JSON.parse(art.json_blob) : art.json_blob;
+          }
+        } catch (_) {}
+
+        if (!data?.batch_id) continue;
+        const batchId = data.batch_id;
+
+        if (!batchMap.has(batchId)) {
+          batchMap.set(batchId, {
+            batch_id: batchId,
+            created_at: null,
+            plan: null,
+            results: null,
+            rollback: null,
+            rolled_back: false,
+          });
+        }
+
+        const entry = batchMap.get(batchId)!;
+
+        if (art.type === 'autocommit_plan') {
+          entry.plan = {
+            eligible_count: data.eligible_count ?? 0,
+            skipped_count: data.skipped_count ?? 0,
+            total_candidates: data.total_candidates ?? 0,
+            thresholds: data.thresholds ?? null,
+            structure_score: data.structure_score ?? null,
+            template_used: data.template_used ?? false,
+            method: data.method ?? 'unknown',
+          };
+          entry.created_at = data.created_at || art.created_at;
+        } else if (art.type === 'autocommit_results') {
+          entry.results = {
+            committed_count: data.committed_count ?? 0,
+            skipped_count: data.skipped_count ?? 0,
+            error_count: data.error_count ?? 0,
+            rows: (data.rows || []).map((r: any) => ({
+              candidateIndex: r.candidateIndex,
+              outcome: r.outcome,
+              recordId: r.recordId,
+              recordType: r.recordType,
+              table: r.table,
+            })),
+          };
+        } else if (art.type === 'rollback_results') {
+          entry.rollback = {
+            deleted: data.deleted ?? {},
+            missing: data.missing ?? {},
+            rolled_back_at: data.rolled_back_at ?? art.created_at,
+            rolled_back_by: data.rolled_back_by ?? 'unknown',
+          };
+          entry.rolled_back = true;
+        }
+      }
+
+      const batches = Array.from(batchMap.values()).sort(
+        (a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime(),
+      );
+
+      res.json({ ok: true, job_id: jobId, church_id: churchId, batches });
+    } catch (error: any) {
+      console.error('[OCR Batches] Error:', error);
+      res.status(500).json({ error: 'Failed to list batches', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // POST /jobs/:jobId/review/rollback-batch — Rollback an autocommit batch
+  // (super_admin only)
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/review/rollback-batch', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const user = req.session?.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'super_admin required' });
+      }
+
+      const { batch_id, dry_run, force } = req.body || {};
+      if (!batch_id || typeof batch_id !== 'string') {
+        return res.status(400).json({ error: 'batch_id is required' });
+      }
+
+      const isDryRun = dry_run === true;
+      const userEmail = user.email || 'system';
+
+      console.log(`[OCR Rollback] POST /jobs/${jobId}/review/rollback-batch batch=${batch_id} dry_run=${isDryRun}`);
+
+      const resolved = await resolveChurchDb(churchId);
+      if (!resolved) return res.status(404).json({ error: 'Church not found' });
+      const { db: tenantPool } = resolved;
+
+      // 1. Locate autocommit_results artifact for this batch
+      const [resultArts] = await tenantPool.query(
+        `SELECT a.id, a.storage_path, a.json_blob, a.page_id
+         FROM ocr_feeder_artifacts a
+         JOIN ocr_feeder_pages p ON a.page_id = p.id
+         WHERE p.job_id = ? AND a.type = 'autocommit_results'
+         ORDER BY a.created_at DESC`,
+        [jobId],
+      );
+
+      let resultsData: any = null;
+      let artifactPageId: number | null = null;
+      for (const art of resultArts as any[]) {
+        let data: any = null;
+        try {
+          if (art.storage_path && fs.existsSync(art.storage_path)) {
+            data = JSON.parse(fs.readFileSync(art.storage_path, 'utf8'));
+          } else if (art.json_blob) {
+            data = typeof art.json_blob === 'string' ? JSON.parse(art.json_blob) : art.json_blob;
+          }
+        } catch (_) {}
+        if (data?.batch_id === batch_id) {
+          resultsData = data;
+          artifactPageId = art.page_id;
+          break;
+        }
+      }
+
+      if (!resultsData) {
+        return res.status(404).json({ error: `No autocommit_results found for batch_id=${batch_id}` });
+      }
+
+      // 2. Check if already rolled back
+      const [rollbackArts] = await tenantPool.query(
+        `SELECT a.id FROM ocr_feeder_artifacts a
+         JOIN ocr_feeder_pages p ON a.page_id = p.id
+         WHERE p.job_id = ? AND a.type = 'rollback_results'`,
+        [jobId],
+      );
+      for (const ra of rollbackArts as any[]) {
+        // Check if this rollback is for our batch
+        // We'll check by artifact content — but since we're here, just check existence
+      }
+      // More precise: check rollback artifact content
+      let alreadyRolledBack = false;
+      for (const ra of rollbackArts as any[]) {
+        // We'd need to read each one — but for efficiency, we'll use a simpler approach
+        // The rollback_results artifact stores batch_id in its content
+      }
+      // Simplified: check via audit history
+      const [historyRows] = await promisePool.query(
+        `SELECT message FROM ocr_job_history WHERE job_id = ? AND stage = 'rollback' AND status = 'completed'`,
+        [jobId],
+      );
+      for (const hr of historyRows as any[]) {
+        try {
+          const msg = typeof hr.message === 'string' ? JSON.parse(hr.message) : hr.message;
+          if (msg?.batch_id === batch_id) {
+            alreadyRolledBack = true;
+            break;
+          }
+        } catch (_) {}
+      }
+
+      if (alreadyRolledBack && !force) {
+        return res.status(409).json({
+          error: 'Batch already rolled back',
+          hint: 'Pass force=true to rollback again (may find 0 rows to delete)',
+        });
+      }
+
+      // 3. Parse committed rows from results
+      const committedRows: Array<{ recordId: number; table: string; recordType: string }> = [];
+      for (const row of resultsData.rows || []) {
+        if (row.outcome === 'committed' && row.recordId && row.table) {
+          committedRows.push({
+            recordId: row.recordId,
+            table: row.table,
+            recordType: row.recordType || 'unknown',
+          });
+        }
+      }
+
+      if (committedRows.length === 0) {
+        return res.json({
+          ok: true,
+          dry_run: isDryRun,
+          batch_id,
+          deleted: {},
+          missing: {},
+          message: 'No committed rows found in batch — nothing to rollback',
+        });
+      }
+
+      // 4. Group by table for batch deletion
+      const byTable = new Map<string, number[]>();
+      for (const r of committedRows) {
+        if (!byTable.has(r.table)) byTable.set(r.table, []);
+        byTable.get(r.table)!.push(r.recordId);
+      }
+
+      // 5. Verify which rows still exist (for both dry run and real rollback)
+      const deleted: Record<string, number> = {};
+      const missing: Record<string, number> = {};
+      const existingIds: Map<string, number[]> = new Map();
+      const missingIds: Map<string, number[]> = new Map();
+
+      for (const [table, ids] of byTable) {
+        const placeholders = ids.map(() => '?').join(',');
+        const [rows] = await tenantPool.query(
+          `SELECT id FROM \`${table}\` WHERE id IN (${placeholders}) AND church_id = ?`,
+          [...ids, churchId],
+        );
+        const foundIds = new Set((rows as any[]).map((r: any) => r.id));
+        const found = ids.filter(id => foundIds.has(id));
+        const notFound = ids.filter(id => !foundIds.has(id));
+
+        existingIds.set(table, found);
+        missingIds.set(table, notFound);
+        deleted[table] = found.length;
+        missing[table] = notFound.length;
+      }
+
+      // 6. Dry run — just return counts
+      if (isDryRun) {
+        return res.json({
+          ok: true,
+          dry_run: true,
+          batch_id,
+          deleted,
+          missing,
+          total_would_delete: Object.values(deleted).reduce((a, b) => a + b, 0),
+          total_missing: Object.values(missing).reduce((a, b) => a + b, 0),
+          details: {
+            existing_ids: Object.fromEntries(existingIds),
+            missing_ids: Object.fromEntries(missingIds),
+          },
+        });
+      }
+
+      // 7. Real rollback — delete in transaction
+      const conn = await tenantPool.getConnection();
+      try {
+        await conn.beginTransaction();
+
+        for (const [table, ids] of existingIds) {
+          if (ids.length === 0) continue;
+          const placeholders = ids.map(() => '?').join(',');
+          await conn.query(
+            `DELETE FROM \`${table}\` WHERE id IN (${placeholders}) AND church_id = ?`,
+            [...ids, churchId],
+          );
+        }
+
+        await conn.commit();
+      } catch (txErr: any) {
+        await conn.rollback();
+        throw txErr;
+      } finally {
+        conn.release();
+      }
+
+      // 8. Write rollback_results.json artifact
+      const rollbackResult = {
+        method: 'autocommit_rollback_v1',
+        batch_id,
+        job_id: jobId,
+        church_id: churchId,
+        deleted,
+        missing,
+        deleted_ids: Object.fromEntries(existingIds),
+        missing_ids: Object.fromEntries(missingIds),
+        total_deleted: Object.values(deleted).reduce((a, b) => a + b, 0),
+        total_missing: Object.values(missing).reduce((a, b) => a + b, 0),
+        rolled_back_by: userEmail,
+        rolled_back_at: new Date().toISOString(),
+        force: !!force,
+      };
+
+      // Find page dir from artifact path
+      let pageDir: string | null = null;
+      if (artifactPageId) {
+        const [pageRows] = await tenantPool.query(
+          `SELECT page_index FROM ocr_feeder_pages WHERE id = ?`, [artifactPageId],
+        );
+        if ((pageRows as any[]).length > 0) {
+          const pageIndex = (pageRows as any[])[0].page_index;
+          pageDir = path.join(__dirname, '../../../storage/feeder', `job_${jobId}`, `page_${pageIndex}`);
+        }
+      }
+
+      if (pageDir && fs.existsSync(pageDir)) {
+        const rollbackJson = JSON.stringify(rollbackResult, null, 2);
+        const rollbackPath = path.join(pageDir, 'rollback_results.json');
+        const tmpPath = rollbackPath + '.tmp';
+        fs.writeFileSync(tmpPath, rollbackJson);
+        fs.renameSync(tmpPath, rollbackPath);
+
+        const rollbackSha = crypto.createHash('sha256').update(rollbackJson).digest('hex');
+        await tenantPool.query(
+          `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, sha256, bytes, mime_type, created_at)
+           VALUES (?, 'rollback_results', ?, ?, ?, 'application/json', NOW())`,
+          [artifactPageId, rollbackPath, rollbackSha, Buffer.byteLength(rollbackJson)],
+        );
+      }
+
+      // 9. Audit history
+      await promisePool.query(
+        `INSERT INTO ocr_job_history (job_id, stage, status, message, created_at)
+         VALUES (?, 'rollback', 'completed', ?, NOW())`,
+        [jobId, JSON.stringify({
+          action: 'AUTOCOMMIT_ROLLBACK',
+          batch_id,
+          deleted,
+          missing,
+          total_deleted: rollbackResult.total_deleted,
+          rolled_back_by: userEmail,
+          force: !!force,
+        })],
+      );
+
+      console.log(`[OCR Rollback] Batch ${batch_id} rolled back: ${rollbackResult.total_deleted} deleted, ${rollbackResult.total_missing} missing`);
+
+      res.json({
+        ok: true,
+        dry_run: false,
+        batch_id,
+        deleted,
+        missing,
+        total_deleted: rollbackResult.total_deleted,
+        total_missing: rollbackResult.total_missing,
+      });
+    } catch (error: any) {
+      console.error('[OCR Rollback] Error:', error);
+      res.status(500).json({ error: 'Rollback failed', message: error.message });
     }
   });
 

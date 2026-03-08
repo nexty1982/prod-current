@@ -162,6 +162,12 @@ const RecordReviewWizard: React.FC<RecordReviewWizardProps> = ({
   const [zoom, setZoom] = useState(100);
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  // Per-record crop + debug
+  const [showDebug, setShowDebug] = useState(false);
+  const [recordCropUrl, setRecordCropUrl] = useState<string | null>(null);
+  const [perRecordExtract, setPerRecordExtract] = useState<any>(null);
+  const isSuperAdmin = true; // TODO: wire from session context
+
   // Derived
   const pageDims = tableExtraction?.page_dimensions;
   const confirmedCount = records.filter(r => r.status === 'confirmed' || r.status === 'auto-confirmed').length;
@@ -194,8 +200,8 @@ const RecordReviewWizard: React.FC<RecordReviewWizardProps> = ({
       const tables = initialTableExtraction.tables || [];
 
       const reviewables: ReviewableRecord[] = initialRecordCandidates.candidates.map((candidate, idx) => {
-        // Compute union bbox from table cells for this row
-        let fb = computeRowBbox(candidate.sourceRowIndex, tables);
+        // Compute union bbox from table cells for this row (or row range for assembled records)
+        let fb = computeRowBbox(candidate.sourceRowIndex, tables, candidate.sourceRowEnd);
         if (!fb) {
           fb = { x_min: 0.05, y_min: 0.1 + idx * 0.04, x_max: 0.95, y_max: 0.14 + idx * 0.04 };
         }
@@ -219,12 +225,13 @@ const RecordReviewWizard: React.FC<RecordReviewWizardProps> = ({
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
-  function computeRowBbox(sourceRowIndex: number, tables: any[]): FractionalBBox | null {
+  function computeRowBbox(sourceRowIndex: number, tables: any[], sourceRowEnd?: number): FractionalBBox | null {
+    const rowEnd = sourceRowEnd ?? sourceRowIndex;
     let xMin = Infinity, yMin = Infinity, xMax = -Infinity, yMax = -Infinity;
     let found = false;
     for (const table of tables) {
       for (const row of table.rows || []) {
-        if (row.row_index !== sourceRowIndex) continue;
+        if (row.row_index < sourceRowIndex || row.row_index > rowEnd) continue;
         for (const cell of row.cells || []) {
           if (cell.bbox?.length === 4) {
             found = true;
@@ -256,6 +263,36 @@ const RecordReviewWizard: React.FC<RecordReviewWizardProps> = ({
       y_max: (bbox.y + bbox.h) / dims.height,
     };
   }
+
+  // ---------------------------------------------------------------------------
+  // Load per-record crop image + extract when current record changes
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (phase !== 1 || !currentRecord) {
+      setRecordCropUrl(null);
+      setPerRecordExtract(null);
+      return;
+    }
+
+    const recordIdx = currentRecord.index;
+    // Build crop URL (the endpoint streams the PNG)
+    const cropUrl = `/api/church/${churchId}/ocr/jobs/${jobId}/record-crop/${recordIdx}`;
+    setRecordCropUrl(cropUrl);
+
+    // Load per-record extract data if available (from debug endpoint)
+    if (showDebug) {
+      apiClient.get(`/church/${churchId}/ocr/jobs/${jobId}/debug?page=0`)
+        .then(resp => {
+          const artifacts = resp.data?.artifacts || {};
+          const manifest = artifacts.record_crops_manifest;
+          if (manifest?.records) {
+            const rec = manifest.records.find((r: any) => r.recordIndex === recordIdx);
+            setPerRecordExtract(rec || null);
+          }
+        })
+        .catch(() => setPerRecordExtract(null));
+    }
+  }, [phase, currentRecord?.index, showDebug, churchId, jobId]);
 
   // ---------------------------------------------------------------------------
   // Auto-scroll to current record
@@ -407,7 +444,7 @@ const RecordReviewWizard: React.FC<RecordReviewWizardProps> = ({
           for (let i = 0; i < data.recordCandidates.candidates.length; i++) {
             const c = data.recordCandidates.candidates[i];
             if (confirmedIndices.has(c.sourceRowIndex) || rejectedIndices.has(c.sourceRowIndex)) continue;
-            const fb = computeRowBbox(c.sourceRowIndex, tables) ||
+            const fb = computeRowBbox(c.sourceRowIndex, tables, c.sourceRowEnd) ||
               { x_min: 0.05, y_min: 0.1 + i * 0.04, x_max: 0.95, y_max: 0.14 + i * 0.04 };
             newRecords.push({
               index: newRecords.length,
@@ -661,6 +698,63 @@ const RecordReviewWizard: React.FC<RecordReviewWizardProps> = ({
                           ))}
                         </TableBody>
                       </Table>
+                    </Paper>
+                  )}
+
+                  {/* Per-record crop preview */}
+                  {recordCropUrl && (
+                    <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                      <Typography variant="caption" fontWeight={600} sx={{ px: 1.5, py: 0.75, display: 'block', bgcolor: alpha(theme.palette.info.main, 0.08) }}>
+                        Record Crop
+                      </Typography>
+                      <Box sx={{ p: 1, textAlign: 'center', maxHeight: 200, overflow: 'auto' }}>
+                        <img
+                          src={recordCropUrl}
+                          alt={`Record ${currentRecord?.index} crop`}
+                          style={{ maxWidth: '100%', maxHeight: 180, objectFit: 'contain', border: '1px solid #ddd', borderRadius: 4 }}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      </Box>
+                    </Paper>
+                  )}
+
+                  {/* Per-record contamination warning */}
+                  {currentRecord?.candidate?._perRecordFlag && (
+                    <Alert severity={currentRecord.candidate._perRecordFlag === 'contamination_warning' ? 'warning' : 'error'} sx={{ borderRadius: 2 }}>
+                      <Typography variant="caption" fontWeight={600}>
+                        {currentRecord.candidate._perRecordFlag === 'contamination_warning' ? 'Possible header contamination' : currentRecord.candidate._perRecordFlag}
+                      </Typography>
+                      {currentRecord.candidate._perRecordNote && (
+                        <Typography variant="caption" display="block">{currentRecord.candidate._perRecordNote}</Typography>
+                      )}
+                    </Alert>
+                  )}
+
+                  {/* Debug toggle (super_admin only) */}
+                  {isSuperAdmin && (
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <Button
+                        size="small"
+                        variant={showDebug ? 'contained' : 'text'}
+                        color="inherit"
+                        onClick={() => setShowDebug(prev => !prev)}
+                        sx={{ fontSize: '0.65rem', textTransform: 'none', opacity: 0.6 }}
+                      >
+                        {showDebug ? 'Hide Debug' : 'Debug'}
+                      </Button>
+                    </Box>
+                  )}
+
+                  {/* Debug info panel */}
+                  {showDebug && perRecordExtract && (
+                    <Paper variant="outlined" sx={{ borderRadius: 2, p: 1.5, bgcolor: '#f5f5f5', fontSize: '0.7rem', fontFamily: 'monospace', overflow: 'auto', maxHeight: 200 }}>
+                      <Typography variant="caption" fontWeight={700} display="block" gutterBottom>Per-Record Debug</Typography>
+                      <div>Status: {perRecordExtract.status}</div>
+                      <div>Tokens: {perRecordExtract.tokenCount}</div>
+                      {perRecordExtract.yBand && (
+                        <div>Y-band: {perRecordExtract.yBand.yMinNorm?.toFixed(3)} → {perRecordExtract.yBand.yMaxNorm?.toFixed(3)}</div>
+                      )}
+                      {perRecordExtract.cropPath && <div>Crop: {perRecordExtract.cropPath.split('/').pop()}</div>}
                     </Paper>
                   )}
 

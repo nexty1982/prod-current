@@ -131,6 +131,28 @@ const DarkThemeColors = [
       },
     },
   },
+  {
+    name: 'LENT_THEME',
+    palette: {
+      primary: {
+        main: '#e0e0e0',
+        light: '#2a2a2a',
+        dark: '#bdbdbd',
+        contrastText: '#000000',
+      },
+      secondary: {
+        main: '#9e9e9e',
+        light: '#1f1f1f',
+        dark: '#757575',
+        contrastText: '#000000',
+      },
+      background: {
+        default: '#0a0a0a',
+        dark: '#0a0a0a',
+        paper: '#141414',
+      },
+    },
+  },
 ];
 
 export { DarkThemeColors };

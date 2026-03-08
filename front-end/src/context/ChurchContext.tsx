@@ -16,6 +16,7 @@ interface ChurchMetadata {
   logo_url: string | null;
   primary_theme_color: string;
   database_name: string | null;
+  calendar_type: 'Julian' | 'Revised Julian';
 }
 
 interface ChurchContextType {
@@ -81,7 +82,8 @@ export const ChurchProvider: React.FC<ChurchProviderProps> = ({ children }) => {
         church_name_display: 'System Admin',
         logo_url: null,
         primary_theme_color: '#6200EE',
-        database_name: null
+        database_name: null,
+        calendar_type: 'Revised Julian'
       });
     } finally {
       setIsLoading(false);

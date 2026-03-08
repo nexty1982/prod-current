@@ -84,8 +84,8 @@ const SUB_CATEGORIES: SubCategory[] = [
     href: '/admin/control-panel/system-server/server-devops',
     quickLinks: [
       { label: 'API Explorer', href: '/devel-tools/api-explorer' },
-      { label: 'Build Info', href: '/devel-tools/build-info' },
-      { label: 'OMTrace Console', href: '/devel-tools/omtrace' },
+      { label: 'Code Safety System', href: '/admin/control-panel/system-server/code-safety' },
+      { label: 'Feature Lifecycle (SDLC)', href: '/admin/control-panel/sdlc' },
     ],
   },
   {

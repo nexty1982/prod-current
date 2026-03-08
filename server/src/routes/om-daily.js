@@ -251,7 +251,24 @@ router.get('/items', requireAuth, async (req, res) => {
       params
     );
 
-    res.json({ items: rows, total: rows.length });
+    // Enrich with change_set membership (computed, not denormalized)
+    let enrichedRows = rows;
+    try {
+      if (rows.length > 0) {
+        const changeSetService = require('../services/changeSetService');
+        const itemIds = rows.map(r => r.id);
+        const memberships = await changeSetService.getChangeSetMemberships(itemIds);
+        enrichedRows = rows.map(r => ({
+          ...r,
+          change_set: memberships[r.id] || null,
+        }));
+      }
+    } catch (csErr) {
+      // Non-fatal: if change_set service fails, items still return without membership
+      console.warn('Change set membership enrichment failed:', csErr.message);
+    }
+
+    res.json({ items: enrichedRows, total: enrichedRows.length });
   } catch (err) {
     console.error('OM Daily list error:', err);
     res.status(500).json({ error: 'Failed to load items' });

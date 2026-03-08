@@ -225,6 +225,7 @@ const versionRouter = require('./routes/version');
 const systemStatusRouter = require('./api/systemStatus');
 const dailyTasksRouter = require('./api/dailyTasks');
 const omDailyRouter = require('./routes/om-daily');
+const snapshotsRouter = require('./routes/snapshots');
 const crmRouter = require('./routes/crm');
 const analyticsRouter = require('./routes/analytics'); // US Church Map analytics
 const omChartsRouter = require('./api/om-charts'); // OM Charts: graphical charts from church records
@@ -284,6 +285,8 @@ const usersRouter = require('./routes/admin/users');
 const adminInvitesRouter = require('./routes/admin/invites');
 const inviteRegisterRouter = require('./routes/invite-register');
 const churchRegisterRouter = require('./routes/church-register');
+const churchOnboardingRouter = require('./routes/admin/church-onboarding');
+const changeSetsRouter = require('./routes/admin/change-sets');
 const activityLogsRouter = require('./routes/admin/activity-logs');
 // Import new modular admin route files (extracted from monolithic admin.js)
 const churchUsersRouter = require('./routes/admin/church-users');
@@ -595,6 +598,10 @@ console.log('✅ [Server] Mounted /api/invite route (public invite registration)
 app.use('/api/auth', churchRegisterRouter); // Public church token registration
 app.use('/api', churchRegisterRouter); // Admin token management endpoints
 console.log('✅ [Server] Mounted church registration token routes');
+app.use('/api/admin/church-onboarding', churchOnboardingRouter);
+console.log('✅ [Server] Mounted /api/admin/church-onboarding route (Phase 2 onboarding pipeline)');
+app.use('/api/admin/change-sets', changeSetsRouter);
+console.log('✅ [Server] Mounted /api/admin/change-sets route (SDLC delivery container)');
 app.use('/api/churches', churchesRouter);
 // Mount churches router at /api/my to handle /api/my/churches
 app.use('/api/my', churchesRouter);
@@ -718,6 +725,9 @@ const omaiSpinRouter = require('./routes/admin/omaiSpin');
 app.use('/api/admin/omai-spin', omaiSpinRouter);
 app.use('/api/tutorials', tutorialsRouter);
 app.use('/api/settings', settingsRouter);
+const lookupRouter = require('./routes/lookup');
+app.use('/api/lookup', lookupRouter);
+console.log('✅ [Server] Mounted /api/lookup routes (clergy dropdowns)');
 app.use('/api/system', systemUpdateRouter); // System update routes (super_admin only, with safe fallback)
 console.log('✅ [Server] Mounted /api/system route (updates, build-info)');
 // Import unified backup routes
@@ -785,6 +795,8 @@ app.use('/api/admin/ai', aiAdminRouter); // AI Admin Panel (commands + training)
 console.log('✅ [Server] Mounted records-inspector, seed-records, and ai-admin routes');
 app.use('/api/om-daily', omDailyRouter); // OM Daily work pipelines
 console.log('✅ [Server] Mounted /api/om-daily routes (Work Pipelines)');
+app.use('/api/snapshots', snapshotsRouter); // Code snapshot safety system
+console.log('✅ [Server] Mounted /api/snapshots routes (Safety System)');
 app.use('/api/crm', crmRouter); // CRM pipeline & outreach
 console.log('✅ [Server] Mounted /api/crm routes (CRM & Outreach)');
 app.use('/api/analytics', analyticsRouter); // US Church Map analytics
@@ -949,14 +961,10 @@ const conversationLogRouter = require('./routes/conversation-log');
 app.use('/api/conversation-log', requireAuthForRoutes, requireAdminForRoutes, conversationLogRouter);
 console.log('✅ [Server] Mounted /api/conversation-log routes');
 
-// OCR Feeder Worker — polls platform DB for pending jobs
-try {
-  const { workerLoop } = require('./workers/ocrFeederWorker');
-  workerLoop().catch((err: any) => console.error('[OCR Worker] Fatal error:', err));
-  console.log('✅ [OCR] Feeder worker started');
-} catch (e: any) {
-  console.warn('⚠️  [OCR] Failed to start feeder worker:', e.message);
-}
+// OCR Feeder Worker — now runs as a dedicated systemd service (om-ocr-worker)
+// Removed from in-process boot in Phase 7.1. To start the worker:
+//   sudo systemctl start om-ocr-worker
+console.log('ℹ️  [OCR] Feeder worker runs as separate service (om-ocr-worker)');
 
 // OCR Routes — modular routers (admin + church-scoped)
 try {
@@ -1634,7 +1642,36 @@ server.listen(PORT, HOST, () => {
   // logMonitor.start('orthodox-backend');
   // console.log('🔍 Backend log monitoring started for orthodox-backend');
   console.log('═══════════════════════════════════════════════════════════');
-  
+
+  // ============================================================================
+  // SESSION HOUSEKEEPING — purge dead refresh tokens every 6 hours
+  // ============================================================================
+  const SESSION_CLEANUP_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
+  const cleanupSessions = async () => {
+    try {
+      const { getAppPool } = require('./config/db-compat');
+      const [result] = await getAppPool().query(
+        `DELETE FROM refresh_tokens WHERE revoked_at IS NOT NULL OR expires_at <= NOW()`
+      );
+      if (result.affectedRows > 0) {
+        console.log(`[SESSION-CLEANUP] Purged ${result.affectedRows} dead refresh token(s)`);
+      }
+      // Also clean expired express sessions
+      const [sessResult] = await getAppPool().query(
+        `DELETE FROM sessions WHERE expires <= NOW()`
+      );
+      if (sessResult.affectedRows > 0) {
+        console.log(`[SESSION-CLEANUP] Purged ${sessResult.affectedRows} expired express session(s)`);
+      }
+    } catch (err: any) {
+      console.error('[SESSION-CLEANUP] Error:', err.message);
+    }
+  };
+  // Run once at startup, then every 6 hours
+  cleanupSessions();
+  setInterval(cleanupSessions, SESSION_CLEANUP_INTERVAL);
+  console.log('Session housekeeping scheduled (every 6h)');
+
   // ============================================================================
   // STARTUP VERIFICATION - Test critical public endpoints
   // ============================================================================

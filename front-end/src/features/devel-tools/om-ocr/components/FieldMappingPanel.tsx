@@ -29,7 +29,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { IconChevronDown, IconSend, IconAlertTriangle, IconColumns, IconUser, IconCalendar, IconHash, IconMapPin, IconBan, IconSettings, IconWand } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronUp, IconSend, IconAlertTriangle, IconColumns, IconUser, IconCalendar, IconHash, IconMapPin, IconBan, IconSettings, IconWand, IconEye, IconEyeOff, IconArrowDown, IconArrowUp, IconCheck, IconFlag } from '@tabler/icons-react';
 import { apiClient } from '@/shared/lib/axiosInstance';
 import { getCustomFieldsForType } from '../utils/fieldConfig';
 import FieldConfigDialog from './FieldConfigDialog';
@@ -111,6 +111,8 @@ interface FieldMappingPanelProps {
   autoExtracting?: boolean;
   // Field suggestions (intelligent entity detection)
   fieldSuggestions?: SuggestionResult | null;
+  // Scoring V2 (field-level scoring with provenance)
+  scoringV2?: any | null;
   // Reject record (not a record)
   onRejectRecord?: (sourceRowIndex: number) => void;
 }
@@ -133,6 +135,7 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
   onOpenLayoutWizard,
   autoExtracting,
   fieldSuggestions,
+  scoringV2,
   onRejectRecord,
 }) => {
   const theme = useTheme();
@@ -150,6 +153,73 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
   const expandedIdx = externalSelectedIdx !== undefined && externalSelectedIdx !== null
     ? externalSelectedIdx
     : internalExpandedIdx;
+
+  // Flag-first review mode: show only flagged rows by default when scoring_v2 is available
+  const [showAllRows, setShowAllRows] = useState(false);
+
+  // Scoring V2 helpers
+  const scoringRows = useMemo(() => scoringV2?.rows || [], [scoringV2]);
+  const hasScoring = scoringRows.length > 0;
+
+  // Get scoring row for a given candidate index
+  const getScoringRow = useCallback((candidateIdx: number) => {
+    return scoringRows.find((r: any) => r.candidate_index === candidateIdx) || null;
+  }, [scoringRows]);
+
+  // Get scoring field for a given candidate index and field name
+  const getScoringField = useCallback((candidateIdx: number, fieldName: string) => {
+    const row = getScoringRow(candidateIdx);
+    if (!row) return null;
+    return row.fields?.find((f: any) => f.field_name === fieldName) || null;
+  }, [getScoringRow]);
+
+  // Compute which rows need review based on scoring
+  const reviewSummary = useMemo(() => {
+    if (!hasScoring) return null;
+    const total = scoringRows.length;
+    const needReview = scoringRows.filter((r: any) => r.needs_review).length;
+    const autoAccepted = total - needReview;
+    const totalFields = scoringV2?.summary?.total_fields || 0;
+    const fieldsFlagged = scoringV2?.summary?.fields_flagged || 0;
+    const pageScore = scoringV2?.page_score_v2 ?? null;
+    const recommendation = scoringV2?.routing_recommendation || null;
+    return { total, needReview, autoAccepted, totalFields, fieldsFlagged, pageScore, recommendation };
+  }, [hasScoring, scoringRows, scoringV2]);
+
+  // Reason code labels and colors
+  const reasonLabel: Record<string, { label: string; color: string }> = {
+    DATE_PARSE_FAIL: { label: 'Date', color: '#e53e3e' },
+    LOW_OCR_CONF: { label: 'Low OCR', color: '#dd6b20' },
+    AMBIGUOUS_COLUMN: { label: 'Ambig', color: '#d69e2e' },
+    MISSING_REQUIRED: { label: 'Missing', color: '#e53e3e' },
+    SHORT_VALUE: { label: 'Short', color: '#d69e2e' },
+    SUSPICIOUS_CHARS: { label: 'Suspect', color: '#9b2c2c' },
+    FIELD_OK: { label: 'OK', color: '#38a169' },
+  };
+
+  // Navigation: find next/prev flagged row
+  const flaggedRowIndices = useMemo(() => {
+    return scoringRows
+      .filter((r: any) => r.needs_review)
+      .map((r: any) => r.candidate_index);
+  }, [scoringRows]);
+
+  const navigateToFlaggedRow = useCallback((direction: 'next' | 'prev') => {
+    if (flaggedRowIndices.length === 0) return;
+    const currentIdx = typeof expandedIdx === 'number' ? expandedIdx : -1;
+
+    if (direction === 'next') {
+      const next = flaggedRowIndices.find((i: number) => i > currentIdx);
+      const target = next !== undefined ? next : flaggedRowIndices[0];
+      onRecordSelect?.(target);
+      setInternalExpandedIdx(target);
+    } else {
+      const prev = [...flaggedRowIndices].reverse().find((i: number) => i < currentIdx);
+      const target = prev !== undefined ? prev : flaggedRowIndices[flaggedRowIndices.length - 1];
+      onRecordSelect?.(target);
+      setInternalExpandedIdx(target);
+    }
+  }, [flaggedRowIndices, expandedIdx, onRecordSelect]);
 
   const handleAccordionChange = useCallback((idx: number, expanded: boolean) => {
     const newVal = expanded ? idx : null;
@@ -566,6 +636,97 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
             </Paper>
           )}
 
+          {/* Review Summary (from scoring_v2) */}
+          {reviewSummary && (
+            <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, borderColor: reviewSummary.recommendation === 'accepted' ? 'success.main' : reviewSummary.recommendation === 'retry' ? 'error.main' : 'warning.main' }}>
+              <Stack spacing={1}>
+                <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+                  <Typography variant="body2" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <IconFlag size={16} />
+                    Review Summary
+                  </Typography>
+                  {reviewSummary.pageScore !== null && (
+                    <Chip
+                      size="small"
+                      label={`Score: ${Math.round(reviewSummary.pageScore * 100)}%`}
+                      color={reviewSummary.pageScore >= 0.85 ? 'success' : reviewSummary.pageScore >= 0.60 ? 'warning' : 'error'}
+                      sx={{ fontWeight: 700, fontSize: '0.7rem' }}
+                    />
+                  )}
+                </Stack>
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  <Chip size="small" variant="outlined" label={`${reviewSummary.total} rows`} sx={{ fontSize: '0.65rem', height: 22 }} />
+                  <Chip size="small" variant="outlined" color="success" icon={<IconCheck size={12} />} label={`${reviewSummary.autoAccepted} clean`} sx={{ fontSize: '0.65rem', height: 22 }} />
+                  <Chip size="small" variant="outlined" color="warning" icon={<IconAlertTriangle size={12} />} label={`${reviewSummary.needReview} flagged`} sx={{ fontSize: '0.65rem', height: 22 }} />
+                  {reviewSummary.fieldsFlagged > 0 && (
+                    <Chip size="small" variant="outlined" color="error" label={`${reviewSummary.fieldsFlagged} fields flagged`} sx={{ fontSize: '0.65rem', height: 22 }} />
+                  )}
+                </Stack>
+                {/* Navigation controls */}
+                {flaggedRowIndices.length > 0 && (
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<IconArrowUp size={14} />}
+                      onClick={() => navigateToFlaggedRow('prev')}
+                      sx={{ textTransform: 'none', fontSize: '0.7rem', py: 0.25, minWidth: 0 }}
+                    >
+                      Prev
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      endIcon={<IconArrowDown size={14} />}
+                      onClick={() => navigateToFlaggedRow('next')}
+                      sx={{ textTransform: 'none', fontSize: '0.7rem', py: 0.25, minWidth: 0 }}
+                    >
+                      Next
+                    </Button>
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                      Flagged Row
+                    </Typography>
+                    <Box sx={{ flex: 1 }} />
+                    <Tooltip title={showAllRows ? 'Show only flagged rows' : 'Show all rows'}>
+                      <IconButton size="small" onClick={() => setShowAllRows(!showAllRows)} sx={{ p: 0.5 }}>
+                        {showAllRows ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                )}
+                {/* Clickable row index */}
+                {scoringRows.length > 0 && (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
+                    {scoringRows.map((row: any) => {
+                      const isActive = expandedIdx === row.candidate_index;
+                      const isFlagged = row.needs_review;
+                      return (
+                        <Chip
+                          key={row.candidate_index}
+                          size="small"
+                          label={row.candidate_index + 1}
+                          variant={isActive ? 'filled' : 'outlined'}
+                          color={isFlagged ? 'warning' : 'success'}
+                          onClick={() => {
+                            onRecordSelect?.(row.candidate_index);
+                            setInternalExpandedIdx(row.candidate_index);
+                          }}
+                          sx={{
+                            fontSize: '0.6rem',
+                            height: 20,
+                            minWidth: 24,
+                            cursor: 'pointer',
+                            fontWeight: isActive ? 700 : 400,
+                          }}
+                        />
+                      );
+                    })}
+                  </Box>
+                )}
+              </Stack>
+            </Paper>
+          )}
+
           {/* Auto-extracting loading state */}
           {autoExtracting && (
             <Paper variant="outlined" sx={{ p: 3, borderRadius: 2, textAlign: 'center' }}>
@@ -637,18 +798,41 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
           </Paper>
 
           {/* Record Cards */}
-          {records.map((rec, idx) => (
+          {records.map((rec, idx) => {
+            const scoringRow = getScoringRow(idx);
+            const rowFlagged = scoringRow?.needs_review ?? rec.needsReview;
+            const rowReasons: string[] = scoringRow?.reasons?.filter((r: string) => r !== 'FIELD_OK') || [];
+            const rowScore = scoringRow?.row_score;
+            const isCleanRow = hasScoring && !rowFlagged;
+
+            // Flag-first: hide clean rows when not showing all (unless it's the expanded one)
+            if (hasScoring && !showAllRows && isCleanRow && expandedIdx !== idx) {
+              return null;
+            }
+
+            return (
             <Accordion
               key={idx}
               expanded={expandedIdx === idx}
               onChange={(_, expanded) => handleAccordionChange(idx, expanded)}
               variant="outlined"
               disableGutters
-              sx={{ borderRadius: '8px !important', '&:before': { display: 'none' } }}
+              sx={{
+                borderRadius: '8px !important',
+                '&:before': { display: 'none' },
+                ...(isCleanRow && {
+                  borderColor: 'success.main',
+                  opacity: expandedIdx === idx ? 1 : 0.7,
+                }),
+                ...(rowFlagged && hasScoring && {
+                  borderColor: 'warning.main',
+                  borderWidth: 2,
+                }),
+              }}
             >
               <AccordionSummary
                 expandIcon={<IconChevronDown size={18} />}
-                sx={{ minHeight: 44, '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1, my: 0.5 } }}
+                sx={{ minHeight: 44, '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 0.5, my: 0.5, flexWrap: 'wrap' } }}
               >
                 <FormControlLabel
                   control={
@@ -669,7 +853,18 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
                 {rec.sourceRowIndex >= 0 && (
                   <Chip size="small" label={`Row ${rec.sourceRowIndex}`} variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
                 )}
-                {rec.confidence > 0 && (
+                {/* Scoring V2 row score badge */}
+                {rowScore !== undefined && rowScore !== null && (
+                  <Chip
+                    size="small"
+                    label={`${Math.round(rowScore * 100)}%`}
+                    color={rowScore >= 0.85 ? 'success' : rowScore >= 0.60 ? 'warning' : 'error'}
+                    variant="outlined"
+                    sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }}
+                  />
+                )}
+                {/* Fallback confidence if no scoring */}
+                {!hasScoring && rec.confidence > 0 && (
                   <Chip
                     size="small"
                     label={`${Math.round(rec.confidence * 100)}%`}
@@ -678,7 +873,30 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
                     sx={{ height: 20, fontSize: '0.7rem' }}
                   />
                 )}
-                {rec.needsReview && (
+                {/* Clean row check mark */}
+                {isCleanRow && (
+                  <IconCheck size={16} color={theme.palette.success.main} />
+                )}
+                {/* Reason code badges from scoring_v2 */}
+                {rowReasons.length > 0 && rowReasons.map((reason: string, ri: number) => {
+                  const info = reasonLabel[reason] || { label: reason, color: '#666' };
+                  return (
+                    <Chip
+                      key={ri}
+                      size="small"
+                      label={info.label}
+                      sx={{
+                        height: 18,
+                        fontSize: '0.6rem',
+                        fontWeight: 700,
+                        bgcolor: info.color,
+                        color: '#fff',
+                      }}
+                    />
+                  );
+                })}
+                {/* Fallback warning icon */}
+                {!hasScoring && rec.needsReview && (
                   <IconAlertTriangle size={16} color={theme.palette.warning.main} />
                 )}
                 {onRejectRecord && !isFinalized && rec.sourceRowIndex >= 0 && (
@@ -727,14 +945,23 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
                     const isDateField = FIELD_ENTITY_MAP[f.key] === 'date';
                     const fieldValue = rec.fields[f.key] || '';
                     const dateError = isDateField && fieldValue ? validateDate(fieldValue) : null;
+                    const fieldScoring = getScoringField(idx, f.key);
 
                     // OCR token chips for this field
                     const availableTokens = expandedIdx === idx && recordCellTokens.length > 0
                       ? getAvailableTokens(f.key, isDateField)
                       : [];
 
+                    const fieldFlagReasons = fieldScoring?.reasons?.filter((r: string) => r !== 'FIELD_OK') || [];
+                    const fieldNeedsReview = fieldScoring?.needs_review && fieldFlagReasons.length > 0;
+
                     return (
-                      <Box key={f.key}>
+                      <Box key={f.key} sx={fieldNeedsReview ? {
+                        borderLeft: '3px solid',
+                        borderColor: (fieldScoring?.field_score ?? 1) < 0.4 ? 'error.main' : 'warning.main',
+                        pl: 1,
+                        borderRadius: 0.5,
+                      } : undefined}>
                         <TextField
                           label={f.label + (f.required ? ' *' : '')}
                           size="small"
@@ -747,8 +974,8 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
                             if (externalFocusedField === f.key) onFieldFocus?.(null);
                           }}
                           disabled={isFinalized}
-                          error={!!dateError}
-                          helperText={dateError}
+                          error={!!dateError || (fieldScoring?.field_score !== undefined && fieldScoring.field_score < 0.4)}
+                          helperText={dateError || (fieldFlagReasons.length > 0 ? fieldFlagReasons.map((r: string) => reasonLabel[r]?.label || r).join(', ') : undefined)}
                           InputLabelProps={{ shrink: true }}
                           sx={isFocused ? {
                             '& .MuiOutlinedInput-root': {
@@ -817,7 +1044,8 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
                 </Stack>
               </AccordionDetails>
             </Accordion>
-          ))}
+          );
+          })}
         </Stack>
       </Box>
 
