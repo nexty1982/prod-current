@@ -245,6 +245,7 @@ const OMDailyPage: React.FC = () => {
 
   // State
   const [activeTab, setActiveTab] = useState(0);
+  const [selectedHorizon, setSelectedHorizon] = useState('');
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [extended, setExtended] = useState<ExtendedDashboard | null>(null);
   const [items, setItems] = useState<DailyItem[]>([]);
@@ -298,6 +299,7 @@ const OMDailyPage: React.FC = () => {
   const [csNewType, setCsNewType] = useState('feature');
   const [csNewStrategy, setCsNewStrategy] = useState('stage_then_promote');
   const [csExistingList, setCsExistingList] = useState<{ id: number; code: string; title: string; status: string }[]>([]);
+  const [csList, setCsList] = useState<{ change_set_id: number; code: string; title: string; status: string }[]>([]);
   const [csSelectedId, setCsSelectedId] = useState<number | null>(null);
   const [csCreating, setCsCreating] = useState(false);
 
@@ -367,7 +369,7 @@ const OMDailyPage: React.FC = () => {
         showToast(`Added ${selectedIds.size} items to change set`);
         setCsDialogOpen(false);
         clearSelection();
-        fetchItems(activeTab > 0 ? HORIZONS[activeTab - 1] : undefined);
+        fetchItems(selectedHorizon || undefined);
       }
     } catch (err: any) {
       showToast(err.response?.data?.error || 'Failed', 'error');
@@ -385,7 +387,8 @@ const OMDailyPage: React.FC = () => {
   // ─── Set initial tab based on URL param ──────────────────────────
   useEffect(() => {
     if (initialHorizon && HORIZONS.includes(initialHorizon)) {
-      setActiveTab(HORIZONS.indexOf(initialHorizon) + 1);
+      setSelectedHorizon(initialHorizon);
+      setActiveTab(1);
     }
   }, [initialHorizon]);
 
@@ -511,7 +514,7 @@ const OMDailyPage: React.FC = () => {
             showToast(`Sync complete: ${data.summary.created} created, ${data.summary.updated} updated, ${data.summary.pulled} pulled`);
           }
           fetchGhStatus();
-          fetchItems(activeTab === 0 ? undefined : HORIZONS[activeTab - 1]);
+          fetchItems(selectedHorizon || undefined);
           fetchDashboard();
         }
       } catch {}
@@ -561,13 +564,22 @@ const OMDailyPage: React.FC = () => {
   // Cleanup polling on unmount
   useEffect(() => () => stopSyncPolling(), [stopSyncPolling]);
 
+  // Fetch active change sets for pipeline overview
+  const fetchCsList = useCallback(async () => {
+    try {
+      const res = await apiClient.get('/admin/change-sets');
+      const items = (res.data.items || []).filter((cs: any) => !['promoted', 'rolled_back', 'rejected'].includes(cs.status));
+      setCsList(items.map((cs: any) => ({ change_set_id: cs.id, code: cs.code, title: cs.title, status: cs.status })));
+    } catch { setCsList([]); }
+  }, []);
+
   // Initial load
   useEffect(() => {
     setLoading(true);
-    Promise.all([fetchDashboard(), fetchExtended(), fetchCategories(), fetchGhStatus(), fetchBuildInfo()]).finally(() => setLoading(false));
+    Promise.all([fetchDashboard(), fetchExtended(), fetchCategories(), fetchGhStatus(), fetchBuildInfo(), fetchCsList()]).finally(() => setLoading(false));
   }, []);
 
-  // Auto-sync today's commits when 24-hour tab selected
+  // Auto-sync today's commits when items tab is first opened
   const commitsSyncedRef = useRef(false);
   useEffect(() => {
     if (activeTab === 1 && !commitsSyncedRef.current) {
@@ -580,7 +592,7 @@ const OMDailyPage: React.FC = () => {
         .then(r => r.json())
         .then(data => {
           if (data.synced > 0) {
-            fetchItems('1');
+            fetchItems(selectedHorizon || undefined);
             fetchDashboard();
           }
         })
@@ -588,17 +600,16 @@ const OMDailyPage: React.FC = () => {
     }
   }, [activeTab]);
 
-  // Fetch items when tab or filters change
+  const CHANGELOG_TAB = HORIZONS.length + 1;
+
+  // Fetch items when tab, horizon, or filters change
   useEffect(() => {
-    if (activeTab >= 1 && activeTab <= HORIZONS.length) {
-      fetchItems(HORIZONS[activeTab - 1]);
+    if (activeTab >= 1 && activeTab !== CHANGELOG_TAB) {
+      fetchItems(selectedHorizon || undefined);
     } else if (activeTab === 0) {
       fetchItems();
     }
-  }, [activeTab, fetchItems]);
-
-  // Load changelog when changelog tab is active
-  const CHANGELOG_TAB = HORIZONS.length + 1;
+  }, [activeTab, selectedHorizon, fetchItems]);
   useEffect(() => {
     if (activeTab === CHANGELOG_TAB) {
       fetchChangelog();
@@ -626,7 +637,7 @@ const OMDailyPage: React.FC = () => {
       });
       if (resp.ok) {
         showToast(editingItem ? 'Item updated' : 'Item created');
-        fetchItems(activeTab === 0 ? undefined : HORIZONS[activeTab - 1]);
+        fetchItems(selectedHorizon || undefined);
         fetchDashboard();
         fetchExtended();
         fetchCategories();
@@ -640,7 +651,7 @@ const OMDailyPage: React.FC = () => {
     try {
       await fetch(`/api/om-daily/items/${id}`, { method: 'DELETE', credentials: 'include' });
       showToast('Item deleted');
-      fetchItems(activeTab === 0 ? undefined : HORIZONS[activeTab - 1]);
+      fetchItems(selectedHorizon || undefined);
       fetchDashboard();
       fetchExtended();
     } catch { showToast('Failed to delete', 'error'); }
@@ -653,14 +664,14 @@ const OMDailyPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       });
-      fetchItems(activeTab === 0 ? undefined : HORIZONS[activeTab - 1]);
+      fetchItems(selectedHorizon || undefined);
       fetchDashboard();
       fetchExtended();
     } catch {}
   };
 
   const openNewDialog = () => {
-    const defaultHorizon = activeTab === 0 ? '7' : HORIZONS[activeTab - 1];
+    const defaultHorizon = selectedHorizon || '7';
     setEditingItem(null);
     setForm({ title: '', description: '', horizon: defaultHorizon, status: 'todo', priority: 'medium', category: '', due_date: '', agent_tool: '', branch_type: '' });
     setDialogOpen(true);
@@ -718,10 +729,10 @@ const OMDailyPage: React.FC = () => {
         {/* ── Top KPI Row ── */}
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 2, mb: 3 }}>
           {[
-            { value: dashboard.totalActive, label: 'Active Items', color: '#1976d2', icon: <AssignmentIcon sx={{ fontSize: 20 }} />, action: () => { setFilterStatus(''); setFilterDue(''); setActiveTab(1); } },
-            { value: dashboard.overdue, label: 'Overdue', color: '#f44336', icon: <WarningIcon sx={{ fontSize: 20 }} />, action: dashboard.overdue > 0 ? () => { setFilterStatus(''); setFilterDue('overdue'); setActiveTab(1); } : undefined },
-            { value: dashboard.dueToday, label: 'Due Today', color: '#ff9800', icon: <ScheduleIcon sx={{ fontSize: 20 }} />, action: dashboard.dueToday > 0 ? () => { setFilterStatus(''); setFilterDue('today'); setActiveTab(1); } : undefined },
-            { value: dashboard.recentlyCompleted, label: 'Done (7d)', color: '#4caf50', icon: <CheckCircleIcon sx={{ fontSize: 20 }} />, action: () => { setFilterDue(''); setFilterStatus('done'); setActiveTab(1); } },
+            { value: dashboard.totalActive, label: 'Active Items', color: '#1976d2', icon: <AssignmentIcon sx={{ fontSize: 20 }} />, action: () => { setFilterStatus(''); setFilterDue(''); setSelectedHorizon(''); setActiveTab(1); } },
+            { value: dashboard.overdue, label: 'Overdue', color: '#f44336', icon: <WarningIcon sx={{ fontSize: 20 }} />, action: dashboard.overdue > 0 ? () => { setFilterStatus(''); setFilterDue('overdue'); setSelectedHorizon(''); setActiveTab(1); } : undefined },
+            { value: dashboard.dueToday, label: 'Due Today', color: '#ff9800', icon: <ScheduleIcon sx={{ fontSize: 20 }} />, action: dashboard.dueToday > 0 ? () => { setFilterStatus(''); setFilterDue('today'); setSelectedHorizon(''); setActiveTab(1); } : undefined },
+            { value: dashboard.recentlyCompleted, label: 'Done (7d)', color: '#4caf50', icon: <CheckCircleIcon sx={{ fontSize: 20 }} />, action: () => { setFilterDue(''); setFilterStatus('done'); setSelectedHorizon(''); setActiveTab(1); } },
             { value: `${overallPct}%`, label: 'Overall Progress', color: '#8c249d', icon: <TrendingUpIcon sx={{ fontSize: 20 }} /> },
           ].map((kpi, i) => (
             <Paper key={i} onClick={kpi.action} sx={{ p: 2, textAlign: 'center', border: `1px solid ${isDark ? '#333' : '#e8e8e8'}`, cursor: kpi.action ? 'pointer' : 'default', transition: 'all 0.15s', '&:hover': kpi.action ? { borderColor: kpi.color, transform: 'translateY(-1px)' } : {} }}>
@@ -747,7 +758,7 @@ const OMDailyPage: React.FC = () => {
             {extended?.inProgressItems && extended.inProgressItems.length > 0 ? (
               <Box>
                 {extended.inProgressItems.slice(0, 8).map((item) => (
-                  <Box key={item.id} onClick={() => { setFilterStatus('in_progress'); setFilterDue(''); setActiveTab(1); }} sx={{
+                  <Box key={item.id} onClick={() => { setFilterStatus('in_progress'); setFilterDue(''); setSelectedHorizon(''); setActiveTab(1); }} sx={{
                     display: 'flex', alignItems: 'center', gap: 1, py: 1, cursor: 'pointer',
                     borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`,
                     '&:last-child': { borderBottom: 'none' },
@@ -837,7 +848,7 @@ const OMDailyPage: React.FC = () => {
             {extended?.dueSoon && extended.dueSoon.length > 0 ? (
               <Box>
                 {extended.dueSoon.slice(0, 6).map((item) => (
-                  <Box key={item.id} onClick={() => { setFilterDue('soon'); setFilterStatus(''); setActiveTab(1); }} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.8, cursor: 'pointer', borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`, '&:last-child': { borderBottom: 'none' }, '&:hover': { bgcolor: alpha('#ff9800', 0.06) } }}>
+                  <Box key={item.id} onClick={() => { setFilterDue('soon'); setFilterStatus(''); setSelectedHorizon(''); setActiveTab(1); }} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.8, cursor: 'pointer', borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`, '&:last-child': { borderBottom: 'none' }, '&:hover': { bgcolor: alpha('#ff9800', 0.06) } }}>
                     <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: PRIORITY_COLORS[item.priority] || '#999', flexShrink: 0 }} />
                     <Typography variant="body2" sx={{ flex: 1, fontSize: '0.82rem' }} noWrap>{item.title}</Typography>
                     {renderStatusChip(item.status)}
@@ -852,6 +863,38 @@ const OMDailyPage: React.FC = () => {
             )}
           </Paper>
         </Box>
+
+        {/* ── Change Set Pipeline ── */}
+        {csList.length > 0 && (
+          <Paper sx={{ p: 2.5, mb: 3, border: `1px solid ${isDark ? '#333' : '#e8e8e8'}` }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PackageIcon sx={{ color: '#9c27b0', fontSize: 20 }} />
+                <Typography variant="subtitle1" fontWeight={700}>Change Set Pipeline</Typography>
+              </Box>
+              <Button size="small" onClick={() => navigate('/admin/control-panel/om-daily/change-sets')}>View All</Button>
+            </Box>
+            {csList.filter(cs => ['staged', 'in_review', 'approved', 'ready_for_staging', 'active'].includes(cs.status)).length === 0 ? (
+              <Typography variant="body2" color="text.secondary">No change sets need attention</Typography>
+            ) : (
+              <Box>
+                {csList.filter(cs => ['staged', 'in_review', 'approved', 'ready_for_staging', 'active'].includes(cs.status)).map(cs => (
+                  <Box key={cs.change_set_id} onClick={() => navigate(`/admin/control-panel/om-daily/change-sets/${cs.change_set_id}`)}
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1, cursor: 'pointer', borderBottom: `1px solid ${isDark ? '#222' : '#f0f0f0'}`, '&:last-child': { borderBottom: 'none' }, '&:hover': { bgcolor: alpha('#9c27b0', 0.04) } }}>
+                    <Chip size="small" label={cs.status.replace(/_/g, ' ')} sx={{
+                      fontSize: '0.65rem', height: 20, fontWeight: 600,
+                      bgcolor: cs.status === 'in_review' ? alpha('#0288d1', 0.12) : cs.status === 'approved' ? alpha('#2e7d32', 0.12) : cs.status === 'staged' ? alpha('#9c27b0', 0.12) : cs.status === 'ready_for_staging' ? alpha('#ed6c02', 0.12) : alpha('#1976d2', 0.12),
+                      color: cs.status === 'in_review' ? '#0288d1' : cs.status === 'approved' ? '#2e7d32' : cs.status === 'staged' ? '#9c27b0' : cs.status === 'ready_for_staging' ? '#ed6c02' : '#1976d2',
+                    }} />
+                    <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#9c27b0', fontWeight: 600 }}>{cs.code}</Typography>
+                    <Typography variant="body2" sx={{ flex: 1 }} noWrap>{cs.title}</Typography>
+                    <ArrowForwardIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Paper>
+        )}
 
         {/* ── Phase Tracking ── */}
         {extended?.phaseGroups && extended.phaseGroups.length > 0 && (
@@ -989,7 +1032,7 @@ const OMDailyPage: React.FC = () => {
               <Paper
                 key={h}
                 sx={{ p: 2, cursor: 'pointer', border: `1px solid ${isDark ? '#333' : '#e0e0e0'}`, '&:hover': { borderColor: '#00897b', bgcolor: alpha('#00897b', 0.03) } }}
-                onClick={() => setActiveTab(idx + 1)}
+                onClick={() => { setSelectedHorizon(h); setActiveTab(1); }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#00897b' }}>{HORIZON_LABELS[h]}</Typography>
@@ -1058,6 +1101,13 @@ const OMDailyPage: React.FC = () => {
             InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }}
             sx={{ minWidth: 200 }}
           />
+          <FormControl size="small" sx={{ minWidth: 130 }}>
+            <InputLabel>Horizon</InputLabel>
+            <Select value={selectedHorizon} label="Horizon" onChange={(e) => setSelectedHorizon(e.target.value)}>
+              <MenuItem value="">All Horizons</MenuItem>
+              {HORIZONS.map(h => <MenuItem key={h} value={h}>{HORIZON_LABELS[h]} Plan</MenuItem>)}
+            </Select>
+          </FormControl>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Status</InputLabel>
             <Select value={filterStatus} label="Status" onChange={(e) => setFilterStatus(e.target.value)}>
@@ -1091,6 +1141,9 @@ const OMDailyPage: React.FC = () => {
             />
           )}
           <Box sx={{ flex: 1 }} />
+          <Button variant="outlined" size="small" startIcon={<PackageIcon />} onClick={() => navigate('/admin/control-panel/om-daily/change-sets')}>
+            Change Sets
+          </Button>
           <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={openNewDialog}>
             New Item
           </Button>
@@ -1486,15 +1539,19 @@ const OMDailyPage: React.FC = () => {
       <Breadcrumb title="OM Daily — Work Pipelines" items={BCrumb} />
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         <Paper sx={{ mb: 2 }}>
-          <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} variant="scrollable" scrollButtons="auto">
+          <Tabs value={activeTab <= 1 ? activeTab : activeTab === CHANGELOG_TAB ? 2 : 1} onChange={(_, v) => {
+            if (v === 0) setActiveTab(0);
+            else if (v === 1) setActiveTab(1);
+            else if (v === 2) setActiveTab(CHANGELOG_TAB);
+          }} variant="scrollable" scrollButtons="auto">
             <Tab label="Overview" />
-            {HORIZONS.map(h => <Tab key={h} label={`${HORIZON_LABELS[h]} Plan`} />)}
+            <Tab label="Items" />
             <Tab label="Changelog" />
           </Tabs>
         </Paper>
 
         {activeTab === 0 && renderOverview()}
-        {activeTab >= 1 && activeTab <= HORIZONS.length && renderItemList()}
+        {activeTab === 1 && renderItemList()}
         {activeTab === CHANGELOG_TAB && renderChangelog()}
       </Box>
 
