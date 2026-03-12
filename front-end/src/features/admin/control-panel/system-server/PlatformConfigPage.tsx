@@ -11,6 +11,7 @@ import {
     Launch as LaunchIcon,
     Edit as MenuEditIcon,
     ViewModule as MenuMgmtIcon,
+    Security as SSLIcon,
     Tune as SettingsConsoleIcon,
     Schedule as TasksIcon,
 } from '@mui/icons-material';
@@ -33,6 +34,7 @@ const TOOLS = [
   { title: 'Settings Console', description: 'VMware-style key-value settings management with override scopes and audit history', href: '/admin/settings?tab=settings-console', icon: <SettingsConsoleIcon /> },
   { title: 'Component Manager', description: 'Manage platform UI components and feature toggles', href: '/admin/settings?tab=components', icon: <ComponentsIcon /> },
   { title: 'Site Map', description: 'Full navigational map of all routes, admin and user views', href: '/site-map', icon: <MenuMgmtIcon /> },
+  { title: 'SSL Certificates', description: 'View, update, and install SSL/TLS certificates for the site', href: '/admin/control-panel/system-server/platform-config/ssl-certificates', icon: <SSLIcon /> },
 ];
 
 const PlatformConfigPage: React.FC = () => {

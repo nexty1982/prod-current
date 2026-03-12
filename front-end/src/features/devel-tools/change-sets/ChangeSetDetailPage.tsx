@@ -95,6 +95,7 @@ interface ChangeSetDetail {
   reviewed_by_email: string | null;
   review_notes: string | null;
   rejection_reason: string | null;
+  pre_promote_snapshot_id: string | null;
   staged_at: string | null;
   approved_at: string | null;
   promoted_at: string | null;
@@ -154,6 +155,7 @@ const EVENT_ICONS: Record<string, string> = {
   rejected: '❌',
   promoted: '🚀',
   rolled_back: '⏪',
+  fast_forwarded: '⏩',
   note_added: '📝',
 };
 
@@ -165,6 +167,10 @@ const ChangeSetDetailPage: React.FC = () => {
   const [cs, setCs] = useState<ChangeSetDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Snapshot restore
+  const [restoring, setRestoring] = useState(false);
+  const [restoreResult, setRestoreResult] = useState<{ restored: number; preRestoreSnapshotId: string | null } | null>(null);
 
   // Dialogs
   const [transitionTarget, setTransitionTarget] = useState<string | null>(null);
@@ -545,6 +551,59 @@ const ChangeSetDetailPage: React.FC = () => {
           )}
         </Paper>
 
+        {/* ── Pre-Promote Snapshot (Code Safety) ──────────────────────── */}
+        {cs.pre_promote_snapshot_id && ['promoted', 'rolled_back'].includes(cs.status) && (
+          <Paper elevation={0} sx={{ p: 3, border: `1px solid ${theme.palette.divider}`, bgcolor: alpha(theme.palette.warning.main, 0.04) }}>
+            <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
+              <WarningIcon sx={{ mr: 1, verticalAlign: 'middle', fontSize: 20, color: theme.palette.warning.main }} />
+              Pre-Promote Snapshot
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              A snapshot was automatically created before this change set was promoted.
+              You can restore this snapshot to revert to the exact state before production changes were applied.
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+              <Chip label={`Snapshot: ${cs.pre_promote_snapshot_id}`} sx={{ fontFamily: 'monospace' }} />
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={() => window.open(`/admin/control-panel/system-server/code-safety`, '_blank')}
+              >
+                View in Code Safety
+              </Button>
+              <Button
+                size="small"
+                variant="contained"
+                color="warning"
+                disabled={restoring}
+                onClick={async () => {
+                  if (!confirm(`Restore snapshot ${cs.pre_promote_snapshot_id}? This will revert files to their pre-promote state. A safety snapshot of the current state will be created first.`)) return;
+                  setRestoring(true);
+                  try {
+                    const res = await apiClient.post(`/snapshots/${cs.pre_promote_snapshot_id}/restore`);
+                    setRestoreResult({ restored: res.data.restored, preRestoreSnapshotId: res.data.preRestoreSnapshotId });
+                    setToast(`Restored ${res.data.restored} files from snapshot`);
+                  } catch (err: any) {
+                    alert(err.response?.data?.error || 'Restore failed');
+                  } finally {
+                    setRestoring(false);
+                  }
+                }}
+              >
+                {restoring ? 'Restoring...' : 'Restore from Snapshot'}
+              </Button>
+            </Box>
+            {restoreResult && (
+              <Alert severity="success" sx={{ mt: 2 }}>
+                Restored {restoreResult.restored} file(s).
+                {restoreResult.preRestoreSnapshotId && (
+                  <> A safety snapshot of the pre-restore state was saved as <code>{restoreResult.preRestoreSnapshotId}</code>.</>
+                )}
+              </Alert>
+            )}
+          </Paper>
+        )}
+
         {/* ── Linked Items ──────────────────────────────────────────────── */}
         <Paper elevation={0} sx={{ p: 3, border: `1px solid ${theme.palette.divider}` }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -703,10 +762,19 @@ const ChangeSetDetailPage: React.FC = () => {
           )}
           {transitionTarget === 'rolled_back' && (
             <Alert severity="warning" sx={{ mt: 1 }}>
-              This will mark the change set as rolled back. You must manually restore from snapshot or deploy a revert.
+              This will mark the change set as rolled back.
+              {cs.pre_promote_snapshot_id
+                ? <> A pre-promote snapshot (<code>{cs.pre_promote_snapshot_id}</code>) is available — you can restore it after marking as rolled back.</>
+                : <> You must manually restore from a snapshot or deploy a revert.</>
+              }
             </Alert>
           )}
-          {!['rejected', 'approved', 'rolled_back'].includes(transitionTarget || '') && (
+          {transitionTarget === 'promoted' && (
+            <Alert severity="info" sx={{ mt: 1 }}>
+              A pre-promote snapshot will be automatically created before applying production changes. You can restore from it if problems occur.
+            </Alert>
+          )}
+          {!['rejected', 'approved', 'rolled_back', 'promoted'].includes(transitionTarget || '') && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               This will transition <strong>{cs.code}</strong> from <em>{cs.status}</em> to <em>{transitionTarget}</em>.
             </Typography>

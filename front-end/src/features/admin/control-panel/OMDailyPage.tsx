@@ -1165,6 +1165,15 @@ const OMDailyPage: React.FC = () => {
           <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={openAddToCsDialog}>
             Add to Existing
           </Button>
+          <Button
+            size="small"
+            variant="outlined"
+            color="secondary"
+            startIcon={<ArrowForwardIcon />}
+            onClick={() => navigate(`/admin/control-panel/om-daily/sdlc-wizard?mode=new-work&items=${Array.from(selectedIds).join(',')}`)}
+          >
+            Send to SDLC Wizard
+          </Button>
           <Button size="small" color="inherit" onClick={clearSelection}>
             Clear
           </Button>

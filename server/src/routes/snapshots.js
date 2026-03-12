@@ -160,6 +160,71 @@ router.delete('/:id', (req, res) => {
   }
 });
 
+// ─── Restore a snapshot ──────────────────────────────────────
+router.post('/:id/restore', (req, res) => {
+  try {
+    const snapDir = path.join(SNAPSHOT_DIR, req.params.id);
+    if (!fs.existsSync(snapDir)) {
+      return res.status(404).json({ error: 'Snapshot not found' });
+    }
+
+    const filelistPath = path.join(snapDir, 'filelist.txt');
+    if (!fs.existsSync(filelistPath)) {
+      return res.status(400).json({ error: 'Snapshot has no file list' });
+    }
+
+    // First, create a pre-restore snapshot of current state
+    let preRestoreId = null;
+    try {
+      const output = execSync(`${SNAPSHOT_SCRIPT} save "pre-restore-${req.params.id}"`, {
+        cwd: PROJECT_ROOT,
+        encoding: 'utf-8',
+        timeout: 10000,
+      });
+      const match = output.match(/Snapshot saved:\s*(\S+)/);
+      preRestoreId = match ? match[1].replace(/\x1b\[[0-9;]*m/g, '') : null;
+    } catch { /* no uncommitted changes to save — that's fine */ }
+
+    const files = fs.readFileSync(filelistPath, 'utf-8').trim().split('\n').filter(Boolean);
+    let restored = 0;
+    let skipped = 0;
+
+    for (const file of files) {
+      const snapFile = path.join(snapDir, 'files', file);
+      const currFile = path.join(PROJECT_ROOT, file);
+
+      if (!fs.existsSync(snapFile)) continue;
+
+      // Skip if identical
+      if (fs.existsSync(currFile)) {
+        const snapContent = fs.readFileSync(snapFile);
+        const currContent = fs.readFileSync(currFile);
+        if (snapContent.equals(currContent)) {
+          skipped++;
+          continue;
+        }
+      }
+
+      // Ensure directory exists and copy
+      const dir = path.dirname(currFile);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.copyFileSync(snapFile, currFile);
+      restored++;
+    }
+
+    res.json({
+      success: true,
+      restored,
+      skipped,
+      totalFiles: files.length,
+      preRestoreSnapshotId: preRestoreId,
+    });
+  } catch (err) {
+    console.error('Error restoring snapshot:', err);
+    res.status(500).json({ error: 'Failed to restore snapshot', details: err.message });
+  }
+});
+
 // ─── Git status summary ───────────────────────────────────────
 router.get('/system/git-status', (req, res) => {
   try {

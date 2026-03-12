@@ -1,6 +1,7 @@
 import { SmartToy as BotIcon } from '@mui/icons-material';
-import { Avatar, Box, CircularProgress, Stack, Typography } from '@mui/material';
+import { Avatar, Box, CircularProgress, Link, Stack, Typography } from '@mui/material';
 import React, { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { OmAssistantContext, OmAssistantMessage } from './omAssistant.types';
 
 interface OmAssistantMessagesProps {
@@ -17,6 +18,7 @@ const welcomeMessages: Record<string, string> = {
 
 export default function OmAssistantMessages({ messages, isLoading, context }: OmAssistantMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -49,19 +51,37 @@ export default function OmAssistantMessages({ messages, isLoading, context }: Om
               <BotIcon sx={{ fontSize: 18 }} />
             </Avatar>
           )}
-          <Box
-            sx={{
-              bgcolor: msg.role === 'user' ? 'primary.main' : 'grey.100',
-              color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
-              borderRadius: 2,
-              px: 1.5,
-              py: 1,
-              maxWidth: '85%',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-            }}
-          >
-            <Typography variant="body2">{msg.content}</Typography>
+          <Box sx={{ maxWidth: '85%' }}>
+            <Box
+              sx={{
+                bgcolor: msg.role === 'user' ? 'primary.main' : 'grey.100',
+                color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
+                borderRadius: 2,
+                px: 1.5,
+                py: 1,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}
+            >
+              <Typography variant="body2">{msg.content}</Typography>
+            </Box>
+            {/* Subtle work item link */}
+            {msg.role === 'assistant' && msg.workItemId && (
+              <Typography
+                variant="caption"
+                sx={{ mt: 0.25, display: 'block', color: 'text.disabled', fontSize: '0.65rem' }}
+              >
+                Work item{' '}
+                <Link
+                  component="button"
+                  variant="caption"
+                  sx={{ fontSize: '0.65rem', verticalAlign: 'baseline' }}
+                  onClick={() => navigate(`/admin/control-panel/om-daily?tab=1&search=%23${msg.workItemId}`)}
+                >
+                  #{msg.workItemId}
+                </Link>
+              </Typography>
+            )}
           </Box>
         </Stack>
       ))}

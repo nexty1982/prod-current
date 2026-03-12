@@ -75,6 +75,11 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'crm', name: 'CRM', stage: 2, route: '/devel-tools/crm', since: '2026-02-01' },
   { id: 'tutorial-management', name: 'Tutorial Management', stage: 2, route: '/admin/tutorials', description: 'Super admin tutorial/welcome system management', since: '2026-02-21' },
   { id: 'change-sets', name: 'Change Sets', stage: 3, route: '/admin/control-panel/om-daily/change-sets', description: 'SDLC delivery container for grouping, staging, reviewing, and promoting work items', since: '2026-03-08' },
+  { id: 'prompt-plans', name: 'Prompt Plans', stage: 2, route: '/devel-tools/prompt-plans', description: 'Ordered sequences of AI prompts for complex initiatives', since: '2026-03-08' },
+  { id: 'page-editor', name: 'Page Content Editor', stage: 2, route: '/devel-tools/page-editor', description: 'CMS for editing frontend page text from the web UI', since: '2026-03-08' },
+  { id: 'records-landing-branding', name: 'Records Landing Branding', stage: 2, route: '/admin/church-branding/records-landing', description: 'Church-level customization for records landing page header', since: '2026-03-10' },
+  { id: 'code-change-detection', name: 'Code Change Detection', stage: 2, route: '/admin/ai/code-changes', description: 'Tracks page content edits, notifies admins, and triggers frontend builds', since: '2026-03-08' },
+  { id: 'sdlc-wizard', name: 'SDLC Pipeline Wizard', stage: 2, route: '/admin/control-panel/om-daily/sdlc-wizard', description: 'Wizard-driven SDLC pipeline management', since: '2026-03-12' },
 
   // ── Stage 1: Prototype ─────────────────────────────────────
   { id: 'us-church-map', name: 'US Church Map', stage: 1, route: '/devel-tools/us-church-map', since: '2026-02-01' },

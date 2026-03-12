@@ -713,7 +713,7 @@ async function generateChangelog(dateStr) {
 /**
  * Build branded HTML email for a changelog entry
  */
-function buildChangelogEmailHtml(entry, pipelineItems) {
+function buildChangelogEmailHtml(entry, pipelineItems, changeSets = [], unassignedItems = []) {
   const commits = typeof entry.commits === 'string' ? JSON.parse(entry.commits) : entry.commits;
   const filesChanged = typeof entry.files_changed === 'string' ? JSON.parse(entry.files_changed) : (entry.files_changed || {});
   const matchedItems = typeof entry.matched_items === 'string' ? JSON.parse(entry.matched_items) : (entry.matched_items || []);
@@ -736,9 +736,47 @@ function buildChangelogEmailHtml(entry, pipelineItems) {
     </tr>`;
   }).join('');
 
+  // ── Change Sets section ──
+  const csStatusColor = (status) => {
+    const colors = { in_review: '#9c27b0', staged: '#2196f3', ready_for_staging: '#009688', active: '#ff9800', draft: '#9e9e9e' };
+    return colors[status] || '#9e9e9e';
+  };
+  const csStatusLabel = (status) => status.replace(/_/g, ' ');
+
+  const changeSetSection = changeSets.length > 0 ? `
+    <h3 style="color:#8c249d;margin-top:24px;">Change Sets</h3>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+      <tr style="background:#f5f5f5;">
+        <th style="text-align:left;padding:8px;font-size:12px;">Code</th>
+        <th style="text-align:left;padding:8px;font-size:12px;">Title</th>
+        <th style="text-align:left;padding:8px;font-size:12px;">Status</th>
+        <th style="text-align:left;padding:8px;font-size:12px;">Items</th>
+        <th style="text-align:left;padding:8px;font-size:12px;">Branch</th>
+      </tr>
+      ${changeSets.map(cs => `<tr>
+        <td style="padding:8px;border-bottom:1px solid #eee;font-family:monospace;font-size:13px;color:#8c249d;">${cs.code}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;font-size:13px;">${cs.title}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;"><span style="background:${csStatusColor(cs.status)};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;">${csStatusLabel(cs.status)}</span></td>
+        <td style="padding:8px;border-bottom:1px solid #eee;font-size:12px;text-align:center;">${cs.item_count}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;font-size:11px;font-family:monospace;color:#666;">${cs.git_branch || '—'}</td>
+      </tr>`).join('')}
+    </table>` : '';
+
+  const unassignedSection = unassignedItems.length > 0 ? `
+    <h3 style="color:#ff9800;margin-top:24px;">Unassigned Pipeline Items</h3>
+    <p style="font-size:12px;color:#666;margin:4px 0 8px;">These items are not assigned to any change set.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+      <tr style="background:#f5f5f5;"><th style="text-align:left;padding:8px;font-size:12px;">Item</th><th style="text-align:left;padding:8px;font-size:12px;">Status</th><th style="text-align:left;padding:8px;font-size:12px;">Priority</th></tr>
+      ${unassignedItems.map(i => `<tr>
+        <td style="padding:8px;border-bottom:1px solid #eee;font-size:13px;">${i.title}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;"><span style="background:${statusColor(i.status)};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;">${i.status}</span></td>
+        <td style="padding:8px;border-bottom:1px solid #eee;font-size:12px;">${i.priority || ''}</td>
+      </tr>`).join('')}
+    </table>` : '';
+
   const activeItems = (pipelineItems || []).filter(i => i.status === 'in_progress' || i.status === 'review');
   const pipelineSection = activeItems.length > 0 ? `
-    <h3 style="color:#8c249d;margin-top:24px;">Active Pipeline Items</h3>
+    <h3 style="color:#8c249d;margin-top:24px;">All Active Pipeline Items</h3>
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
       <tr style="background:#f5f5f5;"><th style="text-align:left;padding:8px;font-size:12px;">Item</th><th style="text-align:left;padding:8px;font-size:12px;">Status</th><th style="text-align:left;padding:8px;font-size:12px;">Priority</th></tr>
       ${activeItems.map(i => `<tr>
@@ -761,7 +799,7 @@ function buildChangelogEmailHtml(entry, pipelineItems) {
             <div style="font-size:12px;color:#666;">Commits</div>
           </div>
           <div style="flex:1;background:#f0f5f0;padding:12px;border-radius:8px;text-align:center;">
-            <div style="font-size:24px;font-weight:700;color:#4caf50;">${filesChanged.added + filesChanged.modified + filesChanged.deleted}</div>
+            <div style="font-size:24px;font-weight:700;color:#4caf50;">${(filesChanged.added || 0) + (filesChanged.modified || 0) + (filesChanged.deleted || 0)}</div>
             <div style="font-size:12px;color:#666;">Files Changed</div>
           </div>
           <div style="flex:1;background:#f5f5f0;padding:12px;border-radius:8px;text-align:center;">
@@ -774,6 +812,8 @@ function buildChangelogEmailHtml(entry, pipelineItems) {
           <tr style="background:#f5f5f5;"><th style="text-align:left;padding:8px;font-size:12px;">Hash</th><th style="text-align:left;padding:8px;font-size:12px;">Message</th><th style="text-align:left;padding:8px;font-size:12px;">Files</th><th style="text-align:left;padding:8px;font-size:12px;">Status</th></tr>
           ${commitRows}
         </table>
+        ${changeSetSection}
+        ${unassignedSection}
         ${pipelineSection}
       </div>
       <div style="background:#f5f5f5;padding:16px 24px;text-align:center;font-size:12px;color:#999;">OrthodoxMetrics &mdash; Daily Changelog</div>
@@ -802,7 +842,29 @@ async function generateAndEmailChangelog() {
      WHERE status NOT IN ('done','cancelled') ORDER BY FIELD(priority,'critical','high','medium','low')`
   );
 
-  const html = buildChangelogEmailHtml(entry, pipelineItems);
+  // Get active change sets
+  const [changeSets] = await pool.query(`
+    SELECT cs.id, cs.code, cs.title, cs.status, cs.priority, cs.git_branch, cs.change_type,
+           (SELECT COUNT(*) FROM change_set_items WHERE change_set_id = cs.id) AS item_count
+    FROM change_sets cs
+    WHERE cs.status NOT IN ('promoted', 'rejected', 'rolled_back')
+    ORDER BY FIELD(cs.status, 'in_review','staged','ready_for_staging','active','draft'),
+             cs.updated_at DESC
+  `);
+
+  // Find unassigned pipeline items
+  const assignedItemIds = new Set();
+  if (changeSets.length) {
+    const csIds = changeSets.map(cs => cs.id);
+    const [assigned] = await pool.query(
+      `SELECT DISTINCT om_daily_item_id FROM change_set_items WHERE change_set_id IN (${csIds.map(() => '?').join(',')})`,
+      csIds
+    );
+    assigned.forEach(r => assignedItemIds.add(r.om_daily_item_id));
+  }
+  const unassignedItems = pipelineItems.filter(i => !assignedItemIds.has(i.id));
+
+  const html = buildChangelogEmailHtml(entry, pipelineItems, changeSets, unassignedItems);
   const plainText = entry.summary || `Changelog for ${today}`;
 
   // Send email
@@ -941,7 +1003,29 @@ router.post('/changelog/email/:date', requireAuth, async (req, res) => {
        WHERE status NOT IN ('done','cancelled') ORDER BY FIELD(priority,'critical','high','medium','low')`
     );
 
-    const html = buildChangelogEmailHtml(entry, pipelineItems);
+    // Get active change sets
+    const [changeSets] = await pool.query(`
+      SELECT cs.id, cs.code, cs.title, cs.status, cs.priority, cs.git_branch, cs.change_type,
+             (SELECT COUNT(*) FROM change_set_items WHERE change_set_id = cs.id) AS item_count
+      FROM change_sets cs
+      WHERE cs.status NOT IN ('promoted', 'rejected', 'rolled_back')
+      ORDER BY FIELD(cs.status, 'in_review','staged','ready_for_staging','active','draft'),
+               cs.updated_at DESC
+    `);
+
+    // Find unassigned pipeline items
+    const assignedItemIds = new Set();
+    if (changeSets.length) {
+      const csIds = changeSets.map(cs => cs.id);
+      const [assigned] = await pool.query(
+        `SELECT DISTINCT om_daily_item_id FROM change_set_items WHERE change_set_id IN (${csIds.map(() => '?').join(',')})`,
+        csIds
+      );
+      assigned.forEach(r => assignedItemIds.add(r.om_daily_item_id));
+    }
+    const unassignedItems = pipelineItems.filter(i => !assignedItemIds.has(i.id));
+
+    const html = buildChangelogEmailHtml(entry, pipelineItems, changeSets, unassignedItems);
     const plainText = entry.summary || `Changelog for ${dateStr}`;
 
     const nodemailer = require('nodemailer');
@@ -1634,8 +1718,78 @@ router.post('/push-to-origin', requireAuth, requireRole(['super_admin']), async 
   }
 });
 
+/**
+ * Send staging review notifications to all super_admins (called by cron at 8 AM)
+ */
+async function sendStagingReviewNotifications() {
+  const pool = getPool();
+  const { sendNotification } = require('../utils/notifications');
+
+  // Gather change set stats
+  const [readyForStaging] = await pool.query(
+    `SELECT code, title FROM change_sets WHERE status = 'ready_for_staging'`
+  );
+  const [inReview] = await pool.query(
+    `SELECT code, title FROM change_sets WHERE status IN ('staged', 'in_review')`
+  );
+  const [active] = await pool.query(
+    `SELECT code, title FROM change_sets WHERE status = 'active'`
+  );
+
+  // Count unassigned in_progress/review pipeline items
+  const [unassignedResult] = await pool.query(`
+    SELECT COUNT(*) AS cnt FROM om_daily_items odi
+    WHERE odi.status IN ('in_progress', 'review')
+      AND odi.id NOT IN (
+        SELECT csi.om_daily_item_id FROM change_set_items csi
+        JOIN change_sets cs ON cs.id = csi.change_set_id
+        WHERE cs.status NOT IN ('promoted', 'rejected', 'rolled_back')
+      )
+  `);
+
+  // Build message
+  const parts = [];
+  if (readyForStaging.length) {
+    parts.push(`${readyForStaging.length} change set(s) ready for staging: ${readyForStaging.map(c => c.code).join(', ')}`);
+  }
+  if (inReview.length) {
+    parts.push(`${inReview.length} change set(s) in review: ${inReview.map(c => c.code).join(', ')}`);
+  }
+  if (active.length) {
+    parts.push(`${active.length} active change set(s)`);
+  }
+  if (unassignedResult[0].cnt > 0) {
+    parts.push(`${unassignedResult[0].cnt} pipeline item(s) not assigned to any change set`);
+  }
+
+  if (parts.length === 0) {
+    console.log('[Staging Review] No actionable items — skipping notification');
+    return;
+  }
+
+  const message = parts.join('. ') + '.';
+
+  // Get all super_admin users
+  const [superAdmins] = await pool.query("SELECT id FROM users WHERE role = 'super_admin'");
+
+  for (const admin of superAdmins) {
+    try {
+      await sendNotification(admin.id, 'system_alert', 'Daily SDLC Review', message, {
+        priority: readyForStaging.length > 0 ? 'high' : 'normal',
+        actionUrl: '/admin/control-panel/om-daily/change-sets',
+        actionText: 'Review Change Sets',
+      });
+    } catch (err) {
+      console.error(`[Staging Review] Failed to notify user ${admin.id}:`, err.message);
+    }
+  }
+
+  console.log(`[Staging Review] Notified ${superAdmins.length} super_admin(s): ${message}`);
+}
+
 // Export cron functions on the router for access from index.ts
 router.generateAndEmailChangelog = generateAndEmailChangelog;
 router.fullSync = fullSync;
+router.sendStagingReviewNotifications = sendStagingReviewNotifications;
 
 module.exports = router;

@@ -5,6 +5,11 @@
  */
 
 const { getAppPool } = require('../config/db-compat');
+const { execSync } = require('child_process');
+const path = require('path');
+
+const SNAPSHOT_SCRIPT = path.resolve(__dirname, '../../../scripts/om-snapshot.sh');
+const PROJECT_ROOT = path.resolve(__dirname, '../../..');
 
 // ── Status lifecycle ────────────────────────────────────────────────────────
 
@@ -312,6 +317,13 @@ class ChangeSetService {
             { status: 409 }
           );
         }
+        // Create pre-promote snapshot before applying production changes
+        {
+          const snapshotId = this._createPrePromoteSnapshot(cs.code);
+          if (snapshotId) {
+            extraUpdates.pre_promote_snapshot_id = snapshotId;
+          }
+        }
         extraUpdates.prod_build_run_id = prod_build_run_id;
         extraUpdates.prod_commit_sha = prod_commit_sha;
         extraUpdates.promoted_at = new Date();
@@ -520,6 +532,106 @@ class ChangeSetService {
     return map;
   }
 
+  // ── FAST FORWARD ────────────────────────────────────────────────────────
+
+  async fastForward(id, userId, { staging_build_run_id, staging_commit_sha, prod_build_run_id, prod_commit_sha } = {}) {
+    const pool = getAppPool();
+    const cs = await this._getOrThrow(id);
+
+    // Only draft or active can be fast-forwarded
+    if (!['draft', 'active'].includes(cs.status)) {
+      throw Object.assign(
+        new Error(`Cannot fast-forward from '${cs.status}'. Only draft or active change sets can be fast-forwarded.`),
+        { status: 400 }
+      );
+    }
+
+    // Require git_branch
+    if (!cs.git_branch) {
+      throw Object.assign(new Error('Cannot fast-forward without a git_branch set on the change set'), { status: 400 });
+    }
+
+    // Require build metadata
+    if (!staging_build_run_id || !staging_commit_sha || !prod_build_run_id || !prod_commit_sha) {
+      throw Object.assign(
+        new Error('staging_build_run_id, staging_commit_sha, prod_build_run_id, and prod_commit_sha are all required for fast-forward'),
+        { status: 400 }
+      );
+    }
+
+    // Validate items ready
+    await this._validateItemsReady(id);
+
+    // Staging slot must be free
+    await this._assertStagingSlotAvailable(id);
+
+    // Create pre-promote snapshot before applying production changes
+    const snapshotId = this._createPrePromoteSnapshot(cs.code);
+
+    const now = new Date();
+
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      // Set all fields in one atomic update
+      await conn.query(`
+        UPDATE change_sets SET
+          status = 'promoted',
+          staging_build_run_id = ?,
+          staging_commit_sha = ?,
+          staged_at = ?,
+          approved_commit_sha = ?,
+          reviewed_by = ?,
+          approved_at = ?,
+          prod_build_run_id = ?,
+          prod_commit_sha = ?,
+          promoted_at = ?,
+          pre_promote_snapshot_id = ?
+        WHERE id = ?
+      `, [
+        staging_build_run_id,
+        staging_commit_sha,
+        now,
+        staging_commit_sha,
+        userId,
+        now,
+        prod_build_run_id,
+        prod_commit_sha,
+        now,
+        snapshotId || null,
+        id,
+      ]);
+
+      // Log the fast_forwarded event
+      await conn.query(`
+        INSERT INTO change_set_events (change_set_id, event_type, from_status, to_status, user_id, message, metadata)
+        VALUES (?, 'fast_forwarded', ?, 'promoted', ?, ?, ?)
+      `, [
+        id,
+        cs.status,
+        userId,
+        `Fast-forwarded from ${cs.status} to promoted`,
+        JSON.stringify({
+          staging_build_run_id,
+          staging_commit_sha,
+          prod_build_run_id,
+          prod_commit_sha,
+          skipped_statuses: ['active', 'ready_for_staging', 'staged', 'in_review', 'approved'].filter(s => s !== cs.status),
+        }),
+      ]);
+
+      await conn.commit();
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+
+    return this.getById(id);
+  }
+
   // ── Release history ─────────────────────────────────────────────────────
 
   async getReleaseHistory(limit = 25, offset = 0) {
@@ -545,6 +657,31 @@ class ChangeSetService {
   }
 
   // ── PRIVATE ─────────────────────────────────────────────────────────────
+
+  /**
+   * Create a pre-promote snapshot and return the snapshot ID.
+   * Non-fatal: returns null if snapshot fails (e.g., no uncommitted changes).
+   */
+  _createPrePromoteSnapshot(csCode) {
+    try {
+      const label = `pre-promote-${csCode}`;
+      const output = execSync(`${SNAPSHOT_SCRIPT} save "${label}"`, {
+        cwd: PROJECT_ROOT,
+        encoding: 'utf-8',
+        timeout: 15000,
+      });
+      const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+      const match = clean.match(/Snapshot saved:\s*(\S+)/);
+      const snapshotId = match ? match[1] : null;
+      if (snapshotId) {
+        console.log(`[ChangeSet] Pre-promote snapshot created: ${snapshotId} for ${csCode}`);
+      }
+      return snapshotId;
+    } catch (err) {
+      console.warn(`[ChangeSet] Pre-promote snapshot skipped for ${csCode}:`, err.message);
+      return null;
+    }
+  }
 
   async _getOrThrow(id) {
     const pool = getAppPool();

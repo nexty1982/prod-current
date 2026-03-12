@@ -1,6 +1,12 @@
 import { registerAgGridModulesOnce } from '@/agGridModules';
+import AGGridErrorBoundary from '@/shared/ui/AGGridErrorBoundary';
 import AdvancedGridDialog from '@/components/AdvancedGridDialog';
 import { recordsEvents, useRecordsEvents } from '@/events/recordsEvents';
+import { useChurchRecordsLanding } from '@/hooks/useChurchRecordsLanding';
+import ChurchRecordsHeader from './ChurchRecordsHeader';
+import RecordsAnalyticsView from './RecordsAnalyticsView';
+import RecordsCardView from './RecordsCardView';
+import RecordsTimelineView from './RecordsTimelineView';
 import ModernRecordViewerModal from '@/features/records-centralized/common/ModernRecordViewerModal';
 import { getAgGridRowClassRules, getRecordRowStyle, isRecordNewWithin24Hours, isRecordUpdatedWithin24Hours, useNowReference } from '@/features/records-centralized/common/recordsHighlighting';
 import '@/features/records-centralized/common/recordsHighlighting.css';
@@ -10,9 +16,10 @@ import { FIELD_DEFINITIONS, RECORD_TYPES } from '@/features/records-centralized/
 import { getPersistedChurchId, getPersistedLastView, useRecordsPersistence } from '@/hooks/useRecordsPersistence';
 import churchService, { Church } from '@/shared/lib/churchService';
 import LookupService from '@/shared/lib/lookupService';
-import { ChevronUp, Download, Eye, FileBarChart, FileText, LayoutGrid, Lock, Pencil, Plus, Search, Trash2, Unlock, Upload, Users, X } from '@/shared/ui/icons';
+import { BarChart3, ChevronDown, ChevronUp, Clock, Download, Eye, FileBarChart, FileText, LayoutGrid, List, MoreVertical, Pencil, Plus, Search, Settings, Trash2, Upload, Users, X } from '@/shared/ui/icons';
 import { ChurchRecord } from '@/types/church-records-advanced.types';
 import { agGridIconMap } from '@/ui/agGridIcons';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { formatRecordDate } from '@/utils/formatDate';
 import CollaborationWizardDialog from '@/features/records-centralized/components/collaborationLinks/CollaborationWizardDialog';
 import {
@@ -35,6 +42,9 @@ import {
     IconButton,
     InputAdornment,
     InputLabel,
+    ListItemIcon,
+    ListItemText,
+    Menu,
     MenuItem,
     Paper,
     Select,
@@ -492,6 +502,46 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     setSelectedRecordType
   );
   
+  // Church records landing branding
+  const { branding: landingBranding, churchName: landingChurchName, isDefault: landingIsDefault, loading: landingLoading } =
+    useChurchRecordsLanding(selectedChurch || null);
+
+  // Sync activeView to the church's default_view when branding loads
+  const brandingDefaultViewApplied = useRef<number | null>(null);
+  useEffect(() => {
+    if (landingBranding?.default_view && brandingDefaultViewApplied.current !== selectedChurch) {
+      const dv = landingBranding.default_view;
+      if (['table', 'card', 'timeline', 'analytics'].includes(dv)) {
+        setActiveView(dv as ViewMode);
+        brandingDefaultViewApplied.current = selectedChurch;
+      }
+    }
+  }, [landingBranding?.default_view, selectedChurch]);
+
+  // Analytics highlights for header (fetched only when branding says to show them)
+  const [headerHighlights, setHeaderHighlights] = useState<{ baptisms: number; marriages: number; funerals: number; total: number; changePercent?: number } | null>(null);
+  useEffect(() => {
+    if (!landingBranding?.show_analytics_highlights || !selectedChurch) {
+      setHeaderHighlights(null);
+      return;
+    }
+    let cancelled = false;
+    apiClient.get(`/churches/${selectedChurch}/dashboard`).then((res: any) => {
+      if (cancelled) return;
+      const d = res.data || res;
+      if (d?.counts) {
+        setHeaderHighlights({
+          baptisms: d.counts.baptisms,
+          marriages: d.counts.marriages,
+          funerals: d.counts.funerals,
+          total: d.counts.total,
+          changePercent: d.yearOverYear?.changePercent,
+        });
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [landingBranding?.show_analytics_highlights, selectedChurch]);
+
   // Collaboration wizard dialog
   const [collaborationWizardOpen, setCollaborationWizardOpen] = useState(false);
 
@@ -626,10 +676,20 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
   // Theme Editor States
   
   // Table View Mode State
-  const [useAgGrid, setUseAgGrid] = useState(false);
+  const [useAgGrid, setUseAgGrid] = useState(true);
+  const [agGridFailed, setAgGridFailed] = useState(false);
+
+  // View mode: table | card | timeline | analytics
+  // Values match DB enum in church_records_landing.default_view
+  type ViewMode = 'table' | 'card' | 'timeline' | 'analytics';
+  const [activeView, setActiveView] = useState<ViewMode>('table');
+  // Backwards-compat alias
+  const showAnalytics = activeView === 'analytics';
   
   // Advanced Grid Modal State
   const [advancedGridOpen, setAdvancedGridOpen] = useState(false);
+  // "More Actions" menu anchor
+  const [moreMenuAnchor, setMoreMenuAnchor] = useState<null | HTMLElement>(null);
 
   // View Details Dialog state
   const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
@@ -814,6 +874,13 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       setPriestOptions([]);
     }
   };
+
+  // Effective church ID — resolves 0 to the single real church when only 1 exists
+  const effectiveChurchId = useMemo(() => {
+    if (selectedChurch && selectedChurch !== 0) return selectedChurch;
+    const realChurches = churches.filter(c => c.id !== 0);
+    return realChurches.length === 1 ? realChurches[0].id : 0;
+  }, [selectedChurch, churches]);
 
   // Effects
   useEffect(() => {
@@ -1596,348 +1663,251 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
             paddingRight: 0
           }
         }}>
-          {/* Professional Header Section */}
-          {!isFiltersCollapsed && (
-            <Card 
-              elevation={2}
-              sx={{ 
-                mb: 3,
-                background: (theme) => theme.palette.mode === 'dark' 
-                  ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
-                  : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-                borderRadius: 2,
-                overflow: 'visible'
-              }}
-            >
-              <CardContent sx={{ pb: 2 }}>
-                {/* Header with Collapse Button */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Box>
-                    <Typography 
-                      variant="h4" 
-                      component="h1"
-                      sx={{ 
-                        fontWeight: 700,
-                        background: (theme) => theme.palette.mode === 'dark'
-                          ? 'linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%)'
-                          : 'linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%)',
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        mb: 0.5
-                      }}
-                    >
-                      Records Management System
+          {/* Church-branded Header */}
+          <ChurchRecordsHeader
+            branding={landingBranding}
+            churchName={landingChurchName}
+            isDefault={landingIsDefault}
+            loading={landingLoading}
+            highlights={headerHighlights}
+          />
+
+          {/* Controls Section */}
+          <Card
+            elevation={0}
+            sx={{
+              mb: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              overflow: 'visible',
+            }}
+          >
+            <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+              <Stack spacing={2}>
+                {/* Row 1: Church + Record Type selectors + View toggle + collapse */}
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ xs: 'stretch', md: 'center' }}>
+                  {/* Church selector or static name */}
+                  {churches.filter(c => c.id !== 0).length === 1 ? (
+                    <Typography variant="body1" fontWeight={700} sx={{ minWidth: 200 }}>
+                      {churches.find(c => c.id !== 0)?.church_name || 'Church'}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Manage church records with advanced filtering and reporting
-                    </Typography>
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <IconButton
-                      onClick={() => setIsFiltersCollapsed(true)}
-                      size="small"
-                      sx={{ 
-                        ml: 1,
-                        transition: 'transform 0.2s ease-in-out',
-                      }}
+                  ) : (
+                    <FormControl sx={{ minWidth: 220 }} size="small">
+                      <InputLabel>Church</InputLabel>
+                      <Select
+                        value={selectedChurch}
+                        label="Church"
+                        onChange={(e) => setSelectedChurch(e.target.value)}
+                        disabled={loading}
+                      >
+                        {churches.map((church) => (
+                          <MenuItem key={church.id} value={church.id}>
+                            {church.church_name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
+
+                  <FormControl sx={{ minWidth: 200 }} size="small">
+                    <InputLabel>Record Type</InputLabel>
+                    <Select
+                      value={selectedRecordType}
+                      label="Record Type"
+                      onChange={(e) => handleRecordTypeChange(e.target.value)}
+                      disabled={loading}
                     >
-                      <ChevronUp size={20} />
-                    </IconButton>
-                  </Box>
-                </Box>
-                
-                {/* Collapsible Content */}
-                <Collapse in={!isFiltersCollapsed}>
-                  <Box>
-                    <Stack spacing={3}>
-                      {/* Church and Record Type Selection */}
-                      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ xs: 'stretch', md: 'center' }}>
-                        {/* Show static church name if user has only one church, otherwise show dropdown */}
-                        {churches.filter(c => c.id !== 0).length === 1 ? (
-                          <Box sx={{ 
-                            minWidth: 250, 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            p: 2,
-                            bgcolor: 'primary.main',
-                            color: 'primary.contrastText',
-                            borderRadius: 1,
-                            boxShadow: 1
-                          }}>
-                            <Typography variant="body1" fontWeight={700}>
-                              {churches.find(c => c.id !== 0)?.church_name || 'Church'}
-                            </Typography>
-                          </Box>
-                        ) : (
-                          <FormControl sx={{ minWidth: 250 }} size="small">
-                            <InputLabel>Select Church</InputLabel>
-                            <Select
-                              value={selectedChurch}
-                              label="Select Church"
-                              onChange={(e) => setSelectedChurch(e.target.value)}
-                              disabled={loading}
-                            >
-                              {churches.map((church) => (
-                                <MenuItem key={church.id} value={church.id}>
-                                  {church.church_name}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        )}
-                        
-                        <FormControl sx={{ minWidth: 250 }} size="small">
-                          <InputLabel>Select Record Table</InputLabel>
-                          <Select
-                            value={selectedRecordType}
-                            label="Select Record Table"
-                            onChange={(e) => handleRecordTypeChange(e.target.value)}
-                            disabled={loading}
-                          >
-                            {recordTypes.map((type) => (
-                              <MenuItem key={type.value} value={type.value}>
-                                {type.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                        
-                        {selectedRecordType && (
-                          <Box sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            px: 2,
-                            py: 1,
-                            bgcolor: 'action.hover',
-                            borderRadius: 1,
-                            border: '1px solid',
-                            borderColor: 'divider'
-                          }}>
-                            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                              {recordTypes.find(type => type.value === selectedRecordType)?.label}
-                            </Typography>
-                          </Box>
-                        )}
-                      </Stack>
-                      
-                      {/* Search and Action Buttons (only show when record type is selected) */}
-                      {selectedRecordType && (
-                        <>
-                          {/* Search Bar */}
-                          <TextField
-                            label="Search Records"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-                                setDebouncedSearch(searchTerm);
-                              }
-                            }}
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <Search size={20} style={{ color: 'inherit' }} />
-                                </InputAdornment>
-                              ),
-                              endAdornment: searchTerm ? (
-                                <InputAdornment position="end">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => setSearchTerm('')}
-                                    edge="end"
-                                    aria-label="clear search"
-                                  >
-                                    <X size={16} />
-                                  </IconButton>
-                                </InputAdornment>
-                              ) : searchLoading ? <CircularProgress size={16} /> : null,
-                            }}
+                      {recordTypes.map((type) => (
+                        <MenuItem key={type.value} value={type.value}>
+                          {type.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {/* View mode toggle */}
+                  {selectedRecordType && (
+                    <Stack direction="row" spacing={0.25} sx={{
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 1.5,
+                      p: 0.25,
+                      bgcolor: 'action.hover',
+                    }}>
+                      {([
+                        { key: 'table' as ViewMode, icon: <LayoutGrid size={15} />, label: 'Table' },
+                        { key: 'card' as ViewMode, icon: <List size={15} />, label: 'Cards' },
+                        { key: 'timeline' as ViewMode, icon: <Clock size={15} />, label: 'Timeline' },
+                        { key: 'analytics' as ViewMode, icon: <BarChart3 size={15} />, label: 'Analytics' },
+                      ]).map(({ key, icon, label }) => {
+                        const isActive = activeView === key;
+                        return (
+                          <Button
+                            key={key}
                             size="small"
-                            fullWidth
-                            sx={{ maxWidth: 500 }}
-                          />
-                          
-                          {/* Action Buttons - Compact Icon Buttons */}
-                          <Box>
-                            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5, fontWeight: 600 }}>
-                              Quick Actions
-                            </Typography>
-                            <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
-                              <Tooltip title="Add New Record">
-                                <IconButton
-                                  onClick={handleAddRecord}
-                                  disabled={loading}
-                                  sx={{ 
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    color: 'text.secondary',
-                                    bgcolor: 'transparent',
-                                    '&:hover': { bgcolor: 'action.hover', color: 'text.primary' },
-                                    '&:disabled': { bgcolor: 'action.disabledBackground', color: 'text.disabled' }
-                                  }}
-                                >
-                                  <Plus size={18} strokeWidth={1.5} />
-                                </IconButton>
-                              </Tooltip>
-                              
-                              <Tooltip title="Import Records">
-                                <IconButton
-                                  onClick={() => {/* TODO: Import functionality */}}
-                                  disabled={loading}
-                                  sx={{ 
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    color: 'text.secondary',
-                                    bgcolor: 'transparent',
-                                    '&:hover': { bgcolor: 'action.hover', color: 'text.primary' },
-                                    '&:disabled': { bgcolor: 'action.disabledBackground', color: 'text.disabled' }
-                                  }}
-                                >
-                                  <Upload size={18} strokeWidth={1.5} />
-                                </IconButton>
-                              </Tooltip>
-                              
-                              <Tooltip title="Advanced Grid Options">
-                                <IconButton
-                                  onClick={() => setAdvancedGridOpen(true)}
-                                  disabled={loading}
-                                  sx={{ 
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    color: 'text.secondary',
-                                    bgcolor: 'transparent',
-                                    '&:hover': { bgcolor: 'action.hover', color: 'text.primary' },
-                                    '&:disabled': { bgcolor: 'action.disabledBackground', color: 'text.disabled' }
-                                  }}
-                                >
-                                  <LayoutGrid size={18} strokeWidth={1.5} />
-                                </IconButton>
-                              </Tooltip>
-                              
-                              <Tooltip title={useAgGrid ? 'Switch to Standard View' : 'Switch to AG Grid'}>
-                                <IconButton
-                                  onClick={() => setUseAgGrid(!useAgGrid)}
-                                  disabled={loading}
-                                  sx={{ 
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    color: 'text.secondary',
-                                    bgcolor: useAgGrid ? 'action.selected' : 'transparent',
-                                    '&:hover': { bgcolor: 'action.hover', color: 'text.primary' },
-                                  }}
-                                >
-                                  {useAgGrid ? <Lock size={18} strokeWidth={1.5} /> : <Unlock size={18} strokeWidth={1.5} />}
-                                </IconButton>
-                              </Tooltip>
-                              
-                              <Tooltip title="Export Records">
-                                <IconButton
-                                  onClick={handleExport}
-                                  disabled={loading}
-                                  sx={{ 
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    color: 'text.secondary',
-                                    bgcolor: 'transparent',
-                                    '&:hover': { bgcolor: 'action.hover', color: 'text.primary' },
-                                    '&:disabled': { bgcolor: 'action.disabledBackground', color: 'text.disabled' }
-                                  }}
-                                >
-                                  <Download size={18} strokeWidth={1.5} />
-                                </IconButton>
-                              </Tooltip>
-                              
-                              <Tooltip title="Generate Report">
-                                <IconButton
-                                  onClick={handleGenerateReport}
-                                  disabled={loading || !selectedRecordType}
-                                  sx={{ 
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    color: 'text.secondary',
-                                    bgcolor: 'transparent',
-                                    '&:hover': { bgcolor: 'action.hover', color: 'text.primary' },
-                                    '&:disabled': { bgcolor: 'action.disabledBackground', color: 'text.disabled' }
-                                  }}
-                                >
-                                  <FileBarChart size={18} strokeWidth={1.5} />
-                                </IconButton>
-                              </Tooltip>
-                              
-                              <Tooltip title="Collaboration Link">
-                                <IconButton
-                                  onClick={handleCollaborativeReport}
-                                  disabled={loading}
-                                  sx={{ 
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    color: 'text.secondary',
-                                    bgcolor: 'transparent',
-                                    '&:hover': { bgcolor: 'action.hover', color: 'text.primary' },
-                                    '&:disabled': { bgcolor: 'action.disabledBackground', color: 'text.disabled' }
-                                  }}
-                                >
-                                  <Users size={18} strokeWidth={1.5} />
-                                </IconButton>
-                              </Tooltip>
-                            </Stack>
-                          </Box>
-                        </>
-                      )}
+                            variant={isActive ? 'contained' : 'text'}
+                            onClick={() => setActiveView(key)}
+                            startIcon={icon}
+                            sx={{
+                              textTransform: 'none',
+                              fontWeight: isActive ? 600 : 400,
+                              px: { xs: 1, sm: 1.5 },
+                              py: 0.5,
+                              minWidth: 'auto',
+                              borderRadius: 1,
+                              boxShadow: isActive ? 1 : 0,
+                              fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                              ...(isActive ? {} : { color: 'text.secondary', '&:hover': { bgcolor: 'action.selected' } }),
+                            }}
+                          >
+                            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{label}</Box>
+                          </Button>
+                        );
+                      })}
                     </Stack>
-                  </Box>
+                  )}
+
+                  {/* Spacer */}
+                  <Box sx={{ flex: 1, display: { xs: 'none', md: 'block' } }} />
+
+                  {/* Collapse toggle */}
+                  <IconButton
+                    onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
+                    size="small"
+                    sx={{ alignSelf: { xs: 'flex-end', md: 'center' } }}
+                  >
+                    <ChevronUp size={20} style={{ transform: isFiltersCollapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                  </IconButton>
+                </Stack>
+
+                {/* Row 2 (collapsible): Search + Add Record + More Actions */}
+                <Collapse in={!isFiltersCollapsed}>
+                  {selectedRecordType && (
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
+                      {/* Search */}
+                      <TextField
+                        placeholder="Search records..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+                            setDebouncedSearch(searchTerm);
+                          }
+                        }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Search size={18} style={{ color: 'inherit' }} />
+                            </InputAdornment>
+                          ),
+                          endAdornment: searchTerm ? (
+                            <InputAdornment position="end">
+                              <IconButton size="small" onClick={() => setSearchTerm('')} edge="end" aria-label="clear search">
+                                <X size={16} />
+                              </IconButton>
+                            </InputAdornment>
+                          ) : searchLoading ? <CircularProgress size={16} /> : null,
+                        }}
+                        size="small"
+                        sx={{ flex: 1, maxWidth: { sm: 400 } }}
+                      />
+
+                      {/* Add Record — prominent primary button */}
+                      <Button
+                        variant="contained"
+                        startIcon={<Plus size={18} />}
+                        onClick={handleAddRecord}
+                        disabled={loading}
+                        sx={{
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          px: 2.5,
+                          borderRadius: 1.5,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        Add Record
+                      </Button>
+
+                      {/* More Actions menu */}
+                      <Tooltip title="More actions">
+                        <IconButton
+                          onClick={(e) => setMoreMenuAnchor(e.currentTarget)}
+                          size="small"
+                          sx={{
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 1.5,
+                          }}
+                        >
+                          <MoreVertical size={18} />
+                        </IconButton>
+                      </Tooltip>
+                      <Menu
+                        anchorEl={moreMenuAnchor}
+                        open={Boolean(moreMenuAnchor)}
+                        onClose={() => setMoreMenuAnchor(null)}
+                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                        slotProps={{ paper: { sx: { minWidth: 200, mt: 0.5 } } }}
+                      >
+                        <MenuItem onClick={() => { handleExport(); setMoreMenuAnchor(null); }}>
+                          <ListItemIcon><Download size={18} /></ListItemIcon>
+                          <ListItemText>Export Records</ListItemText>
+                        </MenuItem>
+                        <MenuItem onClick={() => { setMoreMenuAnchor(null); /* TODO: Import */ }}>
+                          <ListItemIcon><Upload size={18} /></ListItemIcon>
+                          <ListItemText>Import Records</ListItemText>
+                        </MenuItem>
+                        <MenuItem onClick={() => { handleGenerateReport(); setMoreMenuAnchor(null); }} disabled={!selectedRecordType}>
+                          <ListItemIcon><FileBarChart size={18} /></ListItemIcon>
+                          <ListItemText>Generate Report</ListItemText>
+                        </MenuItem>
+                        <MenuItem onClick={() => { handleCollaborativeReport(); setMoreMenuAnchor(null); }}>
+                          <ListItemIcon><Users size={18} /></ListItemIcon>
+                          <ListItemText>Collaboration Link</ListItemText>
+                        </MenuItem>
+                        <Divider />
+                        <MenuItem onClick={() => { setAdvancedGridOpen(true); setMoreMenuAnchor(null); }}>
+                          <ListItemIcon><Settings size={18} /></ListItemIcon>
+                          <ListItemText>Grid Options</ListItemText>
+                        </MenuItem>
+                        {!agGridFailed && (
+                          <MenuItem onClick={() => { setUseAgGrid(!useAgGrid); setMoreMenuAnchor(null); }}>
+                            <ListItemIcon><LayoutGrid size={18} /></ListItemIcon>
+                            <ListItemText>{useAgGrid ? 'Use Standard Table' : 'Use Advanced Grid'}</ListItemText>
+                          </MenuItem>
+                        )}
+                      </Menu>
+                    </Stack>
+                  )}
                 </Collapse>
-              </CardContent>
-            </Card>
-          )}
-          
-          {/* Collapsed Header Button */}
-          {isFiltersCollapsed && (
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-              <Button
-                variant="contained"
-                onClick={() => setIsFiltersCollapsed(false)}
-                startIcon={<ChevronUp size={20} style={{ transform: 'rotate(180deg)' }} />}
-                sx={{ 
-                  borderRadius: 2,
-                  px: 3,
-                  background: (theme) => theme.palette.mode === 'dark'
-                    ? 'linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%)'
-                    : 'linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%)',
-                }}
-              >
-                Show Filters & Actions
-              </Button>
-            </Box>
-          )}
+              </Stack>
+            </CardContent>
+          </Card>
                 
           {/* Status Information */}
-          {selectedRecordType && (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                {loading ? (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CircularProgress size={16} />
-                    Loading records...
-                  </Box>
-                ) : (
-                  <>
-                    {`Showing ${records.length} of ${totalRecords} records`}
-                    {debouncedSearch && ` matching "${debouncedSearch}"`}
-                  </>
-                )}
+          {selectedRecordType && !loading && totalRecords > 0 && (
+            <Box sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                {`${records.length} of ${totalRecords.toLocaleString()} records`}
+                {debouncedSearch && ` matching "${debouncedSearch}"`}
               </Typography>
             </Box>
           )}
           
           {/* Instructions when no selection */}
           {!selectedRecordType && (
-            <Alert severity="info" sx={{ mb: 3 }}>
-              Please select a church and record type to view records.
-            </Alert>
+            <Box sx={{ textAlign: 'center', py: 8, color: 'text.secondary' }}>
+              <Typography variant="h5" sx={{ mb: 1, fontWeight: 600, color: 'text.primary' }}>
+                Welcome to Church Records
+              </Typography>
+              <Typography variant="body1" sx={{ maxWidth: 400, mx: 'auto', lineHeight: 1.6 }}>
+                Select a record type above to browse baptism, marriage, or funeral records.
+              </Typography>
+            </Box>
           )}
 
           {/* Records Table - Only show when record type is selected */}
@@ -1971,9 +1941,45 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   )}
                 </Box>
                 
-                <Paper className="theme-orthodox-traditional" sx={{ 
-                  width: '100%', 
-                  maxWidth: '100%', 
+                {/* Card View */}
+                {activeView === 'card' && (
+                  <Box sx={{ py: 1 }}>
+                    <RecordsCardView
+                      records={filteredAndSortedRecords}
+                      recordType={selectedRecordType}
+                      loading={loading}
+                      onViewRecord={handleViewRecord}
+                      searchTerm={debouncedSearch}
+                    />
+                  </Box>
+                )}
+
+                {/* Timeline View */}
+                {activeView === 'timeline' && (
+                  <Box sx={{ py: 1 }}>
+                    <RecordsTimelineView
+                      records={filteredAndSortedRecords}
+                      recordType={selectedRecordType}
+                      loading={loading}
+                      onViewRecord={handleViewRecord}
+                      searchTerm={debouncedSearch}
+                    />
+                  </Box>
+                )}
+
+                {/* Analytics View */}
+                {activeView === 'analytics' && (
+                  <RecordsAnalyticsView
+                    churchId={effectiveChurchId}
+                    churchName={landingChurchName}
+                  />
+                )}
+
+                {/* Table/Grid View */}
+                {activeView === 'table' && (
+                <Paper className="theme-orthodox-traditional" sx={{
+                  width: '100%',
+                  maxWidth: '100%',
                   margin: 0,
                   marginLeft: 0,
                   marginRight: 0,
@@ -1983,38 +1989,86 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   p: { xs: 0, sm: 1, md: 2 },
                 }}>
 
-                  {/* Conditional Table Rendering */}
-                {useAgGrid ? (
-                  // AG Grid View — uses Theming API (v34+) for consistent styling
-                  <Box sx={{ height: 600, width: '100%' }}>
-                    <AgGridReact
-                      theme={agGridTheme}
-                      rowData={filteredAndSortedRecords}
-                      columnDefs={agGridColumnDefs}
-                      icons={agGridIconMap}
-                      defaultColDef={{
-                        resizable: true,
-                        sortable: true,
-                        filter: false,
-                      }}
-                      getRowId={(params) => String(params.data.id)}
-                      rowClassRules={agGridRowClassRules}
-                      onRowClicked={(event) => handleRowSelect(event.data.id)}
-                      onSortChanged={(event) => {
-                        const sortModel = event.api.getColumnState().filter(c => c.sort);
-                        if (sortModel.length > 0) {
-                          const col = sortModel[0];
-                          handleSort(col.colId as keyof BaptismRecord);
-                        }
-                      }}
-                      animateRows={true}
-                      domLayout="normal"
-                    />
-                  </Box>
+                  {/* Conditional Table Rendering — AG Grid primary with auto-fallback */}
+                {useAgGrid && !agGridFailed ? (
+                  <AGGridErrorBoundary
+                    onFallbackActivated={(err) => { setAgGridFailed(true); console.error('[Records] AG Grid fallback activated:', err.message); }}
+                    fallback={
+                      <TableContainer sx={{
+                        textAlign: 'left', width: '100%', overflowX: 'auto',
+                        bgcolor: isDarkMode ? 'background.paper' : undefined,
+                        '&::-webkit-scrollbar': { height: '8px' },
+                        '&::-webkit-scrollbar-track': { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)' },
+                        '&::-webkit-scrollbar-thumb': { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.3)', borderRadius: '4px' },
+                      }}>
+                      <Table stickyHeader sx={{ minWidth: 650 }}>
+                        <TableHead>
+                          <TableRow>
+                            {getColumnDefinitions(selectedRecordType).map((column: any, index: number) => (
+                              <TableCell key={index} sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', fontWeight: 'bold', '& .MuiTableSortLabel-root': { color: 'inherit' }, '& .MuiTableSortLabel-root.Mui-active': { color: 'inherit' }, '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}>
+                                <TableSortLabel active={sortConfig.key === column.field} direction={sortConfig.direction} onClick={() => handleSort(column.field)}>
+                                  {column.headerName}
+                                </TableSortLabel>
+                              </TableCell>
+                            ))}
+                            <TableCell sx={{ minWidth: '150px', position: 'sticky', right: 0, bgcolor: 'primary.main', color: 'primary.contrastText', zIndex: 2 }} align="center">Actions</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {loading ? (
+                            <TableRow><TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}><CircularProgress /><Typography variant="body2" sx={{ mt: 2 }}>Loading records...</Typography></TableCell></TableRow>
+                          ) : paginatedRecords.length === 0 ? (
+                            <TableRow><TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}><Typography variant="body1" color="text.secondary">No records found</Typography></TableCell></TableRow>
+                          ) : (
+                            paginatedRecords.map((record, index) => (
+                              <TableRow key={record.id} onClick={() => handleRowSelect(record.id)} sx={{ bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper', ...getRecordRowStyle(record, isRecordSelected(record.id), nowReference, isDarkMode), cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}>
+                                {getColumnDefinitions(selectedRecordType).map((column: any, colIndex: number) => {
+                                  const cellVal = getCellValue(record, column);
+                                  const cellText = typeof cellVal === 'string' ? cellVal : String(cellVal ?? '');
+                                  return <TableCell key={colIndex}>{debouncedSearch ? highlightSearchMatch(cellText, debouncedSearch) : cellVal}</TableCell>;
+                                })}
+                                <TableCell sx={{ minWidth: '150px', position: 'sticky', right: 0, bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper', zIndex: 1 }} align="center">
+                                  <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                                    <Tooltip title="View Details"><IconButton size="small" onClick={() => handleViewRecord(record)}><Eye size={16} strokeWidth={1.5} /></IconButton></Tooltip>
+                                    <Tooltip title="Edit Record"><IconButton size="small" onClick={() => handleEditRecord(record)}><Pencil size={16} strokeWidth={1.5} /></IconButton></Tooltip>
+                                    <Tooltip title="Delete Record"><IconButton size="small" onClick={() => handleDeleteClick(record)}><Trash2 size={16} strokeWidth={1.5} /></IconButton></Tooltip>
+                                  </Box>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                      </TableContainer>
+                    }
+                  >
+                    {/* AG Grid View — primary renderer */}
+                    <Box sx={{ height: 600, width: '100%' }}>
+                      <AgGridReact
+                        theme={agGridTheme}
+                        rowData={filteredAndSortedRecords}
+                        columnDefs={agGridColumnDefs}
+                        icons={agGridIconMap}
+                        defaultColDef={{ resizable: true, sortable: true, filter: false }}
+                        getRowId={(params) => String(params.data.id)}
+                        rowClassRules={agGridRowClassRules}
+                        onRowClicked={(event) => handleRowSelect(event.data.id)}
+                        onSortChanged={(event) => {
+                          const sortModel = event.api.getColumnState().filter(c => c.sort);
+                          if (sortModel.length > 0) {
+                            const col = sortModel[0];
+                            handleSort(col.colId as keyof BaptismRecord);
+                          }
+                        }}
+                        animateRows={true}
+                        domLayout="normal"
+                      />
+                    </Box>
+                  </AGGridErrorBoundary>
                 ) : (
-                  // Standard Material-UI Table View
-                  <TableContainer sx={{ 
-                    textAlign: 'left', 
+                  // Standard Material-UI Table View (manual toggle or auto-fallback)
+                  <TableContainer sx={{
+                    textAlign: 'left',
                     width: '100%',
                     overflowX: 'auto',
                     bgcolor: isDarkMode ? 'background.paper' : undefined,
@@ -2146,7 +2200,11 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   </TableContainer>
                 )}
 
-                {/* Pagination — shared by both AG Grid and Material-UI Table views */}
+              </Paper>
+              )}
+
+              {/* Pagination — shared across all record views */}
+              {activeView !== 'analytics' && (
                 <TablePagination
                     rowsPerPageOptions={[10, 25, 50, 100]}
                     component="div"
@@ -2156,7 +2214,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                   />
-              </Paper>
+              )}
               </>
             )}
             {/* Add/Edit Dialog */}
@@ -2821,19 +2879,10 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                 <Button onClick={handleCancelDelete} variant="outlined">
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleConfirmDelete} 
+                <Button
+                  onClick={handleConfirmDelete}
                   variant="contained"
-                  sx={{
-                    background: isDarkMode 
-                      ? 'linear-gradient(135deg, #0a0a0a 0%, #2a2a2a 100%)'
-                      : 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
-                    '&:hover': {
-                      background: isDarkMode 
-                        ? 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)'
-                        : 'linear-gradient(135deg, #4a4a4a 0%, #1a1a1a 100%)',
-                    }
-                  }}
+                  color="error"
                 >
                   Delete
                 </Button>
@@ -2844,27 +2893,19 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
             {/* Toast Snackbar — centered on screen */}
             <Snackbar
               open={toastOpen}
-              autoHideDuration={4000}
+              autoHideDuration={3000}
               onClose={() => setToastOpen(false)}
-              anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-              sx={{
-                top: '50% !important',
-                transform: 'translateY(-50%)',
-              }}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-              <Alert 
-                onClose={() => setToastOpen(false)} 
+              <Alert
+                onClose={() => setToastOpen(false)}
                 severity={toastSeverity}
                 variant="filled"
-                sx={{ 
-                  width: '100%', 
-                  minWidth: 300, 
-                  boxShadow: 6,
-                  background: isDarkMode 
-                    ? 'linear-gradient(135deg, #0a0a0a 0%, #2a2a2a 100%)'
-                    : 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
-                  color: '#fff',
-                  '& .MuiAlert-icon': { color: '#fff' },
+                sx={{
+                  width: '100%',
+                  minWidth: 280,
+                  boxShadow: 4,
+                  borderRadius: 2,
                 }}
               >
                 {toastMessage}

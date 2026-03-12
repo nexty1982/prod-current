@@ -225,6 +225,8 @@ const versionRouter = require('./routes/version');
 const systemStatusRouter = require('./api/systemStatus');
 const dailyTasksRouter = require('./api/dailyTasks');
 const omDailyRouter = require('./routes/om-daily');
+const promptPlansRouter = require('./routes/prompt-plans');
+const pageContentRouter = require('./routes/page-content');
 const snapshotsRouter = require('./routes/snapshots');
 const crmRouter = require('./routes/crm');
 const analyticsRouter = require('./routes/analytics'); // US Church Map analytics
@@ -320,6 +322,7 @@ const globalImagesRouter = require('./routes/admin/globalImages');
 const feederRouter = require('./routes/feeder');
 // Import service management router for system monitoring and control
 const servicesRouter = require('./routes/admin/services');
+const sslCertificatesRouter = require('./routes/admin/ssl-certificates');
 // Import components management router for system component control
 const componentsRouter = require('./routes/admin/components');
 const settingsRouter = require('./routes/settings');
@@ -605,6 +608,10 @@ console.log('✅ [Server] Mounted /api/admin/change-sets route (SDLC delivery co
 app.use('/api/churches', churchesRouter);
 // Mount churches router at /api/my to handle /api/my/churches
 app.use('/api/my', churchesRouter);
+// Church records landing page branding
+const churchRecordsLandingRouter = require('./routes/church-records-landing');
+app.use('/api/churches', churchRecordsLandingRouter);
+console.log('✅ [Server] Mounted /api/churches/:churchId/records-landing route (records branding)');
 
 // Authentication routes (no auth required for login itself)
 
@@ -719,6 +726,7 @@ app.use('/api/menu-permissions', menuPermissionsApiRouter); // Enhanced menu con
 app.use('/api/headlines', headlinesRouter);
 app.use('/api/headlines/config', headlinesConfigRouter);
 app.use('/api/admin/services', servicesRouter);
+app.use('/api/admin/ssl-certificates', sslCertificatesRouter);
 app.use('/api/admin/components', componentsRouter);
 // OMAI-Spin environment mirroring routes
 const omaiSpinRouter = require('./routes/admin/omaiSpin');
@@ -795,6 +803,13 @@ app.use('/api/admin/ai', aiAdminRouter); // AI Admin Panel (commands + training)
 console.log('✅ [Server] Mounted records-inspector, seed-records, and ai-admin routes');
 app.use('/api/om-daily', omDailyRouter); // OM Daily work pipelines
 console.log('✅ [Server] Mounted /api/om-daily routes (Work Pipelines)');
+app.use('/api/prompt-plans', promptPlansRouter); // Prompt Plans (AI orchestration)
+console.log('✅ [Server] Mounted /api/prompt-plans routes (AI Prompt Plans)');
+app.use('/api/page-content', pageContentRouter); // Page Content CMS
+console.log('✅ [Server] Mounted /api/page-content routes (Page Content CMS)');
+const pageContentBuildsRouter = require('./routes/page-content-builds');
+app.use('/api/page-content-builds', pageContentBuildsRouter); // Code change detection & builds
+console.log('✅ [Server] Mounted /api/page-content-builds routes (Code Change Detection)');
 app.use('/api/snapshots', snapshotsRouter); // Code snapshot safety system
 console.log('✅ [Server] Mounted /api/snapshots routes (Safety System)');
 app.use('/api/crm', crmRouter); // CRM pipeline & outreach
@@ -1326,6 +1341,7 @@ if (imagesPath) {
 }
 
 app.use('/uploads', express.static(path.resolve(__dirname, '../misc/public/uploads')));
+app.use('/church-branding', express.static(path.resolve(__dirname, '../storage/church-branding')));
 
 // Serve static assets with long cache (hashed filenames are immutable)
 // Vite produces hashed filenames like assets/index-abc123.js, so these can be cached forever
@@ -1471,6 +1487,17 @@ cron.schedule('0 23 * * *', async () => {
   }
 });
 console.log('Daily changelog cron scheduled (11 PM)');
+
+// Daily staging review notification at 8 AM
+cron.schedule('0 8 * * *', async () => {
+  try {
+    const omDaily = require('./routes/om-daily');
+    await omDaily.sendStagingReviewNotifications();
+  } catch (err) {
+    console.error('[Staging Review] Cron error:', err);
+  }
+});
+console.log('Daily staging review cron scheduled (8 AM)');
 
 // GitHub issue sync at 11:15 PM
 cron.schedule('15 23 * * *', async () => {

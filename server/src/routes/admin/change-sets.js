@@ -165,6 +165,79 @@ router.post('/:id/transition', requireAuth, requireSuperAdmin, async (req, res) 
   }
 });
 
+// ── FAST FORWARD ────────────────────────────────────────────────────────────
+
+router.post('/:id/fast-forward', requireAuth, requireSuperAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ success: false, error: 'Invalid id' });
+
+    const { staging_build_run_id, staging_commit_sha, prod_build_run_id, prod_commit_sha } = req.body;
+    const userId = getUserId(req);
+
+    const cs = await changeSetService.fastForward(id, userId, {
+      staging_build_run_id,
+      staging_commit_sha,
+      prod_build_run_id,
+      prod_commit_sha,
+    });
+
+    res.json({ success: true, change_set: cs });
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// ── PROMOTE AND PUSH ────────────────────────────────────────────────────────
+
+router.post('/:id/promote-and-push', requireAuth, requireSuperAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ success: false, error: 'Invalid id' });
+
+    const { prod_build_run_id, prod_commit_sha } = req.body;
+    const userId = getUserId(req);
+
+    // Transition to promoted
+    const cs = await changeSetService.transition(id, 'promoted', userId, {
+      prod_build_run_id,
+      prod_commit_sha,
+    });
+
+    // Push to origin
+    const { execSync } = require('child_process');
+    const REPO_DIR = '/var/www/orthodoxmetrics/prod';
+    let pushResult = '';
+
+    if (cs.git_branch) {
+      try {
+        pushResult = execSync(`git push origin ${cs.git_branch}`, {
+          cwd: REPO_DIR,
+          encoding: 'utf8',
+          stdio: ['pipe', 'pipe', 'pipe'],
+        });
+      } catch (pushErr) {
+        // Promotion succeeded but push failed — still return success with warning
+        return res.json({
+          success: true,
+          change_set: cs,
+          push_success: false,
+          push_error: pushErr.message,
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      change_set: cs,
+      push_success: true,
+      push_branch: cs.git_branch,
+    });
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
 // ── ADD ITEM ─────────────────────────────────────────────────────────────────
 
 router.post('/:id/items', requireAuth, requireSuperAdmin, async (req, res) => {

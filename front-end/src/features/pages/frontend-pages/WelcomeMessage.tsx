@@ -57,7 +57,7 @@ export const WelcomeMessage: React.FC<Props> = ({
       steps: [
         {
           title: "Welcome to Orthodox Metrics",
-          description: "Your comprehensive platform for managing Orthodox church records and sacraments.",
+          description: "Your comprehensive platform for managing Orthodox church metrical data.",
           primaryLabel: "Next"
         },
         {

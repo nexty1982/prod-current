@@ -36,6 +36,7 @@ const ImageAI = Loadable(lazy(() => import('../features/apps/image-ai/ImageAI'))
 const LoadingDemo = Loadable(lazy(() => import('../features/devel-tools/loading-demo/LoadingDemo')));
 const OmtraceConsole = Loadable(lazy(() => import('../features/devel-tools/omtrace/OmtraceConsole')));
 const MenuEditor = Loadable(lazy(() => import('../features/devel-tools/menu-editor/MenuEditor')));
+const PageEditor = Loadable(lazy(() => import('../features/devel-tools/page-editor/PageEditor')));
 const Kanban = Loadable(lazy(() => import('../features/apps/kanban/Kanban')));
 const InvoiceList = Loadable(lazy(() => import('../features/apps/invoice/List')));
 const InvoiceCreate = Loadable(lazy(() => import('../features/apps/invoice/Create')));
@@ -135,6 +136,8 @@ const RecordsOCRPage = Loadable(lazy(() => import('../features/admin/control-pan
 const CRMOutreachPage = Loadable(lazy(() => import('../features/admin/control-panel/CRMOutreachPage')));
 const SystemServerPage = Loadable(lazy(() => import('../features/admin/control-panel/SystemServerPage')));
 const AIAutomationPage = Loadable(lazy(() => import('../features/admin/control-panel/AIAutomationPage')));
+const CodeChangeDetection = Loadable(lazy(() => import('../features/admin/ai/CodeChangeDetection')));
+const RecordsLandingConfig = Loadable(lazy(() => import('../features/admin/church-branding/RecordsLandingConfig')));
 const OMDailyPage = Loadable(lazy(() => import('../features/admin/control-panel/OMDailyPage')));
 const OMAppSuitePage = Loadable(lazy(() => import('../features/admin/control-panel/OMAppSuitePage')));
 const SDLCPage = Loadable(lazy(() => import('../features/admin/control-panel/SDLCPage')));
@@ -144,6 +147,7 @@ const SocialCommsPage = Loadable(lazy(() => import('../features/admin/control-pa
 const ServerDevOpsPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/ServerDevOpsPage')));
 const PlatformConfigPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/PlatformConfigPage')));
 const CodeSafetyPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/CodeSafetyPage')));
+const SSLCertificatePage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/SSLCertificatePage')));
 const SiteMapPage = Loadable(lazy(() => import('../features/admin/SiteMapPage')));
 const CRMPage = Loadable(lazy(() => import('../features/devel-tools/crm/CRMPage')));
 const USChurchMapPage = Loadable(lazy(() => import('../features/devel-tools/us-church-map/USChurchMapPage')));
@@ -180,6 +184,9 @@ const ConversationLogPage = Loadable(lazy(() => import('../features/devel-tools/
 const ChangeSetsDashboard = Loadable(lazy(() => import('../features/devel-tools/change-sets/ChangeSetsDashboard')));
 const ChangeSetDetailPage = Loadable(lazy(() => import('../features/devel-tools/change-sets/ChangeSetDetailPage')));
 const ReleaseHistoryPage = Loadable(lazy(() => import('../features/devel-tools/change-sets/ReleaseHistoryPage')));
+const SDLCWizardPage = Loadable(lazy(() => import('../features/admin/sdlc-wizard/SDLCWizardPage')));
+const PromptPlansPage = Loadable(lazy(() => import('../features/devel-tools/prompt-plans/PromptPlansPage')));
+const PromptPlanDetailPage = Loadable(lazy(() => import('../features/devel-tools/prompt-plans/PromptPlanDetailPage')));
 const OMChartsPage = Loadable(lazy(() => import('../features/church/apps/om-charts/OMChartsPage')));
 
 /* ****Help & Documentation***** */
@@ -954,6 +961,26 @@ const Router = [
         )
       },
       {
+        path: '/admin/ai/code-changes',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <EnvironmentAwarePage featureId="code-change-detection" priority={2} featureName="Code Change Detection">
+              <CodeChangeDetection />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/church-branding/records-landing',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin']}>
+            <EnvironmentAwarePage featureId="records-landing-branding" priority={2} featureName="Records Landing Branding">
+              <RecordsLandingConfig />
+            </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/admin/control-panel/om-daily',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
@@ -1044,6 +1071,16 @@ const Router = [
         )
       },
       {
+        path: '/admin/control-panel/system-server/platform-config/ssl-certificates',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <SSLCertificatePage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/admin/ops',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin']}>
@@ -1123,6 +1160,16 @@ const Router = [
             <AdminErrorBoundary>
               <MenuEditor />
             </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/page-editor',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="page-editor" priority={2} featureName="Page Content Editor">
+              <PageEditor />
+            </EnvironmentAwarePage>
           </ProtectedRoute>
         )
       },
@@ -1227,6 +1274,16 @@ const Router = [
         )
       },
       {
+        path: '/admin/control-panel/om-daily/sdlc-wizard',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <SDLCWizardPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/admin/control-panel/om-daily/change-sets',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
@@ -1252,6 +1309,26 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
               <ChangeSetDetailPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/prompt-plans',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <PromptPlansPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/prompt-plans/:id',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <PromptPlanDetailPage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )

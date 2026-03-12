@@ -100,7 +100,7 @@ const Header: React.FC = () => {
                 mb: 1.5,
               }}
             >
-              Welcome to Orthodox Metrics, LLC, your gateway to modern, beautifully organized
+              Welcome to Orthodox Metrics, LLC, your gateway to parish records developed specifically for your parish needs.
               Orthodox Church record management. We're honored to support your parish with tools
               that make history, sacraments, and data come alive with clarity and reverence.
             </Typography>

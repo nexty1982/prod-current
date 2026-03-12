@@ -1544,7 +1544,7 @@ const HomePage: React.FC = () => {
                 Multilingual OCR Recognition
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={2}>
-                Advanced text recognition that understands Orthodox terminology in Greek, Cyrillic, and Latin scripts.
+                Advanced text recognition that understands Orthodox Christian terminology throughout multiple languages.
               </Typography>
               {['Greek text recognition', 'Cyrillic script support', 'Orthodox terminology detection', 'Historical document processing'].map((item, i) => (
                 <Stack key={i} direction="row" spacing={1} alignItems="center" mb={0.8}>
@@ -1586,7 +1586,7 @@ const HomePage: React.FC = () => {
                 Smart Record Linking
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={2}>
-                Automatically connect related sacramental records across a person's spiritual journey in your parish.
+                Automatically combines your churches records to provide historical information about your parish. 
               </Typography>
             </Grid>
             <Grid size={{ xs: 12, md: 7 }}>
@@ -1622,7 +1622,7 @@ const HomePage: React.FC = () => {
               fontSize: { xs: '1.75rem', md: '2.25rem' },
             }}
           >
-            Affordable Pricing
+            Orthodox Christian Pricing
           </Typography>
           <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mb: 5 }}>
             Certain churches may qualify for eligibility of free records management
@@ -1667,7 +1667,7 @@ const HomePage: React.FC = () => {
                       '&:hover': { background: 'linear-gradient(135deg, #c9a430, #e6c52e)' },
                     }}
                   >
-                    Get Started Free &rarr;
+                    Get Started Today! &rarr;
                   </Button>
                 </Stack>
               </Grid>
@@ -1713,7 +1713,7 @@ const HomePage: React.FC = () => {
             Ready to Preserve Your Parish Records?
           </Typography>
           <Typography variant="body1" sx={{ color: 'text.secondary', mb: 1 }}>
-            Let us help you get started with a personalized onboarding session
+            Let us help you get started with a personalized onboarding session, we want to assist you. 
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.disabled', mb: 4, fontSize: '0.85rem' }}>
             Our team will guide you through setting up Orthodox Metrics for your parish, including data migration from existing records and training for your staff.
@@ -1735,7 +1735,7 @@ const HomePage: React.FC = () => {
               '&:hover': { background: 'linear-gradient(135deg, #c9a430, #e6c52e)' },
             }}
           >
-            Schedule Free Consultation
+            Have Questions? Schedule A Free Consultation
           </Button>
 
           <Grid container spacing={4} justifyContent="center">
@@ -3993,7 +3993,7 @@ const HomePage: React.FC = () => {
             </Stack>
             
             <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', maxWidth: 700, mx: 'auto' }}>
-              From confirmation records to special liturgical events, from community service 
+              From baptism records to special liturgical events, from community service 
               logs to educational certificates — we adapt to your parish's unique traditions 
               and needs.
             </Typography>
@@ -4047,7 +4047,7 @@ const HomePage: React.FC = () => {
                 <IconFile size={32} color="#F5B800" />
               </FeatureIcon>
               <Typography variant="h5" fontWeight={700} sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#1a1a1a' }} gutterBottom>
-                OCR Done Right
+                Orthodox church metrics designed to keep tradition while providing safe secure access. 
               </Typography>
               <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
                 Advanced optical character recognition that reads
@@ -4074,7 +4074,7 @@ const HomePage: React.FC = () => {
                 Multilingual Support
               </Typography>
               <Typography variant="body1" sx={{ color: theme.palette.mode === 'dark' ? '#ffffff' : '#666666', lineHeight: 1.6 }}>
-                Native support for English, Greek, Russian, and
+                Native support for English, Greek, Russian, Georgian, and
                 Romanian with automatic language detection and
                 character recognition.
               </Typography>
@@ -4341,7 +4341,7 @@ const HomePage: React.FC = () => {
               ))}
             </Box>
 
-            {/* What We Provide Within 60 Days */}
+            {/* What We Provide Within 90 Days  */}
             <Box
               sx={{
                 p: { xs: 3, md: 4 },

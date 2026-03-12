@@ -107,7 +107,7 @@ const C2a = () => {
               },
             }}
           >
-            Request Demo
+            Request Information 
           </Button>
         </Stack>
 

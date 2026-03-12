@@ -190,6 +190,15 @@ const ChangeSetsDashboard: React.FC = () => {
             <Button
               variant="outlined"
               size="small"
+              color="secondary"
+              startIcon={<PackageIcon />}
+              onClick={() => navigate('/admin/control-panel/om-daily/sdlc-wizard')}
+            >
+              SDLC Wizard
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
               startIcon={<HistoryIcon />}
               onClick={() => navigate('/admin/control-panel/om-daily/change-sets/releases')}
             >

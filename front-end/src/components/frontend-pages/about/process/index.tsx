@@ -27,7 +27,7 @@ const Process = () => {
               fontWeight="700"
               mt={5}
             >
-              Self service or handled by us
+              We will provide the initial record intake and provide you the secure access to maintain your churches records.
             </Typography>
           </Grid>
         </Grid>
@@ -46,10 +46,10 @@ const Process = () => {
                     <img src={Icon1} alt="icon1" width={40} height={40} />
                   </Box>
                   <Typography variant="h6" fontWeight={700}>
-                    Beautiful themes and Orthodox fonts
+                    For Orthodox Christian churches, the platform is fully equipped with guidelines established by the OCA.
                   </Typography>
                   <Typography variant="body1">
-                    Choose your preferred visual style effortlessly.
+                    Multiple ways to update and add new records, even using your smart phone / tablet.
                   </Typography>
                 </Stack>
               </Box>
@@ -121,7 +121,7 @@ const Process = () => {
                     <img src={IconFav} alt="icon1" width={40} height={40} />
                   </Box>
                   <Typography variant="h6" fontWeight={700}>
-                    Orthodox icons, styles, and more!
+                    Orthodox platform that tracks Old and New calendar making it easy to schedule baptisms, marriages, and funeral arrangements. 
                   </Typography>
                   <Typography variant="body1">
                     {' '}

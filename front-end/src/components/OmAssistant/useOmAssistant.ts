@@ -21,6 +21,8 @@ export function useOmAssistant(context: OmAssistantContext) {
         success: boolean;
         response: string;
         error?: string;
+        work_item_id?: number;
+        work_item_title?: string;
       }>('/omai/ask', {
         prompt: content,
         context: {
@@ -36,6 +38,8 @@ export function useOmAssistant(context: OmAssistantContext) {
         role: 'assistant',
         content: res.success ? res.response : (res.error || 'Sorry, something went wrong.'),
         timestamp: new Date(),
+        workItemId: res.work_item_id,
+        workItemTitle: res.work_item_title,
       };
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err: any) {

@@ -46,6 +46,125 @@ router.use((req, res, next) => {
 });
 
 // =====================================================
+// PROMPT-DRIVEN WORK ITEM CREATION
+// =====================================================
+
+/**
+ * Generate a clean engineering work item title from a prompt.
+ * Strips conversational phrasing, capitalizes first word, trims to ~80 chars.
+ */
+function generateWorkItemTitle(prompt) {
+  if (!prompt || typeof prompt !== 'string') return 'Untitled AI prompt';
+
+  let title = prompt.trim();
+
+  // Take first sentence or first line
+  const sentenceEnd = title.search(/[.!?\n]/);
+  if (sentenceEnd > 0 && sentenceEnd < 120) {
+    title = title.substring(0, sentenceEnd);
+  }
+
+  // Strip conversational phrasing
+  const conversationalPrefixes = [
+    /^(hey\s*,?\s*)/i,
+    /^(hi\s*,?\s*)/i,
+    /^(hello\s*,?\s*)/i,
+    /^(please\s+)/i,
+    /^(can you\s+)/i,
+    /^(could you\s+)/i,
+    /^(would you\s+)/i,
+    /^(i want you to\s+)/i,
+    /^(i want to\s+)/i,
+    /^(i need you to\s+)/i,
+    /^(i need to\s+)/i,
+    /^(i'd like you to\s+)/i,
+    /^(i'd like to\s+)/i,
+    /^(let's\s+)/i,
+    /^(go ahead and\s+)/i,
+    /^(help me\s+)/i,
+  ];
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const re of conversationalPrefixes) {
+      const before = title;
+      title = title.replace(re, '');
+      if (title !== before) changed = true;
+    }
+  }
+
+  title = title.trim();
+  if (!title) return 'Untitled AI prompt';
+
+  // Capitalize first letter
+  title = title.charAt(0).toUpperCase() + title.slice(1);
+
+  // Trim to ~80 chars at word boundary
+  if (title.length > 80) {
+    title = title.substring(0, 80);
+    const lastSpace = title.lastIndexOf(' ');
+    if (lastSpace > 40) title = title.substring(0, lastSpace);
+  }
+
+  return title;
+}
+
+/**
+ * Create an OM Daily work item for an OMAI prompt.
+ * Returns the created item row, or throws on failure.
+ */
+async function createPromptWorkItem(prompt, context, userId) {
+  const pool = getAppPool();
+  const title = generateWorkItemTitle(prompt);
+  const metadata = {
+    prompt_text: prompt,
+    prompt_context: context || null,
+    execution_status: 'queued',
+    execution_started_at: null,
+    execution_finished_at: null,
+    execution_result_summary: null,
+    execution_error: null,
+  };
+
+  const [result] = await pool.query(
+    `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, source, agent_tool, metadata, conversation_ref, created_by)
+     VALUES (?, 'task', ?, '7', 'todo', 'medium', 'ai', 'ai_prompt', 'omai', ?, ?, ?)`,
+    [
+      title,
+      `AI prompt: ${prompt.substring(0, 200)}`,
+      JSON.stringify(metadata),
+      context?.conversationId || null,
+      userId || null,
+    ]
+  );
+
+  const [rows] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [result.insertId]);
+  return rows[0];
+}
+
+/**
+ * Update the execution metadata on a work item.
+ * @param {number} itemId
+ * @param {object} updates - partial metadata fields to merge
+ */
+async function updateWorkItemExecutionMeta(itemId, updates) {
+  const pool = getAppPool();
+  try {
+    const [rows] = await pool.query('SELECT metadata FROM om_daily_items WHERE id = ?', [itemId]);
+    if (!rows.length) return;
+
+    let meta = {};
+    try { meta = JSON.parse(rows[0].metadata) || {}; } catch { meta = {}; }
+    Object.assign(meta, updates);
+
+    await pool.query('UPDATE om_daily_items SET metadata = ? WHERE id = ?', [JSON.stringify(meta), itemId]);
+  } catch (err) {
+    console.error(`[OMAI] Failed to update work item #${itemId} execution metadata:`, err.message);
+  }
+}
+
+// =====================================================
 // CORE OMAI API ENDPOINTS
 // =====================================================
 
@@ -214,7 +333,10 @@ async function buildRecordContext(churchId, prompt) {
 }
 
 // POST /api/omai/ask - Main query execution (context-aware)
+// Phases 2-6: Auto-creates OM Daily work item before execution, updates metadata after
 router.post('/ask', async (req, res) => {
+  let workItem = null;
+
   try {
     const { prompt, context, securityContext } = req.body;
 
@@ -223,7 +345,26 @@ router.post('/ask', async (req, res) => {
     }
 
     const contextType = context?.type || 'global';
+    const userId = req.session?.user?.id || null;
     console.log(`[OMAI] Query request (${contextType}): ${prompt.substring(0, 100)}...`);
+
+    // ── Phase 2: Create OM Daily work item BEFORE execution ──
+    try {
+      workItem = await createPromptWorkItem(prompt, context, userId);
+      console.log(`[OMAI] Work item #${workItem.id} created for prompt`);
+    } catch (wiErr) {
+      console.error('[OMAI] Failed to create work item:', wiErr.message);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to create work item for prompt. Execution aborted.',
+      });
+    }
+
+    // ── Phase 5: Mark execution as running ──
+    await updateWorkItemExecutionMeta(workItem.id, {
+      execution_status: 'running',
+      execution_started_at: new Date().toISOString(),
+    });
 
     // Build augmented prompt based on context type
     let augmentedPrompt = prompt;
@@ -245,19 +386,44 @@ router.post('/ask', async (req, res) => {
 
     const response = await askOMAIWithMetadata(augmentedPrompt, secContext);
 
+    // ── Phase 5: Mark execution as succeeded ──
+    const resultSummary = typeof response.response === 'string'
+      ? response.response.substring(0, 200)
+      : 'Response received';
+    await updateWorkItemExecutionMeta(workItem.id, {
+      execution_status: 'succeeded',
+      execution_finished_at: new Date().toISOString(),
+      execution_result_summary: resultSummary,
+    });
+
+    // ── Phase 6: Include work item in response ──
     res.json({
       success: true,
       response: response.response,
       context: response.context,
       sources: response.sources,
       memoryContext: response.memoryContext,
+      work_item_id: workItem.id,
+      work_item_title: workItem.title,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('OMAI ask failed:', error);
+
+    // ── Phase 5: Mark execution as failed ──
+    if (workItem) {
+      await updateWorkItemExecutionMeta(workItem.id, {
+        execution_status: 'failed',
+        execution_finished_at: new Date().toISOString(),
+        execution_error: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
+      work_item_id: workItem?.id || null,
+      work_item_title: workItem?.title || null,
     });
   }
 });

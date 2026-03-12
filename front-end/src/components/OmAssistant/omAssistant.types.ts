@@ -3,6 +3,8 @@ export interface OmAssistantMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  workItemId?: number;
+  workItemTitle?: string;
 }
 
 export interface OmAssistantContext {

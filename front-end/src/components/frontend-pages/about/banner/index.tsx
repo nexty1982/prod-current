@@ -40,7 +40,7 @@ const Banner = () => {
                 },
               }}
             >
-              Get to know Orthodox Metrics 
+              Orthodox Metrics is Live and on-boarding parishes in the United States and Canada. 
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <Button variant="contained" size="large" component={Link} to="/auth/register">
@@ -59,7 +59,7 @@ const Banner = () => {
               lg: 5
             }}>
             <Typography lineHeight={1.9}>
-             Orthodox Metrics offers an Orthodox-themed records system designed specifically for baptism, marriage, and funeral documentation. With an intuitive interface, flexible certificate generation, and support for Greek, Russian, Romanian, and English, it brings the sacred work of recordkeeping into a peaceful and organized space. Created with the needs of Orthodox parishes in mind, it honors tradition while simplifying the tools needed to serve your community.
+             Orthodox Metrics offers an Orthodox-themed records system designed specifically for baptism, marriage, and funeral documentation. With an intuitive interface, flexible certificate generation, and support for Greek, Russian, Romanian, Georgian, and English, it brings the sacred work of recordkeeping into a peaceful and organized space. Created with the needs of Orthodox parishes in mind, it honors tradition while simplifying the tools needed to serve your community.
             </Typography>
           </Grid>
         </Grid>

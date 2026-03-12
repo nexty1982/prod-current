@@ -91,7 +91,7 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
 
   if (!record) return null;
 
-  const accent = accentColor || (isDarkMode ? '#333333' : '#1a1a1a');
+  const accent = accentColor || theme.palette.primary.main;
 
   // --- Data helpers ---
   const getPersonName = () => {
@@ -194,12 +194,15 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
     <Typography
       variant="overline"
       sx={{
-        color: accent,
+        color: 'text.secondary',
         fontWeight: 700,
         fontSize: '0.7rem',
         letterSpacing: 1.2,
         display: 'block',
         mb: 1.5,
+        borderBottom: `2px solid`,
+        borderColor: 'divider',
+        pb: 0.5,
       }}
     >
       {title}
@@ -424,9 +427,7 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
           {mode === 'view' ? (
             <>
               <Button size="small" onClick={handleCloseModal} color="inherit">Close</Button>
-              <Button size="small" variant="contained" onClick={handleEditClick} startIcon={<EditIcon />}
-                sx={{ bgcolor: accent, '&:hover': { bgcolor: accent, filter: 'brightness(0.9)' } }}
-              >
+              <Button size="small" variant="contained" onClick={handleEditClick} startIcon={<EditIcon />}>
                 Edit
               </Button>
             </>
