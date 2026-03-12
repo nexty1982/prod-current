@@ -3,17 +3,12 @@
  * Windows Control Panel-style admin hub for super_admin users.
  * Located at /admin/control-panel
  *
- * 7 major categories:
- * 1. Church Management
- * 2. Records & OCR
- * 3. CRM & Outreach
- * 4. System & Server
- * 5. AI & Automation
- * 6. OM Daily
- * 7. OM App Suite
+ * 7 major categories + Components In Development section
  */
 
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
+import { FEATURE_REGISTRY, type FeatureEntry } from '@/config/featureRegistry';
+import { apiClient } from '@/shared/lib/apiClient';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
     Psychology as AIIcon,
@@ -23,16 +18,25 @@ import {
     Description as RecordsIcon,
     Dns as ServerIcon,
     Widgets as SuiteIcon,
+    Code as DevIcon,
+    OpenInNew as OpenIcon,
+    RocketLaunch as PrototypeIcon,
+    Build as BuildIcon,
+    Visibility as ReviewIcon,
+    Tune as StabilizingIcon,
 } from '@mui/icons-material';
 import {
     alpha,
     Box,
+    Chip,
     Link as MuiLink,
     Paper,
+    Skeleton,
+    Tooltip,
     Typography,
     useTheme,
 } from '@mui/material';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // ─── Category definitions ────────────────────────────────────────
@@ -145,12 +149,50 @@ const CATEGORIES: Category[] = [
   },
 ];
 
+// ─── Stage display config ───────────────────────────────────────
+
+const STAGE_CONFIG: Record<number, { label: string; color: string; icon: React.ReactNode }> = {
+  1: { label: 'Prototype', color: '#e53935', icon: <PrototypeIcon sx={{ fontSize: 16 }} /> },
+  2: { label: 'Development', color: '#e53935', icon: <BuildIcon sx={{ fontSize: 16 }} /> },
+  3: { label: 'Review', color: '#f57c00', icon: <ReviewIcon sx={{ fontSize: 16 }} /> },
+  4: { label: 'Stabilizing', color: '#f57c00', icon: <StabilizingIcon sx={{ fontSize: 16 }} /> },
+};
+
+interface ChangeSetBrief {
+  id: number;
+  code: string;
+  title: string;
+  status: string;
+  git_branch: string | null;
+}
+
+/** Match a feature to a change set by its explicit changeSetCode */
+function findLinkedChangeSet(feature: FeatureEntry, changeSets: ChangeSetBrief[]): ChangeSetBrief | undefined {
+  if (!feature.changeSetCode) return undefined;
+  return changeSets.find(cs => cs.code === feature.changeSetCode);
+}
+
 // ─── Component ──────────────────────────────────────────────────
 
 const AdminControlPanel: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const navigate = useNavigate();
+  const [changeSets, setChangeSets] = useState<ChangeSetBrief[]>([]);
+  const [csLoading, setCsLoading] = useState(true);
+
+  useEffect(() => {
+    apiClient.get('/admin/change-sets').then(res => {
+      setChangeSets(res.data?.change_sets || []);
+    }).catch(() => {}).finally(() => setCsLoading(false));
+  }, []);
+
+  const devFeatures = FEATURE_REGISTRY.filter(f => f.stage >= 1 && f.stage <= 4);
+  const grouped = [4, 3, 2, 1].map(stage => ({
+    stage,
+    ...STAGE_CONFIG[stage],
+    features: devFeatures.filter(f => f.stage === stage),
+  })).filter(g => g.features.length > 0);
 
   const BCrumb = [
     { to: '/', title: 'Home' },
@@ -255,6 +297,137 @@ const AdminControlPanel: React.FC = () => {
                 </Box>
               </Box>
             </Paper>
+          ))}
+        </Box>
+
+        {/* ── Components In Development ─────────────────────────── */}
+        <Box sx={{ mt: 5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+            <DevIcon sx={{ color: '#7b1fa2', fontSize: 28 }} />
+            <Typography variant="h5" fontWeight={700}>
+              Components In Development
+            </Typography>
+            <Chip
+              label={`${devFeatures.length} features`}
+              size="small"
+              sx={{ bgcolor: alpha('#7b1fa2', 0.1), color: '#7b1fa2', fontWeight: 600, fontSize: '0.75rem' }}
+            />
+          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, ml: 5.5 }}>
+            Features progressing through the SDLC pipeline. Stages 1-4 are visible to super_admin only.
+          </Typography>
+
+          {grouped.map(group => (
+            <Box key={group.stage} sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                <Box sx={{ color: group.color, display: 'flex', alignItems: 'center' }}>{group.icon}</Box>
+                <Typography variant="subtitle1" fontWeight={700} sx={{ color: group.color }}>
+                  Stage {group.stage}: {group.label}
+                </Typography>
+                <Chip
+                  label={group.features.length}
+                  size="small"
+                  sx={{
+                    height: 20, minWidth: 20,
+                    bgcolor: alpha(group.color, 0.12),
+                    color: group.color,
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                  }}
+                />
+              </Box>
+
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '1fr 1fr 1fr' },
+                gap: 1.5,
+                ml: 3.5,
+              }}>
+                {group.features.map(feature => {
+                  const linkedCS = csLoading ? undefined : findLinkedChangeSet(feature, changeSets);
+                  return (
+                    <Paper
+                      key={feature.id}
+                      variant="outlined"
+                      sx={{
+                        p: 1.5,
+                        borderLeft: `3px solid ${group.color}`,
+                        cursor: feature.route ? 'pointer' : 'default',
+                        transition: 'all 0.15s ease',
+                        '&:hover': feature.route ? {
+                          bgcolor: alpha(group.color, 0.03),
+                          borderColor: group.color,
+                        } : {},
+                      }}
+                      onClick={() => feature.route && navigate(feature.route)}
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
+                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.85rem', lineHeight: 1.3 }}>
+                          {feature.name}
+                        </Typography>
+                        {feature.route && (
+                          <Tooltip title="Open feature">
+                            <OpenIcon sx={{ fontSize: 14, color: 'text.disabled', ml: 0.5, flexShrink: 0 }} />
+                          </Tooltip>
+                        )}
+                      </Box>
+
+                      {feature.description && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75, lineHeight: 1.3 }}>
+                          {feature.description}
+                        </Typography>
+                      )}
+
+                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                        {feature.since && (
+                          <Chip
+                            label={`Since ${feature.since}`}
+                            size="small"
+                            variant="outlined"
+                            sx={{ height: 18, fontSize: '0.65rem', borderColor: isDark ? '#555' : '#ccc' }}
+                          />
+                        )}
+                        {csLoading ? (
+                          <Skeleton width={80} height={18} />
+                        ) : linkedCS ? (
+                          <Chip
+                            label={`${linkedCS.code} · ${linkedCS.status.replace(/_/g, ' ')}`}
+                            size="small"
+                            sx={{
+                              height: 18,
+                              fontSize: '0.65rem',
+                              fontWeight: 600,
+                              bgcolor: linkedCS.status === 'promoted'
+                                ? alpha('#388e3c', 0.12)
+                                : linkedCS.status === 'active'
+                                ? alpha('#1976d2', 0.12)
+                                : alpha('#757575', 0.1),
+                              color: linkedCS.status === 'promoted'
+                                ? '#388e3c'
+                                : linkedCS.status === 'active'
+                                ? '#1976d2'
+                                : '#757575',
+                              cursor: 'pointer',
+                            }}
+                            onClick={(e: React.MouseEvent) => {
+                              e.stopPropagation();
+                              navigate(`/admin/control-panel/om-daily/change-sets/${linkedCS.id}`);
+                            }}
+                          />
+                        ) : (
+                          <Chip
+                            label="No change set"
+                            size="small"
+                            variant="outlined"
+                            sx={{ height: 18, fontSize: '0.65rem', borderColor: isDark ? '#555' : '#ddd', color: 'text.disabled' }}
+                          />
+                        )}
+                      </Box>
+                    </Paper>
+                  );
+                })}
+              </Box>
+            </Box>
           ))}
         </Box>
       </Box>

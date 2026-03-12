@@ -182,6 +182,22 @@ router.post('/:id/fast-forward', requireAuth, requireSuperAdmin, async (req, res
       prod_commit_sha,
     });
 
+    // Push to origin if branch is set
+    if (cs.git_branch) {
+      const { execSync } = require('child_process');
+      const REPO_DIR = '/var/www/orthodoxmetrics/prod';
+      try {
+        execSync(`git push origin ${cs.git_branch}`, {
+          cwd: REPO_DIR,
+          encoding: 'utf8',
+          stdio: ['pipe', 'pipe', 'pipe'],
+        });
+        return res.json({ success: true, change_set: cs, push_success: true, push_branch: cs.git_branch });
+      } catch (pushErr) {
+        return res.json({ success: true, change_set: cs, push_success: false, push_error: pushErr.message });
+      }
+    }
+
     res.json({ success: true, change_set: cs });
   } catch (err) {
     handleError(res, err);

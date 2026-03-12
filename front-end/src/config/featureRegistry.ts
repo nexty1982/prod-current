@@ -30,6 +30,8 @@ export interface FeatureEntry {
   description?: string;
   /** Date feature entered current stage (YYYY-MM-DD) */
   since?: string;
+  /** Linked change set code (e.g. 'CS-0038') — ties feature to SDLC pipeline */
+  changeSetCode?: string;
 }
 
 // ────────────────────────────────────────────────────────────
@@ -55,31 +57,40 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'portal-records', name: 'Portal Records Hub', stage: 5, route: '/portal/records', description: 'Unified records hub with onboarding flow', since: '2026-03-07' },
 
   // ── Stage 4: Stabilizing ───────────────────────────────────
-  { id: 'church-onboarding', name: 'Church Onboarding Pipeline', stage: 4, route: '/admin/control-panel/church-onboarding', description: 'Token-based church registration pipeline with onboarding tracking', since: '2026-03-07' },
-  { id: 'church-onboarding-detail', name: 'Church Onboarding Detail', stage: 4, route: '/admin/control-panel/church-onboarding/:churchId', description: 'Per-church onboarding detail view with members and tokens', since: '2026-03-07' },
-  { id: 'pending-members', name: 'Pending Members', stage: 4, route: '/admin/control-panel/pending-members', description: 'Review and approve users who registered via church token', since: '2026-03-07' },
-  { id: 'upload-records', name: 'Upload Records', stage: 4, route: '/apps/upload-records', description: 'Simplified OCR upload for church staff', since: '2026-02-26' },
+  { id: 'church-onboarding', name: 'Church Onboarding Pipeline', stage: 4, route: '/admin/control-panel/church-onboarding', description: 'Token-based church registration pipeline with onboarding tracking', since: '2026-03-07', changeSetCode: 'CS-0049' },
+  { id: 'church-onboarding-detail', name: 'Church Onboarding Detail', stage: 4, route: '/admin/control-panel/church-onboarding/:churchId', description: 'Per-church onboarding detail view with members and tokens', since: '2026-03-07', changeSetCode: 'CS-0049' },
+  { id: 'pending-members', name: 'Pending Members', stage: 4, route: '/admin/control-panel/pending-members', description: 'Review and approve users who registered via church token', since: '2026-03-07', changeSetCode: 'CS-0049' },
+  { id: 'upload-records', name: 'Upload Records', stage: 4, route: '/apps/upload-records', description: 'Simplified OCR upload for church staff', since: '2026-02-26', changeSetCode: 'CS-0042' },
   { id: 'ocr-studio', name: 'OCR Studio', stage: 5, route: '/portal/ocr', since: '2026-02-01' },
   { id: 'interactive-reports', name: 'Interactive Reports', stage: 4, route: '/apps/records/interactive-reports', since: '2026-02-01' },
   { id: 'interactive-report-jobs', name: 'Interactive Report Jobs', stage: 4, route: '/devel-tools/interactive-reports/jobs', since: '2026-02-01' },
 
   // ── Stage 3: Review ────────────────────────────────────────
-  { id: 'funeral-records-v2', name: 'Funeral Records', stage: 3, route: '/apps/records/funeral', since: '2026-02-01' },
+  { id: 'funeral-records-v2', name: 'Funeral Records', stage: 3, route: '/apps/records/funeral', since: '2026-02-01', changeSetCode: 'CS-0039' },
+  { id: 'change-sets', name: 'Change Sets', stage: 3, route: '/admin/control-panel/om-daily/change-sets', description: 'SDLC delivery container for grouping, staging, reviewing, and promoting work items', since: '2026-03-08', changeSetCode: 'CS-0037' },
 
   // ── Stage 2: Development ───────────────────────────────────
   { id: 'om-charts', name: 'OM Charts', stage: 2, route: '/apps/om-charts', description: 'Graphical charts from church sacramental records', since: '2026-02-18' },
   { id: 'sacramental-restrictions', name: 'Sacramental Date Restrictions', stage: 2, route: '/admin/control-panel/church-management/sacramental-restrictions', description: 'Calendar viewer for Orthodox sacramental date restrictions', since: '2026-02-28' },
-  { id: 'marriage-records-v2', name: 'Marriage Records', stage: 2, route: '/apps/records/marriage', since: '2026-02-01' },
-  { id: 'enhanced-ocr-uploader', name: 'Enhanced OCR Uploader', stage: 2, route: '/devel/ocr-studio/upload', since: '2026-01-15' },
+  { id: 'marriage-records-v2', name: 'Marriage Records', stage: 2, route: '/apps/records/marriage', since: '2026-02-01', changeSetCode: 'CS-0039' },
+  { id: 'enhanced-ocr-uploader', name: 'Enhanced OCR Uploader', stage: 2, route: '/devel/ocr-studio/upload', since: '2026-01-15', changeSetCode: 'CS-0038' },
   { id: 'dynamic-records-inspector', name: 'Dynamic Records Inspector', stage: 2, route: '/devel/dynamic-records', since: '2026-01-20' },
   { id: 'crm', name: 'CRM', stage: 2, route: '/devel-tools/crm', since: '2026-02-01' },
   { id: 'tutorial-management', name: 'Tutorial Management', stage: 2, route: '/admin/tutorials', description: 'Super admin tutorial/welcome system management', since: '2026-02-21' },
-  { id: 'change-sets', name: 'Change Sets', stage: 3, route: '/admin/control-panel/om-daily/change-sets', description: 'SDLC delivery container for grouping, staging, reviewing, and promoting work items', since: '2026-03-08' },
   { id: 'prompt-plans', name: 'Prompt Plans', stage: 2, route: '/devel-tools/prompt-plans', description: 'Ordered sequences of AI prompts for complex initiatives', since: '2026-03-08' },
   { id: 'page-editor', name: 'Page Content Editor', stage: 2, route: '/devel-tools/page-editor', description: 'CMS for editing frontend page text from the web UI', since: '2026-03-08' },
   { id: 'records-landing-branding', name: 'Records Landing Branding', stage: 2, route: '/admin/church-branding/records-landing', description: 'Church-level customization for records landing page header', since: '2026-03-10' },
   { id: 'code-change-detection', name: 'Code Change Detection', stage: 2, route: '/admin/ai/code-changes', description: 'Tracks page content edits, notifies admins, and triggers frontend builds', since: '2026-03-08' },
-  { id: 'sdlc-wizard', name: 'SDLC Pipeline Wizard', stage: 2, route: '/admin/control-panel/om-daily/sdlc-wizard', description: 'Wizard-driven SDLC pipeline management', since: '2026-03-12' },
+  { id: 'sdlc-wizard', name: 'SDLC Pipeline Wizard', stage: 2, route: '/admin/control-panel/om-daily/sdlc-wizard', description: 'Wizard-driven SDLC pipeline management', since: '2026-03-12', changeSetCode: 'CS-0037' },
+  { id: 'ocr-workbench', name: 'OCR Workbench & Review UX', stage: 2, route: '/devel/ocr-studio', description: 'Full OCR document review workbench with overlay editing', since: '2026-02-01', changeSetCode: 'CS-0042' },
+  { id: 'ocr-admin-dashboard', name: 'OCR Admin & Analytics', stage: 2, description: 'Admin dashboard for OCR job monitoring, stats, and quality metrics', since: '2026-03-08', changeSetCode: 'CS-0043' },
+  { id: 'ocr-backend-infra', name: 'OCR Backend Infrastructure', stage: 2, description: 'Pipeline workers, queue management, storage, and API layer', since: '2026-03-08', changeSetCode: 'CS-0044' },
+  { id: 'ocr-test-suite', name: 'OCR Test Suite', stage: 2, description: 'End-to-end and unit test coverage for OCR pipeline', since: '2026-03-08', changeSetCode: 'CS-0045' },
+  { id: 'ocr-accessibility', name: 'OCR Frontend Polish & Accessibility', stage: 2, description: 'Accessibility, responsiveness, and UX polish for OCR pages', since: '2026-03-08', changeSetCode: 'CS-0046' },
+  { id: 'ocr-languages', name: 'OCR Language & Accuracy', stage: 2, description: 'Multi-language support and accuracy improvement system', since: '2026-03-08', changeSetCode: 'CS-0040' },
+  { id: 'ocr-layout-intel', name: 'OCR Layout & Table Intelligence', stage: 2, description: 'Automatic table detection, column mapping, and layout analysis', since: '2026-03-08', changeSetCode: 'CS-0041' },
+  { id: 'documentation-sprint', name: 'Documentation Sprint', stage: 2, description: 'Platform-wide documentation updates and developer guides', since: '2026-03-08', changeSetCode: 'CS-0047' },
+  { id: 'platform-devops', name: 'Platform DevOps & Infrastructure', stage: 2, description: 'CI/CD, monitoring, deployment automation, and server hardening', since: '2026-03-08', changeSetCode: 'CS-0048' },
 
   // ── Stage 1: Prototype ─────────────────────────────────────
   { id: 'us-church-map', name: 'US Church Map', stage: 1, route: '/devel-tools/us-church-map', since: '2026-02-01' },
