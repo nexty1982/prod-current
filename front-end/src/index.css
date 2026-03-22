@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode (Tailwind v4) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Load Tailwind config for custom values */
+@config "../tailwind.config.js";
+
 /* Fix MUI button text visibility - Tailwind preflight sets color:inherit which breaks MUI buttons */
 .MuiButton-root {
   color: inherit !important;
@@ -63,14 +69,17 @@
   color: inherit !important;
 }
 
+/* Georgian font — Google Fonts loaded for ქართული rendering */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap');
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Inter, 'Noto Sans Georgian', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: #213547;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -148,6 +157,17 @@
   --status-dot-live: #10b981; /* bg-green-500 */
   --status-dot-paused: #f59e0b; /* bg-yellow-500 */
 
+  /* Orthodox Schedule Guidelines — Design Tokens */
+  --orthodox-purple: #5B21B6;
+  --orthodox-purple-light: #7C3AED;
+  --orthodox-gold: #D97706;
+  --orthodox-gold-light: #F59E0B;
+  --schedule-allowed: #10B981;
+  --schedule-conditional: #F59E0B;
+  --schedule-restricted: #EF4444;
+  --schedule-feast: #7C3AED;
+  --schedule-fast: #FB923C;
+
   /* Typography */
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
   
@@ -197,16 +217,19 @@
 
 /* Dark Theme Overrides */
 .dark {
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
   /* Console Backgrounds */
   --card-bg: #111827; /* Darker cards */
   --card-border: #374151; /* Subtle borders */
-  
+
   /* Text Colors */
   --text-primary: #f9fafb; /* text-gray-50 */
   --text-secondary: #d1d5db; /* text-gray-300 */
   --text-muted: #9ca3af; /* text-gray-400 */
   --text-dimmed: #6b7280; /* text-gray-500 */
-  
+
   /* Interactive States */
   --hover-bg: rgba(31, 41, 55, 0.5); /* hover:bg-gray-800/50 */
   --focus-ring: #374151; /* focus:ring-gray-700 */
@@ -278,12 +301,13 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-a {
+/* Only apply default link colors to unstyled links (not Tailwind/om-styled) */
+a:not([class]) {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
 }
-a:hover {
+a:not([class]):hover {
   color: #535bf2;
 }
 
@@ -294,14 +318,14 @@ body {
 }
 
 /* Fix dropdown text visibility in dark theme */
-select {
-  color: white !important;
-  background-color: #1f2937 !important;
+.dark select:not([class*="om-"]) {
+  color: white;
+  background-color: #1f2937;
 }
 
-select option {
-  color: white !important;
-  background-color: #1f2937 !important;
+.dark select:not([class*="om-"]) option {
+  color: white;
+  background-color: #1f2937;
 }
 
 /* Custom scrollbar styles for OMAI Logger */
@@ -424,7 +448,7 @@ h1 {
 
 /* Global button styles - scoped to avoid conflicts with Tailwind and MUI */
 /* Only apply to buttons without Tailwind or MUI classes */
-button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]) {
+button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):not([class*="om-"]) {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -436,26 +460,18 @@ button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]) {
   transition: border-color 0.25s;
 }
 
-button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):hover {
+button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):not([class*="om-"]):hover {
   border-color: #646cff;
 }
 
-button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):focus,
-button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):focus-visible {
+button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):not([class*="om-"]):focus,
+button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):not([class*="om-"]):focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]) {
-    background-color: #f9f9f9;
-  }
+/* Light-mode-specific button styling (class-based dark mode, not media query) */
+:root:not(.dark) button:not([class*="bg-"]):not([class*="text-"]):not([class*="Mui"]):not([class*="om-"]) {
+  background-color: #f9f9f9;
 }
 
 /* Orthodox Metrics - Liturgical Flow Animation */

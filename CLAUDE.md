@@ -147,6 +147,60 @@ To register a new feature, add it to `FEATURE_REGISTRY` in `featureRegistry.ts` 
 
 `super_admin` > `admin` > `church_admin` > `priest` > `deacon` > `editor`
 
+## AI Agent Work Tracking (REQUIRED)
+
+**Every change you make MUST be tracked as an OM Daily item.** This is mandatory, not optional.
+
+### Quick Reference
+
+```bash
+# Create item (do this BEFORE starting work)
+curl -X POST http://127.0.0.1:3001/api/om-daily/items \
+  -H "Content-Type: application/json" \
+  -b <session_cookie> \
+  -d '{"title":"...","task_type":"...","status":"in_progress","source":"agent","agent_tool":"claude_cli","priority":"medium","horizon":"7","category":"...","description":"..."}'
+
+# Close item (do this AFTER work is complete)
+curl -X PUT http://127.0.0.1:3001/api/om-daily/items/:id \
+  -H "Content-Type: application/json" \
+  -b <session_cookie> \
+  -d '{"status":"done","progress":100}'
+```
+
+### Workflow
+
+1. **Before starting work** → Create an OM Daily item with `status: "in_progress"`, `source: "agent"`, `agent_tool: "claude_cli"`
+2. **During work** → Update `progress` (0-100) if the task is large
+3. **After completion** → Set `status: "done"`, `progress: 100`
+4. **If abandoned** → Set `status: "cancelled"` with reason in description
+
+### Item Type Quick Guide
+
+| task_type | Use for |
+|-----------|---------|
+| `bugfix` | Fixing broken behavior |
+| `feature` | New functionality |
+| `enhancement` | Improving existing functionality |
+| `refactor` | Code restructuring |
+| `style` | Visual/CSS changes |
+| `config` | Configuration changes |
+| `chore` | Maintenance, cleanup |
+| `security` | Security fixes |
+
+### Branch Types: `new_feature`, `existing_feature`, `bugfix`, `patch`
+### Priorities: `critical`, `high`, `medium` (default), `low`
+### Categories: `frontend`, `backend`, `database`, `ocr`, `auth`, `design-system`, `admin`, `portal`, `records`, `crm`, `ai`, `sdlc`, `deployment`
+
+### Agent Plans (Assigned Work Plans)
+
+Check for assigned plans at conversation start:
+```bash
+curl -b <session_cookie> http://127.0.0.1:3001/api/prompt-plans/agent/claude_cli
+```
+If an active plan is returned, read the `next_step.prompt_text` and execute that stage. Work items are auto-linked to the plan's Change Set. See [docs/ai-agent-workflow.md](docs/ai-agent-workflow.md) for full details.
+
+**Full workflow documentation:** [docs/ai-agent-workflow.md](docs/ai-agent-workflow.md)
+
 ## Documentation
 
 Detailed docs in `docs/`:
@@ -157,3 +211,4 @@ Detailed docs in `docs/`:
 - [database.md](docs/database.md) — Schema & access patterns
 - [frontend.md](docs/frontend.md) — Frontend architecture
 - [sdlc.md](docs/sdlc.md) — Feature lifecycle stages
+- [ai-agent-workflow.md](docs/ai-agent-workflow.md) — AI agent work tracking workflow

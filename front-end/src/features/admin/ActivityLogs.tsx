@@ -51,7 +51,6 @@ import {
 } from '@tabler/icons-react';
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI } from '@/api/admin.api';
-import { userAPI } from '@/api/user.api';
 import { metricsAPI } from '@/api/metrics.api';
 import PageContainer from '@/shared/ui/PageContainer';
 import DashboardCard from '@/shared/ui/DashboardCard';

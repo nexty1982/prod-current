@@ -131,6 +131,7 @@ const baptismRouter = require('./routes/baptism');
 const marriageRouter = require('./routes/marriage');
 const funeralRouter = require('./routes/funeral');
 const uniqueValuesRouter = require('./routes/unique-values');
+const recordBatchesRouter = require('./routes/record-batches');
 const dropdownOptionsRouter = require('./routes/dropdownOptions');
 // Load baptismCertificates router with error handling for native module issues
 let baptismCertificatesRouter: any;
@@ -229,6 +230,9 @@ const promptPlansRouter = require('./routes/prompt-plans');
 const pageContentRouter = require('./routes/page-content');
 const snapshotsRouter = require('./routes/snapshots');
 const crmRouter = require('./routes/crm');
+const jurisdictionsRouter = require('./routes/jurisdictions');
+const certificateTemplatesRouter = require('./routes/certificate-templates');
+const demoChurchesRouter = require('./routes/admin/demo-churches');
 const analyticsRouter = require('./routes/analytics'); // US Church Map analytics
 const omChartsRouter = require('./api/om-charts'); // OM Charts: graphical charts from church records
 const dashboardHomeRouter = require('./api/dashboard-home'); // Dashboard Home: summary data for church dashboard
@@ -288,6 +292,8 @@ const adminInvitesRouter = require('./routes/admin/invites');
 const inviteRegisterRouter = require('./routes/invite-register');
 const churchRegisterRouter = require('./routes/church-register');
 const churchOnboardingRouter = require('./routes/admin/church-onboarding');
+const churchLifecycleRouter = require('./routes/admin/church-lifecycle');
+const orthodoxScheduleGuidelinesRouter = require('./routes/admin/orthodox-schedule-guidelines');
 const changeSetsRouter = require('./routes/admin/change-sets');
 const activityLogsRouter = require('./routes/admin/activity-logs');
 // Import new modular admin route files (extracted from monolithic admin.js)
@@ -396,6 +402,8 @@ try {
 }
 // Import Backend Diagnostics router for system monitoring
 const backendDiagnosticsRouter = require('./routes/backend_diagnostics');
+// Import Platform Status router for DB VM health monitoring
+const platformStatusRouter = require('./routes/platform-status');
 // Import Build System router for build orchestration
 const buildRouter = require('./routes/build');
 // Import AI Administration Panel router
@@ -603,11 +611,27 @@ app.use('/api', churchRegisterRouter); // Admin token management endpoints
 console.log('✅ [Server] Mounted church registration token routes');
 app.use('/api/admin/church-onboarding', churchOnboardingRouter);
 console.log('✅ [Server] Mounted /api/admin/church-onboarding route (Phase 2 onboarding pipeline)');
+app.use('/api/admin/church-lifecycle', churchLifecycleRouter);
+console.log('✅ [Server] Mounted /api/admin/church-lifecycle route (unified CRM + onboarding)');
+app.use('/api/admin/orthodox-schedule-guidelines', orthodoxScheduleGuidelinesRouter);
+console.log('✅ [Server] Mounted /api/admin/orthodox-schedule-guidelines route');
 app.use('/api/admin/change-sets', changeSetsRouter);
 console.log('✅ [Server] Mounted /api/admin/change-sets route (SDLC delivery container)');
 app.use('/api/churches', churchesRouter);
 // Mount churches router at /api/my to handle /api/my/churches
+// OCR Preferences — self-service proxy for church-scoped OCR settings (mount BEFORE /api/my catchall)
+const ocrPreferencesRouter = require('./routes/ocr-preferences');
+app.use('/api/my/ocr-preferences', ocrPreferencesRouter);
+console.log('✅ [Server] Mounted /api/my/ocr-preferences route');
 app.use('/api/my', churchesRouter);
+// Parish Settings — per-church key/value configuration (mapping, theme, ui, search, system, branding)
+const parishSettingsRouter = require('./routes/parish-settings');
+app.use('/api/parish-settings', parishSettingsRouter);
+console.log('✅ [Server] Mounted /api/parish-settings route');
+// Parish Stats — real-time record counts from church tenant databases
+const parishStatsRouter = require('./routes/parish-stats');
+app.use('/api/parish-stats', parishStatsRouter);
+console.log('✅ [Server] Mounted /api/parish-stats route');
 // Church records landing page branding
 const churchRecordsLandingRouter = require('./routes/church-records-landing');
 app.use('/api/churches', churchRecordsLandingRouter);
@@ -770,6 +794,8 @@ app.use('/api/omb', ombRouter);
 app.use('/api/jit', jitTerminalRouter);
 // Backend Diagnostics routes for system monitoring (super_admin only)
 app.use('/api/server', backendDiagnosticsRouter);
+// Platform Status routes for DB VM health (super_admin only, read-only)
+app.use('/api/platform', platformStatusRouter);
 // 🔧 NEW: Modular admin routes (extracted from monolithic admin.js)
 app.use('/api/admin/church-users', churchUsersRouter);
 app.use('/api/admin/church-database', churchDatabaseRouter);
@@ -810,10 +836,22 @@ console.log('✅ [Server] Mounted /api/page-content routes (Page Content CMS)');
 const pageContentBuildsRouter = require('./routes/page-content-builds');
 app.use('/api/page-content-builds', pageContentBuildsRouter); // Code change detection & builds
 console.log('✅ [Server] Mounted /api/page-content-builds routes (Code Change Detection)');
+const pageContentLiveRouter = require('./routes/page-content-live');
+app.use('/api/page-content-live', pageContentLiveRouter); // Live content overrides (inline editor)
+console.log('✅ [Server] Mounted /api/page-content-live routes (Inline Page Editor)');
 app.use('/api/snapshots', snapshotsRouter); // Code snapshot safety system
 console.log('✅ [Server] Mounted /api/snapshots routes (Safety System)');
 app.use('/api/crm', crmRouter); // CRM pipeline & outreach
 console.log('✅ [Server] Mounted /api/crm routes (CRM & Outreach)');
+app.use('/api/jurisdictions', jurisdictionsRouter); // Jurisdictions reference table
+console.log('✅ [Server] Mounted /api/jurisdictions routes (Jurisdictions)');
+app.use('/api/certificate-templates', certificateTemplatesRouter); // Certificate template system
+console.log('✅ [Server] Mounted /api/certificate-templates routes (Certificate Templates)');
+const i18nRouter = require('./routes/i18n');
+app.use('/api/i18n', i18nRouter); // UI translation strings
+console.log('✅ [Server] Mounted /api/i18n routes (UI Translations)');
+app.use('/api/admin/demo-churches', demoChurchesRouter); // Demo church management
+console.log('✅ [Server] Mounted /api/admin/demo-churches routes (Demo Churches)');
 app.use('/api/analytics', analyticsRouter); // US Church Map analytics
 console.log('✅ [Server] Mounted /api/analytics routes (US Church Map)');
 app.use('/api/churches/:churchId/charts', omChartsRouter); // OM Charts
@@ -836,6 +874,10 @@ app.use('/api/kanban', kanbanRouter);
 // User profile routes (authenticated)
 const userProfileRouter = require('./routes/user-profile');
 app.use('/api/user/profile', userProfileRouter);
+
+// User session management (self-service)
+const userSessionsRouter = require('./routes/user-sessions');
+app.use('/api/user/sessions', userSessionsRouter);
 
 // Profile image upload routes (avatar + banner)
 const profileUploadRouter = require('./routes/upload');
@@ -908,6 +950,7 @@ app.use('/api/baptism-records', baptismRouter);
 app.use('/api/marriage-records', marriageRouter);
 app.use('/api/funeral-records', funeralRouter);
 app.use('/api/unique-values', uniqueValuesRouter);
+app.use('/api/record-batches', recordBatchesRouter);
 
 // Certificate routes
 app.use('/api/baptismCertificates', baptismCertificatesRouter);
@@ -1689,6 +1732,13 @@ server.listen(PORT, HOST, () => {
       );
       if (sessResult.affectedRows > 0) {
         console.log(`[SESSION-CLEANUP] Purged ${sessResult.affectedRows} expired express session(s)`);
+      }
+      // Clean used or expired email verification tokens
+      const [verifResult] = await getAppPool().query(
+        `DELETE FROM email_verification_tokens WHERE used_at IS NOT NULL OR expires_at < NOW()`
+      );
+      if (verifResult.affectedRows > 0) {
+        console.log(`[SESSION-CLEANUP] Purged ${verifResult.affectedRows} stale email verification token(s)`);
       }
     } catch (err: any) {
       console.error('[SESSION-CLEANUP] Error:', err.message);

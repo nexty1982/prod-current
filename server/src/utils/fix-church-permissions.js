@@ -37,15 +37,21 @@ async function fixPermissions() {
             
             try {
                 // Grant all privileges on the church database to orthodoxapps user
+                // Grant to both localhost and % (remote) hosts for migration readiness
                 const grantQuery = `GRANT ALL PRIVILEGES ON \`${church.database_name}\`.* TO 'orthodoxapps'@'localhost'`;
                 await getAppPool().query(grantQuery);
-                console.log(`   ✅ Granted permissions on ${church.database_name}`);
-                
+                const grantQueryRemote = `GRANT ALL PRIVILEGES ON \`${church.database_name}\`.* TO 'orthodoxapps'@'%'`;
+                await getAppPool().query(grantQueryRemote);
+                console.log(`   ✅ Granted permissions on ${church.database_name} (localhost + remote)`);
+
                 // Also grant permissions for any specific tables that might need it
                 const tableGrants = [
                     `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_jobs TO 'orthodoxapps'@'localhost'`,
                     `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_settings TO 'orthodoxapps'@'localhost'`,
-                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_queue TO 'orthodoxapps'@'localhost'`
+                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_queue TO 'orthodoxapps'@'localhost'`,
+                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_jobs TO 'orthodoxapps'@'%'`,
+                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_settings TO 'orthodoxapps'@'%'`,
+                    `GRANT SELECT, INSERT, UPDATE, DELETE ON \`${church.database_name}\`.ocr_queue TO 'orthodoxapps'@'%'`
                 ];
                 
                 for (const grantSql of tableGrants) {

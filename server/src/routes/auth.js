@@ -171,7 +171,8 @@ router.post('/login', async (req, res) => {
       last_name: user.last_name,
       role: user.role,
       church_id: user.church_id,
-      account_expires_at: user.account_expires_at || null
+      account_expires_at: user.account_expires_at || null,
+      last_login: user.last_login || null
     };
 
     await new Promise((resolve, reject) => {
@@ -429,7 +430,7 @@ router.get('/check', async (req, res) => {
         
         // Get fresh user data from database
         const [users] = await pool.execute(
-          'SELECT id, email, first_name, last_name, role, church_id FROM users WHERE id = ? AND is_active = 1',
+          'SELECT id, email, first_name, last_name, role, church_id, last_login FROM users WHERE id = ? AND is_active = 1',
           [decoded.userId]
         );
         
@@ -443,7 +444,8 @@ router.get('/check', async (req, res) => {
               first_name: users[0].first_name,
               last_name: users[0].last_name,
               role: users[0].role,
-              church_id: users[0].church_id
+              church_id: users[0].church_id,
+              last_login: users[0].last_login
             }
           });
         }

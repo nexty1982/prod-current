@@ -223,16 +223,15 @@ const PortalRecordsPage: React.FC = () => {
         metricsAPI.records.getFuneralRecords({ limit: 1 }),
       ]);
 
+      const extractTotal = (res: PromiseSettledResult<any>) =>
+        res.status === 'fulfilled'
+          ? (res.value?.totalRecords ?? res.value?.total ?? res.value?.pagination?.total ?? res.value?.records?.length ?? 0)
+          : 0;
+
       setCounts({
-        baptism: baptismRes.status === 'fulfilled'
-          ? (baptismRes.value?.total ?? baptismRes.value?.records?.length ?? 0)
-          : 0,
-        marriage: marriageRes.status === 'fulfilled'
-          ? (marriageRes.value?.total ?? marriageRes.value?.records?.length ?? 0)
-          : 0,
-        funeral: funeralRes.status === 'fulfilled'
-          ? (funeralRes.value?.total ?? funeralRes.value?.records?.length ?? 0)
-          : 0,
+        baptism: extractTotal(baptismRes),
+        marriage: extractTotal(marriageRes),
+        funeral: extractTotal(funeralRes),
       });
     } catch {
       // Non-critical

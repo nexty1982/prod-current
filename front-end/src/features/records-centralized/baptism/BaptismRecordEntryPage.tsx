@@ -1,43 +1,51 @@
 /**
- * BaptismRecordEntryPage Component
+ * BaptismRecordEntryPage — Create / Edit Baptism Record
  *
- * Form page for creating and editing baptism records.
- * Supports both create (new) and edit (edit/:id) modes.
+ * Enterprise-grade form using shared SacramentalFormShell components.
+ * Dynamic clergy dropdown via shared ClergySelector.
+ * Supports both create (/portal/records/baptism/new) and edit modes.
  *
- * Routes:
- *   /portal/records/baptism/new?church_id={id}
- *   /portal/records/baptism/edit/:id?church_id={id}
+ * Field mapping (frontend → backend):
+ *   first_name    → first_name
+ *   last_name     → last_name
+ *   birth_date    → birth_date
+ *   reception_date→ reception_date
+ *   clergy        → clergy
+ *   birthplace    → birthplace
+ *   parents       → parents
+ *   sponsors      → sponsors
+ *   entry_type    → entry_type
+ *   notes         → notes
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Paper,
-  TextField,
-  Button,
-  Stack,
-  Alert,
-  CircularProgress,
-  Grid,
-  Autocomplete,
-  MenuItem,
-} from '@mui/material';
-import { IconCheck, IconX } from '@tabler/icons-react';
+import { Users } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
-import LookupService, { LookupItem } from '../../../shared/lib/lookupService';
+import { useChurch } from '../../../context/ChurchContext';
 import { getBaptismDateRestriction } from '../../../shared/lib/sacramentalDateRestrictions';
+import {
+  inputClass,
+  textareaClass,
+  FormSection,
+  FormField,
+  FormDivider,
+  SelectField,
+  ErrorAlert,
+  SuccessAlert,
+  DateRestrictionAlert,
+  FormPageHeader,
+  FormActionBar,
+  FormLoadingSkeleton,
+  FormModeToggle,
+  WizardStepIndicator,
+  WizardNavBar,
+  type FormMode,
+  type WizardStep,
+} from '../shared/SacramentalFormShell';
+import { ClergySelector } from '../shared/ClergySelector';
 
-// ─── Required fields ─────────────────────────────────────────
-const REQUIRED_FIELDS: (keyof BaptismRecordFormData)[] = [
-  'first_name',
-  'last_name',
-  'birth_date',
-  'reception_date',
-  'clergy',
-  'entry_type',
-];
+/* ─── Types ─── */
 
 interface BaptismRecordFormData {
   first_name: string;
@@ -52,14 +60,24 @@ interface BaptismRecordFormData {
   notes: string;
 }
 
+const REQUIRED_FIELDS: (keyof BaptismRecordFormData)[] = [
+  'first_name', 'last_name', 'birth_date', 'reception_date', 'clergy', 'entry_type',
+];
+
+/* ══════════════════════════════════════════════════════════
+   Main Component
+   ══════════════════════════════════════════════════════════ */
+
 const BaptismRecordEntryPage: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { churchMetadata } = useChurch();
 
   const isEditMode = !!id;
   const churchId = searchParams.get('church_id') || user?.church_id?.toString() || '';
+  const createAnotherRef = useRef(false);
 
   const [loading, setLoading] = useState(isEditMode);
   const [saving, setSaving] = useState(false);
@@ -67,10 +85,14 @@ const BaptismRecordEntryPage: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [touched, setTouched] = useState<Set<string>>(new Set());
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [formMode, setFormMode] = useState<FormMode>('form');
+  const [wizardStep, setWizardStep] = useState(0);
 
-  // Clergy dropdown state
-  const [clergyOptions, setClergyOptions] = useState<string[]>([]);
-  const [clergyLoading, setClergyLoading] = useState(false);
+  const WIZARD_STEPS: WizardStep[] = [
+    { label: 'Record Details', description: 'Primary information about the baptism.' },
+    { label: 'Family & Context', description: 'Family and parish context information.' },
+    { label: 'Notes', description: 'Additional information.' },
+  ];
 
   const [formData, setFormData] = useState<BaptismRecordFormData>({
     first_name: '',
@@ -85,27 +107,6 @@ const BaptismRecordEntryPage: React.FC = () => {
     notes: '',
   });
 
-  // Load clergy options
-  useEffect(() => {
-    if (!churchId) return;
-    let cancelled = false;
-    const fetchClergy = async () => {
-      setClergyLoading(true);
-      try {
-        const res = await LookupService.getClergy({ churchId, recordType: 'baptism' });
-        if (!cancelled) {
-          setClergyOptions(res.items.map((item: LookupItem) => item.label));
-        }
-      } catch {
-        // Silently fail — user can still type a name
-      } finally {
-        if (!cancelled) setClergyLoading(false);
-      }
-    };
-    fetchClergy();
-    return () => { cancelled = true; };
-  }, [churchId]);
-
   // Load record data for edit mode
   useEffect(() => {
     if (isEditMode && id && churchId) {
@@ -113,31 +114,26 @@ const BaptismRecordEntryPage: React.FC = () => {
         try {
           setLoading(true);
           setError(null);
-
           const params = new URLSearchParams({ church_id: churchId });
           const response = await fetch(`/api/baptism-records/${id}?${params.toString()}`, {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
           });
-
-          if (!response.ok) {
-            throw new Error('Failed to load record');
-          }
-
+          if (!response.ok) throw new Error('Failed to load record');
           const data = await response.json();
           if (data.success && data.record) {
-            const record = data.record;
+            const r = data.record;
             setFormData({
-              first_name: record.first_name || '',
-              last_name: record.last_name || '',
-              birth_date: record.birth_date || '',
-              reception_date: record.reception_date || '',
-              clergy: record.clergy || '',
-              birthplace: record.birthplace || '',
-              parents: record.parents || '',
-              sponsors: record.sponsors || '',
-              entry_type: record.entry_type || 'Baptism',
-              notes: record.notes || '',
+              first_name: r.first_name || '',
+              last_name: r.last_name || '',
+              birth_date: r.birth_date || '',
+              reception_date: r.reception_date || '',
+              clergy: r.clergy || '',
+              birthplace: r.birthplace || '',
+              parents: r.parents || '',
+              sponsors: r.sponsors || '',
+              entry_type: r.entry_type || 'Baptism',
+              notes: r.notes || '',
             });
           }
         } catch (err: any) {
@@ -146,19 +142,15 @@ const BaptismRecordEntryPage: React.FC = () => {
           setLoading(false);
         }
       };
-
       loadRecord();
     }
   }, [isEditMode, id, churchId]);
 
-  // ─── Validation ────────────────────────────────────────────
-  const dateRestriction = useMemo(
-    () => {
-      const r = getBaptismDateRestriction(formData.reception_date);
-      return r ? r.message : null;
-    },
-    [formData.reception_date],
-  );
+  // Validation
+  const dateRestriction = useMemo(() => {
+    const r = getBaptismDateRestriction(formData.reception_date);
+    return r ? r.message : null;
+  }, [formData.reception_date]);
 
   const dateBeforeBirth = useMemo(() => {
     if (!formData.birth_date || !formData.reception_date) return false;
@@ -172,7 +164,7 @@ const BaptismRecordEntryPage: React.FC = () => {
   };
 
   const handleChange = (field: keyof BaptismRecordFormData) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
     setError(null);
@@ -187,29 +179,12 @@ const BaptismRecordEntryPage: React.FC = () => {
     e.preventDefault();
     setSubmitAttempted(true);
 
-    if (!churchId) {
-      setError('Church ID is required');
-      return;
-    }
+    if (!churchId) { setError('Church ID is required'); return; }
 
-    // Required field validation
     const missingFields = REQUIRED_FIELDS.filter((f) => !formData[f].trim());
-    if (missingFields.length > 0) {
-      setError('Please fill in all required fields.');
-      return;
-    }
-
-    // Date validation
-    if (dateBeforeBirth) {
-      setError('Reception date cannot be before birth date.');
-      return;
-    }
-
-    // Baptism date restriction — hard block for new records only
-    if (!isEditMode && dateRestriction) {
-      setError(dateRestriction);
-      return;
-    }
+    if (missingFields.length > 0) { setError('Please fill in all required fields.'); return; }
+    if (dateBeforeBirth) { setError('Reception date cannot be before birth date.'); return; }
+    if (!isEditMode && dateRestriction) { setError(dateRestriction); return; }
 
     setSaving(true);
     setError(null);
@@ -235,9 +210,21 @@ const BaptismRecordEntryPage: React.FC = () => {
       const data = await response.json();
       if (data.success) {
         setSuccess(true);
-        setTimeout(() => {
-          navigate(`/portal/records/baptism?church_id=${churchId}`);
-        }, 1500);
+        if (createAnotherRef.current) {
+          createAnotherRef.current = false;
+          setTimeout(() => {
+            setFormData({
+              first_name: '', last_name: '', birth_date: '', reception_date: '',
+              clergy: '', birthplace: '', parents: '', sponsors: '',
+              entry_type: 'Baptism', notes: '',
+            });
+            setSuccess(false);
+            setTouched(new Set());
+            setSubmitAttempted(false);
+          }, 1000);
+        } else {
+          setTimeout(() => navigate('/portal'), 1500);
+        }
       } else {
         throw new Error(data.error || 'Failed to save record');
       }
@@ -248,240 +235,176 @@ const BaptismRecordEntryPage: React.FC = () => {
     }
   };
 
-  const handleCancel = () => {
-    navigate(`/portal/records/baptism?church_id=${churchId}`);
+  const handleCancel = () => navigate('/portal');
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleCreateAnother = () => {
+    createAnotherRef.current = true;
+    formRef.current?.requestSubmit();
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  /* ── Shared section renderers ── */
+
+  const sectionBasicDetails = (
+    <FormSection title="Basic Record Details" description="Primary information about the baptism.">
+      <FormField label="First Name" required error={isFieldError('first_name')}
+        helperText={isFieldError('first_name') ? 'First name is required' : undefined}>
+        <input type="text" value={formData.first_name}
+          onChange={(e) => { setFormData(p => ({ ...p, first_name: e.target.value })); setError(null); }}
+          onBlur={handleBlur('first_name')} placeholder="e.g. Alexander"
+          className={inputClass(isFieldError('first_name'))} />
+      </FormField>
+
+      <FormField label="Last Name" required error={isFieldError('last_name')}
+        helperText={isFieldError('last_name') ? 'Last name is required' : undefined}>
+        <input type="text" value={formData.last_name}
+          onChange={(e) => { setFormData(p => ({ ...p, last_name: e.target.value })); setError(null); }}
+          onBlur={handleBlur('last_name')} placeholder="e.g. Petrov"
+          className={inputClass(isFieldError('last_name'))} />
+      </FormField>
+
+      <FormField label="Entry Type" required error={isFieldError('entry_type')}
+        helperText={isFieldError('entry_type') ? 'Entry type is required' : undefined}>
+        <SelectField
+          value={formData.entry_type}
+          onChange={handleChange('entry_type') as any}
+          onBlur={handleBlur('entry_type')}
+          error={isFieldError('entry_type')}
+          options={[
+            { value: 'Baptism', label: 'Baptism' },
+            { value: 'Chrismation', label: 'Chrismation' },
+          ]}
+        />
+      </FormField>
+
+      <FormField label="Birth Date" required error={isFieldError('birth_date')}
+        helperText={isFieldError('birth_date') ? 'Birth date is required' : undefined}>
+        <input type="date" value={formData.birth_date}
+          onChange={handleChange('birth_date')} onBlur={handleBlur('birth_date')}
+          className={inputClass(isFieldError('birth_date'))} />
+      </FormField>
+
+      <FormField label="Reception Date (Baptism Date)" required
+        error={isFieldError('reception_date') || dateBeforeBirth || (!isEditMode && !!dateRestriction)}
+        helperText={isFieldError('reception_date') ? 'Reception date is required'
+          : dateBeforeBirth ? 'Baptism date cannot be before birth date' : undefined}>
+        <input type="date" value={formData.reception_date}
+          onChange={handleChange('reception_date')} onBlur={handleBlur('reception_date')}
+          className={inputClass(isFieldError('reception_date') || dateBeforeBirth || (!isEditMode && !!dateRestriction))} />
+        {dateRestriction && (
+          <DateRestrictionAlert message={dateRestriction} isEditMode={isEditMode} />
+        )}
+      </FormField>
+
+      <FormField label="Clergy" required error={isFieldError('clergy')}
+        helperText={isFieldError('clergy') ? 'Clergy is required' : 'Select from list or type a name'}>
+        <ClergySelector
+          churchId={churchId}
+          recordType="baptism"
+          value={formData.clergy}
+          onChange={(v) => { setFormData(p => ({ ...p, clergy: v })); setError(null); setSuccess(false); }}
+          onBlur={handleBlur('clergy')}
+          error={isFieldError('clergy')}
+        />
+      </FormField>
+    </FormSection>
+  );
+
+  const sectionFamily = (
+    <FormSection title="Family & Context" description="Family and parish context information.">
+      <FormField label="Birthplace">
+        <input type="text" value={formData.birthplace}
+          onChange={handleChange('birthplace')} placeholder="City, State or Country"
+          className={inputClass()} />
+      </FormField>
+
+      <FormField label="Parents">
+        <textarea value={formData.parents} onChange={handleChange('parents')}
+          placeholder="Names of parents" rows={2} className={textareaClass()} />
+      </FormField>
+
+      <FormField label="Sponsors (Godparents)" fullWidth>
+        <textarea value={formData.sponsors} onChange={handleChange('sponsors')}
+          placeholder="Names of godparents / sponsors" rows={2} className={textareaClass()} />
+      </FormField>
+    </FormSection>
+  );
+
+  const sectionNotes = (
+    <FormSection title="Additional Information">
+      <FormField label="Notes" fullWidth>
+        <textarea value={formData.notes} onChange={handleChange('notes')}
+          placeholder="Any additional notes about this record..." rows={4}
+          className={textareaClass()} />
+      </FormField>
+    </FormSection>
+  );
+
+  const wizardSections = [sectionBasicDetails, sectionFamily, sectionNotes];
+
+  if (loading) return <FormLoadingSkeleton />;
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          {isEditMode ? 'Edit Baptism Record' : 'New Baptism Record'}
-        </Typography>
-
-        <Alert severity="info" sx={{ mb: 2 }}>
-          Fields marked in <strong style={{ color: '#d32f2f' }}>red</strong> are required.
-        </Alert>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-            {error}
-          </Alert>
+    <div className="max-w-[820px] mx-auto py-6 px-4">
+      <div className="flex items-start justify-between">
+        <FormPageHeader
+          backLabel="Back to Portal"
+          backTo={handleCancel}
+          icon={Users}
+          iconColor="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+          title={isEditMode ? 'Edit Baptism Record' : 'New Baptism Record'}
+          subtitle={isEditMode
+            ? 'Update the details for this baptism record.'
+            : 'Enter the details for a new baptism or chrismation record.'}
+          parishName={churchMetadata?.church_name_display || undefined}
+        />
+        {!isEditMode && (
+          <div className="flex-shrink-0 pt-8">
+            <FormModeToggle mode={formMode} onChange={(m) => { setFormMode(m); setWizardStep(0); }} />
+          </div>
         )}
+      </div>
 
-        {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            Record {isEditMode ? 'updated' : 'created'} successfully. Redirecting...
-          </Alert>
-        )}
+      {error && <ErrorAlert message={error} onClose={() => setError(null)} />}
+      {success && <SuccessAlert message={`Record ${isEditMode ? 'updated' : 'created'} successfully. Redirecting...`} />}
 
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            {/* First Name */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="First Name"
-                value={formData.first_name}
-                onChange={handleChange('first_name')}
-                onBlur={handleBlur('first_name')}
-                required
-                error={isFieldError('first_name')}
-                helperText={isFieldError('first_name') ? 'This field is required' : ''}
-                margin="normal"
-              />
-            </Grid>
+      <form ref={formRef} onSubmit={handleSubmit}>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+          <div className="p-6 md:p-8">
+            {formMode === 'wizard' && (
+              <WizardStepIndicator steps={WIZARD_STEPS} current={wizardStep} />
+            )}
 
-            {/* Last Name */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Last Name"
-                value={formData.last_name}
-                onChange={handleChange('last_name')}
-                onBlur={handleBlur('last_name')}
-                required
-                error={isFieldError('last_name')}
-                helperText={isFieldError('last_name') ? 'This field is required' : ''}
-                margin="normal"
-              />
-            </Grid>
+            {formMode === 'form' ? (
+              <>
+                {sectionBasicDetails}
+                <FormDivider />
+                {sectionFamily}
+                <FormDivider />
+                {sectionNotes}
+              </>
+            ) : (
+              wizardSections[wizardStep]
+            )}
+          </div>
 
-            {/* Birth Date */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Birth Date"
-                type="date"
-                value={formData.birth_date}
-                onChange={handleChange('birth_date')}
-                onBlur={handleBlur('birth_date')}
-                InputLabelProps={{ shrink: true }}
-                required
-                error={isFieldError('birth_date')}
-                helperText={isFieldError('birth_date') ? 'This field is required' : ''}
-                margin="normal"
-              />
-            </Grid>
-
-            {/* Reception Date */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Reception Date (Baptism Date)"
-                type="date"
-                value={formData.reception_date}
-                onChange={handleChange('reception_date')}
-                onBlur={handleBlur('reception_date')}
-                InputLabelProps={{ shrink: true }}
-                required
-                error={isFieldError('reception_date') || dateBeforeBirth || (!isEditMode && !!dateRestriction)}
-                helperText={
-                  isFieldError('reception_date')
-                    ? 'This field is required'
-                    : dateBeforeBirth
-                      ? 'Baptism date cannot be before birth date'
-                      : ''
-                }
-                margin="normal"
-              />
-              {dateRestriction && (
-                <Alert
-                  severity={isEditMode ? 'warning' : 'error'}
-                  sx={{ mt: 0.5 }}
-                >
-                  {dateRestriction}
-                  {isEditMode && ' This is allowed in edit mode for historical records.'}
-                </Alert>
-              )}
-            </Grid>
-
-            {/* Clergy — Autocomplete dropdown */}
-            <Grid item xs={12} sm={6}>
-              <Autocomplete
-                freeSolo
-                options={clergyOptions}
-                loading={clergyLoading}
-                value={formData.clergy}
-                onInputChange={(_e, value) => {
-                  setFormData((prev) => ({ ...prev, clergy: value }));
-                  setError(null);
-                  setSuccess(false);
-                }}
-                onBlur={handleBlur('clergy')}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Clergy"
-                    required
-                    error={isFieldError('clergy')}
-                    helperText={isFieldError('clergy') ? 'This field is required' : ''}
-                    margin="normal"
-                  />
-                )}
-              />
-            </Grid>
-
-            {/* Entry Type — Select dropdown */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                select
-                label="Entry Type"
-                value={formData.entry_type}
-                onChange={handleChange('entry_type')}
-                onBlur={handleBlur('entry_type')}
-                required
-                error={isFieldError('entry_type')}
-                helperText={isFieldError('entry_type') ? 'This field is required' : ''}
-                margin="normal"
-              >
-                <MenuItem value="Baptism">Baptism</MenuItem>
-                <MenuItem value="Chrismation">Chrismation</MenuItem>
-              </TextField>
-            </Grid>
-
-            {/* Birthplace */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Birthplace"
-                value={formData.birthplace}
-                onChange={handleChange('birthplace')}
-                margin="normal"
-              />
-            </Grid>
-
-            {/* Parents */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Parents"
-                value={formData.parents}
-                onChange={handleChange('parents')}
-                margin="normal"
-                multiline
-                rows={2}
-              />
-            </Grid>
-
-            {/* Sponsors */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Sponsors (Godparents)"
-                value={formData.sponsors}
-                onChange={handleChange('sponsors')}
-                margin="normal"
-                multiline
-                rows={2}
-              />
-            </Grid>
-
-            {/* Notes */}
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Notes"
-                value={formData.notes}
-                onChange={handleChange('notes')}
-                margin="normal"
-                multiline
-                rows={4}
-              />
-            </Grid>
-          </Grid>
-
-          <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              startIcon={<IconCheck size={18} />}
-              disabled={saving}
-            >
-              {saving ? 'Saving...' : isEditMode ? 'Update Record' : 'Create Record'}
-            </Button>
-            <Button
-              type="button"
-              variant="outlined"
-              startIcon={<IconX size={18} />}
-              onClick={handleCancel}
-              disabled={saving}
-            >
-              Cancel
-            </Button>
-          </Stack>
-        </form>
-      </Paper>
-    </Box>
+          {formMode === 'form' ? (
+            <FormActionBar saving={saving} isEditMode={isEditMode} onCancel={handleCancel} onCreateAnother={handleCreateAnother} />
+          ) : (
+            <WizardNavBar
+              step={wizardStep}
+              totalSteps={WIZARD_STEPS.length}
+              onPrev={() => setWizardStep(s => Math.max(0, s - 1))}
+              onNext={() => setWizardStep(s => Math.min(WIZARD_STEPS.length - 1, s + 1))}
+              saving={saving}
+              isEditMode={isEditMode}
+              onCancel={handleCancel}
+              onCreateAnother={handleCreateAnother}
+            />
+          )}
+        </div>
+      </form>
+    </div>
   );
 };
 

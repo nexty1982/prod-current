@@ -1,0 +1,922 @@
+/* Orthodox Metrics Design System - Component Classes
+ *
+ * Reusable component classes for public pages.
+ * All prefixed with `om-` to avoid conflicts with MUI or existing styles.
+ * Dark mode uses `.dark` ancestor selector.
+ */
+
+/* ========================================
+   Page Containers
+   ======================================== */
+
+.om-page-container {
+  min-height: 100vh;
+  background-color: #fff;
+}
+.dark .om-page-container {
+  background-color: #111827;
+}
+
+/* ========================================
+   Hero Sections
+   ======================================== */
+
+.om-hero-gradient {
+  background: linear-gradient(to bottom right, #2d1b4e, #3a2461, #4a2f74);
+  color: #fff;
+}
+.dark .om-hero-gradient {
+  background: linear-gradient(to bottom right, #030712, #111827, #1f2937);
+}
+
+.om-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(212, 175, 55, 0.15);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 9999px;
+}
+.dark .om-hero-badge {
+  background-color: rgba(212, 175, 55, 0.2);
+}
+
+.om-hero-badge-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #d4af37;
+}
+
+/* ========================================
+   Section Backgrounds
+   ======================================== */
+
+.om-section-base {
+  background-color: #fff;
+}
+.dark .om-section-base {
+  background-color: #111827;
+}
+
+.om-section-elevated {
+  background-color: #f9fafb;
+}
+.dark .om-section-elevated {
+  background-color: #1f2937;
+}
+
+.om-section-subtle {
+  background-color: #f3f4f6;
+}
+.dark .om-section-subtle {
+  background-color: #374151;
+}
+
+/* ========================================
+   Card Components
+   ======================================== */
+
+.om-card {
+  background-color: #fff;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #f3f4f6;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.15s ease;
+}
+.om-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+.dark .om-card {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.om-card-compact {
+  background-color: #fff;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #f3f4f6;
+  border-radius: 0.75rem;
+}
+.dark .om-card-compact {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.om-card-subtle {
+  background-color: #f9fafb;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #e5e7eb;
+  border-radius: 0.75rem;
+}
+.dark .om-card-subtle {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.om-card-elevated {
+  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+  border-radius: 1rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(45, 27, 78, 0.1);
+}
+.dark .om-card-elevated {
+  background: linear-gradient(to bottom right, #1f2937, #374151);
+  border-color: #4b5563;
+}
+
+/* ========================================
+   Badge/Pill Components
+   ======================================== */
+
+.om-badge-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(45, 27, 78, 0.05);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 9999px;
+}
+.dark .om-badge-primary {
+  background-color: #1f2937;
+}
+
+.om-badge-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #fff;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.dark .om-badge-secondary {
+  background-color: #374151;
+}
+
+.om-badge-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #d4af37;
+  color: #2d1b4e;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.dark .om-badge-accent {
+  background-color: #d4af37;
+  color: #2d1b4e;
+}
+
+/* ========================================
+   Typography
+   ======================================== */
+
+.om-heading-primary {
+  font-family: 'Georgia', serif;
+  font-size: 2.25rem;
+  line-height: 1.25;
+  color: #2d1b4e;
+}
+.dark .om-heading-primary {
+  color: #fff;
+}
+@media (min-width: 768px) {
+  .om-heading-primary {
+    font-size: 3rem;
+  }
+}
+
+.om-heading-secondary {
+  font-family: 'Georgia', serif;
+  font-size: 1.875rem;
+  color: #2d1b4e;
+}
+.dark .om-heading-secondary {
+  color: #fff;
+}
+@media (min-width: 768px) {
+  .om-heading-secondary {
+    font-size: 2.25rem;
+  }
+}
+
+.om-heading-tertiary {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 1.5rem;
+  color: #2d1b4e;
+}
+.dark .om-heading-tertiary {
+  color: #fff;
+}
+
+.om-text-primary {
+  font-family: 'Inter', sans-serif;
+  color: #2d1b4e;
+}
+.dark .om-text-primary {
+  color: #fff;
+}
+
+.om-text-secondary {
+  font-family: 'Inter', sans-serif;
+  color: #4a5565;
+}
+.dark .om-text-secondary {
+  color: #9ca3af;
+}
+
+.om-text-tertiary {
+  font-family: 'Inter', sans-serif;
+  color: #6b7280;
+}
+.dark .om-text-tertiary {
+  color: #6b7280;
+}
+
+.om-text-body {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.125rem;
+  color: #4a5565;
+  line-height: 1.625;
+}
+.dark .om-text-body {
+  color: #9ca3af;
+}
+
+/* ========================================
+   Button Components
+   ======================================== */
+
+.om-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-color: #2d1b4e;
+  color: #fff;
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.om-btn-primary:hover {
+  background-color: #1f1236;
+}
+.dark .om-btn-primary {
+  background-color: #d4af37;
+  color: #2d1b4e;
+}
+.dark .om-btn-primary:hover {
+  background-color: #c29d2f;
+}
+
+.om-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.om-btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.om-btn-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-color: #d4af37;
+  color: #2d1b4e;
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.om-btn-accent:hover {
+  background-color: #c29d2f;
+}
+
+.om-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-color: #fff;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #2d1b4e;
+  color: #2d1b4e;
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.om-btn-outline:hover {
+  background-color: #2d1b4e;
+  color: #fff;
+}
+.dark .om-btn-outline {
+  background-color: #374151;
+  border-color: #d4af37;
+  color: #d4af37;
+}
+.dark .om-btn-outline:hover {
+  background-color: #d4af37;
+  color: #2d1b4e;
+}
+
+/* ========================================
+   Icon Containers
+   ======================================== */
+
+.om-icon-container-primary {
+  width: 4rem;
+  height: 4rem;
+  background: linear-gradient(to bottom right, #2d1b4e, #4a2f74);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dark .om-icon-container-primary {
+  background: linear-gradient(to bottom right, #d4af37, #c29d2f);
+}
+
+.om-icon-container-accent {
+  width: 4rem;
+  height: 4rem;
+  background-color: #d4af37;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.om-icon-container-small {
+  width: 3.5rem;
+  height: 3.5rem;
+  background-color: #2d1b4e;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dark .om-icon-container-small {
+  background-color: #d4af37;
+}
+
+/* ========================================
+   Input Components
+   ======================================== */
+
+.om-input {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #e5e7eb;
+  background-color: #fff;
+  color: #2d1b4e;
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+}
+.om-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2d1b4e;
+  border-color: transparent;
+}
+.dark .om-input {
+  border-color: #4b5563;
+  background-color: #374151;
+  color: #fff;
+}
+.dark .om-input:focus {
+  box-shadow: 0 0 0 2px #d4af37;
+}
+
+.om-textarea {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #e5e7eb;
+  background-color: #fff;
+  color: #2d1b4e;
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  resize: none;
+}
+.om-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2d1b4e;
+  border-color: transparent;
+}
+.dark .om-textarea {
+  border-color: #4b5563;
+  background-color: #374151;
+  color: #fff;
+}
+.dark .om-textarea:focus {
+  box-shadow: 0 0 0 2px #d4af37;
+}
+
+.om-select {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #e5e7eb;
+  background-color: #fff;
+  color: #2d1b4e;
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+}
+.om-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2d1b4e;
+  border-color: transparent;
+}
+.dark .om-select {
+  border-color: #4b5563;
+  background-color: #374151;
+  color: #fff;
+}
+.dark .om-select:focus {
+  box-shadow: 0 0 0 2px #d4af37;
+}
+
+/* ========================================
+   Dividers & Borders
+   ======================================== */
+
+.om-divider {
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-color: #f3f4f6;
+}
+.dark .om-divider {
+  border-color: #374151;
+}
+
+.om-border-default {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #e5e7eb;
+}
+.dark .om-border-default {
+  border-color: #4b5563;
+}
+
+/* ========================================
+   Glass/Backdrop Effects
+   ======================================== */
+
+.om-glass {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.dark .om-glass {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.om-glass-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+}
+.dark .om-glass-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ========================================
+   Feature Icons
+   ======================================== */
+
+.om-feature-icon {
+  color: #d4af37;
+}
+.dark .om-feature-icon {
+  color: #d4af37;
+}
+
+.om-feature-icon-inverse {
+  color: #2d1b4e;
+}
+.dark .om-feature-icon-inverse {
+  color: #2d1b4e;
+}
+
+/* ========================================
+   Stat/Metric Display
+   ======================================== */
+
+.om-stat-number {
+  color: #d4af37;
+  font-family: 'Georgia', serif;
+  font-size: 3rem;
+}
+
+.om-stat-number-alt {
+  color: #2d1b4e;
+  font-family: 'Georgia', serif;
+  font-size: 3rem;
+}
+.dark .om-stat-number-alt {
+  color: #d4af37;
+}
+
+.om-stat-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  color: #4a5565;
+}
+.dark .om-stat-label {
+  color: #9ca3af;
+}
+
+/* ========================================
+   Number Badges (for steps)
+   ======================================== */
+
+.om-number-badge-primary {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  background-color: #2d1b4e;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d4af37;
+  font-family: 'Georgia', serif;
+  font-size: 1.25rem;
+}
+.dark .om-number-badge-primary {
+  background-color: #d4af37;
+  color: #2d1b4e;
+}
+
+.om-number-badge-accent {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  background-color: #d4af37;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2d1b4e;
+  font-family: 'Georgia', serif;
+  font-size: 1.25rem;
+}
+
+/* ========================================
+   List Bullets
+   ======================================== */
+
+.om-bullet {
+  width: 0.375rem;
+  height: 0.375rem;
+  background-color: #d4af37;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   Link Styles
+   ======================================== */
+
+.om-link {
+  color: #2d1b4e;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.om-link:hover {
+  text-decoration: underline;
+}
+.dark .om-link {
+  color: #d4af37;
+}
+
+.om-link-subtle {
+  color: #4a5565;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.om-link-subtle:hover {
+  color: #2d1b4e;
+}
+.dark .om-link-subtle {
+  color: #9ca3af;
+}
+.dark .om-link-subtle:hover {
+  color: #fff;
+}
+
+/* ========================================
+   Table Components
+   ======================================== */
+
+.om-table-container {
+  background-color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+.dark .om-table-container {
+  background-color: #111827;
+}
+
+.om-table-header {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-color: #f3f4f6;
+}
+.dark .om-table-header {
+  border-color: #374151;
+}
+
+.om-table-row {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-color: #f3f4f6;
+}
+.om-table-row:last-child {
+  border: 0;
+}
+.dark .om-table-row {
+  border-color: #374151;
+}
+
+.om-table-cell-header {
+  padding: 1.5rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #2d1b4e;
+}
+.dark .om-table-cell-header {
+  color: #fff;
+}
+
+.om-table-cell {
+  padding: 1.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: #4a5565;
+}
+.dark .om-table-cell {
+  color: #9ca3af;
+}
+
+/* ========================================
+   Admin Layout Components
+   ======================================== */
+
+/* Admin page breadcrumb bar */
+.om-breadcrumb {
+  background: linear-gradient(135deg, rgba(45, 27, 78, 0.04) 0%, rgba(212, 175, 55, 0.04) 100%);
+  border-bottom: 1px solid rgba(45, 27, 78, 0.08);
+  padding: 1.5rem 1.75rem 1.25rem;
+  margin-bottom: 1.75rem;
+  border-radius: 0.75rem;
+  position: relative;
+  overflow: hidden;
+}
+.dark .om-breadcrumb {
+  background: linear-gradient(135deg, rgba(45, 27, 78, 0.15) 0%, rgba(212, 175, 55, 0.06) 100%);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Admin page title */
+.om-page-title {
+  font-family: 'Georgia', serif;
+  font-size: 1.5rem;
+  line-height: 1.3;
+  color: #2d1b4e;
+  margin: 0;
+}
+.dark .om-page-title {
+  color: #f3f4f6;
+}
+
+/* Admin page subtitle */
+.om-page-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+.dark .om-page-subtitle {
+  color: #9ca3af;
+}
+
+/* Admin breadcrumb link */
+.om-breadcrumb-link {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.om-breadcrumb-link:hover {
+  color: #2d1b4e;
+}
+.dark .om-breadcrumb-link {
+  color: #9ca3af;
+}
+.dark .om-breadcrumb-link:hover {
+  color: #d4af37;
+}
+
+/* Admin breadcrumb active */
+.om-breadcrumb-active {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  color: #2d1b4e;
+  font-weight: 500;
+}
+.dark .om-breadcrumb-active {
+  color: #d4af37;
+}
+
+/* Admin category card */
+.om-admin-card {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.875rem;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.om-admin-card:hover {
+  border-color: rgba(45, 27, 78, 0.3);
+  box-shadow: 0 8px 24px -4px rgba(45, 27, 78, 0.1);
+  transform: translateY(-2px);
+}
+.dark .om-admin-card {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+.dark .om-admin-card:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 0 8px 24px -4px rgba(212, 175, 55, 0.1);
+}
+
+/* Admin icon container */
+.om-admin-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.om-admin-card:hover .om-admin-icon {
+  transform: scale(1.05);
+}
+
+/* Admin quick link */
+.om-quick-link {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  color: #2d1b4e;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  line-height: 1.6;
+}
+.om-quick-link:hover {
+  color: #d4af37;
+  text-decoration: underline;
+}
+.dark .om-quick-link {
+  color: #d4af37;
+}
+.dark .om-quick-link:hover {
+  color: #e5c54a;
+}
+
+/* Admin section heading */
+.om-admin-heading {
+  font-family: 'Georgia', serif;
+  font-size: 1.75rem;
+  line-height: 1.3;
+  color: #2d1b4e;
+}
+.dark .om-admin-heading {
+  color: #f3f4f6;
+}
+
+/* Admin section description */
+.om-admin-description {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+.dark .om-admin-description {
+  color: #9ca3af;
+}
+
+/* Sidebar section header */
+.om-sidebar-group {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  padding: 3px 12px;
+  margin-top: 1.25rem;
+  margin-bottom: 0;
+}
+.dark .om-sidebar-group {
+  color: #6b7280;
+}
+
+/* Sidebar profile card */
+.om-sidebar-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.75rem;
+  padding: 0.875rem;
+  background-color: rgba(45, 27, 78, 0.03);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(45, 27, 78, 0.06);
+  transition: background-color 0.15s ease;
+}
+.dark .om-sidebar-profile {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+}

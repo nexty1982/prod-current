@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 
 // Database configuration
 const dbConfig = {
-  host: 'localhost',
+  host: process.env.DB_HOST || 'localhost',
   user: 'root',
   password: 'Summerof1982@!', // Update this with your actual password
   database: 'orthodoxmetrics_db',

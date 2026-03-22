@@ -18,8 +18,8 @@ import { formatRecordDate } from '@/utils/formatDate';
 // Helpers for field extraction (same fallback logic as RecordsPage)
 const getPersonName = (record: any, recordType: string): string => {
   if (recordType === 'marriage') {
-    const groom = `${record.fname_groom || record.groom_first || ''} ${record.lname_groom || record.groom_last || ''}`.trim();
-    const bride = `${record.fname_bride || record.bride_first || ''} ${record.lname_bride || record.bride_last || ''}`.trim();
+    const groom = `${record.fname_groom || record.groom_first || record.groomFirstName || ''} ${record.lname_groom || record.groom_last || record.groomLastName || ''}`.trim();
+    const bride = `${record.fname_bride || record.bride_first || record.brideFirstName || ''} ${record.lname_bride || record.bride_last || record.brideLastName || ''}`.trim();
     if (groom && bride) return `${groom} & ${bride}`;
     return groom || bride || 'Unknown';
   }

@@ -6,33 +6,18 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
-import { styled } from '@mui/material/styles';
 import { IconUser, IconLogout } from '@tabler/icons-react';
 import { useAuth } from '@/context/AuthContext';
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  fontSize: '15px',
-  fontWeight: 500,
-  color: theme.palette.text.secondary,
-  '&.active': {
-    backgroundColor: 'rgba(200, 162, 75, 0.12)',
-    color: theme.palette.primary.main,
-  },
-}));
-
-const UPLOAD_ROLES = ['super_admin', 'admin', 'church_admin', 'priest'];
 
 interface PortalNavLink {
   title: string;
   to: string;
-  roles?: string[];
 }
 
 const portalLinks: PortalNavLink[] = [
   { title: 'Portal', to: '/portal' },
-  { title: 'Records', to: '/portal/records/baptism' },
-  { title: 'Upload', to: '/portal/upload', roles: UPLOAD_ROLES },
-  { title: 'OCR Pipeline', to: '/portal/ocr', roles: UPLOAD_ROLES },
+  { title: 'Church Records', to: '/portal/records/baptism' },
+  { title: 'Analytics', to: '/portal/charts' },
   { title: 'Help', to: '/portal/guide' },
 ];
 
@@ -41,11 +26,6 @@ const PortalNavigations: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const role = user?.role || '';
-
-  const visibleLinks = portalLinks.filter(
-    (link) => !link.roles || link.roles.includes(role),
-  );
 
   const handleLogout = async () => {
     setAnchorEl(null);
@@ -58,29 +38,38 @@ const PortalNavigations: React.FC = () => {
     : '?';
 
   return (
-    <>
-      {visibleLinks.map((link) => (
-        <StyledButton
-          key={link.to}
-          className={pathname.startsWith(link.to) && (link.to === '/portal' ? pathname === '/portal' : true) ? 'active' : ''}
-          variant="text"
-          component={NavLink}
-          to={link.to}
-        >
-          {link.title}
-        </StyledButton>
-      ))}
+    <div className="flex items-center gap-8">
+      {portalLinks.map((link) => {
+        const isActive = link.to === '/portal'
+          ? pathname === '/portal'
+          : link.to.startsWith('/account')
+            ? pathname.startsWith('/account')
+            : pathname.startsWith(link.to);
+        return (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={`font-['Inter'] text-[15px] transition-colors no-underline relative pb-1 ${
+              isActive
+                ? 'text-[#2d1b4e] dark:text-white font-medium after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[#2d1b4e] after:dark:bg-[#d4af37] after:rounded-sm'
+                : 'text-[#4a5565] dark:text-gray-400 hover:text-[#2d1b4e] dark:hover:text-white'
+            }`}
+          >
+            {link.title}
+          </NavLink>
+        );
+      })}
 
       {/* User menu */}
-      <Button
+      <button
         onClick={(e) => setAnchorEl(e.currentTarget)}
-        sx={{ ml: 1, minWidth: 'auto', textTransform: 'none', color: 'text.secondary' }}
+        className="flex items-center gap-2 font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 hover:text-[#2d1b4e] dark:hover:text-white transition-colors cursor-pointer border-0 bg-transparent p-0"
       >
-        <Avatar sx={{ width: 30, height: 30, fontSize: '0.8rem', bgcolor: 'primary.main', mr: 1 }}>
+        <span className="w-7 h-7 rounded-full flex items-center justify-center text-[0.75rem] font-medium bg-[rgba(45,27,78,0.08)] dark:bg-[rgba(212,175,55,0.15)] text-[#2d1b4e] dark:text-[#d4af37] border border-[rgba(45,27,78,0.12)] dark:border-[rgba(212,175,55,0.25)]">
           {initials}
-        </Avatar>
-        {user?.first_name || 'Account'}
-      </Button>
+        </span>
+        User
+      </button>
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -88,7 +77,7 @@ const PortalNavigations: React.FC = () => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={() => { setAnchorEl(null); navigate('/portal/profile'); }}>
+        <MenuItem onClick={() => { setAnchorEl(null); navigate('/account/profile'); }}>
           <ListItemIcon><IconUser size={18} /></ListItemIcon>
           My Profile
         </MenuItem>
@@ -98,7 +87,7 @@ const PortalNavigations: React.FC = () => {
           Sign Out
         </MenuItem>
       </Menu>
-    </>
+    </div>
   );
 };
 

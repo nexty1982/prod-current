@@ -79,7 +79,7 @@ class AppErrorBoundary extends Component<Props, State> {
   };
 
   handleGoHome = () => {
-    window.location.href = '/dashboards/super';
+    window.location.href = '/';
   };
 
   render() {

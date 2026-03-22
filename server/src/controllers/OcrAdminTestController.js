@@ -10,23 +10,26 @@ const vision = require('@google-cloud/vision');
 class OcrAdminTestController {
   constructor() {
     // Database configurations
+    const dbHost = process.env.DB_HOST || 'localhost';
+    const dbUser = process.env.DB_USER || 'orthodoxapps';
+    const dbPass = process.env.DB_PASSWORD || 'Summerof1982@!';
     this.dbConfigs = {
       orthodoxmetrics: {
-        host: 'localhost',
-        user: 'orthodoxapps',
-        password: 'Summerof1982@!',
+        host: dbHost,
+        user: dbUser,
+        password: dbPass,
         database: 'orthodoxmetrics_db'
       },
       ocr: {
-        host: 'localhost',
-        user: 'orthodoxapps',
-        password: 'Summerof1982@!',
+        host: dbHost,
+        user: dbUser,
+        password: dbPass,
         database: process.env.OCR_DATABASE || 'orthodoxmetrics_ocr_db'
       },
       records: {
-        host: 'localhost',
-        user: 'orthodoxapps',
-        password: 'Summerof1982@!',
+        host: dbHost,
+        user: dbUser,
+        password: dbPass,
         database: 'ssppoc_records_db'
       }
     };

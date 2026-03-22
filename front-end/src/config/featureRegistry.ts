@@ -56,9 +56,12 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'church-portal', name: 'Church Portal', stage: 5, route: '/portal', description: 'Hub for church staff', since: '2026-02-26' },
   { id: 'portal-records', name: 'Portal Records Hub', stage: 5, route: '/portal/records', description: 'Unified records hub with onboarding flow', since: '2026-03-07' },
 
+  // ── Stage 3: Review ──────────────────────────────────────────
+  { id: 'certificate-templates', name: 'Certificate Template Library', stage: 3, route: '/admin/control-panel/certificate-templates', description: 'Jurisdiction-based certificate template management with field positioning', since: '2026-03-16' },
+
   // ── Stage 4: Stabilizing ───────────────────────────────────
-  { id: 'church-onboarding', name: 'Church Onboarding Pipeline', stage: 4, route: '/admin/control-panel/church-onboarding', description: 'Token-based church registration pipeline with onboarding tracking', since: '2026-03-07', changeSetCode: 'CS-0049' },
-  { id: 'church-onboarding-detail', name: 'Church Onboarding Detail', stage: 4, route: '/admin/control-panel/church-onboarding/:churchId', description: 'Per-church onboarding detail view with members and tokens', since: '2026-03-07', changeSetCode: 'CS-0049' },
+  { id: 'church-onboarding', name: 'Church Onboarding Pipeline (Deprecated)', stage: 4, route: '/admin/control-panel/church-lifecycle', description: 'Redirects to Church Lifecycle. Was: token-based church registration pipeline', since: '2026-03-07', changeSetCode: 'CS-0050' },
+  { id: 'church-onboarding-detail', name: 'Church Onboarding Detail (Deprecated)', stage: 4, route: '/admin/control-panel/church-lifecycle', description: 'Redirects to Church Lifecycle. Was: per-church onboarding detail view', since: '2026-03-07', changeSetCode: 'CS-0050' },
   { id: 'pending-members', name: 'Pending Members', stage: 4, route: '/admin/control-panel/pending-members', description: 'Review and approve users who registered via church token', since: '2026-03-07', changeSetCode: 'CS-0049' },
   { id: 'upload-records', name: 'Upload Records', stage: 4, route: '/apps/upload-records', description: 'Simplified OCR upload for church staff', since: '2026-02-26', changeSetCode: 'CS-0042' },
   { id: 'ocr-studio', name: 'OCR Studio', stage: 5, route: '/portal/ocr', since: '2026-02-01' },
@@ -70,15 +73,22 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'change-sets', name: 'Change Sets', stage: 3, route: '/admin/control-panel/om-daily/change-sets', description: 'SDLC delivery container for grouping, staging, reviewing, and promoting work items', since: '2026-03-08', changeSetCode: 'CS-0037' },
 
   // ── Stage 2: Development ───────────────────────────────────
+  { id: 'account-hub', name: 'Account Hub', stage: 2, route: '/account/profile', description: 'Unified account settings — profile, password, parish info, church details', since: '2026-03-20' },
+  { id: 'parish-management-hub', name: 'Parish Management Hub', stage: 2, route: '/account/parish-management', description: 'Dashboard, database mapping wizard, record settings, branding, themes, search config, system behavior', since: '2026-03-21' },
   { id: 'om-charts', name: 'OM Charts', stage: 2, route: '/apps/om-charts', description: 'Graphical charts from church sacramental records', since: '2026-02-18' },
   { id: 'sacramental-restrictions', name: 'Sacramental Date Restrictions', stage: 2, route: '/admin/control-panel/church-management/sacramental-restrictions', description: 'Calendar viewer for Orthodox sacramental date restrictions', since: '2026-02-28' },
   { id: 'marriage-records-v2', name: 'Marriage Records', stage: 2, route: '/apps/records/marriage', since: '2026-02-01', changeSetCode: 'CS-0039' },
   { id: 'enhanced-ocr-uploader', name: 'Enhanced OCR Uploader', stage: 2, route: '/devel/ocr-studio/upload', since: '2026-01-15', changeSetCode: 'CS-0038' },
   { id: 'dynamic-records-inspector', name: 'Dynamic Records Inspector', stage: 2, route: '/devel/dynamic-records', since: '2026-01-20' },
-  { id: 'crm', name: 'CRM', stage: 2, route: '/devel-tools/crm', since: '2026-02-01' },
+  { id: 'crm', name: 'CRM (Deprecated)', stage: 2, route: '/admin/control-panel/church-lifecycle', description: 'Redirects to Church Lifecycle. Was: standalone CRM page', since: '2026-02-01', changeSetCode: 'CS-0050' },
   { id: 'tutorial-management', name: 'Tutorial Management', stage: 2, route: '/admin/tutorials', description: 'Super admin tutorial/welcome system management', since: '2026-02-21' },
   { id: 'prompt-plans', name: 'Prompt Plans', stage: 2, route: '/devel-tools/prompt-plans', description: 'Ordered sequences of AI prompts for complex initiatives', since: '2026-03-08' },
   { id: 'page-editor', name: 'Page Content Editor', stage: 2, route: '/devel-tools/page-editor', description: 'CMS for editing frontend page text from the web UI', since: '2026-03-08' },
+  { id: 'jurisdictions', name: 'Jurisdictions', stage: 2, route: '/admin/control-panel/jurisdictions', description: 'Orthodox church jurisdictions with calendar type mapping', since: '2026-03-15' },
+  { id: 'demo-churches', name: 'Demo Churches', stage: 2, route: '/admin/control-panel/demo-churches', description: 'Quick-create demo church instances with sample sacramental records', since: '2026-03-15' },
+  { id: 'church-pipeline', name: 'Church Pipeline (Deprecated)', stage: 2, route: '/admin/control-panel/church-lifecycle', description: 'Redirects to Church Lifecycle. Was: unified CRM-to-onboarding dashboard', since: '2026-03-15', changeSetCode: 'CS-0050' },
+  { id: 'church-lifecycle', name: 'Church Lifecycle Management', stage: 2, route: '/admin/control-panel/church-lifecycle', description: 'Unified CRM + onboarding church lifecycle pipeline (PP-0003)', since: '2026-03-15', changeSetCode: 'CS-0050' },
+  { id: 'church-lifecycle-detail', name: 'Church Lifecycle Detail', stage: 2, route: '/admin/control-panel/church-lifecycle/:churchId', description: 'Unified church detail with CRM contacts, activities, follow-ups, and onboarding', since: '2026-03-15', changeSetCode: 'CS-0050' },
   { id: 'records-landing-branding', name: 'Records Landing Branding', stage: 2, route: '/admin/church-branding/records-landing', description: 'Church-level customization for records landing page header', since: '2026-03-10' },
   { id: 'code-change-detection', name: 'Code Change Detection', stage: 2, route: '/admin/ai/code-changes', description: 'Tracks page content edits, notifies admins, and triggers frontend builds', since: '2026-03-08' },
   { id: 'sdlc-wizard', name: 'SDLC Pipeline Wizard', stage: 2, route: '/admin/control-panel/om-daily/sdlc-wizard', description: 'Wizard-driven SDLC pipeline management', since: '2026-03-12', changeSetCode: 'CS-0037' },
@@ -93,7 +103,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'platform-devops', name: 'Platform DevOps & Infrastructure', stage: 2, description: 'CI/CD, monitoring, deployment automation, and server hardening', since: '2026-03-08', changeSetCode: 'CS-0048' },
 
   // ── Stage 1: Prototype ─────────────────────────────────────
-  { id: 'us-church-map', name: 'US Church Map', stage: 1, route: '/devel-tools/us-church-map', since: '2026-02-01' },
+  { id: 'us-church-map', name: 'US Church Map', stage: 2, route: '/devel-tools/us-church-map', description: 'Church Operations Hub — status-aware choropleth with CRM/onboarding integration', since: '2026-03-15', changeSetCode: 'CS-0050' },
   { id: 'live-table-builder', name: 'Live Table Builder', stage: 1, route: '/devel-tools/live-table-builder', since: '2026-01-20' },
   { id: 'berry-crm-leads', name: 'Berry CRM Leads', stage: 1, route: '/berry/crm/leads', since: '2026-02-17' },
   { id: 'berry-crm-contacts', name: 'Berry CRM Contacts', stage: 1, route: '/berry/crm/contacts', since: '2026-02-17' },

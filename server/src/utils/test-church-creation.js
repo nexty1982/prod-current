@@ -3,7 +3,7 @@ const mysql = require('mysql2/promise');
 
 async function testChurchCreation() {
   const pool = mysql.createPool({
-    host: 'localhost',
+    host: process.env.DB_HOST || 'localhost',
     user: 'ssppoc_user',
     password: 'Tr0ubleShoot24!',
     database: 'ssppoc_records_db',

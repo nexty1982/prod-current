@@ -1,46 +1,61 @@
 /**
- * USChurchMapPage.tsx
+ * USChurchMapPage.tsx — Church Operations Hub
+ *
  * Interactive choropleth map of Orthodox Churches in the United States.
+ * Status-aware visualization with CRM pipeline + onboarding integration.
  * Located at /devel-tools/us-church-map
  *
- * Data source: GET /api/analytics/us-church-counts
- * Geo data:    /data/us-states-paths.json (pre-projected Albers USA SVG paths)
- * Color scale: d3-scale (scaleQuantile) with 7-class sequential palette
+ * Data:
+ *   GET /api/analytics/us-church-counts        — choropleth base
+ *   GET /api/analytics/us-church-status-counts  — per-state operational status
+ *   GET /api/analytics/us-churches-enriched     — enriched church list (CRM + onboarding)
+ *   GET /api/analytics/om-churches              — live platform church pins
  */
 
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
-    ArrowBack as ArrowBackIcon,
-    Phone as PhoneIcon,
-    Place as PlaceIcon,
-    Refresh as RefreshIcon,
-    CenterFocusStrong as ResetIcon,
-    Language as WebIcon,
-    ZoomIn as ZoomInIcon,
-    ZoomOut as ZoomOutIcon,
+  Add as AddIcon,
+  ArrowBack as ArrowBackIcon,
+  Business as ChurchIcon,
+  CenterFocusStrong as ResetIcon,
+  FilterList as FilterIcon,
+  Language as WebIcon,
+  OpenInNew as OpenIcon,
+  Phone as PhoneIcon,
+  Place as PlaceIcon,
+  Refresh as RefreshIcon,
+  Visibility as ViewIcon,
+  ZoomIn as ZoomInIcon,
+  ZoomOut as ZoomOutIcon,
 } from '@mui/icons-material';
 import {
-    Alert,
-    alpha,
-    Box,
-    Chip,
-    CircularProgress,
-    Divider,
-    IconButton,
-    Link,
-    Paper,
-    Skeleton,
-    Tab,
-    Tabs,
-    Tooltip,
-    Typography,
-    useTheme
+  Alert,
+  alpha,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Divider,
+  IconButton,
+  Link,
+  Menu,
+  MenuItem,
+  Paper,
+  Skeleton,
+  Tab,
+  Tabs,
+  Tooltip,
+  Typography,
+  useTheme,
 } from '@mui/material';
 import { scaleQuantile } from 'd3-scale';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-// ─── Types ──────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+//  Types
+// ═══════════════════════════════════════════════════════════════════
 
 interface StateGeo {
   name: string;
@@ -55,10 +70,28 @@ interface ChurchCountsResponse {
   max: number;
   total: number;
   stateCount: number;
-  generatedAt: string;
 }
 
-interface ChurchEntry {
+interface StatusCounts {
+  total: number;
+  directory: number;
+  pipeline: number;
+  onboarding: number;
+  live: number;
+}
+
+interface StatusCountsResponse {
+  states: Record<string, StatusCounts>;
+  totals: StatusCounts;
+}
+
+interface JurisdictionCount {
+  jurisdiction: string;
+  count: number;
+}
+
+interface EnrichedChurch {
+  id: number | string;
   name: string;
   street: string | null;
   city: string | null;
@@ -69,109 +102,87 @@ interface ChurchEntry {
   latitude: number | null;
   longitude: number | null;
   jurisdiction: string;
+  pipeline_stage: string | null;
+  stage_label: string | null;
+  stage_color: string | null;
+  priority: string | null;
+  is_client: number;
+  provisioned_church_id: number | null;
+  source: 'crm' | 'onboarded';
+  op_status: OpStatus;
+  onboarded_church_id: number | null;
 }
 
-interface JurisdictionCount {
-  jurisdiction: string;
-  count: number;
-}
-
-interface StateChurchesResponse {
+interface StateChurchesEnriched {
   state: string;
   total: number;
+  totalAll: number;
   jurisdictions: JurisdictionCount[];
-  churches: ChurchEntry[];
+  statusCounts: Record<string, number>;
+  churches: EnrichedChurch[];
 }
 
 interface OMChurch {
   id: number;
   name: string;
   church_name: string | null;
-  address: string | null;
   city: string | null;
   state: string | null;
   latitude: number;
   longitude: number;
 }
 
-// ─── Region definitions ─────────────────────────────────────────────
+type OpStatus = 'directory' | 'pipeline' | 'onboarding' | 'live' | 'client';
+type ViewMode = 'all' | 'pipeline' | 'onboarding' | 'live';
 
-interface Region {
-  label: string;
-  states: string[];
-}
+// ═══════════════════════════════════════════════════════════════════
+//  Constants
+// ═══════════════════════════════════════════════════════════════════
 
-const REGIONS: Record<string, Region> = {
-  all: {
-    label: 'All States',
-    states: [],
-  },
-  northeast: {
-    label: 'Northeast',
-    states: ['CT', 'DE', 'ME', 'MD', 'MA', 'NH', 'NJ', 'NY', 'PA', 'RI', 'VT', 'DC'],
-  },
-  midwest: {
-    label: 'Midwest',
-    states: ['IL', 'IN', 'IA', 'KS', 'MI', 'MN', 'MO', 'NE', 'ND', 'OH', 'SD', 'WI'],
-  },
-  south: {
-    label: 'South',
-    states: [
-      'AL', 'AR', 'FL', 'GA', 'KY', 'LA', 'MS', 'NC', 'OK', 'SC',
-      'TN', 'TX', 'VA', 'WV',
-    ],
-  },
-  west: {
-    label: 'West',
-    states: [
-      'AK', 'AZ', 'CA', 'CO', 'HI', 'ID', 'MT', 'NV', 'NM', 'OR',
-      'UT', 'WA', 'WY',
-    ],
-  },
+const REGIONS: Record<string, { label: string; states: string[] }> = {
+  all: { label: 'All States', states: [] },
+  northeast: { label: 'Northeast', states: ['CT', 'DE', 'ME', 'MD', 'MA', 'NH', 'NJ', 'NY', 'PA', 'RI', 'VT', 'DC'] },
+  midwest: { label: 'Midwest', states: ['IL', 'IN', 'IA', 'KS', 'MI', 'MN', 'MO', 'NE', 'ND', 'OH', 'SD', 'WI'] },
+  south: { label: 'South', states: ['AL', 'AR', 'FL', 'GA', 'KY', 'LA', 'MS', 'NC', 'OK', 'SC', 'TN', 'TX', 'VA', 'WV'] },
+  west: { label: 'West', states: ['AK', 'AZ', 'CA', 'CO', 'HI', 'ID', 'MT', 'NV', 'NM', 'OR', 'UT', 'WA', 'WY'] },
 };
 
-// ─── Color palette (7-class sequential blue) ────────────────────────
+// Color ramps for choropleth (church density)
+const COLOR_RAMP_LIGHT = ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'];
+const COLOR_RAMP_DARK = ['#1a2332', '#1e3a5f', '#22528c', '#2d6db5', '#4a90d9', '#7ab8f5', '#b0d9ff'];
+const NO_DATA_LIGHT = '#f0f0f0';
+const NO_DATA_DARK = '#2a2a2a';
 
-const COLOR_RAMP_LIGHT = [
-  '#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594',
-];
-const COLOR_RAMP_DARK = [
-  '#1a2332', '#1e3a5f', '#22528c', '#2d6db5', '#4a90d9', '#7ab8f5', '#b0d9ff',
-];
+// Status colors — consistent across map, sidebar, badges
+const STATUS_CONFIG: Record<OpStatus, { label: string; color: string; short: string }> = {
+  directory: { label: 'Directory Only', color: '#9e9e9e', short: 'Dir' },
+  pipeline: { label: 'CRM Pipeline', color: '#2196f3', short: 'CRM' },
+  onboarding: { label: 'Onboarding', color: '#ff9800', short: 'Onb' },
+  live: { label: 'Live Client', color: '#4caf50', short: 'Live' },
+  client: { label: 'Client', color: '#4caf50', short: 'Client' },
+};
 
-const NO_DATA_COLOR_LIGHT = '#f0f0f0';
-const NO_DATA_COLOR_DARK = '#2a2a2a';
+// SVG viewport
+const SVG_W = 975;
+const SVG_H = 610;
 
-// ─── SVG viewport (matches pre-projected Albers USA) ────────────────
-const SVG_WIDTH = 975;
-const SVG_HEIGHT = 610;
-
-// ─── Manual Albers USA projection (approximation for pin placement) ──
-// This converts WGS84 lat/lng to the pre-projected SVG coordinate space
-function projectToAlbersUsa(lng: number, lat: number): [number, number] | null {
-  // Bounds check for continental US
-  if (lat < 24 || lat > 50 || lng < -125 || lng > -66) {
-    // Check Alaska
-    if (lat >= 51 && lat <= 72 && lng >= -180 && lng <= -129) {
-      const x = 150 + (lng + 180) * 2.5;
-      const y = 490 + (72 - lat) * 4;
-      return [x, y];
-    }
-    // Check Hawaii
-    if (lat >= 18 && lat <= 23 && lng >= -161 && lng <= -154) {
-      const x = 250 + (lng + 161) * 15;
-      const y = 520 + (23 - lat) * 12;
-      return [x, y];
-    }
-    return null;
+// Albers USA projection approximation
+function projectToAlbersUsa(lngRaw: number | string, latRaw: number | string): [number, number] | null {
+  const lng = Number(lngRaw);
+  const lat = Number(latRaw);
+  if (lat >= 24 && lat <= 50 && lng >= -125 && lng <= -66) {
+    return [Math.max(0, Math.min(SVG_W, 960 + (lng + 96) * 11.5)), Math.max(0, Math.min(SVG_H, 620 + (lat - 38) * -14))];
   }
-  // Continental US: simple affine approximation
-  const x = 960 + (lng + 96) * 11.5;
-  const y = 620 + (lat - 38) * -14;
-  return [Math.max(0, Math.min(SVG_WIDTH, x)), Math.max(0, Math.min(SVG_HEIGHT, y))];
+  if (lat >= 51 && lat <= 72 && lng >= -180 && lng <= -129) {
+    return [150 + (lng + 180) * 2.5, 490 + (72 - lat) * 4];
+  }
+  if (lat >= 18 && lat <= 23 && lng >= -161 && lng <= -154) {
+    return [250 + (lng + 161) * 15, 520 + (23 - lat) * 12];
+  }
+  return null;
 }
 
-// ─── Small-state label offsets (states too small for centered labels) ──
+// Small-state label offsets
 const LABEL_OFFSETS: Record<string, { x: number; y: number; anchor?: 'start' | 'middle' | 'end' }> = {
   CT: { x: 893, y: 218, anchor: 'start' },
   DC: { x: 851, y: 295, anchor: 'start' },
@@ -184,62 +195,214 @@ const LABEL_OFFSETS: Record<string, { x: number; y: number; anchor?: 'start' | '
   VT: { x: 843, y: 163, anchor: 'end' },
 };
 
-// ─── Component ──────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+//  Helpers
+// ═══════════════════════════════════════════════════════════════════
+
+/** Get lifecycle route for a church */
+function getChurchDetailUrl(church: EnrichedChurch): string {
+  if (church.source === 'onboarded' && typeof church.id === 'string') {
+    return `/admin/control-panel/church-lifecycle/${church.id}`;
+  }
+  return `/admin/control-panel/church-lifecycle/${church.id}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Sub-components
+// ═══════════════════════════════════════════════════════════════════
+
+/** Status badge chip */
+const StatusBadge: React.FC<{ status: OpStatus; size?: 'small' | 'medium' }> = ({ status, size = 'small' }) => {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.directory;
+  return (
+    <Chip
+      label={cfg.label}
+      size={size}
+      sx={{
+        fontWeight: 600,
+        fontSize: size === 'small' ? '0.65rem' : '0.75rem',
+        height: size === 'small' ? 20 : 26,
+        bgcolor: alpha(cfg.color, 0.12),
+        color: cfg.color,
+        border: `1px solid ${alpha(cfg.color, 0.3)}`,
+      }}
+    />
+  );
+};
+
+/** Church card in the sidebar */
+const ChurchCard: React.FC<{
+  church: EnrichedChurch;
+  isDark: boolean;
+  isSelected: boolean;
+  onClick: () => void;
+  onAction: (action: string) => void;
+}> = ({ church, isDark, isSelected, onClick, onAction }) => {
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const cfg = STATUS_CONFIG[church.op_status] || STATUS_CONFIG.directory;
+
+  return (
+    <Box
+      onClick={onClick}
+      sx={{
+        p: 1.5,
+        borderRadius: 1.5,
+        cursor: 'pointer',
+        border: isSelected ? `2px solid ${cfg.color}` : `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+        bgcolor: isSelected ? alpha(cfg.color, isDark ? 0.08 : 0.04) : 'transparent',
+        '&:hover': { bgcolor: alpha(cfg.color, isDark ? 0.06 : 0.03) },
+        transition: 'all 0.15s',
+      }}
+    >
+      {/* Row 1: Name + status */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 0.5 }}>
+        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: cfg.color, mt: 0.7, flexShrink: 0 }} />
+        <Typography variant="body2" fontWeight={600} sx={{ flex: 1, fontSize: '0.82rem', lineHeight: 1.35 }}>
+          {church.name}
+        </Typography>
+        <StatusBadge status={church.op_status} />
+      </Box>
+
+      {/* Row 2: Location + jurisdiction */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1.75, mb: 0.5 }}>
+        <PlaceIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem' }}>
+          {[church.city, church.state_code].filter(Boolean).join(', ') || '—'}
+        </Typography>
+        {church.jurisdiction && (
+          <Chip label={church.jurisdiction} size="small" sx={{ fontSize: '0.6rem', height: 16, ml: 0.5 }} />
+        )}
+      </Box>
+
+      {/* Row 3: Pipeline stage + contact info + actions */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, ml: 1.75, flexWrap: 'wrap' }}>
+        {church.stage_label && church.op_status !== 'directory' && (
+          <Chip
+            label={church.stage_label}
+            size="small"
+            sx={{
+              fontSize: '0.6rem', height: 16,
+              bgcolor: church.stage_color ? alpha(church.stage_color, 0.12) : undefined,
+              color: church.stage_color || undefined,
+            }}
+          />
+        )}
+        {church.website && (
+          <Tooltip title={church.website}>
+            <Link
+              href={church.website}
+              target="_blank"
+              rel="noopener"
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              sx={{ display: 'flex', alignItems: 'center', gap: 0.25, textDecoration: 'none' }}
+            >
+              <WebIcon sx={{ fontSize: 11 }} />
+              <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>Web</Typography>
+            </Link>
+          </Tooltip>
+        )}
+        {church.phone && (
+          <Tooltip title={church.phone}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+              <PhoneIcon sx={{ fontSize: 11, color: 'text.secondary' }} />
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{church.phone}</Typography>
+            </Box>
+          </Tooltip>
+        )}
+
+        {/* Action menu */}
+        <Box sx={{ ml: 'auto' }}>
+          <IconButton
+            size="small"
+            onClick={(e) => { e.stopPropagation(); setMenuAnchor(e.currentTarget); }}
+            sx={{ p: 0.25 }}
+          >
+            <FilterIcon sx={{ fontSize: 14 }} />
+          </IconButton>
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={() => setMenuAnchor(null)}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            slotProps={{ paper: { sx: { minWidth: 160 } } }}
+          >
+            <MenuItem dense onClick={() => { setMenuAnchor(null); onAction('view'); }}>
+              <ViewIcon sx={{ fontSize: 16, mr: 1 }} /> View Detail
+            </MenuItem>
+            {church.op_status === 'directory' && (
+              <MenuItem dense onClick={() => { setMenuAnchor(null); onAction('onboard'); }}>
+                <AddIcon sx={{ fontSize: 16, mr: 1 }} /> Start Onboarding
+              </MenuItem>
+            )}
+            {church.op_status === 'onboarding' && (
+              <MenuItem dense onClick={() => { setMenuAnchor(null); onAction('resume'); }}>
+                <OpenIcon sx={{ fontSize: 16, mr: 1 }} /> Resume Onboarding
+              </MenuItem>
+            )}
+          </Menu>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════
+//  Main Component
+// ═══════════════════════════════════════════════════════════════════
 
 const USChurchMapPage: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const navigate = useNavigate();
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // State
+  // ─── State ─────────────────────────────────────────────
   const [geoData, setGeoData] = useState<Record<string, StateGeo> | null>(null);
   const [churchData, setChurchData] = useState<ChurchCountsResponse | null>(null);
+  const [statusData, setStatusData] = useState<StatusCountsResponse | null>(null);
+  const [omChurches, setOmChurches] = useState<OMChurch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Interaction
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [selectedChurch, setSelectedChurch] = useState<EnrichedChurch | null>(null);
   const [activeRegion, setActiveRegion] = useState('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('all');
+  const [jurisdictionFilter, setJurisdictionFilter] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
   // State drill-down
-  const [stateChurches, setStateChurches] = useState<StateChurchesResponse | null>(null);
+  const [stateChurches, setStateChurches] = useState<StateChurchesEnriched | null>(null);
   const [churchesLoading, setChurchesLoading] = useState(false);
-  const [jurisdictionFilter, setJurisdictionFilter] = useState<string | null>(null);
 
-  // OM churches (green pins)
-  const [omChurches, setOmChurches] = useState<OMChurch[]>([]);
-
-  // Breadcrumbs
   const BCrumb = [
     { to: '/', title: 'Home' },
-    { to: '/devel-tools', title: 'Developer Tools' },
-    { title: 'US Church Map' },
+    { to: '/admin/control-panel', title: 'Control Panel' },
+    { title: 'Church Map' },
   ];
 
-  // ─── Data fetching ──────────────────────────────────────────────
-
+  // ─── Data fetching ─────────────────────────────────────
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [geoRes, countsRes, omRes] = await Promise.all([
+      const [geoRes, countsRes, statusRes, omRes] = await Promise.all([
         fetch('/data/us-states-paths.json'),
         fetch('/api/analytics/us-church-counts', { credentials: 'include' }),
+        fetch('/api/analytics/us-church-status-counts', { credentials: 'include' }),
         fetch('/api/analytics/om-churches', { credentials: 'include' }),
       ]);
+      if (!geoRes.ok) throw new Error('Failed to load map geometry');
+      if (!countsRes.ok) throw new Error('Failed to load church counts');
 
-      if (!geoRes.ok) throw new Error(`Failed to load map geometry: ${geoRes.status}`);
-      if (!countsRes.ok) throw new Error(`Failed to load church counts: ${countsRes.status}`);
-
-      const geo: Record<string, StateGeo> = await geoRes.json();
-      const counts: ChurchCountsResponse = await countsRes.json();
-      const omData = omRes.ok ? await omRes.json() : { churches: [] };
-
-      setGeoData(geo);
-      setChurchData(counts);
-      setOmChurches(omData.churches || []);
+      setGeoData(await geoRes.json());
+      setChurchData(await countsRes.json());
+      setStatusData(statusRes.ok ? await statusRes.json() : null);
+      setOmChurches(omRes.ok ? (await omRes.json()).churches || [] : []);
     } catch (err: any) {
       setError(err.message || 'Failed to load data');
     } finally {
@@ -247,182 +410,155 @@ const USChurchMapPage: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const fetchStateChurches = useCallback(async (stateCode: string) => {
+    setChurchesLoading(true);
+    try {
+      const resp = await fetch(`/api/analytics/us-churches-enriched?state=${stateCode}`, { credentials: 'include' });
+      if (resp.ok) {
+        setStateChurches(await resp.json());
+        setJurisdictionFilter(null);
+      }
+    } catch { /* non-critical */ }
+    finally { setChurchesLoading(false); }
+  }, []);
+
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (selectedState) fetchStateChurches(selectedState);
+  }, [selectedState, fetchStateChurches]);
 
-  // ─── Color scale ────────────────────────────────────────────────
-
+  // ─── Color scale ───────────────────────────────────────
   const colorScale = useMemo(() => {
     if (!churchData) return null;
     const values = Object.values(churchData.states);
-    const ramp = isDark ? COLOR_RAMP_DARK : COLOR_RAMP_LIGHT;
-    return scaleQuantile<string>().domain(values).range(ramp);
+    return scaleQuantile<string>().domain(values).range(isDark ? COLOR_RAMP_DARK : COLOR_RAMP_LIGHT);
   }, [churchData, isDark]);
 
-  const getStateColor = useCallback(
-    (code: string) => {
-      if (!churchData || !colorScale) {
-        return isDark ? NO_DATA_COLOR_DARK : NO_DATA_COLOR_LIGHT;
-      }
-      const count = churchData.states[code];
-      if (count === undefined) {
-        return isDark ? NO_DATA_COLOR_DARK : NO_DATA_COLOR_LIGHT;
-      }
-      return colorScale(count);
-    },
-    [churchData, colorScale, isDark],
-  );
+  const getStateColor = useCallback((code: string) => {
+    if (!churchData || !colorScale) return isDark ? NO_DATA_DARK : NO_DATA_LIGHT;
+    const count = churchData.states[code];
+    return count !== undefined ? colorScale(count) : (isDark ? NO_DATA_DARK : NO_DATA_LIGHT);
+  }, [churchData, colorScale, isDark]);
 
-  // ─── Region filtering ──────────────────────────────────────────
+  // State border highlight color based on highest non-directory status
+  const getStateBorderColor = useCallback((code: string): string | null => {
+    if (!statusData?.states[code]) return null;
+    const s = statusData.states[code];
+    if (s.live > 0) return STATUS_CONFIG.live.color;
+    if (s.onboarding > 0) return STATUS_CONFIG.onboarding.color;
+    if (s.pipeline > 0) return STATUS_CONFIG.pipeline.color;
+    return null;
+  }, [statusData]);
 
+  // ─── Region filtering ─────────────────────────────────
   const regionStates = useMemo(() => {
     if (activeRegion === 'all') return null;
     return new Set(REGIONS[activeRegion]?.states || []);
   }, [activeRegion]);
 
-  const isStateInRegion = useCallback(
-    (code: string) => {
-      if (!regionStates) return true;
-      return regionStates.has(code);
-    },
-    [regionStates],
-  );
+  const isInRegion = useCallback((code: string) => !regionStates || regionStates.has(code), [regionStates]);
 
-  // ─── Zoom/pan ──────────────────────────────────────────────────
-
-  const handleZoomIn = () => setZoom((z) => Math.min(z * 1.3, 5));
-  const handleZoomOut = () => setZoom((z) => Math.max(z / 1.3, 0.5));
-  const handleReset = () => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
-    setSelectedState(null);
-  };
-
-
-  // Drag to pan
-  const dragRef = useRef<{ dragging: boolean; startX: number; startY: number; startPanX: number; startPanY: number }>({
-    dragging: false, startX: 0, startY: 0, startPanX: 0, startPanY: 0,
-  });
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    dragRef.current = {
-      dragging: true,
-      startX: e.clientX,
-      startY: e.clientY,
-      startPanX: pan.x,
-      startPanY: pan.y,
-    };
-  }, [pan]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!dragRef.current.dragging) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
-    setPan({
-      x: dragRef.current.startPanX + dx / zoom,
-      y: dragRef.current.startPanY + dy / zoom,
-    });
-  }, [zoom]);
-
-  const handleMouseUp = useCallback(() => {
-    dragRef.current.dragging = false;
-  }, []);
-
-  // ─── Tooltip tracking ──────────────────────────────────────────
-
-  const handleStateMouseMove = useCallback((e: React.MouseEvent, code: string) => {
-    setHoveredState(code);
-    setTooltipPos({ x: e.clientX, y: e.clientY });
-  }, []);
-
-  const handleStateMouseLeave = useCallback(() => {
-    setHoveredState(null);
-  }, []);
-
-  const handleStateClick = useCallback((code: string) => {
-    setSelectedState((prev) => {
-      const newState = prev === code ? null : code;
-      if (!newState) {
-        setStateChurches(null);
-        setJurisdictionFilter(null);
-      }
-      return newState;
-    });
-  }, []);
-
-  // Fetch churches when state is selected
-  const fetchStateChurches = useCallback(async (stateCode: string) => {
-    setChurchesLoading(true);
-    try {
-      const resp = await fetch(`/api/analytics/us-churches?state=${stateCode}`, { credentials: 'include' });
-      if (resp.ok) {
-        const data: StateChurchesResponse = await resp.json();
-        setStateChurches(data);
-        setJurisdictionFilter(null);
-      }
-    } catch (err) {
-      console.warn('Failed to fetch state churches:', err);
-    } finally {
-      setChurchesLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (selectedState) {
-      fetchStateChurches(selectedState);
-    }
-  }, [selectedState, fetchStateChurches]);
-
-  // Filtered churches by jurisdiction
+  // ─── Filtered churches ────────────────────────────────
   const filteredChurches = useMemo(() => {
     if (!stateChurches) return [];
-    if (!jurisdictionFilter) return stateChurches.churches;
-    return stateChurches.churches.filter(c => c.jurisdiction === jurisdictionFilter);
-  }, [stateChurches, jurisdictionFilter]);
+    let list = stateChurches.churches;
+    if (jurisdictionFilter) list = list.filter(c => c.jurisdiction === jurisdictionFilter);
+    if (viewMode !== 'all') {
+      if (viewMode === 'pipeline') list = list.filter(c => c.op_status === 'pipeline');
+      else if (viewMode === 'onboarding') list = list.filter(c => c.op_status === 'onboarding');
+      else if (viewMode === 'live') list = list.filter(c => c.op_status === 'live' || c.op_status === 'client');
+    }
+    return list;
+  }, [stateChurches, jurisdictionFilter, viewMode]);
 
-  // ─── Sorted states for detail panel ────────────────────────────
-
+  // ─── Sorted states ────────────────────────────────────
   const sortedStates = useMemo(() => {
     if (!churchData) return [];
-    return Object.entries(churchData.states)
-      .filter(([code]) => isStateInRegion(code))
-      .sort((a, b) => b[1] - a[1]);
-  }, [churchData, isStateInRegion]);
+    return Object.entries(churchData.states).filter(([c]) => isInRegion(c)).sort((a, b) => b[1] - a[1]);
+  }, [churchData, isInRegion]);
 
-  // ─── Legend quantiles ──────────────────────────────────────────
-
+  // ─── Legend ────────────────────────────────────────────
   const legendItems = useMemo(() => {
     if (!colorScale || !churchData) return [];
-    const quantiles = colorScale.quantiles();
+    const q = colorScale.quantiles();
     const ramp = isDark ? COLOR_RAMP_DARK : COLOR_RAMP_LIGHT;
-    const items: { color: string; label: string }[] = [];
-
-    items.push({ color: ramp[0], label: `${churchData.min}–${Math.floor(quantiles[0]) - 1}` });
-    for (let i = 0; i < quantiles.length; i++) {
-      const lo = Math.floor(quantiles[i]);
-      const hi = i < quantiles.length - 1 ? Math.floor(quantiles[i + 1]) - 1 : churchData.max;
-      items.push({ color: ramp[i + 1], label: `${lo}–${hi}` });
+    const items: { color: string; label: string }[] = [
+      { color: ramp[0], label: `${churchData.min}–${Math.floor(q[0]) - 1}` },
+    ];
+    for (let i = 0; i < q.length; i++) {
+      const hi = i < q.length - 1 ? Math.floor(q[i + 1]) - 1 : churchData.max;
+      items.push({ color: ramp[i + 1], label: `${Math.floor(q[i])}–${hi}` });
     }
     return items;
   }, [colorScale, churchData, isDark]);
 
-  // ─── Region totals ────────────────────────────────────────────
-
+  // ─── Region total ─────────────────────────────────────
   const regionTotal = useMemo(() => {
     if (!churchData) return 0;
     if (activeRegion === 'all') return churchData.total;
-    const regionCodes = REGIONS[activeRegion]?.states || [];
-    return regionCodes.reduce((sum, code) => sum + (churchData.states[code] || 0), 0);
+    return (REGIONS[activeRegion]?.states || []).reduce((s, c) => s + (churchData.states[c] || 0), 0);
   }, [churchData, activeRegion]);
 
-  // ─── Render ───────────────────────────────────────────────────
+  // ─── Global status totals ─────────────────────────────
+  const globalTotals = statusData?.totals || { total: 0, directory: 0, pipeline: 0, onboarding: 0, live: 0 };
+
+  // ─── Zoom/pan ─────────────────────────────────────────
+  const handleZoomIn = () => setZoom(z => Math.min(z * 1.3, 5));
+  const handleZoomOut = () => setZoom(z => Math.max(z / 1.3, 0.5));
+  const handleReset = () => { setZoom(1); setPan({ x: 0, y: 0 }); setSelectedState(null); setSelectedChurch(null); };
+
+  const dragRef = useRef({ dragging: false, startX: 0, startY: 0, startPanX: 0, startPanY: 0 });
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    dragRef.current = { dragging: true, startX: e.clientX, startY: e.clientY, startPanX: pan.x, startPanY: pan.y };
+  }, [pan]);
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!dragRef.current.dragging) return;
+    setPan({ x: dragRef.current.startPanX + (e.clientX - dragRef.current.startX) / zoom, y: dragRef.current.startPanY + (e.clientY - dragRef.current.startY) / zoom });
+  }, [zoom]);
+  const handleMouseUp = useCallback(() => { dragRef.current.dragging = false; }, []);
+
+  // ─── Tooltip ──────────────────────────────────────────
+  const handleStateHover = useCallback((e: React.MouseEvent, code: string) => {
+    setHoveredState(code);
+    setTooltipPos({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  // ─── State click ──────────────────────────────────────
+  const handleStateClick = useCallback((code: string) => {
+    setSelectedState(prev => {
+      const next = prev === code ? null : code;
+      if (!next) { setStateChurches(null); setJurisdictionFilter(null); }
+      setSelectedChurch(null);
+      return next;
+    });
+  }, []);
+
+  // ─── Church actions ───────────────────────────────────
+  const handleChurchAction = useCallback((church: EnrichedChurch, action: string) => {
+    if (action === 'view') {
+      navigate(getChurchDetailUrl(church));
+    } else if (action === 'onboard' || action === 'resume') {
+      navigate(getChurchDetailUrl(church));
+    }
+  }, [navigate]);
+
+  // ─── Selected state data ──────────────────────────────
+  const selectedData = selectedState && churchData
+    ? { code: selectedState, name: geoData?.[selectedState]?.name || selectedState, count: churchData.states[selectedState] || 0 }
+    : null;
+
+  const stateStatus = selectedState && statusData?.states[selectedState]
+    ? statusData.states[selectedState]
+    : null;
+
+  // ─── Render ───────────────────────────────────────────
 
   if (loading) {
     return (
-      <PageContainer title="US Church Map" description="Orthodox Churches in the United States">
-        <Breadcrumb title="US Church Map" items={BCrumb} />
+      <PageContainer title="Church Map" description="Church Operations Hub">
+        <Breadcrumb title="Church Map" items={BCrumb} />
         <Box p={3}>
           <Paper sx={{ p: 3 }}>
             <Skeleton variant="text" width={300} height={40} />
@@ -435,84 +571,82 @@ const USChurchMapPage: React.FC = () => {
 
   if (error) {
     return (
-      <PageContainer title="US Church Map" description="Orthodox Churches in the United States">
-        <Breadcrumb title="US Church Map" items={BCrumb} />
+      <PageContainer title="Church Map" description="Church Operations Hub">
+        <Breadcrumb title="Church Map" items={BCrumb} />
         <Box p={3}>
-          <Alert severity="error" action={
-            <IconButton size="small" onClick={fetchData}>
-              <RefreshIcon />
-            </IconButton>
-          }>
-            {error}
-          </Alert>
+          <Alert severity="error" action={<IconButton size="small" onClick={fetchData}><RefreshIcon /></IconButton>}>{error}</Alert>
         </Box>
       </PageContainer>
     );
   }
 
-  const selectedData = selectedState && churchData
-    ? { code: selectedState, name: geoData?.[selectedState]?.name || selectedState, count: churchData.states[selectedState] || 0 }
-    : null;
-
   return (
-    <PageContainer title="US Church Map" description="Orthodox Churches in the United States">
-      <Breadcrumb title="Orthodox Churches in the United States" items={BCrumb} />
-      <Box p={3}>
-        {/* Header stats */}
-        <Paper sx={{ p: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+    <PageContainer title="Church Map" description="Church Operations Hub">
+      <Breadcrumb title="Church Operations Hub" items={BCrumb} />
+      <Box sx={{ px: { xs: 1, md: 3 }, py: 2 }}>
+
+        {/* ══════════ HEADER BAR ══════════ */}
+        <Paper sx={{ p: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+          <ChurchIcon sx={{ fontSize: 24, color: 'primary.main' }} />
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Orthodox Churches in the United States
+            Church Operations Hub
           </Typography>
-          <Chip label={`${churchData?.total?.toLocaleString() || 0} total churches`} color="primary" />
-          <Chip label={`${churchData?.stateCount || 0} states + DC`} variant="outlined" />
-          <Chip label={`Region: ${REGIONS[activeRegion].label} (${regionTotal.toLocaleString()})`} variant="outlined" color="secondary" />
-          <IconButton size="small" onClick={fetchData} title="Refresh data">
-            <RefreshIcon fontSize="small" />
-          </IconButton>
-        </Paper>
-
-        {/* Region tabs */}
-        <Paper sx={{ mb: 2 }}>
-          <Tabs
-            value={activeRegion}
-            onChange={(_, v) => setActiveRegion(v)}
-            variant="scrollable"
-            scrollButtons="auto"
+          <Chip label={`${globalTotals.total.toLocaleString()} total`} variant="outlined" size="small" />
+          {globalTotals.pipeline > 0 && (
+            <Chip label={`${globalTotals.pipeline} pipeline`} size="small" sx={{ fontWeight: 600, bgcolor: alpha(STATUS_CONFIG.pipeline.color, 0.1), color: STATUS_CONFIG.pipeline.color }} />
+          )}
+          {globalTotals.onboarding > 0 && (
+            <Chip label={`${globalTotals.onboarding} onboarding`} size="small" sx={{ fontWeight: 600, bgcolor: alpha(STATUS_CONFIG.onboarding.color, 0.1), color: STATUS_CONFIG.onboarding.color }} />
+          )}
+          {globalTotals.live > 0 && (
+            <Chip label={`${globalTotals.live} live`} size="small" sx={{ fontWeight: 600, bgcolor: alpha(STATUS_CONFIG.live.color, 0.1), color: STATUS_CONFIG.live.color }} />
+          )}
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/admin/control-panel/church-lifecycle')}
+            sx={{ textTransform: 'none', ml: 1 }}
           >
-            {Object.entries(REGIONS).map(([key, region]) => (
-              <Tab key={key} value={key} label={region.label} />
-            ))}
-          </Tabs>
+            Onboard Church
+          </Button>
+          <IconButton size="small" onClick={fetchData} title="Refresh"><RefreshIcon fontSize="small" /></IconButton>
         </Paper>
 
-        {/* Map + detail panel */}
+        {/* ══════════ VIEW MODE + REGION TABS ══════════ */}
+        <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+          {/* View mode */}
+          <Paper sx={{ display: 'flex' }}>
+            <Tabs value={viewMode} onChange={(_, v) => setViewMode(v)} sx={{ minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0, textTransform: 'none', fontSize: '0.8rem' } }}>
+              <Tab value="all" label="All Churches" />
+              <Tab value="pipeline" label={`Pipeline${globalTotals.pipeline ? ` (${globalTotals.pipeline})` : ''}`} />
+              <Tab value="onboarding" label={`Onboarding${globalTotals.onboarding ? ` (${globalTotals.onboarding})` : ''}`} />
+              <Tab value="live" label={`Live${globalTotals.live ? ` (${globalTotals.live})` : ''}`} />
+            </Tabs>
+          </Paper>
+          {/* Region */}
+          <Paper sx={{ display: 'flex' }}>
+            <Tabs value={activeRegion} onChange={(_, v) => setActiveRegion(v)} sx={{ minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0, textTransform: 'none', fontSize: '0.8rem' } }}>
+              {Object.entries(REGIONS).map(([k, r]) => <Tab key={k} value={k} label={r.label} />)}
+            </Tabs>
+          </Paper>
+        </Box>
+
+        {/* ══════════ MAP + SIDEBAR ══════════ */}
         <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', lg: 'row' } }}>
-          {/* Map */}
-          <Paper
-            sx={{
-              flex: '1 1 auto',
-              position: 'relative',
-              overflow: 'hidden',
-              cursor: dragRef.current.dragging ? 'grabbing' : 'grab',
-              userSelect: 'none',
-            }}
-          >
+
+          {/* ──── MAP ──── */}
+          <Paper sx={{ flex: '1 1 auto', position: 'relative', overflow: 'hidden', cursor: dragRef.current.dragging ? 'grabbing' : 'grab', userSelect: 'none' }}>
             {/* Zoom controls */}
             <Box sx={{ position: 'absolute', top: 8, left: 8, zIndex: 10, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-              <IconButton size="small" onClick={handleZoomIn} sx={{ bgcolor: alpha(theme.palette.background.paper, 0.8) }}>
-                <ZoomInIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small" onClick={handleZoomOut} sx={{ bgcolor: alpha(theme.palette.background.paper, 0.8) }}>
-                <ZoomOutIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small" onClick={handleReset} sx={{ bgcolor: alpha(theme.palette.background.paper, 0.8) }}>
-                <ResetIcon fontSize="small" />
-              </IconButton>
+              <IconButton size="small" onClick={handleZoomIn} sx={{ bgcolor: alpha(theme.palette.background.paper, 0.85) }}><ZoomInIcon fontSize="small" /></IconButton>
+              <IconButton size="small" onClick={handleZoomOut} sx={{ bgcolor: alpha(theme.palette.background.paper, 0.85) }}><ZoomOutIcon fontSize="small" /></IconButton>
+              <IconButton size="small" onClick={handleReset} sx={{ bgcolor: alpha(theme.palette.background.paper, 0.85) }}><ResetIcon fontSize="small" /></IconButton>
             </Box>
 
             <svg
               ref={svgRef}
-              viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+              viewBox={`0 0 ${SVG_W} ${SVG_H}`}
               style={{ width: '100%', height: 'auto', minHeight: 400 }}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
@@ -520,51 +654,45 @@ const USChurchMapPage: React.FC = () => {
               onMouseLeave={handleMouseUp}
             >
               <g transform={`translate(${pan.x * zoom}, ${pan.y * zoom}) scale(${zoom})`}>
+                {/* State polygons */}
                 {geoData && Object.entries(geoData).map(([code, state]) => {
-                  const inRegion = isStateInRegion(code);
+                  const inRegion = isInRegion(code);
                   const isHovered = hoveredState === code;
                   const isSelected = selectedState === code;
-                  const fillColor = getStateColor(code);
+                  const borderColor = getStateBorderColor(code);
 
                   return (
                     <path
                       key={code}
                       d={state.path}
-                      fill={fillColor}
-                      stroke={isDark ? '#555' : '#fff'}
-                      strokeWidth={isHovered || isSelected ? 2 / zoom : 0.75 / zoom}
+                      fill={getStateColor(code)}
+                      stroke={isSelected ? (borderColor || (isDark ? '#fff' : '#333')) : borderColor || (isDark ? '#555' : '#fff')}
+                      strokeWidth={(isHovered || isSelected ? 2.5 : borderColor ? 1.5 : 0.75) / zoom}
                       opacity={inRegion ? 1 : 0.2}
                       style={{
                         transition: 'fill 0.2s, opacity 0.3s, stroke-width 0.15s',
                         cursor: inRegion ? 'pointer' : 'default',
                         filter: isSelected ? `drop-shadow(0 0 ${3 / zoom}px ${isDark ? '#fff' : '#000'})` : undefined,
                       }}
-                      onMouseMove={(e) => inRegion && handleStateMouseMove(e, code)}
-                      onMouseLeave={handleStateMouseLeave}
+                      onMouseMove={(e) => inRegion && handleStateHover(e, code)}
+                      onMouseLeave={() => setHoveredState(null)}
                       onClick={() => inRegion && handleStateClick(code)}
                     />
                   );
                 })}
 
                 {/* State labels */}
-                {geoData && Object.entries(geoData).map(([code, state]) => {
-                  if (!isStateInRegion(code)) return null;
-                  const offset = LABEL_OFFSETS[code];
-                  const x = offset ? offset.x : state.cx;
-                  const y = offset ? offset.y : state.cy;
-                  const fontSize = 10 / zoom;
-
-                  // Skip labels for very small zoom levels
-                  if (zoom < 0.7) return null;
-
+                {geoData && zoom >= 0.7 && Object.entries(geoData).map(([code, state]) => {
+                  if (!isInRegion(code)) return null;
+                  const off = LABEL_OFFSETS[code];
                   return (
                     <text
-                      key={`label-${code}`}
-                      x={x}
-                      y={y}
-                      textAnchor={offset?.anchor || 'middle'}
+                      key={`lbl-${code}`}
+                      x={off ? off.x : state.cx}
+                      y={off ? off.y : state.cy}
+                      textAnchor={off?.anchor || 'middle'}
                       dominantBaseline="central"
-                      fontSize={fontSize}
+                      fontSize={10 / zoom}
                       fontWeight={selectedState === code ? 700 : 500}
                       fill={isDark ? '#ddd' : '#333'}
                       pointerEvents="none"
@@ -575,31 +703,17 @@ const USChurchMapPage: React.FC = () => {
                   );
                 })}
 
-                {/* OM Church pins (green markers) */}
-                {omChurches.map((church) => {
-                  // Project lat/lng to Albers USA coordinates
-                  const coords = projectToAlbersUsa(church.longitude, church.latitude);
-                  if (!coords) return null; // Outside projection bounds
-
-                  const pinSize = 6 / zoom;
+                {/* OM Church pins */}
+                {omChurches.map(ch => {
+                  const coords = projectToAlbersUsa(ch.longitude, ch.latitude);
+                  if (!coords) return null;
+                  const r = 6 / zoom;
                   return (
-                    <Tooltip key={`om-pin-${church.id}`} title={church.church_name || church.name} arrow>
+                    <Tooltip key={`pin-${ch.id}`} title={`${ch.church_name || ch.name} (Live Client)`} arrow>
                       <g style={{ cursor: 'pointer' }}>
-                        <circle
-                          cx={coords[0]}
-                          cy={coords[1]}
-                          r={pinSize}
-                          fill="#22c55e"
-                          stroke="#fff"
-                          strokeWidth={1.5 / zoom}
-                          style={{ filter: `drop-shadow(0 ${1/zoom}px ${2/zoom}px rgba(0,0,0,0.3))` }}
-                        />
-                        <circle
-                          cx={coords[0]}
-                          cy={coords[1]}
-                          r={pinSize * 0.4}
-                          fill="#fff"
-                        />
+                        <circle cx={coords[0]} cy={coords[1]} r={r} fill={STATUS_CONFIG.live.color} stroke="#fff" strokeWidth={1.5 / zoom}
+                          style={{ filter: `drop-shadow(0 ${1 / zoom}px ${2 / zoom}px rgba(0,0,0,0.3))` }} />
+                        <circle cx={coords[0]} cy={coords[1]} r={r * 0.4} fill="#fff" />
                       </g>
                     </Tooltip>
                   );
@@ -607,20 +721,14 @@ const USChurchMapPage: React.FC = () => {
               </g>
             </svg>
 
-            {/* Legend */}
+            {/* ── Legend ── */}
             <Box sx={{
-              position: 'absolute',
-              bottom: 12,
-              left: 12,
-              bgcolor: alpha(theme.palette.background.paper, 0.9),
-              borderRadius: 1,
-              p: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 0.3,
-              minWidth: 120,
+              position: 'absolute', bottom: 12, left: 12,
+              bgcolor: alpha(theme.palette.background.paper, 0.92), borderRadius: 1.5, p: 1.25,
+              display: 'flex', flexDirection: 'column', gap: 0.3, minWidth: 140,
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
             }}>
-              <Typography variant="caption" fontWeight={600} sx={{ mb: 0.5 }}>Churches per State</Typography>
+              <Typography variant="caption" fontWeight={700} sx={{ mb: 0.25 }}>Churches per State</Typography>
               {legendItems.map((item, i) => (
                 <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Box sx={{ width: 14, height: 14, bgcolor: item.color, borderRadius: 0.5, border: `1px solid ${isDark ? '#555' : '#ccc'}` }} />
@@ -628,46 +736,68 @@ const USChurchMapPage: React.FC = () => {
                 </Box>
               ))}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
-                <Box sx={{ width: 14, height: 14, bgcolor: isDark ? NO_DATA_COLOR_DARK : NO_DATA_COLOR_LIGHT, borderRadius: 0.5, border: `1px solid ${isDark ? '#555' : '#ccc'}` }} />
+                <Box sx={{ width: 14, height: 14, bgcolor: isDark ? NO_DATA_DARK : NO_DATA_LIGHT, borderRadius: 0.5, border: `1px solid ${isDark ? '#555' : '#ccc'}` }} />
                 <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>No data</Typography>
               </Box>
-              {omChurches.length > 0 && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, pt: 0.5, borderTop: `1px solid ${isDark ? '#555' : '#ddd'}` }}>
-                  <Box sx={{ width: 14, height: 14, bgcolor: '#22c55e', borderRadius: '50%', border: '2px solid #fff', boxShadow: '0 1px 2px rgba(0,0,0,0.2)' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>OrthodoxMetrics ({omChurches.length})</Typography>
+              <Divider sx={{ my: 0.5 }} />
+              <Typography variant="caption" fontWeight={700} sx={{ mb: 0.25 }}>Status</Typography>
+              {(['live', 'onboarding', 'pipeline', 'directory'] as OpStatus[]).map(s => (
+                <Box key={s} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ width: 14, height: 14, bgcolor: STATUS_CONFIG[s].color, borderRadius: s === 'live' || s === 'onboarding' ? '50%' : 0.5, border: `1px solid ${alpha(STATUS_CONFIG[s].color, 0.5)}` }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>{STATUS_CONFIG[s].label}</Typography>
                 </Box>
-              )}
+              ))}
             </Box>
           </Paper>
 
-          {/* Detail side panel */}
-          <Paper sx={{ width: { xs: '100%', lg: 380 }, flexShrink: 0, maxHeight: 650, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {/* ──── SIDEBAR ──── */}
+          <Paper sx={{
+            width: { xs: '100%', lg: 400 }, flexShrink: 0,
+            maxHeight: 700, overflow: 'hidden',
+            display: 'flex', flexDirection: 'column',
+            border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+          }}>
             {selectedData ? (
               <>
-                {/* State header */}
-                <Box sx={{ p: 2, pb: 1 }}>
+                {/* ── State header ── */}
+                <Box sx={{ p: 2, pb: 1.5 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <IconButton size="small" onClick={() => { setSelectedState(null); setStateChurches(null); setJurisdictionFilter(null); }}>
+                    <IconButton size="small" onClick={() => { setSelectedState(null); setStateChurches(null); setJurisdictionFilter(null); setSelectedChurch(null); }}>
                       <ArrowBackIcon fontSize="small" />
                     </IconButton>
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>{selectedData.name}</Typography>
+                    <Typography variant="h6" sx={{ flexGrow: 1, fontSize: '1.05rem' }}>{selectedData.name}</Typography>
                     <Chip label={selectedData.count.toLocaleString()} color="primary" size="small" />
                   </Box>
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-                    <Chip size="small" variant="outlined" label={`Rank #${sortedStates.findIndex(([c]) => c === selectedData.code) + 1} of ${sortedStates.length}`} />
-                    <Chip size="small" variant="outlined" label={churchData ? `${((selectedData.count / churchData.total) * 100).toFixed(1)}% of total` : ''} />
-                  </Box>
 
-                  {/* Jurisdiction filter chips */}
+                  {/* ── State status summary ── */}
+                  {stateStatus && (
+                    <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 1 }}>
+                      <Chip size="small" variant="outlined" label={`Rank #${sortedStates.findIndex(([c]) => c === selectedData.code) + 1}`} sx={{ height: 22, fontSize: '0.7rem' }} />
+                      {stateStatus.directory > 0 && (
+                        <Chip size="small" label={`${stateStatus.directory} directory`} sx={{ height: 22, fontSize: '0.7rem', bgcolor: alpha(STATUS_CONFIG.directory.color, 0.1), color: STATUS_CONFIG.directory.color }} />
+                      )}
+                      {stateStatus.pipeline > 0 && (
+                        <Chip size="small" label={`${stateStatus.pipeline} pipeline`} sx={{ height: 22, fontSize: '0.7rem', bgcolor: alpha(STATUS_CONFIG.pipeline.color, 0.1), color: STATUS_CONFIG.pipeline.color }} />
+                      )}
+                      {stateStatus.onboarding > 0 && (
+                        <Chip size="small" label={`${stateStatus.onboarding} onboarding`} sx={{ height: 22, fontSize: '0.7rem', bgcolor: alpha(STATUS_CONFIG.onboarding.color, 0.1), color: STATUS_CONFIG.onboarding.color }} />
+                      )}
+                      {stateStatus.live > 0 && (
+                        <Chip size="small" label={`${stateStatus.live} live`} sx={{ height: 22, fontSize: '0.7rem', bgcolor: alpha(STATUS_CONFIG.live.color, 0.1), color: STATUS_CONFIG.live.color }} />
+                      )}
+                    </Box>
+                  )}
+
+                  {/* ── Jurisdiction filters ── */}
                   {stateChurches && stateChurches.jurisdictions.length > 0 && (
-                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 1 }}>
+                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
                       <Chip
                         size="small"
-                        label={`All (${stateChurches.total})`}
-                        color={jurisdictionFilter === null ? 'primary' : 'default'}
-                        variant={jurisdictionFilter === null ? 'filled' : 'outlined'}
+                        label={`All (${stateChurches.totalAll})`}
+                        color={!jurisdictionFilter ? 'primary' : 'default'}
+                        variant={!jurisdictionFilter ? 'filled' : 'outlined'}
                         onClick={() => setJurisdictionFilter(null)}
-                        sx={{ fontSize: '0.7rem', height: 24 }}
+                        sx={{ fontSize: '0.68rem', height: 22 }}
                       />
                       {stateChurches.jurisdictions.map(j => (
                         <Chip
@@ -677,7 +807,7 @@ const USChurchMapPage: React.FC = () => {
                           color={jurisdictionFilter === j.jurisdiction ? 'primary' : 'default'}
                           variant={jurisdictionFilter === j.jurisdiction ? 'filled' : 'outlined'}
                           onClick={() => setJurisdictionFilter(jurisdictionFilter === j.jurisdiction ? null : j.jurisdiction)}
-                          sx={{ fontSize: '0.7rem', height: 24 }}
+                          sx={{ fontSize: '0.68rem', height: 22 }}
                         />
                       ))}
                     </Box>
@@ -685,129 +815,104 @@ const USChurchMapPage: React.FC = () => {
                   <Divider sx={{ mt: 1.5 }} />
                 </Box>
 
-                {/* Church list */}
-                <Box sx={{ flex: 1, overflow: 'auto', px: 2, pb: 2 }}>
+                {/* ── Church list ── */}
+                <Box sx={{ flex: 1, overflow: 'auto', px: 1.5, pb: 1.5 }}>
                   {churchesLoading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                       <CircularProgress size={28} />
                     </Box>
                   ) : filteredChurches.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>No churches found</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>
+                      No churches match current filters
+                    </Typography>
                   ) : (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1 }}>
-                        Showing {filteredChurches.length} church{filteredChurches.length !== 1 ? 'es' : ''}
+                    <>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, px: 0.5 }}>
+                        Showing {filteredChurches.length} of {stateChurches?.totalAll || 0} churches
                       </Typography>
-                      {filteredChurches.map((church, i) => (
-                        <Box
-                          key={`${church.name}-${i}`}
-                          sx={{
-                            py: 1,
-                            borderBottom: `1px solid ${isDark ? '#333' : '#eee'}`,
-                            '&:last-child': { borderBottom: 'none' },
-                          }}
-                        >
-                          <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.82rem', lineHeight: 1.3 }}>
-                            {church.name}
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
-                            <PlaceIcon sx={{ fontSize: 13, color: 'text.secondary' }} />
-                            <Typography variant="caption" color="text.secondary">
-                              {[church.street, church.city, church.state_code, church.zip].filter(Boolean).join(', ')}
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.3, flexWrap: 'wrap' }}>
-                            <Chip label={church.jurisdiction} size="small" sx={{ fontSize: '0.65rem', height: 18 }} />
-                            {church.phone && (
-                              <Tooltip title={church.phone} arrow>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                                  <PhoneIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
-                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.68rem' }}>{church.phone}</Typography>
-                                </Box>
-                              </Tooltip>
-                            )}
-                            {church.website && (
-                              <Tooltip title={church.website} arrow>
-                                <Link href={church.website} target="_blank" rel="noopener" sx={{ display: 'flex', alignItems: 'center', gap: 0.3, textDecoration: 'none' }}>
-                                  <WebIcon sx={{ fontSize: 12 }} />
-                                  <Typography variant="caption" sx={{ fontSize: '0.68rem' }}>Website</Typography>
-                                </Link>
-                              </Tooltip>
-                            )}
-                          </Box>
-                        </Box>
-                      ))}
-                    </Box>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                        {filteredChurches.map((church, i) => (
+                          <ChurchCard
+                            key={`${church.id}-${i}`}
+                            church={church}
+                            isDark={isDark}
+                            isSelected={selectedChurch?.id === church.id}
+                            onClick={() => setSelectedChurch(prev => prev?.id === church.id ? null : church)}
+                            onAction={(action) => handleChurchAction(church, action)}
+                          />
+                        ))}
+                      </Box>
+                    </>
                   )}
                 </Box>
               </>
             ) : (
+              /* ── No state selected: rankings ── */
               <Box sx={{ p: 2, overflow: 'auto', flex: 1 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Click a state to see its churches
+                  Click a state to explore its churches
                 </Typography>
-
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
                   {REGIONS[activeRegion].label} Rankings
                 </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                  {sortedStates.map(([code, count], i) => (
-                    <Box
-                      key={code}
-                      onClick={() => handleStateClick(code)}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        p: 0.5,
-                        borderRadius: 0.5,
-                        cursor: 'pointer',
-                        bgcolor: selectedState === code
-                          ? alpha(theme.palette.primary.main, 0.15)
-                          : 'transparent',
-                        '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.08) },
-                      }}
-                    >
-                      <Typography variant="caption" color="text.secondary" sx={{ width: 20, textAlign: 'right' }}>
-                        {i + 1}.
-                      </Typography>
-                      <Box sx={{ width: 12, height: 12, bgcolor: getStateColor(code), borderRadius: 0.3, border: `1px solid ${isDark ? '#555' : '#ccc'}`, flexShrink: 0 }} />
-                      <Typography variant="body2" sx={{ flexGrow: 1, fontSize: '0.8rem' }}>
-                        {geoData?.[code]?.name || code}
-                      </Typography>
-                      <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.8rem' }}>
-                        {count.toLocaleString()}
-                      </Typography>
-                    </Box>
-                  ))}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+                  {sortedStates.map(([code, count], i) => {
+                    const st = statusData?.states[code];
+                    const hasNonDir = st && (st.pipeline > 0 || st.onboarding > 0 || st.live > 0);
+                    return (
+                      <Box
+                        key={code}
+                        onClick={() => handleStateClick(code)}
+                        sx={{
+                          display: 'flex', alignItems: 'center', gap: 1, p: 0.75, borderRadius: 1,
+                          cursor: 'pointer',
+                          bgcolor: selectedState === code ? alpha(theme.palette.primary.main, 0.15) : 'transparent',
+                          '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.08) },
+                        }}
+                      >
+                        <Typography variant="caption" color="text.secondary" sx={{ width: 22, textAlign: 'right' }}>{i + 1}.</Typography>
+                        <Box sx={{ width: 12, height: 12, bgcolor: getStateColor(code), borderRadius: 0.3, border: `1px solid ${isDark ? '#555' : '#ccc'}`, flexShrink: 0 }} />
+                        <Typography variant="body2" sx={{ flex: 1, fontSize: '0.8rem' }}>
+                          {geoData?.[code]?.name || code}
+                        </Typography>
+                        {hasNonDir && (
+                          <Box sx={{ display: 'flex', gap: 0.25 }}>
+                            {st!.live > 0 && <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: STATUS_CONFIG.live.color }} />}
+                            {st!.onboarding > 0 && <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: STATUS_CONFIG.onboarding.color }} />}
+                            {st!.pipeline > 0 && <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: STATUS_CONFIG.pipeline.color }} />}
+                          </Box>
+                        )}
+                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.8rem' }}>{count.toLocaleString()}</Typography>
+                      </Box>
+                    );
+                  })}
                 </Box>
               </Box>
             )}
           </Paper>
         </Box>
 
-        {/* Floating tooltip */}
+        {/* ══════════ FLOATING TOOLTIP ══════════ */}
         {hoveredState && churchData && (
-          <Box
-            sx={{
-              position: 'fixed',
-              left: tooltipPos.x + 12,
-              top: tooltipPos.y - 40,
-              bgcolor: alpha(theme.palette.background.paper, 0.95),
-              border: `1px solid ${isDark ? '#555' : '#ddd'}`,
-              borderRadius: 1,
-              px: 1.5,
-              py: 0.75,
-              pointerEvents: 'none',
-              zIndex: 1500,
-              boxShadow: theme.shadows[4],
-              minWidth: 120,
-            }}
-          >
+          <Box sx={{
+            position: 'fixed', left: tooltipPos.x + 12, top: tooltipPos.y - 50,
+            bgcolor: alpha(theme.palette.background.paper, 0.95),
+            border: `1px solid ${isDark ? '#555' : '#ddd'}`, borderRadius: 1.5,
+            px: 1.5, py: 1, pointerEvents: 'none', zIndex: 1500,
+            boxShadow: theme.shadows[4], minWidth: 140,
+          }}>
             <Typography variant="subtitle2">{geoData?.[hoveredState]?.name || hoveredState}</Typography>
-            <Typography variant="h6" color="primary">
-              {(churchData.states[hoveredState] || 0).toLocaleString()} churches
-            </Typography>
+            <Typography variant="h6" color="primary">{(churchData.states[hoveredState] || 0).toLocaleString()} churches</Typography>
+            {statusData?.states[hoveredState] && (() => {
+              const s = statusData.states[hoveredState];
+              const items: string[] = [];
+              if (s.live > 0) items.push(`${s.live} live`);
+              if (s.onboarding > 0) items.push(`${s.onboarding} onboarding`);
+              if (s.pipeline > 0) items.push(`${s.pipeline} pipeline`);
+              return items.length > 0 ? (
+                <Typography variant="caption" color="text.secondary">{items.join(' · ')}</Typography>
+              ) : null;
+            })()}
           </Box>
         )}
       </Box>

@@ -56,7 +56,7 @@ async function logToFile(filename, message) {
 // Database connection helper
 async function getDbConnection(settings) {
   return mysql.createConnection({
-    host: 'localhost',
+    host: process.env.DB_HOST || 'localhost',
     user: settings.databaseUser || 'root',
     password: settings.databasePassword || '',
     database: settings.defaultDatabase || 'omai_db',
@@ -740,9 +740,9 @@ async function processMarkdownFile(content, fileName) {
 
     // Store in database
     const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '',
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '',
       database: 'omai_db'
     });
 
@@ -813,9 +813,9 @@ router.get('/status', async (req, res) => {
     // Check database connection
     try {
       const connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: '',
+        host: process.env.DB_HOST || 'localhost',
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || '',
         database: 'omai_db'
       });
       

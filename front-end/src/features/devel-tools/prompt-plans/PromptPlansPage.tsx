@@ -13,8 +13,10 @@ import {
   PlayArrow as ActiveIcon,
   Cancel as CancelledIcon,
   Edit as DraftIcon,
+  SmartToy as AgentIcon,
 } from '@mui/icons-material';
 import {
+  alpha,
   Box,
   Button,
   Chip,
@@ -22,9 +24,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
   LinearProgress,
+  MenuItem,
   Paper,
+  Select,
   Skeleton,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -44,11 +51,21 @@ interface PlanRow {
   title: string;
   description: string | null;
   status: string;
+  assigned_agent: string | null;
+  change_set_code: string | null;
+  change_set_status: string | null;
   step_count: number;
   completed_count: number;
   created_by_email: string | null;
   created_at: string;
 }
+
+const AGENT_OPTIONS = [
+  { value: 'claude_cli', label: 'Claude CLI', color: '#d4a574' },
+  { value: 'windsurf', label: 'Windsurf', color: '#00b4d8' },
+  { value: 'cursor', label: 'Cursor', color: '#7c3aed' },
+  { value: 'github_copilot', label: 'GitHub Copilot', color: '#1f883d' },
+] as const;
 
 const statusConfig: Record<string, { icon: React.ReactNode; color: 'default' | 'primary' | 'success' | 'warning' | 'error' }> = {
   draft:     { icon: <DraftIcon sx={{ fontSize: 14 }} />,     color: 'default' },
@@ -72,19 +89,22 @@ const PromptPlansPage: React.FC = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [newAgent, setNewAgent] = useState('');
   const [creating, setCreating] = useState(false);
+  const [filterAgent, setFilterAgent] = useState('');
 
   const fetchPlans = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/prompt-plans');
+      const params = filterAgent ? `?agent=${filterAgent}` : '';
+      const res = await apiClient.get(`/prompt-plans${params}`);
       setPlans(res.items || []);
     } catch (err) {
       console.error('Failed to load prompt plans:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filterAgent]);
 
   useEffect(() => { fetchPlans(); }, [fetchPlans]);
 
@@ -92,10 +112,15 @@ const PromptPlansPage: React.FC = () => {
     if (!newTitle.trim()) return;
     setCreating(true);
     try {
-      const res = await apiClient.post('/prompt-plans', { title: newTitle.trim(), description: newDesc.trim() || null });
+      const res = await apiClient.post('/prompt-plans', {
+        title: newTitle.trim(),
+        description: newDesc.trim() || null,
+        assigned_agent: newAgent || null,
+      });
       setCreateOpen(false);
       setNewTitle('');
       setNewDesc('');
+      setNewAgent('');
       navigate(`/devel-tools/prompt-plans/${res.plan.id}`);
     } catch (err) {
       console.error('Failed to create plan:', err);
@@ -127,13 +152,27 @@ const PromptPlansPage: React.FC = () => {
           </Button>
         </Box>
 
+        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel>Filter by Agent</InputLabel>
+            <Select value={filterAgent} label="Filter by Agent" onChange={(e) => setFilterAgent(e.target.value)}>
+              <MenuItem value="">All Agents</MenuItem>
+              {AGENT_OPTIONS.map((a) => (
+                <MenuItem key={a.value} value={a.value}>{a.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
+
         <TableContainer component={Paper} elevation={0} sx={{ border: `1px solid ${theme.palette.divider}` }}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>ID</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Title</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Agent</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>CS</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Progress</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Created By</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Created</TableCell>
@@ -143,14 +182,14 @@ const PromptPlansPage: React.FC = () => {
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <TableRow key={i}>
-                    {Array.from({ length: 6 }).map((_, j) => (
+                    {Array.from({ length: 8 }).map((_, j) => (
                       <TableCell key={j}><Skeleton /></TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : plans.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                  <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
                     <Typography color="text.secondary">No prompt plans yet</Typography>
                   </TableCell>
                 </TableRow>
@@ -179,7 +218,39 @@ const PromptPlansPage: React.FC = () => {
                         )}
                       </TableCell>
                       <TableCell>
+                        {plan.assigned_agent ? (() => {
+                          const ag = AGENT_OPTIONS.find(a => a.value === plan.assigned_agent);
+                          return (
+                            <Chip
+                              icon={<AgentIcon sx={{ fontSize: 14, color: `${ag?.color || '#888'} !important` }} />}
+                              label={ag?.label || plan.assigned_agent}
+                              size="small"
+                              sx={{
+                                fontSize: '0.68rem',
+                                fontWeight: 600,
+                                bgcolor: alpha(ag?.color || '#888', 0.1),
+                                color: ag?.color || '#888',
+                                '& .MuiChip-icon': { ml: '4px' },
+                              }}
+                            />
+                          );
+                        })() : (
+                          <Typography variant="caption" color="text.secondary">—</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <Chip icon={sc.icon} label={plan.status} size="small" color={sc.color} variant="outlined" sx={{ fontSize: '0.7rem', textTransform: 'capitalize' }} />
+                      </TableCell>
+                      <TableCell>
+                        {plan.change_set_code ? (
+                          <Chip
+                            label={plan.change_set_code}
+                            size="small"
+                            sx={{ fontSize: '0.68rem', fontWeight: 600, bgcolor: alpha('#2d1b4e', 0.08), color: '#2d1b4e' }}
+                          />
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">—</Typography>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 120 }}>
@@ -231,7 +302,17 @@ const PromptPlansPage: React.FC = () => {
             placeholder="Describe the initiative..."
             value={newDesc}
             onChange={(e) => setNewDesc(e.target.value)}
+            sx={{ mb: 2 }}
           />
+          <FormControl fullWidth>
+            <InputLabel>Assign to Agent (optional)</InputLabel>
+            <Select value={newAgent} label="Assign to Agent (optional)" onChange={(e) => setNewAgent(e.target.value)}>
+              <MenuItem value="">None</MenuItem>
+              {AGENT_OPTIONS.map((a) => (
+                <MenuItem key={a.value} value={a.value}>{a.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCreateOpen(false)}>Cancel</Button>

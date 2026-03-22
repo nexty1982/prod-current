@@ -18,12 +18,15 @@ const NavGroup = ({ item, hideMenu }: ItemType) => {
   const ListSubheaderStyle = styled((props: Theme | any) => (
     <ListSubheader disableSticky {...props} />
   ))(({ theme }) => ({
-    ...theme.typography.overline,
-    fontWeight: '700',
-    marginTop: theme.spacing(3),
-    marginBottom: theme.spacing(0),
-    color: 'text.Primary',
+    fontFamily: "'Inter', sans-serif",
+    fontWeight: 600,
+    fontSize: '0.6875rem',
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase' as const,
+    color: theme.palette.mode === 'dark' ? '#6b7280' : '#9ca3af',
     lineHeight: '26px',
+    marginTop: theme.spacing(2.5),
+    marginBottom: theme.spacing(0.5),
     padding: '3px 12px',
     marginLeft: hideMenu ? '' : '-10px',
   }));

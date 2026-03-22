@@ -8,7 +8,7 @@ export interface OmAssistantMessage {
 }
 
 export interface OmAssistantContext {
-  type: 'global' | 'user-guide' | 'dashboard';
+  type: 'global' | 'public' | 'user-guide' | 'dashboard';
   churchId?: number;
   churchName?: string;
   guideContent?: string;

@@ -27,16 +27,16 @@ const Header = () => {
   const { setIsCollapse, isCollapse, isMobileSidebar, setIsMobileSidebar, headerBackground } = useContext(CustomizerContext);
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
-    boxShadow: theme.palette.mode === 'dark' 
-      ? '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2)'
-      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    boxShadow: theme.palette.mode === 'dark'
+      ? '0 1px 2px 0 rgba(0, 0, 0, 0.3)'
+      : '0 1px 3px 0 rgba(45, 27, 78, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
     background: theme.palette.mode === 'dark'
-      ? 'linear-gradient(135deg, rgba(30, 30, 40, 0.98) 0%, rgba(45, 40, 60, 0.95) 100%)'
-      : 'linear-gradient(135deg, rgba(250, 250, 252, 0.98) 0%, rgba(245, 242, 250, 0.95) 100%)',
-    backdropFilter: 'blur(10px)',
+      ? 'rgba(15, 17, 23, 0.95)'
+      : 'rgba(255, 255, 255, 0.92)',
+    backdropFilter: 'blur(12px)',
     borderBottom: theme.palette.mode === 'dark'
-      ? '1px solid rgba(255, 255, 255, 0.08)'
-      : '1px solid rgba(0, 0, 0, 0.06)',
+      ? '1px solid rgba(255, 255, 255, 0.06)'
+      : '1px solid rgba(45, 27, 78, 0.06)',
     [theme.breakpoints.up('lg')]: {
       minHeight: TopbarHeight,
     },
@@ -44,7 +44,7 @@ const Header = () => {
 
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: '100%',
-    color: theme.palette.mode === 'dark' ? '#FFFFFF' : '#1a1a2e',
+    color: theme.palette.mode === 'dark' ? '#f3f4f6' : '#2d1b4e',
     padding: '0 16px',
     minHeight: TopbarHeight,
     display: 'flex',

@@ -391,7 +391,7 @@ const UserGuide: React.FC = () => {
 
   return (
     <PageContainer title="User Guide" description="Orthodox Metrics documentation and help center">
-      <Box sx={{ maxWidth: 1100, mx: 'auto', pb: 6 }}>
+      <Box sx={{ pb: 6 }}>
         {/* Hero Header */}
         <Paper
           elevation={0}

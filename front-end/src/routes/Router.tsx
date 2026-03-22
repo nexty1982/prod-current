@@ -14,10 +14,13 @@ import Loadable from '../layouts/full/shared/loadable/Loadable';
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
+const PublicLayout = Loadable(lazy(() => import('../layouts/public/PublicLayout')));
 const ChurchPortalLayout = Loadable(lazy(() => import('../layouts/portal/ChurchPortalLayout')));
 const ChurchPortalHub = Loadable(lazy(() => import('../features/portal/ChurchPortalHub')));
+const PortalSettingsPage = Loadable(lazy(() => import('../features/portal/PortalSettingsPage')));
 const PortalSacramentalRestrictionsPage = Loadable(lazy(() => import('../features/portal/PortalSacramentalRestrictionsPage')));
 const PortalRecordsPage = Loadable(lazy(() => import('../features/portal/PortalRecordsPage')));
+const PortalCertificatesPage = Loadable(lazy(() => import('../features/portal/PortalCertificatesPage')));
 
 /* ****Pages***** */
 const ModernDash = Loadable(lazy(() => import('../features/dashboard/ModernDashboard')));
@@ -46,7 +49,6 @@ const InvoiceEdit = Loadable(lazy(() => import('../features/apps/invoice/Edit'))
 const DynamicRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsPage')));
 const AnalyticsDashboard = Loadable(lazy(() => import('../features/admin/AnalyticsDashboard')));
 const Logs = Loadable(lazy(() => import('../features/system/apps/logs/Logs')));
-const UserProfile = Loadable(lazy(() => import('../features/apps/user-profile/UserProfile')));
 const Followers = Loadable(lazy(() => import('../features/apps/user-profile/Followers')));
 const Friends = Loadable(lazy(() => import('../features/apps/user-profile/Friends')));
 const UserProfileGallery = Loadable(lazy(() => import('../features/apps/user-profile/Gallery')));
@@ -122,6 +124,7 @@ const RecipientSubmissionPage = Loadable(lazy(() => import('../features/records-
 const PublicCollaborationPage = Loadable(lazy(() => import('../features/records-centralized/components/collaborationLinks/PublicCollaborationPage')));
 const InteractiveReportJobsPage = Loadable(lazy(() => import('../features/devel-tools/interactive-reports/InteractiveReportJobsPage')));
 const BuildInfoPage = Loadable(lazy(() => import('../features/devel-tools/build-info/BuildInfoPage')));
+const PlatformStatusPage = Loadable(lazy(() => import('../features/devel-tools/platform-status/PlatformStatusPage')));
 const OrthodMetricsAdmin = Loadable(lazy(() => import('../features/admin/admin/OrthodoxMetricsAdmin')));
 const AIAdminPanel = Loadable(lazy(() => import('../features/admin/ai/AIAdminPanel')));
 const OMAIUltimateLogger = Loadable(lazy(() => import('../features/devel-tools/om-ultimatelogger/LoggerDashboard')));
@@ -129,9 +132,13 @@ const ScriptRunner = Loadable(lazy(() => import('../features/admin/admin/ScriptR
 const AdminControlPanel = Loadable(lazy(() => import('../features/admin/control-panel/AdminControlPanel')));
 const ChurchManagementPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchManagementPage')));
 const SacramentalRestrictionsPage = Loadable(lazy(() => import('../features/admin/control-panel/SacramentalRestrictionsPage')));
+const OrthodoxScheduleGuidelinesPage = Loadable(lazy(() => import('../features/admin/control-panel/OrthodoxScheduleGuidelinesPage')));
 const PendingMembersPage = Loadable(lazy(() => import('../features/admin/control-panel/PendingMembersPage')));
 const ChurchOnboardingPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchOnboardingPage')));
 const ChurchOnboardingDetailPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchOnboardingDetailPage')));
+const JurisdictionsPage = Loadable(lazy(() => import('../features/admin/control-panel/JurisdictionsPage')));
+const DemoChurchesPage = Loadable(lazy(() => import('../features/admin/control-panel/DemoChurchesPage')));
+const ChurchPipelinePage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchPipelinePage')));
 const RecordsOCRPage = Loadable(lazy(() => import('../features/admin/control-panel/RecordsOCRPage')));
 const CRMOutreachPage = Loadable(lazy(() => import('../features/admin/control-panel/CRMOutreachPage')));
 const SystemServerPage = Loadable(lazy(() => import('../features/admin/control-panel/SystemServerPage')));
@@ -141,6 +148,10 @@ const RecordsLandingConfig = Loadable(lazy(() => import('../features/admin/churc
 const OMDailyPage = Loadable(lazy(() => import('../features/admin/control-panel/OMDailyPage')));
 const OMAppSuitePage = Loadable(lazy(() => import('../features/admin/control-panel/OMAppSuitePage')));
 const SDLCPage = Loadable(lazy(() => import('../features/admin/control-panel/SDLCPage')));
+const ComponentsInDevelopmentPage = Loadable(lazy(() => import('../features/admin/control-panel/ComponentsInDevelopmentPage')));
+const DeprecatedComponentsPage = Loadable(lazy(() => import('../features/admin/control-panel/DeprecatedComponentsPage')));
+const ChurchLifecyclePage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchLifecyclePage')));
+const ChurchLifecycleDetailPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchLifecycleDetailPage')));
 const UsersSecurityPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/UsersSecurityPage')));
 const ContentMediaPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/ContentMediaPage')));
 const SocialCommsPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/SocialCommsPage')));
@@ -149,14 +160,13 @@ const PlatformConfigPage = Loadable(lazy(() => import('../features/admin/control
 const CodeSafetyPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/CodeSafetyPage')));
 const SSLCertificatePage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/SSLCertificatePage')));
 const SiteMapPage = Loadable(lazy(() => import('../features/admin/SiteMapPage')));
+const CertificateTemplatesPage = Loadable(lazy(() => import('../features/admin/control-panel/CertificateTemplatesPage')));
 const CRMPage = Loadable(lazy(() => import('../features/devel-tools/crm/CRMPage')));
 const USChurchMapPage = Loadable(lazy(() => import('../features/devel-tools/us-church-map/USChurchMapPage')));
 const LogSearch = Loadable(lazy(() => import('../features/admin/dashboard/LogSearch')));
 const OmOcrStudioPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OmOcrStudioPage')));
 const UploadRecordsPage = Loadable(lazy(() => import('../features/records-centralized/apps/upload-records/UploadRecordsPage')));
-const SuperDashboard = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/SuperDashboard')));
-const SuperDashboardCustomizer = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/SuperDashboardCustomizer')));
-const UserDashboard = Loadable(lazy(() => import('../features/devel-tools/users-customized-landing/UserDashboard')));
+// Removed: SuperDashboard, SuperDashboardCustomizer, UserDashboard — replaced by AdminControlPanel and ChurchPortalHub
 const RouterMenuStudio = Loadable(lazy(() => import('../features/devel-tools/RouterMenuStudio/RouterMenuStudioPage')));
 const DynamicRecordsInspector = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsInspector')));
 const RefactorConsole = Loadable(lazy(() => import('../features/devel-tools/refactor-console/RefactorConsole')));
@@ -188,6 +198,29 @@ const SDLCWizardPage = Loadable(lazy(() => import('../features/admin/sdlc-wizard
 const PromptPlansPage = Loadable(lazy(() => import('../features/devel-tools/prompt-plans/PromptPlansPage')));
 const PromptPlanDetailPage = Loadable(lazy(() => import('../features/devel-tools/prompt-plans/PromptPlanDetailPage')));
 const OMChartsPage = Loadable(lazy(() => import('../features/church/apps/om-charts/OMChartsPage')));
+
+/* ****Account Hub***** */
+const AccountLayout = Loadable(lazy(() => import('../features/account/AccountLayout')));
+const AccountProfilePage = Loadable(lazy(() => import('../features/account/AccountProfilePage')));
+const AccountPersonalInfoPage = Loadable(lazy(() => import('../features/account/AccountPersonalInfoPage')));
+const AccountPasswordPage = Loadable(lazy(() => import('../features/account/AccountPasswordPage')));
+const AccountParishInfoPage = Loadable(lazy(() => import('../features/account/AccountParishInfoPage')));
+const AccountChurchDetailsPage = Loadable(lazy(() => import('../features/account/AccountChurchDetailsPage')));
+const AccountBrandingPage = Loadable(lazy(() => import('../features/account/AccountBrandingPage')));
+const AccountSessionsPage = Loadable(lazy(() => import('../features/account/AccountSessionsPage')));
+const AccountNotificationsPage = Loadable(lazy(() => import('../features/account/AccountNotificationsPage')));
+const AccountOcrPreferencesPage = Loadable(lazy(() => import('../features/account/AccountOcrPreferencesPage')));
+
+/* ****Parish Management Hub***** */
+const ParishManagementLayout = Loadable(lazy(() => import('../features/account/parish-management/ParishManagementLayout')));
+const ParishDashboard = Loadable(lazy(() => import('../features/account/parish-management/ParishDashboard')));
+const DatabaseMappingPage = Loadable(lazy(() => import('../features/account/parish-management/DatabaseMappingPage')));
+const PMRecordSettingsPage = Loadable(lazy(() => import('../features/account/parish-management/RecordSettingsPage')));
+const LandingPageBrandingPage = Loadable(lazy(() => import('../features/account/parish-management/LandingPageBrandingPage')));
+const ThemeStudioPage = Loadable(lazy(() => import('../features/account/parish-management/ThemeStudioPage')));
+const UIThemePage = Loadable(lazy(() => import('../features/account/parish-management/UIThemePage')));
+const SearchConfigurationPage = Loadable(lazy(() => import('../features/account/parish-management/SearchConfigurationPage')));
+const SystemBehaviorPage = Loadable(lazy(() => import('../features/account/parish-management/SystemBehaviorPage')));
 
 /* ****Help & Documentation***** */
 const UserGuide = Loadable(lazy(() => import('../features/help/UserGuide')));
@@ -299,14 +332,14 @@ const Register2 = Loadable(lazy(() => import('../features/auth/authentication/au
 const AcceptInvite = Loadable(lazy(() => import('../features/auth/AcceptInvite')));
 const ForgotPassword = Loadable(lazy(() => import('../features/auth/authentication/auth1/ForgotPassword')));
 const ForgotPassword2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/ForgotPassword2')));
+const VerifyEmailPage = Loadable(lazy(() => import('../features/auth/VerifyEmailPage')));
 const TwoSteps = Loadable(lazy(() => import('../features/auth/authentication/auth1/TwoSteps')));
 const TwoSteps2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/TwoSteps2')));
 const Error = Loadable(lazy(() => import('../features/auth/authentication/Error')));
 const Unauthorized = Loadable(lazy(() => import('../features/auth/authentication/Unauthorized')));
 const Maintenance = Loadable(lazy(() => import('../features/auth/authentication/Maintenance')));
 
-// landingpage
-const Landingpage = Loadable(lazy(() => import('../features/pages/landingpage/Landingpage')));
+// Removed: Landingpage — /landingpage now redirects to /admin/control-panel
 
 // front end pages
 const Homepage = Loadable(lazy(() => import('../features/pages/frontend-pages/Homepage')));
@@ -321,6 +354,7 @@ const PagesMenu = Loadable(lazy(() => import('../features/pages/frontend-pages/P
 const HTMLViewer = Loadable(lazy(() => import('../features/pages/frontend-pages/HTMLViewer')));
 const GreekRecordsViewer = Loadable(lazy(() => import('../features/pages/frontend-pages/GreekRecordsViewer')));
 const Samples = Loadable(lazy(() => import('../features/pages/frontend-pages/Samples')));
+const SampleRecordsExplorer = Loadable(lazy(() => import('../features/pages/frontend-pages/SampleRecordsExplorer')));
 const Gallery = Loadable(lazy(() => import('../features/devel-tools/om-gallery/Gallery')));
 const PageImageIndex = Loadable(lazy(() => import('../features/devel-tools/PageImageIndex')));
 const OCATimeline = Loadable(lazy(() => import('../features/pages/frontend-pages/OCATimeline')));
@@ -366,39 +400,10 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/dashboards/user',
-        exact: true,
-        element: (
-          <ProtectedRoute requiredRole={['priest']}>
-            <AppErrorBoundary>
-              <UserDashboard />
-            </AppErrorBoundary>
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/dashboards/super',
-        exact: true,
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <SuperDashboard />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/dashboards/super/customize',
-        exact: true,
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <SuperDashboardCustomizer />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
+      // Legacy dashboard redirects — SuperDashboard/UserDashboard removed, redirect to replacements
+      { path: '/dashboards/user', element: <Navigate to="/portal" replace /> },
+      { path: '/dashboards/super', element: <Navigate to="/admin/control-panel" replace /> },
+      { path: '/dashboards/super/customize', element: <Navigate to="/admin/control-panel" replace /> },
       // Removed: /liturgical-calendar route (misc-legacy)
       {
         path: '/apps/contacts',
@@ -676,14 +681,10 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      // Modernize User Profile Routes
+      // Modernize User Profile Routes → redirect to Account Hub
       {
         path: '/apps/user-profile',
-        element: (
-          <ProtectedRoute>
-            <UserProfile />
-          </ProtectedRoute>
-        )
+        element: <Navigate to="/account/profile" replace />,
       },
       {
         path: '/apps/user-profile/followers',
@@ -709,15 +710,13 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      // Keep legacy user profile route for backward compatibility
+      // Legacy user profile routes → redirect to Account Hub
       {
         path: '/user-profile',
-        element: (
-          <ProtectedRoute>
-            <UserProfile />
-          </ProtectedRoute>
-        )
+        element: <Navigate to="/account/profile" replace />,
       },
+      // Account Hub moved to top-level route (outside FullLayout) so non-admin users
+      // can access it without the admin sidebar. See top-level /account route block.
       // Removed: /settings/menu, /settings/jit-terminal routes
       {
         path: '/admin/users',
@@ -879,7 +878,7 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
-              <SacramentalRestrictionsPage />
+              <OrthodoxScheduleGuidelinesPage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -898,23 +897,69 @@ const Router = [
       },
       {
         path: '/admin/control-panel/church-onboarding',
+        element: <Navigate to="/admin/control-panel/church-lifecycle" replace />,
+      },
+      {
+        path: '/admin/control-panel/church-onboarding/:churchId',
+        element: <Navigate to="/admin/control-panel/church-lifecycle" replace />,
+      },
+      {
+        path: '/admin/control-panel/jurisdictions',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin']}>
             <AdminErrorBoundary>
-              <EnvironmentAwarePage featureId="church-onboarding" priority={4} featureName="Church Onboarding Pipeline">
-                <ChurchOnboardingPage />
+              <EnvironmentAwarePage featureId="jurisdictions" priority={4} featureName="Jurisdictions">
+                <JurisdictionsPage />
               </EnvironmentAwarePage>
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
       },
       {
-        path: '/admin/control-panel/church-onboarding/:churchId',
+        path: '/admin/control-panel/demo-churches',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin']}>
             <AdminErrorBoundary>
-              <EnvironmentAwarePage featureId="church-onboarding-detail" priority={4} featureName="Church Onboarding Detail">
-                <ChurchOnboardingDetailPage />
+              <EnvironmentAwarePage featureId="demo-churches" priority={4} featureName="Demo Churches">
+                <DemoChurchesPage />
+              </EnvironmentAwarePage>
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/certificate-templates',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <CertificateTemplatesPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/admin/control-panel/church-pipeline',
+        element: <Navigate to="/admin/control-panel/church-lifecycle" replace />,
+      },
+      {
+        path: '/admin/control-panel/church-lifecycle',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <EnvironmentAwarePage featureId="church-lifecycle" priority={4} featureName="Church Lifecycle">
+                <ChurchLifecyclePage />
+              </EnvironmentAwarePage>
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/church-lifecycle/:churchId',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <EnvironmentAwarePage featureId="church-lifecycle-detail" priority={4} featureName="Church Lifecycle Detail">
+                <ChurchLifecycleDetailPage />
               </EnvironmentAwarePage>
             </AdminErrorBoundary>
           </ProtectedRoute>
@@ -996,6 +1041,26 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
               <OMAppSuitePage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/components-in-development',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <ComponentsInDevelopmentPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/deprecated-components',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <DeprecatedComponentsPage />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
@@ -1225,13 +1290,7 @@ const Router = [
       },
       {
         path: '/devel-tools/crm',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <CRMPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
+        element: <Navigate to="/admin/control-panel/church-lifecycle" replace />,
       },
       {
         path: '/devel-tools/us-church-map',
@@ -1440,6 +1499,14 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
             <BuildInfoPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/platform-status',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <PlatformStatusPage />
           </ProtectedRoute>
         )
       },
@@ -1831,13 +1898,7 @@ const Router = [
       },
       {
         path: '/berry/profile/settings',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <EnvironmentAwarePage featureId="berry-profile-02" priority={1} featureName="Berry Account Settings">
-              <BerryAccountSettingsPage />
-            </EnvironmentAwarePage>
-          </ProtectedRoute>
-        )
+        element: <Navigate to="/account/profile" replace />,
       },
       {
         path: '/berry/profile/account',
@@ -2117,7 +2178,16 @@ const Router = [
           </ProtectedRoute>
         ),
       },
-      // Certificates
+      // Certificates — new template-based flow
+      {
+        path: 'certificates',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
+            <PortalCertificatesPage />
+          </ProtectedRoute>
+        ),
+      },
+      // Certificates — legacy drag-and-drop generator
       {
         path: 'certificates/generate',
         element: (
@@ -2126,14 +2196,19 @@ const Router = [
           </ProtectedRoute>
         ),
       },
-      // User Profile
+      // Parish Settings
       {
-        path: 'profile',
+        path: 'settings',
         element: (
-          <ProtectedRoute>
-            <UserProfile />
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
+            <PortalSettingsPage />
           </ProtectedRoute>
         ),
+      },
+      // User Profile → redirect to Account Hub
+      {
+        path: 'profile',
+        element: <Navigate to="/account/profile" replace />,
       },
       // User Guide
       {
@@ -2162,12 +2237,12 @@ const Router = [
           </ProtectedRoute>
         ),
       },
-      // Sacramental Restrictions (portal version)
+      // Sacramental Restrictions (portal version — uses updated schedule guidelines)
       {
         path: 'sacramental-restrictions',
         element: (
           <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-            <PortalSacramentalRestrictionsPage />
+            <OrthodoxScheduleGuidelinesPage />
           </ProtectedRoute>
         ),
       },
@@ -2179,6 +2254,52 @@ const Router = [
             <SiteMapPage />
           </ProtectedRoute>
         ),
+      },
+    ],
+  },
+  // ── Account Hub (portal-style layout — no admin sidebar) ──
+  {
+    path: '/account',
+    element: <ChurchPortalLayout />,
+    children: [
+      {
+        element: (
+          <ProtectedRoute>
+            <AccountLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <Navigate to="/account/profile" replace /> },
+          { path: 'profile', element: <AccountProfilePage /> },
+          { path: 'personal-info', element: <AccountPersonalInfoPage /> },
+          { path: 'password', element: <AccountPasswordPage /> },
+          { path: 'sessions', element: <AccountSessionsPage /> },
+          { path: 'notifications', element: <AccountNotificationsPage /> },
+          { path: 'parish', element: <AccountParishInfoPage /> },
+          { path: 'church-details', element: <AccountChurchDetailsPage /> },
+          { path: 'branding', element: <AccountBrandingPage /> },
+          { path: 'ocr-preferences', element: <AccountOcrPreferencesPage /> },
+        ],
+      },
+      // Parish Management Hub — own sidebar layout
+      {
+        path: 'parish-management',
+        element: (
+          <ProtectedRoute>
+            <ParishManagementLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <ParishDashboard /> },
+          { path: 'database-mapping', element: <DatabaseMappingPage /> },
+          { path: 'database-mapping/:step', element: <DatabaseMappingPage /> },
+          { path: 'record-settings', element: <PMRecordSettingsPage /> },
+          { path: 'landing-page-branding', element: <LandingPageBrandingPage /> },
+          { path: 'theme-studio', element: <ThemeStudioPage /> },
+          { path: 'ui-theme', element: <UIThemePage /> },
+          { path: 'search-configuration', element: <SearchConfigurationPage /> },
+          { path: 'system-behavior', element: <SystemBehaviorPage /> },
+        ],
       },
     ],
   },
@@ -2204,34 +2325,39 @@ const Router = [
           { path: 'two-steps2', element: <TwoSteps2 /> },
           { path: 'maintenance', element: <Maintenance /> },
           { path: 'accept-invite/:token', element: <AcceptInvite /> },
+          { path: 'verify-email', element: <VerifyEmailPage /> },
           { path: '*', element: <NotFound404 /> },
         ]
       },
       // Root login redirect
       { path: 'login', element: <Navigate to="/auth/login2" replace /> },
-      { path: '/landingpage', element: <Navigate to="/dashboards/super" replace /> },
-      { path: '/pages/pricing', element: <Navigate to="/dashboards/super" replace /> },
+      { path: '/landingpage', element: <Navigate to="/admin/control-panel" replace /> },
+      { path: '/pages/pricing', element: <Navigate to="/admin/control-panel" replace /> },
       { path: '/pages/faq', element: <Faq /> },
       { path: '/frontend-pages/faq', element: <Faq /> },
-      { path: '/frontend-pages/homepage', element: <Homepage /> },
-      // Removed: /frontend-pages/homepage1 route - old homepage no longer used
       { path: '/frontend-pages/menu', element: <PagesMenu /> },
-      { path: '/samples', element: <Samples /> },
-      { path: '/frontend-pages/samples', element: <Samples /> },
-      // Removed: /assign-task route (misc-legacy)
-      { path: '/frontend-pages/about', element: <About /> },
-      { path: '/frontend-pages/contact', element: <Contact /> },
       { path: '/frontend-pages/portfolio', element: <Portfolio /> },
-      { path: '/frontend-pages/pricing', element: <PagePricing /> },
       { path: '/frontend-pages/oca-timeline', element: <OCATimeline /> },
       { path: '/frontend-pages/welcome-message', element: <WelcomeMessage /> },
-      { path: '/tour', element: <Tour /> },
-      // Removed: /blog route (misc-legacy)
       { path: '/blog/:slug', element: <BlogPost /> },
-      { path: '/frontend-pages/blog', element: <BlogPage /> },
       { path: '/frontend-pages/blog/detail/:id', element: <BlogPost /> },
       { path: '/frontend-pages/gallery', element: <Gallery /> },
       { path: '/frontend-pages/sacramental-restrictions', element: <SacramentalRestrictionsPublicPage /> },
+      // Public pages with shared header/footer via PublicLayout
+      {
+        element: <PublicLayout />,
+        children: [
+          { path: '/frontend-pages/homepage', element: <Homepage /> },
+          { path: '/frontend-pages/about', element: <About /> },
+          { path: '/frontend-pages/contact', element: <Contact /> },
+          { path: '/frontend-pages/pricing', element: <PagePricing /> },
+          { path: '/frontend-pages/blog', element: <BlogPage /> },
+          { path: '/samples', element: <Samples /> },
+          { path: '/frontend-pages/samples', element: <Samples /> },
+          { path: '/samples/explorer', element: <SampleRecordsExplorer /> },
+          { path: '/tour', element: <Tour /> },
+        ],
+      },
       { path: '/greek_baptism_table_demo.html', element: <GreekRecordsViewer /> },
       { path: '/russian_wedding_table_demo.html', element: <HTMLViewer htmlFile="/russian_wedding_table_demo.html" /> },
       { path: '/romanian_funeral_table_demo.html', element: <HTMLViewer htmlFile="/romanian_funeral_table_demo.html" /> },

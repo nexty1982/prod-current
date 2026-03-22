@@ -140,6 +140,7 @@ ensureDirectories();
 const DEFAULT_CONFIG = {
   mode: 'full',
   buildTarget: 'frontend',
+  buildPath: '/var/www/orthodoxmetrics/dev',
   memory: 4096,
   installPackage: '',
   legacyPeerDeps: true,
@@ -206,7 +207,15 @@ router.post('/config', async (req, res) => {
     if (!['frontend', 'server', 'dual'].includes(newConfig.buildTarget)) {
       newConfig.buildTarget = 'frontend';
     }
-    
+
+    // Validate buildPath - must be an absolute path, no command injection
+    if (newConfig.buildPath && (typeof newConfig.buildPath !== 'string' || !path.isAbsolute(newConfig.buildPath) || /[;&|`$]/.test(newConfig.buildPath))) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid build path. Must be an absolute path without shell metacharacters.'
+      });
+    }
+
     await fs.writeFile(BUILD_CONFIG_PATH, JSON.stringify(newConfig, null, 2));
     
     res.json({
@@ -643,8 +652,8 @@ async function executeBuild(config, buildId) {
   return new Promise((resolve) => {
     // Determine build path based on target
     const buildTarget = config.buildTarget || 'frontend';
-    const basePath = '/var/www/orthodoxmetrics/dev';
-    const buildPath = buildTarget === 'server' 
+    const basePath = config.buildPath || '/var/www/orthodoxmetrics/dev';
+    const buildPath = buildTarget === 'server'
       ? path.join(basePath, 'server')
       : path.join(basePath, 'front-end');
     
@@ -768,8 +777,8 @@ async function executeBuildWithStreaming(config, buildId, onData) {
   return new Promise((resolve) => {
     // Determine build path based on target
     const buildTarget = config.buildTarget || 'frontend';
-    const basePath = '/var/www/orthodoxmetrics/dev';
-    const buildPath = buildTarget === 'server' 
+    const basePath = config.buildPath || '/var/www/orthodoxmetrics/dev';
+    const buildPath = buildTarget === 'server'
       ? path.join(basePath, 'server')
       : path.join(basePath, 'front-end');
     

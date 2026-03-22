@@ -11,6 +11,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import FilterErrorBoundary from './components/ErrorBoundary/FilterErrorBoundary';
 import UpdateAvailableBanner from './components/global/UpdateAvailableBanner';
 import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { ChurchProvider } from './context/ChurchContext';
 import { ChurchRecordsProvider } from './context/ChurchRecordsContext';
 import { CustomizerContext } from './context/CustomizerContext';
@@ -56,6 +57,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
       <AuthProvider>
         <ChurchProvider>
           <EnvironmentProvider>
@@ -107,6 +109,7 @@ function App() {
           </EnvironmentProvider>
         </ChurchProvider>
       </AuthProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }

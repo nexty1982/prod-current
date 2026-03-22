@@ -2,7 +2,7 @@ const mysql =  const email = 'superadmin@orthodoxmetrics.com';require('mysql2/pr
 const bcrypt = require('bcrypt');
 
 const DB_CONFIG = {
-  host: 'localhost',
+  host: process.env.DB_HOST || 'localhost',
   user: 'orthodapps',
   password: 'Summerof1982@!',
   database: 'orthodoxmetrics_db',

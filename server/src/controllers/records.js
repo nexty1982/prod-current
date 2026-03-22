@@ -54,6 +54,7 @@ const FIELD_MAP = {
     godparentNames: 'sponsors',
     priest: 'clergy',
     registryNumber: 'source_scan_id',
+    entryType: 'entry_type',
     // snake_case (FIELD_DEFINITIONS / Path B) — pass through
     first_name: 'first_name',
     last_name: 'last_name',
@@ -73,6 +74,8 @@ const FIELD_MAP = {
     groomLastName: 'lname_groom',
     brideFirstName: 'fname_bride',
     brideLastName: 'lname_bride',
+    groomParents: 'parentsg',
+    brideParents: 'parentsb',
     marriageDate: 'mdate',
     marriageLocation: 'mlicense',
     priest: 'clergy',
@@ -92,7 +95,10 @@ const FIELD_MAP = {
     // camelCase
     firstName: 'name',
     lastName: 'lastname',
+    deceasedFirstName: 'name',
+    deceasedLastName: 'lastname',
     dateOfDeath: 'deceased_date',
+    deathDate: 'deceased_date',
     burialDate: 'burial_date',
     burialLocation: 'burial_location',
     priest: 'clergy',

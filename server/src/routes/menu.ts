@@ -5,18 +5,15 @@
 
 import express, { Request, Response } from 'express';
 import MenuService, { MenuItem, ALLOWED_ICONS, PATH_ALLOWLIST_REGEX, normalizeMeta } from '../services/menuService';
-import { authMiddleware, requireRole } from '../middleware/auth';
+import { authMiddleware, optionalAuth, requireRole } from '../middleware/auth';
 
 const router = express.Router();
-
-// Apply auth middleware to all routes
-router.use(authMiddleware);
 
 /**
  * GET /api/ui/menu
  * Frontend menu loader - returns DB menu for super_admin, static indicator for others
  */
-router.get('/ui/menu', async (req: Request, res: Response) => {
+router.get('/ui/menu', optionalAuth, async (req: Request, res: Response) => {
   try {
     const user = (req as any).session?.user;
 

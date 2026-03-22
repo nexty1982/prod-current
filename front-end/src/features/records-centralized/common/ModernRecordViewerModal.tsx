@@ -96,8 +96,8 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
   // --- Data helpers ---
   const getPersonName = () => {
     if (recordType === 'marriage') {
-      const groom = `${record.fname_groom || record.groom_first || ''} ${record.lname_groom || record.groom_last || ''}`.trim();
-      const bride = `${record.fname_bride || record.bride_first || ''} ${record.lname_bride || record.bride_last || ''}`.trim();
+      const groom = `${record.fname_groom || record.groom_first || record.groomFirstName || ''} ${record.lname_groom || record.groom_last || record.groomLastName || ''}`.trim();
+      const bride = `${record.fname_bride || record.bride_first || record.brideFirstName || ''} ${record.lname_bride || record.bride_last || record.brideLastName || ''}`.trim();
       return `${groom} & ${bride}`;
     } else if (recordType === 'funeral') {
       return `${record.deceased_first || record.firstName || ''} ${record.deceased_last || record.lastName || ''}`.trim();
@@ -210,7 +210,7 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
   );
 
   const ceremonyDate = formatDate(
-    recordType === 'marriage' ? (record.marriage_date || record.marriageDate) :
+    recordType === 'marriage' ? (record.mdate || record.marriage_date || record.marriageDate) :
     recordType === 'funeral' ? (record.funeral_date || record.funeralDate) :
     (record.baptism_date || record.dateOfBaptism)
   );
@@ -295,8 +295,10 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
               <>
                 <SectionHeader title="Couple Information" />
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, columnGap: 4 }}>
-                  <Field label="Groom" value={`${record.fname_groom || record.groom_first || ''} ${record.lname_groom || record.groom_last || ''}`.trim()} />
-                  <Field label="Bride" value={`${record.fname_bride || record.bride_first || ''} ${record.lname_bride || record.bride_last || ''}`.trim()} />
+                  <Field label="Groom" value={`${record.fname_groom || record.groom_first || record.groomFirstName || ''} ${record.lname_groom || record.groom_last || record.groomLastName || ''}`.trim()} />
+                  <Field label="Bride" value={`${record.fname_bride || record.bride_first || record.brideFirstName || ''} ${record.lname_bride || record.bride_last || record.brideLastName || ''}`.trim()} />
+                  <Field label="Groom's Parents" value={record.parentsg || record.groomParents} />
+                  <Field label="Bride's Parents" value={record.parentsb || record.brideParents} />
                 </Box>
               </>
             ) : recordType === 'funeral' ? (
@@ -327,7 +329,7 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 0, columnGap: 4 }}>
               <Field label="Date" value={ceremonyDate} />
               <Field label="Clergy" value={record.officiant_name || record.priest || record.clergy} />
-              <Field label="Location" value={record.place_name || record.location || record.churchName} />
+              <Field label="Location" value={record.place_name || record.location || record.mlicense || record.marriageLicense || record.churchName} />
             </Box>
             {record.address && <Field label="Address" value={record.address} />}
 

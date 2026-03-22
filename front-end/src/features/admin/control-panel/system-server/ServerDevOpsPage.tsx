@@ -14,6 +14,7 @@ import {
     Flag as SDLCIcon,
     Dns as ServicesIcon,
     BugReport as SurveyIcon,
+    Storage as DbStatusIcon,
     Info as SysInfoIcon,
     Timeline as TraceIcon,
 } from '@mui/icons-material';
@@ -39,6 +40,7 @@ const TOOLS = [
   { title: 'Site Survey', description: 'Automated testing and quality assurance checks', href: '/admin/tools/survey', icon: <SurveyIcon /> },
   { title: 'Feature Lifecycle (SDLC)', description: 'Five-stage feature pipeline, registry status, and promotion workflow', href: '/admin/control-panel/sdlc', icon: <SDLCIcon /> },
   { title: 'Code Safety System', description: 'Snapshot management, backup verification, and change tracking for uncommitted work', href: '/admin/control-panel/system-server/code-safety', icon: <BackupIcon /> },
+  { title: 'Database Status', description: 'Live MariaDB health metrics from the dedicated database server', href: '/devel-tools/platform-status', icon: <DbStatusIcon /> },
 ];
 
 const ServerDevOpsPage: React.FC = () => {

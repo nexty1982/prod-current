@@ -27,7 +27,7 @@ const MainWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   minHeight: '100vh',
   width: '100%',
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: theme.palette.mode === 'dark' ? '#0f1117' : '#f8f8fb',
 }));
 
 const PageWrapper = styled('div')(({ theme }) => ({
@@ -37,7 +37,7 @@ const PageWrapper = styled('div')(({ theme }) => ({
   flexDirection: 'column',
   zIndex: 1,
   width: '100%',
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: 'transparent',
 }));
 
 const FullLayout: FC = () => {

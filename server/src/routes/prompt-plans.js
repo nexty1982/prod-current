@@ -11,6 +11,15 @@ const express = require('express');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const router = express.Router();
 
+// Change Set service for auto-CS creation and item linking
+let _changeSetService = null;
+function getChangeSetService() {
+  if (!_changeSetService) _changeSetService = require('../services/changeSetService');
+  return _changeSetService;
+}
+
+const VALID_AGENTS = ['claude_cli', 'windsurf', 'cursor', 'github_copilot'];
+
 function getPool() {
   return require('../config/db').promisePool;
 }
@@ -57,7 +66,7 @@ function getOmaiHelpers() {
       return title;
     }
 
-    async function createWorkItemForStep(step, userId) {
+    async function createWorkItemForStep(step, userId, agentTool) {
       const pool = getAppPool();
       const title = step.title || generateWorkItemTitle(step.prompt_text);
       const metadata = {
@@ -72,8 +81,8 @@ function getOmaiHelpers() {
       };
       const [result] = await pool.query(
         `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, source, agent_tool, metadata, created_by)
-         VALUES (?, 'task', ?, '7', 'todo', 'medium', 'ai', 'ai_prompt', 'omai', ?, ?)`,
-        [title, `Prompt Plan step: ${step.prompt_text ? step.prompt_text.substring(0, 200) : title}`, JSON.stringify(metadata), userId || null]
+         VALUES (?, 'task', ?, '7', 'todo', 'medium', 'ai', 'ai_prompt', ?, ?, ?)`,
+        [title, `Prompt Plan step: ${step.prompt_text ? step.prompt_text.substring(0, 200) : title}`, agentTool || 'omai', JSON.stringify(metadata), userId || null]
       );
       const [rows] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [result.insertId]);
       return rows[0];
@@ -131,20 +140,73 @@ function validatePlanTransition(from, to) {
 router.get('/', async (req, res) => {
   try {
     const pool = getPool();
-    const { status } = req.query;
+    const { status, agent } = req.query;
     let sql = `SELECT pp.*, u.email AS created_by_email,
+      cs.code AS change_set_code, cs.status AS change_set_status,
       (SELECT COUNT(*) FROM prompt_plan_steps WHERE prompt_plan_id = pp.id) AS step_count,
       (SELECT COUNT(*) FROM prompt_plan_steps WHERE prompt_plan_id = pp.id AND status = 'completed') AS completed_count
       FROM prompt_plans pp
-      LEFT JOIN users u ON pp.created_by = u.id`;
+      LEFT JOIN users u ON pp.created_by = u.id
+      LEFT JOIN change_sets cs ON pp.change_set_id = cs.id`;
     const params = [];
-    if (status) { sql += ' WHERE pp.status = ?'; params.push(status); }
+    const conditions = [];
+    if (status) { conditions.push('pp.status = ?'); params.push(status); }
+    if (agent) { conditions.push('pp.assigned_agent = ?'); params.push(agent); }
+    if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
     sql += ' ORDER BY pp.created_at DESC';
     const [rows] = await pool.query(sql, params);
     res.json({ items: rows });
   } catch (err) {
     console.error('[PromptPlans] List error:', err);
     res.status(500).json({ error: 'Failed to list prompt plans' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// AGENT LOOKUP — find plans assigned to a specific agent
+// ═══════════════════════════════════════════════════════════════
+
+router.get('/agent/:agentName', async (req, res) => {
+  try {
+    const pool = getPool();
+    const { agentName } = req.params;
+    if (!VALID_AGENTS.includes(agentName)) {
+      return res.status(400).json({ error: `Invalid agent. Must be one of: ${VALID_AGENTS.join(', ')}` });
+    }
+
+    const filterStatus = req.query.status || 'active';
+
+    const [plans] = await pool.query(
+      `SELECT pp.*, cs.code AS change_set_code, cs.status AS change_set_status,
+        (SELECT COUNT(*) FROM prompt_plan_steps WHERE prompt_plan_id = pp.id) AS step_count,
+        (SELECT COUNT(*) FROM prompt_plan_steps WHERE prompt_plan_id = pp.id AND status = 'completed') AS completed_count
+       FROM prompt_plans pp
+       LEFT JOIN change_sets cs ON pp.change_set_id = cs.id
+       WHERE pp.assigned_agent = ? AND pp.status = ?
+       ORDER BY pp.created_at ASC`,
+      [agentName, filterStatus]
+    );
+
+    // For each plan, include the next actionable step
+    for (const plan of plans) {
+      const [steps] = await pool.query(
+        `SELECT id, step_number, title, prompt_text, status, execution_order
+         FROM prompt_plan_steps WHERE prompt_plan_id = ?
+         ORDER BY execution_order ASC`, [plan.id]
+      );
+      // Find next launchable step: not completed/skipped/running, all prior required steps done
+      const nextStep = steps.find(s => {
+        if (['completed', 'skipped', 'running'].includes(s.status)) return false;
+        const prior = steps.filter(p => p.execution_order < s.execution_order);
+        return prior.every(p => ['completed', 'skipped'].includes(p.status));
+      });
+      plan.next_step = nextStep || null;
+    }
+
+    res.json({ agent: agentName, plans });
+  } catch (err) {
+    console.error('[PromptPlans] Agent lookup error:', err);
+    res.status(500).json({ error: 'Failed to lookup agent plans' });
   }
 });
 
@@ -156,8 +218,11 @@ router.get('/:id', async (req, res) => {
   try {
     const pool = getPool();
     const [plans] = await pool.query(
-      `SELECT pp.*, u.email AS created_by_email
-       FROM prompt_plans pp LEFT JOIN users u ON pp.created_by = u.id
+      `SELECT pp.*, u.email AS created_by_email,
+       cs.code AS change_set_code, cs.status AS change_set_status
+       FROM prompt_plans pp
+       LEFT JOIN users u ON pp.created_by = u.id
+       LEFT JOIN change_sets cs ON pp.change_set_id = cs.id
        WHERE pp.id = ?`, [req.params.id]
     );
     if (!plans.length) return res.status(404).json({ error: 'Plan not found' });
@@ -184,13 +249,16 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const pool = getPool();
-    const { title, description, steps } = req.body;
+    const { title, description, steps, assigned_agent } = req.body;
     if (!title) return res.status(400).json({ error: 'title is required' });
+    if (assigned_agent && !VALID_AGENTS.includes(assigned_agent)) {
+      return res.status(400).json({ error: `Invalid agent. Must be one of: ${VALID_AGENTS.join(', ')}` });
+    }
 
     const userId = req.session?.user?.id || null;
     const [result] = await pool.query(
-      'INSERT INTO prompt_plans (title, description, created_by) VALUES (?, ?, ?)',
-      [title, description || null, userId]
+      'INSERT INTO prompt_plans (title, description, assigned_agent, created_by) VALUES (?, ?, ?, ?)',
+      [title, description || null, assigned_agent || null, userId]
     );
     const planId = result.insertId;
 
@@ -230,11 +298,15 @@ router.put('/:id', async (req, res) => {
       return res.status(400).json({ error: `Cannot edit a ${plan.status} plan` });
     }
 
-    const { title, description } = req.body;
+    const { title, description, assigned_agent } = req.body;
+    if (assigned_agent !== undefined && assigned_agent !== null && assigned_agent !== '' && !VALID_AGENTS.includes(assigned_agent)) {
+      return res.status(400).json({ error: `Invalid agent. Must be one of: ${VALID_AGENTS.join(', ')}` });
+    }
     const updates = [];
     const params = [];
     if (title !== undefined) { updates.push('title = ?'); params.push(title); }
     if (description !== undefined) { updates.push('description = ?'); params.push(description); }
+    if (assigned_agent !== undefined) { updates.push('assigned_agent = ?'); params.push(assigned_agent || null); }
     if (!updates.length) return res.status(400).json({ error: 'No fields to update' });
 
     params.push(req.params.id);
@@ -279,11 +351,35 @@ router.post('/:id/transition', async (req, res) => {
       }
     }
 
+    // Auto-create Change Set when activating a plan (if not already linked)
+    let autoCreatedCs = null;
+    if (to === 'active' && !plan.change_set_id) {
+      try {
+        const csService = getChangeSetService();
+        const userId = req.session?.user?.id || null;
+        autoCreatedCs = await csService.create({
+          title: `Plan: ${plan.title}`,
+          description: `Auto-created for Prompt Plan PP-${String(plan.id).padStart(4, '0')}`,
+          change_type: 'feature',
+          priority: 'medium',
+        }, userId);
+        await pool.query('UPDATE prompt_plans SET change_set_id = ? WHERE id = ?', [autoCreatedCs.id, plan.id]);
+        console.log(`[PromptPlans] Auto-created CS ${autoCreatedCs.code} for plan #${plan.id}`);
+      } catch (csErr) {
+        console.warn(`[PromptPlans] Failed to auto-create CS for plan #${plan.id}:`, csErr.message);
+        // Non-fatal: plan still activates without a CS
+      }
+    }
+
     const completedAt = to === 'completed' ? new Date() : null;
     await pool.query('UPDATE prompt_plans SET status = ?, completed_at = ? WHERE id = ?', [to, completedAt, plan.id]);
 
-    const [updated] = await pool.query('SELECT * FROM prompt_plans WHERE id = ?', [plan.id]);
-    res.json({ plan: updated[0] });
+    const [updated] = await pool.query(
+      `SELECT pp.*, cs.code AS change_set_code, cs.status AS change_set_status
+       FROM prompt_plans pp LEFT JOIN change_sets cs ON pp.change_set_id = cs.id
+       WHERE pp.id = ?`, [plan.id]
+    );
+    res.json({ plan: updated[0], ...(autoCreatedCs ? { change_set: { id: autoCreatedCs.id, code: autoCreatedCs.code } } : {}) });
   } catch (err) {
     console.error('[PromptPlans] Transition error:', err);
     res.status(500).json({ error: 'Failed to transition plan' });
@@ -504,12 +600,25 @@ router.post('/:id/steps/:stepId/launch', async (req, res) => {
     let workItem = null;
     if (!step.generated_work_item_id) {
       try {
-        workItem = await helpers.createWorkItemForStep(step, userId);
+        workItem = await helpers.createWorkItemForStep(step, userId, plan.assigned_agent);
         await pool.query(
           'UPDATE prompt_plan_steps SET generated_work_item_id = ? WHERE id = ?',
           [workItem.id, step.id]
         );
         console.log(`[PromptPlans] Work item #${workItem.id} created for step #${step.id}`);
+
+        // Auto-add work item to the plan's change set
+        if (plan.change_set_id) {
+          try {
+            const csService = getChangeSetService();
+            await csService.addItem(plan.change_set_id, workItem.id, {
+              notes: `From PP-${String(plan.id).padStart(4, '0')} step #${step.step_number}`,
+            }, userId);
+            console.log(`[PromptPlans] Added work item #${workItem.id} to CS #${plan.change_set_id}`);
+          } catch (csErr) {
+            console.warn(`[PromptPlans] Failed to add item to CS:`, csErr.message);
+          }
+        }
       } catch (wiErr) {
         console.error('[PromptPlans] Failed to create work item for step:', wiErr.message);
         return res.status(500).json({ error: 'Failed to create work item for step. Launch aborted.' });

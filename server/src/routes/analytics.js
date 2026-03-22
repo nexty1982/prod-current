@@ -118,4 +118,228 @@ router.get('/om-churches', requireAuth, async (req, res) => {
   }
 });
 
+// GET /api/analytics/us-churches-enriched?state=XX&jurisdiction=YY
+// Returns churches enriched with CRM pipeline stage + onboarding status
+router.get('/us-churches-enriched', requireAuth, async (req, res) => {
+  try {
+    const { promisePool } = require('../config/db');
+    const { state, jurisdiction, status } = req.query;
+
+    if (!state || typeof state !== 'string' || state.length !== 2) {
+      return res.status(400).json({ error: 'state query param required (2-letter code)' });
+    }
+
+    const stateUpper = state.toUpperCase();
+
+    // Get CRM churches with pipeline stage
+    let crmSql = `
+      SELECT uc.id, uc.name, uc.street, uc.city, uc.state_code, uc.zip,
+             uc.phone, uc.website, uc.latitude, uc.longitude, uc.jurisdiction,
+             uc.pipeline_stage, uc.priority, uc.is_client, uc.provisioned_church_id,
+             uc.last_contacted_at, uc.next_follow_up,
+             ps.label AS stage_label, ps.color AS stage_color
+      FROM us_churches uc
+      LEFT JOIN crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
+      WHERE uc.state_code = ?`;
+    const params = [stateUpper];
+
+    if (jurisdiction) {
+      crmSql += ' AND uc.jurisdiction = ?';
+      params.push(jurisdiction);
+    }
+
+    crmSql += ' ORDER BY uc.jurisdiction, uc.city, uc.name';
+    const [crmRows] = await promisePool.query(crmSql, params);
+
+    // Get onboarded churches in this state
+    const [onboardedRows] = await promisePool.query(`
+      SELECT c.id, c.name, c.city, c.state_province, c.phone, c.website,
+             c.latitude, c.longitude, c.jurisdiction, c.is_active, c.setup_complete,
+             c.address,
+             COALESCE(tok.active_tokens, 0) AS active_tokens,
+             COALESCE(usr.active_users, 0) AS active_users,
+             COALESCE(usr.pending_users, 0) AS pending_users
+      FROM churches c
+      LEFT JOIN (
+        SELECT church_id, COUNT(*) AS active_tokens
+        FROM church_registration_tokens WHERE is_active = 1
+        GROUP BY church_id
+      ) tok ON tok.church_id = c.id
+      LEFT JOIN (
+        SELECT church_id,
+          SUM(CASE WHEN is_locked = 0 THEN 1 ELSE 0 END) AS active_users,
+          SUM(CASE WHEN is_locked = 1 THEN 1 ELSE 0 END) AS pending_users
+        FROM users WHERE church_id IS NOT NULL
+        GROUP BY church_id
+      ) usr ON usr.church_id = c.id
+      WHERE c.state_province = ?
+    `, [stateUpper]);
+
+    // Build provisioned ID set for dedup
+    const provisionedSet = new Set(
+      crmRows.filter(r => r.provisioned_church_id).map(r => r.provisioned_church_id)
+    );
+
+    // Compute operational status for each church
+    const churches = crmRows.map(r => {
+      let op_status = 'directory';
+      if (r.provisioned_church_id) {
+        const ob = onboardedRows.find(o => o.id === r.provisioned_church_id);
+        if (ob) {
+          if (ob.setup_complete) op_status = 'live';
+          else if (ob.active_users > 0) op_status = 'live';
+          else if (ob.active_tokens > 0 || ob.pending_users > 0) op_status = 'onboarding';
+          else op_status = 'onboarding';
+        } else {
+          op_status = 'client';
+        }
+      } else if (r.pipeline_stage && r.pipeline_stage !== 'new_lead') {
+        op_status = 'pipeline';
+      }
+      return {
+        ...r,
+        source: 'crm',
+        op_status,
+        onboarded_church_id: r.provisioned_church_id || null,
+      };
+    });
+
+    // Add standalone onboarded churches not in CRM
+    for (const ob of onboardedRows) {
+      if (provisionedSet.has(ob.id)) continue;
+      let op_status = 'onboarding';
+      if (ob.setup_complete || ob.active_users > 0) op_status = 'live';
+      churches.push({
+        id: `church_${ob.id}`,
+        name: ob.name,
+        street: ob.address,
+        city: ob.city,
+        state_code: ob.state_province,
+        zip: null,
+        phone: ob.phone,
+        website: ob.website,
+        latitude: ob.latitude,
+        longitude: ob.longitude,
+        jurisdiction: ob.jurisdiction,
+        pipeline_stage: op_status === 'live' ? 'active' : 'onboarding',
+        priority: null,
+        is_client: 1,
+        provisioned_church_id: null,
+        last_contacted_at: null,
+        next_follow_up: null,
+        stage_label: op_status === 'live' ? 'Active' : 'Onboarding',
+        stage_color: op_status === 'live' ? '#2e7d32' : '#00bcd4',
+        source: 'onboarded',
+        op_status,
+        onboarded_church_id: ob.id,
+      });
+    }
+
+    // Filter by operational status
+    let filtered = churches;
+    if (status && status !== 'all') {
+      filtered = churches.filter(c => c.op_status === status);
+    }
+
+    // Jurisdiction breakdown
+    const [jCounts] = await promisePool.query(
+      'SELECT jurisdiction, COUNT(*) as count FROM us_churches WHERE state_code = ? GROUP BY jurisdiction ORDER BY count DESC',
+      [stateUpper]
+    );
+
+    // Status breakdown for this state
+    const statusCounts = { directory: 0, pipeline: 0, onboarding: 0, live: 0, client: 0 };
+    for (const c of churches) {
+      statusCounts[c.op_status] = (statusCounts[c.op_status] || 0) + 1;
+    }
+
+    res.json({
+      state: stateUpper,
+      total: filtered.length,
+      totalAll: churches.length,
+      jurisdictions: jCounts,
+      statusCounts,
+      churches: filtered,
+    });
+  } catch (error) {
+    console.error('Error fetching enriched US churches:', error);
+    res.status(500).json({ error: 'Failed to fetch enriched churches' });
+  }
+});
+
+// GET /api/analytics/us-church-status-counts
+// Returns per-state counts broken down by operational status
+router.get('/us-church-status-counts', requireAuth, async (req, res) => {
+  try {
+    const { promisePool } = require('../config/db');
+
+    // Get all CRM churches with their state and pipeline status
+    const [crmRows] = await promisePool.query(`
+      SELECT uc.state_code, uc.pipeline_stage, uc.provisioned_church_id
+      FROM us_churches uc
+      WHERE uc.state_code IS NOT NULL
+    `);
+
+    // Get onboarded churches
+    const [obRows] = await promisePool.query(`
+      SELECT c.id, c.state_province AS state_code, c.setup_complete, c.is_active,
+             COALESCE(usr.active_users, 0) AS active_users
+      FROM churches c
+      LEFT JOIN (
+        SELECT church_id, SUM(CASE WHEN is_locked = 0 THEN 1 ELSE 0 END) AS active_users
+        FROM users WHERE church_id IS NOT NULL
+        GROUP BY church_id
+      ) usr ON usr.church_id = c.id
+    `);
+
+    const provisionedSet = new Set(
+      crmRows.filter(r => r.provisioned_church_id).map(r => r.provisioned_church_id)
+    );
+
+    // Build per-state status breakdown
+    const stateStats = {};
+    const initState = () => ({ total: 0, directory: 0, pipeline: 0, onboarding: 0, live: 0 });
+
+    for (const r of crmRows) {
+      if (!stateStats[r.state_code]) stateStats[r.state_code] = initState();
+      const s = stateStats[r.state_code];
+      s.total++;
+
+      if (r.provisioned_church_id) {
+        const ob = obRows.find(o => o.id === r.provisioned_church_id);
+        if (ob && (ob.setup_complete || ob.active_users > 0)) s.live++;
+        else s.onboarding++;
+      } else if (r.pipeline_stage && r.pipeline_stage !== 'new_lead') {
+        s.pipeline++;
+      } else {
+        s.directory++;
+      }
+    }
+
+    // Add standalone onboarded churches
+    for (const ob of obRows) {
+      if (provisionedSet.has(ob.id)) continue;
+      const sc = ob.state_code;
+      if (!sc) continue;
+      if (!stateStats[sc]) stateStats[sc] = initState();
+      stateStats[sc].total++;
+      if (ob.setup_complete || ob.active_users > 0) stateStats[sc].live++;
+      else stateStats[sc].onboarding++;
+    }
+
+    // Global totals
+    const globalTotals = { total: 0, directory: 0, pipeline: 0, onboarding: 0, live: 0 };
+    for (const s of Object.values(stateStats)) {
+      for (const k of Object.keys(globalTotals)) {
+        globalTotals[k] += s[k];
+      }
+    }
+
+    res.json({ states: stateStats, totals: globalTotals });
+  } catch (error) {
+    console.error('Error fetching church status counts:', error);
+    res.status(500).json({ error: 'Failed to fetch status counts' });
+  }
+});
+
 module.exports = router;

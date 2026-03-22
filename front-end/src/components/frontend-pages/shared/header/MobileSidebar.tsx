@@ -1,6 +1,7 @@
 import { CustomizerContext } from '@/context/CustomizerContext';
 import { useAuth } from '@/context/AuthContext';
-import { Chip, Divider, Typography } from '@mui/material';
+import { useLanguage } from '@/context/LanguageContext';
+import { Divider, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -10,15 +11,20 @@ import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavLinks } from './Navigations';
 
-const UPLOAD_ROLES = ['super_admin', 'admin', 'church_admin', 'priest'];
-
 const portalMobileLinks = [
-  { title: 'Portal', to: '/portal' },
-  { title: 'Records', to: '/portal/records/baptism' },
-  { title: 'Upload Records', to: '/portal/upload', roles: UPLOAD_ROLES },
-  { title: 'OCR Pipeline', to: '/portal/ocr', roles: UPLOAD_ROLES },
-  { title: 'Help', to: '/portal/guide' },
-  { title: 'My Profile', to: '/portal/profile' },
+  { tKey: 'portal', to: '/portal' },
+  { tKey: 'church_records', to: '/portal/records/baptism' },
+  { tKey: 'analytics', to: '/portal/charts' },
+  { tKey: 'help', to: '/portal/guide' },
+  { tKey: 'user', to: '/account/profile' },
+];
+
+const LANG_OPTIONS: { code: string; flag: string; label: string }[] = [
+  { code: 'en', flag: '🇺🇸', label: 'English' },
+  { code: 'el', flag: '🇬🇷', label: 'Ελληνικά' },
+  { code: 'ru', flag: '🇷🇺', label: 'Русский' },
+  { code: 'ro', flag: '🇷🇴', label: 'Română' },
+  { code: 'ka', flag: '🇬🇪', label: 'ქართული' },
 ];
 
 interface MobileSidebarProps {
@@ -28,18 +34,13 @@ interface MobileSidebarProps {
 const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
   const { activeMode, setActiveMode } = useContext(CustomizerContext);
   const { user, logout } = useAuth();
+  const { t, lang, setLang } = useLanguage();
   const navigate = useNavigate();
   const toggleMode = () => setActiveMode(activeMode === 'light' ? 'dark' : 'light');
-  const role = user?.role || '';
-
   const handleLogout = async () => {
     await logout();
     navigate('/auth/login');
   };
-
-  const visiblePortalLinks = portalMobileLinks.filter(
-    (link) => !link.roles || link.roles.includes(role),
-  );
 
   return (
     <>
@@ -47,7 +48,7 @@ const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
         <Box
           component="img"
           src="/images/logos/om-logo.png"
-          alt="Orthodox Metrics"
+          alt={t('common.brand_name')}
           sx={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }}
         />
       </Box>
@@ -55,18 +56,21 @@ const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
         <Stack direction="column" spacing={2}>
           {isPortal ? (
             <>
-              {visiblePortalLinks.map((link, i) => (
+              {portalMobileLinks.map((link, i) => (
                 <Button
                   color="inherit"
                   key={i}
                   href={link.to}
                   sx={{ justifyContent: 'start' }}
                 >
-                  {link.title}
+                  {link.tKey === 'portal' ? 'Portal' :
+                   link.tKey === 'church_records' ? 'Church Records' :
+                   link.tKey === 'analytics' ? 'Analytics' :
+                   link.tKey === 'help' ? 'Help' : 'User'}
                 </Button>
               ))}
               <Button color="error" variant="outlined" onClick={handleLogout}>
-                Sign Out
+                {t('common.sign_out')}
               </Button>
             </>
           ) : (
@@ -78,33 +82,55 @@ const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
                   href={navlink.to}
                   sx={{ justifyContent: 'start' }}
                 >
-                  {navlink.title}
-                  {navlink.new ? (
-                    <Chip
-                      label="New"
-                      size="small"
-                      sx={{
-                        ml: '6px',
-                        borderRadius: '8px',
-                        color: 'primary.main',
-                        backgroundColor: 'rgba(200, 162, 75, 0.12)',
-                      }}
-                    />
-                  ) : null}
+                  {t(navlink.tKey)}
                 </Button>
               ))}
               <Button color="primary" variant="contained" href="/auth/login">
-                Church Login
+                {t('common.church_login')}
               </Button>
             </>
           )}
+
           <Divider />
+
+          {/* Language Selector */}
+          <Stack direction="column" spacing={0.5}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 0.5 }}>
+              {t('common.language')}
+            </Typography>
+            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+              {LANG_OPTIONS.map((opt) => (
+                <Button
+                  key={opt.code}
+                  size="small"
+                  variant={opt.code === lang ? 'contained' : 'outlined'}
+                  onClick={() => setLang(opt.code)}
+                  sx={{
+                    minWidth: 'auto',
+                    px: 1.5,
+                    py: 0.5,
+                    fontSize: '13px',
+                    textTransform: 'none',
+                    ...(opt.code === lang
+                      ? { backgroundColor: '#2d1b4e', color: '#fff', '&:hover': { backgroundColor: '#1f1236' } }
+                      : { borderColor: 'divider', color: 'text.secondary' }),
+                  }}
+                >
+                  {opt.flag} {opt.label}
+                </Button>
+              ))}
+            </Stack>
+          </Stack>
+
+          <Divider />
+
+          {/* Dark/Light mode toggle */}
           <Stack direction="row" alignItems="center" spacing={1}>
             <IconButton onClick={toggleMode} size="small" sx={{ color: 'text.primary' }}>
               {activeMode === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}
             </IconButton>
             <Typography variant="body2" color="text.secondary">
-              {activeMode === 'light' ? 'Dark Mode' : 'Light Mode'}
+              {activeMode === 'light' ? t('common.dark_mode') : t('common.light_mode')}
             </Typography>
           </Stack>
         </Stack>

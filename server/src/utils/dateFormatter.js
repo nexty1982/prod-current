@@ -9,10 +9,14 @@
 function formatDate(date) {
   if (!date) return null;
   
-  // Handle Date objects - convert to string first
+  // Handle Date objects — use local date methods to prevent timezone shift
+  // (mysql2 returns DATE columns as Date objects at local midnight)
   if (date instanceof Date) {
     if (isNaN(date.getTime())) return null;
-    return date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
   
   // If already in YYYY-MM-DD format, return as-is
@@ -40,8 +44,11 @@ function formatDate(date) {
   // Check if date is valid
   if (isNaN(dateObj.getTime())) return null;
   
-  // Return just the date part in YYYY-MM-DD format as a string
-  return dateObj.toISOString().split('T')[0];
+  // Return just the date part in YYYY-MM-DD format using local methods
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -201,10 +208,23 @@ function transformMarriageRecord(record) {
   
   return {
     id: record.id,
-    // Create consistent firstName/lastName fields for frontend compatibility
+    // ═══════════════════════════════════════════════════════════════
+    // SNAKE_CASE FIELDS (match DB columns — for card/timeline/modal views)
+    // ═══════════════════════════════════════════════════════════════
+    fname_groom: record.fname_groom,
+    lname_groom: record.lname_groom,
+    parentsg: record.parentsg || '',
+    fname_bride: record.fname_bride,
+    lname_bride: record.lname_bride,
+    parentsb: record.parentsb || '',
+    witness: record.witness || '',
+    mlicense: record.mlicense || '',
+    church_id: record.church_id,
+    // ═══════════════════════════════════════════════════════════════
+    // CAMELCASE FIELDS (legacy frontend compatibility)
+    // ═══════════════════════════════════════════════════════════════
     firstName: record.fname_groom,
     lastName: record.lname_groom,
-    // Keep original marriage-specific fields
     groomFirstName: record.fname_groom,
     groomLastName: record.lname_groom,
     groomParents: record.parentsg || '',

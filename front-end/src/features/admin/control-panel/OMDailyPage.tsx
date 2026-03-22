@@ -32,6 +32,9 @@ import {
     Sync as SyncIcon,
     TrendingUp as TrendingUpIcon,
     Warning as WarningIcon,
+    RocketLaunch as RocketIcon,
+    FastForward as FastForwardIcon,
+    Description as PromptPlanIcon,
 } from '@mui/icons-material';
 import {
     Alert,
@@ -69,6 +72,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiClient } from '@/shared/lib/apiClient';
+import OMDailyKanban from '@/components/apps/kanban/OMDailyKanban';
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -168,9 +172,9 @@ interface ChangelogEntry {
 
 const HORIZONS = ['1', '2', '7', '14', '30', '60', '90'];
 const HORIZON_LABELS: Record<string, string> = { '1': '24 Hour', '2': '48 Hour', '7': '7 Day', '14': '14 Day', '30': '30 Day', '60': '60 Day', '90': '90 Day' };
-const AGENT_TOOLS = ['windsurf', 'claude_cli', 'cursor'] as const;
-const AGENT_TOOL_LABELS: Record<string, string> = { windsurf: 'Windsurf', claude_cli: 'Claude CLI', cursor: 'Cursor' };
-const AGENT_TOOL_COLORS: Record<string, string> = { windsurf: '#00b4d8', claude_cli: '#d4a574', cursor: '#7c3aed' };
+const AGENT_TOOLS = ['windsurf', 'claude_cli', 'cursor', 'github_copilot'] as const;
+const AGENT_TOOL_LABELS: Record<string, string> = { windsurf: 'Windsurf', claude_cli: 'Claude CLI', cursor: 'Cursor', github_copilot: 'GitHub Copilot' };
+const AGENT_TOOL_COLORS: Record<string, string> = { windsurf: '#00b4d8', claude_cli: '#d4a574', cursor: '#7c3aed', github_copilot: '#1f883d' };
 const BRANCH_TYPES = ['bugfix', 'new_feature', 'existing_feature', 'patch'] as const;
 const BRANCH_TYPE_LABELS: Record<string, string> = { bugfix: 'Bug Fix', new_feature: 'New Feature', existing_feature: 'Existing Feature', patch: 'Patch' };
 const BRANCH_TYPE_COLORS: Record<string, string> = { bugfix: '#d73a4a', new_feature: '#0e8a16', existing_feature: '#1d76db', patch: '#fbca04' };
@@ -319,6 +323,34 @@ const OMDailyPage: React.FC = () => {
     }
   };
   const clearSelection = () => setSelectedIds(new Set());
+
+  // Prompt Plan dialog state
+  const [ppDialogOpen, setPpDialogOpen] = useState(false);
+  const [ppTitle, setPpTitle] = useState('');
+  const [ppDesc, setPpDesc] = useState('');
+  const [ppAgent, setPpAgent] = useState('');
+  const [ppCreating, setPpCreating] = useState(false);
+
+  const handleCreatePromptPlan = async () => {
+    if (!ppTitle.trim()) return;
+    setPpCreating(true);
+    try {
+      const res = await apiClient.post('/prompt-plans', {
+        title: ppTitle.trim(),
+        description: ppDesc.trim() || null,
+        assigned_agent: ppAgent || null,
+      });
+      setPpDialogOpen(false);
+      setPpTitle('');
+      setPpDesc('');
+      setPpAgent('');
+      navigate(`/devel-tools/prompt-plans/${res.data.plan.id}`);
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to create prompt plan', 'error');
+    } finally {
+      setPpCreating(false);
+    }
+  };
 
   const openCreateCsDialog = () => {
     setCsDialogMode('create');
@@ -604,7 +636,10 @@ const OMDailyPage: React.FC = () => {
 
   // Fetch items when tab, horizon, or filters change
   useEffect(() => {
-    if (activeTab >= 1 && activeTab !== CHANGELOG_TAB) {
+    if (activeTab === 2) {
+      // Board tab: fetch all items (no horizon filter) for full kanban view
+      fetchItems();
+    } else if (activeTab >= 1 && activeTab !== CHANGELOG_TAB) {
       fetchItems(selectedHorizon || undefined);
     } else if (activeTab === 0) {
       fetchItems();
@@ -668,6 +703,33 @@ const OMDailyPage: React.FC = () => {
       fetchDashboard();
       fetchExtended();
     } catch {}
+  };
+
+  const handleKanbanStatusChange = async (itemId: number, newStatus: string) => {
+    try {
+      await fetch(`/api/om-daily/items/${itemId}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus, ...(newStatus === 'done' ? { progress: 100 } : {}) }),
+      });
+      fetchItems(selectedHorizon || undefined);
+      fetchDashboard();
+      fetchExtended();
+    } catch { showToast('Failed to update status', 'error'); }
+  };
+
+  const handleQuickDone = async (itemId: number) => {
+    try {
+      await fetch(`/api/om-daily/items/${itemId}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'done', progress: 100 }),
+      });
+      showToast('Item marked done');
+      fetchItems(selectedHorizon || undefined);
+      fetchDashboard();
+      fetchExtended();
+    } catch { showToast('Failed to update', 'error'); }
   };
 
   const openNewDialog = () => {
@@ -1549,20 +1611,102 @@ const OMDailyPage: React.FC = () => {
     <PageContainer title="OM Daily" description="Work Pipeline Management">
       <Breadcrumb title="OM Daily — Work Pipelines" items={BCrumb} />
       <Box sx={{ p: { xs: 2, md: 3 } }}>
+        {/* ── SDLC Pipeline Actions ── */}
+        <Paper sx={{ p: 2, mb: 2, border: `1px solid ${isDark ? '#333' : '#e0e0e0'}` }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+            <RocketIcon sx={{ color: theme.palette.primary.main, fontSize: 22 }} />
+            <Typography variant="subtitle2" fontWeight={700} sx={{ mr: 1 }}>Work Pipelines</Typography>
+            <Button
+              size="small"
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={openNewDialog}
+              sx={{ textTransform: 'none' }}
+            >
+              New Item
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<PromptPlanIcon />}
+              onClick={() => { setPpTitle(''); setPpDesc(''); setPpAgent(''); setPpDialogOpen(true); }}
+              sx={{ textTransform: 'none' }}
+            >
+              New Prompt Plan
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<PackageIcon />}
+              onClick={() => navigate('/admin/control-panel/om-daily/sdlc-wizard?mode=new-work')}
+              sx={{ textTransform: 'none' }}
+            >
+              New Change Set
+            </Button>
+            <Box sx={{ borderLeft: `1px solid ${isDark ? '#444' : '#ddd'}`, height: 24, mx: 0.5 }} />
+            <Button
+              size="small"
+              variant="text"
+              startIcon={<TrendingUpIcon />}
+              onClick={() => navigate('/admin/control-panel/om-daily/sdlc-wizard?mode=advance')}
+              sx={{ textTransform: 'none', color: theme.palette.info.main }}
+            >
+              Advance Change Set
+            </Button>
+            <Button
+              size="small"
+              variant="text"
+              startIcon={<FastForwardIcon />}
+              onClick={() => navigate('/admin/control-panel/om-daily/sdlc-wizard?mode=fast-forward')}
+              sx={{ textTransform: 'none', color: theme.palette.warning.main }}
+            >
+              Fast Forward
+            </Button>
+            <Box sx={{ flex: 1 }} />
+            <Button
+              size="small"
+              variant="text"
+              onClick={() => navigate('/admin/control-panel/om-daily/change-sets')}
+              sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+            >
+              Change Sets Dashboard
+            </Button>
+            <Button
+              size="small"
+              variant="text"
+              onClick={() => navigate('/devel-tools/prompt-plans')}
+              sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+            >
+              All Prompt Plans
+            </Button>
+          </Box>
+        </Paper>
+
         <Paper sx={{ mb: 2 }}>
-          <Tabs value={activeTab <= 1 ? activeTab : activeTab === CHANGELOG_TAB ? 2 : 1} onChange={(_, v) => {
+          <Tabs value={activeTab <= 2 ? activeTab : activeTab === CHANGELOG_TAB ? 3 : 1} onChange={(_, v) => {
             if (v === 0) setActiveTab(0);
             else if (v === 1) setActiveTab(1);
-            else if (v === 2) setActiveTab(CHANGELOG_TAB);
+            else if (v === 2) setActiveTab(2);
+            else if (v === 3) setActiveTab(CHANGELOG_TAB);
           }} variant="scrollable" scrollButtons="auto">
             <Tab label="Overview" />
             <Tab label="Items" />
+            <Tab label="Board" />
             <Tab label="Changelog" />
           </Tabs>
         </Paper>
 
         {activeTab === 0 && renderOverview()}
         {activeTab === 1 && renderItemList()}
+        {activeTab === 2 && (
+          <OMDailyKanban
+            items={items}
+            onStatusChange={handleKanbanStatusChange}
+            onEditItem={openEditDialog}
+            onDeleteItem={handleDelete}
+            onQuickDone={handleQuickDone}
+          />
+        )}
         {activeTab === CHANGELOG_TAB && renderChangelog()}
       </Box>
 
@@ -1715,6 +1859,37 @@ const OMDailyPage: React.FC = () => {
             disabled={csCreating || (csDialogMode === 'create' && !csNewTitle.trim()) || (csDialogMode === 'add' && !csSelectedId)}
           >
             {csCreating ? 'Processing...' : csDialogMode === 'create' ? 'Create & Add Items' : 'Add Items'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Prompt Plan Dialog ─────────────────────────────────────────── */}
+      <Dialog open={ppDialogOpen} onClose={() => setPpDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>New Prompt Plan</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField label="Title" size="small" fullWidth value={ppTitle} onChange={(e) => setPpTitle(e.target.value)} required autoFocus placeholder="e.g. Implement church onboarding flow" />
+            <TextField label="Description" size="small" fullWidth multiline rows={3} value={ppDesc} onChange={(e) => setPpDesc(e.target.value)} placeholder="What should this plan accomplish?" />
+            <FormControl size="small" fullWidth>
+              <InputLabel>Assigned Agent</InputLabel>
+              <Select value={ppAgent} label="Assigned Agent" onChange={(e) => setPpAgent(e.target.value)}>
+                <MenuItem value="">None</MenuItem>
+                {AGENT_TOOLS.map(a => (
+                  <MenuItem key={a} value={a}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: AGENT_TOOL_COLORS[a] }} />
+                      {AGENT_TOOL_LABELS[a]}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPpDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreatePromptPlan} disabled={!ppTitle.trim() || ppCreating}>
+            {ppCreating ? 'Creating...' : 'Create Plan'}
           </Button>
         </DialogActions>
       </Dialog>

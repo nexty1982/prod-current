@@ -1,4 +1,4 @@
-import SharedFooter from '@/components/frontend-pages/shared/footer';
+import SiteFooter from '@/components/frontend-pages/shared/footer/SiteFooter';
 import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import { useAuth } from '@/context/AuthContext';
@@ -41,7 +41,7 @@ const ChurchPortalLayout: React.FC = () => {
           <Outlet />
         </Box>
       </Container>
-      <SharedFooter />
+      <SiteFooter />
       <ScrollToTop />
       <Customizer />
     </Box>

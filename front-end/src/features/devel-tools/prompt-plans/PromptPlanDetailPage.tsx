@@ -26,6 +26,7 @@ import {
 } from '@mui/icons-material';
 import {
   Alert,
+  alpha,
   Box,
   Button,
   Card,
@@ -37,9 +38,13 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControl,
   IconButton,
+  InputLabel,
   LinearProgress,
+  MenuItem,
   Paper,
+  Select,
   Skeleton,
   Stack,
   Switch,
@@ -48,6 +53,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
+import { SmartToy as AgentIcon } from '@mui/icons-material';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiClient } from '@/api/utils/axiosInstance';
@@ -56,12 +62,23 @@ interface Plan {
   id: number;
   title: string;
   description: string | null;
+  assigned_agent: string | null;
+  change_set_id: number | null;
+  change_set_code: string | null;
+  change_set_status: string | null;
   status: string;
   created_by_email: string | null;
   completed_at: string | null;
   created_at: string;
   updated_at: string;
 }
+
+const AGENT_OPTIONS = [
+  { value: 'claude_cli', label: 'Claude CLI', color: '#d4a574' },
+  { value: 'windsurf', label: 'Windsurf', color: '#00b4d8' },
+  { value: 'cursor', label: 'Cursor', color: '#7c3aed' },
+  { value: 'github_copilot', label: 'GitHub Copilot', color: '#1f883d' },
+] as const;
 
 interface Step {
   id: number;
@@ -119,6 +136,7 @@ const PromptPlanDetailPage: React.FC = () => {
   const [editingPlan, setEditingPlan] = useState(false);
   const [planTitle, setPlanTitle] = useState('');
   const [planDesc, setPlanDesc] = useState('');
+  const [planAgent, setPlanAgent] = useState('');
 
   // Launch state
   const [launching, setLaunching] = useState<number | null>(null);
@@ -158,7 +176,7 @@ const PromptPlanDetailPage: React.FC = () => {
     setSaving(true);
     try {
       const res = await apiClient.put(`/prompt-plans/${plan.id}`, {
-        title: planTitle, description: planDesc || null,
+        title: planTitle, description: planDesc || null, assigned_agent: planAgent || null,
       });
       setPlan(res.plan);
       setEditingPlan(false);
@@ -346,6 +364,13 @@ const PromptPlanDetailPage: React.FC = () => {
               <Stack spacing={2}>
                 <TextField fullWidth label="Title" value={planTitle} onChange={e => setPlanTitle(e.target.value)} />
                 <TextField fullWidth multiline rows={2} label="Description" value={planDesc} onChange={e => setPlanDesc(e.target.value)} />
+                <FormControl fullWidth>
+                  <InputLabel>Assigned Agent</InputLabel>
+                  <Select value={planAgent} label="Assigned Agent" onChange={e => setPlanAgent(e.target.value)}>
+                    <MenuItem value="">None</MenuItem>
+                    {AGENT_OPTIONS.map(a => <MenuItem key={a.value} value={a.value}>{a.label}</MenuItem>)}
+                  </Select>
+                </FormControl>
                 <Stack direction="row" spacing={1}>
                   <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSavePlan} disabled={saving}>Save</Button>
                   <Button onClick={() => setEditingPlan(false)}>Cancel</Button>
@@ -364,22 +389,52 @@ const PromptPlanDetailPage: React.FC = () => {
                     {plan.description && (
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{plan.description}</Typography>
                     )}
-                    <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                    <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap">
                       <Chip label={plan.status} size="small" color={
                         plan.status === 'active' ? 'primary' :
                         plan.status === 'completed' ? 'success' :
                         plan.status === 'paused' ? 'warning' :
                         plan.status === 'cancelled' ? 'error' : 'default'
                       } variant="outlined" sx={{ textTransform: 'capitalize' }} />
+                      {plan.assigned_agent && (() => {
+                        const ag = AGENT_OPTIONS.find(a => a.value === plan.assigned_agent);
+                        return (
+                          <Chip
+                            icon={<AgentIcon sx={{ fontSize: 14, color: `${ag?.color || '#888'} !important` }} />}
+                            label={ag?.label || plan.assigned_agent}
+                            size="small"
+                            sx={{
+                              fontSize: '0.7rem', fontWeight: 600,
+                              bgcolor: alpha(ag?.color || '#888', 0.1),
+                              color: ag?.color || '#888',
+                              '& .MuiChip-icon': { ml: '4px' },
+                            }}
+                          />
+                        );
+                      })()}
+                      {plan.change_set_code && (
+                        <Chip
+                          label={plan.change_set_code}
+                          size="small"
+                          clickable
+                          onClick={(e) => { e.stopPropagation(); navigate(`/admin/control-panel/om-daily/change-sets`); }}
+                          sx={{ fontSize: '0.7rem', fontWeight: 600, bgcolor: alpha('#2d1b4e', 0.08), color: '#2d1b4e' }}
+                        />
+                      )}
                       <Typography variant="caption" color="text.secondary" sx={{ lineHeight: '24px' }}>
                         {plan.created_by_email} &middot; {new Date(plan.created_at).toLocaleDateString()}
                       </Typography>
                     </Stack>
+                    {plan.status === 'draft' && !plan.change_set_id && (
+                      <Alert severity="info" sx={{ mt: 1.5, py: 0 }}>
+                        <Typography variant="caption">A Change Set will be auto-created when this plan is activated.</Typography>
+                      </Alert>
+                    )}
                   </Box>
                   <Stack direction="row" spacing={1}>
                     {canEditPlan && (
                       <Tooltip title="Edit plan">
-                        <IconButton size="small" onClick={() => { setEditingPlan(true); setPlanTitle(plan.title); setPlanDesc(plan.description || ''); }}>
+                        <IconButton size="small" onClick={() => { setEditingPlan(true); setPlanTitle(plan.title); setPlanDesc(plan.description || ''); setPlanAgent(plan.assigned_agent || ''); }}>
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>

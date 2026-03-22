@@ -142,8 +142,14 @@ router.get('/churches', requireAuth, async (req, res) => {
       params.push(pipeline_stage);
     }
     if (jurisdiction) {
-      conditions.push('uc.jurisdiction = ?');
-      params.push(jurisdiction);
+      // Support both legacy free-text and new jurisdiction_id
+      if (!isNaN(parseInt(jurisdiction))) {
+        conditions.push('uc.jurisdiction_id = ?');
+        params.push(parseInt(jurisdiction));
+      } else {
+        conditions.push('uc.jurisdiction = ?');
+        params.push(jurisdiction);
+      }
     }
     if (priority) {
       conditions.push('uc.priority = ?');
@@ -164,11 +170,13 @@ router.get('/churches', requireAuth, async (req, res) => {
 
     const [rows] = await pool.query(
       `SELECT uc.*, ps.label as stage_label, ps.color as stage_color,
+              j.name AS jurisdiction_name, j.abbreviation AS jurisdiction_abbr, j.calendar_type AS jurisdiction_calendar,
               (SELECT COUNT(*) FROM crm_contacts cc WHERE cc.church_id = uc.id) as contact_count,
               (SELECT COUNT(*) FROM crm_activities ca WHERE ca.church_id = uc.id) as activity_count,
               (SELECT COUNT(*) FROM crm_follow_ups cf WHERE cf.church_id = uc.id AND cf.status = 'pending') as pending_followups
        FROM us_churches uc
        LEFT JOIN crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
+       LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
        ${whereClause}
        ORDER BY ${sortField} ${sortDir}
        LIMIT ? OFFSET ?`,
@@ -567,8 +575,15 @@ router.post('/churches/:id/provision', requireAuth, requireAdmin, async (req, re
   try {
     const pool = getPool();
     const { id } = req.params;
+    const crypto = require('crypto');
 
-    const [churchRows] = await pool.query('SELECT * FROM us_churches WHERE id = ?', [id]);
+    const [churchRows] = await pool.query(
+      `SELECT uc.*, j.calendar_type AS jurisdiction_calendar, j.name AS jurisdiction_name
+       FROM us_churches uc
+       LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
+       WHERE uc.id = ?`,
+      [id]
+    );
     if (!churchRows.length) return res.status(404).json({ error: 'Church not found' });
     const church = churchRows[0];
 
@@ -580,42 +595,98 @@ router.post('/churches/:id/provision', requireAuth, requireAdmin, async (req, re
     const [contacts] = await pool.query('SELECT * FROM crm_contacts WHERE church_id = ? AND is_primary = 1 LIMIT 1', [id]);
     const primaryContact = contacts.length > 0 ? contacts[0] : null;
 
-    // Insert into churches table
+    const contactEmail = primaryContact?.email || null;
+    const calendarType = church.jurisdiction_calendar || null;
+
+    // 1. Insert into churches table (correct column names)
     const [insertResult] = await pool.query(
-      `INSERT INTO churches (church_name, location, contact_email, phone, website, street_address, city, state, zip_code)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO churches (name, email, phone, website, address, city, state_province, postal_code, country,
+                             jurisdiction, jurisdiction_id, calendar_type, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'United States', ?, ?, ?, TRUE)`,
       [
         church.name,
-        church.city && church.state_code ? `${church.city}, ${church.state_code}` : church.state_code,
-        primaryContact?.email || null,
+        contactEmail,
         church.phone || primaryContact?.phone || null,
         church.website || null,
         church.street || null,
         church.city || null,
         church.state_code || null,
         church.zip || null,
+        church.jurisdiction || church.jurisdiction_name || null,
+        church.jurisdiction_id || null,
+        calendarType,
       ]
     );
 
     const newChurchId = insertResult.insertId;
 
-    // Link back to CRM
+    // 2. Create tenant database via ChurchProvisioner
+    let dbResult = null;
+    try {
+      const ChurchProvisioner = require('../services/church-provisioner');
+      const provisioner = new ChurchProvisioner();
+      dbResult = await provisioner.createChurchDatabase({
+        name: church.name,
+        email: contactEmail || `admin@church${newChurchId}.orthodoxmetrics.com`,
+        phone: church.phone || null,
+        website: church.website || null,
+        address: church.street || null,
+        city: church.city || null,
+        state_province: church.state_code || null,
+        postal_code: church.zip || null,
+        country: 'United States',
+      });
+
+      // Update churches record with the database name
+      if (dbResult?.databaseName) {
+        await pool.query('UPDATE churches SET database_name = ? WHERE id = ?', [dbResult.databaseName, newChurchId]);
+      }
+    } catch (provisionErr) {
+      console.error('ChurchProvisioner failed (non-fatal, church record still created):', provisionErr.message);
+    }
+
+    // 3. Generate registration token
+    let registrationToken = null;
+    let registrationUrl = null;
+    try {
+      const token = crypto.randomBytes(32).toString('hex');
+      await pool.query(
+        'INSERT INTO church_registration_tokens (church_id, token, created_by) VALUES (?, ?, ?)',
+        [newChurchId, token, req.session?.user?.id || 0]
+      );
+      registrationToken = token;
+      const encodedName = encodeURIComponent(church.name);
+      registrationUrl = `https://orthodoxmetrics.com/auth/register?token=${token}&church=${encodedName}`;
+    } catch (tokenErr) {
+      console.error('Token generation failed (non-fatal):', tokenErr.message);
+    }
+
+    // 4. Link back to CRM
     await pool.query(
       'UPDATE us_churches SET provisioned_church_id = ?, is_client = 1, pipeline_stage = ? WHERE id = ?',
       [newChurchId, 'won', id]
     );
 
-    // Log activity
+    // 5. Log activity
     await pool.query(
       `INSERT INTO crm_activities (church_id, activity_type, subject, metadata, created_by)
        VALUES (?, 'provision', ?, ?, ?)`,
       [id, `Church provisioned as OrthodoxMetrics client (ID: ${newChurchId})`,
-       JSON.stringify({ provisioned_church_id: newChurchId }), req.session?.user?.id || null]
+       JSON.stringify({
+         provisioned_church_id: newChurchId,
+         database_name: dbResult?.databaseName || null,
+         calendar_type: calendarType,
+         jurisdiction_id: church.jurisdiction_id || null,
+         registration_token: registrationToken ? '(generated)' : null,
+       }), req.session?.user?.id || null]
     );
 
     res.status(201).json({
       success: true,
       provisioned_church_id: newChurchId,
+      database_name: dbResult?.databaseName || null,
+      calendar_type: calendarType,
+      registration_url: registrationUrl,
       message: `${church.name} has been provisioned as church #${newChurchId}`,
     });
   } catch (err) {

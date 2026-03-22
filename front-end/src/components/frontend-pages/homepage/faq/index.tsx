@@ -7,9 +7,11 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const FAQ = () => {
   const theme = useTheme();
+  const { t } = useLanguage();
 
   const [expanded, setExpanded] = useState(true);
   const [expanded2, setExpanded2] = useState(false);
@@ -92,7 +94,7 @@ const FAQ = () => {
             }}
             fontWeight="700"
           >
-            Frequently Asked Questions
+            {t('faq.accordion_title')}
           </Typography>
           <Box mt={7}>
             <StyledAccordian expanded={expanded} onChange={handleChange}>
@@ -107,10 +109,10 @@ const FAQ = () => {
                 aria-controls="panel1-content"
                 id="panel1-header"
               >
-                What is included with my purchase?
+                {t('faq.q1')}
               </AccordionSummary>
               <AccordionDetails>
-                An initial consult for a discussion about your church and how we can best assist you.
+                {t('faq.a1')}
               </AccordionDetails>
             </StyledAccordian>
             <StyledAccordian expanded={expanded2} onChange={handleChange2}>
@@ -125,10 +127,10 @@ const FAQ = () => {
                 aria-controls="panel2-content"
                 id="panel2-header"
               >
-                One time purchase
+                {t('faq.q2')}
               </AccordionSummary>
               <AccordionDetails>
-                One time purchase for continual use as your church grows.
+                {t('faq.a2')}
               </AccordionDetails>
             </StyledAccordian>
             <StyledAccordian expanded={expanded3} onChange={handleChange3}>
@@ -143,10 +145,10 @@ const FAQ = () => {
                 aria-controls="panel3-content"
                 id="panel3-header"
               >
-                How does the Orthodox Metrics calendar work?
+                {t('faq.q3')}
               </AccordionSummary>
               <AccordionDetails>
-                The calendar serves as a reference for both Old and New Calendar liturgical timelines
+                {t('faq.a3')}
               </AccordionDetails>
             </StyledAccordian>
             <StyledAccordian expanded={expanded4} onChange={handleChange4}>
@@ -158,13 +160,13 @@ const FAQ = () => {
                     <IconPlus size="21" stroke="1.5" />
                   )
                 }
-                aria-controls="panel2-content"
-                id="panel2-header"
+                aria-controls="panel4-content"
+                id="panel4-header"
               >
-                What is the timeframe to have the church records complete?
+                {t('faq.q4')}
               </AccordionSummary>
               <AccordionDetails>
-                We will work with you, in general the timeframe is relative to the amount of records and how much you need us to do.
+                {t('faq.a4')}
               </AccordionDetails>
             </StyledAccordian>
             <StyledAccordian expanded={expanded5} onChange={handleChange5}>
@@ -176,13 +178,13 @@ const FAQ = () => {
                     <IconPlus size="21" stroke="1.5" />
                   )
                 }
-                aria-controls="panel2-content"
-                id="panel2-header"
+                aria-controls="panel5-content"
+                id="panel5-header"
               >
-                What if I need to print a baptismal or marriage certificate, can I do that?
+                {t('faq.q5')}
               </AccordionSummary>
               <AccordionDetails>
-                Of course. Certificates are dynamically generated and use the template that is provided by your head of church.
+                {t('faq.a5')}
               </AccordionDetails>
             </StyledAccordian>
             <StyledAccordian expanded={expanded6} onChange={handleChange6}>
@@ -194,13 +196,13 @@ const FAQ = () => {
                     <IconPlus size="21" stroke="1.5" />
                   )
                 }
-                aria-controls="panel2-content"
-                id="panel2-header"
+                aria-controls="panel6-content"
+                id="panel6-header"
               >
-                How can I get support? 
+                {t('faq.q6')}
               </AccordionSummary>
               <AccordionDetails>
-                Email is ideal, but we can schedule a call if you prefer talking.
+                {t('faq.a6')}
               </AccordionDetails>
             </StyledAccordian>
           </Box>
@@ -229,7 +231,7 @@ const FAQ = () => {
               },
             }}
           >
-            <Typography>Still have a question?</Typography>
+            <Typography>{t('faq.still_question')}</Typography>
             <Link
               href="https://discord.com/invite/XujgB8ww4n"
               color="inherit"
@@ -240,9 +242,9 @@ const FAQ = () => {
                 },
               }}
             >
-              Email us{' '}
+              {t('faq.email_us')}{' '}
             </Link>
-            <Typography>or</Typography>
+            <Typography>{t('faq.or')}</Typography>
             <Link
               href="/support/"
               color="inherit"
@@ -253,7 +255,7 @@ const FAQ = () => {
                 },
               }}
             >
-              submit a ticket
+              {t('faq.submit_ticket')}
             </Link>
             .
           </Box>

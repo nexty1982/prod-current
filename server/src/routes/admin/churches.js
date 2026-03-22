@@ -51,11 +51,25 @@ function validateChurchAccess(user, churchId = null) {
     return { allowed: true, church_id: user.church_id };
   }
 
+  // Priests can access their assigned church only
+  if (user.role === 'priest') {
+    if (!churchId) {
+      return { allowed: true, church_id: user.church_id };
+    }
+    if (!user.church_id) {
+      return { allowed: false, reason: 'Priest user has no church assignment' };
+    }
+    if (parseInt(churchId) !== user.church_id) {
+      return { allowed: false, reason: 'Access denied to church outside your assignment' };
+    }
+    return { allowed: true, church_id: user.church_id };
+  }
+
   return { allowed: false, reason: 'Insufficient role for church management' };
 }
 
 // GET /api/admin/churches/:id/field-mapper - Get field mapper settings for a church table
-router.get('/:id/field-mapper', requireAuth, requireChurchAccess, async (req, res) => {
+router.get('/:id/field-mapper', requireAuth, requireRole(['admin', 'super_admin', 'manager', 'church_admin', 'priest']), async (req, res) => {
   try {
     const churchId = parseInt(req.params.id);
     const tableName = req.query.table || 'baptism_records';
@@ -147,7 +161,7 @@ router.get('/:id/field-mapper', requireAuth, requireChurchAccess, async (req, re
 });
 
 // POST /api/admin/churches/:id/field-mapper - Save field mapper settings for a church table
-router.post('/:id/field-mapper', requireAuth, requireChurchAccess, async (req, res) => {
+router.post('/:id/field-mapper', requireAuth, requireRole(['admin', 'super_admin', 'manager', 'church_admin', 'priest']), async (req, res) => {
   try {
     const churchId = parseInt(req.params.id);
     const { table, mappings, field_settings } = req.body;

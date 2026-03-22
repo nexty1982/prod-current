@@ -233,90 +233,118 @@ const components: any = (theme: Theme) => {
         root: {
           textTransform: 'none',
           boxShadow: 'none',
+          borderRadius: 6,
+          fontFamily: "'Inter', sans-serif",
         },
         text: {
           padding: '5px 15px',
           '&:hover': {
-            backgroundColor: theme.palette.primary.light,
-            color: theme.palette.primary.main,
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(255, 255, 255, 0.06)'
+                : 'rgba(0, 0, 0, 0.04)',
           },
         },
         textPrimary: {
-          backgroundColor: theme.palette.primary.light,
+          color: theme.palette.primary.main,
           '&:hover': {
-            backgroundColor: theme.palette.primary.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(93, 135, 255, 0.12)'
+                : 'rgba(93, 135, 255, 0.08)',
           },
         },
         textSecondary: {
-          backgroundColor: theme.palette.secondary.light,
+          color: theme.palette.secondary.main,
           '&:hover': {
-            backgroundColor: theme.palette.secondary.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(73, 190, 255, 0.12)'
+                : 'rgba(73, 190, 255, 0.08)',
           },
         },
         textSuccess: {
-          backgroundColor: theme.palette.success.light,
+          color: theme.palette.success.main,
           '&:hover': {
-            backgroundColor: theme.palette.success.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(19, 222, 185, 0.12)'
+                : 'rgba(19, 222, 185, 0.08)',
           },
         },
         textError: {
-          backgroundColor: theme.palette.error.light,
+          color: theme.palette.error.main,
           '&:hover': {
-            backgroundColor: theme.palette.error.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(250, 137, 107, 0.12)'
+                : 'rgba(250, 137, 107, 0.08)',
           },
         },
         textInfo: {
-          backgroundColor: theme.palette.info.light,
+          color: theme.palette.info.main,
           '&:hover': {
-            backgroundColor: theme.palette.info.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(83, 155, 255, 0.12)'
+                : 'rgba(83, 155, 255, 0.08)',
           },
         },
         textWarning: {
-          backgroundColor: theme.palette.warning.light,
+          color: theme.palette.warning.main,
           '&:hover': {
-            backgroundColor: theme.palette.warning.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(255, 174, 31, 0.12)'
+                : 'rgba(255, 174, 31, 0.08)',
           },
         },
         outlinedPrimary: {
           '&:hover': {
-            backgroundColor: theme.palette.primary.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(93, 135, 255, 0.12)'
+                : 'rgba(93, 135, 255, 0.08)',
           },
         },
         outlinedSecondary: {
           '&:hover': {
-            backgroundColor: theme.palette.secondary.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(73, 190, 255, 0.12)'
+                : 'rgba(73, 190, 255, 0.08)',
           },
         },
         outlinedError: {
           '&:hover': {
-            backgroundColor: theme.palette.error.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(250, 137, 107, 0.12)'
+                : 'rgba(250, 137, 107, 0.08)',
           },
         },
         outlinedSuccess: {
           '&:hover': {
-            backgroundColor: theme.palette.success.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(19, 222, 185, 0.12)'
+                : 'rgba(19, 222, 185, 0.08)',
           },
         },
         outlinedInfo: {
           '&:hover': {
-            backgroundColor: theme.palette.info.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(83, 155, 255, 0.12)'
+                : 'rgba(83, 155, 255, 0.08)',
           },
         },
         outlinedWarning: {
           '&:hover': {
-            backgroundColor: theme.palette.warning.main,
-            color: 'white',
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(255, 174, 31, 0.12)'
+                : 'rgba(255, 174, 31, 0.08)',
           },
         },
       },

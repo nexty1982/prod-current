@@ -47,10 +47,21 @@ import {
 import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import BlankCard from '@/shared/ui/BlankCard';
+import { getBuildInfo } from '@/shared/lib/buildInfo';
+import { useServerVersion } from '@/hooks/useServerVersion';
+import {
+  IconGitBranch,
+  IconCalendar,
+  IconServer,
+  IconBrowser,
+  IconCheck,
+  IconAlertTriangle,
+} from '@tabler/icons-react';
 
 interface BuildConfig {
   mode: 'full';
   buildTarget: 'frontend' | 'server' | 'dual';
+  buildPath: string;
   memory: number;
   installPackage: string;
   legacyPeerDeps: boolean;
@@ -105,10 +116,14 @@ interface CategorizedBuildData {
 const BuildConsole: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  
+  const buildInfo = getBuildInfo();
+  const { serverVersion, isLoading: isVersionLoading, refetch: refetchVersion } = useServerVersion();
+  const versionsMatch = serverVersion && buildInfo.gitSha === serverVersion.gitSha;
+
   const [config, setConfig] = useState<BuildConfig>({
     mode: 'full',
     buildTarget: 'frontend',
+    buildPath: '/var/www/orthodoxmetrics/dev',
     memory: 4096,
     installPackage: '',
     legacyPeerDeps: true,
@@ -144,10 +159,11 @@ const BuildConsole: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Ensure buildTarget is set, default to 'frontend' if missing
+        // Ensure buildTarget and buildPath are set with defaults
         setConfig({
           ...data.config,
-          buildTarget: data.config.buildTarget || 'frontend'
+          buildTarget: data.config.buildTarget || 'frontend',
+          buildPath: data.config.buildPath || '/var/www/orthodoxmetrics/dev'
         });
       } else {
         setError('Failed to load build configuration');
@@ -758,6 +774,19 @@ const BuildConsole: React.FC = () => {
                   <TextField
                     fullWidth
                     size="small"
+                    label="Build Path"
+                    value={config.buildPath || '/var/www/orthodoxmetrics/dev'}
+                    onChange={(e) => setConfig({ ...config, buildPath: e.target.value })}
+                    disabled={isRunning}
+                    placeholder="/var/www/orthodoxmetrics/dev"
+                    helperText="Project root directory"
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    fullWidth
+                    size="small"
                     label="Memory (MB)"
                     type="number"
                     value={config.memory}
@@ -819,6 +848,144 @@ const BuildConsole: React.FC = () => {
                 </Grid>
               </Grid>
 
+            </CardContent>
+          </BlankCard>
+        </Grid>
+
+        {/* ===== BUILD INFO - VERSION SYNC STATUS ===== */}
+        <Grid item xs={12}>
+          <BlankCard>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h5" sx={{ display: 'flex', alignItems: 'center' }}>
+                  <InfoIcon sx={{ mr: 1, color: 'primary.main' }} />
+                  Build Information
+                </Typography>
+                <Tooltip title="Refresh server version">
+                  <IconButton onClick={refetchVersion} disabled={isVersionLoading} size="small">
+                    {isVersionLoading ? <CircularProgress size={18} /> : <RefreshIcon fontSize="small" />}
+                  </IconButton>
+                </Tooltip>
+              </Box>
+
+              <Paper
+                sx={{
+                  p: 1.5,
+                  mb: 2,
+                  background: versionsMatch
+                    ? 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)'
+                    : 'linear-gradient(135deg, #e65100 0%, #f57c00 100%)',
+                  borderRadius: 2,
+                  color: '#fff',
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  {versionsMatch ? <IconCheck size={20} /> : <IconAlertTriangle size={20} />}
+                  <Box>
+                    <Typography variant="subtitle2" fontWeight="bold">
+                      {versionsMatch ? 'Versions Synchronized' : 'Version Mismatch Detected'}
+                    </Typography>
+                    <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                      {versionsMatch
+                        ? 'Frontend and Server are running the same build.'
+                        : 'Frontend and Server builds may be out of sync.'}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Paper>
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Paper sx={{ p: 2, background: 'linear-gradient(135deg, #1a237e 0%, #3949ab 100%)', borderRadius: 2, color: '#fff' }}>
+                    <Stack spacing={1.5}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <IconBrowser size={20} />
+                        <Typography variant="subtitle1" fontWeight="bold">Frontend</Typography>
+                      </Stack>
+                      <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)' }} />
+                      <Grid container spacing={1}>
+                        <Grid item xs={6}>
+                          <Typography variant="caption" sx={{ opacity: 0.7 }}>Version</Typography>
+                          <Typography variant="body1" fontFamily="monospace" fontWeight="bold">
+                            {buildInfo.version || 'unknown'}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant="caption" sx={{ opacity: 0.7 }}>Git SHA</Typography>
+                          <Stack direction="row" alignItems="center" spacing={0.5}>
+                            <IconGitBranch size={14} />
+                            <Chip label={buildInfo.gitSha || 'unknown'} size="small" sx={{ fontFamily: 'monospace', bgcolor: 'rgba(255,255,255,0.2)', color: 'inherit', height: 22 }} />
+                          </Stack>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant="caption" sx={{ opacity: 0.7 }}>Build Time</Typography>
+                          <Stack direction="row" alignItems="center" spacing={0.5}>
+                            <IconCalendar size={14} />
+                            <Typography variant="caption" fontFamily="monospace">
+                              {new Date(buildInfo.buildTime).toLocaleString()}
+                            </Typography>
+                          </Stack>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant="caption" sx={{ opacity: 0.7 }}>Environment</Typography>
+                          <Typography variant="body2" fontFamily="monospace">{buildInfo.environment || 'development'}</Typography>
+                        </Grid>
+                      </Grid>
+                    </Stack>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  {isVersionLoading ? (
+                    <Paper sx={{ p: 2, background: 'linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%)', borderRadius: 2, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                      <CircularProgress color="inherit" size={24} />
+                    </Paper>
+                  ) : (
+                    <Paper sx={{ p: 2, background: 'linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%)', borderRadius: 2, color: '#fff' }}>
+                      <Stack spacing={1.5}>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <IconServer size={20} />
+                          <Typography variant="subtitle1" fontWeight="bold">Server</Typography>
+                        </Stack>
+                        <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)' }} />
+                        <Grid container spacing={1}>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" sx={{ opacity: 0.7 }}>Version</Typography>
+                            <Typography variant="body1" fontFamily="monospace" fontWeight="bold">
+                              {serverVersion?.version || 'unknown'}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" sx={{ opacity: 0.7 }}>Git SHA</Typography>
+                            <Stack direction="row" alignItems="center" spacing={0.5}>
+                              <IconGitBranch size={14} />
+                              <Chip label={serverVersion?.gitSha || 'unknown'} size="small" sx={{ fontFamily: 'monospace', bgcolor: 'rgba(255,255,255,0.2)', color: 'inherit', height: 22 }} />
+                            </Stack>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" sx={{ opacity: 0.7 }}>Build Time</Typography>
+                            <Stack direction="row" alignItems="center" spacing={0.5}>
+                              <IconCalendar size={14} />
+                              <Typography variant="caption" fontFamily="monospace">
+                                {serverVersion?.buildTime ? new Date(serverVersion.buildTime).toLocaleString() : 'unknown'}
+                              </Typography>
+                            </Stack>
+                          </Grid>
+                          <Grid item xs={3}>
+                            <Typography variant="caption" sx={{ opacity: 0.7 }}>Node.js</Typography>
+                            <Typography variant="body2" fontFamily="monospace">{serverVersion?.nodeVersion || 'unknown'}</Typography>
+                          </Grid>
+                          <Grid item xs={3}>
+                            <Typography variant="caption" sx={{ opacity: 0.7 }}>Uptime</Typography>
+                            <Typography variant="body2" fontFamily="monospace">
+                              {serverVersion?.uptime ? `${Math.floor(serverVersion.uptime / 3600)}h ${Math.floor((serverVersion.uptime % 3600) / 60)}m` : 'unknown'}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Stack>
+                    </Paper>
+                  )}
+                </Grid>
+              </Grid>
             </CardContent>
           </BlankCard>
         </Grid>

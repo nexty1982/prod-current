@@ -77,22 +77,16 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
     subheader: '📊 Dashboards',
   },
   {
-    id: 'dashboards.user',
-    title: 'User Dashboard',
+    id: 'dashboards.control-panel',
+    title: 'Control Panel',
     icon: IconLayoutDashboard,
-    href: '/dashboards/user',
+    href: '/admin/control-panel',
   },
   {
     id: 'dashboards.admin',
     title: 'Admin Dashboard',
     icon: IconShield,
     href: '/dashboards/orthodmetrics',
-  },
-  {
-    id: 'dashboards.super',
-    title: 'Super Dashboard',
-    icon: IconLayoutDashboard,
-    href: '/dashboards/super',
   },
 
   // ========================================================================

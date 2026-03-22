@@ -60,27 +60,21 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: 'User Dashboard',
-    icon: IconLayoutDashboard,
-    href: '/dashboards/user',
+    title: 'Control Panel',
+    icon: IconSettings,
+    href: '/admin/control-panel',
+  },
+  {
+    id: uniqueId(),
+    title: 'Account Hub',
+    icon: IconUser,
+    href: '/account/profile',
   },
   {
     id: uniqueId(),
     title: 'Church User Dashboard',
     icon: IconShield,
     href: '/dashboards/modern',
-  },
-  {
-    id: uniqueId(),
-    title: 'Super Dashboard',
-    icon: IconLayoutDashboard,
-    href: '/dashboards/super',
-  },
-  {
-    id: uniqueId(),
-    title: 'Control Panel',
-    icon: IconSettings,
-    href: '/admin/control-panel',
   },
 
   // ========================================================================
@@ -506,27 +500,6 @@ const Menuitems: MenuitemsType[] = [
     icon: IconCards,
     href: '/berry/cards',
   },
-  {
-    id: uniqueId(),
-    title: 'Profiles',
-    icon: IconUser,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Account Settings',
-        icon: IconPoint,
-        href: '/berry/profile/settings',
-      },
-      {
-        id: uniqueId(),
-        title: 'Account Profile',
-        icon: IconPoint,
-        href: '/berry/profile/account',
-      },
-    ],
-  },
-
   // ========================================================================
   // DEVELOPER TOOLS (super_admin only)
   // ========================================================================
@@ -614,6 +587,12 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
+        title: 'Database Status',
+        icon: IconDatabase,
+        href: '/devel-tools/platform-status',
+      },
+      {
+        id: uniqueId(),
         title: 'Conversation Log',
         icon: IconMessage,
         href: '/devel-tools/conversation-log',
@@ -680,7 +659,7 @@ export const getMenuItems = (user: any) => {
     return dynamicMenuItems;
   }
   
-  // For priest role, show User Dashboard menu
+  // For priest role, show portal-focused menu
   if (user && user.role === 'priest') {
     return [
       {
@@ -689,9 +668,9 @@ export const getMenuItems = (user: any) => {
       },
       {
         id: uniqueId(),
-        title: 'User Dashboard',
+        title: 'Portal',
         icon: IconLayoutDashboard,
-        href: '/dashboards/user',
+        href: '/portal',
       },
       {
         navlabel: true,

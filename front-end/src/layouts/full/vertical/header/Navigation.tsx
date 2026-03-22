@@ -28,8 +28,13 @@ const AppDD = () => {
         aria-controls="msgs-menu"
         aria-haspopup="true"
         sx={{
-          bgcolor: anchorEl2 ? 'primary.light' : '',
-          color: anchorEl2 ? 'primary.main' : '#FFFFFF', // Explicit white for header text
+          bgcolor: 'transparent',
+          color: 'inherit',
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '15px',
+          fontWeight: 400,
+          textTransform: 'none',
+          '&:hover': { bgcolor: 'transparent', opacity: 0.8 },
         }}
         onClick={handleClick2}
         endIcon={<IconChevronDown size="15" style={{ marginLeft: '-5px', marginTop: '2px' }} />}

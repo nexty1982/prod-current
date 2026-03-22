@@ -18,10 +18,12 @@ import { loginType } from '@/types/auth/auth';
 import CustomCheckbox from '@/components/forms/theme-elements/CustomCheckbox';
 import CustomTextField from '@/components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '@/components/forms/theme-elements/CustomFormLabel';
+import { useLanguage } from '@/context/LanguageContext';
 
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const navigate = useNavigate();
   const { login, loading, error, clearError } = useAuth();
+  const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -63,11 +65,11 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     const errors: { [key: string]: string } = {};
 
     if (!formData.username.trim()) {
-      errors.username = 'Email or username is required';
+      errors.username = t('auth.error_username_required');
     }
 
     if (!formData.password) {
-      errors.password = 'Password is required';
+      errors.password = t('auth.error_password_required');
     }
 
     setFormErrors(errors);
@@ -109,8 +111,8 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       {subtext}
 
       {error && (
-        <Alert 
-          severity="error" 
+        <Alert
+          severity="error"
           icon={<ErrorOutlineIcon />}
           sx={{ mt: 2, mb: 2 }}
         >
@@ -119,64 +121,64 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
               {error}
             </Typography>
             {error.includes("connecting to the server") && (
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
+              <Typography
+                variant="body2"
+                color="text.secondary"
                 sx={{ fontSize: '0.875rem' }}
               >
-                Still having trouble?{' '}
-                <Typography 
-                  component="a" 
-                  href="/support" 
-                  sx={{ 
-                    color: 'primary.main', 
+                {t('auth.error_still_trouble')}{' '}
+                <Typography
+                  component="a"
+                  href="/support"
+                  sx={{
+                    color: 'primary.main',
                     textDecoration: 'underline',
-                    cursor: 'pointer' 
+                    cursor: 'pointer'
                   }}
                 >
-                  Contact support
+                  {t('auth.error_contact_support')}
                 </Typography>
-                {' '}or try refreshing the page.
+                {' '}{t('auth.error_or_refresh')}
               </Typography>
             )}
             {(error.includes("Incorrect email or password") || error.includes("credentials")) && (
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
+              <Typography
+                variant="body2"
+                color="text.secondary"
                 sx={{ fontSize: '0.875rem' }}
               >
-                Forgot your password?{' '}
-                <Typography 
-                  component={Link} 
-                  to="/auth/forgot-password" 
-                  sx={{ 
-                    color: 'primary.main', 
-                    textDecoration: 'underline' 
+                {t('auth.error_forgot_password')}{' '}
+                <Typography
+                  component={Link}
+                  to="/auth/forgot-password"
+                  sx={{
+                    color: 'primary.main',
+                    textDecoration: 'underline'
                   }}
                 >
-                  Reset it here
+                  {t('auth.error_reset_here')}
                 </Typography>
               </Typography>
             )}
             {error.includes("temporarily unavailable") && (
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
+              <Typography
+                variant="body2"
+                color="text.secondary"
                 sx={{ fontSize: '0.875rem' }}
               >
-                Please check our{' '}
-                <Typography 
-                  component="a" 
-                  href="/status" 
-                  sx={{ 
-                    color: 'primary.main', 
+                {t('auth.error_check_status_prefix')}{' '}
+                <Typography
+                  component="a"
+                  href="/status"
+                  sx={{
+                    color: 'primary.main',
                     textDecoration: 'underline',
-                    cursor: 'pointer' 
+                    cursor: 'pointer'
                   }}
                 >
-                  system status page
+                  {t('auth.error_status_page')}
                 </Typography>
-                {' '}for updates.
+                {' '}{t('auth.error_check_status_suffix')}
               </Typography>
             )}
           </Box>
@@ -186,7 +188,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       <Box component="form" onSubmit={handleSubmit}>
         <Stack spacing={3}>
           <Box>
-            <CustomFormLabel htmlFor="username">Email or Username</CustomFormLabel>
+            <CustomFormLabel htmlFor="username">{t('auth.label_email')}</CustomFormLabel>
             <CustomTextField
               id="username"
               variant="outlined"
@@ -199,7 +201,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
             />
           </Box>
           <Box>
-            <CustomFormLabel htmlFor="password">Password</CustomFormLabel>
+            <CustomFormLabel htmlFor="password">{t('auth.label_password')}</CustomFormLabel>
             <CustomTextField
               id="password"
               type="password"
@@ -222,7 +224,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
                     disabled={loading}
                   />
                 }
-                label="Remember this Device"
+                label={t('auth.remember_device')}
               />
             </FormGroup>
             <Typography
@@ -234,7 +236,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
                 color: 'primary.main',
               }}
             >
-              Forgot Password?
+              {t('auth.forgot_password')}
             </Typography>
           </Stack>
         </Stack>
@@ -248,7 +250,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
             disabled={loading}
             startIcon={loading ? <CircularProgress size={20} /> : null}
           >
-            {loading ? 'Signing In...' : 'Sign In'}
+            {loading ? t('auth.btn_signing_in') : t('auth.btn_sign_in')}
           </Button>
         </Box>
       </Box>

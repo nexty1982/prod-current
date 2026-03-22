@@ -1,0 +1,330 @@
+/* Orthodox Metrics Design System - Component Classes */
+
+@layer components {
+  /* ========================================
+     Page Containers
+     ======================================== */
+  
+  .om-page-container {
+    @apply min-h-screen bg-white dark:bg-gray-900;
+  }
+
+  /* ========================================
+     Hero Sections
+     ======================================== */
+  
+  .om-hero-gradient {
+    @apply bg-gradient-to-br from-[#2d1b4e] via-[#3a2461] to-[#4a2f74] 
+           dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 text-white;
+  }
+  
+  .om-hero-badge {
+    @apply inline-flex items-center gap-2 bg-[rgba(212,175,55,0.15)] dark:bg-[rgba(212,175,55,0.2)] 
+           px-4 py-2 rounded-full;
+  }
+  
+  .om-hero-badge-text {
+    @apply font-['Inter'] text-[14px] text-[#d4af37];
+  }
+
+  /* ========================================
+     Section Backgrounds
+     ======================================== */
+  
+  .om-section-base {
+    @apply bg-white dark:bg-gray-900;
+  }
+  
+  .om-section-elevated {
+    @apply bg-[#f9fafb] dark:bg-gray-800;
+  }
+  
+  .om-section-subtle {
+    @apply bg-[#f3f4f6] dark:bg-gray-700;
+  }
+
+  /* ========================================
+     Card Components
+     ======================================== */
+  
+  .om-card {
+    @apply bg-white dark:bg-gray-800 border border-[#f3f4f6] dark:border-gray-700 
+           rounded-2xl shadow-sm hover:shadow-md transition-shadow;
+  }
+  
+  .om-card-compact {
+    @apply bg-white dark:bg-gray-800 border border-[#f3f4f6] dark:border-gray-700 
+           rounded-xl;
+  }
+  
+  .om-card-subtle {
+    @apply bg-[#f9fafb] dark:bg-gray-800 border border-[#e5e7eb] dark:border-gray-700 
+           rounded-xl;
+  }
+  
+  .om-card-elevated {
+    @apply bg-gradient-to-br from-[#f9fafb] to-[#f3f4f6] dark:from-gray-800 dark:to-gray-700 
+           rounded-2xl border border-[rgba(45,27,78,0.1)] dark:border-gray-600;
+  }
+
+  /* ========================================
+     Badge/Pill Components
+     ======================================== */
+  
+  .om-badge-primary {
+    @apply inline-flex items-center gap-2 bg-[rgba(45,27,78,0.05)] dark:bg-gray-800 
+           px-4 py-2 rounded-full;
+  }
+  
+  .om-badge-secondary {
+    @apply inline-flex items-center gap-2 bg-white dark:bg-gray-700 
+           px-4 py-2 rounded-full shadow-sm;
+  }
+  
+  .om-badge-accent {
+    @apply inline-flex items-center gap-2 bg-[#d4af37] dark:bg-[#d4af37] 
+           text-[#2d1b4e] dark:text-[#2d1b4e] px-3 py-1 rounded-full text-[13px] font-medium;
+  }
+
+  /* ========================================
+     Typography
+     ======================================== */
+  
+  .om-heading-primary {
+    @apply font-['Georgia'] text-4xl md:text-5xl text-[#2d1b4e] dark:text-white;
+  }
+  
+  .om-heading-secondary {
+    @apply font-['Georgia'] text-3xl md:text-4xl text-[#2d1b4e] dark:text-white;
+  }
+  
+  .om-heading-tertiary {
+    @apply font-['Inter'] font-medium text-2xl text-[#2d1b4e] dark:text-white;
+  }
+  
+  .om-text-primary {
+    @apply font-['Inter'] text-[#2d1b4e] dark:text-white;
+  }
+  
+  .om-text-secondary {
+    @apply font-['Inter'] text-[#4a5565] dark:text-gray-400;
+  }
+  
+  .om-text-tertiary {
+    @apply font-['Inter'] text-[#6b7280] dark:text-gray-500;
+  }
+  
+  .om-text-body {
+    @apply font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed;
+  }
+
+  /* ========================================
+     Button Components
+     ======================================== */
+  
+  .om-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-8 py-4 
+           bg-[#2d1b4e] dark:bg-[#d4af37] 
+           text-white dark:text-[#2d1b4e] 
+           rounded-lg font-['Inter'] font-medium text-[16px] 
+           hover:bg-[#1f1236] dark:hover:bg-[#c29d2f] 
+           transition-colors;
+  }
+  
+  .om-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-8 py-4 
+           bg-white/10 backdrop-blur-sm border border-white/20 
+           text-white rounded-lg font-['Inter'] font-medium text-[16px] 
+           hover:bg-white/20 transition-colors;
+  }
+  
+  .om-btn-accent {
+    @apply inline-flex items-center justify-center gap-2 px-8 py-4 
+           bg-[#d4af37] text-[#2d1b4e] rounded-lg 
+           font-['Inter'] font-medium text-[16px] 
+           hover:bg-[#c29d2f] transition-colors;
+  }
+  
+  .om-btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-8 py-4 
+           bg-white dark:bg-gray-700 
+           border-2 border-[#2d1b4e] dark:border-[#d4af37] 
+           text-[#2d1b4e] dark:text-[#d4af37] rounded-lg 
+           font-['Inter'] font-medium 
+           hover:bg-[#2d1b4e] hover:text-white 
+           dark:hover:bg-[#d4af37] dark:hover:text-[#2d1b4e] 
+           transition-colors;
+  }
+
+  /* ========================================
+     Icon Containers
+     ======================================== */
+  
+  .om-icon-container-primary {
+    @apply w-16 h-16 bg-gradient-to-br from-[#2d1b4e] to-[#4a2f74] 
+           dark:from-[#d4af37] dark:to-[#c29d2f] 
+           rounded-xl flex items-center justify-center;
+  }
+  
+  .om-icon-container-accent {
+    @apply w-16 h-16 bg-[#d4af37] rounded-xl flex items-center justify-center;
+  }
+  
+  .om-icon-container-small {
+    @apply w-14 h-14 bg-[#2d1b4e] dark:bg-[#d4af37] 
+           rounded-lg flex items-center justify-center;
+  }
+
+  /* ========================================
+     Input Components
+     ======================================== */
+  
+  .om-input {
+    @apply w-full px-4 py-3 border border-[#e5e7eb] dark:border-gray-600 
+           bg-white dark:bg-gray-700 
+           text-[#2d1b4e] dark:text-white 
+           rounded-lg font-['Inter'] text-[15px] 
+           focus:outline-none focus:ring-2 
+           focus:ring-[#2d1b4e] dark:focus:ring-[#d4af37] 
+           focus:border-transparent;
+  }
+  
+  .om-textarea {
+    @apply w-full px-4 py-3 border border-[#e5e7eb] dark:border-gray-600 
+           bg-white dark:bg-gray-700 
+           text-[#2d1b4e] dark:text-white 
+           rounded-lg font-['Inter'] text-[15px] 
+           focus:outline-none focus:ring-2 
+           focus:ring-[#2d1b4e] dark:focus:ring-[#d4af37] 
+           focus:border-transparent resize-none;
+  }
+  
+  .om-select {
+    @apply w-full px-4 py-3 border border-[#e5e7eb] dark:border-gray-600 
+           bg-white dark:bg-gray-700 
+           text-[#2d1b4e] dark:text-white 
+           rounded-lg font-['Inter'] text-[15px] 
+           focus:outline-none focus:ring-2 
+           focus:ring-[#2d1b4e] dark:focus:ring-[#d4af37] 
+           focus:border-transparent;
+  }
+
+  /* ========================================
+     Dividers & Borders
+     ======================================== */
+  
+  .om-divider {
+    @apply border-t border-[#f3f4f6] dark:border-gray-700;
+  }
+  
+  .om-border-default {
+    @apply border border-[#e5e7eb] dark:border-gray-600;
+  }
+  
+  .om-border-subtle {
+    @apply border border-[#f3f4f6] dark:border-gray-700;
+  }
+
+  /* ========================================
+     Glass/Backdrop Effects
+     ======================================== */
+  
+  .om-glass {
+    @apply bg-white/10 dark:bg-white/5 backdrop-blur-sm 
+           border border-white/20 dark:border-white/10;
+  }
+  
+  .om-glass-card {
+    @apply bg-white/10 dark:bg-white/5 backdrop-blur-sm 
+           border border-white/20 dark:border-white/10 rounded-xl;
+  }
+
+  /* ========================================
+     Feature Icons (for icon badges)
+     ======================================== */
+  
+  .om-feature-icon {
+    @apply text-[#d4af37] dark:text-[#d4af37];
+  }
+  
+  .om-feature-icon-inverse {
+    @apply text-[#2d1b4e] dark:text-[#2d1b4e];
+  }
+
+  /* ========================================
+     Stat/Metric Display
+     ======================================== */
+  
+  .om-stat-number {
+    @apply text-[#d4af37] font-['Georgia'] text-5xl;
+  }
+  
+  .om-stat-number-alt {
+    @apply text-[#2d1b4e] dark:text-[#d4af37] font-['Georgia'] text-5xl;
+  }
+  
+  .om-stat-label {
+    @apply font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400;
+  }
+
+  /* ========================================
+     Table Components
+     ======================================== */
+  
+  .om-table-container {
+    @apply bg-white dark:bg-gray-900 rounded-2xl shadow-sm overflow-hidden;
+  }
+  
+  .om-table-header {
+    @apply border-b border-[#f3f4f6] dark:border-gray-700;
+  }
+  
+  .om-table-row {
+    @apply border-b border-[#f3f4f6] dark:border-gray-700 last:border-0;
+  }
+  
+  .om-table-cell-header {
+    @apply p-6 font-['Inter'] font-medium text-[16px] text-[#2d1b4e] dark:text-white;
+  }
+  
+  .om-table-cell {
+    @apply p-6 font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400;
+  }
+
+  /* ========================================
+     Number Badges (for steps, counts)
+     ======================================== */
+  
+  .om-number-badge-primary {
+    @apply flex-shrink-0 w-12 h-12 bg-[#2d1b4e] dark:bg-[#d4af37] 
+           rounded-full flex items-center justify-center 
+           text-[#d4af37] dark:text-[#2d1b4e] font-['Georgia'] text-xl;
+  }
+  
+  .om-number-badge-accent {
+    @apply flex-shrink-0 w-12 h-12 bg-[#d4af37] 
+           rounded-full flex items-center justify-center 
+           text-[#2d1b4e] font-['Georgia'] text-xl;
+  }
+
+  /* ========================================
+     List Bullets
+     ======================================== */
+  
+  .om-bullet {
+    @apply w-1.5 h-1.5 bg-[#d4af37] rounded-full flex-shrink-0;
+  }
+
+  /* ========================================
+     Link Styles
+     ======================================== */
+  
+  .om-link {
+    @apply text-[#2d1b4e] dark:text-[#d4af37] hover:underline transition-colors;
+  }
+  
+  .om-link-subtle {
+    @apply text-[#4a5565] dark:text-gray-400 
+           hover:text-[#2d1b4e] dark:hover:text-white transition-colors;
+  }
+}

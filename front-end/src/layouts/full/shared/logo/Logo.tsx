@@ -23,7 +23,7 @@ const Logo: FC = () => {
 
   if (activeDir === 'ltr') {
     return (
-      <LinkStyled to="/dashboards/user" style={{
+      <LinkStyled to="/" style={{
         display: 'flex',
         alignItems: 'center',
       }}>
@@ -37,7 +37,7 @@ const Logo: FC = () => {
   }
 
   return (
-    <LinkStyled to="/dashboards/user" style={{
+    <LinkStyled to="/" style={{
       display: 'flex',
       alignItems: 'center',
     }}>

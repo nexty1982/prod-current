@@ -324,6 +324,65 @@ class TestChurchDataGenerator {
       branding: this.generateBranding()
     };
   }
+  /**
+   * Load sample records directly into a tenant database
+   */
+  async loadSampleDataIntoDb(tenantPool, counts = {}) {
+    const baptisms = counts.baptisms || 20;
+    const marriages = counts.marriages || 10;
+    const funerals = counts.funerals || 5;
+    const results = { baptisms: 0, marriages: 0, funerals: 0 };
+
+    // Baptism records
+    const baptismRecords = this.generateBaptismRecords(baptisms);
+    for (const r of baptismRecords) {
+      try {
+        await tenantPool.query(
+          `INSERT INTO baptism_records (first_name, last_name, date_of_birth, date_of_baptism,
+           place_of_birth, place_of_baptism, father_name, mother_name, godparents, priest_name, notes)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [r.first_name, r.last_name, r.date_of_birth, r.date_of_baptism,
+           r.place_of_birth, r.place_of_baptism, r.father_name, r.mother_name,
+           r.godparents, r.priest_name, r.notes]
+        );
+        results.baptisms++;
+      } catch (e) { /* skip individual failures */ }
+    }
+
+    // Marriage records
+    const marriageRecords = this.generateMarriageRecords(marriages);
+    for (const r of marriageRecords) {
+      try {
+        await tenantPool.query(
+          `INSERT INTO marriage_records (groom_first_name, groom_last_name, bride_first_name, bride_last_name,
+           marriage_date, place_of_marriage, priest_name, witness1_name, witness2_name, license_number, notes)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [r.groom_first_name, r.groom_last_name, r.bride_first_name, r.bride_last_name,
+           r.marriage_date, r.place_of_marriage, r.priest_name, r.witness1_name,
+           r.witness2_name, r.license_number, r.notes]
+        );
+        results.marriages++;
+      } catch (e) { /* skip individual failures */ }
+    }
+
+    // Funeral records
+    const funeralRecords = this.generateFuneralRecords(funerals);
+    for (const r of funeralRecords) {
+      try {
+        await tenantPool.query(
+          `INSERT INTO funeral_records (first_name, last_name, date_of_birth, date_of_death,
+           date_of_funeral, place_of_death, place_of_funeral, priest_name, burial_location, cause_of_death, notes)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [r.first_name, r.last_name, r.date_of_birth, r.date_of_death,
+           r.date_of_funeral, r.place_of_death, r.place_of_funeral, r.priest_name,
+           r.burial_location, r.cause_of_death, r.notes]
+        );
+        results.funerals++;
+      } catch (e) { /* skip individual failures */ }
+    }
+
+    return results;
+  }
 }
 
 module.exports = TestChurchDataGenerator;

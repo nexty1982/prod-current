@@ -52,27 +52,37 @@ const NavItem = ({ item, level, pathDirect, hideMenu, onClick }: ItemType) => {
   const itemIcon =
     level > 1 ? <Icon stroke={1.5} size="1rem" /> : <Icon stroke={1.5} size="1.3rem" />;
 
+  const isDark = theme.palette.mode === 'dark';
+  const isActive = pathDirect === item?.href;
   const ListItemStyled = styled(ListItemButton)(() => ({
     whiteSpace: 'nowrap',
     marginBottom: '2px',
     padding: '8px 10px',
-    borderRadius: `${isBorderRadius}px`,
-    backgroundColor: level > 1 ? 'transparent !important' : 'inherit',
+    borderRadius: '6px',
+    backgroundColor: 'transparent',
     color:
-      level > 1 && pathDirect === item?.href
-        ? `${theme.palette.primary.main}!important`
-        : theme.palette.text.secondary,
+      level > 1 && isActive
+        ? (isDark ? '#d4af37' : '#2d1b4e')
+        : isDark ? '#9ca3af' : '#6b7280',
+    fontFamily: "'Inter', sans-serif",
+    fontSize: '0.875rem',
+    fontWeight: 400,
     paddingLeft: hideMenu ? '10px' : level > 2 ? `${level * 15}px` : '10px',
+    transition: 'color 0.15s ease, background-color 0.15s ease',
     '&:hover': {
-      backgroundColor: theme.palette.primary.light,
-      color: theme.palette.primary.main,
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(45, 27, 78, 0.04)',
+      color: isDark ? '#f3f4f6' : '#2d1b4e',
     },
     '&.Mui-selected': {
-      color: 'white',
-      backgroundColor: theme.palette.primary.main,
+      color: isDark ? '#d4af37' : '#2d1b4e',
+      backgroundColor: isDark ? 'rgba(212, 175, 55, 0.08)' : 'rgba(45, 27, 78, 0.05)',
+      fontWeight: 500,
+      borderLeft: '2.5px solid',
+      borderLeftColor: isDark ? '#d4af37' : '#2d1b4e',
+      borderRadius: '0 6px 6px 0',
       '&:hover': {
-        backgroundColor: theme.palette.primary.main,
-        color: 'white',
+        backgroundColor: isDark ? 'rgba(212, 175, 55, 0.12)' : 'rgba(45, 27, 78, 0.08)',
+        color: isDark ? '#d4af37' : '#2d1b4e',
       },
     },
   }));
@@ -101,10 +111,9 @@ const NavItem = ({ item, level, pathDirect, hideMenu, onClick }: ItemType) => {
           sx={{
             minWidth: '36px',
             p: '3px 0',
-            color:
-              level > 1 && pathDirect === item?.href
-                ? `${theme.palette.primary.main}!important`
-                : 'inherit',
+            color: 'inherit',
+            opacity: isActive ? 1 : 0.6,
+            transition: 'opacity 0.15s ease',
           }}
         >
           {itemIcon}
@@ -122,9 +131,16 @@ const NavItem = ({ item, level, pathDirect, hideMenu, onClick }: ItemType) => {
         {!item?.chip || hideMenu ? null : (
           <Chip
             color={item?.chipColor}
-            variant={item?.variant ? item?.variant : 'filled'}
+            variant="outlined"
             size="small"
             label={item?.chip}
+            sx={{
+              height: '20px',
+              fontSize: '0.625rem',
+              fontWeight: 600,
+              letterSpacing: '0.04em',
+              borderRadius: '4px',
+            }}
           />
         )}
       </ListItemStyled>

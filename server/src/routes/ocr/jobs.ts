@@ -31,7 +31,8 @@ function createRouters(upload: any) {
 
       // Query PLATFORM DB — ocr_jobs lives in orthodoxmetrics_db (the upload + worker table)
       const [jobRows] = await promisePool.query(`
-        SELECT id, church_id, filename, status, record_type, language,
+        SELECT id, church_id, uploaded_by, filename, status, review_status, review_notes,
+               record_type, language,
                confidence_score, ocr_text, ocr_result, error_regions,
                created_at, source_pipeline
         FROM ocr_jobs
@@ -101,6 +102,8 @@ function createRouters(upload: any) {
           original_filename: job.original_filename || job.filename || '',
           filename: job.filename || '',
           status: jobStatus,
+          review_status: job.review_status || 'uploaded',
+          review_notes: job.review_notes || null,
           confidence_score: job.confidence_score || 0,
           error_message: job.error || null,
           created_at: job.created_at || new Date().toISOString(),
@@ -3496,14 +3499,16 @@ function createRouters(upload: any) {
           const fileStats = fs.statSync(finalPath);
           const fileMimeType = file.mimetype || 'image/jpeg';
 
+          const uploadedBy = req.session?.user?.id || null;
           const insertParams = [
             churchId,
+            uploadedBy,
             uniqueFilename,
             recordType,
             language
           ];
 
-          const insertSql = `INSERT INTO ocr_jobs (church_id, filename, status, record_type, language, created_at, source_pipeline) VALUES (?, ?, 'pending', ?, ?, NOW(), 'uploader')`;
+          const insertSql = `INSERT INTO ocr_jobs (church_id, uploaded_by, filename, status, review_status, record_type, language, created_at, source_pipeline) VALUES (?, ?, ?, 'pending', 'uploaded', ?, ?, NOW(), 'uploader')`;
 
           console.log(`OCR_INSERT_PRE ${JSON.stringify({ pool: 'platformPool', db: currentDb, file: file.originalname, storedFilename: uniqueFilename, paramCount: insertParams.length })}`);
 
@@ -4271,6 +4276,36 @@ function createRouters(upload: any) {
     } catch (error: any) {
       console.error('[Structure Clusters] Error:', error);
       res.status(500).json({ error: 'Failed to compute clusters', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // PATCH /jobs/:jobId/review-status — Admin: update review status
+  // -----------------------------------------------------------------------
+  churchJobsRouter.patch('/jobs/:jobId/review-status', async (req: any, res: any) => {
+    try {
+      const jobId = parseInt(req.params.jobId);
+      const userRole = req.session?.user?.role;
+      if (!['super_admin', 'admin'].includes(userRole)) {
+        return res.status(403).json({ error: 'Only admins can update review status' });
+      }
+      const { review_status, review_notes } = req.body;
+      const validStatuses = ['uploaded', 'pending_review', 'in_review', 'processed', 'returned'];
+      if (!review_status || !validStatuses.includes(review_status)) {
+        return res.status(400).json({ error: `review_status must be one of: ${validStatuses.join(', ')}` });
+      }
+      const updates: string[] = ['review_status = ?'];
+      const params: any[] = [review_status];
+      if (review_notes !== undefined) {
+        updates.push('review_notes = ?');
+        params.push(review_notes);
+      }
+      params.push(jobId);
+      await promisePool.query(`UPDATE ocr_jobs SET ${updates.join(', ')} WHERE id = ?`, params);
+      res.json({ success: true, jobId, review_status });
+    } catch (error: any) {
+      console.error('[OCR] Error updating review status:', error);
+      res.status(500).json({ error: 'Failed to update review status' });
     }
   });
 

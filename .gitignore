@@ -108,10 +108,18 @@ server/docs/**
 !server/docs/README.md
 
 # --- Build & Distribution Artifacts ---
+front-end/public/assets/
+front-end/public/build-info.json
+front-end/public/index.html
 front-end/dist-latest/
 front-end/dist-stable/
 front-end/dist-backup/
 front-end/dupes/
+
+# --- Test / scratch data ---
+test-data/
+screenshots/
+server/data/
 
 # --- Server Backups & Temp Storage ---
 server/storage/

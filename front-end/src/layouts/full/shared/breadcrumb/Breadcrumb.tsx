@@ -1,13 +1,7 @@
 import React from 'react';
-import Grid2 from '@/components/compat/Grid2';
-import { Typography, Box, Breadcrumbs, Link } from '@mui/material';
+import { Box, Breadcrumbs } from '@mui/material';
 import { NavLink } from 'react-router-dom';
-const Grid = Grid2;
-
-// one definition only
-const breadcrumbImg = '/orthodox/banners/default.jpg';
-
-import { IconCircle } from '@tabler/icons-react';
+import { IconChevronRight } from '@tabler/icons-react';
 
 interface BreadCrumbType {
   subtitle?: string;
@@ -17,83 +11,51 @@ interface BreadCrumbType {
 }
 
 const Breadcrumb = ({ subtitle, items, title, children }: BreadCrumbType) => (
-  <Grid
-    container
-    sx={{
-      backgroundColor: 'primary.light',
-      borderRadius: (theme: Theme) => theme.shape.borderRadius / 4,
-      p: '30px 25px 20px',
-      marginBottom: '30px',
-      position: 'relative',
-      overflow: 'hidden',
-    }}
-  >
-    <Grid
-      mb={1}
-      size={{
-        xs: 12,
-        sm: 6,
-        lg: 8
-      }}>
-      <Typography variant="h4">{title}</Typography>
-      <Typography color="textSecondary" variant="h6" fontWeight={400} mt={0.8} mb={0}>
-        {subtitle}
-      </Typography>
-      <Breadcrumbs
-        separator={
-          <IconCircle
-            size="5"
-            fill="textSecondary"
-            fillOpacity={'0.6'}
-            style={{ margin: '0 5px' }}
-          />
-        }
-        sx={{ alignItems: 'center', mt: items ? '10px' : '' }}
-        aria-label="breadcrumb"
-      >
-        {items
-          ? items.map((item) => (
-            <div key={item.title}>
-              {item.to ? (
-                <Link underline="none" color="inherit" component={NavLink} to={item.to}>
-                  {item.title}
-                </Link>
-              ) : (
-                <Typography color="textPrimary">{item.title}</Typography>
-              )}
-            </div>
-          ))
-          : ''}
-      </Breadcrumbs>
-    </Grid>
-    <Grid
-      display="flex"
-      alignItems="flex-end"
-      size={{
-        xs: 12,
-        sm: 6,
-        lg: 4
-      }}>
-      <Box
-        sx={{
-          display: { xs: 'none', md: 'block', lg: 'flex' },
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          width: '100%',
-        }}
-      >
-        {children ? (
-          <Box sx={{ top: '0px', position: 'absolute' }}>{children}</Box>
-        ) : (
-          <>
-            <Box sx={{ top: '0px', position: 'absolute' }}>
-              <img src={breadcrumbImg} alt={breadcrumbImg} width={'165px'} />
-            </Box>
-          </>
-        )}
+  <div className="om-breadcrumb">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 2,
+      }}
+    >
+      <Box>
+        <h2 className="om-page-title">{title}</h2>
+        {subtitle && <p className="om-page-subtitle">{subtitle}</p>}
+        <Breadcrumbs
+          separator={
+            <IconChevronRight
+              size={14}
+              style={{ opacity: 0.4 }}
+            />
+          }
+          sx={{ mt: items ? '0.5rem' : 0 }}
+          aria-label="breadcrumb"
+        >
+          {items
+            ? items.map((item) => (
+              <span key={item.title}>
+                {item.to ? (
+                  <NavLink to={item.to} className="om-breadcrumb-link">
+                    {item.title}
+                  </NavLink>
+                ) : (
+                  <span className="om-breadcrumb-active">{item.title}</span>
+                )}
+              </span>
+            ))
+            : ''}
+        </Breadcrumbs>
       </Box>
-    </Grid>
-  </Grid>
+      {children && (
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
+          {children}
+        </Box>
+      )}
+    </Box>
+  </div>
 );
 
 export default Breadcrumb;

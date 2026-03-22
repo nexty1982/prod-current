@@ -3,12 +3,12 @@
  * Windows Control Panel-style admin hub for super_admin users.
  * Located at /admin/control-panel
  *
- * 7 major categories + Components In Development section
+ * Includes CRM pipeline & follow-up widget + category tiles
  */
 
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
-import { FEATURE_REGISTRY, type FeatureEntry } from '@/config/featureRegistry';
-import { apiClient } from '@/shared/lib/apiClient';
+import { DEPRECATION_REGISTRY } from '@/config/deprecationRegistry';
+import { FEATURE_REGISTRY } from '@/config/featureRegistry';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
     Psychology as AIIcon,
@@ -19,21 +19,16 @@ import {
     Dns as ServerIcon,
     Widgets as SuiteIcon,
     Code as DevIcon,
-    OpenInNew as OpenIcon,
-    RocketLaunch as PrototypeIcon,
-    Build as BuildIcon,
-    Visibility as ReviewIcon,
-    Tune as StabilizingIcon,
+    FolderOff as DeprecatedIcon,
+    WarningAmber as OverdueIcon,
+    Today as TodayIcon,
+    TrendingUp as PipelineIcon,
 } from '@mui/icons-material';
 import {
     alpha,
     Box,
     Chip,
-    Link as MuiLink,
-    Paper,
-    Skeleton,
-    Tooltip,
-    Typography,
+    CircularProgress,
     useTheme,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
@@ -52,6 +47,8 @@ interface Category {
   description: string;
   icon: React.ReactNode;
   color: string;
+  bgLight: string;
+  bgDark: string;
   href: string;
   quickLinks: QuickLink[];
 }
@@ -61,12 +58,16 @@ const CATEGORIES: Category[] = [
     key: 'church',
     title: 'Church Management',
     description: 'Manage churches, setup wizards, field mapping, and provisioning',
-    icon: <ChurchIcon sx={{ fontSize: 48 }} />,
+    icon: <ChurchIcon sx={{ fontSize: 28 }} />,
     color: '#1976d2',
+    bgLight: 'rgba(25, 118, 210, 0.08)',
+    bgDark: 'rgba(25, 118, 210, 0.15)',
     href: '/admin/control-panel/church-management',
     quickLinks: [
       { label: 'All Churches', href: '/apps/church-management' },
-      { label: 'Church Onboarding Pipeline', href: '/admin/control-panel/church-onboarding' },
+      { label: 'Church Lifecycle', href: '/admin/control-panel/church-lifecycle' },
+      { label: 'Jurisdictions', href: '/admin/control-panel/jurisdictions' },
+      { label: 'Demo Churches', href: '/admin/control-panel/demo-churches' },
       { label: 'Sacramental Restrictions', href: '/admin/control-panel/church-management/sacramental-restrictions' },
     ],
   },
@@ -74,11 +75,14 @@ const CATEGORIES: Category[] = [
     key: 'records',
     title: 'Records & OCR',
     description: 'Church metric records, OCR document processing, data tools, and reports',
-    icon: <RecordsIcon sx={{ fontSize: 48 }} />,
+    icon: <RecordsIcon sx={{ fontSize: 28 }} />,
     color: '#388e3c',
+    bgLight: 'rgba(56, 142, 60, 0.08)',
+    bgDark: 'rgba(56, 142, 60, 0.15)',
     href: '/admin/control-panel/records-ocr',
     quickLinks: [
       { label: 'Church Metric Records', href: '/apps/records/baptism' },
+      { label: 'Certificate Templates', href: '/admin/control-panel/certificate-templates' },
       { label: 'OCR Studio', href: '/devel/ocr-studio' },
       { label: 'Live Table Builder', href: '/devel-tools/live-table-builder' },
     ],
@@ -86,12 +90,14 @@ const CATEGORIES: Category[] = [
   {
     key: 'crm',
     title: 'CRM & Outreach',
-    description: 'Customer relationship management, US church map, and sales pipeline',
-    icon: <OutreachIcon sx={{ fontSize: 48 }} />,
+    description: 'Church lifecycle pipeline, lead management, US church map, and sales',
+    icon: <OutreachIcon sx={{ fontSize: 28 }} />,
     color: '#7b1fa2',
+    bgLight: 'rgba(123, 31, 162, 0.08)',
+    bgDark: 'rgba(123, 31, 162, 0.15)',
     href: '/admin/control-panel/crm-outreach',
     quickLinks: [
-      { label: 'CRM Dashboard', href: '/devel-tools/crm' },
+      { label: 'Church Lifecycle', href: '/admin/control-panel/church-lifecycle' },
       { label: 'US Church Map', href: '/devel-tools/us-church-map' },
     ],
   },
@@ -99,8 +105,10 @@ const CATEGORIES: Category[] = [
     key: 'system',
     title: 'System & Server',
     description: 'Users, security, content, server diagnostics, monitoring, and social features',
-    icon: <ServerIcon sx={{ fontSize: 48 }} />,
+    icon: <ServerIcon sx={{ fontSize: 28 }} />,
     color: '#d32f2f',
+    bgLight: 'rgba(211, 47, 47, 0.08)',
+    bgDark: 'rgba(211, 47, 47, 0.15)',
     href: '/admin/control-panel/system-server',
     quickLinks: [
       { label: 'User Management', href: '/admin/users' },
@@ -113,8 +121,10 @@ const CATEGORIES: Category[] = [
     key: 'ai',
     title: 'AI & Automation',
     description: 'AI admin panel, OMAI logger, and automation settings',
-    icon: <AIIcon sx={{ fontSize: 48 }} />,
+    icon: <AIIcon sx={{ fontSize: 28 }} />,
     color: '#f57c00',
+    bgLight: 'rgba(245, 124, 0, 0.08)',
+    bgDark: 'rgba(245, 124, 0, 0.15)',
     href: '/admin/control-panel/ai-automation',
     quickLinks: [
       { label: 'AI Admin Panel', href: '/admin/ai' },
@@ -125,8 +135,10 @@ const CATEGORIES: Category[] = [
     key: 'daily',
     title: 'OM Daily',
     description: 'Work pipelines — 24hr, 48hr, 7/14/30/60/90 day horizons + conversation integration',
-    icon: <DailyIcon sx={{ fontSize: 48 }} />,
+    icon: <DailyIcon sx={{ fontSize: 28 }} />,
     color: '#00897b',
+    bgLight: 'rgba(0, 137, 123, 0.08)',
+    bgDark: 'rgba(0, 137, 123, 0.15)',
     href: '/admin/control-panel/om-daily',
     quickLinks: [
       { label: '24-Hour Plan', href: '/admin/control-panel/om-daily?horizon=1' },
@@ -138,8 +150,10 @@ const CATEGORIES: Category[] = [
     key: 'suite',
     title: 'OM App Suite',
     description: 'Internal productivity tools, analytics, documentation, and learning',
-    icon: <SuiteIcon sx={{ fontSize: 48 }} />,
+    icon: <SuiteIcon sx={{ fontSize: 28 }} />,
     color: '#0277bd',
+    bgLight: 'rgba(2, 119, 189, 0.08)',
+    bgDark: 'rgba(2, 119, 189, 0.15)',
     href: '/admin/control-panel/om-app-suite',
     quickLinks: [
       { label: 'OM Tasks', href: '/devel-tools/om-tasks' },
@@ -147,30 +161,153 @@ const CATEGORIES: Category[] = [
       { label: 'OM Library', href: '/church/om-spec' },
     ],
   },
+  {
+    key: 'dev-components',
+    title: 'Components In Development',
+    description: `${FEATURE_REGISTRY.filter(f => f.stage >= 1 && f.stage <= 4).length} features progressing through the SDLC pipeline (stages 1-4)`,
+    icon: <DevIcon sx={{ fontSize: 28 }} />,
+    color: '#7b1fa2',
+    bgLight: 'rgba(123, 31, 162, 0.08)',
+    bgDark: 'rgba(123, 31, 162, 0.15)',
+    href: '/admin/control-panel/components-in-development',
+    quickLinks: [
+      { label: 'Overview (All Stages)', href: '/admin/control-panel/components-in-development' },
+      { label: 'Stabilizing (Stage 4)', href: '/admin/control-panel/components-in-development?stage=4' },
+      { label: 'Review (Stage 3)', href: '/admin/control-panel/components-in-development?stage=3' },
+      { label: 'Development (Stage 2)', href: '/admin/control-panel/components-in-development?stage=2' },
+      { label: 'Prototype (Stage 1)', href: '/admin/control-panel/components-in-development?stage=1' },
+    ],
+  },
+  {
+    key: 'deprecated-components',
+    title: 'Deprecated Components',
+    description: `${DEPRECATION_REGISTRY.length} components tracked through the deprecation pipeline`,
+    icon: <DeprecatedIcon sx={{ fontSize: 28 }} />,
+    color: '#c62828',
+    bgLight: 'rgba(198, 40, 40, 0.08)',
+    bgDark: 'rgba(198, 40, 40, 0.15)',
+    href: '/admin/control-panel/deprecated-components',
+    quickLinks: [
+      { label: 'Overview (All Stages)', href: '/admin/control-panel/deprecated-components' },
+      { label: 'Deprecated', href: '/admin/control-panel/deprecated-components?stage=1' },
+      { label: 'Quarantined', href: '/admin/control-panel/deprecated-components?stage=2' },
+      { label: 'Verified', href: '/admin/control-panel/deprecated-components?stage=3' },
+    ],
+  },
 ];
 
-// ─── Stage display config ───────────────────────────────────────
+// ─── Component ──────────────────────────────────────────────────
 
-const STAGE_CONFIG: Record<number, { label: string; color: string; icon: React.ReactNode }> = {
-  1: { label: 'Prototype', color: '#e53935', icon: <PrototypeIcon sx={{ fontSize: 16 }} /> },
-  2: { label: 'Development', color: '#e53935', icon: <BuildIcon sx={{ fontSize: 16 }} /> },
-  3: { label: 'Review', color: '#f57c00', icon: <ReviewIcon sx={{ fontSize: 16 }} /> },
-  4: { label: 'Stabilizing', color: '#f57c00', icon: <StabilizingIcon sx={{ fontSize: 16 }} /> },
+/* ─── Pipeline Widget ─────────────────────────────────────────── */
+
+interface PipelineWidgetData {
+  overdue: number;
+  todayFollowups: number;
+  totalCrmLeads: number;
+  totalOnboarded: number;
+  pipeline: { stage_key: string; label: string; color: string; count: number; is_terminal: number }[];
+}
+
+const PipelineWidget: React.FC<{ isDark: boolean; navigate: ReturnType<typeof useNavigate> }> = ({ isDark, navigate }) => {
+  const [data, setData] = useState<PipelineWidgetData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/admin/church-lifecycle/dashboard', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setData(d); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2, mb: 2 }}>
+      <CircularProgress size={20} />
+    </Box>
+  );
+  if (!data) return null;
+
+  const activeStages = data.pipeline.filter(s => !s.is_terminal && s.count > 0);
+
+  return (
+    <div
+      className="om-admin-card"
+      onClick={() => navigate('/admin/control-panel/church-lifecycle')}
+      style={{ marginBottom: '1.5rem' }}
+    >
+      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        {/* Follow-up alerts */}
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {data.overdue > 0 && (
+            <Chip
+              icon={<OverdueIcon sx={{ fontSize: 16 }} />}
+              label={`${data.overdue} overdue`}
+              size="small"
+              sx={{
+                fontWeight: 600,
+                bgcolor: alpha('#f44336', isDark ? 0.2 : 0.1),
+                color: '#f44336',
+                border: `1px solid ${alpha('#f44336', 0.3)}`,
+                cursor: 'pointer',
+              }}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                navigate('/admin/control-panel/church-lifecycle');
+              }}
+            />
+          )}
+          {data.todayFollowups > 0 && (
+            <Chip
+              icon={<TodayIcon sx={{ fontSize: 16 }} />}
+              label={`${data.todayFollowups} today`}
+              size="small"
+              sx={{
+                fontWeight: 600,
+                bgcolor: alpha('#ff9800', isDark ? 0.2 : 0.1),
+                color: '#ff9800',
+                border: `1px solid ${alpha('#ff9800', 0.3)}`,
+                cursor: 'pointer',
+              }}
+            />
+          )}
+          <Chip
+            icon={<PipelineIcon sx={{ fontSize: 16 }} />}
+            label={`${data.totalCrmLeads} leads · ${data.totalOnboarded} onboarded`}
+            size="small"
+            variant="outlined"
+            sx={{ fontWeight: 500, cursor: 'pointer' }}
+          />
+        </div>
+
+        {/* Mini pipeline bar */}
+        {activeStages.length > 0 && (
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
+            {activeStages.slice(0, 6).map(s => (
+              <Chip
+                key={s.stage_key}
+                label={`${s.label}: ${s.count}`}
+                size="small"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '0.72rem',
+                  height: 24,
+                  bgcolor: alpha(s.color, isDark ? 0.2 : 0.1),
+                  color: s.color,
+                  border: `1px solid ${alpha(s.color, 0.25)}`,
+                  cursor: 'pointer',
+                }}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  navigate(`/admin/control-panel/church-lifecycle?stage=${s.stage_key}`);
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
-
-interface ChangeSetBrief {
-  id: number;
-  code: string;
-  title: string;
-  status: string;
-  git_branch: string | null;
-}
-
-/** Match a feature to a change set by its explicit changeSetCode */
-function findLinkedChangeSet(feature: FeatureEntry, changeSets: ChangeSetBrief[]): ChangeSetBrief | undefined {
-  if (!feature.changeSetCode) return undefined;
-  return changeSets.find(cs => cs.code === feature.changeSetCode);
-}
 
 // ─── Component ──────────────────────────────────────────────────
 
@@ -178,21 +315,6 @@ const AdminControlPanel: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const navigate = useNavigate();
-  const [changeSets, setChangeSets] = useState<ChangeSetBrief[]>([]);
-  const [csLoading, setCsLoading] = useState(true);
-
-  useEffect(() => {
-    apiClient.get('/admin/change-sets').then(res => {
-      setChangeSets(res.data?.change_sets || []);
-    }).catch(() => {}).finally(() => setCsLoading(false));
-  }, []);
-
-  const devFeatures = FEATURE_REGISTRY.filter(f => f.stage >= 1 && f.stage <= 4);
-  const grouped = [4, 3, 2, 1].map(stage => ({
-    stage,
-    ...STAGE_CONFIG[stage],
-    features: devFeatures.filter(f => f.stage === stage),
-  })).filter(g => g.features.length > 0);
 
   const BCrumb = [
     { to: '/', title: 'Home' },
@@ -202,81 +324,71 @@ const AdminControlPanel: React.FC = () => {
   return (
     <PageContainer title="Admin Control Panel" description="Orthodox Metrics Administration Hub">
       <Breadcrumb title="Admin Control Panel" items={BCrumb} />
-      <Box sx={{ p: { xs: 2, md: 3 } }}>
+      <Box sx={{ px: { xs: 1, md: 2 } }}>
         {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" fontWeight={700} gutterBottom>
+        <Box sx={{ mb: 3 }}>
+          <h2 className="om-admin-heading" style={{ marginTop: 0, marginBottom: '0.5rem' }}>
             Orthodox Metrics Administration
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
+          </h2>
+          <p className="om-admin-description" style={{ margin: 0 }}>
             Manage your Orthodox community platform. Select a category to get started.
-          </Typography>
+          </p>
         </Box>
 
-        {/* Category tiles — 2-column grid like Windows Control Panel */}
+        {/* Pipeline & Follow-up Widget */}
+        <PipelineWidget isDark={isDark} navigate={navigate} />
+
+        {/* Category tiles — 2-column grid */}
         <Box sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-          gap: 3,
+          gap: 2.5,
         }}>
           {CATEGORIES.map((cat) => (
-            <Paper
+            <div
               key={cat.key}
-              elevation={0}
-              sx={{
-                p: 3,
-                border: `1px solid ${isDark ? '#333' : '#e0e0e0'}`,
-                borderRadius: 2,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  borderColor: cat.color,
-                  bgcolor: alpha(cat.color, 0.03),
-                  boxShadow: `0 4px 20px ${alpha(cat.color, 0.12)}`,
-                  transform: 'translateY(-2px)',
-                },
-              }}
+              className="om-admin-card"
               onClick={() => navigate(cat.href)}
             >
-              <Box sx={{ display: 'flex', gap: 2.5 }}>
+              <div style={{ display: 'flex', gap: '1rem' }}>
                 {/* Icon */}
-                <Box sx={{
-                  width: 72,
-                  height: 72,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 2,
-                  bgcolor: alpha(cat.color, isDark ? 0.15 : 0.08),
-                  color: cat.color,
-                  flexShrink: 0,
-                }}>
+                <div
+                  className="om-admin-icon"
+                  style={{
+                    backgroundColor: isDark ? cat.bgDark : cat.bgLight,
+                    color: cat.color,
+                  }}
+                >
                   {cat.icon}
-                </Box>
+                </div>
 
                 {/* Content */}
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="h6" fontWeight={700} sx={{ color: cat.color, mb: 0.5, fontSize: '1.05rem' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 600,
+                      fontSize: '0.9375rem',
+                      color: cat.color,
+                      marginBottom: '0.25rem',
+                    }}
+                  >
                     {cat.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.4 }}>
+                  </div>
+                  <p className="om-text-tertiary" style={{
+                    margin: '0 0 0.75rem',
+                    fontSize: '0.8125rem',
+                    lineHeight: 1.5,
+                  }}>
                     {cat.description}
-                  </Typography>
+                  </p>
 
                   {/* Quick links */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
                     {cat.quickLinks.map((link) => (
-                      <MuiLink
+                      <span
                         key={link.href}
-                        component="span"
-                        variant="body2"
-                        sx={{
-                          cursor: 'pointer',
-                          textDecoration: 'none',
-                          color: theme.palette.primary.main,
-                          fontSize: '0.82rem',
-                          '&:hover': { textDecoration: 'underline' },
-                        }}
+                        className="om-quick-link"
                         onClick={(e: React.MouseEvent) => {
                           e.stopPropagation();
                           navigate(link.href, {
@@ -291,145 +403,15 @@ const AdminControlPanel: React.FC = () => {
                         }}
                       >
                         {link.label}
-                      </MuiLink>
+                      </span>
                     ))}
-                  </Box>
-                </Box>
-              </Box>
-            </Paper>
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
         </Box>
 
-        {/* ── Components In Development ─────────────────────────── */}
-        <Box sx={{ mt: 5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-            <DevIcon sx={{ color: '#7b1fa2', fontSize: 28 }} />
-            <Typography variant="h5" fontWeight={700}>
-              Components In Development
-            </Typography>
-            <Chip
-              label={`${devFeatures.length} features`}
-              size="small"
-              sx={{ bgcolor: alpha('#7b1fa2', 0.1), color: '#7b1fa2', fontWeight: 600, fontSize: '0.75rem' }}
-            />
-          </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, ml: 5.5 }}>
-            Features progressing through the SDLC pipeline. Stages 1-4 are visible to super_admin only.
-          </Typography>
-
-          {grouped.map(group => (
-            <Box key={group.stage} sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                <Box sx={{ color: group.color, display: 'flex', alignItems: 'center' }}>{group.icon}</Box>
-                <Typography variant="subtitle1" fontWeight={700} sx={{ color: group.color }}>
-                  Stage {group.stage}: {group.label}
-                </Typography>
-                <Chip
-                  label={group.features.length}
-                  size="small"
-                  sx={{
-                    height: 20, minWidth: 20,
-                    bgcolor: alpha(group.color, 0.12),
-                    color: group.color,
-                    fontWeight: 700,
-                    fontSize: '0.7rem',
-                  }}
-                />
-              </Box>
-
-              <Box sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '1fr 1fr 1fr' },
-                gap: 1.5,
-                ml: 3.5,
-              }}>
-                {group.features.map(feature => {
-                  const linkedCS = csLoading ? undefined : findLinkedChangeSet(feature, changeSets);
-                  return (
-                    <Paper
-                      key={feature.id}
-                      variant="outlined"
-                      sx={{
-                        p: 1.5,
-                        borderLeft: `3px solid ${group.color}`,
-                        cursor: feature.route ? 'pointer' : 'default',
-                        transition: 'all 0.15s ease',
-                        '&:hover': feature.route ? {
-                          bgcolor: alpha(group.color, 0.03),
-                          borderColor: group.color,
-                        } : {},
-                      }}
-                      onClick={() => feature.route && navigate(feature.route)}
-                    >
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
-                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.85rem', lineHeight: 1.3 }}>
-                          {feature.name}
-                        </Typography>
-                        {feature.route && (
-                          <Tooltip title="Open feature">
-                            <OpenIcon sx={{ fontSize: 14, color: 'text.disabled', ml: 0.5, flexShrink: 0 }} />
-                          </Tooltip>
-                        )}
-                      </Box>
-
-                      {feature.description && (
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75, lineHeight: 1.3 }}>
-                          {feature.description}
-                        </Typography>
-                      )}
-
-                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
-                        {feature.since && (
-                          <Chip
-                            label={`Since ${feature.since}`}
-                            size="small"
-                            variant="outlined"
-                            sx={{ height: 18, fontSize: '0.65rem', borderColor: isDark ? '#555' : '#ccc' }}
-                          />
-                        )}
-                        {csLoading ? (
-                          <Skeleton width={80} height={18} />
-                        ) : linkedCS ? (
-                          <Chip
-                            label={`${linkedCS.code} · ${linkedCS.status.replace(/_/g, ' ')}`}
-                            size="small"
-                            sx={{
-                              height: 18,
-                              fontSize: '0.65rem',
-                              fontWeight: 600,
-                              bgcolor: linkedCS.status === 'promoted'
-                                ? alpha('#388e3c', 0.12)
-                                : linkedCS.status === 'active'
-                                ? alpha('#1976d2', 0.12)
-                                : alpha('#757575', 0.1),
-                              color: linkedCS.status === 'promoted'
-                                ? '#388e3c'
-                                : linkedCS.status === 'active'
-                                ? '#1976d2'
-                                : '#757575',
-                              cursor: 'pointer',
-                            }}
-                            onClick={(e: React.MouseEvent) => {
-                              e.stopPropagation();
-                              navigate(`/admin/control-panel/om-daily/change-sets/${linkedCS.id}`);
-                            }}
-                          />
-                        ) : (
-                          <Chip
-                            label="No change set"
-                            size="small"
-                            variant="outlined"
-                            sx={{ height: 18, fontSize: '0.65rem', borderColor: isDark ? '#555' : '#ddd', color: 'text.disabled' }}
-                          />
-                        )}
-                      </Box>
-                    </Paper>
-                  );
-                })}
-              </Box>
-            </Box>
-          ))}
-        </Box>
       </Box>
     </PageContainer>
   );

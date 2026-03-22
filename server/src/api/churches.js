@@ -10,7 +10,7 @@ const ApiResponse = require('../utils/apiResponse');
 const router = express.Router();
 
 // Create middleware using requireRole - allows admin, super_admin, and manager access
-const requireChurchAccess = requireRole(['admin', 'super_admin', 'manager']);
+const requireChurchAccess = requireRole(['admin', 'super_admin', 'manager', 'church_admin', 'priest']);
 
 /**
  * Validate church access for user - ensures proper church_id scoping
@@ -48,6 +48,20 @@ function validateChurchAccess(user, churchId = null) {
     // If church_id specified, check if user has access to that specific church
     if (!user.church_id) {
       return { allowed: false, reason: 'Manager user has no church assignment' };
+    }
+    if (parseInt(churchId) !== user.church_id) {
+      return { allowed: false, reason: 'Access denied to church outside your assignment' };
+    }
+    return { allowed: true, church_id: user.church_id };
+  }
+
+  // Priests can access their assigned church only
+  if (user.role === 'priest') {
+    if (!churchId) {
+      return { allowed: true, church_id: user.church_id };
+    }
+    if (!user.church_id) {
+      return { allowed: false, reason: 'Priest user has no church assignment' };
     }
     if (parseInt(churchId) !== user.church_id) {
       return { allowed: false, reason: 'Access denied to church outside your assignment' };
@@ -159,6 +173,172 @@ router.get('/my/churches', requireAuth, async (req, res) => {
       code: 'DATABASE_ERROR',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     }));
+  }
+});
+
+// GET /api/my/church-settings - Full church data for the authenticated user's own church
+// Used by portal Parish Settings page. No admin role required — user can only read their own church.
+router.get('/church-settings', requireAuth, async (req, res) => {
+  try {
+    const user = req.user || req.session?.user;
+    if (!user) {
+      return res.status(401).json(ApiResponse(false, null, { message: 'Authentication required', code: 'AUTH_REQUIRED' }));
+    }
+
+    const churchId = user.church_id;
+    if (!churchId) {
+      return res.status(400).json(ApiResponse(false, null, { message: 'No church assignment found', code: 'CHURCH_ID_MISSING' }));
+    }
+
+    const [churches] = await getAppPool().query(`
+      SELECT
+        c.id, c.name, c.church_name, c.email, c.phone, c.address, c.city, c.state_province,
+        c.postal_code, c.country, c.preferred_language, c.timezone, c.currency,
+        c.calendar_type, c.tax_id, c.website, c.description_multilang, c.is_active,
+        c.database_name, c.setup_complete, c.has_baptism_records, c.has_marriage_records,
+        c.has_funeral_records, c.jurisdiction, c.jurisdiction_id, c.short_name,
+        c.logo_path, c.logo_dark_path, c.favicon_path,
+        c.primary_color, c.secondary_color,
+        c.created_at, c.updated_at,
+        j.name AS jurisdiction_name, j.abbreviation AS jurisdiction_abbr,
+        j.calendar_type AS jurisdiction_calendar_type
+      FROM churches c
+      LEFT JOIN jurisdictions j ON c.jurisdiction_id = j.id
+      WHERE c.id = ? AND c.is_active = 1
+    `, [churchId]);
+
+    if (churches.length === 0) {
+      return res.status(404).json(ApiResponse(false, null, { message: 'Church not found', code: 'CHURCH_NOT_FOUND' }));
+    }
+
+    const church = cleanRecord(churches[0]);
+
+    // Look up CRM match to provide jurisdiction suggestions
+    let crm_match = null;
+    try {
+      // First try direct link via provisioned_church_id
+      let [crmRows] = await getAppPool().query(`
+        SELECT uc.id, uc.jurisdiction, uc.jurisdiction_id,
+               j.name AS jurisdiction_name, j.abbreviation AS jurisdiction_abbr,
+               j.calendar_type AS jurisdiction_calendar_type
+        FROM us_churches uc
+        LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
+        WHERE uc.provisioned_church_id = ?
+        LIMIT 1
+      `, [churchId]);
+
+      // Fallback: match by city + state if no direct link
+      if (crmRows.length === 0 && church.city && church.state_province) {
+        [crmRows] = await getAppPool().query(`
+          SELECT uc.id, uc.jurisdiction, uc.jurisdiction_id,
+                 j.name AS jurisdiction_name, j.abbreviation AS jurisdiction_abbr,
+                 j.calendar_type AS jurisdiction_calendar_type
+          FROM us_churches uc
+          LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
+          WHERE uc.city = ? AND uc.state_code = ?
+          LIMIT 1
+        `, [church.city, church.state_province]);
+      }
+
+      if (crmRows.length > 0) {
+        const match = crmRows[0];
+        // If CRM has text jurisdiction but no jurisdiction_id, resolve from jurisdictions table
+        if (!match.jurisdiction_id && match.jurisdiction) {
+          const [jRows] = await getAppPool().query(
+            'SELECT id, name, abbreviation, calendar_type FROM jurisdictions WHERE abbreviation = ? OR name LIKE ? LIMIT 1',
+            [match.jurisdiction, `%${match.jurisdiction}%`]
+          );
+          if (jRows.length > 0) {
+            match.jurisdiction_id = jRows[0].id;
+            match.jurisdiction_name = jRows[0].name;
+            match.jurisdiction_abbr = jRows[0].abbreviation;
+            match.jurisdiction_calendar_type = jRows[0].calendar_type;
+          }
+        }
+        crm_match = match;
+      }
+    } catch (_) { /* CRM lookup is best-effort */ }
+
+    res.json(ApiResponse(true, { settings: church, crm_match }));
+  } catch (error) {
+    console.error('❌ Error fetching church settings:', error);
+    res.status(500).json(ApiResponse(false, null, { message: 'Failed to fetch church settings', code: 'DATABASE_ERROR' }));
+  }
+});
+
+// PUT /api/my/church-settings - Update church data for the authenticated user's own church
+// Portal users (church_admin, priest) can update their own church's basic info.
+router.put('/church-settings', requireAuth, async (req, res) => {
+  try {
+    const user = req.user || req.session?.user;
+    if (!user) {
+      return res.status(401).json(ApiResponse(false, null, { message: 'Authentication required', code: 'AUTH_REQUIRED' }));
+    }
+
+    // Only church_admin and above can update settings
+    const allowedRoles = ['super_admin', 'admin', 'church_admin', 'priest'];
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(403).json(ApiResponse(false, null, { message: 'Insufficient permissions', code: 'INSUFFICIENT_PERMISSIONS' }));
+    }
+
+    const churchId = user.church_id;
+    if (!churchId) {
+      return res.status(400).json(ApiResponse(false, null, { message: 'No church assignment found', code: 'CHURCH_ID_MISSING' }));
+    }
+
+    const body = req.body;
+
+    // Validate color format if provided
+    const colorRegex = /^#[0-9a-fA-F]{6}$/;
+    if (body.primary_color && !colorRegex.test(body.primary_color)) {
+      return res.status(400).json(ApiResponse(false, null, { message: 'Invalid primary_color format. Use #RRGGBB.', code: 'VALIDATION_ERROR' }));
+    }
+    if (body.secondary_color && !colorRegex.test(body.secondary_color)) {
+      return res.status(400).json(ApiResponse(false, null, { message: 'Invalid secondary_color format. Use #RRGGBB.', code: 'VALIDATION_ERROR' }));
+    }
+
+    // Build dynamic SET clause — only update fields present in request body
+    const allowedFields = [
+      'name', 'email', 'phone', 'website', 'address', 'city', 'state_province',
+      'postal_code', 'country', 'description_multilang', 'preferred_language',
+      'timezone', 'currency', 'calendar_type', 'tax_id', 'jurisdiction', 'jurisdiction_id',
+      'has_baptism_records', 'has_marriage_records', 'has_funeral_records',
+      'short_name', 'primary_color', 'secondary_color',
+    ];
+    const booleanFields = ['has_baptism_records', 'has_marriage_records', 'has_funeral_records'];
+    const nullableFields = ['short_name', 'primary_color', 'secondary_color', 'description_multilang', 'timezone', 'currency', 'tax_id', 'jurisdiction_id'];
+
+    const setClauses = [];
+    const params = [];
+    for (const field of allowedFields) {
+      if (body[field] === undefined) continue;
+      setClauses.push(`${field} = ?`);
+      if (booleanFields.includes(field)) {
+        params.push(body[field] ? 1 : 0);
+      } else if (nullableFields.includes(field)) {
+        params.push(body[field] || null);
+      } else {
+        params.push(body[field]);
+      }
+    }
+
+    if (setClauses.length === 0) {
+      return res.status(400).json(ApiResponse(false, null, { message: 'No fields to update', code: 'VALIDATION_ERROR' }));
+    }
+
+    setClauses.push('updated_at = NOW()');
+    params.push(churchId);
+
+    await getAppPool().query(
+      `UPDATE churches SET ${setClauses.join(', ')} WHERE id = ?`,
+      params,
+    );
+
+    console.log(`✅ Church ${churchId} settings updated by ${user.email}`);
+    res.json(ApiResponse(true, { message: 'Church settings updated successfully' }));
+  } catch (error) {
+    console.error('❌ Error updating church settings:', error);
+    res.status(500).json(ApiResponse(false, null, { message: 'Failed to update church settings', code: 'DATABASE_ERROR' }));
   }
 });
 
@@ -915,6 +1095,150 @@ router.post('/:id/field-mapper', requireAuth, requireChurchAccess, async (req, r
       code: 'DATABASE_ERROR',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     }));
+  }
+});
+
+// ============================================================================
+// CHURCH BRANDING — Logo upload / delete
+// ============================================================================
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const BRANDING_ROOT = path.resolve(__dirname, '../../storage/church-branding');
+const BRANDING_ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
+const BRANDING_MAX_SIZE = 2 * 1024 * 1024; // 2 MB
+
+function ensureBrandingDir(churchId) {
+  const dir = path.join(BRANDING_ROOT, String(churchId));
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function makeBrandingUpload(fieldName) {
+  const storage = multer.diskStorage({
+    destination: (req, _file, cb) => {
+      const churchId = req.user?.church_id;
+      if (!churchId) return cb(new Error('No church assignment'));
+      cb(null, ensureBrandingDir(churchId));
+    },
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      cb(null, `${fieldName}${ext}`);
+    },
+  });
+  return multer({
+    storage,
+    limits: { fileSize: BRANDING_MAX_SIZE },
+    fileFilter: (_req, file, cb) => {
+      if (BRANDING_ALLOWED_TYPES.includes(file.mimetype)) return cb(null, true);
+      cb(new Error('Only PNG, JPEG, SVG, and WebP images are allowed'));
+    },
+  }).single(fieldName);
+}
+
+function removeBrandingFile(churchId, currentPath) {
+  if (!currentPath) return;
+  // currentPath is like /church-branding/46/logo.png
+  const resolved = path.resolve(BRANDING_ROOT, '..', currentPath.replace(/^\//, ''));
+  if (fs.existsSync(resolved)) {
+    try { fs.unlinkSync(resolved); } catch (e) { console.error('Failed to delete old branding file:', e.message); }
+  }
+}
+
+// Allowed branding image fields
+const BRANDING_FIELDS = ['logo', 'logo-dark', 'favicon'];
+const BRANDING_DB_COLUMNS = { 'logo': 'logo_path', 'logo-dark': 'logo_dark_path', 'favicon': 'favicon_path' };
+
+// POST /api/my/church-branding/:field — Upload a branding image (logo, logo-dark, favicon)
+router.post('/church-branding/:field', requireAuth, (req, res) => {
+  const user = req.user || req.session?.user;
+  if (!user) return res.status(401).json({ success: false, error: 'Authentication required' });
+
+  const allowedRoles = ['super_admin', 'admin', 'church_admin'];
+  if (!allowedRoles.includes(user.role)) {
+    return res.status(403).json({ success: false, error: 'Insufficient permissions' });
+  }
+
+  const fieldName = req.params.field;
+  if (!BRANDING_FIELDS.includes(fieldName)) {
+    return res.status(400).json({ success: false, error: `Invalid field. Must be one of: ${BRANDING_FIELDS.join(', ')}` });
+  }
+
+  const churchId = user.church_id;
+  if (!churchId) return res.status(400).json({ success: false, error: 'No church assignment found' });
+
+  makeBrandingUpload(fieldName)(req, res, async (uploadErr) => {
+    if (uploadErr) return res.status(400).json({ success: false, error: uploadErr.message });
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
+
+    try {
+      const dbCol = BRANDING_DB_COLUMNS[fieldName];
+      const newPath = `/church-branding/${churchId}/${req.file.filename}`;
+
+      // Remove old file if exists
+      const [existing] = await getAppPool().query(
+        `SELECT ${dbCol} FROM churches WHERE id = ?`, [churchId]
+      );
+      if (existing.length > 0 && existing[0][dbCol]) {
+        removeBrandingFile(churchId, existing[0][dbCol]);
+      }
+
+      // Update DB
+      await getAppPool().query(
+        `UPDATE churches SET ${dbCol} = ?, updated_at = NOW() WHERE id = ?`,
+        [newPath, churchId]
+      );
+
+      console.log(`✅ Church ${churchId} ${fieldName} uploaded by ${user.email}`);
+      res.json({ success: true, path: newPath });
+    } catch (err) {
+      console.error(`Error uploading church ${fieldName}:`, err);
+      res.status(500).json({ success: false, error: `Failed to save ${fieldName}` });
+    }
+  });
+});
+
+// DELETE /api/my/church-branding/:field — Remove a branding image
+router.delete('/church-branding/:field', requireAuth, async (req, res) => {
+  try {
+    const user = req.user || req.session?.user;
+    if (!user) return res.status(401).json({ success: false, error: 'Authentication required' });
+
+    const allowedRoles = ['super_admin', 'admin', 'church_admin'];
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(403).json({ success: false, error: 'Insufficient permissions' });
+    }
+
+    const fieldName = req.params.field;
+    if (!BRANDING_FIELDS.includes(fieldName)) {
+      return res.status(400).json({ success: false, error: `Invalid field. Must be one of: ${BRANDING_FIELDS.join(', ')}` });
+    }
+
+    const churchId = user.church_id;
+    if (!churchId) return res.status(400).json({ success: false, error: 'No church assignment found' });
+
+    const dbCol = BRANDING_DB_COLUMNS[fieldName];
+
+    // Get current path and remove file
+    const [existing] = await getAppPool().query(
+      `SELECT ${dbCol} FROM churches WHERE id = ?`, [churchId]
+    );
+    if (existing.length > 0 && existing[0][dbCol]) {
+      removeBrandingFile(churchId, existing[0][dbCol]);
+    }
+
+    // Clear in DB
+    await getAppPool().query(
+      `UPDATE churches SET ${dbCol} = NULL, updated_at = NOW() WHERE id = ?`,
+      [churchId]
+    );
+
+    console.log(`✅ Church ${churchId} ${fieldName} removed by ${user.email}`);
+    res.json({ success: true, message: `${fieldName} removed` });
+  } catch (err) {
+    console.error(`Error removing church branding:`, err);
+    res.status(500).json({ success: false, error: 'Failed to remove branding image' });
   }
 });
 

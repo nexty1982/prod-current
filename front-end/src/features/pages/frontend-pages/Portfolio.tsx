@@ -11,7 +11,7 @@ import React from 'react';
 import PageContainer from '@/shared/ui/PageContainer';
 import Banner from '@/components/frontend-pages/portfolio/Banner';
 import C2a from '@/components/frontend-pages/shared/c2a';
-import Footer from '@/components/frontend-pages/shared/footer';
+import Footer from '@/components/frontend-pages/shared/footer/SiteFooter';
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 
 const Portfolio: React.FC = () => {

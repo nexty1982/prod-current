@@ -10,10 +10,10 @@ class BackupEngine {
     this.backupRoot = config.backupRoot || '/var/backups/orthodoxmetrics';
     this.prodRoot = config.prodRoot || '/var/www/orthodoxmetrics/prod';
     this.dbConfig = config.database || {
-      host: 'localhost',
-      user: 'orthodoxmetrics_user',
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'orthodoxmetrics_user',
       password: process.env.DB_PASSWORD,
-      database: 'orthodoxmetrics_db'
+      database: process.env.DB_NAME || 'orthodoxmetrics_db'
     };
   }
 

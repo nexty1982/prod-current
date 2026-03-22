@@ -140,7 +140,7 @@ const Customizer: FC = () => {
         <Fab
           color="primary"
           aria-label="settings"
-          sx={{ position: "fixed", right: "25px", bottom: "15px" }}
+          sx={{ position: "fixed", right: "24px", bottom: "24px", zIndex: 1300 }}
           onClick={() => setShowDrawer(true)}
         >
           <ThreeBarCross />

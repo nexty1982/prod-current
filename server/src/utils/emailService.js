@@ -1065,6 +1065,80 @@ const sendInviteEmail = async (toEmail, inviteUrl, role, accountExpiresAt) => {
   }
 };
 
+// Send email verification link
+const sendVerificationEmail = async (toEmail, verificationUrl, firstName) => {
+  try {
+    const transporter = await createTransporter();
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'Orthodox Metrics';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
+    const displayName = firstName || 'User';
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .header { background: linear-gradient(135deg, #5d87ff 0%, #8c249d 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { margin: 0 0 5px 0; font-size: 24px; }
+        .header p { margin: 0; opacity: 0.9; }
+        .content { padding: 30px; }
+        .verify-box { background: #f0f4ff; border: 2px solid #5d87ff; border-radius: 10px; padding: 25px; text-align: center; margin: 25px 0; }
+        .button { display: inline-block; background: #5d87ff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; }
+        .info { background: #e8f4f8; border-left: 4px solid #5d87ff; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Verify Your Email</h1>
+        <p>Orthodox Metrics</p>
+    </div>
+    <div class="content">
+        <p>Hello ${displayName},</p>
+        <p>Please verify your email address to ensure the security of your account and enable all platform features.</p>
+
+        <div class="verify-box">
+            <p style="margin: 0 0 15px 0; color: #555;">Click the button below to verify your email:</p>
+            <a href="${verificationUrl}" class="button">Verify Email Address</a>
+        </div>
+
+        <p><strong>Direct link:</strong> <a href="${verificationUrl}">${verificationUrl}</a></p>
+
+        <div class="info">
+            <p style="margin: 0;"><strong>Why verify?</strong> Email verification confirms that you have access to this email address, protects your account from unauthorized access, and enables important notifications like password resets and security alerts.</p>
+        </div>
+
+        <p style="color: #888; font-size: 14px;">This verification link expires in 24 hours. If you did not create an account on Orthodox Metrics, you can safely ignore this email.</p>
+    </div>
+    <div class="footer">
+        <p>&copy; ${new Date().getFullYear()} Orthodox Metrics &mdash; Digital Church Metrics</p>
+        <p>This is an automated message. Please do not reply to this email.</p>
+    </div>
+</body>
+</html>
+    `;
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: toEmail,
+      subject: 'Verify Your Email - Orthodox Metrics',
+      html: htmlContent,
+      text: `Hello ${displayName},\n\nPlease verify your email address by visiting the link below:\n\n${verificationUrl}\n\nThis link expires in 24 hours.\n\nIf you did not create this account, you can safely ignore this email.\n\n- Orthodox Metrics`
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Verification email sent to ${toEmail}:`, info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error(`❌ Failed to send verification email to ${toEmail}:`, error.message);
+    throw error;
+  }
+};
+
 module.exports = {
   sendOCRReceipt,
   sendSessionVerification,
@@ -1076,5 +1150,6 @@ module.exports = {
   sendBackupNotification,
   sendContactEmail,
   sendPasswordResetEmail,
-  sendInviteEmail
+  sendInviteEmail,
+  sendVerificationEmail
 };

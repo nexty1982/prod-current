@@ -9,6 +9,8 @@
 
 // ─── Types ──────────────────────────────────────────────────
 
+export type OrthodoxCalendar = 'new' | 'old';
+
 export interface DateRestriction {
   message: string;
   severity: 'error' | 'warning';
@@ -26,6 +28,14 @@ export interface RestrictionPeriod {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Julian-to-Gregorian offset in days.
+ * Old Calendar (Julian) fixed feasts fall 13 days later on the civil
+ * (Gregorian) calendar compared to New Calendar (Revised Julian) churches.
+ * This offset is valid for the 21st–22nd centuries (1900-2100).
+ */
+const JULIAN_OFFSET_DAYS = 13;
+
 function toISO(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -41,6 +51,54 @@ function parseDate(dateStr: string): Date | null {
   if (!dateStr) return null;
   const d = new Date(dateStr + 'T12:00:00');
   return isNaN(d.getTime()) ? null : d;
+}
+
+// ─── Old Calendar date display helper ────────────────────────
+
+const MONTH_ABBREVS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * Shift a "New Calendar" date string like "Dec 25" or "Aug 1–14" by +13 days
+ * to produce the Old Calendar (Julian) civil-calendar equivalent.
+ */
+export function toOldCalendarDates(newCalDates: string): string {
+  // Ranges: "Dec 25 – Jan 6", "Aug 1–14", "Nov 15 – Dec 24"
+  const rangeMatch = newCalDates.match(/^(\w+)\s+(\d+)\s*[–-]\s*(?:(\w+)\s+)?(\d+)$/);
+  if (rangeMatch) {
+    const startMonth = rangeMatch[1];
+    const startDay = parseInt(rangeMatch[2], 10);
+    const endMonth = rangeMatch[3] || startMonth;
+    const endDay = parseInt(rangeMatch[4], 10);
+
+    const startIdx = MONTH_ABBREVS.indexOf(startMonth);
+    const endIdx = MONTH_ABBREVS.indexOf(endMonth);
+    if (startIdx === -1 || endIdx === -1) return newCalDates;
+
+    const sd = addDays(new Date(2026, startIdx, startDay), JULIAN_OFFSET_DAYS);
+    const ed = addDays(new Date(2026, endIdx, endDay), JULIAN_OFFSET_DAYS);
+
+    const sm = MONTH_ABBREVS[sd.getMonth()];
+    const em = MONTH_ABBREVS[ed.getMonth()];
+
+    if (sm === em) {
+      return `${sm} ${sd.getDate()}–${ed.getDate()}`;
+    }
+    return `${sm} ${sd.getDate()} – ${em} ${ed.getDate()}`;
+  }
+
+  // Single date: "Feb 2", "Mar 25", etc.
+  const singleMatch = newCalDates.match(/^(\w+)\s+(\d+)$/);
+  if (singleMatch) {
+    const monthStr = singleMatch[1];
+    const day = parseInt(singleMatch[2], 10);
+    const idx = MONTH_ABBREVS.indexOf(monthStr);
+    if (idx === -1) return newCalDates;
+    const shifted = addDays(new Date(2026, idx, day), JULIAN_OFFSET_DAYS);
+    return `${MONTH_ABBREVS[shifted.getMonth()]} ${shifted.getDate()}`;
+  }
+
+  // Moveable or special (e.g. "Pascha − 7", "Always") — unchanged
+  return newCalDates;
 }
 
 // ─── Pascha (Julian → Gregorian) ────────────────────────────
@@ -240,9 +298,19 @@ export function getFuneralDateRestriction(
 
 // ─── Year Restriction Enumerator (for calendar viewer) ──────
 
-export function getRestrictionsForYear(year: number): RestrictionPeriod[] {
+/**
+ * Returns all restriction periods for a given year.
+ * @param calendar 'new' = Revised Julian (fixed feasts on Gregorian dates),
+ *                 'old' = Julian (fixed feasts shifted +13 days on Gregorian calendar).
+ *                 Moveable feasts (Pascha-based) are the same for both.
+ */
+export function getRestrictionsForYear(year: number, calendar: OrthodoxCalendar = 'new'): RestrictionPeriod[] {
   const periods: RestrictionPeriod[] = [];
   const pascha = calculatePascha(year);
+  const offset = calendar === 'old' ? JULIAN_OFFSET_DAYS : 0;
+
+  /** Apply Julian offset to a fixed-date Date object */
+  const fixedDate = (d: Date): Date => (offset ? addDays(d, offset) : d);
 
   // Helper to add a range of dates
   const addRange = (
@@ -271,17 +339,17 @@ export function getRestrictionsForYear(year: number): RestrictionPeriod[] {
   // ── Baptism restrictions ──
 
   // Christmas–Theophany
-  addRange(new Date(year, 0, 1), new Date(year, 0, 6), 'Christmas–Theophany', 'baptism');
-  addRange(new Date(year, 11, 25), new Date(year, 11, 31), 'Christmas–Theophany', 'baptism');
+  addRange(fixedDate(new Date(year, 0, 1)), fixedDate(new Date(year, 0, 6)), 'Christmas–Theophany', 'baptism');
+  addRange(fixedDate(new Date(year, 11, 25)), fixedDate(new Date(year, 11, 31)), 'Christmas–Theophany', 'baptism');
 
   // Fixed feasts
-  addDay(new Date(year, 1, 2), 'Presentation', 'baptism');
-  addDay(new Date(year, 2, 25), 'Annunciation', 'baptism');
-  addDay(new Date(year, 7, 6), 'Transfiguration', 'baptism');
-  addDay(new Date(year, 8, 14), 'Elevation of the Cross', 'baptism');
+  addDay(fixedDate(new Date(year, 1, 2)), 'Presentation', 'baptism');
+  addDay(fixedDate(new Date(year, 2, 25)), 'Annunciation', 'baptism');
+  addDay(fixedDate(new Date(year, 7, 6)), 'Transfiguration', 'baptism');
+  addDay(fixedDate(new Date(year, 8, 14)), 'Elevation of the Cross', 'baptism');
 
   // Dormition Fast
-  addRange(new Date(year, 7, 1), new Date(year, 7, 14), 'Dormition Fast', 'baptism');
+  addRange(fixedDate(new Date(year, 7, 1)), fixedDate(new Date(year, 7, 14)), 'Dormition Fast', 'baptism');
 
   // Palm Sunday
   addDay(addDays(pascha, -7), 'Palm Sunday', 'baptism');
@@ -303,29 +371,29 @@ export function getRestrictionsForYear(year: number): RestrictionPeriod[] {
   // Pentecost
   addDay(addDays(pascha, 49), 'Pentecost', 'marriage');
 
-  // Apostles' Fast
+  // Apostles' Fast (start is moveable, end is fixed: Jun 28 / Jul 11)
   const apostlesStart = addDays(pascha, 57);
-  const apostlesEnd = new Date(year, 5, 28);
+  const apostlesEnd = fixedDate(new Date(year, 5, 28));
   if (apostlesStart <= apostlesEnd) {
     addRange(apostlesStart, apostlesEnd, 'Apostles\' Fast', 'marriage');
   }
 
   // Dormition Fast
-  addRange(new Date(year, 7, 1), new Date(year, 7, 14), 'Dormition Fast', 'marriage');
+  addRange(fixedDate(new Date(year, 7, 1)), fixedDate(new Date(year, 7, 14)), 'Dormition Fast', 'marriage');
 
   // Nativity Fast
-  addRange(new Date(year, 10, 15), new Date(year, 11, 24), 'Nativity Fast', 'marriage');
+  addRange(fixedDate(new Date(year, 10, 15)), fixedDate(new Date(year, 11, 24)), 'Nativity Fast', 'marriage');
 
   // Christmas–Theophany
-  addRange(new Date(year, 0, 1), new Date(year, 0, 6), 'Christmas–Theophany', 'marriage');
-  addRange(new Date(year, 11, 25), new Date(year, 11, 31), 'Christmas–Theophany', 'marriage');
+  addRange(fixedDate(new Date(year, 0, 1)), fixedDate(new Date(year, 0, 6)), 'Christmas–Theophany', 'marriage');
+  addRange(fixedDate(new Date(year, 11, 25)), fixedDate(new Date(year, 11, 31)), 'Christmas–Theophany', 'marriage');
 
   // Fixed feasts
-  addDay(new Date(year, 7, 29), 'Beheading of St. John', 'marriage');
-  addDay(new Date(year, 8, 14), 'Elevation of the Cross', 'marriage');
-  addDay(new Date(year, 1, 2), 'Presentation', 'marriage');
-  addDay(new Date(year, 2, 25), 'Annunciation', 'marriage');
-  addDay(new Date(year, 7, 6), 'Transfiguration', 'marriage');
+  addDay(fixedDate(new Date(year, 7, 29)), 'Beheading of St. John', 'marriage');
+  addDay(fixedDate(new Date(year, 8, 14)), 'Elevation of the Cross', 'marriage');
+  addDay(fixedDate(new Date(year, 1, 2)), 'Presentation', 'marriage');
+  addDay(fixedDate(new Date(year, 2, 25)), 'Annunciation', 'marriage');
+  addDay(fixedDate(new Date(year, 7, 6)), 'Transfiguration', 'marriage');
 
   // ── Funeral restrictions ──
 
@@ -339,13 +407,13 @@ export function getRestrictionsForYear(year: number): RestrictionPeriod[] {
   addDay(addDays(pascha, 49), 'Pentecost', 'funeral', 'warning');
 
   // Fixed feasts
-  addDay(new Date(year, 11, 25), 'Nativity of Christ', 'funeral', 'warning');
-  addDay(new Date(year, 0, 6), 'Theophany', 'funeral', 'warning');
-  addDay(new Date(year, 2, 25), 'Annunciation', 'funeral', 'warning');
-  addDay(new Date(year, 7, 6), 'Transfiguration', 'funeral', 'warning');
-  addDay(new Date(year, 7, 15), 'Dormition of the Theotokos', 'funeral', 'warning');
-  addDay(new Date(year, 8, 8), 'Nativity of the Theotokos', 'funeral', 'warning');
-  addDay(new Date(year, 8, 14), 'Elevation of the Cross', 'funeral', 'warning');
+  addDay(fixedDate(new Date(year, 11, 25)), 'Nativity of Christ', 'funeral', 'warning');
+  addDay(fixedDate(new Date(year, 0, 6)), 'Theophany', 'funeral', 'warning');
+  addDay(fixedDate(new Date(year, 2, 25)), 'Annunciation', 'funeral', 'warning');
+  addDay(fixedDate(new Date(year, 7, 6)), 'Transfiguration', 'funeral', 'warning');
+  addDay(fixedDate(new Date(year, 7, 15)), 'Dormition of the Theotokos', 'funeral', 'warning');
+  addDay(fixedDate(new Date(year, 8, 8)), 'Nativity of the Theotokos', 'funeral', 'warning');
+  addDay(fixedDate(new Date(year, 8, 14)), 'Elevation of the Cross', 'funeral', 'warning');
 
   return periods;
 }

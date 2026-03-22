@@ -1,8 +1,10 @@
 import { Box, Button, Container, Stack, Typography, useTheme } from '@mui/material';
+import { useLanguage } from '@/context/LanguageContext';
 
 const C2a = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const { t } = useLanguage();
 
   return (
     <Box
@@ -33,8 +35,8 @@ const C2a = () => {
             mb: 1,
           }}
         >
-          Start today with your{' '}
-          <Box component="span" sx={{ color: '#D4AF37' }}>parish</Box>.
+          {t('cta.heading1')}{' '}
+          <Box component="span" sx={{ color: '#D4AF37' }}>{t('cta.heading1_highlight')}</Box>.
         </Typography>
         <Typography
           variant="h3"
@@ -47,8 +49,8 @@ const C2a = () => {
             mb: 3,
           }}
         >
-          We'll handle the{' '}
-          <Box component="span" sx={{ color: '#D4AF37' }}>records</Box>.
+          {t('cta.heading2')}{' '}
+          <Box component="span" sx={{ color: '#D4AF37' }}>{t('cta.heading2_highlight')}</Box>.
         </Typography>
 
         <Typography
@@ -62,7 +64,7 @@ const C2a = () => {
             lineHeight: 1.7,
           }}
         >
-          Become an early adopter and assist in building an Orthodox Church Metrics platform!
+          {t('cta.subtitle')}
         </Typography>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" mb={3}>
@@ -86,7 +88,7 @@ const C2a = () => {
               },
             }}
           >
-            Register Your Church &rarr;
+            {t('cta.btn_register')} &rarr;
           </Button>
           <Button
             variant="outlined"
@@ -107,7 +109,7 @@ const C2a = () => {
               },
             }}
           >
-            Request Information 
+            {t('cta.btn_info')}
           </Button>
         </Stack>
 

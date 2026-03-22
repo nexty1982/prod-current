@@ -145,7 +145,7 @@ function OmAssistantInner({ pageContext }: OmAssistantProps) {
       )}
 
       {/* FAB — responsive positioning */}
-      <Box sx={{ position: 'fixed', bottom: { xs: 24, sm: 80 }, right: 24, zIndex: 1301 }}>
+      <Box sx={{ position: 'fixed', bottom: { xs: 80, sm: 88 }, right: 24, zIndex: 1301 }}>
         <Fab
           color="primary"
           onClick={() => setOpen(prev => !prev)}

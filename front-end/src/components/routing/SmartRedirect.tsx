@@ -69,9 +69,9 @@ const SmartRedirect: React.FC = () => {
             if (contextUser.email === 'frjames@ssppoc.org') {
               safeNavigate('/portal', { replace: true });
             }
-            // Redirect based on role: super_admin/admin to Super Dashboard, priest and others to User Dashboard
+            // Redirect based on role: super_admin/admin to Control Panel, priest and others to Portal
             else if (contextUser.role === 'super_admin' || contextUser.role === 'admin') {
-              safeNavigate('/dashboards/super', { replace: true });
+              safeNavigate('/admin/control-panel', { replace: true });
             } else if (contextUser.role === 'priest') {
               safeNavigate('/portal', { replace: true });
             } else {

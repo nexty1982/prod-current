@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Orthodox Metrics public page design system */
+@import './styles/om-design-system.css';
+@import './styles/om-components.css';
 
 /* Custom animations for OMAI Logger */
 @keyframes slide-in-right {

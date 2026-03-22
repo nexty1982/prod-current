@@ -140,7 +140,7 @@ router.get('/dashboard/extended', requireAuth, async (req, res) => {
 
     // Phase groups — items sharing the same source metadata (e.g., "church-onboarding-pipeline")
     const [phaseGroups] = await pool.query(
-      `SELECT source, category, COUNT(*) as total, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as active_count, GROUP_CONCAT(CONCAT(id, ':', title, ':', status, ':', priority) ORDER BY FIELD(status,'in_progress','todo','review','backlog','done'), FIELD(priority,'critical','high','medium','low') SEPARATOR '||') as items_summary FROM om_daily_items WHERE source IS NOT NULL AND source != 'human' AND status != 'cancelled' GROUP BY source, category HAVING total > 1 ORDER BY active_count DESC, total DESC`
+      `SELECT source, category, COUNT(*) as total, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as active_count, GROUP_CONCAT(CONCAT(id, ':', title, ':', status, ':', priority) ORDER BY FIELD(status,'in_progress','todo','review','backlog','done'), FIELD(priority,'critical','high','medium','low') SEPARATOR '||') as items_summary FROM om_daily_items WHERE source IS NOT NULL AND source != 'human' AND status != 'cancelled' GROUP BY source, category HAVING total > 1 AND SUM(CASE WHEN status != 'done' THEN 1 ELSE 0 END) > 0 ORDER BY active_count DESC, total DESC`
     );
 
     res.json({
@@ -1108,7 +1108,7 @@ const SOURCE_LABELS = { agent: 'source:agent', human: 'source:human' };
 const STATUS_LABELS_GH = { in_progress: 'status:in_progress', review: 'status:review', backlog: 'status:backlog', todo: 'status:todo' };
 const BRANCH_TYPE_LABELS = { bugfix: 'type:bugfix', new_feature: 'type:new-feature', existing_feature: 'type:existing-feature', patch: 'type:patch' };
 const BRANCH_TYPE_PREFIXES = { bugfix: 'BF', new_feature: 'NF', existing_feature: 'EF', patch: 'PA' };
-const AGENT_TOOL_SHORT = { windsurf: 'windsurf', claude_cli: 'claude-cli', cursor: 'cursor' };
+const AGENT_TOOL_SHORT = { windsurf: 'windsurf', claude_cli: 'claude-cli', cursor: 'cursor', github_copilot: 'gh-copilot' };
 
 // Cache of labels known to exist in the repo (populated lazily)
 let _knownLabels = null;

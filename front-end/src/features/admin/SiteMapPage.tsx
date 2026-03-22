@@ -75,9 +75,6 @@ const ADMIN_MAP: SiteNode[] = [
       { label: 'Analytics', path: '/dashboards/analytics', icon: <AnalyticsIcon /> },
       { label: 'Ecommerce', path: '/dashboards/ecommerce', icon: <DashIcon /> },
       { label: 'OrthodoxMetrics', path: '/dashboards/orthodoxmetrics', icon: <DashIcon />, roles: ['admin', 'super_admin'] },
-      { label: 'User Dashboard', path: '/dashboards/user', icon: <DashIcon /> },
-      { label: 'Super Dashboard', path: '/dashboards/super', icon: <DashIcon />, roles: ['admin', 'super_admin'] },
-      { label: 'Super Dashboard Customizer', path: '/dashboards/super/customize', icon: <SettingsIcon />, roles: ['super_admin'] },
     ],
   },
   {
@@ -95,7 +92,7 @@ const ADMIN_MAP: SiteNode[] = [
       { label: 'OCR Studio', path: '/portal/ocr', icon: <OcrIcon /> },
       { label: 'OCR Jobs', path: '/portal/ocr/jobs', icon: <OcrIcon /> },
       { label: 'Sacramental Restrictions', path: '/portal/sacramental-restrictions', icon: <CalendarIcon /> },
-      { label: 'Profile', path: '/portal/profile', icon: <ProfileIcon /> },
+      { label: 'Profile', path: '/account/profile', icon: <ProfileIcon /> },
       { label: 'User Guide', path: '/portal/guide', icon: <HelpIcon /> },
     ],
   },
@@ -324,7 +321,7 @@ const USER_MAP: SiteNode[] = [
   },
   {
     label: 'My Account', icon: <ProfileIcon />, children: [
-      { label: 'Profile', path: '/portal/profile', icon: <ProfileIcon /> },
+      { label: 'Profile', path: '/account/profile', icon: <ProfileIcon /> },
       { label: 'User Guide', path: '/portal/guide', icon: <HelpIcon /> },
     ],
   },

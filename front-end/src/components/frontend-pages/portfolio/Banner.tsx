@@ -1,6 +1,9 @@
 import { Box, Typography, Container, Grid } from '@mui/material';
+import { useLanguage } from '@/context/LanguageContext';
 
 const Banner = () => {
+  const { t } = useLanguage();
+
   return (<>
     <Box
       bgcolor="primary.light"
@@ -25,7 +28,7 @@ const Banner = () => {
               lg: 8
             }}>
             <Typography color="primary.main" textTransform="uppercase" fontSize="13px">
-              Portfolio
+              {t('portfolio.badge')}
             </Typography>
             <Typography
               variant="h1"
@@ -40,7 +43,7 @@ const Banner = () => {
                 },
               }}
             >
-              Explore Our Latest Works
+              {t('portfolio.title')}
             </Typography>
           </Grid>
         </Grid>

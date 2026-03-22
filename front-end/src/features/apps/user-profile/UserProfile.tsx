@@ -13,13 +13,20 @@ import {
     CardContent,
     Chip,
     CircularProgress,
+    Divider,
+    Grid,
     IconButton,
     InputAdornment,
     Snackbar,
     Stack,
+    Tab,
+    Tabs,
     TextField,
     Typography,
+    useTheme,
 } from '@mui/material';
+import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
+import VpnKeyTwoToneIcon from '@mui/icons-material/VpnKeyTwoTone';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
 
@@ -37,8 +44,29 @@ interface PasswordData {
   confirmPassword: string;
 }
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel({ children, value, index }: TabPanelProps) {
+  return (
+    <div role="tabpanel" hidden={value !== index}>
+      {value === index && <Box sx={{ p: 0 }}>{children}</Box>}
+    </div>
+  );
+}
+
+const tabLabels = [
+  { label: 'User Profile', icon: <PersonOutlineTwoToneIcon />, caption: 'Profile Settings' },
+  { label: 'Change Password', icon: <VpnKeyTwoToneIcon />, caption: 'Update Profile Security' },
+];
+
 const UserProfile = () => {
   const { user } = useAuth();
+  const theme = useTheme();
+  const [tabValue, setTabValue] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -197,210 +225,241 @@ const UserProfile = () => {
     <PageContainer title="Account Settings" description="Manage your account settings">
       <Breadcrumb title="Account Settings" items={BCrumb} />
 
-      <Grid2 container spacing={3}>
-        {/* Account Info */}
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h5" fontWeight={600} mb={3}>
-                Account Info
-              </Typography>
+      <Card>
+        <CardContent>
+          <Typography variant="h5" gutterBottom>
+            Account Settings
+          </Typography>
+          <Divider sx={{ mb: 3 }} />
 
-              <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
-                <RoleAvatar role={user?.role} size={80} sx={{ mb: 2 }} />
-                <Chip
-                  label={getRoleLabel(user?.role)}
-                  size="small"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                  }}
-                />
-              </Box>
-
-              <Stack spacing={2}>
-                <TextField
-                  label="Email"
-                  value={profileData.email}
-                  disabled
-                  fullWidth
-                  size="small"
-                  helperText="Email cannot be changed"
-                />
-                <TextField
-                  label="Role"
-                  value={getRoleLabel(user?.role)}
-                  disabled
-                  fullWidth
-                  size="small"
-                />
-                {user?.church_name && (
-                  <TextField
-                    label="Church"
-                    value={user.church_name}
-                    disabled
-                    fullWidth
-                    size="small"
+          <Grid container spacing={3}>
+            {/* Left side: Vertical tabs */}
+            <Grid size={{ xs: 12, md: 4, lg: 3 }}>
+              <Tabs
+                value={tabValue}
+                onChange={(_, newValue) => setTabValue(newValue)}
+                orientation="vertical"
+                variant="scrollable"
+                sx={{
+                  '& .MuiTab-root': {
+                    minHeight: 'auto',
+                    py: 1.5,
+                    px: 2,
+                    mr: 2,
+                    mb: 1,
+                    borderRadius: 1.5,
+                    alignItems: 'flex-start',
+                    textAlign: 'left',
+                    justifyContent: 'flex-start',
+                  },
+                  '& .Mui-selected': {
+                    bgcolor:
+                      theme.palette.mode === 'dark'
+                        ? 'primary.dark'
+                        : 'primary.light',
+                    color: 'primary.main',
+                  },
+                  '& .MuiTabs-indicator': {
+                    display: 'none',
+                  },
+                }}
+              >
+                {tabLabels.map((tab, idx) => (
+                  <Tab
+                    key={idx}
+                    icon={tab.icon}
+                    iconPosition="start"
+                    label={
+                      <Box sx={{ ml: 1 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: tabValue === idx ? 600 : 400 }}>
+                          {tab.label}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {tab.caption}
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ textTransform: 'none' }}
                   />
-                )}
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid2>
+                ))}
+              </Tabs>
+            </Grid>
 
-        {/* Change Password */}
-        <Grid2 size={{ xs: 12, md: 8 }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h5" fontWeight={600} mb={1}>
-                Change Password
-              </Typography>
-              <Typography variant="body2" color="text.secondary" mb={3}>
-                To change your password please confirm here
-              </Typography>
+            {/* Right side: Tab content */}
+            <Grid size={{ xs: 12, md: 8, lg: 9 }}>
+              {/* ── Tab 0: User Profile ── */}
+              <TabPanel value={tabValue} index={0}>
+                {/* Account overview */}
+                <Box display="flex" alignItems="center" gap={2} mb={3}>
+                  <RoleAvatar role={user?.role} size={80} />
+                  <Box>
+                    <Typography variant="h6" fontWeight={600}>
+                      {profileData.display_name || profileData.email}
+                    </Typography>
+                    <Chip
+                      label={getRoleLabel(user?.role)}
+                      size="small"
+                      sx={{ fontWeight: 600, mt: 0.5 }}
+                    />
+                    {user?.church_name && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        {user.church_name}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
 
-              <Stack spacing={2.5}>
-                <TextField
-                  label="Current Password"
-                  type={showPasswords.current ? 'text' : 'password'}
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange('currentPassword')}
-                  fullWidth
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPasswords(p => ({ ...p, current: !p.current }))}
-                          edge="end"
-                          size="small"
-                        >
-                          {showPasswords.current ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <TextField
-                  label="New Password"
-                  type={showPasswords.new ? 'text' : 'password'}
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange('newPassword')}
-                  fullWidth
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPasswords(p => ({ ...p, new: !p.new }))}
-                          edge="end"
-                          size="small"
-                        >
-                          {showPasswords.new ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <TextField
-                  label="Confirm Password"
-                  type={showPasswords.confirm ? 'text' : 'password'}
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange('confirmPassword')}
-                  fullWidth
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPasswords(p => ({ ...p, confirm: !p.confirm }))}
-                          edge="end"
-                          size="small"
-                        >
-                          {showPasswords.confirm ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleChangePassword}
-                  disabled={saving}
-                  sx={{ alignSelf: 'flex-start' }}
-                >
-                  {saving ? <CircularProgress size={20} /> : 'Change Password'}
-                </Button>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid2>
+                <Divider sx={{ mb: 3 }} />
 
-        {/* Personal Details */}
-        <Grid2 size={{ xs: 12 }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h5" fontWeight={600} mb={1}>
-                Personal Details
-              </Typography>
-              <Typography variant="body2" color="text.secondary" mb={3}>
-                To change your personal detail, edit and save from here
-              </Typography>
-
-              <Grid2 container spacing={3}>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <TextField
-                    label="Your Name"
-                    value={profileData.display_name}
-                    onChange={handleProfileChange('display_name')}
-                    fullWidth
-                  />
+                {/* Editable fields */}
+                <Grid2 container spacing={3}>
+                  <Grid2 size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      label="Email Address"
+                      value={profileData.email}
+                      disabled
+                      fullWidth
+                      helperText="Email cannot be changed"
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      label="Display Name"
+                      value={profileData.display_name}
+                      onChange={handleProfileChange('display_name')}
+                      fullWidth
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      label="Organization"
+                      value={profileData.company}
+                      onChange={handleProfileChange('company')}
+                      fullWidth
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      label="Phone Number"
+                      value={profileData.phone}
+                      onChange={handleProfileChange('phone')}
+                      fullWidth
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      label="Location"
+                      value={profileData.location}
+                      onChange={handleProfileChange('location')}
+                      fullWidth
+                    />
+                  </Grid2>
                 </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <TextField
-                    label="Organization"
-                    value={profileData.company}
-                    onChange={handleProfileChange('company')}
-                    fullWidth
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <TextField
-                    label="Location"
-                    value={profileData.location}
-                    onChange={handleProfileChange('location')}
-                    fullWidth
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <TextField
-                    label="Phone"
-                    value={profileData.phone}
-                    onChange={handleProfileChange('phone')}
-                    fullWidth
-                  />
-                </Grid2>
-              </Grid2>
 
-              <Box display="flex" justifyContent="flex-end" gap={2} mt={4}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSaveProfile}
-                  disabled={saving}
-                >
-                  {saving ? <CircularProgress size={20} /> : 'Save'}
-                </Button>
-                <Button
-                  variant="text"
-                  color="error"
-                  onClick={() => window.location.reload()}
-                >
-                  Cancel
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid2>
-      </Grid2>
+                <Box display="flex" justifyContent="flex-end" gap={2} mt={4}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                  >
+                    {saving ? <CircularProgress size={20} /> : 'Save'}
+                  </Button>
+                  <Button
+                    variant="text"
+                    color="error"
+                    onClick={() => window.location.reload()}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </TabPanel>
+
+              {/* ── Tab 1: Change Password ── */}
+              <TabPanel value={tabValue} index={1}>
+                <Typography variant="h6" fontWeight={600} mb={1}>
+                  Change Password
+                </Typography>
+                <Typography variant="body2" color="text.secondary" mb={3}>
+                  To change your password please confirm here
+                </Typography>
+
+                <Stack spacing={2.5} sx={{ maxWidth: 500 }}>
+                  <TextField
+                    label="Current Password"
+                    type={showPasswords.current ? 'text' : 'password'}
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange('currentPassword')}
+                    fullWidth
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPasswords(p => ({ ...p, current: !p.current }))}
+                            edge="end"
+                            size="small"
+                          >
+                            {showPasswords.current ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    label="New Password"
+                    type={showPasswords.new ? 'text' : 'password'}
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange('newPassword')}
+                    fullWidth
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPasswords(p => ({ ...p, new: !p.new }))}
+                            edge="end"
+                            size="small"
+                          >
+                            {showPasswords.new ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    label="Confirm Password"
+                    type={showPasswords.confirm ? 'text' : 'password'}
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange('confirmPassword')}
+                    fullWidth
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPasswords(p => ({ ...p, confirm: !p.confirm }))}
+                            edge="end"
+                            size="small"
+                          >
+                            {showPasswords.confirm ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleChangePassword}
+                    disabled={saving}
+                    sx={{ alignSelf: 'flex-start' }}
+                  >
+                    {saving ? <CircularProgress size={20} /> : 'Change Password'}
+                  </Button>
+                </Stack>
+              </TabPanel>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
       <Snackbar
         open={snackbar.open}

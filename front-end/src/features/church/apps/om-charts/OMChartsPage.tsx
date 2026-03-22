@@ -1,26 +1,30 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  Box, Grid, Card, CardContent, Typography, CircularProgress, Alert, Chip, Stack,
-  FormControl, InputLabel, Select, MenuItem, Tabs, Tab, Skeleton
+  Box, CircularProgress, Alert, Stack, Typography,
+  FormControl, InputLabel, Select, MenuItem, useTheme,
 } from '@mui/material';
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line,
-  PieChart, Pie, Cell, Legend, CartesianGrid
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid,
 } from 'recharts';
+import { IconDroplet, IconHeart, IconCross, IconChartBar, IconTrendingUp, IconTrendingDown } from '@tabler/icons-react';
 import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/api/utils/axiosInstance';
 
-import SacramentCountCards from '@/features/dashboard/widgets/SacramentCountCards';
-import SacramentsByYearChart from '@/features/dashboard/widgets/SacramentsByYearChart';
-import TypeDistributionChart from '@/features/dashboard/widgets/TypeDistributionChart';
-import RecentActivityList from '@/features/dashboard/widgets/RecentActivityList';
-import YearOverYearCard from '@/features/dashboard/widgets/YearOverYearCard';
-import CompletenessGauge from '@/features/dashboard/widgets/CompletenessGauge';
+/* ── Sacramental Color Palette ── */
+const PALETTE = {
+  baptism: '#6366F1',
+  marriage: '#22C55E',
+  funeral: '#F59E0B',
+};
+const PALETTE_HOVER = {
+  baptism: '#818CF8',
+  marriage: '#4ADE80',
+  funeral: '#FBBF24',
+};
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1', '#a4de6c'];
-const TYPE_COLORS = { baptism: '#8884d8', marriage: '#82ca9d', funeral: '#ffc658' };
-
+/* ── Interfaces ── */
 interface ChartData {
   sacramentsByYear: Array<{ year: number; baptism: number; marriage: number; funeral: number }>;
   monthlyTrends: Array<{ month: string; baptism: number; marriage: number; funeral: number }>;
@@ -40,37 +44,147 @@ interface DashboardData {
   dateRange: { earliest: number | null; latest: number | null };
 }
 
-interface ChurchOption {
-  id: number;
-  name: string;
-}
+interface ChurchOption { id: number; name: string; }
+
+/* ── Chart Card Wrapper ── */
+const ChartCard: React.FC<{
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  className?: string;
+}> = ({ title, subtitle, children, className = '' }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  return (
+    <div className={`rounded-xl border shadow-sm p-6 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'} ${className}`}>
+      <div className="mb-4">
+        <h3 className={`text-base font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{title}</h3>
+        {subtitle && <p className={`text-sm mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{subtitle}</p>}
+      </div>
+      {children}
+    </div>
+  );
+};
+
+/* ── Custom Tooltip ── */
+const AnalyticsTooltip: React.FC<any> = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm">
+      <p className="font-semibold text-slate-900 dark:text-slate-100 mb-1.5">{label}</p>
+      {payload.map((entry: any, i: number) => (
+        <div key={i} className="flex items-center justify-between gap-4 py-0.5">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+            <span className="text-slate-600 dark:text-slate-300">{entry.name}</span>
+          </div>
+          <span className="font-medium text-slate-900 dark:text-slate-100 tabular-nums">{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/* ── Donut Center Label ── */
+const DonutCenter: React.FC<{ total: number; isDark: boolean }> = ({ total, isDark }) => (
+  <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ marginBottom: 32 }}>
+    <div className="text-center">
+      <div className={`text-2xl font-bold tabular-nums ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+        {total.toLocaleString()}
+      </div>
+      <div className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Total Records</div>
+    </div>
+  </div>
+);
+
+/* ── KPI Card ── */
+const KpiCard: React.FC<{
+  label: string;
+  value: number;
+  subtitle?: string;
+  trend?: number;
+  icon: React.ElementType;
+  color: string;
+}> = ({ label, value, subtitle, trend, icon: Icon, color }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  return (
+    <div className={`rounded-xl border shadow-sm p-5 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className={`text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{label}</p>
+          <p className={`text-3xl font-semibold mt-1 tabular-nums ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+            {value.toLocaleString()}
+          </p>
+          {subtitle && <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{subtitle}</p>}
+          {trend !== undefined && trend !== 0 && (
+            <div className={`flex items-center gap-1 mt-1.5 text-xs font-medium ${trend > 0 ? 'text-green-600' : 'text-red-500'}`}>
+              {trend > 0 ? <IconTrendingUp size={14} /> : <IconTrendingDown size={14} />}
+              {trend > 0 ? '+' : ''}{trend}% from last year
+            </div>
+          )}
+        </div>
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ backgroundColor: `${color}18` }}
+        >
+          <Icon size={20} color={color} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── Empty State ── */
+const EmptyState: React.FC = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  return (
+    <div className={`rounded-xl border shadow-sm py-20 px-8 text-center ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}>
+      <IconChartBar size={48} className={`mx-auto mb-4 ${isDark ? 'text-slate-600' : 'text-slate-300'}`} />
+      <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
+        No sacramental records available yet.
+      </h3>
+      <p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+        Once records are added, parish insights will appear here.
+      </p>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════ */
+/*  MAIN COMPONENT                                     */
+/* ═══════════════════════════════════════════════════ */
 
 const OMChartsPage: React.FC = () => {
   const { churchId: paramChurchId } = useParams<{ churchId?: string }>();
   const { user } = useAuth();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   const [selectedChurchId, setSelectedChurchId] = useState<string | number>(
     paramChurchId || user?.church_id || ''
   );
   const [churches, setChurches] = useState<ChurchOption[]>([]);
   const [loadingChurches, setLoadingChurches] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
 
-  // Charts data
   const [data, setData] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Dashboard data
   const [dashData, setDashData] = useState<DashboardData | null>(null);
   const [dashLoading, setDashLoading] = useState(false);
 
   const needsChurchPicker = !paramChurchId && !user?.church_id;
 
-  // Fetch churches list for super_admins without a church_id
+  /* ── Chart theme tokens ── */
+  const gridStroke = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const axisColor = isDark ? '#94a3b8' : '#64748b';
+  const labelColor = isDark ? '#cbd5e1' : '#475569';
+
+  /* ── Fetch churches ── */
   useEffect(() => {
     if (!needsChurchPicker) return;
-
     const fetchChurches = async () => {
       setLoadingChurches(true);
       try {
@@ -80,20 +194,17 @@ const OMChartsPage: React.FC = () => {
           .filter((c: any) => c.is_active !== false)
           .map((c: any) => ({ id: c.id, name: c.name || c.church_name || `Church ${c.id}` }));
         setChurches(list);
-        if (list.length > 0 && !selectedChurchId) {
-          setSelectedChurchId(list[0].id);
-        }
+        if (list.length > 0 && !selectedChurchId) setSelectedChurchId(list[0].id);
       } catch (err) {
         console.error('Failed to fetch churches:', err);
       } finally {
         setLoadingChurches(false);
       }
     };
-
     fetchChurches();
   }, [needsChurchPicker]);
 
-  // Fetch chart data when churchId is resolved
+  /* ── Fetch chart data ── */
   const fetchChartData = useCallback(async (churchId: string | number) => {
     if (!churchId) return;
     try {
@@ -101,34 +212,25 @@ const OMChartsPage: React.FC = () => {
       setError(null);
       setData(null);
       const res: any = await apiClient.get(`/churches/${churchId}/charts/summary`);
-      if (res.success) {
-        setData(res.data);
-      } else {
-        setError(res.error?.message || res.error || 'Failed to load chart data');
-      }
+      if (res.success) setData(res.data);
+      else setError(res.error?.message || res.error || 'Failed to load chart data');
     } catch (err: any) {
-      if (err.status === 403) {
-        setError('OM Charts is not enabled for this church. Ask an administrator to enable it.');
-      } else {
-        setError(err.message || 'Failed to load chart data');
-      }
+      if (err.status === 403) setError('OM Charts is not enabled for this church. Ask an administrator to enable it.');
+      else setError(err.message || 'Failed to load chart data');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Fetch dashboard data
+  /* ── Fetch dashboard data ── */
   const fetchDashData = useCallback(async (churchId: string | number) => {
     if (!churchId) return;
     setDashLoading(true);
     try {
       const res = await apiClient.get<any>(`/churches/${churchId}/dashboard`);
       setDashData(res.data || res);
-    } catch {
-      // Non-critical
-    } finally {
-      setDashLoading(false);
-    }
+    } catch { /* non-critical */ }
+    finally { setDashLoading(false); }
   }, []);
 
   useEffect(() => {
@@ -138,22 +240,35 @@ const OMChartsPage: React.FC = () => {
     }
   }, [selectedChurchId, fetchChartData, fetchDashData]);
 
-  // Church selector for super_admins
-  const churchSelector = needsChurchPicker && (
-    <FormControl size="small" sx={{ minWidth: 250 }}>
-      <InputLabel>Church</InputLabel>
-      <Select
-        value={selectedChurchId}
-        label="Church"
-        onChange={(e) => setSelectedChurchId(e.target.value)}
-      >
-        {churches.map((c) => (
-          <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+  /* ── Derived data ── */
+  const counts = dashData?.counts ?? { baptisms: 0, marriages: 0, funerals: 0, total: 0 };
+  const yoy = dashData?.yearOverYear;
+  const hasData = data && (data.sacramentsByYear.length > 0 || data.typeDistribution.some(d => d.value > 0));
+
+  /* ── Sort priests by count descending ── */
+  const sortedPriests = useMemo(() =>
+    data?.byPriest ? [...data.byPriest].sort((a, b) => b.count - a.count) : [],
+    [data?.byPriest]
   );
 
+  /* ── Distribution total for donut center ── */
+  const distributionTotal = useMemo(() =>
+    data?.typeDistribution?.reduce((s, d) => s + d.value, 0) ?? 0,
+    [data?.typeDistribution]
+  );
+
+  const distributionColors = useMemo(() =>
+    data?.typeDistribution?.map(d => {
+      const key = d.name.toLowerCase();
+      if (key.includes('baptism')) return PALETTE.baptism;
+      if (key.includes('marriage')) return PALETTE.marriage;
+      if (key.includes('funeral')) return PALETTE.funeral;
+      return '#94a3b8';
+    }) ?? [],
+    [data?.typeDistribution]
+  );
+
+  /* ── Loading ── */
   if (loadingChurches) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
@@ -163,241 +278,300 @@ const OMChartsPage: React.FC = () => {
   }
 
   if (needsChurchPicker && churches.length === 0 && !loadingChurches) {
-    return (
-      <Alert severity="info" sx={{ mt: 2 }}>No churches available.</Alert>
-    );
+    return <Alert severity="info" sx={{ mt: 2 }}>No churches available.</Alert>;
   }
 
+  const isLoading = loading || dashLoading;
+
   return (
-    <Box>
-      <Stack direction="row" alignItems="center" spacing={2} mb={2} flexWrap="wrap">
-        <Typography variant="h4">Parish Analytics</Typography>
-        {churchSelector}
+    <div className="max-w-[1600px] mx-auto">
+      {/* ── Header ── */}
+      <Stack direction="row" alignItems="center" spacing={2} mb={1} flexWrap="wrap">
+        <Typography variant="h4" fontWeight={700}>Parish Analytics</Typography>
+        {needsChurchPicker && (
+          <FormControl size="small" sx={{ minWidth: 250 }}>
+            <InputLabel>Church</InputLabel>
+            <Select value={selectedChurchId} label="Church" onChange={(e) => setSelectedChurchId(e.target.value)}>
+              {churches.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+            </Select>
+          </FormControl>
+        )}
       </Stack>
+      <p className={`text-sm mb-8 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+        Sacramental records overview and historical trends
+      </p>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
-          <Tab label="Dashboard" />
-          <Tab label="Charts" />
-        </Tabs>
-      </Box>
-
-      {/* Dashboard Tab */}
-      {activeTab === 0 && (
-        <Box>
-          {dashLoading ? (
-            <Grid container spacing={3}>
-              {[1, 2, 3, 4].map((i) => (
-                <Grid item xs={12} sm={6} md={3} key={i}>
-                  <Skeleton variant="rounded" height={100} />
-                </Grid>
-              ))}
-              <Grid item xs={12} md={8}><Skeleton variant="rounded" height={350} /></Grid>
-              <Grid item xs={12} md={4}><Skeleton variant="rounded" height={350} /></Grid>
-            </Grid>
-          ) : dashData ? (
-            <Box>
-              <Box sx={{ mb: 3 }}>
-                <SacramentCountCards counts={dashData.counts} yearOverYear={dashData.yearOverYear} />
-              </Box>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={8}>
-                  <SacramentsByYearChart data={dashData.monthlyActivity} />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <TypeDistributionChart data={dashData.typeDistribution} />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <RecentActivityList data={dashData.recentActivity} />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <YearOverYearCard data={dashData.yearOverYear} />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <CompletenessGauge value={dashData.completeness} dateRange={dashData.dateRange} />
-                </Grid>
-              </Grid>
-            </Box>
-          ) : !selectedChurchId ? (
-            <Alert severity="info">Select a church to view dashboard data.</Alert>
-          ) : (
-            <Alert severity="info">No dashboard data available.</Alert>
-          )}
-        </Box>
+      {/* ── Loading skeleton ── */}
+      {isLoading && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className={`rounded-xl h-28 animate-pulse ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`} />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className={`rounded-xl h-80 animate-pulse ${isDark ? 'bg-slate-800' : 'bg-slate-100'} ${i === 1 ? 'lg:col-span-2' : ''}`} />
+            ))}
+          </div>
+        </div>
       )}
 
-      {/* Charts Tab */}
-      {activeTab === 1 && (
-        <Box>
-          {loading && (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
-              <CircularProgress />
-            </Box>
-          )}
+      {/* ── Error ── */}
+      {!isLoading && error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
 
-          {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+      {/* ── Empty state ── */}
+      {!isLoading && !error && !hasData && selectedChurchId && <EmptyState />}
 
-          {!loading && !error && !data && selectedChurchId && (
-            <Alert severity="info" sx={{ mt: 2 }}>No chart data available.</Alert>
-          )}
+      {/* ── Dashboard content ── */}
+      {!isLoading && !error && hasData && (
+        <div className="space-y-6">
 
-          {!loading && data && (
-            <Grid container spacing={3}>
-              {/* 1. Sacraments by Year — Grouped Bar */}
-              <Grid item xs={12} md={8}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>Sacraments by Year</Typography>
-                    {data.sacramentsByYear.length === 0 ? (
-                      <Typography color="textSecondary">No data available</Typography>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={320}>
-                        <BarChart data={data.sacramentsByYear}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="year" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="baptism" fill={TYPE_COLORS.baptism} name="Baptisms" />
-                          <Bar dataKey="marriage" fill={TYPE_COLORS.marriage} name="Marriages" />
-                          <Bar dataKey="funeral" fill={TYPE_COLORS.funeral} name="Funerals" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
+          {/* ════ PHASE 2: KPI Row ════ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            <KpiCard
+              label="Total Sacraments"
+              value={counts.total}
+              icon={IconChartBar}
+              color="#6366F1"
+              trend={yoy?.changePercent}
+            />
+            <KpiCard
+              label="Baptisms"
+              value={counts.baptisms}
+              subtitle={yoy ? `${yoy.currentYear} year-to-date` : undefined}
+              icon={IconDroplet}
+              color={PALETTE.baptism}
+            />
+            <KpiCard
+              label="Marriages"
+              value={counts.marriages}
+              subtitle={yoy ? `${yoy.currentYear} year-to-date` : undefined}
+              icon={IconHeart}
+              color={PALETTE.marriage}
+            />
+            <KpiCard
+              label="Funerals"
+              value={counts.funerals}
+              subtitle={yoy ? `${yoy.currentYear} year-to-date` : undefined}
+              icon={IconCross}
+              color={PALETTE.funeral}
+            />
+          </div>
 
-              {/* 2. Type Distribution — Pie */}
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>Sacrament Distribution</Typography>
-                    {data.typeDistribution.length === 0 ? (
-                      <Typography color="textSecondary">No data available</Typography>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={320}>
-                        <PieChart>
-                          <Pie
-                            data={data.typeDistribution}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={100}
-                            dataKey="value"
-                          >
-                            {data.typeDistribution.map((_, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                          <Legend />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
+          {/* ════ PHASE 3-4: Chart Grid with Hierarchy ════ */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
 
-              {/* 3. Monthly Trends — Line */}
-              <Grid item xs={12}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>Monthly Trends</Typography>
-                    {data.monthlyTrends.length === 0 ? (
-                      <Typography color="textSecondary">No data available</Typography>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={data.monthlyTrends}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" angle={-45} textAnchor="end" height={60} interval="preserveStartEnd" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Line type="monotone" dataKey="baptism" stroke={TYPE_COLORS.baptism} name="Baptisms" dot={false} />
-                          <Line type="monotone" dataKey="marriage" stroke={TYPE_COLORS.marriage} name="Marriages" dot={false} />
-                          <Line type="monotone" dataKey="funeral" stroke={TYPE_COLORS.funeral} name="Funerals" dot={false} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
+            {/* ── 1. Sacraments Over Time — Stacked Area (large) ── */}
+            {data!.sacramentsByYear.length > 0 && (
+              <ChartCard
+                title="Sacraments Over Time"
+                subtitle="Historical parish sacramental activity"
+                className="lg:col-span-2"
+              >
+                <ResponsiveContainer width="100%" height={360}>
+                  <AreaChart data={data!.sacramentsByYear}>
+                    <defs>
+                      <linearGradient id="gradBaptism" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={PALETTE.baptism} stopOpacity={0.3} />
+                        <stop offset="100%" stopColor={PALETTE.baptism} stopOpacity={0.02} />
+                      </linearGradient>
+                      <linearGradient id="gradMarriage" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={PALETTE.marriage} stopOpacity={0.3} />
+                        <stop offset="100%" stopColor={PALETTE.marriage} stopOpacity={0.02} />
+                      </linearGradient>
+                      <linearGradient id="gradFuneral" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={PALETTE.funeral} stopOpacity={0.3} />
+                        <stop offset="100%" stopColor={PALETTE.funeral} stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke={gridStroke} strokeDasharray="none" vertical={false} />
+                    <XAxis
+                      dataKey="year"
+                      tick={{ fill: axisColor, fontSize: 12 }}
+                      axisLine={{ stroke: gridStroke }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fill: axisColor, fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={40}
+                    />
+                    <Tooltip content={<AnalyticsTooltip />} />
+                    <Legend
+                      iconType="circle"
+                      iconSize={8}
+                      wrapperStyle={{ paddingTop: 16, fontSize: 13, color: labelColor }}
+                    />
+                    <Area
+                      type="monotone" dataKey="baptism" name="Baptisms"
+                      stroke={PALETTE.baptism} fill="url(#gradBaptism)" strokeWidth={2}
+                      stackId="1" animationDuration={400} animationEasing="ease-out"
+                    />
+                    <Area
+                      type="monotone" dataKey="marriage" name="Marriages"
+                      stroke={PALETTE.marriage} fill="url(#gradMarriage)" strokeWidth={2}
+                      stackId="1" animationDuration={400} animationEasing="ease-out"
+                    />
+                    <Area
+                      type="monotone" dataKey="funeral" name="Funerals"
+                      stroke={PALETTE.funeral} fill="url(#gradFuneral)" strokeWidth={2}
+                      stackId="1" animationDuration={400} animationEasing="ease-out"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            )}
 
-              {/* 4. By Priest — Horizontal Bar */}
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>By Priest</Typography>
-                    {data.byPriest.length === 0 ? (
-                      <Typography color="textSecondary">No data available</Typography>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={Math.max(300, data.byPriest.length * 30)}>
-                        <BarChart data={data.byPriest} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis type="number" />
-                          <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 12 }} />
-                          <Tooltip />
-                          <Bar dataKey="count" fill="#8884d8" name="Sacraments" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
+            {/* ── 2. Sacrament Distribution — Donut ── */}
+            {data!.typeDistribution.length > 0 && (
+              <ChartCard title="Sacrament Distribution" subtitle="Breakdown by record type">
+                <div className="relative">
+                  <DonutCenter total={distributionTotal} isDark={isDark} />
+                  <ResponsiveContainer width="100%" height={360}>
+                    <PieChart>
+                      <Pie
+                        data={data!.typeDistribution}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={80}
+                        outerRadius={120}
+                        paddingAngle={3}
+                        dataKey="value"
+                        animationDuration={400}
+                        animationEasing="ease-out"
+                        label={false}
+                      >
+                        {data!.typeDistribution.map((_, i) => (
+                          <Cell key={i} fill={distributionColors[i]} style={{ outline: 'none' }} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<AnalyticsTooltip />} />
+                      <Legend
+                        iconType="circle"
+                        iconSize={8}
+                        wrapperStyle={{ paddingTop: 16, fontSize: 13, color: labelColor }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </ChartCard>
+            )}
 
-              {/* 5. Baptism Age Distribution */}
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>Baptism Age at Reception</Typography>
-                    {data.baptismAge.length === 0 ? (
-                      <Typography color="textSecondary">No data available</Typography>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={data.baptismAge}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="range" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="count" fill="#82ca9d" name="Baptisms" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
+            {/* ── 3. Monthly Trends — Grouped Bar ── */}
+            {data!.monthlyTrends.length > 0 && (
+              <ChartCard title="Monthly Trends" subtitle="Sacramental activity by month">
+                <ResponsiveContainer width="100%" height={320}>
+                  <BarChart data={data!.monthlyTrends} barCategoryGap="20%">
+                    <CartesianGrid stroke={gridStroke} strokeDasharray="none" vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fill: axisColor, fontSize: 11 }}
+                      axisLine={{ stroke: gridStroke }}
+                      tickLine={false}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} width={35} />
+                    <Tooltip content={<AnalyticsTooltip />} />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ paddingTop: 12, fontSize: 13, color: labelColor }} />
+                    <Bar dataKey="baptism" name="Baptisms" fill={PALETTE.baptism} radius={[3, 3, 0, 0]} animationDuration={400} animationEasing="ease-out" />
+                    <Bar dataKey="marriage" name="Marriages" fill={PALETTE.marriage} radius={[3, 3, 0, 0]} animationDuration={400} animationEasing="ease-out" />
+                    <Bar dataKey="funeral" name="Funerals" fill={PALETTE.funeral} radius={[3, 3, 0, 0]} animationDuration={400} animationEasing="ease-out" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            )}
 
-              {/* 6. Seasonal Patterns */}
-              <Grid item xs={12}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>Seasonal Patterns</Typography>
-                    {data.seasonalPatterns.length === 0 ? (
-                      <Typography color="textSecondary">No data available</Typography>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={data.seasonalPatterns}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="baptism" fill={TYPE_COLORS.baptism} name="Baptisms" />
-                          <Bar dataKey="marriage" fill={TYPE_COLORS.marriage} name="Marriages" />
-                          <Bar dataKey="funeral" fill={TYPE_COLORS.funeral} name="Funerals" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          )}
-        </Box>
+            {/* ── 4. Baptism Age Distribution — Histogram ── */}
+            {data!.baptismAge.length > 0 && (
+              <ChartCard title="Baptism Age at Reception" subtitle="Age distribution of baptismal candidates">
+                <ResponsiveContainer width="100%" height={320}>
+                  <BarChart data={data!.baptismAge} barCategoryGap="15%">
+                    <CartesianGrid stroke={gridStroke} strokeDasharray="none" vertical={false} />
+                    <XAxis
+                      dataKey="range"
+                      tick={{ fill: axisColor, fontSize: 11 }}
+                      axisLine={{ stroke: gridStroke }}
+                      tickLine={false}
+                    />
+                    <YAxis tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} width={35} />
+                    <Tooltip content={<AnalyticsTooltip />} />
+                    <Bar
+                      dataKey="count" name="Baptisms"
+                      fill={PALETTE.baptism}
+                      radius={[4, 4, 0, 0]}
+                      animationDuration={400}
+                      animationEasing="ease-out"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            )}
+
+            {/* ── 5. Clergy Activity — Horizontal Bar ── */}
+            {sortedPriests.length > 0 && (
+              <ChartCard title="Clergy Activity" subtitle="Sacraments performed by priest">
+                <ResponsiveContainer width="100%" height={Math.max(320, sortedPriests.length * 36)}>
+                  <BarChart data={sortedPriests} layout="vertical" barCategoryGap="25%">
+                    <CartesianGrid stroke={gridStroke} strokeDasharray="none" horizontal={false} />
+                    <XAxis
+                      type="number"
+                      tick={{ fill: axisColor, fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      width={130}
+                      tick={{ fill: labelColor, fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip content={<AnalyticsTooltip />} />
+                    <Bar
+                      dataKey="count" name="Sacraments"
+                      fill={PALETTE.baptism}
+                      radius={[0, 4, 4, 0]}
+                      animationDuration={400}
+                      animationEasing="ease-out"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            )}
+
+            {/* ── 6. Seasonal Patterns — Stacked Monthly Bar ── */}
+            {data!.seasonalPatterns.length > 0 && (
+              <ChartCard title="Seasonal Patterns" subtitle="Monthly aggregates across all years">
+                <ResponsiveContainer width="100%" height={320}>
+                  <BarChart data={data!.seasonalPatterns} barCategoryGap="20%">
+                    <CartesianGrid stroke={gridStroke} strokeDasharray="none" vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fill: axisColor, fontSize: 12 }}
+                      axisLine={{ stroke: gridStroke }}
+                      tickLine={false}
+                    />
+                    <YAxis tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} width={35} />
+                    <Tooltip content={<AnalyticsTooltip />} />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ paddingTop: 12, fontSize: 13, color: labelColor }} />
+                    <Bar dataKey="baptism" name="Baptisms" stackId="season" fill={PALETTE.baptism} radius={[0, 0, 0, 0]} animationDuration={400} animationEasing="ease-out" />
+                    <Bar dataKey="marriage" name="Marriages" stackId="season" fill={PALETTE.marriage} animationDuration={400} animationEasing="ease-out" />
+                    <Bar dataKey="funeral" name="Funerals" stackId="season" fill={PALETTE.funeral} radius={[3, 3, 0, 0]} animationDuration={400} animationEasing="ease-out" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            )}
+
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 

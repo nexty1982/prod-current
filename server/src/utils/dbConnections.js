@@ -10,9 +10,9 @@ const { promisePool: centralPool } = require('../config/db-compat');
 
 // Database Configuration
 const DB_CONFIG = {
-  host: 'localhost',
-  user: 'orthodoxapps',
-  password: 'Summerof1982@!',
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'orthodoxapps',
+  password: process.env.DB_PASSWORD || 'Summerof1982@!',
   charset: 'utf8mb4',
   connectionLimit: 10,
   acquireTimeout: 60000,
