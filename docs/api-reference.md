@@ -71,11 +71,138 @@ All routes are mounted in `server/src/index.ts` using `safeRequire()` wrappers. 
 
 ## OCR
 
-| Route | Source | Description |
-|-------|--------|-------------|
-| `/api/feeder/*` | `routes/feeder` | OCR feeder pipeline |
-| `/api/church/:churchId/ocr/*` | `routes/ocr/index` (mountOcrRoutes) | Church-scoped OCR |
-| `/api/ocr/*` | `routes/ocr` | Legacy OCR (disabled by default) |
+### Route Groups
+
+| Route Prefix | Source | Auth | Description |
+|-------------|--------|------|-------------|
+| `/api/feeder/*` | `routes/feeder.js` | admin | OCR feeder pipeline ingest |
+| `/api/church/:churchId/ocr/*` | `routes/ocr/` | auth | Church-scoped OCR operations |
+| `/api/admin/ocr/*` | `routes/ocr/adminMonitor.ts` | super_admin | Admin OCR monitoring |
+| `/api/system/ocr/*` | `api/systemStatus.js` | admin | OCR health & recovery |
+
+### Feeder Pipeline (`/api/feeder`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/ingest` | admin | Upload and ingest a new OCR job |
+| GET | `/jobs/:jobId` | admin | Get feeder job status |
+| GET | `/pages/:pageId` | admin | Get page processing status |
+| POST | `/pages/:pageId/retry` | admin | Retry failed page |
+| POST | `/pages/:pageId/correction` | admin | Submit page correction |
+
+### Church-Scoped OCR (`/api/church/:churchId/ocr`)
+
+**Jobs (jobs.ts):**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/jobs` | List jobs for church |
+| POST | `/enhanced/process` | Upload and process via enhanced pipeline |
+| GET | `/jobs/:jobId` | Get job detail |
+| GET | `/jobs/:jobId/image` | Get source image |
+| GET | `/jobs/:jobId/debug` | Debug info for job |
+| PATCH | `/jobs/:jobId` | Update job metadata |
+| POST | `/jobs/:jobId/retry` | Retry failed job |
+| POST | `/jobs/:jobId/replay` | Replay processing |
+| GET | `/jobs/:jobId/history` | Job state change history |
+| POST | `/jobs/:jobId/resume` | Resume paused job |
+| DELETE | `/jobs` | Bulk delete jobs |
+| POST | `/jobs/:jobId/finalize` | Finalize single record |
+| POST | `/jobs/:jobId/finalize-batch` | Finalize multiple records |
+| POST | `/jobs/:jobId/autocommit` | Auto-commit high-confidence records |
+| POST | `/jobs/:jobId/save-draft` | Save draft edits |
+| POST | `/jobs/:jobId/apply-template` | Apply layout template |
+| POST | `/jobs/:jobId/auto-extract` | Run auto-extraction |
+| POST | `/jobs/:jobId/reject-row` | Reject extracted row |
+| POST | `/jobs/:jobId/reextract-row` | Re-extract single row |
+| POST | `/jobs/:jobId/crop-reocr` | Crop and re-OCR region |
+| POST | `/jobs/:jobId/learn-from-confirmations` | Train from user confirmations |
+| GET | `/jobs/:jobId/download` | Download extracted data |
+| PATCH | `/jobs/:jobId/review-status` | Update review status |
+
+**Fusion Workflow (fusion.ts):**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/jobs/:jobId/fusion/drafts` | List fusion drafts |
+| PUT | `/jobs/:jobId/fusion/drafts/:entryIndex` | Update draft entry |
+| POST | `/jobs/:jobId/fusion/drafts` | Create new draft |
+| POST | `/jobs/:jobId/fusion/extract-layout` | Extract using layout template |
+| POST | `/jobs/:jobId/fusion/ready-for-review` | Mark drafts ready for review |
+| POST | `/jobs/:jobId/fusion/validate` | Validate drafts before commit |
+| POST | `/jobs/:jobId/fusion/commit` | Commit drafts to record tables |
+| POST | `/jobs/:jobId/normalize` | Normalize extracted data |
+
+**Review (review.ts):**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/jobs/:jobId/review/finalize` | Finalize review |
+| POST | `/jobs/:jobId/review/commit` | Commit reviewed records |
+| GET | `/finalize-history` | Get finalization history |
+
+**Settings (settings.ts):**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Get church OCR settings |
+| PUT | `/` | Update church OCR settings |
+
+**Setup Wizard (setupWizard.ts):**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/setup-state` | Get setup wizard state |
+| PUT | `/setup-state` | Update wizard state |
+| POST | `/setup-validate` | Validate setup configuration |
+| GET | `/setup-inventory` | Get available OCR capabilities |
+
+### Admin OCR Monitoring (`/api/admin/ocr`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/dashboard` | super_admin | Aggregate OCR dashboard stats |
+| GET | `/jobs` | super_admin | List all OCR jobs across churches |
+| GET | `/jobs/:churchId/:jobId` | super_admin | Get specific job detail |
+| POST | `/jobs/bulk` | super_admin | Bulk job operations |
+| POST | `/jobs/clear-processed` | super_admin | Clear completed jobs |
+| POST | `/jobs/cleanup-stale` | super_admin | Clean up stale jobs |
+| POST | `/jobs/:churchId/:jobId/kill` | super_admin | Kill running job |
+| POST | `/jobs/:churchId/:jobId/reprocess` | super_admin | Reprocess job |
+| POST | `/jobs/:churchId/:jobId/clear` | super_admin | Clear job data |
+| POST | `/jobs/:churchId/:jobId/resume` | super_admin | Resume paused job |
+| DELETE | `/jobs/:churchId/:jobId` | super_admin | Delete job |
+| GET | `/jobs/:churchId/:jobId/history` | super_admin | Job history |
+| GET | `/layout-templates` | super_admin | List layout templates |
+| GET | `/layout-templates/:id` | super_admin | Get template detail |
+| POST | `/layout-templates` | super_admin | Create template |
+| PUT | `/layout-templates/:id` | super_admin | Update template |
+| DELETE | `/layout-templates/:id` | super_admin | Delete template |
+| POST | `/layout-templates/preview-inline` | super_admin | Preview template extraction |
+| POST | `/normalize-schema/:churchId` | super_admin | Normalize church OCR schema |
+
+### OCR Health (`/api/system/ocr`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/health` | admin | OCR subsystem health check |
+| POST | `/recover-stale` | super_admin | Reset stuck jobs to pending |
+
+**Health response:**
+```json
+{
+  "status": "healthy|degraded|unhealthy",
+  "worker_status": "running|stopped",
+  "pending_jobs": 0,
+  "processing_jobs": 0,
+  "failed_jobs": 4,
+  "stale_jobs": 0,
+  "stale_job_ids": [],
+  "avg_processing_time_seconds": null,
+  "storage_writable": true,
+  "completed_last_24h": 0
+}
+```
 
 ## Certificates
 
