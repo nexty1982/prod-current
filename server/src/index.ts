@@ -505,6 +505,10 @@ app.use(databaseRouter);
 // 4a. Database-backed API logger (captures all routes + status code + duration)
 app.use(dbRequestLogger);
 
+// 4b. Session tracker — upserts user_sessions, tracks activity, enforces lock/terminate
+const sessionTracker = require('./middleware/sessionTracker');
+app.use(sessionTracker);
+
 // 5. Request debugging (after session, before routes)
 app.use((req, res, next) => {
   // Log ALL POST requests immediately (especially uploads)
