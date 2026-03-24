@@ -278,3 +278,4 @@ Detailed docs in `docs/`:
 - [frontend.md](docs/frontend.md) — Frontend architecture
 - [sdlc.md](docs/sdlc.md) — Feature lifecycle stages
 - [ai-agent-workflow.md](docs/ai-agent-workflow.md) — AI agent work tracking workflow
+- [omai.md](docs/omai.md) — OMAI platform, auth bridge SSO, Berry frontend

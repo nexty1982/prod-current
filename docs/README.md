@@ -29,6 +29,9 @@ docs/
 - **[Top-Level Conflicts Deep Audit](REFERENCE/top_level_conflicts_deep_audit.md)** - Comprehensive analysis of directory conflicts
 - **[Root-Level Conflicts Summary](REFERENCE/root_level_conflicts_summary.md)** - Summary of conflicts found
 
+### Platform Architecture
+- **[OMAI Platform](omai.md)** - OMAI service architecture, auth bridge SSO, Berry frontend, deployment
+
 ### Feature Documentation
 - **[OM Spec Current State](FEATURES/om-spec_current-state.md)** - Analysis of `/church/om-spec` feature
 - **[OM Spec Enhancement Readiness](FEATURES/om-spec_enhancement-readiness.md)** - Enhancement assessment

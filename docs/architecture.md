@@ -6,12 +6,20 @@ OrthodoxMetrics is a multi-tenant church management platform for Orthodox Christ
 
 ```
 Browser ──► Nginx (443/80) ──► Express backend (3001) ──► MariaDB
-                                    │
-                                    ├── orthodoxmetrics_db  (platform)
-                                    └── om_church_##        (per-tenant)
-
-OMAI service (7060) ──► orthodoxmetrics_db (omai_* tables)
+                                    │                        │
+                                    ├── orthodoxmetrics_db    │  (platform)
+                                    └── om_church_##          │  (per-tenant)
+                                         ▲                    │
+                                         │ API proxy (/api)   │
+OMAI (7060) ─── Berry frontend ──────────┘                    │
+     │                                                        │
+     └── OMAI routes (/omai) ─────────────────────────────────┘
 ```
+
+**OMAI** is a separate service at `/var/www/omai/` that serves as the administrative, AI, and backup
+control plane. It runs the Berry v4.1.0 React frontend and proxies API calls to the OM backend.
+Users access OMAI via an auth bridge from OM — no separate login required.
+See [omai.md](omai.md) for full documentation.
 
 ## Backend
 
