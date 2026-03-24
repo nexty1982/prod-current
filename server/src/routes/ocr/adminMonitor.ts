@@ -16,6 +16,7 @@ router.get('/admin/ocr/jobs/:churchId/:jobId', requireRole('super_admin'), ocrMo
 router.post('/admin/ocr/jobs/bulk', requireRole('super_admin'), ocrMonitor.bulkAction);
 router.post('/admin/ocr/jobs/clear-processed', requireRole('super_admin'), ocrMonitor.clearProcessed);
 router.post('/admin/ocr/jobs/cleanup-stale', requireRole('super_admin'), ocrMonitor.cleanupStale);
+router.post('/admin/ocr/jobs/cleanup-failed', requireRole('super_admin'), ocrMonitor.cleanupFailed);
 router.post('/admin/ocr/jobs/:churchId/:jobId/kill', requireRole('super_admin'), ocrMonitor.killJob);
 router.post('/admin/ocr/jobs/:churchId/:jobId/reprocess', requireRole('super_admin'), ocrMonitor.reprocessJob);
 router.post('/admin/ocr/jobs/:churchId/:jobId/clear', requireRole('super_admin'), ocrMonitor.clearJob);

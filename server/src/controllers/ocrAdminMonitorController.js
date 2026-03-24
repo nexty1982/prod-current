@@ -687,6 +687,62 @@ async function getDashboard(req, res) {
   }
 }
 
+// ── POST /api/admin/ocr/jobs/cleanup-failed ──────────────────────────────────
+
+async function cleanupFailed(req, res) {
+  try {
+    const retentionDays = Math.max(1, parseInt(req.body.retentionDays) || 30);
+    const deleteFiles = req.body.deleteFiles === true;
+    const churchId = req.body.churchId ? parseInt(req.body.churchId) : null;
+    const userId = req.session?.user?.id || 0;
+
+    const pool = getPool();
+
+    const where = ["j.status IN ('failed', 'error')", 'j.created_at < DATE_SUB(NOW(), INTERVAL ? DAY)'];
+    const params = [retentionDays];
+    if (churchId) {
+      where.push('j.church_id = ?');
+      params.push(churchId);
+    }
+
+    const [rows] = await pool.query(
+      `SELECT j.id, j.church_id, j.filename FROM ocr_jobs j WHERE ${where.join(' AND ')} LIMIT 500`,
+      params
+    );
+
+    if (rows.length === 0) {
+      return res.json({ success: true, deleted: 0, filesRemoved: 0, retentionDays });
+    }
+
+    let filesRemoved = 0;
+    if (deleteFiles) {
+      for (const row of rows) {
+        // Clean up feeder storage
+        const jobDir = path.join(__dirname, '../../storage/feeder', `job_${row.id}`);
+        try {
+          if (fs.existsSync(jobDir)) {
+            fs.rmSync(jobDir, { recursive: true, force: true });
+            filesRemoved++;
+          }
+        } catch (_) { /* already gone */ }
+      }
+    }
+
+    // Delete job history first (FK reference)
+    const ids = rows.map(r => r.id);
+    const placeholders = ids.map(() => '?').join(',');
+    await pool.query(`DELETE FROM ocr_job_history WHERE job_id IN (${placeholders})`, ids);
+    await pool.query(`DELETE FROM ocr_jobs WHERE id IN (${placeholders})`, ids);
+
+    const capped = rows.length === 500;
+    console.log(`[OCR Monitor] cleanupFailed: ${rows.length} jobs deleted (retention=${retentionDays}d, files=${filesRemoved}) by user ${userId}${capped ? ' — capped' : ''}`);
+    res.json({ success: true, deleted: rows.length, filesRemoved, retentionDays, capped });
+  } catch (error) {
+    console.error('[OCR Monitor] cleanupFailed error:', error);
+    res.status(500).json({ error: 'Failed to cleanup failed jobs', message: error.message });
+  }
+}
+
 module.exports = {
   listAllJobs,
   getJobDetail,
@@ -694,6 +750,7 @@ module.exports = {
   reprocessJob,
   clearJob,
   clearProcessed,
+  cleanupFailed,
   bulkAction,
   cleanupStale,
   runStaleCleanup,
