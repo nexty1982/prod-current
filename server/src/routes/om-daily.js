@@ -2085,6 +2085,84 @@ router.post('/items/:id/complete-work', requireAuth, async (req, res) => {
   }
 });
 
+// ────────────────────────────────────────────────────────────────────────────
+// Agent Complete — lightweight completion signal for AI agents
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/om-daily/items/:id/agent-complete
+ *
+ * Lightweight endpoint for AI agents (Claude CLI, etc.) to signal work completion.
+ * Transitions: in_progress → self_review (or review if using old status model).
+ * Safe to call multiple times (idempotent if already past in_progress).
+ *
+ * Body (optional):
+ *   agent_tool: string  — e.g. 'claude_cli'
+ *   summary: string     — brief completion summary
+ *   files_changed: string[] — list of changed files
+ */
+router.post('/items/:id/agent-complete', requireAuth, async (req, res) => {
+  const pool = getPool();
+  const { id } = req.params;
+  const { agent_tool, summary, files_changed } = req.body || {};
+
+  try {
+    const [rows] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [id]);
+    if (!rows.length) {
+      console.error(`[agent-complete] Item #${id} not found`);
+      return res.status(404).json({ error: 'Item not found' });
+    }
+    const item = rows[0];
+    const fromStatus = item.status;
+
+    // Already completed or past in_progress — idempotent success
+    const pastStatuses = ['self_review', 'review', 'testing', 'review_ready', 'approved', 'done'];
+    if (pastStatuses.includes(fromStatus)) {
+      return res.json({
+        success: true,
+        action: 'already_past',
+        status: fromStatus,
+        message: `Item #${id} is already at '${fromStatus}' — no transition needed`,
+      });
+    }
+
+    // Only transition from in_progress
+    if (fromStatus !== 'in_progress') {
+      return res.status(422).json({
+        error: `Cannot complete from '${fromStatus}' — item must be in_progress`,
+        current_status: fromStatus,
+        item_id: id,
+      });
+    }
+
+    const toStatus = 'self_review';
+    const actor = agent_tool || item.agent_tool || 'agent';
+
+    // Update status and progress
+    await pool.query(
+      'UPDATE om_daily_items SET status = ?, progress = 100 WHERE id = ?',
+      [toStatus, id]
+    );
+
+    console.log(`[agent-complete] Item #${id}: ${fromStatus} → ${toStatus} by ${actor}`);
+
+    res.json({
+      success: true,
+      action: 'transitioned',
+      from: fromStatus,
+      to: toStatus,
+      item_id: parseInt(id),
+      message: `Item #${id} moved from In Progress to Self Review`,
+    });
+  } catch (err) {
+    console.error(`[agent-complete] Item #${id} error:`, err.message);
+    res.status(500).json({
+      error: 'Failed to complete agent work',
+      detail: err.message,
+    });
+  }
+});
+
 // Export cron functions on the router for access from index.ts
 router.generateAndEmailChangelog = generateAndEmailChangelog;
 router.fullSync = fullSync;

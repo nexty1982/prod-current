@@ -168,7 +168,13 @@ curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/start-work \
 
 # 3. Do your work, commit changes to the branch
 
-# 4. Complete work — ff-only merge to main, delete branch
+# 4. Signal work complete — moves item to Self Review
+curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/agent-complete \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"agent_tool":"claude_cli","summary":"Brief description of what was done"}'
+
+# 5. (Optional) Full merge — ff-only merge to main, delete branch
 curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/complete-work \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
@@ -179,8 +185,9 @@ curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/complete-work \
 1. **Create item** → `POST /api/om-daily/items` with `status: "todo"`, `source: "agent"`, `agent_tool: "claude_cli"`
 2. **Start work** → `POST /api/om-daily/items/:id/start-work` with `branch_type` — creates and checks out a branch from `main`
 3. **During work** → Commit changes to the branch. Update `progress` (0-100) if the task is large
-4. **Complete work** → `POST /api/om-daily/items/:id/complete-work` — fast-forward merges branch to `main`, deletes branch, closes item
-5. **If abandoned** → Set `status: "cancelled"` with reason in description
+4. **Signal complete** → `POST /api/om-daily/items/:id/agent-complete` — moves item from In Progress → Self Review. **ALWAYS call this when you finish work on a task.** Idempotent and safe to call multiple times.
+5. **Full merge** (optional) → `POST /api/om-daily/items/:id/complete-work` — fast-forward merges branch to `main`, deletes branch, closes item
+6. **If abandoned** → Set `status: "cancelled"` with reason in description
 
 ### Branch Types & Naming
 
@@ -193,6 +200,7 @@ curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/complete-work \
 
 ### Key Rules
 
+- **ALWAYS signal completion** — Call `POST /items/:id/agent-complete` when you finish work. This moves the item to Self Review so the board reflects your progress. Without this call, items stay stuck in In Progress.
 - **Fast-forward only** — `complete-work` uses `git merge --ff-only`. If main has diverged, rebase first.
 - **Clean tree required** — All changes must be committed before calling `complete-work`.
 - **Explicit actions** — Branches are NOT auto-merged on status change. You must call the endpoints.
