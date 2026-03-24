@@ -1,228 +1,392 @@
-import { useState } from 'react';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
-import { HeroSection } from '@/components/frontend-pages/shared/sections';
-import EditableText from '@/components/frontend-pages/shared/EditableText';
-import apiClient from '@/api/utils/axiosInstance';
-import { useLanguage } from '@/context/LanguageContext';
-import { useEditMode } from '@/context/EditModeContext';
-import { useAuth } from '@/hooks/useAuth';
+import Grid2 from '@/components/compat/Grid2';
 
-const ENQUIRY_VALUES = ['demo', 'general', 'billing', 'technical', 'other'] as const;
+import CustomFormLabel from '@/components/forms/theme-elements/CustomFormLabel';
 
-const Contact = () => {
-  const { t } = useLanguage();
-  const [form, setForm] = useState({ name: '', email: '', parish: '', phone: '', topic: 'demo', message: '' });
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+import CustomSelect from '@/components/forms/theme-elements/CustomSelect';
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+import CustomTextField from '@/components/forms/theme-elements/CustomTextField';
+
+import C2a from '@/components/frontend-pages/shared/c2a';
+
+import Footer from '@/components/frontend-pages/shared/footer';
+
+import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
+
+import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
+
+import Address from '@/features/records-centralized/components/Address';
+
+import PageContainer from '@/shared/ui/PageContainer';
+
+import { Alert, Box, Button, CircularProgress, Container, MenuItem, Typography } from '@mui/material';
+
+import axios from 'axios';
+
+import React, { useState } from 'react';
+
+
+
+const enquiryTypes = [
+
+  { value: 'general', label: 'General Enquiry' },
+
+  { value: 'parish_registration', label: 'Parish Registration' },
+
+  { value: 'records', label: 'Records & Certificates' },
+
+  { value: 'technical', label: 'Technical Support' },
+
+  { value: 'billing', label: 'Billing & Pricing' },
+
+  { value: 'other', label: 'Other' },
+
+];
+
+
+
+const Form = () => {
+
+  const [form, setForm] = useState({
+
+    firstName: '',
+
+    lastName: '',
+
+    phone: '',
+
+    email: '',
+
+    enquiryType: 'general',
+
+    message: '',
+
+  });
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+
+
+  const handleChange = (field: string) => (e: any) => {
+
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+    if (feedback) setFeedback(null);
+
   };
+
+
+
+  const validate = (): string | null => {
+
+    if (!form.firstName.trim()) return 'First name is required.';
+
+    if (!form.lastName.trim()) return 'Last name is required.';
+
+    if (!form.email.trim()) return 'Email is required.';
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Please enter a valid email address.';
+
+    if (!form.phone.trim()) return 'Phone number is required.';
+
+    if (!form.message.trim()) return 'Please enter a message.';
+
+    return null;
+
+  };
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
-    setStatus('sending');
-    try {
-      await apiClient.post('/contact', {
-        name: form.name,
-        email: form.email,
-        parish: form.parish,
-        phone: form.phone,
-        enquiry_type: form.topic,
-        message: form.message,
-      });
-      setStatus('sent');
-      setForm({ name: '', email: '', parish: '', phone: '', topic: 'demo', message: '' });
-    } catch {
-      setStatus('error');
+
+    const err = validate();
+
+    if (err) {
+
+      setFeedback({ type: 'error', text: err });
+
+      return;
+
     }
+
+    setSubmitting(true);
+
+    setFeedback(null);
+
+    try {
+
+      await axios.post('/api/contact', form);
+
+      setFeedback({ type: 'success', text: 'Thank you! Your message has been sent. We will get back to you shortly.' });
+
+      setForm({ firstName: '', lastName: '', phone: '', email: '', enquiryType: 'general', message: '' });
+
+    } catch (error: any) {
+
+      setFeedback({ type: 'error', text: error.response?.data?.message || 'Failed to send message. Please try again.' });
+
+    } finally {
+
+      setSubmitting(false);
+
+    }
+
   };
 
+
+
   return (
-    <>
-      {/* Hero */}
-      <HeroSection
-        badge={t('contact.hero_badge')}
-        title={t('contact.hero_title')}
-        subtitle={t('contact.hero_subtitle')}
-        editKeyPrefix="contact.hero"
-      />
 
-      {/* Contact Form & Info */}
-      <section className="py-20 om-section-base">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-16">
-            {/* Form */}
-            <div>
-              <EditableText contentKey="contact.form.title" as="h2" className="font-['Georgia'] text-3xl text-[#2d1b4e] dark:text-white mb-6">{t('contact.form_title')}</EditableText>
-              <EditableText contentKey="contact.form.desc" as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 mb-8">
-                {t('contact.form_desc')}
-              </EditableText>
+    <PageContainer title="Contact" description="Contact Orthodox Metrics">
 
-              {status === 'sent' ? (
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-8 text-center">
-                  <EditableText contentKey="contact.success.title" as="h3" className="font-['Inter'] font-medium text-xl text-green-800 dark:text-green-300 mb-2">{t('contact.success_title')}</EditableText>
-                  <EditableText contentKey="contact.success.desc" as="p" className="font-['Inter'] text-[15px] text-green-700 dark:text-green-400">{t('contact.success_desc')}</EditableText>
-                </div>
-              ) : (
-                <form className="space-y-6" onSubmit={handleSubmit}>
-                  <FormField labelKey="contact.label.name" label={t('contact.label_name')} name="name" type="text" value={form.name} onChange={handleChange} placeholder={t('contact.placeholder_name')} required />
-                  <FormField labelKey="contact.label.email" label={t('contact.label_email')} name="email" type="email" value={form.email} onChange={handleChange} placeholder={t('contact.placeholder_email')} required />
-                  <FormField labelKey="contact.label.parish" label={t('contact.label_parish')} name="parish" type="text" value={form.parish} onChange={handleChange} placeholder={t('contact.placeholder_parish')} />
-                  <FormField labelKey="contact.label.phone" label={t('contact.label_phone')} name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder={t('contact.placeholder_phone')} />
+      <HeaderAlert />
 
-                  <div>
-                    <EditableText contentKey="contact.label.topic" as="label" className="block font-['Inter'] font-medium text-[15px] text-[#2d1b4e] dark:text-white mb-2">
-                      {t('contact.label_topic')}
-                    </EditableText>
-                    <EditableSelectOptions
-                      name="topic"
-                      value={form.topic}
-                      onChange={handleChange}
-                      className="om-select"
-                      options={ENQUIRY_VALUES.map((val) => ({
-                        value: val,
-                        contentKey: `contact.option.${val}`,
-                        fallback: t(`contact.option_${val}`),
-                      }))}
+      <HpHeader />
+
+
+
+      {/* Banner */}
+
+      <Box
+
+        sx={{
+
+          backgroundColor: 'primary.light',
+
+          py: { xs: 4, lg: 6 },
+
+          textAlign: 'center',
+
+        }}
+
+      >
+
+        <Container maxWidth="lg">
+
+          <Typography variant="h2" fontWeight={700} mb={1}>
+
+            Get In Touch
+
+          </Typography>
+
+          <Typography variant="body1" color="text.secondary" fontSize="16px">
+
+            We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+
+          </Typography>
+
+        </Container>
+
+      </Box>
+
+
+
+      {/* Contact Form */}
+
+      <Box
+
+        sx={{
+
+          paddingTop: { xs: '40px', lg: '60px' },
+
+          paddingBottom: { xs: '40px', lg: '90px' },
+
+        }}
+
+      >
+
+        <Container maxWidth="lg">
+
+          <Grid2 container spacing={3} justifyContent="center">
+
+            <Grid2
+
+              alignItems="center"
+
+              size={{ xs: 12, lg: 8 }}
+
+            >
+
+              <form onSubmit={handleSubmit}>
+
+                {feedback && (
+
+                  <Alert severity={feedback.type} sx={{ mb: 2 }} onClose={() => setFeedback(null)}>
+
+                    {feedback.text}
+
+                  </Alert>
+
+                )}
+
+                <Grid2 container spacing={3} justifyContent="center">
+
+                  <Grid2 alignItems="center" size={{ xs: 12, lg: 6 }}>
+
+                    <CustomFormLabel htmlFor="fname" sx={{ mt: 0 }}>
+
+                      First Name *
+
+                    </CustomFormLabel>
+
+                    <CustomTextField id="fname" placeholder="Name" fullWidth value={form.firstName} onChange={handleChange('firstName')} />
+
+                  </Grid2>
+
+                  <Grid2 alignItems="center" size={{ xs: 12, lg: 6 }}>
+
+                    <CustomFormLabel htmlFor="lname" sx={{ mt: 0 }}>
+
+                      Last Name *
+
+                    </CustomFormLabel>
+
+                    <CustomTextField id="lname" placeholder="Last Name" fullWidth value={form.lastName} onChange={handleChange('lastName')} />
+
+                  </Grid2>
+
+                  <Grid2 alignItems="center" size={{ xs: 12, lg: 6 }}>
+
+                    <CustomFormLabel htmlFor="phone" sx={{ mt: 0 }}>
+
+                      Phone Number *
+
+                    </CustomFormLabel>
+
+                    <CustomTextField id="phone" placeholder="xxx xxx xxxx" fullWidth value={form.phone} onChange={handleChange('phone')} />
+
+                  </Grid2>
+
+                  <Grid2 alignItems="center" size={{ xs: 12, lg: 6 }}>
+
+                    <CustomFormLabel htmlFor="txt-email" sx={{ mt: 0 }}>
+
+                      Email *
+
+                    </CustomFormLabel>
+
+                    <CustomTextField id="txt-email" placeholder="Email address" fullWidth value={form.email} onChange={handleChange('email')} />
+
+                  </Grid2>
+
+                  <Grid2 alignItems="center" size={12}>
+
+                    <CustomFormLabel htmlFor="txt-enquire" sx={{ mt: 0 }}>
+
+                      Enquire related to *
+
+                    </CustomFormLabel>
+
+                    <CustomSelect
+
+                      fullWidth
+
+                      id="txt-enquire"
+
+                      variant="outlined"
+
+                      value={form.enquiryType}
+
+                      onChange={handleChange('enquiryType')}
+
+                    >
+
+                      {enquiryTypes.map((option) => (
+
+                        <MenuItem key={option.value} value={option.value}>
+
+                          {option.label}
+
+                        </MenuItem>
+
+                      ))}
+
+                    </CustomSelect>
+
+                  </Grid2>
+
+                  <Grid2 alignItems="center" size={12}>
+
+                    <CustomFormLabel htmlFor="txt-message" sx={{ mt: 0 }}>
+
+                      Message *
+
+                    </CustomFormLabel>
+
+                    <CustomTextField
+
+                      id="txt-message"
+
+                      multiline
+
+                      rows={4}
+
+                      variant="outlined"
+
+                      placeholder="Write your message here..."
+
+                      fullWidth
+
+                      value={form.message}
+
+                      onChange={handleChange('message')}
+
                     />
-                  </div>
 
-                  <div>
-                    <EditableText contentKey="contact.label.message" as="label" className="block font-['Inter'] font-medium text-[15px] text-[#2d1b4e] dark:text-white mb-2">{t('contact.label_message')}</EditableText>
-                    <textarea name="message" required rows={6} value={form.message} onChange={handleChange} className="om-textarea" placeholder={t('contact.placeholder_message')} />
-                  </div>
+                  </Grid2>
 
-                  {status === 'error' && (
-                    <EditableText contentKey="contact.error.message" as="p" className="font-['Inter'] text-sm text-red-600 dark:text-red-400">{t('contact.error_message')}</EditableText>
-                  )}
+                  <Grid2 alignItems="center" size={12}>
 
-                  <button type="submit" disabled={status === 'sending'} className="w-full om-btn-primary disabled:opacity-50">
-                    {status === 'sending'
-                      ? <EditableText contentKey="contact.btn.sending">{t('contact.btn_sending')}</EditableText>
-                      : <EditableText contentKey="contact.btn.send">{t('contact.btn_send')}</EditableText>
-                    }
-                  </button>
-                </form>
-              )}
-            </div>
+                    <Button variant="contained" size="large" type="submit" disabled={submitting}>
 
-            {/* Contact Info */}
-            <div>
-              <EditableText contentKey="contact.info.title" as="h2" className="font-['Georgia'] text-3xl text-[#2d1b4e] dark:text-white mb-6">{t('contact.info_title')}</EditableText>
-              <EditableText contentKey="contact.info.desc" as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 mb-8">
-                {t('contact.info_desc')}
-              </EditableText>
-              <div className="space-y-8">
-                <ContactInfo icon={<Mail className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} titleKey="contact.info1.title" infoKey="contact.info1.detail" subtextKey="contact.info1.subtext" title={t('contact.info1_title')} info={t('contact.info1_detail')} subtext={t('contact.info1_subtext')} />
-                <ContactInfo icon={<Phone className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} titleKey="contact.info2.title" infoKey="contact.info2.detail" subtextKey="contact.info2.subtext" title={t('contact.info2_title')} info={t('contact.info2_detail')} subtext={t('contact.info2_subtext')} />
-                <ContactInfo icon={<MapPin className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} titleKey="contact.info3.title" infoKey="contact.info3.detail" subtextKey="contact.info3.subtext" title={t('contact.info3_title')} info={t('contact.info3_detail')} subtext={t('contact.info3_subtext')} />
-                <ContactInfo icon={<Clock className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} titleKey="contact.info4.title" infoKey="contact.info4.detail" subtextKey="contact.info4.subtext" title={t('contact.info4_title')} info={t('contact.info4_detail')} subtext={t('contact.info4_subtext')} />
-              </div>
+                      {submitting ? <CircularProgress size={24} color="inherit" /> : 'Submit'}
 
-              <div className="mt-12 om-card-elevated p-8">
-                <EditableText contentKey="contact.demo.title" as="h3" className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-4">{t('contact.demo_title')}</EditableText>
-                <EditableText contentKey="contact.demo.desc" as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 mb-6">
-                  {t('contact.demo_desc')}
-                </EditableText>
-                <button className="w-full om-btn-primary" onClick={() => { setForm((f) => ({ ...f, topic: 'demo' })); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-                  <EditableText contentKey="contact.demo.button">{t('contact.demo_button')}</EditableText>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+                    </Button>
 
-      {/* FAQ */}
-      <section className="py-20 om-section-elevated">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <EditableText contentKey="contact.faq.title" as="h2" className="font-['Georgia'] text-4xl text-[#2d1b4e] dark:text-white mb-4">{t('contact.faq_title')}</EditableText>
-            <EditableText contentKey="contact.faq.subtitle" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400">{t('contact.faq_subtitle')}</EditableText>
-          </div>
-          <div className="space-y-6">
-            {[1, 2, 3, 4].map((idx) => (
-              <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-[#f3f4f6] dark:border-gray-700 shadow-sm">
-                <EditableText contentKey={`contact.faq${idx}.q`} as="h3" className="font-['Inter'] font-medium text-lg text-[#2d1b4e] dark:text-white mb-2">{t(`contact.faq${idx}_q`)}</EditableText>
-                <EditableText contentKey={`contact.faq${idx}.a`} as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed" multiline>{t(`contact.faq${idx}_a`)}</EditableText>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </>
+                  </Grid2>
+
+                </Grid2>
+
+              </form>
+
+            </Grid2>
+
+            <Grid2
+
+              alignItems="center"
+
+              size={{ xs: 12, lg: 4 }}
+
+            >
+
+              <Address />
+
+            </Grid2>
+
+          </Grid2>
+
+        </Container>
+
+      </Box>
+
+
+
+      <C2a />
+
+      <Footer />
+
+      <ScrollToTop />
+
+    </PageContainer>
+
   );
+
 };
 
-export default Contact;
 
-// ── Local sub-components ──
 
-function FormField({ labelKey, label, name, type, value, onChange, placeholder, required }: {
-  labelKey: string; label: string; name: string; type: string; value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder: string; required?: boolean;
-}) {
-  return (
-    <div>
-      <EditableText contentKey={labelKey} as="label" className="block font-['Inter'] font-medium text-[15px] text-[#2d1b4e] dark:text-white mb-2">{label}</EditableText>
-      <input type={type} name={name} value={value} onChange={onChange} required={required} className="om-input" placeholder={placeholder} />
-    </div>
-  );
-}
+export default Form;
 
-function EditableSelectOptions({ name, value, onChange, className, options }: {
-  name: string; value: string; className: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: { value: string; contentKey: string; fallback: string }[];
-}) {
-  const { isEditMode, getContent, updateContent } = useEditMode();
-  const { isSuperAdmin } = useAuth();
-  const canEdit = isEditMode && isSuperAdmin();
-
-  if (!canEdit) {
-    return (
-      <select name={name} value={value} onChange={onChange} className={className}>
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>{getContent(opt.contentKey, opt.fallback)}</option>
-        ))}
-      </select>
-    );
-  }
-
-  // In edit mode, show the select plus an editable list of option labels below it
-  return (
-    <div>
-      <select name={name} value={value} onChange={onChange} className={className}>
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>{getContent(opt.contentKey, opt.fallback)}</option>
-        ))}
-      </select>
-      <div className="mt-2 space-y-1">
-        {options.map((opt) => (
-          <EditableText key={opt.value} contentKey={opt.contentKey} as="div" className="text-xs text-[#6b7280] dark:text-gray-500 px-2 py-1 border border-dashed border-[#d4af37]/40 rounded">
-            {opt.fallback}
-          </EditableText>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ContactInfo({ icon, titleKey, infoKey, subtextKey, title, info, subtext }: {
-  icon: React.ReactNode; titleKey: string; infoKey: string; subtextKey: string;
-  title: string; info: string; subtext: string;
-}) {
-  return (
-    <div className="flex items-start gap-4">
-      <div className="flex-shrink-0 w-12 h-12 bg-[#2d1b4e] dark:bg-[#d4af37] rounded-lg flex items-center justify-center">
-        {icon}
-      </div>
-      <div>
-        <EditableText contentKey={titleKey} as="h3" className="font-['Inter'] font-medium text-lg text-[#2d1b4e] dark:text-white mb-1">{title}</EditableText>
-        <EditableText contentKey={infoKey} as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 mb-1">{info}</EditableText>
-        <EditableText contentKey={subtextKey} as="p" className="font-['Inter'] text-[13px] text-[#6b7280] dark:text-gray-500">{subtext}</EditableText>
-      </div>
-    </div>
-  );
-}

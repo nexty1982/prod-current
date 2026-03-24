@@ -76,6 +76,13 @@ const Menuitems: MenuitemsType[] = [
     icon: IconShield,
     href: '/dashboards/modern',
   },
+  {
+    id: uniqueId(),
+    title: 'OM Berryops',
+    icon: IconLayoutDashboard,
+    href: '/omai/dashboard/default',
+    external: true,
+  },
 
   // ========================================================================
   // CHURCH MANAGEMENT (matches Control Panel category 1)

@@ -34,9 +34,6 @@ export const PAGE_TITLES: Record<string, string> = {
   '/admin/users': 'User Management',
   '/admin/settings': 'Settings',
   
-  // Help
-  '/help/user-guide': 'User Guide',
-
   // Profile
   '/profile': 'Profile',
   '/settings': 'Settings',
@@ -60,5 +57,5 @@ export const getPageTitle = (pathname: string): string => {
   }
   
   // Default fallback
-  return 'Orthodox Metrics';
+  return 'OrthodoxMetrics';
 };

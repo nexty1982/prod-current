@@ -619,8 +619,8 @@ app.use('/api', churchRegisterRouter); // Admin token management endpoints
 console.log('✅ [Server] Mounted church registration token routes');
 app.use('/api/admin/church-onboarding', churchOnboardingRouter);
 console.log('✅ [Server] Mounted /api/admin/church-onboarding route (Phase 2 onboarding pipeline)');
-app.use('/api/admin/church-lifecycle', churchLifecycleRouter);
-console.log('✅ [Server] Mounted /api/admin/church-lifecycle route (unified CRM + onboarding)');
+app.use('/api/admin/church-lifecycle', churchLifecycleRouter); // OMAI consumer — do not remove (PP-0003)
+console.log('✅ [Server] Mounted /api/admin/church-lifecycle route (OMAI-owned, served from OM backend)');
 app.use('/api/admin/orthodox-schedule-guidelines', orthodoxScheduleGuidelinesRouter);
 console.log('✅ [Server] Mounted /api/admin/orthodox-schedule-guidelines route');
 app.use('/api/admin/change-sets', changeSetsRouter);
@@ -689,6 +689,10 @@ app.use('/api/admin/global-images', globalImagesRouter);
 const buildStatusRouter = require('./routes/admin/buildStatus');
 app.use('/api/admin', buildStatusRouter);
 console.log('✅ [Server] Mounted /api/admin/build-status route');
+
+const buildApprovalRouter = require('./routes/admin/build-approval');
+app.use('/api/admin/build-approval', buildApprovalRouter);
+console.log('✅ [Server] Mounted /api/admin/build-approval route');
 
 // Admin auth check (for Nginx auth_request)
 const authCheckRouter = require('./routes/admin/auth-check');

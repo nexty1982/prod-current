@@ -3,7 +3,7 @@
  * Windows Control Panel-style admin hub for super_admin users.
  * Located at /admin/control-panel
  *
- * Includes CRM pipeline & follow-up widget + category tiles
+ * Includes platform status widget + category tiles
  */
 
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
@@ -20,9 +20,6 @@ import {
     Widgets as SuiteIcon,
     Code as DevIcon,
     FolderOff as DeprecatedIcon,
-    WarningAmber as OverdueIcon,
-    Today as TodayIcon,
-    TrendingUp as PipelineIcon,
 } from '@mui/icons-material';
 import {
     Storage as DbIcon,
@@ -34,7 +31,6 @@ import {
     alpha,
     Box,
     Chip,
-    CircularProgress,
     LinearProgress,
     Skeleton,
     Tooltip,
@@ -75,7 +71,6 @@ const CATEGORIES: Category[] = [
     href: '/admin/control-panel/church-management',
     quickLinks: [
       { label: 'All Churches', href: '/apps/church-management' },
-      { label: 'Church Lifecycle', href: '/admin/control-panel/church-lifecycle' },
       { label: 'Jurisdictions', href: '/admin/control-panel/jurisdictions' },
       { label: 'Demo Churches', href: '/admin/control-panel/demo-churches' },
       { label: 'Sacramental Restrictions', href: '/admin/control-panel/church-management/sacramental-restrictions' },
@@ -100,14 +95,14 @@ const CATEGORIES: Category[] = [
   {
     key: 'crm',
     title: 'CRM & Outreach',
-    description: 'Church lifecycle pipeline, lead management, US church map, and sales',
+    description: 'Lead management, onboarding pipeline, US church map, and sales',
     icon: <OutreachIcon sx={{ fontSize: 28 }} />,
     color: '#7b1fa2',
     bgLight: 'rgba(123, 31, 162, 0.08)',
     bgDark: 'rgba(123, 31, 162, 0.15)',
     href: '/admin/control-panel/crm-outreach',
     quickLinks: [
-      { label: 'Church Lifecycle', href: '/admin/control-panel/church-lifecycle' },
+      { label: 'Onboarding Pipeline', href: '/admin/control-panel/onboarding-pipeline' },
       { label: 'US Church Map', href: '/devel-tools/us-church-map' },
     ],
   },
@@ -207,117 +202,6 @@ const CATEGORIES: Category[] = [
 ];
 
 // ─── Component ──────────────────────────────────────────────────
-
-/* ─── Pipeline Widget ─────────────────────────────────────────── */
-
-interface PipelineWidgetData {
-  overdue: number;
-  todayFollowups: number;
-  totalCrmLeads: number;
-  totalOnboarded: number;
-  pipeline: { stage_key: string; label: string; color: string; count: number; is_terminal: number }[];
-}
-
-const PipelineWidget: React.FC<{ isDark: boolean; navigate: ReturnType<typeof useNavigate> }> = ({ isDark, navigate }) => {
-  const [data, setData] = useState<PipelineWidgetData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/admin/church-lifecycle/dashboard', { credentials: 'include' })
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d) setData(d); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2, mb: 2 }}>
-      <CircularProgress size={20} />
-    </Box>
-  );
-  if (!data) return null;
-
-  const activeStages = data.pipeline.filter(s => !s.is_terminal && s.count > 0);
-
-  return (
-    <div
-      className="om-admin-card"
-      onClick={() => navigate('/admin/control-panel/church-lifecycle')}
-      style={{ marginBottom: '1.5rem' }}
-    >
-      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        {/* Follow-up alerts */}
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          {data.overdue > 0 && (
-            <Chip
-              icon={<OverdueIcon sx={{ fontSize: 16 }} />}
-              label={`${data.overdue} overdue`}
-              size="small"
-              sx={{
-                fontWeight: 600,
-                bgcolor: alpha('#f44336', isDark ? 0.2 : 0.1),
-                color: '#f44336',
-                border: `1px solid ${alpha('#f44336', 0.3)}`,
-                cursor: 'pointer',
-              }}
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                navigate('/admin/control-panel/church-lifecycle');
-              }}
-            />
-          )}
-          {data.todayFollowups > 0 && (
-            <Chip
-              icon={<TodayIcon sx={{ fontSize: 16 }} />}
-              label={`${data.todayFollowups} today`}
-              size="small"
-              sx={{
-                fontWeight: 600,
-                bgcolor: alpha('#ff9800', isDark ? 0.2 : 0.1),
-                color: '#ff9800',
-                border: `1px solid ${alpha('#ff9800', 0.3)}`,
-                cursor: 'pointer',
-              }}
-            />
-          )}
-          <Chip
-            icon={<PipelineIcon sx={{ fontSize: 16 }} />}
-            label={`${data.totalCrmLeads} leads · ${data.totalOnboarded} onboarded`}
-            size="small"
-            variant="outlined"
-            sx={{ fontWeight: 500, cursor: 'pointer' }}
-          />
-        </div>
-
-        {/* Mini pipeline bar */}
-        {activeStages.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
-            {activeStages.slice(0, 6).map(s => (
-              <Chip
-                key={s.stage_key}
-                label={`${s.label}: ${s.count}`}
-                size="small"
-                sx={{
-                  fontWeight: 600,
-                  fontSize: '0.72rem',
-                  height: 24,
-                  bgcolor: alpha(s.color, isDark ? 0.2 : 0.1),
-                  color: s.color,
-                  border: `1px solid ${alpha(s.color, 0.25)}`,
-                  cursor: 'pointer',
-                }}
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  navigate(`/admin/control-panel/church-lifecycle?stage=${s.stage_key}`);
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 /* ─── Platform Status Widget ─────────────────────────────────── */
 
@@ -529,9 +413,6 @@ const AdminControlPanel: React.FC = () => {
             Manage your Orthodox community platform. Select a category to get started.
           </p>
         </Box>
-
-        {/* Pipeline & Follow-up Widget */}
-        <PipelineWidget isDark={isDark} navigate={navigate} />
 
         {/* Platform Status Widget */}
         <PlatformStatusWidget isDark={isDark} navigate={navigate} />

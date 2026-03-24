@@ -1,144 +1,138 @@
-/**
- * NotFound404.tsx
- * Custom 404 "Page Not Found" error page
- * Features a clean, modern design with illustration and clear call-to-action
- */
-
 import React from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Paper
-} from '@mui/material';
-import { Home as HomeIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-const OM_COLORS = { purple: '#7c3aed' };
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import { useTheme } from '@mui/material/styles';
+import { useNavigate, useLocation } from 'react-router-dom';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 
+// ── 3-bar Orthodox Christian cross ──────────────────────────────────────────
+function OrthodoxCrossIcon({ size = 40, color = 'currentColor' }: { size?: number; color?: string }) {
+  return (
+    <svg viewBox="0 0 32 48" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: size * 0.67, height: size, display: 'block' }}>
+      <rect x="14" y="0" width="4" height="48" fill={color} rx="1" />
+      <rect x="8" y="6" width="16" height="3.5" fill={color} rx="1" />
+      <rect x="4" y="16" width="24" height="4" fill={color} rx="1" />
+      <rect x="6" y="36" width="20" height="3.5" fill={color} rx="1" transform="rotate(-18 16 37.75)" />
+    </svg>
+  );
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
 const NotFound404: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
-  const handleGoHome = () => {
-    navigate('/');
-  };
+  const pageBg    = isDark ? '#0a1929' : '#fafaf7';
+  const cardBg    = isDark ? '#0d2137' : '#ffffff';
+  const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
+  const breadBg   = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
+  const breadText = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)';
+  const heading   = isDark ? '#e8eaf0' : '#1a2332';
+  const subtext   = isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)';
+  const btnBorder = isDark ? 'rgba(255,255,255,0.2)'  : 'rgba(0,0,0,0.15)';
+  const btnText   = isDark ? '#e8eaf0' : '#1a2332';
+  const linkColor = isDark ? '#5DADE2' : '#1976d2';
+  const footerText = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.3)';
+
+  const crumbPath = location.pathname === '/' ? 'Home' : location.pathname.replace(/^\//, '').replace(/\//g, ' / ');
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        bgcolor: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        py: 4
-      }}
-    >
-      <Container maxWidth="md">
-        <Box
-          sx={{
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 4
-          }}
-        >
-          {/* 404 Illustration Container */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 4,
-              bgcolor: '#f8f9fa',
-              borderRadius: 3,
-              border: '1px solid #e9ecef',
-              maxWidth: 400,
-              width: '100%'
-            }}
-          >
-            <Box
-              component="img"
-              src="/404.png"
-              alt="404 Error Illustration"
-              sx={{
-                width: '100%',
-                height: 'auto',
-                maxWidth: 300,
-                display: 'block',
-                margin: '0 auto'
-              }}
-            />
-          </Paper>
-
-          {/* Main Heading */}
-          <Typography
-            variant="h2"
-            component="h1"
-            sx={{
-              fontWeight: 700,
-              color: 'text.primary',
-              fontSize: { xs: '2.5rem', md: '3.5rem' },
-              lineHeight: 1.2
-            }}
-          >
-            Opps!!!
-          </Typography>
-
-          {/* Descriptive Text */}
-          <Typography
-            variant="h6"
-            sx={{
-              color: 'text.secondary',
-              fontWeight: 400,
-              maxWidth: 500,
-              lineHeight: 1.5,
-              fontSize: { xs: '1.1rem', md: '1.25rem' }
-            }}
-          >
-            The page you are looking for could not be found.
-          </Typography>
-
-          {/* Action Button */}
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<HomeIcon />}
-            onClick={handleGoHome}
-                         sx={{
-               bgcolor: OM_COLORS.purple,
-               color: 'white',
-               px: 4,
-               py: 1.5,
-               borderRadius: 3,
-               fontSize: '1.1rem',
-               fontWeight: 600,
-               textTransform: 'none',
-               boxShadow: '0 4px 12px rgba(91, 46, 191, 0.3)',
-               '&:hover': {
-                 bgcolor: '#4a1f9a',
-                 boxShadow: '0 6px 16px rgba(91, 46, 191, 0.4)',
-                 transform: 'translateY(-1px)'
-               },
-               transition: 'all 0.2s ease-in-out'
-             }}
-          >
-            Go Back to Home
-          </Button>
-
-          {/* Additional Help Text */}
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-              mt: 2,
-              opacity: 0.8,
-              fontSize: '0.9rem'
-            }}
-          >
-            If you believe this is an error, please contact support.
+    <Box sx={{ minHeight: '100vh', bgcolor: pageBg, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3, transition: 'background-color 0.3s' }}>
+      <Paper
+        elevation={0}
+        sx={{
+          width: '100%',
+          maxWidth: 460,
+          bgcolor: cardBg,
+          border: `1px solid ${cardBorder}`,
+          borderRadius: 3,
+          overflow: 'hidden',
+          boxShadow: isDark ? '0 24px 64px rgba(0,0,0,0.5)' : '0 8px 40px rgba(0,0,0,0.08)',
+        }}
+      >
+        {/* Breadcrumb bar */}
+        <Box sx={{ px: 3, py: 1.25, bgcolor: breadBg, borderBottom: `1px solid ${cardBorder}` }}>
+          <Typography sx={{ fontSize: '0.75rem', color: breadText, fontFamily: 'monospace', letterSpacing: '0.02em' }}>
+            You are here &nbsp;/&nbsp; <span style={{ opacity: 0.7 }}>{crumbPath}</span>
           </Typography>
         </Box>
-      </Container>
+
+        {/* Body */}
+        <Box sx={{ px: 4, py: 4.5, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
+          {/* Icons row */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, mb: 3.5 }}>
+            <OrthodoxCrossIcon size={44} color="#D4AF37" />
+            <MenuBookOutlinedIcon sx={{ fontSize: 38, color: '#5DADE2' }} />
+          </Box>
+
+          {/* Heading */}
+          <Typography sx={{ fontSize: '1.625rem', fontWeight: 600, color: heading, letterSpacing: '-0.01em', mb: 1.5 }}>
+            Page Not Found
+          </Typography>
+
+          {/* Subtitle */}
+          <Typography sx={{ fontSize: '0.9375rem', color: subtext, lineHeight: 1.65, maxWidth: 320, mb: 3.5 }}>
+            The page you're looking for doesn't exist or may have been moved.
+          </Typography>
+
+          {/* Primary button */}
+          <Button
+            variant="outlined"
+            startIcon={<HomeOutlinedIcon sx={{ fontSize: 18 }} />}
+            onClick={() => navigate('/')}
+            sx={{
+              mb: 3,
+              px: 3,
+              py: 1,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 500,
+              fontSize: '0.9375rem',
+              color: btnText,
+              borderColor: btnBorder,
+              '&:hover': { borderColor: linkColor, color: linkColor, bgcolor: 'transparent' },
+              transition: 'all 0.2s',
+            }}
+          >
+            Go to Homepage
+          </Button>
+
+          {/* Secondary links */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box
+              component="button"
+              onClick={() => navigate('/apps/church-management')}
+              sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'none', border: 'none', cursor: 'pointer', color: linkColor, fontSize: '0.8125rem', p: 0, '&:hover': { opacity: 0.75 } }}
+            >
+              <BookmarkBorderIcon sx={{ fontSize: 14 }} />
+              Browse Records
+            </Box>
+            <Typography sx={{ color: subtext, fontSize: '0.75rem' }}>·</Typography>
+            <Box
+              component="a"
+              href="mailto:support@orthodoxmetrics.com"
+              sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: linkColor, textDecoration: 'none', fontSize: '0.8125rem', '&:hover': { opacity: 0.75 } }}
+            >
+              <ArrowForwardIcon sx={{ fontSize: 14 }} />
+              Contact Support
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Footer */}
+        <Box sx={{ px: 3, py: 1.75, borderTop: `1px solid ${cardBorder}`, textAlign: 'center' }}>
+          <Typography sx={{ fontSize: '0.6875rem', color: footerText, letterSpacing: '0.02em' }}>
+            OrthodoxMetrics &nbsp;·&nbsp; Powered by OrthodoxMetrics
+          </Typography>
+        </Box>
+      </Paper>
     </Box>
   );
 };

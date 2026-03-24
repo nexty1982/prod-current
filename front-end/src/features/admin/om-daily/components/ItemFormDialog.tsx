@@ -76,25 +76,35 @@ const ItemFormDialog: React.FC<ItemFormDialogProps> = ({ open, editingItem, form
               </Select>
             </FormControl>
           </Stack>
-          <FormControl size="small" fullWidth>
-            <InputLabel>Branch Type</InputLabel>
-            <Select value={form.branch_type} label="Branch Type" onChange={(e) => setField('branch_type', e.target.value)}>
-              <MenuItem value="">None</MenuItem>
-              {BRANCH_TYPES.map(b => (
-                <MenuItem key={b} value={b}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: BRANCH_TYPE_COLORS[b] }} />
-                    {BRANCH_TYPE_LABELS[b]}
-                  </Box>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Stack direction="row" spacing={1}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Branch Type</InputLabel>
+              <Select value={form.branch_type} label="Branch Type" onChange={(e) => setField('branch_type', e.target.value)}>
+                <MenuItem value="">None</MenuItem>
+                {BRANCH_TYPES.map(b => (
+                  <MenuItem key={b} value={b}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: BRANCH_TYPE_COLORS[b] }} />
+                      {BRANCH_TYPE_LABELS[b]}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Repo Target</InputLabel>
+              <Select value={form.repo_target || 'orthodoxmetrics'} label="Repo Target" onChange={(e) => setField('repo_target', e.target.value)}>
+                <MenuItem value="orthodoxmetrics">OrthodoxMetrics</MenuItem>
+                <MenuItem value="omai">OMAI</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
           {form.agent_tool && form.branch_type && (
             <Alert severity="info" sx={{ fontSize: '0.75rem', py: 0.5 }}>
-              A GitHub issue and branch will be auto-created when saved. Branch: <strong>{
+              A local branch will be auto-created when saved. Branch: <strong>{
                 ({ bugfix: 'BF', new_feature: 'NF', existing_feature: 'EF', patch: 'PA' } as Record<string, string>)[form.branch_type]
               }_{(AGENT_TOOL_LABELS[form.agent_tool] || form.agent_tool).toLowerCase().replace(' ', '-')}_{new Date().toISOString().split('T')[0]}</strong>
+              <br />on <em>{form.repo_target || 'orthodoxmetrics'}</em> repo
             </Alert>
           )}
         </Stack>

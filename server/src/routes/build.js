@@ -472,6 +472,29 @@ router.post('/run', async (req, res) => {
 
 // GET /api/build/run-stream - Server-Sent Events endpoint for streaming builds
 router.get('/run-stream', async (req, res) => {
+  const approvalRequestId = req.query.approvalRequestId || null;
+
+  // If approvalRequestId provided, validate and mark as running
+  if (approvalRequestId) {
+    try {
+      const { getAppPool } = require('../config/db-compat');
+      const [[approval]] = await getAppPool().query(
+        'SELECT * FROM build_approval_requests WHERE request_id = ?',
+        [approvalRequestId]
+      );
+      if (!approval || !['approved', 'queued'].includes(approval.status)) {
+        return res.status(403).json({ success: false, error: `Build not authorized. Status: ${approval?.status || 'not found'}` });
+      }
+      await getAppPool().query(
+        'UPDATE build_approval_requests SET status = ? WHERE request_id = ?',
+        ['running', approvalRequestId]
+      );
+    } catch (err) {
+      console.error('Approval validation error:', err);
+      // Non-blocking — proceed with build even if approval tracking fails
+    }
+  }
+
   // Set up SSE headers
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
@@ -623,7 +646,19 @@ router.get('/run-stream', async (req, res) => {
         categorizedData: categorizedData
       })}\n\n`);
     }
-    
+
+    // Update approval request with build result
+    if (approvalRequestId) {
+      try {
+        const { getAppPool } = require('../config/db-compat');
+        const finalStatus = buildOutput.includes('✅') ? 'completed' : 'failed';
+        await getAppPool().query(
+          `UPDATE build_approval_requests SET status = ?, build_id = ?, build_success = ?, build_duration = ? WHERE request_id = ?`,
+          [finalStatus, buildId, finalStatus === 'completed' ? 1 : 0, Date.now() - buildStart, approvalRequestId]
+        );
+      } catch (err) { console.error('Failed to update approval request:', err); }
+    }
+
   } catch (error) {
     console.error('Streaming build failed:', error);
     res.write(`data: ${JSON.stringify({

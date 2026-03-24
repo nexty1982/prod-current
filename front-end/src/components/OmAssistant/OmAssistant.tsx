@@ -15,25 +15,27 @@ import {
 } from '@mui/material';
 import type { SvgIconProps } from '@mui/material';
 
-/** Ichthys (ΙΧΘΥΣ) — early Christian fish symbol */
+/** Ichthys (ΙΧΘΥΣ) — classic Christian fish symbol */
 const IchthysIcon: React.FC<SvgIconProps> = (props) => (
   <SvgIcon viewBox="0 0 24 24" {...props}>
+    {/* Body — symmetric almond/lens shape, right end at x=20 to leave room for tail */}
     <path
-      d="M1 12 C6 6, 14 4, 23 12 C14 20, 6 18, 1 12 Z"
+      d="M2,12 C4,4 15,4 20,12 C15,20 4,20 2,12 Z"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.8}
+      strokeWidth={1.6}
       strokeLinejoin="round"
     />
-    <circle cx="18" cy="11" r="1.2" fill="currentColor" />
+    {/* Tail — two lines that cross outward to the right, meeting at (20.5, 12) */}
     <path
-      d="M23 12 L20 8 M23 12 L20 16"
+      d="M17,7 L24,17 M17,17 L24,7"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.8}
+      strokeWidth={1.6}
       strokeLinecap="round"
-      strokeLinejoin="round"
     />
+    {/* Eye — on the head (left) side */}
+    <circle cx="8" cy="11.5" r="1.2" fill="currentColor" />
   </SvgIcon>
 );
 import React, { Component, useEffect, useState } from 'react';

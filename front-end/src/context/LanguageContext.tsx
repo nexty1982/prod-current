@@ -13,6 +13,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { apiClient } from '@/api/utils/axiosInstance';
+import { safeTranslate } from '@/utils/safeTranslate';
 
 const SUPPORTED_LANGS = ['en', 'el', 'ru', 'ro', 'ka'] as const;
 type LangCode = (typeof SUPPORTED_LANGS)[number];
@@ -101,7 +102,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   const t = useCallback(
-    (key: string): string => translations[key] ?? key,
+    (key: string): string => safeTranslate(translations, key),
     [translations],
   );
 

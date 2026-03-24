@@ -16,7 +16,7 @@ import OMDailyKanban from '@/components/apps/kanban/OMDailyKanban';
 
 const OMDailyBoardPage: React.FC = () => {
   const theme = useTheme();
-  const { items, fetchItems, saveItem, deleteItem, updateStatus } = useOMDailyItems();
+  const { items, fetchItems, saveItem, deleteItem, updateStatus, startWork } = useOMDailyItems();
   const { toast, showToast, closeToast } = useToast();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -32,11 +32,11 @@ const OMDailyBoardPage: React.FC = () => {
 
   const handleKanbanStatusChange = async (itemId: number, newStatus: string) => {
     try {
-      const extra = newStatus === 'done' ? { progress: 100 } : {};
-      await updateStatus(itemId, newStatus, extra);
+      await updateStatus(itemId, newStatus);
       await fetchItems();
-    } catch {
-      showToast('Failed to update status', 'error');
+    } catch (err: any) {
+      const msg = err.message || 'Transition blocked';
+      showToast(msg, 'error');
     }
   };
 
@@ -62,6 +62,7 @@ const OMDailyBoardPage: React.FC = () => {
       due_date: item.due_date ? item.due_date.split('T')[0] : '',
       agent_tool: item.agent_tool || '',
       branch_type: item.branch_type || '',
+      repo_target: (item as any).repo_target || 'orthodoxmetrics',
     });
     setDialogOpen(true);
   };
@@ -84,8 +85,29 @@ const OMDailyBoardPage: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      await saveItem(form, editingItem?.id);
-      showToast(editingItem ? 'Item updated' : 'Item created', 'success');
+      const result = await saveItem(form, editingItem?.id);
+      const isNew = !editingItem;
+      const itemId = result?.item?.id || result?.id;
+
+      // Auto-create local branch if agent_tool + branch_type are set on new items
+      if (isNew && form.agent_tool && form.branch_type && itemId) {
+        try {
+          const workResult = await startWork(itemId, form.branch_type, form.agent_tool);
+          const branch = workResult?.branch || workResult?.item?.github_branch;
+          showToast(`Item #${itemId} created — branch: ${branch}`, 'success');
+        } catch (branchErr: any) {
+          // Backend POST may have already created a remote branch via syncItemToGitHub
+          const existingBranch = result?.item?.github_branch;
+          if (existingBranch) {
+            showToast(`Item #${itemId} created — remote branch: ${existingBranch}`, 'success');
+          } else {
+            showToast(`Item #${itemId} created (branch failed: ${branchErr.message})`, 'error');
+          }
+        }
+      } else {
+        showToast(isNew ? 'Item created' : 'Item updated', 'success');
+      }
+
       setDialogOpen(false);
       setEditingItem(null);
       setForm({ ...DEFAULT_FORM });

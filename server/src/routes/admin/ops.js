@@ -393,8 +393,27 @@ router.get('/artifacts/:id/file/:filename', requireAuth, requireAdmin, async (re
  * Safe, allowlisted git commands for admin/super_admin only
  */
 
-// Repository root (where git commands will run)
-const REPO_ROOT = '/var/www/orthodoxmetrics/prod';
+// Allowed repositories — whitelist for multi-repo support
+const REPOS = {
+  orthodoxmetrics: '/var/www/orthodoxmetrics/prod',
+  omai: '/var/www/omai',
+};
+const DEFAULT_REPO = 'orthodoxmetrics';
+
+/** Resolve repo root from ?repo= query param. Returns { repoKey, repoRoot } or throws. */
+function resolveRepo(req) {
+  const key = (req.query.repo || DEFAULT_REPO).toLowerCase();
+  const root = REPOS[key];
+  if (!root) throw new Error(`Unknown repository: ${key}. Allowed: ${Object.keys(REPOS).join(', ')}`);
+  return { repoKey: key, repoRoot: root };
+}
+
+// GET /api/ops/git/repos — list available repositories
+router.get('/git/repos', requireAuth, requireAdmin, async (req, res) => {
+  res.json({ repos: Object.keys(REPOS).map(k => ({ key: k, path: REPOS[k] })) });
+});
+
+
 
 /**
  * GET /api/ops/git/status
@@ -403,12 +422,13 @@ const REPO_ROOT = '/var/www/orthodoxmetrics/prod';
  */
 router.get('/git/status', requireAuth, requireAdmin, async (req, res) => {
   try {
+    const { repoKey, repoRoot } = resolveRepo(req);
     // Run git status --short --branch
     const { stdout, stderr } = await execFileAsync(
       'git',
       ['status', '--short', '--branch'],
       {
-        cwd: REPO_ROOT,
+        cwd: repoRoot,
         timeout: 5000, // 5 second timeout
         maxBuffer: 1024 * 1024, // 1MB max output
       }
@@ -447,6 +467,7 @@ router.get('/git/status', requireAuth, requireAdmin, async (req, res) => {
  */
 router.post('/git/branches/create-default', requireAuth, requireAdmin, async (req, res) => {
   try {
+    const { repoKey, repoRoot } = resolveRepo(req);
     const DEFAULT_BRANCHES = [
       'fix/build-events-users-softdelete',
       'chore/gallery-dir-bootstrap'
@@ -459,7 +480,7 @@ router.post('/git/branches/create-default', requireAuth, requireAdmin, async (re
         'git',
         ['rev-parse', '--abbrev-ref', 'HEAD'],
         {
-          cwd: REPO_ROOT,
+          cwd: repoRoot,
           timeout: 3000,
         }
       );
@@ -469,7 +490,7 @@ router.post('/git/branches/create-default', requireAuth, requireAdmin, async (re
         'git',
         ['rev-parse', 'HEAD'],
         {
-          cwd: REPO_ROOT,
+          cwd: repoRoot,
           timeout: 3000,
         }
       );
@@ -493,7 +514,7 @@ router.post('/git/branches/create-default', requireAuth, requireAdmin, async (re
             'git',
             ['show-ref', '--verify', '--quiet', `refs/heads/${branchName}`],
             {
-              cwd: REPO_ROOT,
+              cwd: repoRoot,
               timeout: 3000,
             }
           );
@@ -509,7 +530,7 @@ router.post('/git/branches/create-default', requireAuth, requireAdmin, async (re
             'git',
             ['checkout', '-b', branchName],
             {
-              cwd: REPO_ROOT,
+              cwd: repoRoot,
               timeout: 5000,
             }
           );
@@ -519,7 +540,7 @@ router.post('/git/branches/create-default', requireAuth, requireAdmin, async (re
             'git',
             ['checkout', currentBranch],
             {
-              cwd: REPO_ROOT,
+              cwd: repoRoot,
               timeout: 5000,
             }
           );
@@ -578,13 +599,14 @@ router.post('/git/branches/create-default', requireAuth, requireAdmin, async (re
  */
 router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) => {
   try {
+    const { repoKey, repoRoot } = resolveRepo(req);
     // ── Step 0: Load operator branch notes ────────────────────
     const branchNotes = await loadBranchNotes();
 
     // ── Step 1: Fetch all remotes with prune ──────────────────
     let fetchOk = true;
     try {
-      await execFileAsync('git', ['fetch', '--all', '--prune'], { cwd: REPO_ROOT, timeout: 30000 });
+      await execFileAsync('git', ['fetch', '--all', '--prune'], { cwd: repoRoot, timeout: 30000 });
     } catch (err) {
       fetchOk = false;
       console.warn('[Branch Analysis] git fetch --all --prune failed:', err.message);
@@ -593,7 +615,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
     // ── Step 2: Local context (workstation state) ────────────
     const { stdout: headOut } = await execFileAsync(
       'git', ['rev-parse', '--abbrev-ref', 'HEAD'],
-      { cwd: REPO_ROOT, timeout: 3000 }
+      { cwd: repoRoot, timeout: 3000 }
     );
     const currentBranch = headOut.trim();
 
@@ -602,7 +624,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
     try {
       const { stdout: statusOut } = await execFileAsync(
         'git', ['status', '--porcelain'],
-        { cwd: REPO_ROOT, timeout: 5000 }
+        { cwd: repoRoot, timeout: 5000 }
       );
       isClean = !statusOut.trim();
     } catch { /* assume dirty on error */ isClean = false; }
@@ -612,7 +634,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
     try {
       const { stdout: trackOut } = await execFileAsync(
         'git', ['rev-parse', '--abbrev-ref', `${currentBranch}@{upstream}`],
-        { cwd: REPO_ROOT, timeout: 3000 }
+        { cwd: repoRoot, timeout: 3000 }
       );
       currentTrackingRemote = trackOut.trim();
     } catch { /* no upstream configured */ }
@@ -622,7 +644,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
     try {
       const { stdout: mainOut } = await execFileAsync(
         'git', ['rev-parse', 'origin/main'],
-        { cwd: REPO_ROOT, timeout: 3000 }
+        { cwd: repoRoot, timeout: 3000 }
       );
       originMainSha = mainOut.trim();
     } catch {
@@ -632,7 +654,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
     // ── Step 4: Enumerate all remote branches ────────────────
     const { stdout: remoteOut } = await execFileAsync(
       'git', ['branch', '-r', '--format=%(refname:short)'],
-      { cwd: REPO_ROOT, timeout: 5000 }
+      { cwd: repoRoot, timeout: 5000 }
     );
     const allRemoteRefs = remoteOut.trim().split('\n').filter(Boolean);
     // Exclude origin/HEAD, origin/main, and non-origin refs
@@ -643,7 +665,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
     // ── Step 5: Get remote branches merged into origin/main ──
     const { stdout: mergedOut } = await execFileAsync(
       'git', ['branch', '-r', '--merged', 'origin/main', '--format=%(refname:short)'],
-      { cwd: REPO_ROOT, timeout: 10000 }
+      { cwd: repoRoot, timeout: 10000 }
     );
     const mergedRemoteSet = new Set(
       mergedOut.trim().split('\n').filter(Boolean)
@@ -654,7 +676,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
     // ── Step 6: Get all local branches for cross-reference ───
     const { stdout: localOut } = await execFileAsync(
       'git', ['branch', '--format=%(refname:short)'],
-      { cwd: REPO_ROOT, timeout: 5000 }
+      { cwd: repoRoot, timeout: 5000 }
     );
     const localBranches = localOut.trim().split('\n').filter(Boolean);
     const localBranchSet = new Set(localBranches);
@@ -671,7 +693,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
         // Ahead/behind vs origin/main
         const { stdout: abOut } = await execFileAsync(
           'git', ['rev-list', '--left-right', '--count', `origin/main...${remoteRef}`],
-          { cwd: REPO_ROOT, timeout: 3000 }
+          { cwd: repoRoot, timeout: 3000 }
         );
         const [behindStr, aheadStr] = abOut.trim().split(/\s+/);
         const ahead = parseInt(aheadStr) || 0;
@@ -680,7 +702,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
         // Last commit info (include unix timestamp for age-based classification)
         const { stdout: logOut } = await execFileAsync(
           'git', ['log', '-1', '--format=%s|%ar|%H|%at', remoteRef],
-          { cwd: REPO_ROOT, timeout: 3000 }
+          { cwd: repoRoot, timeout: 3000 }
         );
         const logParts = logOut.trim().split('|');
         const lastCommitMsg = logParts[0] || '';
@@ -693,7 +715,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
         try {
           const { stdout: mbOut } = await execFileAsync(
             'git', ['merge-base', 'origin/main', remoteRef],
-            { cwd: REPO_ROOT, timeout: 3000 }
+            { cwd: repoRoot, timeout: 3000 }
           );
           mergeBase = mbOut.trim().substring(0, 8);
         } catch { /* orphan */ }
@@ -705,7 +727,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
           try {
             const { stdout: diffOut } = await execFileAsync(
               'git', ['diff', '--name-only', `origin/main...${remoteRef}`],
-              { cwd: REPO_ROOT, timeout: 5000 }
+              { cwd: repoRoot, timeout: 5000 }
             );
             changedFiles = diffOut.trim().split('\n').filter(Boolean).length;
           } catch { /* ignore */ }
@@ -829,7 +851,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
         // Check if it has unpushed commits vs origin/main
         const { stdout: abOut } = await execFileAsync(
           'git', ['rev-list', '--left-right', '--count', `origin/main...${localBranch}`],
-          { cwd: REPO_ROOT, timeout: 3000 }
+          { cwd: repoRoot, timeout: 3000 }
         );
         const [behindStr, aheadStr] = abOut.trim().split(/\s+/);
         const ahead = parseInt(aheadStr) || 0;
@@ -838,7 +860,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
         // Last commit info
         const { stdout: logOut } = await execFileAsync(
           'git', ['log', '-1', '--format=%s|%ar|%H', localBranch],
-          { cwd: REPO_ROOT, timeout: 3000 }
+          { cwd: repoRoot, timeout: 3000 }
         );
         const [lastCommitMsg, lastCommitDate, lastCommitSha] = logOut.trim().split('|');
 
@@ -847,7 +869,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
         try {
           const { stdout: mergeCheckOut } = await execFileAsync(
             'git', ['branch', '--merged', 'origin/main', '--format=%(refname:short)'],
-            { cwd: REPO_ROOT, timeout: 5000 }
+            { cwd: repoRoot, timeout: 5000 }
           );
           isMerged = mergeCheckOut.trim().split('\n').includes(localBranch);
         } catch { /* ignore */ }
@@ -939,7 +961,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
 // Only allowed for branches classified as "Already Merged" or "Safe To Delete".
 // ────────────────────────────────────────────────────────────────
 router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin'), async (req, res) => {
-  const REPO_ROOT = path.resolve(__dirname, '../../../../');
+  const { repoKey, repoRoot } = resolveRepo(req);
   const { branchName } = req.params;
 
   // ── Safety: validate branch name ──────────────────────────
@@ -959,7 +981,7 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
 
     // Check branch exists on remote
     try {
-      await execFileAsync('git', ['rev-parse', '--verify', remoteRef], { cwd: REPO_ROOT, timeout: 3000 });
+      await execFileAsync('git', ['rev-parse', '--verify', remoteRef], { cwd: repoRoot, timeout: 3000 });
     } catch {
       return res.status(404).json({ success: false, error: `Remote branch not found: ${branchName}` });
     }
@@ -969,7 +991,7 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
     try {
       const { stdout: mergedOut } = await execFileAsync(
         'git', ['branch', '-r', '--merged', 'origin/main', '--format=%(refname:short)'],
-        { cwd: REPO_ROOT, timeout: 5000 }
+        { cwd: repoRoot, timeout: 5000 }
       );
       isMerged = mergedOut.trim().split('\n').map(s => s.replace('origin/', '')).includes(branchName);
     } catch { /* ignore */ }
@@ -977,7 +999,7 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
     // Get ahead/behind
     const { stdout: abOut } = await execFileAsync(
       'git', ['rev-list', '--left-right', '--count', `origin/main...${remoteRef}`],
-      { cwd: REPO_ROOT, timeout: 3000 }
+      { cwd: repoRoot, timeout: 3000 }
     );
     const [behindStr, aheadStr] = abOut.trim().split(/\s+/);
     const ahead = parseInt(aheadStr) || 0;
@@ -998,7 +1020,7 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
       try {
         const { stdout: dateOut } = await execFileAsync(
           'git', ['log', '-1', '--format=%ci', remoteRef],
-          { cwd: REPO_ROOT, timeout: 3000 }
+          { cwd: repoRoot, timeout: 3000 }
         );
         commitAgeDays = Math.floor((Date.now() - new Date(dateOut.trim()).getTime()) / 86400000);
       } catch { /* ignore */ }
@@ -1038,7 +1060,7 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
     console.log(`[Git Ops] Deleting remote branch: ${branchName} (classification: ${classification})`);
     await execFileAsync(
       'git', ['push', 'origin', '--delete', branchName],
-      { cwd: REPO_ROOT, timeout: 15000 }
+      { cwd: repoRoot, timeout: 15000 }
     );
     console.log(`[Git Ops] Remote branch deleted: ${branchName}`);
 
@@ -1046,18 +1068,18 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
     let localDeleted = false;
     try {
       // Check if local branch exists
-      await execFileAsync('git', ['rev-parse', '--verify', branchName], { cwd: REPO_ROOT, timeout: 3000 });
+      await execFileAsync('git', ['rev-parse', '--verify', branchName], { cwd: repoRoot, timeout: 3000 });
 
       // Check it's not the current branch
       const { stdout: curBranch } = await execFileAsync(
         'git', ['branch', '--show-current'],
-        { cwd: REPO_ROOT, timeout: 3000 }
+        { cwd: repoRoot, timeout: 3000 }
       );
       if (curBranch.trim() === branchName) {
         console.log(`[Git Ops] Skipping local delete — branch ${branchName} is currently checked out`);
       } else {
         // Safe delete (will fail if unmerged commits exist locally)
-        await execFileAsync('git', ['branch', '-d', branchName], { cwd: REPO_ROOT, timeout: 5000 });
+        await execFileAsync('git', ['branch', '-d', branchName], { cwd: repoRoot, timeout: 5000 });
         localDeleted = true;
         console.log(`[Git Ops] Local branch deleted: ${branchName}`);
       }
@@ -1067,7 +1089,7 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
 
     // ── Step 5: Fetch + prune to sync refs ───────────────────
     try {
-      await execFileAsync('git', ['fetch', '--prune'], { cwd: REPO_ROOT, timeout: 15000 });
+      await execFileAsync('git', ['fetch', '--prune'], { cwd: repoRoot, timeout: 15000 });
     } catch (err) {
       console.warn('[Git Ops] Post-delete fetch/prune warning:', err.message);
     }
@@ -1096,7 +1118,7 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
 // Each branch is independently verified server-side before deletion.
 // ────────────────────────────────────────────────────────────────
 router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin'), async (req, res) => {
-  const REPO_ROOT = path.resolve(__dirname, '../../../../');
+  const { repoKey, repoRoot } = resolveRepo(req);
   const { branches } = req.body;
 
   if (!Array.isArray(branches) || branches.length === 0) {
@@ -1114,7 +1136,7 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
   // Get current branch once
   let currentBranch = '';
   try {
-    const { stdout } = await execFileAsync('git', ['branch', '--show-current'], { cwd: REPO_ROOT, timeout: 3000 });
+    const { stdout } = await execFileAsync('git', ['branch', '--show-current'], { cwd: repoRoot, timeout: 3000 });
     currentBranch = stdout.trim();
   } catch { /* ignore */ }
 
@@ -1123,7 +1145,7 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
   try {
     const { stdout: mergedOut } = await execFileAsync(
       'git', ['branch', '-r', '--merged', 'origin/main', '--format=%(refname:short)'],
-      { cwd: REPO_ROOT, timeout: 5000 }
+      { cwd: repoRoot, timeout: 5000 }
     );
     mergedBranches = mergedOut.trim().split('\n').map(s => s.replace('origin/', ''));
   } catch { /* ignore */ }
@@ -1144,7 +1166,7 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
 
       // Verify remote exists
       try {
-        await execFileAsync('git', ['rev-parse', '--verify', remoteRef], { cwd: REPO_ROOT, timeout: 3000 });
+        await execFileAsync('git', ['rev-parse', '--verify', remoteRef], { cwd: repoRoot, timeout: 3000 });
       } catch {
         results.push({ branch: branchName, success: false, error: 'Remote branch not found' });
         continue;
@@ -1153,7 +1175,7 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
       // Get ahead/behind
       const { stdout: abOut } = await execFileAsync(
         'git', ['rev-list', '--left-right', '--count', `origin/main...${remoteRef}`],
-        { cwd: REPO_ROOT, timeout: 3000 }
+        { cwd: repoRoot, timeout: 3000 }
       );
       const [behindStr, aheadStr] = abOut.trim().split(/\s+/);
       const ahead = parseInt(aheadStr) || 0;
@@ -1173,7 +1195,7 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
         try {
           const { stdout: dateOut } = await execFileAsync(
             'git', ['log', '-1', '--format=%ci', remoteRef],
-            { cwd: REPO_ROOT, timeout: 3000 }
+            { cwd: repoRoot, timeout: 3000 }
           );
           commitAgeDays = Math.floor((Date.now() - new Date(dateOut.trim()).getTime()) / 86400000);
         } catch { /* ignore */ }
@@ -1198,14 +1220,14 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
       }
 
       // Delete remote
-      await execFileAsync('git', ['push', 'origin', '--delete', branchName], { cwd: REPO_ROOT, timeout: 15000 });
+      await execFileAsync('git', ['push', 'origin', '--delete', branchName], { cwd: repoRoot, timeout: 15000 });
 
       // Delete local if exists and not current
       let localDeleted = false;
       try {
-        await execFileAsync('git', ['rev-parse', '--verify', branchName], { cwd: REPO_ROOT, timeout: 3000 });
+        await execFileAsync('git', ['rev-parse', '--verify', branchName], { cwd: repoRoot, timeout: 3000 });
         if (currentBranch !== branchName) {
-          await execFileAsync('git', ['branch', '-d', branchName], { cwd: REPO_ROOT, timeout: 5000 });
+          await execFileAsync('git', ['branch', '-d', branchName], { cwd: repoRoot, timeout: 5000 });
           localDeleted = true;
         }
       } catch { /* local doesn't exist */ }
@@ -1220,7 +1242,7 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
 
   // Prune once at the end
   try {
-    await execFileAsync('git', ['fetch', '--prune'], { cwd: REPO_ROOT, timeout: 15000 });
+    await execFileAsync('git', ['fetch', '--prune'], { cwd: repoRoot, timeout: 15000 });
   } catch (err) {
     console.warn('[Git Ops] Post-bulk-delete prune warning:', err.message);
   }
@@ -1281,6 +1303,614 @@ router.get('/git/branch-notes', requireAuth, requireAdmin, async (req, res) => {
     res.json({ success: true, notes });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to load branch notes' });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// GET /api/ops/git/working-changes?repo=...
+// List modified, staged, and untracked files with short diff info
+// ────────────────────────────────────────────────────────────────
+router.get('/git/working-changes', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const opts = { cwd: repoRoot, timeout: 10000, maxBuffer: 5 * 1024 * 1024 };
+
+    // Porcelain v2 status for machine-readable output
+    const { stdout: statusOut } = await execFileAsync('git', ['status', '--porcelain=v1'], opts);
+
+    const files = [];
+    for (const line of statusOut.split('\n').filter(Boolean)) {
+      const index = line[0];   // staged status
+      const working = line[1]; // working tree status
+      const filePath = line.substring(3);
+      let status = 'modified';
+      if (index === '?' && working === '?') status = 'untracked';
+      else if (index === 'A') status = 'added';
+      else if (index === 'D' || working === 'D') status = 'deleted';
+      else if (index === 'R') status = 'renamed';
+
+      const staged = index !== ' ' && index !== '?';
+      files.push({ path: filePath, status, staged, index, working });
+    }
+
+    // Get current branch
+    const { stdout: branchOut } = await execFileAsync('git', ['branch', '--show-current'], opts);
+
+    res.json({
+      success: true,
+      repo: repoKey,
+      branch: branchOut.trim(),
+      files,
+      totalModified: files.filter(f => f.status !== 'untracked').length,
+      totalUntracked: files.filter(f => f.status === 'untracked').length,
+      totalStaged: files.filter(f => f.staged).length,
+    });
+  } catch (error) {
+    console.error('[Git Ops] working-changes error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get working changes', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// POST /api/ops/git/stage
+// Stage specific files for commit
+// Body: { files: string[] } or { all: true }
+// ────────────────────────────────────────────────────────────────
+router.post('/git/stage', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { files, all } = req.body;
+    const opts = { cwd: repoRoot, timeout: 15000 };
+
+    if (all) {
+      await execFileAsync('git', ['add', '-A'], opts);
+    } else if (Array.isArray(files) && files.length > 0) {
+      // Validate file paths — no path traversal
+      for (const f of files) {
+        if (f.includes('..') || f.startsWith('/')) {
+          return res.status(400).json({ success: false, error: `Invalid file path: ${f}` });
+        }
+      }
+      await execFileAsync('git', ['add', '--', ...files], opts);
+    } else {
+      return res.status(400).json({ success: false, error: 'Provide files array or all: true' });
+    }
+
+    // Return updated status
+    const { stdout } = await execFileAsync('git', ['status', '--porcelain=v1'], opts);
+    const staged = stdout.split('\n').filter(l => l && l[0] !== ' ' && l[0] !== '?').length;
+
+    res.json({ success: true, repo: repoKey, stagedCount: staged });
+  } catch (error) {
+    console.error('[Git Ops] stage error:', error);
+    res.status(500).json({ success: false, error: 'Failed to stage files', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// POST /api/ops/git/unstage
+// Unstage specific files
+// Body: { files: string[] } or { all: true }
+// ────────────────────────────────────────────────────────────────
+router.post('/git/unstage', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { files, all } = req.body;
+    const opts = { cwd: repoRoot, timeout: 15000 };
+
+    if (all) {
+      await execFileAsync('git', ['reset', 'HEAD'], opts);
+    } else if (Array.isArray(files) && files.length > 0) {
+      for (const f of files) {
+        if (f.includes('..') || f.startsWith('/')) {
+          return res.status(400).json({ success: false, error: `Invalid file path: ${f}` });
+        }
+      }
+      await execFileAsync('git', ['reset', 'HEAD', '--', ...files], opts);
+    } else {
+      return res.status(400).json({ success: false, error: 'Provide files array or all: true' });
+    }
+
+    res.json({ success: true, repo: repoKey });
+  } catch (error) {
+    console.error('[Git Ops] unstage error:', error);
+    res.status(500).json({ success: false, error: 'Failed to unstage files', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// POST /api/ops/git/commit
+// Commit staged changes
+// Body: { message: string }
+// ────────────────────────────────────────────────────────────────
+router.post('/git/commit', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { message } = req.body;
+    const opts = { cwd: repoRoot, timeout: 30000 };
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({ success: false, error: 'Commit message is required' });
+    }
+
+    // Verify there are staged changes
+    const { stdout: statusOut } = await execFileAsync('git', ['diff', '--cached', '--stat'], opts);
+    if (!statusOut.trim()) {
+      return res.status(400).json({ success: false, error: 'Nothing staged to commit' });
+    }
+
+    const { stdout: commitOut } = await execFileAsync('git', ['commit', '-m', message.trim()], opts);
+
+    // Get the new commit SHA
+    const { stdout: shaOut } = await execFileAsync('git', ['rev-parse', '--short', 'HEAD'], opts);
+
+    res.json({
+      success: true,
+      repo: repoKey,
+      sha: shaOut.trim(),
+      output: commitOut.trim(),
+    });
+  } catch (error) {
+    console.error('[Git Ops] commit error:', error);
+    res.status(500).json({ success: false, error: 'Commit failed', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// POST /api/ops/git/push
+// Push current branch to origin
+// Body: { force?: boolean }
+// ────────────────────────────────────────────────────────────────
+router.post('/git/push', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { force } = req.body || {};
+    const opts = { cwd: repoRoot, timeout: 60000 };
+
+    // Get current branch
+    const { stdout: branchOut } = await execFileAsync('git', ['branch', '--show-current'], opts);
+    const branch = branchOut.trim();
+
+    if (!branch) {
+      return res.status(400).json({ success: false, error: 'Detached HEAD — cannot push' });
+    }
+
+    // Safety: never force-push main/master
+    if (force && (branch === 'main' || branch === 'master')) {
+      return res.status(400).json({ success: false, error: 'Force push to main/master is not allowed' });
+    }
+
+    const args = ['push', '-u', 'origin', branch];
+    if (force) args.splice(1, 0, '--force-with-lease');
+
+    const { stdout, stderr } = await execFileAsync('git', args, opts);
+
+    res.json({
+      success: true,
+      repo: repoKey,
+      branch,
+      output: (stdout + '\n' + stderr).trim(),
+    });
+  } catch (error) {
+    console.error('[Git Ops] push error:', error);
+    res.status(500).json({ success: false, error: 'Push failed', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// GET /api/ops/git/compare?repo=...&base=...&head=...
+// Compare two branches — diffstat + per-file changes
+// ────────────────────────────────────────────────────────────────
+router.get('/git/compare', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { base, head } = req.query;
+    const opts = { cwd: repoRoot, timeout: 30000, maxBuffer: 10 * 1024 * 1024 };
+
+    if (!base || !head) {
+      return res.status(400).json({ success: false, error: 'base and head query params required' });
+    }
+
+    // Validate ref names (no shell injection)
+    const refPattern = /^[a-zA-Z0-9._\-\/]+$/;
+    if (!refPattern.test(base) || !refPattern.test(head)) {
+      return res.status(400).json({ success: false, error: 'Invalid branch name' });
+    }
+
+    // Diff stat summary
+    const { stdout: statOut } = await execFileAsync(
+      'git', ['diff', '--stat', `${base}...${head}`], opts
+    );
+
+    // Numstat for machine-readable per-file changes
+    const { stdout: numstatOut } = await execFileAsync(
+      'git', ['diff', '--numstat', `${base}...${head}`], opts
+    );
+
+    const files = numstatOut.split('\n').filter(Boolean).map(line => {
+      const [added, removed, filePath] = line.split('\t');
+      return {
+        path: filePath,
+        added: added === '-' ? null : parseInt(added),
+        removed: removed === '-' ? null : parseInt(removed),
+      };
+    });
+
+    // Commit log between the two — with date and author
+    const { stdout: logOut } = await execFileAsync(
+      'git', ['log', '--format=%H%x09%h%x09%ai%x09%an%x09%s', '--no-merges', `${base}...${head}`], opts
+    );
+    const commits = logOut.split('\n').filter(Boolean).map(line => {
+      const [fullSha, sha, date, author, message] = line.split('\t');
+      return { sha, fullSha, date, author, message };
+    });
+
+    // Merge base
+    let mergeBase = null;
+    try {
+      const { stdout: mbOut } = await execFileAsync('git', ['merge-base', base, head], opts);
+      mergeBase = mbOut.trim().substring(0, 8);
+    } catch { /* diverged or no common ancestor */ }
+
+    res.json({
+      success: true,
+      repo: repoKey,
+      base,
+      head,
+      mergeBase,
+      summary: statOut.trim(),
+      files,
+      commits,
+      totalFiles: files.length,
+      totalAdded: files.reduce((s, f) => s + (f.added || 0), 0),
+      totalRemoved: files.reduce((s, f) => s + (f.removed || 0), 0),
+    });
+  } catch (error) {
+    console.error('[Git Ops] compare error:', error);
+    res.status(500).json({ success: false, error: 'Compare failed', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// GET /api/ops/git/file-diff?repo=...&base=...&head=...&file=...
+// Get the actual diff content for a single file between two branches
+// ────────────────────────────────────────────────────────────────
+router.get('/git/file-diff', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { base, head, file } = req.query;
+    const opts = { cwd: repoRoot, timeout: 10000, maxBuffer: 2 * 1024 * 1024 };
+
+    if (!base || !head || !file) {
+      return res.status(400).json({ success: false, error: 'base, head, and file query params required' });
+    }
+
+    const refPattern = /^[a-zA-Z0-9._\-\/]+$/;
+    if (!refPattern.test(base) || !refPattern.test(head)) {
+      return res.status(400).json({ success: false, error: 'Invalid branch name' });
+    }
+    if (file.includes('..')) {
+      return res.status(400).json({ success: false, error: 'Invalid file path' });
+    }
+
+    const { stdout } = await execFileAsync(
+      'git', ['diff', `${base}...${head}`, '--', file], opts
+    );
+
+    res.json({ success: true, repo: repoKey, file, diff: stdout });
+  } catch (error) {
+    console.error('[Git Ops] file-diff error:', error);
+    res.status(500).json({ success: false, error: 'File diff failed', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// GET /api/ops/git/gitignore?repo=...
+// Read the .gitignore file, parsed into sections
+// ────────────────────────────────────────────────────────────────
+router.get('/git/gitignore', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const gitignorePath = path.join(repoRoot, '.gitignore');
+
+    let raw = '';
+    try {
+      raw = await fs.readFile(gitignorePath, 'utf8');
+    } catch {
+      // No .gitignore yet
+    }
+
+    // Parse into sections: group consecutive non-blank lines under their preceding comment
+    const lines = raw.split('\n');
+    const sections = [];
+    let currentSection = { title: 'General', lines: [] };
+
+    for (const line of lines) {
+      if (line.startsWith('# ') && currentSection.lines.length > 0) {
+        sections.push(currentSection);
+        currentSection = { title: line.substring(2).trim(), lines: [] };
+      } else if (line.startsWith('# ') && currentSection.lines.length === 0) {
+        currentSection.title = line.substring(2).trim();
+      } else {
+        currentSection.lines.push(line);
+      }
+    }
+    if (currentSection.lines.length > 0 || sections.length === 0) {
+      sections.push(currentSection);
+    }
+
+    // Check which ignored files are currently tracked (would need git rm --cached)
+    let trackedIgnored = [];
+    try {
+      const { stdout } = await execFileAsync(
+        'git', ['ls-files', '-ci', '--exclude-standard'],
+        { cwd: repoRoot, timeout: 5000 }
+      );
+      trackedIgnored = stdout.split('\n').filter(Boolean);
+    } catch { /* ok */ }
+
+    // Get ignore stats
+    let totalIgnored = 0;
+    try {
+      const { stdout } = await execFileAsync(
+        'git', ['status', '--ignored', '--porcelain'],
+        { cwd: repoRoot, timeout: 10000, maxBuffer: 5 * 1024 * 1024 }
+      );
+      totalIgnored = stdout.split('\n').filter(l => l.startsWith('!!')).length;
+    } catch { /* ok */ }
+
+    res.json({
+      success: true,
+      repo: repoKey,
+      raw,
+      sections,
+      stats: {
+        totalPatterns: lines.filter(l => l.trim() && !l.startsWith('#')).length,
+        totalIgnoredFiles: totalIgnored,
+        trackedIgnored,
+      },
+    });
+  } catch (error) {
+    console.error('[Git Ops] gitignore read error:', error);
+    res.status(500).json({ success: false, error: 'Failed to read .gitignore', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// PUT /api/ops/git/gitignore?repo=...
+// Update the .gitignore file
+// Body: { content: string }
+// ────────────────────────────────────────────────────────────────
+router.put('/git/gitignore', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { content } = req.body;
+
+    if (typeof content !== 'string') {
+      return res.status(400).json({ success: false, error: 'content (string) is required' });
+    }
+
+    const gitignorePath = path.join(repoRoot, '.gitignore');
+
+    // Ensure trailing newline
+    const finalContent = content.endsWith('\n') ? content : content + '\n';
+    await fs.writeFile(gitignorePath, finalContent, 'utf8');
+
+    res.json({ success: true, repo: repoKey, message: '.gitignore updated', bytes: finalContent.length });
+  } catch (error) {
+    console.error('[Git Ops] gitignore write error:', error);
+    res.status(500).json({ success: false, error: 'Failed to update .gitignore', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// POST /api/ops/git/gitignore/check?repo=...
+// Check if specific paths are ignored, and test new patterns
+// Body: { paths?: string[], testPattern?: string }
+// ────────────────────────────────────────────────────────────────
+router.post('/git/gitignore/check', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { paths, testPattern } = req.body;
+    const opts = { cwd: repoRoot, timeout: 5000 };
+    const results = {};
+
+    // Check specific paths
+    if (Array.isArray(paths)) {
+      for (const p of paths.slice(0, 50)) { // limit to 50
+        if (p.includes('..')) continue;
+        try {
+          await execFileAsync('git', ['check-ignore', '-q', p], opts);
+          results[p] = 'ignored';
+        } catch {
+          results[p] = 'tracked';
+        }
+      }
+    }
+
+    // Test a pattern — show what it would match
+    let testMatches = [];
+    if (testPattern && typeof testPattern === 'string') {
+      try {
+        // Use git ls-files to find untracked files, then test pattern against them
+        const { stdout } = await execFileAsync(
+          'git', ['ls-files', '--others', '--exclude-standard', '--full-name'],
+          { ...opts, maxBuffer: 5 * 1024 * 1024 }
+        );
+        const allUntracked = stdout.split('\n').filter(Boolean);
+
+        // Simple glob-to-regex conversion for preview
+        const escaped = testPattern
+          .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+          .replace(/\*/g, '.*')
+          .replace(/\?/g, '.');
+        const re = new RegExp(escaped);
+        testMatches = allUntracked.filter(f => re.test(f)).slice(0, 100);
+      } catch { /* ok */ }
+    }
+
+    res.json({ success: true, repo: repoKey, results, testMatches });
+  } catch (error) {
+    console.error('[Git Ops] gitignore check error:', error);
+    res.status(500).json({ success: false, error: 'Check failed', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// POST /api/ops/git/gitignore/untrack?repo=...
+// Remove tracked files that are now in .gitignore (git rm --cached)
+// Body: { files: string[] }
+// ────────────────────────────────────────────────────────────────
+router.post('/git/gitignore/untrack', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { files } = req.body;
+    const opts = { cwd: repoRoot, timeout: 15000 };
+
+    if (!Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({ success: false, error: 'files array required' });
+    }
+
+    // Validate paths
+    for (const f of files) {
+      if (f.includes('..') || f.startsWith('/')) {
+        return res.status(400).json({ success: false, error: `Invalid path: ${f}` });
+      }
+    }
+
+    const { stdout } = await execFileAsync('git', ['rm', '--cached', '-r', '--', ...files], opts);
+
+    res.json({
+      success: true,
+      repo: repoKey,
+      output: stdout.trim(),
+      untracked: files.length,
+    });
+  } catch (error) {
+    console.error('[Git Ops] untrack error:', error);
+    res.status(500).json({ success: false, error: 'Untrack failed', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// GET /api/ops/git/branch-map?repo=...
+// List all branches with metadata for the Branch Map section
+// ────────────────────────────────────────────────────────────────
+router.get('/git/branch-map', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const opts = { cwd: repoRoot, timeout: 15000, maxBuffer: 5 * 1024 * 1024 };
+
+    // Fetch to ensure we have latest refs
+    try { await execFileAsync('git', ['fetch', '--all', '--prune'], { ...opts, timeout: 30000 }); } catch { /* best effort */ }
+
+    // All refs with date, author, subject
+    const { stdout: refOut } = await execFileAsync('git', [
+      'for-each-ref', '--sort=-committerdate',
+      '--format=%(refname:short)\t%(objectname:short)\t%(committerdate:iso)\t%(authorname)\t%(subject)\t%(committerdate:relative)',
+      'refs/heads/', 'refs/remotes/origin/'
+    ], opts);
+
+    const branches = [];
+    const seen = new Set();
+    for (const line of refOut.split('\n').filter(Boolean)) {
+      const [ref, sha, date, author, subject, relativeDate] = line.split('\t');
+      // Skip origin/HEAD
+      if (ref === 'origin/HEAD') continue;
+      // Normalize name — strip origin/ prefix for display
+      const name = ref.replace(/^origin\//, '');
+      if (seen.has(name)) continue;
+      seen.add(name);
+      branches.push({
+        name,
+        ref,
+        sha,
+        date,
+        relativeDate,
+        author,
+        subject,
+        isRemote: ref.startsWith('origin/'),
+        isLocal: !ref.startsWith('origin/'),
+      });
+    }
+
+    // Current branch
+    const { stdout: branchOut } = await execFileAsync('git', ['branch', '--show-current'], opts);
+
+    res.json({
+      success: true,
+      repo: repoKey,
+      currentBranch: branchOut.trim(),
+      branches,
+    });
+  } catch (error) {
+    console.error('[Git Ops] branch-map error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get branch map', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// GET /api/ops/git/archive?repo=...&branch=...
+// Stream a .zip archive of the branch contents
+// ────────────────────────────────────────────────────────────────
+router.get('/git/archive', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { branch } = req.query;
+
+    if (!branch) {
+      return res.status(400).json({ success: false, error: 'branch query param required' });
+    }
+
+    // Validate ref name
+    const refPattern = /^[a-zA-Z0-9._\-\/]+$/;
+    if (!refPattern.test(branch)) {
+      return res.status(400).json({ success: false, error: 'Invalid branch name' });
+    }
+
+    // Verify the ref exists
+    try {
+      await execFileAsync('git', ['rev-parse', '--verify', branch], { cwd: repoRoot, timeout: 5000 });
+    } catch {
+      return res.status(404).json({ success: false, error: `Branch not found: ${branch}` });
+    }
+
+    // Get short SHA for filename
+    const { stdout: shaOut } = await execFileAsync('git', ['rev-parse', '--short', branch], { cwd: repoRoot, timeout: 5000 });
+    const sha = shaOut.trim();
+    const safeName = branch.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const filename = `${repoKey}_${safeName}_${sha}.zip`;
+
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+    // Stream git archive directly to response
+    const { spawn } = require('child_process');
+    const archive = spawn('git', ['archive', '--format=zip', branch], { cwd: repoRoot });
+
+    archive.stdout.pipe(res);
+
+    archive.stderr.on('data', (data) => {
+      console.error('[Git Ops] archive stderr:', data.toString());
+    });
+
+    archive.on('error', (err) => {
+      console.error('[Git Ops] archive spawn error:', err);
+      if (!res.headersSent) {
+        res.status(500).json({ success: false, error: 'Archive failed' });
+      }
+    });
+
+    archive.on('close', (code) => {
+      if (code !== 0 && !res.headersSent) {
+        res.status(500).json({ success: false, error: `git archive exited with code ${code}` });
+      }
+    });
+  } catch (error) {
+    console.error('[Git Ops] archive error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, error: 'Archive failed', message: error.message });
+    }
   }
 });
 

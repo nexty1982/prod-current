@@ -106,6 +106,7 @@ export interface ItemFormData {
   due_date: string;
   agent_tool: string;
   branch_type: string;
+  repo_target: string;
 }
 
 // ─── Constants ──────────────────────────────────────────────────────
@@ -118,9 +119,46 @@ export const AGENT_TOOL_COLORS: Record<string, string> = { windsurf: '#00b4d8', 
 export const BRANCH_TYPES = ['bugfix', 'new_feature', 'existing_feature', 'patch'] as const;
 export const BRANCH_TYPE_LABELS: Record<string, string> = { bugfix: 'Bug Fix', new_feature: 'New Feature', existing_feature: 'Existing Feature', patch: 'Patch' };
 export const BRANCH_TYPE_COLORS: Record<string, string> = { bugfix: '#d73a4a', new_feature: '#0e8a16', existing_feature: '#1d76db', patch: '#fbca04' };
-export const STATUSES = ['backlog', 'todo', 'in_progress', 'review', 'done', 'cancelled'];
-export const STATUS_LABELS: Record<string, string> = { backlog: 'Backlog', todo: 'To Do', in_progress: 'In Progress', review: 'Review', done: 'Done', cancelled: 'Cancelled' };
-export const STATUS_COLORS: Record<string, string> = { backlog: '#9e9e9e', todo: '#2196f3', in_progress: '#ff9800', review: '#9c27b0', done: '#4caf50', cancelled: '#f44336' };
+// Canonical SDLC statuses (12)
+export const STATUSES = [
+  'backlog', 'triaged', 'planned', 'scheduled',
+  'in_progress', 'self_review', 'testing',
+  'review_ready', 'approved', 'done',
+  'blocked', 'cancelled',
+];
+export const STATUS_LABELS: Record<string, string> = {
+  backlog: 'Backlog', triaged: 'Triaged', planned: 'Planned', scheduled: 'Scheduled',
+  in_progress: 'In Progress', self_review: 'Self Review', testing: 'Testing',
+  review_ready: 'Review Ready', approved: 'Approved', done: 'Done',
+  blocked: 'Blocked', cancelled: 'Cancelled',
+};
+export const STATUS_COLORS: Record<string, string> = {
+  backlog: '#9e9e9e', triaged: '#78909c', planned: '#5c6bc0', scheduled: '#42a5f5',
+  in_progress: '#ffa726', self_review: '#ab47bc', testing: '#ec407a',
+  review_ready: '#26c6da', approved: '#66bb6a', done: '#4caf50',
+  blocked: '#ef5350', cancelled: '#bdbdbd',
+};
+
+// Status ownership — mirrors backend STATUS_OWNERSHIP
+export interface StatusOwnership {
+  owner: 'admin' | 'agent' | null;
+  exit_action: string;
+  exit_by: 'admin' | 'agent' | 'any';
+}
+export const STATUS_OWNERSHIP: Record<string, StatusOwnership> = {
+  backlog:      { owner: 'admin', exit_action: 'Triage: review priority, assign category', exit_by: 'admin' },
+  triaged:      { owner: 'admin', exit_action: 'Plan: define approach, set repo_target', exit_by: 'admin' },
+  planned:      { owner: 'admin', exit_action: 'Schedule: set dates, assign to agent', exit_by: 'admin' },
+  scheduled:    { owner: 'admin', exit_action: 'Start work: agent creates branch', exit_by: 'agent' },
+  in_progress:  { owner: 'agent', exit_action: 'Complete implementation, commit all', exit_by: 'agent' },
+  self_review:  { owner: 'agent', exit_action: 'Self-check: build, lint, push to remote', exit_by: 'agent' },
+  testing:      { owner: 'agent', exit_action: 'Verify tests pass, mark ready', exit_by: 'agent' },
+  review_ready: { owner: 'admin', exit_action: 'Review & approve or reject', exit_by: 'admin' },
+  approved:     { owner: 'admin', exit_action: 'Deploy, merge to main, close', exit_by: 'admin' },
+  done:         { owner: null,    exit_action: 'Reopen if needed', exit_by: 'admin' },
+  blocked:      { owner: 'admin', exit_action: 'Resolve blocker', exit_by: 'any' },
+  cancelled:    { owner: null,    exit_action: 'Reopen if needed', exit_by: 'admin' },
+};
 export const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 export const PRIORITY_COLORS: Record<string, string> = { low: '#9e9e9e', medium: '#2196f3', high: '#ff9800', critical: '#f44336' };
 
@@ -154,6 +192,6 @@ export function parseJson(val: any) {
 }
 
 export const DEFAULT_FORM: ItemFormData = {
-  title: '', description: '', horizon: '7', status: 'todo', priority: 'medium',
-  category: '', due_date: '', agent_tool: '', branch_type: '',
+  title: '', description: '', horizon: '7', status: 'backlog', priority: 'medium',
+  category: '', due_date: '', agent_tool: '', branch_type: '', repo_target: 'orthodoxmetrics',
 };

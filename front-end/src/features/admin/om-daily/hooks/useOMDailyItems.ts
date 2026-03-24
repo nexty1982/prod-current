@@ -73,16 +73,35 @@ export function useOMDailyItems(_opts?: UseOMDailyItemsOptions) {
   }, []);
 
   const updateStatus = useCallback(async (id: number, newStatus: string, extra?: Record<string, any>) => {
-    const resp = await fetch(`/api/om-daily/items/${id}`, {
-      method: 'PUT', credentials: 'include',
+    const resp = await fetch(`/api/om-daily/items/${id}/status`, {
+      method: 'PATCH', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus, ...extra }),
     });
-    if (!resp.ok) throw new Error('Failed to update');
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      const err = new Error(data.reasons?.join(' ') || data.error || 'Transition blocked');
+      (err as any).response = { data };
+      throw err;
+    }
+    return resp.json();
+  }, []);
+
+  const startWork = useCallback(async (id: number, branchType: string, agentTool: string) => {
+    const resp = await fetch(`/api/om-daily/items/${id}/start-work`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ branch_type: branchType, agent_tool: agentTool }),
+    });
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      throw new Error(data.error || 'Failed to start work');
+    }
+    return resp.json();
   }, []);
 
   return {
     items, setItems, categories, loading,
-    fetchItems, fetchCategories, saveItem, deleteItem, updateStatus,
+    fetchItems, fetchCategories, saveItem, deleteItem, updateStatus, startWork,
   };
 }

@@ -1,8 +1,9 @@
 /**
  * OMDailyKanban.tsx
  * Kanban board view for OM Daily items.
- * Drag-and-drop between status columns, with rich cards showing
+ * Drag-and-drop between canonical SDLC status columns, with rich cards showing
  * priority, category, agent tool, branch type, and due dates.
+ * Column headers show ownership (admin/agent) and required exit action.
  */
 
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
@@ -10,6 +11,9 @@ import {
   IconCalendar,
   IconDotsVertical,
   IconGripVertical,
+  IconAlertTriangle,
+  IconUser,
+  IconRobot,
 } from '@tabler/icons-react';
 import {
   alpha,
@@ -67,13 +71,33 @@ interface OMDailyKanbanProps {
 
 // ─── Constants ──────────────────────────────────────────────────
 
+// Canonical SDLC pipeline columns (10 main + blocked as side column)
 const KANBAN_COLUMNS = [
-  { id: 'backlog', label: 'Backlog', color: '#9e9e9e' },
-  { id: 'todo', label: 'To Do', color: '#2196f3' },
-  { id: 'in_progress', label: 'In Progress', color: '#ff9800' },
-  { id: 'review', label: 'Review', color: '#9c27b0' },
-  { id: 'done', label: 'Done', color: '#4caf50' },
+  { id: 'backlog',      label: 'Backlog',      color: '#9e9e9e' },
+  { id: 'triaged',      label: 'Triaged',      color: '#78909c' },
+  { id: 'planned',      label: 'Planned',      color: '#5c6bc0' },
+  { id: 'scheduled',    label: 'Scheduled',    color: '#42a5f5' },
+  { id: 'in_progress',  label: 'In Progress',  color: '#ffa726' },
+  { id: 'self_review',  label: 'Self Review',  color: '#ab47bc' },
+  { id: 'testing',      label: 'Testing',      color: '#ec407a' },
+  { id: 'review_ready', label: 'Review Ready', color: '#26c6da' },
+  { id: 'approved',     label: 'Approved',     color: '#66bb6a' },
+  { id: 'done',         label: 'Done',         color: '#4caf50' },
 ];
+
+// Status ownership — who exits each status
+const STATUS_OWNERSHIP: Record<string, { owner: string | null; exit_by: string; exit_action: string }> = {
+  backlog:      { owner: 'admin', exit_by: 'admin', exit_action: 'Triage: review priority, assign category' },
+  triaged:      { owner: 'admin', exit_by: 'admin', exit_action: 'Plan: define approach, set repo_target' },
+  planned:      { owner: 'admin', exit_by: 'admin', exit_action: 'Schedule: set dates, assign to agent' },
+  scheduled:    { owner: 'admin', exit_by: 'agent', exit_action: 'Start work: agent creates branch' },
+  in_progress:  { owner: 'agent', exit_by: 'agent', exit_action: 'Complete implementation, commit all' },
+  self_review:  { owner: 'agent', exit_by: 'agent', exit_action: 'Self-check: build, lint, push to remote' },
+  testing:      { owner: 'agent', exit_by: 'agent', exit_action: 'Verify tests, mark ready for review' },
+  review_ready: { owner: 'admin', exit_by: 'admin', exit_action: 'Review & approve or reject' },
+  approved:     { owner: 'admin', exit_by: 'admin', exit_action: 'Deploy, merge to main, close' },
+  done:         { owner: null,    exit_by: 'admin', exit_action: 'Reopen if needed' },
+};
 
 const PRIORITY_COLORS: Record<string, string> = {
   low: '#9e9e9e',
@@ -93,12 +117,14 @@ const AGENT_TOOL_COLORS: Record<string, string> = {
   windsurf: '#00b4d8',
   claude_cli: '#d4a574',
   cursor: '#7c3aed',
+  github_copilot: '#1f883d',
 };
 
 const AGENT_TOOL_LABELS: Record<string, string> = {
   windsurf: 'Windsurf',
   claude_cli: 'Claude',
   cursor: 'Cursor',
+  github_copilot: 'Copilot',
 };
 
 const BRANCH_TYPE_COLORS: Record<string, string> = {
@@ -144,18 +170,16 @@ const KanbanCard: React.FC<{
           ref={provided.innerRef}
           {...provided.draggableProps}
           sx={{
-            mb: 1.5,
-            borderRadius: '10px',
+            mb: 1,
+            borderRadius: '8px',
             bgcolor: isDark ? '#1a1d27' : '#fff',
             border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
             borderLeft: `3px solid ${priorityColor}`,
             boxShadow: snapshot.isDragging
               ? `0 8px 24px ${alpha(priorityColor, 0.25)}`
               : '0 1px 3px rgba(0,0,0,0.06)',
-            transition: 'box-shadow 0.15s ease, transform 0.15s ease',
-            '&:hover': {
-              boxShadow: `0 2px 8px rgba(0,0,0,0.1)`,
-            },
+            transition: 'box-shadow 0.15s ease',
+            '&:hover': { boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
             opacity: snapshot.isDragging ? 0.9 : 1,
             cursor: 'grab',
           }}
@@ -163,16 +187,16 @@ const KanbanCard: React.FC<{
           {/* Card Header */}
           <Box
             {...provided.dragHandleProps}
-            sx={{ px: 1.5, pt: 1.25, pb: 0.5, display: 'flex', alignItems: 'flex-start', gap: 0.5 }}
+            sx={{ px: 1.25, pt: 1, pb: 0.25, display: 'flex', alignItems: 'flex-start', gap: 0.5 }}
           >
-            <IconGripVertical size={14} style={{ opacity: 0.3, marginTop: 3, flexShrink: 0 }} />
+            <IconGripVertical size={12} style={{ opacity: 0.3, marginTop: 3, flexShrink: 0 }} />
             <Typography
               variant="subtitle2"
               sx={{
                 flex: 1,
-                fontSize: '0.8125rem',
+                fontSize: '0.75rem',
                 fontWeight: 600,
-                lineHeight: 1.35,
+                lineHeight: 1.3,
                 color: isDark ? '#f3f4f6' : '#1a1a2e',
                 overflow: 'hidden',
                 display: '-webkit-box',
@@ -185,9 +209,9 @@ const KanbanCard: React.FC<{
             <IconButton
               size="small"
               onClick={(e) => setAnchorEl(e.currentTarget)}
-              sx={{ ml: 'auto', mt: -0.5, opacity: 0.5, '&:hover': { opacity: 1 } }}
+              sx={{ ml: 'auto', mt: -0.5, opacity: 0.5, '&:hover': { opacity: 1 }, p: 0.25 }}
             >
-              <IconDotsVertical size={14} />
+              <IconDotsVertical size={12} />
             </IconButton>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
               <MenuItem onClick={() => { setAnchorEl(null); onEdit(); }}>
@@ -207,146 +231,71 @@ const KanbanCard: React.FC<{
             </Menu>
           </Box>
 
-          {/* Description preview */}
-          {item.description && (
-            <Typography
-              variant="caption"
-              sx={{
-                display: 'block',
-                px: 1.5,
-                pb: 0.5,
-                color: 'text.secondary',
-                fontSize: '0.7rem',
-                lineHeight: 1.4,
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {item.description}
-            </Typography>
-          )}
-
           {/* Chips row */}
-          <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ px: 1.5, pb: 1 }}>
-            {/* Priority */}
+          <Stack direction="row" flexWrap="wrap" gap={0.4} sx={{ px: 1.25, pb: 0.75 }}>
             <Chip
               size="small"
-              icon={<FlagIcon sx={{ fontSize: 12, color: `${priorityColor} !important` }} />}
+              icon={<FlagIcon sx={{ fontSize: 10, color: `${priorityColor} !important` }} />}
               label={PRIORITY_LABELS[item.priority] || item.priority}
               sx={{
-                height: 20,
-                fontSize: '0.65rem',
-                fontWeight: 600,
+                height: 18, fontSize: '0.6rem', fontWeight: 600,
                 bgcolor: alpha(priorityColor, isDark ? 0.15 : 0.08),
                 color: priorityColor,
-                '& .MuiChip-icon': { ml: '4px' },
+                '& .MuiChip-icon': { ml: '3px' },
               }}
             />
-
-            {/* Horizon */}
             <Chip
               size="small"
               label={HORIZON_LABELS[item.horizon] || item.horizon}
-              sx={{
-                height: 20,
-                fontSize: '0.65rem',
-                fontWeight: 500,
-                bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                color: 'text.secondary',
-              }}
+              sx={{ height: 18, fontSize: '0.6rem', bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: 'text.secondary' }}
             />
-
-            {/* Category */}
             {item.category && (
-              <Chip
-                size="small"
-                label={item.category}
-                sx={{
-                  height: 20,
-                  fontSize: '0.65rem',
-                  bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                  color: 'text.secondary',
-                }}
-              />
+              <Chip size="small" label={item.category} sx={{ height: 18, fontSize: '0.6rem', bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: 'text.secondary' }} />
             )}
-
-            {/* Agent tool */}
             {item.agent_tool && (
               <Chip
                 size="small"
-                icon={<AgentIcon sx={{ fontSize: 12, color: `${AGENT_TOOL_COLORS[item.agent_tool] || '#888'} !important` }} />}
+                icon={<AgentIcon sx={{ fontSize: 10, color: `${AGENT_TOOL_COLORS[item.agent_tool] || '#888'} !important` }} />}
                 label={AGENT_TOOL_LABELS[item.agent_tool] || item.agent_tool}
                 sx={{
-                  height: 20,
-                  fontSize: '0.65rem',
-                  fontWeight: 500,
+                  height: 18, fontSize: '0.6rem',
                   bgcolor: alpha(AGENT_TOOL_COLORS[item.agent_tool] || '#888', isDark ? 0.15 : 0.08),
                   color: AGENT_TOOL_COLORS[item.agent_tool] || '#888',
-                  '& .MuiChip-icon': { ml: '4px' },
+                  '& .MuiChip-icon': { ml: '3px' },
                 }}
               />
             )}
-
-            {/* Branch type */}
             {item.branch_type && (
               <Chip
                 size="small"
                 label={item.branch_type.replace('_', ' ')}
                 sx={{
-                  height: 20,
-                  fontSize: '0.65rem',
+                  height: 18, fontSize: '0.6rem',
                   bgcolor: alpha(BRANCH_TYPE_COLORS[item.branch_type] || '#888', isDark ? 0.15 : 0.08),
                   color: BRANCH_TYPE_COLORS[item.branch_type] || '#888',
                 }}
               />
             )}
-
-            {/* Change set */}
             {item.change_set && (
               <Chip
                 size="small"
                 label={item.change_set.code}
-                sx={{
-                  height: 20,
-                  fontSize: '0.65rem',
-                  fontWeight: 600,
-                  bgcolor: alpha('#2d1b4e', isDark ? 0.2 : 0.08),
-                  color: isDark ? '#d4af37' : '#2d1b4e',
-                }}
+                sx={{ height: 18, fontSize: '0.6rem', fontWeight: 600, bgcolor: alpha('#2d1b4e', isDark ? 0.2 : 0.08), color: isDark ? '#d4af37' : '#2d1b4e' }}
               />
             )}
           </Stack>
 
           {/* Footer: due date + ID */}
-          <Box
-            sx={{
-              px: 1.5,
-              pb: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
+          <Box sx={{ px: 1.25, pb: 0.75, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             {item.due_date ? (
               <Stack direction="row" alignItems="center" gap={0.5}>
-                <IconCalendar size={12} style={{ opacity: 0.5 }} />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontSize: '0.65rem',
-                    color: overdue ? '#f44336' : 'text.secondary',
-                    fontWeight: overdue ? 700 : 400,
-                  }}
-                >
-                  {formatShortDate(item.due_date)}
-                  {overdue && ' (overdue)'}
+                <IconCalendar size={10} style={{ opacity: 0.5 }} />
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', color: overdue ? '#f44336' : 'text.secondary', fontWeight: overdue ? 700 : 400 }}>
+                  {formatShortDate(item.due_date)}{overdue && ' !'}
                 </Typography>
               </Stack>
-            ) : (
-              <Box />
-            )}
-            <Typography variant="caption" sx={{ fontSize: '0.6rem', opacity: 0.35, fontFamily: 'monospace' }}>
+            ) : <Box />}
+            <Typography variant="caption" sx={{ fontSize: '0.55rem', opacity: 0.35, fontFamily: 'monospace' }}>
               #{item.id}
             </Typography>
           </Box>
@@ -366,11 +315,13 @@ const KanbanColumn: React.FC<{
   onDelete: (id: number) => void;
   onQuickDone: (id: number) => void;
 }> = ({ column, items, isDark, onEdit, onDelete, onQuickDone }) => {
+  const ownership = STATUS_OWNERSHIP[column.id];
+
   return (
     <Box
       sx={{
-        width: 280,
-        minWidth: 280,
+        width: 210,
+        minWidth: 210,
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column',
@@ -380,48 +331,48 @@ const KanbanColumn: React.FC<{
       {/* Column header */}
       <Box
         sx={{
-          px: 2,
-          py: 1.25,
-          borderRadius: '10px 10px 0 0',
+          px: 1.5,
+          py: 1,
+          borderRadius: '8px 8px 0 0',
           bgcolor: alpha(column.color, isDark ? 0.12 : 0.06),
           borderBottom: `2px solid ${alpha(column.color, 0.4)}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
         }}
       >
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Box
-            sx={{
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              bgcolor: column.color,
-            }}
-          />
-          <Typography
-            variant="subtitle2"
-            sx={{
-              fontWeight: 700,
-              fontSize: '0.8125rem',
-              color: isDark ? '#f3f4f6' : '#1a1a2e',
-            }}
-          >
-            {column.label}
-          </Typography>
-        </Stack>
-        <Chip
-          size="small"
-          label={items.length}
-          sx={{
-            height: 22,
-            minWidth: 28,
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            bgcolor: alpha(column.color, isDark ? 0.2 : 0.12),
-            color: column.color,
-          }}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Stack direction="row" alignItems="center" gap={0.75}>
+            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: column.color }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.7rem', color: isDark ? '#f3f4f6' : '#1a1a2e' }}>
+              {column.label}
+            </Typography>
+          </Stack>
+          <Stack direction="row" alignItems="center" gap={0.3}>
+            {ownership?.owner && (
+              <Tooltip title={`Owner: ${ownership.owner === 'admin' ? 'Super Admin' : 'AI Agent'} — ${ownership.exit_action}`}>
+                <Box sx={{ display: 'inline-flex' }}>
+                  {ownership.owner === 'admin'
+                    ? <IconUser size={12} color={isDark ? '#90caf9' : '#1976d2'} />
+                    : <IconRobot size={12} color={isDark ? '#ffb74d' : '#e65100'} />
+                  }
+                </Box>
+              </Tooltip>
+            )}
+            <Chip
+              size="small"
+              label={items.length}
+              sx={{
+                height: 20, minWidth: 24, fontSize: '0.7rem', fontWeight: 700,
+                bgcolor: alpha(column.color, isDark ? 0.2 : 0.12), color: column.color,
+              }}
+            />
+          </Stack>
+        </Box>
+        {ownership && (
+          <Tooltip title={ownership.exit_action}>
+            <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'text.disabled', lineHeight: 1.2, display: 'block', mt: 0.25, cursor: 'help' }}>
+              Exit by: {ownership.exit_by === 'admin' ? 'Admin' : ownership.exit_by === 'agent' ? 'Agent' : 'Any'}
+            </Typography>
+          </Tooltip>
+        )}
       </Box>
 
       {/* Droppable area */}
@@ -433,17 +384,16 @@ const KanbanColumn: React.FC<{
             sx={{
               flex: 1,
               overflowY: 'auto',
-              p: 1,
-              borderRadius: '0 0 10px 10px',
+              p: 0.75,
+              borderRadius: '0 0 8px 8px',
               bgcolor: snapshot.isDraggingOver
                 ? alpha(column.color, isDark ? 0.06 : 0.03)
                 : isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)',
               border: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
               borderTop: 'none',
               transition: 'background-color 0.2s ease',
-              minHeight: 120,
-              // Custom scrollbar
-              '&::-webkit-scrollbar': { width: 4 },
+              minHeight: 100,
+              '&::-webkit-scrollbar': { width: 3 },
               '&::-webkit-scrollbar-thumb': {
                 bgcolor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
                 borderRadius: 2,
@@ -463,16 +413,7 @@ const KanbanColumn: React.FC<{
             ))}
             {provided.placeholder}
             {items.length === 0 && (
-              <Typography
-                variant="caption"
-                sx={{
-                  display: 'block',
-                  textAlign: 'center',
-                  py: 3,
-                  opacity: 0.3,
-                  fontStyle: 'italic',
-                }}
-              >
+              <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', py: 2, opacity: 0.3, fontStyle: 'italic', fontSize: '0.6rem' }}>
                 Drop items here
               </Typography>
             )}
@@ -501,7 +442,6 @@ const OMDailyKanban: React.FC<OMDailyKanbanProps> = ({
     columnItems[col.id] = items
       .filter((item) => item.status === col.id)
       .sort((a, b) => {
-        // Sort by priority (critical first), then by due date
         const priorityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
         const pa = priorityOrder[a.priority] ?? 2;
         const pb = priorityOrder[b.priority] ?? 2;
@@ -513,19 +453,16 @@ const OMDailyKanban: React.FC<OMDailyKanbanProps> = ({
       });
   });
 
-  // Items with status "cancelled" are excluded from the board
+  // Blocked items shown in a separate column
+  const blockedItems = items.filter(i => i.status === 'blocked');
 
   const onDragEnd = async (result: any) => {
     const { source, destination, draggableId } = result;
-
     if (!destination) return;
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
     const itemId = parseInt(draggableId);
     const newStatus = destination.droppableId;
-
-    // Optimistic update would go here if we wanted snappier UX,
-    // but we rely on the parent's onStatusChange to refetch
     await onStatusChange(itemId, newStatus);
   };
 
@@ -533,7 +470,7 @@ const OMDailyKanban: React.FC<OMDailyKanbanProps> = ({
     <Box sx={{ mt: 1 }}>
       <SimpleBar style={{ overflowX: 'auto' }}>
         <DragDropContext onDragEnd={onDragEnd}>
-          <Box display="flex" gap={1.5} sx={{ pb: 2, minWidth: KANBAN_COLUMNS.length * 290 }}>
+          <Box display="flex" gap={1} sx={{ pb: 2, minWidth: (KANBAN_COLUMNS.length + (blockedItems.length > 0 ? 1 : 0)) * 220 }}>
             {KANBAN_COLUMNS.map((column) => (
               <KanbanColumn
                 key={column.id}
@@ -545,6 +482,41 @@ const OMDailyKanban: React.FC<OMDailyKanbanProps> = ({
                 onQuickDone={onQuickDone}
               />
             ))}
+
+            {/* Blocked column */}
+            {blockedItems.length > 0 && (
+              <Droppable droppableId="blocked">
+                {(provided, snapshot) => (
+                  <Box sx={{ width: 210, minWidth: 210, flexShrink: 0, display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 280px)' }}>
+                    <Box sx={{ px: 1.5, py: 1, borderRadius: '8px 8px 0 0', bgcolor: alpha('#ef5350', isDark ? 0.12 : 0.06), borderBottom: '2px solid rgba(239,83,80,0.4)' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Stack direction="row" alignItems="center" gap={0.75}>
+                          <IconAlertTriangle size={12} color="#ef5350" />
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.7rem', color: '#ef5350' }}>Blocked</Typography>
+                        </Stack>
+                        <Chip size="small" label={blockedItems.length} sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700, bgcolor: alpha('#ef5350', 0.15), color: '#ef5350' }} />
+                      </Box>
+                    </Box>
+                    <Box
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      sx={{
+                        flex: 1, overflowY: 'auto', p: 0.75,
+                        borderRadius: '0 0 8px 8px',
+                        bgcolor: snapshot.isDraggingOver ? alpha('#ef5350', 0.06) : isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)',
+                        border: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
+                        borderTop: 'none', minHeight: 100,
+                      }}
+                    >
+                      {blockedItems.map((item, index) => (
+                        <KanbanCard key={item.id} item={item} index={index} isDark={isDark} onEdit={() => onEditItem(item)} onDelete={() => onDeleteItem(item.id)} onQuickDone={() => onQuickDone(item.id)} />
+                      ))}
+                      {provided.placeholder}
+                    </Box>
+                  </Box>
+                )}
+              </Droppable>
+            )}
           </Box>
         </DragDropContext>
       </SimpleBar>

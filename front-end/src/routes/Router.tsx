@@ -155,8 +155,9 @@ const OMAppSuitePage = Loadable(lazy(() => import('../features/admin/control-pan
 const SDLCPage = Loadable(lazy(() => import('../features/admin/control-panel/SDLCPage')));
 const ComponentsInDevelopmentPage = Loadable(lazy(() => import('../features/admin/control-panel/ComponentsInDevelopmentPage')));
 const DeprecatedComponentsPage = Loadable(lazy(() => import('../features/admin/control-panel/DeprecatedComponentsPage')));
-const ChurchLifecyclePage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchLifecyclePage')));
 const ChurchLifecycleDetailPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchLifecycleDetailPage')));
+const OnboardingPipelinePage = Loadable(lazy(() => import('../features/admin/control-panel/OnboardingPipelinePage')));
+const OnboardingPipelineDetailPage = Loadable(lazy(() => import('../features/admin/control-panel/OnboardingPipelineDetailPage')));
 const UsersSecurityPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/UsersSecurityPage')));
 const ContentMediaPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/ContentMediaPage')));
 const SocialCommsPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/SocialCommsPage')));
@@ -900,11 +901,11 @@ const Router = [
       },
       {
         path: '/admin/control-panel/church-onboarding',
-        element: <Navigate to="/admin/control-panel/church-lifecycle" replace />,
+        element: <Navigate to="/admin/control-panel" replace />,
       },
       {
         path: '/admin/control-panel/church-onboarding/:churchId',
-        element: <Navigate to="/admin/control-panel/church-lifecycle" replace />,
+        element: <Navigate to="/admin/control-panel" replace />,
       },
       {
         path: '/admin/control-panel/jurisdictions',
@@ -942,20 +943,14 @@ const Router = [
       },
       {
         path: '/admin/control-panel/church-pipeline',
-        element: <Navigate to="/admin/control-panel/church-lifecycle" replace />,
+        element: <Navigate to="/admin/control-panel" replace />,
       },
+      // church-lifecycle list — retired from OM, feature now owned by OMAI (PP-0003)
       {
         path: '/admin/control-panel/church-lifecycle',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
-            <AdminErrorBoundary>
-              <EnvironmentAwarePage featureId="church-lifecycle" priority={4} featureName="Church Lifecycle">
-                <ChurchLifecyclePage />
-              </EnvironmentAwarePage>
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
+        element: <Navigate to="/admin/control-panel" replace />,
       },
+      // church-lifecycle detail — OMAI opens this URL via window.open(); keep route for OMAI consumption
       {
         path: '/admin/control-panel/church-lifecycle/:churchId',
         element: (
@@ -963,6 +958,30 @@ const Router = [
             <AdminErrorBoundary>
               <EnvironmentAwarePage featureId="church-lifecycle-detail" priority={4} featureName="Church Lifecycle Detail">
                 <ChurchLifecycleDetailPage />
+              </EnvironmentAwarePage>
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/onboarding-pipeline',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <EnvironmentAwarePage featureId="onboarding-pipeline" priority={4} featureName="Onboarding Pipeline">
+                <OnboardingPipelinePage />
+              </EnvironmentAwarePage>
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin/control-panel/onboarding-pipeline/:id',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <AdminErrorBoundary>
+              <EnvironmentAwarePage featureId="onboarding-pipeline-detail" priority={4} featureName="Onboarding Detail">
+                <OnboardingPipelineDetailPage />
               </EnvironmentAwarePage>
             </AdminErrorBoundary>
           </ProtectedRoute>
@@ -1293,7 +1312,7 @@ const Router = [
       },
       {
         path: '/devel-tools/crm',
-        element: <Navigate to="/admin/control-panel/church-lifecycle" replace />,
+        element: <Navigate to="/admin/control-panel" replace />,
       },
       {
         path: '/devel-tools/us-church-map',

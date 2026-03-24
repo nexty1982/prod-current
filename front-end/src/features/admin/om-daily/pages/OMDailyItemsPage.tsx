@@ -174,10 +174,11 @@ const OMDailyItemsPage: React.FC = () => {
   // Save item
   const saveItem = async () => {
     try {
-      const method = editingItem ? 'PUT' : 'POST';
-      const url = editingItem
-        ? `/api/om-daily/items/${editingItem.id}`
-        : '/api/om-daily/items';
+      const isNew = !editingItem;
+      const method = isNew ? 'POST' : 'PUT';
+      const url = isNew
+        ? '/api/om-daily/items'
+        : `/api/om-daily/items/${editingItem.id}`;
       const res = await fetch(url, {
         method,
         credentials: 'include',
@@ -185,7 +186,27 @@ const OMDailyItemsPage: React.FC = () => {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error('Failed to save item');
-      showToast(editingItem ? 'Item updated' : 'Item created', 'success');
+      const result = await res.json();
+      const itemId = result?.item?.id || result?.id;
+
+      // Auto-create branch if agent_tool + branch_type are set on new items
+      if (isNew && (form as any).agent_tool && (form as any).branch_type && itemId) {
+        try {
+          const workRes = await fetch(`/api/om-daily/items/${itemId}/start-work`, {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ branch_type: (form as any).branch_type, agent_tool: (form as any).agent_tool }),
+          });
+          const workData = await workRes.json();
+          const branch = workData?.branch || workData?.item?.github_branch;
+          showToast(`Item created — branch ${branch || 'created'}`, 'success');
+        } catch {
+          showToast('Item created but branch creation failed', 'error');
+        }
+      } else {
+        showToast(isNew ? 'Item created' : 'Item updated', 'success');
+      }
+
       setDialogOpen(false);
       setEditingItem(null);
       setForm({ ...DEFAULT_FORM });
@@ -210,16 +231,19 @@ const OMDailyItemsPage: React.FC = () => {
     }
   };
 
-  // Quick done
+  // Quick status change (uses SDLC-enforced PATCH endpoint)
   const updateStatus = async (item: DailyItem, status: string) => {
     try {
-      const res = await fetch(`/api/om-daily/items/${item.id}`, {
-        method: 'PUT',
+      const res = await fetch(`/api/om-daily/items/${item.id}/status`, {
+        method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...item, status }),
+        body: JSON.stringify({ status }),
       });
-      if (!res.ok) throw new Error('Failed to update status');
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.reasons?.join(' ') || data.error || 'Transition blocked');
+      }
       showToast(`Marked as ${STATUS_LABELS[status] || status}`, 'success');
       fetchItems();
     } catch (err: any) {

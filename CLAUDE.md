@@ -198,9 +198,33 @@ curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/complete-work \
 | `bugfix` | `BF` | `BF_claude-cli_2026-03-24` |
 | `patch` | `PA` | `PA_claude-cli_2026-03-24` |
 
+### SDLC Status Ownership
+
+Each status has a defined owner and required exit action. The backend enforces this — agents cannot approve their own work, and admins cannot skip agent-owned steps.
+
+| Status | Owner | Exit Action | Exit By |
+|--------|-------|-------------|---------|
+| Backlog | Admin | Triage: review priority, assign category | Admin |
+| Triaged | Admin | Plan: define approach, set repo_target | Admin |
+| Planned | Admin | Schedule: set dates, assign to agent | Admin |
+| Scheduled | Admin | Start work: agent creates branch | **Agent** |
+| In Progress | **Agent** | Complete implementation, commit all | **Agent** |
+| Self Review | **Agent** | Self-check: build, lint, push to remote | **Agent** |
+| Testing | **Agent** | Verify tests pass, mark ready for review | **Agent** |
+| Review Ready | Admin | Review changes, approve or reject | Admin |
+| Approved | Admin | Deploy, merge to main, close item | Admin |
+| Done | — | Reopen if needed | Admin |
+
+**Key enforcement:**
+- Agents pass `actor_type: "agent"` in PATCH /status calls to identify themselves
+- Agents CANNOT exit admin-owned statuses (e.g., cannot self-approve)
+- Admins CANNOT exit agent-owned statuses (e.g., cannot skip testing)
+- `blocked` and `cancelled` transitions are always allowed by any actor
+
 ### Key Rules
 
 - **ALWAYS signal completion** — Call `POST /items/:id/agent-complete` when you finish work. This moves the item to Self Review so the board reflects your progress. Without this call, items stay stuck in In Progress.
+- **Agent transitions use actor_type** — When calling PATCH /status directly, include `"actor_type": "agent"` in the body. The `agent-complete` and `start-work` endpoints handle this automatically.
 - **Fast-forward only** — `complete-work` uses `git merge --ff-only`. If main has diverged, rebase first.
 - **Clean tree required** — All changes must be committed before calling `complete-work`.
 - **Explicit actions** — Branches are NOT auto-merged on status change. You must call the endpoints.

@@ -1461,9 +1461,19 @@ const ConversationLogPage: React.FC = () => {
                   sx={{ height: 8, borderRadius: 4 }}
                 />
               </Box>
-              <Stack direction="row" spacing={1}>
+              <Stack direction="row" spacing={1} alignItems="center">
                 <Chip label={`${taskStats.completed} Done`} size="small" color="success" variant="outlined" />
                 <Chip label={`${taskStats.pending} Pending`} size="small" color="warning" variant="outlined" />
+                {taskStats.completed > 0 && (
+                  <Button
+                    size="small" variant="outlined" color="error"
+                    startIcon={<IconTrash size={14} />}
+                    onClick={deleteCompletedTasks}
+                    sx={{ textTransform: 'none', fontSize: '0.75rem', ml: 1 }}
+                  >
+                    Delete all done
+                  </Button>
+                )}
               </Stack>
             </Stack>
           </Paper>

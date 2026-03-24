@@ -325,13 +325,13 @@ router.get('/items', requireAuth, async (req, res) => {
 router.post('/items', requireAuth, async (req, res) => {
   try {
     const pool = getPool();
-    const { title, description, horizon = '7', status = 'todo', priority = 'medium', category, due_date, tags, task_type, source, metadata, agent_tool, branch_type, conversation_ref } = req.body;
+    const { title, description, horizon = '7', status = 'backlog', priority = 'medium', category, due_date, tags, task_type, source, metadata, agent_tool, branch_type, conversation_ref, repo_target } = req.body;
 
     if (!title) return res.status(400).json({ error: 'title required' });
 
     const [result] = await pool.query(
-      `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, due_date, tags, source, agent_tool, branch_type, conversation_ref, metadata, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, due_date, tags, source, agent_tool, branch_type, conversation_ref, metadata, repo_target, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title,
         task_type || 'task',
@@ -347,7 +347,8 @@ router.post('/items', requireAuth, async (req, res) => {
         branch_type || null,
         conversation_ref || null,
         metadata ? JSON.stringify(metadata) : null,
-        req.session?.user?.id || null,
+        repo_target || 'orthodoxmetrics',
+        req.session?.user?.id || req.user?.id || null,
       ]
     );
 

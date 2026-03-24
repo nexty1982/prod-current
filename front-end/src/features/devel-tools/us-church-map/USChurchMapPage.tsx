@@ -199,12 +199,9 @@ const LABEL_OFFSETS: Record<string, { x: number; y: number; anchor?: 'start' | '
 //  Helpers
 // ═══════════════════════════════════════════════════════════════════
 
-/** Get lifecycle route for a church */
+/** Get detail route for a church */
 function getChurchDetailUrl(church: EnrichedChurch): string {
-  if (church.source === 'onboarded' && typeof church.id === 'string') {
-    return `/admin/control-panel/church-lifecycle/${church.id}`;
-  }
-  return `/admin/control-panel/church-lifecycle/${church.id}`;
+  return `/admin/control-panel/onboarding-pipeline/${church.id}`;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -605,7 +602,7 @@ const USChurchMapPage: React.FC = () => {
             variant="contained"
             size="small"
             startIcon={<AddIcon />}
-            onClick={() => navigate('/admin/control-panel/church-lifecycle')}
+            onClick={() => navigate('/admin/control-panel/onboarding-pipeline')}
             sx={{ textTransform: 'none', ml: 1 }}
           >
             Onboard Church
