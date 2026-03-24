@@ -251,7 +251,7 @@ const RepoOpsPage: React.FC = () => {
 
   // ── Branch Deletion ─────────────────────────────────────────
 
-  const SAFE_DELETE_CLASSIFICATIONS: BranchClassification[] = ['Already Merged', 'Safe To Delete'];
+  const SAFE_DELETE_CLASSIFICATIONS: BranchClassification[] = ['Already Merged', 'Safe To Delete', 'Stale / Diverged'];
 
   const openDeleteDialog = (branch: RemoteBranch) => {
     setDeleteTarget(branch);
@@ -900,7 +900,7 @@ const RepoOpsPage: React.FC = () => {
                                 View
                               </Button>
                               {SAFE_DELETE_CLASSIFICATIONS.includes(branch.classification) && (
-                                <Tooltip title="Delete merged branch" arrow>
+                                <Tooltip title="Delete branch" arrow>
                                   <IconButton
                                     size="small"
                                     onClick={(e) => { e.stopPropagation(); openDeleteDialog(branch); }}
@@ -1341,7 +1341,7 @@ const RepoOpsPage: React.FC = () => {
                     '&:hover': { bgcolor: isDark ? 'rgba(139,92,246,0.95)' : '#6d28d9' },
                   }}
                 >
-                  Delete Merged Branch
+                  Delete Branch
                 </Button>
               ) : (
                 <>
@@ -1375,7 +1375,7 @@ const RepoOpsPage: React.FC = () => {
         PaperProps={{ sx: { borderRadius: 2, maxWidth: 480, fontFamily: f } }}
       >
         <DialogTitle sx={{ fontFamily: f, fontWeight: 600, fontSize: '1.05rem', pb: 0.5 }}>
-          Delete Merged Branch
+          Delete Branch
         </DialogTitle>
         <DialogContent>
           {deleteTarget && (
@@ -1393,6 +1393,8 @@ const RepoOpsPage: React.FC = () => {
               <Typography sx={{ fontFamily: f, fontSize: '0.8125rem', color: labelColor, mb: 1.5 }}>
                 {deleteTarget.classification === 'Already Merged'
                   ? 'All commits on this branch have been merged into main. No unique work will be lost.'
+                  : deleteTarget.classification === 'Stale / Diverged'
+                  ? `This branch has ${deleteTarget.ahead} commit(s) ahead but is ${deleteTarget.behind} commit(s) behind main. It is stale or significantly diverged and unlikely to merge cleanly.`
                   : 'This branch has no unique commits ahead of main. No work will be lost.'}
               </Typography>
 
@@ -1439,13 +1441,13 @@ const RepoOpsPage: React.FC = () => {
         PaperProps={{ sx: { borderRadius: 2, maxWidth: 520, fontFamily: f } }}
       >
         <DialogTitle sx={{ fontFamily: f, fontWeight: 600, fontSize: '1.05rem', pb: 0.5 }}>
-          Delete {selectedForDelete.size} Merged Branch{selectedForDelete.size !== 1 ? 'es' : ''}
+          Delete {selectedForDelete.size} Branch{selectedForDelete.size !== 1 ? 'es' : ''}
         </DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 1 }}>
             <Typography sx={{ fontFamily: f, fontSize: '0.8125rem', color: labelColor, mb: 2 }}>
-              The following branches are classified as <strong>Already Merged</strong> or <strong>Safe To Delete</strong>.
-              Each branch will be independently verified server-side before deletion. No unique work will be lost.
+              The following branches are classified as <strong>Already Merged</strong>, <strong>Safe To Delete</strong>, or <strong>Stale / Diverged</strong>.
+              Each branch will be independently verified server-side before deletion.
             </Typography>
 
             <Paper

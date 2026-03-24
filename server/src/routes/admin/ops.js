@@ -989,20 +989,48 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
       classification = 'Already Merged';
     } else if (ahead === 0 && behind > 0) {
       classification = 'Safe To Delete';
+    } else if (ahead > 0 && behind > 0) {
+      // Check for parked work vs stale/diverged
+      const behindAheadRatio = behind / ahead;
+      const isParkedWork = ahead >= 15 && behind < 30 && (behind <= 5 || behindAheadRatio < 0.2);
+      // Get commit age for stale detection
+      let commitAgeDays = 0;
+      try {
+        const { stdout: dateOut } = await execFileAsync(
+          'git', ['log', '-1', '--format=%ci', remoteRef],
+          { cwd: REPO_ROOT, timeout: 3000 }
+        );
+        commitAgeDays = Math.floor((Date.now() - new Date(dateOut.trim()).getTime()) / 86400000);
+      } catch { /* ignore */ }
+
+      const isStale = !isParkedWork && (
+        (behind >= 30) ||
+        (behind >= 20 && ahead <= 10) ||
+        (commitAgeDays > 30 && behind >= 10) ||
+        (ahead <= 10 && behind >= 20)
+      );
+
+      if (isParkedWork) {
+        classification = 'Parked Work';
+      } else if (isStale) {
+        classification = 'Stale / Diverged';
+      } else {
+        classification = 'other';
+      }
     } else {
       classification = 'other';
     }
 
-    // ── Step 2: Gate — only allow safe classifications ───────
-    const SAFE_CLASSIFICATIONS = ['Already Merged', 'Safe To Delete'];
+    // ── Step 2: Gate — only allow deletable classifications ──
+    const SAFE_CLASSIFICATIONS = ['Already Merged', 'Safe To Delete', 'Stale / Diverged'];
     if (!SAFE_CLASSIFICATIONS.includes(classification)) {
       return res.status(403).json({
         success: false,
-        error: 'Branch is not safe to delete',
+        error: 'Branch is not eligible for deletion',
         classification,
         ahead,
         behind,
-        message: `This branch has ${ahead} unique commit(s) ahead of main. Only "Already Merged" or "Safe To Delete" branches can be removed through this endpoint.`,
+        message: `This branch is classified as "${classification}" and cannot be deleted through this endpoint.`,
       });
     }
 
@@ -1076,11 +1104,11 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
   }
 
   // Hard cap to prevent abuse
-  if (branches.length > 50) {
-    return res.status(400).json({ success: false, error: 'Maximum 50 branches per bulk delete' });
+  if (branches.length > 100) {
+    return res.status(400).json({ success: false, error: 'Maximum 100 branches per bulk delete' });
   }
 
-  const SAFE_CLASSIFICATIONS = ['Already Merged', 'Safe To Delete'];
+  const SAFE_CLASSIFICATIONS = ['Already Merged', 'Safe To Delete', 'Stale / Diverged'];
   const results = [];
 
   // Get current branch once
@@ -1129,20 +1157,43 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
       );
       const [behindStr, aheadStr] = abOut.trim().split(/\s+/);
       const ahead = parseInt(aheadStr) || 0;
+      const behind = parseInt(behindStr) || 0;
       const isMerged = mergedBranches.includes(branchName);
 
       // Re-derive classification
       let classification;
       if (isMerged && ahead === 0) {
         classification = 'Already Merged';
-      } else if (ahead === 0 && (parseInt(behindStr) || 0) > 0) {
+      } else if (ahead === 0 && behind > 0) {
         classification = 'Safe To Delete';
+      } else if (ahead > 0 && behind > 0) {
+        const behindAheadRatio = behind / ahead;
+        const isParkedWork = ahead >= 15 && behind < 30 && (behind <= 5 || behindAheadRatio < 0.2);
+        let commitAgeDays = 0;
+        try {
+          const { stdout: dateOut } = await execFileAsync(
+            'git', ['log', '-1', '--format=%ci', remoteRef],
+            { cwd: REPO_ROOT, timeout: 3000 }
+          );
+          commitAgeDays = Math.floor((Date.now() - new Date(dateOut.trim()).getTime()) / 86400000);
+        } catch { /* ignore */ }
+
+        const isStale = !isParkedWork && (
+          (behind >= 30) ||
+          (behind >= 20 && ahead <= 10) ||
+          (commitAgeDays > 30 && behind >= 10) ||
+          (ahead <= 10 && behind >= 20)
+        );
+
+        if (isParkedWork) classification = 'Parked Work';
+        else if (isStale) classification = 'Stale / Diverged';
+        else classification = 'other';
       } else {
         classification = 'other';
       }
 
       if (!SAFE_CLASSIFICATIONS.includes(classification)) {
-        results.push({ branch: branchName, success: false, error: 'Not safe to delete', classification, ahead });
+        results.push({ branch: branchName, success: false, error: 'Not eligible for deletion', classification, ahead });
         continue;
       }
 
