@@ -689,7 +689,7 @@ const Router = [
       {
         path: '/admin/omai',
         element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
+          <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest']}>
             <OmaiBridge />
           </ProtectedRoute>
         )
