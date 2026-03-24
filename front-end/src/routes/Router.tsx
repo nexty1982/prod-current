@@ -168,6 +168,7 @@ const PlatformConfigPage = Loadable(lazy(() => import('../features/admin/control
 const CodeSafetyPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/CodeSafetyPage')));
 const SSLCertificatePage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/SSLCertificatePage')));
 const SiteMapPage = Loadable(lazy(() => import('../features/admin/SiteMapPage')));
+const OmaiBridge = Loadable(lazy(() => import('../features/admin/OmaiBridge')));
 const CertificateTemplatesPage = Loadable(lazy(() => import('../features/admin/control-panel/CertificateTemplatesPage')));
 const CRMPage = Loadable(lazy(() => import('../features/devel-tools/crm/CRMPage')));
 const USChurchMapPage = Loadable(lazy(() => import('../features/devel-tools/us-church-map/USChurchMapPage')));
@@ -681,6 +682,15 @@ const Router = [
         element: (
           <ProtectedRoute>
             <SiteMapPage />
+          </ProtectedRoute>
+        )
+      },
+      // OMAI Bridge — redirect to OMAI Berry with auth token
+      {
+        path: '/admin/omai',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <OmaiBridge />
           </ProtectedRoute>
         )
       },

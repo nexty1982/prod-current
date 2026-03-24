@@ -65,6 +65,14 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
+    title: 'OMAI',
+    icon: IconRocket,
+    href: '/admin/omai',
+    chip: 'AI',
+    chipColor: 'primary',
+  },
+  {
+    id: uniqueId(),
     title: 'Account Hub',
     icon: IconUser,
     href: '/account/profile',
