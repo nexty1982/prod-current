@@ -1617,6 +1617,39 @@ console.log('Work session crons started (weekly reports Mon 8AM ET, stale sessio
 // MIGRATED TO OMAI: om-daily cron jobs (changelog, staging review, GitHub sync)
 // These crons now run from the OMAI server
 
+// Weekly OCR artifact cleanup (Sunday 3 AM) — deletes feeder artifacts for completed jobs older than 90 days
+cron.schedule('0 3 * * 0', async () => {
+  try {
+    const fsP = require('fs');
+    const pathP = require('path');
+    const feederDir = pathP.join(__dirname, '../storage/feeder');
+    if (!fsP.existsSync(feederDir)) return;
+
+    const pool = db.getAppPool ? db.getAppPool() : db.promisePool;
+    // Find completed jobs older than 90 days
+    const [oldJobs] = await pool.query(
+      `SELECT id FROM ocr_jobs
+       WHERE status IN ('complete','completed')
+         AND completed_at < DATE_SUB(NOW(), INTERVAL 90 DAY)`
+    );
+
+    let cleaned = 0;
+    for (const job of (oldJobs as any[])) {
+      const jobDir = pathP.join(feederDir, `job_${job.id}`);
+      if (fsP.existsSync(jobDir)) {
+        try {
+          fsP.rmSync(jobDir, { recursive: true, force: true });
+          cleaned++;
+        } catch (_) { /* skip inaccessible dirs */ }
+      }
+    }
+    if (cleaned > 0) console.log(`[OCR Cleanup] Removed artifacts for ${cleaned} completed jobs (>90 days)`);
+  } catch (err: any) {
+    console.error('[OCR Cleanup] Cron error:', err.message);
+  }
+});
+console.log('OCR artifact cleanup cron scheduled (Sunday 3 AM, 90-day retention)');
+
 // --- WEBSOCKET INTEGRATION -----------------------------------------
 const websocketService = require('./services/websocketService');
 
