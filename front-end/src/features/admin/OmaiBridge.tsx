@@ -6,7 +6,7 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 
 const OMAI_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? `http://${window.location.hostname}:7060`
-  : window.location.origin; // In production, OMAI may be behind same domain
+  : `${window.location.origin}/omai`; // In production, OMAI is proxied under /omai/
 
 export default function OmaiBridge() {
   const navigate = useNavigate();
