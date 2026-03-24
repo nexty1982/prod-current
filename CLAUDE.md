@@ -149,45 +149,55 @@ To register a new feature, add it to `FEATURE_REGISTRY` in `featureRegistry.ts` 
 
 ## AI Agent Work Tracking (REQUIRED)
 
-**Every change you make MUST be tracked as an OM Daily item.** This is mandatory, not optional.
+**Every change you make MUST be tracked as an OM Daily item with branch lifecycle management.** This is mandatory, not optional.
 
-### Quick Reference
+### Quick Reference — Branch Lifecycle
 
 ```bash
-# Create item (do this BEFORE starting work)
+# 1. Create item (BEFORE starting work)
 curl -X POST http://127.0.0.1:3001/api/om-daily/items \
   -H "Content-Type: application/json" \
-  -b <session_cookie> \
-  -d '{"title":"...","task_type":"...","status":"in_progress","source":"agent","agent_tool":"claude_cli","priority":"medium","horizon":"7","category":"...","description":"..."}'
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"title":"...","task_type":"task","status":"todo","source":"agent","agent_tool":"claude_cli","priority":"medium","horizon":"7","category":"...","description":"..."}'
 
-# Close item (do this AFTER work is complete)
-curl -X PUT http://127.0.0.1:3001/api/om-daily/items/:id \
+# 2. Start work — creates branch from main, checks it out locally
+curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/start-work \
   -H "Content-Type: application/json" \
-  -b <session_cookie> \
-  -d '{"status":"done","progress":100}'
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"branch_type":"existing_feature","agent_tool":"claude_cli"}'
+
+# 3. Do your work, commit changes to the branch
+
+# 4. Complete work — ff-only merge to main, delete branch
+curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/complete-work \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ### Workflow
 
-1. **Before starting work** → Create an OM Daily item with `status: "in_progress"`, `source: "agent"`, `agent_tool: "claude_cli"`
-2. **During work** → Update `progress` (0-100) if the task is large
-3. **After completion** → Set `status: "done"`, `progress: 100`
-4. **If abandoned** → Set `status: "cancelled"` with reason in description
+1. **Create item** → `POST /api/om-daily/items` with `status: "todo"`, `source: "agent"`, `agent_tool: "claude_cli"`
+2. **Start work** → `POST /api/om-daily/items/:id/start-work` with `branch_type` — creates and checks out a branch from `main`
+3. **During work** → Commit changes to the branch. Update `progress` (0-100) if the task is large
+4. **Complete work** → `POST /api/om-daily/items/:id/complete-work` — fast-forward merges branch to `main`, deletes branch, closes item
+5. **If abandoned** → Set `status: "cancelled"` with reason in description
 
-### Item Type Quick Guide
+### Branch Types & Naming
 
-| task_type | Use for |
-|-----------|---------|
-| `bugfix` | Fixing broken behavior |
-| `feature` | New functionality |
-| `enhancement` | Improving existing functionality |
-| `refactor` | Code restructuring |
-| `style` | Visual/CSS changes |
-| `config` | Configuration changes |
-| `chore` | Maintenance, cleanup |
-| `security` | Security fixes |
+| branch_type | Prefix | Example |
+|-------------|--------|---------|
+| `new_feature` | `NF` | `NF_claude-cli_2026-03-24` |
+| `existing_feature` | `EF` | `EF_claude-cli_2026-03-24` |
+| `bugfix` | `BF` | `BF_claude-cli_2026-03-24` |
+| `patch` | `PA` | `PA_claude-cli_2026-03-24` |
 
-### Branch Types: `new_feature`, `existing_feature`, `bugfix`, `patch`
+### Key Rules
+
+- **Fast-forward only** — `complete-work` uses `git merge --ff-only`. If main has diverged, rebase first.
+- **Clean tree required** — All changes must be committed before calling `complete-work`.
+- **Explicit actions** — Branches are NOT auto-merged on status change. You must call the endpoints.
+- **One branch per item** — Each OM Daily item gets its own isolated branch.
+
 ### Priorities: `critical`, `high`, `medium` (default), `low`
 ### Categories: `frontend`, `backend`, `database`, `ocr`, `auth`, `design-system`, `admin`, `portal`, `records`, `crm`, `ai`, `sdlc`, `deployment`
 
@@ -195,7 +205,7 @@ curl -X PUT http://127.0.0.1:3001/api/om-daily/items/:id \
 
 Check for assigned plans at conversation start:
 ```bash
-curl -b <session_cookie> http://127.0.0.1:3001/api/prompt-plans/agent/claude_cli
+curl -H "Authorization: Bearer $TOKEN" http://127.0.0.1:3001/api/prompt-plans/agent/claude_cli
 ```
 If an active plan is returned, read the `next_step.prompt_text` and execute that stage. Work items are auto-linked to the plan's Change Set. See [docs/ai-agent-workflow.md](docs/ai-agent-workflow.md) for full details.
 

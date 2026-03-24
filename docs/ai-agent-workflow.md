@@ -12,7 +12,7 @@ Every change made by an AI agent (Claude CLI, Cursor, Windsurf, etc.) must be tr
 
 ## Workflow
 
-### 1. On New Work Request
+### 1. Create OM Daily Item
 
 When the user asks you to make changes, **before starting work**, create an OM Daily item:
 
@@ -21,9 +21,9 @@ POST /api/om-daily/items
 {
   "title": "<concise description of the work>",
   "description": "<detailed scope — what files, what changes, why>",
-  "task_type": "<see Item Type Guidelines below>",
+  "task_type": "task",
   "horizon": "<see Horizon Selection below>",
-  "status": "in_progress",
+  "status": "todo",
   "priority": "<see Priority Guidelines below>",
   "category": "<see Category Guidelines below>",
   "source": "agent",
@@ -34,11 +34,43 @@ POST /api/om-daily/items
 }
 ```
 
-Record the returned `id` — you will need it to update and close the item.
+Record the returned `id` — you will need it for the branch lifecycle calls.
 
-### 2. During Work
+### 2. Start Work (Branch Creation)
 
-If the scope changes significantly or you discover the work is larger than expected, update the item:
+**Call the `start-work` endpoint** to create an isolated branch and check it out locally:
+
+```
+POST /api/om-daily/items/:id/start-work
+{
+  "branch_type": "existing_feature",
+  "agent_tool": "claude_cli"
+}
+```
+
+This will:
+- Fetch the latest `main` branch
+- Create a new branch from `main` (naming: `PREFIX_agent_YYYY-MM-DD`, e.g. `EF_claude-cli_2026-03-24`)
+- Check out the branch locally
+- Push it to origin with tracking (`-u`)
+- Set the item status to `in_progress`
+
+**Branch naming prefixes:**
+
+| branch_type | Prefix | Example |
+|-------------|--------|---------|
+| `bugfix` | `BF` | `BF_claude-cli_2026-03-24` |
+| `new_feature` | `NF` | `NF_windsurf_2026-03-24` |
+| `existing_feature` | `EF` | `EF_cursor_2026-03-24` |
+| `patch` | `PA` | `PA_claude-cli_2026-03-24` |
+
+If a branch with the same name already exists (same agent, same day), the item ID is appended for uniqueness (e.g. `EF_claude-cli_2026-03-24_608`).
+
+If the item already has a branch, the endpoint will check it out locally instead of creating a new one.
+
+### 3. During Work
+
+Make your changes, commit them to the branch. If the scope changes significantly, update the item:
 
 ```
 PUT /api/om-daily/items/:id
@@ -48,23 +80,35 @@ PUT /api/om-daily/items/:id
 }
 ```
 
-### 3. On Completion
+### 4. Complete Work (Fast-Forward Merge)
 
-When the work is done and verified (builds pass, tests pass, deployed), close the item:
+When the work is done and verified (builds pass, tests pass, deployed), **call the `complete-work` endpoint**:
 
 ```
-PUT /api/om-daily/items/:id
-{
-  "status": "done",
-  "progress": 100,
-  "metadata": {
-    "filesChanged": ["<list of key files modified>"],
-    "summary": "<one-line summary of what was actually done>"
-  }
-}
+POST /api/om-daily/items/:id/complete-work
 ```
 
-### 4. On Failure or Cancellation
+This will:
+1. Verify the working tree is clean (all changes must be committed)
+2. Push the branch to origin
+3. Switch to `main` and pull latest
+4. Attempt a **fast-forward-only merge** (`git merge --ff-only`)
+5. Push `main` to origin
+6. Delete the branch (local + remote)
+7. Set the item status to `done`, progress to `100`
+8. Close the linked GitHub issue (if any)
+
+**If fast-forward fails** (main has diverged), the endpoint returns a `409` error and switches back to your work branch. You must rebase first:
+
+```bash
+git rebase main
+# resolve any conflicts
+# then call complete-work again
+```
+
+**Important:** `complete-work` is an explicit action — it does NOT trigger automatically when you set status to `done`. You must call it explicitly.
+
+### 5. On Failure or Cancellation
 
 If the work is abandoned or blocked:
 
@@ -75,6 +119,8 @@ PUT /api/om-daily/items/:id
   "description": "<original description>\n\n**Cancelled:** <reason>"
 }
 ```
+
+Note: Cancelling does not delete the branch. Clean up manually if needed.
 
 ---
 

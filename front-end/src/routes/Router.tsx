@@ -124,6 +124,7 @@ const RecipientSubmissionPage = Loadable(lazy(() => import('../features/records-
 const PublicCollaborationPage = Loadable(lazy(() => import('../features/records-centralized/components/collaborationLinks/PublicCollaborationPage')));
 const InteractiveReportJobsPage = Loadable(lazy(() => import('../features/devel-tools/interactive-reports/InteractiveReportJobsPage')));
 const BuildInfoPage = Loadable(lazy(() => import('../features/devel-tools/build-info/BuildInfoPage')));
+const RepoOpsPage = Loadable(lazy(() => import('../features/devel-tools/repo-ops/RepoOpsPage')));
 const PlatformStatusPage = Loadable(lazy(() => import('../features/devel-tools/platform-status/PlatformStatusPage')));
 const OrthodMetricsAdmin = Loadable(lazy(() => import('../features/admin/admin/OrthodoxMetricsAdmin')));
 const AIAdminPanel = Loadable(lazy(() => import('../features/admin/ai/AIAdminPanel')));
@@ -1313,14 +1314,18 @@ const Router = [
         )
       },
       {
-        path: '/devel-tools/git-operations',
+        path: '/devel-tools/repo-ops',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <GitOperations />
-            </AdminErrorBoundary>
+            <EnvironmentAwarePage featureId="repo-ops">
+              <RepoOpsPage />
+            </EnvironmentAwarePage>
           </ProtectedRoute>
         )
+      },
+      {
+        path: '/devel-tools/git-operations',
+        element: <Navigate to="/devel-tools/repo-ops" replace />,
       },
       {
         path: '/devel-tools/conversation-log',
@@ -1496,11 +1501,7 @@ const Router = [
       },
       {
         path: '/devel-tools/build-info',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
-            <BuildInfoPage />
-          </ProtectedRoute>
-        )
+        element: <Navigate to="/devel-tools/repo-ops" replace />,
       },
       {
         path: '/devel-tools/platform-status',

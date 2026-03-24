@@ -575,15 +575,9 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
-        title: 'Git Operations',
+        title: 'Repo Operations',
         icon: IconGitBranch,
-        href: '/devel-tools/git-operations',
-      },
-      {
-        id: uniqueId(),
-        title: 'Build Info',
-        icon: IconGitBranch,
-        href: '/devel-tools/build-info',
+        href: '/devel-tools/repo-ops',
       },
       {
         id: uniqueId(),

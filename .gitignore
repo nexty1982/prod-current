@@ -161,3 +161,4 @@ prod-backup/
 front-end/server/
 server/scripts/
 .snapshots/
+.branch-notes.json

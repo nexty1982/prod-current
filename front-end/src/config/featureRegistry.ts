@@ -103,6 +103,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'platform-devops', name: 'Platform DevOps & Infrastructure', stage: 2, description: 'CI/CD, monitoring, deployment automation, and server hardening', since: '2026-03-08', changeSetCode: 'CS-0048' },
 
   // ── Stage 1: Prototype ─────────────────────────────────────
+  { id: 'repo-ops', name: 'Repository Operations', stage: 2, route: '/devel-tools/repo-ops', description: 'Unified build status, git context, and branch cleanup hub', since: '2026-03-24' },
   { id: 'us-church-map', name: 'US Church Map', stage: 2, route: '/devel-tools/us-church-map', description: 'Church Operations Hub — status-aware choropleth with CRM/onboarding integration', since: '2026-03-15', changeSetCode: 'CS-0050' },
   { id: 'live-table-builder', name: 'Live Table Builder', stage: 1, route: '/devel-tools/live-table-builder', since: '2026-01-20' },
   { id: 'berry-crm-leads', name: 'Berry CRM Leads', stage: 1, route: '/berry/crm/leads', since: '2026-02-17' },
