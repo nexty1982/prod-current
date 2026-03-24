@@ -23,6 +23,16 @@ const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'change_me_access_256
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'change_me_refresh_256bit';
 const ACCESS_TOKEN_TTL = parseInt(process.env.ACCESS_TOKEN_TTL || '900'); // 15 minutes
 const REFRESH_TOKEN_TTL = parseInt(process.env.REFRESH_TOKEN_TTL || '2592000'); // 30 days
+const CLI_REFRESH_TOKEN_TTL = 600; // 10 minutes for curl/CLI sessions
+
+// Detect curl, wget, httpie, and other CLI/non-browser user agents
+function isCliClient(userAgent) {
+  if (!userAgent) return true; // No user-agent = likely CLI
+  const ua = userAgent.toLowerCase();
+  const cliPatterns = ['curl/', 'wget/', 'httpie/', 'python-requests/', 'python-urllib/', 'node-fetch/', 'axios/',
+    'postman', 'insomnia', 'powershell', 'go-http-client', 'ruby', 'perl', 'java/', 'okhttp', 'rest-client'];
+  return cliPatterns.some(p => ua.includes(p));
+}
 
 // Helper functions
 const hashToken = (token) => {
@@ -97,14 +107,21 @@ router.post('/login', async (req, res) => {
 
     const refreshToken = generateRefreshToken();
     const refreshTokenHash = hashToken(refreshToken);
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL * 1000);
+    const userAgent = req.headers['user-agent'] || '';
+    const isCli = isCliClient(userAgent);
+    const refreshTtl = isCli ? CLI_REFRESH_TOKEN_TTL : REFRESH_TOKEN_TTL;
+    const expiresAt = new Date(Date.now() + refreshTtl * 1000);
+
+    if (isCli) {
+      console.log(`[AUTH] CLI session detected (UA: ${userAgent.substring(0, 60)}) — ${refreshTtl}s refresh TTL`);
+    }
 
     // Save refresh token
     await pool.execute(
-      `INSERT INTO refresh_tokens 
-       (user_id, token_hash, expires_at, ip_address, user_agent) 
+      `INSERT INTO refresh_tokens
+       (user_id, token_hash, expires_at, ip_address, user_agent)
        VALUES (?, ?, ?, ?, ?)`,
-      [user.id, refreshTokenHash, expiresAt, req.ip, req.headers['user-agent']]
+      [user.id, refreshTokenHash, expiresAt, req.ip, userAgent]
     );
 
     // Update last login
@@ -118,7 +135,7 @@ router.post('/login', async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      maxAge: refreshTtl * 1000
     });
 
     // Also set session for backward compatibility
@@ -226,14 +243,17 @@ router.post('/refresh', async (req, res) => {
 
     const newRefreshToken = generateRefreshToken();
     const newRefreshTokenHash = hashToken(newRefreshToken);
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL * 1000);
+    const refreshUserAgent = req.headers['user-agent'] || storedToken.user_agent || '';
+    const refreshIsCli = isCliClient(refreshUserAgent);
+    const refreshTtl = refreshIsCli ? CLI_REFRESH_TOKEN_TTL : REFRESH_TOKEN_TTL;
+    const expiresAt = new Date(Date.now() + refreshTtl * 1000);
 
     // Save new refresh token
     await pool.execute(
-      `INSERT INTO refresh_tokens 
-       (user_id, token_hash, expires_at, ip_address, user_agent) 
+      `INSERT INTO refresh_tokens
+       (user_id, token_hash, expires_at, ip_address, user_agent)
        VALUES (?, ?, ?, ?, ?)`,
-      [user.id, newRefreshTokenHash, expiresAt, req.ip, req.headers['user-agent']]
+      [user.id, newRefreshTokenHash, expiresAt, req.ip, refreshUserAgent]
     );
 
     // Set new refresh token as httpOnly cookie
@@ -241,7 +261,7 @@ router.post('/refresh', async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      maxAge: refreshTtl * 1000
     });
 
     return res.json({
