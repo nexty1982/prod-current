@@ -2859,12 +2859,12 @@ async function workerLoop(): Promise<void> {
 
   while (!isShutdownRequested()) {
     try {
-      // Poll pending jobs from PLATFORM DB — only valid columns
+      // Poll pending jobs from PLATFORM DB — priority first, then FIFO
       const [rows] = await platformPool.query(
         `SELECT id, church_id, filename, record_type, language
          FROM ocr_jobs
          WHERE status = 'pending'
-         ORDER BY created_at ASC
+         ORDER BY priority ASC, created_at ASC
          LIMIT ?`,
         [POLL_BATCH]
       ) as [JobRow[], any];

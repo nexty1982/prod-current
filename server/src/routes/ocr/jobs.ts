@@ -788,7 +788,7 @@ function createRouters(upload: any) {
     try {
       const churchId = parseInt(req.params.churchId);
       const jobId = parseInt(req.params.jobId);
-      const { record_type } = req.body;
+      const { record_type, priority } = req.body;
 
       // Build update query dynamically
       const updates: string[] = [];
@@ -797,6 +797,14 @@ function createRouters(upload: any) {
       if (record_type) {
         updates.push('record_type = ?');
         values.push(record_type);
+      }
+
+      if (priority !== undefined) {
+        const p = Math.min(9, Math.max(1, parseInt(priority)));
+        if (!isNaN(p)) {
+          updates.push('priority = ?');
+          values.push(p);
+        }
       }
 
       if (updates.length === 0) {
@@ -3600,7 +3608,10 @@ function createRouters(upload: any) {
             language
           ];
 
-          const insertSql = `INSERT INTO ocr_jobs (church_id, uploaded_by, filename, status, review_status, record_type, language, created_at, source_pipeline) VALUES (?, ?, ?, 'pending', 'uploaded', ?, ?, NOW(), 'uploader')`;
+          // Priority: 1=urgent, 5=normal (default), 9=low
+          const jobPriority = Math.min(9, Math.max(1, parseInt(req.body.priority) || 5));
+          const insertSql = `INSERT INTO ocr_jobs (church_id, uploaded_by, filename, status, priority, review_status, record_type, language, created_at, source_pipeline) VALUES (?, ?, ?, 'pending', ?, 'uploaded', ?, ?, NOW(), 'uploader')`;
+          insertParams.splice(3, 0, jobPriority); // insert priority after filename
 
           console.log(`OCR_INSERT_PRE ${JSON.stringify({ pool: 'platformPool', db: currentDb, file: file.originalname, storedFilename: uniqueFilename, paramCount: insertParams.length })}`);
 
