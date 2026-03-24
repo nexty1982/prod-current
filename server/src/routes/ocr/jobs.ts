@@ -998,6 +998,98 @@ function createRouters(upload: any) {
   });
 
   // -----------------------------------------------------------------------
+  // 6d. POST /jobs/:jobId/cancel — Cancel a pending or processing job
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/cancel', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const { reason } = req.body || {};
+
+      const [jobs] = await promisePool.query(
+        `SELECT id, status, filename, church_id
+         FROM ocr_jobs WHERE id = ? AND church_id = ?`,
+        [jobId, churchId]
+      );
+      if (!(jobs as any[]).length) {
+        return res.status(404).json({ error: 'Job not found' });
+      }
+
+      const job = (jobs as any[])[0];
+      const cancellableStatuses = ['pending', 'processing'];
+      if (!cancellableStatuses.includes(job.status)) {
+        return res.status(400).json({
+          error: `Cannot cancel job with status '${job.status}'. Only pending or processing jobs can be cancelled.`
+        });
+      }
+
+      await promisePool.query(
+        `UPDATE ocr_jobs SET
+          status = 'failed',
+          current_stage = 'cancelled',
+          last_activity_at = NOW()
+         WHERE id = ?`,
+        [jobId]
+      );
+
+      // Record cancellation in job history
+      await promisePool.query(
+        `INSERT INTO ocr_job_history (job_id, stage, status, message, created_at)
+         VALUES (?, 'cancelled', 'cancelled', ?, NOW())`,
+        [jobId, JSON.stringify({ action: 'user_cancelled', reason: reason || null, cancelled_by: req.user?.id || null })]
+      );
+
+      console.log(`[OCR Jobs] Job ${churchId}/${jobId} cancelled by user ${req.user?.id}`);
+      res.json({
+        success: true,
+        message: `Job ${jobId} cancelled`,
+        previous_status: job.status
+      });
+    } catch (error: any) {
+      console.error('[OCR Jobs] cancelJob error:', error);
+      res.status(500).json({ error: 'Failed to cancel job', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // 6e. POST /jobs/batch-status — Get status of multiple jobs at once
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/batch-status', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const { jobIds } = req.body;
+
+      if (!Array.isArray(jobIds) || jobIds.length === 0) {
+        return res.status(400).json({ error: 'jobIds array is required' });
+      }
+
+      if (jobIds.length > 100) {
+        return res.status(400).json({ error: 'Maximum 100 job IDs per request' });
+      }
+
+      const placeholders = jobIds.map(() => '?').join(',');
+      const [rows] = await promisePool.query(
+        `SELECT id, status, review_status, record_type, filename,
+                confidence_score, current_stage, progress_percent,
+                created_at, started_at, completed_at
+         FROM ocr_jobs
+         WHERE id IN (${placeholders}) AND church_id = ?
+         ORDER BY created_at DESC`,
+        [...jobIds.map((id: any) => parseInt(id)), churchId]
+      );
+
+      res.json({
+        jobs: rows,
+        requested: jobIds.length,
+        found: (rows as any[]).length
+      });
+    } catch (error: any) {
+      console.error('[OCR Jobs] batchStatus error:', error);
+      res.status(500).json({ error: 'Failed to get batch status', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // 7. DELETE /jobs — Bulk delete jobs
   // -----------------------------------------------------------------------
   churchJobsRouter.delete('/jobs', async (req: any, res: any) => {
