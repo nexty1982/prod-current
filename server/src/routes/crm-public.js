@@ -34,7 +34,7 @@ router.get('/available-slots', async (req, res) => {
 
     // Check if date is blocked
     const [blocks] = await pool.query(
-      'SELECT id FROM crm_appointment_blocks WHERE block_date = ?',
+      'SELECT id FROM omai_crm_appointment_blocks WHERE block_date = ?',
       [date]
     );
     if (blocks.length > 0) {
@@ -43,7 +43,7 @@ router.get('/available-slots', async (req, res) => {
 
     // Get slot config for this day of week
     const [slotConfigs] = await pool.query(
-      'SELECT start_time, end_time, slot_duration_min FROM crm_appointment_slots WHERE day_of_week = ? AND is_active = 1',
+      'SELECT start_time, end_time, slot_duration_min FROM omai_crm_appointment_slots WHERE day_of_week = ? AND is_active = 1',
       [dayOfWeek]
     );
 
@@ -53,7 +53,7 @@ router.get('/available-slots', async (req, res) => {
 
     // Get already-booked appointments for this date
     const [booked] = await pool.query(
-      `SELECT scheduled_time, duration_min FROM crm_appointments
+      `SELECT scheduled_time, duration_min FROM omai_crm_appointments
        WHERE scheduled_date = ? AND status NOT IN ('cancelled')`,
       [date]
     );
@@ -108,13 +108,13 @@ router.get('/available-dates', async (req, res) => {
 
     // Get active slot configs
     const [slotConfigs] = await pool.query(
-      'SELECT day_of_week FROM crm_appointment_slots WHERE is_active = 1'
+      'SELECT day_of_week FROM omai_crm_appointment_slots WHERE is_active = 1'
     );
     const activeDays = new Set(slotConfigs.map(s => s.day_of_week));
 
     // Get blocked dates
     const [blocks] = await pool.query(
-      'SELECT block_date FROM crm_appointment_blocks WHERE block_date >= ? AND block_date <= ?',
+      'SELECT block_date FROM omai_crm_appointment_blocks WHERE block_date >= ? AND block_date <= ?',
       [`${month}-01`, `${month}-${daysInMonth}`]
     );
     const blockedDates = new Set(blocks.map(b => {
@@ -124,7 +124,7 @@ router.get('/available-dates', async (req, res) => {
 
     // Get fully booked dates (count booked vs total slots per day)
     const [bookedCounts] = await pool.query(
-      `SELECT scheduled_date, COUNT(*) as cnt FROM crm_appointments
+      `SELECT scheduled_date, COUNT(*) as cnt FROM omai_crm_appointments
        WHERE scheduled_date >= ? AND scheduled_date <= ? AND status NOT IN ('cancelled')
        GROUP BY scheduled_date`,
       [`${month}-01`, `${month}-${daysInMonth}`]
@@ -138,7 +138,7 @@ router.get('/available-dates', async (req, res) => {
     // Calculate max slots per day config
     let maxSlotsPerDay = 0;
     const [allConfigs] = await pool.query(
-      'SELECT start_time, end_time, slot_duration_min FROM crm_appointment_slots WHERE is_active = 1'
+      'SELECT start_time, end_time, slot_duration_min FROM omai_crm_appointment_slots WHERE is_active = 1'
     );
     for (const config of allConfigs) {
       const startParts = String(config.start_time).split(':').map(Number);
@@ -204,7 +204,7 @@ router.post('/inquiry', async (req, res) => {
     if (wantsMeeting && appointmentDate && appointmentTime) {
       // Verify slot is still available
       const [existing] = await pool.query(
-        `SELECT id FROM crm_appointments
+        `SELECT id FROM omai_crm_appointments
          WHERE scheduled_date = ? AND scheduled_time = ? AND status NOT IN ('cancelled')`,
         [appointmentDate, appointmentTime + ':00']
       );
@@ -213,7 +213,7 @@ router.post('/inquiry', async (req, res) => {
       }
 
       const [apptResult] = await pool.query(
-        `INSERT INTO crm_appointments
+        `INSERT INTO omai_crm_appointments
          (church_id, appointment_type, contact_name, contact_email, contact_phone, scheduled_date, scheduled_time, duration_min)
          VALUES (?, 'demo', ?, ?, ?, ?, ?, 30)`,
         [churchId || null, `${firstName} ${lastName || ''}`.trim(), email, phone || null, appointmentDate, appointmentTime + ':00']
@@ -223,7 +223,7 @@ router.post('/inquiry', async (req, res) => {
 
     // Create inquiry record
     const [result] = await pool.query(
-      `INSERT INTO crm_inquiries
+      `INSERT INTO omai_crm_inquiries
        (church_id, church_name_entered, state_code, contact_first_name, contact_last_name,
         contact_email, contact_phone, contact_role, maintains_records, heard_about,
         heard_about_detail, interested_digital_records, wants_meeting, appointment_id)
@@ -240,7 +240,7 @@ router.post('/inquiry', async (req, res) => {
     if (churchId) {
       try {
         await pool.query(
-          `INSERT INTO crm_activities (church_id, activity_type, subject, body, metadata)
+          `INSERT INTO omai_crm_activities (church_id, activity_type, subject, body, metadata)
            VALUES (?, 'note', ?, ?, ?)`,
           [
             churchId,
@@ -252,7 +252,7 @@ router.post('/inquiry', async (req, res) => {
 
         // Update pipeline stage to 'interested' if currently 'new_lead'
         await pool.query(
-          `UPDATE us_churches SET pipeline_stage = 'interested', last_contacted_at = NOW()
+          `UPDATE omai_crm_leads SET pipeline_stage = 'interested', last_contacted_at = NOW()
            WHERE id = ? AND pipeline_stage = 'new_lead'`,
           [churchId]
         );

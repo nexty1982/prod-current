@@ -3,6 +3,10 @@
  * Full customer relationship management for US Orthodox Churches
  *
  * Mounted at /api/crm
+ *
+ * DATA OWNERSHIP: All write operations target omai_crm_* tables (OMAI-owned).
+ * Legacy us_churches/crm_* tables are read-only during quarantine.
+ * Migration completed 2026-03-24.
  */
 
 const express = require('express');
@@ -26,27 +30,27 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     // Pipeline counts
     const [pipelineCounts] = await pool.query(
       `SELECT uc.pipeline_stage, ps.label, ps.color, ps.sort_order, COUNT(*) as count
-       FROM us_churches uc
-       LEFT JOIN crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
+       FROM omai_crm_leads uc
+       LEFT JOIN omai_crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
        GROUP BY uc.pipeline_stage, ps.label, ps.color, ps.sort_order
        ORDER BY ps.sort_order`
     );
 
     // Overdue follow-ups
     const [overdue] = await pool.query(
-      `SELECT COUNT(*) as count FROM crm_follow_ups WHERE status = 'pending' AND due_date < CURDATE()`
+      `SELECT COUNT(*) as count FROM omai_crm_followups WHERE status = 'pending' AND due_date < CURDATE()`
     );
 
     // Today's follow-ups
     const [todayFollowups] = await pool.query(
-      `SELECT COUNT(*) as count FROM crm_follow_ups WHERE status = 'pending' AND due_date = CURDATE()`
+      `SELECT COUNT(*) as count FROM omai_crm_followups WHERE status = 'pending' AND due_date = CURDATE()`
     );
 
     // Upcoming follow-ups (next 7 days)
     const [upcoming] = await pool.query(
       `SELECT f.*, uc.name as church_name, uc.state_code, uc.city
-       FROM crm_follow_ups f
-       JOIN us_churches uc ON f.church_id = uc.id
+       FROM omai_crm_followups f
+       JOIN omai_crm_leads uc ON f.church_id = uc.id
        WHERE f.status = 'pending' AND f.due_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
        ORDER BY f.due_date ASC
        LIMIT 20`
@@ -55,21 +59,21 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     // Recent activity (last 20)
     const [recentActivity] = await pool.query(
       `SELECT a.*, uc.name as church_name, uc.state_code
-       FROM crm_activities a
-       JOIN us_churches uc ON a.church_id = uc.id
+       FROM omai_crm_activities a
+       JOIN omai_crm_leads uc ON a.church_id = uc.id
        ORDER BY a.created_at DESC
        LIMIT 20`
     );
 
     // Total churches, total clients
     const [totals] = await pool.query(
-      `SELECT COUNT(*) as total, SUM(is_client) as clients FROM us_churches`
+      `SELECT COUNT(*) as total, SUM(is_client) as clients FROM omai_crm_leads`
     );
 
     // Churches by state (top 10 by pipeline activity — non-new_lead)
     const [activeStates] = await pool.query(
       `SELECT state_code, COUNT(*) as count
-       FROM us_churches
+       FROM omai_crm_leads
        WHERE pipeline_stage != 'new_lead'
        GROUP BY state_code
        ORDER BY count DESC
@@ -98,7 +102,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
 
 router.get('/pipeline-stages', requireAuth, async (req, res) => {
   try {
-    const [rows] = await getPool().query('SELECT * FROM crm_pipeline_stages ORDER BY sort_order');
+    const [rows] = await getPool().query('SELECT * FROM omai_crm_pipeline_stages ORDER BY sort_order');
     res.json({ stages: rows });
   } catch (err) {
     console.error('Pipeline stages error:', err);
@@ -165,17 +169,17 @@ router.get('/churches', requireAuth, async (req, res) => {
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    const [countRows] = await pool.query(`SELECT COUNT(*) as total FROM us_churches uc ${whereClause}`, params);
+    const [countRows] = await pool.query(`SELECT COUNT(*) as total FROM omai_crm_leads uc ${whereClause}`, params);
     const total = countRows[0].total;
 
     const [rows] = await pool.query(
       `SELECT uc.*, ps.label as stage_label, ps.color as stage_color,
               j.name AS jurisdiction_name, j.abbreviation AS jurisdiction_abbr, j.calendar_type AS jurisdiction_calendar,
-              (SELECT COUNT(*) FROM crm_contacts cc WHERE cc.church_id = uc.id) as contact_count,
-              (SELECT COUNT(*) FROM crm_activities ca WHERE ca.church_id = uc.id) as activity_count,
-              (SELECT COUNT(*) FROM crm_follow_ups cf WHERE cf.church_id = uc.id AND cf.status = 'pending') as pending_followups
-       FROM us_churches uc
-       LEFT JOIN crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
+              (SELECT COUNT(*) FROM omai_crm_contacts cc WHERE cc.church_id = uc.id) as contact_count,
+              (SELECT COUNT(*) FROM omai_crm_activities ca WHERE ca.church_id = uc.id) as activity_count,
+              (SELECT COUNT(*) FROM omai_crm_followups cf WHERE cf.church_id = uc.id AND cf.status = 'pending') as pending_followups
+       FROM omai_crm_leads uc
+       LEFT JOIN omai_crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
        LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
        ${whereClause}
        ORDER BY ${sortField} ${sortDir}
@@ -204,19 +208,19 @@ router.get('/churches/:id', requireAuth, async (req, res) => {
 
     const [churchRows] = await pool.query(
       `SELECT uc.*, ps.label as stage_label, ps.color as stage_color
-       FROM us_churches uc
-       LEFT JOIN crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
+       FROM omai_crm_leads uc
+       LEFT JOIN omai_crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
        WHERE uc.id = ?`,
       [id]
     );
     if (!churchRows.length) return res.status(404).json({ error: 'Church not found' });
 
-    const [contacts] = await pool.query('SELECT * FROM crm_contacts WHERE church_id = ? ORDER BY is_primary DESC, first_name', [id]);
+    const [contacts] = await pool.query('SELECT * FROM omai_crm_contacts WHERE church_id = ? ORDER BY is_primary DESC, first_name', [id]);
     const [activities] = await pool.query(
-      'SELECT * FROM crm_activities WHERE church_id = ? ORDER BY created_at DESC LIMIT 50', [id]
+      'SELECT * FROM omai_crm_activities WHERE church_id = ? ORDER BY created_at DESC LIMIT 50', [id]
     );
     const [followUps] = await pool.query(
-      'SELECT * FROM crm_follow_ups WHERE church_id = ? ORDER BY due_date ASC', [id]
+      'SELECT * FROM omai_crm_followups WHERE church_id = ? ORDER BY due_date ASC', [id]
     );
 
     res.json({
@@ -251,23 +255,23 @@ router.put('/churches/:id', requireAuth, async (req, res) => {
     if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' });
 
     params.push(id);
-    await pool.query(`UPDATE us_churches SET ${updates.join(', ')} WHERE id = ?`, params);
+    await pool.query(`UPDATE omai_crm_leads SET ${updates.join(', ')} WHERE id = ?`, params);
 
     // Log stage change as activity
     if (pipeline_stage !== undefined) {
       await pool.query(
-        `INSERT INTO crm_activities (church_id, activity_type, subject, metadata, created_by)
+        `INSERT INTO omai_crm_activities (church_id, activity_type, subject, metadata, created_by)
          VALUES (?, 'stage_change', ?, ?, ?)`,
         [id, `Pipeline stage changed to: ${pipeline_stage}`, JSON.stringify({ new_stage: pipeline_stage }), req.session?.user?.id || null]
       );
 
       // If moved to 'won', mark as client
       if (pipeline_stage === 'won') {
-        await pool.query('UPDATE us_churches SET is_client = 1 WHERE id = ?', [id]);
+        await pool.query('UPDATE omai_crm_leads SET is_client = 1 WHERE id = ?', [id]);
       }
     }
 
-    const [updated] = await pool.query('SELECT * FROM us_churches WHERE id = ?', [id]);
+    const [updated] = await pool.query('SELECT * FROM omai_crm_leads WHERE id = ?', [id]);
     res.json({ church: updated[0] });
   } catch (err) {
     console.error('CRM church update error:', err);
@@ -283,12 +287,12 @@ router.put('/churches/bulk/pipeline', requireAuth, async (req, res) => {
     if (!church_ids?.length || !pipeline_stage) return res.status(400).json({ error: 'church_ids and pipeline_stage required' });
 
     const placeholders = church_ids.map(() => '?').join(',');
-    await pool.query(`UPDATE us_churches SET pipeline_stage = ? WHERE id IN (${placeholders})`, [pipeline_stage, ...church_ids]);
+    await pool.query(`UPDATE omai_crm_leads SET pipeline_stage = ? WHERE id IN (${placeholders})`, [pipeline_stage, ...church_ids]);
 
     // Log activities
     for (const cid of church_ids) {
       await pool.query(
-        `INSERT INTO crm_activities (church_id, activity_type, subject, metadata, created_by) VALUES (?, 'stage_change', ?, ?, ?)`,
+        `INSERT INTO omai_crm_activities (church_id, activity_type, subject, metadata, created_by) VALUES (?, 'stage_change', ?, ?, ?)`,
         [cid, `Bulk pipeline stage changed to: ${pipeline_stage}`, JSON.stringify({ new_stage: pipeline_stage, bulk: true }), req.session?.user?.id || null]
       );
     }
@@ -307,7 +311,7 @@ router.put('/churches/bulk/pipeline', requireAuth, async (req, res) => {
 router.get('/churches/:churchId/contacts', requireAuth, async (req, res) => {
   try {
     const [rows] = await getPool().query(
-      'SELECT * FROM crm_contacts WHERE church_id = ? ORDER BY is_primary DESC, first_name', [req.params.churchId]
+      'SELECT * FROM omai_crm_contacts WHERE church_id = ? ORDER BY is_primary DESC, first_name', [req.params.churchId]
     );
     res.json({ contacts: rows });
   } catch (err) {
@@ -325,23 +329,23 @@ router.post('/churches/:churchId/contacts', requireAuth, async (req, res) => {
 
     // If setting as primary, unset other primaries
     if (is_primary) {
-      await pool.query('UPDATE crm_contacts SET is_primary = 0 WHERE church_id = ?', [churchId]);
+      await pool.query('UPDATE omai_crm_contacts SET is_primary = 0 WHERE church_id = ?', [churchId]);
     }
 
     const [result] = await pool.query(
-      `INSERT INTO crm_contacts (church_id, first_name, last_name, role, email, phone, is_primary, notes)
+      `INSERT INTO omai_crm_contacts (church_id, first_name, last_name, role, email, phone, is_primary, notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [churchId, first_name, last_name || null, role || null, email || null, phone || null, is_primary ? 1 : 0, notes || null]
     );
 
     // Log activity
     await pool.query(
-      `INSERT INTO crm_activities (church_id, contact_id, activity_type, subject, created_by)
+      `INSERT INTO omai_crm_activities (church_id, contact_id, activity_type, subject, created_by)
        VALUES (?, ?, 'note', ?, ?)`,
       [churchId, result.insertId, `Contact added: ${first_name} ${last_name || ''}`.trim(), req.session?.user?.id || null]
     );
 
-    const [contact] = await pool.query('SELECT * FROM crm_contacts WHERE id = ?', [result.insertId]);
+    const [contact] = await pool.query('SELECT * FROM omai_crm_contacts WHERE id = ?', [result.insertId]);
     res.status(201).json({ contact: contact[0] });
   } catch (err) {
     console.error('CRM contact create error:', err);
@@ -355,19 +359,19 @@ router.put('/contacts/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
     const { first_name, last_name, role, email, phone, is_primary, notes } = req.body;
 
-    const [existing] = await pool.query('SELECT * FROM crm_contacts WHERE id = ?', [id]);
+    const [existing] = await pool.query('SELECT * FROM omai_crm_contacts WHERE id = ?', [id]);
     if (!existing.length) return res.status(404).json({ error: 'Contact not found' });
 
     if (is_primary) {
-      await pool.query('UPDATE crm_contacts SET is_primary = 0 WHERE church_id = ?', [existing[0].church_id]);
+      await pool.query('UPDATE omai_crm_contacts SET is_primary = 0 WHERE church_id = ?', [existing[0].church_id]);
     }
 
     await pool.query(
-      `UPDATE crm_contacts SET first_name = ?, last_name = ?, role = ?, email = ?, phone = ?, is_primary = ?, notes = ? WHERE id = ?`,
+      `UPDATE omai_crm_contacts SET first_name = ?, last_name = ?, role = ?, email = ?, phone = ?, is_primary = ?, notes = ? WHERE id = ?`,
       [first_name || existing[0].first_name, last_name, role, email, phone, is_primary ? 1 : 0, notes, id]
     );
 
-    const [updated] = await pool.query('SELECT * FROM crm_contacts WHERE id = ?', [id]);
+    const [updated] = await pool.query('SELECT * FROM omai_crm_contacts WHERE id = ?', [id]);
     res.json({ contact: updated[0] });
   } catch (err) {
     console.error('CRM contact update error:', err);
@@ -378,10 +382,10 @@ router.put('/contacts/:id', requireAuth, async (req, res) => {
 router.delete('/contacts/:id', requireAuth, async (req, res) => {
   try {
     const pool = getPool();
-    const [existing] = await pool.query('SELECT * FROM crm_contacts WHERE id = ?', [req.params.id]);
+    const [existing] = await pool.query('SELECT * FROM omai_crm_contacts WHERE id = ?', [req.params.id]);
     if (!existing.length) return res.status(404).json({ error: 'Contact not found' });
 
-    await pool.query('DELETE FROM crm_contacts WHERE id = ?', [req.params.id]);
+    await pool.query('DELETE FROM omai_crm_contacts WHERE id = ?', [req.params.id]);
     res.json({ deleted: true });
   } catch (err) {
     console.error('CRM contact delete error:', err);
@@ -396,7 +400,7 @@ router.delete('/contacts/:id', requireAuth, async (req, res) => {
 router.get('/churches/:churchId/activities', requireAuth, async (req, res) => {
   try {
     const { limit = 50, offset = 0, type = '' } = req.query;
-    let sql = 'SELECT * FROM crm_activities WHERE church_id = ?';
+    let sql = 'SELECT * FROM omai_crm_activities WHERE church_id = ?';
     const params = [req.params.churchId];
     if (type) { sql += ' AND activity_type = ?'; params.push(type); }
     sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
@@ -418,17 +422,17 @@ router.post('/churches/:churchId/activities', requireAuth, async (req, res) => {
     if (!activity_type || !subject) return res.status(400).json({ error: 'activity_type and subject required' });
 
     const [result] = await pool.query(
-      `INSERT INTO crm_activities (church_id, contact_id, activity_type, subject, body, metadata, created_by)
+      `INSERT INTO omai_crm_activities (church_id, contact_id, activity_type, subject, body, metadata, created_by)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [churchId, contact_id || null, activity_type, subject, body || null, metadata ? JSON.stringify(metadata) : null, req.session?.user?.id || null]
     );
 
     // Update last_contacted_at if it's a contact-type activity
     if (['call', 'email', 'meeting'].includes(activity_type)) {
-      await pool.query('UPDATE us_churches SET last_contacted_at = NOW() WHERE id = ?', [churchId]);
+      await pool.query('UPDATE omai_crm_leads SET last_contacted_at = NOW() WHERE id = ?', [churchId]);
     }
 
-    const [activity] = await pool.query('SELECT * FROM crm_activities WHERE id = ?', [result.insertId]);
+    const [activity] = await pool.query('SELECT * FROM omai_crm_activities WHERE id = ?', [result.insertId]);
     res.status(201).json({ activity: activity[0] });
   } catch (err) {
     console.error('CRM activity create error:', err);
@@ -444,8 +448,8 @@ router.get('/follow-ups', requireAuth, async (req, res) => {
   try {
     const { status = 'pending', limit = 50 } = req.query;
     let sql = `SELECT f.*, uc.name as church_name, uc.state_code, uc.city, uc.pipeline_stage
-               FROM crm_follow_ups f
-               JOIN us_churches uc ON f.church_id = uc.id`;
+               FROM omai_crm_followups f
+               JOIN omai_crm_leads uc ON f.church_id = uc.id`;
     const params = [];
 
     if (status && status !== 'all') {
@@ -480,20 +484,20 @@ router.post('/churches/:churchId/follow-ups', requireAuth, async (req, res) => {
     if (!due_date || !subject) return res.status(400).json({ error: 'due_date and subject required' });
 
     const [result] = await pool.query(
-      `INSERT INTO crm_follow_ups (church_id, assigned_to, due_date, subject, description)
+      `INSERT INTO omai_crm_followups (church_id, assigned_to, due_date, subject, description)
        VALUES (?, ?, ?, ?, ?)`,
       [churchId, assigned_to || null, due_date, subject, description || null]
     );
 
     // Update next_follow_up on church
     await pool.query(
-      `UPDATE us_churches SET next_follow_up = (
-         SELECT MIN(due_date) FROM crm_follow_ups WHERE church_id = ? AND status = 'pending'
+      `UPDATE omai_crm_leads SET next_follow_up = (
+         SELECT MIN(due_date) FROM omai_crm_followups WHERE church_id = ? AND status = 'pending'
        ) WHERE id = ?`,
       [churchId, churchId]
     );
 
-    const [followUp] = await pool.query('SELECT * FROM crm_follow_ups WHERE id = ?', [result.insertId]);
+    const [followUp] = await pool.query('SELECT * FROM omai_crm_followups WHERE id = ?', [result.insertId]);
     res.status(201).json({ followUp: followUp[0] });
   } catch (err) {
     console.error('CRM follow-up create error:', err);
@@ -507,7 +511,7 @@ router.put('/follow-ups/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
     const { status, due_date, subject, description } = req.body;
 
-    const [existing] = await pool.query('SELECT * FROM crm_follow_ups WHERE id = ?', [id]);
+    const [existing] = await pool.query('SELECT * FROM omai_crm_followups WHERE id = ?', [id]);
     if (!existing.length) return res.status(404).json({ error: 'Follow-up not found' });
 
     const updates = [];
@@ -524,18 +528,18 @@ router.put('/follow-ups/:id', requireAuth, async (req, res) => {
     if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' });
 
     params.push(id);
-    await pool.query(`UPDATE crm_follow_ups SET ${updates.join(', ')} WHERE id = ?`, params);
+    await pool.query(`UPDATE omai_crm_followups SET ${updates.join(', ')} WHERE id = ?`, params);
 
     // Refresh next_follow_up on church
     const churchId = existing[0].church_id;
     await pool.query(
-      `UPDATE us_churches SET next_follow_up = (
-         SELECT MIN(due_date) FROM crm_follow_ups WHERE church_id = ? AND status = 'pending'
+      `UPDATE omai_crm_leads SET next_follow_up = (
+         SELECT MIN(due_date) FROM omai_crm_followups WHERE church_id = ? AND status = 'pending'
        ) WHERE id = ?`,
       [churchId, churchId]
     );
 
-    const [updated] = await pool.query('SELECT * FROM crm_follow_ups WHERE id = ?', [id]);
+    const [updated] = await pool.query('SELECT * FROM omai_crm_followups WHERE id = ?', [id]);
     res.json({ followUp: updated[0] });
   } catch (err) {
     console.error('CRM follow-up update error:', err);
@@ -546,16 +550,16 @@ router.put('/follow-ups/:id', requireAuth, async (req, res) => {
 router.delete('/follow-ups/:id', requireAuth, async (req, res) => {
   try {
     const pool = getPool();
-    const [existing] = await pool.query('SELECT * FROM crm_follow_ups WHERE id = ?', [req.params.id]);
+    const [existing] = await pool.query('SELECT * FROM omai_crm_followups WHERE id = ?', [req.params.id]);
     if (!existing.length) return res.status(404).json({ error: 'Follow-up not found' });
 
-    await pool.query('DELETE FROM crm_follow_ups WHERE id = ?', [req.params.id]);
+    await pool.query('DELETE FROM omai_crm_followups WHERE id = ?', [req.params.id]);
 
     // Refresh next_follow_up on church
     const churchId = existing[0].church_id;
     await pool.query(
-      `UPDATE us_churches SET next_follow_up = (
-         SELECT MIN(due_date) FROM crm_follow_ups WHERE church_id = ? AND status = 'pending'
+      `UPDATE omai_crm_leads SET next_follow_up = (
+         SELECT MIN(due_date) FROM omai_crm_followups WHERE church_id = ? AND status = 'pending'
        ) WHERE id = ?`,
       [churchId, churchId]
     );
@@ -579,7 +583,7 @@ router.post('/churches/:id/provision', requireAuth, requireAdmin, async (req, re
 
     const [churchRows] = await pool.query(
       `SELECT uc.*, j.calendar_type AS jurisdiction_calendar, j.name AS jurisdiction_name
-       FROM us_churches uc
+       FROM omai_crm_leads uc
        LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
        WHERE uc.id = ?`,
       [id]
@@ -592,7 +596,7 @@ router.post('/churches/:id/provision', requireAuth, requireAdmin, async (req, re
     }
 
     // Get primary contact
-    const [contacts] = await pool.query('SELECT * FROM crm_contacts WHERE church_id = ? AND is_primary = 1 LIMIT 1', [id]);
+    const [contacts] = await pool.query('SELECT * FROM omai_crm_contacts WHERE church_id = ? AND is_primary = 1 LIMIT 1', [id]);
     const primaryContact = contacts.length > 0 ? contacts[0] : null;
 
     const contactEmail = primaryContact?.email || null;
@@ -663,13 +667,13 @@ router.post('/churches/:id/provision', requireAuth, requireAdmin, async (req, re
 
     // 4. Link back to CRM
     await pool.query(
-      'UPDATE us_churches SET provisioned_church_id = ?, is_client = 1, pipeline_stage = ? WHERE id = ?',
+      'UPDATE omai_crm_leads SET provisioned_church_id = ?, is_client = 1, pipeline_stage = ? WHERE id = ?',
       [newChurchId, 'won', id]
     );
 
     // 5. Log activity
     await pool.query(
-      `INSERT INTO crm_activities (church_id, activity_type, subject, metadata, created_by)
+      `INSERT INTO omai_crm_activities (church_id, activity_type, subject, metadata, created_by)
        VALUES (?, 'provision', ?, ?, ?)`,
       [id, `Church provisioned as OrthodoxMetrics client (ID: ${newChurchId})`,
        JSON.stringify({
@@ -706,7 +710,7 @@ router.get('/map-data', requireAuth, async (req, res) => {
     // State-level pipeline breakdown
     const [stateData] = await pool.query(
       `SELECT state_code, pipeline_stage, COUNT(*) as count
-       FROM us_churches
+       FROM omai_crm_leads
        GROUP BY state_code, pipeline_stage
        ORDER BY state_code`
     );
