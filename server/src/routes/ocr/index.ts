@@ -7,8 +7,31 @@
  *   mountOcrRoutes(app, upload);
  */
 const express = require('express');
+const rateLimit = require('express-rate-limit');
+
+// OCR-specific rate limiters
+const ocrUploadLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10,             // 10 uploads per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many OCR uploads. Please wait before uploading more files.' },
+});
+
+const ocrApiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 120,            // 120 API calls per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many OCR API requests. Please slow down.' },
+});
 
 export function mountOcrRoutes(app: any, upload: any) {
+  // Apply rate limiting to all OCR endpoints
+  app.use('/api/church/:churchId/ocr', ocrApiLimiter);
+  app.use('/api/ocr', ocrApiLimiter);
+  // Stricter limit on upload/ingest endpoints (applied in feeder.js too)
+  app.use('/api/feeder/ingest', ocrUploadLimiter);
   // -------------------------------------------------------------------------
   // 1. Admin OCR Monitor (mounted at /api — routes include /admin/ocr/... paths)
   // -------------------------------------------------------------------------
