@@ -852,6 +852,38 @@ async function runOCR(
     throw new Error(`Image file not found: ${imagePath}`);
   }
 
+  // ── Vision API file-based cache: reuse existing result if available ──
+  const cachedVisionPath = path.join(pageDir, 'vision_result.json');
+  if (fs.existsSync(cachedVisionPath)) {
+    try {
+      const cachedJson = JSON.parse(fs.readFileSync(cachedVisionPath, 'utf-8'));
+      if (cachedJson && cachedJson.pages && cachedJson.text !== undefined) {
+        const cachedText = cachedJson.text || '';
+        let cachedConf = 0;
+        if (cachedJson.pages.length > 0 && cachedJson.pages[0].confidence !== undefined) {
+          cachedConf = cachedJson.pages[0].confidence;
+        }
+        console.log(`  [runOCR] Cache HIT for page ${page.id} — reusing vision_result.json (${cachedText.length} chars, conf=${cachedConf.toFixed(3)})`);
+
+        // Save raw text artifact (may not exist yet on retry)
+        await writeFile(artifactPath, cachedText);
+        await tenantPool.execute(
+          `INSERT INTO ocr_feeder_artifacts (page_id, type, storage_path, meta_json)
+           VALUES (?, 'raw_text', ?, ?)
+           ON DUPLICATE KEY UPDATE storage_path = VALUES(storage_path)`,
+          [page.id, artifactPath, JSON.stringify({ confidence: cachedConf, extractedAt: new Date().toISOString(), cached: true })]
+        );
+        await tenantPool.execute(
+          `UPDATE ocr_feeder_pages SET ocr_confidence = ?, updated_at = NOW() WHERE id = ?`,
+          [cachedConf, page.id]
+        );
+        return { rawText: cachedText, confidence: cachedConf, visionResultJson: cachedJson };
+      }
+    } catch (cacheErr: any) {
+      console.warn(`  [runOCR] Cache file corrupt for page ${page.id}, re-calling Vision API: ${cacheErr.message}`);
+    }
+  }
+
   console.log(`  Calling Google Vision API for page ${page.id} -> ${imagePath}`);
 
   const vision = require('@google-cloud/vision');
