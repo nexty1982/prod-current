@@ -439,12 +439,15 @@ router.post('/items', requireAuth, async (req, res) => {
 
     if (!title) return res.status(400).json({ error: 'title required' });
 
+    const VALID_TASK_TYPES = ['task', 'note', 'followup', 'feature', 'bugfix', 'improvement', 'research'];
+    const safeTaskType = VALID_TASK_TYPES.includes(task_type) ? task_type : 'task';
+
     const [result] = await pool.query(
       `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, due_date, tags, source, agent_tool, branch_type, conversation_ref, metadata, repo_target, milestone_id, created_by)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title,
-        task_type || 'chore',
+        safeTaskType,
         description || null,
         horizon,
         status,
@@ -512,7 +515,10 @@ router.put('/items/:id', requireAuth, async (req, res) => {
     if (due_date !== undefined) { updates.push('due_date = ?'); params.push(due_date || null); }
     if (tags !== undefined) { updates.push('tags = ?'); params.push(JSON.stringify(tags)); }
     if (progress !== undefined) { updates.push('progress = ?'); params.push(Math.min(100, Math.max(0, parseInt(progress) || 0))); }
-    if (task_type !== undefined) { updates.push('task_type = ?'); params.push(task_type); }
+    if (task_type !== undefined) {
+      const VALID_TASK_TYPES = ['task', 'note', 'followup', 'feature', 'bugfix', 'improvement', 'research'];
+      updates.push('task_type = ?'); params.push(VALID_TASK_TYPES.includes(task_type) ? task_type : 'task');
+    }
     if (source !== undefined) { updates.push('source = ?'); params.push(source); }
     if (agent_tool !== undefined) { updates.push('agent_tool = ?'); params.push(agent_tool || null); }
     if (branch_type !== undefined) { updates.push('branch_type = ?'); params.push(branch_type || null); }
