@@ -135,7 +135,7 @@ router.post('/login', async (req, res) => {
       `INSERT INTO refresh_tokens 
        (user_id, token_hash, expires_at, ip_address, user_agent) 
        VALUES (?, ?, ?, ?, ?)`,
-      [user.id, refreshTokenHash, expiresAt, req.ip, req.headers['user-agent']]
+      [user.id, refreshTokenHash, expiresAt, req.ip || null, req.headers['user-agent'] || null]
     );
 
     // Update last login
@@ -392,7 +392,7 @@ router.post('/refresh', async (req, res) => {
       `INSERT INTO refresh_tokens 
        (user_id, token_hash, expires_at, ip_address, user_agent) 
        VALUES (?, ?, ?, ?, ?)`,
-      [user.id, newRefreshTokenHash, expiresAt, req.ip, req.headers['user-agent']]
+      [user.id, newRefreshTokenHash, expiresAt, req.ip || null, req.headers['user-agent'] || null]
     );
 
     // Set new refresh token as httpOnly cookie

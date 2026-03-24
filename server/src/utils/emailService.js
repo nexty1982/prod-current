@@ -1139,6 +1139,149 @@ const sendVerificationEmail = async (toEmail, verificationUrl, firstName) => {
   }
 };
 
+// Send interactive report invite to a recipient
+const sendRecipientInvite = async ({ to, reportTitle, link, expiresAt, churchName }) => {
+  try {
+    const transporter = await createTransporter();
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'Orthodox Metrics';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
+    const expiresDate = new Date(expiresAt).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+    const church = churchName || 'your parish';
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .header { background: linear-gradient(135deg, #5d87ff 0%, #8c249d 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { margin: 0 0 5px 0; font-size: 24px; }
+        .header p { margin: 0; opacity: 0.9; }
+        .content { padding: 30px; }
+        .info-box { background: #f0f4ff; border: 2px solid #5d87ff; border-radius: 10px; padding: 20px; text-align: center; margin: 25px 0; }
+        .button { display: inline-block; background: #5d87ff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; }
+        .detail { background: #f9f9f9; border-left: 4px solid #8c249d; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Interactive Report Request</h1>
+        <p>Orthodox Metrics</p>
+    </div>
+    <div class="content">
+        <p>Hello,</p>
+        <p>A priest from <strong>${church}</strong> has requested your help completing church records.</p>
+
+        <div class="detail">
+            <p><strong>Report:</strong> ${reportTitle}</p>
+            <p><strong>Expires:</strong> ${expiresDate}</p>
+        </div>
+
+        <p>Please click the link below to review and fill in the requested information. No account is required.</p>
+
+        <div class="info-box">
+            <p style="margin: 0 0 15px 0; color: #555;">Open your interactive report:</p>
+            <a href="${link}" class="button">Open Report</a>
+        </div>
+
+        <p><strong>Direct link:</strong> <a href="${link}">${link}</a></p>
+
+        <p style="color: #888; font-size: 14px;">This link expires on ${expiresDate}. If you did not expect this email, you can safely ignore it.</p>
+    </div>
+    <div class="footer">
+        <p>&copy; ${new Date().getFullYear()} Orthodox Metrics &mdash; Digital Church Metrics</p>
+    </div>
+</body>
+</html>
+    `;
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to,
+      subject: `Record information requested: ${reportTitle}`,
+      html: htmlContent,
+      text: `Hello,\n\nA priest from ${church} has requested your help completing church records.\n\nReport: ${reportTitle}\nExpires: ${expiresDate}\n\nOpen your report: ${link}\n\nNo account is required. If you did not expect this email, you can safely ignore it.`
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Interactive report invite sent to ${to}:`, info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error(`❌ Failed to send interactive report invite to ${to}:`, error.message);
+    throw error;
+  }
+};
+
+// Notify priest when a recipient submits their interactive report patches
+const sendPriestSummary = async ({ to, reportTitle, submittedBy, patchCount, churchName }) => {
+  try {
+    const transporter = await createTransporter();
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'Orthodox Metrics';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .header { background: linear-gradient(135deg, #2e7d32 0%, #1565c0 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { margin: 0 0 5px 0; font-size: 24px; }
+        .header p { margin: 0; opacity: 0.9; }
+        .content { padding: 30px; }
+        .detail { background: #f9f9f9; border-left: 4px solid #2e7d32; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Report Submission Received</h1>
+        <p>Orthodox Metrics</p>
+    </div>
+    <div class="content">
+        <p>Hello,</p>
+        <p>A recipient has submitted their responses for an interactive report.</p>
+
+        <div class="detail">
+            <p><strong>Report:</strong> ${reportTitle}</p>
+            <p><strong>Submitted by:</strong> ${submittedBy}</p>
+            <p><strong>Patches to review:</strong> ${patchCount}</p>
+        </div>
+
+        <p>Log in to Orthodox Metrics to review and accept or reject the submitted changes.</p>
+    </div>
+    <div class="footer">
+        <p>&copy; ${new Date().getFullYear()} Orthodox Metrics &mdash; Digital Church Metrics</p>
+    </div>
+</body>
+</html>
+    `;
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to,
+      subject: `Report submission: ${reportTitle} — ${patchCount} patch(es) to review`,
+      html: htmlContent,
+      text: `Hello,\n\nA recipient has submitted their responses for an interactive report.\n\nReport: ${reportTitle}\nSubmitted by: ${submittedBy}\nPatches to review: ${patchCount}\n\nLog in to Orthodox Metrics to review and accept or reject the submitted changes.`
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Priest summary email sent to ${to}:`, info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error(`❌ Failed to send priest summary email to ${to}:`, error.message);
+    throw error;
+  }
+};
+
 module.exports = {
   sendOCRReceipt,
   sendSessionVerification,
@@ -1151,5 +1294,7 @@ module.exports = {
   sendContactEmail,
   sendPasswordResetEmail,
   sendInviteEmail,
-  sendVerificationEmail
+  sendVerificationEmail,
+  sendRecipientInvite,
+  sendPriestSummary
 };

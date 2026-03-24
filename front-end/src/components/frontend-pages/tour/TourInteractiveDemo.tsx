@@ -217,13 +217,13 @@ const TourInteractiveDemo = () => {
               animate="center"
               exit="exit"
               transition={{ duration: prefersReducedMotion.current ? 0 : 0.35, ease: 'easeInOut' }}
-              className="grid md:grid-cols-2 gap-0"
+              className="grid md:grid-cols-2 gap-0 md:h-[480px]"
               id={`tour-panel-${step.id}`}
               role="tabpanel"
               aria-label={tx(t, step.titleKey, step.titleFallback)}
             >
               {/* Left: description */}
-              <div className="p-8 md:p-10 lg:p-12 flex flex-col justify-center">
+              <div className="p-8 md:p-10 lg:p-12 flex flex-col justify-center overflow-hidden">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-xl bg-[#2d1b4e] dark:bg-[#d4af37] flex items-center justify-center">
                     <StepIcon size={20} className="text-[#d4af37] dark:text-[#2d1b4e]" />
@@ -263,7 +263,7 @@ const TourInteractiveDemo = () => {
               </div>
 
               {/* Right: interactive panel */}
-              <div className="bg-white dark:bg-gray-800 p-6 md:p-8 border-t md:border-t-0 md:border-l border-[rgba(45,27,78,0.08)] dark:border-gray-700 min-h-[420px] md:min-h-[480px]">
+              <div className="bg-white dark:bg-gray-800 p-6 md:p-8 border-t md:border-t-0 md:border-l border-[rgba(45,27,78,0.08)] dark:border-gray-700 h-[420px] md:h-[480px] overflow-hidden">
                 <PanelComponent isActive={activeStep === STEPS.indexOf(step)} />
               </div>
             </motion.div>

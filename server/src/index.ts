@@ -291,6 +291,7 @@ const usersRouter = require('./routes/admin/users');
 const adminInvitesRouter = require('./routes/admin/invites');
 const inviteRegisterRouter = require('./routes/invite-register');
 const churchRegisterRouter = require('./routes/church-register');
+const crmPublicRouter = require('./routes/crm-public');
 const churchOnboardingRouter = require('./routes/admin/church-onboarding');
 const churchLifecycleRouter = require('./routes/admin/church-lifecycle');
 const orthodoxScheduleGuidelinesRouter = require('./routes/admin/orthodox-schedule-guidelines');
@@ -331,6 +332,10 @@ const servicesRouter = require('./routes/admin/services');
 const sslCertificatesRouter = require('./routes/admin/ssl-certificates');
 // Import components management router for system component control
 const componentsRouter = require('./routes/admin/components');
+const deprecationRegistryRouter = require('./routes/admin/deprecation-registry');
+const featureRegistryRouter = require('./routes/admin/feature-registry');
+const fieldConfigRouter = require('./routes/admin/field-config');
+const adminCalendarRouter = require('./routes/admin-calendar');
 const settingsRouter = require('./routes/settings');
 // Import system update routes (safe to fail if not available)
 let systemUpdateRouter;
@@ -404,6 +409,8 @@ try {
 const backendDiagnosticsRouter = require('./routes/backend_diagnostics');
 // Import Platform Status router for DB VM health monitoring
 const platformStatusRouter = require('./routes/platform-status');
+// Import Platform Actions router for operational controls (super_admin only)
+const platformActionsRouter = require('./routes/platform-actions');
 // Import Build System router for build orchestration
 const buildRouter = require('./routes/build');
 // Import AI Administration Panel router
@@ -607,6 +614,7 @@ app.get('/__debug/session', (req, res) => {
 app.use('/api/invite', inviteRegisterRouter); // Public invite validation + registration
 console.log('✅ [Server] Mounted /api/invite route (public invite registration)');
 app.use('/api/auth', churchRegisterRouter); // Public church token registration
+app.use('/api/crm-public', crmPublicRouter); // Public CRM inquiry + appointment booking
 app.use('/api', churchRegisterRouter); // Admin token management endpoints
 console.log('✅ [Server] Mounted church registration token routes');
 app.use('/api/admin/church-onboarding', churchOnboardingRouter);
@@ -752,6 +760,11 @@ app.use('/api/headlines/config', headlinesConfigRouter);
 app.use('/api/admin/services', servicesRouter);
 app.use('/api/admin/ssl-certificates', sslCertificatesRouter);
 app.use('/api/admin/components', componentsRouter);
+app.use('/api/admin/deprecation-registry', deprecationRegistryRouter);
+app.use('/api/admin/feature-registry', featureRegistryRouter);
+app.use('/api/admin/field-config', fieldConfigRouter);
+console.log('✅ [Server] Mounted /api/admin/field-config route (canonical field configuration)');
+app.use('/api/admin/calendar', adminCalendarRouter);
 // OMAI-Spin environment mirroring routes
 const omaiSpinRouter = require('./routes/admin/omaiSpin');
 app.use('/api/admin/omai-spin', omaiSpinRouter);
@@ -794,6 +807,8 @@ app.use('/api/omb', ombRouter);
 app.use('/api/jit', jitTerminalRouter);
 // Backend Diagnostics routes for system monitoring (super_admin only)
 app.use('/api/server', backendDiagnosticsRouter);
+// Platform Actions routes for operational controls (super_admin only) — MUST be before /api/platform
+app.use('/api/platform/actions', platformActionsRouter);
 // Platform Status routes for DB VM health (super_admin only, read-only)
 app.use('/api/platform', platformStatusRouter);
 // 🔧 NEW: Modular admin routes (extracted from monolithic admin.js)

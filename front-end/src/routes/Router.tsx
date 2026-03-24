@@ -21,6 +21,9 @@ const PortalSettingsPage = Loadable(lazy(() => import('../features/portal/Portal
 const PortalSacramentalRestrictionsPage = Loadable(lazy(() => import('../features/portal/PortalSacramentalRestrictionsPage')));
 const PortalRecordsPage = Loadable(lazy(() => import('../features/portal/PortalRecordsPage')));
 const PortalCertificatesPage = Loadable(lazy(() => import('../features/portal/PortalCertificatesPage')));
+// TODO: ParishOnboardingWizardPage and FieldConfigEditorPage not yet created
+// const ParishOnboardingWizardPage = Loadable(lazy(() => import('../features/portal/onboarding/ParishOnboardingWizardPage')));
+// const FieldConfigEditorPage = Loadable(lazy(() => import('../features/portal/onboarding/FieldConfigEditorPage')));
 
 /* ****Pages***** */
 const ModernDash = Loadable(lazy(() => import('../features/dashboard/ModernDashboard')));
@@ -119,6 +122,7 @@ const MenuPermissions = Loadable(lazy(() => import('../features/admin/admin/Menu
 const MenuManagement = Loadable(lazy(() => import('../features/admin/admin/MenuManagement')));
 const ChurchPublishingGuide = Loadable(lazy(() => import('../features/admin/components/ChurchPublishingGuide')));
 const InteractiveReportReview = Loadable(lazy(() => import('../features/records-centralized/components/interactiveReport/InteractiveReportReview')));
+const InteractiveReportsPage = Loadable(lazy(() => import('../features/records-centralized/components/interactiveReport/InteractiveReportsPage')));
 const CertificateGeneratorPage = Loadable(lazy(() => import('../features/certificates/CertificateGeneratorPage')));
 const RecipientSubmissionPage = Loadable(lazy(() => import('../features/records-centralized/components/interactiveReport/RecipientSubmissionPage')));
 const PublicCollaborationPage = Loadable(lazy(() => import('../features/records-centralized/components/collaborationLinks/PublicCollaborationPage')));
@@ -199,6 +203,7 @@ const SDLCWizardPage = Loadable(lazy(() => import('../features/admin/sdlc-wizard
 const PromptPlansPage = Loadable(lazy(() => import('../features/devel-tools/prompt-plans/PromptPlansPage')));
 const PromptPlanDetailPage = Loadable(lazy(() => import('../features/devel-tools/prompt-plans/PromptPlanDetailPage')));
 const OMChartsPage = Loadable(lazy(() => import('../features/church/apps/om-charts/OMChartsPage')));
+const OMSeedlingsPage = Loadable(lazy(() => import('../features/devel-tools/om-seedlings/OMSeedlingsPage')));
 
 /* ****Account Hub***** */
 const AccountLayout = Loadable(lazy(() => import('../features/account/AccountLayout')));
@@ -330,6 +335,7 @@ const OrthodoxLogin = Loadable(lazy(() => import('../features/auth/authenticatio
 const Login2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/Login2')));
 const Register = Loadable(lazy(() => import('../features/auth/authentication/auth1/Register')));
 const Register2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/Register2')));
+const RegisterToken = Loadable(lazy(() => import('../features/auth/authentication/authForms/AuthRegisterToken')));
 const AcceptInvite = Loadable(lazy(() => import('../features/auth/AcceptInvite')));
 const ForgotPassword = Loadable(lazy(() => import('../features/auth/authentication/auth1/ForgotPassword')));
 const ForgotPassword2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/ForgotPassword2')));
@@ -631,11 +637,7 @@ const Router = [
       },
       {
         path: '/apps/church-management/:id/field-mapper',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
-            <FieldMapperPage />
-          </ProtectedRoute>
-        )
+        element: <Navigate to="/account/parish-management/database-mapping" replace />,
       },
      // {
      //   path: '/apps/church-management/:id/records',
@@ -1398,6 +1400,16 @@ const Router = [
         )
       },
       {
+        path: '/devel-tools/om-seedlings',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <OMSeedlingsPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/devel-tools/ocr-operations',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
@@ -1868,10 +1880,10 @@ const Router = [
         )
       },
       {
-        path: '/berry/calendar',
+        path: '/admin/calendar',
         element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <EnvironmentAwarePage featureId="berry-calendar" priority={1} featureName="Berry Calendar">
+          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+            <EnvironmentAwarePage featureId="berry-calendar" priority={1} featureName="Admin Calendar">
               <BerryCalendarPage />
             </EnvironmentAwarePage>
           </ProtectedRoute>
@@ -2049,6 +2061,20 @@ const Router = [
        )
      },
      {
+       path: '/apps/records/interactive-reports',
+       element: (
+         <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
+           <EnvironmentAwarePage
+             featureId="interactive-reports"
+             priority={4}
+             featureName="Interactive Reports"
+           >
+             <InteractiveReportsPage />
+           </EnvironmentAwarePage>
+         </ProtectedRoute>
+       )
+     },
+     {
        path: '/apps/records/interactive-reports/:reportId',
        element: (
          <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
@@ -2206,6 +2232,10 @@ const Router = [
           </ProtectedRoute>
         ),
       },
+      // TODO: Parish Onboarding Wizard — page not yet created
+      // { path: 'onboarding', element: <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin']}><ParishOnboardingWizardPage /></ProtectedRoute> },
+      // TODO: Record Field Settings — page not yet created
+      // { path: 'settings/fields', element: <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin']}><FieldConfigEditorPage /></ProtectedRoute> },
       // User Profile → redirect to Account Hub
       {
         path: 'profile',
@@ -2319,6 +2349,7 @@ const Router = [
           { path: 'login', element: <Login2 /> },
           { path: 'login2', element: <Login2 /> },
           { path: 'register', element: <Register /> },
+          { path: 'register-token', element: <RegisterToken /> },
           { path: 'register2', element: <Register2 /> },
           { path: 'forgot-password', element: <ForgotPassword /> },
           { path: 'forgot-password2', element: <ForgotPassword2 /> },

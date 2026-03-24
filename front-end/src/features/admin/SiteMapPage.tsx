@@ -254,7 +254,7 @@ const ADMIN_MAP: SiteNode[] = [
       { label: 'CRM Leads', path: '/berry/crm/leads', icon: <ContactIcon /> },
       { label: 'CRM Contacts', path: '/berry/crm/contacts', icon: <ContactIcon /> },
       { label: 'CRM Sales', path: '/berry/crm/sales', icon: <InvoiceIcon /> },
-      { label: 'Calendar', path: '/berry/calendar', icon: <CalendarIcon /> },
+      { label: 'Calendar', path: '/admin/calendar', icon: <CalendarIcon /> },
       { label: 'Map', path: '/berry/map', icon: <MapIcon /> },
       { label: 'Card Gallery', path: '/berry/cards', icon: <ImageIcon /> },
       { label: 'Account Settings', path: '/berry/profile/settings', icon: <SettingsIcon /> },

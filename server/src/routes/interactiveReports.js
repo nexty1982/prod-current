@@ -240,7 +240,7 @@ router.post(
         }
 
         // Send email to recipient (non-blocking)
-        const reportUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/r/interactive/${token}`;
+        const reportUrl = `${process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'https://orthodoxmetrics.com'}/r/interactive/${token}`;
         
         // Get church name if available
         db.query('SELECT church_name FROM churches WHERE id = ?', [churchId])
@@ -322,6 +322,44 @@ router.post(
         }
       }
       
+      res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+  }
+);
+
+// ==========================================
+// LIST ROUTE - Must be defined BEFORE /:id to avoid route conflicts
+// ==========================================
+
+/**
+ * GET /api/records/interactive-reports/list
+ * List all reports for the current user (with recipient/patch counts)
+ */
+router.get(
+  '/list',
+  requireAuth,
+  requireRole(['admin', 'super_admin', 'church_admin', 'priest']),
+  async (req, res) => {
+    try {
+      const db = getDb();
+      const userId = req.user?.id || req.session?.user?.id;
+
+      const [reports] = await db.query(
+        `SELECT r.*, u.email AS created_by_email,
+          (SELECT COUNT(*) FROM interactive_report_recipients rr WHERE rr.report_id = r.id) AS recipient_count,
+          (SELECT COUNT(*) FROM interactive_report_recipients rr WHERE rr.report_id = r.id AND rr.submitted_at IS NOT NULL) AS submitted_count,
+          (SELECT COUNT(*) FROM interactive_report_patches p WHERE p.report_id = r.id AND p.status = 'pending') AS patch_pending,
+          (SELECT COUNT(*) FROM interactive_report_patches p WHERE p.report_id = r.id AND p.status = 'accepted') AS patch_accepted,
+          (SELECT COUNT(*) FROM interactive_report_patches p WHERE p.report_id = r.id AND p.status = 'rejected') AS patch_rejected
+        FROM interactive_reports r
+        LEFT JOIN users u ON r.created_by_user_id = u.id
+        ORDER BY r.created_at DESC
+        LIMIT 100`
+      );
+
+      res.json({ success: true, reports });
+    } catch (error) {
+      console.error('Error listing reports:', error);
       res.status(500).json({ error: error.message || 'Internal server error' });
     }
   }
@@ -918,6 +956,42 @@ router.post(
   }
 );
 
+/**
+ * DELETE /api/records/interactive-reports/:id
+ * Delete a report and all related data
+ */
+router.delete(
+  '/:id',
+  requireAuth,
+  requireRole(['admin', 'super_admin', 'church_admin', 'priest']),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const db = getDb();
+
+      // Verify report exists
+      const [check] = await db.query('SELECT id FROM interactive_reports WHERE id = ?', [id]);
+      if (check.length === 0) {
+        return res.status(404).json({ error: 'Report not found' });
+      }
+
+      // Delete in order (foreign key constraints)
+      await db.query('DELETE FROM interactive_report_patches WHERE report_id = ?', [id]);
+      await db.query('DELETE FROM interactive_report_submissions WHERE report_id = ?', [id]);
+      await db.query('DELETE FROM interactive_report_assignments WHERE report_id = ?', [id]);
+      await db.query('DELETE FROM interactive_report_recipients WHERE report_id = ?', [id]);
+      await db.query('DELETE FROM interactive_report_audit WHERE report_id = ?', [id]);
+      await db.query('DELETE FROM interactive_report_jobs WHERE report_id = ?', [id]);
+      await db.query('DELETE FROM interactive_reports WHERE id = ?', [id]);
+
+      res.json({ success: true, message: 'Report deleted' });
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+  }
+);
+
 // Public recipient endpoints (token-based, no auth required)
 
 /**
@@ -1120,7 +1194,7 @@ router.post(
         .then(([priestResult]) => {
           if (priestResult.length > 0) {
             const priestData = priestResult[0];
-            const reviewUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/apps/records/interactive-reports/${recipient.report_id}`;
+            const reviewUrl = `${process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'https://orthodoxmetrics.com'}/apps/records/interactive-reports/${recipient.report_id}`;
             
             // Get church name
             return db.query('SELECT church_name FROM churches WHERE id = ?', [priestData.church_id])

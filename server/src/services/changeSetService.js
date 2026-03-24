@@ -49,7 +49,7 @@ class ChangeSetService {
 
   // ── CREATE ──────────────────────────────────────────────────────────────
 
-  async create({ title, description, change_type, priority, git_branch, deployment_strategy, has_db_changes, migration_files }, userId) {
+  async create({ title, description, change_type, priority, git_branch, deployment_strategy, has_db_changes, migration_files, target_start_date, target_end_date }, userId) {
     const pool = getAppPool();
 
     // Validate branch uniqueness for active change_sets
@@ -63,9 +63,9 @@ class ChangeSetService {
 
       const [result] = await conn.query(`
         INSERT INTO change_sets
-          (code, title, description, change_type, priority, git_branch, deployment_strategy, has_db_changes, migration_files, created_by)
+          (code, title, description, change_type, priority, git_branch, deployment_strategy, has_db_changes, migration_files, target_start_date, target_end_date, created_by)
         VALUES
-          ('__TEMP__', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ('__TEMP__', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
         title,
         description || null,
@@ -75,6 +75,8 @@ class ChangeSetService {
         deployment_strategy || 'stage_then_promote',
         has_db_changes ? 1 : 0,
         migration_files ? JSON.stringify(migration_files) : null,
+        target_start_date || null,
+        target_end_date || null,
         userId,
       ]);
 
@@ -191,7 +193,7 @@ class ChangeSetService {
       throw Object.assign(new Error(`Cannot update metadata when status is '${cs.status}'. Only draft/active change_sets can be edited.`), { status: 400 });
     }
 
-    const allowedFields = ['title', 'description', 'change_type', 'priority', 'git_branch', 'deployment_strategy', 'has_db_changes', 'migration_files'];
+    const allowedFields = ['title', 'description', 'change_type', 'priority', 'git_branch', 'deployment_strategy', 'has_db_changes', 'migration_files', 'target_start_date', 'target_end_date'];
     const updates = [];
     const params = [];
 

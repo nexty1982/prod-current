@@ -4,6 +4,8 @@ import { HeroSection } from '@/components/frontend-pages/shared/sections';
 import EditableText from '@/components/frontend-pages/shared/EditableText';
 import apiClient from '@/api/utils/axiosInstance';
 import { useLanguage } from '@/context/LanguageContext';
+import { useEditMode } from '@/context/EditModeContext';
+import { useAuth } from '@/hooks/useAuth';
 
 const ENQUIRY_VALUES = ['demo', 'general', 'billing', 'technical', 'other'] as const;
 
@@ -58,38 +60,47 @@ const Contact = () => {
 
               {status === 'sent' ? (
                 <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-8 text-center">
-                  <h3 className="font-['Inter'] font-medium text-xl text-green-800 dark:text-green-300 mb-2">{t('contact.success_title')}</h3>
-                  <p className="font-['Inter'] text-[15px] text-green-700 dark:text-green-400">{t('contact.success_desc')}</p>
+                  <EditableText contentKey="contact.success.title" as="h3" className="font-['Inter'] font-medium text-xl text-green-800 dark:text-green-300 mb-2">{t('contact.success_title')}</EditableText>
+                  <EditableText contentKey="contact.success.desc" as="p" className="font-['Inter'] text-[15px] text-green-700 dark:text-green-400">{t('contact.success_desc')}</EditableText>
                 </div>
               ) : (
                 <form className="space-y-6" onSubmit={handleSubmit}>
-                  <FormField label={t('contact.label_name')} name="name" type="text" value={form.name} onChange={handleChange} placeholder={t('contact.placeholder_name')} required />
-                  <FormField label={t('contact.label_email')} name="email" type="email" value={form.email} onChange={handleChange} placeholder={t('contact.placeholder_email')} required />
-                  <FormField label={t('contact.label_parish')} name="parish" type="text" value={form.parish} onChange={handleChange} placeholder={t('contact.placeholder_parish')} />
-                  <FormField label={t('contact.label_phone')} name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder={t('contact.placeholder_phone')} />
+                  <FormField labelKey="contact.label.name" label={t('contact.label_name')} name="name" type="text" value={form.name} onChange={handleChange} placeholder={t('contact.placeholder_name')} required />
+                  <FormField labelKey="contact.label.email" label={t('contact.label_email')} name="email" type="email" value={form.email} onChange={handleChange} placeholder={t('contact.placeholder_email')} required />
+                  <FormField labelKey="contact.label.parish" label={t('contact.label_parish')} name="parish" type="text" value={form.parish} onChange={handleChange} placeholder={t('contact.placeholder_parish')} />
+                  <FormField labelKey="contact.label.phone" label={t('contact.label_phone')} name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder={t('contact.placeholder_phone')} />
 
                   <div>
-                    <label className="block font-['Inter'] font-medium text-[15px] text-[#2d1b4e] dark:text-white mb-2">
+                    <EditableText contentKey="contact.label.topic" as="label" className="block font-['Inter'] font-medium text-[15px] text-[#2d1b4e] dark:text-white mb-2">
                       {t('contact.label_topic')}
-                    </label>
-                    <select name="topic" value={form.topic} onChange={handleChange} className="om-select">
-                      {ENQUIRY_VALUES.map((val) => (
-                        <option key={val} value={val}>{t(`contact.option_${val}`)}</option>
-                      ))}
-                    </select>
+                    </EditableText>
+                    <EditableSelectOptions
+                      name="topic"
+                      value={form.topic}
+                      onChange={handleChange}
+                      className="om-select"
+                      options={ENQUIRY_VALUES.map((val) => ({
+                        value: val,
+                        contentKey: `contact.option.${val}`,
+                        fallback: t(`contact.option_${val}`),
+                      }))}
+                    />
                   </div>
 
                   <div>
-                    <label className="block font-['Inter'] font-medium text-[15px] text-[#2d1b4e] dark:text-white mb-2">{t('contact.label_message')}</label>
+                    <EditableText contentKey="contact.label.message" as="label" className="block font-['Inter'] font-medium text-[15px] text-[#2d1b4e] dark:text-white mb-2">{t('contact.label_message')}</EditableText>
                     <textarea name="message" required rows={6} value={form.message} onChange={handleChange} className="om-textarea" placeholder={t('contact.placeholder_message')} />
                   </div>
 
                   {status === 'error' && (
-                    <p className="font-['Inter'] text-sm text-red-600 dark:text-red-400">{t('contact.error_message')}</p>
+                    <EditableText contentKey="contact.error.message" as="p" className="font-['Inter'] text-sm text-red-600 dark:text-red-400">{t('contact.error_message')}</EditableText>
                   )}
 
                   <button type="submit" disabled={status === 'sending'} className="w-full om-btn-primary disabled:opacity-50">
-                    {status === 'sending' ? t('contact.btn_sending') : t('contact.btn_send')}
+                    {status === 'sending'
+                      ? <EditableText contentKey="contact.btn.sending">{t('contact.btn_sending')}</EditableText>
+                      : <EditableText contentKey="contact.btn.send">{t('contact.btn_send')}</EditableText>
+                    }
                   </button>
                 </form>
               )}
@@ -102,19 +113,19 @@ const Contact = () => {
                 {t('contact.info_desc')}
               </EditableText>
               <div className="space-y-8">
-                <ContactInfo icon={<Mail className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} title={t('contact.info1_title')} info={t('contact.info1_detail')} subtext={t('contact.info1_subtext')} />
-                <ContactInfo icon={<Phone className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} title={t('contact.info2_title')} info={t('contact.info2_detail')} subtext={t('contact.info2_subtext')} />
-                <ContactInfo icon={<MapPin className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} title={t('contact.info3_title')} info={t('contact.info3_detail')} subtext={t('contact.info3_subtext')} />
-                <ContactInfo icon={<Clock className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} title={t('contact.info4_title')} info={t('contact.info4_detail')} subtext={t('contact.info4_subtext')} />
+                <ContactInfo icon={<Mail className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} titleKey="contact.info1.title" infoKey="contact.info1.detail" subtextKey="contact.info1.subtext" title={t('contact.info1_title')} info={t('contact.info1_detail')} subtext={t('contact.info1_subtext')} />
+                <ContactInfo icon={<Phone className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} titleKey="contact.info2.title" infoKey="contact.info2.detail" subtextKey="contact.info2.subtext" title={t('contact.info2_title')} info={t('contact.info2_detail')} subtext={t('contact.info2_subtext')} />
+                <ContactInfo icon={<MapPin className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} titleKey="contact.info3.title" infoKey="contact.info3.detail" subtextKey="contact.info3.subtext" title={t('contact.info3_title')} info={t('contact.info3_detail')} subtext={t('contact.info3_subtext')} />
+                <ContactInfo icon={<Clock className="text-[#d4af37] dark:text-[#2d1b4e]" size={24} />} titleKey="contact.info4.title" infoKey="contact.info4.detail" subtextKey="contact.info4.subtext" title={t('contact.info4_title')} info={t('contact.info4_detail')} subtext={t('contact.info4_subtext')} />
               </div>
 
               <div className="mt-12 om-card-elevated p-8">
-                <h3 className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-4">{t('contact.demo_title')}</h3>
-                <p className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 mb-6">
+                <EditableText contentKey="contact.demo.title" as="h3" className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-4">{t('contact.demo_title')}</EditableText>
+                <EditableText contentKey="contact.demo.desc" as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 mb-6">
                   {t('contact.demo_desc')}
-                </p>
+                </EditableText>
                 <button className="w-full om-btn-primary" onClick={() => { setForm((f) => ({ ...f, topic: 'demo' })); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-                  {t('contact.demo_button')}
+                  <EditableText contentKey="contact.demo.button">{t('contact.demo_button')}</EditableText>
                 </button>
               </div>
             </div>
@@ -132,8 +143,8 @@ const Contact = () => {
           <div className="space-y-6">
             {[1, 2, 3, 4].map((idx) => (
               <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-[#f3f4f6] dark:border-gray-700 shadow-sm">
-                <h3 className="font-['Inter'] font-medium text-lg text-[#2d1b4e] dark:text-white mb-2">{t(`contact.faq${idx}_q`)}</h3>
-                <p className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(`contact.faq${idx}_a`)}</p>
+                <EditableText contentKey={`contact.faq${idx}.q`} as="h3" className="font-['Inter'] font-medium text-lg text-[#2d1b4e] dark:text-white mb-2">{t(`contact.faq${idx}_q`)}</EditableText>
+                <EditableText contentKey={`contact.faq${idx}.a`} as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed" multiline>{t(`contact.faq${idx}_a`)}</EditableText>
               </div>
             ))}
           </div>
@@ -147,29 +158,70 @@ export default Contact;
 
 // ── Local sub-components ──
 
-function FormField({ label, name, type, value, onChange, placeholder, required }: {
-  label: string; name: string; type: string; value: string;
+function FormField({ labelKey, label, name, type, value, onChange, placeholder, required }: {
+  labelKey: string; label: string; name: string; type: string; value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder: string; required?: boolean;
 }) {
   return (
     <div>
-      <label className="block font-['Inter'] font-medium text-[15px] text-[#2d1b4e] dark:text-white mb-2">{label}</label>
+      <EditableText contentKey={labelKey} as="label" className="block font-['Inter'] font-medium text-[15px] text-[#2d1b4e] dark:text-white mb-2">{label}</EditableText>
       <input type={type} name={name} value={value} onChange={onChange} required={required} className="om-input" placeholder={placeholder} />
     </div>
   );
 }
 
-function ContactInfo({ icon, title, info, subtext }: { icon: React.ReactNode; title: string; info: string; subtext: string }) {
+function EditableSelectOptions({ name, value, onChange, className, options }: {
+  name: string; value: string; className: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  options: { value: string; contentKey: string; fallback: string }[];
+}) {
+  const { isEditMode, getContent, updateContent } = useEditMode();
+  const { isSuperAdmin } = useAuth();
+  const canEdit = isEditMode && isSuperAdmin();
+
+  if (!canEdit) {
+    return (
+      <select name={name} value={value} onChange={onChange} className={className}>
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>{getContent(opt.contentKey, opt.fallback)}</option>
+        ))}
+      </select>
+    );
+  }
+
+  // In edit mode, show the select plus an editable list of option labels below it
+  return (
+    <div>
+      <select name={name} value={value} onChange={onChange} className={className}>
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>{getContent(opt.contentKey, opt.fallback)}</option>
+        ))}
+      </select>
+      <div className="mt-2 space-y-1">
+        {options.map((opt) => (
+          <EditableText key={opt.value} contentKey={opt.contentKey} as="div" className="text-xs text-[#6b7280] dark:text-gray-500 px-2 py-1 border border-dashed border-[#d4af37]/40 rounded">
+            {opt.fallback}
+          </EditableText>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ContactInfo({ icon, titleKey, infoKey, subtextKey, title, info, subtext }: {
+  icon: React.ReactNode; titleKey: string; infoKey: string; subtextKey: string;
+  title: string; info: string; subtext: string;
+}) {
   return (
     <div className="flex items-start gap-4">
       <div className="flex-shrink-0 w-12 h-12 bg-[#2d1b4e] dark:bg-[#d4af37] rounded-lg flex items-center justify-center">
         {icon}
       </div>
       <div>
-        <h3 className="font-['Inter'] font-medium text-lg text-[#2d1b4e] dark:text-white mb-1">{title}</h3>
-        <p className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 mb-1">{info}</p>
-        <p className="font-['Inter'] text-[13px] text-[#6b7280] dark:text-gray-500">{subtext}</p>
+        <EditableText contentKey={titleKey} as="h3" className="font-['Inter'] font-medium text-lg text-[#2d1b4e] dark:text-white mb-1">{title}</EditableText>
+        <EditableText contentKey={infoKey} as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 mb-1">{info}</EditableText>
+        <EditableText contentKey={subtextKey} as="p" className="font-['Inter'] text-[13px] text-[#6b7280] dark:text-gray-500">{subtext}</EditableText>
       </div>
     </div>
   );

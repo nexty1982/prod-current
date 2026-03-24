@@ -51,6 +51,55 @@ export interface DeprecatedEntry {
   category?: 'frontend' | 'backend' | 'shared';
 }
 
+/** Risk level for a deprecated component */
+export type RiskLevel = 'no_risk' | 'low' | 'medium' | 'high';
+
+/** DB-persisted tracking data (from deprecation_tracking table) */
+export interface DeprecationTracking {
+  id: string;
+  stage: number;
+  risk_level: RiskLevel | null;
+  router_refs: number;
+  menu_refs: number;
+  import_refs: number;
+  dependent_components: string[] | null;
+  last_analysis_at: string | null;
+  last_analysis_by: string | null;
+  router_removed: boolean;
+  menu_removed: boolean;
+  files_deleted: boolean;
+}
+
+/** Analysis result from the backend */
+export interface RiskAnalysisResult {
+  riskLevel: RiskLevel;
+  totalActiveRefs: number;
+  router: {
+    total: number;
+    active: number;
+    redirects: number;
+    refs: Array<{ line: number; text: string; isRedirect: boolean; pattern: string }>;
+  };
+  menu: {
+    total: number;
+    refs: Array<{ line: number; text: string; pattern: string }>;
+  };
+  imports: {
+    total: number;
+    refs: Array<{ file: string; match: string; component: string }>;
+  };
+  dependentComponents: string[];
+  files: Array<{ file: string; exists: boolean }>;
+}
+
+/** Blocker returned when stage advancement is rejected */
+export interface AdvancementBlocker {
+  type: 'router' | 'menu' | 'imports' | 'files';
+  message: string;
+  refs: unknown[];
+  dependentComponents?: string[];
+}
+
 // ────────────────────────────────────────────────────────────
 // Registry
 // ────────────────────────────────────────────────────────────
@@ -180,6 +229,19 @@ export const DEPRECATION_REGISTRY: DeprecatedEntry[] = [
     owner: 'nectarios',
     originalRoute: '/admin/control-panel/crm-outreach',
     changeSetCode: 'CS-0050',
+    category: 'frontend',
+  },
+  {
+    id: 'field-mapper-legacy',
+    name: 'Legacy Field Mapper',
+    stage: 1,
+    files: ['features/church/FieldMapperPage.tsx'],
+    replacement: '/account/parish-management/database-mapping',
+    reason: 'Replaced by canonical field config system (church_record_fields table) — legacy tool used raw DB columns via field_mapper_settings table, new tool uses canonical keys with professional labels',
+    deprecatedDate: '2026-03-23',
+    owner: 'nectarios',
+    originalRoute: '/apps/church-management/:id/field-mapper',
+    redirectTo: '/account/parish-management/database-mapping',
     category: 'frontend',
   },
 ];

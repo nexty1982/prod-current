@@ -95,6 +95,8 @@ interface ChangeSetDetail {
   reviewed_by_email: string | null;
   review_notes: string | null;
   rejection_reason: string | null;
+  target_start_date: string | null;
+  target_end_date: string | null;
   pre_promote_snapshot_id: string | null;
   staged_at: string | null;
   approved_at: string | null;
@@ -111,7 +113,7 @@ interface ChangeSetDetail {
 // ── Status config ─────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  draft:              { label: 'Draft',             color: '#9e9e9e' },
+  draft:              { label: 'Planned',            color: '#7e57c2' },
   active:             { label: 'Active',            color: '#1976d2' },
   ready_for_staging:  { label: 'Ready for Staging', color: '#ed6c02' },
   staged:             { label: 'Staged',            color: '#9c27b0' },
@@ -322,6 +324,20 @@ const ChangeSetDetailPage: React.FC = () => {
                 <Typography variant="body2" color="text.secondary">{cs.priority} priority</Typography>
                 <Typography variant="body2" color="text.secondary">{cs.deployment_strategy === 'hotfix_direct' ? 'Hotfix Direct' : 'Stage → Promote'}</Typography>
                 <Typography variant="body2" color="text.secondary">by {cs.created_by_email}</Typography>
+                {(cs.target_start_date || cs.target_end_date) && (
+                  <Typography variant="body2" sx={{ color: '#7e57c2', fontWeight: 500 }}>
+                    {(() => {
+                      const fmt = (d: string | null) => {
+                        if (!d) return null;
+                        const dt = d.includes('T') ? new Date(d) : new Date(d + 'T00:00:00');
+                        return isNaN(dt.getTime()) ? null : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                      };
+                      const s = fmt(cs.target_start_date);
+                      const e = fmt(cs.target_end_date);
+                      return s && e ? `${s} – ${e}` : s || e;
+                    })()}
+                  </Typography>
+                )}
               </Box>
               {cs.description && (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{cs.description}</Typography>

@@ -438,6 +438,14 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
+    title: 'OM Seedlings',
+    icon: IconDatabase,
+    href: '/devel-tools/om-seedlings',
+    chip: 'NEW',
+    chipColor: 'success',
+  },
+  {
+    id: uniqueId(),
     title: 'Daily Tasks',
     icon: IconCheckbox,
     href: '/devel-tools/daily-tasks',
@@ -486,7 +494,7 @@ const Menuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: 'Calendar',
     icon: IconCalendar,
-    href: '/berry/calendar',
+    href: '/admin/calendar',
   },
   {
     id: uniqueId(),
@@ -581,7 +589,7 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
-        title: 'Database Status',
+        title: 'Platform Status',
         icon: IconDatabase,
         href: '/devel-tools/platform-status',
       },

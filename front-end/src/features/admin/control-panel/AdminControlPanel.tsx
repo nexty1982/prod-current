@@ -25,14 +25,24 @@ import {
     TrendingUp as PipelineIcon,
 } from '@mui/icons-material';
 import {
+    Storage as DbIcon,
+    CheckCircle as HealthyIcon,
+    Warning as WarnIcon,
+    Error as ErrorIcon,
+} from '@mui/icons-material';
+import {
     alpha,
     Box,
     Chip,
     CircularProgress,
+    LinearProgress,
+    Skeleton,
+    Tooltip,
     useTheme,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 // ─── Category definitions ────────────────────────────────────────
 
@@ -309,6 +319,191 @@ const PipelineWidget: React.FC<{ isDark: boolean; navigate: ReturnType<typeof us
   );
 };
 
+/* ─── Platform Status Widget ─────────────────────────────────── */
+
+interface PlatformWidgetService {
+  status: string;
+  label: string;
+  service_name: string;
+  uptime: string | null;
+}
+
+interface PlatformWidgetSystem {
+  cpu_usage_pct: number;
+  memory_used_pct: number;
+  disk_usage_pct: number;
+}
+
+interface PlatformWidgetData {
+  status: string;
+  overall_status?: 'ok' | 'warn' | 'error';
+  alerts?: { metric: string; severity: 'warn' | 'error'; message: string }[];
+  database: {
+    status: string;
+    connections: number;
+    max_connections: number;
+    latency_ms: number;
+    disk_usage_pct: number;
+    disk_used: string;
+    disk_total: string;
+    last_backup_age_hours: number;
+    buffer_pool_used_pct: number;
+  } | null;
+  services?: Record<string, PlatformWidgetService>;
+  system?: PlatformWidgetSystem | null;
+}
+
+const chipSx = { fontWeight: 500, fontSize: '0.72rem', height: 24, cursor: 'pointer', fontFamily: 'monospace' };
+
+const PlatformStatusWidget: React.FC<{ isDark: boolean; navigate: ReturnType<typeof useNavigate> }> = ({ isDark, navigate }) => {
+  const [data, setData] = useState<PlatformWidgetData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    apiClient.get<PlatformWidgetData>('/platform/status')
+      .then((r) => setData(r))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return (
+    <div className="om-admin-card" style={{ marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <DbIcon sx={{ fontSize: 20, color: '#546e7a' }} />
+        <Skeleton width={120} height={20} />
+        <Skeleton width={80} height={20} />
+        <Skeleton width={100} height={20} />
+      </div>
+    </div>
+  );
+
+  if (error || (!data?.database && !data?.services)) return (
+    <div
+      className="om-admin-card"
+      onClick={() => navigate('/devel-tools/platform-status')}
+      style={{ marginBottom: '1.5rem', cursor: 'pointer' }}
+    >
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <DbIcon sx={{ fontSize: 20, color: '#f44336' }} />
+        <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#f44336' }}>Platform Status</span>
+        <Chip label="Unreachable" size="small" sx={{ fontWeight: 600, fontSize: '0.7rem', height: 22, bgcolor: alpha('#f44336', isDark ? 0.2 : 0.1), color: '#f44336' }} />
+      </div>
+    </div>
+  );
+
+  const db = data!.database;
+  const services = data!.services;
+  const system = data!.system;
+  const severity: 'ok' | 'warn' | 'error' = data!.overall_status || 'ok';
+  const sevColor = severity === 'error' ? '#f44336' : severity === 'warn' ? '#ff9800' : '#4caf50';
+  const SevIcon = severity === 'error' ? ErrorIcon : severity === 'warn' ? WarnIcon : HealthyIcon;
+
+  const svcList = services ? Object.values(services) : [];
+  const svcOk = svcList.filter(s => s.status === 'ok').length;
+  const svcDown = svcList.filter(s => s.status !== 'ok' && s.status !== 'starting');
+
+  return (
+    <div
+      className="om-admin-card"
+      onClick={() => navigate('/devel-tools/platform-status')}
+      style={{ marginBottom: '1.5rem', cursor: 'pointer' }}
+    >
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        {/* Overall status */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <SevIcon sx={{ fontSize: 18, color: sevColor }} />
+          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>Platform</span>
+          <Chip
+            label={severity === 'ok' ? 'Healthy' : severity === 'warn' ? 'Warning' : 'Critical'}
+            size="small"
+            sx={{ fontWeight: 600, fontSize: '0.7rem', height: 22, bgcolor: alpha(sevColor, isDark ? 0.2 : 0.1), color: sevColor, border: `1px solid ${alpha(sevColor, 0.3)}` }}
+          />
+        </div>
+
+        {/* Metrics chips */}
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
+          {/* Services summary */}
+          {svcList.length > 0 && (
+            <Tooltip title={svcDown.length > 0 ? `Down: ${svcDown.map(s => s.label).join(', ')}` : 'All services running'}>
+              <Chip
+                label={`${svcOk}/${svcList.length} svc`}
+                size="small" variant="outlined"
+                sx={{
+                  ...chipSx,
+                  ...(svcDown.length > 0 ? { borderColor: '#f44336', color: '#f44336' } : {}),
+                }}
+              />
+            </Tooltip>
+          )}
+
+          {/* DB metrics */}
+          {db && (
+            <>
+              <Tooltip title={`DB: ${db.connections}/${db.max_connections} connections`}>
+                <Chip label={`DB ${db.latency_ms}ms`} size="small" variant="outlined" sx={chipSx} />
+              </Tooltip>
+              <Tooltip title={`DB Disk: ${db.disk_used} / ${db.disk_total}`}>
+                <Chip label={`DB Disk ${db.disk_usage_pct}%`} size="small" variant="outlined" sx={chipSx} />
+              </Tooltip>
+              <Tooltip title="Last backup age">
+                <Chip
+                  label={db.last_backup_age_hours >= 0 ? `Backup ${db.last_backup_age_hours}h` : 'No backup'}
+                  size="small" variant="outlined"
+                  sx={{
+                    ...chipSx,
+                    ...(db.last_backup_age_hours > 12 ? { borderColor: '#ff9800', color: '#ff9800' } : {}),
+                    ...(db.last_backup_age_hours > 24 || db.last_backup_age_hours < 0 ? { borderColor: '#f44336', color: '#f44336' } : {}),
+                  }}
+                />
+              </Tooltip>
+            </>
+          )}
+
+          {/* System metrics */}
+          {system && (
+            <>
+              <Tooltip title={`App VM CPU: ${system.cpu_usage_pct}%`}>
+                <Chip
+                  label={`CPU ${system.cpu_usage_pct}%`}
+                  size="small" variant="outlined"
+                  sx={{
+                    ...chipSx,
+                    ...(system.cpu_usage_pct > 95 ? { borderColor: '#f44336', color: '#f44336' } : system.cpu_usage_pct > 85 ? { borderColor: '#ff9800', color: '#ff9800' } : {}),
+                  }}
+                />
+              </Tooltip>
+              <Tooltip title={`App VM Memory: ${system.memory_used_pct}%`}>
+                <Chip
+                  label={`Mem ${system.memory_used_pct}%`}
+                  size="small" variant="outlined"
+                  sx={{
+                    ...chipSx,
+                    ...(system.memory_used_pct > 95 ? { borderColor: '#f44336', color: '#f44336' } : system.memory_used_pct > 85 ? { borderColor: '#ff9800', color: '#ff9800' } : {}),
+                  }}
+                />
+              </Tooltip>
+            </>
+          )}
+        </div>
+
+        {/* Alert count if any */}
+        {data!.alerts && data!.alerts.length > 0 && (
+          <Chip
+            label={`${data!.alerts.length} alert${data!.alerts.length > 1 ? 's' : ''}`}
+            size="small"
+            sx={{
+              fontWeight: 600, fontSize: '0.7rem', height: 22,
+              bgcolor: alpha(data!.alerts.some(a => a.severity === 'error') ? '#f44336' : '#ff9800', isDark ? 0.2 : 0.1),
+              color: data!.alerts.some(a => a.severity === 'error') ? '#f44336' : '#ff9800',
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ─── Component ──────────────────────────────────────────────────
 
 const AdminControlPanel: React.FC = () => {
@@ -337,6 +532,9 @@ const AdminControlPanel: React.FC = () => {
 
         {/* Pipeline & Follow-up Widget */}
         <PipelineWidget isDark={isDark} navigate={navigate} />
+
+        {/* Platform Status Widget */}
+        <PlatformStatusWidget isDark={isDark} navigate={navigate} />
 
         {/* Category tiles — 2-column grid */}
         <Box sx={{

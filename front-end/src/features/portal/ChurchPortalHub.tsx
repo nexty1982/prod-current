@@ -23,6 +23,7 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
+  ClipboardList,
   Cross,
   Eye,
   Heart,
@@ -811,6 +812,12 @@ const ChurchPortalHub: React.FC = () => {
                 label="Sacramental Calendar"
                 description="Restriction dates"
                 onClick={() => navigate('/portal/sacramental-restrictions')}
+              />
+              <ToolItem
+                icon={ClipboardList}
+                label="Interactive Reports"
+                description="Delegate record collection"
+                onClick={() => navigate('/apps/records/interactive-reports')}
               />
               <ToolItem
                 icon={Settings}

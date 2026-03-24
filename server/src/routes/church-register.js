@@ -5,6 +5,48 @@ const crypto = require('crypto');
 const router = express.Router();
 const { getAppPool } = require('../config/db');
 
+// GET /api/auth/church-search/states — Public: list US states that have churches
+router.get('/church-search/states', async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const [rows] = await pool.query(
+      `SELECT DISTINCT state_code FROM us_churches WHERE state_code IS NOT NULL ORDER BY state_code`
+    );
+    res.json({ success: true, states: rows.map(r => r.state_code) });
+  } catch (error) {
+    console.error('Church search states error:', error);
+    res.status(500).json({ success: false, message: 'Failed to load states.' });
+  }
+});
+
+// GET /api/auth/church-search?state=NY&q=saint — Public: search CRM churches by state + name
+router.get('/church-search', async (req, res) => {
+  try {
+    const { state, q } = req.query;
+    if (!state) {
+      return res.status(400).json({ success: false, message: 'State is required.' });
+    }
+
+    const pool = getAppPool();
+    const params = [state];
+    let where = 'WHERE state_code = ?';
+
+    if (q && String(q).trim().length >= 2) {
+      where += ' AND name LIKE ?';
+      params.push(`%${String(q).trim()}%`);
+    }
+
+    const [rows] = await pool.query(
+      `SELECT id, name, city, state_code, jurisdiction FROM us_churches ${where} ORDER BY name LIMIT 50`,
+      params
+    );
+    res.json({ success: true, churches: rows });
+  } catch (error) {
+    console.error('Church search error:', error);
+    res.status(500).json({ success: false, message: 'Failed to search churches.' });
+  }
+});
+
 // POST /api/auth/church-register — Public self-registration with church token
 router.post('/church-register', async (req, res) => {
   try {

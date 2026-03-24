@@ -32,7 +32,7 @@ export const RECORDS_LEGACY_ENABLED = getEnvBool('VITE_RECORDS_LEGACY_ENABLED', 
 // Default feature flags (can be overridden by environment variables)
 const defaultFlags: FeatureFlags = {
   interactiveReports: {
-    enableRecipientPages: getEnvBool('ENABLE_INTERACTIVE_REPORT_RECIPIENTS', false),
+    enableRecipientPages: getEnvBool('ENABLE_INTERACTIVE_REPORT_RECIPIENTS', true),
   },
   environmentGating: {
     // Enable the environment gating system

@@ -1787,6 +1787,304 @@ async function sendStagingReviewNotifications() {
   console.log(`[Staging Review] Notified ${superAdmins.length} super_admin(s): ${message}`);
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Branch Lifecycle Endpoints — explicit start-work / complete-work actions
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/om-daily/items/:id/start-work
+ *
+ * Explicit action to begin work on an OM Daily item.
+ *   1. Validates item has branch_type (required) and agent_tool
+ *   2. Fetches latest main
+ *   3. Creates a local branch from main (naming: PREFIX_agent_YYYY-MM-DD[_itemId])
+ *   4. Pushes branch to origin with tracking
+ *   5. Updates item: status → in_progress, github_branch → branch name
+ *
+ * Does NOT auto-trigger on status change — must be called explicitly.
+ */
+router.post('/items/:id/start-work', requireAuth, async (req, res) => {
+  const pool = getPool();
+  const { id } = req.params;
+  const { agent_tool: reqAgent, branch_type: reqBranchType } = req.body;
+
+  try {
+    // 1. Load item
+    const [rows] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [id]);
+    if (!rows.length) return res.status(404).json({ error: 'Item not found' });
+    const item = rows[0];
+
+    // Allow overriding agent_tool/branch_type from request body
+    const agentTool = reqAgent || item.agent_tool;
+    const branchType = reqBranchType || item.branch_type;
+
+    if (!branchType) {
+      return res.status(400).json({
+        error: 'branch_type is required (bugfix | new_feature | existing_feature | patch)',
+        hint: 'Pass branch_type in the request body or set it on the item first',
+      });
+    }
+    if (!agentTool) {
+      return res.status(400).json({
+        error: 'agent_tool is required (claude_cli | windsurf | cursor | github_copilot)',
+        hint: 'Pass agent_tool in the request body or set it on the item first',
+      });
+    }
+
+    // 2. Check if work already started (branch exists)
+    if (item.github_branch) {
+      // Branch already exists — check if it exists locally
+      try {
+        execSync(`git rev-parse --verify ${item.github_branch}`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+        // Already checked out locally
+        return res.json({
+          success: true,
+          branch: item.github_branch,
+          action: 'already_active',
+          message: `Branch ${item.github_branch} already exists and is available locally`,
+        });
+      } catch {
+        // Branch exists in DB but not locally — try to check it out from remote
+        try {
+          execSync('git fetch origin', { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+          execSync(`git checkout -b ${item.github_branch} origin/${item.github_branch}`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+          return res.json({
+            success: true,
+            branch: item.github_branch,
+            action: 'checked_out_existing',
+            message: `Checked out existing branch ${item.github_branch} from origin`,
+          });
+        } catch (coErr) {
+          // Remote branch gone — clear it and create fresh
+          console.warn(`[start-work] Branch ${item.github_branch} in DB but not on remote, creating fresh`);
+        }
+      }
+    }
+
+    // 3. Build branch name
+    const prefix = BRANCH_TYPE_PREFIXES[branchType];
+    if (!prefix) {
+      return res.status(400).json({ error: `Invalid branch_type: ${branchType}` });
+    }
+    const agent = AGENT_TOOL_SHORT[agentTool] || agentTool;
+    const today = new Date().toISOString().split('T')[0];
+    let branchName = `${prefix}_${agent}_${today}`;
+
+    // Check if branch name already taken (same agent, same day)
+    try {
+      execSync(`git rev-parse --verify origin/${branchName}`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+      // Exists — append item id for uniqueness
+      branchName = `${branchName}_${item.id}`;
+    } catch {
+      // Doesn't exist — good
+    }
+
+    // 4. Fetch latest main and create branch
+    execSync('git fetch origin main', { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+
+    // Stash any uncommitted changes before switching
+    const status = execSync('git status --porcelain', { cwd: REPO_DIR, encoding: 'utf-8' }).trim();
+    let didStash = false;
+    if (status.length > 0) {
+      execSync('git stash push -m "start-work auto-stash"', { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+      didStash = true;
+    }
+
+    try {
+      // Create and switch to new branch from origin/main
+      execSync(`git checkout -b ${branchName} origin/main`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+
+      // Push to origin with tracking
+      execSync(`git push -u origin ${branchName}`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+    } catch (gitErr) {
+      // Restore previous branch if branch creation fails
+      if (didStash) {
+        try { execSync('git stash pop', { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' }); } catch { /* ignore */ }
+      }
+      throw gitErr;
+    }
+
+    // Pop stash onto new branch if we stashed
+    if (didStash) {
+      try {
+        execSync('git stash pop', { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+      } catch {
+        console.warn('[start-work] Stash pop had conflicts — changes are in stash, resolve manually');
+      }
+    }
+
+    // 5. Update item in DB
+    const updateFields = [
+      'github_branch = ?',
+      'status = ?',
+    ];
+    const updateValues = [branchName, 'in_progress'];
+
+    if (!item.agent_tool && agentTool) {
+      updateFields.push('agent_tool = ?');
+      updateValues.push(agentTool);
+    }
+    if (!item.branch_type && branchType) {
+      updateFields.push('branch_type = ?');
+      updateValues.push(branchType);
+    }
+
+    updateValues.push(id);
+    await pool.query(
+      `UPDATE om_daily_items SET ${updateFields.join(', ')} WHERE id = ?`,
+      updateValues
+    );
+
+    console.log(`[start-work] Item #${id}: created branch ${branchName} from main, checked out locally`);
+
+    res.json({
+      success: true,
+      branch: branchName,
+      action: 'created',
+      message: `Created and checked out branch ${branchName} from main`,
+      stashed: didStash,
+    });
+  } catch (err) {
+    console.error(`[start-work] Item #${id} error:`, err.message);
+    res.status(500).json({
+      error: 'Failed to start work',
+      detail: err.message,
+      stderr: err.stderr?.toString() || '',
+    });
+  }
+});
+
+/**
+ * POST /api/om-daily/items/:id/complete-work
+ *
+ * Explicit action to complete work on an OM Daily item.
+ *   1. Validates item has github_branch and is in_progress
+ *   2. Requires clean working tree (all changes committed)
+ *   3. Pushes branch to origin
+ *   4. Switches to main, pulls latest
+ *   5. Attempts fast-forward-only merge
+ *   6. Pushes main to origin
+ *   7. Deletes branch (local + remote)
+ *   8. Updates item: status → done, progress → 100
+ *
+ * Returns error if fast-forward is not possible (main has diverged).
+ * Does NOT force-merge. The caller must rebase and retry.
+ */
+router.post('/items/:id/complete-work', requireAuth, async (req, res) => {
+  const pool = getPool();
+  const { id } = req.params;
+
+  try {
+    // 1. Load item
+    const [rows] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [id]);
+    if (!rows.length) return res.status(404).json({ error: 'Item not found' });
+    const item = rows[0];
+
+    if (!item.github_branch) {
+      return res.status(400).json({
+        error: 'No branch associated with this item',
+        hint: 'Call POST /items/:id/start-work first to create a branch',
+      });
+    }
+
+    const branch = item.github_branch;
+
+    // 2. Check we're on the right branch
+    const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: REPO_DIR, encoding: 'utf-8' }).trim();
+    if (currentBranch !== branch) {
+      return res.status(400).json({
+        error: `Currently on branch '${currentBranch}', expected '${branch}'`,
+        hint: `Checkout the work branch first: git checkout ${branch}`,
+      });
+    }
+
+    // 3. Require clean working tree
+    const status = execSync('git status --porcelain', { cwd: REPO_DIR, encoding: 'utf-8' }).trim();
+    if (status.length > 0) {
+      return res.status(400).json({
+        error: 'Working tree is not clean — commit or stash all changes before completing work',
+        uncommitted: status.split('\n').slice(0, 15),
+      });
+    }
+
+    // 4. Push branch to origin (ensure remote is up to date)
+    execSync(`git push origin ${branch}`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+
+    // 5. Switch to main and pull latest
+    execSync('git checkout main', { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+    execSync('git pull origin main', { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+
+    // 6. Fast-forward-only merge
+    try {
+      execSync(`git merge --ff-only ${branch}`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+    } catch (mergeErr) {
+      // FF failed — switch back to the work branch so the user isn't stranded on main
+      execSync(`git checkout ${branch}`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+      return res.status(409).json({
+        error: 'Fast-forward merge not possible — main has diverged',
+        hint: `Rebase your branch onto main first:\n  git checkout ${branch}\n  git rebase main\n  # resolve any conflicts\n  Then call complete-work again`,
+        branch,
+        detail: mergeErr.stderr?.toString() || mergeErr.message,
+      });
+    }
+
+    // 7. Push main
+    execSync('git push origin main', { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+
+    // 8. Delete branch (local + remote)
+    try {
+      execSync(`git branch -d ${branch}`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+    } catch {
+      console.warn(`[complete-work] Could not delete local branch ${branch} (may already be gone)`);
+    }
+    try {
+      execSync(`git push origin --delete ${branch}`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
+    } catch {
+      console.warn(`[complete-work] Could not delete remote branch ${branch} (may already be gone)`);
+    }
+
+    // 9. Update item in DB
+    await pool.query(
+      `UPDATE om_daily_items SET status = 'done', progress = 100, completed_at = NOW() WHERE id = ?`,
+      [id]
+    );
+
+    // Close linked GitHub issue if exists
+    if (item.github_issue_number) {
+      try {
+        execSync(
+          `gh issue close ${item.github_issue_number} --repo ${GITHUB_REPO} -c "Work completed and merged to main via fast-forward"`,
+          { encoding: 'utf-8', cwd: REPO_DIR, stdio: 'pipe' }
+        );
+      } catch {
+        console.warn(`[complete-work] Could not close GitHub issue #${item.github_issue_number}`);
+      }
+    }
+
+    const mergeCommit = execSync('git rev-parse HEAD', { cwd: REPO_DIR, encoding: 'utf-8' }).trim();
+
+    console.log(`[complete-work] Item #${id}: merged ${branch} → main (ff), deleted branch, commit ${mergeCommit.slice(0, 8)}`);
+
+    res.json({
+      success: true,
+      action: 'merged_and_cleaned',
+      branch,
+      merged_to: 'main',
+      merge_type: 'fast-forward',
+      commit: mergeCommit,
+      branch_deleted: true,
+      message: `Branch ${branch} merged to main (fast-forward) and deleted`,
+    });
+  } catch (err) {
+    console.error(`[complete-work] Item #${id} error:`, err.message);
+    res.status(500).json({
+      error: 'Failed to complete work',
+      detail: err.message,
+      stderr: err.stderr?.toString() || '',
+    });
+  }
+});
+
 // Export cron functions on the router for access from index.ts
 router.generateAndEmailChangelog = generateAndEmailChangelog;
 router.fullSync = fullSync;

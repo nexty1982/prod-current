@@ -98,7 +98,7 @@ router.get('/:id', requireAuth, requireSuperAdmin, async (req, res) => {
 router.post('/', requireAuth, requireSuperAdmin, async (req, res) => {
   try {
     const userId = getUserId(req);
-    const { title, description, change_type, priority, git_branch, deployment_strategy, has_db_changes, migration_files } = req.body;
+    const { title, description, change_type, priority, git_branch, deployment_strategy, has_db_changes, migration_files, target_start_date, target_end_date } = req.body;
 
     if (!title || !title.trim()) {
       return res.status(400).json({ success: false, error: 'title is required' });
@@ -113,6 +113,8 @@ router.post('/', requireAuth, requireSuperAdmin, async (req, res) => {
       deployment_strategy,
       has_db_changes,
       migration_files,
+      target_start_date,
+      target_end_date,
     }, userId);
 
     res.status(201).json({ success: true, change_set: cs });
