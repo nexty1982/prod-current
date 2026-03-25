@@ -406,63 +406,7 @@ const Menuitems: MenuitemsType[] = [
     ],
   },
 
-  // ========================================================================
-  // OM DAILY (matches Control Panel category 6)
-  // ========================================================================
-  {
-    navlabel: true,
-    subheader: '📅 OM Daily',
-  },
-  {
-    id: uniqueId(),
-    title: 'OM Daily',
-    icon: IconCheckbox,
-    href: '/admin/control-panel/om-daily',
-  },
-  {
-    id: uniqueId(),
-    title: 'Change Sets',
-    icon: IconGitBranch,
-    href: '/admin/control-panel/om-daily/change-sets',
-    chip: 'SDLC',
-    chipColor: 'secondary',
-  },
-  {
-    id: uniqueId(),
-    title: 'SDLC Wizard',
-    icon: IconRocket,
-    href: '/admin/control-panel/om-daily/sdlc-wizard',
-    chip: 'NEW',
-    chipColor: 'primary',
-  },
-  {
-    id: uniqueId(),
-    title: 'Prompt Plans',
-    icon: IconRocket,
-    href: '/devel-tools/prompt-plans',
-    chip: 'AI',
-    chipColor: 'primary',
-  },
-  {
-    id: uniqueId(),
-    title: 'OM Seedlings',
-    icon: IconDatabase,
-    href: '/devel-tools/om-seedlings',
-    chip: 'NEW',
-    chipColor: 'success',
-  },
-  {
-    id: uniqueId(),
-    title: 'Daily Tasks',
-    icon: IconCheckbox,
-    href: '/devel-tools/daily-tasks',
-  },
-  {
-    id: uniqueId(),
-    title: 'OM Tasks',
-    icon: IconEdit,
-    href: '/devel-tools/om-tasks',
-  },
+  // Prompt Plans, OM Seedlings, Daily Tasks, OM Tasks — retired, now on OMAI Operations Hub
 
   // ========================================================================
   // BERRY COMPONENTS (super_admin only, stage 1 prototypes)
@@ -600,12 +544,7 @@ const Menuitems: MenuitemsType[] = [
         icon: IconDatabase,
         href: '/devel-tools/platform-status',
       },
-      {
-        id: uniqueId(),
-        title: 'Conversation Log',
-        icon: IconMessage,
-        href: '/devel-tools/conversation-log',
-      },
+      // Conversation Log — retired, now on OMAI Operations Hub
       {
         id: uniqueId(),
         title: 'OCR Operations',

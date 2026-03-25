@@ -68,7 +68,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
 
   // ── Stage 3: Review ────────────────────────────────────────
   { id: 'funeral-records-v2', name: 'Funeral Records', stage: 3, route: '/apps/records/funeral', since: '2026-02-01', changeSetCode: 'CS-0039' },
-  { id: 'change-sets', name: 'Change Sets', stage: 3, route: '/admin/control-panel/om-daily/change-sets', description: 'SDLC delivery container for grouping, staging, reviewing, and promoting work items', since: '2026-03-08', changeSetCode: 'CS-0037' },
+  { id: 'change-sets', name: 'Change Sets', stage: 3, route: '/omai/tools/om-daily', description: 'SDLC delivery container — migrated to OMAI Operations Hub', since: '2026-03-08', changeSetCode: 'CS-0037' },
 
   // ── Stage 2: Development ───────────────────────────────────
   { id: 'account-hub', name: 'Account Hub', stage: 2, route: '/account/profile', description: 'Unified account settings — profile, password, parish info, church details', since: '2026-03-20' },
@@ -79,7 +79,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'enhanced-ocr-uploader', name: 'Enhanced OCR Uploader', stage: 2, route: '/devel/ocr-studio/upload', since: '2026-01-15', changeSetCode: 'CS-0038' },
   { id: 'dynamic-records-inspector', name: 'Dynamic Records Inspector', stage: 2, route: '/devel/dynamic-records', since: '2026-01-20' },
   { id: 'tutorial-management', name: 'Tutorial Management', stage: 2, route: '/admin/tutorials', description: 'Super admin tutorial/welcome system management', since: '2026-02-21' },
-  { id: 'prompt-plans', name: 'Prompt Plans', stage: 2, route: '/devel-tools/prompt-plans', description: 'Ordered sequences of AI prompts for complex initiatives', since: '2026-03-08' },
+  { id: 'prompt-plans', name: 'Prompt Plans', stage: 2, route: '/omai/ai/prompt-plans', description: 'Ordered sequences of AI prompts for complex initiatives — migrated to OMAI Operations Hub', since: '2026-03-08' },
   { id: 'page-editor', name: 'Page Content Editor', stage: 2, route: '/devel-tools/page-editor', description: 'CMS for editing frontend page text from the web UI', since: '2026-03-08' },
   { id: 'jurisdictions', name: 'Jurisdictions', stage: 2, route: '/admin/control-panel/jurisdictions', description: 'Orthodox church jurisdictions with calendar type mapping', since: '2026-03-15' },
   { id: 'demo-churches', name: 'Demo Churches', stage: 2, route: '/admin/control-panel/demo-churches', description: 'Quick-create demo church instances with sample sacramental records', since: '2026-03-15' },
@@ -87,7 +87,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'onboarding-pipeline-detail', name: 'Onboarding Pipeline Detail', stage: 2, route: '/admin/control-panel/onboarding-pipeline/:id', description: 'Church onboarding workspace with contacts, requirements, email drafts, and provisioning', since: '2026-03-24' },
   { id: 'records-landing-branding', name: 'Records Landing Branding', stage: 2, route: '/admin/church-branding/records-landing', description: 'Church-level customization for records landing page header', since: '2026-03-10' },
   { id: 'code-change-detection', name: 'Code Change Detection', stage: 2, route: '/admin/ai/code-changes', description: 'Tracks page content edits, notifies admins, and triggers frontend builds', since: '2026-03-08' },
-  { id: 'sdlc-wizard', name: 'SDLC Pipeline Wizard', stage: 2, route: '/admin/control-panel/om-daily/sdlc-wizard', description: 'Wizard-driven SDLC pipeline management', since: '2026-03-12', changeSetCode: 'CS-0037' },
+  { id: 'sdlc-wizard', name: 'SDLC Pipeline Wizard', stage: 2, route: '/omai/tools/om-daily', description: 'Wizard-driven SDLC pipeline — migrated to OMAI Operations Hub', since: '2026-03-12', changeSetCode: 'CS-0037' },
   { id: 'ocr-workbench', name: 'OCR Workbench & Review UX', stage: 2, route: '/devel/ocr-studio', description: 'Full OCR document review workbench with overlay editing', since: '2026-02-01', changeSetCode: 'CS-0042' },
   { id: 'ocr-admin-dashboard', name: 'OCR Admin & Analytics', stage: 2, description: 'Admin dashboard for OCR job monitoring, stats, and quality metrics', since: '2026-03-08', changeSetCode: 'CS-0043' },
   { id: 'ocr-backend-infra', name: 'OCR Backend Infrastructure', stage: 2, description: 'Pipeline workers, queue management, storage, and API layer', since: '2026-03-08', changeSetCode: 'CS-0044' },
@@ -101,7 +101,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   // ── Stage 1: Prototype ─────────────────────────────────────
   { id: 'repo-ops', name: 'Repository Operations', stage: 2, route: '/devel-tools/repo-ops', description: 'Unified build status, git context, and branch cleanup hub', since: '2026-03-24' },
   { id: 'us-church-map', name: 'US Church Map', stage: 2, route: '/devel-tools/us-church-map', description: 'Church Operations Hub — status-aware choropleth with CRM/onboarding integration', since: '2026-03-15', changeSetCode: 'CS-0050' },
-  { id: 'om-seedlings', name: 'OM Seedlings', stage: 2, route: '/devel-tools/om-seedlings', description: 'Mass-generate sacramental records for onboarded churches', since: '2026-03-23' },
+  { id: 'om-seedlings', name: 'OM Seedlings', stage: 2, route: '/omai/tools/om-seedlings', description: 'Mass-generate sacramental records for onboarded churches — migrated to OMAI Operations Hub', since: '2026-03-23' },
   { id: 'parish-onboarding-wizard', name: 'Parish Onboarding Wizard', stage: 2, route: '/portal/onboarding', description: 'Guided parish setup wizard for configuring record field labels, order, and visibility', since: '2026-03-24' },
   { id: 'live-table-builder', name: 'Live Table Builder', stage: 1, route: '/devel-tools/live-table-builder', since: '2026-01-20' },
   { id: 'berry-crm-leads', name: 'Berry CRM Leads', stage: 1, route: '/berry/crm/leads', since: '2026-02-17' },

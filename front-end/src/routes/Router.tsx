@@ -150,7 +150,7 @@ const SystemServerPage = Loadable(lazy(() => import('../features/admin/control-p
 const AIAutomationPage = Loadable(lazy(() => import('../features/admin/control-panel/AIAutomationPage')));
 const CodeChangeDetection = Loadable(lazy(() => import('../features/admin/ai/CodeChangeDetection')));
 const RecordsLandingConfig = Loadable(lazy(() => import('../features/admin/church-branding/RecordsLandingConfig')));
-const OMDailyPage = Loadable(lazy(() => import('../features/admin/control-panel/OMDailyPage')));
+// OM Daily retired from orthodoxmetrics — now on OMAI Operations Hub
 const OMAppSuitePage = Loadable(lazy(() => import('../features/admin/control-panel/OMAppSuitePage')));
 const SDLCPage = Loadable(lazy(() => import('../features/admin/control-panel/SDLCPage')));
 const ComponentsInDevelopmentPage = Loadable(lazy(() => import('../features/admin/control-panel/ComponentsInDevelopmentPage')));
@@ -191,20 +191,13 @@ const LayoutTemplateEditorPage = Loadable(lazy(() => import('../features/devel-t
 const OcrActivityMonitor = Loadable(lazy(() => import('../features/admin/OcrActivityMonitor')));
 const OcrOperationsDashboard = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrOperationsDashboard')));
 const OcrBatchManager = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrBatchManager')));
-const OMTasksPage = Loadable(lazy(() => import('../features/devel-tools/om-tasks/OMTasksPage')));
-const DailyTasks = Loadable(lazy(() => import('../features/devel-tools/DailyTasks')));
+// OMTasksPage, DailyTasks — retired, now managed via OMAI OM Daily
 const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-explorer/ApiExplorerPage')));
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
 const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-operations/GitOperations')));
-const ConversationLogPage = Loadable(lazy(() => import('../features/devel-tools/conversation-log/ConversationLogPage')));
-const ChangeSetsDashboard = Loadable(lazy(() => import('../features/devel-tools/change-sets/ChangeSetsDashboard')));
-const ChangeSetDetailPage = Loadable(lazy(() => import('../features/devel-tools/change-sets/ChangeSetDetailPage')));
-const ReleaseHistoryPage = Loadable(lazy(() => import('../features/devel-tools/change-sets/ReleaseHistoryPage')));
-const SDLCWizardPage = Loadable(lazy(() => import('../features/admin/sdlc-wizard/SDLCWizardPage')));
-const PromptPlansPage = Loadable(lazy(() => import('../features/devel-tools/prompt-plans/PromptPlansPage')));
-const PromptPlanDetailPage = Loadable(lazy(() => import('../features/devel-tools/prompt-plans/PromptPlanDetailPage')));
+// ConversationLogPage — retired, now on OMAI Operations Hub
+// ChangeSetsDashboard, ChangeSetDetailPage, ReleaseHistoryPage, SDLCWizardPage, PromptPlans, OMSeedlings — retired, now on OMAI
 const OMChartsPage = Loadable(lazy(() => import('../features/church/apps/om-charts/OMChartsPage')));
-const OMSeedlingsPage = Loadable(lazy(() => import('../features/devel-tools/om-seedlings/OMSeedlingsPage')));
 
 /* ****Account Hub***** */
 const AccountLayout = Loadable(lazy(() => import('../features/account/AccountLayout')));
@@ -1048,16 +1041,6 @@ const Router = [
         )
       },
       {
-        path: '/admin/control-panel/om-daily',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <OMDailyPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
         path: '/admin/control-panel/om-app-suite',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
@@ -1348,86 +1331,7 @@ const Router = [
         path: '/devel-tools/git-operations',
         element: <Navigate to="/devel-tools/repo-ops" replace />,
       },
-      {
-        path: '/devel-tools/conversation-log',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <ConversationLogPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/admin/control-panel/om-daily/sdlc-wizard',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <SDLCWizardPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/admin/control-panel/om-daily/change-sets',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <ChangeSetsDashboard />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/admin/control-panel/om-daily/change-sets/releases',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <ReleaseHistoryPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/admin/control-panel/om-daily/change-sets/:id',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <ChangeSetDetailPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/devel-tools/prompt-plans',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <PromptPlansPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/devel-tools/prompt-plans/:id',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <PromptPlanDetailPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/devel-tools/om-seedlings',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <OMSeedlingsPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
+      // Conversation Log, Prompt Plans, OM Seedlings — retired from OM, now on OMAI Operations Hub
       {
         path: '/devel-tools/ocr-operations',
         element: (
@@ -1448,30 +1352,7 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/devel-tools/om-tasks',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
-            <AdminErrorBoundary>
-              <OMTasksPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/devel-tools/daily-tasks',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <DailyTasks />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        ),
-        meta: {
-          requiresAuth: true,
-          hidden: false
-        }
-      },
+      // OM Tasks, Daily Tasks — retired from OM, now managed via OMAI OM Daily
       {
         path: '/devel-tools/api-explorer',
         element: (
