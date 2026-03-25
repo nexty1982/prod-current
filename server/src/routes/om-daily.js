@@ -29,9 +29,41 @@ const PRIORITY_STR_TO_NUM = { critical: 1, high: 2, medium: 3, low: 4 };
 
 // DailyTasks status mapping → OM Daily status
 // DT: pending, in_progress, blocked, completed, failed, cancelled
-// OM: backlog, todo, in_progress, review, done, cancelled
+// OM: backlog, todo, in_progress, self_review, review, staging, done, cancelled
 const DT_STATUS_TO_OM = { pending: 'todo', in_progress: 'in_progress', blocked: 'review', completed: 'done', failed: 'cancelled', cancelled: 'cancelled' };
-const OM_STATUS_TO_DT = { backlog: 'pending', todo: 'pending', in_progress: 'in_progress', review: 'in_progress', done: 'completed', cancelled: 'cancelled' };
+const OM_STATUS_TO_DT = { backlog: 'pending', todo: 'pending', in_progress: 'in_progress', self_review: 'in_progress', review: 'in_progress', staging: 'in_progress', done: 'completed', cancelled: 'cancelled' };
+
+// ── SDLC Git-to-Status Mapping ──────────────────────────────────────────
+// 1. Backlog      → Task creation (manual)
+// 2. In Progress  → Branch created
+// 3. Review & QA  → PR opened (draft → ready)
+// 4. Staging      → PR approved / CI pass
+// 5. Done         → PR merged into main
+const SDLC_STAGES = {
+  BACKLOG: 'backlog',
+  IN_PROGRESS: 'in_progress',
+  SELF_REVIEW: 'self_review',
+  REVIEW: 'review',
+  STAGING: 'staging',
+  DONE: 'done',
+};
+
+// Slugify a title for use in branch names
+function slugify(str, maxLen = 50) {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .substring(0, maxLen)
+    .replace(/-$/, '');
+}
+
+// Extract OM Daily item ID from a branch name like feat/636-some-description
+const BRANCH_TASK_ID_REGEX = /^(?:feat|fix|patch|chore)\/([0-9]+)(?:-|$)/;
+function extractTaskIdFromBranch(branchName) {
+  const m = branchName.match(BRANCH_TASK_ID_REGEX);
+  return m ? parseInt(m[1], 10) : null;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // DASHBOARD — aggregate stats across all horizons
@@ -46,7 +78,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
        FROM om_daily_items
        WHERE status != 'cancelled'
        GROUP BY horizon, status
-       ORDER BY FIELD(horizon,'1','2','7','14','30','60','90'), FIELD(status,'backlog','todo','in_progress','review','done')`
+       ORDER BY FIELD(horizon,'1','2','7','14','30','60','90'), FIELD(status,'backlog','todo','in_progress','self_review','review','staging','done')`
     );
 
     const [overdue] = await pool.query(
@@ -100,7 +132,7 @@ router.get('/dashboard/extended', requireAuth, async (req, res) => {
 
     // Status distribution across ALL items (not cancelled)
     const [statusDist] = await pool.query(
-      `SELECT status, COUNT(*) as count FROM om_daily_items WHERE status != 'cancelled' GROUP BY status ORDER BY FIELD(status,'in_progress','todo','review','backlog','done')`
+      `SELECT status, COUNT(*) as count FROM om_daily_items WHERE status != 'cancelled' GROUP BY status ORDER BY FIELD(status,'in_progress','todo','self_review','review','staging','backlog','done')`
     );
 
     // Priority distribution
@@ -140,7 +172,7 @@ router.get('/dashboard/extended', requireAuth, async (req, res) => {
 
     // Phase groups — items sharing the same source metadata (e.g., "church-onboarding-pipeline")
     const [phaseGroups] = await pool.query(
-      `SELECT source, category, COUNT(*) as total, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as active_count, GROUP_CONCAT(CONCAT(id, ':', title, ':', status, ':', priority) ORDER BY FIELD(status,'in_progress','todo','review','backlog','done'), FIELD(priority,'critical','high','medium','low') SEPARATOR '||') as items_summary FROM om_daily_items WHERE source IS NOT NULL AND source != 'human' AND status != 'cancelled' GROUP BY source, category HAVING total > 1 AND SUM(CASE WHEN status != 'done' THEN 1 ELSE 0 END) > 0 ORDER BY active_count DESC, total DESC`
+      `SELECT source, category, COUNT(*) as total, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as active_count, GROUP_CONCAT(CONCAT(id, ':', title, ':', status, ':', priority) ORDER BY FIELD(status,'in_progress','todo','self_review','review','staging','backlog','done'), FIELD(priority,'critical','high','medium','low') SEPARATOR '||') as items_summary FROM om_daily_items WHERE source IS NOT NULL AND source != 'human' AND status != 'cancelled' GROUP BY source, category HAVING total > 1 AND SUM(CASE WHEN status != 'done' THEN 1 ELSE 0 END) > 0 ORDER BY active_count DESC, total DESC`
     );
 
     res.json({
@@ -282,7 +314,7 @@ router.get('/items', requireAuth, async (req, res) => {
 
     const allowedSorts = {
       priority: `FIELD(priority,'critical','high','medium','low') ${direction === 'desc' ? 'DESC' : 'ASC'}`,
-      status: `FIELD(status,'in_progress','todo','review','backlog','done','cancelled') ${direction === 'desc' ? 'DESC' : 'ASC'}`,
+      status: `FIELD(status,'in_progress','todo','self_review','review','staging','backlog','done','cancelled') ${direction === 'desc' ? 'DESC' : 'ASC'}`,
       due_date: `due_date ${direction === 'desc' ? 'DESC' : 'ASC'}`,
       created_at: `created_at ${direction === 'desc' ? 'DESC' : 'ASC'}`,
       title: `title ${direction === 'desc' ? 'DESC' : 'ASC'}`,
@@ -290,7 +322,7 @@ router.get('/items', requireAuth, async (req, res) => {
     const orderBy = allowedSorts[sort] || allowedSorts.priority;
 
     const [rows] = await pool.query(
-      `SELECT * FROM om_daily_items ${whereClause} ORDER BY FIELD(status,'in_progress','todo','review','backlog','done','cancelled'), ${orderBy}, created_at DESC`,
+      `SELECT * FROM om_daily_items ${whereClause} ORDER BY FIELD(status,'in_progress','todo','self_review','review','staging','backlog','done','cancelled'), ${orderBy}, created_at DESC`,
       params
     );
 
@@ -325,13 +357,13 @@ router.get('/items', requireAuth, async (req, res) => {
 router.post('/items', requireAuth, async (req, res) => {
   try {
     const pool = getPool();
-    const { title, description, horizon = '7', status = 'backlog', priority = 'medium', category, due_date, tags, task_type, source, metadata, agent_tool, branch_type, conversation_ref, repo_target } = req.body;
+    const { title, description, horizon = '7', status = 'backlog', priority = 'medium', category, due_date, tags, task_type, source, metadata, agent_tool, branch_type, conversation_ref, repo_target, milestone_id } = req.body;
 
     if (!title) return res.status(400).json({ error: 'title required' });
 
     const [result] = await pool.query(
-      `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, due_date, tags, source, agent_tool, branch_type, conversation_ref, metadata, repo_target, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, due_date, tags, source, agent_tool, branch_type, conversation_ref, metadata, repo_target, milestone_id, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title,
         task_type || 'task',
@@ -348,6 +380,7 @@ router.post('/items', requireAuth, async (req, res) => {
         conversation_ref || null,
         metadata ? JSON.stringify(metadata) : null,
         repo_target || 'orthodoxmetrics',
+        milestone_id || null,
         req.session?.user?.id || req.user?.id || null,
       ]
     );
@@ -407,6 +440,7 @@ router.put('/items/:id', requireAuth, async (req, res) => {
     if (branch_type !== undefined) { updates.push('branch_type = ?'); params.push(branch_type || null); }
     if (conversation_ref !== undefined) { updates.push('conversation_ref = ?'); params.push(conversation_ref || null); }
     if (metadata !== undefined) { updates.push('metadata = ?'); params.push(JSON.stringify(metadata)); }
+    if (req.body.milestone_id !== undefined) { updates.push('milestone_id = ?'); params.push(req.body.milestone_id || null); }
 
     if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' });
 
@@ -1106,9 +1140,9 @@ const GITHUB_REPO = 'nexty1982/prod-current';
 const PRIORITY_LABELS = { critical: 'P:critical', high: 'P:high', medium: 'P:medium', low: 'P:low' };
 const HORIZON_LABELS_GH = { '1': 'H:24hr', '2': 'H:48hr', '7': 'H:7day', '14': 'H:14day', '30': 'H:30day', '60': 'H:60day', '90': 'H:90day' };
 const SOURCE_LABELS = { agent: 'source:agent', human: 'source:human' };
-const STATUS_LABELS_GH = { in_progress: 'status:in_progress', review: 'status:review', backlog: 'status:backlog', todo: 'status:todo' };
+const STATUS_LABELS_GH = { in_progress: 'status:in_progress', self_review: 'status:self_review', review: 'status:review', staging: 'status:staging', backlog: 'status:backlog', todo: 'status:todo' };
 const BRANCH_TYPE_LABELS = { bugfix: 'type:bugfix', new_feature: 'type:new-feature', existing_feature: 'type:existing-feature', patch: 'type:patch' };
-const BRANCH_TYPE_PREFIXES = { bugfix: 'BF', new_feature: 'NF', existing_feature: 'EF', patch: 'PA' };
+const BRANCH_TYPE_PREFIXES = { bugfix: 'fix', new_feature: 'feat', existing_feature: 'feat', patch: 'patch' };
 const AGENT_TOOL_SHORT = { windsurf: 'windsurf', claude_cli: 'claude-cli', cursor: 'cursor', github_copilot: 'gh-copilot' };
 
 // Cache of labels known to exist in the repo (populated lazily)
@@ -1239,69 +1273,49 @@ function ensureMonthlyBranch(date) {
 }
 
 /**
- * Create a task branch from the monthly dev branch.
- * Naming: PREFIX_AGENT_DATE  e.g. BF_windsurf_2026-02-16
+ * Create a task branch from main using SDLC naming convention.
+ * Naming: type/taskID-short-description  e.g. feat/636-migration-logic
  * Returns the branch name or null on failure.
  */
 async function createTaskBranch(item) {
-  if (!item.branch_type || !item.agent_tool) return null;
+  if (!item.branch_type) return null;
   if (item.github_branch) return item.github_branch; // already created
 
   const prefix = BRANCH_TYPE_PREFIXES[item.branch_type];
   if (!prefix) return null;
 
-  const agent = AGENT_TOOL_SHORT[item.agent_tool] || item.agent_tool;
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-  const taskBranch = `${prefix}_${agent}_${today}`;
-
-  // Ensure monthly branch exists first
-  const monthlyBranch = ensureMonthlyBranch();
-  if (!monthlyBranch) {
-    console.error(`[Branch] Cannot create task branch — monthly branch failed`);
-    return null;
-  }
+  const slug = slugify(item.title);
+  const taskBranch = `${prefix}/${item.id}-${slug}`;
 
   try {
-    // Check if task branch already exists
+    // Check if task branch already exists on remote
     try {
       const check = execSync(
-        `gh api repos/${GITHUB_REPO}/branches/${taskBranch} --jq '.name' 2>/dev/null`,
+        `gh api repos/${GITHUB_REPO}/branches/${encodeURIComponent(taskBranch)} --jq '.name' 2>/dev/null`,
         { encoding: 'utf-8', cwd: REPO_DIR }
       ).trim();
-      if (check === taskBranch) {
-        // Branch exists — might be same agent same day, append issue number
-        const uniqueBranch = `${taskBranch}_${item.github_issue_number || item.id}`;
-        const monthlySha = execSync(
-          `gh api repos/${GITHUB_REPO}/git/ref/heads/${monthlyBranch} --jq '.object.sha'`,
-          { encoding: 'utf-8', cwd: REPO_DIR }
-        ).trim();
-        execSync(
-          `gh api repos/${GITHUB_REPO}/git/refs -f ref="refs/heads/${uniqueBranch}" -f sha="${monthlySha}"`,
-          { encoding: 'utf-8', cwd: REPO_DIR }
-        );
-        console.log(`[Branch] Created task branch ${uniqueBranch} from ${monthlyBranch}`);
-
-        // Save to DB
+      if (check) {
+        console.log(`[Branch] Task branch ${taskBranch} already exists on remote`);
         const pool = getPool();
-        await pool.query('UPDATE om_daily_items SET github_branch = ? WHERE id = ?', [uniqueBranch, item.id]);
-        return uniqueBranch;
+        await pool.query('UPDATE om_daily_items SET github_branch = ? WHERE id = ?', [taskBranch, item.id]);
+        return taskBranch;
       }
     } catch {
       // Branch doesn't exist, proceed to create
     }
 
-    // Get monthly branch SHA
-    const monthlySha = execSync(
-      `gh api repos/${GITHUB_REPO}/git/ref/heads/${monthlyBranch} --jq '.object.sha'`,
+    // Get main branch SHA
+    const mainSha = execSync(
+      `gh api repos/${GITHUB_REPO}/git/ref/heads/main --jq '.object.sha'`,
       { encoding: 'utf-8', cwd: REPO_DIR }
     ).trim();
 
-    // Create task branch
+    // Create task branch from main
     execSync(
-      `gh api repos/${GITHUB_REPO}/git/refs -f ref="refs/heads/${taskBranch}" -f sha="${monthlySha}"`,
+      `gh api repos/${GITHUB_REPO}/git/refs -f ref="refs/heads/${taskBranch}" -f sha="${mainSha}"`,
       { encoding: 'utf-8', cwd: REPO_DIR }
     );
-    console.log(`[Branch] Created task branch ${taskBranch} from ${monthlyBranch} (${monthlySha.slice(0, 8)})`);
+    console.log(`[Branch] Created task branch ${taskBranch} from main (${mainSha.slice(0, 8)})`);
 
     // Save to DB
     const pool = getPool();
@@ -1862,23 +1876,13 @@ router.post('/items/:id/start-work', requireAuth, async (req, res) => {
       }
     }
 
-    // 3. Build branch name
+    // 3. Build branch name: type/taskID-short-description
     const prefix = BRANCH_TYPE_PREFIXES[branchType];
     if (!prefix) {
       return res.status(400).json({ error: `Invalid branch_type: ${branchType}` });
     }
-    const agent = AGENT_TOOL_SHORT[agentTool] || agentTool;
-    const today = new Date().toISOString().split('T')[0];
-    let branchName = `${prefix}_${agent}_${today}`;
-
-    // Check if branch name already taken (same agent, same day)
-    try {
-      execSync(`git rev-parse --verify origin/${branchName}`, { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
-      // Exists — append item id for uniqueness
-      branchName = `${branchName}_${item.id}`;
-    } catch {
-      // Doesn't exist — good
-    }
+    const slug = slugify(item.title);
+    let branchName = `${prefix}/${item.id}-${slug}`;
 
     // 4. Fetch latest main and create branch
     execSync('git fetch origin main', { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });
@@ -2161,6 +2165,502 @@ router.post('/items/:id/agent-complete', requireAuth, async (req, res) => {
       error: 'Failed to complete agent work',
       detail: err.message,
     });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// GITHUB WEBHOOK — receive PR events and auto-update SDLC status
+// ════════════════════════════════════════════════════════════════════════════
+//
+// Configure in GitHub repo → Settings → Webhooks:
+//   Payload URL:  https://orthodoxmetrics.com/api/om-daily/webhooks/github
+//   Content type: application/json
+//   Secret:       (set GITHUB_WEBHOOK_SECRET env var)
+//   Events:       Pull requests, Pull request reviews
+// ════════════════════════════════════════════════════════════════════════════
+
+const crypto = require('crypto');
+
+/**
+ * Verify GitHub webhook signature (HMAC SHA-256).
+ * Returns true if valid or if no secret is configured (dev mode).
+ */
+function verifyWebhookSignature(req) {
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+  if (!secret) {
+    console.warn('[Webhook] GITHUB_WEBHOOK_SECRET not set — skipping signature verification');
+    return true;
+  }
+  const sig = req.headers['x-hub-signature-256'];
+  if (!sig) return false;
+  const body = JSON.stringify(req.body);
+  const expected = 'sha256=' + crypto.createHmac('sha256', secret).update(body).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+}
+
+/**
+ * POST /api/om-daily/webhooks/github
+ *
+ * GitHub webhook handler. No auth required (uses signature verification).
+ * Handles:
+ *   pull_request: opened/ready_for_review → review
+ *   pull_request: closed + merged → done
+ *   pull_request_review: approved → staging
+ *
+ * Extracts task ID from branch name: type/TASK_ID-description
+ */
+router.post('/webhooks/github', async (req, res) => {
+  // Verify signature
+  if (!verifyWebhookSignature(req)) {
+    console.warn('[Webhook] Invalid signature — rejecting');
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+
+  const event = req.headers['x-github-event'];
+  const payload = req.body;
+
+  // Only handle pull_request and pull_request_review events
+  if (event !== 'pull_request' && event !== 'pull_request_review') {
+    return res.json({ ok: true, skipped: true, reason: `Unhandled event: ${event}` });
+  }
+
+  const pool = getPool();
+
+  try {
+    if (event === 'pull_request') {
+      const pr = payload.pull_request;
+      const action = payload.action;
+      const branchName = pr.head.ref;
+      const prNumber = pr.number;
+      const prUrl = pr.html_url;
+      const merged = pr.merged || false;
+      const isDraft = pr.draft || false;
+
+      // Extract task ID from branch name
+      const taskId = extractTaskIdFromBranch(branchName);
+      if (!taskId) {
+        console.log(`[Webhook] PR #${prNumber} branch '${branchName}' — no task ID found, skipping`);
+        return res.json({ ok: true, skipped: true, reason: 'No task ID in branch name' });
+      }
+
+      // Verify item exists
+      const [rows] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [taskId]);
+      if (!rows.length) {
+        console.log(`[Webhook] PR #${prNumber} references task #${taskId} but item not found`);
+        return res.json({ ok: true, skipped: true, reason: `Item #${taskId} not found` });
+      }
+
+      const item = rows[0];
+      let newStatus = null;
+      let logAction = '';
+
+      if (action === 'closed' && merged) {
+        // PR merged → Done
+        newStatus = SDLC_STAGES.DONE;
+        logAction = 'PR merged → done';
+        await pool.query(
+          `UPDATE om_daily_items SET status = ?, progress = 100, completed_at = NOW(),
+           github_pr_number = ?, github_pr_url = ?, github_pr_state = 'merged' WHERE id = ?`,
+          [newStatus, prNumber, prUrl, taskId]
+        );
+
+        // Close linked GitHub issue if exists
+        if (item.github_issue_number) {
+          try {
+            execSync(
+              `gh issue close ${item.github_issue_number} --repo ${GITHUB_REPO} -c "PR #${prNumber} merged"`,
+              { encoding: 'utf-8', cwd: REPO_DIR, stdio: 'pipe' }
+            );
+          } catch { /* non-critical */ }
+        }
+
+      } else if (action === 'closed' && !merged) {
+        // PR closed without merge — update PR state but don't change task status
+        await pool.query(
+          `UPDATE om_daily_items SET github_pr_number = ?, github_pr_url = ?, github_pr_state = 'closed' WHERE id = ?`,
+          [prNumber, prUrl, taskId]
+        );
+        logAction = 'PR closed (not merged)';
+
+      } else if ((action === 'opened' || action === 'ready_for_review') && !isDraft) {
+        // PR opened (non-draft) or moved from draft to ready → Review & QA
+        newStatus = SDLC_STAGES.REVIEW;
+        logAction = `PR ${action} → review`;
+        await pool.query(
+          `UPDATE om_daily_items SET status = ?, github_pr_number = ?, github_pr_url = ?, github_pr_state = 'open' WHERE id = ?`,
+          [newStatus, prNumber, prUrl, taskId]
+        );
+
+      } else if (action === 'opened' && isDraft) {
+        // Draft PR opened — track PR but keep status as self_review
+        await pool.query(
+          `UPDATE om_daily_items SET github_pr_number = ?, github_pr_url = ?, github_pr_state = 'draft' WHERE id = ?`,
+          [prNumber, prUrl, taskId]
+        );
+        logAction = 'Draft PR opened (status unchanged)';
+
+      } else if (action === 'reopened') {
+        // PR reopened → back to review
+        newStatus = SDLC_STAGES.REVIEW;
+        logAction = 'PR reopened → review';
+        await pool.query(
+          `UPDATE om_daily_items SET status = ?, completed_at = NULL, github_pr_state = 'open' WHERE id = ?`,
+          [newStatus, taskId]
+        );
+      }
+
+      console.log(`[Webhook] PR #${prNumber} (${action}) → task #${taskId}: ${logAction || 'no action'}`);
+      return res.json({ ok: true, taskId, prNumber, action: logAction || action, newStatus });
+    }
+
+    if (event === 'pull_request_review') {
+      const review = payload.review;
+      const pr = payload.pull_request;
+      const branchName = pr.head.ref;
+      const prNumber = pr.number;
+
+      // Only care about approved reviews
+      if (review.state !== 'approved') {
+        return res.json({ ok: true, skipped: true, reason: `Review state: ${review.state}` });
+      }
+
+      const taskId = extractTaskIdFromBranch(branchName);
+      if (!taskId) {
+        return res.json({ ok: true, skipped: true, reason: 'No task ID in branch name' });
+      }
+
+      const [rows] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [taskId]);
+      if (!rows.length) {
+        return res.json({ ok: true, skipped: true, reason: `Item #${taskId} not found` });
+      }
+
+      // PR approved → Staging/Ready
+      await pool.query(
+        `UPDATE om_daily_items SET status = ?, github_pr_state = 'approved' WHERE id = ?`,
+        [SDLC_STAGES.STAGING, taskId]
+      );
+
+      console.log(`[Webhook] PR #${prNumber} approved → task #${taskId}: review → staging`);
+      return res.json({ ok: true, taskId, prNumber, action: 'PR approved → staging', newStatus: SDLC_STAGES.STAGING });
+    }
+
+  } catch (err) {
+    console.error('[Webhook] Error processing GitHub event:', err.message);
+    return res.status(500).json({ error: 'Webhook processing failed', detail: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// DUAL-REPO ORCHESTRATION — repository_dispatch support
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * POST /api/om-daily/dispatch/:repo
+ *
+ * Send a repository_dispatch event to another repo.
+ * Used to signal cross-repo dependencies (e.g., OMAI → OM).
+ *
+ * Body: { event_type: string, client_payload: object }
+ */
+router.post('/dispatch/:repo', requireAuth, async (req, res) => {
+  const { repo } = req.params;
+  const { event_type, client_payload = {} } = req.body;
+
+  if (!event_type) {
+    return res.status(400).json({ error: 'event_type is required' });
+  }
+
+  // Allowed repos for dispatch
+  const ALLOWED_REPOS = {
+    orthodoxmetrics: GITHUB_REPO,
+    omai: 'nexty1982/omai',
+  };
+
+  const targetRepo = ALLOWED_REPOS[repo];
+  if (!targetRepo) {
+    return res.status(400).json({ error: `Unknown repo: ${repo}. Allowed: ${Object.keys(ALLOWED_REPOS).join(', ')}` });
+  }
+
+  try {
+    const payloadJson = JSON.stringify(client_payload).replace(/"/g, '\\"');
+    execSync(
+      `gh api repos/${targetRepo}/dispatches -f event_type="${event_type}" -f client_payload="${payloadJson}"`,
+      { encoding: 'utf-8', cwd: REPO_DIR }
+    );
+
+    console.log(`[Dispatch] Sent '${event_type}' to ${targetRepo}`);
+    res.json({ ok: true, repo: targetRepo, event_type });
+  } catch (err) {
+    console.error(`[Dispatch] Failed to send '${event_type}' to ${targetRepo}:`, err.message);
+    res.status(500).json({ error: 'Dispatch failed', detail: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// MILESTONES — workplan / version tracking
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Check whether every task in a milestone is done.
+ * Returns { total, completed, percent, ready }.
+ */
+async function checkMilestoneCompletion(milestoneId) {
+  const pool = getPool();
+  const [rows] = await pool.query(
+    `SELECT COUNT(*) AS total,
+            SUM(status = 'done') AS completed
+     FROM om_daily_items
+     WHERE milestone_id = ?`,
+    [milestoneId]
+  );
+  const { total, completed } = rows[0];
+  const ready = total > 0 && Number(total) === Number(completed);
+  const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+  if (ready) {
+    console.log(`[Milestone] #${milestoneId} is release-ready (${total}/${total} done)`);
+  }
+  return { total: Number(total), completed: Number(completed), percent, ready };
+}
+
+/**
+ * GET /milestones — list all milestones with task counts
+ */
+router.get('/milestones', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [milestones] = await pool.query(
+      `SELECT m.*,
+              COUNT(i.id) AS task_count,
+              SUM(i.status = 'done') AS tasks_done
+       FROM om_milestones m
+       LEFT JOIN om_daily_items i ON i.milestone_id = m.id
+       GROUP BY m.id
+       ORDER BY FIELD(m.status, 'active', 'planned', 'released'), m.created_at DESC`
+    );
+    res.json({ milestones });
+  } catch (err) {
+    console.error('[Milestones] list error:', err);
+    res.status(500).json({ error: 'Failed to list milestones' });
+  }
+});
+
+/**
+ * GET /milestones/:id — single milestone with its tasks
+ */
+router.get('/milestones/:id', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [ms] = await pool.query('SELECT * FROM om_milestones WHERE id = ?', [req.params.id]);
+    if (!ms.length) return res.status(404).json({ error: 'Milestone not found' });
+
+    const [items] = await pool.query(
+      `SELECT * FROM om_daily_items WHERE milestone_id = ?
+       ORDER BY FIELD(status, 'backlog','todo','in_progress','self_review','review','staging','done','cancelled'), priority ASC`,
+      [req.params.id]
+    );
+
+    const completion = await checkMilestoneCompletion(req.params.id);
+    res.json({ milestone: ms[0], items, completion });
+  } catch (err) {
+    console.error('[Milestones] get error:', err);
+    res.status(500).json({ error: 'Failed to get milestone' });
+  }
+});
+
+/**
+ * POST /milestones — create a milestone
+ */
+router.post('/milestones', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const { version_tag, title, description, status, target_date } = req.body;
+
+    if (!version_tag || !title) {
+      return res.status(400).json({ error: 'version_tag and title are required' });
+    }
+
+    const [result] = await pool.query(
+      `INSERT INTO om_milestones (version_tag, title, description, status, target_date)
+       VALUES (?, ?, ?, ?, ?)`,
+      [version_tag, title, description || null, status || 'planned', target_date || null]
+    );
+
+    const [ms] = await pool.query('SELECT * FROM om_milestones WHERE id = ?', [result.insertId]);
+    res.status(201).json({ milestone: ms[0] });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: `version_tag '${req.body.version_tag}' already exists` });
+    }
+    console.error('[Milestones] create error:', err);
+    res.status(500).json({ error: 'Failed to create milestone' });
+  }
+});
+
+/**
+ * PUT /milestones/:id — update a milestone
+ */
+router.put('/milestones/:id', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const { version_tag, title, description, status, target_date } = req.body;
+    const updates = [];
+    const params = [];
+
+    if (version_tag !== undefined) { updates.push('version_tag = ?'); params.push(version_tag); }
+    if (title !== undefined) { updates.push('title = ?'); params.push(title); }
+    if (description !== undefined) { updates.push('description = ?'); params.push(description); }
+    if (status !== undefined) {
+      updates.push('status = ?'); params.push(status);
+      if (status === 'released') { updates.push('released_at = NOW()'); }
+    }
+    if (target_date !== undefined) { updates.push('target_date = ?'); params.push(target_date || null); }
+
+    if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' });
+
+    params.push(req.params.id);
+    await pool.query(`UPDATE om_milestones SET ${updates.join(', ')} WHERE id = ?`, params);
+
+    const [ms] = await pool.query('SELECT * FROM om_milestones WHERE id = ?', [req.params.id]);
+    if (!ms.length) return res.status(404).json({ error: 'Milestone not found' });
+    res.json({ milestone: ms[0] });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: `version_tag already exists` });
+    }
+    console.error('[Milestones] update error:', err);
+    res.status(500).json({ error: 'Failed to update milestone' });
+  }
+});
+
+/**
+ * DELETE /milestones/:id — delete a milestone (FK SET NULL unlinks tasks)
+ */
+router.delete('/milestones/:id', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [existing] = await pool.query('SELECT id FROM om_milestones WHERE id = ?', [req.params.id]);
+    if (!existing.length) return res.status(404).json({ error: 'Milestone not found' });
+    await pool.query('DELETE FROM om_milestones WHERE id = ?', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[Milestones] delete error:', err);
+    res.status(500).json({ error: 'Failed to delete milestone' });
+  }
+});
+
+/**
+ * POST /milestones/:id/items — bulk-assign tasks to a milestone
+ * Body: { item_ids: [1, 2, 3] }
+ */
+router.post('/milestones/:id/items', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const { item_ids } = req.body;
+    if (!Array.isArray(item_ids) || item_ids.length === 0) {
+      return res.status(400).json({ error: 'item_ids array is required' });
+    }
+
+    const [ms] = await pool.query('SELECT id FROM om_milestones WHERE id = ?', [req.params.id]);
+    if (!ms.length) return res.status(404).json({ error: 'Milestone not found' });
+
+    await pool.query(
+      `UPDATE om_daily_items SET milestone_id = ? WHERE id IN (?)`,
+      [req.params.id, item_ids]
+    );
+
+    const completion = await checkMilestoneCompletion(req.params.id);
+    res.json({ ok: true, assigned: item_ids.length, completion });
+  } catch (err) {
+    console.error('[Milestones] bulk-assign error:', err);
+    res.status(500).json({ error: 'Failed to assign items' });
+  }
+});
+
+/**
+ * DELETE /milestones/:id/items/:itemId — remove a task from a milestone
+ */
+router.delete('/milestones/:id/items/:itemId', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    await pool.query(
+      `UPDATE om_daily_items SET milestone_id = NULL WHERE id = ? AND milestone_id = ?`,
+      [req.params.itemId, req.params.id]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[Milestones] remove-item error:', err);
+    res.status(500).json({ error: 'Failed to remove item from milestone' });
+  }
+});
+
+/**
+ * GET /milestones/:id/status — completion stats
+ */
+router.get('/milestones/:id/status', requireAuth, async (req, res) => {
+  try {
+    const [ms] = await getPool().query('SELECT * FROM om_milestones WHERE id = ?', [req.params.id]);
+    if (!ms.length) return res.status(404).json({ error: 'Milestone not found' });
+
+    const completion = await checkMilestoneCompletion(req.params.id);
+    res.json({ milestone: ms[0], completion });
+  } catch (err) {
+    console.error('[Milestones] status error:', err);
+    res.status(500).json({ error: 'Failed to get milestone status' });
+  }
+});
+
+/**
+ * POST /milestones/:id/release — promote milestone to production
+ * Dispatches 'promote-to-production' event to the repo and marks milestone as released.
+ */
+router.post('/milestones/:id/release', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [ms] = await pool.query('SELECT * FROM om_milestones WHERE id = ?', [req.params.id]);
+    if (!ms.length) return res.status(404).json({ error: 'Milestone not found' });
+
+    const milestone = ms[0];
+    if (milestone.status === 'released') {
+      return res.status(400).json({ error: 'Milestone is already released' });
+    }
+
+    const completion = await checkMilestoneCompletion(req.params.id);
+    if (!completion.ready) {
+      return res.status(400).json({
+        error: `Milestone is not ready: ${completion.completed}/${completion.total} tasks done (${completion.percent}%)`,
+        completion,
+      });
+    }
+
+    // Dispatch promote-to-production event to GitHub
+    const payloadJson = JSON.stringify({
+      version: milestone.version_tag,
+      milestone_id: milestone.id,
+      title: milestone.title,
+    }).replace(/"/g, '\\"');
+
+    try {
+      execSync(
+        `gh api repos/${GITHUB_REPO}/dispatches -f event_type="promote-to-production" -f client_payload="${payloadJson}"`,
+        { encoding: 'utf-8', cwd: REPO_DIR }
+      );
+      console.log(`[Milestone] Dispatched promote-to-production for ${milestone.version_tag}`);
+    } catch (ghErr) {
+      console.error('[Milestone] GitHub dispatch failed:', ghErr.message);
+      return res.status(500).json({ error: 'GitHub dispatch failed', detail: ghErr.message });
+    }
+
+    // Mark milestone as released
+    await pool.query(
+      `UPDATE om_milestones SET status = 'released', released_at = NOW() WHERE id = ?`,
+      [req.params.id]
+    );
+
+    const [updated] = await pool.query('SELECT * FROM om_milestones WHERE id = ?', [req.params.id]);
+    res.json({ ok: true, milestone: updated[0], completion });
+  } catch (err) {
+    console.error('[Milestones] release error:', err);
+    res.status(500).json({ error: 'Failed to release milestone' });
   }
 });
 

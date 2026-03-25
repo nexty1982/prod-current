@@ -194,7 +194,6 @@ const ADMIN_MAP: SiteNode[] = [
       { label: 'CRM & Outreach', path: '/admin/control-panel/crm-outreach', icon: <OutreachIcon /> },
       { label: 'System & Server', path: '/admin/control-panel/system-server', icon: <ServerIcon /> },
       { label: 'AI & Automation', path: '/admin/control-panel/ai-automation', icon: <AIIcon /> },
-      { label: 'OM Daily', path: '/admin/control-panel/om-daily', icon: <TaskIcon /> },
       { label: 'Feature Lifecycle (SDLC)', path: '/admin/control-panel/sdlc', icon: <CodeIcon /> },
       {
         label: 'System & Server Sub-Pages', icon: <ServerIcon />, children: [

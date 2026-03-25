@@ -1560,7 +1560,7 @@ const ConversationLogPage: React.FC = () => {
                   <Alert severity="success" sx={{ fontSize: '0.8rem' }} onClose={() => setBulkExportResult(null)}>
                     Successfully exported {bulkExportResult.count} task(s) to OM Daily pipeline.
                     {bulkExportResult.skipped > 0 && ` ${bulkExportResult.skipped} duplicate(s) skipped.`}
-                    {' '}<a href="/admin/control-panel/om-daily" style={{ color: 'inherit', fontWeight: 600 }}>View Pipeline →</a>
+                    {' '}<a href="/omai/tools/om-daily" target="_blank" rel="noopener" style={{ color: 'inherit', fontWeight: 600 }}>View Pipeline →</a>
                   </Alert>
                 )}
               </Stack>
@@ -2015,7 +2015,7 @@ const ConversationLogPage: React.FC = () => {
                     </Button>
                     <Button
                       size="small" variant="text" fullWidth
-                      onClick={() => window.open('/admin/control-panel/om-daily', '_blank')}
+                      onClick={() => window.open('/omai/tools/om-daily', '_blank')}
                       sx={{ textTransform: 'none', fontSize: '0.75rem', color: '#00897b' }}
                     >
                       Open OM Daily Pipeline

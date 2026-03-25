@@ -417,7 +417,7 @@ const PromptPlanDetailPage: React.FC = () => {
                           label={plan.change_set_code}
                           size="small"
                           clickable
-                          onClick={(e) => { e.stopPropagation(); navigate(`/admin/control-panel/om-daily/change-sets`); }}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/omai/tools/om-daily/change-sets`); }}
                           sx={{ fontSize: '0.7rem', fontWeight: 600, bgcolor: alpha('#2d1b4e', 0.08), color: '#2d1b4e' }}
                         />
                       )}
@@ -472,7 +472,7 @@ const PromptPlanDetailPage: React.FC = () => {
               Step completed. Work item{' '}
               <Typography component="a" variant="body2" fontWeight={600}
                 sx={{ cursor: 'pointer', textDecoration: 'underline' }}
-                onClick={() => navigate(`/admin/control-panel/om-daily?tab=1&search=%23${launchResult.workItemId}`)}>
+                onClick={() => navigate(`/omai/tools/om-daily?tab=1&search=%23${launchResult.workItemId}`)}>
                 #{launchResult.workItemId}
               </Typography>
               {' '}created. Response: {launchResult.response.substring(0, 120)}...
@@ -581,7 +581,7 @@ const PromptPlanDetailPage: React.FC = () => {
                           sx={{ mt: 1, fontSize: '0.65rem', cursor: 'pointer' }}
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/admin/control-panel/om-daily?tab=1&search=%23${step.generated_work_item_id}`);
+                            navigate(`/omai/tools/om-daily?tab=1&search=%23${step.generated_work_item_id}`);
                           }}
                         />
                       )}

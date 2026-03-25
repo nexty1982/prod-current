@@ -76,7 +76,7 @@ export default function OmAssistantMessages({ messages, isLoading, context }: Om
                   component="button"
                   variant="caption"
                   sx={{ fontSize: '0.65rem', verticalAlign: 'baseline' }}
-                  onClick={() => navigate(`/admin/control-panel/om-daily?tab=1&search=%23${msg.workItemId}`)}
+                  onClick={() => window.open(`/omai/tools/om-daily`, '_blank')}
                 >
                   #{msg.workItemId}
                 </Link>

@@ -13,7 +13,6 @@ import PageContainer from '@/shared/ui/PageContainer';
 import {
     Psychology as AIIcon,
     Business as ChurchIcon,
-    CalendarMonth as DailyIcon,
     Campaign as OutreachIcon,
     Description as RecordsIcon,
     Dns as ServerIcon,
@@ -134,21 +133,6 @@ const CATEGORIES: Category[] = [
     quickLinks: [
       { label: 'AI Admin Panel', href: '/admin/ai' },
       { label: 'OMAI Logger', href: '/church/omai-logger' },
-    ],
-  },
-  {
-    key: 'daily',
-    title: 'OM Daily',
-    description: 'Work pipelines — 24hr, 48hr, 7/14/30/60/90 day horizons + conversation integration',
-    icon: <DailyIcon sx={{ fontSize: 28 }} />,
-    color: '#00897b',
-    bgLight: 'rgba(0, 137, 123, 0.08)',
-    bgDark: 'rgba(0, 137, 123, 0.15)',
-    href: '/admin/control-panel/om-daily',
-    quickLinks: [
-      { label: '24-Hour Plan', href: '/admin/control-panel/om-daily?horizon=1' },
-      { label: '48-Hour Plan', href: '/admin/control-panel/om-daily?horizon=2' },
-      { label: '7-Day Plan', href: '/admin/control-panel/om-daily?horizon=7' },
     ],
   },
   {

@@ -430,7 +430,7 @@ const ComponentsInDevelopmentPage: React.FC = () => {
                             }}
                             onClick={(e: React.MouseEvent) => {
                               e.stopPropagation();
-                              navigate(`/admin/control-panel/om-daily/change-sets/${linkedCS.id}`);
+                              navigate(`/omai/tools/om-daily/change-sets/${linkedCS.id}`);
                             }}
                           />
                         ) : (
