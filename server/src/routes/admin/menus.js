@@ -8,8 +8,8 @@ const router = express.Router();
 const { getAppPool } = require('../../config/db-compat');
 const { requireRole } = require('../../middleware/auth');
 
-// All routes require super_admin
-router.use(requireRole(['super_admin']));
+// All routes require super_admin or admin
+router.use(requireRole(['super_admin', 'admin']));
 
 /**
  * POST /api/admin/menus/seed

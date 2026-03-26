@@ -39,7 +39,7 @@ import {
   IconTemplate,
   IconReload,
 } from '@tabler/icons-react';
-import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowsProp, GridActionsCellItem, GridRowParams } from '@mui/x-data-grid';
 import { getMenuItems } from '@/layouts/full/vertical/sidebar/MenuItems';
 import { useAuth } from '@/context/AuthContext';
 
@@ -93,7 +93,8 @@ interface MenuItem {
 }
 
 const MenuEditor: React.FC = () => {
-  const { user, isSuperAdmin } = useAuth();
+  const { user, isSuperAdmin, hasRole } = useAuth();
+  const canAccess = () => hasRole(['super_admin', 'admin']);
   const [loading, setLoading] = useState(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -101,6 +102,10 @@ const MenuEditor: React.FC = () => {
   const [seedDialogOpen, setSeedDialogOpen] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   
+  // Delete confirmation state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
+
   // Template system state
   const [selectedTemplate, setSelectedTemplate] = useState<string>('default-superadmins');
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
@@ -135,10 +140,10 @@ const MenuEditor: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isSuperAdmin()) {
+    if (canAccess()) {
       loadMenuItems();
     }
-  }, [isSuperAdmin]);
+  }, []);
 
   // Save menu items
   const handleSave = async () => {
@@ -470,6 +475,37 @@ const MenuEditor: React.FC = () => {
     }
   };
 
+  // Delete a single menu item
+  const handleDeleteItem = async () => {
+    if (!itemToDelete?.id) return;
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`/api/admin/menus/${itemToDelete.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete menu item');
+      }
+
+      setSuccess(`Deleted menu item "${itemToDelete.label}"`);
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+      await loadMenuItems();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete menu item');
+      console.error('Error deleting menu item:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Update menu item
   const updateMenuItem = (id: number, field: keyof MenuItem, value: any) => {
     setMenuItems(prevItems =>
@@ -526,13 +562,30 @@ const MenuEditor: React.FC = () => {
         />
       ),
     },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 80,
+      getActions: (params: GridRowParams) => [
+        <GridActionsCellItem
+          key="delete"
+          icon={<IconTrash size={16} />}
+          label="Delete"
+          onClick={() => {
+            setItemToDelete(params.row as MenuItem);
+            setDeleteDialogOpen(true);
+          }}
+        />,
+      ],
+    },
   ];
 
-  if (!isSuperAdmin()) {
+  if (!canAccess()) {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">
-          Access denied. Only super_admin users can access the Menu Editor.
+          Access denied. Only admin and super_admin users can access the Menu Editor.
         </Alert>
       </Box>
     );
@@ -674,9 +727,9 @@ const MenuEditor: React.FC = () => {
               <DataGrid
                 rows={menuItems}
                 columns={columns}
-                pageSizeOptions={[10, 25, 50]}
+                pageSizeOptions={[25, 50, 100]}
                 initialState={{
-                  pagination: { paginationModel: { pageSize: 25 } },
+                  pagination: { paginationModel: { pageSize: 100 } },
                 }}
                 disableRowSelectionOnClick
                 processRowUpdate={(newRow) => {
@@ -773,6 +826,25 @@ const MenuEditor: React.FC = () => {
             startIcon={templateLoading ? <CircularProgress size={20} /> : <IconDatabase />}
           >
             Seed from Template
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>Delete Menu Item</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete <strong>{itemToDelete?.label}</strong> ({itemToDelete?.key_name})?
+          </Typography>
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            Any child items will be moved to the root level.
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleDeleteItem} variant="contained" color="error" disabled={loading}>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

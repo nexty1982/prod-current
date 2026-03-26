@@ -63,7 +63,7 @@ router.get('/ui/menu', optionalAuth, async (req: Request, res: Response) => {
  * Returns all menus (including inactive) for editing
  * Super admin only
  */
-router.get('/admin/menus', requireRole(['super_admin']), async (req: Request, res: Response) => {
+router.get('/admin/menus', requireRole(['super_admin', 'admin']), async (req: Request, res: Response) => {
   try {
     const activeOnly = req.query.active_only === 'true';
     const rows = await MenuService.getMenusByRole('super_admin', activeOnly);
@@ -92,7 +92,7 @@ router.get('/admin/menus', requireRole(['super_admin']), async (req: Request, re
  * Bulk update/insert menu items
  * Super admin only
  */
-router.put('/admin/menus', requireRole(['super_admin']), async (req: Request, res: Response) => {
+router.put('/admin/menus', requireRole(['super_admin', 'admin']), async (req: Request, res: Response) => {
   try {
     const { items } = req.body;
 
@@ -148,7 +148,7 @@ router.put('/admin/menus', requireRole(['super_admin']), async (req: Request, re
  * Seed menus from frontend payload (converted from MenuItems.ts)
  * Super admin only
  */
-router.post('/admin/menus/seed', requireRole(['super_admin']), async (req: Request, res: Response) => {
+router.post('/admin/menus/seed', requireRole(['super_admin', 'admin']), async (req: Request, res: Response) => {
   try {
     const { items } = req.body;
 
@@ -223,7 +223,7 @@ router.post('/admin/menus/seed', requireRole(['super_admin']), async (req: Reque
  * Reset super_admin menus (set all inactive)
  * Super admin only
  */
-router.post('/admin/menus/reset', requireRole(['super_admin']), async (req: Request, res: Response) => {
+router.post('/admin/menus/reset', requireRole(['super_admin', 'admin']), async (req: Request, res: Response) => {
   try {
     const user = (req as any).session?.user;
     const userId = user?.email || user?.username || 'unknown';
@@ -250,7 +250,7 @@ router.post('/admin/menus/reset', requireRole(['super_admin']), async (req: Requ
  * Returns validation constants (icon whitelist, path regex, etc.)
  * Super admin only
  */
-router.get('/admin/menus/constants', requireRole(['super_admin']), (req: Request, res: Response) => {
+router.get('/admin/menus/constants', requireRole(['super_admin', 'admin']), (req: Request, res: Response) => {
   try {
     return res.json({
       success: true,
@@ -265,6 +265,49 @@ router.get('/admin/menus/constants', requireRole(['super_admin']), (req: Request
     return res.status(500).json({
       success: false,
       error: 'Failed to fetch constants',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * DELETE /api/admin/menus/:id
+ * Delete a single menu item by ID
+ * Super admin or admin only
+ */
+router.delete('/admin/menus/:id', requireRole(['super_admin', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        code: 'VALIDATION_ERROR',
+        error: 'Invalid menu item ID',
+      });
+    }
+
+    const user = (req as any).session?.user;
+    const userId = user?.email || user?.username || 'unknown';
+    const deleted = await MenuService.deleteMenuItem(id, userId);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        code: 'NOT_FOUND',
+        error: 'Menu item not found',
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: `Menu item ${id} deleted successfully`,
+    });
+  } catch (error: any) {
+    console.error('Error deleting menu item:', error);
+    return res.status(500).json({
+      success: false,
+      code: 'INTERNAL_ERROR',
+      error: 'Failed to delete menu item',
       message: error.message,
     });
   }

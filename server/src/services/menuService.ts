@@ -39,7 +39,7 @@ export const ALLOWED_ICONS = [
 ];
 
 // Path validation regex
-export const PATH_ALLOWLIST_REGEX = /^\/(?:apps|dev|admin|devel|devel-tools|church|dashboards|tools|sandbox|social|frontend-pages|user-profile)(?:\/|$)/;
+export const PATH_ALLOWLIST_REGEX = /^\/(?:apps|dev|admin|devel|devel-tools|church|dashboards|tools|sandbox|social|frontend-pages|user-profile|account|omai)(?:\/|$)/;
 
 // Allowed meta keys
 export const ALLOWED_META_KEYS = ['systemRequired', 'badge', 'note', 'chip', 'chipColor'];
@@ -445,6 +445,34 @@ export class MenuService {
       return count;
     } catch (error) {
       console.error('Error resetting menus:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a single menu item by ID
+   * Also nullifies parent_id on any children (re-parents them to root)
+   */
+  static async deleteMenuItem(id: number, userId: string): Promise<boolean> {
+    try {
+      const appDb = db.getAppPool();
+
+      // Re-parent children to root before deleting
+      await appDb.query(
+        'UPDATE menus SET parent_id = NULL, updated_by = ?, updated_at = CURRENT_TIMESTAMP WHERE parent_id = ?',
+        [userId, id]
+      );
+
+      const [result] = await appDb.query('DELETE FROM menus WHERE id = ?', [id]);
+      const deleted = (result as any).affectedRows > 0;
+
+      if (deleted) {
+        await MenuService.logAudit('delete', userId, { deletedId: id });
+      }
+
+      return deleted;
+    } catch (error) {
+      console.error('Error deleting menu item:', error);
       throw error;
     }
   }
