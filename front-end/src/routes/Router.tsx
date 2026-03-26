@@ -1,9 +1,10 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import AppErrorBoundary from '@/shared/ui/AppErrorBoundary';
+import { useAuth } from '@/context/AuthContext';
 import { RecordsRouteErrorBoundary } from '@/shared/ui/RecordsRouteErrorBoundary';
 import { lazy } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
 import SmartRedirect from '../components/routing/SmartRedirect';
@@ -365,6 +366,16 @@ const WelcomeMessage = Loadable(lazy(() => import('../features/pages/frontend-pa
 const Tour = Loadable(lazy(() => import('../features/pages/frontend-pages/Tour')));
 const Faq = Loadable(lazy(() => import('../features/pages/frontend-pages/Faq')));
 const SacramentalRestrictionsPublicPage = Loadable(lazy(() => import('../features/pages/frontend-pages/SacramentalRestrictionsPublicPage')));
+
+/**
+ * Super admins stay in FullLayout (admin shell with sidebar).
+ * All other users get ChurchPortalLayout (portal-style, no sidebar).
+ */
+function AccountLayoutSwitcher() {
+  const { user } = useAuth();
+  if (user?.role === 'super_admin') return <FullLayout />;
+  return <ChurchPortalLayout />;
+}
 
 const Router = [
   {
@@ -2188,10 +2199,10 @@ const Router = [
       },
     ],
   },
-  // ── Account Hub (portal-style layout — no admin sidebar) ──
+  // ── Account Hub — super_admin uses FullLayout, others use portal ──
   {
     path: '/account',
-    element: <ChurchPortalLayout />,
+    element: <AccountLayoutSwitcher />,
     children: [
       {
         element: (
