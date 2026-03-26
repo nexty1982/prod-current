@@ -7,12 +7,62 @@
  */
 
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const router = express.Router();
 
 function getPool() {
   return require('../config/db').promisePool;
 }
+
+// ── Attachment storage config ──────────────────────────────────
+const UPLOADS_ROOT = path.resolve(__dirname, '../../uploads/om-daily');
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_EXTENSIONS = new Set([
+  '.jpg', '.jpeg', '.png', '.webp',
+  '.pdf', '.doc', '.docx', '.txt', '.md',
+  '.xls', '.xlsx', '.csv',
+]);
+const ALLOWED_MIMES = new Set([
+  'image/jpeg', 'image/png', 'image/webp',
+  'application/pdf',
+  'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain', 'text/markdown',
+  'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv',
+]);
+
+function sanitizeFilename(name) {
+  return name.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 200);
+}
+
+const attachmentStorage = multer.diskStorage({
+  destination: (req, _file, cb) => {
+    const itemId = req.params.id;
+    const dir = path.join(UPLOADS_ROOT, String(itemId));
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const unique = crypto.randomBytes(12).toString('hex');
+    cb(null, `${unique}${ext}`);
+  },
+});
+
+const attachmentUpload = multer({
+  storage: attachmentStorage,
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!ALLOWED_EXTENSIONS.has(ext)) return cb(new Error(`File type ${ext} not allowed`));
+    if (!ALLOWED_MIMES.has(file.mimetype)) return cb(new Error(`MIME type ${file.mimetype} not allowed`));
+    cb(null, true);
+  },
+});
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -1637,9 +1687,6 @@ router.get('/github/status', requireAuth, async (req, res) => {
 // BUILD INFO & PUSH TO ORIGIN
 // ═══════════════════════════════════════════════════════════════
 
-const fs = require('fs');
-const path = require('path');
-
 const ROOT_PATH = '/var/www/orthodoxmetrics/prod';
 const BUILD_INFO_FILE = path.join(ROOT_PATH, '.build-info');
 
@@ -2179,8 +2226,6 @@ router.post('/items/:id/agent-complete', requireAuth, async (req, res) => {
 //   Events:       Pull requests, Pull request reviews
 // ════════════════════════════════════════════════════════════════════════════
 
-const crypto = require('crypto');
-
 /**
  * Verify GitHub webhook signature (HMAC SHA-256).
  * Returns true if valid or if no secret is configured (dev mode).
@@ -2661,6 +2706,279 @@ router.post('/milestones/:id/release', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('[Milestones] release error:', err);
     res.status(500).json({ error: 'Failed to release milestone' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// DRAFTS — server-backed draft lifecycle
+// ═══════════════════════════════════════════════════════════════
+
+// POST /items/draft — create a new draft
+router.post('/items/draft', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const userId = req.session?.user?.id || req.user?.id || null;
+    const { title, description, task_type, priority, horizon, category, due_date, agent_tool, branch_type, repo_target } = req.body;
+
+    const [result] = await pool.query(
+      `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, due_date, source, agent_tool, branch_type, repo_target, created_by, draft_saved_at)
+       VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, 'human', ?, ?, ?, ?, NOW())`,
+      [
+        title || '', task_type || 'task', description || null, horizon || '7',
+        priority || 'medium', category || null, due_date || null,
+        agent_tool || null, branch_type || null, repo_target || 'orthodoxmetrics',
+        userId,
+      ]
+    );
+
+    const [item] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [result.insertId]);
+    console.log(`[OM Daily] Draft created #${result.insertId} by user ${userId}`);
+    res.status(201).json({ success: true, item: item[0] });
+  } catch (err) {
+    console.error('[OM Daily] Draft create error:', err);
+    res.status(500).json({ error: 'Failed to create draft' });
+  }
+});
+
+// PATCH /items/:id/draft — auto-save draft fields
+router.patch('/items/:id/draft', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const userId = req.session?.user?.id || req.user?.id || null;
+
+    // Verify item exists and is a draft
+    const [existing] = await pool.query('SELECT id, status, created_by FROM om_daily_items WHERE id = ?', [req.params.id]);
+    if (!existing.length) return res.status(404).json({ error: 'Item not found' });
+    if (existing[0].status !== 'draft') return res.status(400).json({ error: 'Item is not a draft' });
+
+    const allowed = ['title', 'description', 'task_type', 'priority', 'horizon', 'category', 'due_date', 'agent_tool', 'branch_type', 'repo_target'];
+    const updates = []; const values = [];
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) {
+        updates.push(`${key} = ?`);
+        values.push(req.body[key] === '' ? null : req.body[key]);
+      }
+    }
+    if (!updates.length) return res.json({ success: true, message: 'Nothing to update' });
+
+    updates.push('draft_saved_at = NOW()');
+    updates.push('updated_by = ?'); values.push(userId);
+    values.push(req.params.id);
+
+    await pool.query(`UPDATE om_daily_items SET ${updates.join(', ')} WHERE id = ?`, values);
+    const [item] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [req.params.id]);
+    res.json({ success: true, item: item[0] });
+  } catch (err) {
+    console.error('[OM Daily] Draft save error:', err);
+    res.status(500).json({ error: 'Failed to save draft' });
+  }
+});
+
+// GET /items/draft/current — get the user's current in-progress draft (most recent)
+router.get('/items/draft/current', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const userId = req.session?.user?.id || req.user?.id || null;
+    if (!userId) return res.json({ success: true, draft: null });
+
+    const [drafts] = await pool.query(
+      `SELECT d.*, (SELECT COUNT(*) FROM om_daily_item_attachments a WHERE a.work_item_id = d.id AND a.is_deleted = 0) AS attachment_count
+       FROM om_daily_items d WHERE d.status = 'draft' AND d.created_by = ? ORDER BY d.draft_saved_at DESC LIMIT 1`,
+      [userId]
+    );
+    res.json({ success: true, draft: drafts[0] || null });
+  } catch (err) {
+    console.error('[OM Daily] Draft fetch error:', err);
+    res.status(500).json({ error: 'Failed to fetch draft' });
+  }
+});
+
+// DELETE /items/:id/draft — discard a draft (hard delete + cleanup attachments)
+router.delete('/items/:id/draft', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [existing] = await pool.query('SELECT id, status FROM om_daily_items WHERE id = ?', [req.params.id]);
+    if (!existing.length) return res.status(404).json({ error: 'Item not found' });
+    if (existing[0].status !== 'draft') return res.status(400).json({ error: 'Item is not a draft' });
+
+    // Remove attachment files from disk
+    const itemDir = path.join(UPLOADS_ROOT, String(req.params.id));
+    try { fs.rmSync(itemDir, { recursive: true, force: true }); } catch { /* ok */ }
+
+    // DB cascade will handle om_daily_item_attachments via FK
+    await pool.query('DELETE FROM om_daily_items WHERE id = ? AND status = ?', [req.params.id, 'draft']);
+    console.log(`[OM Daily] Draft #${req.params.id} discarded`);
+    res.json({ success: true, message: 'Draft discarded' });
+  } catch (err) {
+    console.error('[OM Daily] Draft discard error:', err);
+    res.status(500).json({ error: 'Failed to discard draft' });
+  }
+});
+
+// POST /items/:id/submit — promote draft to active item (backlog)
+router.post('/items/:id/submit', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const userId = req.session?.user?.id || req.user?.id || null;
+
+    const [existing] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [req.params.id]);
+    if (!existing.length) return res.status(404).json({ error: 'Item not found' });
+    if (existing[0].status !== 'draft') return res.status(400).json({ error: 'Item is not a draft' });
+    if (!existing[0].title || !existing[0].title.trim()) return res.status(400).json({ error: 'Title is required to submit' });
+
+    await pool.query(
+      `UPDATE om_daily_items SET status = 'backlog', submitted_at = NOW(), updated_by = ?, draft_saved_at = NULL WHERE id = ?`,
+      [userId, req.params.id]
+    );
+
+    const [item] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [req.params.id]);
+    const createdItem = item[0];
+
+    // Auto-sync to GitHub if agent_tool + branch_type are set
+    if (createdItem.agent_tool && createdItem.branch_type) {
+      try { await syncItemToGitHub(createdItem); } catch (syncErr) {
+        console.error('[Auto-sync] Failed on submit:', syncErr.message);
+      }
+    }
+
+    const [final] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [req.params.id]);
+    console.log(`[OM Daily] Draft #${req.params.id} submitted as active item by user ${userId}`);
+    res.json({ success: true, item: final[0] });
+  } catch (err) {
+    console.error('[OM Daily] Draft submit error:', err);
+    res.status(500).json({ error: 'Failed to submit draft' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// ATTACHMENTS — file upload/download/delete for work items
+// ═══════════════════════════════════════════════════════════════
+
+// POST /items/:id/attachments — upload files to a work item or draft
+router.post('/items/:id/attachments', requireAuth, (req, res) => {
+  const upload = attachmentUpload.array('files', 10);
+  upload(req, res, async (multerErr) => {
+    if (multerErr) {
+      if (multerErr.code === 'LIMIT_FILE_SIZE') return res.status(413).json({ error: `File exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit` });
+      return res.status(400).json({ error: multerErr.message });
+    }
+    try {
+      const pool = getPool();
+      const userId = req.session?.user?.id || req.user?.id || null;
+
+      // Verify item exists
+      const [existing] = await pool.query('SELECT id, status FROM om_daily_items WHERE id = ?', [req.params.id]);
+      if (!existing.length) {
+        // Cleanup uploaded files
+        (req.files || []).forEach(f => { try { fs.unlinkSync(f.path); } catch {} });
+        return res.status(404).json({ error: 'Work item not found' });
+      }
+
+      const attachments = [];
+      for (const file of (req.files || [])) {
+        const ext = path.extname(file.originalname).toLowerCase();
+        const [insertResult] = await pool.query(
+          `INSERT INTO om_daily_item_attachments (work_item_id, original_filename, stored_filename, storage_path, mime_type, file_size_bytes, file_extension, uploaded_by)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            req.params.id,
+            sanitizeFilename(file.originalname),
+            file.filename,
+            path.join(String(req.params.id), file.filename),
+            file.mimetype,
+            file.size,
+            ext,
+            userId,
+          ]
+        );
+        attachments.push({
+          id: insertResult.insertId,
+          original_filename: sanitizeFilename(file.originalname),
+          stored_filename: file.filename,
+          mime_type: file.mimetype,
+          file_size_bytes: file.size,
+          file_extension: ext,
+        });
+      }
+
+      console.log(`[OM Daily] ${attachments.length} attachment(s) uploaded to item #${req.params.id} by user ${userId}`);
+      res.status(201).json({ success: true, attachments });
+    } catch (err) {
+      console.error('[OM Daily] Attachment upload error:', err);
+      res.status(500).json({ error: 'Failed to upload attachments' });
+    }
+  });
+});
+
+// GET /items/:id/attachments — list attachments for a work item
+router.get('/items/:id/attachments', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [attachments] = await pool.query(
+      `SELECT id, work_item_id, original_filename, stored_filename, mime_type, file_size_bytes, file_extension, uploaded_by, uploaded_at, label, sort_order
+       FROM om_daily_item_attachments WHERE work_item_id = ? AND is_deleted = 0 ORDER BY sort_order, uploaded_at`,
+      [req.params.id]
+    );
+    res.json({ success: true, attachments });
+  } catch (err) {
+    console.error('[OM Daily] Attachment list error:', err);
+    res.status(500).json({ error: 'Failed to list attachments' });
+  }
+});
+
+// GET /attachments/:attachmentId/download — download/view an attachment
+router.get('/attachments/:attachmentId/download', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [rows] = await pool.query(
+      'SELECT * FROM om_daily_item_attachments WHERE id = ? AND is_deleted = 0',
+      [req.params.attachmentId]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Attachment not found' });
+
+    const att = rows[0];
+    const filePath = path.join(UPLOADS_ROOT, att.storage_path);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found on disk' });
+
+    // Prevent path traversal
+    const resolved = path.resolve(filePath);
+    if (!resolved.startsWith(path.resolve(UPLOADS_ROOT))) return res.status(403).json({ error: 'Access denied' });
+
+    const isInline = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(att.mime_type);
+    res.setHeader('Content-Type', att.mime_type);
+    res.setHeader('Content-Disposition', `${isInline ? 'inline' : 'attachment'}; filename="${att.original_filename}"`);
+    res.setHeader('Content-Length', att.file_size_bytes);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    fs.createReadStream(filePath).pipe(res);
+  } catch (err) {
+    console.error('[OM Daily] Attachment download error:', err);
+    res.status(500).json({ error: 'Failed to download attachment' });
+  }
+});
+
+// DELETE /attachments/:attachmentId — soft-delete an attachment
+router.delete('/attachments/:attachmentId', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [rows] = await pool.query(
+      'SELECT * FROM om_daily_item_attachments WHERE id = ? AND is_deleted = 0',
+      [req.params.attachmentId]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Attachment not found' });
+
+    // Soft-delete in DB
+    await pool.query('UPDATE om_daily_item_attachments SET is_deleted = 1 WHERE id = ?', [req.params.attachmentId]);
+
+    // Remove file from disk
+    const att = rows[0];
+    const filePath = path.join(UPLOADS_ROOT, att.storage_path);
+    try { fs.unlinkSync(filePath); } catch { /* ok if already gone */ }
+
+    console.log(`[OM Daily] Attachment #${req.params.attachmentId} deleted from item #${att.work_item_id}`);
+    res.json({ success: true, message: 'Attachment deleted' });
+  } catch (err) {
+    console.error('[OM Daily] Attachment delete error:', err);
+    res.status(500).json({ error: 'Failed to delete attachment' });
   }
 });
 

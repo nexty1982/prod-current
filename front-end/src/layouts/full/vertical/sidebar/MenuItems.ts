@@ -4,10 +4,7 @@ import {
     IconBell,
     IconBorderAll,
     IconBug,
-    IconCalendar,
-    IconCards,
     IconChartBar,
-    IconCheckbox,
     IconCode,
     IconDatabase,
     IconEdit,
@@ -15,7 +12,6 @@ import {
     IconGitBranch,
     IconLayout,
     IconLayoutDashboard,
-    IconMap,
     IconMessage,
     IconNotes,
     IconPalette,
@@ -31,7 +27,7 @@ import {
     IconUser,
     IconUserPlus,
     IconUsers,
-    IconWriting,
+    IconWriting
 } from '@tabler/icons-react';
 import { uniqueId } from 'lodash';
 
@@ -415,12 +411,6 @@ const Menuitems: MenuitemsType[] = [
   {
     navlabel: true,
     subheader: '🛠️ Developer Tools',
-  },
-  {
-    id: uniqueId(),
-    title: 'Build Console',
-    icon: IconRocket,
-    href: '/admin/build',
   },
   {
     id: uniqueId(),

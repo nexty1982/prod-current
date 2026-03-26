@@ -18,7 +18,6 @@ import {
     IconBell,
     IconBorderAll,
     IconBug,
-    IconCheckbox,
     IconComponents,
     IconDatabase,
     IconEdit,
@@ -292,12 +291,6 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
   },
   // OM Tasks — retired, now on OMAI Operations Hub
   {
-    id: 'admin.build-console',
-    title: 'Build Console',
-    icon: IconRocket,
-    href: '/admin/build',
-  },
-  {
     id: 'church.omai-logger',
     title: 'OMAI Ultimate Logger',
     icon: IconBug,
@@ -513,12 +506,6 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
         title: 'Task Assignment',
         icon: IconEdit,
         href: '/admin/settings',
-      },
-      {
-        id: 'broken.build-console',
-        title: 'Build Console',
-        icon: IconTerminal,
-        href: '/admin/build',
       },
     ],
   },

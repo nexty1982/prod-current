@@ -1,10 +1,10 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import AppErrorBoundary from '@/shared/ui/AppErrorBoundary';
 import { useAuth } from '@/context/AuthContext';
+import AppErrorBoundary from '@/shared/ui/AppErrorBoundary';
 import { RecordsRouteErrorBoundary } from '@/shared/ui/RecordsRouteErrorBoundary';
 import { lazy } from 'react';
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
 import SmartRedirect from '../components/routing/SmartRedirect';
@@ -251,8 +251,6 @@ const OpsReportsPage = Loadable(lazy(() => import('../features/admin/ops/OpsRepo
 // OMLearn Module (unchanged in phase3 map)
 const OMLearn = Loadable(lazy(() => import('../features/omlearn/OMLearn')));
 
-// Build System
-const BuildConsole = Loadable(lazy(() => import('../features/devel-tools/om-build-console/BuildConsole')));
 
 // Records Pages
 import { isInteractiveReportRecipientsEnabled } from '../config/featureFlags';
@@ -1582,16 +1580,6 @@ const Router = [
           <ProtectedRoute requiredRole={['super_admin']}>
             <AdminErrorBoundary>
               <OcrActivityMonitor />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/admin/build',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
-            <AdminErrorBoundary>
-              <BuildConsole />
             </AdminErrorBoundary>
           </ProtectedRoute>
         )
