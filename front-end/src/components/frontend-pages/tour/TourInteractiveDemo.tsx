@@ -17,10 +17,9 @@ import { Upload, Database, Search, BarChart3, ChevronLeft, ChevronRight, Play, P
 import EditableText from '@/components/frontend-pages/shared/EditableText';
 import { useLanguage } from '@/context/LanguageContext';
 
-/** Return translation if it exists, otherwise the fallback. t() returns the key when missing. */
-function tx(t: (k: string) => string, key: string, fallback: string): string {
-  const val = t(key);
-  return val !== key ? val : fallback;
+/** Return translation if it exists in the translations map, otherwise the fallback. */
+function tx(translations: Record<string, string>, key: string, fallback: string): string {
+  return translations[key] ?? fallback;
 }
 
 import DemoStepDigitize from './DemoStepDigitize';
@@ -92,7 +91,7 @@ const STEPS: TourStep[] = [
 const AUTOPLAY_INTERVAL = 8000;
 
 const TourInteractiveDemo = () => {
-  const { t } = useLanguage();
+  const { translations } = useLanguage();
   const [activeStep, setActiveStep] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
@@ -161,14 +160,14 @@ const TourInteractiveDemo = () => {
         <div className="text-center mb-12">
           <div className="om-badge-primary mb-4 inline-flex">
             <EditableText contentKey="tour.demo.badge" as="span" className="om-text-primary text-[14px]">
-              {tx(t, 'tour.demo_badge', 'See It In Action')}
+              {tx(translations,'tour.demo_badge', 'See It In Action')}
             </EditableText>
           </div>
           <EditableText contentKey="tour.demo.heading" as="h2" className="om-heading-primary mb-3">
-            {tx(t, 'tour.demo_heading', 'How Orthodox Metrics Works')}
+            {tx(translations,'tour.demo_heading', 'How Orthodox Metrics Works')}
           </EditableText>
           <EditableText contentKey="tour.demo.subheading" as="p" className="om-text-body max-w-2xl mx-auto">
-            {tx(t, 'tour.demo_subheading', 'Experience the complete workflow — from paper records to parish insights — in four simple steps.')}
+            {tx(translations,'tour.demo_subheading', 'Experience the complete workflow — from paper records to parish insights — in four simple steps.')}
           </EditableText>
         </div>
 
@@ -192,7 +191,7 @@ const TourInteractiveDemo = () => {
                 }`}
               >
                 <Icon size={15} />
-                <span className="hidden sm:inline">{tx(t, s.subtitleKey, s.subtitleFallback)}</span>
+                <span className="hidden sm:inline">{tx(translations,s.subtitleKey, s.subtitleFallback)}</span>
                 <span className="sm:hidden">{i + 1}</span>
               </button>
             );
@@ -220,7 +219,7 @@ const TourInteractiveDemo = () => {
               className="grid md:grid-cols-2 gap-0 md:h-[480px]"
               id={`tour-panel-${step.id}`}
               role="tabpanel"
-              aria-label={tx(t, step.titleKey, step.titleFallback)}
+              aria-label={tx(translations,step.titleKey, step.titleFallback)}
             >
               {/* Left: description */}
               <div className="p-8 md:p-10 lg:p-12 flex flex-col justify-center overflow-hidden">
@@ -229,14 +228,14 @@ const TourInteractiveDemo = () => {
                     <StepIcon size={20} className="text-[#d4af37] dark:text-[#2d1b4e]" />
                   </div>
                   <span className="font-['Inter'] text-[12px] font-semibold tracking-wider uppercase text-[#6a7282] dark:text-gray-500">
-                    {tx(t, step.subtitleKey, step.subtitleFallback)}
+                    {tx(translations,step.subtitleKey, step.subtitleFallback)}
                   </span>
                 </div>
                 <EditableText contentKey={step.titleKey} as="h3" className="font-['Georgia'] text-2xl md:text-3xl text-[#2d1b4e] dark:text-white mb-4 leading-tight">
-                  {tx(t, step.titleKey, step.titleFallback)}
+                  {tx(translations,step.titleKey, step.titleFallback)}
                 </EditableText>
                 <EditableText contentKey={step.descKey} as="p" className="font-['Inter'] text-[15px] md:text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed" multiline>
-                  {tx(t, step.descKey, step.descFallback)}
+                  {tx(translations,step.descKey, step.descFallback)}
                 </EditableText>
 
                 {/* Step counter */}
