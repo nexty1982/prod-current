@@ -21,7 +21,7 @@ import {
   Save,
   TableProperties,
   X,
-} from 'lucide-react';
+} from '@/ui/icons';
 
 /* ══════════════════════════════════════════════════════════
    Style utilities — shared input/textarea classes

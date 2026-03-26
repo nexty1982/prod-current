@@ -15,7 +15,7 @@ import {
   InputAdornment,
   Button,
 } from '@mui/material';
-import { Search } from 'lucide-react';
+import { Search } from '@/ui/icons';
 import type { SacramentType } from './scheduleTypes';
 
 interface ScheduleFilterPanelProps {

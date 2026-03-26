@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calendar, User, MapPin, BookOpen } from 'lucide-react';
+import { Calendar, User, MapPin, BookOpen } from '@/ui/icons';
 import { PUBLIC_ROUTES } from '@/config/publicRoutes';
 import { HeroSection, SectionHeader, CTASection } from '@/components/frontend-pages/shared/sections';
 import EditableText from '@/components/frontend-pages/shared/EditableText';

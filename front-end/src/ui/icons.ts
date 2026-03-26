@@ -31,6 +31,7 @@ export {
   Edit,
   Copy,
   Share2,
+  ClipboardList,
 
   // Navigation
   ChevronUp,
@@ -40,6 +41,7 @@ export {
   ArrowLeft,
   ArrowRight,
   ExternalLink,
+  Globe,
 
   // UI / Layout
   Search,
@@ -49,6 +51,7 @@ export {
   Settings,
   Palette,
   LayoutGrid,
+  LayoutList,
   List,
   Table,
   Columns,
@@ -57,11 +60,15 @@ export {
   Minimize2,
   SortAsc,
   SortDesc,
+  Circle,
+  Table2,
+  TableProperties,
 
   // Data / Files
   Download,
   Upload,
   RefreshCw,
+  ArrowUpDown,
   FileText,
   FileBarChart,
   FileCheck,
@@ -84,6 +91,7 @@ export {
 
   // Status / Feedback
   CheckCircle,
+  CheckCircle2,
   AlertCircle,
   AlertTriangle,
   XCircle,
@@ -91,6 +99,7 @@ export {
   Loader2,
   Info,
   Check,
+  HelpCircle,
   Zap,
 
   // Utility
@@ -104,8 +113,16 @@ export {
   Wrench,
   ScanLine,
 
+  // Communication
+  Mail,
+  Phone,
+
+  // Buildings
+  Building2,
+
   // Domain-specific
   Calendar,
+  CalendarDays,
   Bell,
   Bookmark,
   Star,
@@ -119,11 +136,18 @@ export {
   Church,
   Coffee,
   Cross,
+  Crown,
   Fish,
+  Flame,
   History,
+  MapPin,
   Milk,
   Scroll,
+  ScrollText,
 } from 'lucide-react';
+
+// ── Type re-exports ─────────────────────────────────────────────────────────
+export type { LucideIcon } from 'lucide-react';
 
 // ── Safe aliases for browser-global-colliding names ────────────────────────
 // Use these when you want extra safety or clarity.

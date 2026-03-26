@@ -13,7 +13,7 @@ import {
   Chip,
   IconButton,
 } from '@mui/material';
-import { CalendarDays, LayoutList, Table, ArrowLeft } from 'lucide-react';
+import { CalendarDays, LayoutList, Table, ArrowLeft } from '@/ui/icons';
 import { useNavigate } from 'react-router-dom';
 import type { ViewMode, CalendarType } from './scheduleTypes';
 

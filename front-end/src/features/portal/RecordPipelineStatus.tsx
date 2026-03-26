@@ -6,7 +6,7 @@
  * Admins/super_admins see full pipeline.
  */
 
-import { CheckCircle2, Circle, Loader2 } from 'lucide-react';
+import { CheckCircle2, Circle, Loader2 } from '@/ui/icons';
 import React from 'react';
 
 export interface PipelineStageCounts {

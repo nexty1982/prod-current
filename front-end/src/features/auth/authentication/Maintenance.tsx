@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Globe } from 'lucide-react';
+import { ChevronDown, Globe } from '@/ui/icons';
 import {
   type MaintenanceLang,
   MAINTENANCE_LANGUAGES,

@@ -11,7 +11,7 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import { X, Calendar, Info, CheckCircle2, AlertCircle, XCircle, Crown, Flame } from 'lucide-react';
+import { X, Calendar, Info, CheckCircle2, AlertCircle, XCircle, Crown, Flame } from '@/ui/icons';
 import type { ScheduleDay, ScheduleEvent, RestrictionLevel } from './scheduleTypes';
 
 interface ScheduleDayDrawerProps {

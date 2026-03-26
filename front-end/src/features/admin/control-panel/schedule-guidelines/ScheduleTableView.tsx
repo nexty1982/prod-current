@@ -15,7 +15,7 @@ import {
   TableRow,
   Chip,
 } from '@mui/material';
-import { CheckCircle2, AlertCircle, XCircle, Crown, Flame } from 'lucide-react';
+import { CheckCircle2, AlertCircle, XCircle, Crown, Flame } from '@/ui/icons';
 import type { ScheduleData, RestrictionLevel, SacramentType } from './scheduleTypes';
 
 interface ScheduleTableViewProps {

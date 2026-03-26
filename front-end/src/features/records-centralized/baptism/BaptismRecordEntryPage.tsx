@@ -20,7 +20,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Users } from 'lucide-react';
+import { Users } from '@/ui/icons';
 import { useAuth } from '../../../context/AuthContext';
 import { useChurch } from '../../../context/ChurchContext';
 import { getBaptismDateRestriction } from '../../../shared/lib/sacramentalDateRestrictions';

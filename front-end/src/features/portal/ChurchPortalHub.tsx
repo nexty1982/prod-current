@@ -33,7 +33,7 @@ import {
   Upload,
   Users,
   X,
-} from 'lucide-react';
+} from '@/ui/icons';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 

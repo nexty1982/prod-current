@@ -19,7 +19,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart } from '@/ui/icons';
 import { useAuth } from '../../../context/AuthContext';
 import { useChurch } from '../../../context/ChurchContext';
 import { getMarriageDateRestriction } from '../../../shared/lib/sacramentalDateRestrictions';

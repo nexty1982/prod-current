@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Globe, Calendar, BarChart3, Shield, BookOpen, Search, ArrowRight, CheckCircle2, type LucideIcon } from 'lucide-react';
+import { Globe, Calendar, BarChart3, Shield, BookOpen, Search, ArrowRight, CheckCircle2, type LucideIcon } from '@/ui/icons';
 import { PUBLIC_ROUTES } from '@/config/publicRoutes';
 import EditableText from '@/components/frontend-pages/shared/EditableText';
 import HomepageHero from '@/components/frontend-pages/homepage/HomepageHero';

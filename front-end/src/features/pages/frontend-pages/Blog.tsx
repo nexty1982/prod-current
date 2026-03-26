@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Church, ScrollText, Users } from 'lucide-react';
+import { ArrowRight, BookOpen, Church, ScrollText, Users } from '@/ui/icons';
 import { PUBLIC_ROUTES } from '@/config/publicRoutes';
 import { HeroSection, CTASection } from '@/components/frontend-pages/shared/sections';
 import EditableText from '@/components/frontend-pages/shared/EditableText';

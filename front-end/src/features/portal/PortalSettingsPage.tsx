@@ -26,7 +26,7 @@ import {
   Mail,
   MapPin,
   Phone,
-} from 'lucide-react';
+} from '@/ui/icons';
 import { Alert, Snackbar } from '@mui/material';
 
 /* ─── Types ─── */

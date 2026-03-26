@@ -18,7 +18,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Cross } from 'lucide-react';
+import { Cross } from '@/ui/icons';
 import { useAuth } from '../../../context/AuthContext';
 import { useChurch } from '../../../context/ChurchContext';
 import { getFuneralDateRestriction } from '../../../shared/lib/sacramentalDateRestrictions';

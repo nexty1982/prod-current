@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import {
   Table2, LayoutGrid, Clock, BarChart3, Search, ChevronDown,
   Cross, Church, Heart, User, Calendar, MapPin, BookOpen, ArrowLeft, Globe, Filter, Check,
-} from 'lucide-react';
+} from '@/ui/icons';
 import { ColDef, themeQuartz } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { agGridIconMap } from '@/ui/agGridIcons';

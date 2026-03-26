@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Search, Shield, Globe } from 'lucide-react';
+import { BookOpen, Search, Shield, Globe } from '@/ui/icons';
 import PageContainer from '@/shared/ui/PageContainer';
 import AuthLogin from '@/features/auth/authentication/authForms/AuthLogin';
 import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
