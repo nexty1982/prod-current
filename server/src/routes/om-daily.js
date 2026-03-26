@@ -2756,7 +2756,7 @@ router.patch('/items/:id/draft', requireAuth, async (req, res) => {
     for (const key of allowed) {
       if (req.body[key] !== undefined) {
         updates.push(`${key} = ?`);
-        values.push(req.body[key] === '' ? null : req.body[key]);
+        values.push(req.body[key] === '' && key !== 'title' ? null : req.body[key]);
       }
     }
     if (!updates.length) return res.json({ success: true, message: 'Nothing to update' });

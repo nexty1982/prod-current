@@ -190,7 +190,7 @@ try {
     });
     churchCertificatesRouter = stubRouter;
 }
-const tutorialsRouter = require('./routes/tutorials');
+// MIGRATED TO OMAI: const tutorialsRouter = require('./routes/tutorials');
 const calendarRouter = require('./routes/calendar');
 const dashboardRouter = require('./routes/dashboard');
 const invoicesRouter = require('./routes/invoices');
@@ -225,7 +225,7 @@ const globalOmaiRouter = require('./routes/globalOmai');
 const versionRouter = require('./routes/version');
 const systemStatusRouter = require('./api/systemStatus');
 const dailyTasksRouter = require('./api/dailyTasks');
-const omDailyRouter = require('./routes/om-daily');
+// MIGRATED TO OMAI: const omDailyRouter = require('./routes/om-daily');
 const promptPlansRouter = require('./routes/prompt-plans');
 const pageContentRouter = require('./routes/page-content');
 const snapshotsRouter = require('./routes/snapshots');
@@ -286,17 +286,17 @@ const adminSystemRouter = require('./routes/adminSystem');
 const churchAdminRouter = require('./routes/admin/church');
 // Import churches management router for church provisioning
 const churchesManagementRouter = require('./routes/admin/churches');
-const sessionsRouter = require('./routes/admin/sessions');
-const usersRouter = require('./routes/admin/users');
+// MIGRATED TO OMAI: const sessionsRouter = require('./routes/admin/sessions');
+// MIGRATED TO OMAI: const usersRouter = require('./routes/admin/users');
 const adminInvitesRouter = require('./routes/admin/invites');
 const inviteRegisterRouter = require('./routes/invite-register');
 const churchRegisterRouter = require('./routes/church-register');
 const crmPublicRouter = require('./routes/crm-public');
 const churchOnboardingRouter = require('./routes/admin/church-onboarding');
-const churchLifecycleRouter = require('./routes/admin/church-lifecycle');
+// MIGRATED TO OMAI: const churchLifecycleRouter = require('./routes/admin/church-lifecycle');
 const orthodoxScheduleGuidelinesRouter = require('./routes/admin/orthodox-schedule-guidelines');
 const changeSetsRouter = require('./routes/admin/change-sets');
-const activityLogsRouter = require('./routes/admin/activity-logs');
+// MIGRATED TO OMAI: const activityLogsRouter = require('./routes/admin/activity-logs');
 // Import new modular admin route files (extracted from monolithic admin.js)
 const churchUsersRouter = require('./routes/admin/church-users');
 const churchDatabaseRouter = require('./routes/admin/church-database');
@@ -407,10 +407,8 @@ try {
 }
 // Import Backend Diagnostics router for system monitoring
 const backendDiagnosticsRouter = require('./routes/backend_diagnostics');
-// Import Platform Status router for DB VM health monitoring
-const platformStatusRouter = require('./routes/platform-status');
-// Import Platform Actions router for operational controls (super_admin only)
-const platformActionsRouter = require('./routes/platform-actions');
+// MIGRATED TO OMAI: const platformStatusRouter = require('./routes/platform-status');
+// MIGRATED TO OMAI: const platformActionsRouter = require('./routes/platform-actions');
 // Import Build System router for build orchestration
 const buildRouter = require('./routes/build');
 // Import AI Administration Panel router
@@ -619,8 +617,8 @@ app.use('/api', churchRegisterRouter); // Admin token management endpoints
 console.log('✅ [Server] Mounted church registration token routes');
 app.use('/api/admin/church-onboarding', churchOnboardingRouter);
 console.log('✅ [Server] Mounted /api/admin/church-onboarding route (Phase 2 onboarding pipeline)');
-app.use('/api/admin/church-lifecycle', churchLifecycleRouter); // OMAI consumer — do not remove (PP-0003)
-console.log('✅ [Server] Mounted /api/admin/church-lifecycle route (OMAI-owned, served from OM backend)');
+// MIGRATED TO OMAI: app.use('/api/admin/church-lifecycle', churchLifecycleRouter);
+// MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/admin/church-lifecycle route');
 app.use('/api/admin/orthodox-schedule-guidelines', orthodoxScheduleGuidelinesRouter);
 console.log('✅ [Server] Mounted /api/admin/orthodox-schedule-guidelines route');
 app.use('/api/admin/change-sets', changeSetsRouter);
@@ -671,19 +669,19 @@ app.use('/api/admin/churches', churchesCompatRouter);
 app.use('/api/admin/church', churchesCompatRouter); // Legacy singular path support
 // Mount main churches router after compatibility router
 app.use('/api/admin/churches', churchesManagementRouter);
-app.use('/api/admin/sessions', sessionsRouter);
-app.use('/api/admin/users', usersRouter); // 🎯 CRITICAL: This route was being intercepted
+// MIGRATED TO OMAI: app.use('/api/admin/sessions', sessionsRouter);
+// MIGRATED TO OMAI: app.use('/api/admin/users', usersRouter);
 app.use('/api/admin/invites', adminInvitesRouter);
 console.log('✅ [Server] Mounted /api/admin/invites route (invite user management)');
 // Removed duplicate mounting - users are managed through /api/admin/users
-app.use('/api/admin/activity-logs', activityLogsRouter);
+// MIGRATED TO OMAI: app.use('/api/admin/activity-logs', activityLogsRouter);
 app.use('/api/admin/templates', adminTemplatesRouter);
 console.log('✅ [Server] Mounted /api/admin/templates route');
 app.use('/api/admin/logs', adminLogsRouter);
 console.log('✅ [Server] Mounted /api/admin/logs route (log monitoring)');
-const logSearchRouter = require('./routes/admin/log-search');
-app.use('/api/admin/log-search', logSearchRouter);
-console.log('✅ [Server] Mounted /api/admin/log-search route');
+// MIGRATED TO OMAI: const logSearchRouter = require('./routes/admin/log-search');
+// MIGRATED TO OMAI: app.use('/api/admin/log-search', logSearchRouter);
+// MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/admin/log-search route');
 app.use('/api/admin/global-images', globalImagesRouter);
 // Build status endpoint for admins
 const buildStatusRouter = require('./routes/admin/buildStatus');
@@ -772,7 +770,7 @@ app.use('/api/admin/calendar', adminCalendarRouter);
 // OMAI-Spin environment mirroring routes
 const omaiSpinRouter = require('./routes/admin/omaiSpin');
 app.use('/api/admin/omai-spin', omaiSpinRouter);
-app.use('/api/tutorials', tutorialsRouter);
+// MIGRATED TO OMAI: app.use('/api/tutorials', tutorialsRouter);
 app.use('/api/settings', settingsRouter);
 const lookupRouter = require('./routes/lookup');
 app.use('/api/lookup', lookupRouter);
@@ -811,10 +809,8 @@ app.use('/api/omb', ombRouter);
 app.use('/api/jit', jitTerminalRouter);
 // Backend Diagnostics routes for system monitoring (super_admin only)
 app.use('/api/server', backendDiagnosticsRouter);
-// Platform Actions routes for operational controls (super_admin only) — MUST be before /api/platform
-app.use('/api/platform/actions', platformActionsRouter);
-// Platform Status routes for DB VM health (super_admin only, read-only)
-app.use('/api/platform', platformStatusRouter);
+// MIGRATED TO OMAI: app.use('/api/platform/actions', platformActionsRouter);
+// MIGRATED TO OMAI: app.use('/api/platform', platformStatusRouter);
 // 🔧 NEW: Modular admin routes (extracted from monolithic admin.js)
 app.use('/api/admin/church-users', churchUsersRouter);
 app.use('/api/admin/church-database', churchDatabaseRouter);
@@ -846,8 +842,8 @@ app.use('/api/admin/records-inspector', recordsInspectorRouter); // Dynamic Reco
 app.use('/api/admin', seedRecordsRouter); // Seed Records (POST /api/admin/seed-records)
 app.use('/api/admin/ai', aiAdminRouter); // AI Admin Panel (commands + training)
 console.log('✅ [Server] Mounted records-inspector, seed-records, and ai-admin routes');
-app.use('/api/om-daily', omDailyRouter); // OM Daily work pipelines
-console.log('✅ [Server] Mounted /api/om-daily routes (Work Pipelines)');
+// MIGRATED TO OMAI: app.use('/api/om-daily', omDailyRouter);
+// MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/om-daily routes');
 app.use('/api/prompt-plans', promptPlansRouter); // Prompt Plans (AI orchestration)
 console.log('✅ [Server] Mounted /api/prompt-plans routes (AI Prompt Plans)');
 app.use('/api/page-content', pageContentRouter); // Page Content CMS
@@ -1222,12 +1218,7 @@ app.get('/api/system/config', (req, res) => {
   }
 });
 
-// /api/admin/session-stats -> same router as /api/admin/sessions
-app.use('/api/admin/session-stats', (req, res, next) => {
-  // Rewrite to /stats so the sessions router handles it
-  req.url = '/stats' + req.url;
-  sessionsRouter(req, res, next);
-});
+// MIGRATED TO OMAI: session-stats alias (handled by admin-sessions route in OMAI)
 
 // --- OMAI FRONTEND COMPATIBILITY ENDPOINTS --------------------------
 // These endpoints are for frontend compatibility with the OMAI system
@@ -1539,38 +1530,8 @@ cron.schedule('*/5 * * * *', async () => {
 
 console.log('Email queue processor started (runs every 5 minutes)');
 
-// Daily changelog at 11 PM
-cron.schedule('0 23 * * *', async () => {
-  try {
-    const omDaily = require('./routes/om-daily');
-    await omDaily.generateAndEmailChangelog();
-  } catch (err) {
-    console.error('[Changelog] Cron error:', err);
-  }
-});
-console.log('Daily changelog cron scheduled (11 PM)');
-
-// Daily staging review notification at 8 AM
-cron.schedule('0 8 * * *', async () => {
-  try {
-    const omDaily = require('./routes/om-daily');
-    await omDaily.sendStagingReviewNotifications();
-  } catch (err) {
-    console.error('[Staging Review] Cron error:', err);
-  }
-});
-console.log('Daily staging review cron scheduled (8 AM)');
-
-// GitHub issue sync at 11:15 PM
-cron.schedule('15 23 * * *', async () => {
-  try {
-    const omDaily = require('./routes/om-daily');
-    await omDaily.fullSync();
-  } catch (err) {
-    console.error('[GitHub Sync] Cron error:', err);
-  }
-});
-console.log('GitHub issue sync cron scheduled (11:15 PM)');
+// MIGRATED TO OMAI: om-daily cron jobs (changelog, staging review, GitHub sync)
+// These crons now run from the OMAI server
 
 // --- WEBSOCKET INTEGRATION -----------------------------------------
 const websocketService = require('./services/websocketService');
