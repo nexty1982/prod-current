@@ -119,23 +119,20 @@ export const AGENT_TOOL_COLORS: Record<string, string> = { windsurf: '#00b4d8', 
 export const BRANCH_TYPES = ['bugfix', 'new_feature', 'existing_feature', 'patch'] as const;
 export const BRANCH_TYPE_LABELS: Record<string, string> = { bugfix: 'Bug Fix', new_feature: 'New Feature', existing_feature: 'Existing Feature', patch: 'Patch' };
 export const BRANCH_TYPE_COLORS: Record<string, string> = { bugfix: '#d73a4a', new_feature: '#0e8a16', existing_feature: '#1d76db', patch: '#fbca04' };
-// Canonical SDLC statuses (12)
+// Canonical SDLC statuses (6 main + 2 side)
 export const STATUSES = [
-  'backlog', 'triaged', 'planned', 'scheduled',
-  'in_progress', 'self_review', 'testing',
-  'review_ready', 'approved', 'done',
+  'backlog', 'in_progress', 'self_review',
+  'review', 'staging', 'done',
   'blocked', 'cancelled',
 ];
 export const STATUS_LABELS: Record<string, string> = {
-  backlog: 'Backlog', triaged: 'Triaged', planned: 'Planned', scheduled: 'Scheduled',
-  in_progress: 'In Progress', self_review: 'Self Review', testing: 'Testing',
-  review_ready: 'Review Ready', approved: 'Approved', done: 'Done',
+  backlog: 'Backlog', in_progress: 'In Progress', self_review: 'Self Review',
+  review: 'Review', staging: 'Staging', done: 'Done',
   blocked: 'Blocked', cancelled: 'Cancelled',
 };
 export const STATUS_COLORS: Record<string, string> = {
-  backlog: '#9e9e9e', triaged: '#78909c', planned: '#5c6bc0', scheduled: '#42a5f5',
-  in_progress: '#ffa726', self_review: '#ab47bc', testing: '#ec407a',
-  review_ready: '#26c6da', approved: '#66bb6a', done: '#4caf50',
+  backlog: '#9e9e9e', in_progress: '#ffa726', self_review: '#ab47bc',
+  review: '#26c6da', staging: '#66bb6a', done: '#4caf50',
   blocked: '#ef5350', cancelled: '#bdbdbd',
 };
 
@@ -146,15 +143,11 @@ export interface StatusOwnership {
   exit_by: 'admin' | 'agent' | 'any';
 }
 export const STATUS_OWNERSHIP: Record<string, StatusOwnership> = {
-  backlog:      { owner: 'admin', exit_action: 'Triage: review priority, assign category', exit_by: 'admin' },
-  triaged:      { owner: 'admin', exit_action: 'Plan: define approach, set repo_target', exit_by: 'admin' },
-  planned:      { owner: 'admin', exit_action: 'Schedule: set dates, assign to agent', exit_by: 'admin' },
-  scheduled:    { owner: 'admin', exit_action: 'Start work: agent creates branch', exit_by: 'agent' },
-  in_progress:  { owner: 'agent', exit_action: 'Complete implementation, commit all', exit_by: 'agent' },
-  self_review:  { owner: 'agent', exit_action: 'Self-check: build, lint, push to remote', exit_by: 'agent' },
-  testing:      { owner: 'agent', exit_action: 'Verify tests pass, mark ready', exit_by: 'agent' },
-  review_ready: { owner: 'admin', exit_action: 'Review & approve or reject', exit_by: 'admin' },
-  approved:     { owner: 'admin', exit_action: 'Deploy, merge to main, close', exit_by: 'admin' },
+  backlog:      { owner: 'admin', exit_action: 'Assign to agent, create branch (POST /start-work)', exit_by: 'admin' },
+  in_progress:  { owner: 'agent', exit_action: 'Complete implementation, signal completion (POST /agent-complete)', exit_by: 'agent' },
+  self_review:  { owner: 'agent', exit_action: 'Self-check: build, lint, push to remote, open PR', exit_by: 'agent' },
+  review:       { owner: 'admin', exit_action: 'Review PR, test in staging — approve or request changes', exit_by: 'admin' },
+  staging:      { owner: 'admin', exit_action: 'Merge PR into main, deploy to production', exit_by: 'admin' },
   done:         { owner: null,    exit_action: 'Reopen if needed', exit_by: 'admin' },
   blocked:      { owner: 'admin', exit_action: 'Resolve blocker', exit_by: 'any' },
   cancelled:    { owner: null,    exit_action: 'Reopen if needed', exit_by: 'admin' },

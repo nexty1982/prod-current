@@ -8,34 +8,34 @@
 
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import {
-  IconCalendar,
-  IconDotsVertical,
-  IconGripVertical,
-  IconAlertTriangle,
-  IconUser,
-  IconRobot,
-} from '@tabler/icons-react';
+    SmartToy as AgentIcon,
+    CheckCircle as CheckCircleIcon,
+    Delete as DeleteIcon,
+    Edit as EditIcon,
+    Flag as FlagIcon,
+} from '@mui/icons-material';
 import {
-  alpha,
-  Box,
-  Chip,
-  IconButton,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme,
+    alpha,
+    Box,
+    Chip,
+    IconButton,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+    Stack,
+    Tooltip,
+    Typography,
+    useTheme,
 } from '@mui/material';
 import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  CheckCircle as CheckCircleIcon,
-  Flag as FlagIcon,
-  SmartToy as AgentIcon,
-} from '@mui/icons-material';
+    IconAlertTriangle,
+    IconCalendar,
+    IconDotsVertical,
+    IconGripVertical,
+    IconRobot,
+    IconUser,
+} from '@tabler/icons-react';
 import React, { useState } from 'react';
 import SimpleBar from 'simplebar-react';
 
@@ -71,31 +71,23 @@ interface OMDailyKanbanProps {
 
 // ─── Constants ──────────────────────────────────────────────────
 
-// Canonical SDLC pipeline columns (10 main + blocked as side column)
+// Canonical SDLC pipeline columns (6 main + blocked as side column)
 const KANBAN_COLUMNS = [
   { id: 'backlog',      label: 'Backlog',      color: '#9e9e9e' },
-  { id: 'triaged',      label: 'Triaged',      color: '#78909c' },
-  { id: 'planned',      label: 'Planned',      color: '#5c6bc0' },
-  { id: 'scheduled',    label: 'Scheduled',    color: '#42a5f5' },
   { id: 'in_progress',  label: 'In Progress',  color: '#ffa726' },
   { id: 'self_review',  label: 'Self Review',  color: '#ab47bc' },
-  { id: 'testing',      label: 'Testing',      color: '#ec407a' },
-  { id: 'review_ready', label: 'Review Ready', color: '#26c6da' },
-  { id: 'approved',     label: 'Approved',     color: '#66bb6a' },
+  { id: 'review',       label: 'Review',       color: '#26c6da' },
+  { id: 'staging',      label: 'Staging',      color: '#66bb6a' },
   { id: 'done',         label: 'Done',         color: '#4caf50' },
 ];
 
 // Status ownership — who exits each status
 const STATUS_OWNERSHIP: Record<string, { owner: string | null; exit_by: string; exit_action: string }> = {
-  backlog:      { owner: 'admin', exit_by: 'admin', exit_action: 'Triage: review priority, assign category' },
-  triaged:      { owner: 'admin', exit_by: 'admin', exit_action: 'Plan: define approach, set repo_target' },
-  planned:      { owner: 'admin', exit_by: 'admin', exit_action: 'Schedule: set dates, assign to agent' },
-  scheduled:    { owner: 'admin', exit_by: 'agent', exit_action: 'Start work: agent creates branch' },
-  in_progress:  { owner: 'agent', exit_by: 'agent', exit_action: 'Complete implementation, commit all' },
-  self_review:  { owner: 'agent', exit_by: 'agent', exit_action: 'Self-check: build, lint, push to remote' },
-  testing:      { owner: 'agent', exit_by: 'agent', exit_action: 'Verify tests, mark ready for review' },
-  review_ready: { owner: 'admin', exit_by: 'admin', exit_action: 'Review & approve or reject' },
-  approved:     { owner: 'admin', exit_by: 'admin', exit_action: 'Deploy, merge to main, close' },
+  backlog:      { owner: 'admin', exit_by: 'admin', exit_action: 'Assign to agent, create branch' },
+  in_progress:  { owner: 'agent', exit_by: 'agent', exit_action: 'Complete implementation, signal completion' },
+  self_review:  { owner: 'agent', exit_by: 'agent', exit_action: 'Self-check: build, lint, push, open PR' },
+  review:       { owner: 'admin', exit_by: 'admin', exit_action: 'Review PR — approve or request changes' },
+  staging:      { owner: 'admin', exit_by: 'admin', exit_action: 'Merge PR into main, deploy' },
   done:         { owner: null,    exit_by: 'admin', exit_action: 'Reopen if needed' },
 };
 

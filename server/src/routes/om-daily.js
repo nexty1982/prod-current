@@ -29,9 +29,9 @@ const PRIORITY_STR_TO_NUM = { critical: 1, high: 2, medium: 3, low: 4 };
 
 // DailyTasks status mapping → OM Daily status
 // DT: pending, in_progress, blocked, completed, failed, cancelled
-// OM: backlog, todo, in_progress, self_review, review, staging, done, cancelled
-const DT_STATUS_TO_OM = { pending: 'todo', in_progress: 'in_progress', blocked: 'review', completed: 'done', failed: 'cancelled', cancelled: 'cancelled' };
-const OM_STATUS_TO_DT = { backlog: 'pending', todo: 'pending', in_progress: 'in_progress', self_review: 'in_progress', review: 'in_progress', staging: 'in_progress', done: 'completed', cancelled: 'cancelled' };
+// OM: backlog, in_progress, self_review, review, staging, done, blocked, cancelled
+const DT_STATUS_TO_OM = { pending: 'backlog', in_progress: 'in_progress', blocked: 'blocked', completed: 'done', failed: 'cancelled', cancelled: 'cancelled' };
+const OM_STATUS_TO_DT = { backlog: 'pending', in_progress: 'in_progress', self_review: 'in_progress', review: 'in_progress', staging: 'in_progress', done: 'completed', blocked: 'pending', cancelled: 'cancelled' };
 
 // ── SDLC Git-to-Status Mapping ──────────────────────────────────────────
 // 1. Backlog      → Task creation (manual)
@@ -78,7 +78,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
        FROM om_daily_items
        WHERE status != 'cancelled'
        GROUP BY horizon, status
-       ORDER BY FIELD(horizon,'1','2','7','14','30','60','90'), FIELD(status,'backlog','todo','in_progress','self_review','review','staging','done')`
+       ORDER BY FIELD(horizon,'1','2','7','14','30','60','90'), FIELD(status,'backlog','in_progress','self_review','review','staging','done','blocked')`
     );
 
     const [overdue] = await pool.query(
@@ -132,7 +132,7 @@ router.get('/dashboard/extended', requireAuth, async (req, res) => {
 
     // Status distribution across ALL items (not cancelled)
     const [statusDist] = await pool.query(
-      `SELECT status, COUNT(*) as count FROM om_daily_items WHERE status != 'cancelled' GROUP BY status ORDER BY FIELD(status,'in_progress','todo','self_review','review','staging','backlog','done')`
+      `SELECT status, COUNT(*) as count FROM om_daily_items WHERE status != 'cancelled' GROUP BY status ORDER BY FIELD(status,'in_progress','self_review','review','staging','backlog','done','blocked')`
     );
 
     // Priority distribution
@@ -172,7 +172,7 @@ router.get('/dashboard/extended', requireAuth, async (req, res) => {
 
     // Phase groups — items sharing the same source metadata (e.g., "church-onboarding-pipeline")
     const [phaseGroups] = await pool.query(
-      `SELECT source, category, COUNT(*) as total, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as active_count, GROUP_CONCAT(CONCAT(id, ':', title, ':', status, ':', priority) ORDER BY FIELD(status,'in_progress','todo','self_review','review','staging','backlog','done'), FIELD(priority,'critical','high','medium','low') SEPARATOR '||') as items_summary FROM om_daily_items WHERE source IS NOT NULL AND source != 'human' AND status != 'cancelled' GROUP BY source, category HAVING total > 1 AND SUM(CASE WHEN status != 'done' THEN 1 ELSE 0 END) > 0 ORDER BY active_count DESC, total DESC`
+      `SELECT source, category, COUNT(*) as total, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as active_count, GROUP_CONCAT(CONCAT(id, ':', title, ':', status, ':', priority) ORDER BY FIELD(status,'in_progress','self_review','review','staging','backlog','done','blocked'), FIELD(priority,'critical','high','medium','low') SEPARATOR '||') as items_summary FROM om_daily_items WHERE source IS NOT NULL AND source != 'human' AND status != 'cancelled' GROUP BY source, category HAVING total > 1 AND SUM(CASE WHEN status != 'done' THEN 1 ELSE 0 END) > 0 ORDER BY active_count DESC, total DESC`
     );
 
     res.json({
@@ -314,7 +314,7 @@ router.get('/items', requireAuth, async (req, res) => {
 
     const allowedSorts = {
       priority: `FIELD(priority,'critical','high','medium','low') ${direction === 'desc' ? 'DESC' : 'ASC'}`,
-      status: `FIELD(status,'in_progress','todo','self_review','review','staging','backlog','done','cancelled') ${direction === 'desc' ? 'DESC' : 'ASC'}`,
+      status: `FIELD(status,'in_progress','self_review','review','staging','backlog','done','blocked','cancelled') ${direction === 'desc' ? 'DESC' : 'ASC'}`,
       due_date: `due_date ${direction === 'desc' ? 'DESC' : 'ASC'}`,
       created_at: `created_at ${direction === 'desc' ? 'DESC' : 'ASC'}`,
       title: `title ${direction === 'desc' ? 'DESC' : 'ASC'}`,
@@ -322,7 +322,7 @@ router.get('/items', requireAuth, async (req, res) => {
     const orderBy = allowedSorts[sort] || allowedSorts.priority;
 
     const [rows] = await pool.query(
-      `SELECT * FROM om_daily_items ${whereClause} ORDER BY FIELD(status,'in_progress','todo','self_review','review','staging','backlog','done','cancelled'), ${orderBy}, created_at DESC`,
+      `SELECT * FROM om_daily_items ${whereClause} ORDER BY FIELD(status,'in_progress','self_review','review','staging','backlog','done','blocked','cancelled'), ${orderBy}, created_at DESC`,
       params
     );
 
@@ -756,7 +756,7 @@ function buildChangelogEmailHtml(entry, pipelineItems, changeSets = [], unassign
   const matchRate = commits.length > 0 ? Math.round((matchCount / commits.length) * 100) : 0;
 
   const statusColor = (status) => {
-    const colors = { backlog: '#9e9e9e', todo: '#2196f3', in_progress: '#ff9800', review: '#9c27b0', done: '#4caf50', cancelled: '#f44336', complete: '#4caf50' };
+    const colors = { backlog: '#9e9e9e', in_progress: '#ffa726', self_review: '#ab47bc', review: '#26c6da', staging: '#66bb6a', done: '#4caf50', blocked: '#ef5350', cancelled: '#bdbdbd', complete: '#4caf50' };
     return colors[status] || '#9e9e9e';
   };
 
@@ -1140,7 +1140,7 @@ const GITHUB_REPO = 'nexty1982/prod-current';
 const PRIORITY_LABELS = { critical: 'P:critical', high: 'P:high', medium: 'P:medium', low: 'P:low' };
 const HORIZON_LABELS_GH = { '1': 'H:24hr', '2': 'H:48hr', '7': 'H:7day', '14': 'H:14day', '30': 'H:30day', '60': 'H:60day', '90': 'H:90day' };
 const SOURCE_LABELS = { agent: 'source:agent', human: 'source:human' };
-const STATUS_LABELS_GH = { in_progress: 'status:in_progress', self_review: 'status:self_review', review: 'status:review', staging: 'status:staging', backlog: 'status:backlog', todo: 'status:todo' };
+const STATUS_LABELS_GH = { in_progress: 'status:in_progress', self_review: 'status:self_review', review: 'status:review', staging: 'status:staging', backlog: 'status:backlog', done: 'status:done', blocked: 'status:blocked' };
 const BRANCH_TYPE_LABELS = { bugfix: 'type:bugfix', new_feature: 'type:new-feature', existing_feature: 'type:existing-feature', patch: 'type:patch' };
 const BRANCH_TYPE_PREFIXES = { bugfix: 'fix', new_feature: 'feat', existing_feature: 'feat', patch: 'patch' };
 const AGENT_TOOL_SHORT = { windsurf: 'windsurf', claude_cli: 'claude-cli', cursor: 'cursor', github_copilot: 'gh-copilot' };
@@ -2121,7 +2121,7 @@ router.post('/items/:id/agent-complete', requireAuth, async (req, res) => {
     const fromStatus = item.status;
 
     // Already completed or past in_progress — idempotent success
-    const pastStatuses = ['self_review', 'review', 'testing', 'review_ready', 'approved', 'done'];
+    const pastStatuses = ['self_review', 'review', 'staging', 'done'];
     if (pastStatuses.includes(fromStatus)) {
       return res.json({
         success: true,
@@ -2455,7 +2455,7 @@ router.get('/milestones/:id', requireAuth, async (req, res) => {
 
     const [items] = await pool.query(
       `SELECT * FROM om_daily_items WHERE milestone_id = ?
-       ORDER BY FIELD(status, 'backlog','todo','in_progress','self_review','review','staging','done','cancelled'), priority ASC`,
+       ORDER BY FIELD(status, 'backlog','in_progress','self_review','review','staging','done','blocked','cancelled'), priority ASC`,
       [req.params.id]
     );
 

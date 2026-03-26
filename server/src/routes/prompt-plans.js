@@ -81,7 +81,7 @@ function getOmaiHelpers() {
       };
       const [result] = await pool.query(
         `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, source, agent_tool, metadata, created_by)
-         VALUES (?, 'task', ?, '7', 'todo', 'medium', 'ai', 'ai_prompt', ?, ?, ?)`,
+         VALUES (?, 'task', ?, '7', 'backlog', 'medium', 'ai', 'ai_prompt', ?, ?, ?)`,
         [title, `Prompt Plan step: ${step.prompt_text ? step.prompt_text.substring(0, 200) : title}`, agentTool || 'omai', JSON.stringify(metadata), userId || null]
       );
       const [rows] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [result.insertId]);

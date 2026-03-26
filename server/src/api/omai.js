@@ -129,7 +129,7 @@ async function createPromptWorkItem(prompt, context, userId) {
 
   const [result] = await pool.query(
     `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, source, agent_tool, metadata, conversation_ref, created_by)
-     VALUES (?, 'task', ?, '7', 'todo', 'medium', 'ai', 'ai_prompt', 'omai', ?, ?, ?)`,
+     VALUES (?, 'task', ?, '7', 'backlog', 'medium', 'ai', 'ai_prompt', 'omai', ?, ?, ?)`,
     [
       title,
       `AI prompt: ${prompt.substring(0, 200)}`,

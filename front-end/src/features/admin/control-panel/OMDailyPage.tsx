@@ -5,36 +5,38 @@
  * Located at /admin/control-panel/om-daily
  */
 
+import OMDailyKanban from '@/components/apps/kanban/OMDailyKanban';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
+import { apiClient } from '@/shared/lib/apiClient';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
     Add as AddIcon,
+    SmartToy as AgentIcon,
     ArrowForward as ArrowForwardIcon,
     Assignment as AssignmentIcon,
-    CheckCircle as CheckCircleIcon,
-    CloudUpload as CloudUploadIcon,
-    SmartToy as AgentIcon,
-    Check as CheckIcon,
     CheckBoxOutlineBlank as CheckBoxBlankIcon,
     CheckBox as CheckBoxIcon,
+    CheckCircle as CheckCircleIcon,
+    Check as CheckIcon,
+    CloudUpload as CloudUploadIcon,
     Delete as DeleteIcon,
     Edit as EditIcon,
     Email as EmailIcon,
     ExpandMore as ExpandMoreIcon,
+    FastForward as FastForwardIcon,
     Flag as FlagIcon,
     History as HistoryIcon,
-    Inventory2 as PackageIcon,
     OpenInNew as OpenInNewIcon,
+    Inventory2 as PackageIcon,
     PlayArrow as PlayArrowIcon,
+    Description as PromptPlanIcon,
     Refresh as RefreshIcon,
+    RocketLaunch as RocketIcon,
     Schedule as ScheduleIcon,
     Search as SearchIcon,
     Sync as SyncIcon,
     TrendingUp as TrendingUpIcon,
     Warning as WarningIcon,
-    RocketLaunch as RocketIcon,
-    FastForward as FastForwardIcon,
-    Description as PromptPlanIcon,
 } from '@mui/icons-material';
 import {
     Alert,
@@ -71,8 +73,6 @@ import {
 } from '@mui/material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { apiClient } from '@/shared/lib/apiClient';
-import OMDailyKanban from '@/components/apps/kanban/OMDailyKanban';
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -178,9 +178,9 @@ const AGENT_TOOL_COLORS: Record<string, string> = { windsurf: '#00b4d8', claude_
 const BRANCH_TYPES = ['bugfix', 'new_feature', 'existing_feature', 'patch'] as const;
 const BRANCH_TYPE_LABELS: Record<string, string> = { bugfix: 'Bug Fix', new_feature: 'New Feature', existing_feature: 'Existing Feature', patch: 'Patch' };
 const BRANCH_TYPE_COLORS: Record<string, string> = { bugfix: '#d73a4a', new_feature: '#0e8a16', existing_feature: '#1d76db', patch: '#fbca04' };
-const STATUSES = ['backlog', 'todo', 'in_progress', 'review', 'done', 'cancelled'];
-const STATUS_LABELS: Record<string, string> = { backlog: 'Backlog', todo: 'To Do', in_progress: 'In Progress', review: 'Review', done: 'Done', cancelled: 'Cancelled' };
-const STATUS_COLORS: Record<string, string> = { backlog: '#9e9e9e', todo: '#2196f3', in_progress: '#ff9800', review: '#9c27b0', done: '#4caf50', cancelled: '#f44336' };
+const STATUSES = ['backlog', 'in_progress', 'self_review', 'review', 'staging', 'done', 'blocked', 'cancelled'];
+const STATUS_LABELS: Record<string, string> = { backlog: 'Backlog', in_progress: 'In Progress', self_review: 'Self Review', review: 'Review', staging: 'Staging', done: 'Done', blocked: 'Blocked', cancelled: 'Cancelled' };
+const STATUS_COLORS: Record<string, string> = { backlog: '#9e9e9e', in_progress: '#ffa726', self_review: '#ab47bc', review: '#26c6da', staging: '#66bb6a', done: '#4caf50', blocked: '#ef5350', cancelled: '#bdbdbd' };
 const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 const PRIORITY_COLORS: Record<string, string> = { low: '#9e9e9e', medium: '#2196f3', high: '#ff9800', critical: '#f44336' };
 
@@ -269,7 +269,7 @@ const OMDailyPage: React.FC = () => {
   // Dialog
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<DailyItem | null>(null);
-  const [form, setForm] = useState({ title: '', description: '', horizon: '7', status: 'todo', priority: 'medium', category: '', due_date: '', agent_tool: '', branch_type: '' });
+  const [form, setForm] = useState({ title: '', description: '', horizon: '7', status: 'backlog', priority: 'medium', category: '', due_date: '', agent_tool: '', branch_type: '' });
 
   // Toast
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
@@ -735,7 +735,7 @@ const OMDailyPage: React.FC = () => {
   const openNewDialog = () => {
     const defaultHorizon = selectedHorizon || '7';
     setEditingItem(null);
-    setForm({ title: '', description: '', horizon: defaultHorizon, status: 'todo', priority: 'medium', category: '', due_date: '', agent_tool: '', branch_type: '' });
+    setForm({ title: '', description: '', horizon: defaultHorizon, status: 'backlog', priority: 'medium', category: '', due_date: '', agent_tool: '', branch_type: '' });
     setDialogOpen(true);
   };
 

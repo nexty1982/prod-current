@@ -1007,7 +1007,7 @@ router.post('/export-to-pipeline', async (req, res) => {
           item.task_type || 'task',
           item.description || null,
           item.horizon || '7',
-          item.status || 'todo',
+          item.status || 'backlog',
           item.priority || 'medium',
           item.category || null,
           'conversation',

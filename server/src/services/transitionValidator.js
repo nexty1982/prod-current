@@ -4,11 +4,18 @@
  * Validates whether a status transition is allowed and checks prerequisites.
  * Returns structured errors with human-readable messages for the UI.
  *
- * Canonical statuses (12):
- *   backlog → triaged → planned → scheduled → in_progress →
- *   self_review → testing → review_ready → approved → done
+ * Canonical statuses (8):
+ *   backlog → in_progress → self_review → review → staging → done
  *   blocked (from any active status)
  *   cancelled (from any status)
+ *
+ * Git-trigger mapping:
+ *   Backlog      — Manual task creation
+ *   In Progress  — Branch created (POST /start-work)
+ *   Self Review  — Agent signals completion (POST /agent-complete)
+ *   Review       — PR opened (non-draft) or "ready for review"
+ *   Staging      — Pull Request approved by a reviewer
+ *   Done         — PR merged into main
  *
  * Ownership model:
  *   Each status has a defined owner (admin or agent) and a required exit action.
@@ -19,41 +26,31 @@ const repoService = require('./repoService');
 
 // ── Canonical Status Order ──────────────────────────────────────
 const STATUSES = [
-  'backlog', 'triaged', 'planned', 'scheduled',
-  'in_progress', 'self_review', 'testing',
-  'review_ready', 'approved', 'done',
+  'backlog', 'in_progress', 'self_review',
+  'review', 'staging', 'done',
   'blocked', 'cancelled',
 ];
 
 // ── Allowed Transitions Matrix ──────────────────────────────────
 // Key = from_status, Value = array of allowed to_statuses
 const ALLOWED_TRANSITIONS = {
-  backlog:      ['triaged', 'planned', 'blocked', 'cancelled'],
-  triaged:      ['planned', 'scheduled', 'backlog', 'blocked', 'cancelled'],
-  planned:      ['scheduled', 'triaged', 'backlog', 'blocked', 'cancelled'],
-  scheduled:    ['in_progress', 'planned', 'blocked', 'cancelled'],
-  in_progress:  ['self_review', 'testing', 'blocked', 'cancelled'],
-  self_review:  ['testing', 'in_progress', 'blocked', 'cancelled'],
-  testing:      ['review_ready', 'in_progress', 'self_review', 'blocked', 'cancelled'],
-  review_ready: ['approved', 'testing', 'in_progress', 'blocked', 'cancelled'],
-  approved:     ['done', 'testing', 'blocked', 'cancelled'],
+  backlog:      ['in_progress', 'blocked', 'cancelled'],
+  in_progress:  ['self_review', 'backlog', 'blocked', 'cancelled'],
+  self_review:  ['review', 'in_progress', 'blocked', 'cancelled'],
+  review:       ['staging', 'in_progress', 'self_review', 'blocked', 'cancelled'],
+  staging:      ['done', 'review', 'blocked', 'cancelled'],
   done:         ['backlog'],  // reopening
-  blocked:      ['backlog', 'triaged', 'planned', 'scheduled', 'in_progress',
-                 'self_review', 'testing', 'review_ready', 'cancelled'],
+  blocked:      ['backlog', 'in_progress', 'self_review', 'review', 'staging', 'cancelled'],
   cancelled:    ['backlog'],  // reopening
 };
 
 // ── Status display labels ───────────────────────────────────────
 const STATUS_LABELS = {
   backlog: 'Backlog',
-  triaged: 'Triaged',
-  planned: 'Planned',
-  scheduled: 'Scheduled',
   in_progress: 'In Progress',
   self_review: 'Self Review',
-  testing: 'Testing',
-  review_ready: 'Review Ready',
-  approved: 'Approved',
+  review: 'Review',
+  staging: 'Staging',
   done: 'Done',
   blocked: 'Blocked',
   cancelled: 'Cancelled',
@@ -70,47 +67,27 @@ const STATUS_LABELS = {
 const STATUS_OWNERSHIP = {
   backlog: {
     owner: 'admin',
-    exit_action: 'Triage: review priority, assign category, set horizon',
+    exit_action: 'Assign to agent, create branch (POST /start-work)',
     exit_by: 'admin',
-  },
-  triaged: {
-    owner: 'admin',
-    exit_action: 'Plan: define implementation approach, set repo_target',
-    exit_by: 'admin',
-  },
-  planned: {
-    owner: 'admin',
-    exit_action: 'Schedule: set start/end dates, assign to agent',
-    exit_by: 'admin',
-  },
-  scheduled: {
-    owner: 'admin',
-    exit_action: 'Start work: agent picks up item and creates branch',
-    exit_by: 'agent',
   },
   in_progress: {
     owner: 'agent',
-    exit_action: 'Complete implementation: commit all changes, signal completion',
+    exit_action: 'Complete implementation, signal completion (POST /agent-complete)',
     exit_by: 'agent',
   },
   self_review: {
     owner: 'agent',
-    exit_action: 'Self-check: verify build, lint, no regressions — push to remote',
+    exit_action: 'Self-check: build, lint, push to remote, open PR',
     exit_by: 'agent',
   },
-  testing: {
-    owner: 'agent',
-    exit_action: 'Verify: run tests, confirm CI passes — mark ready for review',
-    exit_by: 'agent',
-  },
-  review_ready: {
+  review: {
     owner: 'admin',
-    exit_action: 'Review: inspect changes, test in staging — approve or reject',
+    exit_action: 'Review PR, test in staging — approve or request changes',
     exit_by: 'admin',
   },
-  approved: {
+  staging: {
     owner: 'admin',
-    exit_action: 'Deploy: merge to main, deploy to production, close item',
+    exit_action: 'Merge PR into main, deploy to production',
     exit_by: 'admin',
   },
   done: {
@@ -150,16 +127,7 @@ function resolveActorType(requestBody, item) {
 // Each check returns null if OK, or an error string if blocked.
 
 const PREREQUISITES = {
-  scheduled: (item) => {
-    if (!item.schedule_start || !item.schedule_end) {
-      return 'Cannot move to Scheduled until schedule_start and schedule_end are set.';
-    }
-    return null;
-  },
-
   in_progress: (item) => {
-    // Branch must exist or will be created by the transition handler
-    // Just validate repo_target is set
     if (!item.repo_target) {
       return 'Cannot move to In Progress — repo_target must be set (omai or orthodoxmetrics).';
     }
@@ -170,43 +138,31 @@ const PREREQUISITES = {
     if (!item.github_branch) {
       return 'Cannot move to Self Review — no branch exists. Start work first.';
     }
-    // Check that changes exist (branch should have commits)
     return null;
   },
 
-  testing: (item) => {
+  review: (item) => {
     if (!item.github_branch) {
-      return 'Cannot move to Testing — no branch exists.';
-    }
-    // Backend will verify push status during transition
-    return null;
-  },
-
-  review_ready: (item) => {
-    if (!item.github_branch) {
-      return 'Cannot move to Review Ready — no branch exists.';
+      return 'Cannot move to Review — no branch exists.';
     }
     return null;
   },
 
-  approved: (item) => {
+  staging: (item) => {
     if (!item.github_branch) {
-      return 'Cannot move to Approved — no branch exists.';
+      return 'Cannot move to Staging — no branch exists.';
     }
     return null;
   },
 
   done: (item) => {
     if (!item.github_branch) {
-      // Allow done without branch for items that don't need one
       return null;
     }
-    // Backend will verify clean working tree during transition
     return null;
   },
 
   blocked: (item) => {
-    // Must provide a reason
     if (!item._blocked_reason) {
       return 'Cannot move to Blocked without providing a blocked_reason.';
     }
@@ -223,11 +179,11 @@ async function checkRepoPrerequisites(toStatus, item) {
 
   try {
     switch (toStatus) {
-      case 'testing': {
+      case 'review': {
         // Branch must be pushed to remote
         const existsRemote = repoService.branchExistsRemote(item.repo_target, item.github_branch);
         if (!existsRemote) {
-          errors.push('Cannot move to Testing — branch has not been pushed to remote.');
+          errors.push('Cannot move to Review — branch has not been pushed to remote.');
         }
         break;
       }
