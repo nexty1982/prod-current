@@ -1,0 +1,193 @@
+# ════════════════════════════════════════════════════════════════
+# SDLC Status Sync — Auto-update OM Daily pipeline from Git events
+# ════════════════════════════════════════════════════════════════
+#
+# Git-to-Status Mapping:
+#   1. Backlog      → Task creation (manual — only manual step)
+#   2. In Progress  → Branch created (via start-work endpoint)
+#   3. Review & QA  → PR opened (non-draft)
+#   4. Staging      → PR approved
+#   5. Done         → PR merged into main
+#
+# Branch naming convention: type/taskID-short-description
+#   Examples: feat/636-migration-logic, fix/637-login-redirect
+#
+# The webhook at /api/om-daily/webhooks/github handles the DB updates.
+# This workflow provides additional GitHub-side automation (labels, comments).
+# ════════════════════════════════════════════════════════════════
+
+name: SDLC Status Sync
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, closed]
+  pull_request_review:
+    types: [submitted]
+  repository_dispatch:
+    types: [cross-repo-sync, promote-to-production]
+
+env:
+  TASK_ID_REGEX: '^(feat|fix|patch|chore)/([0-9]+)-'
+
+jobs:
+  # ──────────────────────────────────────────────────────────────
+  # Extract task ID from branch name and set outputs
+  # ──────────────────────────────────────────────────────────────
+  extract-task:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review'
+    outputs:
+      task_id: ${{ steps.parse.outputs.task_id }}
+      branch_type: ${{ steps.parse.outputs.branch_type }}
+      has_task: ${{ steps.parse.outputs.has_task }}
+    steps:
+      - name: Parse branch name
+        id: parse
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          echo "Branch: $BRANCH"
+
+          if [[ "$BRANCH" =~ ^(feat|fix|patch|chore)/([0-9]+)- ]]; then
+            echo "task_id=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+            echo "branch_type=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "has_task=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Task ID: ${BASH_REMATCH[2]}, Type: ${BASH_REMATCH[1]}"
+          else
+            echo "has_task=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ No task ID found in branch name"
+          fi
+
+  # ──────────────────────────────────────────────────────────────
+  # Label PR with SDLC stage
+  # ──────────────────────────────────────────────────────────────
+  label-pr:
+    needs: extract-task
+    runs-on: ubuntu-latest
+    if: needs.extract-task.outputs.has_task == 'true'
+    steps:
+      - name: Add SDLC labels on PR opened
+        if: >
+          github.event.action == 'opened' ||
+          github.event.action == 'ready_for_review'
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --add-label "sdlc:review" \
+            || echo "Label may not exist yet"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add staging label on approval
+        if: >
+          github.event_name == 'pull_request_review' &&
+          github.event.review.state == 'approved'
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --remove-label "sdlc:review" \
+            --add-label "sdlc:staging" \
+            || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add done label on merge
+        if: >
+          github.event.action == 'closed' &&
+          github.event.pull_request.merged == true
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --remove-label "sdlc:review" \
+            --remove-label "sdlc:staging" \
+            --add-label "sdlc:done" \
+            || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ──────────────────────────────────────────────────────────────
+  # Comment on PR with task link
+  # ──────────────────────────────────────────────────────────────
+  comment-task-link:
+    needs: extract-task
+    runs-on: ubuntu-latest
+    if: >
+      needs.extract-task.outputs.has_task == 'true' &&
+      github.event.action == 'opened'
+    steps:
+      - name: Add OM Daily task link comment
+        run: |
+          TASK_ID="${{ needs.extract-task.outputs.task_id }}"
+          BODY="🔗 **OM Daily Task:** #${TASK_ID}
+          📋 **SDLC Stage:** Review & QA
+          🌿 **Branch Type:** ${{ needs.extract-task.outputs.branch_type }}
+
+          ---
+          _This PR is tracked by the OM Daily SDLC pipeline._
+          _Status will auto-update: Review → Staging (on approval) → Done (on merge)._"
+
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --body "$BODY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ──────────────────────────────────────────────────────────────
+  # Cross-repo dispatch handler (OMAI ↔ OM orchestration)
+  # ──────────────────────────────────────────────────────────────
+  cross-repo-handler:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'repository_dispatch'
+    steps:
+      - name: Handle cross-repo sync
+        run: |
+          echo "📡 Received repository_dispatch: ${{ github.event.action }}"
+          echo "Payload: ${{ toJSON(github.event.client_payload) }}"
+
+          # If the dispatch includes a task_id, we could update it here
+          # For now, log it — the webhook endpoint handles the actual DB update
+          TASK_ID="${{ github.event.client_payload.task_id }}"
+          SOURCE_REPO="${{ github.event.client_payload.source_repo }}"
+
+          if [ -n "$TASK_ID" ]; then
+            echo "✅ Cross-repo signal for task #${TASK_ID} from ${SOURCE_REPO}"
+          fi
+
+  # ──────────────────────────────────────────────────────────────
+  # Promote to Production — creates beta → main PR on milestone release
+  # Triggered by: repository_dispatch type 'promote-to-production'
+  # ──────────────────────────────────────────────────────────────
+  promote-to-production:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'repository_dispatch' &&
+      github.event.action == 'promote-to-production'
+    steps:
+      - name: Create Release PR (beta → main)
+        run: |
+          VERSION="${{ github.event.client_payload.version }}"
+          MILESTONE_ID="${{ github.event.client_payload.milestone_id }}"
+          TITLE="${{ github.event.client_payload.title }}"
+
+          echo "🚀 Promoting ${VERSION} to production"
+          echo "   Milestone: #${MILESTONE_ID} — ${TITLE}"
+
+          # Create PR from beta → main
+          PR_URL=$(gh pr create \
+            --repo ${{ github.repository }} \
+            --base main \
+            --head beta \
+            --title "Release ${VERSION}: ${TITLE}" \
+            --body "## 🚀 Production Release: ${VERSION}
+
+          **Milestone:** #${MILESTONE_ID} — ${TITLE}
+
+          All tasks in this milestone have been completed and verified on beta.
+
+          ---
+          _Auto-created by OM Daily SDLC pipeline._
+          _Merging this PR will deploy to production._" \
+            2>&1) || true
+
+          echo "PR: ${PR_URL}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
