@@ -406,6 +406,213 @@ router.delete('/history/:buildId', async (req, res) => {
 });
 
 // =====================================================
+// INDIVIDUAL BUILD LOG
+// =====================================================
+
+// GET /api/build/logs/:buildId - Get log output for a specific build
+router.get('/logs/:buildId', async (req, res) => {
+  try {
+    const { buildId } = req.params;
+    const logFile = path.join(BUILD_LOGS_DIR, `${buildId}.log`);
+
+    try {
+      const output = await fs.readFile(logFile, 'utf8');
+      return res.json({ success: true, output });
+    } catch (fileErr) {
+      // Log file doesn't exist — check if the history entry has inline output
+      try {
+        const historyData = await fs.readFile(BUILD_HISTORY_PATH, 'utf8');
+        const history = JSON.parse(historyData);
+        const entry = history.find(b => b.id === buildId);
+        if (entry && entry.output) {
+          return res.json({ success: true, output: entry.output });
+        }
+      } catch { /* no history file */ }
+
+      return res.json({ success: false, output: '' });
+    }
+  } catch (error) {
+    console.error('Error loading build log:', error);
+    res.status(500).json({ success: false, error: 'Failed to load build log' });
+  }
+});
+
+// =====================================================
+// WATCH-ALL SSE (multi-build tracking)
+// =====================================================
+
+// In-memory registry for builds triggered via run-stream on this server
+const activeSseBuilds = new Map();
+
+// GET /api/build/watch-all - SSE endpoint to track all running builds
+router.get('/watch-all', async (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+
+  // Send heartbeat immediately
+  res.write(`data: ${JSON.stringify({ type: 'heartbeat' })}\n\n`);
+
+  // Track log tailing offsets per build target
+  const tailOffsets = {};
+
+  const poll = async () => {
+    try {
+      // 1. Check build_runs table for CLI-triggered builds (via om-deploy.sh)
+      let dbBuilds = [];
+      try {
+        const { getAppPool } = require('../config/db-compat');
+        const [rows] = await getAppPool().query(
+          `SELECT run_id, origin, command, status, started_at, ended_at, meta_json
+           FROM build_runs
+           WHERE status = 'running'
+              OR (status IN ('success','failed') AND ended_at > DATE_SUB(NOW(), INTERVAL 2 MINUTE))
+           ORDER BY started_at DESC LIMIT 10`
+        );
+        dbBuilds = rows;
+      } catch { /* DB not available or table missing */ }
+
+      // 2. Check active-builds.json file (for builds from OMAI runtime)
+      let fileBuilds = [];
+      try {
+        const activeManifest = path.join(SERVER_ROOT, 'data', 'active-builds.json');
+        const data = await fs.readFile(activeManifest, 'utf8');
+        const parsed = JSON.parse(data);
+        // Expire stale entries (30 min)
+        fileBuilds = (Array.isArray(parsed) ? parsed : [])
+          .filter(b => (Date.now() - b.startedAt) < 30 * 60 * 1000);
+      } catch { /* file doesn't exist */ }
+
+      // 3. Check activeSseBuilds (in-process builds from run-stream)
+      const sseBuilds = Array.from(activeSseBuilds.values());
+
+      // Merge all sources into unified build list
+      const builds = [];
+      const seenTargets = new Set();
+
+      // DB builds (from om-deploy.sh)
+      for (const row of dbBuilds) {
+        const meta = typeof row.meta_json === 'string' ? JSON.parse(row.meta_json || '{}') : (row.meta_json || {});
+        // Map origin/command to a target key
+        let target = 'om-frontend';
+        const cmd = (row.command || '').toLowerCase();
+        if (cmd.includes('be') || cmd.includes('server') || cmd.includes('backend')) target = 'om-server';
+        if (cmd.includes('omai') || (meta.repo && meta.repo.includes('omai'))) {
+          target = cmd.includes('server') || cmd.includes('be') ? 'omai-server' : 'omai-frontend';
+        }
+        if (cmd === 'all' || cmd === './scripts/om-deploy.sh') target = 'om-frontend'; // default
+
+        if (!seenTargets.has(target)) {
+          seenTargets.add(target);
+          builds.push({
+            id: row.run_id,
+            target,
+            startedAt: new Date(row.started_at).getTime(),
+            status: row.status === 'running' ? 'running' : 'done',
+            success: row.status === 'success',
+            label: `${row.origin} · ${row.command}`,
+          });
+        }
+      }
+
+      // File-based active builds
+      for (const fb of fileBuilds) {
+        const target = fb.target || 'om-frontend';
+        if (!seenTargets.has(target)) {
+          seenTargets.add(target);
+          builds.push({
+            id: fb.id,
+            target,
+            startedAt: fb.startedAt,
+            status: fb.status === 'running' ? 'running' : 'done',
+            success: fb.status === 'success',
+            label: fb.label || target,
+          });
+        }
+      }
+
+      // SSE in-process builds
+      for (const sb of sseBuilds) {
+        if (!seenTargets.has(sb.target)) {
+          seenTargets.add(sb.target);
+          builds.push(sb);
+        }
+      }
+
+      // Send builds update
+      res.write(`data: ${JSON.stringify({ type: 'builds', builds })}\n\n`);
+
+      // 4. Tail log files for running builds
+      for (const b of builds.filter(x => x.status === 'running')) {
+        const logFile = path.join(BUILD_LOGS_DIR, `${b.id}.log`);
+        try {
+          const content = await fs.readFile(logFile, 'utf8');
+          const prevOffset = tailOffsets[b.target] || 0;
+          if (content.length > prevOffset) {
+            const newData = content.slice(prevOffset);
+            tailOffsets[b.target] = content.length;
+            res.write(`data: ${JSON.stringify({ type: 'output', target: b.target, data: newData })}\n\n`);
+          }
+        } catch { /* log file not yet created */ }
+      }
+    } catch (err) {
+      // Non-fatal — keep SSE alive
+      console.error('[watch-all] poll error:', err.message);
+    }
+  };
+
+  // Poll immediately and then every 2 seconds
+  await poll();
+  const interval = setInterval(poll, 2000);
+
+  // Heartbeat every 15s to keep connection alive
+  const heartbeat = setInterval(() => {
+    res.write(`data: ${JSON.stringify({ type: 'heartbeat' })}\n\n`);
+  }, 15000);
+
+  req.on('close', () => {
+    clearInterval(interval);
+    clearInterval(heartbeat);
+  });
+});
+
+// =====================================================
+// SERVICE RESTART
+// =====================================================
+
+// POST /api/build/restart - Restart a service (no rebuild)
+router.post('/restart', async (req, res) => {
+  const { target } = req.body;
+  if (!target) return res.status(400).json({ success: false, error: 'Missing target' });
+
+  const serviceMap = {
+    'om-frontend': null, // Frontend has no service to restart — it's static files
+    'om-server': 'orthodox-backend',
+    'omai-frontend': null,
+    'omai-server': 'omai',
+  };
+
+  const service = serviceMap[target];
+  if (service === undefined) {
+    return res.status(400).json({ success: false, error: `Unknown target: ${target}` });
+  }
+  if (!service) {
+    return res.status(400).json({ success: false, error: `${target} is a static frontend — no service to restart` });
+  }
+
+  try {
+    execSync(`sudo systemctl restart ${service}`, { timeout: 15000 });
+    res.json({ success: true, message: `${service} restarted successfully` });
+  } catch (err) {
+    console.error(`Failed to restart ${service}:`, err.message);
+    res.status(500).json({ success: false, error: `Failed to restart ${service}: ${err.message}` });
+  }
+});
+
+// =====================================================
 // BUILD EXECUTION ENDPOINTS
 // =====================================================
 
@@ -505,10 +712,22 @@ router.get('/run-stream', async (req, res) => {
   });
   
   const buildStart = Date.now();
+  const sseTarget = req.query.target || 'om-frontend';
   const buildId = `stream_build_${buildStart}`;
   let buildOutput = '';
   let frontendOutput = '';
   let serverOutput = '';
+
+  // Register in activeSseBuilds so watch-all can track it
+  activeSseBuilds.set(sseTarget, {
+    id: buildId, target: sseTarget, startedAt: buildStart, status: 'running', success: false, label: `Console · ${sseTarget}`,
+  });
+
+  // Write live output to a log file so watch-all can tail it
+  const liveLogPath = path.join(BUILD_LOGS_DIR, `${buildId}.log`);
+  const appendLog = async (text) => {
+    try { await fs.appendFile(liveLogPath, text); } catch { /* non-critical */ }
+  };
   
   try {
     // Load current configuration
@@ -606,6 +825,7 @@ router.get('/run-stream', async (req, res) => {
       // Execute the build with streaming output
       const buildResult = await executeBuildWithStreaming(config, buildId, (data) => {
         buildOutput += data;
+        appendLog(data);
         res.write(`data: ${JSON.stringify({
           type: 'output',
           data: data
@@ -633,6 +853,7 @@ router.get('/run-stream', async (req, res) => {
         timestamp: new Date(buildStart).toISOString(),
         duration: Date.now() - buildStart,
         success: buildResult.success,
+        buildTarget: sseTarget,
         config: config,
         output: buildOutput,
         error: buildResult.error || null,
@@ -666,7 +887,7 @@ router.get('/run-stream', async (req, res) => {
       data: `Build failed: ${error.message}`,
       error: error.message
     })}\n\n`);
-    
+
     res.write(`data: ${JSON.stringify({
       type: 'complete',
       success: false,
@@ -674,7 +895,14 @@ router.get('/run-stream', async (req, res) => {
       buildId: buildId
     })}\n\n`);
   }
-  
+
+  // Deregister from activeSseBuilds (mark done briefly so watch-all sees the result)
+  const finalSuccess = buildOutput.includes('✅');
+  activeSseBuilds.set(sseTarget, {
+    id: buildId, target: sseTarget, startedAt: buildStart, status: 'done', success: finalSuccess, label: `Console · ${sseTarget}`,
+  });
+  setTimeout(() => activeSseBuilds.delete(sseTarget), 60000); // Remove after 60s
+
   res.end();
 });
 
