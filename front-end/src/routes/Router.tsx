@@ -109,7 +109,7 @@ const EditableRecordPage = Loadable(lazy(() => import('../features/records-centr
 // Removed: NotificationList, NotificationPreferences from misc-legacy
 
 // Admin
-const UserManagement = Loadable(lazy(() => import('../features/admin/admin/UserManagement')));
+// UserManagement — migrated to OMAI (/omai/ops/users)
 const OMPermissionCenter = Loadable(lazy(() => import('../features/devel-tools/om-permission-center/PermissionsManagement')));
 const AdminSettings = Loadable(lazy(() => import('../features/admin/admin/AdminSettings')));
 const OMSiteSurvey = Loadable(lazy(() => import('../features/admin/admin/tools/OMSiteSurvey')));
@@ -719,16 +719,7 @@ const Router = [
       // Account Hub moved to top-level route (outside FullLayout) so non-admin users
       // can access it without the admin sidebar. See top-level /account route block.
       // Removed: /settings/menu, /settings/jit-terminal routes
-      {
-        path: '/admin/users',
-        element: (
-          <ProtectedRoute requiredRole={['admin', 'super_admin']}>
-            <AdminErrorBoundary>
-              <UserManagement />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
+      // /admin/users — migrated to OMAI (/omai/ops/users)
       {
         path: '/admin/menu-permissions',
         element: (

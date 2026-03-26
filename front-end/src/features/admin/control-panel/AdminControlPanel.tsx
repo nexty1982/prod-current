@@ -101,7 +101,7 @@ const CATEGORIES: Category[] = [
     bgDark: 'rgba(211, 47, 47, 0.15)',
     href: '/admin/control-panel/system-server',
     quickLinks: [
-      { label: 'User Management', href: '/admin/users' },
+      // User Management — migrated to OMAI (/omai/ops/users)
       { label: 'Code Safety System', href: '/admin/control-panel/system-server/code-safety' },
       { label: 'Site Map', href: '/site-map' },
       { label: 'API Explorer', href: '/devel-tools/api-explorer' },

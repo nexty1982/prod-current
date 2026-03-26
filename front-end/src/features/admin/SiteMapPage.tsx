@@ -163,7 +163,7 @@ const ADMIN_MAP: SiteNode[] = [
   {
     label: 'Admin', icon: <AdminIcon />, roles: ['admin', 'super_admin'], children: [
       { label: 'Admin Home', path: '/admin', icon: <AdminIcon /> },
-      { label: 'User Management', path: '/admin/users', icon: <PeopleIcon /> },
+      // User Management — migrated to OMAI (/omai/ops/users)
       { label: 'Session Management', path: '/admin/sessions', icon: <SecurityIcon /> },
       { label: 'Admin Settings', path: '/admin/settings', icon: <SettingsIcon /> },
       { label: 'Activity Logs', path: '/admin/activity-logs', icon: <RecordIcon /> },
