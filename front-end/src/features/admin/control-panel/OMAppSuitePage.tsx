@@ -14,12 +14,7 @@ import React from 'react';
 import CategoryPage, { CategorySection } from './CategoryPage';
 
 const sections: CategorySection[] = [
-  {
-    sectionTitle: 'Productivity',
-    tools: [
-      { title: 'OM Tasks', description: 'Task assignment dashboard with link generation, submission tracking, and email integration', href: '/devel-tools/om-tasks', icon: <TasksIcon /> },
-    ],
-  },
+  // Productivity section: OM Tasks retired — now on OMAI Operations Hub
   {
     sectionTitle: 'Analytics & Visualization',
     tools: [

@@ -572,11 +572,7 @@ const BackupSettings: React.FC = () => {
                       {settings.email_notifications && (
                         <Alert severity="info" sx={{ mt: 1 }}>
                           <Typography variant="body2">
-                            Backup notifications use the SMTP configuration from <strong>OM Tasks → Email Settings</strong>.
-                            {' '}
-                            <a href="/devel-tools/om-tasks" style={{ color: 'inherit', fontWeight: 600 }}>
-                              Configure email settings →
-                            </a>
+                            Backup notifications use the SMTP configuration from system email settings.
                           </Typography>
                         </Alert>
                       )}

@@ -218,9 +218,7 @@ const ADMIN_MAP: SiteNode[] = [
       { label: 'CRM Page', path: '/devel-tools/crm', icon: <ContactIcon /> },
       { label: 'US Church Map', path: '/devel-tools/us-church-map', icon: <MapIcon /> },
       { label: 'Git Operations', path: '/devel-tools/git-operations', icon: <CodeIcon />, roles: ['super_admin'] },
-      { label: 'Conversation Log', path: '/devel-tools/conversation-log', icon: <ChatIcon />, roles: ['super_admin'] },
-      { label: 'OM Tasks', path: '/devel-tools/om-tasks', icon: <TaskIcon /> },
-      { label: 'Daily Tasks', path: '/devel-tools/daily-tasks', icon: <TaskIcon />, roles: ['super_admin'] },
+      // Conversation Log, OM Tasks, Daily Tasks — retired, now on OMAI Operations Hub
       { label: 'API Explorer', path: '/devel-tools/api-explorer', icon: <ServerIcon />, roles: ['super_admin'] },
       { label: 'Loading Demo', path: '/apps/devel/loading-demo', icon: <DevToolsIcon /> },
       { label: 'Live Table Builder', path: '/devel-tools/live-table-builder', icon: <TableIcon /> },

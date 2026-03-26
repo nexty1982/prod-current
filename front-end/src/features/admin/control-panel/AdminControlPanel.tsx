@@ -145,7 +145,6 @@ const CATEGORIES: Category[] = [
     bgDark: 'rgba(2, 119, 189, 0.15)',
     href: '/admin/control-panel/om-app-suite',
     quickLinks: [
-      { label: 'OM Tasks', href: '/devel-tools/om-tasks' },
       { label: 'OM Charts', href: '/apps/om-charts' },
       { label: 'OM Library', href: '/church/om-spec' },
     ],

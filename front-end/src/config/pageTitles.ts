@@ -22,8 +22,7 @@ export const PAGE_TITLES: Record<string, string> = {
   
   // Developer Tools
   '/devel-tools': 'Developer Tools',
-  '/devel-tools/om-tasks': 'Task Assignment',
-  '/devel-tools/daily-tasks': 'Daily Tasks',
+  // om-tasks, daily-tasks — retired, now on OMAI Operations Hub
   '/devel-tools/om-ocr': 'OCR Tools',
   '/devel-tools/omtrace': 'OM Trace',
   '/devel-tools/refactor-console': 'Refactor Console',

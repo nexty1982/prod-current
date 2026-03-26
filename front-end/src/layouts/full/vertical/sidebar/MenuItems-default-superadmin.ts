@@ -290,12 +290,7 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
     icon: IconFileDescription,
     href: '/church/om-spec',
   },
-  {
-    id: 'church.om-tasks',
-    title: 'OM Tasks',
-    icon: IconEdit,
-    href: '/devel-tools/om-tasks',
-  },
+  // OM Tasks — retired, now on OMAI Operations Hub
   {
     id: 'admin.build-console',
     title: 'Build Console',
@@ -359,12 +354,7 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
         icon: IconTool,
         href: '/devel-tools/refactor-console',
       },
-      {
-        id: 'devel.daily-tasks',
-        title: 'Daily Tasks',
-        icon: IconCheckbox,
-        href: '/devel-tools/daily-tasks',
-      },
+      // Daily Tasks — retired, now on OMAI Operations Hub
       {
         id: 'devel.live-table-builder',
         title: 'Live Table Builder',
