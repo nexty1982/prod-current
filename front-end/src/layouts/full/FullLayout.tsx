@@ -15,7 +15,7 @@ import config from '@/context/config';
 import { useAuth } from '@/context/AuthContext';
 import AdminFloatingHUD from '../../components/AdminFloatingHUD';
 import ImpersonationBanner from '../../components/ImpersonationBanner';
-import TutorialViewer from '../../components/tutorials/TutorialViewer';
+// TutorialViewer — migrated to OMAI
 import { getPageTitle } from '../../config/pageTitles';
 // import SiteEditorOverlay from '../../components/SiteEditorOverlay';
 // import GlobalOMAI from '../../components/global/GlobalOMAI';
@@ -130,7 +130,7 @@ const FullLayout: FC = () => {
       {/* Admin Floating HUD - Super Admin Only */}
       {/* ------------------------------------------- */}
       {/* {isSuperAdmin() && <AdminFloatingHUD />} */}
-      <TutorialViewer />
+      {/* TutorialViewer — migrated to OMAI */}
     </>
   );
 };

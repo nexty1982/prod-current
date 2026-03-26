@@ -239,27 +239,70 @@ router.post('/config', async (req, res) => {
 router.get('/logs', async (req, res) => {
   try {
     let buildHistory = [];
-    
+
+    // Primary source: build_runs database table (populated by om-deploy.sh)
+    try {
+      const { getAppPool } = require('../config/db-compat');
+      const [rows] = await getAppPool().query(
+        `SELECT run_id, env, origin, command, status, started_at, ended_at, meta_json
+         FROM build_runs
+         ORDER BY started_at DESC
+         LIMIT 50`
+      );
+      buildHistory = rows.map(row => {
+        const meta = typeof row.meta_json === 'string' ? JSON.parse(row.meta_json || '{}') : (row.meta_json || {});
+        const startMs = new Date(row.started_at).getTime();
+        const endMs = row.ended_at ? new Date(row.ended_at).getTime() : Date.now();
+        const duration = endMs - startMs;
+        // Map origin/command to a build target label
+        const cmd = (row.command || '').toLowerCase();
+        let buildTarget = 'om-frontend';
+        if (cmd.includes('be') || cmd.includes('server') || cmd.includes('backend') || row.origin === 'server') buildTarget = 'om-server';
+        if (cmd.includes('all')) buildTarget = 'om-frontend'; // full deploy defaults to frontend display
+        if (cmd.includes('omai')) buildTarget = cmd.includes('server') || cmd.includes('be') ? 'omai-server' : 'omai-frontend';
+        return {
+          id: row.run_id,
+          timestamp: row.started_at,
+          timestampFormatted: formatTimestampUser(row.started_at),
+          duration,
+          durationFormatted: formatDuration(duration),
+          success: row.status === 'success',
+          buildTarget,
+          source: 'database',
+          branch: meta.branch || null,
+          commit: meta.commit || null,
+          command: row.command,
+        };
+      });
+    } catch (dbErr) {
+      console.warn('build_runs DB query failed, falling back to file:', dbErr.message);
+    }
+
+    // Fallback/merge: file-based history (for in-browser builds via run-stream)
     try {
       const historyData = await fs.readFile(BUILD_HISTORY_PATH, 'utf8');
-      buildHistory = JSON.parse(historyData);
-    } catch (error) {
+      const fileHistory = JSON.parse(historyData);
+      const dbIds = new Set(buildHistory.map(b => b.id));
+      for (const build of fileHistory) {
+        if (!dbIds.has(build.id)) {
+          buildHistory.push({
+            ...build,
+            source: 'file',
+            timestampFormatted: formatTimestampUser(build.timestamp),
+            durationFormatted: formatDuration(build.duration || 0),
+          });
+        }
+      }
+    } catch {
       // History file doesn't exist yet
     }
-    
-    // Sort by most recent first and limit to last 50 builds
-    buildHistory = buildHistory
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .slice(0, 50)
-      .map(build => ({
-        ...build,
-        timestampFormatted: formatTimestampUser(build.timestamp),
-        durationFormatted: formatDuration(build.duration || 0)
-      }));
-    
+
+    // Sort by most recent first
+    buildHistory.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
     res.json({
       success: true,
-      logs: buildHistory
+      logs: buildHistory.slice(0, 50)
     });
   } catch (error) {
     console.error('Error loading build history:', error);
@@ -273,26 +316,62 @@ router.get('/logs', async (req, res) => {
 // GET /api/build/meta - Get build metadata and statistics
 router.get('/meta', async (req, res) => {
   try {
-    let buildHistory = [];
-    
+    let totalBuilds = 0, successfulBuilds = 0, failedBuilds = 0, averageDuration = 0;
+    let lastBuild = null;
+
+    // Primary: database stats
     try {
-      const historyData = await fs.readFile(BUILD_HISTORY_PATH, 'utf8');
-      buildHistory = JSON.parse(historyData);
-    } catch (error) {
-      // History file doesn't exist yet
+      const { getAppPool } = require('../config/db-compat');
+      const [[stats]] = await getAppPool().query(
+        `SELECT COUNT(*) as total,
+                SUM(status = 'success') as successes,
+                SUM(status = 'failed') as failures,
+                AVG(TIMESTAMPDIFF(SECOND, started_at, COALESCE(ended_at, NOW()))) * 1000 as avg_dur
+         FROM build_runs`
+      );
+      totalBuilds = stats.total || 0;
+      successfulBuilds = Number(stats.successes) || 0;
+      failedBuilds = Number(stats.failures) || 0;
+      averageDuration = Number(stats.avg_dur) || 0;
+
+      const [lastRows] = await getAppPool().query(
+        `SELECT run_id, status, started_at, ended_at FROM build_runs ORDER BY started_at DESC LIMIT 1`
+      );
+      if (lastRows.length) {
+        const lr = lastRows[0];
+        const dur = lr.ended_at ? new Date(lr.ended_at).getTime() - new Date(lr.started_at).getTime() : 0;
+        lastBuild = {
+          id: lr.run_id,
+          timestamp: lr.started_at,
+          timestampFormatted: formatTimestampUser(lr.started_at),
+          success: lr.status === 'success',
+          duration: dur,
+          durationFormatted: formatDuration(dur),
+        };
+      }
+    } catch (dbErr) {
+      console.warn('build meta DB query failed, falling back to file:', dbErr.message);
+      // Fallback to file
+      try {
+        const historyData = await fs.readFile(BUILD_HISTORY_PATH, 'utf8');
+        const buildHistory = JSON.parse(historyData);
+        totalBuilds = buildHistory.length;
+        successfulBuilds = buildHistory.filter(b => b.success).length;
+        failedBuilds = totalBuilds - successfulBuilds;
+        averageDuration = totalBuilds > 0
+          ? buildHistory.reduce((sum, b) => sum + (b.duration || 0), 0) / totalBuilds
+          : 0;
+        const sorted = buildHistory.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        if (sorted.length) {
+          lastBuild = {
+            ...sorted[0],
+            timestampFormatted: formatTimestampUser(sorted[0].timestamp),
+            durationFormatted: formatDuration(sorted[0].duration || 0),
+          };
+        }
+      } catch { /* no file */ }
     }
-    
-    const totalBuilds = buildHistory.length;
-    const successfulBuilds = buildHistory.filter(b => b.success).length;
-    const failedBuilds = totalBuilds - successfulBuilds;
-    const averageDuration = totalBuilds > 0 
-      ? buildHistory.reduce((sum, b) => sum + (b.duration || 0), 0) / totalBuilds 
-      : 0;
-    
-    const lastBuild = buildHistory.length > 0 
-      ? buildHistory.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0]
-      : null;
-    
+
     const meta = {
       totalBuilds,
       successfulBuilds,
@@ -300,17 +379,10 @@ router.get('/meta', async (req, res) => {
       successRate: totalBuilds > 0 ? ((successfulBuilds / totalBuilds) * 100).toFixed(1) : 0,
       averageDuration: Math.round(averageDuration),
       averageDurationFormatted: formatDuration(averageDuration),
-      lastBuild: lastBuild ? {
-        ...lastBuild,
-        timestampFormatted: formatTimestampUser(lastBuild.timestamp),
-        durationFormatted: formatDuration(lastBuild.duration || 0)
-      } : null
+      lastBuild,
     };
-    
-    res.json({
-      success: true,
-      meta
-    });
+
+    res.json({ success: true, meta });
   } catch (error) {
     console.error('Error loading build metadata:', error);
     res.status(500).json({
@@ -325,13 +397,13 @@ router.delete('/history', async (req, res) => {
   try {
     // Clear build history file
     await fs.writeFile(BUILD_HISTORY_PATH, '[]');
-    
+
     // Clear build logs directory
     try {
       const files = await fs.readdir(BUILD_LOGS_DIR);
       await Promise.all(
-        files.map(file => 
-          fs.unlink(path.join(BUILD_LOGS_DIR, file)).catch(err => 
+        files.map(file =>
+          fs.unlink(path.join(BUILD_LOGS_DIR, file)).catch(err =>
             console.warn(`Failed to delete log file ${file}:`, err)
           )
         )
@@ -339,7 +411,16 @@ router.delete('/history', async (req, res) => {
     } catch (error) {
       console.warn('Failed to clear build logs directory:', error);
     }
-    
+
+    // Clear database build history
+    try {
+      const { getAppPool } = require('../config/db-compat');
+      await getAppPool().query('DELETE FROM build_run_events');
+      await getAppPool().query('DELETE FROM build_runs');
+    } catch (dbErr) {
+      console.warn('Failed to clear build_runs from DB:', dbErr.message);
+    }
+
     res.json({
       success: true,
       message: 'Build history cleared successfully'
@@ -357,41 +438,39 @@ router.delete('/history', async (req, res) => {
 router.delete('/history/:buildId', async (req, res) => {
   try {
     const { buildId } = req.params;
-    
-    // Load current build history
-    let buildHistory = [];
+    let deleted = false;
+
+    // Try to remove from file-based history
     try {
       const historyData = await fs.readFile(BUILD_HISTORY_PATH, 'utf8');
-      buildHistory = JSON.parse(historyData);
-    } catch (error) {
-      return res.status(404).json({
-        success: false,
-        error: 'Build history not found'
-      });
+      let buildHistory = JSON.parse(historyData);
+      const initialLength = buildHistory.length;
+      buildHistory = buildHistory.filter(build => build.id !== buildId);
+      if (buildHistory.length < initialLength) {
+        await fs.writeFile(BUILD_HISTORY_PATH, JSON.stringify(buildHistory, null, 2));
+        deleted = true;
+      }
+    } catch { /* file doesn't exist */ }
+
+    // Try to remove from database (cascade deletes build_run_events)
+    try {
+      const { getAppPool } = require('../config/db-compat');
+      const [result] = await getAppPool().query('DELETE FROM build_runs WHERE run_id = ?', [buildId]);
+      if (result.affectedRows > 0) deleted = true;
+    } catch (dbErr) {
+      console.warn('Failed to delete build from DB:', dbErr.message);
     }
-    
-    // Find and remove the specific build
-    const initialLength = buildHistory.length;
-    buildHistory = buildHistory.filter(build => build.id !== buildId);
-    
-    if (buildHistory.length === initialLength) {
-      return res.status(404).json({
-        success: false,
-        error: 'Build not found'
-      });
-    }
-    
-    // Save updated history
-    await fs.writeFile(BUILD_HISTORY_PATH, JSON.stringify(buildHistory, null, 2));
-    
+
     // Delete associated log file if exists
     try {
       const logFile = path.join(BUILD_LOGS_DIR, `${buildId}.log`);
       await fs.unlink(logFile);
-    } catch (error) {
-      // Log file might not exist, which is okay
+    } catch { /* Log file might not exist */ }
+
+    if (!deleted) {
+      return res.status(404).json({ success: false, error: 'Build not found' });
     }
-    
+
     res.json({
       success: true,
       message: `Build ${buildId} deleted successfully`
@@ -413,24 +492,75 @@ router.delete('/history/:buildId', async (req, res) => {
 router.get('/logs/:buildId', async (req, res) => {
   try {
     const { buildId } = req.params;
-    const logFile = path.join(BUILD_LOGS_DIR, `${buildId}.log`);
 
+    // 1. Try on-disk log file first (most detailed, from in-browser builds)
+    const logFile = path.join(BUILD_LOGS_DIR, `${buildId}.log`);
     try {
       const output = await fs.readFile(logFile, 'utf8');
       return res.json({ success: true, output });
-    } catch (fileErr) {
-      // Log file doesn't exist — check if the history entry has inline output
-      try {
-        const historyData = await fs.readFile(BUILD_HISTORY_PATH, 'utf8');
-        const history = JSON.parse(historyData);
-        const entry = history.find(b => b.id === buildId);
-        if (entry && entry.output) {
-          return res.json({ success: true, output: entry.output });
-        }
-      } catch { /* no history file */ }
+    } catch { /* no log file */ }
 
-      return res.json({ success: false, output: '' });
+    // 2. Try file-based history inline output
+    try {
+      const historyData = await fs.readFile(BUILD_HISTORY_PATH, 'utf8');
+      const history = JSON.parse(historyData);
+      const entry = history.find(b => b.id === buildId);
+      if (entry && entry.output) {
+        return res.json({ success: true, output: entry.output });
+      }
+    } catch { /* no history file */ }
+
+    // 3. Reconstruct output from build_run_events database table
+    try {
+      const { getAppPool } = require('../config/db-compat');
+      const [[run]] = await getAppPool().query(
+        `SELECT run_id, env, origin, command, status, started_at, ended_at, meta_json
+         FROM build_runs WHERE run_id = ?`, [buildId]
+      );
+      if (run) {
+        const [events] = await getAppPool().query(
+          `SELECT event, stage, message, duration_ms, created_at, payload_json
+           FROM build_run_events
+           WHERE run_id = ? AND event != 'heartbeat'
+           ORDER BY created_at ASC`, [buildId]
+        );
+        const meta = typeof run.meta_json === 'string' ? JSON.parse(run.meta_json || '{}') : (run.meta_json || {});
+        const lines = [];
+        lines.push(`🔨 Build: ${run.command} (${run.env})`);
+        if (meta.branch) lines.push(`🌿 Branch: ${meta.branch}`);
+        if (meta.commit) lines.push(`📝 Commit: ${meta.commit}`);
+        lines.push(`⏱  Started: ${new Date(run.started_at).toLocaleString()}`);
+        lines.push('');
+        for (const evt of events) {
+          const ts = new Date(evt.created_at).toLocaleTimeString();
+          if (evt.event === 'build_started') {
+            lines.push(`[${ts}] ▶ Build started`);
+          } else if (evt.event === 'stage_started') {
+            lines.push(`[${ts}] 🔄 ${evt.stage || 'Stage'} — started`);
+          } else if (evt.event === 'stage_completed') {
+            const dur = evt.duration_ms ? ` (${(evt.duration_ms / 1000).toFixed(1)}s)` : '';
+            lines.push(`[${ts}] ✅ ${evt.stage || 'Stage'} — completed${dur}`);
+          } else if (evt.event === 'build_completed') {
+            lines.push(`[${ts}] ✅ Build completed successfully`);
+          } else if (evt.event === 'build_failed') {
+            lines.push(`[${ts}] ❌ Build failed${evt.message ? ': ' + evt.message : ''}`);
+          } else {
+            lines.push(`[${ts}] ${evt.event}${evt.stage ? ' — ' + evt.stage : ''}${evt.message ? ': ' + evt.message : ''}`);
+          }
+        }
+        if (run.ended_at) {
+          const duration = new Date(run.ended_at).getTime() - new Date(run.started_at).getTime();
+          lines.push('');
+          lines.push(`⏱  Total duration: ${formatDuration(duration)}`);
+          lines.push(`📋 Status: ${run.status === 'success' ? '✅ Success' : '❌ Failed'}`);
+        }
+        return res.json({ success: true, output: lines.join('\n') });
+      }
+    } catch (dbErr) {
+      console.warn('build_run_events DB query failed:', dbErr.message);
     }
+
+    return res.json({ success: false, output: '' });
   } catch (error) {
     console.error('Error loading build log:', error);
     res.status(500).json({ success: false, error: 'Failed to load build log' });

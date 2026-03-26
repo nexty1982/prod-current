@@ -115,7 +115,7 @@ const AdminSettings = Loadable(lazy(() => import('../features/admin/admin/AdminS
 const OMSiteSurvey = Loadable(lazy(() => import('../features/admin/admin/tools/OMSiteSurvey')));
 // Removed: BlogFeed from misc-legacy
 const BlogAdmin = Loadable(lazy(() => import('../features/admin/admin/BlogAdmin')));
-const TutorialManagement = Loadable(lazy(() => import('../features/admin/tutorials/TutorialManagement')));
+// TutorialManagement — migrated to OMAI (/omai/ops/tutorials)
 const SessionManagement = Loadable(lazy(() => import('../features/auth/admin/SessionManagement')));
 const AdminLogs = Loadable(lazy(() => import('../features/admin/admin/AdminLogs')));
 const ActivityLogs = Loadable(lazy(() => import('../features/admin/admin/ActivityLogs')));
@@ -146,7 +146,7 @@ const JurisdictionsPage = Loadable(lazy(() => import('../features/admin/control-
 const DemoChurchesPage = Loadable(lazy(() => import('../features/admin/control-panel/DemoChurchesPage')));
 const ChurchPipelinePage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchPipelinePage')));
 const RecordsOCRPage = Loadable(lazy(() => import('../features/admin/control-panel/RecordsOCRPage')));
-const CRMOutreachPage = Loadable(lazy(() => import('../features/admin/control-panel/CRMOutreachPage')));
+// CRMOutreachPage — migrated to OMAI
 const SystemServerPage = Loadable(lazy(() => import('../features/admin/control-panel/SystemServerPage')));
 const AIAutomationPage = Loadable(lazy(() => import('../features/admin/control-panel/AIAutomationPage')));
 const CodeChangeDetection = Loadable(lazy(() => import('../features/admin/ai/CodeChangeDetection')));
@@ -785,14 +785,7 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/admin/tutorials',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <TutorialManagement />
-          </ProtectedRoute>
-        )
-      },
+      // /admin/tutorials — migrated to OMAI (/omai/ops/tutorials)
       {
         path: '/admin/logs',
         element: (
@@ -994,16 +987,7 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/admin/control-panel/crm-outreach',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <CRMOutreachPage />
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
+      // /admin/control-panel/crm-outreach — migrated to OMAI
       {
         path: '/admin/control-panel/system-server',
         element: (

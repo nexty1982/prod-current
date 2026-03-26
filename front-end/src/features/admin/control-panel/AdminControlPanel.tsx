@@ -13,7 +13,6 @@ import PageContainer from '@/shared/ui/PageContainer';
 import {
     Psychology as AIIcon,
     Business as ChurchIcon,
-    Campaign as OutreachIcon,
     Description as RecordsIcon,
     Dns as ServerIcon,
     Widgets as SuiteIcon,
@@ -91,20 +90,7 @@ const CATEGORIES: Category[] = [
       { label: 'Live Table Builder', href: '/devel-tools/live-table-builder' },
     ],
   },
-  {
-    key: 'crm',
-    title: 'CRM & Outreach',
-    description: 'Lead management, onboarding pipeline, US church map, and sales',
-    icon: <OutreachIcon sx={{ fontSize: 28 }} />,
-    color: '#7b1fa2',
-    bgLight: 'rgba(123, 31, 162, 0.08)',
-    bgDark: 'rgba(123, 31, 162, 0.15)',
-    href: '/admin/control-panel/crm-outreach',
-    quickLinks: [
-      { label: 'Onboarding Pipeline', href: '/admin/control-panel/onboarding-pipeline' },
-      { label: 'US Church Map', href: '/devel-tools/us-church-map' },
-    ],
-  },
+  // CRM & Outreach — migrated to OMAI
   {
     key: 'system',
     title: 'System & Server',

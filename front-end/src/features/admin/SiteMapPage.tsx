@@ -171,7 +171,7 @@ const ADMIN_MAP: SiteNode[] = [
       { label: 'Menu Permissions', path: '/admin/menu-permissions', icon: <SecurityIcon /> },
       { label: 'Menu Management', path: '/admin/menu-management', icon: <SettingsIcon /> },
       { label: 'Blog Admin', path: '/admin/blog-admin', icon: <BlogIcon /> },
-      { label: 'Tutorials', path: '/admin/tutorials', icon: <LearnIcon />, roles: ['super_admin'] },
+      // Tutorials — migrated to OMAI (/omai/ops/tutorials)
       { label: 'Headlines Config', path: '/admin/headlines-config', icon: <BlogIcon /> },
       { label: 'Script Runner', path: '/admin/script-runner', icon: <CodeIcon /> },
       { label: 'AI Admin Panel', path: '/admin/ai', icon: <AIIcon /> },

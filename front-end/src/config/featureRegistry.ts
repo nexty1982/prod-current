@@ -78,7 +78,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'marriage-records-v2', name: 'Marriage Records', stage: 2, route: '/apps/records/marriage', since: '2026-02-01', changeSetCode: 'CS-0039' },
   { id: 'enhanced-ocr-uploader', name: 'Enhanced OCR Uploader', stage: 2, route: '/devel/ocr-studio/upload', since: '2026-01-15', changeSetCode: 'CS-0038' },
   { id: 'dynamic-records-inspector', name: 'Dynamic Records Inspector', stage: 2, route: '/devel/dynamic-records', since: '2026-01-20' },
-  { id: 'tutorial-management', name: 'Tutorial Management', stage: 2, route: '/admin/tutorials', description: 'Super admin tutorial/welcome system management', since: '2026-02-21' },
+  // tutorial-management — migrated to OMAI (/omai/ops/tutorials)
   { id: 'prompt-plans', name: 'Prompt Plans', stage: 2, route: '/omai/ai/prompt-plans', description: 'Ordered sequences of AI prompts for complex initiatives — migrated to OMAI Operations Hub', since: '2026-03-08' },
   { id: 'page-editor', name: 'Page Content Editor', stage: 2, route: '/devel-tools/page-editor', description: 'CMS for editing frontend page text from the web UI', since: '2026-03-08' },
   { id: 'jurisdictions', name: 'Jurisdictions', stage: 2, route: '/admin/control-panel/jurisdictions', description: 'Orthodox church jurisdictions with calendar type mapping', since: '2026-03-15' },
