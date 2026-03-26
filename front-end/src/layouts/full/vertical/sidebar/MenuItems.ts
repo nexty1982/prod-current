@@ -408,57 +408,7 @@ const Menuitems: MenuitemsType[] = [
 
   // Prompt Plans, OM Seedlings, Daily Tasks, OM Tasks — retired, now on OMAI Operations Hub
 
-  // ========================================================================
-  // BERRY COMPONENTS (super_admin only, stage 1 prototypes)
-  // ========================================================================
-  {
-    navlabel: true,
-    subheader: 'Berry Components',
-  },
-  {
-    id: uniqueId(),
-    title: 'CRM',
-    icon: IconUsers,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Lead Management',
-        icon: IconPoint,
-        href: '/berry/crm/leads',
-      },
-      {
-        id: uniqueId(),
-        title: 'Contact Management',
-        icon: IconPoint,
-        href: '/berry/crm/contacts',
-      },
-      {
-        id: uniqueId(),
-        title: 'Sales Management',
-        icon: IconPoint,
-        href: '/berry/crm/sales',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Calendar',
-    icon: IconCalendar,
-    href: '/admin/calendar',
-  },
-  {
-    id: uniqueId(),
-    title: 'Map',
-    icon: IconMap,
-    href: '/berry/map',
-  },
-  {
-    id: uniqueId(),
-    title: 'Card Gallery',
-    icon: IconCards,
-    href: '/berry/cards',
-  },
+  // Berry Components section removed — CRM, Calendar, Map, Cards prototypes retired
   // ========================================================================
   // DEVELOPER TOOLS (super_admin only)
   // ========================================================================

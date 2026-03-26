@@ -68,9 +68,7 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import BerryLeadManagementPage from '../../berry-crm/BerryLeadManagementPage';
-import BerryContactManagementPage from '../../berry-crm/BerryContactManagementPage';
-import BerrySalesManagementPage from '../../berry-crm/BerrySalesManagementPage';
+// Berry CRM components removed — Leads, Contacts, Sales tabs retired
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -1082,9 +1080,6 @@ const CRMPage: React.FC = () => {
             <Tab label="Pipeline Board" />
             <Tab label="Churches" />
             <Tab label="Follow-ups" />
-            <Tab label="Leads" />
-            <Tab label="Contacts (Berry)" />
-            <Tab label="Sales" />
           </Tabs>
         </Paper>
 
@@ -1092,9 +1087,6 @@ const CRMPage: React.FC = () => {
         {mainTab === 1 && renderPipelineBoard()}
         {mainTab === 2 && renderChurchesList()}
         {mainTab === 3 && renderFollowUps()}
-        {mainTab === 4 && <BerryLeadManagementPage embedded />}
-        {mainTab === 5 && <BerryContactManagementPage embedded />}
-        {mainTab === 6 && <BerrySalesManagementPage embedded />}
       </Box>
 
       {renderDrawer()}

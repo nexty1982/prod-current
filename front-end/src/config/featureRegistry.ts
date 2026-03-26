@@ -104,15 +104,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'om-seedlings', name: 'OM Seedlings', stage: 2, route: '/omai/tools/om-seedlings', description: 'Mass-generate sacramental records for onboarded churches — migrated to OMAI Operations Hub', since: '2026-03-23' },
   { id: 'parish-onboarding-wizard', name: 'Parish Onboarding Wizard', stage: 2, route: '/portal/onboarding', description: 'Guided parish setup wizard for configuring record field labels, order, and visibility', since: '2026-03-24' },
   { id: 'live-table-builder', name: 'Live Table Builder', stage: 1, route: '/devel-tools/live-table-builder', since: '2026-01-20' },
-  { id: 'berry-crm-leads', name: 'Berry CRM Leads', stage: 1, route: '/berry/crm/leads', since: '2026-02-17' },
-  { id: 'berry-crm-contacts', name: 'Berry CRM Contacts', stage: 1, route: '/berry/crm/contacts', since: '2026-02-17' },
-  { id: 'berry-crm-sales', name: 'Berry CRM Sales', stage: 1, route: '/berry/crm/sales', since: '2026-02-17' },
   { id: 'liturgical-calendar', name: 'Liturgical Calendar', stage: 5, route: '/apps/liturgical-calendar', description: 'Eastern Orthodox liturgical calendar with auto-theme', since: '2026-02-27' },
-  { id: 'berry-calendar', name: 'Admin Calendar', stage: 2, route: '/admin/calendar', description: 'Per-user admin calendar with CRM appointment overlay', since: '2026-03-23' },
-  { id: 'berry-map', name: 'Berry Map', stage: 1, route: '/berry/map', since: '2026-02-17' },
-  { id: 'berry-cards', name: 'Berry Card Gallery', stage: 1, route: '/berry/cards', since: '2026-02-17' },
-  { id: 'berry-profile-02', name: 'Berry Account Settings', stage: 1, route: '/berry/profile/settings', since: '2026-02-17' },
-  { id: 'berry-profile-03', name: 'Berry Account Profile', stage: 1, route: '/berry/profile/account', since: '2026-02-17' },
 ];
 
 // ────────────────────────────────────────────────────────────

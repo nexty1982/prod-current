@@ -246,18 +246,7 @@ const ADMIN_MAP: SiteNode[] = [
       { label: 'OCR Settings', path: '/devel/ocr-studio/settings', icon: <SettingsIcon /> },
     ],
   },
-  {
-    label: 'Berry Components', icon: <DevToolsIcon />, roles: ['super_admin'], badge: 'Proto', children: [
-      { label: 'CRM Leads', path: '/berry/crm/leads', icon: <ContactIcon /> },
-      { label: 'CRM Contacts', path: '/berry/crm/contacts', icon: <ContactIcon /> },
-      { label: 'CRM Sales', path: '/berry/crm/sales', icon: <InvoiceIcon /> },
-      { label: 'Calendar', path: '/admin/calendar', icon: <CalendarIcon /> },
-      { label: 'Map', path: '/berry/map', icon: <MapIcon /> },
-      { label: 'Card Gallery', path: '/berry/cards', icon: <ImageIcon /> },
-      { label: 'Account Settings', path: '/berry/profile/settings', icon: <SettingsIcon /> },
-      { label: 'Account Profile', path: '/berry/profile/account', icon: <ProfileIcon /> },
-    ],
-  },
+  // Berry Components section removed — prototypes retired
   {
     label: 'Reference & Documentation', icon: <BookIcon />, roles: ['admin', 'super_admin'], children: [
       { label: 'OM Library / Spec', path: '/church/om-spec', icon: <BookIcon /> },
