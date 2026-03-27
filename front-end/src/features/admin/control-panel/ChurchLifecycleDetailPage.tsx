@@ -31,6 +31,7 @@ import {
   Star as StarIcon,
   SwapHoriz as StageChangeIcon,
   Task as TaskIcon,
+  Timeline as TimelineIcon,
   VpnKey as TokenIcon,
 } from '@mui/icons-material';
 import {
@@ -45,6 +46,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Grid,
   IconButton,
   MenuItem,
@@ -94,6 +96,20 @@ interface CRMChurch {
   stage_color?: string;
   street?: string;
   zip?: string;
+  // Extended pipeline fields
+  current_records_situation?: string | null;
+  estimated_volume?: string | null;
+  historical_import_needed?: number;
+  ocr_assistance_needed?: number;
+  public_records_needed?: number;
+  desired_launch_timeline?: string | null;
+  custom_structure_required?: number;
+  provisioning_ready?: number;
+  provisioning_completed?: number;
+  activation_date?: string | null;
+  assigned_to_user_id?: number | null;
+  discovery_notes?: string | null;
+  blockers?: string | null;
 }
 
 interface OnboardedChurch {
@@ -182,6 +198,58 @@ interface PipelineStage {
   color: string;
   sort_order: number;
   is_terminal: number;
+}
+
+interface RecordRequirement {
+  id: number;
+  record_type: string;
+  uses_sample: number;
+  sample_template_id: number | null;
+  custom_required: number;
+  custom_notes: string | null;
+  template_name?: string;
+}
+
+interface OnboardingEmail {
+  id: number;
+  email_type: string;
+  subject: string;
+  recipients: string;
+  status: string;
+  sent_at: string | null;
+  replied_at: string | null;
+  created_at: string;
+}
+
+interface PipelineActivity {
+  id: number;
+  activity_type: string;
+  summary: string;
+  details_json: any;
+  actor_user_id: number | null;
+  created_at: string;
+}
+
+interface ProvisioningChecklist {
+  contact_complete: boolean;
+  record_requirements_set: boolean;
+  templates_or_custom: boolean;
+  internal_review_done: boolean;
+  provisioning_email_sent: boolean;
+  response_received: boolean;
+  account_created: boolean;
+  invite_sent: boolean;
+  activated: boolean | null;
+}
+
+interface TimelineEntry {
+  id: string;
+  type: 'activity' | 'crm_activity' | 'email' | 'stage_change' | 'member' | 'token' | 'pipeline';
+  icon: React.ReactNode;
+  color: string;
+  title: string;
+  detail?: string;
+  date: string;
 }
 
 type SnackState = { open: boolean; message: string; severity: 'success' | 'error' | 'info' };
@@ -277,6 +345,12 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const [rejectDialog, setRejectDialog] = useState<{ open: boolean; userId: number | null; email: string }>({ open: false, userId: null, email: '' });
   const [rejectReason, setRejectReason] = useState('');
 
+  // Pipeline extended data
+  const [pipelineRequirements, setPipelineRequirements] = useState<RecordRequirement[]>([]);
+  const [pipelineEmails, setPipelineEmails] = useState<OnboardingEmail[]>([]);
+  const [pipelineActivities, setPipelineActivities] = useState<PipelineActivity[]>([]);
+  const [provisionChecklist, setProvisionChecklist] = useState<ProvisioningChecklist | null>(null);
+
   const churchName = crm?.name || onboarded?.name || 'Church Detail';
 
   const BCrumb = [
@@ -313,6 +387,22 @@ const ChurchLifecycleDetailPage: React.FC = () => {
       const n = data.crm?.crm_notes || data.onboarded?.notes || '';
       setNotes(n);
       setNotesOriginal(n);
+
+      // Fetch extended pipeline data for CRM churches
+      if (data.crm?.id) {
+        try {
+          const pipeResp = await fetch(`/api/admin/onboarding-pipeline/${data.crm.id}/detail`, { credentials: 'include' });
+          if (pipeResp.ok) {
+            const pipeData = await pipeResp.json();
+            if (pipeData.success) {
+              setPipelineRequirements(pipeData.requirements || []);
+              setPipelineEmails(pipeData.emails || []);
+              setPipelineActivities(pipeData.activities || []);
+              setProvisionChecklist(pipeData.checklist || null);
+            }
+          }
+        } catch { /* non-critical — pipeline data is supplementary */ }
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load church detail');
     } finally {
@@ -631,6 +721,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     { label: 'Activity', badge: activities.length, show: hasCrm },
     { label: 'Follow-ups', badge: followUps.filter(f => f.status === 'pending').length, show: hasCrm },
     { label: 'Onboarding', show: hasOnboarding },
+    { label: 'Timeline', badge: activities.length + pipelineActivities.length + pipelineEmails.length, show: true },
   ];
   const visibleTabs = tabDefs.filter(t => t.show);
 
@@ -812,6 +903,104 @@ const ChurchLifecycleDetailPage: React.FC = () => {
               </Box>
             );
           })}
+        </>
+      )}
+
+      {/* Discovery & Qualification (CRM extended fields) */}
+      {hasCrm && crm && sectionPaper(
+        <>
+          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>Discovery & Qualification</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>Current Records</Typography>
+              <Typography variant="body2">{crm.current_records_situation || '—'}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>Estimated Volume</Typography>
+              <Typography variant="body2">{crm.estimated_volume || '—'}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>Launch Timeline</Typography>
+              <Typography variant="body2">{crm.desired_launch_timeline || '—'}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>Needs</Typography>
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+                {crm.historical_import_needed ? <Chip label="Historical Import" size="small" variant="outlined" /> : null}
+                {crm.ocr_assistance_needed ? <Chip label="OCR Assistance" size="small" variant="outlined" /> : null}
+                {crm.public_records_needed ? <Chip label="Public Records" size="small" variant="outlined" /> : null}
+                {crm.custom_structure_required ? <Chip label="Custom Structure" size="small" color="warning" variant="outlined" /> : null}
+                {!crm.historical_import_needed && !crm.ocr_assistance_needed && !crm.public_records_needed && !crm.custom_structure_required && (
+                  <Typography variant="body2" color="text.secondary">None specified</Typography>
+                )}
+              </Box>
+            </Grid>
+            {crm.discovery_notes && (
+              <Grid item xs={12}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>Discovery Notes</Typography>
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{crm.discovery_notes}</Typography>
+              </Grid>
+            )}
+            {crm.blockers && (
+              <Grid item xs={12}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>Blockers</Typography>
+                <Alert severity="warning" sx={{ mt: 0.5 }}>{crm.blockers}</Alert>
+              </Grid>
+            )}
+          </Grid>
+        </>
+      )}
+
+      {/* Provisioning Checklist (from pipeline) */}
+      {hasCrm && provisionChecklist && sectionPaper(
+        <>
+          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>Provisioning Checklist</Typography>
+          <Grid container spacing={1}>
+            {[
+              { key: 'contact_complete', label: 'Contact info complete' },
+              { key: 'record_requirements_set', label: 'Record requirements defined' },
+              { key: 'templates_or_custom', label: 'Templates or custom structure confirmed' },
+              { key: 'internal_review_done', label: 'Internal review done' },
+              { key: 'provisioning_email_sent', label: 'Provisioning email sent' },
+              { key: 'response_received', label: 'Response received' },
+              { key: 'account_created', label: 'Account created' },
+              { key: 'invite_sent', label: 'Invite sent' },
+              { key: 'activated', label: 'Activated' },
+            ].map(item => {
+              const done = !!(provisionChecklist as Record<string, any>)[item.key];
+              return (
+                <Grid item xs={12} sm={6} md={4} key={item.key}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckIcon sx={{ fontSize: 18, color: done ? '#4caf50' : alpha('#9e9e9e', 0.4) }} />
+                    <Typography variant="body2" sx={{ color: done ? 'text.primary' : 'text.disabled' }}>
+                      {item.label}
+                    </Typography>
+                  </Box>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </>
+      )}
+
+      {/* Record Requirements (from pipeline) */}
+      {pipelineRequirements.length > 0 && sectionPaper(
+        <>
+          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>Record Requirements</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {pipelineRequirements.map(r => (
+              <Paper key={r.id} variant="outlined" sx={{ p: 1.5, borderRadius: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" fontWeight={600} sx={{ textTransform: 'capitalize' }}>{r.record_type}</Typography>
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    {r.uses_sample ? <Chip label={r.template_name || 'Sample Template'} size="small" color="info" variant="outlined" /> : null}
+                    {r.custom_required ? <Chip label="Custom Required" size="small" color="warning" variant="outlined" /> : null}
+                  </Box>
+                </Box>
+                {r.custom_notes && <Typography variant="caption" color="text.secondary">{r.custom_notes}</Typography>}
+              </Paper>
+            ))}
+          </Box>
         </>
       )}
     </>
@@ -1175,6 +1364,137 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     </>
   );
 
+  /* --- Timeline Tab -------------------------------------------------- */
+  const buildTimeline = (): TimelineEntry[] => {
+    const entries: TimelineEntry[] = [];
+
+    // CRM activities
+    for (const a of activities) {
+      entries.push({
+        id: `crm-${a.id}`,
+        type: 'crm_activity',
+        icon: ACTIVITY_ICONS[a.activity_type] || <NoteIcon fontSize="small" />,
+        color: ACTIVITY_COLORS[a.activity_type] || '#9e9e9e',
+        title: a.subject,
+        detail: a.body || undefined,
+        date: a.created_at,
+      });
+    }
+
+    // Pipeline activities
+    for (const a of pipelineActivities) {
+      entries.push({
+        id: `pipe-${a.id}`,
+        type: 'pipeline',
+        icon: <TaskIcon fontSize="small" />,
+        color: '#00bcd4',
+        title: a.summary,
+        detail: a.activity_type,
+        date: a.created_at,
+      });
+    }
+
+    // Emails
+    for (const e of pipelineEmails) {
+      entries.push({
+        id: `email-${e.id}`,
+        type: 'email',
+        icon: <EmailIcon fontSize="small" />,
+        color: '#2196f3',
+        title: `${e.email_type.replace(/_/g, ' ')}: ${e.subject}`,
+        detail: `To: ${e.recipients} — ${e.status}`,
+        date: e.sent_at || e.created_at,
+      });
+    }
+
+    // Token events
+    for (const t of tokens) {
+      entries.push({
+        id: `token-${t.id}`,
+        type: 'token',
+        icon: <TokenIcon fontSize="small" />,
+        color: '#00bcd4',
+        title: t.is_active ? 'Registration token generated' : 'Token deactivated',
+        date: t.created_at,
+      });
+    }
+
+    // Member joins
+    for (const m of members) {
+      entries.push({
+        id: `member-${m.id}`,
+        type: 'member',
+        icon: <PersonIcon fontSize="small" />,
+        color: '#4caf50',
+        title: `${m.full_name || m.first_name} joined as ${m.role || 'viewer'}`,
+        detail: m.email,
+        date: m.created_at,
+      });
+    }
+
+    // Sort descending by date
+    entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return entries;
+  };
+
+  const renderTimeline = () => {
+    const timeline = buildTimeline();
+
+    if (timeline.length === 0) {
+      return <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>No timeline events yet</Typography>;
+    }
+
+    let lastDateStr = '';
+
+    return (
+      <Box sx={{ position: 'relative', pl: 3.5 }}>
+        {/* Vertical line */}
+        <Box sx={{ position: 'absolute', left: 14, top: 0, bottom: 0, width: 2, bgcolor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />
+
+        {timeline.map(entry => {
+          const d = new Date(entry.date);
+          const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const showDate = dateStr !== lastDateStr;
+          lastDateStr = dateStr;
+
+          return (
+            <React.Fragment key={entry.id}>
+              {showDate && (
+                <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ display: 'block', mt: 2, mb: 1, ml: 1.5 }}>
+                  {dateStr}
+                </Typography>
+              )}
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 1.5, position: 'relative' }}>
+                {/* Dot */}
+                <Avatar
+                  sx={{
+                    width: 28, height: 28,
+                    bgcolor: alpha(entry.color, isDark ? 0.25 : 0.12),
+                    color: entry.color,
+                    position: 'absolute',
+                    left: -28,
+                  }}
+                >
+                  {entry.icon}
+                </Avatar>
+                {/* Content */}
+                <Box sx={{ flex: 1, ml: 1 }}>
+                  <Typography variant="body2" fontWeight={600}>{entry.title}</Typography>
+                  {entry.detail && (
+                    <Typography variant="caption" color="text.secondary">{entry.detail}</Typography>
+                  )}
+                  <Typography variant="caption" color="text.disabled" sx={{ display: 'block' }}>
+                    {d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                  </Typography>
+                </Box>
+              </Box>
+            </React.Fragment>
+          );
+        })}
+      </Box>
+    );
+  };
+
   /* ------------------------------------------------------------------ */
   /*  Main Render                                                        */
   /* ------------------------------------------------------------------ */
@@ -1278,6 +1598,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
               {visibleTabs[tab]?.label === 'Activity' && renderActivity()}
               {visibleTabs[tab]?.label === 'Follow-ups' && renderFollowUps()}
               {visibleTabs[tab]?.label === 'Onboarding' && renderOnboarding()}
+              {visibleTabs[tab]?.label === 'Timeline' && renderTimeline()}
             </Box>
           </>
         )}
