@@ -197,7 +197,7 @@ const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools
 const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-operations/GitOperations')));
 // ConversationLogPage — retired, now on OMAI Operations Hub
 // ChangeSetsDashboard, ChangeSetDetailPage, ReleaseHistoryPage, SDLCWizardPage, PromptPlans — retired, now on OMAI
-const RecordCreationWizard = Loadable(lazy(() => import('../features/devel-tools/om-seedlings/RecordCreationWizard')));
+// RecordCreationWizard — retired, canonical tool now at OMAI /omai/tools/om-seedlings
 const OMChartsPage = Loadable(lazy(() => import('../features/church/apps/om-charts/OMChartsPage')));
 
 /* ****Account Hub***** */
@@ -1287,18 +1287,10 @@ const Router = [
         path: '/devel-tools/git-operations',
         element: <Navigate to="/devel-tools/repo-ops" replace />,
       },
-      // Conversation Log, Prompt Plans — retired from OM, now on OMAI Operations Hub
+      // Record Creation Wizard — retired from OM, now on OMAI /omai/tools/om-seedlings
       {
         path: '/devel-tools/record-creation-wizard',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <EnvironmentAwarePage featureId="record-creation-wizard" priority={2} featureName="Record Creation Wizard">
-              <AdminErrorBoundary>
-                <RecordCreationWizard />
-              </AdminErrorBoundary>
-            </EnvironmentAwarePage>
-          </ProtectedRoute>
-        ),
+        element: <Navigate to="/admin/control-panel" replace />,
       },
       {
         path: '/devel-tools/ocr-operations',

@@ -94,7 +94,7 @@ const ItemFormDialog: React.FC<ItemFormDialogProps> = ({ open, editingItem, form
             <FormControl size="small" fullWidth>
               <InputLabel>Repo Target</InputLabel>
               <Select value={form.repo_target || 'orthodoxmetrics'} label="Repo Target" onChange={(e) => setField('repo_target', e.target.value)}>
-                <MenuItem value="orthodoxmetrics">OrthodoxMetrics</MenuItem>
+                <MenuItem value="orthodoxmetrics">OM</MenuItem>
                 <MenuItem value="omai">OMAI</MenuItem>
               </Select>
             </FormControl>

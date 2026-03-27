@@ -179,50 +179,67 @@ router.get('/dashboard', requireAuth, async (req, res) => {
 router.get('/dashboard/extended', requireAuth, async (req, res) => {
   try {
     const pool = getPool();
+    const repo = req.query.repo_target; // optional: 'omai' | 'orthodoxmetrics'
+    const repoFilter = repo ? ` AND repo_target = ?` : '';
+    const repoParam = repo ? [repo] : [];
 
     // Status distribution across ALL items (not cancelled)
     const [statusDist] = await pool.query(
-      `SELECT status, COUNT(*) as count FROM om_daily_items WHERE status != 'cancelled' GROUP BY status ORDER BY FIELD(status,'in_progress','self_review','review','staging','backlog','done','blocked')`
+      `SELECT status, COUNT(*) as count FROM om_daily_items WHERE status != 'cancelled'${repoFilter} GROUP BY status ORDER BY FIELD(status,'in_progress','self_review','review','staging','backlog','done','blocked')`,
+      repoParam
     );
 
     // Priority distribution
     const [priorityDist] = await pool.query(
-      `SELECT priority, COUNT(*) as count FROM om_daily_items WHERE status NOT IN ('done','cancelled') GROUP BY priority ORDER BY FIELD(priority,'critical','high','medium','low')`
+      `SELECT priority, COUNT(*) as count FROM om_daily_items WHERE status NOT IN ('done','cancelled')${repoFilter} GROUP BY priority ORDER BY FIELD(priority,'critical','high','medium','low')`,
+      repoParam
     );
 
     // Category breakdown (active items only)
     const [categoryDist] = await pool.query(
-      `SELECT COALESCE(category, 'Uncategorized') as category, COUNT(*) as count, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_count FROM om_daily_items WHERE status != 'cancelled' GROUP BY category ORDER BY count DESC LIMIT 15`
+      `SELECT COALESCE(category, 'Uncategorized') as category, COUNT(*) as count, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_count FROM om_daily_items WHERE status != 'cancelled'${repoFilter} GROUP BY category ORDER BY count DESC LIMIT 15`,
+      repoParam
     );
 
     // Recently completed items (last 14 days, with details)
     const [recentCompleted] = await pool.query(
-      `SELECT id, title, category, horizon, completed_at, priority FROM om_daily_items WHERE status = 'done' AND completed_at >= DATE_SUB(NOW(), INTERVAL 14 DAY) ORDER BY completed_at DESC LIMIT 15`
+      `SELECT id, title, category, horizon, completed_at, priority, repo_target FROM om_daily_items WHERE status = 'done' AND completed_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)${repoFilter} ORDER BY completed_at DESC LIMIT 15`,
+      repoParam
     );
 
     // Currently in-progress items
     const [inProgressItems] = await pool.query(
-      `SELECT id, title, description, category, horizon, priority, due_date, agent_tool, branch_type, updated_at FROM om_daily_items WHERE status = 'in_progress' ORDER BY FIELD(priority,'critical','high','medium','low'), updated_at DESC LIMIT 20`
+      `SELECT id, title, description, category, horizon, priority, due_date, agent_tool, branch_type, repo_target, updated_at FROM om_daily_items WHERE status = 'in_progress'${repoFilter} ORDER BY FIELD(priority,'critical','high','medium','low'), updated_at DESC LIMIT 20`,
+      repoParam
     );
 
     // Items due soon (next 7 days)
     const [dueSoon] = await pool.query(
-      `SELECT id, title, status, priority, due_date, horizon, category FROM om_daily_items WHERE due_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND status NOT IN ('done','cancelled') ORDER BY due_date ASC LIMIT 15`
+      `SELECT id, title, status, priority, due_date, horizon, category, repo_target FROM om_daily_items WHERE due_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND status NOT IN ('done','cancelled')${repoFilter} ORDER BY due_date ASC LIMIT 15`,
+      repoParam
     );
 
     // Completion velocity — done items per day over last 14 days
     const [velocity] = await pool.query(
-      `SELECT DATE(completed_at) as date, COUNT(*) as count FROM om_daily_items WHERE status = 'done' AND completed_at >= DATE_SUB(NOW(), INTERVAL 14 DAY) GROUP BY DATE(completed_at) ORDER BY date ASC`
+      `SELECT DATE(completed_at) as date, COUNT(*) as count FROM om_daily_items WHERE status = 'done' AND completed_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)${repoFilter} GROUP BY DATE(completed_at) ORDER BY date ASC`,
+      repoParam
     );
 
     // Items created per day over last 14 days
     const [created] = await pool.query(
-      `SELECT DATE(created_at) as date, COUNT(*) as count FROM om_daily_items WHERE created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY) GROUP BY DATE(created_at) ORDER BY date ASC`
+      `SELECT DATE(created_at) as date, COUNT(*) as count FROM om_daily_items WHERE created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)${repoFilter} GROUP BY DATE(created_at) ORDER BY date ASC`,
+      repoParam
     );
 
-    // Phase groups — items sharing the same source metadata (e.g., "church-onboarding-pipeline")
+    // Phase groups — items sharing the same source metadata
     const [phaseGroups] = await pool.query(
-      `SELECT source, category, COUNT(*) as total, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as active_count, GROUP_CONCAT(CONCAT(id, ':', title, ':', status, ':', priority) ORDER BY FIELD(status,'in_progress','self_review','review','staging','backlog','done','blocked'), FIELD(priority,'critical','high','medium','low') SEPARATOR '||') as items_summary FROM om_daily_items WHERE source IS NOT NULL AND source != 'human' AND status != 'cancelled' GROUP BY source, category HAVING total > 1 AND SUM(CASE WHEN status != 'done' THEN 1 ELSE 0 END) > 0 ORDER BY active_count DESC, total DESC`
+      `SELECT source, category, COUNT(*) as total, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_count, SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as active_count, GROUP_CONCAT(CONCAT(id, ':', title, ':', status, ':', priority) ORDER BY FIELD(status,'in_progress','self_review','review','staging','backlog','done','blocked'), FIELD(priority,'critical','high','medium','low') SEPARATOR '||') as items_summary FROM om_daily_items WHERE source IS NOT NULL AND source != 'human' AND status != 'cancelled'${repoFilter} GROUP BY source, category HAVING total > 1 AND SUM(CASE WHEN status != 'done' THEN 1 ELSE 0 END) > 0 ORDER BY active_count DESC, total DESC`,
+      repoParam
+    );
+
+    // Repo distribution (always unfiltered — for the repo tabs)
+    const [repoDist] = await pool.query(
+      `SELECT COALESCE(repo_target, 'orthodoxmetrics') as repo_target, COUNT(*) as count, SUM(CASE WHEN status NOT IN ('done','cancelled') THEN 1 ELSE 0 END) as active_count FROM om_daily_items WHERE status != 'cancelled' GROUP BY repo_target`
     );
 
     res.json({
@@ -235,6 +252,7 @@ router.get('/dashboard/extended', requireAuth, async (req, res) => {
       velocity,
       created,
       phaseGroups,
+      repoDistribution: repoDist,
     });
   } catch (err) {
     console.error('OM Daily extended dashboard error:', err);
@@ -476,7 +494,7 @@ router.put('/items/:id', requireAuth, async (req, res) => {
     if (status !== undefined) {
       updates.push('status = ?');
       params.push(status);
-      if (status === 'done') { updates.push('completed_at = NOW()'); }
+      if (status === 'done') { updates.push('completed_at = NOW()'); updates.push('progress = 100'); }
       if (status !== 'done') { updates.push('completed_at = NULL'); }
     }
     if (priority !== undefined) { updates.push('priority = ?'); params.push(priority); }

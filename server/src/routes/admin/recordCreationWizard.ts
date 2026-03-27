@@ -585,5 +585,147 @@ router.delete('/presets/:id', async (req: any, res: any) => {
   }
 });
 
+// ============================================================================
+// RECORD COUNTS — current record counts for a church
+// ============================================================================
+
+/**
+ * GET /counts/:churchId — Return current record counts per type
+ */
+router.get('/counts/:churchId', async (req: any, res: any) => {
+  try {
+    const { promisePool } = require('../../config/db');
+    const { churchId } = req.params;
+    const [churchRows] = await promisePool.query('SELECT id, name, database_name FROM churches WHERE id = ?', [churchId]);
+    if (!churchRows.length) return res.status(404).json({ error: 'Church not found' });
+    const church = churchRows[0];
+
+    const counts: Record<string, number> = {};
+    for (const [type, table] of Object.entries(TABLE_MAP)) {
+      try {
+        const [rows] = await promisePool.query(
+          `SELECT COUNT(*) as cnt FROM \`${church.database_name}\`.${table} WHERE church_id = ?`, [churchId]
+        );
+        counts[type] = rows[0].cnt;
+      } catch { counts[type] = -1; }
+    }
+
+    res.json({ church_id: parseInt(churchId), church: church.name, database: church.database_name, counts });
+  } catch (err: any) {
+    console.error('[RecordWizard] Counts error:', err);
+    res.status(500).json({ error: 'Failed to load counts' });
+  }
+});
+
+// ============================================================================
+// PURGE — delete records by type for a church
+// ============================================================================
+
+/**
+ * POST /purge — Delete all records of specified types from a church
+ */
+router.post('/purge', async (req: any, res: any) => {
+  try {
+    const { promisePool } = require('../../config/db');
+    const { church_id, record_types } = req.body;
+
+    if (!church_id) return res.status(400).json({ error: 'church_id is required' });
+    const types = Array.isArray(record_types) ? record_types : [record_types];
+    const validTypes = types.filter((t: string) => TABLE_MAP[t]);
+    if (validTypes.length === 0) return res.status(400).json({ error: 'At least one valid record_type is required (baptism, marriage, funeral)' });
+
+    const [churchRows] = await promisePool.query('SELECT id, name, database_name FROM churches WHERE id = ?', [church_id]);
+    if (!churchRows.length) return res.status(404).json({ error: 'Church not found' });
+    const church = churchRows[0];
+
+    const results: Record<string, number> = {};
+    for (const type of validTypes) {
+      const table = TABLE_MAP[type];
+      const [result] = await promisePool.query(
+        `DELETE FROM \`${church.database_name}\`.${table} WHERE church_id = ?`, [church_id]
+      );
+      results[type] = (result as any).affectedRows;
+    }
+
+    res.json({
+      success: true,
+      church: church.name,
+      database: church.database_name,
+      deleted: results,
+      total: Object.values(results).reduce((s, n) => s + n, 0),
+    });
+  } catch (err: any) {
+    console.error('[RecordWizard] Purge error:', err);
+    res.status(500).json({ error: 'Failed to purge records' });
+  }
+});
+
+// ============================================================================
+// QUICK SEED — simple batch generation (replaces legacy seed-records endpoint)
+// ============================================================================
+
+/**
+ * POST /quick-seed — Generate and insert records in one step (Quick Seed mode)
+ */
+router.post('/quick-seed', async (req: any, res: any) => {
+  try {
+    const { church_id, record_type, count = 100, year_start = 1960, year_end = 2025, dry_run = false } = req.body;
+
+    if (!church_id) return res.status(400).json({ error: 'church_id is required' });
+    if (!record_type || !['baptism', 'marriage', 'funeral'].includes(record_type)) {
+      return res.status(400).json({ error: 'record_type must be baptism, marriage, or funeral' });
+    }
+
+    const { promisePool } = require('../../config/db');
+    const [churchRows] = await promisePool.query('SELECT id, name, database_name FROM churches WHERE id = ?', [church_id]);
+    if (!churchRows.length) return res.status(404).json({ error: 'Church not found' });
+    const church = churchRows[0];
+
+    const n = Math.min(Math.max(1, parseInt(count)), 5000);
+    const fields = FIELD_CONFIGS[record_type];
+    const dateStart = `${year_start}-01-01`;
+    const dateEnd = `${year_end}-12-31`;
+    const distributedDates = distributeDates(n, dateStart, dateEnd, 'random', 5);
+
+    const records: Record<string, any>[] = [];
+    for (let i = 0; i < n; i++) {
+      records.push(generateRecord(record_type, fields, { start: dateStart, end: dateEnd }, distributedDates, i, church_id));
+    }
+
+    if (dry_run) {
+      return res.json({ success: true, preview: records.slice(0, 10), total: records.length, church: church.name, database: church.database_name });
+    }
+
+    // Insert
+    const table = TABLE_MAP[record_type];
+    const cols = fields.map((f: WizardFieldConfig) => f.dbColumn);
+    cols.push('church_id');
+    const placeholders = records.map(() => `(${cols.map(() => '?').join(',')})`).join(',');
+    const values = records.flatMap((r: Record<string, any>) => {
+      return cols.map((c: string) => {
+        if (c === 'church_id') return church_id;
+        const field = fields.find((f: WizardFieldConfig) => f.dbColumn === c);
+        return field ? (r[field.key] ?? null) : null;
+      });
+    });
+
+    const [result] = await promisePool.query(
+      `INSERT INTO \`${church.database_name}\`.${table} (${cols.join(',')}) VALUES ${placeholders}`,
+      values
+    );
+
+    res.json({
+      success: true,
+      inserted: (result as any).affectedRows,
+      record_type,
+      church: church.name,
+      database: church.database_name,
+    });
+  } catch (err: any) {
+    console.error('[RecordWizard] Quick-seed error:', err);
+    res.status(500).json({ error: 'Failed to seed records', message: err.message });
+  }
+});
+
 module.exports = router;
 export {};

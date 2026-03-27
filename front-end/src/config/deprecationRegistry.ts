@@ -274,6 +274,22 @@ export const DEPRECATION_REGISTRY: DeprecatedEntry[] = [
     redirectTo: '/account/parish-management/database-mapping',
     category: 'frontend',
   },
+  {
+    id: 'record-creation-wizard',
+    name: 'Record Creation Wizard',
+    stage: 2,
+    files: [
+      'features/devel-tools/om-seedlings/RecordCreationWizard.tsx',
+      'features/devel-tools/om-seedlings/OMSeedlingsPage.tsx',
+    ],
+    replacement: 'OMAI /omai/tools/om-seedlings (dual-mode: Quick Seed + Advanced)',
+    reason: 'Consolidated with OMAI Seedlings into single canonical seeding system. Backend remains at /api/admin/record-wizard.',
+    deprecatedDate: '2026-03-27',
+    owner: 'nectarios',
+    originalRoute: '/devel-tools/record-creation-wizard',
+    redirectTo: '/admin/control-panel',
+    category: 'frontend',
+  },
 ];
 
 // ────────────────────────────────────────────────────────────
