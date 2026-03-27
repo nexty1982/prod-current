@@ -1314,9 +1314,11 @@ const Router = [
         path: '/devel-tools/record-creation-wizard',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <RecordCreationWizard />
-            </AdminErrorBoundary>
+            <EnvironmentAwarePage featureId="record-creation-wizard" priority={2} featureName="Record Creation Wizard">
+              <AdminErrorBoundary>
+                <RecordCreationWizard />
+              </AdminErrorBoundary>
+            </EnvironmentAwarePage>
           </ProtectedRoute>
         ),
       },

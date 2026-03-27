@@ -102,6 +102,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'repo-ops', name: 'Repository Operations', stage: 2, route: '/devel-tools/repo-ops', description: 'Unified build status, git context, and branch cleanup hub', since: '2026-03-24' },
   { id: 'us-church-map', name: 'US Church Map', stage: 2, route: '/devel-tools/us-church-map', description: 'Church Operations Hub — status-aware choropleth with CRM/onboarding integration', since: '2026-03-15', changeSetCode: 'CS-0050' },
   { id: 'om-seedlings', name: 'OM Seedlings', stage: 2, route: '/omai/tools/om-seedlings', description: 'Mass-generate sacramental records for onboarded churches — migrated to OMAI Operations Hub', since: '2026-03-23' },
+  { id: 'record-creation-wizard', name: 'Record Creation Wizard', stage: 2, route: '/devel-tools/record-creation-wizard', description: 'Wizard-based batch record creation with configurable fields, date distribution, validation, and presets', since: '2026-03-27' },
   { id: 'parish-onboarding-wizard', name: 'Parish Onboarding Wizard', stage: 2, route: '/portal/onboarding', description: 'Guided parish setup wizard for configuring record field labels, order, and visibility', since: '2026-03-24' },
   { id: 'live-table-builder', name: 'Live Table Builder', stage: 1, route: '/devel-tools/live-table-builder', since: '2026-01-20' },
   { id: 'liturgical-calendar', name: 'Liturgical Calendar', stage: 5, route: '/apps/liturgical-calendar', description: 'Eastern Orthodox liturgical calendar with auto-theme', since: '2026-02-27' },

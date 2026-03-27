@@ -362,7 +362,7 @@ router.get('/config/:recordType', (req: any, res: any) => {
 router.get('/churches', async (req: any, res: any) => {
   try {
     const { promisePool } = require('../../config/db');
-    const [rows] = await promisePool.query('SELECT id, name, database_name FROM churches WHERE status = "active" OR status IS NULL ORDER BY name');
+    const [rows] = await promisePool.query('SELECT id, name, database_name FROM churches ORDER BY name');
     res.json({ churches: rows });
   } catch (err: any) {
     console.error('[RecordWizard] Churches error:', err);
