@@ -64,8 +64,10 @@ import {
   Storage as SeedIcon,
   Warning as WarningIcon,
 } from '@mui/icons-material';
+import UploadFile from '@mui/icons-material/UploadFile';
 import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
+import * as XLSX from 'xlsx';
 
 const BCrumb = [
   { to: '/', title: 'Home' },
@@ -108,7 +110,7 @@ interface ValidationIssue {
 interface WizardState {
   recordType: string;
   church: Church | null;
-  mode: 'single' | 'batch' | 'auto' | 'template';
+  mode: 'single' | 'batch' | 'auto' | 'template' | 'csv';
   count: number;
   dateStart: string;
   dateEnd: string;
@@ -197,6 +199,10 @@ export default function RecordCreationWizard() {
   const [createResult, setCreateResult] = useState<any>(null);
   const [toast, setToast] = useState<{ msg: string; severity: 'success' | 'error' | 'warning' | 'info' } | null>(null);
   const [editingRow, setEditingRow] = useState<number | null>(null);
+  const [csvFileName, setCsvFileName] = useState<string>('');
+  const [csvColumnMap, setCsvColumnMap] = useState<Record<string, string>>({});
+  const [csvRawHeaders, setCsvRawHeaders] = useState<string[]>([]);
+  const [csvRawRows, setCsvRawRows] = useState<Record<string, any>[]>([]);
   const [editRowData, setEditRowData] = useState<Record<string, any>>({});
   const [presetDialogOpen, setPresetDialogOpen] = useState(false);
   const [presetName, setPresetName] = useState('');
@@ -428,6 +434,65 @@ export default function RecordCreationWizard() {
   }, [state, updateState]);
 
   // ============================================================================
+  // CSV / XLSX FILE HANDLER
+  // ============================================================================
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCsvFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target!.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: '' });
+        if (!json.length) {
+          setToast({ msg: 'File is empty or has no data rows', severity: 'warning' });
+          return;
+        }
+        const headers = Object.keys(json[0]);
+        setCsvRawHeaders(headers);
+        const limited = json.slice(0, 500);
+        setCsvRawRows(limited);
+        if (json.length > 500) {
+          setToast({ msg: `File has ${json.length} rows — limited to first 500`, severity: 'warning' });
+        }
+
+        // Auto-map: try exact match of header to field key or dbColumn
+        const autoMap: Record<string, string> = {};
+        for (const h of headers) {
+          const lower = h.toLowerCase().replace(/[\s-]/g, '_');
+          const match = fieldConfigs.find(
+            f => f.key === lower || f.dbColumn === lower || f.label.toLowerCase().replace(/[\s-]/g, '_') === lower
+          );
+          if (match) autoMap[h] = match.key;
+        }
+        setCsvColumnMap(autoMap);
+        setToast({ msg: `Loaded ${limited.length} rows, ${headers.length} columns from ${file.name}`, severity: 'success' });
+      } catch (err: any) {
+        setToast({ msg: 'Failed to parse file: ' + (err.message || 'Unknown error'), severity: 'error' });
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    // Reset input so the same file can be re-selected
+    e.target.value = '';
+  }, [fieldConfigs]);
+
+  const handleApplyCsvMapping = useCallback(() => {
+    // Convert raw rows using column mapping
+    const mapped = csvRawRows.map(row => {
+      const record: Record<string, any> = { church_id: state.church!.id };
+      for (const [csvCol, fieldKey] of Object.entries(csvColumnMap)) {
+        if (fieldKey) record[fieldKey] = row[csvCol];
+      }
+      return record;
+    });
+    updateState({ records: mapped, count: mapped.length });
+    setToast({ msg: `Mapped ${mapped.length} records — advancing to preview`, severity: 'success' });
+  }, [csvRawRows, csvColumnMap, state.church, updateState]);
+
+  // ============================================================================
   // STEP VALIDATION
   // ============================================================================
   const canProceed = useMemo(() => {
@@ -435,7 +500,9 @@ export default function RecordCreationWizard() {
       case 0: return !!state.recordType;
       case 1: return !!state.church;
       case 2: return !!state.mode;
-      case 3: return true; // Config step always allows forward (preview validates)
+      case 3: return state.mode === 'csv'
+        ? csvRawRows.length > 0 && Object.values(csvColumnMap).some(Boolean)
+        : true; // Config step always allows forward (preview validates)
       case 4: return state.records.length > 0 && !state.validationIssues.some(v => v.severity === 'error');
       default: return false;
     }
@@ -454,11 +521,16 @@ export default function RecordCreationWizard() {
   // ============================================================================
   const handleNext = useCallback(async () => {
     if (activeStep === 3) {
-      // Moving from Configure to Preview — generate records
-      await handleGeneratePreview();
+      if (state.mode === 'csv') {
+        // CSV mode: apply column mapping to produce records
+        handleApplyCsvMapping();
+      } else {
+        // Other modes: generate records via API
+        await handleGeneratePreview();
+      }
     }
     setActiveStep(prev => Math.min(prev + 1, STEPS.length - 1));
-  }, [activeStep, handleGeneratePreview]);
+  }, [activeStep, state.mode, handleGeneratePreview, handleApplyCsvMapping]);
 
   const handleBack = useCallback(() => {
     setActiveStep(prev => Math.max(prev - 1, 0));
@@ -551,6 +623,7 @@ export default function RecordCreationWizard() {
           { value: 'auto', label: 'Auto-Generated Batch', desc: 'System generates realistic records within your date range and rules. Best for demo/sample data.' },
           { value: 'single', label: 'Manual Single Record', desc: 'Fill in all fields manually for one record.' },
           { value: 'batch', label: 'Manual Batch Entry', desc: 'Define shared rules and generate multiple records with manual overrides.' },
+          { value: 'csv', label: 'Import from CSV / XLSX', desc: 'Upload a CSV or Excel file to create records in bulk. Column headers are mapped to record fields.' },
           { value: 'template', label: 'From Saved Preset', desc: 'Load a previously saved configuration preset.' },
         ].map(opt => (
           <Paper
@@ -629,6 +702,108 @@ export default function RecordCreationWizard() {
       );
     }
 
+    // CSV / XLSX import mode
+    if (state.mode === 'csv') {
+      return (
+        <Box sx={{ py: 2 }}>
+          <Typography variant="h6" fontWeight={600} gutterBottom>
+            Import {meta?.label} Records from File
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Upload a CSV or Excel (.xlsx) file. Map columns to record fields, then preview before creating.
+            Maximum 500 rows will be imported.
+          </Typography>
+
+          {/* File upload */}
+          <Box sx={{ mb: 3 }}>
+            <Button
+              variant="outlined"
+              component="label"
+              startIcon={<UploadFile />}
+              sx={{ mr: 2 }}
+            >
+              {csvFileName || 'Choose File'}
+              <input
+                type="file"
+                hidden
+                accept=".csv,.xlsx,.xls"
+                onChange={handleFileUpload}
+              />
+            </Button>
+            {csvFileName && (
+              <Chip label={`${csvRawRows.length} rows`} size="small" color="info" />
+            )}
+          </Box>
+
+          {/* Column mapping */}
+          {csvRawHeaders.length > 0 && (
+            <>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Column Mapping</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Map each file column to a {meta?.label?.toLowerCase()} record field. Unmapped columns will be skipped.
+              </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5, mb: 3 }}>
+                {csvRawHeaders.map(header => (
+                  <Stack key={header} direction="row" spacing={1} alignItems="center">
+                    <Typography variant="body2" sx={{ minWidth: 140, fontWeight: 500, fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                      {header}
+                    </Typography>
+                    <FormControl size="small" fullWidth>
+                      <Select
+                        value={csvColumnMap[header] || ''}
+                        onChange={(e) => setCsvColumnMap(prev => ({ ...prev, [header]: e.target.value }))}
+                        displayEmpty
+                      >
+                        <MenuItem value=""><em>-- skip --</em></MenuItem>
+                        {fieldConfigs.map(f => (
+                          <MenuItem key={f.key} value={f.key}>{f.label} ({f.key})</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Stack>
+                ))}
+              </Box>
+
+              {/* Sample data preview */}
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Sample Data (first 3 rows)</Typography>
+              <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 200, mb: 2 }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      {csvRawHeaders.map(h => (
+                        <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+                          {h}
+                          {csvColumnMap[h] && (
+                            <Chip label={csvColumnMap[h]} size="small" color="primary" sx={{ ml: 0.5, height: 18, fontSize: '0.65rem' }} />
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {csvRawRows.slice(0, 3).map((row, idx) => (
+                      <TableRow key={idx}>
+                        {csvRawHeaders.map(h => (
+                          <TableCell key={h} sx={{ fontSize: '0.7rem', maxWidth: 150 }}>
+                            <Typography variant="body2" fontSize="0.7rem" noWrap>{String(row[h] ?? '')}</Typography>
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <Alert severity="info" sx={{ mb: 2 }}>
+                {Object.values(csvColumnMap).filter(Boolean).length} of {csvRawHeaders.length} columns mapped
+                &bull; {csvRawRows.length} rows will be imported
+              </Alert>
+            </>
+          )}
+        </Box>
+      );
+    }
+
     // Batch / Auto modes
     return (
       <Box sx={{ py: 2 }}>
@@ -649,7 +824,7 @@ export default function RecordCreationWizard() {
               sx={{ width: 120 }}
             />
             <Stack direction="row" spacing={1}>
-              {[5, 10, 25, 50, 100].map(n => (
+              {[5, 10, 25, 50, 100, 250, 500].map(n => (
                 <Chip
                   key={n}
                   label={n}
@@ -1129,7 +1304,7 @@ export default function RecordCreationWizard() {
                     onClick={handleNext}
                     disabled={!canProceed || loading}
                   >
-                    {activeStep === 3 ? 'Generate Preview' : 'Next'}
+                    {activeStep === 3 ? (state.mode === 'csv' ? 'Map & Preview' : 'Generate Preview') : 'Next'}
                   </Button>
                 )}
               </Stack>
