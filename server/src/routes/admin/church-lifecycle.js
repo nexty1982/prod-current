@@ -553,11 +553,20 @@ router.put('/:id/stage', requireAuth, requireRole(ADMIN_ROLES), async (req, res)
       await pool.query('UPDATE omai_crm_leads SET pipeline_stage = ? WHERE id = ?', [stage, numericId]);
     }
 
-    // Log activity
+    // Log activity to CRM activities
+    const actorId = req.session?.user?.id || req.user?.userId || null;
     await pool.query(
       `INSERT INTO omai_crm_activities (church_id, activity_type, subject, metadata, created_by)
        VALUES (?, 'stage_change', ?, ?, ?)`,
-      [numericId, `Stage changed to: ${stage}`, JSON.stringify({ new_stage: stage }), req.session?.user?.id || req.user?.userId || null]
+      [numericId, `Stage changed to: ${stage}`, JSON.stringify({ new_stage: stage, previous_stage: church.pipeline_stage }), actorId]
+    );
+
+    // Also log to onboarding activity log for unified timeline
+    await pool.query(
+      `INSERT INTO onboarding_activity_log (onboarding_id, activity_type, actor_user_id, summary, details_json)
+       VALUES (?, ?, ?, ?, ?)`,
+      [numericId, 'stage_change', actorId, `Pipeline stage changed: ${church.pipeline_stage || 'none'} → ${stage}`,
+       JSON.stringify({ previous_stage: church.pipeline_stage, new_stage: stage })]
     );
 
     // If moving to 'won', mark as client

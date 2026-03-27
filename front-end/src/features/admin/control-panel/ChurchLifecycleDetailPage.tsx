@@ -8,6 +8,7 @@
  * PP-0003 Step 4 | CS-0050
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
@@ -410,6 +411,12 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   // Pipeline saving state
   const [pipelineSaving, setPipelineSaving] = useState(false);
 
+  // Inline editing for discovery notes / blockers
+  const [editingDiscovery, setEditingDiscovery] = useState(false);
+  const [discoveryDraft, setDiscoveryDraft] = useState('');
+  const [editingBlockers, setEditingBlockers] = useState(false);
+  const [blockersDraft, setBlockersDraft] = useState('');
+
   const churchName = crm?.name || onboarded?.name || 'Church Detail';
 
   const BCrumb = [
@@ -428,9 +435,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const resp = await fetch(`/api/admin/church-lifecycle/${churchId}`, { credentials: 'include' });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
+      const data = await apiClient.get<any>(`/api/admin/church-lifecycle/${churchId}`);
 
       setSource(data.source || 'crm');
       setUnifiedStage(data.unified_stage || '');
@@ -450,28 +455,19 @@ const ChurchLifecycleDetailPage: React.FC = () => {
       // Fetch extended pipeline data for CRM churches
       if (data.crm?.id) {
         try {
-          const [pipeResp, tmplResp, eTmplResp] = await Promise.all([
-            fetch(`/api/admin/onboarding-pipeline/${data.crm.id}/detail`, { credentials: 'include' }),
-            fetch('/api/admin/onboarding-pipeline/templates', { credentials: 'include' }),
-            fetch('/api/admin/onboarding-pipeline/email-templates', { credentials: 'include' }),
+          const [pipeData, tmplData, eTmplData] = await Promise.all([
+            apiClient.get<any>(`/api/admin/onboarding-pipeline/${data.crm.id}/detail`),
+            apiClient.get<any>('/api/admin/onboarding-pipeline/templates'),
+            apiClient.get<any>('/api/admin/onboarding-pipeline/email-templates'),
           ]);
-          if (pipeResp.ok) {
-            const pipeData = await pipeResp.json();
-            if (pipeData.success) {
-              setPipelineRequirements(pipeData.requirements || []);
-              setPipelineEmails(pipeData.emails || []);
-              setPipelineActivities(pipeData.activities || []);
-              setProvisionChecklist(pipeData.checklist || null);
-            }
+          if (pipeData?.success) {
+            setPipelineRequirements(pipeData.requirements || []);
+            setPipelineEmails(pipeData.emails || []);
+            setPipelineActivities(pipeData.activities || []);
+            setProvisionChecklist(pipeData.checklist || null);
           }
-          if (tmplResp.ok) {
-            const tmplData = await tmplResp.json();
-            setSampleTemplates(tmplData.templates || []);
-          }
-          if (eTmplResp.ok) {
-            const eTmplData = await eTmplResp.json();
-            setEmailTemplates(eTmplData.templates || []);
-          }
+          setSampleTemplates(tmplData?.templates || []);
+          setEmailTemplates(eTmplData?.templates || []);
         } catch { /* non-critical — pipeline data is supplementary */ }
       }
     } catch (err: any) {
@@ -483,11 +479,8 @@ const ChurchLifecycleDetailPage: React.FC = () => {
 
   const fetchStages = useCallback(async () => {
     try {
-      const resp = await fetch('/api/admin/church-lifecycle/stages', { credentials: 'include' });
-      if (resp.ok) {
-        const data = await resp.json();
-        setStages(data.stages || []);
-      }
+      const data = await apiClient.get<any>('/api/admin/church-lifecycle/stages');
+      setStages(data.stages || []);
     } catch { /* non-critical */ }
   }, []);
 
@@ -559,19 +552,9 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     setNotesSaving(true);
     try {
       if (crmId) {
-        const resp = await fetch(`/api/crm/churches/${crmId}`, {
-          method: 'PUT', credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ crm_notes: notes }),
-        });
-        if (!resp.ok) throw new Error('Failed to save notes');
+        await apiClient.put(`/api/crm/churches/${crmId}`, { crm_notes: notes });
       } else if (onboardedId) {
-        const resp = await fetch(`/api/admin/church-onboarding/${onboardedId}/update-notes`, {
-          method: 'POST', credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ notes }),
-        });
-        if (!resp.ok) throw new Error('Failed to save notes');
+        await apiClient.post(`/api/admin/church-onboarding/${onboardedId}/update-notes`, { notes });
       }
       setNotesOriginal(notes);
       showToast('Notes saved');
@@ -585,19 +568,12 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const handleSaveContact = async () => {
     if (!crmId || !contactForm.first_name) return;
     try {
-      const url = editingContact
-        ? `/api/crm/contacts/${editingContact.id}`
-        : `/api/crm/churches/${crmId}/contacts`;
-      const method = editingContact ? 'PUT' : 'POST';
-      const resp = await fetch(url, {
-        method, credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...contactForm,
-          is_primary: contactForm.is_primary ? 1 : 0,
-        }),
-      });
-      if (!resp.ok) throw new Error('Failed to save contact');
+      const payload = { ...contactForm, is_primary: contactForm.is_primary ? 1 : 0 };
+      if (editingContact) {
+        await apiClient.put(`/api/crm/contacts/${editingContact.id}`, payload);
+      } else {
+        await apiClient.post(`/api/crm/churches/${crmId}/contacts`, payload);
+      }
       showToast(editingContact ? 'Contact updated' : 'Contact added');
       setContactDialogOpen(false);
       setEditingContact(null);
@@ -610,8 +586,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
 
   const handleDeleteContact = async (contactId: number) => {
     try {
-      const resp = await fetch(`/api/crm/contacts/${contactId}`, { method: 'DELETE', credentials: 'include' });
-      if (!resp.ok) throw new Error('Failed to delete contact');
+      await apiClient.delete(`/api/crm/contacts/${contactId}`);
       showToast('Contact deleted');
       fetchDetail();
     } catch (err: any) {
@@ -622,12 +597,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const handleLogActivity = async () => {
     if (!crmId || !activityForm.subject) return;
     try {
-      const resp = await fetch(`/api/crm/churches/${crmId}/activities`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(activityForm),
-      });
-      if (!resp.ok) throw new Error('Failed to log activity');
+      await apiClient.post(`/api/crm/churches/${crmId}/activities`, activityForm);
       showToast('Activity logged');
       setActivityDialogOpen(false);
       setActivityForm({ activity_type: 'note', subject: '', body: '' });
@@ -640,12 +610,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const handleAddFollowUp = async () => {
     if (!crmId || !followUpForm.due_date || !followUpForm.subject) return;
     try {
-      const resp = await fetch(`/api/crm/churches/${crmId}/follow-ups`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(followUpForm),
-      });
-      if (!resp.ok) throw new Error('Failed to add follow-up');
+      await apiClient.post(`/api/crm/churches/${crmId}/follow-ups`, followUpForm);
       showToast('Follow-up scheduled');
       setFollowUpDialogOpen(false);
       setFollowUpForm({ due_date: '', subject: '', description: '' });
@@ -657,12 +622,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
 
   const handleCompleteFollowUp = async (id: number) => {
     try {
-      const resp = await fetch(`/api/crm/follow-ups/${id}`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'completed' }),
-      });
-      if (!resp.ok) throw new Error('Failed to complete follow-up');
+      await apiClient.put(`/api/crm/follow-ups/${id}`, { status: 'completed' });
       showToast('Follow-up completed');
       fetchDetail();
     } catch (err: any) {
@@ -673,12 +633,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const handleStageChange = async () => {
     if (!churchId || !newStage) return;
     try {
-      const resp = await fetch(`/api/admin/church-lifecycle/${churchId}/stage`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage: newStage }),
-      });
-      if (!resp.ok) throw new Error('Failed to change stage');
+      await apiClient.put(`/api/admin/church-lifecycle/${churchId}/stage`, { stage: newStage });
       showToast(`Stage changed to ${newStage}`);
       setStageDialogOpen(false);
       setNewStage('');
@@ -696,10 +651,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     if (!onboardedId) return;
     setTogglingSetup(true);
     try {
-      const resp = await fetch(`/api/admin/church-onboarding/${onboardedId}/toggle-setup`, {
-        method: 'POST', credentials: 'include',
-      });
-      if (!resp.ok) throw new Error('Failed to toggle setup');
+      await apiClient.post(`/api/admin/church-onboarding/${onboardedId}/toggle-setup`);
       showToast('Setup status toggled');
       fetchDetail();
     } catch (err: any) {
@@ -713,10 +665,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     if (!onboardedId) return;
     setGeneratingToken(true);
     try {
-      const resp = await fetch(`/api/admin/church-onboarding/${onboardedId}/send-token`, {
-        method: 'POST', credentials: 'include',
-      });
-      if (!resp.ok) throw new Error('Failed to generate token');
+      await apiClient.post(`/api/admin/church-onboarding/${onboardedId}/send-token`);
       showToast('Token generated');
       fetchDetail();
     } catch (err: any) {
@@ -730,10 +679,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     if (!onboardedId) return;
     setDeactivatingToken(tokenId);
     try {
-      const resp = await fetch(`/api/admin/churches/${onboardedId}/registration-token`, {
-        method: 'DELETE', credentials: 'include',
-      });
-      if (!resp.ok) throw new Error('Failed to deactivate token');
+      await apiClient.delete(`/api/admin/churches/${onboardedId}/registration-token`);
       showToast('Token deactivated');
       fetchDetail();
     } catch (err: any) {
@@ -746,11 +692,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const handleApproveMember = async (userId: number, email: string) => {
     setActionLoading(userId);
     try {
-      const resp = await fetch(`/api/admin/users/${userId}/unlock`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!resp.ok) throw new Error('Failed to unlock user');
+      await apiClient.post(`/api/admin/users/${userId}/unlock`);
       showToast(`${email} approved`);
       fetchDetail();
     } catch (err: any) {
@@ -764,10 +706,8 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     if (!rejectDialog.userId) return;
     setActionLoading(rejectDialog.userId);
     try {
-      await fetch(`/api/admin/users/${rejectDialog.userId}/lockout`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: `Registration rejected: ${rejectReason || 'Not approved by admin'}` }),
+      await apiClient.post(`/api/admin/users/${rejectDialog.userId}/lockout`, {
+        reason: `Registration rejected: ${rejectReason || 'Not approved by admin'}`,
       });
       showToast(`${rejectDialog.email} rejected`);
       setRejectDialog({ open: false, userId: null, email: '' });
@@ -790,12 +730,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     if (!crmId) return;
     setPipelineSaving(true);
     try {
-      const resp = await fetch(`/api/admin/onboarding-pipeline/${crmId}/requirements`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reqForm),
-      });
-      if (!resp.ok) throw new Error('Failed to save requirement');
+      await apiClient.post(`/api/admin/onboarding-pipeline/${crmId}/requirements`, reqForm);
       showToast('Requirement added');
       setReqDialogOpen(false);
       setReqForm({ record_type: 'baptism', uses_sample: false, sample_template_id: null, custom_required: false, custom_notes: '', review_required: false });
@@ -810,10 +745,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const handleDeleteRequirement = async (reqId: number) => {
     if (!crmId) return;
     try {
-      const resp = await fetch(`/api/admin/onboarding-pipeline/${crmId}/requirements/${reqId}`, {
-        method: 'DELETE', credentials: 'include',
-      });
-      if (!resp.ok) throw new Error('Failed to delete requirement');
+      await apiClient.delete(`/api/admin/onboarding-pipeline/${crmId}/requirements/${reqId}`);
       showToast('Requirement removed');
       fetchDetail();
     } catch (err: any) {
@@ -838,12 +770,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     if (!crmId) return;
     setPipelineSaving(true);
     try {
-      const resp = await fetch(`/api/admin/onboarding-pipeline/${crmId}/emails`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...emailForm, status }),
-      });
-      if (!resp.ok) throw new Error('Failed to save email');
+      await apiClient.post(`/api/admin/onboarding-pipeline/${crmId}/emails`, { ...emailForm, status });
       showToast(status === 'sent' ? 'Email marked as sent' : 'Draft saved');
       setEmailDialogOpen(false);
       fetchDetail();
@@ -860,16 +787,27 @@ const ChurchLifecycleDetailPage: React.FC = () => {
       const updates: Record<string, any> = { status };
       if (status === 'sent') updates.sent_at = new Date().toISOString();
       if (status === 'replied') updates.replied_at = new Date().toISOString();
-      const resp = await fetch(`/api/admin/onboarding-pipeline/${crmId}/emails/${emailId}`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      });
-      if (!resp.ok) throw new Error('Failed to update email');
+      await apiClient.put(`/api/admin/onboarding-pipeline/${crmId}/emails/${emailId}`, updates);
       showToast(`Email marked as ${status.replace('_', ' ')}`);
       fetchDetail();
     } catch (err: any) {
       showToast(err.message, 'error');
+    }
+  };
+
+  const handleSaveInlineField = async (field: string, value: string) => {
+    if (!crmId) return;
+    setPipelineSaving(true);
+    try {
+      await apiClient.put(`/api/admin/onboarding-pipeline/${crmId}`, { [field]: value });
+      showToast('Updated successfully');
+      if (field === 'discovery_notes') setEditingDiscovery(false);
+      if (field === 'blockers') setEditingBlockers(false);
+      fetchDetail();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setPipelineSaving(false);
     }
   };
 
@@ -881,12 +819,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
       if (field === 'provisioning_completed') {
         body.activation_date = new Date().toISOString().split('T')[0];
       }
-      const resp = await fetch(`/api/admin/onboarding-pipeline/${crmId}`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!resp.ok) throw new Error('Failed to update');
+      await apiClient.put(`/api/admin/onboarding-pipeline/${crmId}`, body);
       showToast(field === 'provisioning_ready' ? 'Marked ready for provisioning' : 'Marked as active');
       fetchDetail();
     } catch (err: any) {
@@ -1122,18 +1055,50 @@ const ChurchLifecycleDetailPage: React.FC = () => {
                 )}
               </Box>
             </Grid>
-            {crm.discovery_notes && (
-              <Grid item xs={12}>
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Typography variant="caption" color="text.secondary" fontWeight={600}>Discovery Notes</Typography>
-                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{crm.discovery_notes}</Typography>
-              </Grid>
-            )}
-            {crm.blockers && (
-              <Grid item xs={12}>
+                {!editingDiscovery && (
+                  <IconButton size="small" onClick={() => { setDiscoveryDraft(crm.discovery_notes || ''); setEditingDiscovery(true); }}>
+                    <EditIcon fontSize="inherit" />
+                  </IconButton>
+                )}
+              </Box>
+              {editingDiscovery ? (
+                <Box sx={{ mt: 0.5 }}>
+                  <TextField fullWidth multiline minRows={2} maxRows={6} size="small" value={discoveryDraft} onChange={e => setDiscoveryDraft(e.target.value)} />
+                  <Box sx={{ mt: 0.5, display: 'flex', gap: 1 }}>
+                    <Button size="small" variant="contained" disabled={pipelineSaving} onClick={() => handleSaveInlineField('discovery_notes', discoveryDraft)} sx={{ bgcolor: COLOR }}>Save</Button>
+                    <Button size="small" onClick={() => setEditingDiscovery(false)}>Cancel</Button>
+                  </Box>
+                </Box>
+              ) : (
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', mt: 0.5 }}>{crm.discovery_notes || <em>None yet — click edit to add</em>}</Typography>
+              )}
+            </Grid>
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Typography variant="caption" color="text.secondary" fontWeight={600}>Blockers</Typography>
+                {!editingBlockers && (
+                  <IconButton size="small" onClick={() => { setBlockersDraft(crm.blockers || ''); setEditingBlockers(true); }}>
+                    <EditIcon fontSize="inherit" />
+                  </IconButton>
+                )}
+              </Box>
+              {editingBlockers ? (
+                <Box sx={{ mt: 0.5 }}>
+                  <TextField fullWidth multiline minRows={2} maxRows={4} size="small" value={blockersDraft} onChange={e => setBlockersDraft(e.target.value)} />
+                  <Box sx={{ mt: 0.5, display: 'flex', gap: 1 }}>
+                    <Button size="small" variant="contained" disabled={pipelineSaving} onClick={() => handleSaveInlineField('blockers', blockersDraft)} sx={{ bgcolor: COLOR }}>Save</Button>
+                    <Button size="small" onClick={() => setEditingBlockers(false)}>Cancel</Button>
+                  </Box>
+                </Box>
+              ) : crm.blockers ? (
                 <Alert severity="warning" sx={{ mt: 0.5 }}>{crm.blockers}</Alert>
-              </Grid>
-            )}
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}><em>None</em></Typography>
+              )}
+            </Grid>
           </Grid>
         </>
       )}
@@ -1144,23 +1109,33 @@ const ChurchLifecycleDetailPage: React.FC = () => {
           <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>Provisioning Checklist</Typography>
           <Grid container spacing={1}>
             {[
-              { key: 'contact_complete', label: 'Contact info complete' },
-              { key: 'record_requirements_set', label: 'Record requirements defined' },
-              { key: 'templates_or_custom', label: 'Templates or custom structure confirmed' },
-              { key: 'internal_review_done', label: 'Internal review done' },
-              { key: 'provisioning_email_sent', label: 'Provisioning email sent' },
-              { key: 'response_received', label: 'Response received' },
-              { key: 'account_created', label: 'Account created' },
-              { key: 'invite_sent', label: 'Invite sent' },
-              { key: 'activated', label: 'Activated' },
+              { key: 'contact_complete', label: 'Contact info complete', manual: false },
+              { key: 'record_requirements_set', label: 'Record requirements defined', manual: false },
+              { key: 'templates_or_custom', label: 'Templates or custom structure confirmed', manual: false },
+              { key: 'internal_review_done', label: 'Internal review done', manual: true },
+              { key: 'provisioning_email_sent', label: 'Provisioning email sent', manual: false },
+              { key: 'response_received', label: 'Response received', manual: true },
+              { key: 'account_created', label: 'Account created', manual: false },
+              { key: 'invite_sent', label: 'Invite sent', manual: false },
+              { key: 'activated', label: 'Activated', manual: false },
             ].map(item => {
               const done = !!(provisionChecklist as Record<string, any>)[item.key];
               return (
                 <Grid item xs={12} sm={6} md={4} key={item.key}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    sx={{
+                      display: 'flex', alignItems: 'center', gap: 1,
+                      ...(item.manual ? { cursor: 'pointer', '&:hover': { opacity: 0.7 } } : {}),
+                    }}
+                    onClick={item.manual ? () => {
+                      if (item.key === 'internal_review_done') {
+                        handleMarkProvisioning('provisioning_ready', done ? 0 : 1);
+                      }
+                    } : undefined}
+                  >
                     <CheckIcon sx={{ fontSize: 18, color: done ? '#4caf50' : alpha('#9e9e9e', 0.4) }} />
                     <Typography variant="body2" sx={{ color: done ? 'text.primary' : 'text.disabled' }}>
-                      {item.label}
+                      {item.label}{item.manual ? ' ✎' : ''}
                     </Typography>
                   </Box>
                 </Grid>
@@ -1488,7 +1463,10 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const renderEmailWorkflow = () => (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-        <Typography variant="subtitle1" fontWeight={700}>Email Correspondence ({pipelineEmails.length})</Typography>
+        <Box>
+          <Typography variant="subtitle1" fontWeight={700}>Email Correspondence ({pipelineEmails.length})</Typography>
+          <Typography variant="caption" color="text.secondary">Track emails sent outside this system — drafts and status updates are for logging only</Typography>
+        </Box>
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
           {EMAIL_TYPES.map(et => (
             <Button key={et.key} size="small" variant="outlined" onClick={() => openEmailComposer(et.key)}
@@ -1529,28 +1507,28 @@ const ChurchLifecycleDetailPage: React.FC = () => {
                 </Box>
                 <Box sx={{ display: 'flex', gap: 0.5, ml: 2 }}>
                   {email.status === 'draft' && (
-                    <Tooltip title="Mark as Sent">
+                    <Tooltip title="Log as Sent">
                       <IconButton size="small" color="primary" onClick={() => handleUpdateEmailStatus(email.id, 'sent')}>
                         <SendIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   )}
                   {email.status === 'sent' && (
-                    <Tooltip title="Mark as Replied">
+                    <Tooltip title="Log Reply Received">
                       <IconButton size="small" color="success" onClick={() => handleUpdateEmailStatus(email.id, 'replied')}>
                         <CheckIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   )}
                   {(email.status === 'sent' || email.status === 'awaiting_response') && (
-                    <Tooltip title="Mark Awaiting Response">
+                    <Tooltip title="Log as Awaiting Response">
                       <IconButton size="small" color="warning" onClick={() => handleUpdateEmailStatus(email.id, 'awaiting_response')}>
                         <TimelineIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   )}
                   {email.status !== 'completed' && (
-                    <Tooltip title="Mark Completed">
+                    <Tooltip title="Log as Completed">
                       <IconButton size="small" onClick={() => handleUpdateEmailStatus(email.id, 'completed')}>
                         <CheckOutlineIcon fontSize="small" />
                       </IconButton>
@@ -2209,7 +2187,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
           <Button variant="contained" startIcon={<SendIcon />} onClick={() => handleSaveEmail('sent')} disabled={pipelineSaving}
             sx={{ bgcolor: COLOR, '&:hover': { bgcolor: alpha(COLOR, 0.85) } }}
           >
-            Mark as Sent
+            Log as Sent
           </Button>
         </DialogActions>
       </Dialog>

@@ -5,6 +5,8 @@
  * to the existing CRM/church-lifecycle system.
  *
  * Mounted at /api/admin/onboarding-pipeline
+ *
+ * Data source: omai_crm_leads (unified CRM table), NOT omai_crm_leads.
  */
 
 const express = require('express');
@@ -13,6 +15,9 @@ const { getAppPool } = require('../../config/db');
 const { requireAuth, requireRole } = require('../../middleware/auth');
 
 const ADMIN_ROLES = ['super_admin', 'admin'];
+const VALID_RECORD_TYPES = ['baptism', 'marriage', 'funeral', 'chrismation', 'other'];
+const VALID_EMAIL_TYPES = ['welcome', 'info_request', 'template_confirm', 'custom_review', 'provisioned', 'reminder'];
+const VALID_EMAIL_STATUSES = ['draft', 'sent', 'replied', 'awaiting_response', 'completed'];
 
 // Helper: get current user ID from session or JWT
 function getUserId(req) {
@@ -98,11 +103,11 @@ router.get('/list', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
         j.name AS jurisdiction_name,
         assigned.email AS assigned_to_email,
         assigned.full_name AS assigned_to_name,
-        (SELECT COUNT(*) FROM crm_contacts cc WHERE cc.church_id = uc.id) AS contact_count,
+        (SELECT COUNT(*) FROM omai_crm_contacts cc WHERE cc.church_id = uc.id) AS contact_count,
         (SELECT COUNT(*) FROM onboarding_emails oe WHERE oe.onboarding_id = uc.id) AS email_count,
         (SELECT MAX(oal.created_at) FROM onboarding_activity_log oal WHERE oal.onboarding_id = uc.id) AS last_activity
-      FROM us_churches uc
-      LEFT JOIN crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
+      FROM omai_crm_leads uc
+      LEFT JOIN omai_crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
       LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
       LEFT JOIN users assigned ON uc.assigned_to_user_id = assigned.id
       ${where}
@@ -131,8 +136,8 @@ router.get('/:id/detail', requireAuth, requireRole(ADMIN_ROLES), async (req, res
       SELECT uc.*, ps.label AS stage_label, ps.color AS stage_color,
              j.name AS jurisdiction_name,
              assigned.email AS assigned_to_email, assigned.full_name AS assigned_to_name
-      FROM us_churches uc
-      LEFT JOIN crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
+      FROM omai_crm_leads uc
+      LEFT JOIN omai_crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
       LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
       LEFT JOIN users assigned ON uc.assigned_to_user_id = assigned.id
       WHERE uc.id = ?
@@ -143,7 +148,7 @@ router.get('/:id/detail', requireAuth, requireRole(ADMIN_ROLES), async (req, res
 
     // Contacts
     const [contacts] = await pool.query(
-      'SELECT * FROM crm_contacts WHERE church_id = ? ORDER BY is_primary DESC, first_name', [id]
+      'SELECT * FROM omai_crm_contacts WHERE church_id = ? ORDER BY is_primary DESC, first_name', [id]
     );
 
     // Record requirements
@@ -176,7 +181,7 @@ router.get('/:id/detail', requireAuth, requireRole(ADMIN_ROLES), async (req, res
 
     // CRM follow-ups
     const [followUps] = await pool.query(
-      'SELECT * FROM crm_follow_ups WHERE church_id = ? ORDER BY due_date ASC', [id]
+      'SELECT * FROM omai_crm_followups WHERE church_id = ? ORDER BY due_date ASC', [id]
     );
 
     // Provisioning data (if provisioned)
@@ -261,7 +266,7 @@ router.put('/:id', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
     if (!updates.length) return res.status(400).json({ error: 'No valid fields to update' });
 
     params.push(id);
-    await pool.query(`UPDATE us_churches SET ${updates.join(', ')} WHERE id = ?`, params);
+    await pool.query(`UPDATE omai_crm_leads SET ${updates.join(', ')} WHERE id = ?`, params);
 
     // Log activity
     await logActivity(pool, id, 'update', 'Onboarding record updated', getUserId(req), { fields: Object.keys(req.body).filter(k => allowedFields.includes(k)) });
@@ -324,6 +329,13 @@ router.post('/:id/requirements', requireAuth, requireRole(ADMIN_ROLES), async (r
     const { record_type, uses_sample, sample_template_id, custom_required, custom_notes, review_required } = req.body;
 
     if (!record_type) return res.status(400).json({ error: 'record_type is required' });
+    if (!VALID_RECORD_TYPES.includes(record_type)) {
+      return res.status(400).json({ error: `Invalid record_type: ${record_type}. Must be one of: ${VALID_RECORD_TYPES.join(', ')}` });
+    }
+    if (uses_sample && sample_template_id) {
+      const [tmpl] = await pool.query('SELECT id FROM sample_record_templates WHERE id = ? AND is_active = 1', [sample_template_id]);
+      if (!tmpl.length) return res.status(400).json({ error: `Template ID ${sample_template_id} not found or inactive` });
+    }
 
     // Upsert: delete existing for this type, insert new
     await pool.query(
@@ -344,7 +356,7 @@ router.post('/:id/requirements', requireAuth, requireRole(ADMIN_ROLES), async (r
       'SELECT custom_required FROM onboarding_record_requirements WHERE onboarding_id = ?', [onboardingId]
     );
     const hasCustom = allReqs.some(r => r.custom_required);
-    await pool.query('UPDATE us_churches SET custom_structure_required = ? WHERE id = ?', [hasCustom ? 1 : 0, onboardingId]);
+    await pool.query('UPDATE omai_crm_leads SET custom_structure_required = ? WHERE id = ?', [hasCustom ? 1 : 0, onboardingId]);
 
     await logActivity(pool, onboardingId, 'requirement', `Record requirement set: ${record_type}`, getUserId(req), {
       record_type, uses_sample, custom_required
@@ -360,9 +372,11 @@ router.post('/:id/requirements', requireAuth, requireRole(ADMIN_ROLES), async (r
 router.delete('/:id/requirements/:reqId', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
   try {
     const pool = getAppPool();
-    await pool.query('DELETE FROM onboarding_record_requirements WHERE id = ? AND onboarding_id = ?',
-      [parseInt(req.params.reqId), parseInt(req.params.id)]);
-    await logActivity(pool, parseInt(req.params.id), 'requirement_removed', 'Record requirement removed', getUserId(req));
+    const id = parseInt(req.params.id);
+    const reqId = parseInt(req.params.reqId);
+    if (isNaN(id) || isNaN(reqId)) return res.status(400).json({ error: 'Invalid ID' });
+    await pool.query('DELETE FROM onboarding_record_requirements WHERE id = ? AND onboarding_id = ?', [reqId, id]);
+    await logActivity(pool, id, 'requirement_removed', 'Record requirement removed', getUserId(req));
     res.json({ success: true });
   } catch (err) {
     console.error('Requirement delete error:', err);
@@ -508,6 +522,12 @@ router.post('/:id/emails', requireAuth, requireRole(ADMIN_ROLES), async (req, re
     if (!email_type || !subject || !recipients || !body) {
       return res.status(400).json({ error: 'email_type, subject, recipients, and body are required' });
     }
+    if (!VALID_EMAIL_TYPES.includes(email_type)) {
+      return res.status(400).json({ error: `Invalid email_type: ${email_type}. Must be one of: ${VALID_EMAIL_TYPES.join(', ')}` });
+    }
+    if (status && !VALID_EMAIL_STATUSES.includes(status)) {
+      return res.status(400).json({ error: `Invalid status: ${status}. Must be one of: ${VALID_EMAIL_STATUSES.join(', ')}` });
+    }
 
     const [result] = await pool.query(
       `INSERT INTO onboarding_emails (onboarding_id, email_type, subject, recipients, cc, body, status, notes, created_by)
@@ -535,6 +555,10 @@ router.put('/:id/emails/:emailId', requireAuth, requireRole(ADMIN_ROLES), async 
 
     const updates = [];
     const params = [];
+
+    if (status !== undefined && !VALID_EMAIL_STATUSES.includes(status)) {
+      return res.status(400).json({ error: `Invalid status: ${status}. Must be one of: ${VALID_EMAIL_STATUSES.join(', ')}` });
+    }
 
     if (subject !== undefined) { updates.push('subject = ?'); params.push(subject); }
     if (recipients !== undefined) { updates.push('recipients = ?'); params.push(recipients); }
@@ -612,7 +636,7 @@ router.post('/:id/mark-ready', requireAuth, requireRole(ADMIN_ROLES), async (req
   try {
     const pool = getAppPool();
     const id = parseInt(req.params.id);
-    await pool.query('UPDATE us_churches SET provisioning_ready = 1 WHERE id = ?', [id]);
+    await pool.query('UPDATE omai_crm_leads SET provisioning_ready = 1 WHERE id = ?', [id]);
     await logActivity(pool, id, 'provisioning_ready', 'Marked ready for provisioning', getUserId(req));
     res.json({ success: true });
   } catch (err) {
@@ -627,7 +651,7 @@ router.post('/:id/mark-active', requireAuth, requireRole(ADMIN_ROLES), async (re
     const id = parseInt(req.params.id);
     const now = new Date().toISOString().split('T')[0];
     await pool.query(
-      'UPDATE us_churches SET provisioning_completed = 1, activation_date = ?, pipeline_stage = ? WHERE id = ?',
+      'UPDATE omai_crm_leads SET provisioning_completed = 1, activation_date = ?, pipeline_stage = ? WHERE id = ?',
       [now, 'active', id]
     );
     await logActivity(pool, id, 'activated', 'Church marked as active', getUserId(req));

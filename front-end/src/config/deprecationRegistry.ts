@@ -232,11 +232,11 @@ export const DEPRECATION_REGISTRY: DeprecatedEntry[] = [
     changeSetCode: 'CS-0050',
     category: 'frontend',
   },
-  // ── Stage 1: Deprecated (route still active, being folded into lifecycle) ──
+  // ── Stage 2: Quarantined (routes redirect, files on disk) ──
   {
     id: 'onboarding-pipeline-page',
     name: 'Onboarding Pipeline List Page',
-    stage: 1,
+    stage: 2,
     files: ['features/admin/control-panel/OnboardingPipelinePage.tsx'],
     replacement: '/admin/control-panel/church-lifecycle',
     reason: 'Layer 3 onboarding pipeline features folded into ChurchLifecycleDetailPage (PP-0003 Stage 4). List view superseded by ChurchLifecyclePage.',
@@ -250,7 +250,7 @@ export const DEPRECATION_REGISTRY: DeprecatedEntry[] = [
   {
     id: 'onboarding-pipeline-detail-page',
     name: 'Onboarding Pipeline Detail Page',
-    stage: 1,
+    stage: 2,
     files: ['features/admin/control-panel/OnboardingPipelineDetailPage.tsx'],
     replacement: '/admin/control-panel/church-lifecycle/:churchId',
     reason: 'Layer 3 onboarding detail features (record requirements, email workflow, provisioning checklist) folded into ChurchLifecycleDetailPage (PP-0003 Stage 4).',

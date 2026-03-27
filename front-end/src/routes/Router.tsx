@@ -157,8 +157,7 @@ const SDLCPage = Loadable(lazy(() => import('../features/admin/control-panel/SDL
 const ComponentsInDevelopmentPage = Loadable(lazy(() => import('../features/admin/control-panel/ComponentsInDevelopmentPage')));
 const DeprecatedComponentsPage = Loadable(lazy(() => import('../features/admin/control-panel/DeprecatedComponentsPage')));
 const ChurchLifecycleDetailPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchLifecycleDetailPage')));
-const OnboardingPipelinePage = Loadable(lazy(() => import('../features/admin/control-panel/OnboardingPipelinePage')));
-const OnboardingPipelineDetailPage = Loadable(lazy(() => import('../features/admin/control-panel/OnboardingPipelineDetailPage')));
+// OnboardingPipelinePage and OnboardingPipelineDetailPage — deprecated, routes redirect (PP-0003 Stage 4)
 const UsersSecurityPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/UsersSecurityPage')));
 const ContentMediaPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/ContentMediaPage')));
 const SocialCommsPage = Loadable(lazy(() => import('../features/admin/control-panel/system-server/SocialCommsPage')));
@@ -943,30 +942,9 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      {
-        path: '/admin/control-panel/onboarding-pipeline',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
-            <AdminErrorBoundary>
-              <EnvironmentAwarePage featureId="onboarding-pipeline" priority={4} featureName="Onboarding Pipeline">
-                <OnboardingPipelinePage />
-              </EnvironmentAwarePage>
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/admin/control-panel/onboarding-pipeline/:id',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
-            <AdminErrorBoundary>
-              <EnvironmentAwarePage featureId="onboarding-pipeline-detail" priority={4} featureName="Onboarding Detail">
-                <OnboardingPipelineDetailPage />
-              </EnvironmentAwarePage>
-            </AdminErrorBoundary>
-          </ProtectedRoute>
-        )
-      },
+      // Deprecated: onboarding-pipeline routes → redirect to church lifecycle (PP-0003 Stage 4)
+      { path: '/admin/control-panel/onboarding-pipeline', element: <Navigate to="/admin/control-panel" replace /> },
+      { path: '/admin/control-panel/onboarding-pipeline/:id', element: <Navigate to="/admin/control-panel" replace /> },
       {
         path: '/admin/control-panel/records-ocr',
         element: (
