@@ -197,7 +197,8 @@ const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
 const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-operations/GitOperations')));
 // ConversationLogPage — retired, now on OMAI Operations Hub
-// ChangeSetsDashboard, ChangeSetDetailPage, ReleaseHistoryPage, SDLCWizardPage, PromptPlans, OMSeedlings — retired, now on OMAI
+// ChangeSetsDashboard, ChangeSetDetailPage, ReleaseHistoryPage, SDLCWizardPage, PromptPlans — retired, now on OMAI
+const RecordCreationWizard = Loadable(lazy(() => import('../features/devel-tools/om-seedlings/RecordCreationWizard')));
 const OMChartsPage = Loadable(lazy(() => import('../features/church/apps/om-charts/OMChartsPage')));
 
 /* ****Account Hub***** */
@@ -1308,7 +1309,17 @@ const Router = [
         path: '/devel-tools/git-operations',
         element: <Navigate to="/devel-tools/repo-ops" replace />,
       },
-      // Conversation Log, Prompt Plans, OM Seedlings — retired from OM, now on OMAI Operations Hub
+      // Conversation Log, Prompt Plans — retired from OM, now on OMAI Operations Hub
+      {
+        path: '/devel-tools/record-creation-wizard',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <RecordCreationWizard />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
       {
         path: '/devel-tools/ocr-operations',
         element: (

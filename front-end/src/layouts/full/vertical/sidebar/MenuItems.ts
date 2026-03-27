@@ -487,6 +487,12 @@ const Menuitems: MenuitemsType[] = [
       // Conversation Log — retired, now on OMAI Operations Hub
       {
         id: uniqueId(),
+        title: 'Record Creation Wizard',
+        icon: IconDatabase,
+        href: '/devel-tools/record-creation-wizard',
+      },
+      {
+        id: uniqueId(),
         title: 'OCR Operations',
         icon: IconScan,
         href: '/devel-tools/ocr-operations',

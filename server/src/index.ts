@@ -368,6 +368,7 @@ const originalBackupRouter = require('./routes/backup');
 const nfsBackupRouter = require('./routes/admin/nfs-backup');
 const recordsInspectorRouter = require('./routes/admin/records-inspector');
 const seedRecordsRouter = require('./routes/admin/seedRecords');
+const recordCreationWizardRouter = require('./routes/admin/recordCreationWizard');
 const aiAdminRouter = require('./routes/admin/ai-admin');
 // Import Big Book system router
 const bigBookRouter = require('./routes/bigbook');
@@ -840,8 +841,9 @@ console.log('✅ [Server] Mounted /api/system/routes and /api/admin/api-tests (A
 app.use('/api/admin/tasks', dailyTasksRouter); // Daily tasks management
 app.use('/api/admin/records-inspector', recordsInspectorRouter); // Dynamic Records Inspector
 app.use('/api/admin', seedRecordsRouter); // Seed Records (POST /api/admin/seed-records)
+app.use('/api/admin/record-wizard', recordCreationWizardRouter); // Record Creation Wizard
 app.use('/api/admin/ai', aiAdminRouter); // AI Admin Panel (commands + training)
-console.log('✅ [Server] Mounted records-inspector, seed-records, and ai-admin routes');
+console.log('✅ [Server] Mounted records-inspector, seed-records, record-wizard, and ai-admin routes');
 // MIGRATED TO OMAI: app.use('/api/om-daily', omDailyRouter);
 // MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/om-daily routes');
 app.use('/api/prompt-plans', promptPlansRouter); // Prompt Plans (AI orchestration)

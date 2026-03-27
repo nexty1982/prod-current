@@ -342,4 +342,182 @@ router.get('/us-church-status-counts', requireAuth, async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// PARISH GEO MAP — GeoJSON endpoint for parish-level mapping
+// ═══════════════════════════════════════════════════════════════
+
+// Affiliation normalization map
+const AFFILIATION_NORMALIZE = {
+  'greek orthodox': 'Greek Orthodox',
+  'goarch': 'Greek Orthodox',
+  'greek archdiocese': 'Greek Orthodox',
+  'greek orthodox archdiocese': 'Greek Orthodox',
+  'oca': 'OCA',
+  'orthodox church in america': 'OCA',
+  'rocor': 'ROCOR',
+  'russian orthodox': 'ROCOR',
+  'russian orthodox church outside russia': 'ROCOR',
+  'antiochian': 'Antiochian',
+  'antiochian orthodox': 'Antiochian',
+  'aocana': 'Antiochian',
+  'serbian': 'Serbian',
+  'serbian orthodox': 'Serbian',
+  'soc': 'Serbian',
+  'romanian': 'Romanian',
+  'romanian orthodox': 'Romanian',
+  'roea': 'Romanian',
+  'ukrainian': 'Ukrainian',
+  'ukrainian orthodox': 'Ukrainian',
+  'uoc-usa': 'Ukrainian',
+  'bulgarian': 'Bulgarian',
+  'beod': 'Bulgarian',
+  'albanian': 'Albanian',
+  'aoa': 'Albanian',
+  'carpatho-russian': 'Carpatho-Russian',
+  'acrod': 'Carpatho-Russian',
+  'georgian': 'Georgian',
+  'goc': 'Georgian',
+};
+
+function normalizeAffiliation(raw) {
+  if (!raw) return 'Other';
+  const key = raw.trim().toLowerCase();
+  return AFFILIATION_NORMALIZE[key] || raw.trim();
+}
+
+// GET /api/analytics/church-map/parishes?state=XX
+// Returns GeoJSON FeatureCollection for parish-level map with enriched data
+router.get('/church-map/parishes', requireAuth, async (req, res) => {
+  try {
+    const { promisePool } = require('../config/db');
+    const { state } = req.query;
+
+    if (!state || typeof state !== 'string' || state.length !== 2) {
+      return res.status(400).json({ error: 'state query param required (2-letter code)' });
+    }
+
+    const stateUpper = state.toUpperCase();
+
+    // Get all churches for this state with CRM pipeline data
+    const [crmRows] = await promisePool.query(`
+      SELECT uc.id, uc.name, uc.street, uc.city, uc.state_code, uc.zip,
+             uc.phone, uc.website, uc.latitude, uc.longitude, uc.jurisdiction,
+             uc.pipeline_stage, uc.priority, uc.is_client, uc.provisioned_church_id,
+             ps.label AS stage_label, ps.color AS stage_color
+      FROM us_churches uc
+      LEFT JOIN crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
+      WHERE uc.state_code = ?
+      ORDER BY uc.jurisdiction, uc.city, uc.name
+    `, [stateUpper]);
+
+    // Get onboarded churches for status enrichment
+    const [obRows] = await promisePool.query(`
+      SELECT c.id, c.state_province, c.setup_complete,
+             COALESCE(usr.active_users, 0) AS active_users,
+             COALESCE(usr.pending_users, 0) AS pending_users,
+             COALESCE(tok.active_tokens, 0) AS active_tokens
+      FROM churches c
+      LEFT JOIN (
+        SELECT church_id, COUNT(*) AS active_tokens
+        FROM church_registration_tokens WHERE is_active = 1
+        GROUP BY church_id
+      ) tok ON tok.church_id = c.id
+      LEFT JOIN (
+        SELECT church_id,
+          SUM(CASE WHEN is_locked = 0 THEN 1 ELSE 0 END) AS active_users,
+          SUM(CASE WHEN is_locked = 1 THEN 1 ELSE 0 END) AS pending_users
+        FROM users WHERE church_id IS NOT NULL
+        GROUP BY church_id
+      ) usr ON usr.church_id = c.id
+      WHERE c.state_province = ?
+    `, [stateUpper]);
+
+    const obMap = new Map(obRows.map(o => [o.id, o]));
+
+    // Build GeoJSON features
+    const features = [];
+    const affiliationCounts = {};
+
+    for (const r of crmRows) {
+      const lat = parseFloat(r.latitude);
+      const lng = parseFloat(r.longitude);
+      const hasCoords = !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+
+      // Compute operational status
+      let op_status = 'directory';
+      if (r.provisioned_church_id) {
+        const ob = obMap.get(r.provisioned_church_id);
+        if (ob) {
+          if (ob.setup_complete || ob.active_users > 0) op_status = 'live';
+          else op_status = 'onboarding';
+        } else {
+          op_status = 'client';
+        }
+      } else if (r.pipeline_stage && r.pipeline_stage !== 'new_lead') {
+        op_status = 'pipeline';
+      }
+
+      const affNorm = normalizeAffiliation(r.jurisdiction);
+
+      // Count affiliations
+      affiliationCounts[affNorm] = (affiliationCounts[affNorm] || 0) + 1;
+
+      const properties = {
+        id: r.id,
+        name: r.name,
+        city: r.city || null,
+        state: r.state_code,
+        street: r.street || null,
+        zip: r.zip || null,
+        phone: r.phone || null,
+        website: r.website || null,
+        affiliation: r.jurisdiction || null,
+        affiliation_normalized: affNorm,
+        op_status,
+        stage_label: r.stage_label || null,
+        stage_color: r.stage_color || null,
+        priority: r.priority || null,
+        is_client: r.is_client || 0,
+        has_coordinates: hasCoords,
+        directory_only: op_status === 'directory',
+      };
+
+      if (hasCoords) {
+        features.push({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [lng, lat] },
+          properties,
+        });
+      } else {
+        // Include in response but without geometry for list display
+        features.push({
+          type: 'Feature',
+          geometry: null,
+          properties,
+        });
+      }
+    }
+
+    // Sort affiliation counts descending
+    const affiliations = Object.entries(affiliationCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    res.json({
+      type: 'FeatureCollection',
+      features,
+      metadata: {
+        state: stateUpper,
+        total: features.length,
+        withCoordinates: features.filter(f => f.geometry !== null).length,
+        withoutCoordinates: features.filter(f => f.geometry === null).length,
+        affiliations,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching parish geo data:', error);
+    res.status(500).json({ error: 'Failed to fetch parish geo data' });
+  }
+});
+
 module.exports = router;
