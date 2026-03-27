@@ -416,7 +416,7 @@ router.post('/items', requireAuth, async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title,
-        task_type || 'task',
+        task_type || 'chore',
         description || null,
         horizon,
         status,
@@ -2724,7 +2724,7 @@ router.post('/items/draft', requireAuth, async (req, res) => {
       `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, due_date, source, agent_tool, branch_type, repo_target, created_by, draft_saved_at)
        VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, 'human', ?, ?, ?, ?, NOW())`,
       [
-        title || '', task_type || 'task', description || null, horizon || '7',
+        title || '', task_type || 'chore', description || null, horizon || '7',
         priority || 'medium', category || null, due_date || null,
         agent_tool || null, branch_type || null, repo_target || 'orthodoxmetrics',
         userId,
