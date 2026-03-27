@@ -1191,8 +1191,8 @@ const PRIORITY_LABELS = { critical: 'P:critical', high: 'P:high', medium: 'P:med
 const HORIZON_LABELS_GH = { '1': 'H:24hr', '2': 'H:48hr', '7': 'H:7day', '14': 'H:14day', '30': 'H:30day', '60': 'H:60day', '90': 'H:90day' };
 const SOURCE_LABELS = { agent: 'source:agent', human: 'source:human' };
 const STATUS_LABELS_GH = { in_progress: 'status:in_progress', self_review: 'status:self_review', review: 'status:review', staging: 'status:staging', backlog: 'status:backlog', done: 'status:done', blocked: 'status:blocked' };
-const BRANCH_TYPE_LABELS = { bugfix: 'type:bugfix', new_feature: 'type:new-feature', existing_feature: 'type:existing-feature', patch: 'type:patch' };
-const BRANCH_TYPE_PREFIXES = { bugfix: 'fix', new_feature: 'feat', existing_feature: 'feat', patch: 'patch' };
+const BRANCH_TYPE_LABELS = { feature: 'type:feature', enhancement: 'type:enhancement', bugfix: 'type:bugfix', refactor: 'type:refactor', migration: 'type:migration', chore: 'type:chore', spike: 'type:spike', docs: 'type:docs' };
+const BRANCH_TYPE_PREFIXES = { feature: 'feat', enhancement: 'enh', bugfix: 'fix', refactor: 'ref', migration: 'mig', chore: 'chore', spike: 'spike', docs: 'docs' };
 const AGENT_TOOL_SHORT = { windsurf: 'windsurf', claude_cli: 'claude-cli', cursor: 'cursor', github_copilot: 'gh-copilot' };
 
 // Cache of labels known to exist in the repo (populated lazily)
@@ -1882,7 +1882,7 @@ router.post('/items/:id/start-work', requireAuth, async (req, res) => {
 
     if (!branchType) {
       return res.status(400).json({
-        error: 'branch_type is required (bugfix | new_feature | existing_feature | patch)',
+        error: 'branch_type is required (feature | enhancement | bugfix | refactor | migration | chore | spike | docs)',
         hint: 'Pass branch_type in the request body or set it on the item first',
       });
     }

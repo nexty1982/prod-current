@@ -102,8 +102,8 @@ const ItemFormDialog: React.FC<ItemFormDialogProps> = ({ open, editingItem, form
           {form.agent_tool && form.branch_type && (
             <Alert severity="info" sx={{ fontSize: '0.75rem', py: 0.5 }}>
               A local branch will be auto-created when saved. Branch: <strong>{
-                ({ bugfix: 'BF', new_feature: 'NF', existing_feature: 'EF', patch: 'PA' } as Record<string, string>)[form.branch_type]
-              }_{(AGENT_TOOL_LABELS[form.agent_tool] || form.agent_tool).toLowerCase().replace(' ', '-')}_{new Date().toISOString().split('T')[0]}</strong>
+                ({ feature: 'feat', enhancement: 'enh', bugfix: 'fix', refactor: 'ref', migration: 'mig', chore: 'chore', spike: 'spike', docs: 'docs' } as Record<string, string>)[form.branch_type]
+              }/id-{form.title ? form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30) : 'slug'}</strong>
               <br />on <em>{form.repo_target || 'orthodoxmetrics'}</em> repo
             </Alert>
           )}

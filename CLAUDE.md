@@ -158,13 +158,13 @@ To register a new feature, add it to `FEATURE_REGISTRY` in `featureRegistry.ts` 
 curl -X POST http://127.0.0.1:3001/api/om-daily/items \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"title":"...","task_type":"task","status":"todo","source":"agent","agent_tool":"claude_cli","priority":"medium","horizon":"7","category":"...","description":"..."}'
+  -d '{"title":"...","task_type":"chore","status":"todo","source":"agent","agent_tool":"claude_cli","priority":"medium","horizon":"7","category":"om-frontend","description":"..."}'
 
 # 2. Start work — creates branch from main, checks it out locally
 curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/start-work \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"branch_type":"existing_feature","agent_tool":"claude_cli"}'
+  -d '{"branch_type":"enhancement","agent_tool":"claude_cli"}'
 
 # 3. Do your work, commit changes to the branch
 
@@ -189,14 +189,28 @@ curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/complete-work \
 5. **Full merge** (optional) → `POST /api/om-daily/items/:id/complete-work` — fast-forward merges branch to `main`, deletes branch, closes item
 6. **If abandoned** → Set `status: "cancelled"` with reason in description
 
+### Task Types
+
+`feature` | `enhancement` | `bugfix` | `refactor` | `migration` | `chore` | `spike` | `docs`
+
 ### Branch Types & Naming
 
 | branch_type | Prefix | Example |
 |-------------|--------|---------|
-| `new_feature` | `NF` | `NF_claude-cli_2026-03-24` |
-| `existing_feature` | `EF` | `EF_claude-cli_2026-03-24` |
-| `bugfix` | `BF` | `BF_claude-cli_2026-03-24` |
-| `patch` | `PA` | `PA_claude-cli_2026-03-24` |
+| `feature` | `feat` | `feat/42-add-parish-wizard` |
+| `enhancement` | `enh` | `enh/43-improve-ocr-accuracy` |
+| `bugfix` | `fix` | `fix/44-session-cookie-issue` |
+| `refactor` | `ref` | `ref/45-extract-db-helpers` |
+| `migration` | `mig` | `mig/46-move-crm-to-omai` |
+| `chore` | `chore` | `chore/47-update-deps` |
+| `spike` | `spike` | `spike/48-evaluate-ocr-engine` |
+| `docs` | `docs` | `docs/49-api-reference` |
+
+### Categories
+
+**OM (prod-current):** `om-frontend` | `om-backend` | `om-database` | `om-ocr` | `om-records` | `om-admin` | `om-portal` | `om-auth` | `om-devops`
+**OMAI:** `omai-frontend` | `omai-backend` | `omai-sdlc` | `omai-ai`
+**Shared:** `docs`
 
 ### SDLC Status Ownership
 
@@ -231,7 +245,7 @@ Each status has a defined owner and required exit action. The backend enforces t
 - **One branch per item** — Each OM Daily item gets its own isolated branch.
 
 ### Priorities: `critical`, `high`, `medium` (default), `low`
-### Categories: `frontend`, `backend`, `database`, `ocr`, `auth`, `design-system`, `admin`, `portal`, `records`, `crm`, `ai`, `sdlc`, `deployment`
+### Categories: `om-frontend`, `om-backend`, `om-database`, `om-ocr`, `om-records`, `om-admin`, `om-portal`, `om-auth`, `om-devops`, `omai-frontend`, `omai-backend`, `omai-sdlc`, `omai-ai`, `docs`
 
 ### Agent Plans (Assigned Work Plans)
 

@@ -116,9 +116,13 @@ export const HORIZON_LABELS: Record<string, string> = { '1': '24 Hour', '2': '48
 export const AGENT_TOOLS = ['windsurf', 'claude_cli', 'cursor', 'github_copilot'] as const;
 export const AGENT_TOOL_LABELS: Record<string, string> = { windsurf: 'Windsurf', claude_cli: 'Claude CLI', cursor: 'Cursor', github_copilot: 'GitHub Copilot' };
 export const AGENT_TOOL_COLORS: Record<string, string> = { windsurf: '#00b4d8', claude_cli: '#d4a574', cursor: '#7c3aed', github_copilot: '#1f883d' };
-export const BRANCH_TYPES = ['bugfix', 'new_feature', 'existing_feature', 'patch'] as const;
-export const BRANCH_TYPE_LABELS: Record<string, string> = { bugfix: 'Bug Fix', new_feature: 'New Feature', existing_feature: 'Existing Feature', patch: 'Patch' };
-export const BRANCH_TYPE_COLORS: Record<string, string> = { bugfix: '#d73a4a', new_feature: '#0e8a16', existing_feature: '#1d76db', patch: '#fbca04' };
+export const BRANCH_TYPES = ['feature', 'enhancement', 'bugfix', 'refactor', 'migration', 'chore', 'spike', 'docs'] as const;
+export const BRANCH_TYPE_LABELS: Record<string, string> = { feature: 'Feature', enhancement: 'Enhancement', bugfix: 'Bug Fix', refactor: 'Refactor', migration: 'Migration', chore: 'Chore', spike: 'Spike', docs: 'Docs' };
+export const BRANCH_TYPE_COLORS: Record<string, string> = { feature: '#0e8a16', enhancement: '#1d76db', bugfix: '#d73a4a', refactor: '#6f42c1', migration: '#e36209', chore: '#fbca04', spike: '#0075ca', docs: '#5319e7' };
+export const TASK_TYPES = ['feature', 'enhancement', 'bugfix', 'refactor', 'migration', 'chore', 'spike', 'docs'] as const;
+export const TASK_TYPE_LABELS: Record<string, string> = { feature: 'Feature', enhancement: 'Enhancement', bugfix: 'Bug Fix', refactor: 'Refactor', migration: 'Migration', chore: 'Chore', spike: 'Spike', docs: 'Docs' };
+export const CATEGORIES = ['om-frontend', 'om-backend', 'om-database', 'om-ocr', 'om-records', 'om-admin', 'om-portal', 'om-auth', 'om-devops', 'omai-frontend', 'omai-backend', 'omai-sdlc', 'omai-ai', 'docs'] as const;
+export const CATEGORY_LABELS: Record<string, string> = { 'om-frontend': 'OM Frontend', 'om-backend': 'OM Backend', 'om-database': 'OM Database', 'om-ocr': 'OM OCR', 'om-records': 'OM Records', 'om-admin': 'OM Admin', 'om-portal': 'OM Portal', 'om-auth': 'OM Auth', 'om-devops': 'OM DevOps', 'omai-frontend': 'OMAI Frontend', 'omai-backend': 'OMAI Backend', 'omai-sdlc': 'OMAI SDLC', 'omai-ai': 'OMAI AI', 'docs': 'Docs' };
 // Canonical SDLC statuses (6 main + 2 side)
 export const STATUSES = [
   'backlog', 'in_progress', 'self_review',
