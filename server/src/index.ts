@@ -293,6 +293,7 @@ const inviteRegisterRouter = require('./routes/invite-register');
 const churchRegisterRouter = require('./routes/church-register');
 const crmPublicRouter = require('./routes/crm-public');
 const churchOnboardingRouter = require('./routes/admin/church-onboarding');
+const onboardingPipelineRouter = require('./routes/admin/onboarding-pipeline');
 // MIGRATED TO OMAI: const churchLifecycleRouter = require('./routes/admin/church-lifecycle');
 const orthodoxScheduleGuidelinesRouter = require('./routes/admin/orthodox-schedule-guidelines');
 const changeSetsRouter = require('./routes/admin/change-sets');
@@ -618,6 +619,8 @@ app.use('/api', churchRegisterRouter); // Admin token management endpoints
 console.log('✅ [Server] Mounted church registration token routes');
 app.use('/api/admin/church-onboarding', churchOnboardingRouter);
 console.log('✅ [Server] Mounted /api/admin/church-onboarding route (Phase 2 onboarding pipeline)');
+app.use('/api/admin/onboarding-pipeline', onboardingPipelineRouter);
+console.log('✅ [Server] Mounted /api/admin/onboarding-pipeline route (Layer 3 extended pipeline)');
 // MIGRATED TO OMAI: app.use('/api/admin/church-lifecycle', churchLifecycleRouter);
 // MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/admin/church-lifecycle route');
 app.use('/api/admin/orthodox-schedule-guidelines', orthodoxScheduleGuidelinesRouter);
