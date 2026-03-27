@@ -18,6 +18,9 @@ import {
     Widgets as SuiteIcon,
     Code as DevIcon,
     FolderOff as DeprecatedIcon,
+    NotificationsActive as OverdueIcon,
+    Today as TodayIcon,
+    TrendingUp as PipelineIcon,
 } from '@mui/icons-material';
 import {
     Storage as DbIcon,
@@ -357,6 +360,127 @@ const PlatformStatusWidget: React.FC<{ isDark: boolean; navigate: ReturnType<typ
   );
 };
 
+/* ─── CRM Activity Widget ────────────────────────────────────── */
+
+interface CRMDashboardData {
+  pipeline: { pipeline_stage: string; label: string; color: string; count: number }[];
+  overdue: number;
+  todayFollowups: number;
+  totalChurches: number;
+  totalClients: number;
+}
+
+const CRMActivityWidget: React.FC<{ isDark: boolean; navigate: ReturnType<typeof useNavigate> }> = ({ isDark, navigate }) => {
+  const [data, setData] = useState<CRMDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiClient.get<CRMDashboardData>('/crm/dashboard')
+      .then((r) => setData(r))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return (
+    <div className="om-admin-card" style={{ marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <PipelineIcon sx={{ fontSize: 20, color: '#546e7a' }} />
+        <Skeleton width={120} height={20} />
+        <Skeleton width={80} height={20} />
+      </div>
+    </div>
+  );
+
+  if (!data) return null;
+
+  const activeStages = (data.pipeline || []).filter(s => s.count > 0 && s.pipeline_stage !== 'new_lead');
+
+  return (
+    <div
+      className="om-admin-card"
+      onClick={() => navigate('/admin/control-panel/church-lifecycle')}
+      style={{ marginBottom: '1.5rem', cursor: 'pointer' }}
+    >
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        {/* Title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <PipelineIcon sx={{ fontSize: 18, color: '#1976d2' }} />
+          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>Church Pipeline</span>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
+          {/* Overdue follow-ups */}
+          {data.overdue > 0 && (
+            <Tooltip title={`${data.overdue} overdue follow-up${data.overdue > 1 ? 's' : ''} — click to view`}>
+              <Chip
+                icon={<OverdueIcon sx={{ fontSize: 14 }} />}
+                label={`${data.overdue} overdue`}
+                size="small"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  navigate('/admin/control-panel/church-lifecycle', { state: { tab: 'follow-ups' } });
+                }}
+                sx={{
+                  ...chipSx,
+                  bgcolor: alpha('#f44336', isDark ? 0.2 : 0.1),
+                  color: '#f44336',
+                  border: `1px solid ${alpha('#f44336', 0.3)}`,
+                  '& .MuiChip-icon': { color: '#f44336' },
+                }}
+              />
+            </Tooltip>
+          )}
+
+          {/* Today's follow-ups */}
+          {data.todayFollowups > 0 && (
+            <Tooltip title={`${data.todayFollowups} follow-up${data.todayFollowups > 1 ? 's' : ''} due today`}>
+              <Chip
+                icon={<TodayIcon sx={{ fontSize: 14 }} />}
+                label={`${data.todayFollowups} today`}
+                size="small"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  navigate('/admin/control-panel/church-lifecycle', { state: { tab: 'follow-ups' } });
+                }}
+                sx={{
+                  ...chipSx,
+                  bgcolor: alpha('#ff9800', isDark ? 0.2 : 0.1),
+                  color: '#ff9800',
+                  border: `1px solid ${alpha('#ff9800', 0.3)}`,
+                  '& .MuiChip-icon': { color: '#ff9800' },
+                }}
+              />
+            </Tooltip>
+          )}
+
+          {/* No follow-ups indicator */}
+          {data.overdue === 0 && data.todayFollowups === 0 && (
+            <Chip label="No pending follow-ups" size="small" variant="outlined" sx={{ ...chipSx, color: '#4caf50', borderColor: '#4caf50' }} />
+          )}
+
+          {/* Pipeline stage counts */}
+          {activeStages.map(s => (
+            <Tooltip key={s.pipeline_stage} title={`${s.count} church${s.count > 1 ? 'es' : ''} at ${s.label}`}>
+              <Chip
+                label={`${s.label} ${s.count}`}
+                size="small"
+                variant="outlined"
+                sx={{ ...chipSx, borderColor: s.color || '#757575', color: s.color || '#757575' }}
+              />
+            </Tooltip>
+          ))}
+
+          {/* Totals */}
+          <Chip label={`${data.totalChurches} total`} size="small" variant="outlined" sx={chipSx} />
+          {data.totalClients > 0 && (
+            <Chip label={`${data.totalClients} client${data.totalClients > 1 ? 's' : ''}`} size="small" variant="outlined" sx={{ ...chipSx, color: '#4caf50', borderColor: '#4caf50' }} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Component ──────────────────────────────────────────────────
 
 const AdminControlPanel: React.FC = () => {
@@ -385,6 +509,9 @@ const AdminControlPanel: React.FC = () => {
 
         {/* Platform Status Widget */}
         <PlatformStatusWidget isDark={isDark} navigate={navigate} />
+
+        {/* CRM Activity Widget */}
+        <CRMActivityWidget isDark={isDark} navigate={navigate} />
 
         {/* Category tiles — 2-column grid */}
         <Box sx={{

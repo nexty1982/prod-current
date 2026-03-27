@@ -17,17 +17,23 @@ import {
   Cancel as RejectIcon,
   CheckCircle as ApproveIcon,
   CheckCircle as CheckIcon,
+  CheckCircleOutline as CheckOutlineIcon,
+  Close as CloseIcon,
   ContentCopy as CopyIcon,
   Delete as DeleteIcon,
+  Description as TemplateIcon,
   Edit as EditIcon,
   Email as EmailIcon,
   Event as FollowUpIcon,
+  ExpandMore as ExpandIcon,
   Groups as MeetingIcon,
   LinkOff as DeactivateIcon,
+  ListAlt as ChecklistIcon,
   NoteAlt as NoteIcon,
   Person as PersonIcon,
   Refresh as RefreshIcon,
   Save as SaveIcon,
+  Send as SendIcon,
   Star as StarIcon,
   SwapHoriz as StageChangeIcon,
   Task as TaskIcon,
@@ -35,11 +41,17 @@ import {
   VpnKey as TokenIcon,
 } from '@mui/icons-material';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Alert,
   alpha,
   Avatar,
   Box,
   Button,
+  Card,
+  CardContent,
+  CardHeader,
   Chip,
   CircularProgress,
   Dialog,
@@ -47,11 +59,16 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControl,
+  FormControlLabel,
   Grid,
   IconButton,
+  InputLabel,
   MenuItem,
   Paper,
+  Select,
   Snackbar,
+  Stack,
   Step,
   StepLabel,
   Stepper,
@@ -191,6 +208,15 @@ interface OnboardingChecklist {
   setup_complete: boolean;
 }
 
+interface SampleTemplate {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  record_type: string;
+  fields: { name: string; type: string; required: boolean; label: string }[];
+}
+
 interface PipelineStage {
   id: number;
   stage_key: string;
@@ -261,6 +287,17 @@ type SnackState = { open: boolean; message: string; severity: 'success' | 'error
 const COLOR = '#1565c0';
 
 const STEPPER_STEPS = ['Church Created', 'Token Issued', 'Members Registered', 'Members Active', 'Setup Complete'];
+
+const RECORD_TYPES = ['baptism', 'marriage', 'funeral', 'chrismation', 'other'] as const;
+
+const EMAIL_TYPES = [
+  { key: 'welcome', label: 'Welcome / Discovery Follow-up' },
+  { key: 'info_request', label: 'Request Missing Info' },
+  { key: 'template_confirm', label: 'Template Confirmation' },
+  { key: 'custom_review', label: 'Custom Review Needed' },
+  { key: 'provisioned', label: 'Account Provisioned' },
+  { key: 'reminder', label: 'Reminder / Follow-up' },
+];
 
 const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
   note: <NoteIcon fontSize="small" />,
@@ -351,6 +388,28 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const [pipelineActivities, setPipelineActivities] = useState<PipelineActivity[]>([]);
   const [provisionChecklist, setProvisionChecklist] = useState<ProvisioningChecklist | null>(null);
 
+  // Templates (for record requirements + email workflow)
+  const [sampleTemplates, setSampleTemplates] = useState<SampleTemplate[]>([]);
+  const [emailTemplates, setEmailTemplates] = useState<{ type: string; subject: string; body: string }[]>([]);
+
+  // Record requirement dialog
+  const [reqDialogOpen, setReqDialogOpen] = useState(false);
+  const [reqForm, setReqForm] = useState({
+    record_type: 'baptism' as string,
+    uses_sample: false,
+    sample_template_id: null as number | null,
+    custom_required: false,
+    custom_notes: '',
+    review_required: false,
+  });
+
+  // Email composer dialog
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailForm, setEmailForm] = useState({ email_type: 'welcome', subject: '', recipients: '', cc: '', body: '', notes: '' });
+
+  // Pipeline saving state
+  const [pipelineSaving, setPipelineSaving] = useState(false);
+
   const churchName = crm?.name || onboarded?.name || 'Church Detail';
 
   const BCrumb = [
@@ -391,7 +450,11 @@ const ChurchLifecycleDetailPage: React.FC = () => {
       // Fetch extended pipeline data for CRM churches
       if (data.crm?.id) {
         try {
-          const pipeResp = await fetch(`/api/admin/onboarding-pipeline/${data.crm.id}/detail`, { credentials: 'include' });
+          const [pipeResp, tmplResp, eTmplResp] = await Promise.all([
+            fetch(`/api/admin/onboarding-pipeline/${data.crm.id}/detail`, { credentials: 'include' }),
+            fetch('/api/admin/onboarding-pipeline/templates', { credentials: 'include' }),
+            fetch('/api/admin/onboarding-pipeline/email-templates', { credentials: 'include' }),
+          ]);
           if (pipeResp.ok) {
             const pipeData = await pipeResp.json();
             if (pipeData.success) {
@@ -400,6 +463,14 @@ const ChurchLifecycleDetailPage: React.FC = () => {
               setPipelineActivities(pipeData.activities || []);
               setProvisionChecklist(pipeData.checklist || null);
             }
+          }
+          if (tmplResp.ok) {
+            const tmplData = await tmplResp.json();
+            setSampleTemplates(tmplData.templates || []);
+          }
+          if (eTmplResp.ok) {
+            const eTmplData = await eTmplResp.json();
+            setEmailTemplates(eTmplData.templates || []);
           }
         } catch { /* non-critical — pipeline data is supplementary */ }
       }
@@ -712,6 +783,120 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const hasActiveToken = tokens.some(t => t.is_active);
 
   /* ------------------------------------------------------------------ */
+  /*  Pipeline CRUD actions                                              */
+  /* ------------------------------------------------------------------ */
+
+  const handleSaveRequirement = async () => {
+    if (!crmId) return;
+    setPipelineSaving(true);
+    try {
+      const resp = await fetch(`/api/admin/onboarding-pipeline/${crmId}/requirements`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reqForm),
+      });
+      if (!resp.ok) throw new Error('Failed to save requirement');
+      showToast('Requirement added');
+      setReqDialogOpen(false);
+      setReqForm({ record_type: 'baptism', uses_sample: false, sample_template_id: null, custom_required: false, custom_notes: '', review_required: false });
+      fetchDetail();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setPipelineSaving(false);
+    }
+  };
+
+  const handleDeleteRequirement = async (reqId: number) => {
+    if (!crmId) return;
+    try {
+      const resp = await fetch(`/api/admin/onboarding-pipeline/${crmId}/requirements/${reqId}`, {
+        method: 'DELETE', credentials: 'include',
+      });
+      if (!resp.ok) throw new Error('Failed to delete requirement');
+      showToast('Requirement removed');
+      fetchDetail();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const openEmailComposer = (type?: string) => {
+    const primaryContact = contacts.find(c => c.is_primary === 1) || contacts[0];
+    const template = emailTemplates.find(t => t.type === (type || 'welcome'));
+    const name = churchName;
+    const contactName = primaryContact ? `${primaryContact.first_name} ${primaryContact.last_name || ''}`.trim() : 'Parish Administrator';
+
+    const subject = (template?.subject || '').replace(/{church_name}/g, name).replace(/{contact_name}/g, contactName);
+    const body = (template?.body || '').replace(/{church_name}/g, name).replace(/{contact_name}/g, contactName).replace(/{custom_message}/g, '');
+
+    setEmailForm({ email_type: type || 'welcome', subject, recipients: primaryContact?.email || '', cc: '', body, notes: '' });
+    setEmailDialogOpen(true);
+  };
+
+  const handleSaveEmail = async (status: string = 'draft') => {
+    if (!crmId) return;
+    setPipelineSaving(true);
+    try {
+      const resp = await fetch(`/api/admin/onboarding-pipeline/${crmId}/emails`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...emailForm, status }),
+      });
+      if (!resp.ok) throw new Error('Failed to save email');
+      showToast(status === 'sent' ? 'Email marked as sent' : 'Draft saved');
+      setEmailDialogOpen(false);
+      fetchDetail();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setPipelineSaving(false);
+    }
+  };
+
+  const handleUpdateEmailStatus = async (emailId: number, status: string) => {
+    if (!crmId) return;
+    try {
+      const updates: Record<string, any> = { status };
+      if (status === 'sent') updates.sent_at = new Date().toISOString();
+      if (status === 'replied') updates.replied_at = new Date().toISOString();
+      const resp = await fetch(`/api/admin/onboarding-pipeline/${crmId}/emails/${emailId}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!resp.ok) throw new Error('Failed to update email');
+      showToast(`Email marked as ${status.replace('_', ' ')}`);
+      fetchDetail();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const handleMarkProvisioning = async (field: string, value: any) => {
+    if (!crmId) return;
+    setPipelineSaving(true);
+    try {
+      const body: Record<string, any> = { [field]: value };
+      if (field === 'provisioning_completed') {
+        body.activation_date = new Date().toISOString().split('T')[0];
+      }
+      const resp = await fetch(`/api/admin/onboarding-pipeline/${crmId}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!resp.ok) throw new Error('Failed to update');
+      showToast(field === 'provisioning_ready' ? 'Marked ready for provisioning' : 'Marked as active');
+      fetchDetail();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setPipelineSaving(false);
+    }
+  };
+
+  /* ------------------------------------------------------------------ */
   /*  Tab definitions                                                    */
   /* ------------------------------------------------------------------ */
 
@@ -720,6 +905,8 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     { label: 'Contacts', badge: contacts.length, show: hasCrm },
     { label: 'Activity', badge: activities.length, show: hasCrm },
     { label: 'Follow-ups', badge: followUps.filter(f => f.status === 'pending').length, show: hasCrm },
+    { label: 'Requirements', badge: pipelineRequirements.length, show: hasCrm },
+    { label: 'Email Workflow', badge: pipelineEmails.length, show: hasCrm },
     { label: 'Onboarding', show: hasOnboarding },
     { label: 'Timeline', badge: activities.length + pipelineActivities.length + pipelineEmails.length, show: true },
   ];
@@ -980,6 +1167,30 @@ const ChurchLifecycleDetailPage: React.FC = () => {
               );
             })}
           </Grid>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+            {Object.values(provisionChecklist).filter(Boolean).length} / {Object.keys(provisionChecklist).length} complete
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {!crm?.provisioning_ready && (
+              <Button
+                size="small" variant="outlined" color="info"
+                onClick={() => handleMarkProvisioning('provisioning_ready', 1)}
+                disabled={pipelineSaving}
+              >
+                Mark Ready for Provisioning
+              </Button>
+            )}
+            {crm?.provisioning_ready && !crm?.provisioning_completed && (
+              <Button
+                size="small" variant="contained" color="success"
+                onClick={() => handleMarkProvisioning('provisioning_completed', 1)}
+                disabled={pipelineSaving}
+              >
+                Mark Active / Provisioned
+              </Button>
+            )}
+          </Box>
         </>
       )}
 
@@ -1191,6 +1402,168 @@ const ChurchLifecycleDetailPage: React.FC = () => {
       </>
     );
   };
+
+  /* --- Record Requirements Tab --------------------------------------- */
+  const renderRequirements = () => (
+    <>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="subtitle1" fontWeight={700}>Record Structure Requirements ({pipelineRequirements.length})</Typography>
+        <Button
+          variant="contained" size="small" startIcon={<AddIcon />}
+          onClick={() => {
+            setReqForm({ record_type: 'baptism', uses_sample: false, sample_template_id: null, custom_required: false, custom_notes: '', review_required: false });
+            setReqDialogOpen(true);
+          }}
+          sx={{ textTransform: 'none', bgcolor: COLOR, '&:hover': { bgcolor: alpha(COLOR, 0.85) } }}
+        >
+          Add Requirement
+        </Button>
+      </Box>
+
+      {pipelineRequirements.length === 0 ? (
+        <Alert severity="info" sx={{ mb: 3 }}>No record requirements set yet. Add requirements to specify which record types this church needs.</Alert>
+      ) : (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
+          {pipelineRequirements.map(req => (
+            <Paper key={req.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <Typography fontWeight={600} sx={{ textTransform: 'capitalize' }}>{req.record_type}</Typography>
+                    {req.uses_sample ? (
+                      <Chip label={`Template: ${req.template_name || 'Standard'}`} size="small" color="success" variant="outlined" />
+                    ) : req.custom_required ? (
+                      <Chip label="Custom Structure" size="small" color="warning" variant="outlined" />
+                    ) : null}
+                  </Box>
+                  {req.custom_notes && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>{req.custom_notes}</Typography>
+                  )}
+                </Box>
+                <Tooltip title="Remove">
+                  <IconButton size="small" color="error" onClick={() => handleDeleteRequirement(req.id)}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Paper>
+          ))}
+        </Box>
+      )}
+
+      {/* Available Templates Preview */}
+      {sampleTemplates.length > 0 && (
+        <>
+          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>Available Sample Templates</Typography>
+          <Grid container spacing={2}>
+            {sampleTemplates.map(tmpl => (
+              <Grid item xs={12} sm={6} key={tmpl.id}>
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandIcon />}>
+                    <Box>
+                      <Typography fontWeight={600}>{tmpl.name}</Typography>
+                      <Typography variant="caption" color="text.secondary">{tmpl.record_type} · {tmpl.fields.length} fields</Typography>
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Typography variant="body2" sx={{ mb: 1 }}>{tmpl.description}</Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      {tmpl.fields.map(f => (
+                        <Typography key={f.name} variant="caption">
+                          {f.required ? '●' : '○'} {f.label} ({f.type})
+                        </Typography>
+                      ))}
+                    </Box>
+                  </AccordionDetails>
+                </Accordion>
+              </Grid>
+            ))}
+          </Grid>
+        </>
+      )}
+    </>
+  );
+
+  /* --- Email Workflow Tab ------------------------------------------- */
+  const renderEmailWorkflow = () => (
+    <>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+        <Typography variant="subtitle1" fontWeight={700}>Email Correspondence ({pipelineEmails.length})</Typography>
+        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+          {EMAIL_TYPES.map(et => (
+            <Button key={et.key} size="small" variant="outlined" onClick={() => openEmailComposer(et.key)}
+              sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+            >
+              {et.label}
+            </Button>
+          ))}
+        </Box>
+      </Box>
+
+      {pipelineEmails.length === 0 ? (
+        <Alert severity="info">No emails yet. Use the buttons above to draft a formal email.</Alert>
+      ) : (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {pipelineEmails.map(email => (
+            <Paper key={email.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 0.5, flexWrap: 'wrap' }}>
+                    <Chip label={email.email_type.replace(/_/g, ' ')} size="small" sx={{ textTransform: 'capitalize' }} />
+                    <Chip
+                      label={email.status.replace(/_/g, ' ')}
+                      size="small"
+                      color={
+                        email.status === 'completed' ? 'success' :
+                        email.status === 'sent' ? 'info' :
+                        email.status === 'replied' ? 'primary' :
+                        email.status === 'awaiting_response' ? 'warning' : 'default'
+                      }
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {formatDateTime(email.sent_at || email.created_at)}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" fontWeight={600}>{email.subject}</Typography>
+                  <Typography variant="caption" color="text.secondary">To: {email.recipients}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 0.5, ml: 2 }}>
+                  {email.status === 'draft' && (
+                    <Tooltip title="Mark as Sent">
+                      <IconButton size="small" color="primary" onClick={() => handleUpdateEmailStatus(email.id, 'sent')}>
+                        <SendIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {email.status === 'sent' && (
+                    <Tooltip title="Mark as Replied">
+                      <IconButton size="small" color="success" onClick={() => handleUpdateEmailStatus(email.id, 'replied')}>
+                        <CheckIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {(email.status === 'sent' || email.status === 'awaiting_response') && (
+                    <Tooltip title="Mark Awaiting Response">
+                      <IconButton size="small" color="warning" onClick={() => handleUpdateEmailStatus(email.id, 'awaiting_response')}>
+                        <TimelineIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {email.status !== 'completed' && (
+                    <Tooltip title="Mark Completed">
+                      <IconButton size="small" onClick={() => handleUpdateEmailStatus(email.id, 'completed')}>
+                        <CheckOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
+              </Box>
+            </Paper>
+          ))}
+        </Box>
+      )}
+    </>
+  );
 
   /* --- Onboarding Tab ----------------------------------------------- */
   const renderOnboarding = () => (
@@ -1597,6 +1970,8 @@ const ChurchLifecycleDetailPage: React.FC = () => {
               {visibleTabs[tab]?.label === 'Contacts' && renderContacts()}
               {visibleTabs[tab]?.label === 'Activity' && renderActivity()}
               {visibleTabs[tab]?.label === 'Follow-ups' && renderFollowUps()}
+              {visibleTabs[tab]?.label === 'Requirements' && renderRequirements()}
+              {visibleTabs[tab]?.label === 'Email Workflow' && renderEmailWorkflow()}
               {visibleTabs[tab]?.label === 'Onboarding' && renderOnboarding()}
               {visibleTabs[tab]?.label === 'Timeline' && renderTimeline()}
             </Box>
@@ -1727,6 +2102,115 @@ const ChurchLifecycleDetailPage: React.FC = () => {
         <DialogActions>
           <Button onClick={() => setRejectDialog({ open: false, userId: null, email: '' })}>Cancel</Button>
           <Button onClick={handleRejectMember} color="error" variant="contained">Reject</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Record Requirement Dialog */}
+      <Dialog open={reqDialogOpen} onClose={() => setReqDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add Record Requirement</DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Record Type</InputLabel>
+              <Select value={reqForm.record_type} label="Record Type" onChange={(e) => setReqForm(f => ({ ...f, record_type: e.target.value }))}>
+                {RECORD_TYPES.map(rt => (
+                  <MenuItem key={rt} value={rt} sx={{ textTransform: 'capitalize' }}>{rt}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControlLabel
+              control={<Switch checked={reqForm.uses_sample} onChange={(e) => setReqForm(f => ({ ...f, uses_sample: e.target.checked, custom_required: e.target.checked ? false : f.custom_required }))} />}
+              label="Use Sample Template"
+            />
+            {reqForm.uses_sample && (
+              <FormControl fullWidth size="small">
+                <InputLabel>Template</InputLabel>
+                <Select
+                  value={reqForm.sample_template_id || ''}
+                  label="Template"
+                  onChange={(e) => setReqForm(f => ({ ...f, sample_template_id: e.target.value ? Number(e.target.value) : null }))}
+                >
+                  {sampleTemplates.filter(t => t.record_type === reqForm.record_type).map(t => (
+                    <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+            <FormControlLabel
+              control={<Switch checked={reqForm.custom_required} onChange={(e) => setReqForm(f => ({ ...f, custom_required: e.target.checked, uses_sample: e.target.checked ? false : f.uses_sample }))} />}
+              label="Custom Structure Required"
+            />
+            {reqForm.custom_required && (
+              <TextField
+                label="Custom Notes" fullWidth multiline rows={3}
+                value={reqForm.custom_notes}
+                onChange={(e) => setReqForm(f => ({ ...f, custom_notes: e.target.value }))}
+                placeholder="Describe custom field requirements..."
+              />
+            )}
+            <FormControlLabel
+              control={<Switch checked={reqForm.review_required} onChange={(e) => setReqForm(f => ({ ...f, review_required: e.target.checked }))} />}
+              label="Review Required Before Provisioning"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReqDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSaveRequirement} disabled={pipelineSaving} sx={{ bgcolor: COLOR }}>
+            Save Requirement
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Email Composer Dialog */}
+      <Dialog open={emailDialogOpen} onClose={() => setEmailDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">Compose Email</Typography>
+            <IconButton size="small" onClick={() => setEmailDialogOpen(false)}><CloseIcon /></IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Email Type</InputLabel>
+              <Select
+                value={emailForm.email_type}
+                label="Email Type"
+                onChange={(e) => {
+                  const type = e.target.value;
+                  const template = emailTemplates.find(t => t.type === type);
+                  const name = churchName;
+                  const primaryContact = contacts.find(c => c.is_primary === 1) || contacts[0];
+                  const contactName = primaryContact ? `${primaryContact.first_name} ${primaryContact.last_name || ''}`.trim() : 'Parish Administrator';
+                  setEmailForm(prev => ({
+                    ...prev,
+                    email_type: type,
+                    subject: (template?.subject || '').replace(/{church_name}/g, name).replace(/{contact_name}/g, contactName),
+                    body: (template?.body || '').replace(/{church_name}/g, name).replace(/{contact_name}/g, contactName).replace(/{custom_message}/g, ''),
+                  }));
+                }}
+              >
+                {EMAIL_TYPES.map(et => (
+                  <MenuItem key={et.key} value={et.key}>{et.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField size="small" label="To" fullWidth value={emailForm.recipients} onChange={(e) => setEmailForm(f => ({ ...f, recipients: e.target.value }))} />
+            <TextField size="small" label="CC" fullWidth value={emailForm.cc} onChange={(e) => setEmailForm(f => ({ ...f, cc: e.target.value }))} />
+            <TextField size="small" label="Subject" fullWidth value={emailForm.subject} onChange={(e) => setEmailForm(f => ({ ...f, subject: e.target.value }))} />
+            <TextField label="Body" fullWidth multiline rows={12} value={emailForm.body} onChange={(e) => setEmailForm(f => ({ ...f, body: e.target.value }))} />
+            <TextField size="small" label="Internal Notes" fullWidth multiline rows={2} value={emailForm.notes} onChange={(e) => setEmailForm(f => ({ ...f, notes: e.target.value }))} />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEmailDialogOpen(false)}>Cancel</Button>
+          <Button variant="outlined" onClick={() => handleSaveEmail('draft')} disabled={pipelineSaving}>Save Draft</Button>
+          <Button variant="contained" startIcon={<SendIcon />} onClick={() => handleSaveEmail('sent')} disabled={pipelineSaving}
+            sx={{ bgcolor: COLOR, '&:hover': { bgcolor: alpha(COLOR, 0.85) } }}
+          >
+            Mark as Sent
+          </Button>
         </DialogActions>
       </Dialog>
 

@@ -229,13 +229,7 @@ const Menuitems: MenuitemsType[] = [
   // ========================================================================
   {
     navlabel: true,
-    subheader: '📣 CRM & Outreach',
-  },
-  {
-    id: uniqueId(),
-    title: 'CRM Dashboard',
-    icon: IconUsers,
-    href: '/devel-tools/crm',
+    subheader: '📣 Church Operations',
   },
   {
     id: uniqueId(),
