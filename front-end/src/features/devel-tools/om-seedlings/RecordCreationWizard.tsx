@@ -64,7 +64,7 @@ import {
   Storage as SeedIcon,
   Warning as WarningIcon,
 } from '@mui/icons-material';
-import UploadFile from '@mui/icons-material/UploadFile';
+import Download from '@mui/icons-material/Download';
 import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import * as XLSX from 'xlsx';
@@ -110,7 +110,7 @@ interface ValidationIssue {
 interface WizardState {
   recordType: string;
   church: Church | null;
-  mode: 'single' | 'batch' | 'auto' | 'template' | 'csv';
+  mode: 'single' | 'batch' | 'auto' | 'template';
   count: number;
   dateStart: string;
   dateEnd: string;
@@ -199,10 +199,7 @@ export default function RecordCreationWizard() {
   const [createResult, setCreateResult] = useState<any>(null);
   const [toast, setToast] = useState<{ msg: string; severity: 'success' | 'error' | 'warning' | 'info' } | null>(null);
   const [editingRow, setEditingRow] = useState<number | null>(null);
-  const [csvFileName, setCsvFileName] = useState<string>('');
-  const [csvColumnMap, setCsvColumnMap] = useState<Record<string, string>>({});
-  const [csvRawHeaders, setCsvRawHeaders] = useState<string[]>([]);
-  const [csvRawRows, setCsvRawRows] = useState<Record<string, any>[]>([]);
+  const [outputFormat, setOutputFormat] = useState<'database' | 'csv' | 'xlsx'>('database');
   const [editRowData, setEditRowData] = useState<Record<string, any>>({});
   const [presetDialogOpen, setPresetDialogOpen] = useState(false);
   const [presetName, setPresetName] = useState('');
@@ -434,63 +431,32 @@ export default function RecordCreationWizard() {
   }, [state, updateState]);
 
   // ============================================================================
-  // CSV / XLSX FILE HANDLER
+  // DOWNLOAD AS CSV / XLSX
   // ============================================================================
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setCsvFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try {
-        const data = new Uint8Array(evt.target!.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: '' });
-        if (!json.length) {
-          setToast({ msg: 'File is empty or has no data rows', severity: 'warning' });
-          return;
-        }
-        const headers = Object.keys(json[0]);
-        setCsvRawHeaders(headers);
-        const limited = json.slice(0, 500);
-        setCsvRawRows(limited);
-        if (json.length > 500) {
-          setToast({ msg: `File has ${json.length} rows — limited to first 500`, severity: 'warning' });
-        }
+  const handleDownloadFile = useCallback((format: 'csv' | 'xlsx') => {
+    if (!state.records.length) return;
+    // Build rows using field configs for column ordering and labels
+    const headers = fieldConfigs.map(f => f.label);
+    const keys = fieldConfigs.map(f => f.key);
+    const rows = state.records.map(r => keys.map(k => r[k] ?? ''));
 
-        // Auto-map: try exact match of header to field key or dbColumn
-        const autoMap: Record<string, string> = {};
-        for (const h of headers) {
-          const lower = h.toLowerCase().replace(/[\s-]/g, '_');
-          const match = fieldConfigs.find(
-            f => f.key === lower || f.dbColumn === lower || f.label.toLowerCase().replace(/[\s-]/g, '_') === lower
-          );
-          if (match) autoMap[h] = match.key;
-        }
-        setCsvColumnMap(autoMap);
-        setToast({ msg: `Loaded ${limited.length} rows, ${headers.length} columns from ${file.name}`, severity: 'success' });
-      } catch (err: any) {
-        setToast({ msg: 'Failed to parse file: ' + (err.message || 'Unknown error'), severity: 'error' });
-      }
-    };
-    reader.readAsArrayBuffer(file);
-    // Reset input so the same file can be re-selected
-    e.target.value = '';
-  }, [fieldConfigs]);
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Records');
 
-  const handleApplyCsvMapping = useCallback(() => {
-    // Convert raw rows using column mapping
-    const mapped = csvRawRows.map(row => {
-      const record: Record<string, any> = { church_id: state.church!.id };
-      for (const [csvCol, fieldKey] of Object.entries(csvColumnMap)) {
-        if (fieldKey) record[fieldKey] = row[csvCol];
-      }
-      return record;
-    });
-    updateState({ records: mapped, count: mapped.length });
-    setToast({ msg: `Mapped ${mapped.length} records — advancing to preview`, severity: 'success' });
-  }, [csvRawRows, csvColumnMap, state.church, updateState]);
+    const meta = RECORD_TYPE_META[state.recordType as RecordType];
+    const churchName = (state.church?.name || 'records').replace(/[^a-zA-Z0-9]/g, '_');
+    const filename = `${meta?.label || state.recordType}_${churchName}_${state.records.length}`;
+
+    if (format === 'csv') {
+      XLSX.writeFile(wb, `${filename}.csv`, { bookType: 'csv' });
+    } else {
+      XLSX.writeFile(wb, `${filename}.xlsx`, { bookType: 'xlsx' });
+    }
+    setToast({ msg: `Downloaded ${state.records.length} records as ${format.toUpperCase()}`, severity: 'success' });
+    setCreateResult({ downloaded: true, format, count: state.records.length, record_type: meta?.label, church: state.church?.name });
+    setActiveStep(5);
+  }, [state, fieldConfigs]);
 
   // ============================================================================
   // STEP VALIDATION
@@ -500,9 +466,7 @@ export default function RecordCreationWizard() {
       case 0: return !!state.recordType;
       case 1: return !!state.church;
       case 2: return !!state.mode;
-      case 3: return state.mode === 'csv'
-        ? csvRawRows.length > 0 && Object.values(csvColumnMap).some(Boolean)
-        : true; // Config step always allows forward (preview validates)
+      case 3: return true; // Config step always allows forward (preview validates)
       case 4: return state.records.length > 0 && !state.validationIssues.some(v => v.severity === 'error');
       default: return false;
     }
@@ -521,16 +485,11 @@ export default function RecordCreationWizard() {
   // ============================================================================
   const handleNext = useCallback(async () => {
     if (activeStep === 3) {
-      if (state.mode === 'csv') {
-        // CSV mode: apply column mapping to produce records
-        handleApplyCsvMapping();
-      } else {
-        // Other modes: generate records via API
-        await handleGeneratePreview();
-      }
+      // Moving from Configure to Preview — generate records
+      await handleGeneratePreview();
     }
     setActiveStep(prev => Math.min(prev + 1, STEPS.length - 1));
-  }, [activeStep, state.mode, handleGeneratePreview, handleApplyCsvMapping]);
+  }, [activeStep, handleGeneratePreview]);
 
   const handleBack = useCallback(() => {
     setActiveStep(prev => Math.max(prev - 1, 0));
@@ -623,7 +582,6 @@ export default function RecordCreationWizard() {
           { value: 'auto', label: 'Auto-Generated Batch', desc: 'System generates realistic records within your date range and rules. Best for demo/sample data.' },
           { value: 'single', label: 'Manual Single Record', desc: 'Fill in all fields manually for one record.' },
           { value: 'batch', label: 'Manual Batch Entry', desc: 'Define shared rules and generate multiple records with manual overrides.' },
-          { value: 'csv', label: 'Import from CSV / XLSX', desc: 'Upload a CSV or Excel file to create records in bulk. Column headers are mapped to record fields.' },
           { value: 'template', label: 'From Saved Preset', desc: 'Load a previously saved configuration preset.' },
         ].map(opt => (
           <Paper
@@ -698,108 +656,6 @@ export default function RecordCreationWizard() {
               updateState({ overrides: { ...state.overrides, [key]: val } });
             }))}
           </Box>
-        </Box>
-      );
-    }
-
-    // CSV / XLSX import mode
-    if (state.mode === 'csv') {
-      return (
-        <Box sx={{ py: 2 }}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            Import {meta?.label} Records from File
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Upload a CSV or Excel (.xlsx) file. Map columns to record fields, then preview before creating.
-            Maximum 500 rows will be imported.
-          </Typography>
-
-          {/* File upload */}
-          <Box sx={{ mb: 3 }}>
-            <Button
-              variant="outlined"
-              component="label"
-              startIcon={<UploadFile />}
-              sx={{ mr: 2 }}
-            >
-              {csvFileName || 'Choose File'}
-              <input
-                type="file"
-                hidden
-                accept=".csv,.xlsx,.xls"
-                onChange={handleFileUpload}
-              />
-            </Button>
-            {csvFileName && (
-              <Chip label={`${csvRawRows.length} rows`} size="small" color="info" />
-            )}
-          </Box>
-
-          {/* Column mapping */}
-          {csvRawHeaders.length > 0 && (
-            <>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>Column Mapping</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Map each file column to a {meta?.label?.toLowerCase()} record field. Unmapped columns will be skipped.
-              </Typography>
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5, mb: 3 }}>
-                {csvRawHeaders.map(header => (
-                  <Stack key={header} direction="row" spacing={1} alignItems="center">
-                    <Typography variant="body2" sx={{ minWidth: 140, fontWeight: 500, fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                      {header}
-                    </Typography>
-                    <FormControl size="small" fullWidth>
-                      <Select
-                        value={csvColumnMap[header] || ''}
-                        onChange={(e) => setCsvColumnMap(prev => ({ ...prev, [header]: e.target.value }))}
-                        displayEmpty
-                      >
-                        <MenuItem value=""><em>-- skip --</em></MenuItem>
-                        {fieldConfigs.map(f => (
-                          <MenuItem key={f.key} value={f.key}>{f.label} ({f.key})</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Stack>
-                ))}
-              </Box>
-
-              {/* Sample data preview */}
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>Sample Data (first 3 rows)</Typography>
-              <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 200, mb: 2 }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      {csvRawHeaders.map(h => (
-                        <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
-                          {h}
-                          {csvColumnMap[h] && (
-                            <Chip label={csvColumnMap[h]} size="small" color="primary" sx={{ ml: 0.5, height: 18, fontSize: '0.65rem' }} />
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {csvRawRows.slice(0, 3).map((row, idx) => (
-                      <TableRow key={idx}>
-                        {csvRawHeaders.map(h => (
-                          <TableCell key={h} sx={{ fontSize: '0.7rem', maxWidth: 150 }}>
-                            <Typography variant="body2" fontSize="0.7rem" noWrap>{String(row[h] ?? '')}</Typography>
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-
-              <Alert severity="info" sx={{ mb: 2 }}>
-                {Object.values(csvColumnMap).filter(Boolean).length} of {csvRawHeaders.length} columns mapped
-                &bull; {csvRawRows.length} rows will be imported
-              </Alert>
-            </>
-          )}
         </Box>
       );
     }
@@ -1158,17 +1014,30 @@ export default function RecordCreationWizard() {
       return (
         <Box sx={{ py: 4, textAlign: 'center' }}>
           <Check sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-          <Typography variant="h5" fontWeight={700} gutterBottom>Records Created Successfully</Typography>
+          <Typography variant="h5" fontWeight={700} gutterBottom>
+            {createResult.downloaded ? 'Records Downloaded' : 'Records Created Successfully'}
+          </Typography>
           <Box sx={{ display: 'inline-block', textAlign: 'left', mt: 2 }}>
             <Stack spacing={1}>
-              <Typography variant="body1">Requested: <strong>{createResult.requested}</strong></Typography>
-              <Typography variant="body1">Inserted: <strong>{createResult.inserted}</strong></Typography>
-              {createResult.skipped > 0 && (
-                <Typography variant="body1" color="warning.main">Skipped: <strong>{createResult.skipped}</strong></Typography>
+              {createResult.downloaded ? (
+                <>
+                  <Typography variant="body1">Format: <strong>{createResult.format?.toUpperCase()}</strong></Typography>
+                  <Typography variant="body1">Records: <strong>{createResult.count}</strong></Typography>
+                  <Typography variant="body1">Record Type: <strong>{createResult.record_type}</strong></Typography>
+                  <Typography variant="body1">Church: <strong>{createResult.church}</strong></Typography>
+                </>
+              ) : (
+                <>
+                  <Typography variant="body1">Requested: <strong>{createResult.requested}</strong></Typography>
+                  <Typography variant="body1">Inserted: <strong>{createResult.inserted}</strong></Typography>
+                  {createResult.skipped > 0 && (
+                    <Typography variant="body1" color="warning.main">Skipped: <strong>{createResult.skipped}</strong></Typography>
+                  )}
+                  <Typography variant="body1">Record Type: <strong>{createResult.record_type}</strong></Typography>
+                  <Typography variant="body1">Church: <strong>{createResult.church}</strong></Typography>
+                  <Typography variant="body1">Database: <strong>{createResult.database}</strong></Typography>
+                </>
               )}
-              <Typography variant="body1">Record Type: <strong>{createResult.record_type}</strong></Typography>
-              <Typography variant="body1">Church: <strong>{createResult.church}</strong></Typography>
-              <Typography variant="body1">Database: <strong>{createResult.database}</strong></Typography>
             </Stack>
           </Box>
           {createResult.warnings?.length > 0 && (
@@ -1195,6 +1064,7 @@ export default function RecordCreationWizard() {
                   validationIssues: [],
                 });
                 setCreateResult(null);
+                setOutputFormat('database');
               }}
             >
               Create More Records
@@ -1213,7 +1083,7 @@ export default function RecordCreationWizard() {
           <Stack spacing={1.5}>
             <Typography variant="body1">Record Type: <strong>{meta?.label}</strong></Typography>
             <Typography variant="body1">Church: <strong>{state.church?.name}</strong></Typography>
-            <Typography variant="body1">Records to Create: <strong>{state.records.length}</strong></Typography>
+            <Typography variant="body1">Records: <strong>{state.records.length}</strong></Typography>
             <Typography variant="body1">Date Range: <strong>{state.dateStart} to {state.dateEnd}</strong></Typography>
             {errorCount > 0 && (
               <Alert severity="error">Cannot create — {errorCount} validation error(s) must be resolved first.</Alert>
@@ -1223,16 +1093,42 @@ export default function RecordCreationWizard() {
             )}
           </Stack>
         </Paper>
-        <Button
-          variant="contained"
-          size="large"
-          color="primary"
-          onClick={handleCreate}
-          disabled={creating || errorCount > 0}
-          startIcon={creating ? <CircularProgress size={20} color="inherit" /> : <SeedIcon />}
+
+        {/* Output format selection */}
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>Output Format</Typography>
+        <RadioGroup
+          row
+          value={outputFormat}
+          onChange={(e) => setOutputFormat(e.target.value as 'database' | 'csv' | 'xlsx')}
+          sx={{ mb: 3 }}
         >
-          {creating ? 'Creating...' : `Create ${state.records.length} Records`}
-        </Button>
+          <FormControlLabel value="database" control={<Radio />} label="Insert into Church Database" />
+          <FormControlLabel value="csv" control={<Radio />} label="Download as CSV" />
+          <FormControlLabel value="xlsx" control={<Radio />} label="Download as Excel (.xlsx)" />
+        </RadioGroup>
+
+        {outputFormat === 'database' ? (
+          <Button
+            variant="contained"
+            size="large"
+            color="primary"
+            onClick={handleCreate}
+            disabled={creating || errorCount > 0}
+            startIcon={creating ? <CircularProgress size={20} color="inherit" /> : <SeedIcon />}
+          >
+            {creating ? 'Creating...' : `Create ${state.records.length} Records in Database`}
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            size="large"
+            color="primary"
+            onClick={() => handleDownloadFile(outputFormat)}
+            startIcon={<Download />}
+          >
+            Download {state.records.length} Records as {outputFormat.toUpperCase()}
+          </Button>
+        )}
       </Box>
     );
   };
@@ -1304,7 +1200,7 @@ export default function RecordCreationWizard() {
                     onClick={handleNext}
                     disabled={!canProceed || loading}
                   >
-                    {activeStep === 3 ? (state.mode === 'csv' ? 'Map & Preview' : 'Generate Preview') : 'Next'}
+                    {activeStep === 3 ? 'Generate Preview' : 'Next'}
                   </Button>
                 )}
               </Stack>
