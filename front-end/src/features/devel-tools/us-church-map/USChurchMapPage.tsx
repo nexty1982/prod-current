@@ -19,7 +19,11 @@ import {
   ArrowBack as ArrowBackIcon,
   Business as ChurchIcon,
   CenterFocusStrong as ResetIcon,
+  CheckBox as CheckBoxIcon,
+  CheckBoxOutlineBlank as CheckBoxBlankIcon,
+  Download as DownloadIcon,
   FilterList as FilterIcon,
+  IndeterminateCheckBox as IndeterminateCheckBoxIcon,
   Language as WebIcon,
   OpenInNew as OpenIcon,
   Phone as PhoneIcon,
@@ -34,6 +38,7 @@ import {
   alpha,
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   Divider,
@@ -49,6 +54,8 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
+import ExportModal from './ExportModal';
+import type { ExportFilters } from './ExportModal';
 import { scaleQuantile } from 'd3-scale';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -376,6 +383,11 @@ const USChurchMapPage: React.FC = () => {
   const [stateChurches, setStateChurches] = useState<StateChurchesEnriched | null>(null);
   const [churchesLoading, setChurchesLoading] = useState(false);
 
+  // Export & multi-select
+  const [exportOpen, setExportOpen] = useState(false);
+  const [selectedChurchIds, setSelectedChurchIds] = useState<Set<number | string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
+
   const BCrumb = [
     { to: '/', title: 'Home' },
     { to: '/admin/control-panel', title: 'Control Panel' },
@@ -541,6 +553,37 @@ const USChurchMapPage: React.FC = () => {
     }
   }, [navigate]);
 
+  // ─── Church selection ────────────────────────────────
+  const toggleChurchSelect = useCallback((id: number | string) => {
+    setSelectedChurchIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    if (!filteredChurches.length) return;
+    const allSelected = filteredChurches.every(c => selectedChurchIds.has(c.id));
+    if (allSelected) {
+      setSelectedChurchIds(new Set());
+    } else {
+      setSelectedChurchIds(new Set(filteredChurches.map(c => c.id)));
+    }
+  }, [filteredChurches, selectedChurchIds]);
+
+  // Clear selection when state/filters change
+  useEffect(() => {
+    setSelectedChurchIds(new Set());
+  }, [selectedState, viewMode, jurisdictionFilter]);
+
+  // Export filters object for the modal
+  const exportFilters: ExportFilters = useMemo(() => ({
+    viewMode,
+    jurisdiction: jurisdictionFilter,
+  }), [viewMode, jurisdictionFilter]);
+
   // ─── Selected state data ──────────────────────────────
   const selectedData = selectedState && churchData
     ? { code: selectedState, name: geoData?.[selectedState]?.name || selectedState, count: churchData.states[selectedState] || 0 }
@@ -599,11 +642,20 @@ const USChurchMapPage: React.FC = () => {
             <Chip label={`${globalTotals.live} live`} size="small" sx={{ fontWeight: 600, bgcolor: alpha(STATUS_CONFIG.live.color, 0.1), color: STATUS_CONFIG.live.color }} />
           )}
           <Button
+            variant="outlined"
+            size="small"
+            startIcon={<DownloadIcon />}
+            onClick={() => setExportOpen(true)}
+            sx={{ textTransform: 'none', ml: 1 }}
+          >
+            Export
+          </Button>
+          <Button
             variant="contained"
             size="small"
             startIcon={<AddIcon />}
             onClick={() => navigate('/admin/control-panel/onboarding-pipeline')}
-            sx={{ textTransform: 'none', ml: 1 }}
+            sx={{ textTransform: 'none' }}
           >
             Onboard Church
           </Button>
@@ -824,19 +876,66 @@ const USChurchMapPage: React.FC = () => {
                     </Typography>
                   ) : (
                     <>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, px: 0.5 }}>
-                        Showing {filteredChurches.length} of {stateChurches?.totalAll || 0} churches
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, px: 0.5, gap: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
+                          Showing {filteredChurches.length} of {stateChurches?.totalAll || 0} churches
+                        </Typography>
+                        <Tooltip title={selectMode ? 'Exit selection' : 'Select churches for export'}>
+                          <IconButton
+                            size="small"
+                            onClick={() => { setSelectMode(s => !s); if (selectMode) setSelectedChurchIds(new Set()); }}
+                            sx={{ p: 0.25, color: selectMode ? 'primary.main' : 'text.secondary' }}
+                          >
+                            {selectMode ? <CheckBoxIcon sx={{ fontSize: 18 }} /> : <CheckBoxBlankIcon sx={{ fontSize: 18 }} />}
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                      {selectMode && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1, px: 0.5 }}>
+                          <Checkbox
+                            size="small"
+                            checked={filteredChurches.length > 0 && filteredChurches.every(c => selectedChurchIds.has(c.id))}
+                            indeterminate={selectedChurchIds.size > 0 && !filteredChurches.every(c => selectedChurchIds.has(c.id))}
+                            onChange={toggleSelectAll}
+                            sx={{ p: 0 }}
+                          />
+                          <Typography variant="caption" color="text.secondary">
+                            {selectedChurchIds.size > 0 ? `${selectedChurchIds.size} selected` : 'Select all'}
+                          </Typography>
+                          {selectedChurchIds.size > 0 && (
+                            <Button
+                              size="small"
+                              startIcon={<DownloadIcon sx={{ fontSize: 14 }} />}
+                              onClick={() => setExportOpen(true)}
+                              sx={{ ml: 'auto', textTransform: 'none', fontSize: '0.7rem', py: 0 }}
+                            >
+                              Export selected
+                            </Button>
+                          )}
+                        </Box>
+                      )}
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
                         {filteredChurches.map((church, i) => (
-                          <ChurchCard
-                            key={`${church.id}-${i}`}
-                            church={church}
-                            isDark={isDark}
-                            isSelected={selectedChurch?.id === church.id}
-                            onClick={() => setSelectedChurch(prev => prev?.id === church.id ? null : church)}
-                            onAction={(action) => handleChurchAction(church, action)}
-                          />
+                          <Box key={`${church.id}-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+                            {selectMode && (
+                              <Checkbox
+                                size="small"
+                                checked={selectedChurchIds.has(church.id)}
+                                onChange={() => toggleChurchSelect(church.id)}
+                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                sx={{ p: 0, mt: 0.75, flexShrink: 0 }}
+                              />
+                            )}
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <ChurchCard
+                                church={church}
+                                isDark={isDark}
+                                isSelected={selectedChurch?.id === church.id}
+                                onClick={() => setSelectedChurch(prev => prev?.id === church.id ? null : church)}
+                                onAction={(action) => handleChurchAction(church, action)}
+                              />
+                            </Box>
+                          </Box>
                         ))}
                       </Box>
                     </>
@@ -913,6 +1012,17 @@ const USChurchMapPage: React.FC = () => {
           </Box>
         )}
       </Box>
+
+      {/* ══════════ EXPORT MODAL ══════════ */}
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        filters={exportFilters}
+        selectedState={selectedState}
+        activeRegion={activeRegion}
+        selectedChurchIds={Array.from(selectedChurchIds)}
+        filteredCount={filteredChurches.length}
+      />
     </PageContainer>
   );
 };

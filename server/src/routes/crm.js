@@ -732,4 +732,382 @@ router.get('/map-data', requireAuth, async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// EXPORT — generate XLSX/CSV of church data with filter parity
+// ═══════════════════════════════════════════════════════════════
+
+const REGIONS_MAP = {
+  northeast: ['CT', 'DE', 'ME', 'MD', 'MA', 'NH', 'NJ', 'NY', 'PA', 'RI', 'VT', 'DC'],
+  midwest: ['IL', 'IN', 'IA', 'KS', 'MI', 'MN', 'MO', 'NE', 'ND', 'OH', 'SD', 'WI'],
+  south: ['AL', 'AR', 'FL', 'GA', 'KY', 'LA', 'MS', 'NC', 'OK', 'SC', 'TN', 'TX', 'VA', 'WV'],
+  west: ['AK', 'AZ', 'CA', 'CO', 'HI', 'ID', 'MT', 'NV', 'NM', 'OR', 'UT', 'WA', 'WY'],
+};
+
+const EXPORT_COLUMN_DEFS = {
+  church_id:            { header: 'Church ID',            key: 'id' },
+  church_name:          { header: 'Church Name',          key: 'name' },
+  jurisdiction:         { header: 'Jurisdiction',         key: 'jurisdiction' },
+  street:               { header: 'Street',               key: 'street' },
+  city:                 { header: 'City',                 key: 'city' },
+  state:                { header: 'State',                key: 'state_code' },
+  zip:                  { header: 'ZIP',                  key: 'zip' },
+  phone:                { header: 'Phone',                key: 'phone' },
+  website:              { header: 'Website',              key: 'website' },
+  latitude:             { header: 'Latitude',             key: 'latitude' },
+  longitude:            { header: 'Longitude',            key: 'longitude' },
+  op_status:            { header: 'Operational Status',   key: 'op_status' },
+  pipeline_stage:       { header: 'Pipeline Stage',       key: 'stage_label' },
+  priority:             { header: 'Priority',             key: 'priority' },
+  is_client:            { header: 'Is Client',            key: 'is_client' },
+  source:               { header: 'Source',               key: 'source' },
+  last_contacted_at:    { header: 'Last Contacted',       key: 'last_contacted_at' },
+  next_follow_up:       { header: 'Next Follow-Up',       key: 'next_follow_up' },
+  primary_contact_name: { header: 'Primary Contact',      key: 'primary_contact_name' },
+  primary_contact_email:{ header: 'Primary Contact Email', key: 'primary_contact_email' },
+  primary_contact_phone:{ header: 'Primary Contact Phone', key: 'primary_contact_phone' },
+};
+
+const MAX_EXPORT_ROWS = 10000;
+
+router.post('/churches/export', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const {
+      exportMode = 'all',        // all | state | region | selected
+      filters = {},              // { viewMode, jurisdiction, search }
+      state = null,              // for 'state' mode
+      region = null,             // for 'region' mode
+      selectedIds = [],          // for 'selected' mode
+      columns = null,            // array of column keys, or null for defaults
+      includeContacts = false,
+      includeCoordinates = true,
+      format = 'xlsx',           // xlsx | csv
+    } = req.body;
+
+    // Validate export mode
+    const validModes = ['all', 'state', 'region', 'selected'];
+    if (!validModes.includes(exportMode)) {
+      return res.status(400).json({ error: 'Invalid exportMode' });
+    }
+
+    if (exportMode === 'selected' && (!Array.isArray(selectedIds) || selectedIds.length === 0)) {
+      return res.status(400).json({ error: 'selectedIds required for selected mode' });
+    }
+
+    if (exportMode === 'state' && (!state || typeof state !== 'string' || state.length !== 2)) {
+      return res.status(400).json({ error: 'Valid 2-letter state code required for state mode' });
+    }
+
+    if (exportMode === 'region' && (!region || !REGIONS_MAP[region])) {
+      return res.status(400).json({ error: 'Valid region required (northeast, midwest, south, west)' });
+    }
+
+    // Determine which states to query
+    let targetStates = null; // null means all
+    if (exportMode === 'state') {
+      targetStates = [state.toUpperCase()];
+    } else if (exportMode === 'region') {
+      targetStates = REGIONS_MAP[region];
+    }
+
+    // Build enriched church list (same logic as analytics/us-churches-enriched)
+    let crmSql = `
+      SELECT uc.id, uc.name, uc.street, uc.city, uc.state_code, uc.zip,
+             uc.phone, uc.website, uc.latitude, uc.longitude, uc.jurisdiction,
+             uc.pipeline_stage, uc.priority, uc.is_client, uc.provisioned_church_id,
+             uc.last_contacted_at, uc.next_follow_up, uc.crm_notes,
+             ps.label AS stage_label, ps.color AS stage_color
+      FROM us_churches uc
+      LEFT JOIN crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key`;
+    const crmParams = [];
+
+    if (targetStates) {
+      crmSql += ` WHERE uc.state_code IN (${targetStates.map(() => '?').join(',')})`;
+      crmParams.push(...targetStates);
+    }
+
+    if (filters.jurisdiction) {
+      crmSql += targetStates ? ' AND' : ' WHERE';
+      crmSql += ' uc.jurisdiction = ?';
+      crmParams.push(filters.jurisdiction);
+    }
+
+    if (filters.search) {
+      crmSql += (crmParams.length > 0 ? ' AND' : ' WHERE');
+      crmSql += ' (uc.name LIKE ? OR uc.city LIKE ?)';
+      crmParams.push(`%${filters.search}%`, `%${filters.search}%`);
+    }
+
+    crmSql += ' ORDER BY uc.state_code, uc.jurisdiction, uc.city, uc.name';
+    const [crmRows] = await pool.query(crmSql, crmParams);
+
+    // Get onboarded churches
+    let obSql = `
+      SELECT c.id, c.name, c.city, c.state_province, c.phone, c.website,
+             c.latitude, c.longitude, c.jurisdiction, c.is_active, c.setup_complete,
+             c.address,
+             COALESCE(usr.active_users, 0) AS active_users,
+             COALESCE(usr.pending_users, 0) AS pending_users
+      FROM churches c
+      LEFT JOIN (
+        SELECT church_id,
+          SUM(CASE WHEN is_locked = 0 THEN 1 ELSE 0 END) AS active_users,
+          SUM(CASE WHEN is_locked = 1 THEN 1 ELSE 0 END) AS pending_users
+        FROM users WHERE church_id IS NOT NULL
+        GROUP BY church_id
+      ) usr ON usr.church_id = c.id`;
+    const obParams = [];
+
+    if (targetStates) {
+      obSql += ` WHERE c.state_province IN (${targetStates.map(() => '?').join(',')})`;
+      obParams.push(...targetStates);
+    }
+
+    const [onboardedRows] = await pool.query(obSql, obParams);
+
+    // Build provisioned set for dedup
+    const provisionedSet = new Set(
+      crmRows.filter(r => r.provisioned_church_id).map(r => r.provisioned_church_id)
+    );
+
+    // Compute operational status (same logic as analytics/us-churches-enriched)
+    const churches = crmRows.map(r => {
+      let op_status = 'directory';
+      if (r.provisioned_church_id) {
+        const ob = onboardedRows.find(o => o.id === r.provisioned_church_id);
+        if (ob) {
+          if (ob.setup_complete || ob.active_users > 0) op_status = 'live';
+          else op_status = 'onboarding';
+        } else {
+          op_status = 'client';
+        }
+      } else if (r.pipeline_stage && r.pipeline_stage !== 'new_lead') {
+        op_status = 'pipeline';
+      }
+      return { ...r, source: 'crm', op_status, onboarded_church_id: r.provisioned_church_id || null };
+    });
+
+    // Add standalone onboarded churches not in CRM
+    for (const ob of onboardedRows) {
+      if (provisionedSet.has(ob.id)) continue;
+      let op_status = 'onboarding';
+      if (ob.setup_complete || ob.active_users > 0) op_status = 'live';
+      churches.push({
+        id: `church_${ob.id}`,
+        name: ob.name,
+        street: ob.address,
+        city: ob.city,
+        state_code: ob.state_province,
+        zip: null,
+        phone: ob.phone,
+        website: ob.website,
+        latitude: ob.latitude,
+        longitude: ob.longitude,
+        jurisdiction: ob.jurisdiction,
+        pipeline_stage: op_status === 'live' ? 'active' : 'onboarding',
+        priority: null,
+        is_client: 1,
+        provisioned_church_id: null,
+        last_contacted_at: null,
+        next_follow_up: null,
+        crm_notes: null,
+        stage_label: op_status === 'live' ? 'Active' : 'Onboarding',
+        stage_color: null,
+        source: 'onboarded',
+        op_status,
+        onboarded_church_id: ob.id,
+      });
+    }
+
+    // Apply viewMode filter
+    let filtered = churches;
+    if (filters.viewMode && filters.viewMode !== 'all') {
+      if (filters.viewMode === 'pipeline') filtered = filtered.filter(c => c.op_status === 'pipeline');
+      else if (filters.viewMode === 'onboarding') filtered = filtered.filter(c => c.op_status === 'onboarding');
+      else if (filters.viewMode === 'live') filtered = filtered.filter(c => c.op_status === 'live' || c.op_status === 'client');
+    }
+
+    // Apply selected IDs filter
+    if (exportMode === 'selected') {
+      const idSet = new Set(selectedIds.map(String));
+      filtered = filtered.filter(c => idSet.has(String(c.id)));
+    }
+
+    // Enforce export limit
+    if (filtered.length > MAX_EXPORT_ROWS) {
+      return res.status(400).json({
+        error: `Export limited to ${MAX_EXPORT_ROWS} rows. Current result: ${filtered.length}. Apply more filters.`,
+      });
+    }
+
+    if (filtered.length === 0) {
+      return res.status(400).json({ error: 'No churches match the current filters' });
+    }
+
+    // Optionally join primary contacts
+    let contactMap = {};
+    if (includeContacts) {
+      const churchIds = filtered.filter(c => typeof c.id === 'number').map(c => c.id);
+      if (churchIds.length > 0) {
+        const [contacts] = await pool.query(
+          `SELECT church_id, CONCAT(first_name, ' ', COALESCE(last_name, '')) AS contact_name, email, phone
+           FROM omai_crm_contacts WHERE church_id IN (${churchIds.map(() => '?').join(',')}) AND is_primary = 1`,
+          churchIds
+        );
+        for (const c of contacts) {
+          contactMap[c.church_id] = c;
+        }
+      }
+    }
+
+    // Resolve columns
+    const defaultCols = ['church_id', 'church_name', 'jurisdiction', 'street', 'city', 'state', 'zip', 'phone', 'website', 'op_status', 'pipeline_stage', 'priority', 'source'];
+    if (includeCoordinates) defaultCols.push('latitude', 'longitude');
+    if (includeContacts) defaultCols.push('primary_contact_name', 'primary_contact_email', 'primary_contact_phone');
+
+    const exportColumns = (columns && Array.isArray(columns) && columns.length > 0)
+      ? columns.filter(c => EXPORT_COLUMN_DEFS[c])
+      : defaultCols;
+
+    // Build rows
+    const rows = filtered.map(church => {
+      const contact = contactMap[church.id] || {};
+      const row = {
+        ...church,
+        primary_contact_name: contact.contact_name || '',
+        primary_contact_email: contact.email || '',
+        primary_contact_phone: contact.phone || '',
+      };
+      return exportColumns.map(colKey => {
+        const def = EXPORT_COLUMN_DEFS[colKey];
+        const val = row[def.key];
+        return val != null ? val : '';
+      });
+    });
+
+    const headers = exportColumns.map(c => EXPORT_COLUMN_DEFS[c].header);
+
+    if (format === 'csv') {
+      // CSV output
+      const { format: formatCsv } = require('@fast-csv/format');
+      const timestamp = new Date().toISOString().slice(0, 10);
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="church-export-${timestamp}.csv"`);
+
+      const csvStream = formatCsv({ headers: true });
+      csvStream.pipe(res);
+      // Write header row
+      for (const row of rows) {
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = row[i]; });
+        csvStream.write(obj);
+      }
+      csvStream.end();
+    } else {
+      // XLSX output
+      const ExcelJS = require('exceljs');
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'OrthodoxMetrics CRM';
+      workbook.created = new Date();
+
+      const sheet = workbook.addWorksheet('Churches');
+
+      // Header row
+      sheet.columns = exportColumns.map((colKey, i) => ({
+        header: headers[i],
+        key: colKey,
+        width: Math.max(headers[i].length + 4, 14),
+      }));
+
+      // Style header
+      const headerRow = sheet.getRow(1);
+      headerRow.font = { bold: true, size: 11 };
+      headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+      headerRow.alignment = { vertical: 'middle' };
+      headerRow.height = 24;
+
+      // Data rows
+      for (const row of rows) {
+        const obj = {};
+        exportColumns.forEach((colKey, i) => { obj[colKey] = row[i]; });
+        sheet.addRow(obj);
+      }
+
+      // Auto-filter
+      sheet.autoFilter = { from: 'A1', to: `${String.fromCharCode(64 + exportColumns.length)}1` };
+
+      // Freeze header
+      sheet.views = [{ state: 'frozen', ySplit: 1 }];
+
+      const timestamp = new Date().toISOString().slice(0, 10);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="church-export-${timestamp}.xlsx"`);
+
+      await workbook.xlsx.write(res);
+      res.end();
+    }
+
+    console.log(`CRM export: ${filtered.length} churches, mode=${exportMode}, format=${format}, user=${req.session?.user?.id || 'jwt'}`);
+  } catch (err) {
+    console.error('CRM export error:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to generate export' });
+    }
+  }
+});
+
+// Export count preview (lightweight — no file generation)
+router.post('/churches/export-count', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const { exportMode = 'all', filters = {}, state = null, region = null, selectedIds = [] } = req.body;
+
+    let targetStates = null;
+    if (exportMode === 'state' && state) targetStates = [state.toUpperCase()];
+    else if (exportMode === 'region' && region && REGIONS_MAP[region]) targetStates = REGIONS_MAP[region];
+
+    // Count CRM churches
+    let crmSql = 'SELECT COUNT(*) as cnt FROM us_churches uc';
+    const crmParams = [];
+    const conditions = [];
+
+    if (targetStates) {
+      conditions.push(`uc.state_code IN (${targetStates.map(() => '?').join(',')})`);
+      crmParams.push(...targetStates);
+    }
+    if (filters.jurisdiction) {
+      conditions.push('uc.jurisdiction = ?');
+      crmParams.push(filters.jurisdiction);
+    }
+    if (filters.search) {
+      conditions.push('(uc.name LIKE ? OR uc.city LIKE ?)');
+      crmParams.push(`%${filters.search}%`, `%${filters.search}%`);
+    }
+    if (conditions.length) crmSql += ' WHERE ' + conditions.join(' AND ');
+
+    const [countResult] = await pool.query(crmSql, crmParams);
+    let total = countResult[0].cnt;
+
+    // Rough count of onboarded (not exact with dedup but good enough for preview)
+    let obSql = 'SELECT COUNT(*) as cnt FROM churches c';
+    const obParams = [];
+    if (targetStates) {
+      obSql += ` WHERE c.state_province IN (${targetStates.map(() => '?').join(',')})`;
+      obParams.push(...targetStates);
+    }
+    const [obCount] = await pool.query(obSql, obParams);
+    total += obCount[0].cnt;
+
+    if (exportMode === 'selected') {
+      total = Array.isArray(selectedIds) ? selectedIds.length : 0;
+    }
+
+    res.json({ count: total });
+  } catch (err) {
+    console.error('CRM export count error:', err);
+    res.status(500).json({ error: 'Failed to get export count' });
+  }
+});
+
 module.exports = router;
