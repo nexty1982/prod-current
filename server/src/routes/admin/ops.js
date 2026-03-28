@@ -619,6 +619,16 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
     );
     const currentBranch = headOut.trim();
 
+    // HEAD SHA (short)
+    let headSha = 'unknown';
+    try {
+      const { stdout: shaOut } = await execFileAsync(
+        'git', ['rev-parse', '--short=7', 'HEAD'],
+        { cwd: repoRoot, timeout: 3000 }
+      );
+      headSha = shaOut.trim();
+    } catch { /* ignore */ }
+
     // Working tree clean/dirty
     let isClean = true;
     try {
@@ -938,6 +948,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
       originMainSha: originMainSha.substring(0, 8),
       localContext: {
         currentBranch,
+        headSha,
         isClean,
         trackingRemote: currentTrackingRemote,
       },

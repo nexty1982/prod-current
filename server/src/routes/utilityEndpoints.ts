@@ -60,15 +60,40 @@ router.get('/health', async (req: any, res: any) => {
   }
 });
 
-// GET /api/system/version — Server + frontend build info
+// GET /api/system/version — Server build provenance + runtime info
 router.get('/system/version', (req: any, res: any) => {
-  let gitSha = process.env.GIT_SHA || 'unknown';
-  if (gitSha === 'unknown') {
+  // Source SHA: frozen at deploy time via .build-info, NOT live git HEAD
+  let sourceSha = process.env.GIT_SHA || 'unknown';
+  let buildDate: string | null = process.env.BUILD_TIME || null;
+
+  // Try reading .build-info for the frozen deploy-time SHA
+  if (sourceSha === 'unknown') {
+    try {
+      const buildInfoPath = path.resolve(__dirname, '../../.build-info');
+      const raw = fs.readFileSync(buildInfoPath, 'utf8');
+      const lines: Record<string, string> = {};
+      raw.split('\n').forEach((line: string) => {
+        const [k, ...v] = line.split('=');
+        if (k && v.length) lines[k.trim()] = v.join('=').trim();
+      });
+      if (lines.GIT_COMMIT) sourceSha = lines.GIT_COMMIT;
+      if (lines.BUILD_DATE && !buildDate) buildDate = lines.BUILD_DATE;
+    } catch (_) { /* .build-info not found — fall back to live git */ }
+  }
+
+  // Live HEAD SHA: current repo state (may differ from deployed build)
+  let headSha = 'unknown';
+  if (sourceSha === 'unknown') {
+    // Only fall back to live git if no frozen SHA available
     try {
       const { execSync } = require('child_process');
-      gitSha = execSync('git rev-parse --short=7 HEAD', { cwd: path.resolve(__dirname, '..'), timeout: 3000 }).toString().trim();
+      sourceSha = execSync('git rev-parse --short=7 HEAD', { cwd: path.resolve(__dirname, '..'), timeout: 3000 }).toString().trim();
     } catch (_) { /* git not available or not a repo */ }
   }
+  try {
+    const { execSync } = require('child_process');
+    headSha = execSync('git rev-parse --short=7 HEAD', { cwd: path.resolve(__dirname, '..'), timeout: 3000 }).toString().trim();
+  } catch (_) { /* git not available */ }
 
   let packageVersion = '1.0.0';
   try {
@@ -80,9 +105,14 @@ router.get('/system/version', (req: any, res: any) => {
     success: true,
     server: {
       version: packageVersion,
-      gitSha: gitSha.length > 7 ? gitSha.substring(0, 7) : gitSha,
-      gitShaFull: gitSha,
-      buildTime: process.env.BUILD_TIME || null,
+      // Build provenance — the commit this build was produced from
+      sourceSha: sourceSha.length > 7 ? sourceSha.substring(0, 7) : sourceSha,
+      // Backwards compat — old consumers still expect gitSha
+      gitSha: sourceSha.length > 7 ? sourceSha.substring(0, 7) : sourceSha,
+      gitShaFull: sourceSha,
+      // Current repo HEAD (may differ due to post-deploy commits)
+      headSha: headSha.length > 7 ? headSha.substring(0, 7) : headSha,
+      buildTime: buildDate,
       nodeVersion: process.version,
       environment: process.env.NODE_ENV || 'development',
       uptime: process.uptime(),

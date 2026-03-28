@@ -108,6 +108,7 @@ server/docs/**
 !server/docs/README.md
 
 # --- Build & Distribution Artifacts ---
+.build-info
 front-end/public/assets/
 front-end/public/build-info.json
 front-end/public/index.html

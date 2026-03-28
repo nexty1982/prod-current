@@ -121,6 +121,7 @@ interface BranchAnalysis {
   originMainSha: string;
   localContext: {
     currentBranch: string;
+    headSha: string;
     isClean: boolean;
     trackingRemote: string | null;
   };
@@ -175,7 +176,11 @@ const RepoOpsPage: React.FC = () => {
   // Build info
   const buildInfo = getBuildInfo();
   const { serverVersion, isLoading: serverLoading, refetch: refetchServer } = useServerVersion();
-  const versionsMatch = serverVersion && buildInfo.gitSha === serverVersion.gitSha;
+
+  // Deploy Sync: compare deployed source SHA against repo HEAD from analysis
+  const repoHeadSha = analysis?.localContext?.headSha || null;
+  const deployedSha = serverVersion?.sourceSha || serverVersion?.gitSha || null;
+  const buildSynced = repoHeadSha && deployedSha && deployedSha !== 'unknown' && repoHeadSha === deployedSha;
 
   // Git status
   const [gitStatus, setGitStatus] = useState<string | null>(null);
@@ -535,26 +540,30 @@ const RepoOpsPage: React.FC = () => {
           </Box>
           <Box>
             <Typography sx={{ fontFamily: f, fontSize: '0.6875rem', color: labelColor, mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Build Sync
+              Deploy Sync
             </Typography>
-            {serverLoading ? (
+            {(serverLoading || analysisLoading) ? (
               <CircularProgress size={14} />
+            ) : !repoHeadSha || !deployedSha || deployedSha === 'unknown' ? (
+              <Chip size="small" label="Unknown" sx={{ fontFamily: f, fontSize: '0.75rem', fontWeight: 600, height: 24, bgcolor: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', color: labelColor }} />
             ) : (
-              <Chip
-                size="small"
-                icon={versionsMatch ? <IconCheck size={14} /> : <IconAlertTriangle size={14} />}
-                label={versionsMatch ? 'Synchronized' : 'Mismatch'}
-                sx={{
-                  fontFamily: f, fontSize: '0.75rem', fontWeight: 600, height: 24,
-                  bgcolor: versionsMatch
-                    ? isDark ? 'rgba(34,197,94,0.15)' : '#dcfce7'
-                    : isDark ? 'rgba(249,115,22,0.15)' : '#ffedd5',
-                  color: versionsMatch
-                    ? isDark ? '#4ade80' : '#16a34a'
-                    : isDark ? '#fb923c' : '#ea580c',
-                  '& .MuiChip-icon': { color: 'inherit' },
-                }}
-              />
+              <Tooltip title={buildSynced ? 'Deployed build matches repo HEAD' : `Deployed: ${deployedSha} · HEAD: ${repoHeadSha}`}>
+                <Chip
+                  size="small"
+                  icon={buildSynced ? <IconCheck size={14} /> : <IconAlertTriangle size={14} />}
+                  label={buildSynced ? 'Deployed' : 'Drift'}
+                  sx={{
+                    fontFamily: f, fontSize: '0.75rem', fontWeight: 600, height: 24,
+                    bgcolor: buildSynced
+                      ? isDark ? 'rgba(34,197,94,0.15)' : '#dcfce7'
+                      : isDark ? 'rgba(249,115,22,0.15)' : '#ffedd5',
+                    color: buildSynced
+                      ? isDark ? '#4ade80' : '#16a34a'
+                      : isDark ? '#fb923c' : '#ea580c',
+                    '& .MuiChip-icon': { color: 'inherit' },
+                  }}
+                />
+              </Tooltip>
             )}
           </Box>
           <Box>

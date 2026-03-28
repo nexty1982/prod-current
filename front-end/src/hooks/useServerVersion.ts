@@ -7,8 +7,10 @@ import { useState, useEffect, useCallback } from 'react';
 
 export interface ServerVersion {
   version: string;
+  sourceSha: string;
   gitSha: string;
   gitShaFull: string;
+  headSha: string;
   buildTime: string;
   nodeVersion: string;
   environment: string;
@@ -46,8 +48,10 @@ export const useServerVersion = (): UseServerVersionReturn => {
       if (data.success && data.server) {
         setServerVersion({
           version: data.server.version || 'unknown',
+          sourceSha: data.server.sourceSha || data.server.gitSha || 'unknown',
           gitSha: data.server.gitSha || 'unknown',
           gitShaFull: data.server.gitShaFull || 'unknown',
+          headSha: data.server.headSha || 'unknown',
           buildTime: data.server.buildTime || new Date().toISOString(),
           nodeVersion: data.server.nodeVersion || 'unknown',
           environment: data.server.environment || 'unknown',
@@ -61,8 +65,10 @@ export const useServerVersion = (): UseServerVersionReturn => {
       setError(errorMessage);
       setServerVersion({
         version: 'unknown',
+        sourceSha: 'unknown',
         gitSha: 'unknown',
         gitShaFull: 'unknown',
+        headSha: 'unknown',
         buildTime: new Date().toISOString(),
         nodeVersion: 'unknown',
         environment: 'unknown',
