@@ -9,6 +9,7 @@ const express = require('express');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const { getAppPool } = require('../config/db');
 const { runBatchEnrichment, enrichChurch, upsertEnrichmentProfile, createEnrichmentRun, updateRunStatus } = require('../services/churchEnrichmentService');
+const { runFastFill } = require('../services/fastEstablishedDateService');
 
 const router = express.Router();
 const requireAdmin = requireRole(['admin', 'super_admin']);
@@ -449,6 +450,52 @@ router.get('/filter-options', requireAuth, requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('[Enrichment API] GET /filter-options error:', err);
     res.status(500).json({ error: 'Failed to fetch filter options' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// FAST FILL — demo-mode rapid established date population
+// Uses web search snippets + heuristic fallback (no crawling)
+// ═══════════════════════════════════════════════════════════════
+
+router.post('/fast-fill', requireAuth, requireSuper, async (req, res) => {
+  try {
+    const { state, jurisdiction, limit, overwriteExisting } = req.body;
+    const { createTask, findActiveTaskByScope } = require('../services/taskRunner');
+
+    // Duplicate-run protection
+    const existing = await findActiveTaskByScope(null, 'enrichment_fast_fill', 'church-enrichment', {
+      state: state || null,
+      jurisdiction: jurisdiction || null,
+    });
+    if (existing) {
+      return res.status(409).json({
+        error: `A fast-fill batch is already ${existing.status} (Task #${existing.id}: ${existing.title})`,
+        existing_task_id: existing.id,
+      });
+    }
+
+    const userId = req.session?.user?.id || req.user?.id || null;
+    const userName = req.session?.user?.username || req.user?.username || null;
+    const filterDesc = [state, jurisdiction].filter(Boolean).join(', ') || 'all';
+
+    const taskId = await createTask(null, {
+      task_type: 'enrichment_fast_fill',
+      source_feature: 'church-enrichment',
+      title: `Fast fill established dates — ${filterDesc}${limit ? ` (limit ${limit})` : ''}`,
+      created_by: userId,
+      created_by_name: userName,
+      metadata_json: { state, jurisdiction, limit, overwriteExisting, mode: 'fast_demo' }
+    });
+
+    res.json({ message: 'Fast fill started', status: 'accepted', task_id: taskId });
+
+    runFastFill({ state, jurisdiction, limit, overwriteExisting, taskId })
+      .then(summary => console.log('[Enrichment API] Fast fill complete:', summary))
+      .catch(err => console.error('[Enrichment API] Fast fill error:', err));
+  } catch (err) {
+    console.error('[Enrichment API] POST /fast-fill error:', err);
+    res.status(500).json({ error: 'Failed to start fast fill' });
   }
 });
 
