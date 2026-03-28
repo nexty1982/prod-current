@@ -1113,6 +1113,72 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
 });
 
 // ────────────────────────────────────────────────────────────────
+// POST /api/ops/git/branch/:branchName/merge
+// Fast-forward merge a branch into main, push, and delete the branch.
+// Only allowed for branches classified as "Fast-Forward Safe" (ahead > 0, behind === 0).
+// ────────────────────────────────────────────────────────────────
+router.post('/git/branch/:branchName/merge', requireAuth, requireRole('super_admin'), async (req, res) => {
+  const { repoKey, repoRoot } = resolveRepo(req);
+  const { branchName } = req.params;
+
+  // ── Safety: validate branch name ──────────────────────────
+  if (!branchName || branchName === 'main' || branchName === 'master') {
+    return res.status(400).json({ success: false, error: 'Cannot merge a protected branch into itself' });
+  }
+  if (!/^[a-zA-Z0-9._\-\/]+$/.test(branchName)) {
+    return res.status(400).json({ success: false, error: 'Invalid branch name' });
+  }
+
+  try {
+    // ── Step 1: Verify branch exists and is ff-safe ─────────
+    const remoteRef = `origin/${branchName}`;
+    try {
+      await execFileAsync('git', ['rev-parse', '--verify', remoteRef], { cwd: repoRoot, timeout: 3000 });
+    } catch {
+      return res.status(404).json({ success: false, error: `Remote branch not found: ${branchName}` });
+    }
+
+    // Get ahead/behind relative to origin/main
+    const { stdout: abOut } = await execFileAsync(
+      'git', ['rev-list', '--left-right', '--count', `origin/main...${remoteRef}`],
+      { cwd: repoRoot, timeout: 3000 }
+    );
+    const [behindStr, aheadStr] = abOut.trim().split(/\s+/);
+    const ahead = parseInt(aheadStr) || 0;
+    const behind = parseInt(behindStr) || 0;
+
+    if (ahead === 0) {
+      return res.status(400).json({ success: false, error: 'Branch has no unique commits to merge' });
+    }
+    if (behind > 0) {
+      return res.status(400).json({
+        success: false,
+        error: `Branch is ${behind} commit(s) behind main — rebase required before merge`,
+        ahead,
+        behind,
+      });
+    }
+
+    // ── Step 2: Perform fast-forward merge via repoService ──
+    const { mergeToMain } = require('../../services/repoService');
+    const result = mergeToMain(repoKey, branchName);
+
+    res.json({
+      success: true,
+      ...result,
+      message: `Branch "${branchName}" merged into main (fast-forward) and deleted`,
+    });
+  } catch (error) {
+    console.error(`[Git Ops] Merge error for ${branchName}:`, error);
+    res.status(error.code === 'FF_FAILED' ? 409 : 500).json({
+      success: false,
+      error: error.code === 'FF_FAILED' ? 'Fast-forward merge failed' : 'Merge failed',
+      message: error.message,
+    });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
 // POST /api/ops/git/branches/bulk-delete
 // Safely delete multiple branches that are "Already Merged" or "Safe To Delete".
 // Each branch is independently verified server-side before deletion.

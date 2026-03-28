@@ -200,6 +200,11 @@ const RepoOpsPage: React.FC = () => {
   const [deleting, setDeleting] = useState(false);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 
+  // Merge branch
+  const [mergeTarget, setMergeTarget] = useState<RemoteBranch | null>(null);
+  const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
+  const [merging, setMerging] = useState(false);
+
   // Bulk delete
   const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(new Set());
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
@@ -277,6 +282,33 @@ const RepoOpsPage: React.FC = () => {
       setSnackbar({ open: true, message: err.message || 'Deletion failed', severity: 'error' });
     } finally {
       setDeleting(false);
+    }
+  };
+
+  // ── Merge Branch ────────────────────────────────────────────
+
+  const openMergeDialog = (branch: RemoteBranch) => {
+    setMergeTarget(branch);
+    setMergeDialogOpen(true);
+  };
+
+  const handleMergeBranch = async () => {
+    if (!mergeTarget) return;
+    setMerging(true);
+    try {
+      const res: any = await apiClient.post(`/ops/git/branch/${encodeURIComponent(mergeTarget.name)}/merge`);
+      setSnackbar({ open: true, message: res.message || `Branch "${mergeTarget.name}" merged into main`, severity: 'success' });
+      setMergeDialogOpen(false);
+      setMergeTarget(null);
+      if (selectedBranch?.name === mergeTarget.name) {
+        setDrawerOpen(false);
+        setSelectedBranch(null);
+      }
+      fetchAnalysis();
+    } catch (err: any) {
+      setSnackbar({ open: true, message: err.message || 'Merge failed', severity: 'error' });
+    } finally {
+      setMerging(false);
     }
   };
 
@@ -1343,6 +1375,21 @@ const RepoOpsPage: React.FC = () => {
                 >
                   Delete Branch
                 </Button>
+              ) : selectedBranch.recommendedAction === 'Merge' && selectedBranch.behind === 0 && selectedBranch.ahead > 0 ? (
+                <Button
+                  variant="contained"
+                  fullWidth
+                  startIcon={<IconGitMerge size={16} />}
+                  onClick={() => openMergeDialog(selectedBranch)}
+                  disabled={merging}
+                  sx={{
+                    fontFamily: f, textTransform: 'none', fontSize: '0.875rem',
+                    bgcolor: isDark ? 'rgba(34,197,94,0.8)' : '#16a34a',
+                    '&:hover': { bgcolor: isDark ? 'rgba(34,197,94,0.95)' : '#15803d' },
+                  }}
+                >
+                  Merge Branch
+                </Button>
               ) : (
                 <>
                   <Button
@@ -1430,6 +1477,57 @@ const RepoOpsPage: React.FC = () => {
             }}
           >
             {deleting ? 'Deleting...' : 'Confirm Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Merge Confirmation Dialog ─────────────────────── */}
+      <Dialog
+        open={mergeDialogOpen}
+        onClose={() => !merging && setMergeDialogOpen(false)}
+        PaperProps={{ sx: { borderRadius: 2, maxWidth: 480, fontFamily: f } }}
+      >
+        <DialogTitle sx={{ fontFamily: f, fontWeight: 600, fontSize: '1.05rem', pb: 0.5 }}>
+          Merge Branch
+        </DialogTitle>
+        <DialogContent>
+          {mergeTarget && (
+            <Box sx={{ mt: 1 }}>
+              <Paper variant="outlined" sx={{ p: 1.5, mb: 2, fontFamily: 'monospace', fontSize: '0.8125rem', wordBreak: 'break-all', bgcolor: isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb' }}>
+                {mergeTarget.name}
+              </Paper>
+
+              <Typography sx={{ fontFamily: f, fontSize: '0.8125rem', color: labelColor, mb: 1.5 }}>
+                This branch has <strong>{mergeTarget.ahead}</strong> unique commit{mergeTarget.ahead !== 1 ? 's' : ''} and is not behind main.
+                It will be fast-forward merged into <strong>main</strong>, pushed to origin, and the branch will be deleted.
+              </Typography>
+
+              <Typography sx={{ fontFamily: f, fontSize: '0.75rem', color: labelColor }}>
+                This will run <code>git merge --ff-only {mergeTarget.name}</code> into main
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button
+            onClick={() => setMergeDialogOpen(false)}
+            disabled={merging}
+            sx={{ fontFamily: f, textTransform: 'none', fontSize: '0.8125rem' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleMergeBranch}
+            disabled={merging}
+            startIcon={merging ? <CircularProgress size={14} color="inherit" /> : <IconGitMerge size={14} />}
+            sx={{
+              fontFamily: f, textTransform: 'none', fontSize: '0.8125rem',
+              bgcolor: isDark ? 'rgba(34,197,94,0.8)' : '#16a34a',
+              '&:hover': { bgcolor: isDark ? 'rgba(34,197,94,0.95)' : '#15803d' },
+            }}
+          >
+            {merging ? 'Merging...' : 'Confirm Merge'}
           </Button>
         </DialogActions>
       </Dialog>
