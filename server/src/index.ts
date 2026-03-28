@@ -1165,16 +1165,39 @@ app.get('/api/health', async (req, res) => {
 
 // --- FRONTEND COMPATIBILITY ALIASES ---------------------------------
 
-// /api/system/version -> server + frontend build info
+// /api/system/version -> server build provenance + runtime info
 app.get('/api/system/version', (req, res) => {
-  // Auto-detect GIT_SHA from git if not in env
-  let gitSha = process.env.GIT_SHA || 'unknown';
-  if (gitSha === 'unknown') {
+  // Source SHA: frozen at deploy time via .build-info, NOT live git HEAD
+  let sourceSha = process.env.GIT_SHA || 'unknown';
+  let buildDate: string | null = process.env.BUILD_TIME || null;
+
+  // Try reading .build-info for the frozen deploy-time SHA
+  if (sourceSha === 'unknown') {
+    try {
+      const buildInfoPath = path.resolve(__dirname, '../../.build-info');
+      const raw = fs.readFileSync(buildInfoPath, 'utf8');
+      const lines: Record<string, string> = {};
+      raw.split('\n').forEach((line: string) => {
+        const [k, ...v] = line.split('=');
+        if (k && v.length) lines[k.trim()] = v.join('=').trim();
+      });
+      if (lines.GIT_COMMIT) sourceSha = lines.GIT_COMMIT;
+      if (lines.BUILD_DATE && !buildDate) buildDate = lines.BUILD_DATE;
+    } catch (_) { /* .build-info not found — fall back to live git */ }
+  }
+
+  // Live HEAD SHA: current repo state (may differ from deployed build)
+  let headSha = 'unknown';
+  if (sourceSha === 'unknown') {
     try {
       const { execSync } = require('child_process');
-      gitSha = execSync('git rev-parse --short=7 HEAD', { cwd: path.resolve(__dirname, '..'), timeout: 3000 }).toString().trim();
-    } catch (_) { /* git not available or not a repo */ }
+      sourceSha = execSync('git rev-parse --short=7 HEAD', { cwd: path.resolve(__dirname, '..'), timeout: 3000 }).toString().trim();
+    } catch (_) { /* git not available */ }
   }
+  try {
+    const { execSync } = require('child_process');
+    headSha = execSync('git rev-parse --short=7 HEAD', { cwd: path.resolve(__dirname, '..'), timeout: 3000 }).toString().trim();
+  } catch (_) { /* git not available */ }
 
   let packageVersion = '1.0.0';
   try {
@@ -1186,9 +1209,11 @@ app.get('/api/system/version', (req, res) => {
     success: true,
     server: {
       version: packageVersion,
-      gitSha: gitSha.length > 7 ? gitSha.substring(0, 7) : gitSha,
-      gitShaFull: gitSha,
-      buildTime: process.env.BUILD_TIME || null,
+      sourceSha: sourceSha.length > 7 ? sourceSha.substring(0, 7) : sourceSha,
+      gitSha: sourceSha.length > 7 ? sourceSha.substring(0, 7) : sourceSha,
+      gitShaFull: sourceSha,
+      headSha: headSha.length > 7 ? headSha.substring(0, 7) : headSha,
+      buildTime: buildDate,
       nodeVersion: process.version,
       environment: process.env.NODE_ENV || 'development',
       uptime: process.uptime(),
