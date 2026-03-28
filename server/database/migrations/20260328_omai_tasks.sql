@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS omai_tasks (
   started_at      TIMESTAMP     NULL DEFAULT NULL,
   finished_at     TIMESTAMP     NULL DEFAULT NULL,
   last_heartbeat  TIMESTAMP     NULL DEFAULT NULL,
+  cancel_requested_at TIMESTAMP NULL DEFAULT NULL COMMENT 'When cancellation was requested; execution loop checks this',
 
   total_count     INT           NOT NULL DEFAULT 0,
   completed_count INT           NOT NULL DEFAULT 0,

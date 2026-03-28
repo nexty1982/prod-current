@@ -834,6 +834,17 @@ async function runBatchEnrichment({ state = null, jurisdiction = null, limit = n
   let enrichedCount = 0, failedCount = 0, skippedCount = 0;
 
   for (let i = 0; i < churches.length; i++) {
+    // Check for cancellation request before each church
+    if (taskId) {
+      const { isCancelled } = require('./taskRunner');
+      if (await isCancelled(pool, taskId)) {
+        console.log(`[Enrichment] Cancellation requested — stopping after ${i} of ${churches.length} churches`);
+        await taskUpdate({ status: 'cancelled', message: `Cancelled after processing ${i} of ${churches.length} churches` });
+        await taskEvent({ level: 'warn', stage: 'cancelled', message: `Batch cancelled by user after ${i} churches` });
+        return { enriched: enrichedCount, failed: failedCount, skipped: skippedCount, cancelled: true };
+      }
+    }
+
     const church = churches[i];
     const progress = `[${i + 1}/${churches.length}]`;
     console.log(`[Enrichment] ${progress} Processing: ${church.name} (${church.city}, ${church.state_code})`);

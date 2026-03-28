@@ -1,11 +1,15 @@
 /**
  * taskRunner — Internal helper for creating and updating omai_tasks from services.
  *
+ * IMPORTANT: All timestamps use UTC_TIMESTAMP() to avoid mysql2 timezone
+ * misinterpretation (Node.js runs in America/New_York but MariaDB SYSTEM tz is UTC).
+ *
  * Usage:
- *   const { createTask, updateTask, addTaskEvent } = require('./taskRunner');
+ *   const { createTask, updateTask, addTaskEvent, isCancelled } = require('./taskRunner');
  *   const taskId = await createTask(pool, { task_type: 'enrichment_batch', title: '...', ... });
  *   await updateTask(pool, taskId, { status: 'running', stage: 'Fetching pages', completed_count: 5 });
  *   await addTaskEvent(pool, taskId, { level: 'info', message: 'Enriched Church X' });
+ *   if (await isCancelled(pool, taskId)) { /* stop work */ }
  */
 
 const { getAppPool } = require('../config/db');
@@ -23,8 +27,8 @@ async function createTask(pool, opts) {
 
   const [result] = await pool.query(
     `INSERT INTO omai_tasks
-       (task_type, source_feature, title, status, created_by, created_by_name, total_count, metadata_json)
-     VALUES (?, ?, ?, 'queued', ?, ?, ?, ?)`,
+       (task_type, source_feature, title, status, created_by, created_by_name, created_at, total_count, metadata_json)
+     VALUES (?, ?, ?, 'queued', ?, ?, UTC_TIMESTAMP(), ?, ?)`,
     [
       task_type, source_feature || null, title,
       created_by, created_by_name,
@@ -60,13 +64,13 @@ async function updateTask(pool, taskId, updates) {
   }
 
   if (updates.status === 'running') {
-    sets.push('started_at = COALESCE(started_at, NOW())');
+    sets.push('started_at = COALESCE(started_at, UTC_TIMESTAMP())');
   }
   if (['succeeded', 'failed', 'cancelled'].includes(updates.status)) {
-    sets.push('finished_at = COALESCE(finished_at, NOW())');
+    sets.push('finished_at = COALESCE(finished_at, UTC_TIMESTAMP())');
   }
 
-  sets.push('last_heartbeat = NOW()');
+  sets.push('last_heartbeat = UTC_TIMESTAMP()');
 
   if (sets.length === 0) return;
 
@@ -82,10 +86,23 @@ async function addTaskEvent(pool, taskId, opts) {
   const { level = 'info', stage = null, message, detail_json = null } = opts;
 
   await pool.query(
-    `INSERT INTO omai_task_events (task_id, level, stage, message, detail_json)
-     VALUES (?, ?, ?, ?, ?)`,
+    `INSERT INTO omai_task_events (task_id, level, stage, message, detail_json, created_at)
+     VALUES (?, ?, ?, ?, ?, UTC_TIMESTAMP())`,
     [taskId, level, stage, message, detail_json ? JSON.stringify(detail_json) : null]
   );
 }
 
-module.exports = { createTask, updateTask, addTaskEvent };
+/**
+ * Check if a task has a pending cancellation request.
+ * Returns true if cancel_requested_at is set.
+ */
+async function isCancelled(pool, taskId) {
+  pool = pool || getAppPool();
+  const [rows] = await pool.query(
+    'SELECT cancel_requested_at FROM omai_tasks WHERE id = ?',
+    [taskId]
+  );
+  return rows.length > 0 && rows[0].cancel_requested_at !== null;
+}
+
+module.exports = { createTask, updateTask, addTaskEvent, isCancelled };
