@@ -339,7 +339,11 @@ async function getChurchesForMap(filters = {}) {
   const [allDbs] = await pool.query('SHOW DATABASES');
   const dbSet = new Set(allDbs.map(r => Object.values(r)[0]));
 
-  // 3. Batch-check existing record counts via cross-DB queries
+  // 3. Extract per-church seed history from om_seedling_runs report_json
+  //    Only look at execute runs that succeeded or partially succeeded
+  const seedHistory = await buildSeedHistory(pool);
+
+  // 4. Build result with readiness computation
   const result = [];
   const summary = {
     total: churches.length,
@@ -347,8 +351,17 @@ async function getChurchesForMap(filters = {}) {
     has_records: 0,
     missing_db: 0,
     missing_established: 0,
+    missing_size: 0,
     by_state: {},
     by_jurisdiction: {},
+    // Readiness summary
+    readiness: {
+      not_ready: 0,
+      ready_dry_run: 0,
+      ready_execute: 0,
+      seeded: 0,
+      review_required: 0,
+    },
   };
 
   for (const ch of churches) {
@@ -358,33 +371,95 @@ async function getChurchesForMap(filters = {}) {
     // Resolve established year
     const establishedYear = ch.manual_established_year || ch.established_year || null;
     const sizeCategory = ch.manual_size_category || ch.size_category || null;
+    const hasSize = sizeCategory && sizeCategory !== 'unknown';
 
     // Check existing records if DB exists
     let existingCounts = { baptism: 0, marriage: 0, funeral: 0 };
     let totalExisting = 0;
+    let hasSeededRecords = false;
     if (hasDb) {
       try {
         const countSql = `
           SELECT
             (SELECT COUNT(*) FROM \`${dbName}\`.baptism_records) AS baptism,
             (SELECT COUNT(*) FROM \`${dbName}\`.marriage_records) AS marriage,
-            (SELECT COUNT(*) FROM \`${dbName}\`.funeral_records) AS funeral`;
+            (SELECT COUNT(*) FROM \`${dbName}\`.funeral_records) AS funeral,
+            (SELECT COUNT(*) FROM \`${dbName}\`.baptism_records WHERE seed_run_id IS NOT NULL) +
+            (SELECT COUNT(*) FROM \`${dbName}\`.marriage_records WHERE seed_run_id IS NOT NULL) +
+            (SELECT COUNT(*) FROM \`${dbName}\`.funeral_records WHERE seed_run_id IS NOT NULL) AS seeded_total`;
         const [[counts]] = await pool.query(countSql);
         existingCounts = { baptism: counts.baptism, marriage: counts.marriage, funeral: counts.funeral };
         totalExisting = counts.baptism + counts.marriage + counts.funeral;
+        hasSeededRecords = counts.seeded_total > 0;
       } catch {
         // Tables may not exist — treat as 0
       }
     }
 
-    // Determine eligibility
+    // Determine eligibility (unchanged from Phase 4)
     const issues = [];
     if (!hasDb) issues.push('no_tenant_db');
     if (!establishedYear) issues.push('no_established_year');
-    if (!sizeCategory || sizeCategory === 'unknown') issues.push('no_size_category');
+    if (!hasSize) issues.push('no_size_category');
     if (totalExisting > 0) issues.push('has_existing_records');
 
     const eligible = issues.length === 0 || (issues.length === 1 && issues[0] === 'has_existing_records');
+
+    // Get seed run history for this church
+    const history = seedHistory[ch.church_id] || null;
+
+    // ── Compute readiness status ──
+    // Readiness is distinct from eligibility:
+    //   eligibility = "can this church theoretically be seeded?"
+    //   readiness   = "is this church currently in a safe state to proceed?"
+    const readinessReasons = [];
+    let readinessStatus;
+
+    if (hasSeededRecords) {
+      // Church has seeded records — check if it needs review
+      if (history && (history.status === 'partial' || history.status === 'failed')) {
+        readinessStatus = 'review_required';
+        readinessReasons.push('Last seed run was ' + history.status);
+      } else {
+        readinessStatus = 'seeded';
+        if (history) readinessReasons.push(`Seeded in run #${history.run_id}`);
+      }
+    } else if (!hasDb) {
+      readinessStatus = 'not_ready';
+      readinessReasons.push('No tenant database — needs provisioning');
+    } else if (!establishedYear) {
+      readinessStatus = 'not_ready';
+      readinessReasons.push('Missing established year — needs enrichment');
+    } else if (!hasSize) {
+      // Has DB + established year, but missing size.
+      // Size can be inferred via fallback, so ready for dry run but not full execute.
+      readinessStatus = 'ready_dry_run';
+      readinessReasons.push('Missing size category — dry run will use fallback inference');
+    } else {
+      // Fully enriched, has DB, has established year + size
+      readinessStatus = 'ready_execute';
+    }
+
+    // Determine next recommended action
+    let nextAction;
+    switch (readinessStatus) {
+      case 'not_ready':
+        if (!hasDb) nextAction = 'provision_db';
+        else if (!establishedYear) nextAction = 'enrich_established_year';
+        break;
+      case 'ready_dry_run':
+        nextAction = hasSize ? 'dry_run' : 'enrich_size';
+        break;
+      case 'ready_execute':
+        nextAction = 'dry_run';
+        break;
+      case 'seeded':
+        nextAction = 'review_seeded';
+        break;
+      case 'review_required':
+        nextAction = 'review_failed_run';
+        break;
+    }
 
     // State/jurisdiction summary
     const state = ch.state_province || 'Unknown';
@@ -395,6 +470,8 @@ async function getChurchesForMap(filters = {}) {
     if (totalExisting > 0) summary.has_records++;
     if (!hasDb) summary.missing_db++;
     if (!establishedYear) summary.missing_established++;
+    if (!hasSize) summary.missing_size++;
+    summary.readiness[readinessStatus] = (summary.readiness[readinessStatus] || 0) + 1;
 
     result.push({
       church_id: ch.church_id,
@@ -415,12 +492,67 @@ async function getChurchesForMap(filters = {}) {
       existing_counts: existingCounts,
       total_existing: totalExisting,
       has_tenant_db: hasDb,
+      has_seeded_records: hasSeededRecords,
+      // Eligibility (Phase 4 — can theoretically be seeded)
       eligible,
       eligibility_issues: issues,
+      // Readiness (Phase 5 — safe to proceed right now)
+      readiness_status: readinessStatus,
+      readiness_reasons: readinessReasons,
+      next_recommended_action: nextAction,
+      // Seed history
+      latest_run: history,
     });
   }
 
   return { churches: result, summary };
+}
+
+// ─── Build seed history from om_seedling_runs ──────────────────────────────
+
+/**
+ * Extract per-church seed run history from om_seedling_runs.report_json.
+ * Returns a map of church_id → latest execute run info.
+ */
+async function buildSeedHistory(pool) {
+  const history = {};
+  try {
+    const [runs] = await pool.query(
+      `SELECT id, mode, status, started_at, finished_at, duration_ms, report_json
+       FROM om_seedling_runs
+       WHERE mode = 'execute' AND status IN ('succeeded', 'partial', 'failed')
+       ORDER BY started_at DESC
+       LIMIT 50`
+    );
+
+    for (const run of runs) {
+      let report;
+      try {
+        report = typeof run.report_json === 'string' ? JSON.parse(run.report_json) : run.report_json;
+      } catch { continue; }
+      if (!report || !report.results) continue;
+
+      for (const r of report.results) {
+        // Only record the latest run per church (runs are sorted DESC)
+        if (history[r.church_id]) continue;
+        history[r.church_id] = {
+          run_id: run.id,
+          mode: run.mode,
+          status: r.status === 'success' ? 'succeeded' : r.status,
+          run_status: run.status,
+          started_at: run.started_at,
+          finished_at: run.finished_at,
+          total_inserted: r.total_inserted || 0,
+          inserted: r.inserted || { baptism: 0, marriage: 0, funeral: 0 },
+          duration_ms: r.duration_ms || 0,
+          error: r.error || null,
+        };
+      }
+    }
+  } catch {
+    // If om_seedling_runs doesn't exist yet, return empty
+  }
+  return history;
 }
 
 module.exports = {
