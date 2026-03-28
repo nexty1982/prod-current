@@ -97,23 +97,24 @@ router.get('/my/churches', requireAuth, async (req, res) => {
     }
 
     // Build query based on user role
+    // Super admins see all provisioned churches (with a database), others see only active ones
+    const isSuperAdmin = user.role === 'super_admin';
     let query = `
-      SELECT 
+      SELECT
         id,
         name,
         email,
         database_name,
         is_active
-      FROM churches 
-      WHERE is_active = 1
+      FROM churches
+      WHERE ${isSuperAdmin ? 'database_name IS NOT NULL' : 'is_active = 1'}
     `;
 
     const params = [];
 
-    // Super admins can see all churches
-    if (user.role === 'super_admin') {
-      // No additional WHERE clause needed - return all active churches
-      // This ensures superadmin always has access to at least one church if any exist
+    // Super admins can see all provisioned churches
+    if (isSuperAdmin) {
+      // No additional WHERE clause needed - return all provisioned churches
     }
     // Admins and managers see their assigned church
     else if (user.role === 'admin' || user.role === 'manager' || user.role === 'church_admin') {
@@ -356,24 +357,25 @@ router.get('/churches', requireAuth, async (req, res) => {
     }
 
     // Build query based on user role
+    // Super admins see all provisioned churches (with a database), others see only active ones
+    const isSuperAdmin = user.role === 'super_admin';
     let query = `
-      SELECT 
+      SELECT
         id,
         name,
         church_name,
         email,
         database_name,
         is_active
-      FROM churches 
-      WHERE is_active = 1
+      FROM churches
+      WHERE ${isSuperAdmin ? 'database_name IS NOT NULL' : 'is_active = 1'}
     `;
 
     const params = [];
 
-    // Super admins can see all churches
-    if (user.role === 'super_admin') {
-      // No additional WHERE clause - return all active churches
-      console.log(`🔍 [GET /churches] Super admin ${user.email} requesting all churches`);
+    // Super admins can see all provisioned churches
+    if (isSuperAdmin) {
+      console.log(`🔍 [GET /churches] Super admin ${user.email} requesting all provisioned churches`);
     }
     // Other roles see their assigned church
     else if (user.church_id) {

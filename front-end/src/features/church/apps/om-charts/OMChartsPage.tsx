@@ -175,7 +175,7 @@ const OMChartsPage: React.FC = () => {
   const [dashData, setDashData] = useState<DashboardData | null>(null);
   const [dashLoading, setDashLoading] = useState(false);
 
-  const needsChurchPicker = !paramChurchId && !user?.church_id;
+  const needsChurchPicker = !paramChurchId && (!user?.church_id || user?.role === 'super_admin');
 
   /* ── Chart theme tokens ── */
   const gridStroke = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
